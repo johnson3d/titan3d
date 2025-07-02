@@ -107,32 +107,32 @@ namespace EngineNS.NxRHI
         {
             public class TtHitGroup
             {
-                [Rtti.Meta]
+                [Rtti.Meta("")]
                 public string Name { get; set; }
-                [Rtti.Meta]
+                [Rtti.Meta("")]
                 public string ClosestHitShader { get; set; }
-                [Rtti.Meta]
+                [Rtti.Meta("")]
                 public string AnyHitShader { get; set; }
-                [Rtti.Meta]
+                [Rtti.Meta("")]
                 public string IntersectionShader { get; set; }
-                [Rtti.Meta]
+                [Rtti.Meta("")]
                 public List<string> LocalSignatures { get; set; }
             }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public uint MaxRecursionDepth { get; set; } = 1;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public uint PayloadSize { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public uint AttributeSize { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public List<string> Functions { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public List<string> GlobalSignatures { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public List<TtHitGroup> HitGroups { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string RayGenShader { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string MissShader { get; set; }
         }
         public NxRHI.TtRayTracingEffect.TtRTShaderLibDesc ShaderLibDesc { get; set; }

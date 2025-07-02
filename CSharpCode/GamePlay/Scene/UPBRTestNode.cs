@@ -29,16 +29,16 @@ namespace EngineNS.GamePlay.Scene
         }
         public class UMeshNodeData : TtNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
             public RName MeshName { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
             public RName CollideName { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [ReadOnly(true)]
             public string MdfQueueType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMdfStaticMesh));
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [ReadOnly(true)]
             public string AtomType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMesh.TtAtom));
 

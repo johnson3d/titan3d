@@ -8,7 +8,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 {
     [Bricks.CodeBuilder.ContextMenu("TerrainNode", "TerrainNode", GamePlay.Scene.TtNode.EditorKeyword)]
     [GamePlay.Scene.TtNode(NodeDataType = typeof(TtTerrainData), DefaultNamePrefix = "Terrain")]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.Terrain.CDLOD.UTerrainNode@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.Terrain.CDLOD.UTerrainNode@EngineCore" })]
     public class TtTerrainNode : GamePlay.Scene.TtSceneActorNode
     {
         public TtTerrainNode() 
@@ -33,7 +33,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             TerrainMaterialIdManager?.Cleanup();
             TerrainMaterialIdManager = null;
         }
-        [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.Terrain.CDLOD.UTerrainNode.UTerrainData@EngineCore" })]
+        [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.Terrain.CDLOD.UTerrainNode.UTerrainData@EngineCore" })]
         public class TtTerrainData : GamePlay.Scene.TtNodeData
         {
             public TtTerrainData()
@@ -44,21 +44,21 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 LODRangeFloat.Add(600.0f);
                 LODRangeFloat.Add(950.0f);
             }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public int MipLevels { get; set; } = 6;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public int NumOfLevelX { get; set; } = 100;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public int NumOfLevelZ { get; set; } = 100;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public int PatchSide { get; set; } = 16;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float PatchSize { get; set; } = 64.0f;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public int ActiveLevel { get; set; } = 1;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public List<float> LODRangeFloat { get; set; } = new List<float>();
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [RName.PGRName(FilterExts = Procedure.UPgcAsset.AssetExt)]
             public RName PgcName { get; set; }
             

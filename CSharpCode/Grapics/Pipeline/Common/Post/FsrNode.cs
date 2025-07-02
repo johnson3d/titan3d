@@ -136,7 +136,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin UpSamplePinOut = TtRenderGraphPin.CreateOutput("UpSample", false, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin RcasPinOut = TtRenderGraphPin.CreateOutput("Rcas", false, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Scale { get; set; } = 2.0f;
         public NxRHI.TtCbView CBShadingEnv;
         public TtFsrUpSampleShading UpSampleShadingEnv;

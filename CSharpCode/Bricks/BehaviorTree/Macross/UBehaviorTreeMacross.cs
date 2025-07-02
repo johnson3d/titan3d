@@ -17,14 +17,14 @@ namespace EngineNS.BehaviorTree.Macross
     {
 
     }
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.BehaviorTree.Macross.UBehaviorTreeMacrossAMeta@EngineCore", "EngineNS.BehaviorTree.Macross.UBehaviorTreeMacrossAMeta" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.BehaviorTree.Macross.UBehaviorTreeMacrossAMeta@EngineCore", "EngineNS.BehaviorTree.Macross.UBehaviorTreeMacrossAMeta" })]
     public partial class TtBehaviorTreeMacrossAMeta : IO.IAssetMeta
     {
         public override string TypeExt
         {
             get => TtBehaviorTreeMacross.AssetExt;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string BaseTypeStr { get; set; }
         public override string GetAssetTypeName()
         {
@@ -65,7 +65,7 @@ namespace EngineNS.BehaviorTree.Macross
     [BehaviorTreeMacrossCreate]
     [IO.AssetCreateMenu(MenuName = "Anim/BehaviorTreeMacross")]
     [Editor.UAssetEditor(EditorType = typeof(TtBehaviorTreeMacrossEditor))]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.BehaviorTree.Macross.UBehaviorTreeMacross@EngineCore", "EngineNS.BehaviorTree.Macross.UBehaviorTreeMacross" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.BehaviorTree.Macross.UBehaviorTreeMacross@EngineCore", "EngineNS.BehaviorTree.Macross.UBehaviorTreeMacross" })]
     public partial class TtBehaviorTreeMacross : IO.IAsset
     {
         public const string AssetExt = ".BehaviorTreeMacross";

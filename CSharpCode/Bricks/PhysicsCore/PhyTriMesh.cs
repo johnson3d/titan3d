@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.PhysicsCore
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtPhyTriMeshAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -74,7 +74,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 return base.DoImportAsset();
             }
             Graphics.Mesh.TtMeshPrimitives mMesh;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [RName.PGRName(FilterExts=Graphics.Mesh.TtMeshPrimitives.AssetExt)]
             public RName MeshSource
             {
@@ -163,7 +163,7 @@ namespace EngineNS.Bricks.PhysicsCore
             }
             return true;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(ReadOnly = true)]
         public RName AssetName
         {
@@ -196,7 +196,7 @@ namespace EngineNS.Bricks.PhysicsCore
             }
         }
         [UMeshDataSave()]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public object MeshDataSave
         {
             get { return null; }

@@ -42,7 +42,7 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
                 return result;
             return null;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void OnPickedItem(IItem item, IInventory invetory, IItemContain contain)
         {
 

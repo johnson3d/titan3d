@@ -15,7 +15,7 @@ namespace EngineNS.DesignMacross.Design.Statements
     [ContextMenu("For", "FlowControl\\For", UDesignMacross.MacrossScriptEditorKeyword)]
     public class TtForLoopStatementDescription : TtStatementDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IncludeEnd { get; set; } = true;
 
         public TtForLoopStatementDescription()

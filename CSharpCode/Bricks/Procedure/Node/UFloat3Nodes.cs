@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
             AddOutput(ResultPin, "Result", OutputDesc);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 Value { get; set; } = Vector3.One;
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
@@ -263,7 +263,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return null;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float GridSize { get; set; } = 1.0f;
         //public float HeightRange;
         public override bool OnProcedure(UPgcGraph graph)
@@ -485,7 +485,7 @@ namespace EngineNS.Bricks.Procedure.Node
             SourceDesc.BufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
             ResultDesc.BufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool ClampBorder { get; set; } = true;
         public override bool OnProcedure(UPgcGraph graph)
         {
@@ -681,7 +681,7 @@ namespace EngineNS.Bricks.Procedure.Node
             FactorY,
             FactorZ,
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EFactorAxis FactorAxis { get; set; } = EFactorAxis.FactorY;
         public UFloat3Morph()
         {
@@ -820,7 +820,7 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false)]
         public PinOut OutXYZ { get; set; } = new PinOut();
         FTransform mTransform = FTransform.Identity;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public FTransform Transform 
         { 
             get => mTransform; 

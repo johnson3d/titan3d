@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
             AddOutput(ResultPin, "Result", OutputDesc);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Value { get; set; } = 1.0f;
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
@@ -112,7 +112,7 @@ namespace EngineNS.Bricks.Procedure.Node
             AddOutput(ResultPin, "Result", Float1Desc);
         }
         int mOctaves = 3;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Octaves
         {
             get => mOctaves;
@@ -123,7 +123,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
         float mFreq = 3.5f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Freq
         {
             get => mFreq;
@@ -134,7 +134,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
         float mAmptitude = 10.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Amptitude
         {
             get => mAmptitude;
@@ -145,7 +145,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
         int mSeed = (int)Support.TtTime.GetTickCount();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Seed
         {
             get => mSeed;
@@ -156,7 +156,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
         int mSamplerSize = 1024;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int SamplerSize
         {
             get
@@ -170,17 +170,17 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float GridSize { get; set; } = 1.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Border { get; set; } = 3.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Support.TtPerlin2.EFbmMode FbmMode { get; set; } = Support.TtPerlin2.EFbmMode.Classic;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Lacumarity { get; set; } = 2.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Gain { get; set; } = 0.5f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Rotator { get; set; } = 0.0f;
         //protected Support.CPerlin mPerlin;
         protected Support.TtPerlin2 mPerlin;
@@ -281,9 +281,9 @@ namespace EngineNS.Bricks.Procedure.Node
         {
 
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MinValue { get; set; } = 0.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MaxValue { get; set; } = 1.0f;
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
@@ -317,7 +317,7 @@ namespace EngineNS.Bricks.Procedure.Node
             { 0.118318f, 0.147761f, 0.118318f },
             { 0.0947416f, 0.118318f, 0.0947416f }
         };
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool ClampBorder { get; set; } = true;
         public override bool OnProcedure(UPgcGraph graph)
         {
@@ -624,24 +624,24 @@ namespace EngineNS.Bricks.Procedure.Node
             AddInput(SourcePin, "Source", Float1Desc);
             AddOutput(ResultPin, "Result", Float1Desc);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint SrcX { get; set; } = 0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint SrcY { get; set; } = 0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint SrcW { get; set; } = 1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint SrcH { get; set; } = 1;
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint DstX { get; set; } = 0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint DstY { get; set; } = 0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint DstW { get; set; } = 1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint DstH { get; set; } = 1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UBufferComponent.EBufferSamplerType SamplerType { get; set; } = UBufferComponent.EBufferSamplerType.Linear;
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
@@ -710,7 +710,7 @@ namespace EngineNS.Bricks.Procedure.Node
             VCoord,
             WCoord,
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public ECoord Coord { get; set; } = ECoord.UCoord;
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {

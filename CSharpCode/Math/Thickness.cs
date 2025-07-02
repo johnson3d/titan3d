@@ -167,7 +167,7 @@ namespace EngineNS
         //     the bounding rectangle for this instance of CSUtility.Support.Thickness. a pixel
         //     is equal to 1/96 on an inch. The default is 0.
         float mLeft;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Left
         {
             get { return mLeft; }
@@ -182,7 +182,7 @@ namespace EngineNS
         //     the bounding rectangle for this instance of CSUtility.Support.Thickness. A pixel
         //     is equal to 1/96 of an inch. The default is 0.
         float mTop;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Top
         {
             get { return mTop; }
@@ -197,7 +197,7 @@ namespace EngineNS
         //     the bounding rectangle for this instance of CSUtility.Support.Thickness. A pixel
         //     is equal to 1/96 of an inch. The default is 0.
         float mRight;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Right
         {
             get { return mRight; }
@@ -211,7 +211,7 @@ namespace EngineNS
         //     the bounding rectangle for this instance of CSUtility.Support.Thickness. A pixel
         //     is equal to 1/96 of an inch. The default is 0.
         float mBottom;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Bottom
         {
             get { return mBottom; }

@@ -89,7 +89,7 @@ namespace EngineNS
         {
             Tickables.Clear();
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void AddTickable(ITickable tickable)
         {
             lock(this)
@@ -123,7 +123,7 @@ namespace EngineNS
                 //}); 
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void RemoveTickable(ITickable tickable)
         {
             lock (this)

@@ -7,7 +7,7 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("Copy", "Copy", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UCopyNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UCopyNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UCopyNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UCopyNode" })]
     public class TtCopyNode : Graphics.Pipeline.TtRenderGraphNode
     {
         public TtRenderGraphPin SrcPinIn = TtRenderGraphPin.CreateInput("Src", NxRHI.EBufferType.BFT_SRV);
@@ -130,7 +130,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     }
 
     [Bricks.CodeBuilder.ContextMenu("Copy", "Copy2NextFrame", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode" })]
     public class TtCopy2NextFrameNode : Graphics.Pipeline.TtRenderGraphNode
     {
         public TtRenderGraphPin SrcPinIn = TtRenderGraphPin.CreateInput("Src", NxRHI.EBufferType.BFT_SRV);

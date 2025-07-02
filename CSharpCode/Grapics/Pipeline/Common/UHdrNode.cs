@@ -45,7 +45,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Hdr", "Post\\Hdr", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UHdrNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UHdrNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UHdrNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UHdrNode" })]
     public class TtHdrNode : TtSceenSpaceNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);

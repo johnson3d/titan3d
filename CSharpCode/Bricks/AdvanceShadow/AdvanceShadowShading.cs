@@ -78,7 +78,7 @@ namespace EngineNS.Bricks.AdvanceShadow
         public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_R16_FLOAT, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//or D32
         public TtRenderGraphPin SelfNodePinOut = TtRenderGraphPin.CreateOutput("Self", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_NONE);
         bool mIsDepth32 = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool IsDepth32
         {
@@ -89,7 +89,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                 //DepthPinOut.Attachement.Format = value ? EPixelFormat.PXF_D32_FLOAT : EPixelFormat.PXF_D16_UNORM;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public int PageResolution { get; set; } = 128;
         

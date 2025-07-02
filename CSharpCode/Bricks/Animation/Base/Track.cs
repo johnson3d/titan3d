@@ -6,44 +6,44 @@ namespace EngineNS.Animation
 {
     namespace Curve
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public struct FKeyframe
         {
             public FKeyframe()
             {
             }
 
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float Time { get; set; } = 0;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float Value { get; set; } = 0;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float InSlope { get; set; } = 0;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float OutSlope { get; set; } = 0;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public struct FTrackCache
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public int Index { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float Time { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float TimeEnd { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float Coeff0 { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float Coeff1 { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float Coeff2 { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float Coeff3 { get; set; }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public class TtTrack : IO.BaseSerializer
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public List<FKeyframe> KeyFramesList { get; set; } = new List<FKeyframe>();
             public bool AddKeyframeBack(ref FKeyframe keyframe)
             {

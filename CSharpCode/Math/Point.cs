@@ -6,7 +6,7 @@ namespace EngineNS
 {
     public struct Point
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsEmpty
         {
             get
@@ -18,14 +18,14 @@ namespace EngineNS
             }
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int X
         {
             get;
             set;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Y
         {
             get;
@@ -34,7 +34,7 @@ namespace EngineNS
 
         static Point mEmpty = new Point(0, 0);
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Point Empty
         {
             get { return mEmpty; }
@@ -62,7 +62,7 @@ namespace EngineNS
         {
             return vec * scale;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Length
         {
             get { return (int)System.Math.Sqrt((X * X) + (Y * Y)); }

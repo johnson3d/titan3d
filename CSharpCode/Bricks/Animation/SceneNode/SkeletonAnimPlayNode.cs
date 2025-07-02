@@ -10,7 +10,7 @@ namespace EngineNS.Animation.SceneNode
     {
         public class TtSkeletonAnimPlayNodeData : TtNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [RName.PGRName(FilterExts = Animation.Asset.TtAnimationClip.AssetExt)]
             public RName AnimatinName { get; set; }
             public TtMeshNode AnimatedMeshNode { get; set; } = null;

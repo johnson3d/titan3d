@@ -47,21 +47,21 @@ namespace EngineNS.UI
         //    throw new NotImplementedException();
         //}
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual TtUIElement FindElement(string name)
         {
             if (HostElement == null)
                 return null;
             return HostElement.FindElement(name);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual TtUIElement FindElement(UInt64 id)
         {
             if (HostElement == null)
                 return null;
             return HostElement.FindElement(id);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual TtUIElement FindElement(
             [Rtti.MetaParameter(FilterType = typeof(TtUIElement), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type rType,
@@ -69,7 +69,7 @@ namespace EngineNS.UI
         {
             return FindElement(name);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual TtUIElement FindElement(
             [Rtti.MetaParameter(FilterType = typeof(TtUIElement), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type rType,

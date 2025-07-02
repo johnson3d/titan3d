@@ -115,7 +115,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
         FSunShaftStruct mSunShaftStruct = new FSunShaftStruct();
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.PGValueRange(0, 1)]
         [EGui.Controls.PropertyGrid.PGValueChangeStep(0.001f)]
         public float DepthThreshole
@@ -124,7 +124,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             set => mSunShaftStruct.DepthThreshole = value;
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.PGValueRange(0, 32)]
         [EGui.Controls.PropertyGrid.PGValueChangeStep(0.1f)]
         public float LumThreshold
@@ -136,7 +136,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MaxBlurRadius
         {
             get => mSunShaftStruct.SunPosition.W;
@@ -254,7 +254,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         FSunShaftStruct mSunShaftStruct = new FSunShaftStruct();
         
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.PGValueRange(0, 1)]
         [EGui.Controls.PropertyGrid.PGValueChangeStep(0.001f)]
         public float BlurDecay
@@ -266,7 +266,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.PGValueRange(0, 32)]
         [EGui.Controls.PropertyGrid.PGValueChangeStep(0.1f)]
         public Vector2 BlurRadius

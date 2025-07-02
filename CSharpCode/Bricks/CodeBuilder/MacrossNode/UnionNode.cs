@@ -13,10 +13,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
     public class UnionPinDefine : UNodePinDefineBase
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.PGTypeEditor()]
         public TtTypeDesc Type { get; set; } = TtTypeDesc.TypeOf(typeof(int));
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public LinkDesc LinkDesc { get; set; }
         protected override void InitFromPin<T>(T pin)
@@ -27,15 +27,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
 
-    public class EndPointNode : TtNodeBase, IEndPointNode
+    public class EndPointNode : TtMacrossNodeBase, IEndPointNode
     {
         public UnionNode HostUnion;
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public bool IsStart { get; set; }
         List<UNodePinDefineBase> mUserInputs = new List<UNodePinDefineBase>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public List<UNodePinDefineBase> UserInputs
         {
@@ -47,7 +47,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
         List<UNodePinDefineBase> mUserOutputs = new List<UNodePinDefineBase>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public List<UNodePinDefineBase> UserOutputs
         {
@@ -254,7 +254,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
 
-    public class UnionNode : TtNodeBase, IUnionNode, INodeWithContextMenu
+    public class UnionNode : TtMacrossNodeBase, IUnionNode, INodeWithContextMenu
     {
         [Rtti.Meta, Browsable(false)]
         public TtNodeGraph ContentGraph { get; set; }
@@ -263,7 +263,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         [Rtti.Meta, Browsable(false)]
         public Guid OutputNodeId { get; set; }
         List<UNodePinDefineBase> mUserInputs = new List<UNodePinDefineBase>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.PGBaseType(typeof(UnionPinDefine))]
         public List<UNodePinDefineBase> UserInputs
         {
@@ -275,7 +275,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
         List<UNodePinDefineBase> mUserOutputs = new List<UNodePinDefineBase>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.PGBaseType(typeof(UnionPinDefine))]
         public List<UNodePinDefineBase> UserOutputs
         {

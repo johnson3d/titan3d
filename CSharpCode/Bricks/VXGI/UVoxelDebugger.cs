@@ -263,7 +263,7 @@ namespace EngineNS.Bricks.VXGI
         #endregion
 
         bool mDebugVoxels = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool DebugVoxels
         {
             get => mDebugVoxels;

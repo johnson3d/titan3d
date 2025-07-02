@@ -107,9 +107,9 @@ namespace EngineNS
     [Macross.TtMacross()]
     public partial class TtCommandMacross
     {
-        [Rtti.Meta()]
+        [Rtti.Meta("")]
         public delegate bool OnProcAsset(IO.IAssetMeta ameta);
-        [Rtti.Meta()]
+        [Rtti.Meta("")]
         public void IterateDirectory(string dir, string ext, OnProcAsset fun, bool bAllDir = false)
         {
             if (dir == null)
@@ -129,7 +129,7 @@ namespace EngineNS
                 fun(ameta);
             }
         }
-        [Rtti.Meta()]
+        [Rtti.Meta("")]
         public virtual async Thread.Async.TtTask DoCommand(TtMcCommand host)
         {
 
@@ -144,7 +144,7 @@ namespace EngineNS
             CmdHelp = "McCmd Macross=(string) OnGameThread=(bool)";
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = EngineNS.Bricks.CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtCommandMacross))]
         public RName McName
         {
@@ -174,7 +174,7 @@ namespace EngineNS
             get => mMcObject;
         }
         KeyValuePair<string, string>[] Args;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string FindArgument(string argName)
         {
             return FindArgument(Args, argName);

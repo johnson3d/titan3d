@@ -5,35 +5,35 @@ using System.Text;
 
 namespace EngineNS.Plugins.GameItems
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class AItemRequirement
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<RName> Items { get; set; } = new List<RName>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int RequireCount { get; set; }
     }
 
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class AItemMakeSuccess
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName Item { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Num { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float RateOfSuccess { get; set; } = 1.0f;
     }
 
 
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class AItemMaker
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<AItemRequirement> InputItems { get; set; } = new List<AItemRequirement>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<AItemRequirement> Catalyzers { get; set; } = new List<AItemRequirement>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<AItemMakeSuccess> OutputItems { get; set; } = new List<AItemMakeSuccess>();
         
         public virtual List<AGameItemBox> MakeItems(AGameItemInventory inventory, Support.TtRandom rd)

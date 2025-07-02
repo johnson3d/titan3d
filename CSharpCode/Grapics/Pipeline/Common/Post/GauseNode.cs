@@ -101,21 +101,21 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
         FGaussStruct mGaussStruct;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Stride
         {
             get => mGaussStruct.Stride;
             set => mGaussStruct.Stride = value;
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int BlurSize
         {
             get => mGaussStruct.BlurSize;
             set => mGaussStruct.BlurSize = value;
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float BlurSigma
         {
             get => mGaussStruct.BlurSigma;

@@ -47,7 +47,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set => base.Label = value; 
         }
 
-        [Rtti.Meta(Order = 0)]
+        [Rtti.Meta("",Order = 0)]
         public Guid MethodId 
         {
             get;
@@ -56,7 +56,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public PinOut AfterExec { get; set; } = new PinOut();
         string mMethodDecKeyword;
-        [Rtti.Meta(Order = 1)]
+        [Rtti.Meta("",Order = 1)]
         public string MethodDecKeyword 
         {
             get => mMethodDecKeyword;
@@ -294,10 +294,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public class MethodData : IO.ISerializer
     {
         public UMethodStartNode StartNode;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtMethodDeclaration MethodDec { get; set; }
         public Rtti.TtClassMeta.TtMethodMeta Method;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsDelegate { get; set; } = false;
 
         [Flags]
@@ -920,12 +920,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 MethodDatas[0].StartNode.BuildStatements(null, ref data);
             }
         }
-        //[Rtti.Meta]
+        //[Rtti.Meta("")]
         //public string FunctionName
         //{
         //    get { return Function.GetFunctionDeclType(); }
         //}
-        //[Rtti.Meta]
+        //[Rtti.Meta("")]
         //public Guid StartNodeId
         //{
         //    get { return StartNode.NodeId; }
@@ -1046,9 +1046,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return GraphName;
         }
         public bool VisibleInClassGraphTables = false;
-        //[Rtti.Meta]
+        //[Rtti.Meta("")]
         //public DefineFunction Function { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public List<MethodData> MethodDatas
         {
@@ -1335,6 +1335,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public override void UpdateNodeMenus()
         {
             base.UpdateNodeMenus();
+            NodeMenus.AddMenuItem(
+                "Open Node", null,
+                (TtMenuItem item, object sender) =>
+                {
+                    var pNode = sender as TtNodeBase;
+                    if (pNode == null)
+                        return;
+
+                    this.OpenNode(pNode);
+                });
             int start = -1;
             int i = 0;
             for(i=0; i<NodeMenus.SubMenuItems.Count; i++)
@@ -1367,7 +1377,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //    NodeMenus.InsertMenuItem(start, "Collapse to Method", null, collapseToMethodAction)
             //}
         }
-
+        public void OpenNode(TtNodeBase node)
+        {
+            if (node is TtMacrossNodeBase mn)
+            {
+                mn.OpenNode(this);
+            }
+        }
         public override void CollapseNodes(List<TtNodeBase> nodeList)
         {
             var node = IUnionNode.CreateUnionNode<UnionNode, UnionPinDefine, EndPointNode>(this, nodeList);

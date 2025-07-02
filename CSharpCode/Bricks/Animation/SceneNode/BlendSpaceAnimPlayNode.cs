@@ -22,14 +22,14 @@ namespace EngineNS.Animation.SceneNode
     {
         public class TtBlendSpaceAnimPlayNodeData : TtNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [RName.PGRName(FilterExts = Animation.Asset.BlendSpace.TtBlendSpace2D.AssetExt)]
             public RName AnimatinName { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public bool OverrideAsset { get; set; } = false;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public List<TtBlendSpace_Axis> Axises { get; set; } = new List<TtBlendSpace_Axis>();
-            [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+            [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
             public List<FBlendSpacePoint> Points { get; set; } = new List<FBlendSpacePoint>();
         }
         public Animation.Player.TtBlendSpace2DPlayer Player { get; set; }

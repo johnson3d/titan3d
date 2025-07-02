@@ -11,7 +11,7 @@ namespace EngineNS.GamePlay.Scene
 {
     [Bricks.CodeBuilder.ContextMenu("Capture", "SceneCapture", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtSceneCapture.TtSceneCaptureData), DefaultNamePrefix = "Capture")]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.USceneCapture@EngineCore", "EngineNS.GamePlay.Scene.USceneCapture" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.USceneCapture@EngineCore", "EngineNS.GamePlay.Scene.USceneCapture" })]
     public partial class TtSceneCapture : TtSceneActorNode, ITickable, IRootForm
     {
         public override void Dispose()
@@ -29,25 +29,25 @@ namespace EngineNS.GamePlay.Scene
             OnlyShowNodes,
             ExcludeNodes,
         }
-        [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.USceneCapture.USceneCaptureData@EngineCore", "EngineNS.GamePlay.Scene.USceneCapture.USceneCaptureData" })]
+        [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.USceneCapture.USceneCaptureData@EngineCore", "EngineNS.GamePlay.Scene.USceneCapture.USceneCaptureData" })]
         public class TtSceneCaptureData : TtNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
             public RName RPolicyName { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Vector2 TargetSize { get; set; } = new Vector2(256, 256);
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public ECaptureMode CaptureMode { get; set; } = ECaptureMode.Normal;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public List<Guid> ShowActors { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public List<Guid> ExcludeActors { get; set; }
         }
 
         #region OnlyShowNodes
         public List<TtNode> OnlyShowNodes { get; } = new List<TtNode>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void AddOnlyShowNode(TtNode node)
         {
             if (OnlyShowNodes.Contains(node) == false)
@@ -55,7 +55,7 @@ namespace EngineNS.GamePlay.Scene
                 OnlyShowNodes.Add(node);
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void RemoveOnlyShowNode(TtNode node)
         {
             if (OnlyShowNodes.Contains(node))
@@ -63,7 +63,7 @@ namespace EngineNS.GamePlay.Scene
                 OnlyShowNodes.Remove(node);
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void ClearOnlyShowNodes()
         {
             OnlyShowNodes.Clear();
@@ -180,7 +180,7 @@ namespace EngineNS.GamePlay.Scene
             return true;
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public ECaptureMode CaptureMode
         {
             get => GetNodeData<TtSceneCaptureData>().CaptureMode;

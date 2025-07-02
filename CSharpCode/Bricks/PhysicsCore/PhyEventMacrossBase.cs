@@ -10,17 +10,17 @@ namespace EngineNS.Bricks.PhysicsCore
     [TtMacrossNodeCustomCodeGen]
     public partial class TtPhyEventMacrossBase : TtSceneNodeMacrossBase
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void OnContact(TtNode selfNode, TtNode otherNode)
         {
             //MacrossGetter.Get()
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void OnBeginTrigger(TtNode selfNode, TtNode otherNode)
         {
             //MacrossGetter.Get()
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void OnEndTrigger(TtNode selfNode, TtNode otherNode)
         {
             //MacrossGetter.Get()

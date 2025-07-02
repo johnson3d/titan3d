@@ -8,7 +8,7 @@ namespace EngineNS.Bricks.DataSet
     public class TtDataProvider : IO.BaseSerializer
     {
         [Category("Excel")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int RowInSheet { get; set; }
     }
     public class TtDataTableAttribute : Attribute

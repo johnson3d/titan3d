@@ -19,9 +19,9 @@ namespace EngineNS.UI
             set;
         } = enDPIScaleMode.ShortestSide;
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<BezierPointBase> BezierPoints = new List<BezierPointBase>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RectangleF DefaultDesignRect = new RectangleF(0, 0, 1920, 1080);
 
         public TtUIConfig()

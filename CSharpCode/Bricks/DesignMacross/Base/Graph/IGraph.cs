@@ -153,9 +153,9 @@ namespace EngineNS.DesignMacross.Base.Graph
     }
     public interface IGraphElementStyle : IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 Location { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public SizeF Size { get; set; }
         public Color4f BackgroundColor { get; set; }
 

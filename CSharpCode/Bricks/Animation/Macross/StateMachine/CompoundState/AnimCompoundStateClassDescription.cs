@@ -19,7 +19,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
     [Graph(typeof(TtGraph_AnimCompoundState))]
     public class TtAnimCompoundStateClassDescription : TtTimedCompoundStateClassDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public override string Name { get; set; } = "TimedStatesHub";
 

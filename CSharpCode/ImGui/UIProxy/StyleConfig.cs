@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.EGui.UIProxy
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class StyleConfig
     {
         public static StyleConfig Instance { get; } = new StyleConfig();

@@ -513,7 +513,7 @@ namespace EngineNS.Graphics.Mesh
                 return mSubMeshes;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Pipeline.Shader.TtMaterial GetMaterial(uint subMesh, uint atom)
         {
             if (subMesh >= SubMeshes.Count)

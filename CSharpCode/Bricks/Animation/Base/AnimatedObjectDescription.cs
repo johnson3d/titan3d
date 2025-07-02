@@ -19,22 +19,22 @@ namespace EngineNS.Animation.Base
             set { TypeName =value.TypeString; }
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string TypeName { get; set; } = null;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Name { get; set; } = null;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string ParentName { get; set; } = null;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtAnimatedPropertyDescription TranslationProperty { get; set; }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtAnimatedPropertyDescription RotationProperty { get; set; }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtAnimatedPropertyDescription ScaleProperty { get; set; }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtAnimatedPropertyDescription> Properties { get; set; } = new List<TtAnimatedPropertyDescription>();
 
         public TtAnimatedObjectDescription()
@@ -52,11 +52,11 @@ namespace EngineNS.Animation.Base
             get { return Rtti.TtTypeDesc.TypeOf(TypeName); }
             set { TypeName = value.TypeString; }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string TypeName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Name { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid CurveId { get; set; }
     }
 }

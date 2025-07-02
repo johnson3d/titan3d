@@ -13,14 +13,14 @@ namespace EngineNS.GamePlay.Movemnet
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtMovement : Scene.TtLightWeightNodeBase
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public class TtMovementData : TtNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public bool EnableGravity { get; set; } = false;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Vector3 GravityAcceleration { get; set; } = Vector3.Down * 9.8f;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float Speed { get; set; } = 5;
         }
         public TtMovementData MovementData { get=> NodeData as TtMovementData;}

@@ -9,7 +9,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     [GraphElement(typeof(TtGraphElement_VarGet))]
     public class TtVarGetDescription : TtExpressionDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid VariableId { get; set; } = Guid.Empty;
         public override string Name
         {

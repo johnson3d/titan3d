@@ -16,7 +16,7 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             get => mBezierCtrl;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 GraphSize
         {
             get
@@ -30,7 +30,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MinX
         {
             get => mBezierCtrl.MinX;
@@ -39,7 +39,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 mBezierCtrl.MinX = value;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MaxX
         {
             get => mBezierCtrl.MaxX;
@@ -48,13 +48,13 @@ namespace EngineNS.Bricks.Procedure.Node
                 mBezierCtrl.MaxX = value;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float RangeX
         {
             get => MaxX - MinX;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MinY
         {
             get => mBezierCtrl.MinY;
@@ -63,7 +63,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 mBezierCtrl.MinY = value;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MaxY
         {
             get => mBezierCtrl.MaxY;
@@ -76,7 +76,7 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             get => MaxY - MinY;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<BezierPointBase> BzPoints
         {
             get => mBezierCtrl.BezierPoints;
@@ -136,7 +136,7 @@ namespace EngineNS.Bricks.Procedure.Node
             //ImGuiAPI.InvisibleButton("canvas", prevEnd - prevStart, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonRight);
             mBezierCtrl.OnDrawCanvas(in prevStart, prevEnd - prevStart);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float GetY(float x)
         {
             var vzValue = BezierCalculate.ValueOnBezier(BzPoints, x);
@@ -187,7 +187,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return null;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float GridSize { get; set; } = 1.0f;
         //public float HeightRange;
         public override bool OnProcedure(UPgcGraph graph)
@@ -497,11 +497,11 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn RadiusPin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Radius { get; set; } = 10;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Seed { get; set; } = 10000;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int CalculateDeep { get; set; } = 30;
 
         public UBufferCreator FloatBuffer { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);

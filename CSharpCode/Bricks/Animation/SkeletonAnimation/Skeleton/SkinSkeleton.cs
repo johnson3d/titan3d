@@ -11,22 +11,22 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
     {
 
     }
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtSkinSkeletonDesc : IO.BaseSerializer, ILimbDesc
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Name { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint NameHash { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string ParentName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint ParentHash { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EngineNS.Matrix InitMatrix { get; set; }
     }
 
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtSkinSkeleton : IO.BaseSerializer, ILimb, ISkeleton
     {
         public AnimatablePose.IAnimatableLimbPose CreatePose()
@@ -47,7 +47,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
         {
             Desc = desc;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<ILimb> Limbs { get; set; } = new List<ILimb>(); //all Limbs, like bone, sockets or others
         public List<ILimb> Children { get; set; } = new List<ILimb>(); //Roots
         private Dictionary<uint, ILimb> HashDic { get; set; } = new Dictionary<uint, ILimb>();
@@ -55,7 +55,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
         public IndexInSkeleton ParentIndex { get; set; } = IndexInSkeleton.Invalid;
         public IndexInSkeleton Index { get; set; } = IndexInSkeleton.Invalid;
         public ILimb Root { get; set; } //Named "Root" bone in children
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public FTransform RootPreTransform { get; set; } = FTransform.Identity;
 
         public void AddLimb(ILimb limb)

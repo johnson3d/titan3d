@@ -7,9 +7,9 @@ using EngineNS.EGui.Controls;
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
     [ContextMenu("Sequence", "FlowControl\\Sequence", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
-    public partial class SequenceNode : TtNodeBase, IBeforeExecNode, IBreakableNode
+    public partial class SequenceNode : TtMacrossNodeBase, IBeforeExecNode, IBreakableNode
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int SequenceCount 
         {
             get => Sequences.Count;
@@ -235,7 +235,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         int mConditionCount = 1;
         [Browsable(false)]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int ConditionCount
         {
             get => mConditionCount;
@@ -718,7 +718,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return;
             Initialize(funGraph);
         }
-        //[Rtti.Meta]
+        //[Rtti.Meta("")]
         //public string ReturnType
         //{
         //    get;
@@ -883,11 +883,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         [Browsable(false)]
         public PinOut LoopBodyPin;
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Int64 BeginIdx { get; set; } = 0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Int64 EndIdx { get; set; } = 1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Int64 StepIdx { get; set; } = 1;
 
         static string mLoopIdxName = "loopIndex";

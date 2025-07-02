@@ -5,19 +5,19 @@ using EngineNS;
 
 namespace EngineNS.EGui
 {
-    //[Rtti.Meta(NameAlias = new string[] { "EngineNS.EGui.UVAnimAMeta@EngineCore" })]
-    [Rtti.Meta]
+    //[Rtti.Meta("",NameAlias = new string[] { "EngineNS.EGui.UVAnimAMeta@EngineCore" })]
+    [Rtti.Meta("")]
     public partial class TtUVAnimAMeta : IO.IAssetMeta
     {
         public override string TypeExt
         {
             get => TtUVAnim.AssetExt;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName TextureName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 SnapUVStart { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 SnapUVEnd { get; set; } = new Vector2(1, 1);
         public override string GetAssetTypeName()
         {
@@ -79,8 +79,8 @@ namespace EngineNS.EGui
         }
         Thread.Async.TtTask<NxRHI.TtSrView>? SnapTask;
     }
-    //[Rtti.Meta(NameAlias = new string[] { "EngineNS.EGui.UUvAnim@EngineCore" })]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.EGui.UUvAnim@EngineCore", "EngineNS.EGui.UUvAnim" })]
+    //[Rtti.Meta("",NameAlias = new string[] { "EngineNS.EGui.UUvAnim@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.EGui.UUvAnim@EngineCore", "EngineNS.EGui.UUvAnim" })]
     [TtUVAnim.Import]
     [Editor.UAssetEditor(EditorType = typeof(UUvAnimEditor))]
     [IO.AssetCreateMenu(MenuName = "UI/UVAnim")]
@@ -189,7 +189,7 @@ namespace EngineNS.EGui
             }
             return true;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [ReadOnly(true)]
         public RName AssetName
         {
@@ -197,10 +197,10 @@ namespace EngineNS.EGui
             set;
         }
         #endregion
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 Size { get; set; } = new Vector2(50, 50);
         RName mTextureName;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName TextureName 
         { 
@@ -230,7 +230,7 @@ namespace EngineNS.EGui
             }
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<Vector4> FrameUVs { get; set; } = new List<Vector4>();
         public void GetUV(int frame, out Vector2 min, out Vector2 max)
         {
@@ -250,9 +250,9 @@ namespace EngineNS.EGui
             max.Y = FrameUVs[frame].Y + FrameUVs[frame].W;
         }
         [EGui.Controls.PropertyGrid.UByte4ToColor4PickerEditor]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UInt32 Color { get; set; } = 0xFFFFFFFF;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Duration { get; set; } = 1000.0f;
         public bool IsReadyToDraw()
         {

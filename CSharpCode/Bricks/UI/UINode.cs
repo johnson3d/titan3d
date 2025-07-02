@@ -70,7 +70,7 @@ namespace EngineNS.UI
         }
         public class TtUINodeData : TtNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [RName.PGRName(FilterExts = UI.TtUIAsset.AssetExt)]
             public RName UIName { get; set; }
         }

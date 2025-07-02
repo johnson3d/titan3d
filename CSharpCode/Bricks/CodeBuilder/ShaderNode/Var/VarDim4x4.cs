@@ -13,7 +13,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
     public class VarDimF4x4 : VarNode
     {
         Matrix mValue = Matrix.Identity;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Matrix Value { get => mValue; set => mValue = value; }
         [Browsable(false)]
         public PinIn InValue { get; set; } = new PinIn();

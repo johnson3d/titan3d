@@ -25,7 +25,7 @@ namespace EngineNS.Bricks.Particle
                 this.MdfQueueType = Rtti.TtTypeDesc.TypeStr(typeof(TtParticleMdfQueue));
             }
             public TtNebulaParticle NebulaParticle = null;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public RName NebulaName { get; set; }
         }
         [Category("Option")]

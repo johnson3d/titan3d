@@ -210,7 +210,7 @@ namespace EngineNS.UI.Controls
         } = 0;
 
         Thickness mMargin = Thickness.Empty;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [BindProperty, Category("Layout")]
         public Thickness Margin
         {
@@ -224,7 +224,7 @@ namespace EngineNS.UI.Controls
         }
 
         float mMinWidth = 0.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [BindProperty, Category("Layout")]
         public float MinWidth
         {
@@ -237,7 +237,7 @@ namespace EngineNS.UI.Controls
             }
         }
         float mMinHeight = 0.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [BindProperty, Category("Layout")]
         public float MinHeight
         {
@@ -250,7 +250,7 @@ namespace EngineNS.UI.Controls
             }
         }
         float mMaxWidth = float.MaxValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [BindProperty, Category("Layout")]
         public float MaxWidth
         {
@@ -263,7 +263,7 @@ namespace EngineNS.UI.Controls
             }
         }
         float mMaxHeight = float.MaxValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [BindProperty, Category("Layout")]
         public float MaxHeight
         {
@@ -276,7 +276,7 @@ namespace EngineNS.UI.Controls
             }
         }
         float mWidth = 100;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [BindProperty, Category("Layout")]
         public float Width
         {
@@ -291,7 +291,7 @@ namespace EngineNS.UI.Controls
             }
         }
         bool mWidthAuto = true;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [BindProperty, Category("Layout")]
         public bool WidthAuto
         {
@@ -306,7 +306,7 @@ namespace EngineNS.UI.Controls
             }
         }
         float mHeight = 100;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [BindProperty, Category("Layout")]
         public float Height
         {
@@ -321,7 +321,7 @@ namespace EngineNS.UI.Controls
             }
         }
         bool mHeightAuto = true;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [BindProperty, Category("Layout")]
         public bool HeightAuto
         {

@@ -6,10 +6,10 @@ namespace EngineNS.EGui.Controls
 {
     public class BezierControl
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<BezierPointBase> BezierPoints { get; set; } = new List<BezierPointBase>();
         float mMinX = 0.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MinX
         {
             get => mMinX;
@@ -33,7 +33,7 @@ namespace EngineNS.EGui.Controls
             }
         }
         float mMinY = 0.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MinY 
         {
             get => mMinY;
@@ -56,7 +56,7 @@ namespace EngineNS.EGui.Controls
             }
         }
         float mMaxX = 1.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MaxX
         {
             get => mMaxX;
@@ -80,7 +80,7 @@ namespace EngineNS.EGui.Controls
             }
         }
         float mMaxY = 1.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MaxY 
         {
             get => mMaxY;
@@ -102,59 +102,59 @@ namespace EngineNS.EGui.Controls
                 mMaxY = value;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 MinSize { get; set; } = new Vector2(50, 50);
         bool mShowGrid = true;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool ShowGrid 
         {
             get => mShowGrid;
             set => mShowGrid = value;
         }
         float mGridRowCount = 10;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float GridRowCount
         {
             get => mGridRowCount;
             set => mGridRowCount = value;
         }
         float mGridColumnCount = 15;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float GridColumnCount
         {
             get => mGridColumnCount;
             set => mGridColumnCount = value;
         }
         bool mLockLinkedControlPoint = true;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool LockLinkedControlPoint 
         {
             get => mLockLinkedControlPoint;
             set => mLockLinkedControlPoint = value;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float ControlPointRadius { get; set; } = 4.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MaxControlPointRadius { get; set; } = 4.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint ControlPointColor { get; set; } = 0xFFFFFF00;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float ControlPointThickness { get; set; } = 1.5f;
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float PointRadius { get; set; } = 6.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MaxPointRadius { get; set; } = 6.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint PointColor { get; set; } = 0xFF00FF00;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint PointDeleteColor { get; set; } = 0xFF0000FF;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint PointFocusColor { get; set; } = 0xFF00FFFF;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint BezierColor { get; set; } = 0xFFE0E0E0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float BezierThickness { get; set; } = 2.0f;
 
         public float DefaultControlPointExtersion { get; set; } = 0.1f;

@@ -67,14 +67,14 @@ namespace EngineNS.GamePlay
             }
         }
         Scene.TtScene mRoot;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Scene.TtScene Root
         {
             get => mRoot;
             set => mRoot = value;
         }
         internal List<Scene.TtSunNode> mSuns = new List<Scene.TtSunNode>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Scene.TtSunNode GetSun(int index = 0)
         {
             if (index < 0 || index >= mSuns.Count)
@@ -83,7 +83,7 @@ namespace EngineNS.GamePlay
         }
         TtDirectionLight mDirectionLight;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtDirectionLight DirectionLight 
         {
             get

@@ -61,7 +61,7 @@ namespace EngineNS.Plugins.GameTasks
             }
         }
     }
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     [AGameTaskDescriptor.ADescriptor]
     [IO.CommonCreate]
     [IO.AssetCreateMenu(MenuName = "Game/Task")]
@@ -95,7 +95,7 @@ namespace EngineNS.Plugins.GameTasks
         }
     }
 
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class AGameTaskDescriptor : IO.IAsset
     {
         #region IAsset
@@ -124,7 +124,7 @@ namespace EngineNS.Plugins.GameTasks
             }
             IO.TtFileManager.SaveObjectToXml(name.Address, this);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName AssetName
         {
             get;
@@ -138,17 +138,17 @@ namespace EngineNS.Plugins.GameTasks
                 return ((UGameTaskPlugin)TtPluginLoader.mPluginObject).TaskDescriptorManager.FindDescriptor(rn);
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName Uid { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Name { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<RName> RequireTasks { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<GameItems.AItemRequirement> AcceptRequireItems { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<GameItems.AItemRequirement> FinishRequireItems { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<GameItems.AItemMakeSuccess> RewardItems { get; set; }
 
         public virtual AGameTask CreateTask()
@@ -215,7 +215,7 @@ namespace EngineNS.Plugins.GameTasks
         }
     }
 
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class AGameTask
     {
         public AGameTaskDescriptor Descriptor
@@ -227,9 +227,9 @@ namespace EngineNS.Plugins.GameTasks
                 return DescriptorUid.GetTagObject<AGameTaskDescriptor>();
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName DescriptorUid { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid Uid { get; set; }
 
         public virtual bool Abandom(AGameTaskBoard board)
@@ -244,9 +244,9 @@ namespace EngineNS.Plugins.GameTasks
 
     public class AGameTaskBoard
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<AGameTask> FinishedTasks { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<AGameTask> ContinueTasks { get; set; }
         public virtual bool IsFinishedTask(RName tsk)
         {

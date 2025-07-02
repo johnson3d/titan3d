@@ -108,14 +108,14 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
         FAdditiveStruct mAdditiveStruct = new FAdditiveStruct();
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Factor1
         {
             get => mAdditiveStruct.Factor1;
             set => mAdditiveStruct.Factor1 = value;
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Factor2
         {
             get => mAdditiveStruct.Factor2;

@@ -74,31 +74,31 @@ namespace EngineNS.Animation
             }
         }
         // curve can be a asset 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public interface ICurve : IO.ISerializer
         {
             public Guid Id { get; set; }
            public FCurveValue Evaluate(float time);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public class TtVector3Curve : IO.BaseSerializer, ICurve
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Guid Id { get; set; } = Guid.NewGuid();
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public TtTrack XTrack { get;set; } = null;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public TtTrack YTrack { get; set; } = null;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public TtTrack ZTrack { get; set; } = null;
             private FTrackCache mXCache = new FTrackCache() { Index = 0 };
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public FTrackCache XCache { get=>mXCache; set=>mXCache = value; }
             private FTrackCache mYCache = new FTrackCache() { Index = 0 };
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public FTrackCache YCache { get => mYCache; set => mYCache = value; }
             private FTrackCache mZCache = new FTrackCache() { Index = 0 };
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public FTrackCache ZCache { get => mZCache; set => mZCache = value; }
             //public Vector3 Evaluate(float time)
             //{
@@ -122,30 +122,30 @@ namespace EngineNS.Animation
                 return value;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public class TtQuaternionCurve : IO.BaseSerializer, ICurve
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Guid Id { get; set; } = Guid.NewGuid();
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public TtTrack XTrack { get; set; } = null;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public TtTrack YTrack { get; set; } = null;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public TtTrack ZTrack { get; set; } = null;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public TtTrack WTrack { get; set; } = null;
             private FTrackCache mXCache = new FTrackCache() { Index = 0 };
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public FTrackCache XCache { get => mXCache; set => mXCache = value; }
             private FTrackCache mYCache = new FTrackCache() { Index = 0 };
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public FTrackCache YCache { get => mYCache; set => mYCache = value; }
             private FTrackCache mZCache = new FTrackCache() { Index = 0 };
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public FTrackCache ZCache { get => mZCache; set => mZCache = value; }
             private FTrackCache mWCache = new FTrackCache() { Index = 0 };
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public FTrackCache WCache { get => mWCache; set => mWCache = value; }
 
             public FCurveValue Evaluate(float time)
@@ -179,13 +179,13 @@ namespace EngineNS.Animation
         }
         public class TtFloatCurve : IO.BaseSerializer, ICurve
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Guid Id { get; set; } = Guid.NewGuid();
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public TtTrack Track { get; set; } = null;
 
             private FTrackCache mCache = new FTrackCache() { Index = 0 };
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public FTrackCache Cache { get=>mCache; set=>mCache = value; }
             //public float Evaluate(float time)
             //{

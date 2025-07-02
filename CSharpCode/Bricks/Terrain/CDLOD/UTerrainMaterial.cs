@@ -28,17 +28,17 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             return result;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName TexDiffuse { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName TexNormal { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float TransitionRange { get; set; } = 5.0f;
 
         List<UTerrainPlant> mPlants = new List<UTerrainPlant>();
-        [Rtti.Meta(Order = 1)]
+        [Rtti.Meta("",Order = 1)]
         public List<UTerrainPlant> Plants 
         {
             get => mPlants;
@@ -78,7 +78,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
         }
         int mNullPlantDensity = 100000;
-        [Rtti.Meta(Order = 0)]
+        [Rtti.Meta("",Order = 0)]
         public int NullPlantDensity 
         {
             get => mNullPlantDensity;
@@ -89,7 +89,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
         }
         //List<UTerrainGrass> mGrasses = new List<UTerrainGrass>();
-        //[Rtti.Meta]
+        //[Rtti.Meta("")]
         //public List<UTerrainGrass> Grasses
         //{
         //    get => mGrasses;
@@ -130,7 +130,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         //    }
         //}
         //int mNullGrassDensity = 10;
-        //[Rtti.Meta]
+        //[Rtti.Meta("")]
         //public int NullGrassDensity
         //{
         //    get => mNullGrassDensity;
@@ -140,7 +140,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         //        UpdateTotalGrassDensity();
         //    }
         //}
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int GetRandomPlant(int rdValue)
         {
             rdValue = rdValue % TotalPlantDensity;
@@ -173,7 +173,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     }
     public class UTerrainMaterialIdManager : IO.BaseSerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<Terrain.CDLOD.UTerrainMaterialId> MaterialIdArray { get; set; } = new List<Terrain.CDLOD.UTerrainMaterialId>();
         public NxRHI.TtTexture DiffuseTextureArray;
         public NxRHI.TtTexture NormalTextureArray;

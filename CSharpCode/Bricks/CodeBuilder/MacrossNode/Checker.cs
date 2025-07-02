@@ -13,7 +13,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public PinIn TypePin { get; set; } = new PinIn();
         public PinOut OutPin { get; set; }
 
-        [Rtti.Meta(Order = 0)]
+        [Rtti.Meta("",Order = 0)]
         public Rtti.TtTypeDesc TargetType
         {
             get;
@@ -223,7 +223,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     }
 
     [ContextMenu("isnull,isvalid,valid", "Utilitites\\IsValid", TtMacross.MacrossEditorKeyword)]
-    public partial class IsValidNode : TtNodeBase
+    public partial class IsValidNode : TtMacrossNodeBase
     {
         public PinIn InPin { get; set; } = new PinIn();
         public PinOut OutPin { get; set; }

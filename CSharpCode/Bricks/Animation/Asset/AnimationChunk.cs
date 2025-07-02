@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Animation.Asset
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtAnimationChunk : IO.BaseSerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName RescouceName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Dictionary<Guid,Curve.ICurve> AnimCurvesList { get; set; } = new Dictionary<Guid, Curve.ICurve>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Dictionary<String, TtAnimatedObjectDescription> AnimatedObjectDescs { get; set; } = new Dictionary<String, TtAnimatedObjectDescription>();
     }
 

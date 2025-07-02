@@ -408,7 +408,7 @@ namespace EngineNS.UnitTest
         }
         public class TestRPCArgument : IO.BaseSerializer
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public int AA { get; set; } = 100 + 3;
             public override void OnWriteMember(IO.IWriter ar, IO.ISerializer obj, TtMetaVersion metaVersion)
             {

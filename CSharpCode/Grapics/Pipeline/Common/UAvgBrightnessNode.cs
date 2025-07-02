@@ -7,7 +7,7 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("AvgBrightness", "AvgBrightness", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UAvgBrightnessNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UAvgBrightnessNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UAvgBrightnessNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UAvgBrightnessNode" })]
     public class TtAvgBrightnessNode : Graphics.Pipeline.TtRenderGraphNode
     {
         public override void Dispose()

@@ -11,7 +11,7 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn ValuePin { get; set; } = new PinIn();
 
         Rtti.TtTypeDesc mType;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Rtti.TtTypeDesc Type
         {
             get => mType;
@@ -102,7 +102,7 @@ namespace EngineNS.Bricks.Procedure.Node
         public UBufferCreator ResultBuffer => mResultBuffer;
 
         Rtti.TtTypeDesc mType;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Rtti.TtTypeDesc Type 
         {
             get => mType;

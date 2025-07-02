@@ -63,7 +63,7 @@ namespace EngineNS
             Minimum = new DVector2(double.MaxValue);
             Maximum = new DVector2(-double.MaxValue);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static DBoundingBox2D EmptyBox()
         {
             var bb = new DBoundingBox2D();
@@ -71,7 +71,7 @@ namespace EngineNS
             return bb;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsEmpty()
         {
             if (Minimum.X >= Maximum.X ||
@@ -188,7 +188,7 @@ namespace EngineNS
         /// 获取包围盒的中心点
         /// </summary>
         /// <returns>返回包围盒的中心点</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public DVector2 GetCenter()
         {
             return (Maximum + Minimum) * 0.5f;
@@ -236,12 +236,12 @@ namespace EngineNS
                 return sz.Y;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public ContainmentType Contains(in DBoundingBox2D box)
         {
             return Contains(in this, in box);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static ContainmentType Contains(in DBoundingBox2D box1, in DBoundingBox2D box2)
         {
             if (box1.Maximum.X < box2.Minimum.X || box1.Minimum.X > box2.Maximum.X)
@@ -258,12 +258,12 @@ namespace EngineNS
         }
 
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public ContainmentType Contains(in DVector2 vector)
         {
             return Contains(in this, in vector);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static ContainmentType Contains(in DBoundingBox2D box, in DVector2 vector)
         {
             if (box.Minimum.X <= vector.X && vector.X <= box.Maximum.X && box.Minimum.Y <= vector.Y &&
@@ -310,7 +310,7 @@ namespace EngineNS
             return result;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void Merge(in DVector2 pos)
         {
             DVector2.Minimize(in Minimum, in pos, out Minimum);
@@ -331,7 +331,7 @@ namespace EngineNS
                 Maximum = DVector2.Maximize(in Maximum, in box.Maximum);
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static DBoundingBox2D Merge(in DBoundingBox2D box1, in DBoundingBox2D box2)
         {
             if (box1.IsEmpty())
@@ -346,7 +346,7 @@ namespace EngineNS
                 return box;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Merge(in DBoundingBox2D box1, in DBoundingBox2D box2, out DBoundingBox2D box)
         {
             if (box1.IsEmpty())
@@ -363,7 +363,7 @@ namespace EngineNS
                 DVector2.Maximize(in box1.Maximum, in box2.Maximum, out box.Maximum);
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void Merge2(in DBoundingBox2D box, out DBoundingBox2D outBox)
         {
             if (box.IsEmpty())
@@ -374,7 +374,7 @@ namespace EngineNS
             DVector2.Minimize(in this.Minimum, in box.Minimum, out outBox.Minimum);
             DVector2.Maximize(in this.Maximum, in box.Maximum, out outBox.Maximum);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static DBoundingBox2D Merge(in DBoundingBox2D box, in DVector2 point)
         {
             DBoundingBox2D retBox;
@@ -393,7 +393,7 @@ namespace EngineNS
         /// <param name="box1">包围盒对象1</param>
         /// <param name="box2">包围盒对象2</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(DBoundingBox2D box1, DBoundingBox2D box2)
         {
             return Intersects(in box1, in box2);
@@ -411,7 +411,7 @@ namespace EngineNS
         /// <param name="box">包围盒对象</param>
         /// <param name="sphere">球体对象</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(in DBoundingBox2D box, in DBoundingSphere2D sphere)
         {
             DVector2 clamped;

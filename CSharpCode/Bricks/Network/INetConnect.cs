@@ -22,9 +22,9 @@ namespace EngineNS.Bricks.Network
                 return new FNetworkPoint();
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Ip { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UInt16 Port { get; set; }
         public override string ToString()
         {
@@ -34,9 +34,9 @@ namespace EngineNS.Bricks.Network
 
     public class FLoginResultArgument : IO.BaseSerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Bricks.Network.FNetworkPoint GatewayURL { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid Sessiond { get; set; }
     }
 

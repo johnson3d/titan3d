@@ -11,9 +11,9 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn SrcPin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UBufferCreator SourceDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UBufferCreator ResultDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public virtual UBufferCreator GetResultDesc()
         {
@@ -101,11 +101,11 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("CopyRect", "BaseOp\\CopyRect", UPgcGraph.PgcEditorKeyword)]
     public class UCopyRect : UAnyTypeMonocular
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int X { get; set; } = 0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Y { get; set; } = 0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Z { get; set; } = 0;
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
@@ -198,7 +198,7 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             PrevSize = new Vector2(70, 30);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Value { get; set; } = 1.0f;
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {

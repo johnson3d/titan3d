@@ -13,9 +13,9 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateAttachment
     public class TtTimedStateAttachmentClassDescription : TtDesignableVariableDescription
     {
         public override string Name { get; set; } = "Script";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTimedStateScriptMethodDescription InitMethodDescription { get; set; } = null;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTimedStateScriptMethodDescription TickMethodDescription { get; set; } = null;
         public override void UpdateData(ref FDescriptionUpdateContext updateContext)
         {

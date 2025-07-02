@@ -127,10 +127,10 @@ namespace EngineNS.GamePlay
         }
     }
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public partial class TtMacrossFunctionLibrary
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static TtPrefabNode InstantiatePrefab(
             [RName.PGRName(FilterExts = GamePlay.Scene.TtPrefab.AssetExt)]
             RName prefab, 
@@ -141,13 +141,13 @@ namespace EngineNS.GamePlay
             newPrefab.Parent = root;
             return newPrefab;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void DestroyPrefab(TtPrefabNode prefab)
         {
             prefab.Parent = null;
             TtEngine.Instance.GameInstance?.PrefabPoolManager.ReleasePrefab(prefab);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void SetPropertyTarget(object obj)
         {
             var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;

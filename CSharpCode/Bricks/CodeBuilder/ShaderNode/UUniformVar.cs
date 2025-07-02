@@ -8,7 +8,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
     public partial class UUniformVar : TtNodeBase
     {
         Rtti.TtTypeDesc mVarType;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Rtti.TtTypeDesc VarType 
         {
             get => mVarType;

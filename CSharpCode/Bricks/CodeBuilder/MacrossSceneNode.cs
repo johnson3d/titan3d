@@ -321,20 +321,20 @@ namespace EngineNS.Bricks.CodeBuilder
             return null;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool TestBool { get; set; } = true;
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual async TtTask BeginPlay(TtNode host)
         {
             
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void Tick(TtNode host)
         {
 
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void DestroyNode(TtNode host)
         {
             
@@ -348,7 +348,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public class TtMacrossSceneNodeData : TtNodeData
         {
             RName mMacrossName;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [RName.PGMacrossRName<TtSceneNodeMacrossBase>(FilterExts = TtMacross.AssetExt)]
             public RName MacrossName 
             {
@@ -378,7 +378,7 @@ namespace EngineNS.Bricks.CodeBuilder
             }
 
             Guid mNodeId = Guid.NewGuid();
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Guid NodeId 
             { 
                 get => mNodeId; 
@@ -388,7 +388,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
         [RName.PGMacrossRName<TtSceneNodeMacrossBase>(FilterExts = TtMacross.AssetExt)]
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName MacrossName
         {
             get

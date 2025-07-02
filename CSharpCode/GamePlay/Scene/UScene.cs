@@ -10,7 +10,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.USceneAMeta@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.USceneAMeta@EngineCore" })]
     public class TtSceneAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -41,18 +41,18 @@ namespace EngineNS.GamePlay.Scene
         //    cmdlist.AddText(in start, 0xFFFFFFFF, "scene", null);
         //}
     }
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.USceneData@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.USceneData@EngineCore" })]
     public class TtSceneData : TtNodeData
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
         public RName RPolicyName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int NumOfNodes { get; set; }
     }
     [TtScene.SceneCreateAttribute]
     [IO.AssetCreateMenu(MenuName = "Scene")]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UScene@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.UScene@EngineCore" })]
     public partial class TtScene : TtNode, IO.IAsset
     {
         public const string AssetExt = ".scene";
@@ -121,7 +121,7 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         [Category("Option")]
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
         public RName RPolicyName
         {
@@ -133,7 +133,7 @@ namespace EngineNS.GamePlay.Scene
                 SceneData.RPolicyName = value;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public async Thread.Async.TtTask<TtRenderPolicy> SetRenderPolicyToViewport(TtViewportSlate slate)
         {
             TtRenderPolicy policy = null;

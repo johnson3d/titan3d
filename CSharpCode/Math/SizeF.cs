@@ -6,13 +6,13 @@ namespace EngineNS
 {
     public struct SizeF
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Width
         {
             get;
             set;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Height
         {
             get;
@@ -20,7 +20,7 @@ namespace EngineNS
         }
 
         static SizeF mEmpty = new SizeF(0.0f, 0.0f);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static SizeF Empty
         {
             get { return mEmpty; }

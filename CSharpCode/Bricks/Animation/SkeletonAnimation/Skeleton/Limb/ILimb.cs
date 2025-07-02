@@ -42,21 +42,21 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton.Limb
 {
     public interface ILimbDesc : IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
        public string Name { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint NameHash { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string ParentName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint ParentHash { get; set; } 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EngineNS.Matrix InitMatrix { get; set; }
     }
     public interface ILimb : IO.ISerializer
     {
         public AnimatablePose.IAnimatableLimbPose CreatePose();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public ILimbDesc Desc { get; set; }
         public List<ILimb> Children { get; set; }
         public Skeleton.IndexInSkeleton ParentIndex { get; set; }

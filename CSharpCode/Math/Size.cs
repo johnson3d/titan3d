@@ -6,7 +6,7 @@ namespace EngineNS
 {
     public struct Size
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsEmpty
         {
             get
@@ -17,13 +17,13 @@ namespace EngineNS
                 return false;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Width
         {
             get;
             set;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Height
         {
             get;
@@ -31,7 +31,7 @@ namespace EngineNS
         }
 
         static Size mEmpty = new Size(0, 0);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Size Empty
         {
             get { return mEmpty; }

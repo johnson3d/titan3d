@@ -9,16 +9,16 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
     [Bricks.CodeBuilder.ContextMenu("WaterBasin", "Float1\\WaterBasin", UPgcGraph.PgcEditorKeyword)]
     public class TtWaterBasinNode : TtGpuNodeBase
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName RainMap
         {
             get;
             set;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Step { get; set; } = 16;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float RainScalar { get; set; } = 20.0f;
         TtAttachBuffer HeightAttachement = new TtAttachBuffer();
         TtAttachBuffer IncWaterAttachement = new TtAttachBuffer();

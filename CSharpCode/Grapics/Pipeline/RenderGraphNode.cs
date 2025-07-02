@@ -120,7 +120,7 @@ namespace EngineNS.Graphics.Pipeline
             set;
         } = true;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual bool Enable
         {
             get;

@@ -14,7 +14,7 @@ namespace EngineNS.GamePlay.Scene
         public class TtPrefabNodeData : TtNodeData
         {
             RName mPrefabName = null;
-            [Rtti.Meta(Order = 3)]
+            [Rtti.Meta("",Order = 3)]
             public RName PrefabName
             {
                 get => mPrefabName;
@@ -180,7 +180,7 @@ namespace EngineNS.GamePlay.Scene
         }
         
     }
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtPrefabAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -230,7 +230,7 @@ namespace EngineNS.GamePlay.Scene
         public const string AssetExt = ".prefab";
         public string TypeExt { get => AssetExt; }
         [Category("Option")]
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
         public RName RPolicyName
         {

@@ -34,13 +34,13 @@ namespace EngineNS.Animation.Macross.BlendTree
     [Graph(typeof(TtGraph_BlendTree))]
     public class TtBlendTreeClassDescription : TtDesignableVariableDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public override string Name { get; set; } = "BlendTree";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [DrawInGraph]
         public TtBlendTree_PoseOutputClassDescription PoseOutput { get; set; } = new TtBlendTree_PoseOutputClassDescription();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [DrawInGraph]
         public List<TtBlendTreeNodeClassDescription> Nodes { get; set; } = new List<TtBlendTreeNodeClassDescription>();
         [Rtti.Meta, DrawInGraph]
@@ -107,7 +107,13 @@ namespace EngineNS.Animation.Macross.BlendTree
             thisClassDeclaration.Properties.Add(PoseOutput.BuildVariableDeclaration(ref classBuildContext));
             foreach (var blendTreeNode in Nodes)
             {
-                classDeclarationsBuilded.AddRange(blendTreeNode.BuildClassDeclarations(ref classBuildContext));
+                var decl = blendTreeNode.BuildClassDeclarations(ref classBuildContext);
+                if (decl == null)
+                {
+                    Profiler.Log.WriteLine<Profiler.TtMacrossCategory>(Profiler.ELogTag.Error, $"BuildClassDeclarations: Node ({blendTreeNode.Name}) build failed");
+                    return null;
+                }
+                classDeclarationsBuilded.AddRange(decl);
                 thisClassDeclaration.Properties.Add(blendTreeNode.BuildVariableDeclaration(ref classBuildContext));
             }
             thisClassDeclaration.AddMethod(BuildOverrideInitializeMethod());

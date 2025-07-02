@@ -53,7 +53,7 @@ namespace EngineNS.Bricks.CodeBuilder
         void AddReferenceAsset(RName rn);
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMacrossAMeta@EngineCore", "EngineNS.Bricks.CodeBuilder.UMacrossAMeta" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMacrossAMeta@EngineCore", "EngineNS.Bricks.CodeBuilder.UMacrossAMeta" })]
     public partial class TtMacrossAMeta : IO.IAssetMeta, IMacrossMeta
     {
         public static readonly string DisablePreDefineKey = "// DisablePredefine:";
@@ -62,9 +62,9 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             get => TtMacross.AssetExt;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsDisable { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string BaseTypeStr { get; set; }
         Rtti.TtTypeDesc mBaseType;
         public Rtti.TtTypeDesc BaseType
@@ -121,7 +121,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMacross@EngineCore", "EngineNS.Bricks.CodeBuilder.UMacross" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMacross@EngineCore", "EngineNS.Bricks.CodeBuilder.UMacross" })]
     [TtMacross.MacrossCreate]
     [IO.AssetCreateMenu(MenuName = "Script/Macross")]
     [Editor.UAssetEditor(EditorType = typeof(Bricks.CodeBuilder.MacrossNode.TtMacrossEditor))]

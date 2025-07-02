@@ -13,7 +13,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("GpuErosion", "Float1\\GpuErosion", UPgcGraph.PgcEditorKeyword)]
     public class TtGpuErosionNode : TtGpuNodeBase
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName RainMap
         {

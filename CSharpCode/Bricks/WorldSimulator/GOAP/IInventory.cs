@@ -6,13 +6,13 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
 {
     public partial class IItem
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual string Name
         {
             get;
             set;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void UseItem()
         {
 
@@ -27,7 +27,7 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
     public partial class IItemContain : IItem
     {
         public List<IItem> Items { get; } = new List<IItem>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public IItem GetItem(string name,
             [Rtti.MetaParameter(FilterType = typeof(IItem), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type type = null)
@@ -39,7 +39,7 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
             }
             return null;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public IItem TakeItem(string name,
             [Rtti.MetaParameter(FilterType = typeof(IItem), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type type = null)
@@ -60,12 +60,12 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
     public partial class IInventory
     {
         public Dictionary<string, IItem> Items { get; } = new Dictionary<string, IItem>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool HaveItem(string name)
         {
             return Items.ContainsKey(name);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public IItem GetItem(string name,
             [Rtti.MetaParameter(FilterType = typeof(IItem), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type type = null)
@@ -75,7 +75,7 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
                 return result;
             return null;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public IItem TakeItem(string name,
             [Rtti.MetaParameter(FilterType = typeof(IItem), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type type = null)
@@ -88,7 +88,7 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
             }
             return null;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool PutItem(IActor actor, string name, IItem item, string bagName)
         {
             if (Items.ContainsKey(name))

@@ -14,7 +14,7 @@ using static EngineNS.RName;
 
 namespace EngineNS.NxRHI
 {
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.NxRHI.USrViewAMeta@EngineCore", "EngineNS.NxRHI.USrViewAMeta" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.NxRHI.USrViewAMeta@EngineCore", "EngineNS.NxRHI.USrViewAMeta" })]
     public class TtSrViewAMeta : IO.IAssetMeta
     {
         public TtSrViewAMeta()
@@ -38,7 +38,7 @@ namespace EngineNS.NxRHI
             return "SrView";
         }
         string mOriginImageAddress = null;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string OriginImageAddress 
         {
             get
@@ -284,7 +284,7 @@ namespace EngineNS.NxRHI
                 "IsNormal: " + Srv.PicDesc.IsNormal);
         }
     }
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.NxRHI.USrView@EngineCore", "EngineNS.NxRHI.USrView" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.NxRHI.USrView@EngineCore", "EngineNS.NxRHI.USrView" })]
     [TtSrView.Import]
     [IO.AssetCreateMenu(MenuName = "Texture")]
     public partial class TtSrView : AuxPtrType<NxRHI.ISrView>, IO.IAsset, IO.IStreaming
@@ -1250,7 +1250,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName AssetName
         {
             get;

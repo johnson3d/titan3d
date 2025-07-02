@@ -6,7 +6,7 @@ namespace EngineNS.Bricks.Procedure.Node
 {
     public class UNodePinDefine : NodeGraph.UNodePinDefineBase
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UBufferCreator BufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, - 1, -1);
         protected override void InitFromPin<T>(T pin)
         {
@@ -19,12 +19,12 @@ namespace EngineNS.Bricks.Procedure.Node
     [Macross.TtMacross]
     public partial class UProgram
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual bool InitProcedure(UPgcGraph graph, UProgramNode node)
         {
             return true;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual bool OnProcedure(UPgcGraph graph, UProgramNode node)
         {
             //graph.BufferCache.FindBuffer()
@@ -35,7 +35,7 @@ namespace EngineNS.Bricks.Procedure.Node
             //}
             return true;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public unsafe virtual void OnPerPixel(UPgcGraph graph, UProgramNode node, 
             UBufferComponent resuilt, int x, int y, int z, object tag)
         {
@@ -115,18 +115,18 @@ namespace EngineNS.Bricks.Procedure.Node
             get;
         } = new UProgramNodeDefine();
         List<UNodePinDefine> mUserInputs = new List<UNodePinDefine>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<UNodePinDefine> UserInputs
         {
             get => mUserInputs;
         }
         List<UNodePinDefine> mUserOutputs = new List<UNodePinDefine>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<UNodePinDefine> UserOutputs
         {
             get => mUserOutputs;
         }
-        [Rtti.Meta(Order = 1)]
+        [Rtti.Meta("",Order = 1)]
         public bool SerializeSignal
         {
             get => true;
@@ -139,7 +139,7 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             ameta.AddReferenceAsset(ProgramName);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(UProgram))]
         public RName ProgramName
         {

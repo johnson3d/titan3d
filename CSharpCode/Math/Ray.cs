@@ -36,7 +36,7 @@ namespace EngineNS
         /// <param name="plane">平面对象</param>
         /// <param name="distance">交点距离</param>
         /// <returns>相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(in Ray ray, in Plane plane, out float distance)
 	    {
 		    ray.Direction.Normalize();
@@ -73,7 +73,7 @@ namespace EngineNS
         /// <param name="vertex3">顶点坐标</param>
         /// <param name="distance">交点距离</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(in Ray ray, in Vector3 vertex1, in Vector3 vertex2, in Vector3 vertex3, out float distance)
 	    {
 		    float u, v;
@@ -90,7 +90,7 @@ namespace EngineNS
         /// <param name="barycentricU">质心的U坐标</param>
         /// <param name="barycentricV">质心的V坐标</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(in Ray ray, in Vector3 vertex1, in Vector3 vertex2, in Vector3 vertex3, out float distance, out float barycentricU, out float barycentricV)
 	    {
             unsafe
@@ -126,7 +126,7 @@ namespace EngineNS
         /// <param name="box">包围盒对象</param>
         /// <param name="distance">交点距离</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(in Ray ray, in BoundingBox box, out float distance)
 	    {
 		    float d = 0.0f;
@@ -236,7 +236,7 @@ namespace EngineNS
         /// <param name="sphere">球体形状的包围盒</param>
         /// <param name="distance">交点距离</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(in Ray ray, in BoundingSphere sphere, out float distance)
 	    {
 		    float x = sphere.Center.X - ray.Position.X;
@@ -370,7 +370,7 @@ namespace EngineNS
         /// <param name="plane">平面对象</param>
         /// <param name="distance">交点距离</param>
         /// <returns>相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(in DRay ray, in DPlane plane, out double distance)
         {
             ray.Direction.Normalize();
@@ -407,7 +407,7 @@ namespace EngineNS
         /// <param name="vertex3">顶点坐标</param>
         /// <param name="distance">交点距离</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(in DRay ray, in DVector3 vertex1, in DVector3 vertex2, in DVector3 vertex3, out double distance)
         {
             double u, v;
@@ -424,7 +424,7 @@ namespace EngineNS
         /// <param name="barycentricU">质心的U坐标</param>
         /// <param name="barycentricV">质心的V坐标</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(in DRay ray, in DVector3 vertex1, in DVector3 vertex2, in DVector3 vertex3, out double distance, out double barycentricU, out double barycentricV)
         {
             unsafe
@@ -461,7 +461,7 @@ namespace EngineNS
         /// <param name="box">包围盒对象</param>
         /// <param name="distance">交点距离</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(in DRay ray, in DBoundingBox box, out double distance)
         {
             double d = 0.0f;
@@ -673,7 +673,7 @@ namespace EngineNS
         /// <param name="sphere">球体形状的包围盒</param>
         /// <param name="distance">交点距离</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(in Ray ray, in DBoundingSphere sphere, out double distance)
         {
             var x = sphere.Center.X - ray.Position.X;

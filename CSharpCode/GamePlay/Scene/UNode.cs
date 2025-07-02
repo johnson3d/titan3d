@@ -15,7 +15,7 @@ namespace EngineNS.GamePlay.Scene
         public System.Type NodeDataType = typeof(TtNodeData);
         public string DefaultNamePrefix = "Node";
     }
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UNodeData@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.UNodeData@EngineCore" })]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtNodeData : IO.BaseSerializer
     {
@@ -33,19 +33,19 @@ namespace EngineNS.GamePlay.Scene
                 IsDirty = false;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtNode.ENodeStyles NodeStyles { get; set; } = 0;
-        [Rtti.Meta(Order = 0)]
+        [Rtti.Meta("",Order = 0)]
         public string Name { get; set; }
         TtBoundVolume mBoundVolume;
-        [Rtti.Meta(Order = 1)]
+        [Rtti.Meta("",Order = 1)]
         public TtBoundVolume BoundVolume
         {
             get => mBoundVolume;
             set => mBoundVolume = value;
         }
         TtPlacementBase mPlacement = null;
-        [Rtti.Meta(Order = 2)]
+        [Rtti.Meta("",Order = 2)]
         public TtPlacementBase Placement
         {
             get => mPlacement;
@@ -80,7 +80,7 @@ namespace EngineNS.GamePlay.Scene
             }
         }
     }
-    [Rtti.Meta()]
+    [Rtti.Meta("")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtNode
     {
@@ -150,7 +150,7 @@ namespace EngineNS.GamePlay.Scene
             }
             this.Behavior?.DestroyNode(this);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void DisposeWithChildren()
         {
             foreach (var i in Children)
@@ -313,7 +313,7 @@ namespace EngineNS.GamePlay.Scene
             return result;
         }
         public delegate TtTask FPostSpawnNode(TtNode node);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static async Thread.Async.TtTask<TtNode> SpawnNode(TtNode parent, System.Type nodeType, FPostSpawnNode postAction, TtNodeData data = null, EBoundVolumeType bvType = EBoundVolumeType.Box, Type placementType = null, TtWorld world = null)
         {
             if (nodeType.IsSubclassOf(typeof(TtNode)) == false)
@@ -587,7 +587,7 @@ namespace EngineNS.GamePlay.Scene
             return false;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual Guid NodeId
         {
             get => Guid.Empty;
@@ -644,7 +644,7 @@ namespace EngineNS.GamePlay.Scene
         }
         WeakReference<TtNode> mParent;
         //protected TtNode mParent;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual TtNode Parent
         {
             get
@@ -695,7 +695,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtScene ParentScene
         {
             get
@@ -710,7 +710,7 @@ namespace EngineNS.GamePlay.Scene
                 return scene.World;
             return null;
         }
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public TtWorld HostWorld { get => GetWorld(); }
         public List<TtNode> Children { get; } = new List<TtNode>();
         TtNodeData mNodeData = null;
@@ -855,7 +855,7 @@ namespace EngineNS.GamePlay.Scene
             Children.Clear();
             UpdateAABB();
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtNode FindFirstChild(string name,
             [Rtti.MetaParameter(FilterType = typeof(TtNode), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type type = null, bool bRecursive = false)
@@ -1459,7 +1459,7 @@ namespace EngineNS.GamePlay.Scene
             this.Behavior?.Tick(this);
             return true;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void RemoveFromWorld()
         {
             Parent = null;

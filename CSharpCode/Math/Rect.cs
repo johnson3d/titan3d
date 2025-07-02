@@ -169,7 +169,7 @@
         /// <summary>
         /// 对象置空
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Rect Empty
         {
             get { return DefaultRect; }
@@ -177,7 +177,7 @@
         /// <summary>
         /// 只读属性，该对象是否为空
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsEmpty
         {
             get
@@ -191,7 +191,7 @@
         /// <summary>
         /// 对象的位置坐标
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 Location
         {
             get
@@ -210,7 +210,7 @@
         /// <summary>
         /// 对象的大小
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public SizeF Size
         {
             get
@@ -231,7 +231,7 @@
         /// <summary>
         /// X坐标
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float X
         {
             get { return _x; }
@@ -241,7 +241,7 @@
         /// <summary>
         /// Y坐标
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Y
         {
             get { return _y; }
@@ -251,7 +251,7 @@
         /// <summary>
         /// 宽
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Width
         {
             get { return _width; }
@@ -261,7 +261,7 @@
         /// <summary>
         /// 高
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Height
         {
             get { return _height; }
@@ -270,7 +270,7 @@
         /// <summary>
         /// 只读属性，最左边的值
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Left
         {
             get { return _x; }
@@ -278,7 +278,7 @@
         /// <summary>
         /// 只读属性，最高点的值
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Top
         {
             get { return _y; }
@@ -286,7 +286,7 @@
         /// <summary>
         /// 只读属性，右侧的值
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Right
         {
             get { return _x + _width; }
@@ -294,7 +294,7 @@
         /// <summary>
         /// 只读属性，最下方的值
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Bottom
         {
             get { return _y + _height; }
@@ -302,7 +302,7 @@
         /// <summary>
         /// 只读属性，左上方坐标
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 TopLeft
         {
             get
@@ -316,7 +316,7 @@
         /// <summary>
         /// 只读属性，右上方坐标
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 TopRight
         {
             get
@@ -330,7 +330,7 @@
         /// <summary>
         /// 只读属性，左下方坐标
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 BottomLeft
         {
             get
@@ -344,7 +344,7 @@
         /// <summary>
         /// 只读属性，右下方坐标
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 BottomRight
         {
             get
@@ -360,7 +360,7 @@
         /// </summary>
         /// <param name="point">点对象</param>
         /// <returns>如果包含该点返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool Contains(Vector2 point)
         {
             if (point.X >= Left && point.X <= Right &&
@@ -375,7 +375,7 @@
         /// <param name="x">X坐标</param>
         /// <param name="y">Y坐标</param>
         /// <returns>如果包含该点返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool Contains(float x, float y)
         {
             if (x >= Left && x <= Right &&
@@ -389,7 +389,7 @@
         /// </summary>
         /// <param name="rect">矩形对象</param>
         /// <returns>如果碰撞返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool Contains(Rect rect)
         {
             if (rect.Left >= Left && rect.Right <= Right &&
@@ -403,7 +403,7 @@
         /// </summary>
         /// <param name="rect">矩形对象</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IntersectsWith(Rect rect)
         {
             if (rect.Left > Right || rect.Right < Left ||
@@ -416,7 +416,7 @@
         /// 相交矩形的交点
         /// </summary>
         /// <param name="rect">矩形对象</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void Intersect(Rect rect)
         {
             var tempRect = Intersect(this, rect);
@@ -431,7 +431,7 @@
         /// <param name="rect1">矩形对象</param>
         /// <param name="rect2">矩形对象</param>
         /// <returns>返回相交矩形的交点</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Rect Intersect(Rect rect1, Rect rect2)
         {
             if (!rect1.IntersectsWith(rect2))

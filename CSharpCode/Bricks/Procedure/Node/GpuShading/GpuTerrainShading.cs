@@ -55,7 +55,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         private NxRHI.TtComputeDraw mDrawcall;
         public Vector3ui DispatchThread = new Vector3ui(1, 1, 1);
         public RName mRain;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName Rain 
         {
@@ -71,7 +71,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             }
         }
         internal NxRHI.TtSrView mRainTexture;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float RainScalar { get; set; } = 10.0f;
         public int TextureWidth { get; set; } = 1;
         public int TextureHeight { get; set; } = 1;
@@ -283,7 +283,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         public Vector3ui DispatchThread = new Vector3ui(1, 1, 1);
 
         public Graphics.Pipeline.TtGpuBuffer<uint> PrevWaterTexture = new TtGpuBuffer<uint>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Step { get; set; } = 16;
         public TtWaterBasinNode()
         {

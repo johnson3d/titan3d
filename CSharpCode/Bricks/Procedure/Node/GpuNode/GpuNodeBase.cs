@@ -8,7 +8,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
     public class TtGpuNodeBase : Node.UAnyTypeMonocular
     {
         protected RName mPolicyName;
-        [Rtti.Meta(Order = 2)]
+        [Rtti.Meta("",Order = 2)]
         [RName.PGRName(FilterExts = TtRenderPolicyAsset.AssetExt)]
         public RName PolicyName
         {

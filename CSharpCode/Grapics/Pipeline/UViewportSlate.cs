@@ -36,7 +36,7 @@ namespace EngineNS.Graphics.Pipeline
         NxRHI.FScissorRect mScissorRect = new NxRHI.FScissorRect();
         public NxRHI.FScissorRect ScissorRect { get => mScissorRect; }
         GamePlay.TtWorld mWorld;
-        [Rtti.Meta()]
+        [Rtti.Meta("")]
         [Category("Option")]
         public GamePlay.TtWorld World { get => mWorld; protected set => mWorld = value; }
         public void SetCameraOffset(in DVector3 offset)
@@ -73,7 +73,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         protected Graphics.Pipeline.TtRenderPolicy mRenderPolicy;
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true, UserDraw = false)]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Graphics.Pipeline.TtRenderPolicy RenderPolicy 
         { 
             get => mRenderPolicy; 
@@ -437,7 +437,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public delegate System.Threading.Tasks.Task<bool> FOnInitialize(TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax);
         public FOnInitialize OnInitialize = null;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual async System.Threading.Tasks.Task<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
         {
             var policy = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(policyName).CreateRenderPolicy(this);
@@ -457,7 +457,7 @@ namespace EngineNS.Graphics.Pipeline
 
         #region HUD
         //protected UI.TtUIHost mDefaultHUD = new UI.TtUIHost();
-        //[Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly | Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        //[Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly | Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         //public UI.TtUIHost DefaultHUD
         //{
         //    get => mDefaultHUD;
@@ -475,13 +475,13 @@ namespace EngineNS.Graphics.Pipeline
         //    }
         //}
         protected Stack<UI.TtUIHost> mHUDStack = new Stack<UI.TtUIHost>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void SetHUD(UI.Controls.TtUIElement hud)
         {
             ClearHUDs();
             PushHUD(hud);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void PushHUD(UI.Controls.TtUIElement hud)
         {
             TtUIHost tempHost = null;
@@ -503,7 +503,7 @@ namespace EngineNS.Graphics.Pipeline
 
             TtEngine.Instance.UIManager.AddActivedUI(tempHost);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void PopHUD()
         {
             var hud = mHUDStack.Peek();
@@ -513,7 +513,7 @@ namespace EngineNS.Graphics.Pipeline
 
             TtEngine.Instance.UIManager.RemoveActivedUI(hud);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void ClearHUDs()
         {
             while (mHUDStack.Count > 0)
@@ -521,7 +521,7 @@ namespace EngineNS.Graphics.Pipeline
                 PopHUD();
             }
         }
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly | Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly | Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         [Category("Option")]
         public UI.TtUIHost HUD
         {

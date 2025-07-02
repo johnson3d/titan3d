@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Animation.Asset.BlendSpace
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtBlendSpace2DAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -155,7 +155,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
         }
         public const string AssetExt = ".blendspace2d";
         public override string TypeExt { get => AssetExt; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public override RName AssetName { get; set; }
         public override IAssetMeta CreateAMeta()
         {

@@ -5,13 +5,13 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.UDirectionLight@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.UDirectionLight@EngineCore" })]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtDirectionLight
         : IO.BaseSerializer
     {
         public Graphics.Pipeline.Shader.FDirLight mDirLight;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public Vector3 Direction
         {
@@ -20,7 +20,7 @@ namespace EngineNS.GamePlay
         }
 
         [EGui.Controls.PropertyGrid.Color3PickerEditor]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public Vector3 SunLightColor
         {
@@ -31,7 +31,7 @@ namespace EngineNS.GamePlay
             }
         }
         [EGui.Controls.PropertyGrid.Color3PickerEditor]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public Vector3 SkyLightColor
         {
@@ -42,7 +42,7 @@ namespace EngineNS.GamePlay
             }
         }
         [EGui.Controls.PropertyGrid.Color3PickerEditor]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public Vector3 GroundLightColor
         {
@@ -52,7 +52,7 @@ namespace EngineNS.GamePlay
                 mDirLight.GroundLightColor = value;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public float SunLightIntensity
         {

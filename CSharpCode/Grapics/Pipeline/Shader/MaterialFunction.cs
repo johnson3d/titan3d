@@ -97,7 +97,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 }
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void SaveAssetTo(RName name)
         {
             var MaterialGraph = new Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionGraph();
@@ -308,7 +308,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             return true;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(ReadOnly = true)]
         [Category("Option")]
         public RName AssetName
@@ -322,16 +322,16 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public NxRHI.TtShaderCode SourceCode { get; } = new NxRHI.TtShaderCode();
         #endregion
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [ReadOnly(true)]
         public string GraphXMLString { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [ReadOnly(true)]
         public string HLSLCode { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Rtti.TtClassMeta.TtMethodMeta MethodMeta { get; set; } = new Rtti.TtClassMeta.TtMethodMeta();
         private string mCallNodeName = null;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public string CallNodeName
         {

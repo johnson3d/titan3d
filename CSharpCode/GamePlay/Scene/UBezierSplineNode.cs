@@ -11,11 +11,11 @@ namespace EngineNS.GamePlay.Scene
     {
         public class TtBezierSplineNodeData : TtNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public TtBezier3DSpline Spline { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float PointRadius { get; set; } = 0.1f;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public uint PointSmooth { get; set; } = 8;
             public TtBezierSplineNodeData()
             {

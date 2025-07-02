@@ -289,9 +289,9 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool EnableInstanceMeshCullling { get; set; } = true;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool EnableStaticMeshBatch { get; set; } = false;
         #region InstanceMeshCulling
         public Dictionary<Hash64, TtInstanceStaticMeshBatch> InstanceMeshes = new Dictionary<Hash64, TtInstanceStaticMeshBatch>();

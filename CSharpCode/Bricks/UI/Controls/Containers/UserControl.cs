@@ -20,7 +20,7 @@ namespace EngineNS.UI.Controls.Containers
     {
         TtUIElement mChildElement = null;
         RName mChildRName;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public RName ChildRName 
         {

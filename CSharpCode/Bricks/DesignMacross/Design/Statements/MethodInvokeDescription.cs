@@ -106,13 +106,13 @@ namespace EngineNS.DesignMacross.Design.Statement
             return methodInvoke;
         }
         //ReturnType OutPin Index 0
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsStatic { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsAsync { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTypeDesc DeclaringType { get; set; } = null;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTypeDesc ReturnType { get; set; } = TtTypeDesc.TypeOf(typeof(void));
         public TtMethodInvokeDescription()
         {

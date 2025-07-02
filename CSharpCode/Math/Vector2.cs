@@ -216,7 +216,7 @@ namespace EngineNS
         public readonly static Vector2 MinusOne = new Vector2(-1, -1);        
         public readonly static Vector2 UnitX = new Vector2(1, 0);        
         public readonly static Vector2 UnitY = new Vector2(0, 1);        
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static int SizeInBytes 
         { 
             get
@@ -280,7 +280,7 @@ namespace EngineNS
         /// 向量的长度
         /// </summary>
         /// <returns>返回向量的长度</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Length()
 	    {
 		    return (float)( Math.Sqrt( (X * X) + (Y * Y) ) );
@@ -289,7 +289,7 @@ namespace EngineNS
         /// 长度的平方
         /// </summary>
         /// <returns>返回长度的平方</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float LengthSquared()
         {
             return (X * X) + (Y * Y);
@@ -297,7 +297,7 @@ namespace EngineNS
         /// <summary>
         /// 二维向量的单位化
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Normalize()
         {
             float length = Length();
@@ -314,7 +314,7 @@ namespace EngineNS
         /// <param name="left">二维向量对象</param>
         /// <param name="right">二维向量对象</param>
         /// <returns>返回两个向量的和</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 Add( Vector2 left, Vector2 right )
 	    {
             Vector2 ret;
@@ -328,7 +328,7 @@ namespace EngineNS
         /// <param name="left">二维向量对象</param>
         /// <param name="right">二维向量对象</param>
         /// <param name="result">两个向量的和</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Add( ref Vector2 left, ref Vector2 right, out Vector2 result )
 	    {
             result.X = left.X + right.X;
@@ -340,7 +340,7 @@ namespace EngineNS
         /// <param name="left">二维向量对象</param>
         /// <param name="right">二维向量对象</param>
         /// <returns>返回两个向量的差</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 Subtract( Vector2 left, Vector2 right )
 	    {
             Vector2 ret;
@@ -354,13 +354,13 @@ namespace EngineNS
         /// <param name="left">二维向量对象</param>
         /// <param name="right">二维向量对象</param>
         /// <param name="result">两个向量的差</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Subtract( ref Vector2 left, ref Vector2 right, out Vector2 result )
 	    {
             result.X = left.X - right.X;
             result.Y = left.Y - right.Y;
 	    }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 Modulate( Vector2 left, Vector2 right )
 	    {
             Vector2 result;
@@ -374,13 +374,13 @@ namespace EngineNS
         /// <param name="left">二维向量对象</param>
         /// <param name="right">二维向量对象</param>
         /// <param name="result">两个向量的积</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Modulate( ref Vector2 left, ref Vector2 right, out Vector2 result )
 	    {
             result.X = left.X * right.X;
             result.Y = left.Y * right.Y;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 Multiply( Vector2 value, float scale )
 	    {
             Vector2 result;
@@ -394,7 +394,7 @@ namespace EngineNS
         /// <param name="value">二维向量对象</param>
         /// <param name="scale">常数</param>
         /// <param name="result">向量与常数的积</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Multiply( ref Vector2 value, float scale, out Vector2 result )
 	    {
             result.X = value.X * scale;
@@ -406,7 +406,7 @@ namespace EngineNS
         /// <param name="value">二维向量对象</param>
         /// <param name="scale">常数</param>
         /// <returns>返回向量与常数的商</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 Divide( Vector2 value, float scale )
 	    {
             Vector2 result;
@@ -420,7 +420,7 @@ namespace EngineNS
         /// <param name="value">二维向量对象</param>
         /// <param name="scale">常数</param>
         /// <param name="result">向量与常数的商</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Divide( ref Vector2 value, float scale, out Vector2 result )
 	    {
             result.X = value.X / scale;
@@ -431,7 +431,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="value">二维向量对象</param>
         /// <returns>返回向量取反的结果</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 Negate( Vector2 value )
 	    {
             Vector2 result;
@@ -444,7 +444,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="value">二维向量对象</param>
         /// <param name="result">向量取反的结果</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Negate( ref Vector2 value, out Vector2 result )
 	    {
             result.X = -value.X;
@@ -459,7 +459,7 @@ namespace EngineNS
         /// <param name="amount1">参数</param>
         /// <param name="amount2">参数</param>
         /// <returns>返回对象的质心坐标</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 Barycentric(in Vector2 value1, in Vector2 value2, in Vector2 value3, float amount1, float amount2 )
 	    {
 		    Vector2 vector;
@@ -497,7 +497,7 @@ namespace EngineNS
         /// <param name="value4">二维坐标点</param>
         /// <param name="amount">插值数据</param>
         /// <returns>返回计算后的坐标点</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 CatmullRom( Vector2 value1, Vector2 value2, Vector2 value3, Vector2 value4, float amount )
 	    {
             Vector2 vector;
@@ -523,7 +523,7 @@ namespace EngineNS
         /// <param name="value4">二维坐标点</param>
         /// <param name="amount">插值数据</param>
         /// <param name="result">计算后的坐标点</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void CatmullRom( ref Vector2 value1, ref Vector2 value2, ref Vector2 value3, ref Vector2 value4, float amount, out Vector2 result )
 	    {
 		    float squared = amount * amount;
@@ -547,7 +547,7 @@ namespace EngineNS
         /// <param name="min">二维坐标点的最小值</param>
         /// <param name="max">二维坐标点的最大值</param>
         /// <returns>返回计算后的坐标</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 Clamp( Vector2 value, Vector2 min, Vector2 max )
 	    {
             Vector2 result;
@@ -571,7 +571,7 @@ namespace EngineNS
         /// <param name="min">二维坐标点的最小值</param>
         /// <param name="max">二维坐标点的最大值</param>
         /// <param name="result">计算后的坐标</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Clamp( in Vector2 value, in Vector2 min, in Vector2 max, out Vector2 result )
 	    {
 		    float x = value.X;
@@ -594,7 +594,7 @@ namespace EngineNS
         /// <param name="tangent2">二维向量的正切点坐标</param>
         /// <param name="amount">插值</param>
         /// <returns>返回计算后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 Hermite( Vector2 value1, Vector2 tangent1, Vector2 value2, Vector2 tangent2, float amount )
 	    {
             Vector2 vector;
@@ -619,7 +619,7 @@ namespace EngineNS
         /// <param name="tangent2">二维向量的正切点坐标</param>
         /// <param name="amount">插值</param>
         /// <param name="result">计算后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Hermite( ref Vector2 value1, ref Vector2 tangent1, ref Vector2 value2, ref Vector2 tangent2, float amount, out Vector2 result )
 	    {
 		    float squared = amount * amount;
@@ -642,7 +642,7 @@ namespace EngineNS
         /// <param name="end">终点坐标</param>
         /// <param name="factor">插值因子</param>
         /// <returns>返回计算后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 Lerp(in Vector2 start, in Vector2 end, float factor)
         {
             Vector2 vector;
@@ -652,7 +652,7 @@ namespace EngineNS
 
             return vector;
 	    }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 Lerp(in Vector2 start, in Vector2 end, in Vector2 factor)
         {
             Vector2 vector;
@@ -669,7 +669,7 @@ namespace EngineNS
         /// <param name="end">终点坐标</param>
         /// <param name="factor">插值因子</param>
         /// <param name="result">计算后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Lerp(in Vector2 start, in Vector2 end, float factor, out Vector2 result )
 	    {
 		    Vector2 r;
@@ -685,7 +685,7 @@ namespace EngineNS
         /// <param name="end">终点坐标</param>
         /// <param name="amount">插值因子</param>
         /// <returns>返回计算后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 SmoothStep(in Vector2 start, in Vector2 end, float amount )
 	    {
             Vector2 vector;
@@ -705,7 +705,7 @@ namespace EngineNS
         /// <param name="end">终点坐标</param>
         /// <param name="amount">插值因子</param>
         /// <param name="result">计算后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void SmoothStep( ref Vector2 start, ref Vector2 end, float amount, out Vector2 result )
 	    {
 		    amount = (amount > 1.0f) ? 1.0f : ((amount < 0.0f) ? 0.0f : amount);
@@ -723,7 +723,7 @@ namespace EngineNS
         /// <param name="value1">坐标点</param>
         /// <param name="value2">坐标点</param>
         /// <returns>返回两点间的距离</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static float Distance(in Vector2 value1, in Vector2 value2 )
 	    {
 		    float x = value1.X - value2.X;
@@ -737,7 +737,7 @@ namespace EngineNS
         /// <param name="value1">坐标点</param>
         /// <param name="value2">坐标点</param>
         /// <returns>返回两点间的距离的平方</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static float DistanceSquared(in Vector2 value1, in Vector2 value2 )
 	    {
 		    float x = value1.X - value2.X;
@@ -751,7 +751,7 @@ namespace EngineNS
         /// <param name="left">二维向量</param>
         /// <param name="right">二维向量</param>
         /// <returns>返回点积值</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static float Dot(in Vector2 left, in Vector2 right )
 	    {
 		    return (left.X * right.X + left.Y * right.Y);
@@ -761,7 +761,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="vector">二维向量</param>
         /// <returns>返回单位化后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 Normalize(in Vector2 vector )
 	    {
 		    vector.Normalize();
@@ -772,7 +772,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="vector">二维向量</param>
         /// <param name="result">单位化后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Normalize( ref Vector2 vector, out Vector2 result )
 	    {
 		    result = Normalize(vector);
@@ -783,7 +783,7 @@ namespace EngineNS
         /// <param name="vector">二维向量</param>
         /// <param name="transform">转换矩阵</param>
         /// <returns>返回转换后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 Transform( Vector2 vector, Matrix transform )
 	    {
             Vector4 result;
@@ -801,7 +801,7 @@ namespace EngineNS
         /// <param name="vector">二维向量</param>
         /// <param name="transform">转换矩阵</param>
         /// <param name="result">转换后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Transform( ref Vector2 vector, ref Matrix transform, out Vector4 result )
 	    {
             Vector4 r;
@@ -845,7 +845,7 @@ namespace EngineNS
         /// <param name="value">二维向量</param>
         /// <param name="rotation">旋转四元数</param>
         /// <returns>返回转换后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 Transform( Vector2 value, Quaternion rotation )
 	    {
             Vector4 vector;
@@ -875,7 +875,7 @@ namespace EngineNS
         /// <param name="value">二维向量</param>
         /// <param name="rotation">旋转四元数</param>
         /// <param name="result">转换后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Transform( ref Vector2 value, ref Quaternion rotation, out Vector4 result )
 	    {
 		    float x = rotation.X + rotation.X;
@@ -945,7 +945,7 @@ namespace EngineNS
         /// <param name="coord">坐标轴向量</param>
         /// <param name="transform">转换矩阵</param>
         /// <returns>返回转换后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 TransformCoordinate( Vector2 coord, in Matrix transform )
 	    {
             Vector4 vector;
@@ -960,7 +960,7 @@ namespace EngineNS
             result.Y = vector.Y * vector.W;
             return result;
 	    }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void TransformCoordinate(in Vector2 coord, in Matrix3x3 transform, out Vector2 result )
 	    {
             Vector3 vector;
@@ -992,7 +992,7 @@ namespace EngineNS
 
 		    return results;
 	    }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 TransformNormal(in Vector2 normal, in Matrix3x3 transform )
 	    {
             Vector2 vector;
@@ -1008,7 +1008,7 @@ namespace EngineNS
         /// <param name="normal">单位向量</param>
         /// <param name="transform">转换矩阵</param>
         /// <param name="result">转换后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void TransformNormal(in Vector2 normal, in Matrix3x3 transform, out Vector2 result )
 	    {
             Vector2 r;
@@ -1048,7 +1048,7 @@ namespace EngineNS
         /// <param name="left">二维向量</param>
         /// <param name="right">二维向量</param>
         /// <returns>返回最小化后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 Minimize(in Vector2 left,in Vector2 right )
 	    {
             Vector2 vector;
@@ -1062,7 +1062,7 @@ namespace EngineNS
         /// <param name="left">二维向量</param>
         /// <param name="right">二维向量</param>
         /// <param name="result">最小化后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Minimize(in Vector2 left, in Vector2 right, out Vector2 result )
 	    {
             Vector2 r;
@@ -1077,7 +1077,7 @@ namespace EngineNS
         /// <param name="left">二维向量</param>
         /// <param name="right">二维向量</param>
         /// <returns>返回最大化后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector2 Maximize(in Vector2 left, in Vector2 right )
 	    {
             Vector2 vector;
@@ -1091,7 +1091,7 @@ namespace EngineNS
         /// <param name="left">二维向量</param>
         /// <param name="right">二维向量</param>
         /// <param name="result">最大化后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Maximize(in Vector2 left, in Vector2 right, out Vector2 result )
 	    {
             Vector2 r;

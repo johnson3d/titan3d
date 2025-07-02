@@ -9,7 +9,7 @@ using NPOI.POIFS.Crypt.Dsig;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialOutput@EngineCore", "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialOutput" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialOutput@EngineCore", "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialOutput" })]
     public partial class TtMaterialOutput : TtNodeBase
     {
         public static TtMaterialOutput NewNode(TtMaterialGraph graph)

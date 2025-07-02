@@ -59,7 +59,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     public class TtLayerManager : IO.BaseSerializer
     {
         public string CurrentLayerName { get; set; } = null;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<string> LayerNames { get; set; } = new List<string>();
     }
 

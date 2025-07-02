@@ -8,23 +8,23 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton.Limb
 
     public class TtBoneDesc : IO.BaseSerializer, ILimbDesc
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Name { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint NameHash { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string ParentName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint ParentHash { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EngineNS.Matrix InitMatrix { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EngineNS.Matrix InvInitMatrix { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EngineNS.Vector3 InvPos { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EngineNS.Vector3 InvScale { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EngineNS.Quaternion InvQuat { get; set; }
     }
     public class TtBone : IO.BaseSerializer, ILimb
@@ -54,7 +54,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton.Limb
             return new AnimatablePose.TtAnimatableBonePose(mDesc);
         }
         private TtBoneDesc mDesc = null;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public ILimbDesc Desc { get=>mDesc; set => mDesc = value as TtBoneDesc; }
         public IndexInSkeleton ParentIndex
         {

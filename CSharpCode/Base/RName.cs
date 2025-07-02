@@ -268,7 +268,7 @@ namespace EngineNS
                 return false;
             return IO.TtFileManager.FileExists(rName.Address) || IO.TtFileManager.DirectoryExists(rName.Address);
         }
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public Guid AssetId
         {
             get
@@ -293,22 +293,22 @@ namespace EngineNS
                 }
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public ERNameType RNameType
         {
             get { return mRNameType; }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Name
         {
             get => mName;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Address
         {
             get => mAddress;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string ExtName
         {
             get
@@ -316,7 +316,7 @@ namespace EngineNS
                 return IO.TtFileManager.GetExtName(mName);
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string PureName => IO.TtFileManager.GetPureName(mName);
         public static RName GetRNameFromAbsPath(string path)
         {

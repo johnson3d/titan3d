@@ -207,7 +207,7 @@ namespace EngineNS.IO
         Loading,
         LoadFailed,
     }
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public partial class IAssetMeta
     {
         public static readonly string MetaExt = ".ameta";
@@ -237,7 +237,7 @@ namespace EngineNS.IO
         {
             throw new NotImplementedException("Need override this method!");
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual string TypeExt
         {
             get 
@@ -744,19 +744,19 @@ namespace EngineNS.IO
         {
             return true;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EGui.TtUVAnim Icon
         {
             get;
             set;
         } = new EGui.TtUVAnim();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string TypeStr { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Description { get; set; } = "This is a Asset";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid AssetId { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<RName> RefAssetRNames { get; set; } = new List<RName>();
 
         public long ShowIconTime;

@@ -59,17 +59,17 @@ namespace EngineNS.Bricks.Particle.Editor
             AddPinOut(Effectors);
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool Enable { get; set; } = true;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
         public RName MeshName
         {
             get; set;
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtEmitterMacross))]
         public RName McName
         {
@@ -77,7 +77,7 @@ namespace EngineNS.Bricks.Particle.Editor
             set;
         } = null;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtShaderAsset.AssetExt, ShaderType = "NebulaEmitter")]
         public RName ShaderName
         {
@@ -85,22 +85,22 @@ namespace EngineNS.Bricks.Particle.Editor
             set;
         } = null;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsGpuDriven { get; set; } = true;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint MaxParticle { get; set; } = 1024;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string DefaultCurrentQueue { get; set; } = "Default";
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string EmitterName { get; set; } = "Default";
 
         public TtEmitter EditingObject = null;
         Vector3 mLocation;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 Location
         {
             get => mLocation;
@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         Vector3 mVelocity;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 Velocity
         {
             get => mVelocity;
@@ -144,7 +144,7 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         float mTimerInterval;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float TimerInterval 
         {
             get => mTimerInterval;
@@ -159,7 +159,7 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         EParticleEmitterStyles mEmitterStyles;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EParticleEmitterStyles EmitterStyles
         {
             get => mEmitterStyles;
@@ -236,7 +236,7 @@ namespace EngineNS.Bricks.Particle.Editor
     public class TtEffectorQueueNode : TtParticleNode
     {
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string QueueName { get; set; } = "Default";
         public PinIn Left { get; set; } = new PinIn()
         {
@@ -317,7 +317,7 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         Vector3 mCenter = Vector3.Zero;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 Center 
         { 
             get => mCenter;
@@ -333,7 +333,7 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         Vector3 mHalfExtent = Vector3.One;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 HalfExtent 
         { 
             get => mHalfExtent;
@@ -349,7 +349,7 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         float mThinness = 1.0f;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Thinness 
         { 
             get => mThinness;
@@ -382,7 +382,7 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         Vector3 mCenter = Vector3.Zero;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 Center
         {
             get => mCenter;
@@ -398,7 +398,7 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         float mRadius = 1.0f;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Radius
         {
             get => mRadius;
@@ -413,7 +413,7 @@ namespace EngineNS.Bricks.Particle.Editor
             }
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Thinness { get; set; } = 1.0f;
         public override TtShape CreateShape()
         {
@@ -434,7 +434,7 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         Vector3 mAccelerationMin = new Vector3(0, -0.1f, 0);
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 AccelerationMin 
         { 
             get => mAccelerationMin;
@@ -450,7 +450,7 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         Vector3 mAccelerationRange = new Vector3(0, -0.1f, 0);
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 AccelerationRange
         {
             get => mAccelerationRange;
@@ -482,7 +482,7 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         Vector4 mOpColorMin = Vector4.Zero;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector4 OpColorMin
         {
             get => mOpColorMin;
@@ -498,7 +498,7 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         Vector4 mOpColorRange = Vector4.Zero;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector4 OpColorRange
         {
             get => mOpColorRange;
@@ -530,7 +530,7 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         float mOpScaleMin = 0;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float OpScaleMin
         {
             get => mOpScaleMin;
@@ -546,7 +546,7 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         float mOpScaleRange = 0;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float OpScaleRange
         {
             get => mOpScaleRange;

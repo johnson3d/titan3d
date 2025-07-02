@@ -29,7 +29,7 @@ namespace EngineNS.Bricks.CodeBuilder
         void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data);
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCodeCreator@EngineCore", "EngineNS.Bricks.CodeBuilder.UCodeCreator" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCodeCreator@EngineCore", "EngineNS.Bricks.CodeBuilder.UCodeCreator" })]
     public class TtCodeCreator
     {
         protected byte mIndentCount = 0;
@@ -92,7 +92,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCodeGeneratorBase@EngineCore", "EngineNS.Bricks.CodeBuilder.UCodeGeneratorBase" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCodeGeneratorBase@EngineCore", "EngineNS.Bricks.CodeBuilder.UCodeGeneratorBase" })]
     public abstract class TtCodeGeneratorBase : TtCodeCreator
     {
         public bool IsEditorDebug = true;

@@ -65,14 +65,14 @@ namespace EngineNS.Bricks.CodeBuilder
         string Gen(OpExpress src, ICodeGen cgen);
     }
     //定义表达式
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public partial class DefineAttribute : IExpression
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string AttributeName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string NameSpace { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<DefineVar> Members
         {
             get;
@@ -85,21 +85,21 @@ namespace EngineNS.Bricks.CodeBuilder
         }
 
     }
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public partial class DefineClass : IExpression
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string ClassName { get; set; } = "NewClass";
         //[DefineVar.PropDefTypeEditor(typeof(void), ExcludeValueType = true, ExcludeSealed = true, AssemblyFilter = "EngineCore")]
         //[EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true)]
         [ReadOnly(true)]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string SuperClassName { get; set; } = null;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string NameSpace { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<DefineVar> Members { get; } = new List<DefineVar>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<DefineFunction> Functions { get; } = new List<DefineFunction>();
         public System.Type TryGetType()
         {
@@ -162,13 +162,13 @@ namespace EngineNS.Bricks.CodeBuilder
             return null;
         }
     }
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     
     public partial class DefineVar : IExpression
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EVisitMode VisitMode { get; set; } = EVisitMode.Public;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsLocalVar { get; set; } = true;
         public class PropDefTypeEditor : EGui.Controls.PropertyGrid.PGTypeEditorAttribute
         {
@@ -211,14 +211,14 @@ namespace EngineNS.Bricks.CodeBuilder
         }
         //[PropDefTypeEditor(typeof(void))]
         [PropDefTypeEditor(null, false)]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string DefType { get; set; } = typeof(int).FullName;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string VarName { get; set; } = null;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string InitValue { get; set; } = null;
     }
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     
     public class DefineFunctionParam : DefineVar
     {
@@ -229,12 +229,12 @@ namespace EngineNS.Bricks.CodeBuilder
             Out,
             Ref,
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public enOpType OpType { get; set; } = enOpType.normal;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsParamArray { get; set; } = false;
     }
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     
     public partial class DefineFunction : IExpression
     {
@@ -258,13 +258,13 @@ namespace EngineNS.Bricks.CodeBuilder
                 NameSpace = "EngineNS.Rtti",
             }
         };
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EVisitMode VisitMode { get; set; } = EVisitMode.Public;
         //[DefineVar.PropDefTypeEditor(typeof(void))]
         [DefineVar.PropDefTypeEditor(null, true)]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string ReturnType { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Name { get; set; }
         [Rtti.Meta, ReadOnly(true)]
         public List<DefineFunctionParam> Arguments

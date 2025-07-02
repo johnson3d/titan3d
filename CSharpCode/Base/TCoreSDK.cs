@@ -280,13 +280,13 @@ namespace EngineNS
         {
             ConfigType = Rtti.TtTypeDesc.TypeOf(typeof(TtGlobalConfigVar));
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Name { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Value { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public NxRHI.EShaderVarType ValueType { get; set; } = NxRHI.EShaderVarType.SVT_Int;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Rtti.TtTypeDesc ConfigType { get; set; }
         public TtGlobalConfigVar SetToGlobalConfig()
         {

@@ -5,7 +5,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class Monocular : TtNodeBase
+    public partial class Monocular : TtMacrossNodeBase
     {
         public PinIn Left { get; set; } = new PinIn();
         public PinOut Result { get; set; } = new PinOut()
@@ -60,16 +60,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //AddPinIn(ToType);
             AddPinOut(Result);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public class TSaveData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string SrcType { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string TarType { get; set; }
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TSaveData SaveData
         {
             get

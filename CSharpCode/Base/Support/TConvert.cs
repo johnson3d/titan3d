@@ -243,7 +243,7 @@ namespace EngineNS.Support
         }
     }
 
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public partial class TConvert
     {
         public static object ToEnumValue(System.Type realType, string name)
@@ -410,22 +410,22 @@ namespace EngineNS.Support
             }
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool ToBoolean(string txt)
         {
             return System.Convert.ToBoolean(txt);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static int ToInt32(string txt)
         {
             return System.Convert.ToInt32(txt);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static UInt32 ToUInt32(string txt)
         {
             return System.Convert.ToUInt32(txt);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static float ToSingle(string txt)
         {
             return System.Convert.ToSingle(txt);

@@ -9,31 +9,31 @@ namespace EngineNS.DesignMacross.Design
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtDesignableVariableDescription : IDesignableVariableDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid Id { get; set; } = Guid.NewGuid();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual string Name { get; set; } = "DesignableVariable";
         public string VariableName { get => TtASTBuildUtil.GenerateVariableName(this); }
         public string ClassName { get => TtASTBuildUtil.GenerateClassName(this); }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTypeReference VariableType { get => new TtTypeReference(ClassName); set { } }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase InitValue { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtCommentStatement Comment { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public IClassDescription DesignedClassDescription { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtNamespaceDeclaration Namespace { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsStruct { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<string> SupperClassNames { get; set; } = new List<string>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<IVariableDescription> Variables { get; set; } = new List<IVariableDescription>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<IMethodDescription> Methods { get; set; } = new List<IMethodDescription>();
         public IDescription Parent { get; set; }
         public virtual void UpdateData(ref FDescriptionUpdateContext updateContext)

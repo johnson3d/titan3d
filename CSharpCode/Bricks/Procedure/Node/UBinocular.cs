@@ -22,11 +22,11 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn RightPin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UBufferCreator InputLeftDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UBufferCreator InputRightDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UBinocular()
         {
@@ -414,22 +414,22 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("StretchBlt", "BaseOp\\StretchBlt", UPgcGraph.PgcEditorKeyword)]
     public class UStretchBlt : UBinocular
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint SrcX { get; set; } = 0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint SrcY { get; set; } = 0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int SrcW { get; set; } = -1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int SrcH { get; set; } = -1;
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint DstX { get; set; } = 0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint DstY { get; set; } = 0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int DstW { get; set; } = -1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int DstH { get; set; } = -1;
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {

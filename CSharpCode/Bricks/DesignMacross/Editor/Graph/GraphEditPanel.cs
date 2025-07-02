@@ -11,7 +11,7 @@ namespace EngineNS.DesignMacross.Editor
         public TtNavigableGraphsPanel ActiveGraphNavigatedPanel { get; set; } = null;
 
         public Dictionary<IDescription, TtNavigableGraphsPanel> OpenedNavigableGraphsPanels = new();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<IGraph> Graphs { get; set; } = new List<IGraph>();
         public void EditGraph(IDescription description)
         {

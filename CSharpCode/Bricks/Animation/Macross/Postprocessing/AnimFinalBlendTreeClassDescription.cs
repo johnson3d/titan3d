@@ -24,7 +24,7 @@ namespace EngineNS.Animation.Macross.Postprocessing
     [Graph(typeof(TtGraph_BlendTree))]
     public class TtAnimFinalBlendTreeClassDescription : TtBlendTreeClassDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public override string Name { get; set; } = "AnimFinalBlendTree";
     }

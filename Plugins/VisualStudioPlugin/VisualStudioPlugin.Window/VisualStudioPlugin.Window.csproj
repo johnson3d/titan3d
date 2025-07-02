@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <BaseOutputPath>$(SolutionDir)\binaries\Plugins</BaseOutputPath>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <Import Project="..\VisualStudioPlugin\VisualStudioPlugin.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <PackageReference Include="envdte100" Version="17.14.40260" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Module\Engine.Window\Engine.Window.csproj" />
+  </ItemGroup>
+
+</Project>

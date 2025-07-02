@@ -140,22 +140,22 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
     public class UTerrainGrass : IO.BaseSerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
         public RName MeshName { get; set; }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MinScale { get; set; } = 0.5f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MaxScale { get; set; } = 2.0f;
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Density { get; set; } = 1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool RandomRotation { get; set; } = true;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool FollowHeight { get; set; } = true;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool NoShadow { get; set; } = true;
 
         public float GetScaleRange()

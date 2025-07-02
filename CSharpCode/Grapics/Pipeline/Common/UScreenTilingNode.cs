@@ -5,7 +5,7 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("ScreenTiling", "ScreenTiling", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UScreenTilingNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UScreenTilingNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UScreenTilingNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UScreenTilingNode" })]
     public class TtScreenTilingNode : Graphics.Pipeline.TtRenderGraphNode
     {
         public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth", NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);

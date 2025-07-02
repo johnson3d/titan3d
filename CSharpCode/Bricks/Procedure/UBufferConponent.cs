@@ -83,7 +83,7 @@ namespace EngineNS.Bricks.Procedure
             }
         }
         Rtti.TtTypeDesc mBufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         //[IO.UTypeDescSerializer()]
         [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(UBufferComponent), FilterMode = EGui.Controls.UTypeSelector.EFilterMode.IncludeObjectType)]
         public Rtti.TtTypeDesc BufferType
@@ -103,11 +103,11 @@ namespace EngineNS.Bricks.Procedure
                 }
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int XSize { get; set; } = 1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int YSize { get; set; } = 1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int ZSize { get; set; } = 1;
 
         public static Type GetBufferOperatorType(Type type)
@@ -660,7 +660,7 @@ namespace EngineNS.Bricks.Procedure
         #endregion
 
         #region template
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public bool IsValidPixel(int x, int y = 0, int z = 0)
         {
@@ -891,7 +891,7 @@ namespace EngineNS.Bricks.Procedure
 
         #region Macross
         public delegate void FOnPerPixel(UBufferComponent result, int x, int y, int z);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void DispatchPixels(FOnPerPixel onPerPiexel, bool bMultThread = false)
         {
             //bMultThread = false;
@@ -1001,14 +1001,14 @@ namespace EngineNS.Bricks.Procedure
                 //smp.FreeSemaphore();
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UBufferComponent Clone()
         {
             var result = UBufferComponent.CreateInstance(this.BufferCreator);
             CopyData(this, result);
             return result;
         }
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.ManualMarshal)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.ManualMarshal)]
         public static unsafe bool CopyData(UBufferComponent src, UBufferComponent dst)
         {
             if (src.Width != dst.Width ||
@@ -1038,7 +1038,7 @@ namespace EngineNS.Bricks.Procedure
             var _return_value = CopyData(src, dst);
             return _return_value;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 GetUVW(int x, int y, int z)
         {
             Vector3 result;
@@ -1047,7 +1047,7 @@ namespace EngineNS.Bricks.Procedure
             result.Z = (float)z / (float)Depth;
             return result;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 GetClampedUVW(int x, int y, int z)
         {
             Vector3 result;
@@ -1056,7 +1056,7 @@ namespace EngineNS.Bricks.Procedure
             result.Z = MathHelper.Clamp((float)z / (float)Depth, 0, 1);
             return result;
         }
-        [Rtti.Meta(MethodGenericParameters = new System.Type[]
+        [Rtti.Meta("",MethodGenericParameters = new System.Type[]
                 {
                     typeof(float), typeof(Vector2), typeof(Vector3)
                 })]
@@ -1079,7 +1079,7 @@ namespace EngineNS.Bricks.Procedure
             Span<T> result = new Span<T>(ptr, num);
             return result;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         protected unsafe void* GetSuperPixelAddress(int x, int y, int z,
                 [Rtti.MetaParameter(TypeList = new System.Type[]
                 {
@@ -1096,7 +1096,7 @@ namespace EngineNS.Bricks.Procedure
             var ptr = &pBuffer[Slice * z + y * Pitch + x * ElementSize];
             return ptr;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public unsafe object GetSuperPixelAddressEX(int x, int y, int z,
            [Rtti.MetaParameter(TypeList = new System.Type[]
                 {
@@ -1136,7 +1136,7 @@ namespace EngineNS.Bricks.Procedure
             }
             return null;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float GetFloat1(int x, int y, int z)
         {
             return GetPixel<float>(x, y, z);
@@ -1180,12 +1180,12 @@ namespace EngineNS.Bricks.Procedure
             Linear,
             Box,
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Sampler2DFloat1(in Vector3 uvw, EBufferSamplerType type = EBufferSamplerType.Point, EPixelAddressMode address = EPixelAddressMode.Wrap)
         {
             return Sampler2DFloat1(uvw.X, uvw.Y, uvw.Z, type, address);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Sampler2DFloat1(float u, float v, float w = 0, EBufferSamplerType type = EBufferSamplerType.Point, EPixelAddressMode address = EPixelAddressMode.Wrap)
         {
             switch (type)
@@ -1247,67 +1247,67 @@ namespace EngineNS.Bricks.Procedure
             }
             return 0;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void SetFloat1(int x, int y, int z, float v)
         {
             SetPixel<float>(x, y, z, v);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 GetFloat2(int x, int y, int z)
         {
             return GetPixel<Vector2>(x, y, z);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void SetFloat2(int x, int y, int z, in Vector2 v)
         {
             SetPixel<Vector2>(x, y, z, in v);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 GetFloat3(int x, int y, int z)
         {
             return GetPixel<Vector3>(x, y, z);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void SetFloat3(int x, int y, int z, in Vector3 v)
         {
             SetPixel<Vector3>(x, y, z, in v);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public DVector3 GetDouble3(int x, int y, int z)
         {
             return GetPixel<DVector3>(x, y, z);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void SetDouble3(int x, int y, int z, in DVector3 v)
         {
             SetPixel<DVector3>(x, y, z, in v);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int GetInt1(int x, int y, int z)
         {
             return GetPixel<int>(x, y, z);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void SetInt1(int x, int y, int z, int v)
         {
             SetPixel<int>(x, y, z, v);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2i GetInt2(int x, int y, int z)
         {
             return GetPixel<Vector2i>(x, y, z);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void SetInt2(int x, int y, int z, in Vector2i v)
         {
             SetPixel<Vector2i>(x, y, z, in v);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3i GetInt3(int x, int y, int z)
         {
             return GetPixel<Vector3i>(x, y, z);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void SetInt3(int x, int y, int z, in Vector3i v)
         {
             SetPixel<Vector3i>(x, y, z, in v);

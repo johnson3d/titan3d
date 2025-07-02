@@ -7,28 +7,28 @@ namespace EngineNS
     [System.ComponentModel.TypeConverterAttribute("System.ComponentModel.ExpandableObjectConverter")]
     public struct Rectangle : IEquatable<Rectangle>
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Left
         {
             get { return X; }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Top
         {
             get { return Y; }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Right
         {
             get { return X + Width; }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Bottom
         {
             get { return Y + Height; }
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Point Center
         {
             get
@@ -37,7 +37,7 @@ namespace EngineNS
             }
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsEmpty
         {
             get
@@ -72,7 +72,7 @@ namespace EngineNS
         {
             return !(lhs.Left == rhs.Left && lhs.Top == rhs.Top && lhs.Width == rhs.Width && lhs.Height == rhs.Height);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Size Size
         {
             get { return new Size(Width, Height); }
@@ -82,7 +82,7 @@ namespace EngineNS
                 Height = value.Height;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Point Location
         {
             get { return new Point(X, Y); }
@@ -92,32 +92,32 @@ namespace EngineNS
                 Y = value.Y;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int X
         {
             get;
             set;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Y
         {
             get;
             set;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Width
         {
             get;
             set;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Height
         {
             get;
             set;
         }
         static Rectangle mEmpty = new Rectangle(0, 0, 0, 0);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Rectangle Empty
         {
             get { return mEmpty; }
@@ -139,7 +139,7 @@ namespace EngineNS
             Height = size.Height;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool Contains(Point pt)
         {
             if ((pt.X >= X) && (pt.Y >= Y) && (pt.X < Right) && (pt.Y < Bottom))
@@ -147,7 +147,7 @@ namespace EngineNS
 
             return false;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool Contains(int x, int y)
         {
             if ((x >= X) && (y >= Y) && (x < Right) && (y < Bottom))
@@ -156,7 +156,7 @@ namespace EngineNS
             return false;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Rectangle Intersect(Rectangle a, Rectangle b)
         {
             if (a.Left > b.Right || a.Top > b.Bottom || a.Right < b.Left || a.Bottom < b.Top)

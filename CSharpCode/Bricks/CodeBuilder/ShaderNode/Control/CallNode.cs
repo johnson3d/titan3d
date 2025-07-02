@@ -24,7 +24,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         //public List<PinOut> OutArguments = new List<PinOut>();
         public List<PinData> Arguments = new List<PinData>();
         public Rtti.TtClassMeta.TtMethodMeta Method;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string MethodDeclString
         {
             get
@@ -396,7 +396,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
     public class TtCallMaterialFunctionNode : CallNode
     {
         RName mFunctionName;
-        [Rtti.Meta(Order = 1)]
+        [Rtti.Meta("",Order = 1)]
         [RName.PGRName(FilterExts = TtMaterialFunction.AssetExt)]
         public RName FunctionName 
         {

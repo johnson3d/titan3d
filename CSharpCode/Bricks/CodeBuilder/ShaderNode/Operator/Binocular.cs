@@ -11,7 +11,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
         public Rtti.TtTypeDesc LeftType;
         [Browsable(false)]
         public TtBinaryOperatorExpression.EBinaryOperation Op { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public string LeftTypeString
         {

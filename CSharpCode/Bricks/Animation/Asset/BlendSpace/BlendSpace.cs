@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace EngineNS.Animation.Asset.BlendSpace
 {
     public delegate void AxisNameChange(string newName);
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtBlendSpace_Axis : IO.BaseSerializer
     {
@@ -67,7 +67,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
         //List<float> PerBoneBlendData;
     }
     //BlendSpace中 动作和所在的位置
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtBlendSpace_Point : IO.BaseSerializer
     {
@@ -93,13 +93,13 @@ namespace EngineNS.Animation.Asset.BlendSpace
         {
         }
     }
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtBlentSpace_Triangle : IO.BaseSerializer
     {
         public static int MaxVertices = 3;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<int> Indices { get; set; } = new List<int>() { -1, -1, -1 };
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<float> Weights { get; set; } = new List<float>() { 0, 0, 0 };
         public TtBlentSpace_Triangle()
         {
@@ -124,7 +124,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
     }
 
     //need to seperate editor and runtime
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public abstract class TtBlendSpace : IO.BaseSerializer, IAnimationCompositeAsset
     {
@@ -134,7 +134,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
         }
         [Rtti.Meta, Category("Option")]
         public List<TtBlendSpace_Axis> BlendAxises { get; set; } = new List<TtBlendSpace_Axis>() { null, null, null };
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtBlentSpace_Triangle> GridTriangles { get; protected set; } = new List<TtBlentSpace_Triangle>();
  
         [Rtti.Meta, Category("Option")]    

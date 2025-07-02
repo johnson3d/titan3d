@@ -14,10 +14,10 @@ using System.Threading.Tasks;
 
 namespace EngineNS.UI
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public partial class TtUIAssistFunctions
     {
-        [Rtti.Meta(MacrossDisplayPath = new string[] { "UI", "UIManager" }, Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        [Rtti.Meta(nameof(UIManager), MacrossDisplayPath = new string[] { "UI", "UIManager" }, Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public static TtUIManager UIManager
         {
             get => TtEngine.Instance.UIManager;
@@ -335,7 +335,7 @@ namespace EngineNS.UI
             }
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta(nameof(Load))]
         public TtUIElement Load(
             [RName.PGRName(FilterExts = TtUIAsset.AssetExt)]
             RName name)
@@ -399,7 +399,7 @@ namespace EngineNS
     public partial class TtEngine
     {
         UI.TtUIManager mUIManager;
-        [Rtti.Meta]
+        [Rtti.Meta("",nameof(UIManager))]
         public UI.TtUIManager UIManager 
         { 
             get

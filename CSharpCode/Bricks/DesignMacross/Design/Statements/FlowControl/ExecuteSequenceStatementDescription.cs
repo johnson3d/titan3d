@@ -12,7 +12,7 @@ namespace EngineNS.DesignMacross.Design.Statement
     [GraphElement(typeof(TtGraphElement_ExecuteSequenceOutPin))]
     public class TtExecuteSequenceOutPinDescription : TtExecutionOutPinDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool Deleteable { get; set; } = true;
     }
 

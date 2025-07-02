@@ -88,7 +88,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
     }
     [Bricks.CodeBuilder.ContextMenu("SdfForword", "Deferred\\SdfForword", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.USdfForwordNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.USdfForwordNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.USdfForwordNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.USdfForwordNode" })]
     public class TtSdfForwordNode : Common.TtBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
@@ -203,7 +203,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 }
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<ERenderLayer> LayerFilters { get; set; } = new List<ERenderLayer> { ERenderLayer.RL_Opaque, ERenderLayer.RL_Translucent, ERenderLayer.RL_Sky };
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsFilters(ERenderLayer layer)

@@ -22,7 +22,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             }
         }
         TtVariableDescription mVariableDescription = null;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid VariableId { get; set; } = Guid.Empty;
         public TtTypeDesc VarTypeDesc { get => mVariableDescription?.VariableType.TypeDesc; }
 

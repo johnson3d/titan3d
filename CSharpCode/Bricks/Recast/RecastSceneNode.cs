@@ -15,7 +15,7 @@ namespace EngineNS.Bricks.Recast
         public class TtRecastSceneNodeData : GamePlay.Scene.TtNodeData
         {
             Guid mNodeId = Guid.NewGuid();
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Guid NodeId
             {
                 get => mNodeId;

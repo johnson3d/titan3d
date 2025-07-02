@@ -10,7 +10,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.DataSet
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtDataSetAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -42,7 +42,7 @@ namespace EngineNS.Bricks.DataSet
 
             base.DeleteAsset(name, type);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Rtti.TtTypeDesc DataType { get; set; }
     }
 
@@ -206,7 +206,7 @@ namespace EngineNS.Bricks.DataSet
             savexnd.SaveXnd(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(ReadOnly = true)]
         public RName AssetName
         {

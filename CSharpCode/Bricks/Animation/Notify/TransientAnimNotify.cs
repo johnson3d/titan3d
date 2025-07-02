@@ -7,7 +7,7 @@ using System.Text;
 namespace EngineNS.Animation.Notify
 {
     public delegate void NotifyHandle(IAnimNotify sender);
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtTransientAnimNotify : IO.BaseSerializer, IAnimNotify
     {
         Int64 mTriggerTime = 0;

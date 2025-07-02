@@ -48,7 +48,7 @@ namespace EngineNS.UI.Controls
             TtUIELement_Template();
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         [RName.PGRName(FilterExts = TtUIAsset.AssetExt)]
         public RName AssetName
@@ -140,7 +140,7 @@ namespace EngineNS.UI.Controls
         }
 
         UInt64 mId = 0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public UInt64 Id
         {
@@ -197,7 +197,7 @@ namespace EngineNS.UI.Controls
         }
 
         [Bind.BindProperty(DefaultValue = true)]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsEnabled
         {
             get => ReadFlag(ECoreFlags.IsEnable);
@@ -231,7 +231,7 @@ namespace EngineNS.UI.Controls
         }
 
         [Bind.BindProperty]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool NoHitTest
         {
             get => ReadFlag(ECoreFlags.NoHitTest);
@@ -316,7 +316,7 @@ namespace EngineNS.UI.Controls
 
         Visibility mVisibility = Visibility.Visible;
         [BindProperty]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual Visibility Visibility
         {
             get => mVisibility;
@@ -480,7 +480,7 @@ namespace EngineNS.UI.Controls
 
         protected RectangleF mDesignRect;
         [Browsable(false)]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RectangleF DesignRect
         {
             get => mDesignRect;
@@ -739,21 +739,21 @@ namespace EngineNS.UI.Controls
             mLoadedAttachedValues.Clear();
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual TtUIElement FindElement(string name)
         {
             if (mName == name)
                 return this;
             return null;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual TtUIElement FindElement(UInt64 id)
         {
             if(mId == id)
                 return this;
             return null;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual TtUIElement FindElement(
             [Rtti.MetaParameter(FilterType = typeof(TtUIElement), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type rType,
@@ -761,7 +761,7 @@ namespace EngineNS.UI.Controls
         {
             return FindElement(name);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual TtUIElement FindElement(
             [Rtti.MetaParameter(FilterType = typeof(TtUIElement), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type rType,

@@ -7,7 +7,7 @@ using NPOI.HSSF.Record;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public enum EPixelShaderInput
     {
         PST_Position,
@@ -547,9 +547,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return false;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string ShaderType { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = TtShaderAsset.AssetExt)]
         public RName TemplateName
         {
@@ -557,7 +557,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             set;
         }
     }
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     [TtMacrossShadingEnv.TtMacrossShadingEnvImport]
     [IO.AssetCreateMenu(MenuName = "FX/McShader")]
     [EngineNS.Editor.UAssetEditor(EditorType = typeof(TtMacrossShadingEnvEditor))]
@@ -628,7 +628,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             IO.TtFileManager.LoadXmlToObject(rn.Address, result);
             return result;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName AssetName
         {
             get;
@@ -655,7 +655,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         }
         [Category("Option")]
-        [Rtti.Meta()]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtShaderAsset.AssetExt, ShaderType = "ComputeShadingMacross")]
         public override RName CodeName
         {
@@ -667,14 +667,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public override string MainName
         {
             get => base.MainName;
             set => base.MainName = value;
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Bricks.CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtShadingMacross))]
         public RName McName
         {
@@ -709,12 +709,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
     [Macross.TtMacross(IsGenShader = true)]
     public partial class TtShadingMacross
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual Vector3ui GetDispatchArg(TtMacrossShadingEnv shading)
         {
             return Vector3ui.Zero;
         }
-        [Rtti.Meta(ShaderName = "CSMacrossShaderMain")]
+        [Rtti.Meta("",ShaderName = "CSMacrossShaderMain")]
         public virtual void CSMacrossShaderMain(TtMacrossShadingEnv shading)
         {
 
@@ -927,7 +927,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #endregion
 
         [Category("Option")]
-        [Rtti.Meta()]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtShaderAsset.AssetExt, ShaderType = "ComputeShadingMacross")]
         public RName CodeName
         {
@@ -943,7 +943,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string MainName
         {
             get => ShaderAsset.MainName;
@@ -953,7 +953,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Bricks.CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtShadingMacross))]
         public RName McName
         {

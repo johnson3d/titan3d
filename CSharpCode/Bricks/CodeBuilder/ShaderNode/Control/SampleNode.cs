@@ -19,10 +19,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         {
             CoreSDK.DisposeObject(ref CmdParameters);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public string TextureVarName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName AssetName
@@ -54,7 +54,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         TtEffect mSlateEffect;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public NxRHI.FSamplerDesc Sampler
         {
@@ -142,10 +142,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         {
             CoreSDK.DisposeObject(ref CmdParameters);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public string TextureVarName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName AssetName
@@ -178,7 +178,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         TtEffect mSlateEffect;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
         private NxRHI.TtSrView TextureSRV;
@@ -277,10 +277,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         {
             CoreSDK.DisposeObject(ref CmdParameters);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public string TextureVarName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName AssetName
@@ -313,7 +313,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         TtEffect mSlateEffect;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
         private NxRHI.TtSrView TextureSRV;
@@ -403,10 +403,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         ~SampleArrayLevel2DNode()
         {
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public string TextureVarName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName AssetName
@@ -438,7 +438,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         TtEffect mSlateEffect;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public NxRHI.FSamplerDesc Sampler
         {
@@ -524,10 +524,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         ~SampleArray2DNode()
         {
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public string TextureVarName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName AssetName
@@ -558,7 +558,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         TtEffect mSlateEffect;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public NxRHI.FSamplerDesc Sampler
         {

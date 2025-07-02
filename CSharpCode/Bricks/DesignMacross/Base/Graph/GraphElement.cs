@@ -45,7 +45,7 @@ namespace EngineNS.DesignMacross.Base.Graph
     public class TtGraphElementStyleCollection : IO.BaseSerializer
     {
         
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Dictionary<Guid, IGraphElementStyle> GraphElementStyles { get; set; } = new Dictionary<Guid, IGraphElementStyle>();
         public IGraphElementStyle GetOrAdd(IDescription description)
         {
@@ -98,9 +98,9 @@ namespace EngineNS.DesignMacross.Base.Graph
     }
     public class TtGraphElementStyle : IO.BaseSerializer, IGraphElementStyle
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 Location { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public SizeF Size { get; set; } = new SizeF();
         public Color4f BackgroundColor { get; set; } = new Color4f(0, 0, 0, 0);
     }

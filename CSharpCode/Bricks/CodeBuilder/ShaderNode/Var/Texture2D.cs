@@ -12,7 +12,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         [Browsable(false)]
         public PinOut OutTex { get; set; } = new PinOut();
         RName mAssetName;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         [Category("Option")]
         public RName AssetName
@@ -62,7 +62,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         TtEffect mSlateEffect;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
         private NxRHI.TtSrView TextureSRV;

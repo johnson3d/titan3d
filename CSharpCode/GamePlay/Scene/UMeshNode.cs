@@ -13,7 +13,7 @@ namespace EngineNS.GamePlay.Scene
 {
     [Bricks.CodeBuilder.ContextMenu("MeshNode", "MeshNode", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtMeshNode.TtMeshNodeData), DefaultNamePrefix = "Mesh")]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UMeshNode@EngineCore", "EngineNS.GamePlay.Scene.UMeshNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.UMeshNode@EngineCore", "EngineNS.GamePlay.Scene.UMeshNode" })]
     public partial class TtMeshNode : TtGpuSceneNode
     {
         public override void Dispose()
@@ -21,23 +21,23 @@ namespace EngineNS.GamePlay.Scene
             CoreSDK.DisposeObject(ref mMesh);
             base.Dispose();
         }
-        [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UMeshNode.UMeshNodeData@EngineCore" })]
+        [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.UMeshNode.UMeshNodeData@EngineCore" })]
         public class TtMeshNodeData : TtNodeData
         {
             public TtMeshNodeData()
             {
                 HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
             }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
             public RName MeshName { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
             public RName CollideName { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [ReadOnly(true)]
             public string MdfQueueType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMdfStaticMesh));
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [ReadOnly(true)]
             public string AtomType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMesh.TtAtom));
 
@@ -206,7 +206,7 @@ namespace EngineNS.GamePlay.Scene
             return BoundVolume as UBoxBV;
         }
         Graphics.Mesh.TtMesh mMesh;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Graphics.Mesh.TtMesh Mesh 
         {
             get 

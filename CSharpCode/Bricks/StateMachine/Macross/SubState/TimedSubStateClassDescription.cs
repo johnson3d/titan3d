@@ -16,20 +16,20 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState
     [GraphElement(typeof(TtGraphElement_TimedSubState))]
     public class TtTimedSubStateClassDescription : TtDesignableVariableDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public override string Name { get; set; } = "TimedSubState";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool bInitialActive { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public float Duration { get; set; } = 1;
         [DrawInGraph]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtTimedStateTransitionClassDescription> Transitions { get; set; } = new List<TtTimedStateTransitionClassDescription>();
         [DrawInGraph]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtTimedStateAttachmentClassDescription> Attachments { get; set; } = new List<TtTimedStateAttachmentClassDescription>();
         public override void UpdateData(ref FDescriptionUpdateContext updateContext)
         {

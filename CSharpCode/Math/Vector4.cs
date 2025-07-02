@@ -403,7 +403,7 @@ namespace EngineNS
         /// <summary>
         /// 只读属性，该对象的所占内存大小
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static int SizeInBytes 
         { 
             get 
@@ -578,7 +578,7 @@ namespace EngineNS
         /// 对象的长度
         /// </summary>
         /// <returns>返回对象的长度</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Length()
 	    {
 		    return (float)( Math.Sqrt( (X * X) + (Y * Y) + (Z * Z) + (W * W) ) );
@@ -587,7 +587,7 @@ namespace EngineNS
         /// 对象长度平方
         /// </summary>
         /// <returns>返回对象长度的平方</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float LengthSquared()
         {
             return (X * X) + (Y * Y) + (Z * Z) + (W * W);
@@ -595,7 +595,7 @@ namespace EngineNS
         /// <summary>
         /// 对象的单位化
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void Normalize()
         {
             float length = Length();
@@ -613,7 +613,7 @@ namespace EngineNS
         /// <param name="left">Vector4对象</param>
         /// <param name="right">Vector4对象</param>
         /// <returns>返回相加的结果</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 Add(in Vector4 left, in Vector4 right )
 	    {
             Vector4 result;
@@ -629,7 +629,7 @@ namespace EngineNS
         /// <param name="left">Vector4对象</param>
         /// <param name="right">Vector4对象</param>
         /// <param name="result">相加的结果</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Add(in Vector4 left, in Vector4 right, out Vector4 result )
 	    {
             result.X = left.X + right.X;
@@ -643,7 +643,7 @@ namespace EngineNS
         /// <param name="left">Vector4对象</param>
         /// <param name="right">Vector4对象</param>
         /// <returns>返回计算后的结果</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 Subtract(in Vector4 left, in Vector4 right)
 	    {
             Vector4 result;
@@ -659,7 +659,7 @@ namespace EngineNS
         /// <param name="left">Vector4对象</param>
         /// <param name="right">Vector4对象</param>
         /// <param name="result">计算后的结果</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Subtract(in Vector4 left, in Vector4 right, out Vector4 result )
 	    {
             result.X = left.X - right.X;
@@ -673,7 +673,7 @@ namespace EngineNS
         /// <param name="left">Vector4对象</param>
         /// <param name="right">Vector4对象</param>
         /// <returns>返回计算后的结果</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 Modulate(in Vector4 left, in Vector4 right)
 	    {
             Vector4 result;
@@ -689,7 +689,7 @@ namespace EngineNS
         /// <param name="left">Vector4对象</param>
         /// <param name="right">Vector4对象</param>
         /// <param name="result">计算后的结果</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Modulate(in Vector4 left, in Vector4 right, out Vector4 result )
 	    {
             result.X = left.X * right.X;
@@ -703,7 +703,7 @@ namespace EngineNS
         /// <param name="value">Vector4对象</param>
         /// <param name="scale">缩放值</param>
         /// <returns>返回计算后的结果</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 Multiply(in Vector4 value, float scale )
 	    {
             Vector4 result;
@@ -719,7 +719,7 @@ namespace EngineNS
         /// <param name="value">Vector4对象</param>
         /// <param name="scale">缩放值</param>
         /// <param name="result">计算后的结果</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Multiply(in Vector4 value, float scale, out Vector4 result )
 	    {
             result.X = value.X * scale;
@@ -733,7 +733,7 @@ namespace EngineNS
         /// <param name="value">Vector4对象</param>
         /// <param name="scale">缩放值</param>
         /// <returns>返回计算后的结果</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 Divide(in Vector4 value, float scale)
 	    {
             Vector4 result;
@@ -749,7 +749,7 @@ namespace EngineNS
         /// <param name="value">Vector4对象</param>
         /// <param name="scale">缩放值</param>
         /// <param name="result">计算后的结果</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Divide(in Vector4 value, float scale, out Vector4 result )
 	    {
             result.X = value.X / scale;
@@ -762,7 +762,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="value">Vector4对象</param>
         /// <returns>返回计算后的结果</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 Negate(in Vector4 value)
 	    {
             Vector4 result;
@@ -777,7 +777,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="value">Vector4对象</param>
         /// <param name="result">计算后的结果</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Negate(in Vector4 value, out Vector4 result )
 	    {
             result.X = -value.X;
@@ -794,7 +794,7 @@ namespace EngineNS
         /// <param name="amount1">参数</param>
         /// <param name="amount2">参数</param>
         /// <returns>返回计算后的结果</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 Barycentric(in Vector4 value1, in Vector4 value2, in Vector4 value3, float amount1, float amount2 )
 	    {
 		    Vector4 vector;
@@ -813,7 +813,7 @@ namespace EngineNS
         /// <param name="amount1">参数</param>
         /// <param name="amount2">参数</param>
         /// <param name="result">计算后的结果</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Barycentric(in Vector4 value1, in Vector4 value2, in Vector4 value3, float amount1, float amount2, out Vector4 result )
 	    {
             result.X = (value1.X + (amount1 * (value2.X - value1.X))) + (amount2 * (value3.X - value1.X));
@@ -830,7 +830,7 @@ namespace EngineNS
         /// <param name="value4">Vector4对象坐标</param>
         /// <param name="amount">参数</param>
         /// <returns>返回计算后的结果</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 CatmullRom( Vector4 value1, Vector4 value2, Vector4 value3, Vector4 value4, float amount )
 	    {
 		    Vector4 vector;
@@ -864,7 +864,7 @@ namespace EngineNS
         /// <param name="value4">Vector4对象坐标</param>
         /// <param name="amount">参数</param>
         /// <param name="result">计算后的结果</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void CatmullRom( ref Vector4 value1, ref Vector4 value2, ref Vector4 value3, ref Vector4 value4, float amount, out Vector4 result )
 	    {
 		    float squared = amount * amount;
@@ -897,7 +897,7 @@ namespace EngineNS
         /// <param name="min">Vector4对象的最小值</param>
         /// <param name="max">Vector4对象的最大值</param>
         /// <returns>返回计算后的结果</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 Clamp(in Vector4 value, in Vector4 min, in Vector4 max )
 	    {
 		    float x = value.X;
@@ -930,7 +930,7 @@ namespace EngineNS
         /// <param name="min">Vector4对象的最小值</param>
         /// <param name="max">Vector4对象的最大值</param>
         /// <param name="result">计算后的结果</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Clamp(in Vector4 value, in Vector4 min, in Vector4 max, out Vector4 result )
 	    {
 		    float x = value.X;
@@ -963,7 +963,7 @@ namespace EngineNS
         /// <param name="tangent2">Vector4对象的正切点坐标</param>
         /// <param name="amount">插值</param>
         /// <returns>返回计算后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 Hermite( Vector4 value1, Vector4 tangent1, Vector4 value2, Vector4 tangent2, float amount )
 	    {
 		    Vector4 vector;
@@ -990,7 +990,7 @@ namespace EngineNS
         /// <param name="tangent2">Vector4对象的正切点坐标</param>
         /// <param name="amount">插值</param>
         /// <param name="result">计算后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Hermite( ref Vector4 value1, ref Vector4 tangent1, ref Vector4 value2, ref Vector4 tangent2, float amount, out Vector4 result )
 	    {
 		    float squared = amount * amount;
@@ -1012,7 +1012,7 @@ namespace EngineNS
         /// <param name="end">终点坐标</param>
         /// <param name="factor">插值因子</param>
         /// <returns>返回计算后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 Lerp(in Vector4 start, in Vector4 end, float factor )
 	    {
 		    Vector4 vector;
@@ -1031,7 +1031,7 @@ namespace EngineNS
         /// <param name="end">终点坐标</param>
         /// <param name="factor">插值因子</param>
         /// <param name="result">计算后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Lerp(in Vector4 start, in Vector4 end, float factor, out Vector4 result )
 	    {
 		    result.X = start.X + ((end.X - start.X) * factor);
@@ -1046,7 +1046,7 @@ namespace EngineNS
         /// <param name="end">终点坐标</param>
         /// <param name="amount">插值因子</param>
         /// <returns>返回计算后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 SmoothStep(in Vector4 start, in Vector4 end, float amount )
 	    {
 		    Vector4 vector;
@@ -1068,7 +1068,7 @@ namespace EngineNS
         /// <param name="end">终点坐标</param>
         /// <param name="amount">插值因子</param>
         /// <param name="result">计算后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void SmoothStep( ref Vector4 start, ref Vector4 end, float amount, out Vector4 result )
 	    {
 		    amount = (amount > 1.0f) ? 1.0f : ((amount < 0.0f) ? 0.0f : amount);
@@ -1085,7 +1085,7 @@ namespace EngineNS
         /// <param name="value1">坐标点</param>
         /// <param name="value2">坐标点</param>
         /// <returns>返回两点间的距离</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static float Distance(in Vector4 value1, in Vector4 value2 )
 	    {
 		    float x = value1.X - value2.X;
@@ -1101,7 +1101,7 @@ namespace EngineNS
         /// <param name="value1">坐标点</param>
         /// <param name="value2">坐标点</param>
         /// <returns>返回两点间的距离的平方</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static float DistanceSquared(in Vector4 value1, in Vector4 value2 )
 	    {
 		    float x = value1.X - value2.X;
@@ -1117,7 +1117,7 @@ namespace EngineNS
         /// <param name="left">向量对象</param>
         /// <param name="right">对象向量</param>
         /// <returns>返回点积值</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static float Dot(in Vector4 left, in Vector4 right)
 	    {
 		    return (left.X * right.X + left.Y * right.Y + left.Z * right.Z + left.W * right.W);
@@ -1127,7 +1127,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="vector">向量对象</param>
         /// <returns>返回单位向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 Normalize(in Vector4 vector)
 	    {
 		    vector.Normalize();
@@ -1138,7 +1138,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="vector">向量对象</param>
         /// <param name="result">单位向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Normalize(in Vector4 vector, out Vector4 result )
 	    {
             result = vector;
@@ -1150,7 +1150,7 @@ namespace EngineNS
         /// <param name="vector">向量对象</param>
         /// <param name="transform">转换矩阵</param>
         /// <returns>返回转换后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 Transform(in Vector4 vector, in Matrix transform )
 	    {
 		    Vector4 result;
@@ -1168,7 +1168,7 @@ namespace EngineNS
         /// <param name="vector">向量对象</param>
         /// <param name="transform">转换矩阵</param>
         /// <param name="result">转换后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Transform(in Vector4 vector, in Matrix transform, out Vector4 result )
 	    {
             Vector4 r;
@@ -1212,7 +1212,7 @@ namespace EngineNS
         /// <param name="value">向量对象</param>
         /// <param name="rotation">旋转四元数</param>
         /// <returns>返回转换后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 Transform(in Vector4 value, in Quaternion rotation )
 	    {
 		    Vector4 vector;
@@ -1242,7 +1242,7 @@ namespace EngineNS
         /// <param name="value">向量对象</param>
         /// <param name="rotation">旋转四元数</param>
         /// <param name="result">转换后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Transform(in Vector4 value, in Quaternion rotation, out Vector4 result )
 	    {
 		    float x = rotation.X + rotation.X;

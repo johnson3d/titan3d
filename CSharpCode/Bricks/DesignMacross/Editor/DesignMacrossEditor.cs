@@ -142,7 +142,9 @@ namespace EngineNS.DesignMacross.Editor
             xml.AppendChild(xmlRoot);
             IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, GraphElementCollection);
             var xmlText = IO.TtFileManager.GetXmlText(xml);
-            IO.TtFileManager.WriteAllText($"{rn.Address}/GraphElementStyles.dat", xmlText);
+            var file = $"{rn.Address}/GraphElementStyles.dat";
+            IO.TtFileManager.WriteAllText(file, xmlText);
+            TtEngine.Instance.SourceControlModule.AddFile(file, true);
         }
 
         void LoadElements(RName rn)
@@ -159,30 +161,39 @@ namespace EngineNS.DesignMacross.Editor
         List<TtClassDeclaration> ClassDeclarationsForGenerateCompileCode = new List<TtClassDeclaration>();
         public string GenerateCode()
         {
-            ClassDeclarationsForGenerateCompileCode.Clear();
-            FClassBuildContext classBuildContext = new FClassBuildContext();
-            classBuildContext.MainClassDescription = mDesignMacross.DesignedClassDescription;
-            ClassDeclarationsForGenerateCompileCode = mDesignMacross.DesignedClassDescription.BuildClassDeclarations(ref classBuildContext);
+            try
+            {
+                ClassDeclarationsForGenerateCompileCode.Clear();
+                FClassBuildContext classBuildContext = new FClassBuildContext();
+                classBuildContext.MainClassDescription = mDesignMacross.DesignedClassDescription;
+                ClassDeclarationsForGenerateCompileCode = mDesignMacross.DesignedClassDescription.BuildClassDeclarations(ref classBuildContext);
 
-            var codeGenerator = new UCSharpCodeGenerator();
-            string code = "";
-            foreach (var classDeclaration in ClassDeclarationsForGenerateCompileCode)
-            {
-                codeGenerator.GenerateClassCode(classDeclaration, AssetName, ref code);
+                var codeGenerator = new UCSharpCodeGenerator();
+                string code = "";
+                foreach (var classDeclaration in ClassDeclarationsForGenerateCompileCode)
+                {
+                    codeGenerator.GenerateClassCode(classDeclaration, AssetName, ref code);
+                }
+                var fileName = AssetName.Address + "/" + mDesignMacross.DesignedClassDescription.ClassName + ".cs";
+                using (var sr = new System.IO.StreamWriter(fileName, false, Encoding.UTF8))
+                {
+                    sr.Write(code);
+                }
+                TtEngine.Instance.SourceControlModule.AddFile(fileName, true);
+                EngineNS.TtEngine.Instance.MacrossManager.GenerateProjects();
+                return code;
             }
-            var fileName = AssetName.Address + "/" + mDesignMacross.DesignedClassDescription.ClassName + ".cs";
-            using (var sr = new System.IO.StreamWriter(fileName, false, Encoding.UTF8))
+            catch (Exception ex)
             {
-                sr.Write(code);
+                Profiler.Log.WriteException(ex);
+                return null;
             }
-            EngineNS.TtEngine.Instance.MacrossManager.GenerateProjects();
-            return code;
         }
         public void CompileCode()
         {
             TtEngine.Instance.MacrossManager.ClearGameProjectTemplateBuildFiles();
             var assemblyFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameAssembly;
-            if (TtEngine.Instance.MacrossModule.CompileCode(assemblyFile, TtEngine.Instance.CurrentPlatform))
+            if (ClassDeclarationsForGenerateCompileCode !=null && TtEngine.Instance.MacrossModule.CompileCode(assemblyFile, TtEngine.Instance.CurrentPlatform))
             {
                 TtEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
                 foreach (var classDeclaration in ClassDeclarationsForGenerateCompileCode)

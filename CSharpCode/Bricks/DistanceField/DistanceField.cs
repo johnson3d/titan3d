@@ -51,15 +51,15 @@ namespace EngineNS.DistanceField
             DistanceFieldConfig sdfConfig = new DistanceFieldConfig();
             return IndirectionDimensions * sdfConfig.BrickSize;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3i IndirectionDimensions { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int NumDistanceFieldBricks { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 VolumeToVirtualUVScale { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 VolumeToVirtualUVAdd { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 DistanceFieldToVolumeScaleBias { get; set; }
 
         public List<uint> IndirectionTable { get; set; }
@@ -67,7 +67,7 @@ namespace EngineNS.DistanceField
     };
 
 
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtSdfAssetAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -88,7 +88,7 @@ namespace EngineNS.DistanceField
         }
     }
 
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtSdfAsset : IO.BaseSerializer, IO.IAsset
     {
         public TtSdfAsset()
@@ -102,7 +102,7 @@ namespace EngineNS.DistanceField
         #region IO.IAsset
         public const string AssetExt = ".sdf";
         public string TypeExt { get => AssetExt; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName AssetName { get; set; }
 
         public IO.IAssetMeta CreateAMeta()
@@ -211,17 +211,17 @@ namespace EngineNS.DistanceField
             return memorySize;
         }
         /** Local space bounding box of the distance field volume. */
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public BoundingBox LocalSpaceMeshBounds { get; set; }
 
         /** Whether most of the triangles in the mesh used a two-sided material. */
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool bMostlyTwoSided { get; set; }
 
         public int Id;
         static Thread.TtAtomic_Int NextId = new Thread.TtAtomic_Int();
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtSparseSdfMip> Mips { get; set; }
 
 

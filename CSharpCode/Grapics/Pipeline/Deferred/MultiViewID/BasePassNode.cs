@@ -95,7 +95,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
         public TtGpuCullingNode GpuCullNode = null;
         public NxRHI.FViewPort[] Viewports = new FViewPort[2];
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool ClearMRT
         {
             get;
@@ -226,7 +226,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
             }
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<ERenderLayer> LayerFilters { get; set; } = new List<ERenderLayer> { ERenderLayer.RL_Opaque, ERenderLayer.RL_Translucent, ERenderLayer.RL_Sky };
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsFilters(ERenderLayer layer)

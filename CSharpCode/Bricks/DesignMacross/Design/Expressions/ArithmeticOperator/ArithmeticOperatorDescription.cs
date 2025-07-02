@@ -11,7 +11,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
 {
     public class TtBinaryArithmeticOperatorDescription : TtExpressionDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtBinaryOperatorExpression.EBinaryOperation Op { get; set; }
         public TtBinaryArithmeticOperatorDescription()
         {
@@ -150,7 +150,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             }
         }
         int mArrayDimension = 0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int ArrayDimension
         {
             get => mArrayDimension;

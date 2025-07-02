@@ -5,10 +5,10 @@ using System.Text;
 namespace EngineNS.GamePlay.Scene
 {
     [TtNode(NodeDataType = typeof(TtGridNode.TtGridNodeData), DefaultNamePrefix = "Grid")]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UGridNode@EngineCore", "EngineNS.GamePlay.Scene.UGridNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.UGridNode@EngineCore", "EngineNS.GamePlay.Scene.UGridNode" })]
     public partial class TtGridNode : TtMeshNode
     {
-        [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UGridNode.UGridNodeData@EngineCore", "EngineNS.GamePlay.Scene.UGridNode.UGridNodeData" })]
+        [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.UGridNode.UGridNodeData@EngineCore", "EngineNS.GamePlay.Scene.UGridNode.UGridNodeData" })]
         public class TtGridNodeData : TtNodeData
         {
         }

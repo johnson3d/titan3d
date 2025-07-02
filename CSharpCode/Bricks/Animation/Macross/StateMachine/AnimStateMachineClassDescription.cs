@@ -20,10 +20,10 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine
     [Designable(typeof(TtAnimStateMachine), "AnimStateMachine")]
     public class TtAnimStateMachineClassDescription : TtTimedStateMachineClassDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public override string Name { get; set; } = "AnimStateMachine";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [OutlineElement_List(typeof(TtOutlineElementsList_AnimCompoundStates), true)]
         public override List<TtTimedCompoundStateClassDescription> CompoundStates { get; set; } = new();
         public override List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)

@@ -296,7 +296,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public List<TtVariableDeclaration> UniformVars { get; } = new List<TtVariableDeclaration>();
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialGraph@EngineCore", "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialGraph" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialGraph@EngineCore", "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialGraph" })]
     public partial class TtMaterialGraph : TtMaterialGraphBase
     {
         public TtMaterialEditor ShaderEditor;
@@ -328,7 +328,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         {
             //do nothing
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float DefaultValue { get; set; } = 0;
         public object GetDefaultValueObject()
         {
@@ -347,7 +347,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         {
             //do nothing
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float DefaultValue { get; set; } = 0;
         public object GetDefaultValueObject()
         {
@@ -366,7 +366,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         {
             //do nothing
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 DefaultValue { get; set; } = Vector2.Zero;
         public object GetDefaultValueObject()
         {
@@ -385,7 +385,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         {
             //do nothing
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 DefaultValue { get; set; } = Vector3.Zero;
         public object GetDefaultValueObject()
         {
@@ -404,7 +404,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         {
             //do nothing
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector4 DefaultValue { get; set; } = Vector4.Zero;
         public object GetDefaultValueObject()
         {
@@ -424,7 +424,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         {
             return node.Name;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float DefaultValue { get; set; } = 0;
         public object GetDefaultValueObject()
         {
@@ -451,7 +451,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             System.Diagnostics.Debug.Assert(false);
             return node.Name;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 DefaultValue { get; set; } = Vector2.Zero;
         public object GetDefaultValueObject()
         {
@@ -480,7 +480,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             System.Diagnostics.Debug.Assert(false);
             return node.Name;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 DefaultValue { get; set; } = Vector3.Zero;
         public object GetDefaultValueObject()
         {
@@ -511,7 +511,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             System.Diagnostics.Debug.Assert(false);
             return node.Name;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector4 DefaultValue { get; set; } = Vector4.Zero;
         public object GetDefaultValueObject()
         {

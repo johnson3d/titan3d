@@ -706,7 +706,7 @@ namespace EngineNS
         MenuHighlight = 174
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Color@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Color@EngineCore" })]
     public struct Color4b
     {
         public Byte4 Value;
@@ -803,7 +803,7 @@ namespace EngineNS
         {
             return (((uint)(R)) | ((uint)(G) << 8) | ((uint)(B << 16)) | ((uint)(A << 24)));
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Color4f ToColor4Float()
         {
             var result = new Color4f();

@@ -7,7 +7,7 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("GpuScene", "GpuScene", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UGpuSceneNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UGpuSceneNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UGpuSceneNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UGpuSceneNode" })]
     public partial class TtGpuSceneNode : Graphics.Pipeline.TtRenderGraphNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);

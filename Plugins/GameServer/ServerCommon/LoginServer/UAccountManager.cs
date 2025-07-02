@@ -6,11 +6,11 @@ namespace EngineNS.Plugins.LoginServer
 {
     public class UAccountData : IO.BaseSerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string UserName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Password { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid SessionId { get; set; }
     }
     public class UAccountManager

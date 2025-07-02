@@ -45,7 +45,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
         RName mImageName;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName ImageName
         {
@@ -462,13 +462,13 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn SurfacePin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float UStart { get; set; } = 0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float VStart { get; set; } = 0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float UEnd { get; set; } = 1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float VEnd { get; set; } = 1;
         public UBufferCreator HeightCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public USamplerSurface()
@@ -514,7 +514,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         uint mKernalX = 3;
         uint mKernalY = 3;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint KernalX
         {
             get => mKernalX;
@@ -524,7 +524,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 UpdateKernal();
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint KernalY
         {
             get => mKernalY;
@@ -534,7 +534,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 UpdateKernal();
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public List<float> KernalValues { get; set; }
         public class UKernalValueDefine
@@ -655,11 +655,11 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Erosion", "Image\\Erosion", UPgcGraph.PgcEditorKeyword)]
     public class UErosion : UMonocular
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UKernal Kernal { get; set; } = new UKernal();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int KernalScale { get; set; } = 1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float DeltaLimit { get; set; } = 0.5f;
         public float ErosionScale { get; set; } = 1.0f;
         public unsafe override bool OnProcedure(UPgcGraph graph)

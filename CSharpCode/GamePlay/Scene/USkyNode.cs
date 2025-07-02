@@ -8,10 +8,10 @@ namespace EngineNS.GamePlay.Scene
     //https://zhuanlan.zhihu.com/p/621412675
     [Bricks.CodeBuilder.ContextMenu("Sky", "Sky", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtSkyNode.TtSkyNodeData), DefaultNamePrefix = "Sky")]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.USkyNode@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.USkyNode@EngineCore" })]
     public class TtSkyNode : TtMeshNode
     {
-        [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.USkyNode.TtSkyNodeData@EngineCore" })]
+        [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.USkyNode.TtSkyNodeData@EngineCore" })]
         public class TtSkyNodeData : TtMeshNodeData
         {
             public TtSkyNodeData()
@@ -20,14 +20,14 @@ namespace EngineNS.GamePlay.Scene
                 SunDirection = new Vector3(1,1,1);
                 SunDirection.Normalize();
             }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt)]
             public RName SunMaterialName { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Vector3 SunDirection { get; set; }
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 SunDirection
         {
             get => GetNodeData<TtSkyNodeData>().SunDirection;
@@ -35,7 +35,7 @@ namespace EngineNS.GamePlay.Scene
         }
         Graphics.Pipeline.Shader.TtMaterialInstance SunMaterial;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt)]
         public RName SunMaterialName
         {

@@ -26,9 +26,9 @@ namespace EngineNS.GamePlay.Scene
     {
         public class TtScenePartitionNodeData : TtSceneData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public int NumOfLevelX { get; set; } = 100;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public int NumOfLevelZ { get; set; } = 100;
         }
         TtScenePartitionLevel[,] Levels = null;

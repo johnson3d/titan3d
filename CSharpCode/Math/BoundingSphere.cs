@@ -36,7 +36,7 @@ namespace EngineNS
         /// <param name="sphere">球体对象</param>
         /// <param name="box">包围盒对象</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static ContainmentType Contains(BoundingSphere sphere, BoundingBox box)
 	    {
 		    Vector3 vector;
@@ -109,7 +109,7 @@ namespace EngineNS
         /// <param name="sphere1">球体1</param>
         /// <param name="sphere2">球体2</param>
         /// <returns>返回相交类型</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static ContainmentType Contains(BoundingSphere sphere1, BoundingSphere sphere2)
 	    {
 		    float distance;
@@ -135,7 +135,7 @@ namespace EngineNS
         /// <param name="sphere">球体对象</param>
         /// <param name="vector">点坐标</param>
         /// <returns>返回相交类型</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static ContainmentType Contains(BoundingSphere sphere, Vector3 vector)
 	    {
 		    float x = vector.X - sphere.Center.X;
@@ -178,7 +178,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="box">包围盒对象</param>
         /// <returns>返回建立的球体包围盒</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static BoundingSphere FromBox(BoundingBox box)
 	    {
 		    BoundingSphere sphere;
@@ -221,7 +221,7 @@ namespace EngineNS
         /// <param name="sphere1">球体包围盒1</param>
         /// <param name="sphere2">球体包围盒2</param>
         /// <returns>返回混合后的球体包围盒对象</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static BoundingSphere Merge(BoundingSphere sphere1, BoundingSphere sphere2)
 	    {
 		    BoundingSphere sphere;
@@ -255,7 +255,7 @@ namespace EngineNS
         /// <param name="sphere">球体包围盒对象</param>
         /// <param name="box">包围盒对象</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(BoundingSphere sphere, BoundingBox box)
 	    {
 		    return BoundingBox.Intersects( box, sphere );
@@ -266,7 +266,7 @@ namespace EngineNS
         /// <param name="sphere1">球体包围盒对象</param>
         /// <param name="sphere2">球体包围盒对象</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(BoundingSphere sphere1, BoundingSphere sphere2)
 	    {
 		    float distance;
@@ -290,7 +290,7 @@ namespace EngineNS
         /// <param name="sphere">球体包围盒对象</param>
         /// <param name="plane">面对象</param>
         /// <returns>返回相交类型</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static PlaneIntersectionType Intersects(BoundingSphere sphere, Plane plane)
 	    {
 		    return Plane.Intersects( plane, sphere );

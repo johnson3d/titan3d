@@ -18,7 +18,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Hitproxy", "Hitproxy", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UHitproxyNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UHitproxyNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UHitproxyNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UHitproxyNode" })]
     public class TtHitproxyNode : TtRenderGraphNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
@@ -140,7 +140,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public TtLayerDrawBuffers HitproxyPass = new TtLayerDrawBuffers();
         public NxRHI.TtRenderPass HitproxyRenderPass;
         public NxRHI.TtRenderPass GizmosRenderPass;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float ScaleFactor { get; set; } = 0.5f;
         public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {

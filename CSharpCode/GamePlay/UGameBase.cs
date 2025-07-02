@@ -14,9 +14,9 @@ namespace EngineNS.GamePlay
 {
     public partial class TtGameModeBase : IDisposable
     {
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public Scene.TtScene CurrentScene { get; set; }
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public Controller.TtCharacterController CharacterController { get; set; } = null;
         public virtual void OnSetGameMode(TtGameModeBase prev)
         {
@@ -30,20 +30,20 @@ namespace EngineNS.GamePlay
         {
 
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void Dispose()
         {
 
         }
     }
     [Macross.TtMacross]
-    //[Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.UMacrossGame@EngineCore", "EngineNS.GamePlay.UMacrossGame" })]
+    //[Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.UMacrossGame@EngineCore", "EngineNS.GamePlay.UMacrossGame" })]
     public partial class TtMacrossGame
     {
         TtGameModeBase mGameMode = new TtGameModeBase();
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public TtGameModeBase GameMode { get => mGameMode; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void SetGameMode(TtGameModeBase mode)
         {
             mGameMode?.OnUnsetGameMode(mode);
@@ -51,38 +51,38 @@ namespace EngineNS.GamePlay
             mGameMode = mode;
             mGameMode?.OnSetGameMode(saved);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual async System.Threading.Tasks.Task<bool> BeginPlay(TtGameInstance host)
         {
             await host.InitViewportSlate(TtEngine.Instance.Config.MainRPolicyName);
 
             return true;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void Tick(TtGameInstance host, float elapsedMillisecond)
         {
             GameMode?.Tick(host, elapsedMillisecond);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void BeginDestroy(TtGameInstance host)
         {
             host.FinalViewportSlate();
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public delegate void Delegate_DelegateTest(IAssetMeta meta);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void DelegateTest(int param1, Delegate_DelegateTest delegateParam)
         {
 
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void TestFunction(int paramInt, bool param2)
         {
 
         }
     }
-    [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoMacrossCreate)]
+    [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.NoMacrossCreate)]
     public partial class TtGameInstance : TtModuleHost<TtGameInstance>, ITickable, IDisposable
     {
         static int mNodeAliveNumber = 0;
@@ -124,14 +124,14 @@ namespace EngineNS.GamePlay
         {
             WorldViewportSlate?.TickSync(ellapse);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtWorld GameWorld
         {
             get => WorldViewportSlate.World;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtGameViewportSlate WorldViewportSlate { get; private set; } = new TtGameViewportSlate(true);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Graphics.Pipeline.TtCamera DefaultCamera 
         {
             get => WorldViewportSlate.RenderPolicy.DefaultCamera;
@@ -146,7 +146,7 @@ namespace EngineNS.GamePlay
                 return mMcObject;
             }
         }
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public TtMacrossGame MacrossGame
         {
             get
@@ -179,7 +179,7 @@ namespace EngineNS.GamePlay
             McObject?.Get()?.BeginDestroy(this);
             PrefabPoolManager.Dispose();
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public async Thread.Async.TtTask InitViewportSlate(
             [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
             RName rPolicy, 
@@ -191,7 +191,7 @@ namespace EngineNS.GamePlay
             WorldViewportSlate.RenderPolicy.ShadowMode = Graphics.Pipeline.EShadowMode.Csm;
             TtEngine.Instance.GfxDevice.SlateApplication.NativeWindow.RegEventProcessor(WorldViewportSlate);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void FinalViewportSlate()
         {
             if (WorldViewportSlate == null)
@@ -202,7 +202,7 @@ namespace EngineNS.GamePlay
             WorldViewportSlate = null;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public async Thread.Async.TtTask<GamePlay.Scene.TtScene> LoadScene(
             [RName.PGRName(FilterExts = GamePlay.Scene.TtScene.AssetExt)]
             RName mapName, bool bSetToWorld = true)
@@ -220,7 +220,7 @@ namespace EngineNS.GamePlay
             }
             return scene;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void SetSceneToWorld(TtScene scene)
         {
             var viewport = this.WorldViewportSlate;
@@ -230,7 +230,7 @@ namespace EngineNS.GamePlay
             world.Root.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
             scene.Parent = world.Root;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public async Thread.Async.TtTask<TtScene> InitViewportSlateWithScene(
             [RName.PGRName(FilterExts = GamePlay.Scene.TtScene.AssetExt)]
             RName mapName,
@@ -258,14 +258,14 @@ namespace EngineNS.GamePlay
             return scene;
         }
         
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public async Thread.Async.TtTask CreateCharacterFromPrefab(Scene.TtScene scene,
             [RName.PGRName(FilterExts = TtPrefab.AssetExt)]
             RName prefabName)
         {
             this.MacrossGame.GameMode.CharacterController = await CreateCharacterController(scene, prefabName, true, false);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public async Thread.Async.TtTask<TtCharacterController> CreateCharacterController(Scene.TtScene scene,
             [RName.PGRName(FilterExts = TtPrefab.AssetExt)]
             RName prefabName,
@@ -298,7 +298,7 @@ namespace EngineNS.GamePlay
             result.MovementNode = actor.FindFirstChild<TtMovement>(null, true);
             return result;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public async Thread.Async.TtTask CreateCharacter(Scene.TtScene scene)
         {
             var playerStart = scene.FindFirstChild<TtPlayerStart>();
@@ -384,7 +384,7 @@ namespace EngineNS
 {
     public partial class TtEngine
     {
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public GamePlay.TtGameInstance GameInstance
         {
             get;

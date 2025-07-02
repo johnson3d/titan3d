@@ -8,11 +8,11 @@ namespace EngineNS.Bricks.Procedure.Node
 {
     public class UEndPointNode : UPgcNodeBase, IEndPointNode
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsStart { get; set; }
 
         List<UNodePinDefineBase> mUserInputs = new List<UNodePinDefineBase>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<UNodePinDefineBase> UserInputs
         {
             get => mUserInputs;
@@ -23,7 +23,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
         List<UNodePinDefineBase> mUserOutputs = new List<UNodePinDefineBase>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<UNodePinDefineBase> UserOutputs
         {
             get => mUserOutputs;
@@ -85,18 +85,18 @@ namespace EngineNS.Bricks.Procedure.Node
     }
     public class UUnionNode : UPgcNodeBase, IUnionNode, INodeWithContextMenu
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public TtNodeGraph ContentGraph { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public Guid InputNodeId { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public Guid OutputNodeId { get; set; }
 
         List<UNodePinDefineBase> mUserInputs = new List<UNodePinDefineBase>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<UNodePinDefineBase> UserInputs
         {
             get => mUserInputs;
@@ -107,7 +107,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
         List<UNodePinDefineBase> mUserOutputs = new List<UNodePinDefineBase>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<UNodePinDefineBase> UserOutputs
         {
             get => mUserOutputs;
@@ -369,18 +369,18 @@ namespace EngineNS.Bricks.Procedure.Node
             get;
         } = new USubGraphNodeDefine();
         List<UNodePinDefine> mUserInputs = new List<UNodePinDefine>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<UNodePinDefine> UserInputs
         {
             get => mUserInputs;
         }
         List<UNodePinDefine> mUserOutputs = new List<UNodePinDefine>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<UNodePinDefine> UserOutputs
         {
             get => mUserOutputs;
         }
-        [Rtti.Meta(Order = 1)]
+        [Rtti.Meta("",Order = 1)]
         public bool SerializeSignal
         {
             get => true;
@@ -390,7 +390,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
         RName mGraphName;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = UPgcAsset.AssetExt)]
         public RName GraphName
         {

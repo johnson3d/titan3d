@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.PhysicsCore
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtPhyMaterialAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -123,7 +123,7 @@ namespace EngineNS.Bricks.PhysicsCore
             }
             return true;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(ReadOnly = true)]
         public RName AssetName
         {
@@ -135,19 +135,19 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             mCoreObject = self;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float DynamicFriction
         {
             get { return mCoreObject.GetDynamicFriction(); }
             set { mCoreObject.SetDynamicFriction(value); }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float StaticFriction
         {
             get { return mCoreObject.GetStaticFriction(); }
             set { mCoreObject.SetStaticFriction(value); }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Restitution
         {
             get { return mCoreObject.GetRestitution(); }

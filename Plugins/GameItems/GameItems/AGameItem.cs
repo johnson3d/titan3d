@@ -67,7 +67,7 @@ namespace EngineNS.Plugins.GameItems
         }
     }
 
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class AGameItemDescriptorAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -98,7 +98,7 @@ namespace EngineNS.Plugins.GameItems
         }
     }
 
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     [AGameItemDescriptor.ADescriptor]
     [IO.CommonCreate]
     [IO.AssetCreateMenu(MenuName = "Game/Item")]
@@ -130,7 +130,7 @@ namespace EngineNS.Plugins.GameItems
             }
             IO.TtFileManager.SaveObjectToXml(name.Address, this);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName AssetName
         {
             get;
@@ -144,9 +144,9 @@ namespace EngineNS.Plugins.GameItems
                 return ((UGameItemPlugin)TtPluginLoader.mPluginObject).ItemDescriptorManager.FindDescriptor(rn);
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Name { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int MaxStack { get; set; } = 1;
         public virtual AGameItem CreateItem()
         {
@@ -192,7 +192,7 @@ namespace EngineNS.Plugins.GameItems
         }
     }
 
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class AGameItem
     {
         public AGameItemDescriptor Descriptor
@@ -204,9 +204,9 @@ namespace EngineNS.Plugins.GameItems
                 return DescriptorName.GetTagObject<AGameItemDescriptor>();
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName DescriptorName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid Uid { get; set; }
     }
     public class AGameItemBox

@@ -23,7 +23,7 @@ namespace EngineNS.Animation.Macross.BlendTree
     public class TtBlendTree_AnimStateMachineClassDescription : TtBlendTreeNodeClassDescription
     {
         public override string Name { get => "BlendTree_StateMachine"; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         [PGStateMachineSelect()]
         public Guid AnimStateMachineId { get; set; } = Guid.Empty;
@@ -41,6 +41,11 @@ namespace EngineNS.Animation.Macross.BlendTree
                 {
                     stateMachine = designVar;
                 }
+            }
+            if (stateMachine == null)
+            {
+                Profiler.Log.WriteLine<Profiler.TtMacrossCategory>(Profiler.ELogTag.Error, $"State Machine({AnimStateMachineId}) not found");
+                return null;
             }
             SupperClassNames.Clear();
             SupperClassNames.Add($"EngineNS.Animation.BlendTree.Node.TtLocalSpaceBlendTree_AnimStateMachine<{classBuildContext.MainClassDescription.ClassName}>");

@@ -17,16 +17,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             result += Density;
             return result;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
         public RName MeshName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MinScale { get; set; } = 0.8f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MaxScale { get; set; } = 2.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float MaxBiasAngle { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Density { get; set; }
     }
     public class UTerainPlantManager : IDisposable

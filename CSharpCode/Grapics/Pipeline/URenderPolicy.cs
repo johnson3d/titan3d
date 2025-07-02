@@ -191,7 +191,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         protected EShadowMode mShadowMode = EShadowMode.Csm;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual EShadowMode ShadowMode
         {
             get => mShadowMode;
@@ -199,7 +199,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         protected bool mDisableAO;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual bool DisableAO
         {
             get => mDisableAO;
@@ -210,7 +210,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         protected bool mDisablePointLight;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual bool DisablePointLight
         {
             get => mDisableAO;
@@ -221,7 +221,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         protected bool mDisableHDR;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual bool DisableHDR
         {
             get => mDisableHDR;
@@ -239,7 +239,7 @@ namespace EngineNS.Graphics.Pipeline
             TypeCount,
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual ETypeAA TypeAA { get; set; } = ETypeAA.Taa;
 
         public enum ETypeFog
@@ -249,7 +249,7 @@ namespace EngineNS.Graphics.Pipeline
             TypeCount,
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual ETypeFog TypeFog { get; set; } = ETypeFog.None;
 
         public Dictionary<string, object> PolicyOptionData { get; } = new Dictionary<string, object>();
@@ -417,12 +417,12 @@ namespace EngineNS.Graphics.Pipeline
         }
     }
 
-    //[Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.UDeferredPolicyBase@EngineCore" })]
+    //[Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.UDeferredPolicyBase@EngineCore" })]
     public class TtDeferredPolicyBase : TtRenderPolicy
     {
         #region Feature On/Off
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public override EShadowMode ShadowMode
         {
             get => mShadowMode;
@@ -435,7 +435,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public override bool DisablePointLight
         {
             get
@@ -451,7 +451,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public override bool DisableHDR
         {
             get
@@ -467,7 +467,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public override ETypeAA TypeAA 
         {
             get => base.TypeAA;
@@ -521,12 +521,12 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
     }
-    //[Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.UForwordPolicyBase@EngineCore" })]
+    //[Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.UForwordPolicyBase@EngineCore" })]
     public class TtForwordPolicyBase : TtRenderPolicy
     {
         #region Feature On/Off
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public override bool DisableAO
         {
             get => mDisableAO;
@@ -541,7 +541,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public override bool DisableHDR
         {
             get

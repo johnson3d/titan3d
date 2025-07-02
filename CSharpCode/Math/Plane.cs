@@ -163,7 +163,7 @@ namespace EngineNS
         /// <param name="plane">平面对象</param>
         /// <param name="point">点的4维坐标</param>
         /// <returns>返回计算后的值</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static float Dot(Plane plane, Vector4 point )
 	    {
 		    return (plane.Normal.X * point.X) + (plane.Normal.Y * point.Y) + (plane.Normal.Z * point.Z) + (plane.D * point.W);
@@ -174,7 +174,7 @@ namespace EngineNS
         /// <param name="plane">平面对象</param>
         /// <param name="point">三维向量</param>
         /// <returns>返回计算后的值</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static float DotCoordinate(Plane plane, Vector3 point)
         {
             return (plane.Normal.X * point.X) + (plane.Normal.Y * point.Y) + (plane.Normal.Z * point.Z) + plane.D;
@@ -185,7 +185,7 @@ namespace EngineNS
         /// <param name="plane">平面对象</param>
         /// <param name="point">三维向量</param>
         /// <returns>返回计算后的值</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static float DotNormal(Plane plane, Vector3 point)
         {
             return (plane.Normal.X * point.X) + (plane.Normal.Y * point.Y) + (plane.Normal.Z * point.Z);
@@ -193,7 +193,7 @@ namespace EngineNS
         /// <summary>
         /// 把向量变为单位向量
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void Normalize()
         {
             float magnitude = 1.0f / (float)(Math.Sqrt((Normal.X * Normal.X) + (Normal.Y * Normal.Y) + (Normal.Z * Normal.Z)));
@@ -208,7 +208,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="plane">平面对象</param>
         /// <returns>返回单位化后的平面</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Plane Normalize( Plane plane )
 	    {
 		    float magnitude = 1.0f / (float)( Math.Sqrt( (plane.Normal.X * plane.Normal.X) + (plane.Normal.Y * plane.Normal.Y) + (plane.Normal.Z * plane.Normal.Z) ) );
@@ -225,7 +225,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="plane">平面对象</param>
         /// <param name="result">单位化后的平面</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Normalize( ref Plane plane, out Plane result )
 	    {
 		    float magnitude = 1.0f / (float)( Math.Sqrt( (plane.Normal.X * plane.Normal.X) + (plane.Normal.Y * plane.Normal.Y) + (plane.Normal.Z * plane.Normal.Z) ) );
@@ -241,7 +241,7 @@ namespace EngineNS
         /// <param name="plane">平面对象</param>
         /// <param name="transformation">转换矩阵</param>
         /// <returns>返回转换后的平面</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Plane Transform( Plane plane, Matrix transformation)
 	    {
 		    Plane result;
@@ -259,7 +259,7 @@ namespace EngineNS
         /// <param name="plane">平面对象</param>
         /// <param name="temp">转换矩阵</param>
         /// <param name="result">转换后的平面</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Transform( ref Plane plane, ref Matrix temp, out Plane result )
 	    {
 		    float x = plane.Normal.X;
@@ -316,7 +316,7 @@ namespace EngineNS
         /// <param name="plane">平面对象</param>
         /// <param name="rotation">旋转四元数</param>
         /// <returns>返回转换后的平面</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Plane Transform( Plane plane, Quaternion rotation )
 	    {
 		    Plane result;
@@ -349,7 +349,7 @@ namespace EngineNS
         /// <param name="plane">平面对象</param>
         /// <param name="rotation">旋转四元数</param>
         /// <param name="result">转换后的平面</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Transform( ref Plane plane, ref Quaternion rotation, out Plane result )
 	    {
 		    float x2 = rotation.X + rotation.X;
@@ -429,7 +429,7 @@ namespace EngineNS
         /// <param name="end">终点坐标</param>
         /// <param name="intersectPoint">交点坐标</param>
         /// <returns>相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(in Plane plane, in Vector3 start, in Vector3 end, out Vector3 intersectPoint)
 	    {
             unsafe
@@ -459,7 +459,7 @@ namespace EngineNS
         /// <param name="plane">平面对象</param>
         /// <param name="box">包围盒</param>
         /// <returns>返回平面与包围盒对象的相对位置类型</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static PlaneIntersectionType Intersects(in Plane plane, in BoundingBox box)
         {
             Vector3 min;
@@ -498,7 +498,7 @@ namespace EngineNS
         /// <param name="plane">平面对象</param>
         /// <param name="sphere">球体包围盒</param>
         /// <returns>返回平面与包围盒对象的相对位置类型</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static PlaneIntersectionType Intersects(Plane plane, BoundingSphere sphere)
         {
             float dot = (sphere.Center.X * plane.Normal.X) + (sphere.Center.Y * plane.Normal.Y) + (sphere.Center.Z * plane.Normal.Z) + plane.D;
@@ -517,7 +517,7 @@ namespace EngineNS
         /// <param name="plane">平面对象</param>
         /// <param name="scale">缩放值</param>
         /// <returns>返回转换后的平面对象</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Plane Multiply( Plane plane, float scale )
 	    {
 		    Plane result;
@@ -534,7 +534,7 @@ namespace EngineNS
         /// <param name="plane">平面对象</param>
         /// <param name="scale">缩放值</param>
         /// <param name="result">转换后的平面对象</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Multiply( ref Plane plane, float scale, out Plane result )
 	    {
             unsafe

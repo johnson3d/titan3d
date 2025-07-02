@@ -30,7 +30,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ShaderNode.UShaderEditor@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ShaderNode.UShaderEditor@EngineCore" })]
     public partial class TtMaterialEditor : EngineNS.Editor.Forms.TtLightEnvironemnt, Editor.IAssetEditor, IRootForm
     {
         public int GetTickOrder()
@@ -241,10 +241,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public float LeftWidth = 0;
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtMaterialGraph MaterialGraph { get; } = new TtMaterialGraph();
         public Bricks.NodeGraph.TtGraphRenderer GraphRenderer = new NodeGraph.TtGraphRenderer();
-        [Rtti.Meta(Order = 1)]
+        [Rtti.Meta("",Order = 1)]
         public Guid OutputNodeId
         {
             get

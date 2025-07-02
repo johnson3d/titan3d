@@ -13,7 +13,7 @@ namespace EngineNS.Bricks.PhysicsCore
     {
         public class TtRigidBodyNodeData : GamePlay.Scene.TtNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public EPhyActorType PxActorType { get; set; }
             public class TtShapeSerializer : IO.TtCustomSerializerAttribute
             {
@@ -45,7 +45,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 }
             }
             [TtShapeSerializer]
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public object PxShapeSerializer 
             { 
                 get => null; 

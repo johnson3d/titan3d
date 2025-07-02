@@ -3,6 +3,7 @@ using EngineNS.Support;
 using EngineNS.Thread.Async;
 using EngineNS.UI;
 using MathNet.Numerics.Distributions;
+using Org.BouncyCastle.Asn1.Mozilla;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -67,6 +68,37 @@ namespace EngineNS.Rtti
 
             CanRefForMacross = (1 << 11),// Macross代码生成时，可以用ref做传引用，这里有一个潜规则，需要提供对应名为m{PropertyName}的public成员变量
         }
+        public MetaAttribute()
+        {
+
+        }
+        public MetaAttribute(string name, [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
+                [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
+        {
+            SourceFilePath = sourceFilePath;
+            SourceLineNumber = sourceLineNumber;
+            if (SourceFilePath.StartsWith(TtEngine.EngineSourceFilePathAOT))
+            {
+                SourceFilePath = "@Engine/" + SourceFilePath.Substring(TtEngine.EngineSourceFilePathAOT.Length);
+            }
+        }
+        public static bool OpenSourceCode(MetaAttribute meta)
+        {
+            if (meta==null)
+                return false;
+            var file = meta.SourceFilePath;
+            if (file.StartsWith("@Engine/"))
+            {
+                file = TtEngine.EngineSourceFilePathJIT + file.Substring("@Engine/".Length);
+            }
+            var plugin = Bricks.DevIDE.TtDevIDEPlugin.FindDevIDEPlugin();
+            if (plugin==null)
+                return false;
+            plugin?.OpenFileAtLine(file, meta.SourceLineNumber);
+            return true;
+        }
+        public string SourceFilePath = null;
+        public int SourceLineNumber = 0;
         public int Order = 0;
         public EMetaFlags Flags = 0;
         public string ShaderName;
@@ -448,7 +480,7 @@ namespace EngineNS.Rtti
             {
                 public MetaParameterAttribute Meta;
                 public TtMethodMeta HostMethod;
-                [Rtti.Meta]
+                [Rtti.Meta("")]
                 public int ParamIndex { get; set; } = -1;
                 public System.Reflection.ParameterInfo GetParamInfo()
                 {
@@ -458,18 +490,18 @@ namespace EngineNS.Rtti
                 {
                     return GetParamInfo().GetCustomAttributes(attributeType, inherit);
                 }
-                [Rtti.Meta]
+                [Rtti.Meta("")]
                 public Rtti.TtTypeDesc ParameterType { get; set; }
-                [Rtti.Meta]
+                [Rtti.Meta("")]
                 public bool IsParamArray { get; set; } = false;
-                [Rtti.Meta]
+                [Rtti.Meta("")]
                 public bool IsDelegate { get; set; } = false;
-                [Rtti.Meta]
+                [Rtti.Meta("")]
                 public string Name { get; set; }
-                [Rtti.Meta]
+                [Rtti.Meta("")]
                 public Bricks.CodeBuilder.EMethodArgumentAttribute ArgumentAttribute { get; set; } = Bricks.CodeBuilder.EMethodArgumentAttribute.Default;
                 public object DefaultValue = null;
-                [Rtti.Meta(Order = 1)]
+                [Rtti.Meta("",Order = 1)]
                 public string DefaultValueString
                 {
                     get => DefaultValue?.ToString();
@@ -526,17 +558,17 @@ namespace EngineNS.Rtti
                 }
             }
             public MetaAttribute Meta;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public List<TtParamMeta> Parameters { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string MethodName { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Rtti.TtTypeDesc ReturnType { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Rtti.TtTypeDesc DeclaringType { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public bool IsStatic { get; set; } = false;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public bool IsVirtual { get; set; } = false;
 
             private string DeclarName;

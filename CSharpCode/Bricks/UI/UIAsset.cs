@@ -8,10 +8,10 @@ using System.Text;
 
 namespace EngineNS.UI
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtUIAssetAMeta : IO.IAssetMeta, IMacrossMeta
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2i DesignResolution
         {
             get;
@@ -23,7 +23,7 @@ namespace EngineNS.UI
             get => TtUIAsset.AssetExt;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsDisable
         {
             get;
@@ -53,7 +53,7 @@ namespace EngineNS.UI
             return "disable_ui_" + AssetId.ToString().Replace("-", "_");
         }
     }
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     [TtUIAsset.Import]
     [IO.AssetCreateMenu(MenuName = "UI/UI")]
     [EngineNS.Editor.UAssetEditor(EditorType = typeof(EngineNS.UI.Editor.TtUIEditor))]
@@ -133,7 +133,7 @@ namespace EngineNS.UI
                 TtEngine.Instance.UIManager.Save(name, UIHost.Children[0]);
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName AssetName
         {
             get;

@@ -123,7 +123,7 @@ namespace EngineNS.Bricks.Procedure
                 EGui.Controls.CtrlUtility.DrawHelper($"{creator.ElementType.Name}");
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual int PreviewResultIndex
         {
             get => mPreviewResultIndex;
@@ -357,7 +357,7 @@ namespace EngineNS.Bricks.Procedure
         {
 
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void DispatchBuffer(UPgcGraph graph, UBufferComponent result, object tag, bool bMultThread = false)
         {
             if (result == null)
@@ -454,7 +454,7 @@ namespace EngineNS.Bricks.Procedure
         #endregion
 
         #region Macross
-        [Rtti.Meta()]
+        [Rtti.Meta("")]
         public UBufferComponent FindBuffer(string name)
         {
             var graph = this.ParentGraph as UPgcGraph;
@@ -476,7 +476,7 @@ namespace EngineNS.Bricks.Procedure
                 return null;
             return linker.OutNode as UPgcNodeBase;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UPgcNodeBase GetInputNodeByName(UPgcGraph graph, string pinName,
             [Rtti.MetaParameter(FilterType = typeof(UPgcNodeBase),
             ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
@@ -490,7 +490,7 @@ namespace EngineNS.Bricks.Procedure
                 return null;
             return linker.OutNode as UPgcNodeBase;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UPgcNodeBase GetInputNode(UPgcGraph graph, PinIn pin)
         {
             var linker = graph.FindInLinkerSingle(pin);

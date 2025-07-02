@@ -56,7 +56,7 @@ namespace EngineNS.Graphics.Pipeline
             mPolicy = policy;
         }
         TtRenderPolicy mPolicy;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string CullCameraName
         {
             get

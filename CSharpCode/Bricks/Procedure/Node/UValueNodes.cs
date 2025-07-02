@@ -21,7 +21,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
             AddOutput(ResultPin, "Result", OutputDesc);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public DVector3 Value { get; set; } = DVector3.One;
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
@@ -60,7 +60,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
             AddOutput(ResultPin, "Result", OutputDesc);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Quaternion Value { get; set; } = Quaternion.Identity;
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
@@ -98,7 +98,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
             AddOutput(ResultPin, "Result", OutputDesc);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Value { get; set; } = 0;
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {

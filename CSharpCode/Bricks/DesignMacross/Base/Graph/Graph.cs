@@ -15,7 +15,7 @@ namespace EngineNS.DesignMacross.Base.Graph
 
         public IGraphElement Parent { get; set; } = null;
         public virtual IDescription Description { get; set; } = null;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<IDescriptionGraphElement> Elements { get; set; } = new List<IDescriptionGraphElement>();
         public IGraphElementStyle Style { get; set; } = null;
 

@@ -42,9 +42,9 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
             set { }
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid FromId { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid ToId { get; set; }
         private IDescription mFrom = null;
         public IDescription From
@@ -99,7 +99,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
             }
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTransitionCheckConditionMethodDescription CheckConditionMethodDescription { get; set; } = null;
         public TtTimedStateTransitionClassDescription()
         {

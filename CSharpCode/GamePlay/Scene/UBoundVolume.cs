@@ -80,7 +80,7 @@ namespace EngineNS.GamePlay.Scene
     public class USphereBV : TtBoundVolume
     {
         Vector3 mCenter;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 Center
         {
             get => mCenter;
@@ -91,7 +91,7 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         float mRadius = 1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Radius
         {
             get => mRadius;

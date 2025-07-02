@@ -36,17 +36,17 @@ namespace EngineNS.Bricks.Particle
         public Vector3 mVelocity;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "Rotator")]
         public uint mRotator;
-        [Rtti.Meta(ShaderName = "Flags")]
+        [Rtti.Meta("",ShaderName = "Flags")]
         public uint Flags { get => mFlags; set => mFlags = value; }
-        [Rtti.Meta(ShaderName = "Life")]
+        [Rtti.Meta("",ShaderName = "Life")]
         public float Life { get => mLife; set => mLife = value; }
-        [Rtti.Meta(ShaderName = "Scale")]
+        [Rtti.Meta("",ShaderName = "Scale")]
         public float Scale { get => mScale; set => mScale = value; }
-        [Rtti.Meta(ShaderName = "RandomSeed")]
+        [Rtti.Meta("",ShaderName = "RandomSeed")]
         public uint RandomSeed { get => mRandomSeed; set => mRandomSeed = value; }
-        [Rtti.Meta(ShaderName = "Location")]
+        [Rtti.Meta("",ShaderName = "Location")]
         public Vector3 Location { get => mLocation; set => mLocation = value; }
-        [Rtti.Meta(ShaderName = "Color")]
+        [Rtti.Meta("",ShaderName = "Color")]
         public uint Color { get => mColor; set => mColor = value; }
         public Color4f Colorf
         {
@@ -59,9 +59,9 @@ namespace EngineNS.Bricks.Particle
                 Color = value.ToArgb();
             }
         }
-        [Rtti.Meta(ShaderName = "Velocity")]
+        [Rtti.Meta("",ShaderName = "Velocity")]
         public Vector3 Velocity { get => mVelocity; set => mVelocity = value; }
-        [Rtti.Meta(ShaderName = "Rotator")]
+        [Rtti.Meta("",ShaderName = "Rotator")]
         public uint Rotator { get => mRotator; set => mRotator = value; }
         //float[0-1]
         public Vector3 Rotatorf
@@ -119,19 +119,19 @@ namespace EngineNS.Bricks.Particle
 
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "TempData")]
         public Vector4i mTempData;//for compute UAV
-        [Rtti.Meta(ShaderName = "Location")]
+        [Rtti.Meta("",ShaderName = "Location")]
         public Vector3 Location { get => mLocation; set => mLocation = value; }
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.CanRefForMacross, ShaderName = "Flags")]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.CanRefForMacross, ShaderName = "Flags")]
         public uint Flags { get => mFlags; set => mFlags = value; }
-        [Rtti.Meta(ShaderName = "Velocity")]
+        [Rtti.Meta("",ShaderName = "Velocity")]
         public Vector3 Velocity { get => mVelocity; set => mVelocity = value; }
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.CanRefForMacross, ShaderName = "Flags1")]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.CanRefForMacross, ShaderName = "Flags1")]
         public uint Flags1 { get => mFlags1; set => mFlags1 = value; }
-        [Rtti.Meta(ShaderName = "CameralEuler")]
+        [Rtti.Meta("",ShaderName = "CameralEuler")]
         public FRotator CameralEuler { get => mCameralEuler; set => mCameralEuler = value; }
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.CanRefForMacross, ShaderName = "Flags2")]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.CanRefForMacross, ShaderName = "Flags2")]
         public uint Flags2 { get => mFlags2; set => mFlags2 = value; }
-        [Rtti.Meta(ShaderName = "TempData")]
+        [Rtti.Meta("",ShaderName = "TempData")]
         public Vector4i TempData { get => mTempData; set => mTempData = value; }
     }
     public class TtGpuParticleResources : IDisposable
@@ -244,7 +244,7 @@ namespace EngineNS.Bricks.Particle
         }
     }
 
-    [Rtti.Meta(ShaderName = "TtEmitter")]
+    [Rtti.Meta("",ShaderName = "TtEmitter")]
     public partial class TtEmitter : AuxPtrType<IEmitter> 
     {
         public override void Dispose()
@@ -292,9 +292,9 @@ namespace EngineNS.Bricks.Particle
         public bool IsGpuDriven { get; set; } = false;
         public FParticleEmitter EmitterData = default;
         public float TimerRemain { get; set; } = float.MaxValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float TimerInterval { get; set; } = float.MaxValue;
-        [Rtti.Meta(ShaderName = "EmitterDataRef[0]", Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        [Rtti.Meta("",ShaderName = "EmitterDataRef[0]", Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public ref FParticleEmitter EmitterDataRef
         {
             get
@@ -373,7 +373,7 @@ namespace EngineNS.Bricks.Particle
         #endregion
 
         #region Queue&Emitter
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual async Thread.Async.TtTask<bool> InitEmitter(RName meshName, uint maxParticle)
         {
             NxRHI.TtGpuDevice rc = TtEngine.Instance.GfxDevice.RenderContext;
@@ -542,14 +542,14 @@ namespace EngineNS.Bricks.Particle
 
         #region Macross API
         [Category("Option")]
-        [Rtti.Meta(ShaderName = "Location")]
+        [Rtti.Meta("",ShaderName = "Location")]
         public Vector3 Location
         {
             get => EmitterData.Location;
             set => EmitterData.Location = value;
         }
         [Category("Option")]
-        [Rtti.Meta(ShaderName = "Velocity")]
+        [Rtti.Meta("",ShaderName = "Velocity")]
         public Vector3 Velocity
         {
             get => EmitterData.Velocity;
@@ -558,37 +558,37 @@ namespace EngineNS.Bricks.Particle
                 EmitterData.Velocity = value;
             }
         }
-        [Rtti.Meta(ShaderName = "Color2Uint")]
+        [Rtti.Meta("",ShaderName = "Color2Uint")]
         public uint Color2Uint(Color4f color)
         {
             return color.ToArgb();
         }
-        [Rtti.Meta(ShaderName = "Uint2Color4f")]
+        [Rtti.Meta("",ShaderName = "Uint2Color4f")]
         public Color4f Uint2Color4f(uint value)
         {
             return Color4f.FromColor4b(Color4b.FromArgb((int)value));
         }
-        [Rtti.Meta(ShaderName = "HasFlags")]
+        [Rtti.Meta("",ShaderName = "HasFlags")]
         public EParticleFlags HasFlags(in FParticle particle, EParticleFlags flags)
         {
             return (EParticleFlags)(particle.Flags & (uint)flags);
         }
-        [Rtti.Meta(ShaderName = "GetParticleData")]
+        [Rtti.Meta("",ShaderName = "GetParticleData")]
         public uint GetParticleData(uint flags)
         {
             return (flags & (uint)(~EParticleFlags.FlagMask));
         }
-        [Rtti.Meta(ShaderName = "SetParticleFlags")]
+        [Rtti.Meta("",ShaderName = "SetParticleFlags")]
         public uint SetParticleFlags(EParticleFlags flags, uint data)
         {
             return (uint)flags | (data & ((uint)~EParticleFlags.FlagMask));
         }
-        [Rtti.Meta(ShaderName = "Spawn")]
+        [Rtti.Meta("",ShaderName = "Spawn")]
         public uint Spawn(uint num, uint flags, float life)
         {
             return mCoreObject.Spawn(num, flags, life);
         }
-        [Rtti.Meta(ShaderName = "GetParticle")]
+        [Rtti.Meta("",ShaderName = "GetParticle")]
         public unsafe FParticle GetParticle(uint index)
         {
             var pParticles = (FParticle*)mCoreObject.GetParticleAddress();
@@ -601,23 +601,23 @@ namespace EngineNS.Bricks.Particle
             return rng_state;
         }
         #region Random
-        [Rtti.Meta(ShaderName = "RandomUnit")]
+        [Rtti.Meta("",ShaderName = "RandomUnit")]
         public float RandomUnit(ref FParticle cur)//[0,1]
         {
             //cur.RandomSeed = rand_lcg(cur.RandomSeed);
             return (float)TtEngine.Instance.NebulaTemplateManager.mRandom.NextDouble();
         }
-        [Rtti.Meta(ShaderName = "RandomSignedUnit")]
+        [Rtti.Meta("",ShaderName = "RandomSignedUnit")]
         public float RandomSignedUnit(ref FParticle cur)//[-1,1]
         {
             return TtEngine.Instance.NebulaTemplateManager.RandomSignedUnit();
         }
-        [Rtti.Meta(ShaderName = "RandomNext")]
+        [Rtti.Meta("",ShaderName = "RandomNext")]
         public int RandomNext(ref FParticle cur)
         {
             return TtEngine.Instance.NebulaTemplateManager.mRandom.Next();
         }
-        [Rtti.Meta(ShaderName = "RandomVector3")]
+        [Rtti.Meta("",ShaderName = "RandomVector3")]
         public Vector3 RandomVector3(ref FParticle cur, bool normalized = true)
         {
             var result = new Vector3();
@@ -630,7 +630,7 @@ namespace EngineNS.Bricks.Particle
             }
             return result;
         }
-        [Rtti.Meta(ShaderName = "RandomVector3")]
+        [Rtti.Meta("",ShaderName = "RandomVector3")]
         public Vector4 RandomVector4(ref FParticle cur)
         {
             var result = new Vector4();
@@ -670,7 +670,7 @@ namespace EngineNS.Bricks.Particle
 
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtEmitterMacross))]
         public RName McName
         {
@@ -700,7 +700,7 @@ namespace EngineNS.Bricks.Particle
             get => mMcObject;
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtShaderAsset.AssetExt, ShaderType = "NebulaEmitter")]
         public RName ShaderName
         {
@@ -721,33 +721,33 @@ namespace EngineNS.Bricks.Particle
     [Macross.TtMacross(IsGenShader = true)]
     public partial class TtEmitterMacross
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string HLSLDoUpdateSystem { get; set; } = "";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string HLSLOnInitParticle { get; set; } = "";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string HLSLOnDeadParticle { get; set; } = "";
-        [Rtti.Meta(ShaderName = "DoUpdateSystem")]
+        [Rtti.Meta("",ShaderName = "DoUpdateSystem")]
         public virtual void DoUpdateSystem(TtEmitter emt)
         {
 
         }
-        [Rtti.Meta(ShaderName = "OnInitParticle")]
+        [Rtti.Meta("",ShaderName = "OnInitParticle")]
         public unsafe virtual void OnInitParticle(TtEmitter emt, ref FParticle particle)
         {
 
         }
-        [Rtti.Meta(ShaderName = "OnDeadParticle")]
+        [Rtti.Meta("",ShaderName = "OnDeadParticle")]
         public unsafe virtual void OnDeadParticle(TtEmitter emt, uint index, ref FParticle particle)
         {
 
         }
-        [Rtti.Meta(ShaderName = "OnParticleTick")]
+        [Rtti.Meta("",ShaderName = "OnParticleTick")]
         public virtual unsafe void OnParticleTick(TtEmitter emt, float elapsed, ref FParticle particle)
         {
 
         }
-        [Rtti.Meta(ShaderName = "OnTimer")]
+        [Rtti.Meta("",ShaderName = "OnTimer")]
         public virtual unsafe void OnTimer(TtEmitter emt, float second)
         {
 

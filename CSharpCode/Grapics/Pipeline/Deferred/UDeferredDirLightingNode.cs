@@ -339,7 +339,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
     }
     [Bricks.CodeBuilder.ContextMenu("DirLighting", "Deferred\\DirLighting", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.UDeferredDirLightingNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.UDeferredDirLightingNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.UDeferredDirLightingNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.UDeferredDirLightingNode" })]
     public partial class TtDeferredDirLightingNode : Common.TtSceenSpaceNode
     {
         public TtRenderGraphPin Rt0PinIn = TtRenderGraphPin.CreateInput("MRT0", NxRHI.EBufferType.BFT_SRV);

@@ -6,13 +6,13 @@ using EngineNS.Graphics.Pipeline.Shader;
 
 namespace EngineNS.Graphics.Mesh
 {
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMdfStaticMesh@EngineCore", "EngineNS.Graphics.Mesh.UMdfStaticMesh" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMdfStaticMesh@EngineCore", "EngineNS.Graphics.Mesh.UMdfStaticMesh" })]
     public class TtMdfStaticMesh : Graphics.Pipeline.Shader.TtMdfQueue1<Mesh.Modifier.TtStaticModifier>
     {
         
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMdfInstanceStaticMesh@EngineCore", "EngineNS.Graphics.Mesh.UMdfInstanceStaticMesh" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMdfInstanceStaticMesh@EngineCore", "EngineNS.Graphics.Mesh.UMdfInstanceStaticMesh" })]
     public class TtMdfInstanceStaticMesh : Graphics.Pipeline.Shader.TtMdfQueue2<Mesh.Modifier.TtStaticModifier, Modifier.TtInstanceModifier>
     {
         public TtMdfInstanceStaticMesh()

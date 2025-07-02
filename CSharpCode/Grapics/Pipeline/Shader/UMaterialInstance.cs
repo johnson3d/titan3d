@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterialInstanceAMeta@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterialInstanceAMeta@EngineCore" })]
     public partial class TtMaterialInstanceAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -44,7 +44,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return TtEngine.Instance.EditorInstance.Config.MaterialInstanceBoderColor;
         }
     }
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterialInstance@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterialInstance@EngineCore" })]
     [TtMaterialInstance.MaterialInstanceImport]
     [IO.AssetCreateMenu(MenuName = "Graphics/MaterialInstance")]
     public partial class TtMaterialInstance : TtMaterial
@@ -219,13 +219,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         [Browsable(false)]
         public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
-        [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterialInstance.TSaveData@EngineCore" })]
+        [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterialInstance.TSaveData@EngineCore" })]
         public class TSaveData : IO.BaseSerializer
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public RName MaterialName { get; set; }
         }
-        [Rtti.Meta(Order = 1)]
+        [Rtti.Meta("",Order = 1)]
         [Browsable(false)]
         public TSaveData SaveData
         {
@@ -702,7 +702,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return null;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtMaterialInstance CreateMaterialInstance(TtMaterial mtl)
         {
             return TtMaterialInstance.CreateMaterialInstance(mtl);

@@ -39,7 +39,7 @@ namespace EngineNS
         Queue,
         QueueNextFrame,
     }
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.UEngineConfig@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.UEngineConfig@EngineCore" })]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtEngineConfig
     {
@@ -58,30 +58,30 @@ namespace EngineNS
                 IO.TtFileManager.SaveObjectToXml(sltFile, this);
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool IsReverseZ { get; set; } = true;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public EMultiRenderMode MultiRenderMode { get; set; } = EMultiRenderMode.QueueNextFrame;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool UsePhysxMT { get; set; } = true;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool UseRenderDoc { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool Feature_UseRVT { get; set; } = false;
         public string ConfigName;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public int NumOfThreadPool { get; set; } = -1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool IsParrallelWorldGather { get; set; } = true;
         int mInterval = 15;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public int Interval {
             get => mInterval;
@@ -96,117 +96,117 @@ namespace EngineNS
         {
             get => mTargetFps;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public RName DefaultTexture { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public int AdaperId { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public Vector4 MainWindow { get; set; } = new Vector4(100, 100, 1280, 720);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool SupportMultWindows { get; set; } = true;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool DoUnitTest { get; set; } = true;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public NxRHI.ERhiType RHIType { get; set; } = NxRHI.ERhiType.RHI_D3D11;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool HasDebugLayer { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool IsGpuBaseValidation { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool IsDebugShader { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool IsGpuDred { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool IsAftermath { get; set; } = false;//if true, engine will disable debuglayer&renderdoc
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public string MainWindowType { get; set; }// = Rtti.TypeManager.Instance.GetTypeStringFromType(typeof(Editor.MainEditorWindow));
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public RName MainRPolicyName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public RName SimpleRPolicyName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public string RpcRootType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.UnitTest.UTest_Rpc));
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool CookDXBC { get; set; } = true;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool CookDXIL { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool CookSPIRV { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool CookGLSL { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool CookMETAL { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool CompressDxt { get; set; } = true;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool CompressEtc { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool CompressAstc { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public RName DefaultVMS { get; set; } = RName.GetRName("mesh/base/box.vms", RName.ERNameType.Engine);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public RName DefaultMaterial { get; set; }// = RName.GetRName("UTest/ttt.material");
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public RName DefaultMaterialInstance { get; set; }// = RName.GetRName("UTest/box_wite.uminst");
         [RName.PGRName(FilterExts = Bricks.CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(GamePlay.TtMacrossGame))]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public RName PlayGameName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public string RootServerURL { get; set; } = "127.0.0.1:2333";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public Bricks.Network.RPC.EAuthority DefaultAuthority { get; set; } = Bricks.Network.RPC.EAuthority.Server;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public List<TtGlobalConfig> GlobalConfigs { get; set; } = new List<TtGlobalConfig>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public RName EditorFont { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public RName EditorSmallFont { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public RName EditorEffectFont { get; set; }
         public string EditorLanguage { get; set; } = "English";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public RName UIDefaultTexture { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool IsWriteShaderDebugFile { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool IsTryUnloadMacrossAssembly { get; set; } = true;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public List<string> Plugins { get; set; } = new List<string>() { "SourceGit", "Survivor" };
         public TtEngineConfig()
@@ -216,7 +216,7 @@ namespace EngineNS
             UIDefaultTexture = RName.GetRName("texture/white.srv", RName.ERNameType.Engine);
         }
     }
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public partial class TtEngine : TtModuleHost<TtEngine>
     {
         public static string FindArgument(string[] args, string startWith)
@@ -235,22 +235,22 @@ namespace EngineNS
             mFileManager = new IO.TtFileManager(args);
         }
         private static TtEngine mInstance;
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public static TtEngine Instance { get => mInstance; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static RName GetRName(string name, RName.ERNameType type = RName.ERNameType.Game)
         {
             return RName.GetRName(name, type);
         }
         public EPlayMode PlayMode { get; set; } = EPlayMode.Editor;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtEngineConfig Config { get; set; }
         private IO.TtFileManager mFileManager;
         public IO.TtFileManager FileManager
         {
             get => mFileManager;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UTickableManager TickableManager
         {
             get;
@@ -272,7 +272,7 @@ namespace EngineNS
         }
         public float ElapseTickCountMS { get; set; }  // 毫秒
         public int FrameCount { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float TickCountSecond { get; set; }
         public float ElapsedSecond { get; set; }
         public float FPS { get; set; }
@@ -292,8 +292,13 @@ namespace EngineNS
             engine.Config = new TtEngineConfig();
             engine.InitTypes(cfgFile, bNatvieMemory, false);
         }
-        public static async System.Threading.Tasks.Task<bool> StartEngine(TtEngine engine, string cfgFile, bool bNatvieMemory)
+        internal static string EngineSourceFilePathAOT = null;
+        public static string EngineSourceFilePathJIT = null;
+        public static async System.Threading.Tasks.Task<bool> StartEngine(TtEngine engine, string cfgFile, bool bNatvieMemory, [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "")
         {
+            EngineSourceFilePathAOT = IO.TtFileManager.GetBaseDirectory(sourceFilePath, 3);
+            EngineSourceFilePathAOT = EngineSourceFilePathAOT.Replace('/', '\\');
+            EngineSourceFilePathJIT = EngineSourceFilePathAOT;
             System.Threading.Thread.CurrentThread.Name = "Main";
             mInstance = engine;
             engine.Config = new TtEngineConfig();

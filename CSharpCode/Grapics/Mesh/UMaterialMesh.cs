@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Graphics.Mesh
 {
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMaterialMeshAMeta@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMaterialMeshAMeta@EngineCore" })]
     public class TtMaterialMeshAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -167,7 +167,7 @@ namespace EngineNS.Graphics.Mesh
             mPreviewNode.Placement.Position = hitPos;
         }
     }
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMaterialMesh@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMaterialMesh@EngineCore" })]
     [TtMaterialMesh.Import]
     [IO.AssetCreateMenu(MenuName = "Mesh/MaterialMesh")]
     public partial class TtMaterialMesh : IO.ISerializer, IO.IAsset
@@ -236,7 +236,7 @@ namespace EngineNS.Graphics.Mesh
             }
             TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(ReadOnly = true)]
         public RName AssetName
         {
@@ -342,7 +342,7 @@ namespace EngineNS.Graphics.Mesh
                 return true;
             }
         }
-        [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMaterialMesh.TtSubMaterialedMesh@EngineCore" })]
+        [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMaterialMesh.TtSubMaterialedMesh@EngineCore" })]
         public class TtSubMaterialedMesh : IO.BaseSerializer
         {
             TtMeshPrimitives mMesh;
@@ -559,27 +559,27 @@ namespace EngineNS.Graphics.Mesh
                 return true;
             }
 
-            [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMaterialMesh.TtSubMaterialedMesh.TSaveData@EngineCore" })]
+            [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMaterialMesh.TtSubMaterialedMesh.TSaveData@EngineCore" })]
             public class TSaveData : IO.BaseSerializer
             {
                 public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
                 {
                     base.OnPreRead(tagObject, hostObject, fromXml);
                 }
-                [Rtti.Meta]
+                [Rtti.Meta("")]
                 public RName MeshName 
                 { 
                     get; 
                     set;
                 }
-                [Rtti.Meta]
+                [Rtti.Meta("")]
                 public List<RName> Materials 
                 { 
                     get;
                     set; 
                 } = new List<RName>();
             }
-            [Rtti.Meta(Order = 1)]
+            [Rtti.Meta("",Order = 1)]
             [Browsable(false)]
             public TSaveData SaveData
             {
@@ -640,7 +640,7 @@ namespace EngineNS.Graphics.Mesh
                 }
             }
         }
-        [Rtti.Meta()]
+        [Rtti.Meta("")]
         public List<TtSubMaterialedMesh> SubMeshes { get; set; } = new List<TtSubMaterialedMesh>() { new TtSubMaterialedMesh() };
         public int GetMeshNum()
         {

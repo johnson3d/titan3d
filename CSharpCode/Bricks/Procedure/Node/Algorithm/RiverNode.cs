@@ -19,9 +19,9 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinOut FlowMaskMapPin { get; set; } = new PinOut();
         [Browsable(false)]
         public PinOut FillElevationPin { get; set; } = new PinOut();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UBufferCreator SourceDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UBufferCreator ResultDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public TtRiverNode()
         {

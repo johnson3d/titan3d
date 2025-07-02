@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reflection;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.EGui.Controls;
 using EngineNS.Thread.Async;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class MethodNode : TtNodeBase, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode, IBreakableNode, EGui.Controls.PropertyGrid.IPropertyCustomization
+    public partial class MethodNode : TtMacrossNodeBase, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode, IBreakableNode, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
         public PinOut Result = null;
         public PinIn Self = null;
@@ -97,7 +98,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
         bool mIsNodeAsync = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsNodeAsync
         {
             get => mIsNodeAsync;
@@ -105,7 +106,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public TtMethodDeclaration MethodDesc;
         public string mMethodMeta;
-        [Rtti.Meta(Order = 0)]
+        [Rtti.Meta("",Order = 0)]
         public string MethodMeta
         {
             get
@@ -158,23 +159,23 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public class DelegateArgumentSaveData : IO.ISerializer
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string ArgumentName { get; set; }
 
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public UMacrossMethodGraph DelegateGraph { get; set; } = null;
 
             public class ExtPinData : IO.ISerializer
             {
-                [Rtti.Meta]
+                [Rtti.Meta("")]
                 public string PinName { get; set; }
-                [Rtti.Meta]
+                [Rtti.Meta("")]
                 public Rtti.TtTypeDesc Type { get; set; }
 
                 public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
                 public void OnPropertyRead(object tagObject, string prop, bool fromXml) { }
             }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public List<ExtPinData> ExtPinDatas { get; set; } = new List<ExtPinData>();
 
             public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
@@ -182,17 +183,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             public void OnPropertyRead(object tagObject, string prop, bool fromXml) { }
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool SelfMethod { get; set; } = false;
         public class TSaveData : IO.BaseSerializer
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Dictionary<string, string> DefaultArguments { get; } = new Dictionary<string, string>();
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public List<DelegateArgumentSaveData> DelegateArgumentSaveDatas { get; set; } = new List<DelegateArgumentSaveData>();
         }
 
-        [Rtti.Meta(Order = 1)]
+        [Rtti.Meta("",Order = 1)]
         public TSaveData SaveData
         {
             get
@@ -322,7 +323,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float InputControlWidth { get; set; } = 60.0f;
 
         public string BreakerName 
@@ -803,6 +804,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     string helperString = GetRuntimeValueString(paramName);                    
                     EGui.Controls.CtrlUtility.DrawHelper($"{helperString}({type.FullName})");
                 }
+            }
+        }
+        public override void OpenNode(UMacrossMethodGraph graph)
+        {
+            if (this.Method?.GetMethod()!=null)
+            {
+                Rtti.MetaAttribute.OpenSourceCode(this.Method?.GetMethod().GetCustomAttribute<Rtti.MetaAttribute>());
             }
         }
         public override object GetPropertyEditObject()

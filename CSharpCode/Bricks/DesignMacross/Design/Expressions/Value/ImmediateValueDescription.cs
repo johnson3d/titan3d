@@ -9,7 +9,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
 {
     public class TtImmediateValueDescription : TtExpressionDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTypeDesc TypeDesc { get; set; } = TtTypeDesc.TypeOf<bool>();
         [Rtti.Meta, Category("Option"), DisplayName("Value")]
         public string StrValue { get; set; }

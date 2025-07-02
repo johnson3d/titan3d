@@ -11,7 +11,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     #region UnaryLogicOperator
     public class TtUnaryLogicOperatorDescription : TtExpressionDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtUnaryOperatorExpression.EUnaryOperation Op { get; set; }
         public TtUnaryLogicOperatorDescription()
         {
@@ -25,7 +25,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     #region BinaryLogicOperator
     public class TtBinaryLogicOperatorDescription : TtExpressionDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtBinaryOperatorExpression.EBinaryOperation Op { get; set; }
         public TtBinaryLogicOperatorDescription()
         {

@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace EngineNS.Bricks.CodeBuilder
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public partial class UMacrossConfig
     {
         public List<string> GameReferenceAssemblies = new List<string>();

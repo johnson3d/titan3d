@@ -22,11 +22,11 @@ namespace EngineNS.Animation.Macross.BlendTree.Node
     }
     public class TtBlendTreeNodeClassDescription : TtDesignableVariableDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtDataInPinDescription> DataInPins { get; set; } = new();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtPoseInPinDescription> PoseInPins { get; set; } = new();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtPoseOutPinDescription> PoseOutPins { get; set; } = new();
         public void AddPoseInPin(TtPoseInPinDescription pinDescription)
         {

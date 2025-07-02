@@ -16,7 +16,7 @@ namespace EngineNS.DesignMacross.Design
 
         public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; } = "Event";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 Location { get; set; }
         public void UpdateData(ref FDescriptionUpdateContext updateContext)
         {

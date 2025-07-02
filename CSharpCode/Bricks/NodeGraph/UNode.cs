@@ -166,7 +166,7 @@ namespace EngineNS.Bricks.NodeGraph
     }
     public class PinIn : NodePin
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UEditableValue EditValue { get; set; } = null;
 
         public override void CopyTo(NodePin pin)
@@ -214,7 +214,7 @@ namespace EngineNS.Bricks.NodeGraph
     {
         public TtMenuItem ContextMenu { get; set; }
     }
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore", "EngineNS.Bricks.NodeGraph.UNodeBase" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore", "EngineNS.Bricks.NodeGraph.UNodeBase" })]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtNodeBase : IO.ISerializer
     {
@@ -238,7 +238,7 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public virtual void OnPropertyRead(object root, string prop, bool fromXml) { }
         string mName = "NoName";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public virtual string Name 
         {
@@ -251,9 +251,9 @@ namespace EngineNS.Bricks.NodeGraph
                 LayoutDirty = true;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual string Label { get; set; } = "NoName";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid NodeId { get; set; }
         [Category("Option")]
         public string NodeType
@@ -265,7 +265,7 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public bool Selected { get; set; }
         internal Vector2 mPosition;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [System.ComponentModel.Browsable(false)]
         public Vector2 Position 
         { 
@@ -299,9 +299,9 @@ namespace EngineNS.Bricks.NodeGraph
         public object UserData;
         public class UInputEditableValueInfo : IO.BaseSerializer
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string PinName { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public object Value 
             { 
                 get; 
@@ -309,7 +309,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
 
-        [Rtti.Meta(Order = 1), Browsable(false)]
+        [Rtti.Meta("",Order = 1), Browsable(false)]
         public List<UInputEditableValueInfo> InputEditableValues
         {
             get

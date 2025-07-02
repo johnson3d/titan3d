@@ -25,7 +25,7 @@ namespace EngineNS.UI.Controls
 
         // 0~1
         Vector2 mRenderTransformCenter = new Vector2(0.5f, 0.5f);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 RenderTransformCenter
         {
             get => mRenderTransformCenter;
@@ -62,7 +62,7 @@ namespace EngineNS.UI.Controls
             }
         }
         FTransform mRenderTransform = FTransform.Identity;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public FTransform RenderTransform
         {
             get => mRenderTransform;

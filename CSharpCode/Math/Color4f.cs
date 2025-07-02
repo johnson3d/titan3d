@@ -14,13 +14,13 @@ namespace EngineNS
         public float Green;
         public float Blue;
         public float Alpha;
-        [Rtti.Meta(ShaderName = "r")]
+        [Rtti.Meta("",ShaderName = "r")]
         public float r { get => Red; set => Red = value; }
-        [Rtti.Meta(ShaderName = "g")]
+        [Rtti.Meta("",ShaderName = "g")]
         public float g { get => Green; set => Green = value; }
-        [Rtti.Meta(ShaderName = "b")]
+        [Rtti.Meta("",ShaderName = "b")]
         public float b { get => Blue; set => Blue = value; }
-        [Rtti.Meta(ShaderName = "a")]
+        [Rtti.Meta("",ShaderName = "a")]
         public float a { get => Alpha; set => Alpha = value; }
         public static Color4f FromObject(object obj)
         {

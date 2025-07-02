@@ -25,88 +25,88 @@ namespace EngineNS.Macross
     [TtMacross]
     public partial class BaseClass
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void BaseFunc() { }
     }
     [TtMacross]
     public partial class SubClass1 : BaseClass
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void SubFunc1() { }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public BaseClass UseBaseClassFunc(BaseClass item) { return null; }
     }
     [TtMacross]
     public partial class SubClass2 : BaseClass
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void SubFunc2() { }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public BaseClass UseBaseClassFunc(BaseClass item) { return null; }
     }
 
     [TtMacross]
     public partial class UMacrossTestClass
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void VirtualFunc1()
         {
 
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         protected virtual void ProtectedVirtualFunc()
         {
 
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual int VirtualFunc2()
         {
             return 0;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void VirtualFunc3(int val1)
         {
 
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void VirtualFunc4(in int inValue, out int outValue, ref int refValue)
         {
             outValue = 0;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void VirtualFunc_params(params int[] values)
         {
 
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float FuncFloat(float fVal) { return fVal; }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public BaseClass UseBaseClassFunc(BaseClass item) { return null; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public BaseClass UseBaseClassFuncRef(ref BaseClass item) { return null; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public SubClass1 UseSubClass1Func(SubClass1 item) { return null; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public SubClass2 UseSubClass2Func(SubClass2 item) { return null; }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int IntProperty { get; set; } = 10;
 
         public delegate Task<bool> Delegate_DelegateTest(int intParam);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void DelegateFunc(Delegate_DelegateTest func) { }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual async Task<bool> TaskFunction() 
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return false;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public unsafe int* UnsafeFunction(float inValue)
         {
             return (int*)IntPtr.Zero;

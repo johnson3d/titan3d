@@ -5,12 +5,12 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class Binocular : TtNodeBase
+    public partial class Binocular : TtMacrossNodeBase
     {
         public Rtti.TtTypeDesc LeftType;
         public TtBinaryOperatorExpression.EBinaryOperation Op { get; set; }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string LeftTypeString
         {
             get

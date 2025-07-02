@@ -15,7 +15,7 @@ namespace EngineNS.UI.Controls
     {
         public virtual Macross.TtMacrossGetter<TtUIMacrossBase> MacrossGetter { get; set; }
 
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public TtUIMacrossBase MacrossObject
         {
             get
@@ -30,11 +30,11 @@ namespace EngineNS.UI.Controls
 
         public class UIBindingData_Element : IO.ISerializer
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string PropertyName { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Rtti.TtTypeDesc PropertyType { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public UInt64 Id { get; set; }
 
             public bool IsSame(UIBindingData_Element data)
@@ -111,11 +111,11 @@ namespace EngineNS.UI.Controls
         // 辅助记录属性之间绑定数据，用于生成代码
         public class BindingData_Property : BindingDataBase
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public UIBindingData_Element Source { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public UIBindingData_Element Target { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public UI.Bind.EBindingMode Mode { get; set; } = UI.Bind.EBindingMode.Default;
 
             public override void DrawBindInfo(Editor.EditorUIHost host, in ImDrawList drawList)
@@ -162,13 +162,13 @@ namespace EngineNS.UI.Controls
         // 辅助记录属性和macross函数绑定，用于生成代码
         public class BindingData_Method : BindingDataBase
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public UIBindingData_Element Target { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string SetMethodName { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string GetMethodName { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public UI.Bind.EBindingMode Mode { get; set; } = UI.Bind.EBindingMode.Default;
 
             public override void DrawBindInfo(EditorUIHost host, in ImDrawList drawList)
@@ -237,11 +237,11 @@ namespace EngineNS.UI.Controls
         }
         public class BindingData_SelfProperty : BindingDataBase
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public UIBindingData_Element Target { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string PropertyName { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public UI.Bind.EBindingMode Mode { get; set; } = UI.Bind.EBindingMode.Default;
             
             public override void DrawBindInfo(EditorUIHost host, in ImDrawList drawList)
@@ -303,7 +303,7 @@ namespace EngineNS.UI.Controls
         }
 
         //[Browsable(false)]
-        //[Rtti.Meta]
+        //[Rtti.Meta("")]
         //public Dictionary<string, BindingDataBase> BindingDatas
         //{
         //    get;
@@ -401,7 +401,7 @@ namespace EngineNS.UI.Controls
         public class MacrossEventMethodData : MacrossMethodData
         {
             public Bricks.CodeBuilder.TtMethodDeclaration Desc;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string EventName { get; set; }
             string mDisplayName;
             public override string GetDisplayName(TtMethodDeclaration desc)
@@ -418,7 +418,7 @@ namespace EngineNS.UI.Controls
         // 用于辅助记录属性绑定到macross函数
         public class MacrossPropertyBindMethodData : MacrossMethodData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string PropertyName { get; set; }
 
             public Bricks.CodeBuilder.TtMethodDeclaration GetDesc;
@@ -460,7 +460,7 @@ namespace EngineNS.UI.Controls
         //}
 
         //Dictionary<string, MacrossMethodData> mMacrossMethods = new Dictionary<string, MacrossMethodData>();
-        //[Rtti.Meta]
+        //[Rtti.Meta("")]
         //[Browsable(false)]
         //public Dictionary<string, MacrossMethodData> MacrossMethods
         //{

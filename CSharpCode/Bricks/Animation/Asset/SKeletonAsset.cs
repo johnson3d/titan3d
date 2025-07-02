@@ -6,7 +6,7 @@ using EngineNS.Animation.SkeletonAnimation.Skeleton;
 
 namespace EngineNS.Animation.Asset
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public partial class TtSkeletonAssetAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -26,16 +26,16 @@ namespace EngineNS.Animation.Asset
             return "Skeleton";
         }
     }
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     //[UFullSkeleton.Import]
     public partial class TtSkeletonAsset :IO.BaseSerializer, IO.IAsset
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtSkinSkeleton Skeleton { get; set; } = new TtSkinSkeleton();
         #region IO.IAsset
         public const string AssetExt = ".skt";
         public string TypeExt { get => AssetExt; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName AssetName { get; set; }
 
         public IAssetMeta CreateAMeta()

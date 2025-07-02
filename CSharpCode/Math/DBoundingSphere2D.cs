@@ -32,7 +32,7 @@ namespace EngineNS
         /// <param name="sphere">球体对象</param>
         /// <param name="box">包围盒对象</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static ContainmentType Contains(DBoundingSphere2D sphere, DBoundingBox2D box)
         {
             DVector2 vector;
@@ -73,7 +73,7 @@ namespace EngineNS
         /// <param name="sphere1">球体1</param>
         /// <param name="sphere2">球体2</param>
         /// <returns>返回相交类型</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static ContainmentType Contains(DBoundingSphere2D sphere1, DBoundingSphere2D sphere2)
         {
             double distance;
@@ -98,7 +98,7 @@ namespace EngineNS
         /// <param name="sphere">球体对象</param>
         /// <param name="vector">点坐标</param>
         /// <returns>返回相交类型</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static ContainmentType Contains(DBoundingSphere2D sphere, DVector2 vector)
         {
             double x = vector.X - sphere.Center.X;
@@ -140,7 +140,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="box">包围盒对象</param>
         /// <returns>返回建立的球体包围盒</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static DBoundingSphere2D FromBox(DBoundingBox2D box)
         {
             DBoundingSphere2D sphere;
@@ -162,7 +162,7 @@ namespace EngineNS
         /// <param name="sphere1">球体包围盒1</param>
         /// <param name="sphere2">球体包围盒2</param>
         /// <returns>返回混合后的球体包围盒对象</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static DBoundingSphere2D Merge(DBoundingSphere2D sphere1, DBoundingSphere2D sphere2)
         {
             DBoundingSphere2D sphere;
@@ -196,7 +196,7 @@ namespace EngineNS
         /// <param name="sphere">球体包围盒对象</param>
         /// <param name="box">包围盒对象</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(DBoundingSphere2D sphere, DBoundingBox2D box)
         {
             return DBoundingBox2D.Intersects(box, sphere);
@@ -207,7 +207,7 @@ namespace EngineNS
         /// <param name="sphere1">球体包围盒对象</param>
         /// <param name="sphere2">球体包围盒对象</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(DBoundingSphere2D sphere1, DBoundingSphere2D sphere2)
         {
             double distance;

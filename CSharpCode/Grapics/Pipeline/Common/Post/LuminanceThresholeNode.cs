@@ -94,7 +94,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
         FLuminanceThresholeStruct mLuminanceThresholeStruct = new FLuminanceThresholeStruct();
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Threshole
         {
             get => mLuminanceThresholeStruct.Threshole;

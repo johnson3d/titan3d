@@ -61,7 +61,7 @@ namespace EngineNS.Bricks.Procedure.Node
             get;
         } = new UEndingNodeDefine();
         List<UNodePinDefine> mUserInputs = new List<UNodePinDefine>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<UNodePinDefine> UserInputs
         {
             get => mUserInputs;

@@ -16,13 +16,13 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             TitleColor = 0xffff00ff;
         }
         Graphics.Pipeline.TtRenderGraphNode mGraphNode;
-        [Rtti.Meta(Order = 1)]
+        [Rtti.Meta("",Order = 1)]
         [Category("Option")]
         public Graphics.Pipeline.TtRenderGraphNode GraphNode 
         {
             get => mGraphNode;
         }
-        [Rtti.Meta(Order = 0)]
+        [Rtti.Meta("",Order = 0)]
         public string GraphNodeTypeString
         {
             get
@@ -42,7 +42,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                 }
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public override string Name
         {
             get
@@ -179,7 +179,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             UpdatePinMenus();
         }
         Graphics.Pipeline.TtRenderPolicy mRenderPolicy;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Graphics.Pipeline.TtRenderPolicy RenderPolicy
         {
             get => mRenderPolicy;
@@ -189,7 +189,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             }
         }
         Rtti.TtTypeDesc mPolicyType;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [PGTypeEditor(typeof(Graphics.Pipeline.TtRenderPolicy))]
         public Rtti.TtTypeDesc PolicyType
         {

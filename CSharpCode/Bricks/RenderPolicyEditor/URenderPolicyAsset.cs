@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.RenderPolicyEditor
 {
-    //[Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.RenderPolicyEditor.URenderPolicyAssetAMeta@EngineCore" })]
+    //[Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.RenderPolicyEditor.URenderPolicyAssetAMeta@EngineCore" })]
     public class TtRenderPolicyAssetAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -65,7 +65,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
     [TtRenderPolicyAsset.Import]
     [IO.AssetCreateMenu(MenuName = "FX/RenderPolicy")]
     [Editor.UAssetEditor(EditorType = typeof(TtPolicyEditor))]
-    //[Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.RenderPolicyEditor.URenderPolicyAsset@EngineCore" })]
+    //[Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.RenderPolicyEditor.URenderPolicyAsset@EngineCore" })]
     public class TtRenderPolicyAsset : IO.IAsset
     {
         public const string AssetExt = ".rpolicy";
@@ -113,7 +113,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             IO.TtFileManager.SaveObjectToXml(name.Address, PolicyGraph);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName AssetName
         {
             get;
@@ -132,13 +132,13 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             result.PolicyGraph.AssetName = name;
             return result;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string EndingNode
         {
             get;
             set;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UPolicyGraph PolicyGraph { get; } = new UPolicyGraph();
         public Graphics.Pipeline.TtRenderPolicy CreateRenderPolicy(TtViewportSlate viewport, string endingName = "Copy2SwapChainNode")
         {

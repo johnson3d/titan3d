@@ -214,7 +214,7 @@ namespace EngineNS.GamePlay.Scene
                 ameta.SaveAMeta(this);
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName AssetName
         {
             get;
@@ -249,7 +249,7 @@ namespace EngineNS.GamePlay.Scene
 
     partial class TtNodeData
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName BehaviorName { get; set; }
     }
     partial class TtNode
@@ -301,7 +301,7 @@ namespace EngineNS.GamePlay.Scene
         }
         protected TtBehaviorGetter mBehaviorGetter;
         [Category("User")]
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public TtBehavior Behavior
         {
             get
@@ -314,7 +314,7 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = TtBehavior.AssetExt)]
         public RName BehaviorName
         {

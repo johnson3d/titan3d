@@ -37,25 +37,25 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             }
             public const uint CurrentEffectVersion = 6;
-            [Rtti.Meta()]
+            [Rtti.Meta("")]
             public uint EffectVersion { get; set; } = CurrentEffectVersion;
-            [Rtti.Meta()]
+            [Rtti.Meta("")]
             public Hash160 GlobalEnvHash { get; set; }
-            [Rtti.Meta()]
+            [Rtti.Meta("")]
             public Hash160 CodeHash { get; set; }
-            [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
+            [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
             public Hash160 MaterialHash { get; set; }
-            [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
+            [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
             public Hash160 MdfQueueHash { get; set; }
-            [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
+            [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
             public RName MaterialName { get; set; }
-            [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
+            [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
             public string MdfQueueType { get; set; }
-            [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
+            [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
             public Shader.TtShadingEnv.FPermutationId PermutationId { get; set; }
-            [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
+            [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
             public string ShadingType { get; set; }
-            [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
+            [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
             public uint InputStreams { get; set; }
 
             public Hash160 EffectHash;

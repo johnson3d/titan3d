@@ -281,11 +281,11 @@ namespace EngineNS.Graphics.Pipeline
 
         #region Manager
         public NxRHI.TtTextureManager TextureManager { get; } = new NxRHI.TtTextureManager();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Shader.TtMaterialManager MaterialManager { get; private set; } = new Shader.TtMaterialManager();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Shader.TtMaterialInstanceManager MaterialInstanceManager { get; private set; } = new Shader.TtMaterialInstanceManager();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Shader.TtMaterialFunctionManager MaterialFunctionManager { get; private set; } = new Shader.TtMaterialFunctionManager();
         public EGui.Slate.UBaseRenderer SlateRenderer { get; private set; }
         public Graphics.Pipeline.Shader.TtEffectManager EffectManager
@@ -352,7 +352,7 @@ namespace EngineNS
     {
         public static System.Type UGfxDeviceType = typeof(Graphics.Pipeline.TtGfxDevice);
         private Graphics.Pipeline.TtGfxDevice mGfxDevice;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Graphics.Pipeline.TtGfxDevice GfxDevice 
         { 
             get

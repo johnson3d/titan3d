@@ -28,19 +28,19 @@ namespace EngineNS.Animation.Macross.BlendTree
     public class TtPoseLineDescription : IDescription
     {
         public IDescription Parent { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid Id { get; set; } = Guid.NewGuid();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Name { get; set; }
         /// <summary>
         /// DataPinId
         /// </summary>
-        [Rtti.Meta] 
+        [Rtti.Meta("")] 
         public Guid FromId { get; set; } = Guid.Empty;
         /// <summary>
         /// DataPinId
         /// </summary>
-        [Rtti.Meta] 
+        [Rtti.Meta("")] 
         public Guid ToId { get; set; } = Guid.Empty;
         public void UpdateData(ref FDescriptionUpdateContext updateContext)
         {

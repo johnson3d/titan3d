@@ -72,7 +72,7 @@ namespace EngineNS
             Minimum = new Vector3(float.MaxValue);
             Maximum = new Vector3(-float.MaxValue);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static BoundingBox EmptyBox()
         {
             var bb = new BoundingBox();
@@ -80,7 +80,7 @@ namespace EngineNS
             return bb;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsEmpty()
         {
             if (Minimum.X >= Maximum.X ||
@@ -244,7 +244,7 @@ namespace EngineNS
         /// 获取包围盒的中心点
         /// </summary>
         /// <returns>返回包围盒的中心点</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 GetCenter()
 	    {
 		    return (Maximum + Minimum) * 0.5f;
@@ -298,12 +298,12 @@ namespace EngineNS
                     return sz.Z;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public ContainmentType Contains(in BoundingBox box)
         {
             return Contains(in this, in box);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static ContainmentType Contains(in BoundingBox box1, in BoundingBox box2)
         {
             if (box1.Maximum.X < box2.Minimum.X || box1.Minimum.X > box2.Maximum.X)
@@ -349,12 +349,12 @@ namespace EngineNS
         //    return ContainmentType.Intersects;
         //}
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public ContainmentType Contains(in Vector3 vector)
         {
             return Contains(in this, in vector);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static ContainmentType Contains(in BoundingBox box, in Vector3 vector)
         {
             if (box.Minimum.X <= vector.X && vector.X <= box.Maximum.X && box.Minimum.Y <= vector.Y &&
@@ -430,13 +430,13 @@ namespace EngineNS
         /// <param name="box2">包围盒对象2</param>
         /// <returns>返回混合后的包围盒</returns>
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void Merge(in Vector3 pos)
         {
             Vector3.Minimize(in Minimum, in pos, out Minimum);
             Vector3.Maximize(in Maximum, in pos, out Maximum);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static BoundingBox Merge(in BoundingBox box1, in BoundingBox box2)
 	    {
             if (box1.IsEmpty())
@@ -451,7 +451,7 @@ namespace EngineNS
                 return box;
             }
 	    }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Merge(in BoundingBox box1, in BoundingBox box2, out BoundingBox box)
         {
             if (box1.IsEmpty())
@@ -468,7 +468,7 @@ namespace EngineNS
                 Vector3.Maximize(in box1.Maximum, in box2.Maximum, out box.Maximum);
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void Merge2(in BoundingBox box, out BoundingBox outBox)
         {
             if (box.IsEmpty())
@@ -479,7 +479,7 @@ namespace EngineNS
             Vector3.Minimize(in this.Minimum, in box.Minimum, out outBox.Minimum);
             Vector3.Maximize(in this.Maximum, in box.Maximum, out outBox.Maximum);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static BoundingBox Merge(in BoundingBox box, in Vector3 point)
         {
             BoundingBox retBox;
@@ -498,7 +498,7 @@ namespace EngineNS
         /// <param name="box1">包围盒对象1</param>
         /// <param name="box2">包围盒对象2</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(BoundingBox box1, BoundingBox box2)
 	    {
             return Intersects(in box1, in box2);
@@ -519,7 +519,7 @@ namespace EngineNS
         /// <param name="box">包围盒对象</param>
         /// <param name="sphere">球体对象</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static bool Intersects(in BoundingBox box, in BoundingSphere sphere)
         {
             Vector3 clamped;
@@ -560,7 +560,7 @@ namespace EngineNS
         /// <param name="box">包围盒对象</param>
         /// <param name="plane">面对象</param>
         /// <returns>发生碰撞返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static PlaneIntersectionType Intersects(BoundingBox box, Plane plane)
 	    {
 		    return Plane.Intersects( plane, box);

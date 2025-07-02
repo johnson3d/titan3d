@@ -10,10 +10,10 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
     [GraphElement(typeof(TtGraphElement_TimedCompoundStateEntry))]
     public class TtTimedCompoundStateEntryClassDescription : IDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public List<TtTimedStateTransitionClassDescription> Transitions { get; set; } = new();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get=> Parent.Name; set { } }

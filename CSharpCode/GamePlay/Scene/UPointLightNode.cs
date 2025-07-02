@@ -7,7 +7,7 @@ namespace EngineNS.GamePlay.Scene
 {
     [Bricks.CodeBuilder.ContextMenu("PointLight", "PointLight", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtPointLightNode.TtLightNodeData), DefaultNamePrefix = "PointLight")]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UPointLightNode@EngineCore", "EngineNS.GamePlay.Scene.UPointLightNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.UPointLightNode@EngineCore", "EngineNS.GamePlay.Scene.UPointLightNode" })]
     public partial class TtPointLightNode : TtSceneActorNode
     {
         public override void Dispose()
@@ -15,12 +15,12 @@ namespace EngineNS.GamePlay.Scene
             CoreSDK.DisposeObject(ref mDebugMesh);
             base.Dispose();
         }
-        [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UPointLightNode.ULightNodeData@EngineCore", "EngineNS.GamePlay.Scene.UPointLightNode.ULightNodeData" })]
+        [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.UPointLightNode.ULightNodeData@EngineCore", "EngineNS.GamePlay.Scene.UPointLightNode.ULightNodeData" })]
         public class TtLightNodeData : TtNodeData
         {
             internal TtPointLightNode HostNode;
             Vector3 mColor;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [Category("Option")]
             [EGui.Controls.PropertyGrid.Color3PickerEditor()]
             public Vector3 Color 
@@ -32,10 +32,10 @@ namespace EngineNS.GamePlay.Scene
                     HostNode?.OnLightColorChanged();
                 }
             }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [Category("Option")]
             public float Intensity { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [Category("Option")]
             public float Radius { get; set; }
         }

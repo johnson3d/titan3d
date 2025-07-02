@@ -19,7 +19,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
             AddOutput(IdMapPin, "Self", null, "IdMap");
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Terrain.CDLOD.UTerrainMaterialIdManager MaterialIdManager { get; } = new Terrain.CDLOD.UTerrainMaterialIdManager();
         public override void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
@@ -102,7 +102,7 @@ namespace EngineNS.Bricks.Procedure.Node
             AddInput(IdMapPin, "IdMap", Float1Desc, "IdMap");
             AddOutput(ResultPin, "Result", OutputFloat1Desc);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int SamplerNum { get; set; } = 20;
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
@@ -474,13 +474,13 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return null;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float WaterPerPixel { get; set; } = 1.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int SimStep { get; set; } = 1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int SimCount { get; set; } = 1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int NoneWaterLimit { get; set; } = 0;
         private struct FPixelWater
         {
@@ -731,17 +731,17 @@ namespace EngineNS.Bricks.Procedure.Node
 
         public class UGrassPinDefine : IO.BaseSerializer
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string Name { get; set; } = "UserPin";
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string TypeValue { get; set; } = "Value";
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Terrain.CDLOD.UTerrainGrass GrassData { get; set; } = new Terrain.CDLOD.UTerrainGrass();
         }
 
         List<UGrassPinDefine> mGrassDefines = new List<UGrassPinDefine>();
         UBufferCreator mInBufferCreator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<UGrassPinDefine> GrassDefines
         {
             get => mGrassDefines;

@@ -24,9 +24,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return false;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string ShaderType { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = TtShaderAsset.AssetExt)]
         public RName TemplateName
         {
@@ -127,7 +127,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName AssetName
         {
             get;
@@ -369,15 +369,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #endregion
     }
 
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public partial class TtMacrossShaderUtility
     {
-        [Rtti.Meta(ShaderName = "InterlockedAdd")]
+        [Rtti.Meta("",ShaderName = "InterlockedAdd")]
         public static void InterlockedAddUInt32(ref uint location1, uint value, out uint oriValue)
         {
             oriValue = System.Threading.Interlocked.Add(ref location1, value);
         }
-        [Rtti.Meta(ShaderName = "InterlockedAdd")]
+        [Rtti.Meta("",ShaderName = "InterlockedAdd")]
         public static void InterlockedAddInt32(ref int location1, int value, out int oriValue)
         {
             oriValue = System.Threading.Interlocked.Add(ref location1, value);

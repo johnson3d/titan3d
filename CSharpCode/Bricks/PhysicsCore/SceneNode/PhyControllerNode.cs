@@ -9,13 +9,13 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     {
         public class TtPhyControllerNodeDataBase : TtNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public RName PxMaterial { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public PhyFilterData QueryFilterData { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public PhyFilterData SimulationFilterData { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public PhyQueryFlag PhyQueryFlags { get; set; } = PhyQueryFlag.eSTATIC | PhyQueryFlag.eDYNAMIC | PhyQueryFlag.ePREFILTER;
 
         }
@@ -50,9 +50,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     {
         public class TtCapsulePhyControllerNodeData : TtPhyControllerNodeDataBase
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float Radius { get; set; } = 0.3f;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float Height { get; set; } = 1.0f;
         }
         public TtCapsulePhyControllerNodeData CapsulePhyControllerNodeData

@@ -10,20 +10,20 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     //only contians one shape
     public class TtPhyCollisionNode : GamePlay.Scene.TtLightWeightNodeBase
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public class TtPhyCollisionNodeData : GamePlay.Scene.TtNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public RName PxMaterial { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Vector3 Center { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public FRotator Rotator { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public bool IsTrigger { get; set; } = false;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public PhyFilterData QueryFilterData { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public PhyFilterData SimulationFilterData { get; set; }
         }
         public TtPhyCollisionNodeData CollisionNodeData
@@ -132,10 +132,10 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     [TtNode(NodeDataType = typeof(TtPhySphereCollisionNode.TtPhySphereCollisionNodeData), DefaultNamePrefix = "SphereCollision")]
     public class TtPhySphereCollisionNode : TtPhyCollisionNode
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public class TtPhySphereCollisionNodeData : TtPhyCollisionNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float Radius { get; set; } = 0.5f;
         }
 
@@ -167,10 +167,10 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     [TtNode(NodeDataType = typeof(TtPhyBoxCollisionNode.TtPhyBoxCollisionNodeData), DefaultNamePrefix = "BoxCollision")]
     public class TtPhyBoxCollisionNode : TtPhyCollisionNode
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public class TtPhyBoxCollisionNodeData : TtPhyCollisionNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Vector3 HalfExtent { get; set; } = Vector3.One * 0.5f;
         }
         public TtPhyBoxCollisionNodeData BoxCollisionNodeData
@@ -201,7 +201,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     [TtNode(NodeDataType = typeof(TtPhyPlaneCollisionNode.TtPhyPlaneCollisionNodeData), DefaultNamePrefix = "PlaneCollision")]
     public class TtPhyPlaneCollisionNode : TtPhyCollisionNode
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public class TtPhyPlaneCollisionNodeData : TtPhyCollisionNodeData
         {
 
@@ -223,12 +223,12 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     [TtNode(NodeDataType = typeof(TtPhyCapsuleCollisionNode.TtPhyCapsuleCollisionNodeData), DefaultNamePrefix = "CapsuleCollision")]
     public class TtPhyCapsuleCollisionNode : TtPhyCollisionNode
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public class TtPhyCapsuleCollisionNodeData : TtPhyCollisionNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float Radius { get; set; } = 0.5f;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float HalfHeight { get; set; } = 0.5f;
         }
         public TtPhyCapsuleCollisionNodeData CapsuleCollisionNodeData
@@ -271,10 +271,10 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     [TtNode(NodeDataType = typeof(TtPhyConvexCollisionNode.TtPhyConvexCollisionNodeData), DefaultNamePrefix = "ConvexCollision")]
     public class TtPhyConvexCollisionNode : TtPhyCollisionNode
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public class TtPhyConvexCollisionNodeData : TtPhyCollisionNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public RName ConvexSource { get; set; }
         }
         public TtPhyConvexCollisionNodeData ConvexCollisionNodeData
@@ -307,10 +307,10 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     [TtNode(NodeDataType = typeof(TtPhyTriMeshCollisionNode.TtPhyTriMeshCollisionNodeData), DefaultNamePrefix = "TriMeshCollision")]
     public class TtPhyTriMeshCollisionNode : TtPhyCollisionNode
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public class TtPhyTriMeshCollisionNodeData : TtPhyCollisionNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public RName TriMeshSource { get; set; }
         }
         public TtPhyTriMeshCollisionNodeData TriMeshCollisionNodeData

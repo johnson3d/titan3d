@@ -7,30 +7,30 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Erosion", "Float1\\Erosion", UPgcGraph.PgcEditorKeyword)]
     public class TtErosionNode : Node.UAnyTypeMonocular
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int DropNum { get; set; } = 100;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float init_speed { get; set; } = 1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float init_water { get; set; } = 1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int max_life { get; set; } = 30;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float inertia { get; set; } = 0.05f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float sediment_capacity_factor { get; set; } = 4;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float min_sediment_capacity { get; set; } = 0.01f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float deposit_speed { get; set; } = 0.3f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float erode_speed { get; set; } = 0.4f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float evaporate_speed { get; set; } = 0.01f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float gravity { get; set; } = 4;
         int mSeed = (int)Support.TtTime.GetTickCount();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Seed
         {
             get => mSeed;

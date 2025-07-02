@@ -501,22 +501,22 @@ namespace EngineNS.Bricks.AdvanceShadow
     {
         public class TtAdvanceShadowData : TtNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [Category("Option")]
             public DVector2 BoxCenter { get; set; } = DVector2.Zero;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [Category("Option")]
             public double BoxExtent { get; set; } = 1024;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [Category("Option")]
             public int MaxDeepLevel { get; set; } = 8;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [Category("Option")]
             public float MaxShadowDistance { get; set; } = 500.0f;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [Category("Option")]
             public int ShadowMapPage { get; set; } = 512;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [Category("Option")]
             public int MaxDirtyPagePerFrame { get; set; } = 3;
         }

@@ -242,11 +242,11 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             return true;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public DVector3 Offset { get; set; } = DVector3.Zero;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float GridSize { get; set; } = 1.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int RandomSeed { get; set; } = 60;
         public int FinalRandomSeed { get; set; }
         public unsafe override bool OnProcedure(UPgcGraph graph)

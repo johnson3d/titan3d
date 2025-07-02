@@ -161,17 +161,17 @@ namespace EngineNS.Bricks.AssemblyLoader
         void OnUnloadPlugin();
     }
 
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtPluginDescriptor
     {
         public string FilePath { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool Enable { get; set; } = true;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool LoadOnInit { get; set; } = true;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<EPlatformType> Platforms { get; set; } = new List<EPlatformType>() { EPlatformType.PLTF_Windows };
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<string> Dependencies { get; set; } = new List<string>();
         public void SaveDescriptor()
         {

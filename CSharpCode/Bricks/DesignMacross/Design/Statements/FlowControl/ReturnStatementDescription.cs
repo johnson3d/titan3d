@@ -12,7 +12,7 @@ namespace EngineNS.DesignMacross.Design.Statement
     [ContextMenu("Return", "FlowControl\\Return", UDesignMacross.MacrossScriptEditorKeyword)]
     public class TtReturnStatementDescription : TtStatementDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTypeDesc ReturnType { get => MethodDescription.ReturnValueType; }
         public TtMethodDescription MethodDescription { get => Parent as TtMethodDescription; }
         public override IDescription Parent 

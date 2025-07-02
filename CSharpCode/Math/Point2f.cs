@@ -7,14 +7,14 @@ namespace EngineNS
     public struct Point2f
     {
         public float _X;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float X
         {
             get { return _X; }
             set { _X = value; }
         }
         public float _Y;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Y
         {
             get { return _Y; }
@@ -22,7 +22,7 @@ namespace EngineNS
         }
 
         static Point2f mEmpty = new Point2f(0.0f, 0.0f);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Point2f Empty
         {
             get { return mEmpty; }

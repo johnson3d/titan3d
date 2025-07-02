@@ -9,7 +9,7 @@ namespace EngineNS.Bricks.DataSet
     public partial class TtTable : IO.BaseSerializer
     {
         public TtDataProviderBinder Binder;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtDataProvider> DataProviders { get; set; } = new List<TtDataProvider>();
         private Dictionary<string, List<TtDataProvider>> SortedDataProviders { get; } = new Dictionary<string, List<TtDataProvider>>();
         public int Count

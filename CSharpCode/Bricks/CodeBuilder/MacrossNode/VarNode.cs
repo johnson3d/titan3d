@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reflection;
 using System.Text;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.EGui.Controls.PropertyGrid;
@@ -8,7 +9,7 @@ using EngineNS.Rtti;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class VarNode : TtNodeBase
+    public partial class VarNode : TtMacrossNodeBase
     {
         public TtVariableDeclaration Var;
         public Rtti.TtTypeDesc VarType;
@@ -90,7 +91,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     }
 
     [ContextMenu("self,this,my,myself", "Self\\Self", TtMacross.MacrossEditorKeyword)]
-    public partial class SelfNode : TtNodeBase
+    public partial class SelfNode : TtMacrossNodeBase
     {
         public PinOut OutPin { get; set; } = new PinOut();
         public SelfNode()
@@ -118,7 +119,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
     [ContextMenu("null", "Data\\null", TtMacross.MacrossEditorKeyword)]
-    public partial class NullNode : TtNodeBase
+    public partial class NullNode : TtMacrossNodeBase
     {
         public PinOut OutPin { get; set; } = new PinOut();
         public NullNode()
@@ -146,10 +147,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public class TSaveData : IO.BaseSerializer
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string DefaultValue { get; set; } = null;
         }
-        [Rtti.Meta(Order = 2)]
+        [Rtti.Meta("",Order = 2)]
         public TSaveData SaveData
         {
             get
@@ -218,7 +219,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mDefClass = klsGraph.MacrossEditor.DefClass;
         }
         private TtClassDeclaration mDefClass;
-        [Rtti.Meta(Order = 1)]
+        [Rtti.Meta("",Order = 1)]
         public string MemberName
         {
             get
@@ -254,7 +255,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set => base.Label = value;
         }
         bool mIsGet = true;
-        [Rtti.Meta(Order = 0)]
+        [Rtti.Meta("",Order = 0)]
         public bool IsGet
         {
             get => mIsGet;
@@ -399,10 +400,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public class TSaveData : IO.BaseSerializer
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string DefaultValue { get; set; } = null;
         }
-        [Rtti.Meta(Order = 2)]
+        [Rtti.Meta("",Order = 2)]
         public TSaveData SaveData
         {
             get
@@ -471,7 +472,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mDefMethod = klsGraph;
         }
         private UMacrossMethodGraph mDefMethod;
-        [Rtti.Meta(Order = 1)]
+        [Rtti.Meta("",Order = 1)]
         public string LocalName
         {
             get
@@ -507,7 +508,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set => base.Label = value;
         }
         bool mIsGet = true;
-        [Rtti.Meta(Order = 0)]
+        [Rtti.Meta("",Order = 0)]
         public bool IsGet
         {
             get => mIsGet;
@@ -646,14 +647,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public PinIn Self;
 
         bool mIsGet = true;
-        [Rtti.Meta(Order = 0)]
+        [Rtti.Meta("",Order = 0)]
         public bool IsGet
         {
             get => mIsGet;
             set => mIsGet = value;
         }
         public string mClassPropertyMeta;
-        [Rtti.Meta(Order = 1)]
+        [Rtti.Meta("",Order = 1)]
         public string ClassPropertyMeta
         {
             get => mClassPropertyMeta;
@@ -698,10 +699,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public class TSaveData : IO.BaseSerializer
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string DefaultValue { get; set; } = null;
         }
-        [Rtti.Meta(Order = 2)]
+        [Rtti.Meta("",Order = 2)]
         public TSaveData SaveData
         {
             get
@@ -947,6 +948,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     node.UnLightDebuggerLine();
             }
         }
+        public override void OpenNode(UMacrossMethodGraph graph)
+        {
+            if (this.ClassProperty.PropInfo!=null)
+            {
+                MetaAttribute.OpenSourceCode(this.ClassProperty.PropInfo.GetCustomAttribute<MetaAttribute>());
+            }
+        }
     }
 
     public partial class ClassFieldVar : VarNode, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode, IPropertyCustomization
@@ -984,14 +992,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
         bool mIsGet = true;
-        [Rtti.Meta(Order = 0)]
+        [Rtti.Meta("",Order = 0)]
         public bool IsGet
         {
             get => mIsGet;
             set => mIsGet = value;
         }
         public string mClassFieldMeta;
-        [Rtti.Meta(Order = 1)]
+        [Rtti.Meta("",Order = 1)]
         public string ClassFieldMeta
         {
             get => mClassFieldMeta;
@@ -1013,10 +1021,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public class TSaveData : IO.BaseSerializer
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string DefaultValue { get; set; } = null;
         }
-        [Rtti.Meta(Order = 2)]
+        [Rtti.Meta("",Order = 2)]
         public TSaveData SaveData
         {
             get
@@ -1091,7 +1099,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //    MemberName = varName;
         //}
         //private DefineClass mDefClass;
-        //[Rtti.Meta(Order = 0)]
+        //[Rtti.Meta("",Order = 0)]
         //public DefineClass DefClass
         //{
         //    get => mDefClass;
@@ -1320,7 +1328,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //EditObject.Host = this;
             AddPinOut(GetPin);
         }
-        //[Rtti.Meta]
+        //[Rtti.Meta("")]
         //public UVariableDeclaration LVar
         //{
         //    get { return Var; }
@@ -1373,7 +1381,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             VarType = ev.Value as Rtti.TtTypeDesc;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string VarTypeString
         {
             get
@@ -1399,7 +1407,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class BoolLVar : LocalVar, UEditableValue.IValueEditNotify
     {
         bool mValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool Value
         {
             get => mValue;
@@ -1444,7 +1452,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class SByteLVar : LocalVar, UEditableValue.IValueEditNotify
     {
         SByte mValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public SByte Value
         {
             get => mValue;
@@ -1489,7 +1497,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class Int16LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Int16 mValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Int16 Value
         {
             get => mValue;
@@ -1534,7 +1542,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class Int32LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Int32 mValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Int32 Value
         {
             get => mValue;
@@ -1579,7 +1587,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class Int64LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Int64 mValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Int64 Value
         {
             get => mValue;
@@ -1624,7 +1632,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class ByteLVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Byte mValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Byte Value
         {
             get => mValue;
@@ -1669,7 +1677,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class UInt16LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         UInt16 mValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UInt16 Value
         {
             get => mValue;
@@ -1714,7 +1722,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class UInt32LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         UInt32 mValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UInt32 Value
         {
             get => mValue;
@@ -1759,7 +1767,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class UInt64LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         UInt64 mValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UInt64 Value
         {
             get => mValue;
@@ -1804,7 +1812,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class FloatLVar : LocalVar, UEditableValue.IValueEditNotify
     {
         float mValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Value
         {
             get => mValue;
@@ -1849,7 +1857,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class DoubleLVar : LocalVar, UEditableValue.IValueEditNotify
     {
         double mValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public double Value
         {
             get => mValue;
@@ -1894,7 +1902,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class StringLVar : LocalVar, UEditableValue.IValueEditNotify
     {
         string mValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Value 
         {
             get => mValue;
@@ -1942,7 +1950,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class Vector2LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Vector2 mValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 Value
         {
             get => mValue;
@@ -1987,7 +1995,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class Vector3LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Vector3 mValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 Value
         {
             get => mValue;
@@ -2032,7 +2040,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class Vector4LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Vector4 mValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector4 Value
         {
             get => mValue;
@@ -2078,7 +2086,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class Color3fLVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Color3f mValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Color3f Value
         {
             get => mValue;
@@ -2116,7 +2124,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class Color4fLVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Color4f mValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Color4f Value
         {
             get => mValue;

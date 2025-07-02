@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Mesh
 {
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMeshPrimitivesAMeta@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMeshPrimitivesAMeta@EngineCore" })]
     public class TtMeshPrimitivesAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -34,11 +34,11 @@ namespace EngineNS.Graphics.Mesh
             return TtEngine.Instance.EditorInstance.Config.MeshPrimitivesBoderColor;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsClustered { get; set; } = false;
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMeshPrimitives@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMeshPrimitives@EngineCore" })]
     [TtMeshPrimitives.Import]
     [IO.AssetCreateMenu(MenuName = "Mesh/Mesh")]
     public partial class TtMeshPrimitives : AuxPtrType<NxRHI.FMeshPrimitives>, IO.IAsset
@@ -182,7 +182,7 @@ namespace EngineNS.Graphics.Mesh
             xnd.SaveXnd(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName AssetName
         {
             get;
@@ -190,7 +190,7 @@ namespace EngineNS.Graphics.Mesh
         }
         #endregion
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Animation.SkeletonAnimation.Skeleton.TtSkinSkeleton PartialSkeleton
         {
             get;

@@ -236,7 +236,7 @@ namespace EngineNS.Bricks.PhysicsCore
             }
             #endregion
 
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [RName.PGRName(FilterExts = TtPhyMaterial.AssetExt)]
             public RName PxMaterialName { get; set; }
         }
@@ -312,7 +312,7 @@ namespace EngineNS.Bricks.PhysicsCore
 
         public class TtBoxSerializer : TtShapeSerializer
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Vector3 HalfExtent { get; set; }
         }
         public override TtShapeSerializer GetShapeSerializer()
@@ -351,7 +351,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public class TtSphereSerializer : TtShapeSerializer
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float Radius { get; set; }
         }
         public override TtShapeSerializer GetShapeSerializer()
@@ -398,9 +398,9 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public class TtCapsuleSerializer : TtShapeSerializer
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float Radius { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float HalfHeight { get; set; }
         }
         public override TtShapeSerializer GetShapeSerializer()
@@ -473,12 +473,12 @@ namespace EngineNS.Bricks.PhysicsCore
         public class TtTriMeshSerializer : TtShapeSerializer
         {
             [RName.PGRName(FilterExts = TtPhyTriMesh.AssetExt)]
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public RName TriMeshSource { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [PGPxMaterials]
             public List<TtPhyMaterial> Materials { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Vector3 Scale { get; set; }
         }
         public override TtShapeSerializer GetShapeSerializer()

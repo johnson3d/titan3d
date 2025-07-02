@@ -311,7 +311,7 @@ namespace EngineNS.UI.Controls.Containers
             }
             return returnValue;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void Add(TtUIElement item)
         {
             //if (!TtEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))

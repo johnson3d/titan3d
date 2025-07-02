@@ -24,13 +24,13 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             base.InitNodePins();
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float DownSampleSigma { get; set; } = 1.0f;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int BlurSize { get; set; } = 5;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int NumDownSample { get; set; } = 5;
         public TtGaussNode[] DownSampleNodes = null;
         public TtGaussAdditiveNode[] UpSampleNodes = null;

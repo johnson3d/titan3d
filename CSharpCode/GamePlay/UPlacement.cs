@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.UPlacementBase@EngineCore", "EngineNS.GamePlay.UPlacementBase" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.UPlacementBase@EngineCore", "EngineNS.GamePlay.UPlacementBase" })]
     public partial class TtPlacementBase : IO.ISerializer
     {
         public TtPlacementBase()
@@ -94,7 +94,7 @@ namespace EngineNS.GamePlay
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.UIdentityPlacement@EngineCore", "EngineNS.GamePlay.UIdentityPlacement" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.UIdentityPlacement@EngineCore", "EngineNS.GamePlay.UIdentityPlacement" })]
     public partial class TtIdentityPlacement : TtPlacementBase
     {
         public TtIdentityPlacement()
@@ -111,7 +111,7 @@ namespace EngineNS.GamePlay
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.UPlacement@EngineCore", "EngineNS.GamePlay.UPlacement" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.UPlacement@EngineCore", "EngineNS.GamePlay.UPlacement" })]
     public partial class TtPlacement : TtIdentityPlacement
     {
         public TtPlacement()
@@ -125,7 +125,7 @@ namespace EngineNS.GamePlay
             get { return mIsIdentity; }
         }
         public FTransform mTransformData;
-        [Rtti.Meta(Order = 0)]
+        [Rtti.Meta("",Order = 0)]
         public override FTransform TransformData
         {
             get => mTransformData;

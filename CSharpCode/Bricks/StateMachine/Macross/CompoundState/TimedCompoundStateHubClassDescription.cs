@@ -11,12 +11,12 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
     {
         [Browsable(false)]
         public IDescription Parent { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Browsable(false)]
         public string Name { get=> TimedCompoundStateClassDescription.Name + "_Hub"; set { } }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public Guid TimedCompoundStateClassDescriptionId { get; set; } = Guid.Empty;
         private TtTimedCompoundStateClassDescription mTimedCompoundStateClassDescription = null;

@@ -7,7 +7,7 @@ using EnumsNET;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterialAMeta@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterialAMeta@EngineCore" })]
     public partial class TtMaterialAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -37,7 +37,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         //    cmdlist.AddText(in start, 0xFFFFFFFF, "Mtl", null);
         //}
     }
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial@EngineCore" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial@EngineCore" })]
     [TtMaterial.MaterialImport]
     [IO.AssetCreateMenu(MenuName = "Graphics/Material")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
@@ -62,7 +62,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return result;
         }
         protected Hash160 mMaterialHash;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public virtual Hash160 MaterialHash
         {
@@ -132,7 +132,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 ameta.RefAssetRNames.Add(f.FunctionName);
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void SaveAssetTo(RName name)
         {
             var MaterialGraph = new Bricks.CodeBuilder.ShaderNode.TtMaterialGraph();
@@ -218,7 +218,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             return true;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(ReadOnly = true)]
         [Category("Option")]
         public RName AssetName
@@ -386,7 +386,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             Eye,
             Num,
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public virtual ELightingMode LightingMode
         {
@@ -400,7 +400,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             NormalNone,
         }
         ENormalMode mNormalMode = ENormalMode.NormalMap;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public virtual ENormalMode NormalMode
         {
@@ -411,7 +411,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         protected ERenderLayer mRenderLayer = ERenderLayer.RL_Opaque;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public virtual unsafe ERenderLayer RenderLayer
         {
@@ -432,7 +432,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 SerialId++;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public virtual bool AlphaTest
         {
@@ -448,7 +448,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             DisableEnvColor = 1,
         }
         private ERenderFlags mRenderFlags = ERenderFlags.None;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public virtual ERenderFlags RenderFlags { get => mRenderFlags; }
         [Category("Option")]
@@ -468,7 +468,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         #endregion
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<string> UserDefines { get; set; } = new List<string>();
         internal virtual void UpdateShaderCode(bool EmptyMaterial)
         {
@@ -704,7 +704,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #region Data
 
         #region Code&Graph
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
         [Browsable(false)]
         public string GraphXMLString
         {
@@ -712,7 +712,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             set;
         }
         string mHLSLCode;
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
         [Browsable(false)]
         public string HLSLCode
         {
@@ -723,15 +723,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 MaterialHash = GetHash();
             }
         }
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
         public List<string> IncludeFiles { get; set; } = new List<string>();
-        [Rtti.Meta()]
+        [Rtti.Meta("")]
         public List<EngineNS.NxRHI.EVertexStreamType> VSNeedStreams
         {
             get;
             set;
         } = null;        
-        [Rtti.Meta()]
+        [Rtti.Meta("")]
         public List<Graphics.Pipeline.Shader.EPixelShaderInput> PSNeedInputs 
         { 
             get; 
@@ -739,7 +739,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         } = null;
         #endregion
         #region Texture
-        [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial.NameRNamePair@EngineCore" })]
+        [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial.NameRNamePair@EngineCore" })]
         [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
         public class NameRNamePair : IO.BaseSerializer
         {
@@ -748,12 +748,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 HostMaterial = hostObject as TtMaterial;
             }
             TtMaterial HostMaterial;
-            [Rtti.Meta()]
+            [Rtti.Meta("")]
             [Category("Option")]
             [ReadOnly(true)]
             public string Name { get; set; }
             RName mValue;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [Category("Option")]
             [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
             public RName Value
@@ -766,7 +766,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                         HostMaterial.SerialId++;
                 }
             }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string ShaderType { get; set; } = "Texture2D";
             public NameRNamePair Clone(TtMaterial mtl)
             {
@@ -779,7 +779,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             public object SrvObject { get; set; } = null;
         }
         protected List<NameRNamePair> mUsedSrView = new List<NameRNamePair>();
-        [Rtti.Meta(NameAlias = new string[] { "UsedRSView" })]
+        [Rtti.Meta("",NameAlias = new string[] { "UsedRSView" })]
         [Category("Variable")]
         public List<NameRNamePair> UsedSrView { get => mUsedSrView; }
         public NameRNamePair FindSRV(string name)
@@ -822,7 +822,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         #endregion
         #region Sampler
-        [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair@EngineCore" })]
+        [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair@EngineCore" })]
         [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
         public class NameSamplerStateDescPair : IO.BaseSerializer
         {
@@ -835,12 +835,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 HostMaterial = hostObject as TtMaterial;
             }
             TtMaterial HostMaterial;
-            [Rtti.Meta()]
+            [Rtti.Meta("")]
             [Category("Option")]
             [ReadOnly(true)]
             public string Name { get; set; }
             internal NxRHI.FSamplerDesc mValue;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [Category("Option")]
             public NxRHI.FSamplerDesc Value
             {
@@ -862,7 +862,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         protected List<NameSamplerStateDescPair> mUsedSamplerStates = new List<NameSamplerStateDescPair>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Variable")]
         public List<NameSamplerStateDescPair> UsedSamplerStates { 
             get => mUsedSamplerStates; 
@@ -907,7 +907,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         #endregion
         #region UniformVar
-        [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial.NameValuePair@EngineCore" })]
+        [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial.NameValuePair@EngineCore" })]
         [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
         public class NameValuePair : IO.BaseSerializer
         {
@@ -916,16 +916,16 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 HostMaterial = hostObject as TtMaterial;
             }
             TtMaterial HostMaterial;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [Category("Option")]
             [ReadOnly(true)]
             public string VarType { get; set; }
             [Category("Option")]
             [ReadOnly(true)]
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string Name { get; set; }
             string mValue;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [Category("Option")]
             public string Value
             {
@@ -991,7 +991,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         protected List<NameValuePair> mUsedUniformVars = new List<NameValuePair>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Variable")]
         public List<NameValuePair> UsedUniformVars { get => mUsedUniformVars; }
         public NameValuePair FindVar(string name)
@@ -1126,7 +1126,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return mPerMaterialCBuffer;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool SetSrv(string name,
             [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
             RName srv)
@@ -1141,7 +1141,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             return false;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool SetColor4(string name, in Color4f color)
         {
             var v = FindVar(name);
@@ -1151,7 +1151,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             PerMaterialCBuffer?.SetValue(name, in color);
             return true;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool SetColor3(string name, in Color3f color)
         {
             var v = FindVar(name);
@@ -1161,7 +1161,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             PerMaterialCBuffer?.SetValue(name, in color);
             return true;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool SetFloat4(string name, in Vector4 value)
         {
             var v = FindVar(name);
@@ -1179,7 +1179,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             mPerMaterialCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
             return true;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("State")]
         public NxRHI.FRasterizerDesc Rasterizer
         {
@@ -1190,7 +1190,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 UpdatePipeline();
             }
     }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("State")]
         public NxRHI.FDepthStencilDesc DepthStencil
         {
@@ -1201,7 +1201,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 UpdatePipeline();
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("State")]
         public NxRHI.FBlendDesc Blend
         {
@@ -1342,7 +1342,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 Materials.Add(name, obj);
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtMaterial FindMaterial(RName rn)
         {
             if (rn == null)
@@ -1354,7 +1354,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return null;
         }
         private Thread.TtAwaitSessionManager<RName, TtMaterial> mCreatingSession = new ();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public async Thread.Async.TtTask<TtMaterial> GetMaterial(RName rn)
         {
             if (rn == null)

@@ -9,26 +9,26 @@ namespace EngineNS.DesignMacross.Design
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtClassDescription : IClassDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid Id { get; set; } = Guid.NewGuid();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Name { get; set; } = "ClassDescription";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector2 Location { get; set; }
         public string ClassName { get => Name; }
         public string ClassFullName { get => Namespace + "." + ClassName; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtCommentStatement Comment { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtNamespaceDeclaration Namespace { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsStruct { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<string> SupperClassNames { get; set; } = new List<string>();
         [OutlineElement_List(typeof(TtOutlineElementsList_Variables))]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<IVariableDescription> Variables { get; set; } = new List<IVariableDescription>();
         public IVariableDescription GetVariable(Guid varId)
         {
@@ -41,11 +41,11 @@ namespace EngineNS.DesignMacross.Design
             }
             return null;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [OutlineElement_List(typeof(TtOutlineElementsList_Methods))]
         public List<IMethodDescription> Methods { get; set; } = new List<IMethodDescription>();
         [OutlineElement_List(typeof(TtOutlineElementsList_DesignableVariables))]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<IDesignableVariableDescription> DesignableVariables { get; set; } = new List<IDesignableVariableDescription>();
         public IDescription Parent { get; set; }
         public void UpdateData(ref FDescriptionUpdateContext updateContext)
@@ -82,7 +82,10 @@ namespace EngineNS.DesignMacross.Design
             {
                 if(designVarDesc is TtAnimFinalBlendTreeClassDescription finalBlendTreeClassDescription)
                 {
-                    classDeclarationsBuilded.AddRange(designVarDesc.BuildClassDeclarations(ref classBuildContext));
+                    var btc = designVarDesc.BuildClassDeclarations(ref classBuildContext);
+                    if (btc==null)
+                        return null;
+                    classDeclarationsBuilded.AddRange(btc);
                     thisClassDeclaration.Properties.Add(designVarDesc.BuildVariableDeclaration(ref classBuildContext));
                     designVarDesc.GenerateCodeInClass(thisClassDeclaration, ref classBuildContext);
                 }

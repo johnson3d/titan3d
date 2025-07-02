@@ -5,7 +5,7 @@ using System.Xml;
 
 namespace EngineNS.CodeCompiler
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public partial class ProjectConfig
     {
         public enum enProjectType

@@ -37,7 +37,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         }
     }
     [Bricks.CodeBuilder.ContextMenu("CSM", "Shadow\\CSM", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shadow.UShadowMapNode@EngineCore", "EngineNS.Graphics.Pipeline.Shadow.UShadowMapNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shadow.UShadowMapNode@EngineCore", "EngineNS.Graphics.Pipeline.Shadow.UShadowMapNode" })]
     public class TtShadowMapNode : TtRenderGraphNode
     {
         public TtRenderGraphPin[] VisiblePinIn = new TtRenderGraphPin[]{
@@ -49,7 +49,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         //public TtRenderGraphPin ColorPinOut = TtRenderGraphPin.CreateOutput("Color", false, EPixelFormat.PXF_B8G8R8A8_UNORM);
         public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D16_UNORM, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);//or D32
         bool mIsDepth32 = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsDepth32 
         {
             get => mIsDepth32;

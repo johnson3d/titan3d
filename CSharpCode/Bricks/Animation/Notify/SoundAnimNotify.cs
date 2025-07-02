@@ -4,10 +4,10 @@ using System.Text;
 
 namespace EngineNS.Animation.Notify
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class SoundAnimNotify : TtTransientAnimNotify
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName Sound { get; set; }
         public override void Trigger(long beforeTime, long afterTime)
         {

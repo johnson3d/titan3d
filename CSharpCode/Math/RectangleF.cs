@@ -8,28 +8,28 @@ namespace EngineNS
     public struct RectangleF
     {
         // 考虑到Width、Height有小于0的情况
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Left
         {
             get { return System.Math.Min(X, X + Width); }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Top
         {
             get { return System.Math.Min(Y, Y + Height); }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Right
         {
             get { return System.Math.Max(X, X + Width); }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Bottom
         {
             get { return System.Math.Max(Y, Y + Height); }
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsEmpty
         {
             get
@@ -40,7 +40,7 @@ namespace EngineNS
                 return false;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public SizeF Size
         {
             get { return new SizeF(Width, Height); }
@@ -50,7 +50,7 @@ namespace EngineNS
                 Height = value.Height;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Point2f Location
         {
             get { return new Point2f(X, Y); }
@@ -60,25 +60,25 @@ namespace EngineNS
                 Y = value.Y;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float X
         {
             get;
             set;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Y
         {
             get;
             set;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Width
         {
             get;
             set;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Height
         {
             get;
@@ -86,7 +86,7 @@ namespace EngineNS
         }
 
         static RectangleF mEmpty = new RectangleF(0, 0, 0, 0);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static RectangleF Empty
         {
             get { return mEmpty; }
@@ -130,12 +130,12 @@ namespace EngineNS
 
             return false;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool Contains(Point2f pt)
         {
             return Contains(in pt);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool Contains(float x, float y)
         {
             if ((x >= Left) && (y >= Top) && (x < Right) && (y < Bottom))
@@ -144,7 +144,7 @@ namespace EngineNS
             return false;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static RectangleF Intersect( RectangleF a, RectangleF b )
         {
             return Intersect(in a, in b);
@@ -161,7 +161,7 @@ namespace EngineNS
 
             return new RectangleF(left, top, right - left, bottom - top);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RectangleF Intersect(in RectangleF rect)
         {
             return Intersect(in this, in rect);

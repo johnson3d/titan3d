@@ -49,7 +49,7 @@ namespace EngineNS.Bricks.CodeBuilder
         Ref,
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCodeObject@EngineCore", "EngineNS.Bricks.CodeBuilder.UCodeObject" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCodeObject@EngineCore", "EngineNS.Bricks.CodeBuilder.UCodeObject" })]
     public class TtCodeObject : IO.ISerializer
     {
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
@@ -77,18 +77,18 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore", "EngineNS.Bricks.CodeBuilder.UExpressionBase" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore", "EngineNS.Bricks.CodeBuilder.UExpressionBase" })]
     public class TtExpressionBase : TtCodeObject { }
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UStatementBase@EngineCore", "EngineNS.Bricks.CodeBuilder.UStatementBase" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UStatementBase@EngineCore", "EngineNS.Bricks.CodeBuilder.UStatementBase" })]
     public class TtStatementBase : TtCodeObject
     {
         public TtStatementBase Next;
     }
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore", "EngineNS.Bricks.CodeBuilder.UTypeReference" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore", "EngineNS.Bricks.CodeBuilder.UTypeReference" })]
     public class TtTypeReference : IO.ISerializer
     {
         string mTypeFullName;
-        [Rtti.Meta(Order = 1)]
+        [Rtti.Meta("",Order = 1)]
         public string TypeFullName
         {
             get
@@ -114,14 +114,14 @@ namespace EngineNS.Bricks.CodeBuilder
             }
         }
         Rtti.TtTypeDesc mTypeDesc;
-        [Rtti.Meta(Order = 0)]
+        [Rtti.Meta("",Order = 0)]
         public Rtti.TtTypeDesc TypeDesc
         {
             get => mTypeDesc;
             set => mTypeDesc = value;
         }
         bool mIsEnum = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsEnum
         {
             get
@@ -258,14 +258,14 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UDebuggerSetWatchVariable@EngineCore", "EngineNS.Bricks.CodeBuilder.UDebuggerSetWatchVariable" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UDebuggerSetWatchVariable@EngineCore", "EngineNS.Bricks.CodeBuilder.UDebuggerSetWatchVariable" })]
     public class TtDebuggerSetWatchVariable : TtStatementBase
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTypeReference VariableType { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string VariableName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase VariableValue { get; set; }
 
         public override bool Equals(object obj)
@@ -286,10 +286,10 @@ namespace EngineNS.Bricks.CodeBuilder
             return "debugger:" + VariableType.TypeFullName + " " + VariableName + " " + VariableValue.ToString();
         }
     }
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UDebuggerTryBreak@EngineCore", "EngineNS.Bricks.CodeBuilder.UDebuggerTryBreak" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UDebuggerTryBreak@EngineCore", "EngineNS.Bricks.CodeBuilder.UDebuggerTryBreak" })]
     public class TtDebuggerTryBreak : TtStatementBase
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string BreakName { get; set; }
 
         public TtDebuggerTryBreak(string name)
@@ -315,9 +315,9 @@ namespace EngineNS.Bricks.CodeBuilder
     }
     public class TtAttribute : TtExpressionBase
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTypeReference AttributeType { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtExpressionBase> Arguments { get; set; } = new List<TtExpressionBase>();
 
         public override bool Equals(object obj)
@@ -354,12 +354,12 @@ namespace EngineNS.Bricks.CodeBuilder
             AttributeType?.GetReferenceMacrossRName(rNames);
         }
     }
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore", "EngineNS.Bricks.CodeBuilder.UVariableDeclaration" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore", "EngineNS.Bricks.CodeBuilder.UVariableDeclaration" })]
     public class TtVariableDeclaration : TtStatementBase, IO.ISerializer, EGui.Controls.PropertyGrid.IPropertyCustomization, NodeGraph.UEditableValue.IValueEditNotify
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTypeReference VariableType { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string VariableName { get; set; } = "Unknow";
         public Func<TtVariableDeclaration, string> GetDisplayNameFunc;
         public string DisplayName
@@ -371,25 +371,25 @@ namespace EngineNS.Bricks.CodeBuilder
                 return VariableName;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Category { get; set; } = "Macross";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase InitValue { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtCommentStatement Comment { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
         [Rtti.Meta, Browsable(false)]
         public List<TtAttribute> Attributes { get; set; } = new List<TtAttribute>();
 
         [Browsable(false)]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsBindable { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsAutoSaveLoad { get; set; } = true;
         [Browsable(false)]
         public bool IsPropertyVisibleDirty { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsBrowsable { get; set; } = true;
 
         public TtVariableDeclaration()
@@ -559,9 +559,9 @@ namespace EngineNS.Bricks.CodeBuilder
     }
     public class TtPredefinedMacros : TtCodeObject
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string MacrosString { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool NoDefine { get; set; } = false;
 
         public override bool Equals(object obj)
@@ -580,7 +580,7 @@ namespace EngineNS.Bricks.CodeBuilder
     }
     public class TtIncludeDeclaration : TtStatementBase, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string FilePath { get; set; }
         public override bool Equals(object obj)
         {
@@ -597,7 +597,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration@EngineCore", "EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration@EngineCore", "EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration" })]
     public class TtMethodArgumentDeclaration : TtCodeObject, IO.ISerializer, EGui.Controls.PropertyGrid.IPropertyCustomization, NodeGraph.UEditableValue.IValueEditNotify
     {
         [Browsable(false)]
@@ -605,7 +605,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
         bool mOperationVisible = true;
         [Browsable(false)]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool OperationVisible 
         {
             get => mOperationVisible;
@@ -617,7 +617,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
         bool mInitValueVisible = true;
         [Browsable(false)]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool InitValueVisible 
         {
             get => mInitValueVisible;
@@ -630,7 +630,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
         public Rtti.MetaParameterAttribute Meta;
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
 
         /* 项目“Engine.Android”的未合并的更改
         在此之前:
@@ -643,7 +643,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public TtTypeReference VariableType { get; set; } = new TtTypeReference(Rtti.TtTypeDesc.TypeOf<int>());
         public Action<string, string> OnVariableNameChanged = null;
         string mVariableName = "NewValue";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [VariableName]
         public string VariableName 
         {
@@ -669,13 +669,13 @@ namespace EngineNS.Bricks.CodeBuilder
                 return maDec?.GetErrorStringAction?.Invoke(in info, maDec, newValue);
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase InitValue { get; set; } = new TtPrimitiveExpression(Rtti.TtTypeDesc.TypeOf<int>(), 0);
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EMethodArgumentAttribute OperationType { get; set; } = EMethodArgumentAttribute.Default;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsParamArray { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool HasDefaultValue { get; set; } = false;
 
         public static EMethodArgumentAttribute GetOperationType(System.Reflection.ParameterInfo info)
@@ -902,7 +902,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMethodDeclaration@EngineCore", "EngineNS.Bricks.CodeBuilder.UMethodDeclaration" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMethodDeclaration@EngineCore", "EngineNS.Bricks.CodeBuilder.UMethodDeclaration" })]
     public class TtMethodDeclaration : TtCodeObject, IO.ISerializer
     {
         [Flags]
@@ -915,17 +915,17 @@ namespace EngineNS.Bricks.CodeBuilder
         EFlag mFlags = EFlag.None;
 
         public Rtti.TtClassMeta.TtMethodMeta OverrideMethod = null;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtVariableDeclaration ReturnValue { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase Host;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string MethodName { get; set; } = "Unknow";
         public Func<TtMethodDeclaration, string> GetDisplayNameFunc;
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid Id { get; set; }
         public string UniqueMethodName
         {
@@ -943,15 +943,15 @@ namespace EngineNS.Bricks.CodeBuilder
                 return MethodName;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtMethodArgumentDeclaration> Arguments { get; set; } = new List<TtMethodArgumentDeclaration>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtVariableDeclaration> LocalVariables { get; set; } = new List<TtVariableDeclaration>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtCommentStatement Comment { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtAttribute> Attributes { get; set; } = new List<TtAttribute>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsOverride 
         {
             get { return ((mFlags & EFlag.IsOverride) == EFlag.IsOverride); }
@@ -963,7 +963,7 @@ namespace EngineNS.Bricks.CodeBuilder
                     mFlags &= ~EFlag.IsOverride;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsManual
         {
             get { return ((mFlags & EFlag.IsManual) == EFlag.IsManual); }
@@ -975,7 +975,7 @@ namespace EngineNS.Bricks.CodeBuilder
                     mFlags &= ~EFlag.IsManual;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string CustomData;
         public enum EAsyncType
         {
@@ -983,7 +983,7 @@ namespace EngineNS.Bricks.CodeBuilder
             SystemTask,
             CustomTask,
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EAsyncType AsyncType { get; set; } = EAsyncType.None;
 
         public bool IsUnsafe
@@ -1249,12 +1249,12 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UNamespaceDeclaration@EngineCore", "EngineNS.Bricks.CodeBuilder.UNamespaceDeclaration" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UNamespaceDeclaration@EngineCore", "EngineNS.Bricks.CodeBuilder.UNamespaceDeclaration" })]
     public class TtNamespaceDeclaration : TtCodeObject, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Namespace { get; set; } = "Unknow";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtClassDeclaration> Classes { get; set; } = new List<TtClassDeclaration>();
 
         public TtNamespaceDeclaration(string ns)
@@ -1308,26 +1308,26 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UClassDeclaration@EngineCore", "EngineNS.Bricks.CodeBuilder.UClassDeclaration" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UClassDeclaration@EngineCore", "EngineNS.Bricks.CodeBuilder.UClassDeclaration" })]
     public class TtClassDeclaration : TtCodeObject, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsUnsafe { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsStruct { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string ClassName { get; set; } = "Unknow";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<string> SupperClassNames { get; set; } = new List<string>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtVariableDeclaration> Properties { get; set; } = new List<TtVariableDeclaration>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtMethodDeclaration> Methods { get; set; } = new List<TtMethodDeclaration>();
 
         public TtNamespaceDeclaration Namespace;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtCommentStatement Comment { get; set; }
 
         public List<TtVariableDeclaration> PreDefineVariables = new List<TtVariableDeclaration>();
@@ -1525,10 +1525,10 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UClassReferenceExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UClassReferenceExpression" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UClassReferenceExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UClassReferenceExpression" })]
     public class TtClassReferenceExpression : TtExpressionBase, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Rtti.TtTypeDesc Class { get; set; }
 
         public TtClassReferenceExpression() { }
@@ -1600,17 +1600,17 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UVariableReferenceExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UVariableReferenceExpression" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UVariableReferenceExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UVariableReferenceExpression" })]
     public class TtVariableReferenceExpression : TtExpressionBase, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase Host { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string VariableName { get; set; } = "Unknow";
         public bool IsProperty { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTypeDesc PropertyDeclClass { get; set; } = null;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtTypeReference> GenericTypes { get; set; } = new List<TtTypeReference>();
 
         public TtVariableReferenceExpression()
@@ -1672,7 +1672,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.USelfReferenceExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.USelfReferenceExpression" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.USelfReferenceExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.USelfReferenceExpression" })]
     public class TtSelfReferenceExpression : TtExpressionBase    
     {
         public override bool Equals(object obj)
@@ -1692,7 +1692,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UBaseReferenceExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UBaseReferenceExpression" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UBaseReferenceExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UBaseReferenceExpression" })]
     public class TtBaseReferenceExpression : TtExpressionBase
     {
         public override bool Equals(object obj)
@@ -1712,11 +1712,11 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMethodInvokeArgumentExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UMethodInvokeArgumentExpression" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMethodInvokeArgumentExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UMethodInvokeArgumentExpression" })]
     public class TtMethodInvokeArgumentExpression : TtExpressionBase, IO.ISerializer
     {
         public TtExpressionBase Expression;// { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EMethodArgumentAttribute OperationType { get; set; } = EMethodArgumentAttribute.Default;
 
         public TtMethodInvokeArgumentExpression()
@@ -1752,33 +1752,33 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMethodInvokeStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UMethodInvokeStatement" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMethodInvokeStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UMethodInvokeStatement" })]
     public class TtMethodInvokeStatement : TtStatementBase, IO.ISerializer
     {
         public Rtti.TtClassMeta.TtMethodMeta Method = null;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase Host { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string MethodName { get; set; } = "Unknow";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtMethodInvokeArgumentExpression> Arguments { get; set; } = new List<TtMethodInvokeArgumentExpression>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtVariableDeclaration ReturnValue { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool DeclarationReturnValue { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool ForceCastReturnType { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsReturnRef { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsAsync { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsUnsafe { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsTaskWaitComplate { get; set; } = true;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsVoidTask { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtMethodDeclaration.EAsyncType GenGetTaskResult { get; set; } = TtMethodDeclaration.EAsyncType.None;
         public List<TtTypeDesc> GenericTypes { get; set; } = new List<TtTypeDesc>();
         
@@ -1863,20 +1863,20 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ULambdaExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.ULambdaExpression" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ULambdaExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.ULambdaExpression" })]
     public class TtLambdaExpression : TtExpressionBase, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTypeReference ReturnType { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtMethodInvokeArgumentExpression> LambdaArguments { get; set; } = new List<TtMethodInvokeArgumentExpression>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtStatementBase> Sequence { get; set; } = new List<TtStatementBase>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtMethodDeclaration MethodDesc;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtMethodInvokeStatement MethodInvoke { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsAsync { get; set; } = false;
 
         public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
@@ -1895,12 +1895,12 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UAssignOperatorStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UAssignOperatorStatement" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UAssignOperatorStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UAssignOperatorStatement" })]
     public class TtAssignOperatorStatement : TtStatementBase, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase To { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase From { get; set; }
 
         public override bool Equals(object obj)
@@ -1928,7 +1928,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UBinaryOperatorExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UBinaryOperatorExpression" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UBinaryOperatorExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UBinaryOperatorExpression" })]
     public class TtBinaryOperatorExpression : TtExpressionBase, IO.ISerializer
     {
         public enum EBinaryOperation
@@ -1956,13 +1956,13 @@ namespace EngineNS.Bricks.CodeBuilder
             SubtractAssignment,
             Is,
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EBinaryOperation Operation { get; set; } = EBinaryOperation.Add;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase Left { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase Right { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool Cell { get; set; } = true;  // true在生成时增加括号
 
         public override bool Equals(object obj)
@@ -1989,7 +1989,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UUnaryOperatorExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UUnaryOperatorExpression" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UUnaryOperatorExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UUnaryOperatorExpression" })]
     public class TtUnaryOperatorExpression : TtExpressionBase, IO.ISerializer
     {
         public enum EUnaryOperation
@@ -1998,9 +1998,9 @@ namespace EngineNS.Bricks.CodeBuilder
             BooleanNot,
             BitwiseNot,
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EUnaryOperation Operation { get; set; } = EUnaryOperation.Negative;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase Value { get; set; }
 
         public override bool Equals(object obj)
@@ -2025,12 +2025,12 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UIndexerOperatorExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UIndexerOperatorExpression" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UIndexerOperatorExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UIndexerOperatorExpression" })]
     public class TtIndexerOperatorExpression : TtExpressionBase, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase Target { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtExpressionBase> Indices { get; set; } = new List<TtExpressionBase>();
 
         public override bool Equals(object obj)
@@ -2070,22 +2070,22 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UPrimitiveExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UPrimitiveExpression" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UPrimitiveExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UPrimitiveExpression" })]
     public class TtPrimitiveExpression : TtExpressionBase, IO.ISerializer
     {
-        [Rtti.Meta(Order = 0)]
+        [Rtti.Meta("",Order = 0)]
         public Rtti.TtTypeDesc Type { get; set; }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string ObjectStr { get; set; }
         string mValueStr;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string ValueStr 
         {
             get => mValueStr;
             set => mValueStr = value;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool TypeIsTypeof { get; set; } = true;
 
         public override bool Equals(object obj)
@@ -2408,14 +2408,14 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCastExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UCastExpression" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCastExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UCastExpression" })]
     public class TtCastExpression : TtExpressionBase, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTypeReference TargetType { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTypeReference SourceType { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase Expression { get; set; }
 
         public override bool Equals(object obj)
@@ -2446,13 +2446,13 @@ namespace EngineNS.Bricks.CodeBuilder
 
     public class TtStackallocStatement : TtStatementBase, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Length { get; set; } = 0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string VarName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTypeReference Type { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtExpressionBase> Contents { get; set; } = new List<TtExpressionBase>();
 
         public TtStackallocStatement(TtTypeReference type, int length)
@@ -2506,12 +2506,12 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCreateObjectExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UCreateObjectExpression" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCreateObjectExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UCreateObjectExpression" })]
     public class TtCreateObjectExpression : TtExpressionBase, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string TypeName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtExpressionBase> Parameters { get; set; } = new List<TtExpressionBase>();
 
         public TtCreateObjectExpression(string typeName, params TtExpressionBase[] exps)
@@ -2566,10 +2566,10 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UDefaultValueExpression" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UDefaultValueExpression" })]
     public class TtDefaultValueExpression : TtExpressionBase, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTypeReference Type { get; set; }
         public TtDefaultValueExpression() { }
         public TtDefaultValueExpression(Rtti.TtTypeDesc type)
@@ -2608,7 +2608,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UNullValueExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UNullValueExpression" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UNullValueExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UNullValueExpression" })]
     public class TtNullValueExpression : TtExpressionBase 
     {
         public override bool Equals(object obj)
@@ -2629,7 +2629,7 @@ namespace EngineNS.Bricks.CodeBuilder
     }
     public class TtTypeOfExpression : TtExpressionBase
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTypeReference Variable { get; set; }
 
         public TtTypeOfExpression()
@@ -2667,10 +2667,10 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UExecuteSequenceStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UExecuteSequenceStatement" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UExecuteSequenceStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UExecuteSequenceStatement" })]
     public class TtExecuteSequenceStatement : TtStatementBase, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtStatementBase> Sequence { get; set; } = new List<TtStatementBase>();
 
         public TtExecuteSequenceStatement()
@@ -2728,7 +2728,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UReturnStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UReturnStatement" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UReturnStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UReturnStatement" })]
     public class TtReturnStatement : TtStatementBase 
     {
         public override bool Equals(object obj)
@@ -2750,9 +2750,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
     public class TtSwitchStatement : TtStatementBase
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase Condition { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Dictionary<TtPrimitiveExpression, TtStatementBase> Statements { get; set; } = new Dictionary<TtPrimitiveExpression, TtStatementBase>();
 
         public override bool Equals(object obj)
@@ -2797,16 +2797,16 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UIfStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UIfStatement" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UIfStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UIfStatement" })]
     public class TtIfStatement : TtStatementBase, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase Condition { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtStatementBase TrueStatement { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtStatementBase FalseStatement { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtIfStatement> ElseIfs { get; set; } = new List<TtIfStatement>();
 
         public override bool Equals(object obj)
@@ -2852,20 +2852,20 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UForLoopStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UForLoopStatement" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UForLoopStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UForLoopStatement" })]
     public class TtForLoopStatement : TtStatementBase, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IncludeEnd { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string LoopIndexName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase BeginExpression { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase EndExpression { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase StepExpression { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtStatementBase LoopBody { get; set; }
 
         public override bool Equals(object obj)
@@ -2903,12 +2903,12 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UWhileLoopStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UWhileLoopStatement" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UWhileLoopStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UWhileLoopStatement" })]
     public class TtWhileLoopStatement : TtStatementBase, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase Condition { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtStatementBase LoopBody { get; set; }
 
         public override bool Equals(object obj)
@@ -2934,7 +2934,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UContinueStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UContinueStatement" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UContinueStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UContinueStatement" })]
     public class TtContinueStatement : TtStatementBase 
     {
         public override bool Equals(object obj)
@@ -2951,7 +2951,7 @@ namespace EngineNS.Bricks.CodeBuilder
             return "continue statement";
         }
     }
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UBreakStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UBreakStatement" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UBreakStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UBreakStatement" })]
     public class TtBreakStatement : TtStatementBase
     {
         public override bool Equals(object obj)
@@ -2969,10 +2969,10 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCommentStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UCommentStatement" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCommentStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UCommentStatement" })]
     public class TtCommentStatement : TtStatementBase, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string CommentString { get; set; }
         public TtCommentStatement(string comment)
         {
@@ -2994,12 +2994,12 @@ namespace EngineNS.Bricks.CodeBuilder
             return "/*" + CommentString + "*/";
         }
     }
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UExpressionStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UExpressionStatement" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UExpressionStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UExpressionStatement" })]
     public class TtExpressionStatement : TtStatementBase, IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtExpressionBase Expression { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtStatementBase NextStatement { get; set; }
         public TtExpressionStatement(TtExpressionBase exp)
         {
@@ -3034,7 +3034,7 @@ namespace EngineNS.Bricks.CodeBuilder
             NextStatement?.GetReferenceMacrossRNames(rNames);
         }
     }
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UTest_Expressions@EngineCore", "EngineNS.Bricks.CodeBuilder.UTest_Expressions" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UTest_Expressions@EngineCore", "EngineNS.Bricks.CodeBuilder.UTest_Expressions" })]
     public class TtTest_Expressions
     {
         public static TtNamespaceDeclaration GetTestNamespace()

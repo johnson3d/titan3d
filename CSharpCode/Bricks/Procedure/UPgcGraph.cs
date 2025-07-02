@@ -8,12 +8,12 @@ namespace EngineNS.Bricks.Procedure
     [Macross.TtMacross]
     public partial class UPgcGraphProgram
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual bool OnNodeInitialized(UPgcGraph graph, UPgcNodeBase node)
         {
             return true;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual bool OnNodeProcedureFinished(UPgcGraph graph, UPgcNodeBase node)
         {
             return true;
@@ -23,9 +23,9 @@ namespace EngineNS.Bricks.Procedure
     {
         public const string PgcEditorKeyword = "PGC";
         public bool IsTryCacheBuffer { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public uint Version { get; set; } = 0;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UBufferCreator DefaultCreator { get; set; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(1, 1, 1);
 
         public UPgcEditor GraphEditor;
@@ -224,7 +224,7 @@ namespace EngineNS.Bricks.Procedure
             return allNodes;
         }
         #region Macross
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(UPgcGraphProgram))]
         public RName ProgramName
         {
@@ -251,12 +251,12 @@ namespace EngineNS.Bricks.Procedure
                 return mMcProgram;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UBufferComponent RegBuffer(PinOut pin, UBufferComponent buffer)
         {
             return this.BufferCache.RegBuffer(pin, buffer);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UPgcNodeBase FindPgcNodeByName(string name,
             [Rtti.MetaParameter(FilterType = typeof(UPgcNodeBase),
             ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]

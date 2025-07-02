@@ -11,15 +11,15 @@ namespace EngineNS.DesignMacross.Design.Expressions
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtExpressionDescription : IExpressionDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Rtti.Meta, Category("Option")]
         public virtual string Name { get; set; } = "ExpressionDescription";
         public virtual IDescription Parent { get; set; }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtExecutionInPinDescription> ExecutionInPins { get; set; } = new();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtExecutionOutPinDescription> ExecutionOutPins { get; set; } = new();
         public List<TtExecutionPinDescription> ExecutionPins
         {
@@ -31,9 +31,9 @@ namespace EngineNS.DesignMacross.Design.Expressions
                 return pins; ;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtDataInPinDescription> DataInPins { get; set; } = new();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtDataOutPinDescription> DataOutPins { get; set; } = new();
         public List<TtDataPinDescription> DataPins
         {

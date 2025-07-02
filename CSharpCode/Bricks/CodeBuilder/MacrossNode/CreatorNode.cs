@@ -9,7 +9,7 @@ using System.Text;
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
     [ContextMenu("create,creator,new", "Create instance", TtMacross.MacrossEditorKeyword)]
-    public partial class CreatorNode : TtNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode, UEditableValue.IValueEditNotify
+    public partial class CreatorNode : TtMacrossNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode, UEditableValue.IValueEditNotify
     {
         public PinIn TypePin;
         public PinOut OutPin;
@@ -34,7 +34,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public string VariableName => "new_" + (uint)NodeId.GetHashCode();
         Rtti.TtTypeDesc mTargetType;
-        [Rtti.Meta(Order = 0)]
+        [Rtti.Meta("",Order = 0)]
         public Rtti.TtTypeDesc TargetType
         {
             get => mTargetType;

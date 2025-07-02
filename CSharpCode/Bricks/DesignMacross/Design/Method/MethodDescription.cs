@@ -113,7 +113,7 @@ namespace EngineNS.DesignMacross.Design
     {
         public IDescription Parent { get; set; }
         public virtual string MethodName { get=> TtASTBuildUtil.GenerateMethodName(this);}
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Rtti.Meta, Category("Option")]
         public string Name { get; set; } = "Method";
@@ -121,15 +121,15 @@ namespace EngineNS.DesignMacross.Design
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
         [Rtti.Meta, Category("Option")]
         public TtCommentStatement Comment { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool IsOverride { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtMethodDeclaration.EAsyncType AsyncType { get; set; } = TtMethodDeclaration.EAsyncType.None;
         [Rtti.Meta, Category("Option")]
         public List<TtMethodArgumentDescription> Arguments { get; set; } = new List<TtMethodArgumentDescription>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TtVariableDescription> LocalVariables { get; set; } = new List<TtVariableDescription>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTypeDesc ReturnValueType { get; set; } = null;
         [Rtti.Meta, DrawInGraph]
         public TtMethodStartDescription Start { get; set; } = null;

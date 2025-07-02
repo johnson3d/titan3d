@@ -6,9 +6,9 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Morphology", "Float1\\Morphology", UPgcGraph.PgcEditorKeyword)]
     public class TtMorphology : Node.UAnyTypeMonocular
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Step { get; set; } = 1;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float LerpValue { get; set; } = 1.0f;
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {

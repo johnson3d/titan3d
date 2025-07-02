@@ -54,7 +54,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         }
     }
     [Bricks.CodeBuilder.ContextMenu("ESM", "Shadow\\ESM", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shadow.UExponentialShadowNode@EngineCore", "EngineNS.Graphics.Pipeline.Shadow.UExponentialShadowNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shadow.UExponentialShadowNode@EngineCore", "EngineNS.Graphics.Pipeline.Shadow.UExponentialShadowNode" })]
     public class TtExponentialShadowNode : TtSceenSpaceNode
     {
         public TtRenderGraphPin ShadowMapPinIn = TtRenderGraphPin.CreateInput("ShadowMap", NxRHI.EBufferType.BFT_SRV);

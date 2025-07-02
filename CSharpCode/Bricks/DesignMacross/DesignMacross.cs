@@ -1,12 +1,13 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
-using EngineNS.IO;
-using EngineNS.EGui.Controls;
-using EngineNS.Rtti;
-using EngineNS.DesignMacross.Editor;
 using EngineNS.DesignMacross.Design;
-using System.Text.RegularExpressions;
+using EngineNS.DesignMacross.Editor;
+using EngineNS.EGui.Controls;
 using EngineNS.GamePlay.Scene;
+using EngineNS.IO;
+using EngineNS.Rtti;
 using EngineNS.Thread.Async;
+using NPOI.HPSF;
+using System.Text.RegularExpressions;
 
 namespace EngineNS.DesignMacross
 {
@@ -71,7 +72,7 @@ namespace EngineNS.DesignMacross
         {
             get => UDesignMacross.AssetExt;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string BaseTypeStr { get; set; }
         public override string GetAssetTypeName()
         {
@@ -110,7 +111,7 @@ namespace EngineNS.DesignMacross
         //    cmdlist.AddText(in start, 0xFFFFFFFF, "Macross", null);
         //}
     }
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     [DesignMacrossCreate]
     [IO.AssetCreateMenu(MenuName = "Script/DesignMacross")]
     [EngineNS.Editor.UAssetEditor(EditorType = typeof(DesignMacross.Editor.TtDesignMacrossEditor))]
@@ -248,9 +249,9 @@ namespace EngineNS.DesignMacross
                 return retValue;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName AssetName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtClassDescription DesignedClassDescription { get; set; } = new TtClassDescription();
 
         public IAssetMeta CreateAMeta()
@@ -264,7 +265,7 @@ namespace EngineNS.DesignMacross
         {
             return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtTypeDesc DesignMacrossBaseClass { get; set; } = null;
         public void SaveAssetTo(RName name)
         {
@@ -302,7 +303,9 @@ namespace EngineNS.DesignMacross
             xml.AppendChild(xmlRoot);
             IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this);
             var xmlText = IO.TtFileManager.GetXmlText(xml);
-            IO.TtFileManager.WriteAllText($"{rn.Address}/DesignMacrossDescription.dat", xmlText);
+            var file = $"{rn.Address}/DesignMacrossDescription.dat";
+            IO.TtFileManager.WriteAllText(file, xmlText);
+            TtEngine.Instance.SourceControlModule.AddFile(file, true);
         }
         public void Load(RName rn) 
         {

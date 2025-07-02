@@ -35,7 +35,7 @@ namespace EngineNS.Bricks.NodeGraph
     {
 
     }
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.NodeGraph.UNodeGraph@EngineCore", "EngineNS.Bricks.NodeGraph.UNodeGraph" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.NodeGraph.UNodeGraph@EngineCore", "EngineNS.Bricks.NodeGraph.UNodeGraph" })]
     public partial class TtNodeGraph : IO.ISerializer
     {
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
@@ -64,15 +64,15 @@ namespace EngineNS.Bricks.NodeGraph
             }
             set { mEditor = value; }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public RName AssetName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string GraphName { get; set; } = "NodeGraph";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public List<TtNodeBase> Nodes { get; } = new List<TtNodeBase>();
-        [Rtti.Meta(Order = 1)]
+        [Rtti.Meta("",Order = 1)]
         [Browsable(false)]
         public List<UPinLinker> Linkers { get; } = new List<UPinLinker>();
         
@@ -168,7 +168,7 @@ namespace EngineNS.Bricks.NodeGraph
             PreOrderPinIn = null;
             PreOrderPinOut = null;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtNodeBase FindFirstNode(string name, bool findInSubGraphs = true)
         {
             for(int i=0; i<Nodes.Count; i++)
@@ -781,7 +781,7 @@ namespace EngineNS.Bricks.NodeGraph
                         return;
 
                     this.RemoveNode(pNode);
-                });            
+                });
             NodeMenus.AddMenuItem(
                 "Delete Selected", null,
                 (TtMenuItem item, object sender) =>

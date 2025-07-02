@@ -429,9 +429,9 @@ namespace EngineNS.Profiler
         }
         public class ResetMaxTimeArg : IO.BaseSerializer
         { 
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string ThreadName { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string ScopeName { get; set; }
         }
         [URpcMethod(Index = 2)]

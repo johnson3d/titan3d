@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.Procedure
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class UPgcAssetAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -59,7 +59,7 @@ namespace EngineNS.Bricks.Procedure
             base.OnShowIconTimout(time);
         }
     }
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     [UPgcAsset.Import]
     [IO.AssetCreateMenu(MenuName = "Procedure")]
     [Editor.UAssetEditor(EditorType = typeof(UPgcEditor))]
@@ -118,7 +118,7 @@ namespace EngineNS.Bricks.Procedure
             IO.TtFileManager.SaveObjectToXml(name.Address, AssetGraph);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName AssetName
         {
             get;
@@ -126,7 +126,7 @@ namespace EngineNS.Bricks.Procedure
         }
         #endregion
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public UPgcGraph AssetGraph { get; } = new UPgcGraph();
 
         public static UPgcAsset LoadAsset(RName name)

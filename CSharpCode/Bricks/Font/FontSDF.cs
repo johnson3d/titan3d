@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Bricks.Font
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtFontSDFAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -39,7 +39,7 @@ namespace EngineNS.Bricks.Font
             return TtEngine.Instance.EditorInstance.Config.FontSDFBoderColor;
         }
     }
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     [TtFontSDF.Import]
     [IO.AssetCreateMenu(MenuName = "UI/FontSDF")]
     public class TtFontSDF : AuxPtrType<Canvas.FTFont>, IO.IAsset
@@ -52,13 +52,13 @@ namespace EngineNS.Bricks.Font
             {
                 
             }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public int OriginPixelSize { get; set; } = 2048;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public int FontSize { get; set; } = 64;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public byte Spread { get; set; } = 5;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public byte PixelColored { get; set; } = 127;
             public TtFontCharFilter CharFilters { get; set; } = new TtFontCharFilter();
         }
@@ -212,7 +212,7 @@ namespace EngineNS.Bricks.Font
             }
             TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName AssetName
         {
             get;
@@ -251,12 +251,12 @@ namespace EngineNS.Bricks.Font
             {
                 IncludeChars = "abc中国1A，!,";
             }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public uint CharBegin { get; set; } = 0;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public uint CharEnd { get; set; } = ushort.MaxValue;
             string mIncludeChars;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string IncludeChars 
             { 
                 get
@@ -286,9 +286,9 @@ namespace EngineNS.Bricks.Font
                 }
             }
             public List<uint> IncludeUnicodes = new List<uint>();
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public List<Vector2ui> Includes { get; set; } = new List<Vector2ui>();
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public List<Vector2ui> Excludes { get; set; } = new List<Vector2ui>();
             public bool IsInclude(uint c)
             {
@@ -502,11 +502,11 @@ namespace EngineNS.Bricks.Font
         }
     }
 
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     [Bricks.CodeBuilder.ShaderNode.Control.TtMaterialShader]
     public partial class TtFontHLSLMethod
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Bricks.CodeBuilder.ShaderNode.Control.TtMaterialShader(Name = "GetFontSDF", Include = "@Engine/Shaders/Bricks/TextFont/FontSDF.cginc")]
         [Bricks.CodeBuilder.ContextMenu("font", "Bricks\\Font\\GetFontSDF", Bricks.CodeBuilder.ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
         public static Vector4 GetFontSDF(int effect, Vector3 baseColor, Vector3 borderColor, float alpha, float lowThreshold = 0, float highThreshold = 0.8f, float smoothValue = 0.5f)

@@ -9,9 +9,9 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
     public class TtExecutionPinDescription : IDescription
     {
         public IDescription Parent { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid Id { get; set; } = Guid.NewGuid();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Name { get; set; } = "";
         public void UpdateData(ref FDescriptionUpdateContext updateContext)
         {
@@ -52,19 +52,19 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
     public class TtExecutionLineDescription : IDescription
     {
         public IDescription Parent { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid Id { get; set; } = Guid.NewGuid();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Name { get; set; } = "ExecutionLine";
         /// <summary>
         /// ExecutePinId
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid FromId { get; set; } = Guid.Empty;
         /// <summary>
         /// ExecutePinId
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid ToId { get; set; } = Guid.Empty;
         public void UpdateData(ref FDescriptionUpdateContext updateContext)
         {

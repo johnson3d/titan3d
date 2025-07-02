@@ -6,14 +6,14 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("Find", "Find", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UFindNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UFindNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UFindNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UFindNode" })]
     public class TtFindNode : TtRenderGraphNode
     {
         public TtRenderGraphPin InputPinInOut = TtRenderGraphPin.CreateInputOutput("Input", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin ResultPinOut = TtRenderGraphPin.CreateOutput("Result", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         TtRenderGraphNode mNode;
         public string mProxyNodeName = "";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public string ProxyNodeName
         {
@@ -36,7 +36,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             return Color4b.FromRgb(0, 255, 255);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string ProxyPinName
         {
             get; set;

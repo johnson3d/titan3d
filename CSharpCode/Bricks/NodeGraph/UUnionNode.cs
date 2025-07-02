@@ -12,7 +12,7 @@ namespace EngineNS.Bricks.NodeGraph
     {
         public Action<string, string> OnNameChanged = null;
         string mName = "UserPin";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [NameCheckAttribute]
         public virtual string Name 
         {
@@ -38,7 +38,7 @@ namespace EngineNS.Bricks.NodeGraph
                 return def?.GetErrorStringAction?.Invoke(in info, def, newValue);
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual string TypeValue { get; set; } = "Value";
 
         public static UNodePinDefineBase CreatePinDefineFromPin<T, T_Pin>(T_Pin pin) 
@@ -68,17 +68,17 @@ namespace EngineNS.Bricks.NodeGraph
     }
     public class UnionNodePropertyData : IO.BaseSerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Browsable(false)]
         public Guid NodeId { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [ReadOnly(true)]
         public string Name { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string DisplayName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Category { get; set; } = "Custom";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool ReadOnly { get; set; } = false;
 
         public void CopyTo(ref UnionNodePropertyData data)

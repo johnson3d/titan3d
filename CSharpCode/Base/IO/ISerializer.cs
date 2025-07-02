@@ -1196,63 +1196,63 @@ namespace EngineNS.IO
 
 namespace EngineNS.UnitTest
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial class UTest_MetaObject : EngineNS.IO.ISerializer
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public class TestSubClass : EngineNS.IO.ISerializer
         {
             public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
             public void OnPropertyRead(object root, string prop, bool fromXml) { }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public int A { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float B { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string C { get; set; }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int A { get; set; } = 2;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float B { get; set; } = 3.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string C { get; set; } = "4";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TestSubClass D { get; } = new TestSubClass();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TestSubClass E { get; set; } = new TestSubClass()
         {
             A = 10,
         };
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public FTransform F { get; set; } = new FTransform();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<int> G { get; set; } = new List<int>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<TestSubClass> H { get; set; } = new List<TestSubClass>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Dictionary<int, string> I { get; set; } = new Dictionary<int, string>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Dictionary<int, TestSubClass> J { get; set; } = new Dictionary<int, TestSubClass>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public void TestFunction1(float a)
         {
 
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void TestStaticFunction1(float a)
         {
 
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static object TestOutArguments(
             [Rtti.MetaParameter(FilterType = typeof(Bricks.CodeBuilder.MacrossNode.VarNode), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type rType)
         {
             return null;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static object TestOut2(
             [Rtti.MetaParameter(FilterType = typeof(UTest_MetaObject), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type rType)
@@ -1260,7 +1260,7 @@ namespace EngineNS.UnitTest
             return null;
         }
 
-        [Rtti.Meta(Order = 100)]
+        [Rtti.Meta("",Order = 100)]
         public bool ReadSignal
         {
             get => true;

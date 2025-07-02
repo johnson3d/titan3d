@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             return null;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public Vector2 Value { get; set; } = Vector2.Zero;
         [Browsable(false)]
@@ -271,7 +271,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             return null;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public Vector2i Value { get; set; } = Vector2i.Zero;
         [Browsable(false)]

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.USceenSpaceNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.USceenSpaceNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.USceenSpaceNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.USceenSpaceNode" })]
     public class TtSceenSpaceNode : TtRenderGraphNode
     {
         public override void Dispose()
@@ -26,7 +26,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             AddOutput(ResultPinOut);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public float OutputScaleFactor { get; set; } = 1.0f;
         public Graphics.Mesh.TtMesh ScreenMesh;

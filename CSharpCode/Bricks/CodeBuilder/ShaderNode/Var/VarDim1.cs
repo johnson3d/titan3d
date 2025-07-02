@@ -16,7 +16,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             BackColor = 0x80808080;
         }
         private bool mIsUniform = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool IsUniform 
         {
@@ -95,7 +95,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 TitleColor = 0xFF804020;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public bool IsHalfPrecision { get; set; } = false;
         public Rtti.TtTypeDesc VarType;
@@ -195,7 +195,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         {
             return Value.ToString();
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public float Value { get; set; } = 0;
         [Browsable(false)]
@@ -280,7 +280,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         {
             return Value.ToString();
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public int Value { get; set; } = 0;
         [Browsable(false)]

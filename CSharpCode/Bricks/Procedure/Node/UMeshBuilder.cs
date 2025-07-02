@@ -52,7 +52,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         public Graphics.Mesh.TtMaterialMesh Mesh;
         RName mMeshName;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
         public RName MeshName
         {

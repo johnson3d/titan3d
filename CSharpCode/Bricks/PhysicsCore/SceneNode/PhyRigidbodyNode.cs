@@ -13,20 +13,20 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     //only contians one shape
     public class TtPhyRigidbodyNode : GamePlay.Scene.TtLightWeightNodeBase
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public class TtPhyRigidbodyNodeData : GamePlay.Scene.TtNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public EPhyActorType PhyActorType { get; set; } = EPhyActorType.PAT_Static;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float Mass { get; set; } = 1;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public EPhyActorFlag ActorFlag { get; set; } = EPhyActorFlag.PAF_eVISUALIZATION;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public PhyFilterData QueryFilterData { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public PhyFilterData SimulationFilterData { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public RName EventMacross { get; set; }
         }
         public TtPhyRigidbodyNodeData RigidbodyNodeData

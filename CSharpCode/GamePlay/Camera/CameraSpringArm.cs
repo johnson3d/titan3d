@@ -17,23 +17,23 @@ namespace EngineNS.GamePlay.Camera
     {
         public class TtCameraSpringArmData : TtNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public DVector3 TargetOffset { get; set; } = DVector3.Zero;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float ArmLength { get; set; } = 3.0f;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float ProbeSize
             {
                 get;
                 set;
             } = 0.01f;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public float SpringDamping { get; set; } = 0.2f;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public bool DoCollisionTest { get; set; } = true;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public bool AcceptInput { get; set; } = true;
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public FRotator InitRotation { get; set; } = new FRotator();
         }
         [Category("Option")]

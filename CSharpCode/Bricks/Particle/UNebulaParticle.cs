@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.Particle
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtNebulaParticleAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -177,7 +177,7 @@ namespace EngineNS.Bricks.Particle
 
             mMcObject?.Get()?.OnCreated(this);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName AssetName
         {
             get;
@@ -191,12 +191,12 @@ namespace EngineNS.Bricks.Particle
             }
             Emitter.Clear();
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Editor.TtParticleGraph ParticleGraph { get; set; }
         public Dictionary<string, TtEmitter> Emitter { get; } = new Dictionary<string, TtEmitter>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int ParticleNumOfTask { get; set; } = 50;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtEmitter AddEmitter(System.Type type, string name)
         {
             var emitter = Rtti.TtTypeDescManager.CreateInstance(type) as TtEmitter;
@@ -221,7 +221,7 @@ namespace EngineNS.Bricks.Particle
             //cmdlist.EndCommand();
             //policy.CommitCommandList(cmdlist);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtNebulaMacross))]
         public RName McName
         {
@@ -264,17 +264,17 @@ namespace EngineNS.Bricks.Particle
     [Macross.TtMacross]
     public partial class TtNebulaMacross
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void OnCreated(TtNebulaParticle nebula)
         {
 
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void OnUpdate(TtNebulaParticle nebula, UParticleGraphNode particleSystem, float elpased)
         {
 
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void OnUpdateEmitter(TtNebulaParticle nebula, TtEmitter emitter, UParticleGraphNode particleSystem, float elpased)
         {
 

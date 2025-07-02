@@ -15,7 +15,7 @@ namespace EngineNS.DesignMacross.Design
     public class TtVariableDescription : IVariableDescription, EGui.Controls.PropertyGrid.IPropertyCustomization, Bricks.NodeGraph.UEditableValue.IValueEditNotify
     {
         public IDescription Parent { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Rtti.Meta, Category("Option")]
         public string Name { get; set; } = "Variable";
@@ -26,7 +26,7 @@ namespace EngineNS.DesignMacross.Design
         public TtExpressionBase InitValue { get; set; } = new TtPrimitiveExpression(TtTypeDesc.TypeOf<bool>(), (object)false);
         [Rtti.Meta, Category("Option")]
         public TtCommentStatement Comment { get; set; } = new TtCommentStatement("This is a Variable");
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
 
         public bool IsPropertyVisibleDirty { get; set; } = false;

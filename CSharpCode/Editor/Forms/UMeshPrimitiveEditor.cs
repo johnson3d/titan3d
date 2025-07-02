@@ -16,7 +16,7 @@ namespace EngineNS
 {
     public partial class TtEngineConfig
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Editor.Forms.TtMeshPrimitiveEditorConfig MeshPrimitiveEditorConfig
         {
             get; set;

@@ -99,11 +99,11 @@ namespace EngineNS
         public Vector3 mScale;//为了Hierarchical计算方便，我们设定mScale在Transform中只影响本节点而不传递，如果需要整体放缩，在Node上新增一个ScaleMatrix
         public Quaternion mQuat;
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public DVector3 Position { get => mPosition; set => mPosition = value; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 Scale { get => mScale; set => mScale = value; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Quaternion Quat { get => mQuat; set => mQuat = value; }
 
         #region Matrix
@@ -307,7 +307,7 @@ namespace EngineNS
         #endregion
 
         #region Transform
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.ManualMarshal)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.ManualMarshal)]
         public static void Multiply(out FTransform OutTransform, in FTransform A, in FTransform B)
         {
             if (A.mScale.HasNagative() || B.mScale.HasNagative())

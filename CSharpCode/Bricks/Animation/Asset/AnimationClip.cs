@@ -11,7 +11,7 @@ using EngineNS.Thread.Async;
 
 namespace EngineNS.Animation.Asset
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtAnimationClipAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -33,7 +33,7 @@ namespace EngineNS.Animation.Asset
         }
     }
 
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     [TtAnimationClip.Import]
     [IO.AssetCreateMenu(MenuName = "Anim/Animation")]
     public partial class TtAnimationClip : IO.BaseSerializer, IAnimationAsset
@@ -41,17 +41,17 @@ namespace EngineNS.Animation.Asset
         #region IAnimationAsset
         public const string AssetExt = ".animclip";
         public string TypeExt { get => AssetExt; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName AssetName
         {
             get;
             set;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float SampleRate { get; set; } = 1.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Duration { get; set; } = 0.0f;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public List<IAnimNotify> Notifies { get; set; } = new List<IAnimNotify>();
         public IAssetMeta CreateAMeta()
         {
@@ -71,7 +71,7 @@ namespace EngineNS.Animation.Asset
         #endregion IAnimationAsset
 
         #region AnimationChunk
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName AnimationChunkName { get; set; }
         public TtAnimationChunk AnimationChunk { get; set; } = null;
 

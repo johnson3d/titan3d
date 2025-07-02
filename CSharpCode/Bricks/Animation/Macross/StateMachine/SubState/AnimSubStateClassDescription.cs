@@ -23,7 +23,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.SubState
     [GraphElement(typeof(TtGraphElement_AnimSubState))]
     public class TtAnimSubStateClassDescription : TtTimedSubStateClassDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [Category("Option")]
         public override string Name { get; set; } = "AnimSubState";
         

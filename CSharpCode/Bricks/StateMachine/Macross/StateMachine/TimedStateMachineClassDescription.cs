@@ -13,9 +13,9 @@ namespace EngineNS.Bricks.StateMachine.Macross
     [Designable(typeof(TtTimedStateMachine), "TimedStateMachine")]
     public class TtTimedStateMachineClassDescription : TtDesignableVariableDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public override string Name { get; set; } = "TimeStateMachine";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [OutlineElement_List(typeof(TtOutlineElementsList_TimedCompoundStates), true)]
         public virtual List<TtTimedCompoundStateClassDescription> CompoundStates { get; set; } = new List<TtTimedCompoundStateClassDescription>();
         public TtTimedStateMachineClassDescription()

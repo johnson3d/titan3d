@@ -29,14 +29,14 @@ namespace EngineNS.Graphics.Pipeline.Common
         public NxRHI.ERenderPassClearFlags[] ClearFlags = new NxRHI.ERenderPassClearFlags[4];
 
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int OutputRT
         {
             get;
             set;
         } = 0;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool OutputDS { get; set; } = true;
         public TtClearMRTNode()
         {

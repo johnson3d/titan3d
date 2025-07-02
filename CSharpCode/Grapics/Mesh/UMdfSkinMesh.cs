@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Mesh
 {
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMdfSkinMesh@EngineCore", "EngineNS.Graphics.Mesh.UMdfSkinMesh" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMdfSkinMesh@EngineCore", "EngineNS.Graphics.Mesh.UMdfSkinMesh" })]
     public class TtMdfSkinMesh : Graphics.Pipeline.Shader.TtMdfQueue1<Mesh.Modifier.TtSkinModifier>
     {
         public Mesh.Modifier.TtSkinModifier SkinModifier

@@ -175,7 +175,7 @@ Plugins目录下CopyPlugins.bat在修改*.plugin后目前需要手工执行，刷新到插件目录
  ```C#
 	public partial class HLSLMethod
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [UserCallNode(CallNodeType = typeof(SampleLevel2DNode))]
         [ContextMenu("samplelevel2d", "Sample\\Level2D", UMaterialGraph.MaterialEditorKeyword)]
         public static Vector4 SampleLevel2D(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, float level, out Vector3 rgb)
@@ -183,38 +183,38 @@ Plugins目录下CopyPlugins.bat在修改*.plugin后目前需要手工执行，刷新到插件目录
             rgb = new Vector3();
             return new Vector4();
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [UserCallNode(CallNodeType = typeof(Sample2DNode))]
         public static Vector4 Sample2D(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, out Vector3 rgb)
         {
             rgb = new Vector3();
             return new Vector4();
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [UserCallNode(CallNodeType = typeof(SampleArrayLevel2DNode))]
         public static Vector4 SampleArrayLevel2D(Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, float level, out Vector3 rgb)
         {
             rgb = new Vector3();
             return new Vector4();
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [UserCallNode(CallNodeType = typeof(SampleArray2DNode))]
         public static Vector4 SampleArray2D(Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, out Vector3 rgb)
         {
             rgb = new Vector3();
             return new Vector4();
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 GetTerrainDiffuse(Vector2 uv, Graphics.Pipeline.Shader.UMaterial.PSInput input)
         {
             return Vector3.Zero;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 GetTerrainNormal(Vector2 uv, Graphics.Pipeline.Shader.UMaterial.PSInput input)
         {
             return Vector3.Zero;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Clamp(float x, float min, float max, out float ret)
         {
             ret = 0;

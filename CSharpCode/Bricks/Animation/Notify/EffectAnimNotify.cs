@@ -4,20 +4,20 @@ using System.Text;
 
 namespace EngineNS.Animation.Notify
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtEffectAnimNotify : TtTransientAnimNotify
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName Particle { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 Position { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 Rotation { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 Scale { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool WorldSpace { get; set; } = false;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string SocketName { get; set; } = "";
         public override void Trigger(long beforeTime, long afterTime)
         {

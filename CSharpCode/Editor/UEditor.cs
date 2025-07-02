@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Editor
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public partial class TtEditorConfig
     {
         public void SaveConfig(string sltFile)
         {
             IO.TtFileManager.SaveObjectToXml(sltFile, this);
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string GameProject { get; set; }
         public string GameProjectPath 
         {
@@ -23,7 +23,7 @@ namespace EngineNS.Editor
                 return IO.TtFileManager.GetBaseDirectory(GameProject);
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string GameModuleName { get; set; } = "GameProject.dll";
         public string GameAssembly 
         { 
@@ -32,35 +32,35 @@ namespace EngineNS.Editor
                 return $"binaries/{TtEngine.DotNetVersion}/{GameModuleName}";
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName PhyMaterialIconName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName FontIconName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public RName MacrossIconName { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Color4b PrefabBoderColor { get; set; } = Color4b.DeepPink;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Color4b SceneBoderColor { get; set; } = Color4b.Crimson;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Color4b RenderPolicyBoderColor { get; set; } = Color4b.Coral;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Color4b FontSDFBoderColor { get; set; } = Color4b.LightGray;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Color4b NebulaBoderColor { get; set; } = Color4b.HotPink;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Color4b MaterialMeshBoderColor { get; set; } = Color4b.OrangeRed;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Color4b MeshPrimitivesBoderColor { get; set; } = Color4b.LightYellow;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Color4b MaterialBoderColor { get; set; } = Color4b.Gold;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Color4b MaterialFunctionBoderColor { get; set; } = Color4b.Goldenrod;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Color4b MaterialInstanceBoderColor { get; set; } = Color4b.Cyan;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Color4b TextureBoderColor { get; set; } = Color4b.LightPink;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Color4b PgcBoderColor { get; set; } = Color4b.Khaki;
     }
 

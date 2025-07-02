@@ -57,7 +57,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
     }
     [Bricks.CodeBuilder.ContextMenu("BassPass", "Deferred\\BassPass", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.UDeferredBasePassNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.UDeferredBasePassNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.UDeferredBasePassNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.UDeferredBasePassNode" })]
     public class TtDeferredBasePassNode : Common.TtBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
@@ -71,14 +71,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public TtCpuCullingNode CpuCullNode = null;
         public TtGpuCullingNode GpuCullNode = null;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool ClearMRT
         {
             get;
             set;
         } = true;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public bool EnableMeshlets
         {
             get;

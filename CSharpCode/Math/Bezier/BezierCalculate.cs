@@ -5,13 +5,13 @@ using System.Text;
 
 namespace EngineNS
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public partial class BezierPointBase : EngineNS.IO.ISerializer
     {
         public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
         public void OnPropertyRead(object root, string prop, bool fromXml) { }
         protected EngineNS.Vector2 mPosition = EngineNS.Vector2.Zero;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EngineNS.Vector2 Position
         {
             get => mPosition;
@@ -22,7 +22,7 @@ namespace EngineNS
         }
 
         protected EngineNS.Vector2 mControlPoint = EngineNS.Vector2.Zero;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public EngineNS.Vector2 ControlPoint
         {
             get => mControlPoint;

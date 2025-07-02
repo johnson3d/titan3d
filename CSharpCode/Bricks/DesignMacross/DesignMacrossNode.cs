@@ -15,7 +15,7 @@ namespace EngineNS.DesignMacross
     {
         public class TtDesignMacrossNodeData : TtNodeData
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [RName.PGRName(FilterExts = EngineNS.DesignMacross.UDesignMacross.AssetExt)]
             public RName DesignMacrossName { get; set; }
         }

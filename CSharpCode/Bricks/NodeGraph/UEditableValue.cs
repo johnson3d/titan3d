@@ -242,9 +242,9 @@ namespace EngineNS.Bricks.NodeGraph
             return null;
         }
         private string LabelName;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Rtti.TtTypeDesc ValueType { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual object Value { get; set; } = null;   // todo: change value to TtAnyValue
         public string GetValueString()
         {

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Animation.Notify
 {
-    [Rtti.Meta]
+    [Rtti.Meta("")]
     public class TtDurativeAnimNotify : IO.BaseSerializer, IAnimNotify
     {
         Int64 mBeginTriggerTime = 0;

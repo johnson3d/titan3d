@@ -8,9 +8,9 @@ namespace EngineNS.Graphics.Pipeline.Common
 {
     public class UNodePinDefine : Bricks.NodeGraph.UNodePinDefineBase
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public override string Name { get; set; } = "UserPin";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public override string TypeValue { get; set; } = "Value";
 
         protected override void InitFromPin<T>(T pin)
@@ -24,7 +24,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public TtAttachBuffer ColorAttachement = null;
     }
     [Bricks.CodeBuilder.ContextMenu("Copy2SwapChain", "Copy2SwapChain", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UCopy2SwapChainNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UCopy2SwapChainNode" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UCopy2SwapChainNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UCopy2SwapChainNode" })]
     public class TtCopy2SwapChainNode : TtEndingNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);

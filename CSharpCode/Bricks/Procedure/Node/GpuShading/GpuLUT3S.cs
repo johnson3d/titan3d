@@ -64,7 +64,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         public Vector3ui DispatchThread = new Vector3ui(8, 8, 1);
 
         public Graphics.Pipeline.TtGpuBuffer<uint> PrevWaterTexture = new();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public int Step { get; set; } = 16;
         public TtGpuSkinLUT3SGenNode()
         {

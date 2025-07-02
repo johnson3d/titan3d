@@ -38,16 +38,16 @@ namespace EngineNS.Bricks.NodeGraph
 
         public class TSaveData : IO.BaseSerializer
         {
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Guid InNodeId { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public Guid OutNodeId { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string InPinName { get; set; }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public string OutPinName { get; set; }
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TSaveData SaveData
         {
             get

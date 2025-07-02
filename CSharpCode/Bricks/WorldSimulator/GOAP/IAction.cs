@@ -7,46 +7,46 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
     public partial class IAction
     {
         public float TmpCost = float.MaxValue;
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public string Name
         {
             get;
             set;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public IWeights Weights
         {
             get;
             set;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public IGoal Goal
         {
             get;
             set;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual bool PassPreCondition(IActor actor, IEnvironment env)
         {
             //actor.Inventory.HaveItem("Money")
             return false;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void OnStartAction(IActor actor, IEnvironment env)
         {
             
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void OnTickAction(IActor actor, IEnvironment env)
         {
 
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual bool IsFinished(IActor actor, IEnvironment env)
         {
             return true;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public virtual void OnActionFinished(bool bSuccessed)
         {
 

@@ -20,7 +20,7 @@ using System.Xml.Linq;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor@EngineCore", "EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor" })]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor@EngineCore", "EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor" })]
     public partial class TtMacrossEditor : IO.ISerializer, Editor.IAssetEditor, IRootForm, NodeGraph.IGraphEditor, IMacrossMethodHolder
     {
         public TtMacrossEditor()
@@ -114,10 +114,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
         public void OnPropertyRead(object root, string prop, bool fromXml) { }
-        [Rtti.Meta(Order = 0)]
+        [Rtti.Meta("",Order = 0)]
         public TtClassDeclaration DefClass { get; } = new TtClassDeclaration();
         //public DefineClass DefClass { get; } = new DefineClass();
-        //[Rtti.Meta(Order = 1)]
+        //[Rtti.Meta("",Order = 1)]
         public List<UMacrossMethodGraph> Methods { get; } = new List<UMacrossMethodGraph>();
         public List<UMacrossMethodGraph> MethodDeletedList { get; } = new List<UMacrossMethodGraph>();
         public RName AssetName { get; set; }

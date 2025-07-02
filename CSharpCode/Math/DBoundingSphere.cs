@@ -36,7 +36,7 @@ namespace EngineNS
         /// <param name="sphere">球体对象</param>
         /// <param name="box">包围盒对象</param>
         /// <returns>如果相交返回true，否则返回false</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static ContainmentType Contains(DBoundingSphere sphere, DBoundingBox box)
         {
             DVector3 vector;
@@ -109,7 +109,7 @@ namespace EngineNS
         /// <param name="sphere1">球体1</param>
         /// <param name="sphere2">球体2</param>
         /// <returns>返回相交类型</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static ContainmentType Contains(DBoundingSphere sphere1, DBoundingSphere sphere2)
         {
             double distance;
@@ -135,7 +135,7 @@ namespace EngineNS
         /// <param name="sphere">球体对象</param>
         /// <param name="vector">点坐标</param>
         /// <returns>返回相交类型</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static ContainmentType Contains(DBoundingSphere sphere, DVector3 vector)
         {
             double x = vector.X - sphere.Center.X;
@@ -149,7 +149,7 @@ namespace EngineNS
 
             return ContainmentType.Contains;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static DBoundingSphere FromBox(DBoundingBox box)
         {
             DBoundingSphere sphere;
@@ -177,7 +177,7 @@ namespace EngineNS
         /// <param name="sphere1">球体包围盒1</param>
         /// <param name="sphere2">球体包围盒2</param>
         /// <returns>返回混合后的球体包围盒对象</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static DBoundingSphere Merge(DBoundingSphere sphere1, DBoundingSphere sphere2)
         {
             DBoundingSphere sphere;
@@ -218,7 +218,7 @@ namespace EngineNS
             return true;
         }
 
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static PlaneIntersectionType Intersects(DBoundingSphere sphere, DPlane plane)
         {
             return DPlane.Intersects(plane, sphere);

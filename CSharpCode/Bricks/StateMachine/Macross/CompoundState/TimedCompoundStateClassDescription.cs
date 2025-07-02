@@ -15,15 +15,15 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
     [Graph(typeof(TtGraph_TimedCompoundState))]
     public class TtTimedCompoundStateClassDescription : TtDesignableVariableDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public override string Name { get; set; } = "TimedStatesHub";
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [DrawInGraph]
         public TtTimedCompoundStateEntryClassDescription Entry { get; set; } = new TtTimedCompoundStateEntryClassDescription();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [DrawInGraph]
         public List<TtTimedSubStateClassDescription> States { get; set; } = new List<TtTimedSubStateClassDescription>();
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [DrawInGraph]
         public List<TtTimedCompoundStateHubClassDescription> Hubs { get; set; } = new();
         public TtTimedStateMachineClassDescription StateMachineClassDescription { get=> Parent as TtTimedStateMachineClassDescription;  }

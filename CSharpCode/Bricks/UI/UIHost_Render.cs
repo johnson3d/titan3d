@@ -14,7 +14,7 @@ namespace EngineNS.UI
 {
     public partial class TtUIHost
     {
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public bool IsScreenSpace
         {
             get { return ReadFlag(ECoreFlags.IsScreenSpace); }

@@ -236,17 +236,17 @@ namespace EngineNS
         public float X;
         public float Y;
         public float Z;
-        [Rtti.Meta(ShaderName = "x")]
+        [Rtti.Meta("",ShaderName = "x")]
         public float x { get => X; set => X = value; }
-        [Rtti.Meta(ShaderName = "y")]
+        [Rtti.Meta("",ShaderName = "y")]
         public float y { get => Y; set => Y = value; }
-        [Rtti.Meta(ShaderName = "z")]
+        [Rtti.Meta("",ShaderName = "z")]
         public float z { get => Z; set => Z = value; }
-        [Rtti.Meta(ShaderName = "r")]
+        [Rtti.Meta("",ShaderName = "r")]
         public float r => X;
-        [Rtti.Meta(ShaderName = "g")]
+        [Rtti.Meta("",ShaderName = "g")]
         public float g => Y;
-        [Rtti.Meta(ShaderName = "b")]
+        [Rtti.Meta("",ShaderName = "b")]
         public float b => Z;
         public float this[int index]
         {
@@ -362,7 +362,7 @@ namespace EngineNS
         /// 长度
         /// </summary>
         /// <returns>返回向量的长度</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Length()
 	    {
 		    return (float)( System.Math.Sqrt( (X * X) + (Y * Y) + (Z * Z) ) );
@@ -371,7 +371,7 @@ namespace EngineNS
         /// 长度的平方
         /// </summary>
         /// <returns>返回向量长度的平方</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float LengthSquared()
 	    {
 		    return (X * X) + (Y * Y) + (Z * Z);
@@ -379,7 +379,7 @@ namespace EngineNS
         /// <summary>
         /// 向量的单位化
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public float Normalize()
 	    {
 		    float length = Length();
@@ -394,7 +394,7 @@ namespace EngineNS
         /// <summary>
         /// 向量的单位向量，不改变原向量
         /// </summary>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public Vector3 NormalizeValue
         {
             get {
@@ -409,7 +409,7 @@ namespace EngineNS
         /// <param name="left">三维向量</param>
         /// <param name="right">三维向量</param>
         /// <returns>返回两个三维向量的和</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Add(in Vector3 left, in Vector3 right )
 	    {
             Vector3 result;
@@ -424,7 +424,7 @@ namespace EngineNS
         /// <param name="left">三维向量</param>
         /// <param name="right">三维向量</param>
         /// <param name="result">两个三维向量的和</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Add(in Vector3 left, in Vector3 right, out Vector3 result)
 	    {
             result.X = left.X + right.X;
@@ -437,7 +437,7 @@ namespace EngineNS
         /// <param name="left">三维向量</param>
         /// <param name="right">三维向量</param>
         /// <returns>返回两个三维向量的差</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Subtract(in Vector3 left, in Vector3 right)
 	    {
             EngineNS.Vector3 result;
@@ -452,7 +452,7 @@ namespace EngineNS
         /// <param name="left">三维向量</param>
         /// <param name="right">三维向量</param>
         /// <param name="result">两个三维向量的差</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Subtract(in Vector3 left, in Vector3 right, out Vector3 result)
 	    {
             result.X = left.X - right.X;
@@ -465,7 +465,7 @@ namespace EngineNS
         /// <param name="left">三维向量</param>
         /// <param name="right">三维向量</param>
         /// <returns>返回两个三维向量的积</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Modulate(in Vector3 left, in Vector3 right)
 	    {
             Vector3 result;
@@ -480,7 +480,7 @@ namespace EngineNS
         /// <param name="left">三维向量</param>
         /// <param name="right">三维向量</param>
         /// <param name="result">两个三维向量的积</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Modulate(in Vector3 left, in Vector3 right, out Vector3 result)
 	    {
             result.X = left.X * right.X;
@@ -493,7 +493,7 @@ namespace EngineNS
         /// <param name="value">三维向量</param>
         /// <param name="scale">常数</param>
         /// <returns>返回计算结果</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Multiply(in Vector3 value, float scale)
 	    {
             Vector3 result;
@@ -508,7 +508,7 @@ namespace EngineNS
         /// <param name="value">三维向量</param>
         /// <param name="scale">常数</param>
         /// <param name="result">计算结果</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Multiply(in Vector3 value, float scale, out Vector3 result)
 	    {
             result.X = value.X * scale;
@@ -521,7 +521,7 @@ namespace EngineNS
         /// <param name="value">三维向量</param>
         /// <param name="scale">常数</param>
         /// <returns>返回计算结果</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Divide(in Vector3 value, float scale)
 	    {
             Vector3 result;
@@ -536,7 +536,7 @@ namespace EngineNS
         /// <param name="value">三维向量</param>
         /// <param name="scale">常数</param>
         /// <param name="result">计算结果</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Divide(in Vector3 value, float scale, out Vector3 result)
 	    {
             result.X = value.X / scale;
@@ -548,7 +548,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="value">三维向量</param>
         /// <returns>返回计算结果</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Negate(in Vector3 value)
 	    {
             Vector3 result;
@@ -562,7 +562,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="value">三维向量</param>
         /// <param name="result">计算结果</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Negate(in Vector3 value, out Vector3 result)
 	    {
             result.X = -value.X;
@@ -578,7 +578,7 @@ namespace EngineNS
         /// <param name="amount1">参数</param>
         /// <param name="amount2">参数</param>
         /// <returns>返回计算结果</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Barycentric(in Vector3 value1, in Vector3 value2, in Vector3 value3, float amount1, float amount2)
 	    {
 		    Vector3 vector;
@@ -596,7 +596,7 @@ namespace EngineNS
         /// <param name="value4">三维坐标点</param>
         /// <param name="amount">参数因子</param>
         /// <returns>返回计算结果</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 CatmullRom(Vector3 value1, Vector3 value2, Vector3 value3, Vector3 value4, float amount)
 	    {
 		    Vector3 vector;
@@ -626,7 +626,7 @@ namespace EngineNS
         /// <param name="value4">三维坐标点</param>
         /// <param name="amount">参数因子</param>
         /// <param name="result">计算结果</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void CatmullRom(ref Vector3 value1, ref Vector3 value2, ref Vector3 value3, ref Vector3 value4, float amount, out Vector3 result)
 	    {
 		    float squared = amount * amount;
@@ -655,7 +655,7 @@ namespace EngineNS
         /// <param name="min">三维坐标点的最小值</param>
         /// <param name="max">三维坐标点的最大值</param>
         /// <returns>返回计算结果</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Clamp(in Vector3 value, in Vector3 min, in Vector3 max)
 	    {
 		    float x = value.X;
@@ -683,7 +683,7 @@ namespace EngineNS
         /// <param name="min">三维坐标点的最小值</param>
         /// <param name="max">三维坐标点的最大值</param>
         /// <param name="result">计算结果</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Clamp(in Vector3 value, in Vector3 min, in Vector3 max, out Vector3 result)
 	    {
 		    float x = value.X;
@@ -711,7 +711,7 @@ namespace EngineNS
         /// <param name="tangent2">三维向量的正切点坐标</param>
         /// <param name="amount">插值</param>
         /// <returns>返回计算后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Hermite(in Vector3 value1, in Vector3 tangent1, in Vector3 value2, in Vector3 tangent2, float amount)
 	    {
 		    Vector3 vector;
@@ -737,7 +737,7 @@ namespace EngineNS
         /// <param name="tangent2">三维向量的正切点坐标</param>
         /// <param name="amount">插值</param>
         /// <param name="result">计算后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Hermite(ref Vector3 value1, ref Vector3 tangent1, ref Vector3 value2, ref Vector3 tangent2, float amount, out Vector3 result)
 	    {
 		    float squared = amount * amount;
@@ -758,7 +758,7 @@ namespace EngineNS
         /// <param name="end">终点坐标</param>
         /// <param name="factor">插值因子</param>
         /// <returns>返回计算后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Lerp(in Vector3 start, in Vector3 end, float factor)
 	    {
 		    Vector3 vector;
@@ -776,7 +776,7 @@ namespace EngineNS
         /// <param name="end">终点坐标</param>
         /// <param name="factor">插值因子</param>
         /// <param name="result">计算后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Lerp(in Vector3 start, in Vector3 end, float factor, out Vector3 result)
 	    {
 		    result.X = start.X + ((end.X - start.X) * factor);
@@ -790,7 +790,7 @@ namespace EngineNS
         /// <param name="end">终点坐标</param>
         /// <param name="amount">插值因子</param>
         /// <returns>返回计算后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 SmoothStep(in Vector3 start, in Vector3 end, float amount)
 	    {
 		    Vector3 vector;
@@ -811,7 +811,7 @@ namespace EngineNS
         /// <param name="end">终点坐标</param>
         /// <param name="amount">插值因子</param>
         /// <param name="result">计算后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void SmoothStep(in Vector3 start, in Vector3 end, float amount, out Vector3 result)
 	    {
 		    amount = (amount > 1.0f) ? 1.0f : ((amount < 0.0f) ? 0.0f : amount);
@@ -821,7 +821,7 @@ namespace EngineNS
 		    result.Y = start.Y + ((end.Y - start.Y) * amount);
 		    result.Z = start.Z + ((end.Z - start.Z) * amount);
 	    }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Slerp(Vector3 start, Vector3 end, float factor)
         {
             float lhsMag = start.Length();
@@ -894,7 +894,7 @@ namespace EngineNS
         /// <param name="value1">坐标点</param>
         /// <param name="value2">坐标点</param>
         /// <returns>返回两点间的距离</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static float Distance(in Vector3 value1, in Vector3 value2)
 	    {
 		    float x = value1.X - value2.X;
@@ -903,7 +903,7 @@ namespace EngineNS
 
 		    return (float)( Math.Sqrt( (x * x) + (y * y) + (z * z) ) );
 	    }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static float RayDistanceSquared(in Vector3 point, in Vector3 start, in Vector3 dirNormalized, out float len)
         {
             var v = point - start;
@@ -916,7 +916,7 @@ namespace EngineNS
         /// <param name="value1">坐标点</param>
         /// <param name="value2">坐标点</param>
         /// <returns>返回两点间的距离的平方</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static float DistanceSquared(in Vector3 value1, in Vector3 value2)
 	    {
 		    float x = value1.X - value2.X;
@@ -947,7 +947,7 @@ namespace EngineNS
         /// <param name="left">三维向量</param>
         /// <param name="right">三维向量</param>
         /// <returns>返回叉积值</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Cross(in Vector3 left, in Vector3 right)
 	    {
 		    Vector3 result;
@@ -962,7 +962,7 @@ namespace EngineNS
         /// <param name="left">三维向量</param>
         /// <param name="right">三维向量</param>
         /// <param name="result">叉积结果</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Cross(in Vector3 left, in Vector3 right, out Vector3 result)
 	    {
 		    Vector3 r;
@@ -978,7 +978,7 @@ namespace EngineNS
         /// <param name="vector">三维向量</param>
         /// <param name="normal">投影到的单位向量</param>
         /// <returns>返回投影向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Reflect(in Vector3 vector, in Vector3 normal)
 	    {
 		    Vector3 result;
@@ -1016,7 +1016,7 @@ namespace EngineNS
         /// <param name="vector">三维向量</param>
         /// <param name="normal">投影到的单位向量</param>
         /// <param name="result">投影向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Reflect(in Vector3 vector, in Vector3 normal, out Vector3 result)
 	    {
 		    float dot = ((vector.X * normal.X) + (vector.Y * normal.Y)) + (vector.Z * normal.Z);
@@ -1030,7 +1030,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="vector">三维向量</param>
         /// <returns>返回单位向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Normalize(in Vector3 vector)
 	    {
             Vector3 result;
@@ -1042,13 +1042,13 @@ namespace EngineNS
         /// </summary>
         /// <param name="vector">三维向量</param>
         /// <param name="result">单位向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Normalize(in Vector3 vector, out Vector3 result)
 	    {
 		    result = vector;
 		    result.Normalize();
 	    }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 Transform(in Vector3 vector, in Matrix transform)
         {
             Vector4 result;
@@ -1066,7 +1066,7 @@ namespace EngineNS
         /// <param name="vector">三维向量</param>
         /// <param name="transform">转换矩阵</param>
         /// <param name="result">转换后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Transform(in Vector3 vector, in Matrix transform, out Vector4 result)
         {
             result.X = (((vector.X * transform.M11) + (vector.Y * transform.M21)) + (vector.Z * transform.M31)) + transform.M41;
@@ -1083,7 +1083,7 @@ namespace EngineNS
         /// <param name="vectorsOut">计算后的向量</param>
         /// <param name="outputStride">输出的步数</param>
         /// <param name="count">次数</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Transform(IntPtr vectorsIn, int inputStride, IntPtr transformation, IntPtr vectorsOut, int outputStride, int count)
         {
             IDllImportApi.v3dxVec3TransformArray((vectorsOut), (UInt32)outputStride,
@@ -1097,7 +1097,7 @@ namespace EngineNS
         /// <param name="transformation">转换矩阵指针</param>
         /// <param name="vectorsOut">计算后的向量</param>
         /// <param name="count">次数</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Transform(IntPtr vectorsIn, IntPtr transformation, IntPtr vectorsOut, int count) 
         { 
             Transform(vectorsIn, sizeof(float)*3, transformation, vectorsOut, sizeof(float) * 4, count); 
@@ -1165,7 +1165,7 @@ namespace EngineNS
         /// <param name="value">需要转换的三维向量</param>
         /// <param name="rotation">旋转四元数</param>
         /// <returns>返回计算后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector4 Transform(in Vector3 value, in Quaternion rotation)
         {
             Vector4 vector;
@@ -1195,7 +1195,7 @@ namespace EngineNS
         /// <param name="value">需要转换的三维向量</param>
         /// <param name="rotation">旋转四元数</param>
         /// <param name="result">计算后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Transform(in Vector3 value, in Quaternion rotation, out Vector4 result)
         {
             float x = rotation.X + rotation.X;
@@ -1262,7 +1262,7 @@ namespace EngineNS
         /// <param name="coord">坐标轴对象</param>
         /// <param name="transform">转换矩阵</param>
         /// <returns>返回计算后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 TransformCoordinate(in Vector3 coord, in Matrix transform)
         {
             Vector4 vector;
@@ -1284,7 +1284,7 @@ namespace EngineNS
         /// <param name="coord">坐标轴对象</param>
         /// <param name="transform">转换矩阵</param>
         /// <param name="result">计算后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static float TransformCoordinate(in Vector3 coord, in Matrix transform, out Vector3 result)
         {
             Vector4 vector;
@@ -1305,7 +1305,7 @@ namespace EngineNS
         /// <param name="value">三维向量</param>
         /// <param name="rotation">旋转四元数</param>
         /// <returns>返回计算后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 TransformCoordinate(in Vector3 value, in Quaternion rotation)
         {
             var v4 = Transform(value, rotation);
@@ -1411,7 +1411,7 @@ namespace EngineNS
         /// <param name="normal">单位向量</param>
         /// <param name="transform">转换矩阵</param>
         /// <returns>返回转换后的向量</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 TransformNormal(in Vector3 normal, in Matrix transform)
         {
             Vector3 vector;
@@ -1422,7 +1422,7 @@ namespace EngineNS
 
             return vector;
         }
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 TransposeTransformNormal(in Vector3 normal, in Matrix transform)
         {
             Vector3 vector;
@@ -1439,7 +1439,7 @@ namespace EngineNS
         /// <param name="normal">单位向量</param>
         /// <param name="transform">转换矩阵</param>
         /// <param name="result">转换后的向量</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void TransformNormal(in Vector3 normal, in Matrix transform, out Vector3 result)
         {
             result.X = ((normal.X * transform.M11) + (normal.Y * transform.M21)) + (normal.Z * transform.M31);
@@ -1548,7 +1548,7 @@ namespace EngineNS
         /// <param name="maxZ">最大的Z值</param>
         /// <param name="worldViewProjection">世界坐标下的转换矩阵</param>
         /// <returns>返回转换后的三维坐标</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Project(Vector3 vector, float x, float y, float width, float height, float minZ, float maxZ, in Matrix worldViewProjection)
         {
             TransformCoordinate(in vector, in worldViewProjection, out vector );
@@ -1570,7 +1570,7 @@ namespace EngineNS
         /// <param name="maxZ">最大的Z值</param>
         /// <param name="worldViewProjection">世界坐标下的转换矩阵</param>
         /// <param name="result">转换后的三维坐标</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Project(ref Vector3 vector, float x, float y, float width, float height, float minZ, float maxZ, ref Matrix worldViewProjection, out Vector3 result)
         {
             Vector3 v;
@@ -1593,7 +1593,7 @@ namespace EngineNS
         /// <param name="maxZ">最大的Z值</param>
         /// <param name="worldViewProjection">世界坐标下的转换矩阵</param>
         /// <returns>返回转换后的三维坐标</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Unproject(in Vector3 vector, float x, float y, float width, float height, float minZ, float maxZ, in Matrix worldViewProjection )
         {
             Vector3 v;
@@ -1619,7 +1619,7 @@ namespace EngineNS
         /// <param name="maxZ">最大的Z值</param>
         /// <param name="worldViewProjection">世界坐标下的转换矩阵</param>
         /// <param name="result">转换后的三维坐标</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Unproject(in Vector3 vector, float x, float y, float width, float height, float minZ, float maxZ, in Matrix worldViewProjection, out Vector3 result )
         {
             Vector3 v;
@@ -1639,7 +1639,7 @@ namespace EngineNS
         /// <param name="left">三维坐标</param>
         /// <param name="right">三维坐标</param>
         /// <returns>返回计算后的三维坐标</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Minimize(in Vector3 left, in Vector3 right )
         {
             Vector3 vector;
@@ -1654,7 +1654,7 @@ namespace EngineNS
         /// <param name="left">三维坐标</param>
         /// <param name="right">三维坐标</param>
         /// <param name="result">计算后的三维坐标</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Minimize(in Vector3 left, in Vector3 right, out Vector3 result )
         {
             result.X = (left.X < right.X) ? left.X : right.X;
@@ -1667,7 +1667,7 @@ namespace EngineNS
         /// <param name="left">三维坐标</param>
         /// <param name="right">三维坐标</param>
         /// <returns>返回计算后的三维坐标</returns>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static Vector3 Maximize(in Vector3 left, in Vector3 right )
         {
             Vector3 vector;
@@ -1682,7 +1682,7 @@ namespace EngineNS
         /// <param name="left">三维坐标</param>
         /// <param name="right">三维坐标</param>
         /// <param name="result">计算后的三维坐标</param>
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public static void Maximize(in Vector3 left, in Vector3 right, out Vector3 result )
         {
             result.X = (left.X > right.X) ? left.X : right.X;

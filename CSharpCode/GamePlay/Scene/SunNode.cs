@@ -16,9 +16,9 @@ namespace EngineNS.GamePlay.Scene
             {
                 SunMaterialName = RName.GetRName("material/default_sun.uminst", RName.ERNameType.Engine);
             }
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             public TtDirectionLight DirectionLight { get; set; } = new TtDirectionLight();
-            [Rtti.Meta]
+            [Rtti.Meta("")]
             [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt)]
             public RName SunMaterialName { get; set; }
         }
@@ -31,7 +31,7 @@ namespace EngineNS.GamePlay.Scene
             base.OnParentChanged(prev, cur);
         }
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         public TtDirectionLight DirectionLight
         {
             get => GetNodeData<TtSunNodeData>().DirectionLight;
@@ -39,7 +39,7 @@ namespace EngineNS.GamePlay.Scene
         }
         Graphics.Pipeline.Shader.TtMaterialInstance SunMaterial;
         [Category("Option")]
-        [Rtti.Meta]
+        [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt)]
         public RName SunMaterialName
         {
