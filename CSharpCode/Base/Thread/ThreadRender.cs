@@ -6,6 +6,10 @@ namespace EngineNS.Thread
 {
     public class TtThreadRender : TtContextThread
     {
+        public override Async.EAsyncTarget GetThreadType()
+        {
+            return Async.EAsyncTarget.Render;
+        }
         public TtThreadRender()
         {
             Interval = 0;

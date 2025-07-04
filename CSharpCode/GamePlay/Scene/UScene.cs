@@ -516,11 +516,12 @@ namespace EngineNS.GamePlay.Scene
                 {
                     var numTask = TtEngine.Instance.EventPoster.NumOfPool;
                     numTask = Math.Min(ManagedNodes.Length, numTask);
-                    TtEngine.Instance.EventPoster.ParrallelFor(numTask, static (int index, object arg1, object arg2, Thread.Async.TtAsyncTaskStateBase state) =>
+                    TtEngine.Instance.EventPoster.ParallelFor(numTask, static (Thread.Async.TtAsyncTaskStateBase state) =>
                     {
-                        var node = arg1 as TtScene;
-                        var rp = arg2 as TtWorld.TtVisParameter;
-                        int stride = node.Children.Count / (int)state.UserArguments.NumOfParrallelFor + 1;
+                        int index = state.IndexOfParallelFor;
+                        var node = state.GetForArgument0<TtScene>();
+                        var rp = state.GetForArgument1<TtWorld.TtVisParameter>();
+                        int stride = node.Children.Count / (int)state.UserArguments.NumOfParallelFor + 1;
                         var start = index * stride;
                         for (int n = 0; n < stride; n++)
                         {

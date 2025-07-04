@@ -44,12 +44,13 @@ namespace EngineNS.Animation.BlendTree.Node
 
             return mAnimationCommand;
         }
+        private TtAnimStateMachineContext mStateMachineContext = new();
         public override void Tick(float elapseSecond, ref FAnimBlendTreeContext context)
         {
             System.Diagnostics.Debug.Assert(AnimStateMachine != null);
-            TtAnimStateMachineContext stateMachineContext = new();
-            stateMachineContext.BlendTreeContext = context;
-            AnimStateMachine.Tick(elapseSecond, stateMachineContext);
+            //TtAnimStateMachineContext stateMachineContext = new();
+            mStateMachineContext.BlendTreeContext = context;
+            AnimStateMachine.Tick(elapseSecond, mStateMachineContext);
         }
     }
 }

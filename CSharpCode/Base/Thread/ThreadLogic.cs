@@ -6,6 +6,10 @@ namespace EngineNS.Thread
 {
     public class TtThreadLogic : TtContextThread
     {
+        public override Async.EAsyncTarget GetThreadType()
+        {
+            return Async.EAsyncTarget.Logic;
+        }
         [ThreadStatic]
         private static Profiler.TimeScope mScopeTick;
         private static Profiler.TimeScope ScopeTick

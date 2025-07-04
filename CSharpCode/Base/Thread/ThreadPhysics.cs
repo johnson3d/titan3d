@@ -6,6 +6,10 @@ namespace EngineNS.Thread
 {
     public class TtThreadPhysics : TtContextThread
     {
+        public override Async.EAsyncTarget GetThreadType()
+        {
+            return Async.EAsyncTarget.Physics;
+        }
         public TtThreadPhysics()
         {
             this.LimitTime = long.MaxValue;

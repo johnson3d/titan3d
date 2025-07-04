@@ -6,6 +6,10 @@ namespace EngineNS.Thread
 {
     public class TtThreadPool : TtContextThread
     {
+        public override Async.EAsyncTarget GetThreadType()
+        {
+            return Async.EAsyncTarget.TPools;
+        }
         private static int mNumOfActiveThreads = 0;
         public static int NumOfActiveThreads { get => mNumOfActiveThreads; }
         private static int mMaxActiveThreads = 0;

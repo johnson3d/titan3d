@@ -12,9 +12,10 @@ namespace EngineNS.Animation.Command
         public List<TtParallelExecuteCommandList> CommandLists = new List<TtParallelExecuteCommandList>();
         public void AddCommand(int depth, IAnimationCommand cmd)
         {
-            if(CommandLists.Count == 0)
+            if (depth >= CommandLists.Count)
             {
-                for (int i = 0; i < 10; ++i)
+                int extraDepth = depth * 2 - CommandLists.Count + 1;
+                for (int i = 0; i < extraDepth; ++i)
                 {
                     CommandLists.Add(new TtParallelExecuteCommandList());
                 }
@@ -45,6 +46,12 @@ namespace EngineNS.Animation.Command
             {
                 cmd?.Execute();
             }
+            //TtEngine.Instance.EventPoster.ParallelFor(Commands.Count, static (Thread.Async.TtAsyncTaskStateBase state) =>
+            //{
+            //    int index = state.IndexOfParallelFor;
+            //    var Commands = state.GetForArgument0<List<IAnimationCommand>>();
+            //    Commands[index].Execute();
+            //}, Commands);
         }
     }
 

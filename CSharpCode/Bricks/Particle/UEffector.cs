@@ -168,10 +168,11 @@ namespace EngineNS.Bricks.Particle
                     if (ForParameters.aliveNum > 0)
                     {
                         var numTask = Math.Max(1, (int)ForParameters.aliveNum / nebula.ParticleNumOfTask);
-                        TtEngine.Instance.EventPoster.ParrallelFor((int)numTask, static (i, arg1, arg2, state) =>
+                        TtEngine.Instance.EventPoster.ParallelFor((int)numTask, static (state) =>
                         {
-                            var ForParameters = (TtForParameters)arg1;
-                            int stride = (int)ForParameters.aliveNum / (int)state.UserArguments.NumOfParrallelFor + 1;
+                            int i = state.IndexOfParallelFor;
+                            var ForParameters = state.GetForArgument0<TtForParameters>();
+                            int stride = (int)ForParameters.aliveNum / (int)state.NumOfParallelFor + 1;
                             var start = i * stride;
                             for (int n = 0; n < stride; n++)
                             {
@@ -209,10 +210,11 @@ namespace EngineNS.Bricks.Particle
                 {
                     //var numTask = Math.Min(TtEngine.Instance.EventPoster.NumOfPool, (int)ForParameters.aliveNum);
                     var numTask = Math.Max(1, (int)ForParameters.aliveNum / nebula.ParticleNumOfTask);
-                    TtEngine.Instance.EventPoster.ParrallelFor(numTask, static (i, arg1, arg2, state) =>
+                    TtEngine.Instance.EventPoster.ParallelFor(numTask, static (state) =>
                     {
-                        var ForParameters = (TtForParameters)arg1;
-                        int stride = (int)ForParameters.aliveNum / (int)state.UserArguments.NumOfParrallelFor + 1;
+                        int i = state.IndexOfParallelFor;
+                        var ForParameters = state.GetForArgument0<TtForParameters>();
+                        int stride = (int)ForParameters.aliveNum / (int)state.NumOfParallelFor + 1;
                         var start = i * stride;
                         for (int n = 0; n < stride; n++)
                         {

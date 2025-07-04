@@ -7,6 +7,10 @@ namespace EngineNS.Thread
 {
     public class TtThreadAsync : TtContextThread
     {
+        public override Async.EAsyncTarget GetThreadType()
+        {
+            return Async.EAsyncTarget.AsyncIO;
+        }
         public TtThreadAsync()
         {
             Interval = 0;

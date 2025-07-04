@@ -6,8 +6,9 @@ using System.Text;
 
 namespace EngineNS.Thread
 {
-    public class TtContextThread
+    public abstract class TtContextThread
     {
+        public abstract Async.EAsyncTarget GetThreadType();
         public static List<WeakReference<TtContextThread>> AllContexts = new List<WeakReference<TtContextThread>>();
         public static int GetTotalContinueEventNumber(TtContextThread thread)
         {
@@ -36,34 +37,9 @@ namespace EngineNS.Thread
                 AllContexts.Add(new WeakReference<TtContextThread>(this));
             }
         }
-        //List<object> mMonitorEnterObjects = new List<object>();
-        //public int MonitorEnter(object obj)
-        //{
-        //    System.Threading.Monitor.Enter(obj);
-        //    int index = mMonitorEnterObjects.Count;
-        //    mMonitorEnterObjects.Add(obj);
-        //    return index;
-        //}
-        //public bool MonitorExit(int index)
-        //{
-        //    if (index<0 || index >= mMonitorEnterObjects.Count)
-        //        return false;
-
-        //    System.Threading.Monitor.Exit(mMonitorEnterObjects[index]);
-        //    mMonitorEnterObjects[index] = null;
-        //    return true;
-        //}
         public void ExitWhenFrameFinished()
         {
-            //for (int i = 0; i < mMonitorEnterObjects.Count; i++)
-            //{
-            //    if(mMonitorEnterObjects[i]!=null)
-            //    {
-            //        System.Threading.Monitor.Exit(mMonitorEnterObjects[i]);
-            //        Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Locker({mMonitorEnterObjects[i]}) is not released");
-            //    }
-            //}
-            //mMonitorEnterObjects.Clear();
+            
         }
         public bool IsWaitingTask = false;
         protected bool mIsRun = false;
@@ -535,5 +511,9 @@ namespace EngineNS.Thread
             }
             return (this.ThreadId == System.Threading.Thread.CurrentThread.ManagedThreadId);
         }
+
+        #region Payload
+        public bool IsWaiting = false;
+        #endregion
     }
 }

@@ -911,12 +911,13 @@ namespace EngineNS.Bricks.Procedure
             else
             {
                 var numTask = TtEngine.Instance.EventPoster.NumOfPool;
-                TtEngine.Instance.EventPoster.ParrallelFor(numTask, static (i, arg1, arg2, state) =>
+                TtEngine.Instance.EventPoster.ParallelFor(numTask, static (state) =>
                 {
-                    var pThis = arg1 as UBufferComponent;
-                    var onPerPiexel = arg2 as FOnPerPixel;
+                    int i = state.IndexOfParallelFor;
+                    var pThis = state.GetForArgument0<UBufferComponent>();
+                    var onPerPiexel = state.GetForArgument1<FOnPerPixel>();
                     int TotalNum = (int)(pThis.Width * pThis.Height * pThis.Depth);
-                    int stride = TotalNum / (int)state.UserArguments.NumOfParrallelFor + 1;
+                    int stride = TotalNum / (int)state.NumOfParallelFor + 1;
                     var start = i * stride;
                     for (int n = 0; n < stride; n++)
                     {

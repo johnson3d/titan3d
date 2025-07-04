@@ -61,11 +61,11 @@ namespace EngineNS.Thread.Async
             public object Obj1;
             public object Obj2;
             public object Obj3;
-            public uint IndexOfParrallelFor
+            public uint IndexOfParallelFor
             {
                 get => Value0.X;
             }
-            public uint NumOfParrallelFor
+            public uint NumOfParallelFor
             {
                 get => Value0.Y;
             }
@@ -79,6 +79,25 @@ namespace EngineNS.Thread.Async
             }
         }
         public FUserArguments UserArguments = new FUserArguments();
+
+        #region ParallelFor
+        public int IndexOfParallelFor
+        {
+            get => (int)UserArguments.IndexOfParallelFor;
+        }
+        public uint NumOfParallelFor
+        {
+            get => UserArguments.NumOfParallelFor;
+        }
+        public T GetForArgument0<T>()
+        {
+            return (T)UserArguments.Obj2;
+        }
+        public T GetForArgument1<T>()
+        {
+            return (T)UserArguments.Obj3;
+        }
+        #endregion
 
         public object Tag = null;
         public System.Exception ExceptionInfo = null;
@@ -309,7 +328,7 @@ namespace EngineNS.Thread.Async
         }
 
         #region for each
-        public delegate void Delegate_ParrallelForAction(int index, object arg1, object arg2, TtAsyncTaskStateBase state);
+        public delegate void Delegate_ParrallelForAction(TtAsyncTaskStateBase state);
         public bool EnableMTForeach = true;
         internal TtPooledSemaphoreAllocator ParrallelForSmpAllocator = new TtPooledSemaphoreAllocator();
         [ThreadStatic]
@@ -319,48 +338,42 @@ namespace EngineNS.Thread.Async
             get
             {
                 if (mScopeParrallelForWait == null)
-                    mScopeParrallelForWait = new Profiler.TimeScope(typeof(TtContextThreadManager), nameof(ParrallelFor) + ".Wait");
+                    mScopeParrallelForWait = new Profiler.TimeScope(typeof(TtContextThreadManager), nameof(ParallelFor) + ".Wait");
                 return mScopeParrallelForWait;
             }
         }
-        public void ParrallelFor(int num, Delegate_ParrallelForAction action, object userData1 = null, object userData2 = null)
+        public void ParallelFor(int num, Delegate_ParrallelForAction action, object userData1 = null, object userData2 = null)
         {
+            System.Diagnostics.Debug.Assert(Thread.TtContextThread.CurrentContext.GetThreadType()!= EAsyncTarget.TPools);
             if (num == 0)
                 return;
-            //if (EnableMTForeach == false)
-            //{
-            //    for (int i = 0; i < num; i++)
-            //    {
-            //        action(i, userData1, userData2, null);
-            //    }
-            //}
-            //else
+
+            var smp = ParrallelForSmpAllocator.QueryObjectSync();
+            smp.Reset(num);
+            var userArgs = new TtAsyncTaskStateBase.FUserArguments();
+            userArgs.Obj0 = action;
+            userArgs.Obj1 = smp;
+            userArgs.Obj2 = userData1;
+            userArgs.Obj3 = userData2;
+            userArgs.Value0.Y = (uint)num;
+            for (int i = 0; i < num; i++)
             {
-                var smp = ParrallelForSmpAllocator.QueryObjectSync();
-                smp.Reset(num);
-                var userArgs = new TtAsyncTaskStateBase.FUserArguments();
-                userArgs.Obj0 = action;
-                userArgs.Obj1 = smp;
-                userArgs.Obj2 = userData1;
-                userArgs.Obj3 = userData2;
-                userArgs.Value0.Y = (uint)num;
-                for (int i = 0; i < num; i++)
+                userArgs.Value0.X = (uint)i;
+                this.RunParallel(static (state) =>
                 {
-                    userArgs.Value0.X = (uint)i;
-                    this.RunParallel(static (state) =>
-                    {
-                        var action = (Delegate_ParrallelForAction)state.UserArguments.Obj0;
-                        action((int)state.UserArguments.Value0.X, state.UserArguments.Obj2, state.UserArguments.Obj3, state);
-                        ((TtPooledSemaphore)state.UserArguments.Obj1).Semaphore.Release();
-                        return true;
-                    }, in userArgs/*, smp.WaitEvent*/);
-                }
-                using (new Profiler.TimeScopeHelper(ScopeParrallelForWait))
-                {
-                    smp.WaitEvent.WaitOne(int.MaxValue);
-                }
-                ParrallelForSmpAllocator.ReleaseObject(smp);
+                    var action = (Delegate_ParrallelForAction)state.UserArguments.Obj0;
+                    action(state);
+                    ((TtPooledSemaphore)state.UserArguments.Obj1).Semaphore.Release();
+                    return true;
+                }, in userArgs/*, smp.WaitEvent*/);
             }
+            using (new Profiler.TimeScopeHelper(ScopeParrallelForWait))
+            {
+                Thread.TtContextThread.CurrentContext.IsWaiting = true;
+                smp.WaitEvent.WaitOne(int.MaxValue);
+                Thread.TtContextThread.CurrentContext.IsWaiting = false;
+            }
+            ParrallelForSmpAllocator.ReleaseObject(smp);
         }
         #endregion
         public int NumOfPool

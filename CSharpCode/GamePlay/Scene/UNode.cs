@@ -1401,9 +1401,10 @@ namespace EngineNS.GamePlay.Scene
                 {
                     var numTask = Math.Max(1, NodeBFSParameters.InputNodes.Count / NumOfParralelLimit);
                     NodeBFSParameters.TaskNum = numTask;
-                    TtEngine.Instance.EventPoster.ParrallelFor(numTask, static (int index, object arg1, object arg2, Thread.Async.TtAsyncTaskStateBase state) =>
+                    TtEngine.Instance.EventPoster.ParallelFor(numTask, static (Thread.Async.TtAsyncTaskStateBase state) =>
                     {
-                        var parameters = arg1 as TtNodeBFSParameters;
+                        int index = state.IndexOfParallelFor;
+                        var parameters = state.GetForArgument0<TtNodeBFSParameters>();
                         int stride = parameters.InputNodes.Count / (int)parameters.TaskNum + 1;
                         var start = index * stride;
                         for (int n = 0; n < stride; n++)

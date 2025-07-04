@@ -584,9 +584,10 @@ namespace EngineNS.Bricks.DataCopyer
             {
                 var klsCodes = new string[metas.Count];
                 var numTask = TtEngine.Instance.EventPoster.NumOfPool;
-                TtEngine.Instance.EventPoster.ParrallelFor(numTask, (i, arg1, arg2, state) =>
+                TtEngine.Instance.EventPoster.ParallelFor(numTask, (state) =>
                 {
-                    int stride = (int)metas.Count / (int)state.UserArguments.NumOfParrallelFor + 1;
+                    var i = state.IndexOfParallelFor;
+                    int stride = (int)metas.Count / (int)state.NumOfParallelFor + 1;
                     var start = i * stride;
                     for (int n = 0; n < stride; n++)
                     {
