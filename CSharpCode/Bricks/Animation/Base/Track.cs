@@ -1,5 +1,8 @@
-﻿using System;
+﻿using NPOI.SS.Formula.Functions;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace EngineNS.Animation
@@ -76,6 +79,13 @@ namespace EngineNS.Animation
                 }
                 return (rightIndex, rightTime);
             }
+            private struct FKeyframeCmp : IComparer<FKeyframe>
+            {
+                public int Compare(FKeyframe x, FKeyframe y)
+                {
+                    return x.Time.CompareTo(y.Time);
+                }
+            }
             /// Evaluates the AnimationCurve caching the segment.
             public float Evaluate(float curveT, ref FTrackCache animCurveCache)
             {
@@ -87,15 +97,21 @@ namespace EngineNS.Animation
                 {
                     return KeyFramesList[KeyFramesList.Count - 1].Value;
                 }
-                int rightIndex = 0;
-                for (int i = 1; i < KeyFramesList.Count; ++i)
+                var key = new FKeyframe() { Time = curveT };
+                int rightIndex = KeyFramesList.BinarySearch(key, new FKeyframeCmp());
+                if (rightIndex < 0)
                 {
-                    if (KeyFramesList[i].Time > curveT)
-                    {
-                        rightIndex = i;
-                        break;
-                    }
+                    rightIndex = ~rightIndex;
                 }
+                //int rightIndex = 0;
+                //for (int i = 1; i < KeyFramesList.Count; ++i)
+                //{
+                //    if (KeyFramesList[i].Time > curveT)
+                //    {
+                //        rightIndex = i;
+                //        break;
+                //    }
+                //}
 
                 var delta = KeyFramesList[rightIndex].Time - KeyFramesList[rightIndex - 1].Time;
                 var percent = (curveT - KeyFramesList[rightIndex - 1].Time) / delta;
@@ -112,15 +128,21 @@ namespace EngineNS.Animation
                 {
                     return (KeyFramesList[KeyFramesList.Count - 1], KeyFramesList[KeyFramesList.Count - 1]);
                 }
-                int rightIndex = 0;
-                for (int i = 1; i < KeyFramesList.Count; ++i)
+                var key = new FKeyframe() { Time = curveT };
+                int rightIndex = KeyFramesList.BinarySearch(key, new FKeyframeCmp());
+                if (rightIndex < 0)
                 {
-                    if (KeyFramesList[i].Time > curveT)
-                    {
-                        rightIndex = i;
-                        break;
-                    }
+                    rightIndex = ~rightIndex;
                 }
+                //int rightIndex = 0;
+                //for (int i = 1; i < KeyFramesList.Count; ++i)
+                //{
+                //    if (KeyFramesList[i].Time > curveT)
+                //    {
+                //        rightIndex = i;
+                //        break;
+                //    }
+                //}
                 return (KeyFramesList[rightIndex - 1], KeyFramesList[rightIndex]);
             }
             public float EvaluateClamp(float curveT)
