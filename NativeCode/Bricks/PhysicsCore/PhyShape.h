@@ -5,7 +5,7 @@ NS_BEGIN
 
 class PhyScene;
 class PhyActor;
-struct PhyFilterData;
+struct FPhyFilterData;
 class PhyMaterial;
 
 enum TR_ENUM(SV_EnumNoFlags = true)
@@ -50,8 +50,8 @@ public:
 	virtual void RemoveFromActor() = 0;
 	virtual void SetLocalPose(const v3dxVector3* p, const v3dxQuaternion* q) = 0;
 	virtual void GetLocalPose(v3dxVector3* p, v3dxQuaternion* q) = 0;
-	virtual void SetQueryFilterData(const PhyFilterData* filterData) = 0;
-	virtual void SetSimulationFilterData(const PhyFilterData* filterData) = 0;
+	virtual void SetQueryFilterData(const FPhyFilterData* filterData) = 0;
+	virtual void SetSimulationFilterData(const FPhyFilterData* filterData) = 0;
 	virtual void SetFlag(EPhysShapeFlag flag, bool value) = 0;
 	virtual bool HaveFlag(EPhysShapeFlag flag) = 0;
 

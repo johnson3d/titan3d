@@ -25,7 +25,7 @@ public:
 	{
 
 	}
-	PhyFilterData mFilterData;
+	FPhyFilterData mFilterData;
 	void SetHitReportCallback()
 	{
 
@@ -69,7 +69,7 @@ public:
 	virtual void BindPhysX() = 0;
 	
 	virtual PhyActor* GetReadOnlyActor() = 0;
-	virtual EPhyControllerCollisionFlag Move(const v3dxVector3* disp, float minDist, float elapsedTime, const PhyFilterData* filterData, PhyQueryFlag filterFlags) = 0;
+	virtual EPhyControllerCollisionFlag Move(const v3dxVector3* disp, float minDist, float elapsedTime, const FPhyFilterData* filterData, EPhyQueryFlag filterFlags) = 0;
 	virtual void SetPosition(const v3dxVector3* position) = 0;
 	virtual v3dxVector3 GetPosition() = 0;
 	virtual void SetFootPosition(const v3dxVector3* position) = 0;
@@ -78,8 +78,8 @@ public:
 	virtual void SetContactOffset(float offset) = 0;
 	virtual float GetSlopeLimit() = 0;
 	virtual void SetSlopeLimit(float slopeLimit) = 0;
-	virtual void SetQueryFilterData(const PhyFilterData * filterData) = 0;
-	virtual void SetSimulationFilterData(const PhyFilterData * filterData) = 0;
+	virtual void SetQueryFilterData(const FPhyFilterData * filterData) = 0;
+	virtual void SetSimulationFilterData(const FPhyFilterData * filterData) = 0;
 };
 
 NS_END

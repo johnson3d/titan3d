@@ -11,7 +11,7 @@ NS_BEGIN
 using RealType = float;
 
 enum TR_ENUM() 
-	PhyEntityType
+	EPhyEntityType
 {
 	Phy_Context,
 	Phy_Scene,
@@ -23,7 +23,7 @@ enum TR_ENUM()
 };
 
 enum TR_ENUM() 
-	PhyFeatureFlag
+	EPhyFeatureFlag
 {
 	Articulations = (1 << 0),
 	HeightFields = (1 << 1),
@@ -39,7 +39,7 @@ enum TR_ENUM()
 };
 
 enum TR_ENUM()
-	PhyQueryFlag
+	EPhyQueryFlag
 {
 	eSTATIC = (1 << 0),	//!< Traverse static shapes
 	eDYNAMIC = (1 << 1),	//!< Traverse dynamic shapes
@@ -53,9 +53,9 @@ enum TR_ENUM()
 };
 
 struct TR_CLASS(SV_LayoutStruct = 8)
-	PhyFilterData
+	FPhyFilterData
 {
-	PhyFilterData()
+	FPhyFilterData()
 	{
 		SetDefault();
 	}
@@ -64,7 +64,21 @@ struct TR_CLASS(SV_LayoutStruct = 8)
 	{
 		word0 = word1 = word2 = word3 = 1;
 	}
-
+	void operator = (const FPhyFilterData& fd)
+	{
+		word0 = fd.word0;
+		word1 = fd.word1;
+		word2 = fd.word2;
+		word3 = fd.word3;
+	}
+	bool operator == (const FPhyFilterData& a) const
+	{
+		return a.word0 == word0 && a.word1 == word1 && a.word2 == word2 && a.word3 == word3;
+	}
+	bool operator != (const FPhyFilterData& a) const
+	{
+		return !(a == *this);
+	}
 	UINT word0;
 	UINT word1;
 	UINT word2;
@@ -84,8 +98,8 @@ public:
 		EntityType = Unknown;
 	}
 	~PhyEntity();
-	PhyEntityType EntityType;
-	PhyEntityType  GetEntityType() { return EntityType; };
+	EPhyEntityType EntityType;
+	EPhyEntityType  GetEntityType() { return EntityType; };
 };
 
 NS_END

@@ -71,7 +71,7 @@ public:
 	void BindPhysX();
 	
 	PhyActor* GetReadOnlyActor();
-	EPhyControllerCollisionFlag Move(const v3dxVector3* disp, float minDist, float elapsedTime, const PhyFilterData* filterData, PhyQueryFlag filterFlags);
+	EPhyControllerCollisionFlag Move(const v3dxVector3* disp, float minDist, float elapsedTime, const FPhyFilterData* filterData, EPhyQueryFlag filterFlags);
 	void SetPosition(const v3dxVector3* position);
 	v3dxVector3 GetPosition();
 	void SetFootPosition(const v3dxVector3* position);
@@ -80,8 +80,8 @@ public:
 	void SetContactOffset(float offset);
 	float GetSlopeLimit();
 	void SetSlopeLimit(float slopeLimit);
-	void SetQueryFilterData(const PhyFilterData * filterData);
-	void SetSimulationFilterData(const PhyFilterData * filterData);
+	void SetQueryFilterData(const FPhyFilterData * filterData);
+	void SetSimulationFilterData(const FPhyFilterData * filterData);
 };
 
 NS_END

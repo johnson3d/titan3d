@@ -160,7 +160,7 @@ namespace EngineNS.Bricks.PhysicsCore
 
             return true;
         }
-        public unsafe void OnContact(void* arg0, EngineNS.PhyContactPairHeader* arg1, EngineNS.PhyContactPair* arg2,uint arg3)
+        public unsafe void OnContact(void* arg0, FPhyContactPairHeader* arg1, FPhyContactPair* arg2,uint arg3)
         {
             var phyActor1 = new EngineNS.PhyActor(arg1->actors[0]);
             var actor1 = TtPhyActor.GetActor(phyActor1);
@@ -173,23 +173,23 @@ namespace EngineNS.Bricks.PhysicsCore
                 actor2.RigidBodyNode.OnContact(actor2.TagNode, actor1.TagNode);
             }
         }
-        public unsafe void OnTrigger(void* arg0, EngineNS.PhyTriggerPair* arg1, uint arg2)
+        public unsafe void OnTrigger(void* arg0, FPhyTriggerPair* arg1, uint arg2)
         {
             var triggerActor = TtPhyActor.GetActor(new EngineNS.PhyActor(arg1->triggerActor));
             if (triggerActor == null)
                 return;
 
-            var otherController = TtPhyController.GetPhyController(new EngineNS.PhyController(arg1->otherActor));
+            var otherController = TtPhyController.GetPhyController(new PhyController(arg1->otherActor));
             if (otherController != null)
             {
-                if (PhyPairFlag.eNOTIFY_TOUCH_FOUND == (arg1->status & PhyPairFlag.eNOTIFY_TOUCH_FOUND))
+                if (EPhyPairFlag.eNOTIFY_TOUCH_FOUND == (arg1->status & EPhyPairFlag.eNOTIFY_TOUCH_FOUND))
                 {
                     triggerActor.RigidBodyNode.OnBeginTrigger(triggerActor.TagNode, otherController.TagNode);
                     //otherActor.RigidBodyNode.OnBeginTrigger(otherActor.TagNode, triggerActor.TagNode);
                     return;
                 }
 
-                if (PhyPairFlag.eNOTIFY_TOUCH_LOST == (arg1->status & PhyPairFlag.eNOTIFY_TOUCH_LOST))
+                if (EPhyPairFlag.eNOTIFY_TOUCH_LOST == (arg1->status & EPhyPairFlag.eNOTIFY_TOUCH_LOST))
                 {
                     triggerActor.RigidBodyNode.OnEndTrigger(triggerActor.TagNode, otherController.TagNode);
                     //otherActor.RigidBodyNode.OnEndTrigger(otherActor.TagNode, triggerActor.TagNode);
@@ -200,14 +200,14 @@ namespace EngineNS.Bricks.PhysicsCore
             var otherActor = TtPhyActor.GetActor(new EngineNS.PhyActor(arg1->otherActor));
             if (otherActor != null)
             {
-                if (PhyPairFlag.eNOTIFY_TOUCH_FOUND == (arg1->status & PhyPairFlag.eNOTIFY_TOUCH_FOUND))
+                if (EPhyPairFlag.eNOTIFY_TOUCH_FOUND == (arg1->status & EPhyPairFlag.eNOTIFY_TOUCH_FOUND))
                 {
                     triggerActor.RigidBodyNode.OnBeginTrigger(triggerActor.TagNode, otherActor.TagNode);
                     otherActor.RigidBodyNode.OnBeginTrigger(otherActor.TagNode, triggerActor.TagNode);
                     return;
                 }
 
-                if (PhyPairFlag.eNOTIFY_TOUCH_LOST == (arg1->status & PhyPairFlag.eNOTIFY_TOUCH_LOST))
+                if (EPhyPairFlag.eNOTIFY_TOUCH_LOST == (arg1->status & EPhyPairFlag.eNOTIFY_TOUCH_LOST))
                 {
                     triggerActor.RigidBodyNode.OnEndTrigger(triggerActor.TagNode, otherActor.TagNode);
                     otherActor.RigidBodyNode.OnEndTrigger(otherActor.TagNode, triggerActor.TagNode);

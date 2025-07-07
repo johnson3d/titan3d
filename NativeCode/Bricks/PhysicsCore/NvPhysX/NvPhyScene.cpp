@@ -150,7 +150,7 @@ PhyActor* NvPhyScene::GetActor(void* updatedActors, UINT index)
 	if (activeActors[index]->userData != nullptr)
 	{
 		PhyEntity* entity = static_cast<PhyEntity*>(activeActors[index]->userData);
-		if (entity->EntityType == PhyEntityType::Phy_Actor)
+		if (entity->EntityType == EPhyEntityType::Phy_Actor)
 		{
 			PhyActor* actor = (PhyActor*)entity;
 			return actor;
@@ -161,10 +161,10 @@ PhyActor* NvPhyScene::GetActor(void* updatedActors, UINT index)
 
 vBOOL NvPhyScene::Raycast(const v3dxVector3* origin, const v3dxVector3* unitDir, float maxDistance, OUT VHitResult* hitResult)
 {
-	PhyQueryFilterData queryFilterData;
+	FPhyQueryFilterData queryFilterData;
 	return RaycastWithFilter(origin, unitDir, maxDistance, &queryFilterData, OUT hitResult);
 }
-vBOOL NvPhyScene::RaycastWithFilter(const v3dxVector3* origin, const v3dxVector3* unitDir, float maxDistance, PhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult)
+vBOOL NvPhyScene::RaycastWithFilter(const v3dxVector3* origin, const v3dxVector3* unitDir, float maxDistance, FPhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult)
 {
 	PxRaycastBuffer hit;
 	PxVec3& pxOrgin = *(PxVec3*)origin;
@@ -193,7 +193,7 @@ vBOOL NvPhyScene::RaycastWithFilter(const v3dxVector3* origin, const v3dxVector3
 			if (hit.block.actor != nullptr)
 			{
 				auto pPhyActor = (PhyEntity*)hit.block.actor->userData;
-				if (pPhyActor && pPhyActor->EntityType == PhyEntityType::Phy_Actor)
+				if (pPhyActor && pPhyActor->EntityType == EPhyEntityType::Phy_Actor)
 					hitResult->ExtData = pPhyActor->mCSharpHandle;
 				else
 					hitResult->ExtData = nullptr;
@@ -207,10 +207,10 @@ vBOOL NvPhyScene::RaycastWithFilter(const v3dxVector3* origin, const v3dxVector3
 }
 vBOOL NvPhyScene::Sweep(const PhyShape* shape, const v3dxVector3* position, const v3dxVector3* unitDir, float maxDistance, OUT VHitResult* hitResult)
 {
-	PhyQueryFilterData queryFilterData;
+	FPhyQueryFilterData queryFilterData;
 	return SweepWithFilter(shape, position, unitDir, maxDistance, &queryFilterData, OUT hitResult);
 }
-vBOOL NvPhyScene::SweepWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxVector3* unitDir, float maxDistance, PhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult)
+vBOOL NvPhyScene::SweepWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxVector3* unitDir, float maxDistance, FPhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult)
 {
 	PxSweepBuffer hit;
 	PxGeometry* geo = &((NvPhyShape*)shape)->mShape->getGeometry().any();
@@ -239,7 +239,7 @@ vBOOL NvPhyScene::SweepWithFilter(const PhyShape* shape, const v3dxVector3* posi
 			if (hit.block.actor != nullptr)
 			{
 				auto pPhyActor = (PhyEntity*)hit.block.actor->userData;
-				if (pPhyActor && pPhyActor->EntityType == PhyEntityType::Phy_Actor)
+				if (pPhyActor && pPhyActor->EntityType == EPhyEntityType::Phy_Actor)
 					hitResult->ExtData = pPhyActor->mCSharpHandle;
 				else
 					hitResult->ExtData = nullptr;
@@ -254,10 +254,10 @@ vBOOL NvPhyScene::SweepWithFilter(const PhyShape* shape, const v3dxVector3* posi
 
 vBOOL NvPhyScene::Overlap(const PhyShape* shape, const v3dxVector3* position, const v3dxQuaternion* rotation, OUT VHitResult* hitResult)
 {
-	PhyQueryFilterData queryFilterData;
+	FPhyQueryFilterData queryFilterData;
 	return OverlapWithFilter(shape, position, rotation, &queryFilterData, OUT hitResult);
 }
-vBOOL NvPhyScene::OverlapWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxQuaternion* rotation, PhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult)
+vBOOL NvPhyScene::OverlapWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxQuaternion* rotation, FPhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult)
 {
 	PxOverlapBuffer hit;
 	PxGeometry* geo = &((NvPhyShape*)shape)->mShape->getGeometry().any();
@@ -277,7 +277,7 @@ vBOOL NvPhyScene::OverlapWithFilter(const PhyShape* shape, const v3dxVector3* po
 			if (hit.block.actor != nullptr)
 			{
 				auto pPhyActor = (PhyEntity*)hit.block.actor->userData;
-				if (pPhyActor && pPhyActor->EntityType == PhyEntityType::Phy_Actor)
+				if (pPhyActor && pPhyActor->EntityType == EPhyEntityType::Phy_Actor)
 					hitResult->ExtData = pPhyActor->mCSharpHandle;
 				else
 					hitResult->ExtData = nullptr;

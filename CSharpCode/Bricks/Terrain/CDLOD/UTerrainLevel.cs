@@ -709,7 +709,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 var materials = new List<Bricks.PhysicsCore.TtPhyMaterial>() { TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial };
                 var terrainShape = pc.CreateShapeHeightfield(materials,
                     PhyHeightfield, PxHeightfieldScale, in Vector3.One);
-                PhyFilterData SimulationFilterData = new PhyFilterData();
+                var SimulationFilterData = new FPhyFilterData();
                 terrainShape.mCoreObject.SetQueryFilterData(SimulationFilterData);
                 terrainShape.mCoreObject.SetSimulationFilterData(SimulationFilterData);
                 PhyActor = pc.CreateActor(EPhyActorType.PAT_Static, in Level.Node.Placement.AbsTransform.mPosition, in Quaternion.Identity);

@@ -12,11 +12,11 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             [Rtti.Meta("")]
             public RName PxMaterial { get; set; }
             [Rtti.Meta("")]
-            public PhyFilterData QueryFilterData { get; set; }
+            public FPhyFilterData QueryFilterData { get; set; }
             [Rtti.Meta("")]
-            public PhyFilterData SimulationFilterData { get; set; }
+            public FPhyFilterData SimulationFilterData { get; set; }
             [Rtti.Meta("")]
-            public PhyQueryFlag PhyQueryFlags { get; set; } = PhyQueryFlag.eSTATIC | PhyQueryFlag.eDYNAMIC | PhyQueryFlag.ePREFILTER;
+            public EPhyQueryFlag PhyQueryFlags { get; set; } = EPhyQueryFlag.eSTATIC | EPhyQueryFlag.eDYNAMIC | EPhyQueryFlag.ePREFILTER;
 
         }
         public Bricks.PhysicsCore.TtPhyController PhyController { get; set; } = null;

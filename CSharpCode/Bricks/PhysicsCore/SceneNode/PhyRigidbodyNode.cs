@@ -23,9 +23,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             [Rtti.Meta("")]
             public EPhyActorFlag ActorFlag { get; set; } = EPhyActorFlag.PAF_eVISUALIZATION;
             [Rtti.Meta("")]
-            public PhyFilterData QueryFilterData { get; set; }
+            public FPhyFilterData QueryFilterData { get; set; }
             [Rtti.Meta("")]
-            public PhyFilterData SimulationFilterData { get; set; }
+            public FPhyFilterData SimulationFilterData { get; set; }
             [Rtti.Meta("")]
             public RName EventMacross { get; set; }
         }
@@ -51,9 +51,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         [Category("Option")]
         public float Mass { get => RigidbodyNodeData.Mass; set => RigidbodyNodeData.Mass = value; }
         [Category("Option")]
-        public PhyFilterData QueryFilterData { get => RigidbodyNodeData.QueryFilterData; set => RigidbodyNodeData.QueryFilterData = value; }
+        public FPhyFilterData QueryFilterData { get => RigidbodyNodeData.QueryFilterData; set => RigidbodyNodeData.QueryFilterData = value; }
         [Category("Option")]
-        public PhyFilterData SimulationFilterData { get => RigidbodyNodeData.SimulationFilterData; set => RigidbodyNodeData.SimulationFilterData = value; }
+        public FPhyFilterData SimulationFilterData { get => RigidbodyNodeData.SimulationFilterData; set => RigidbodyNodeData.SimulationFilterData = value; }
 
         Macross.TtMacrossGetter<TtPhyEventMacrossBase> mMacrossGetter = null;
         public Macross.TtMacrossGetter<TtPhyEventMacrossBase> MacrossGetter

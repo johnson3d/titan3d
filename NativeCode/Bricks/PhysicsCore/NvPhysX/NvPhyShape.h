@@ -6,7 +6,7 @@ NS_BEGIN
 
 class NvPhyScene;
 class NvPhyActor;
-struct PhyFilterData;
+struct FPhyFilterData;
 class NvPhyMaterial;
 
 class NvPhyShape : public PhyShape
@@ -72,8 +72,8 @@ public:
 		q->Z = tm.q.z;
 		q->W = tm.q.w;
 	}
-	void SetQueryFilterData(const PhyFilterData* filterData);
-	void SetSimulationFilterData(const PhyFilterData* filterData);
+	void SetQueryFilterData(const FPhyFilterData* filterData);
+	void SetSimulationFilterData(const FPhyFilterData* filterData);
 	void SetFlag(EPhysShapeFlag flag, bool value);
 	bool HaveFlag(EPhysShapeFlag flag);
 

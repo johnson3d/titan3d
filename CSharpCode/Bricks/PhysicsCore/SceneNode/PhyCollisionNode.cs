@@ -22,9 +22,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             [Rtti.Meta("")]
             public bool IsTrigger { get; set; } = false;
             [Rtti.Meta("")]
-            public PhyFilterData QueryFilterData { get; set; }
+            public FPhyFilterData QueryFilterData { get; set; }
             [Rtti.Meta("")]
-            public PhyFilterData SimulationFilterData { get; set; }
+            public FPhyFilterData SimulationFilterData { get; set; }
         }
         public TtPhyCollisionNodeData CollisionNodeData
         {
@@ -70,9 +70,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             }
         }
         [Category("Option")]
-        public PhyFilterData QueryFilterData { get => CollisionNodeData.QueryFilterData; set => CollisionNodeData.QueryFilterData = value; }
+        public FPhyFilterData QueryFilterData { get => CollisionNodeData.QueryFilterData; set => CollisionNodeData.QueryFilterData = value; }
         [Category("Option")]
-        public PhyFilterData SimulationFilterData { get => CollisionNodeData.SimulationFilterData; set => CollisionNodeData.SimulationFilterData = value; }
+        public FPhyFilterData SimulationFilterData { get => CollisionNodeData.SimulationFilterData; set => CollisionNodeData.SimulationFilterData = value; }
         protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var baseResult = await base.InitializeNode(world, data, bvType, placementType);

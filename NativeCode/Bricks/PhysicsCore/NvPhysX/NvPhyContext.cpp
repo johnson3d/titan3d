@@ -178,9 +178,9 @@ vBOOL NvPhyContext::Init(UINT featureFlags)
 		return FALSE;
 	}
 
-	if (featureFlags & PhyFeatureFlag::Articulations)
+	if (featureFlags & EPhyFeatureFlag::Articulations)
 		PxRegisterArticulations(*mContext);
-	if (featureFlags & PhyFeatureFlag::HeightFields)
+	if (featureFlags & EPhyFeatureFlag::HeightFields)
 		PxRegisterHeightFields(*mContext);
 	/*if (featureFlags & PhyFeatureFlag::Cloth)
 		PxRegisterCloth(*mContext);

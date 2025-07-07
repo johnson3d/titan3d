@@ -14,7 +14,7 @@ class PhyActor;
 class PhyObstacleContext;
 
 enum TR_ENUM()
-	PhyPairFlag
+	EPhyPairFlag
 {
 	eSOLVE_CONTACT = (1 << 0),
 	eMODIFY_CONTACTS = (1 << 1),
@@ -38,59 +38,23 @@ enum TR_ENUM()
 	eTRIGGER_DEFAULT = eNOTIFY_TOUCH_FOUND | eNOTIFY_TOUCH_LOST | eDETECT_DISCRETE_CONTACT
 };
 
-struct FFilterData
-{
-	FFilterData()
-	{
-		word0 = word1 = word2 = word3 = 0;
-	}
-
-	FFilterData(const FFilterData& fd) : word0(fd.word0), word1(fd.word1), word2(fd.word2), word3(fd.word3) {}
-
-	FFilterData(UINT w0, UINT w1, UINT w2, UINT w3) : word0(w0), word1(w1), word2(w2), word3(w3) {}
-
-	void setToDefault()
-	{
-		*this = FFilterData();
-	}
-	void operator = (const FFilterData& fd)
-	{
-		word0 = fd.word0;
-		word1 = fd.word1;
-		word2 = fd.word2;
-		word3 = fd.word3;
-	}
-	bool operator == (const FFilterData& a) const
-	{
-		return a.word0 == word0 && a.word1 == word1 && a.word2 == word2 && a.word3 == word3;
-	}
-	bool operator != (const FFilterData& a) const
-	{
-		return !(a == *this);
-	}
-
-	UINT word0;
-	UINT word1;
-	UINT word2;
-	UINT word3;
-};
-
 struct TR_CLASS(SV_LayoutStruct = 8)
-	PhyQueryFilterData
+	FPhyQueryFilterData
 {
 public:
-	PhyQueryFilterData() : flag((PhyQueryFlag)(PhyQueryFlag::eDYNAMIC | PhyQueryFlag::eSTATIC)){}
+	FPhyQueryFilterData() : flag((EPhyQueryFlag)(EPhyQueryFlag::eDYNAMIC | EPhyQueryFlag::eSTATIC)){}
 
 	/** \brief constructor to set both filter data and filter flags */
-	PhyQueryFilterData(const FFilterData& fd, PhyQueryFlag f) : data(fd), flag(f){}
+	FPhyQueryFilterData(const FPhyFilterData& fd, EPhyQueryFlag f) : data(fd), flag(f){}
 
 	/** \brief constructor to set filter flags only */
-	PhyQueryFilterData(PhyQueryFlag f) : flag(f){}
-	FFilterData		data;		//!< Filter data associated with the scene query
-	PhyQueryFlag	flag;		//!< Filter flags (see #PxQueryFlags)
+	FPhyQueryFilterData(EPhyQueryFlag f) : flag(f){}
+	FPhyFilterData	data;		//!< Filter data associated with the scene query
+	EPhyQueryFlag	flag;		//!< Filter flags (see #PxQueryFlags)
 };
 
-enum ETriggerPairFlag
+enum TR_ENUM()
+	ETriggerPairFlag
 {
 	eREMOVED_SHAPE_TRIGGER = (1 << 0),					//!< The trigger shape has been removed from the actor/scene.
 		eREMOVED_SHAPE_OTHER = (1 << 1),					//!< The shape causing the trigger event has been removed from the actor/scene.
@@ -98,23 +62,23 @@ enum ETriggerPairFlag
 };
 
 struct TR_CLASS(SV_LayoutStruct = 8)
-	PhyTriggerPair
+	FPhyTriggerPair
 {
-	PhyTriggerPair() {}
+	FPhyTriggerPair() {}
 
-	void*				triggerShape;	//!< The shape that has been marked as a trigger.
+	void*			triggerShape;	//!< The shape that has been marked as a trigger.
 	void*			triggerActor;	//!< The actor to which triggerShape is attached
-	void*				otherShape;		//!< The shape causing the trigger event. \deprecated (see #PxSimulationEventCallback::onTrigger()) If collision between trigger shapes is enabled, then this member might point to a trigger shape as well.
+	void*			otherShape;		//!< The shape causing the trigger event. \deprecated (see #PxSimulationEventCallback::onTrigger()) If collision between trigger shapes is enabled, then this member might point to a trigger shape as well.
 	void*			otherActor;		//!< The actor to which otherShape is attached
-	PhyPairFlag		status;			//!< Type of trigger event (eNOTIFY_TOUCH_FOUND or eNOTIFY_TOUCH_LOST). eNOTIFY_TOUCH_PERSISTS events are not supported.
-	ETriggerPairFlag		flags;			//!< Additional information on the pair (see #PxTriggerPairFlag)
+	EPhyPairFlag		status;			//!< Type of trigger event (eNOTIFY_TOUCH_FOUND or eNOTIFY_TOUCH_LOST). eNOTIFY_TOUCH_PERSISTS events are not supported.
+	ETriggerPairFlag	flags;			//!< Additional information on the pair (see #PxTriggerPairFlag)
 };
 
 struct TR_CLASS(SV_LayoutStruct = 8)
-	PhyContactPair
+	FPhyContactPair
 {
 public:
-	PhyContactPair() {}
+	FPhyContactPair() {}
 	void*				shapes[2];
 	const UINT8* contactPatches;
 	const UINT8* contactPoints;
@@ -133,28 +97,26 @@ public:
 };
 
 struct TR_CLASS(SV_LayoutStruct = 8)
-	PhyContactPairHeader
+	FPhyContactPairHeader
 {
 public:
-	PhyContactPairHeader() {}
+	FPhyContactPairHeader() {}
 
 	void*						actors[2];
 	const BYTE*					extraDataStream;
 	UINT16						extraDataStreamSize;
 	UINT						flags;
-	PhyContactPair*				pairs;
+	FPhyContactPair*			pairs;
 	UINT						nbPairs;
 };
 
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
-typedef void(* FonTrigger)(void* self, PhyTriggerPair* pairs, UINT count);
+typedef void(* FonTrigger)(void* self, FPhyTriggerPair* pairs, UINT count);
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
-typedef void(* FonContact)(void* selft, const PhyContactPairHeader* pairHeader, const PhyContactPair* pairs, UINT nbPairs);
-
-
+typedef void(* FonContact)(void* selft, const FPhyContactPairHeader* pairHeader, const FPhyContactPair* pairs, UINT nbPairs);
 
 enum TR_ENUM()
-EPhySceneFlag
+	EPhySceneFlag
 {
 	eENABLE_ACTIVE_ACTORS = (1 << 0),
 	eENABLE_CCD = (1 << 1),
@@ -214,9 +176,9 @@ public:
 	virtual vBOOL Raycast(const v3dxVector3* origin, const v3dxVector3* unitDir, float maxDistance, OUT VHitResult* hitResult) = 0;
 	virtual vBOOL Sweep(const PhyShape* shape, const v3dxVector3* position, const v3dxVector3* unitDir, float maxDistance, OUT VHitResult* hitResult) = 0;
 	virtual vBOOL Overlap(const PhyShape* shape, const v3dxVector3* position, const v3dxQuaternion* rotation, OUT VHitResult* hitResult) = 0;
-	virtual vBOOL RaycastWithFilter(const v3dxVector3* origin, const v3dxVector3* unitDir, float maxDistance, PhyQueryFilterData* queryFilterData,OUT VHitResult* hitResult) = 0;
-	virtual vBOOL SweepWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxVector3* unitDir, float maxDistance, PhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult) = 0;
-	virtual vBOOL OverlapWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxQuaternion* rotation, PhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult) = 0;
+	virtual vBOOL RaycastWithFilter(const v3dxVector3* origin, const v3dxVector3* unitDir, float maxDistance, FPhyQueryFilterData* queryFilterData,OUT VHitResult* hitResult) = 0;
+	virtual vBOOL SweepWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxVector3* unitDir, float maxDistance, FPhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult) = 0;
+	virtual vBOOL OverlapWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxQuaternion* rotation, FPhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult) = 0;
 	virtual PhyController* CreateBoxController(const PhyBoxControllerDesc* desc) = 0;
 	virtual PhyController* CreateCapsuleController(const PhyCapsuleControllerDesc* desc) = 0;
 	virtual int GetNbControllers() = 0;

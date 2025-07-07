@@ -24,8 +24,8 @@ typedef void(*FonAdvance)(void* selft, const physx::PxRigidBody* const*, const p
 //typedef physx::PxSimulationFilterShader FPxSimulationFilterShader;
 //typedef physx::PxFilterFlags(WINAPI*FPxSimulationFilterShader)(//void* self, 
 typedef USHORT(*FSimulationFilterShader)(//void* self, 
-	UINT attributes0, FFilterData* filterData0,
-	UINT attributes1, FFilterData* filterData1,
+	UINT attributes0, FPhyFilterData* filterData0,
+	UINT attributes1, FPhyFilterData* filterData1,
 	physx::PxPairFlags* pairFlags, const void* constantBlock, UINT constantBlockSize);
 
 
@@ -59,7 +59,7 @@ public:
 			physx::PxContactPairHeader* pUsed = (physx::PxContactPairHeader*)&pairHeader;
 			pUsed->actors[0] = (physx::PxRigidActor*)pairHeader.actors[0]->userData;
 			pUsed->actors[1] = (physx::PxRigidActor*)pairHeader.actors[1]->userData;
-			_onContact(Handle, (PhyContactPairHeader*)&pairHeader, (PhyContactPair*)pairs, nbPairs);
+			_onContact(Handle, (FPhyContactPairHeader*)&pairHeader, (FPhyContactPair*)pairs, nbPairs);
 			pUsed->actors[0] = saved_actor0;
 			pUsed->actors[1] = saved_actor1;
 		}
@@ -68,7 +68,7 @@ public:
 	{
 		if (_onTrigger != nullptr)
 		{
-			PhyTriggerPair* phyPairs = (PhyTriggerPair*)alloca(sizeof(PhyTriggerPair) * count);
+			FPhyTriggerPair* phyPairs = (FPhyTriggerPair*)alloca(sizeof(FPhyTriggerPair) * count);
 			if (phyPairs != nullptr)
 			{
 				//PhyTriggerPair* phyPairs = new PhyTriggerPair[count];
@@ -78,7 +78,7 @@ public:
 					phyPairs[i].otherShape = pairs[i].otherShape->userData;
 					phyPairs[i].triggerActor = pairs[i].triggerActor->userData;
 					phyPairs[i].triggerShape = pairs[i].triggerShape->userData;
-					phyPairs[i].status = (PhyPairFlag)pairs[i].status;
+					phyPairs[i].status = (EPhyPairFlag)pairs[i].status;
 					phyPairs[i].flags = (ETriggerPairFlag)((uint32_t)pairs[i].flags);
 				}
 				_onTrigger(Handle, phyPairs, count);
@@ -120,7 +120,7 @@ struct PhySimulationFilterShader
 			{
 				VFX_LTRACE(ELTT_Physics, "CorePxSimulationFilterShader pairFlags == null\r\n");
 			}
-			return (physx::PxFilterFlags)_CustomSimulationFilterShader(attributes0, (FFilterData*)&filterData0, attributes1, (FFilterData*)&filterData1, &pairFlags, constantBlock, constantBlockSize);
+			return (physx::PxFilterFlags)_CustomSimulationFilterShader(attributes0, (FPhyFilterData*)&filterData0, attributes1, (FPhyFilterData*)&filterData1, &pairFlags, constantBlock, constantBlockSize);
 		}
 		pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT| physx::PxPairFlag::eTRIGGER_DEFAULT;
 		return physx::PxFilterFlags();
@@ -223,9 +223,9 @@ public:
 	vBOOL Raycast(const v3dxVector3* origin, const v3dxVector3* unitDir, float maxDistance, OUT VHitResult* hitResult);
 	vBOOL Sweep(const PhyShape* shape, const v3dxVector3* position, const v3dxVector3* unitDir, float maxDistance, OUT VHitResult* hitResult);
 	vBOOL Overlap(const PhyShape* shape, const v3dxVector3* position, const v3dxQuaternion* rotation, OUT VHitResult* hitResult);
-	vBOOL RaycastWithFilter(const v3dxVector3* origin, const v3dxVector3* unitDir, float maxDistance, PhyQueryFilterData* queryFilterData,OUT VHitResult* hitResult);
-	vBOOL SweepWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxVector3* unitDir, float maxDistance, PhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult);
-	vBOOL OverlapWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxQuaternion* rotation, PhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult);
+	vBOOL RaycastWithFilter(const v3dxVector3* origin, const v3dxVector3* unitDir, float maxDistance, FPhyQueryFilterData* queryFilterData,OUT VHitResult* hitResult);
+	vBOOL SweepWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxVector3* unitDir, float maxDistance, FPhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult);
+	vBOOL OverlapWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxQuaternion* rotation, FPhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult);
 	PhyController* CreateBoxController(const PhyBoxControllerDesc* desc);
 	PhyController* CreateCapsuleController(const PhyCapsuleControllerDesc* desc);
 	int GetNbControllers() {

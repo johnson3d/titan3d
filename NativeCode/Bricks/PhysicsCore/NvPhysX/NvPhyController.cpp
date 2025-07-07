@@ -154,7 +154,7 @@ void NvPhyController::BindPhysX()
 }
 
 EPhyControllerCollisionFlag NvPhyController::Move(const v3dxVector3* disp, float minDist, float elapsedTime,
-	const PhyFilterData* filterData, PhyQueryFlag filterFlags)
+	const FPhyFilterData* filterData, EPhyQueryFlag filterFlags)
 {
 	auto pScene = mScene.GetCastPtr<NvPhyScene>();
 
@@ -237,7 +237,7 @@ void NvPhyController::SetSlopeLimit(float slopeLimit)
 	physx::PxSceneWriteLock Lock(*pScene->mScene);
 	mController->setSlopeLimit(slopeLimit);
 }
-void NvPhyController::SetQueryFilterData(const PhyFilterData* filterData)
+void NvPhyController::SetQueryFilterData(const FPhyFilterData* filterData)
 {
 	auto pScene = mScene.GetCastPtr<NvPhyScene>();
 	physx::PxSceneWriteLock Lock(*pScene->mScene);
@@ -262,7 +262,7 @@ void NvPhyController::SetQueryFilterData(const PhyFilterData* filterData)
 		delete[] shapeList;
 	}
 }
-void NvPhyController::SetSimulationFilterData(const PhyFilterData* filterData)
+void NvPhyController::SetSimulationFilterData(const FPhyFilterData* filterData)
 {
 	auto pScene = mScene.GetCastPtr<NvPhyScene>();
 	physx::PxSceneWriteLock Lock(*pScene->mScene);

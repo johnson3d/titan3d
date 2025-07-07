@@ -120,7 +120,7 @@ void NvPhyShape::GetLocalPose(physx::PxTransform* relativePose)
 	}
 }
 
-void NvPhyShape::SetQueryFilterData(const PhyFilterData* filterData)
+void NvPhyShape::SetQueryFilterData(const FPhyFilterData* filterData)
 {
 	if (mActor.IsValid() && mActor.GetPtr() && mActor.GetPtr()->mScene.GetPtr() != nullptr)
 	{
@@ -132,7 +132,7 @@ void NvPhyShape::SetQueryFilterData(const PhyFilterData* filterData)
 		mShape->setQueryFilterData(*(physx::PxFilterData*)filterData);
 	}
 
-}void NvPhyShape::SetSimulationFilterData(const PhyFilterData* filterData)
+}void NvPhyShape::SetSimulationFilterData(const FPhyFilterData* filterData)
 {
 	if (mActor.IsValid() && mActor.GetPtr() && mActor.GetPtr()->mScene.GetPtr() != nullptr)
 	{
