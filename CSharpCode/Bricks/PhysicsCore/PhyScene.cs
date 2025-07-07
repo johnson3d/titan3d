@@ -145,7 +145,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 return false;
 
             mPxceneDesc = pc.CreateSceneDesc();
-            mPxceneDesc.mCoreObject.SetFlags(PhySceneFlag.eENABLE_ACTIVE_ACTORS);
+            mPxceneDesc.mCoreObject.SetFlags(EPhySceneFlag.eENABLE_ACTIVE_ACTORS);
             var gravity = new Vector3(0, -9.8f, 0);
             mPxceneDesc.mCoreObject.SetGravity(in gravity);
             unsafe

@@ -38,86 +38,41 @@ public:
 	ENGINE_RTTI(PhyShape)
 
 public:
-	TWeakRefHandle<PhyActor>			mActor;
+	TWeakRefHandle<PhyActor>		mActor;
 	EPhysShapeType					mType;
-	physx::PxShape*					mShape;
 
 	int								mTrianglesRemapNumber;
-	uint32_t*						mTrianglesRemap;
+	unsigned int*					mTrianglesRemap;
 
-	//physx::PxTriangleMesh*			mTriangleMesh;
 public:
-	PhyShape();
-	~PhyShape();
-	virtual void Cleanup() override;
-	void BindPhysX();
-	vBOOL AddToActor(PhyActor* actor, const physx::PxTransform* relativePose);
-	bool AddToActor(PhyActor * actor, const v3dxVector3 * p, const v3dxQuaternion * q)
-	{
-		physx::PxTransform tm;
-		tm.p.x = p->X;
-		tm.p.y = p->Y;
-		tm.p.z = p->Z;
+	virtual void BindPhysX() = 0;
+	virtual bool AddToActor(PhyActor* actor, const v3dxVector3* p, const v3dxQuaternion* q) = 0;
+	virtual void RemoveFromActor() = 0;
+	virtual void SetLocalPose(const v3dxVector3* p, const v3dxQuaternion* q) = 0;
+	virtual void GetLocalPose(v3dxVector3* p, v3dxQuaternion* q) = 0;
+	virtual void SetQueryFilterData(const PhyFilterData* filterData) = 0;
+	virtual void SetSimulationFilterData(const PhyFilterData* filterData) = 0;
+	virtual void SetFlag(EPhysShapeFlag flag, bool value) = 0;
+	virtual bool HaveFlag(EPhysShapeFlag flag) = 0;
 
-		tm.q.x = q->X;
-		tm.q.y = q->Y;
-		tm.q.z = q->Z;
-		tm.q.w = q->W;
+	virtual void GetMaterials(PhyMaterial** materials, int count) = 0;
+	virtual void SetMaterials(PhyMaterial** materials, int count) = 0;
 
-		return AddToActor(actor, &tm) ? true : false;
-	}
-	void RemoveFromActor();
-	void SetLocalPose(const physx::PxTransform* relativePose);
-	void SetLocalPose(const v3dxVector3* p, const v3dxQuaternion* q)
-	{
-		physx::PxTransform tm;
-		tm.p.x = p->X;
-		tm.p.y = p->Y;
-		tm.p.z = p->Z;
-
-		tm.q.x = q->X;
-		tm.q.y = q->Y;
-		tm.q.z = q->Z;
-		tm.q.w = q->W;
-		SetLocalPose(&tm);
-	}
-	void GetLocalPose(physx::PxTransform* relativePose);
-	void GetLocalPose(v3dxVector3* p, v3dxQuaternion* q)
-	{
-		physx::PxTransform tm;
-		GetLocalPose(&tm);
-		p->X = tm.p.x;
-		p->Y = tm.p.y;
-		p->Z = tm.p.z;
-
-		q->X = tm.q.x;
-		q->Y = tm.q.y;
-		q->Z = tm.q.z;
-		q->W = tm.q.w;
-	}
-	void SetQueryFilterData(const PhyFilterData* filterData);
-	void SetSimulationFilterData(const PhyFilterData* filterData);
-	void SetFlag(EPhysShapeFlag flag, bool value);
-	bool HaveFlag(EPhysShapeFlag flag);
-
-	void GetMaterials(PhyMaterial** materials, int count);
-	void SetMaterials(PhyMaterial** materials, int count);
-
-	bool IfGetBox(v3dxVector3* halfExtent);
-	bool IfSetBox(const v3dxVector3* halfExtent);
-	bool IfGetSphere(float* radius);
-	bool IfSetSphere(float radius);
-	bool IfGetCapsule(float* radius, float* halfHeight);
-	bool IfSetCapsule(float radius, float halfHeight);
-	bool IfGetTriMeshScaling(v3dxVector3* scale, v3dxQuaternion* scaleRot);
-	bool IfSetTriMeshScaling(const v3dxVector3* scale, const v3dxQuaternion* scaleRot);
+	virtual bool IfGetBox(v3dxVector3* halfExtent) = 0;
+	virtual bool IfSetBox(const v3dxVector3* halfExtent) = 0;
+	virtual bool IfGetSphere(float* radius) = 0;
+	virtual bool IfSetSphere(float radius) = 0;
+	virtual bool IfGetCapsule(float* radius, float* halfHeight) = 0;
+	virtual bool IfSetCapsule(float radius, float halfHeight) = 0;
+	virtual bool IfGetTriMeshScaling(v3dxVector3* scale, v3dxQuaternion* scaleRot) = 0;
+	virtual bool IfSetTriMeshScaling(const v3dxVector3* scale, const v3dxQuaternion* scaleRot) = 0;
 
 	TR_MEMBER(SV_NoBind = true)
-	NxRHI::FMeshPrimitives* IfGetTriMesh(NxRHI::IGpuDevice* rc);
+	virtual NxRHI::FMeshPrimitives* IfGetTriMesh(NxRHI::IGpuDevice* rc) = 0;
 	TR_MEMBER(SV_NoBind = true)
-	NxRHI::FMeshPrimitives* IfGetConvexMesh(NxRHI::IGpuDevice* rc);
+	virtual NxRHI::FMeshPrimitives* IfGetConvexMesh(NxRHI::IGpuDevice* rc) = 0;
 
-	int GetTrianglesRemap(int index);
+	virtual int GetTrianglesRemap(int index) = 0;
 };
 
 NS_END

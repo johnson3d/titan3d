@@ -40,10 +40,6 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             mCoreObject = self;
         }
-        public TtPhyTriMesh()
-        {
-            mCoreObject = PhyTriMesh.CreateInstance();
-        }
         public const string AssetExt = ".pxmesh";
         public string TypeExt { get => AssetExt; }
         public class UPhyMeshImportAttribute : IO.CommonCreateAttribute
@@ -139,7 +135,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public static TtPhyTriMesh LoadXnd(UPhyMeshManager manager, IO.TtXndNode node)
         {
-            TtPhyTriMesh result = new TtPhyTriMesh();
+            TtPhyTriMesh result = TtEngine.Instance.PhyModule.PhyContext.CreateTriMesh();
             if (ReloadXnd(result, manager, node) == false)
                 return null;
             return result;

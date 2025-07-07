@@ -76,7 +76,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         }
         protected void CreateController()
         {
-            PhyControllerDesc = new Bricks.PhysicsCore.TtPhyCapsuleControllerDesc();
+            PhyControllerDesc = TtEngine.Instance.PhyModule.PhyContext.CreateCapsuleControllerDesc();
             PhyControllerDesc.mCoreObject.SetCapsuleHeight(CapsulePhyControllerNodeData.Height);
             PhyControllerDesc.mCoreObject.SetCapsuleRadius(CapsulePhyControllerNodeData.Radius);
 
@@ -162,7 +162,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         }
         protected void CreateController()
         {
-            PhyControllerDesc = new Bricks.PhysicsCore.TtPhyBoxControllerDesc();
+            PhyControllerDesc = TtEngine.Instance.PhyModule.PhyContext.CreateBoxControllerDesc();
             PhyControllerDesc.mCoreObject.SetExtent(BoxPhyControllerNodeData.Extent);
             Bricks.PhysicsCore.TtPhyMaterial mtl;
             if (BoxPhyControllerNodeData.PxMaterial != null)

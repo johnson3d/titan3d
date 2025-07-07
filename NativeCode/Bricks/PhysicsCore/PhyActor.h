@@ -36,12 +36,11 @@ class TR_CLASS()
 public:
 	ENGINE_RTTI(PhyActor)
 public:
-	TWeakRefHandle<PhyScene>			mScene;
+	TWeakRefHandle<PhyScene>		mScene;
 	v3dxVector3						mPosition;
 	v3dxQuaternion					mRotation;
 
 	EPhyActorType					mActorType;
-	physx::PxActor*					mActor;
 public:
 	PhyActor();
 	~PhyActor();
@@ -54,76 +53,24 @@ public:
 	inline const v3dxQuaternion* GetRotation() const {
 		return &mRotation;
 	}
-	virtual void Cleanup() override;
-	void BindPhysX();
-	bool AddToScene(PhyScene* scene);
-	bool RemoveFromScene(PhyScene* scene);
-	virtual void UpdateTransform();
+	virtual void BindPhysX() = 0;
+	virtual bool AddToScene(PhyScene* scene) = 0;
+	virtual bool RemoveFromScene(PhyScene* scene) = 0;
+	virtual void UpdateTransform() = 0;
 
-	bool SetPose2Physics(const v3dxVector3* p, const v3dxQuaternion* q, bool autowake)
-	{
-		physx::PxTransform trf;
-		trf.p.x = p->X;
-		trf.p.y = p->Y;
-		trf.p.z = p->Z;
-		trf.q.x = q->X;
-		trf.q.y = q->Y;
-		trf.q.z = q->Z;
-		trf.q.w = q->W;
-		return SetPose2Physics(&trf, autowake ? TRUE : FALSE);
-	}
-	bool SetPose2Physics(const physx::PxTransform* transform, bool autowake);
-	bool AttachShape(PhyShape* shape, const v3dxVector3* p, const v3dxQuaternion* q)
-	{
-		physx::PxTransform trf;
-		trf.p.x = p->X;
-		trf.p.y = p->Y;
-		trf.p.z = p->Z;
-		trf.q.x = q->X;
-		trf.q.y = q->Y;
-		trf.q.z = q->Z;
-		trf.q.w = q->W;
-		return AttachShape(shape, &trf);
-	}
-	bool AttachShape(PhyShape* shape, const physx::PxTransform* relativePose);
-	void DetachShape(PhyShape* shape, bool wakeOnLostTouch);
+	virtual bool SetPose2Physics(const v3dxVector3* p, const v3dxQuaternion* q, bool autowake) = 0;
+	virtual bool AttachShape(PhyShape* shape, const v3dxVector3* p, const v3dxQuaternion* q) = 0;
+	virtual void DetachShape(PhyShape* shape, bool wakeOnLostTouch) = 0;
 
-	bool SetRigidBodyFlag(EPhyRigidBodyFlag flag, bool value);
-	bool SetActorFlag(EPhyActorFlag flag, bool value);
+	virtual bool SetRigidBodyFlag(EPhyRigidBodyFlag flag, bool value) = 0;
+	virtual bool SetActorFlag(EPhyActorFlag flag, bool value) = 0;
 
-	void SetMass(float mass)
-	{
-		if (mActorType == EPhyActorType::PAT_Dynamic)
-		{
-			((physx::PxRigidDynamic*)mActor)->setMass(mass);
-		}
-	}
-	float GetMass() const 
-	{
-		if (mActorType == EPhyActorType::PAT_Dynamic)
-		{
-			return ((physx::PxRigidDynamic*)mActor)->getMass();
-		}
-		return 0;
-	}
-	void SetMassSpaceInertiaTensor(const v3dxVector3* m)
-	{
-		if (mActorType == EPhyActorType::PAT_Dynamic)
-		{
-			((physx::PxRigidDynamic*)mActor)->setMassSpaceInertiaTensor(*(physx::PxVec3*)m);
-		}
-	}
-	v3dxVector3 GetMassSpaceInertiaTensor() const
-	{
-		if (mActorType == EPhyActorType::PAT_Dynamic)
-		{
-			auto v3 = ((physx::PxRigidDynamic*)mActor)->getMassSpaceInertiaTensor();
-			return *(v3dxVector3*)&v3;
-		}
-		return v3dxVector3::ZERO;
-	}
-	float GetMinCCDAdvanceCoefficient();
-	void SetMinCCDAdvanceCoefficient(float advanceCoefficient);
+	virtual void SetMass(float mass) = 0;
+	virtual float GetMass() const = 0;
+	virtual void SetMassSpaceInertiaTensor(const v3dxVector3* m) = 0;
+	virtual v3dxVector3 GetMassSpaceInertiaTensor() const = 0;
+	virtual float GetMinCCDAdvanceCoefficient() = 0;
+	virtual void SetMinCCDAdvanceCoefficient(float advanceCoefficient) = 0;
 };
 
 NS_END

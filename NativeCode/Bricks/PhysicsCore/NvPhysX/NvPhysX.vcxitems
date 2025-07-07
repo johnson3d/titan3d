@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{b6cab0aa-e7d9-4f42-be02-92f6a6ec6e33}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)NvPhyActor.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NvPhyContext.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NvPhyController.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NvPhyHeightfield.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NvPhyMaterial.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NvPhyMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NvPhyObstacle.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NvPhyScene.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NvPhyShape.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)NvCommon.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NvPhyActor.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NvPhyContext.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NvPhyController.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NvPhyHeightfield.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NvPhyMaterial.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NvPhyMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NvPhyObstacle.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NvPhyScene.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NvPhyShape.h" />
+  </ItemGroup>
+</Project>

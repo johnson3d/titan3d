@@ -20,24 +20,17 @@ class TR_CLASS()
 	PhyHeightfield : public IWeakRefObject
 {
 public:
-	physx::PxHeightField*		mHeightField;
 	TR_MEMBER(SV_NoBind)
 	IBlobObject					mCookedData;
-	PhyHeightfield()
-	{
-		mHeightField = nullptr;
-	}
-	~PhyHeightfield();
-	void Cleanup();
-	bool CreateFromCookedData(PhyContext* ctx, void* cookedData, UINT size);
+	virtual bool CreateFromCookedData(PhyContext* ctx, void* cookedData, UINT size) = 0;
 	IBlobObject* GetCookedData() {
 		return &mCookedData;
 	}
-	NxRHI::FMeshDataProvider* CreateMeshProvider();
+	virtual NxRHI::FMeshDataProvider* CreateMeshProvider() = 0;
 
-	bool ModifySamples(UINT startCol, UINT startRow, 
+	virtual bool ModifySamples(UINT startCol, UINT startRow,
 			UINT nbCols, UINT nbRows, void* pData, UINT dataStride, float convexEdgeThreshold,
-			bool shrinkBounds = false);
+			bool shrinkBounds = false) = 0;
 };
 
 NS_END

@@ -1,7 +1,6 @@
 #pragma once
 #include "PhyEntity.h"
 #include "../../Math/v3dxRayCast.h"
-using namespace physx;
 
 NS_BEGIN
 
@@ -32,38 +31,83 @@ enum TR_ENUM()
 	ePRE_SOLVER_VELOCITY = (1 << 12),
 	ePOST_SOLVER_VELOCITY = (1 << 13),
 	eCONTACT_EVENT_POSE = (1 << 14),
-	eNEXT_FREE = (1 << 15),        //!< For internal use only.
+	//eNEXT_FREE = (1 << 15),        //!< For internal use only.
 
 	eCONTACT_DEFAULT = eSOLVE_CONTACT | eDETECT_DISCRETE_CONTACT,
 
 	eTRIGGER_DEFAULT = eNOTIFY_TOUCH_FOUND | eNOTIFY_TOUCH_LOST | eDETECT_DISCRETE_CONTACT
 };
 
+struct FFilterData
+{
+	FFilterData()
+	{
+		word0 = word1 = word2 = word3 = 0;
+	}
+
+	FFilterData(const FFilterData& fd) : word0(fd.word0), word1(fd.word1), word2(fd.word2), word3(fd.word3) {}
+
+	FFilterData(UINT w0, UINT w1, UINT w2, UINT w3) : word0(w0), word1(w1), word2(w2), word3(w3) {}
+
+	void setToDefault()
+	{
+		*this = FFilterData();
+	}
+	void operator = (const FFilterData& fd)
+	{
+		word0 = fd.word0;
+		word1 = fd.word1;
+		word2 = fd.word2;
+		word3 = fd.word3;
+	}
+	bool operator == (const FFilterData& a) const
+	{
+		return a.word0 == word0 && a.word1 == word1 && a.word2 == word2 && a.word3 == word3;
+	}
+	bool operator != (const FFilterData& a) const
+	{
+		return !(a == *this);
+	}
+
+	UINT word0;
+	UINT word1;
+	UINT word2;
+	UINT word3;
+};
+
 struct TR_CLASS(SV_LayoutStruct = 8)
 	PhyQueryFilterData
 {
 public:
-	PX_INLINE PhyQueryFilterData() : flag((PhyQueryFlag)(PhyQueryFlag::eDYNAMIC | PhyQueryFlag::eSTATIC)){}
+	PhyQueryFilterData() : flag((PhyQueryFlag)(PhyQueryFlag::eDYNAMIC | PhyQueryFlag::eSTATIC)){}
 
 	/** \brief constructor to set both filter data and filter flags */
-	PX_INLINE PhyQueryFilterData(const physx::PxFilterData& fd, PhyQueryFlag f) : data(fd), flag(f){}
+	PhyQueryFilterData(const FFilterData& fd, PhyQueryFlag f) : data(fd), flag(f){}
 
 	/** \brief constructor to set filter flags only */
-	PX_INLINE PhyQueryFilterData(PhyQueryFlag f) : flag(f){}
-	physx::PxFilterData	data;		//!< Filter data associated with the scene query
+	PhyQueryFilterData(PhyQueryFlag f) : flag(f){}
+	FFilterData		data;		//!< Filter data associated with the scene query
 	PhyQueryFlag	flag;		//!< Filter flags (see #PxQueryFlags)
 };
+
+enum ETriggerPairFlag
+{
+	eREMOVED_SHAPE_TRIGGER = (1 << 0),					//!< The trigger shape has been removed from the actor/scene.
+		eREMOVED_SHAPE_OTHER = (1 << 1),					//!< The shape causing the trigger event has been removed from the actor/scene.
+		//eNEXT_FREE = (1 << 2)					//!< For internal use only.
+};
+
 struct TR_CLASS(SV_LayoutStruct = 8)
 	PhyTriggerPair
 {
-	PX_INLINE PhyTriggerPair() {}
+	PhyTriggerPair() {}
 
 	void*				triggerShape;	//!< The shape that has been marked as a trigger.
 	void*			triggerActor;	//!< The actor to which triggerShape is attached
 	void*				otherShape;		//!< The shape causing the trigger event. \deprecated (see #PxSimulationEventCallback::onTrigger()) If collision between trigger shapes is enabled, then this member might point to a trigger shape as well.
 	void*			otherActor;		//!< The actor to which otherShape is attached
 	PhyPairFlag		status;			//!< Type of trigger event (eNOTIFY_TOUCH_FOUND or eNOTIFY_TOUCH_LOST). eNOTIFY_TOUCH_PERSISTS events are not supported.
-	physx::PxTriggerPairFlags		flags;			//!< Additional information on the pair (see #PxTriggerPairFlag)
+	ETriggerPairFlag		flags;			//!< Additional information on the pair (see #PxTriggerPairFlag)
 };
 
 struct TR_CLASS(SV_LayoutStruct = 8)
@@ -72,55 +116,45 @@ struct TR_CLASS(SV_LayoutStruct = 8)
 public:
 	PhyContactPair() {}
 	void*				shapes[2];
-	const physx::PxU8* contactPatches;
-	const physx::PxU8* contactPoints;
-	const physx::PxReal*			contactImpulses;
-	physx::PxU32					requiredBufferSize;
-	physx::PxU8					contactCount;
-	physx::PxU8					patchCount;
-	physx::PxU16					contactStreamSize;
-	physx::PxContactPairFlags		flags;
-	physx::PxPairFlags				events;
-	physx::PxU32					internalData[2];	// For internal use only
-	//PX_INLINE PxU32			extractContacts(PxContactPairPoint* userBuffer, PxU32 bufferSize) const;
+	const UINT8* contactPatches;
+	const UINT8* contactPoints;
+	const RealType*			contactImpulses;
+	UINT					requiredBufferSize;
+	UINT8					contactCount;
+	UINT8					patchCount;
+	UINT16					contactStreamSize;
+	UINT					flags;
+	UINT					events;
+	UINT					internalData[2];	// For internal use only
+	//PX_INLINE UINT			extractContacts(PxContactPairPoint* userBuffer, UINT bufferSize) const;
 	//PX_INLINE void				bufferContacts(PxContactPair* newPair, PxU8* bufferMemory) const;
 
-	const physx::PxU32*		getInternalFaceIndices() const { return reinterpret_cast<const physx::PxU32*>(contactImpulses + contactCount); };
+	const UINT*		getInternalFaceIndices() const { return reinterpret_cast<const UINT*>(contactImpulses + contactCount); };
 };
+
 struct TR_CLASS(SV_LayoutStruct = 8)
 	PhyContactPairHeader
 {
 public:
 	PhyContactPairHeader() {}
 
-	void*				actors[2];
+	void*						actors[2];
 	const BYTE*					extraDataStream;
 	UINT16						extraDataStreamSize;
-	physx::PxContactPairHeaderFlags	flags;
-	const struct physx::PxContactPair*	pairs;
+	UINT						flags;
+	PhyContactPair*				pairs;
 	UINT						nbPairs;
 };
 
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
-typedef void(* FonTrigger)(void* self, PhyTriggerPair* pairs, physx::PxU32 count);
+typedef void(* FonTrigger)(void* self, PhyTriggerPair* pairs, UINT count);
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
-typedef void(* FonContact)(void* selft, const PhyContactPairHeader* pairHeader, const PhyContactPair* pairs, physx::PxU32 nbPairs);
+typedef void(* FonContact)(void* selft, const PhyContactPairHeader* pairHeader, const PhyContactPair* pairs, UINT nbPairs);
 
-//TODO: Need to impl
-typedef void(*FonConstraintBreak)(void* selft, physx::PxConstraintInfo*, physx::PxU32);
-typedef void(*FonWake)(void* selft, physx::PxActor**, physx::PxU32);
-typedef void(*FonSleep)(void* selft, physx::PxActor**, physx::PxU32);
-typedef void(*FonAdvance)(void* selft, const physx::PxRigidBody* const*, const physx::PxTransform*, const physx::PxU32);
 
-//typedef physx::PxSimulationFilterShader FPxSimulationFilterShader;
-//typedef physx::PxFilterFlags(WINAPI*FPxSimulationFilterShader)(//void* self, 
-typedef USHORT(*FSimulationFilterShader)(//void* self, 
-	UINT attributes0, physx::PxFilterData* filterData0,
-	UINT attributes1, physx::PxFilterData* filterData1,
-	physx::PxPairFlags* pairFlags, const void* constantBlock, physx::PxU32 constantBlockSize);
 
 enum TR_ENUM()
-PhySceneFlag
+EPhySceneFlag
 {
 	eENABLE_ACTIVE_ACTORS = (1 << 0),
 	eENABLE_CCD = (1 << 1),
@@ -139,106 +173,6 @@ PhySceneFlag
 	eMUTABLE_FLAGS = eENABLE_ACTIVE_ACTORS | eEXCLUDE_KINEMATICS_FROM_ACTIVE_ACTORS
 };
 
-class PhySimulationEventCallback : public physx::PxSimulationEventCallback
-{
-public:
-	void* Handle;
-	FonContact _onContact = nullptr;
-	FonTrigger _onTrigger;
-	FonConstraintBreak _onConstraintBreak;
-	FonWake _onWake;
-	FonSleep _onSleep;
-	FonAdvance _onAdvance;
-	
-	PhySimulationEventCallback()
-	{
-		_onContact = nullptr;
-		_onTrigger = nullptr;
-		_onConstraintBreak = nullptr;
-		_onWake = nullptr;
-		_onSleep = nullptr;
-		_onAdvance = nullptr;
-	}
-
-	virtual void onContact(const physx::PxContactPairHeader& pairHeader, const physx::PxContactPair* pairs, physx::PxU32 nbPairs) override
-	{
-		if (_onContact != nullptr)
-		{
-			auto saved_actor0 = pairHeader.actors[0];
-			auto saved_actor1 = pairHeader.actors[1];
-			physx::PxContactPairHeader* pUsed = (physx::PxContactPairHeader*)&pairHeader;
-			pUsed->actors[0] = (physx::PxRigidActor*)pairHeader.actors[0]->userData;
-			pUsed->actors[1] = (physx::PxRigidActor*)pairHeader.actors[1]->userData;
-			_onContact(Handle, (PhyContactPairHeader*)&pairHeader, (PhyContactPair*)pairs, nbPairs);
-			pUsed->actors[0] = saved_actor0;
-			pUsed->actors[1] = saved_actor1;
-		}
-	}
-	virtual void onTrigger(physx::PxTriggerPair* pairs, physx::PxU32 count) override
-	{
-		if (_onTrigger != nullptr)
-		{
-			PhyTriggerPair* phyPairs = (PhyTriggerPair*)alloca(sizeof(PhyTriggerPair) * count);
-			if (phyPairs != nullptr)
-			{
-				//PhyTriggerPair* phyPairs = new PhyTriggerPair[count];
-				for (UINT i = 0; i < count; ++i)
-				{
-					phyPairs[i].otherActor = pairs[i].otherActor->userData;
-					phyPairs[i].otherShape = pairs[i].otherShape->userData;
-					phyPairs[i].triggerActor = pairs[i].triggerActor->userData;
-					phyPairs[i].triggerShape = pairs[i].triggerShape->userData;
-					phyPairs[i].status = (PhyPairFlag)pairs[i].status;
-					phyPairs[i].flags = pairs[i].flags;
-				}
-				_onTrigger(Handle, phyPairs, count);
-				//delete[] phyPairs;
-			}
-		}
-	}
-	virtual void onConstraintBreak(physx::PxConstraintInfo* constrait, physx::PxU32 count) override
-	{
-		if (_onConstraintBreak != nullptr)
-			_onConstraintBreak(Handle, constrait, count);
-	}
-	virtual void onWake(physx::PxActor** actor, physx::PxU32 count) override
-	{
-		if (_onWake != nullptr)
-			_onWake(Handle, actor, count);
-	}
-	virtual void onSleep(physx::PxActor** actor, physx::PxU32 count) override
-	{
-		if (_onSleep != nullptr)
-			_onSleep(Handle, actor, count);
-	}
-	virtual void onAdvance(const physx::PxRigidBody* const* body, const physx::PxTransform* trans, const physx::PxU32 count) override
-	{
-		if (_onAdvance != nullptr)
-			_onAdvance(Handle, body, trans, count);
-	}
-};
-
-struct PhySimulationFilterShader
-{
-	static physx::PxFilterFlags DefaultSimulationFilterShader(physx::PxFilterObjectAttributes attributes0, physx::PxFilterData filterData0,
-		physx::PxFilterObjectAttributes attributes1, physx::PxFilterData filterData1,
-		physx::PxPairFlags& pairFlags, const void* constantBlock, physx::PxU32 constantBlockSize)
-	{
-		if (_CustomSimulationFilterShader != nullptr)
-		{
-			if ((&pairFlags) == nullptr)
-			{
-				VFX_LTRACE(ELTT_Physics, "CorePxSimulationFilterShader pairFlags == null\r\n");
-			}
-			return (physx::PxFilterFlags)_CustomSimulationFilterShader(attributes0, &filterData0, attributes1, &filterData1, &pairFlags, constantBlock, constantBlockSize);
-		}
-		pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT| physx::PxPairFlag::eTRIGGER_DEFAULT;
-		return physx::PxFilterFlags();
-	}
-
-	static FSimulationFilterShader _CustomSimulationFilterShader;
-};
-
 class TR_CLASS() 
 	PhySceneDesc : public IWeakRefObject
 {
@@ -246,52 +180,16 @@ class TR_CLASS()
 public:
 
 	ENGINE_RTTI(PhySceneDesc);
-	PhySceneDesc();
-	~PhySceneDesc();
-	void Init();
-	physx::PxSceneDesc* GetDesc() {
-		return mDesc;
-	}
-	void SetFlags(PhySceneFlag flags) {
-		mDesc->flags = (physx::PxSceneFlag::Enum)flags;
-	}
-	PhySceneFlag GetFlags() {
-		return (PhySceneFlag)((physx::PxU32)mDesc->flags);
-	}
-	void SetContactDataBlocks(physx::PxU32 nb) {
-		mDesc->nbContactDataBlocks = nb;
-	}
-	physx::PxU32 GetContactDataBlocks() {
-		return mDesc->nbContactDataBlocks;
-	}
-	void SetGravity(const v3dxVector3* gravity) {
-		mDesc->gravity = *(physx::PxVec3*)gravity;
-	}
-	void GetGravity(v3dxVector3* gravity) {
-		*gravity = *(v3dxVector3*)(&mDesc->gravity);
-	}
-	void SetSimulationEventCallback(void* handle,
-		FonContact onContact,
-		FonTrigger onTrigger,
-		FonConstraintBreak onConstraintBreak,
-		FonWake onWake,
-		FonSleep onSleep,
-		FonAdvance onAdvance);
+	virtual void Init() = 0;
+	virtual void SetFlags(EPhySceneFlag flags) = 0;
+	virtual EPhySceneFlag GetFlags() = 0;
+	virtual void SetContactDataBlocks(UINT nb) = 0;
+	virtual UINT GetContactDataBlocks() = 0;
+	virtual void SetGravity(const v3dxVector3* gravity) = 0;
+	virtual void GetGravity(v3dxVector3* gravity) = 0;
 
-	void SetHandle(void* handle) {
-		mSimulationEventCallback.Handle = handle;
-	}
-	void SetOnTrigger(FonTrigger onTrigger) {
-		mSimulationEventCallback._onTrigger = onTrigger;
-	}
-	void SetOnContact(FonContact onContact) {
-		mSimulationEventCallback._onContact = onContact;
-	}
-	
-protected:
-	PxSceneDesc*	mDesc;
-	PhySimulationEventCallback mSimulationEventCallback;
-	PhySimulationFilterShader SimulationFilterShader;
+	virtual void SetOnTrigger(FonTrigger onTrigger) = 0;
+	virtual void SetOnContact(FonContact onContact) = 0;
 };
 
 
@@ -301,55 +199,29 @@ class TR_CLASS()
 public:
 	ENGINE_RTTI(PhyScene);
 
-	PhyScene();
-	~PhyScene();
-	virtual void Cleanup() override;
-	void BindPhysX();
+	virtual void BindPhysX() = 0;
 
-	void LockRead() {
-		mScene->lockRead();
-	}
-	void UnlockRead() {
-		mScene->unlockRead();
-	}
-	void LockWrite() {
-		mScene->lockWrite();
-	}
-	void UnlockWrite() {
-		mScene->unlockWrite();
-	}
-	void* UpdateActorTransforms(UINT* activeActorCount);
-	PhyActor* GetActor(void* updatedActors, UINT index);
+	virtual void LockRead() = 0;
+	virtual void UnlockRead() = 0;
+	virtual void LockWrite() = 0;
+	virtual void UnlockWrite() = 0;
+	virtual void* UpdateActorTransforms(UINT* activeActorCount) = 0;
+	virtual PhyActor* GetActor(void* updatedActors, UINT index) = 0;
 
-	void Simulate(physx::PxReal elapsedTime,
-		void* scratchMemBlock = 0, physx::PxU32 scratchMemBlockSize = 0, bool controlSimulation = true)
-	{
-		physx::PxSceneWriteLock writeLock(*mScene);
-		mScene->simulate(elapsedTime, CompletionTask, scratchMemBlock, scratchMemBlockSize, controlSimulation);
-	}
-	vBOOL FetchResults(bool block = false, physx::PxU32* errorState = 0)
-	{
-		physx::PxSceneWriteLock writeLock(*mScene);
-		return mScene->fetchResults(block, errorState) ? 1 : 0;
-	}
-	vBOOL Raycast(const v3dxVector3* origin, const v3dxVector3* unitDir, float maxDistance, OUT VHitResult* hitResult);
-	vBOOL Sweep(const PhyShape* shape, const v3dxVector3* position, const v3dxVector3* unitDir, float maxDistance, OUT VHitResult* hitResult);
-	vBOOL Overlap(const PhyShape* shape, const v3dxVector3* position, const v3dxQuaternion* rotation, OUT VHitResult* hitResult);
-	vBOOL RaycastWithFilter(const v3dxVector3* origin, const v3dxVector3* unitDir, float maxDistance, PhyQueryFilterData* queryFilterData,OUT VHitResult* hitResult);
-	vBOOL SweepWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxVector3* unitDir, float maxDistance, PhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult);
-	vBOOL OverlapWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxQuaternion* rotation, PhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult);
-	PhyController* CreateBoxController(const PhyBoxControllerDesc* desc);
-	PhyController* CreateCapsuleController(const PhyCapsuleControllerDesc* desc);
-	int GetNbControllers() {
-		return ControllerManager->getNbControllers();
-	}
-	PhyController* GetController(UINT index);
-	PhyObstacleContext* CreateObstacleContext();
-public:
-	physx::PxScene*			mScene;
-	physx::PxControllerManager* ControllerManager;
-	physx::PxObstacleContext*	ObstacleContext;
-	physx::PxBaseTask*		CompletionTask;
+	virtual void Simulate(RealType elapsedTime,
+		void* scratchMemBlock = 0, UINT scratchMemBlockSize = 0, bool controlSimulation = true) = 0;
+	virtual vBOOL FetchResults(bool block = false, UINT* errorState = 0) = 0;
+	virtual vBOOL Raycast(const v3dxVector3* origin, const v3dxVector3* unitDir, float maxDistance, OUT VHitResult* hitResult) = 0;
+	virtual vBOOL Sweep(const PhyShape* shape, const v3dxVector3* position, const v3dxVector3* unitDir, float maxDistance, OUT VHitResult* hitResult) = 0;
+	virtual vBOOL Overlap(const PhyShape* shape, const v3dxVector3* position, const v3dxQuaternion* rotation, OUT VHitResult* hitResult) = 0;
+	virtual vBOOL RaycastWithFilter(const v3dxVector3* origin, const v3dxVector3* unitDir, float maxDistance, PhyQueryFilterData* queryFilterData,OUT VHitResult* hitResult) = 0;
+	virtual vBOOL SweepWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxVector3* unitDir, float maxDistance, PhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult) = 0;
+	virtual vBOOL OverlapWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxQuaternion* rotation, PhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult) = 0;
+	virtual PhyController* CreateBoxController(const PhyBoxControllerDesc* desc) = 0;
+	virtual PhyController* CreateCapsuleController(const PhyCapsuleControllerDesc* desc) = 0;
+	virtual int GetNbControllers() = 0;
+	virtual PhyController* GetController(UINT index) = 0;
+	virtual PhyObstacleContext* CreateObstacleContext() = 0;
 };
 
 NS_END

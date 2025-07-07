@@ -13,7 +13,7 @@ namespace EngineNS.Bricks.PhysicsCore
     {
         public TtPhyContext()
         {
-            mCoreObject = PhyContext.CreateInstance();
+            mCoreObject = PhyContext.CreateContext(EPhysicsContextType.NvPhysX);
         }
         public TtPhySceneDesc CreateSceneDesc()
         {
@@ -148,6 +148,34 @@ namespace EngineNS.Bricks.PhysicsCore
             if (self.IsValidPointer == false)
                 return null;
             return new TtPhyTriMesh(self);
+        }
+        public TtPhyCapsuleControllerDesc CreateCapsuleControllerDesc()
+        {
+            var self = mCoreObject.CreateCapsuleControllerDesc();
+            if (self.IsValidPointer == false)
+                return null;
+            return new TtPhyCapsuleControllerDesc(self);
+        }
+        public TtPhyBoxControllerDesc CreateBoxControllerDesc()
+        {
+            var self = mCoreObject.CreateBoxControllerDesc();
+            if (self.IsValidPointer == false)
+                return null;
+            return new TtPhyBoxControllerDesc(self);
+        }
+        public TtPhyTriMesh CreateTriMesh()
+        {
+            var self = mCoreObject.CreateTriMesh();
+            if (self.IsValidPointer == false)
+                return null;
+            return new TtPhyTriMesh(self);
+        }
+        public TtPhyConvexMesh CreateConvexMesh()
+        {
+            var self = mCoreObject.CreateConvexMesh();
+            if (self.IsValidPointer == false)
+                return null;
+            return new TtPhyConvexMesh(self);
         }
         public TtPhyMaterialManager PhyMaterialManager { get; } = new TtPhyMaterialManager();
         public UPhyMeshManager PhyMeshManager { get; } = new UPhyMeshManager();

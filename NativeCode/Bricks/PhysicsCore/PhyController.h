@@ -25,10 +25,7 @@ public:
 	{
 
 	}
-	physx::PxControllerDesc* mDesc;
 	PhyFilterData mFilterData;
-	void SetMaterial(PhyMaterial * mtl);
-	void SetQueryFilterData(physx::PxFilterData * data);
 	void SetHitReportCallback()
 	{
 
@@ -44,23 +41,10 @@ class TR_CLASS()
 {
 public:
 	ENGINE_RTTI(PhyBoxControllerDesc);
-	PhyBoxControllerDesc()
-	{
-		mDesc = &mBoxDesc;
-	}
-	physx::PxBoxControllerDesc		mBoxDesc;
-	v3dxVector3 GetExtent() {
-		v3dxVector3 v;
-		v.X = mBoxDesc.halfSideExtent;
-		v.Y = mBoxDesc.halfHeight;
-		v.Z = mBoxDesc.halfForwardExtent;
-		return v;
-	}
-	void SetExtent(const v3dxVector3 * v) {
-		mBoxDesc.halfSideExtent = v->X;
-		mBoxDesc.halfHeight = v->Y;
-		mBoxDesc.halfForwardExtent = v->Z;
-	}
+	
+	virtual void SetMaterial(PhyMaterial* mtl) = 0;
+	virtual v3dxVector3 GetExtent() = 0;
+	virtual void SetExtent(const v3dxVector3* v) = 0;
 };
 
 class TR_CLASS()
@@ -68,55 +52,34 @@ class TR_CLASS()
 {
 public:
 	ENGINE_RTTI(PhyCapsuleControllerDesc);
-	PhyCapsuleControllerDesc();
-	physx::PxCapsuleControllerDesc	mCapsuleDesc;
-
-	float GetCapsuleRadius() {
-		return mCapsuleDesc.radius;
-	}
-	void SetCapsuleRadius(float v) {
-		mCapsuleDesc.radius = v;
-	}
-	float GetCapsuleHeight() {
-		return mCapsuleDesc.height;
-	}
-	void SetCapsuleHeight(float v) {
-		mCapsuleDesc.height = v;
-	}
-	physx::PxCapsuleClimbingMode::Enum GetCapsuleClimbingMode() {
-		return mCapsuleDesc.climbingMode;
-	}
-	void SetCapsuleClimbingMode(physx::PxCapsuleClimbingMode::Enum v) {
-		mCapsuleDesc.climbingMode = v;
-	}
+	
+	virtual void SetMaterial(PhyMaterial* mtl) = 0;
+	virtual float GetCapsuleRadius() = 0;
+	virtual void SetCapsuleRadius(float v) = 0;
+	virtual float GetCapsuleHeight() = 0;
+	virtual void SetCapsuleHeight(float v) = 0;
 };
 
 class TR_CLASS() 
 	PhyController : public PhyEntity
 {
-	PhyActor*					mActor;
-	physx::PxController*		mController;
-	TWeakRefHandle<PhyScene>		mScene;
 public:
 	ENGINE_RTTI(PhyController);
 
-	PhyController(PhyScene* scene, physx::PxController* ctr);
-	~PhyController();
-	virtual void Cleanup() override;
-	void BindPhysX();
+	virtual void BindPhysX() = 0;
 	
-	PhyActor* GetReadOnlyActor();
-	EPhyControllerCollisionFlag Move(const v3dxVector3* disp, float minDist, float elapsedTime, const PhyFilterData* filterData, PhyQueryFlag filterFlags);
-	void SetPosition(const v3dxVector3* position);
-	v3dxVector3 GetPosition();
-	void SetFootPosition(const v3dxVector3* position);
-	v3dxVector3 GetFootPosition();
-	float GetContactOffset();
-	void SetContactOffset(float offset);
-	float GetSlopeLimit();
-	void SetSlopeLimit(float slopeLimit);
-	void SetQueryFilterData(const PhyFilterData * filterData);
-	void SetSimulationFilterData(const PhyFilterData * filterData);
+	virtual PhyActor* GetReadOnlyActor() = 0;
+	virtual EPhyControllerCollisionFlag Move(const v3dxVector3* disp, float minDist, float elapsedTime, const PhyFilterData* filterData, PhyQueryFlag filterFlags) = 0;
+	virtual void SetPosition(const v3dxVector3* position) = 0;
+	virtual v3dxVector3 GetPosition() = 0;
+	virtual void SetFootPosition(const v3dxVector3* position) = 0;
+	virtual v3dxVector3 GetFootPosition() = 0;
+	virtual float GetContactOffset() = 0;
+	virtual void SetContactOffset(float offset) = 0;
+	virtual float GetSlopeLimit() = 0;
+	virtual void SetSlopeLimit(float slopeLimit) = 0;
+	virtual void SetQueryFilterData(const PhyFilterData * filterData) = 0;
+	virtual void SetSimulationFilterData(const PhyFilterData * filterData) = 0;
 };
 
 NS_END

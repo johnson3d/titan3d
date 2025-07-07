@@ -6,24 +6,24 @@ namespace EngineNS.Bricks.PhysicsCore
 {
     public class TtPhyCapsuleControllerDesc : AuxPtrType<PhyCapsuleControllerDesc>
     {
-        public TtPhyCapsuleControllerDesc()
+        public TtPhyCapsuleControllerDesc(PhyCapsuleControllerDesc ptr)
         {
-            mCoreObject = PhyCapsuleControllerDesc.CreateInstance();
+            mCoreObject = ptr;
         }
         public void SetMaterial(TtPhyMaterial mtl)
         {
-            mCoreObject.NativeSuper.SetMaterial(mtl.mCoreObject);
+            mCoreObject.SetMaterial(mtl.mCoreObject);
         }
     }
     public class TtPhyBoxControllerDesc : AuxPtrType<PhyBoxControllerDesc>
     {
-        public TtPhyBoxControllerDesc()
+        public TtPhyBoxControllerDesc(PhyBoxControllerDesc ptr)
         {
-            mCoreObject = PhyBoxControllerDesc.CreateInstance();
+            mCoreObject = ptr;
         }
         public void SetMaterial(TtPhyMaterial mtl)
         {
-            mCoreObject.NativeSuper.SetMaterial(mtl.mCoreObject);
+            mCoreObject.SetMaterial(mtl.mCoreObject);
         }
     }
     public class TtPhyController : AuxPtrType<PhyController>
@@ -63,7 +63,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public void Cleanup()
         {
-            mCoreObject.Cleanup();
+            mCoreObject.NativeSuper.NativeSuper.Cleanup();
             TagNode = null;
         }
     }

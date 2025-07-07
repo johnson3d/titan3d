@@ -10,34 +10,20 @@ class TR_CLASS()
 	PhyTriMesh : public IWeakRefObject
 {
 public:
-	physx::PxTriangleMesh*		mMesh;
 	TR_MEMBER(SV_NoBind)
 	IBlobObject					mCookedData;
-	PhyTriMesh()
-	{
-		mMesh = nullptr;
-	}
-	~PhyTriMesh();
-	void Cleanup();
-	bool CreateFromCookedData(PhyContext* ctx, void* cookedData, UINT size);
+	virtual bool CreateFromCookedData(PhyContext* ctx, void* cookedData, UINT size) = 0;
 	IBlobObject* GetCookedData() {
 		return &mCookedData;
 	}
-	NxRHI::FMeshDataProvider* CreateMeshProvider();
+	virtual NxRHI::FMeshDataProvider* CreateMeshProvider() = 0;
 };
 
 class TR_CLASS()
 	PhyConvexMesh : public IWeakRefObject
 {
 public:
-	physx::PxConvexMesh*		mMesh;
 	IBlobObject* mCookedData;
-	PhyConvexMesh()
-	{
-		mMesh = nullptr;
-		mCookedData = nullptr;
-	}
-	~PhyConvexMesh();
 };
 
 NS_END
