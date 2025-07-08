@@ -147,12 +147,14 @@ namespace EngineNS.Editor
             if (ShowWorldAxis && CameraController.Camera != null)
                 DrawWorldAxis(this.CameraController.Camera);
         }
-        protected override IntPtr GetShowTexture()
+        protected override ImTextureRef GetShowTexture()
         {
             var srv = RenderPolicy?.GetFinalShowRSV();
             if (srv == null)
-                return IntPtr.Zero;
-            return srv.GetTextureHandle();
+                return new ImTextureRef();
+            var result = new ImTextureRef();
+            result.m__TexID = (ulong)srv.GetTextureHandle();
+            return result;
         }
         #region CameraControl
         Vector2 mPreMousePt;

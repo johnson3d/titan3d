@@ -99,7 +99,11 @@ namespace EngineNS.EGui.UIProxy
 
             ImGuiAPI.PushClipRect(in start, in end, IntersectWithCurrentClipRect);
             if (GetImagePtrPointer() != IntPtr.Zero)
-                drawList.AddImage((ulong)GetImagePtrPointer(), in start, in end, in UVMin, in UVMax, color);
+            {
+                ImTextureRef imTextureRef = new ImTextureRef();
+                imTextureRef.m__TexID = (ulong)GetImagePtrPointer();
+                drawList.AddImage(imTextureRef, in start, in end, in UVMin, in UVMax, color);
+            }
             ImGuiAPI.PopClipRect();
             return true;
         }
@@ -155,9 +159,12 @@ namespace EngineNS.EGui.UIProxy
                 return false;
 
             ImGuiAPI.PushClipRect(in startPos, in endPos, IntersectWithCurrentClipRect);
-            var imgPtr = GetImagePtrPointer();
-            if (imgPtr != IntPtr.Zero)
+            var imgPtr1 = GetImagePtrPointer();
+            if (imgPtr1 != IntPtr.Zero)
             {
+                ImTextureRef imgPtr = new ImTextureRef();
+                imgPtr.m__TexID = (ulong)imgPtr1;
+
                 var uvSize = UVMax - UVMin;
                 var realLeft = mUVMargin.Left * uvSize.X;
                 var realRight = mUVMargin.Right * uvSize.X;
@@ -165,31 +172,31 @@ namespace EngineNS.EGui.UIProxy
                 var realBottom = mUVMargin.Bottom * uvSize.Y;
                 var tempStart = startPos;
                 var tempEnd = startPos + new Vector2(mSizeMargin.Left, mSizeMargin.Top);
-                drawList.AddImage((ulong)imgPtr, tempStart, tempEnd, new Vector2(UVMin.X, UVMin.Y), new Vector2(realLeft + UVMin.X, realTop + UVMin.Y), color);
+                drawList.AddImage(imgPtr, tempStart, tempEnd, new Vector2(UVMin.X, UVMin.Y), new Vector2(realLeft + UVMin.X, realTop + UVMin.Y), color);
                 tempStart = new Vector2(startPos.X + mSizeMargin.Left, startPos.Y);
                 tempEnd = new Vector2(endPos.X - mSizeMargin.Right, startPos.Y + mSizeMargin.Top);
-                drawList.AddImage((ulong)imgPtr, tempStart, tempEnd, new Vector2(realLeft + UVMin.X, UVMin.Y), new Vector2(UVMax.X - realRight, realTop + UVMin.Y), color);
+                drawList.AddImage(imgPtr, tempStart, tempEnd, new Vector2(realLeft + UVMin.X, UVMin.Y), new Vector2(UVMax.X - realRight, realTop + UVMin.Y), color);
                 tempStart = new Vector2(endPos.X - mSizeMargin.Right, startPos.Y);
                 tempEnd = new Vector2(endPos.X, startPos.Y + mSizeMargin.Top);
-                drawList.AddImage((ulong)imgPtr, tempStart, tempEnd, new Vector2(UVMax.X - realRight, UVMin.Y), new Vector2(UVMax.X, realTop + UVMin.Y), color);
+                drawList.AddImage(imgPtr, tempStart, tempEnd, new Vector2(UVMax.X - realRight, UVMin.Y), new Vector2(UVMax.X, realTop + UVMin.Y), color);
                 tempStart = new Vector2(startPos.X, startPos.Y + mSizeMargin.Top);
                 tempEnd = new Vector2(startPos.X + mSizeMargin.Left, endPos.Y - mSizeMargin.Bottom);
-                drawList.AddImage((ulong)imgPtr, tempStart, tempEnd, new Vector2(UVMin.X, realTop + UVMin.Y), new Vector2(realLeft + UVMin.X, UVMax.Y - realBottom), color);
+                drawList.AddImage(imgPtr, tempStart, tempEnd, new Vector2(UVMin.X, realTop + UVMin.Y), new Vector2(realLeft + UVMin.X, UVMax.Y - realBottom), color);
                 tempStart = new Vector2(startPos.X + mSizeMargin.Left, startPos.Y + mSizeMargin.Top);
                 tempEnd = new Vector2(endPos.X - mSizeMargin.Right, endPos.Y - mSizeMargin.Bottom);
-                drawList.AddImage((ulong)imgPtr, tempStart, tempEnd, new Vector2(realLeft + UVMin.X, realTop + UVMin.Y), new Vector2(UVMax.X - realRight, UVMax.Y - realBottom), color);
+                drawList.AddImage(imgPtr, tempStart, tempEnd, new Vector2(realLeft + UVMin.X, realTop + UVMin.Y), new Vector2(UVMax.X - realRight, UVMax.Y - realBottom), color);
                 tempStart = new Vector2(endPos.X - mSizeMargin.Right, startPos.Y + mSizeMargin.Top);
                 tempEnd = new Vector2(endPos.X, endPos.Y - mSizeMargin.Bottom);
-                drawList.AddImage((ulong)imgPtr, tempStart, tempEnd, new Vector2(UVMax.X - realRight, realTop + UVMin.Y), new Vector2(UVMax.X, UVMax.Y - realBottom), color);
+                drawList.AddImage(imgPtr, tempStart, tempEnd, new Vector2(UVMax.X - realRight, realTop + UVMin.Y), new Vector2(UVMax.X, UVMax.Y - realBottom), color);
                 tempStart = new Vector2(startPos.X, endPos.Y - mSizeMargin.Bottom);
                 tempEnd = new Vector2(startPos.X + mSizeMargin.Left, endPos.Y);
-                drawList.AddImage((ulong)imgPtr, tempStart, tempEnd, new Vector2(UVMin.X, UVMax.Y - realBottom), new Vector2(realLeft + UVMin.X, UVMax.Y), color);
+                drawList.AddImage(imgPtr, tempStart, tempEnd, new Vector2(UVMin.X, UVMax.Y - realBottom), new Vector2(realLeft + UVMin.X, UVMax.Y), color);
                 tempStart = new Vector2(startPos.X + mSizeMargin.Left, endPos.Y - mSizeMargin.Bottom);
                 tempEnd = new Vector2(endPos.X - mSizeMargin.Right, endPos.Y);
-                drawList.AddImage((ulong)imgPtr, tempStart, tempEnd, new Vector2(realLeft + UVMin.X, UVMax.Y - realBottom), new Vector2(UVMax.X - realRight, UVMax.Y), color);
+                drawList.AddImage(imgPtr, tempStart, tempEnd, new Vector2(realLeft + UVMin.X, UVMax.Y - realBottom), new Vector2(UVMax.X - realRight, UVMax.Y), color);
                 tempStart = new Vector2(endPos.X - mSizeMargin.Right, endPos.Y - mSizeMargin.Bottom);
                 tempEnd = new Vector2(endPos.X, endPos.Y);
-                drawList.AddImage((ulong)imgPtr, tempStart, tempEnd, new Vector2(UVMax.X - realRight, UVMax.Y - realBottom), new Vector2(UVMax.X, UVMax.Y), color);
+                drawList.AddImage(imgPtr, tempStart, tempEnd, new Vector2(UVMax.X - realRight, UVMax.Y - realBottom), new Vector2(UVMax.X, UVMax.Y), color);
             }
             ImGuiAPI.PopClipRect();
             return true;

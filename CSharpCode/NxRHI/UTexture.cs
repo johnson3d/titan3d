@@ -220,7 +220,9 @@ namespace EngineNS.NxRHI
                 {
                     var uv0 = new Vector2(0, 0);
                     var uv1 = new Vector2(1, 1);
-                    cmdlist.AddImage((ulong)CmdParameters.GetHandle(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
+                    ImTextureRef imTextureRef = new ImTextureRef();
+                    imTextureRef.m__TexID = (ulong)CmdParameters.GetHandle();
+                    cmdlist.AddImage(imTextureRef, in start, in end, in uv0, in uv1, 0xFFFFFFFF);
                     if (CmdParameters.IsNormalMap == 1)
                     {
                         var indiactorPos = start + new Vector2(3, 2);

@@ -36,12 +36,14 @@ namespace EngineNS.Editor
                 //RenderPolicy?.OnResize(vpSize.X, vpSize.Y);
             }
         }
-        protected override IntPtr GetShowTexture()
+        protected override ImTextureRef GetShowTexture()
         {
             var srv = RenderPolicy?.GetFinalShowRSV();
             if (srv == null)
-                return IntPtr.Zero;
-            return srv.GetTextureHandle();
+                return new ImTextureRef();
+            var result = new ImTextureRef();
+            result.m__TexID = (ulong)srv.GetTextureHandle();
+            return result;
         }
         #region CameraControl
         Vector2 mPreMousePt;
@@ -149,19 +151,16 @@ namespace EngineNS.Editor
         public override unsafe void OnDrawShowTexture()
         {
             var showTexture = GetShowTexture();
-            if (showTexture != IntPtr.Zero)
+            if (showTexture.m__TexID != 0)
             {
                 var drawlist = ImGuiAPI.GetWindowDrawList();
                 var uv1 = Vector2.Zero;
                 var uv2 = Vector2.One;
-                unsafe
-                {
-                    var min = ImGuiAPI.GetWindowContentRegionMin();
-                    var max = ImGuiAPI.GetWindowContentRegionMax();
-                    min = min + WindowPos;
-                    max = max + WindowPos;
-                    drawlist.AddImage((ulong)showTexture, in min, in max, in uv1, in uv2, 0x01FFFFFF);// 0xFFFFFFFF);abgr
-                }
+                var min = ImGuiAPI.GetWindowContentRegionMin();
+                var max = ImGuiAPI.GetWindowContentRegionMax();
+                min = min + WindowPos;
+                max = max + WindowPos;
+                drawlist.AddImage(showTexture, in min, in max, in uv1, in uv2, 0x01FFFFFF);// 0xFFFFFFFF);abgr
             }
         }
 

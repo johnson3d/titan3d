@@ -1,40 +1,40 @@
 #include "imgui_binding.h"
 
-#if defined(PLATFORM_WIN)
-#include "imgui_impl_win32.cpp"
-#endif
+//#if defined(PLATFORM_WIN)
+//#include "backends/imgui_impl_win32.h"
+//#endif
 
 NS_BEGIN
 
 static const float          DRAG_MOUSE_THRESHOLD_FACTOR = 0.50f;    // Multiplier for the default value of io.MouseDragThreshold to make DragFloat/DragInt react faster to mouse drags.
 
-void	ImGuiAPI::ImGui_NativeWindow_EnableDpiAwareness()
-{
-#if defined(PLATFORM_WIN)
-	ImGui_ImplWin32_EnableDpiAwareness();
-#endif
-}
-
-bool     ImGuiAPI::ImGui_NativeWindow_Init(void* hwnd)
-{
-#if defined(PLATFORM_WIN)
-	return ImGui_ImplWin32_Init(hwnd);
-#else
-	return false;
-#endif
-}
-void     ImGuiAPI::ImGui_NativeWindow_Shutdown()
-{
-#if defined(PLATFORM_WIN)
-	ImGui_ImplWin32_Shutdown();
-#endif
-}
-void     ImGuiAPI::ImGui_NativeWindow_NewFrame()
-{
-#if defined(PLATFORM_WIN)
-	ImGui_ImplWin32_NewFrame();
-#endif
-}
+//void	ImGuiAPI::ImGui_NativeWindow_EnableDpiAwareness()
+//{
+//#if defined(PLATFORM_WIN)
+//	ImGui_ImplWin32_EnableDpiAwareness();
+//#endif
+//}
+//
+//bool     ImGuiAPI::ImGui_NativeWindow_Init(void* hwnd)
+//{
+//#if defined(PLATFORM_WIN)
+//	return ImGui_ImplWin32_Init(hwnd);
+//#else
+//	return false;
+//#endif
+//}
+//void     ImGuiAPI::ImGui_NativeWindow_Shutdown()
+//{
+//#if defined(PLATFORM_WIN)
+//	ImGui_ImplWin32_Shutdown();
+//#endif
+//}
+//void     ImGuiAPI::ImGui_NativeWindow_NewFrame()
+//{
+//#if defined(PLATFORM_WIN)
+//	ImGui_ImplWin32_NewFrame();
+//#endif
+//}
 
 bool identical(const char* buf, const char* item) {
 	size_t buf_size = strlen(buf);
@@ -182,7 +182,8 @@ static const ImGuiDataTypeInfo GDataTypeInfo[] =
 #endif
 	{ sizeof(float),            "float", "%.3f","%f"    },  // ImGuiDataType_Float (float are promoted to double in va_arg)
 	{ sizeof(double),           "double","%f",  "%lf"   },  // ImGuiDataType_Double
-	{ sizeof(bool),				"bool","%d",	"%lf"   },  // ImGuiDataType_Bool
+	{ sizeof(bool),				"bool",	"%d",	"%lf"   },  // ImGuiDataType_Bool
+	{ sizeof(char*),			"string","%s",	"%s"   },  // ImGuiDataType_String
 };
 IM_STATIC_ASSERT(IM_ARRAYSIZE(GDataTypeInfo) == ImGuiDataType_COUNT); 
 bool ImGuiAPI::DragScalar2(const char* label, ImGuiDataType data_type, void* p_data, float v_speed, const void* p_min, const void* p_max, const char* format, ImGuiSliderFlags_ flags)
@@ -490,7 +491,7 @@ static bool BeginComboPopup(ImGuiID popup_id, const ImRect& bb, ImGuiComboFlags 
 
 	// Set popup size
 	float w = bb.GetWidth();
-	if (g.NextWindowData.Flags & ImGuiNextWindowDataFlags_HasSizeConstraint)
+	if (g.NextWindowData.HasFlags & ImGuiNextWindowDataFlags_HasSizeConstraint)
 	{
 		g.NextWindowData.SizeConstraintRect.Min.x = ImMax(g.NextWindowData.SizeConstraintRect.Min.x, w);
 	}
@@ -542,7 +543,7 @@ bool ImGuiAPI::BeginCombo(const char* label, const char* preview_value, ImGuiCom
 	ImGuiContext& g = *GImGui;
 	ImGuiWindow* window = ImGui::GetCurrentWindow();
 
-	ImGuiNextWindowDataFlags backup_next_window_data_flags = g.NextWindowData.Flags;
+	ImGuiNextWindowDataFlags backup_next_window_data_flags = g.NextWindowData.HasFlags;
 	g.NextWindowData.ClearFlags(); // We behave like Begin() and need to consume those values
 	if (window->SkipItems)
 		return false;
@@ -608,7 +609,7 @@ bool ImGuiAPI::BeginCombo(const char* label, const char* preview_value, ImGuiCom
 	if (!popup_open)
 		return false;
 
-	g.NextWindowData.Flags = backup_next_window_data_flags;
+	g.NextWindowData.HasFlags = backup_next_window_data_flags;
 	return BeginComboPopup(popup_id, bb, flags, winFlags);
 }
 

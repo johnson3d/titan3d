@@ -170,7 +170,9 @@ namespace EngineNS.Bricks.Procedure.Node
                 }
                 else
                 {
-                    cmdlist.AddImage((ulong)Task.Result.mTextureRSV.GetTextureHandle(), in prevStart, in prevEnd, in Vector2.Zero, in Vector2.One, 0xFFFFFFFF);
+                    ImTextureRef imTextureRef = new ImTextureRef();
+                    imTextureRef.m__TexID = (ulong)Task.Result.mTextureRSV.GetTextureHandle();
+                    cmdlist.AddImage(imTextureRef, in prevStart, in prevEnd, in Vector2.Zero, in Vector2.One, 0xFFFFFFFF);
                 }
             }
         }

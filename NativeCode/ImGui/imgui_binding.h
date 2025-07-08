@@ -1,8 +1,6 @@
 #pragma once
+
 #include "imgui.h"
-#ifndef IMGUI_DEFINE_MATH_OPERATORS
-#define IMGUI_DEFINE_MATH_OPERATORS
-#endif
 #include "imgui_internal.h"
 
 NS_BEGIN
@@ -459,11 +457,13 @@ public:
 	}
 	static void          PushAllowKeyboardFocus(bool allow_keyboard_focus)
 	{
-		return ImGui::PushAllowKeyboardFocus(allow_keyboard_focus);
+		ImGui::PushItemFlag(ImGuiItemFlags_NoTabStop, true);
+		//return ImGui::PushAllowKeyboardFocus(allow_keyboard_focus);
 	}
 	static void          PopAllowKeyboardFocus()
 	{
-		return ImGui::PopAllowKeyboardFocus();
+		ImGui::PopItemFlag();
+		//return ImGui::PopAllowKeyboardFocus();
 	}
 	static void          PushButtonRepeat(bool repeat)
 	{
@@ -547,7 +547,8 @@ public:
 	}
 	static void          SetCursorScreenPos(const ImVec2* pos)
 	{
-		return ImGui::SetCursorScreenPos(*pos);
+		ImGui::SetCursorScreenPos(*pos);
+		//ImGui::Dummy(ImVec2());
 	}
 	static void          AlignTextToFramePadding()
 	{
@@ -1570,7 +1571,8 @@ public:
 	// Inputs Utilities: Keyboard
 	static int           GetKeyIndex(ImGuiKey imgui_key)
 	{
-		return ImGui::GetKeyIndex(imgui_key);
+		return imgui_key;
+		//return ImGui::GetKeyIndex(imgui_key);
 	}
 	static bool          IsKeyDown(ImGuiKey user_key_index)
 	{
@@ -1758,10 +1760,10 @@ public:
 	{
 		PlatformIO->Renderer_SwapBuffers = fn;
 	}
-	static void		ImGui_NativeWindow_EnableDpiAwareness();
+	/*static void		ImGui_NativeWindow_EnableDpiAwareness();
 	static bool     ImGui_NativeWindow_Init(void* hwnd);
 	static void     ImGui_NativeWindow_Shutdown();
-	static void     ImGui_NativeWindow_NewFrame();
+	static void     ImGui_NativeWindow_NewFrame();*/
 
 	static void PlatformIO_Monitor_Resize(ImGuiPlatformIO* io, int size)
 	{

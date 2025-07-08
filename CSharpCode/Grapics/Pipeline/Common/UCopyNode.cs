@@ -299,7 +299,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                         var cmdlist = ImGuiAPI.GetWindowDrawList();
                         var size = ImGuiAPI.GetWindowSize();
                         //RDGNode.ResultBuffer.Srv.TagObject = "RDG Debugger";
-                        cmdlist.AddImage((ulong)RDGNode.ResultBuffer.Srv.GetTextureHandle(), DrawOffset, DrawOffset + (vpMax - vpMin), in Vector2.Zero, in Vector2.One, 0xFFFFFFFF);
+                        ImTextureRef imTextureRef = new ImTextureRef();
+                        imTextureRef.m__TexID = (ulong)RDGNode.ResultBuffer.Srv.GetTextureHandle();
+                        cmdlist.AddImage(imTextureRef, DrawOffset, DrawOffset + (vpMax - vpMin), in Vector2.Zero, in Vector2.One, 0xFFFFFFFF);
                     }
                 }
                 EGui.UIProxy.DockProxy.EndMainForm(result);

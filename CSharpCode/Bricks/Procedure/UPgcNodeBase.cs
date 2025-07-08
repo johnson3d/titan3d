@@ -153,10 +153,10 @@ namespace EngineNS.Bricks.Procedure
 
             var uv0 = new Vector2(0, 0);
             var uv1 = new Vector2(1, 1);
-            unsafe
-            {
-                cmdlist.AddImage((ulong)PreviewSRV.GetTextureHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
-            }
+
+            ImTextureRef imTextureRef = new ImTextureRef();
+            imTextureRef.m__TexID = (ulong)PreviewSRV.GetTextureHandle();
+            cmdlist.AddImage(imTextureRef, in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
         }
         public override void OnLButtonClicked(NodePin clickedPin)
         {

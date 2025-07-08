@@ -32,7 +32,7 @@
   "IsDebugShader": false,
   "IsGpuDred": false,
   "IsAftermath": false,
-  "MainWindowType": "EngineNS.GamePlay.UGameApplication@EngineCore",
+  "MainWindowType": "EngineNS.GamePlay.TtGameApplication@EngineCore",
   "MainRPolicyName": null,
   "SimpleRPolicyName": null,
   "RpcRootType": "EngineNS.UTest.UTest_Rpc@EngineCore",

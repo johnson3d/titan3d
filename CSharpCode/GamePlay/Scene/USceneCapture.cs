@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using static EngineNS.GamePlay.TtWorld;
@@ -292,7 +293,9 @@ namespace EngineNS.GamePlay.Scene
 
                     min1 = min1 + pos;
                     max1 = max1 + pos;
-                    drawlist.AddImage((ulong)RenderPolicy.GetFinalShowRSV().GetTextureHandle(), in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
+                    ImTextureRef imTextureRef = new ImTextureRef();
+                    imTextureRef.m__TexID = (ulong)RenderPolicy.GetFinalShowRSV().GetTextureHandle();
+                    drawlist.AddImage(imTextureRef, in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
                 }
                 ImGuiAPI.EndChild();
             }

@@ -96,7 +96,7 @@ namespace EngineNS.GamePlay
                     }
                 }
                 var showTexture = GetShowTexture();
-                if (showTexture != IntPtr.Zero)
+                if (showTexture.m__TexID != 0)
                 {
                     var drawlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());
                     var uv1 = new Vector2(0, 0);
@@ -105,7 +105,7 @@ namespace EngineNS.GamePlay
                     {
                         min = min + pos;
                         max = max + pos;
-                        drawlist.AddImage((ulong)showTexture, in min, in max, in uv1, in uv2, 0x01FFFFFF);// 0xFFFFFFFF);
+                        drawlist.AddImage(showTexture, in min, in max, in uv1, in uv2, 0x01FFFFFF);// 0xFFFFFFFF);
                     }
                 }
             }

@@ -231,10 +231,9 @@ namespace EngineNS.Bricks.Procedure.Node
 
             var uv0 = new Vector2(0, 0);
             var uv1 = new Vector2(1, 1);
-            unsafe
-            {
-                cmdlist.AddImage((ulong)TextureSRV.GetTextureHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
-            }
+            ImTextureRef imTextureRef = new ImTextureRef();
+            imTextureRef.m__TexID = (ulong)TextureSRV.GetTextureHandle();
+            cmdlist.AddImage(imTextureRef, in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Preview", "Image\\Preview", UPgcGraph.PgcEditorKeyword)]
@@ -294,10 +293,9 @@ namespace EngineNS.Bricks.Procedure.Node
 
             var uv0 = new Vector2(0, 0);
             var uv1 = new Vector2(1, 1);
-            unsafe
-            {
-                cmdlist.AddImage((ulong)PreviewSRV.GetTextureHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
-            }
+            ImTextureRef imTextureRef = new ImTextureRef();
+            imTextureRef.m__TexID = (ulong)PreviewSRV.GetTextureHandle();
+            cmdlist.AddImage(imTextureRef, in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
         }
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {

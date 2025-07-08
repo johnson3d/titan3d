@@ -118,7 +118,7 @@ namespace EngineNS.Graphics.Pipeline
         public virtual unsafe void OnDrawShowTexture()
         {
             var showTexture = GetShowTexture();
-            if (showTexture != IntPtr.Zero)
+            if (showTexture.m__TexID != 0)
             {
                 var drawlist = ImGuiAPI.GetWindowDrawList();
                 var uv1 = Vector2.Zero;
@@ -129,7 +129,7 @@ namespace EngineNS.Graphics.Pipeline
                     var max = ImGuiAPI.GetWindowContentRegionMax();
                     min = min + WindowPos;
                     max = max + WindowPos;
-                    drawlist.AddImage((ulong)showTexture, in min, in max, in uv1, in uv2, 0x01FFFFFF);// 0xFFFFFFFF);abgr
+                    drawlist.AddImage(showTexture, in min, in max, in uv1, in uv2, 0x01FFFFFF);// 0xFFFFFFFF);abgr
                 }
             }
         }
@@ -377,14 +377,16 @@ namespace EngineNS.Graphics.Pipeline
         {
 
         }
-        protected virtual IntPtr GetShowTexture()
+        protected virtual ImTextureRef GetShowTexture()
         {
+            var result = new ImTextureRef();
             if (RenderPolicy == null)
-                return IntPtr.Zero;
+                return result;
             var srv = RenderPolicy.GetFinalShowRSV();
             if (srv == null)
-                return IntPtr.Zero;
-            return srv.GetTextureHandle();
+                return result;
+            result.m__TexID = (ulong)srv.GetTextureHandle();
+            return result;
         }
         public virtual void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
         {

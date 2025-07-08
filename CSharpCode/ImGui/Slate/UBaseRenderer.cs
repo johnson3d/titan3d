@@ -214,7 +214,7 @@ namespace EngineNS.EGui.Slate
 
             var fontData = new FontDatas();
             fontData.Font = io.Fonts.AddFontFromFileTTF(rn.Address, size_pixels, fontConfig, glyph_ranges);
-            
+
             mFontDataList.Add(fontData);
         }
 

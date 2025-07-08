@@ -338,7 +338,7 @@ namespace EngineNS.EGui
                                 }
                                 else
                                 {
-                                    var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)pcmd->TextureId);
+                                    var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)pcmd->TexRef.GetTexID());
                                     if (handle.IsAllocated)
                                     {
                                         var rsv = handle.Target as NxRHI.TtSrView;

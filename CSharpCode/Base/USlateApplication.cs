@@ -1,4 +1,5 @@
 ﻿using EngineNS.Graphics.Pipeline;
+using SDL;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -143,16 +144,7 @@ namespace EngineNS
 
         public IntPtr mImGuiContext;
         public EGui.TtImDrawDataRHI mDrawData = new EGui.TtImDrawDataRHI();
-
-        bool[] MousePressed = new bool[3] { false, false, false };
-        IntPtr[] MouseCursors = new IntPtr[(int)ImGuiMouseCursor_.ImGuiMouseCursor_COUNT];
-        partial void LoadMouseCursors();
-        partial void FreeMouseCursors();
-        partial void MapKeys(ImGuiIO io);
-        partial void ImGui_Init(ImGuiIO io, IntPtr window);
-        partial void ImGui_UpdateMousePosAndButtons(ImGuiIO io);
-        partial void ImGui_UpdateMouseCursor(ImGuiIO io);
-
+        
         public virtual async Task<bool> InitializeApplication(NxRHI.TtGpuDevice rc, RName rpName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -189,7 +181,7 @@ namespace EngineNS
                     style->Colors[(int)ImGuiCol_.ImGuiCol_WindowBg].W = 1.0f;
                 }
 
-                ImGui_Init(ImGuiAPI.GetIO(), NativeWindow.Window);
+                ImGui_Init_SDL(ImGuiAPI.GetIO(), NativeWindow.Window);
 
                 SetPerFrameImGuiData(1f / 60f);
             }
@@ -199,9 +191,7 @@ namespace EngineNS
         {
             mDrawData.Dispose();
 
-            FreeMouseCursors();
-
-            MouseCursors = new IntPtr[(int)ImGuiMouseCursor_.ImGuiMouseCursor_COUNT];
+            ImGuiData.Dispose();
 
             NativeWindow?.Cleanup();
             NativeWindow = null;
@@ -222,9 +212,6 @@ namespace EngineNS
         }
 
         #region ImGUI & SDL
-
-        bool g_MouseCanUseGlobalState = false;
-
 
         public virtual void OnResize(float x, float y)
         {
@@ -258,8 +245,10 @@ namespace EngineNS
         {
             SetPerFrameImGuiData(deltaSeconds);
 
-            ImGui_UpdateMousePosAndButtons(ImGuiAPI.GetIO());
-            ImGui_UpdateMouseCursor(ImGuiAPI.GetIO());
+            TtDockWindowSDL.ImGui_ImplSDL3_UpdateMouseData(ImGuiAPI.GetIO());
+            TtDockWindowSDL.ImGui_ImplSDL3_UpdateMouseCursor(ImGuiAPI.GetIO());
+            
+            //EGui.UDockWindowSDL.ImGui_ImplSDL2_UpdateMonitors();
 
             ImGuiAPI.NewFrame();
         }
@@ -406,83 +395,6 @@ namespace EngineNS
                 return TtRootFormManager.Insance;
             }
         }
-        //public class TtStopOperateCover : IRootForm
-        //{
-        //    public async Thread.Async.TtTask<bool> Initialize()
-        //    {
-        //        await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
-        //        return true;
-        //    }
-
-        //    public RectangleF FormRect { get; set; }
-
-        //    public void Dispose() { }
-        //    bool mVisible = true;
-        //    public bool Visible
-        //    {
-        //        get => mVisible;
-        //        set => mVisible = value;
-        //    }
-
-        //    public uint DockId { get; set; }
-        //    public ImGuiWindowClass DockKeyClass { get; }
-        //    public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
-        //    public Editor.IAssetEditor CurrentEditor;
-        //    public string Info;
-        //    public Action DrawAction;
-
-        //    //void DrawRootFormConver(IRootForm rootForm)
-        //    //{
-        //    //    var pos = new Vector2(rootForm.FormRect.Location);
-        //    //    var size = new Vector2(rootForm.FormRect.Size);
-        //    //    ImGuiAPI.SetNextWindowSize(size, ImGuiCond_.ImGuiCond_Always);
-        //    //    ImGuiAPI.SetNextWindowPos(pos, ImGuiCond_.ImGuiCond_Always, in Vector2.Zero);
-        //    //    if (ImGuiAPI.Begin("OpCover", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
-        //    //    {
-        //    //        ImGuiAPI.Text(Info);
-        //    //        if (DrawAction != null)
-        //    //            DrawAction();
-        //    //    }
-        //    //    ImGuiAPI.End();
-        //    //}
-        //    public void OnDraw()
-        //    {
-        //        //TtEngine.RootFormManager.TourRootForms(DrawRootFormConver);
-
-        //        //var size = new Vector2(8000, 6000);
-        //        //ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_Always);
-        //        //ImGuiAPI.SetNextWindowPos(in Vector2.Zero, ImGuiCond_.ImGuiCond_Always, in Vector2.Zero);
-        //        //if (ImGuiAPI.Begin("OpCover", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
-        //        //{
-        //        //    ImGuiAPI.Text(Info);
-        //        //    if (DrawAction != null)
-        //        //        DrawAction();
-        //        //}
-        //        //ImGuiAPI.End();
-        //        ////var result = EGui.UIProxy.DockProxy.BeginMainForm($"Not Allow User Operation", this, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove);
-        //        ////if (result)
-        //        ////{
-        //        ////    ImGuiAPI.Text(Info);
-        //        ////}
-        //        ////EGui.UIProxy.DockProxy.EndMainForm(result);
-        //    }
-
-        //    public void OnDraw(in Vector2 pos, in Vector2 size)
-        //    {
-        //        ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_Always);
-        //        ImGuiAPI.SetNextWindowPos(in pos, ImGuiCond_.ImGuiCond_Always, in Vector2.Zero);
-        //        ImGuiAPI.SetNextWindowBgAlpha(0.5f);
-        //        if (ImGuiAPI.Begin("OpCover", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoInputs))
-        //        {
-        //            ImGuiAPI.Text(Info);
-        //            if (DrawAction != null)
-        //                DrawAction();
-        //        }
-        //        ImGuiAPI.End();
-        //    }
-        //}
-        //TtStopOperateCover mStopOperateCover = new TtStopOperateCover();
-        //public TtStopOperateCover StopOperateCover => mStopOperateCover; 
         private List<IRootForm> TopMostForms { get; } = new List<IRootForm>();
         public void ShowTopMost(IRootForm form)
         {

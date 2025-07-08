@@ -9,6 +9,6 @@
     <Import_RootNamespace>WindowSDL</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)UDockWindowSDL.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DockWindowSDL.cs" />
   </ItemGroup>
 </Project>

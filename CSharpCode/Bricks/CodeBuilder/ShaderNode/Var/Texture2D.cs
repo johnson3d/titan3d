@@ -106,7 +106,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             var uv0 = new Vector2(0, 0);
             var uv1 = new Vector2(1, 1);
-            cmdlist.AddImage((ulong)CmdParameters.GetHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
+            ImTextureRef imTextureRef = new ImTextureRef();
+            imTextureRef.m__TexID = (ulong)CmdParameters.GetHandle();
+            cmdlist.AddImage(imTextureRef, in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
         }
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {

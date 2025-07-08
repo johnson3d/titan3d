@@ -732,7 +732,9 @@ namespace EngineNS.IO
                 }
                 else
                 {
-                    cmdlist.AddImage((ulong)Task.Result.mTextureRSV.GetTextureHandle(), in start, in end, in Vector2.Zero, in Vector2.One, 0xFFFFFFFF);
+                    ImTextureRef imTextureRef = new ImTextureRef();
+                    imTextureRef.m__TexID = (ulong)Task.Result.mTextureRSV.GetTextureHandle();
+                    cmdlist.AddImage(imTextureRef, in start, in end, in Vector2.Zero, in Vector2.One, 0xFFFFFFFF);
                 }
             }
         }

@@ -80,6 +80,7 @@ namespace EngineNS.EGui.UIProxy
         public static void EndToolbar()
         {
             ImGuiAPI.SetCursorScreenPos(in RectMax);
+            ImGuiAPI.Dummy(in Vector2.Zero);
             ImGuiAPI.EndGroup();
         }
     }
@@ -168,6 +169,7 @@ namespace EngineNS.EGui.UIProxy
             }
             ImGuiAPI.ItemAdd(cursorScrPos, tempScrPos, 0, (int)ImGuiItemFlags_.ImGuiItemFlags_None);
             ImGuiAPI.SetCursorScreenPos(in tempScrPos);
+            ImGuiAPI.Dummy(in Vector2.Zero);
             Vector4 color = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor);
             if(disable)
                 color = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor_Disable);

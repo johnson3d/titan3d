@@ -48,7 +48,9 @@ namespace EngineNS.Bricks.AdvanceShadow
                 if (node.ShadowObjects.Count > 0 && graphNode.mDebuggerSRViews != null && node.Leaf.PageIndex < graphNode.mDebuggerSRViews.Length)
                 {
                     var srv = graphNode.mDebuggerSRViews[node.Leaf.PageIndex];
-                    cmdlist.AddImage((ulong)srv.GetTextureHandle(), in min, in max, in Vector2.Zero, in Vector2.One, 0xffffffff);
+                    ImTextureRef imTextureRef = new ImTextureRef();
+                    imTextureRef.m__TexID = (ulong)srv.GetTextureHandle();
+                    cmdlist.AddImage(imTextureRef, in min, in max, in Vector2.Zero, in Vector2.One, 0xffffffff);
                 }
                 var level = (byte)(node.DeepLevel * 255 / MaxDeepLevel);
                 var color = new Color4b(level, level, level, 255);

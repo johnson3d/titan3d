@@ -67,7 +67,9 @@ namespace EngineNS.EGui
                 {
                     var uv0 = SnapUVStart;
                     var uv1 = SnapUVEnd;
-                    cmdlist.AddImage((ulong)SnapTask.Value.DirectResult.GetTextureHandle(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
+                    ImTextureRef imTextureRef = new ImTextureRef();
+                    imTextureRef.m__TexID = (ulong)SnapTask.Value.DirectResult.GetTextureHandle();
+                    cmdlist.AddImage(imTextureRef, in start, in end, in uv0, in uv1, 0xFFFFFFFF);
                 }
                 else
                 {
@@ -271,7 +273,9 @@ namespace EngineNS.EGui
                 Vector2 uvMin;
                 Vector2 uvMax;
                 this.GetUV(frame, out uvMin, out uvMax);
-                cmdlist.AddImage((ulong)mTextureTask.Value.DirectResult.GetTextureHandle(), in rectMin, in rectMax, in uvMin, in uvMax, Color);
+                ImTextureRef imTextureRef = new ImTextureRef();
+                imTextureRef.m__TexID = (ulong)mTextureTask.Value.DirectResult.GetTextureHandle();
+                cmdlist.AddImage(imTextureRef, in rectMin, in rectMax, in uvMin, in uvMax, Color);
             }
             else
             {

@@ -40,7 +40,7 @@ namespace EngineNS.Bricks.Input
             DropFiles.Clear();
         }
 
-        public Device.Mouse.UMouse Mouse;
+        public Device.Mouse.TtMouse Mouse;
 
         public TtInputSystem()
         {
@@ -55,7 +55,7 @@ namespace EngineNS.Bricks.Input
                 EventTriggerDic.Add((EventType)enumValue, new UEventTrigger());
             }
 
-            Mouse = new Device.Mouse.UMouse();
+            Mouse = new Device.Mouse.TtMouse();
             return true;
         }
         public void BeforeTick()

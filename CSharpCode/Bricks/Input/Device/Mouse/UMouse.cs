@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.Input.Device.Mouse
 {
-    public partial class UMouse : IInputDevice
+    public partial class TtMouse : IInputDevice
     {
         bool bShowCursor = true;
         public bool ShowCursor 

@@ -21,7 +21,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)ImGuiFileDialog.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ImGuiFileDialogConfig.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_filedialog.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)imgui_impl_win32.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_binding.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)misc\freetype\imgui_freetype.h" />
@@ -33,9 +32,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_demo.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_draw.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_filedialog.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)imgui_impl_win32.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_tables.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_widgets.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_binding.cpp" />
