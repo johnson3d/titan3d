@@ -1,4 +1,5 @@
 ﻿using EngineNS.EGui.Controls;
+using SDL;
 using System;
 using System.Collections.Generic;
 using System.Security.AccessControl;
@@ -326,7 +327,8 @@ namespace EngineNS.Editor.Forms
             if (node == null)
                 return;
 
-            if (ImGuiAPI.IsKeyDown((ImGuiKey)Bricks.Input.Scancode.SCANCODE_LCTRL))
+            var key = ImGuiAPI.GetImGuiKey(Bricks.Input.Keycode.KEY_LCTRL);
+            if (ImGuiAPI.IsKeyDown(key))
             {
                 node.Selected = !node.Selected;
                 if (node.Selected == false)

@@ -69,7 +69,7 @@ namespace EngineNS
             // SDL2 by default doesn't pass mouse clicks to the application when the click focused a window. This is getting in the way of our interactions and we disable that behavior.
             SDL.SDL3.SDL_SetHint(SDL.SDL3.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
         }
-        static ImGuiKey ImGui_ImplSDL3_KeyEventToImGuiKey(SDL_Keycode keycode, SDL_Scancode scancode)
+        public static ImGuiKey ImGui_ImplSDL3_KeyEventToImGuiKey(SDL_Keycode keycode, SDL_Scancode scancode)
         {
             // Keypad doesn't have individual key values in SDL3
             switch (scancode)

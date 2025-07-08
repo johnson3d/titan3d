@@ -1568,12 +1568,12 @@ public:
 	{
 		return ImGui::ColorConvertHSVtoRGB(h, s, v, *out_r, *out_g, *out_b);
 	}
-	// Inputs Utilities: Keyboard
-	static int           GetKeyIndex(ImGuiKey imgui_key)
-	{
-		return imgui_key;
-		//return ImGui::GetKeyIndex(imgui_key);
-	}
+	//// Inputs Utilities: Keyboard
+	//static int           GetKeyIndex(ImGuiKey imgui_key)
+	//{
+	//	return imgui_key;
+	//	//return ImGui::GetKeyIndex(imgui_key);
+	//}
 	static bool          IsKeyDown(ImGuiKey user_key_index)
 	{
 		return ImGui::IsKeyDown(user_key_index);
