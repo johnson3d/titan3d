@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_997695841434732508 Type="EngineNS.GamePlay.Scene.TtSceneCapture@EngineCore">
+  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <CaptureMode Type="EngineNS.GamePlay.Scene.TtSceneCapture.ECaptureMode@EngineCore" Order="0" />
+  <NodeId Type="System.Guid@Unknown" Order="0" />
+  <Parent Type="EngineNS.GamePlay.Scene.TtNode@EngineCore" Order="0" />
+  <ParentScene Type="EngineNS.GamePlay.Scene.TtScene@EngineCore" Order="0" />
+</Hash_997695841434732508>
