@@ -273,7 +273,7 @@ namespace EngineNS.Editor.Forms
             if (ImGuiAPI.MenuItem($"Goto", null, false, true))
             {
                 var camera = WorldViewportState.CameraController.Camera;
-                var radius = (node.AABB.GetMaxSide()) * 5.0f;
+                var radius = (node.RefAABB.GetMaxSide()) * 5.0f;
                 camera.LookAtLH(node.Placement.Position - camera.GetDirection().AsDVector() * radius, node.Placement.Position, Vector3.Up);
             }
             if (ImGuiAPI.MenuItem($"DoCommand", null, false, true))

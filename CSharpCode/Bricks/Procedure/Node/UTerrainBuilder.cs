@@ -362,7 +362,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
 
             PreviewTerrainNode.UpdateAABB();
-            var aabb = PreviewTerrainNode.AABB.ToSingleAABB();
+            var aabb = PreviewTerrainNode.RefAABB.ToSingleAABB();
             float radius = aabb.GetMaxSide();
             DBoundingSphere sphere;
             sphere.Center = aabb.GetCenter().AsDVector();

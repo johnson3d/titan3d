@@ -48,7 +48,7 @@ namespace EngineNS.Graphics.Mesh
                 meshNode.IsAcceptShadow = false;
                 meshNode.IsCastShadow = false;
                 meshNode.IsSceneManaged = false;
-                renderer.RenderPolicy.DefaultCamera.AutoZoom(in meshNode.AABB);
+                renderer.RenderPolicy.DefaultCamera.AutoZoom(in meshNode.RefAABB);
             }
 
             TtEngine.Instance.GfxDevice.RenderSwapQueue.CaptureRenderDocFrame = true;

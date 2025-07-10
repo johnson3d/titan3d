@@ -71,6 +71,18 @@ namespace EngineNS.Thread
                 EqueueContinue();
             }
         }
+        public void AddNum(int num)
+        {
+            System.Threading.Interlocked.Add(ref mCount, num);
+            if (mCount <= 0)
+            {
+                if (Waiter!=null)
+                {
+                    Waiter.Set();
+                }
+                EqueueContinue();
+            }
+        }
         public void EqueueContinue()
         {
             if (PostEvent == null)

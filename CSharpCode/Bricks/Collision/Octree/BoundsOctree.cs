@@ -334,7 +334,7 @@ namespace EngineNS.Bricks.Collision.Octree
                     {
                         var scene = host as GamePlay.Scene.TtScene;
                         var node = notify.Parameter as GamePlay.Scene.TtNode;
-                        var aabb = new Aabb(node.AbsAABB);
+                        var aabb = new Aabb(node.RefAbsAABB);
                         mOctree.Add(node, aabb);
                     }
                     break;
@@ -368,7 +368,7 @@ namespace EngineNS.Bricks.Collision.Octree
                             {
                                 node.OctreeNode.Remove(node);
                             }
-                            var aabb = new Aabb(node.AbsAABB);
+                            var aabb = new Aabb(node.RefAbsAABB);
                             if (mOctree != null)
                             {
                                 mOctree.Add(node, aabb);

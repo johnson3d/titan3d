@@ -1,3 +1,4 @@
+using EngineNS.Bricks.WorldSimulator;
 using EngineNS.EGui.Slate;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
@@ -23,6 +24,7 @@ namespace EngineNS.GamePlay
             mBoundingDebugMaterial = null;
 
             mMemberTickables.CleanupMembers(this);
+            this.EntityManager.Dispose();
         }
         public TtWorld(Graphics.Pipeline.TtViewportSlate viewport)
         {
@@ -46,7 +48,7 @@ namespace EngineNS.GamePlay
         {
             Scene.TtNodeData data = new Scene.TtNodeData();
             mRoot = await TtNode.SpawnNode<Scene.TtScene>(null, null, data, Scene.EBoundVolumeType.Box, typeof(TtPlacement), this);
-            mRoot.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
+            mRoot.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleAlways);
 
             mBoundingDebugMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
 
@@ -71,7 +73,14 @@ namespace EngineNS.GamePlay
         public Scene.TtScene Root
         {
             get => mRoot;
-            set => mRoot = value;
+            set
+            {
+                mRoot = value;
+                if (mRoot!=null)
+                {
+                    mRoot.World.EntityManager.AddEntity(mRoot.BoundVolume);
+                }
+            }
         }
         internal List<Scene.TtSunNode> mSuns = new List<Scene.TtSunNode>();
         [Rtti.Meta("")]
@@ -261,16 +270,24 @@ namespace EngineNS.GamePlay
         }
         public virtual void GatherVisibleMeshes(TtVisParameter rp)
         {
-            using (new Profiler.TimeScopeHelper(ScopeGatherVisibleMeshes))
+            if (TtEngine.Instance.Config.UseECS)
             {
-                rp.ClearVisibles();
-
-                GatherVisibleMeshes(rp, Root);
+                this.EntityManager.CullingSystem.World = this;
+                this.EntityManager.CullingSystem.VisParameter = rp;
+                this.EntityManager.Process(0);
+            }
+            else
+            {
+                using (new Profiler.TimeScopeHelper(ScopeGatherVisibleMeshes))
+                {
+                    rp.ClearVisibles();
+                    GatherVisibleMeshes(rp, Root);
+                }
             }
         }
         public virtual void GatherVisibleMeshes(TtVisParameter rp, TtNode rootNode)
         {
-            rootNode.IterateNodesBFS(static (node, arg) =>
+            rootNode.IterateNodes(static (node, arg) =>
             {
                 var rp = arg as TtVisParameter;
                 if (rp.OnVisitNode != null)
@@ -282,7 +299,11 @@ namespace EngineNS.GamePlay
                     }
                 }
                 CONTAIN_TYPE type = CONTAIN_TYPE.CONTAIN_TEST_OUTER;
-                if (node.HasStyle(Scene.TtNode.ENodeStyles.VisibleFollowParent))
+                if (node.HasStyle(Scene.TtNode.ENodeStyles.VisibleAlways))
+                {
+                    type = CONTAIN_TYPE.CONTAIN_TEST_REFER;
+                }
+                else if (node.HasStyle(Scene.TtNode.ENodeStyles.VisibleFollowParent))
                 {
                     type = CONTAIN_TYPE.CONTAIN_TEST_REFER;
                 }
@@ -290,12 +311,19 @@ namespace EngineNS.GamePlay
                 {
                     using (new Profiler.TimeScopeHelper(ScopeGatherVisibleMeshes_Cull))
                     {
-                        type = rp.CullCamera.WhichContainTypeFast(rp.World, in node.AbsAABB, true);
+                        if (node.RefAbsAABB.IsEmpty())
+                        {
+                            type = CONTAIN_TYPE.CONTAIN_TEST_REFER;
+                        }
+                        else
+                        {
+                            type = rp.CullCamera.WhichContainTypeFast(rp.World, in node.RefAbsAABB, true);
+                        }
                     }
                 }
                 else
                 {
-                    var ct = DBoundingBox.Contains(in rp.CullBox, in node.AbsAABB);
+                    var ct = DBoundingBox.Contains(in rp.CullBox, in node.RefAbsAABB);
                     switch (ct)
                     {
                         case ContainmentType.Contains:
@@ -338,7 +366,7 @@ namespace EngineNS.GamePlay
                     }
                 }
                 return true;
-            }, rp, 8);
+            }, rp);
         }
         #endregion
 
@@ -358,7 +386,7 @@ namespace EngineNS.GamePlay
 
             var bvs = arg as List<Graphics.Pipeline.FVisibleMesh>;
 
-            ref var aabb = ref node.AABB;
+            ref var aabb = ref node.RefAABB;
             var size = aabb.GetSize();
             var cookedMesh = Graphics.Mesh.TtMeshDataProvider.MakeBoxWireframe((float)aabb.Minimum.X, (float)aabb.Minimum.Y, (float)aabb.Minimum.Z,
                 (float)size.X, (float)size.Y, (float)size.Z).ToMesh();

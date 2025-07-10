@@ -11,7 +11,7 @@ namespace EngineNS.NxPhysics
 {
     [Bricks.CodeBuilder.ContextMenu("NxSceneDbg", "NxSceneDbg", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(GamePlay.Scene.TtNodeData), DefaultNamePrefix = "NxSceneDbg")]
-    public class NxSceneDebugger : GamePlay.Scene.TtSceneActorNode
+    public class NxSceneDebugger : GamePlay.Scene.TtVisual
     {
         protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {

@@ -112,7 +112,7 @@ namespace EngineNS
                 {    
                     if (IsAsyncCreate)
                     {
-                        smp = TtEngine.Instance.EventPoster.ParrallelForSmpAllocator.QueryObjectSync();
+                        smp = TtEngine.Instance.EventPoster.ParallelForSmpAllocator.QueryObjectSync();
                         smp.Reset(GrowStep);
                     }
                     for (int i = 0; i < GrowStep; i++)
@@ -145,7 +145,7 @@ namespace EngineNS
                 if (mPool.Count == 0 && IsAsyncCreate)
                 {
                     Thread.TtContextThread.CurrentContext.FlushToSemephore(smp.Semaphore);
-                    TtEngine.Instance.EventPoster.ParrallelForSmpAllocator.ReleaseObject(smp);
+                    TtEngine.Instance.EventPoster.ParallelForSmpAllocator.ReleaseObject(smp);
                     //Thread.TtContextThread.CurrentContext.FlushAllThreadEvents();
                 }
                 var result = mPool.Peek();

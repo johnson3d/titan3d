@@ -48,7 +48,7 @@ namespace EngineNS.Editor.Forms
             return !(left == right);
         }
     }
-    public class USkeletonShowNode : TtSceneActorNode
+    public class USkeletonShowNode : TtVisual
     {
         public static async System.Threading.Tasks.Task<USkeletonShowNode> AddNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
         {

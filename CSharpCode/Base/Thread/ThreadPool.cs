@@ -32,26 +32,6 @@ namespace EngineNS.Thread
             PoolIndex = index;
             Interval = 0;
         }
-        //Queue<Async.IJobThread> mJobThreads = new Queue<Async.IJobThread>();
-        //public void AddJobThread(Async.IJobThread job)
-        //{
-        //    lock (mJobThreads)
-        //    {
-        //        mJobThreads.Enqueue(job);
-        //    }
-        //}
-        //private void TickJobThread()
-        //{
-        //    while (mJobThreads.Count > 0)
-        //    {
-        //        Async.IJobThread jobs = null;
-        //        lock (mJobThreads)
-        //        {
-        //            jobs = mJobThreads.Dequeue();
-        //        }
-        //        jobs.DoWorks();
-        //    }
-        //}
         private List<Async.TtAsyncTaskStateBase> Suspended = new List<Async.TtAsyncTaskStateBase>();
         public override void Tick()
         {
@@ -59,14 +39,14 @@ namespace EngineNS.Thread
             var e = TtEngine.Instance.ContextThreadManager.PopPoolEvent();
             if (e == null)
             {
+                System.Threading.Interlocked.Decrement(ref mNumOfActiveThreads);
                 TtEngine.Instance.EventPoster.IdleThreads.SetBit((uint)PoolIndex);
-                //TtEngine.Instance.ContextThreadManager.mTPoolTrigger.Wait();
-                TtEngine.Instance.ContextThreadManager.mTaskSemaphore.Wait();
+                TtEngine.Instance.ContextThreadManager.mTPoolTrigger.Wait();
                 TtEngine.Instance.EventPoster.IdleThreads.UnsetBit((uint)PoolIndex);
-                //return;
+                System.Threading.Interlocked.Increment(ref mNumOfActiveThreads);
             }
 
-            System.Threading.Interlocked.Increment(ref mNumOfActiveThreads);
+            
 #if DEBUG
             lock (mLocker)
             {
@@ -77,29 +57,25 @@ namespace EngineNS.Thread
 
             while (e != null)
             {
-                //TickJobThread();
-
+                Async.TtAsyncTaskStateBase state = null;
+                try
                 {
-                    Async.TtAsyncTaskStateBase state = null;
-                    try
-                    {
-                        state = e.ExecutePostEvent();
-                    }
-                    catch (Exception ex)
-                    {
-                        Profiler.Log.WriteException(ex);
-                        e.ExceptionInfo = ex;
-                    }
-                    if (state.TaskState == Async.EAsyncTaskState.Suspended)
-                    {
-                        Suspended.Add(e);
-                    }
-                    else
-                    {
-                        e.TaskState = Async.EAsyncTaskState.Completed;
-                        e.CompletedEvent?.Set();
-                        e.Dispose();
-                    }
+                    state = e.ExecutePostEvent();
+                }
+                catch (Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                    e.ExceptionInfo = ex;
+                }
+                if (state.TaskState == Async.EAsyncTaskState.Suspended)
+                {
+                    Suspended.Add(e);
+                }
+                else
+                {
+                    e.TaskState = Async.EAsyncTaskState.Completed;
+                    e.CompletedEvent?.Set();
+                    e.Dispose();
                 }
                 e = TtEngine.Instance.ContextThreadManager.PopPoolEvent();
             }
@@ -110,8 +86,7 @@ namespace EngineNS.Thread
             }
             Suspended.Clear();
 
-            //TickAwaitEvent();
-            System.Threading.Interlocked.Decrement(ref mNumOfActiveThreads);
+            
         }
         protected override void OnThreadStart()
         {

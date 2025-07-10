@@ -1,4 +1,5 @@
 ﻿//#define HAS_DebugInfo
+#define STATE_TIME
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -41,6 +42,9 @@ namespace EngineNS.Thread.Async
     }
     public abstract class TtAsyncTaskStateBase : IPooledObject, IDisposable
     {
+#if STATE_TIME
+        public Int64 CreateTime = 0;
+#endif
         public bool IsAlloc { get; set; } = false;
         public EAsyncTaskState TaskState = EAsyncTaskState.Ready;
         internal System.Threading.AutoResetEvent CompletedEvent = null;
@@ -56,12 +60,12 @@ namespace EngineNS.Thread.Async
         public TtContextThread AsyncTarget;
         public struct FUserArguments : IDisposable
         {
-            public Vector2ui Value0;
+            public Vector4ui Value0;
             public object Obj0;
             public object Obj1;
             public object Obj2;
             public object Obj3;
-            public uint IndexOfParallelFor
+            public uint TaskIndexOfParallelFor
             {
                 get => Value0.X;
             }
@@ -69,25 +73,33 @@ namespace EngineNS.Thread.Async
             {
                 get => Value0.Y;
             }
+            public uint StrideOfParallelFor
+            {
+                get => Value0.Z;
+            }
             public void Dispose()
             {
                 Obj0 = null;
                 Obj1 = null;
                 Obj2 = null;
                 Obj3 = null;
-                Value0 = Vector2ui.Zero;
+                Value0 = Vector4ui.Zero;
             }
         }
         public FUserArguments UserArguments = new FUserArguments();
 
         #region ParallelFor
-        public int IndexOfParallelFor
+        public int TaskIndexOfParallelFor
         {
-            get => (int)UserArguments.IndexOfParallelFor;
+            get => (int)UserArguments.TaskIndexOfParallelFor;
         }
         public uint NumOfParallelFor
         {
             get => UserArguments.NumOfParallelFor;
+        }
+        public uint StrideOfParallelFor
+        {
+            get => UserArguments.StrideOfParallelFor;
         }
         public T GetForArgument0<T>()
         {
@@ -208,6 +220,9 @@ namespace EngineNS.Thread.Async
         public static TtAsyncTaskState<T> CreateInstance(uint timeOut = uint.MaxValue)
         {
             var result = mAllocator.QueryObjectSync();
+#if STATE_TIME
+            result.CreateTime = Support.TtTime.HighPrecision_GetTickCount();
+#endif
             result.PostAction = null;
             result.AsyncTarget = null;
             result.ContinueThread = TtContextThread.CurrentContext;
@@ -217,7 +232,7 @@ namespace EngineNS.Thread.Async
         {
             mAllocator.ReleaseObject(this);
         }
-        #endregion
+#endregion
         public override void Reset()
         {
             PostAction = null;
@@ -267,57 +282,68 @@ namespace EngineNS.Thread.Async
         }
 
         private Stack<TtAsyncTaskStateBase> mTPoolEvents = new Stack<TtAsyncTaskStateBase>();
-        //internal bool IsPoolWaiting = true;
-        //internal System.Threading.ManualResetEventSlim mTPoolTrigger = new System.Threading.ManualResetEventSlim(false);
-        const int MaxSemaphore = 4;
-        internal System.Threading.SemaphoreSlim mTaskSemaphore = new SemaphoreSlim(0, MaxSemaphore);
-        //private TtAtomicLocker mPoolLocker = new TtAtomicLocker();
+        internal System.Threading.ManualResetEventSlim mTPoolTrigger = new System.Threading.ManualResetEventSlim(false);
+        private bool IsWaiting = true;
         internal void PushPoolEvent(TtAsyncTaskStateBase ev)
         {
-            //using(var lk = new FAtomLock(mPoolLocker))
             lock (mTPoolEvents)
             {
                 mTPoolEvents.Push(ev);
-                //放开最多4条线程获取任务
-                //避免使用ManualResetEventSlim一次将所有线程放开导致的资源争夺 
-                if (mTaskSemaphore.CurrentCount < MaxSemaphore)
+#if STATE_TIME
+                ev.CreateTime = Support.TtTime.HighPrecision_GetTickCount();
+#endif
+                if (IsWaiting)
                 {
-                    mTaskSemaphore.Release(MaxSemaphore - mTaskSemaphore.CurrentCount);
+                    IsWaiting = false;
+                    var t1 = Support.TtTime.HighPrecision_GetTickCount();
+                    mTPoolTrigger.Set();
+                    var t2 = Support.TtTime.HighPrecision_GetTickCount();
+                    if (t2 - t1 > 2)
+                    {
+                        return;
+                    }
                 }
-                //if (IsPoolWaiting)
-                //{
-                //    IsPoolWaiting = false;
-                //    mTPoolTrigger.Set();
-                //}
             }
         }
         internal TtAsyncTaskStateBase PopPoolEvent()
         {
-            //using (var lk = new FAtomLock(mPoolLocker))
+            var t1 = Support.TtTime.HighPrecision_GetTickCount();
+            TtAsyncTaskStateBase result;
             lock (mTPoolEvents)
             {
                 if (mTPoolEvents.Count == 0)
                 {
-                    return null;
+                    result = null;
+                    IsWaiting = true;
+                    mTPoolTrigger.Reset();
                 }
-                var result = mTPoolEvents.Pop();
-                if (mTPoolEvents.Count > 0)
+                else
                 {
-                    //任务队列非空，再放开一条线程获取任务 
-                    //任务队列如果很长，这个操作会逐渐放开线程池执行任务
-                    //从而避免使用ManualResetEventSlim一次将所有线程放开导致的资源争夺 
-                    if (mTaskSemaphore.CurrentCount < MaxSemaphore)
+                    result = mTPoolEvents.Pop();
+                    if (IsWaiting)
                     {
-                        mTaskSemaphore.Release();
+                        IsWaiting = false;
+                        mTPoolTrigger.Set();
                     }
                 }
-                //if (mTPoolEvents.Count == 0)
-                //{
-                //    IsPoolWaiting = true;
-                //    mTPoolTrigger.Reset();
-                //}
+            }
+
+#if STATE_TIME
+            if(result!=null)
+            {
+                var time = Support.TtTime.HighPrecision_GetTickCount();
+                if (time - result.CreateTime > 20)
+                {
+                    return result;
+                }
+            }
+#endif
+            var t2 = Support.TtTime.HighPrecision_GetTickCount();
+            if (t2 - t1 > 2)
+            {
                 return result;
             }
+            return result;
         }
         internal Support.TtBitset IdleThreads;
         internal TtThreadPool[] ContextPools;
@@ -328,9 +354,9 @@ namespace EngineNS.Thread.Async
         }
 
         #region for each
-        public delegate void Delegate_ParrallelForAction(TtAsyncTaskStateBase state);
+        public delegate void Delegate_ParrallelForAction(int index, TtAsyncTaskStateBase state);
         public bool EnableMTForeach = true;
-        internal TtPooledSemaphoreAllocator ParrallelForSmpAllocator = new TtPooledSemaphoreAllocator();
+        internal TtPooledSemaphoreAllocator ParallelForSmpAllocator = new TtPooledSemaphoreAllocator();
         [ThreadStatic]
         private static Profiler.TimeScope mScopeParrallelForWait;
         private static Profiler.TimeScope ScopeParrallelForWait
@@ -342,28 +368,43 @@ namespace EngineNS.Thread.Async
                 return mScopeParrallelForWait;
             }
         }
-        public void ParallelFor(int num, Delegate_ParrallelForAction action, object userData1 = null, object userData2 = null)
+        public void ParallelFor(int numTask, int numTaskGroup, Delegate_ParrallelForAction action, object userData1 = null, object userData2 = null)
         {
             System.Diagnostics.Debug.Assert(Thread.TtContextThread.CurrentContext.GetThreadType()!= EAsyncTarget.TPools);
-            if (num == 0)
+            if (numTask == 0)
                 return;
 
-            var smp = ParrallelForSmpAllocator.QueryObjectSync();
-            smp.Reset(num);
+            var smp = ParallelForSmpAllocator.QueryObjectSync();
+            smp.Reset(numTask);
             var userArgs = new TtAsyncTaskStateBase.FUserArguments();
             userArgs.Obj0 = action;
             userArgs.Obj1 = smp;
             userArgs.Obj2 = userData1;
             userArgs.Obj3 = userData2;
-            userArgs.Value0.Y = (uint)num;
-            for (int i = 0; i < num; i++)
+            userArgs.Value0.Y = (uint)numTask;
+            userArgs.Value0.Z = (uint)(numTask / numTaskGroup);
+            if (numTask % numTaskGroup!=0)
+            {
+                userArgs.Value0.Z += 1;
+            }
+            for (int i = 0; i < numTaskGroup; i++)
             {
                 userArgs.Value0.X = (uint)i;
                 this.RunParallel(static (state) =>
                 {
                     var action = (Delegate_ParrallelForAction)state.UserArguments.Obj0;
-                    action(state);
-                    ((TtPooledSemaphore)state.UserArguments.Obj1).Semaphore.Release();
+                    var stride = state.UserArguments.StrideOfParallelFor;
+                    var start = (int)(state.UserArguments.TaskIndexOfParallelFor * stride);
+                    int count = 0;
+                    for (int j = 0; j < stride; j++)
+                    {
+                        var index = start + j;
+                        if (index >= state.UserArguments.NumOfParallelFor)
+                            break;
+                        action(index, state);
+                        count++;
+                    }
+                    ((TtPooledSemaphore)state.UserArguments.Obj1).Semaphore.AddNum(-count);
                     return true;
                 }, in userArgs/*, smp.WaitEvent*/);
             }
@@ -373,7 +414,7 @@ namespace EngineNS.Thread.Async
                 smp.WaitEvent.WaitOne(int.MaxValue);
                 Thread.TtContextThread.CurrentContext.IsWaiting = false;
             }
-            ParrallelForSmpAllocator.ReleaseObject(smp);
+            ParallelForSmpAllocator.ReleaseObject(smp);
         }
         #endregion
         public int NumOfPool
@@ -410,10 +451,7 @@ namespace EngineNS.Thread.Async
                 {
                     lock (mTPoolEvents)
                     {
-                        if (mTaskSemaphore.CurrentCount < MaxSemaphore)
-                        {
-                            mTaskSemaphore.Release(MaxSemaphore - mTaskSemaphore.CurrentCount);
-                        }
+                        mTPoolTrigger.Set();
                     }   
                 });
             }

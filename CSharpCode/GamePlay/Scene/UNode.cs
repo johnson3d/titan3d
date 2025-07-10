@@ -149,13 +149,15 @@ namespace EngineNS.GamePlay.Scene
                 OctreeOwner = null;
             }
             this.Behavior?.DestroyNode(this);
+            this.BoundVolume?.Dispose();
         }
         [Rtti.Meta("")]
         public void DisposeWithChildren()
         {
-            foreach (var i in Children)
+            var copy = new List<TtNode>(Children);
+            foreach (var i in copy)
             {
-                i.UnsafeNullParent();
+                i.Parent = null;
                 i.DisposeWithChildren();
             }
             Children.Clear();
@@ -195,6 +197,7 @@ namespace EngineNS.GamePlay.Scene
         public const string EditorKeyword = "UNode";
         protected virtual async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
+            mWorld = world;
             NodeData = data;
 
             if (NodeData != null)
@@ -249,6 +252,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 mBehaviorGetter = new TtBehaviorGetter();
             }
+
             return true;
         }
         //Callback: Children ready!
@@ -264,6 +268,7 @@ namespace EngineNS.GamePlay.Scene
         {
             return typeof(T).GetCustomAttribute(typeof(TtNodeAttribute)) as TtNodeAttribute;
         }
+        #region Creator
         public static TtNodeData CreateNodeData(System.Type nodeType)
         {
             var attr = nodeType.GetCustomAttribute(typeof(TtNodeAttribute)) as TtNodeAttribute;
@@ -346,6 +351,7 @@ namespace EngineNS.GamePlay.Scene
             await result.OnPostInitNode(parent);
             return result;
         }
+        #endregion
         public EBoundVolumeType BoundVolumeType
         {
             get
@@ -363,12 +369,12 @@ namespace EngineNS.GamePlay.Scene
         {
             //var matrix = this.Placement.AbsTransform.ToMatrixNoScale();
             //BoundingBox.Transform(in AABB, in matrix, out outVal);            
-            DBoundingBox.TransformNoScale(in AABB, in Placement.AbsTransform, out outVal);
+            DBoundingBox.TransformNoScale(in RefAABB, in Placement.AbsTransform, out outVal);
         }
         [Flags]
         public enum ENodeStyles : uint
         {
-            VisibleMeshProvider = (1 << 0),//deprecated
+            VisibleAlways = (1 << 0),
             VisibleFollowParent = (1 << 1),
             HitproxyMasks = (1 << 2) | (1 << 3),//value: 0,1,2 NoProxy,RootProxy,FollowProxy
             DiscardAABB = (1 << 4),
@@ -403,6 +409,25 @@ namespace EngineNS.GamePlay.Scene
                     NodeData.NodeStyles = value;
                 }
             }
+        }
+        public bool SetVisible(bool visible, bool bRecursive = false)
+        {
+            if (visible)
+            {
+                UnsetStyle(ENodeStyles.SelfInvisible);
+            }
+            else
+            {
+                SetStyle(ENodeStyles.SelfInvisible);
+            }
+            if (bRecursive)
+            {
+                foreach (var i in Children)
+                {
+                    i.SetVisible(visible, true);
+                }
+            }
+            return true;
         }
         #region Styles
         public bool HasStyle(ENodeStyles style)
@@ -582,6 +607,10 @@ namespace EngineNS.GamePlay.Scene
         #endregion
 
         #region BaseFields
+        public virtual bool HashVisual
+        {
+            get => false;
+        }
         public virtual bool IsSceneManagedType()
         {
             return false;
@@ -696,6 +725,16 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         [Rtti.Meta("")]
+        public TtNode RootNode
+        {
+            get
+            {
+                if(Parent == null)
+                    return this;
+                return Parent.RootNode;
+            }
+        }
+        [Rtti.Meta("")]
         public TtScene ParentScene
         {
             get
@@ -703,12 +742,10 @@ namespace EngineNS.GamePlay.Scene
                 return GetNearestParentScene();
             }
         }
+        TtWorld mWorld = null;
         public TtWorld GetWorld()
         {
-            var scene = ParentScene;
-            if (scene != null)
-                return scene.World;
-            return null;
+            return mWorld;
         }
         [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public TtWorld HostWorld { get => GetWorld(); }
@@ -782,7 +819,7 @@ namespace EngineNS.GamePlay.Scene
             get { return NodeData?.BoundVolume; }
         }
         private static DBoundingBox Empty = DBoundingBox.Empty;
-        public ref DBoundingBox AABB
+        public ref DBoundingBox RefAABB
         {
             get
             {
@@ -792,7 +829,11 @@ namespace EngineNS.GamePlay.Scene
                     return ref BoundVolume.AABB;
             }
         }
-        public ref DBoundingBox AbsAABB
+        public DBoundingBox AABB
+        {
+            get => RefAABB;
+        }
+        public ref DBoundingBox RefAbsAABB
         {
             get
             {
@@ -802,16 +843,40 @@ namespace EngineNS.GamePlay.Scene
                     return ref BoundVolume.AbsAABB;
             }
         }
+        public DBoundingBox AbsAABB
+        {
+            get => RefAbsAABB;
+        }
         #endregion
 
         #region Virtual Interface
         private void ParentChanged(TtNode prev, TtNode cur)
         {
             OnParentChanged(prev, cur);
+            this.IterateNodes((node, arg) =>
+            {
+                node.OnRootParentChanged(this, prev, cur);
+                return true;
+            }, null);
         }
         protected virtual void OnParentChanged(TtNode prev, TtNode cur)
         {
 
+        }
+        protected virtual void OnRootParentChanged(TtNode root, TtNode prev, TtNode cur)
+        {
+            var world = GetWorld();
+            if (world != null && this.BoundVolume!=null)
+            {   
+                if (cur == null)
+                {
+                    world.EntityManager.RemoveEntity(this.BoundVolume.Id);
+                }
+                else
+                {
+                    world.EntityManager.AddEntity(this.BoundVolume);
+                }
+            }
         }
         private void ParentSceneChanged(TtScene prev, TtScene cur)
         {
@@ -835,22 +900,26 @@ namespace EngineNS.GamePlay.Scene
         {
             rp.AddVisibleNode(this);
         }
-        #endregion
-
-        #region Link
-        protected virtual void UnsafeNullParent()
-        {
-            if (ParentScene != null)
-            {
-                ParentScene.FreeId(this);
-            }
-            mParent = null;
-        }
-        public void ClearChildren()
+        public virtual void GatherFollowVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             foreach(var i in Children)
             {
-                i.UnsafeNullParent();
+                if (i.HasStyle(ENodeStyles.VisibleFollowParent) && i.TryTreeGatherVisibleMeshes(rp))
+                {
+                    i.OnGatherVisibleMeshes(rp);
+                    i.GatherFollowVisibleMeshes(rp);
+                }
+            }
+        }
+        #endregion
+
+        #region Link
+        public void ClearChildren()
+        {
+            var copy = new List<TtNode>(Children);
+            foreach (var i in copy)
+            {
+                i.Parent = null;
             }
             Children.Clear();
             UpdateAABB();
@@ -1178,7 +1247,7 @@ namespace EngineNS.GamePlay.Scene
                 //Placement.AbsTransformInv = Matrix.Invert(in matrix);
                 OnAbsTransformChanged();
                 if (BoundVolume != null)
-                    DBoundingBox.TransformNoScale(in BoundVolume.AABB, in Placement.AbsTransform, out AbsAABB);
+                    DBoundingBox.TransformNoScale(in BoundVolume.AABB, in Placement.AbsTransform, out RefAbsAABB);
             }
             UpdateChildrenAbsTransform();
         }
@@ -1204,13 +1273,13 @@ namespace EngineNS.GamePlay.Scene
             if (BoundVolume != null && BoundVolume.mLocalAABB.IsEmpty() == false)
             {
                 //BoundingBox.Transform(ref BoundVolume.mLocalAABB, ref Placement.AbsTransform, out AABB);
-                AABB.FromSingle(in BoundVolume.mLocalAABB);
-                AABB.Maximum = AABB.Maximum * Placement.Scale;
-                AABB.Minimum = AABB.Minimum * Placement.Scale;
+                RefAABB.FromSingle(in BoundVolume.mLocalAABB);
+                RefAABB.Maximum = RefAABB.Maximum * Placement.Scale;
+                RefAABB.Minimum = RefAABB.Minimum * Placement.Scale;
             }
             else
             {
-                AABB.InitEmptyBox();
+                RefAABB.InitEmptyBox();
             }
             foreach (var i in Children)
             {
@@ -1226,9 +1295,9 @@ namespace EngineNS.GamePlay.Scene
                         DBoundingBox tmp;
                         //var matrix = uplc.TransformData.ToMatrixNoScale();
                         var matrix = uplc.TransformData;
-                        DBoundingBox.TransformNoScale(in i.AABB, in matrix, out tmp);
+                        DBoundingBox.TransformNoScale(in i.RefAABB, in matrix, out tmp);
                         //BoundingBox.Transform(in i.AABB, in uplc.mTransform, out tmp);
-                        AABB = DBoundingBox.Merge(in AABB, in tmp);
+                        RefAABB = DBoundingBox.Merge(in RefAABB, in tmp);
                     }
                     else
                     {
@@ -1236,23 +1305,23 @@ namespace EngineNS.GamePlay.Scene
                         //var trans = i.Placement.TransformData;
                         //var trans = i.Placement.TransformData.ToMatrixNoScale();
                         var trans = i.Placement.TransformData;
-                        DBoundingBox.TransformNoScale(in i.AABB, in trans, out tmp);
-                        AABB = DBoundingBox.Merge(in AABB, in tmp);
+                        DBoundingBox.TransformNoScale(in i.RefAABB, in trans, out tmp);
+                        RefAABB = DBoundingBox.Merge(in RefAABB, in tmp);
                     }
                 }
                 else
                 {
-                    AABB = DBoundingBox.Merge(AABB, i.AABB);
+                    RefAABB = DBoundingBox.Merge(RefAABB, i.RefAABB);
                 }
             }
 
-            if (AABB.IsEmpty())
+            if (RefAABB.IsEmpty())
             {
-                AABB.Minimum = DVector3.Zero;
-                AABB.Maximum = DVector3.Zero;
+                RefAABB.Minimum = DVector3.Zero;
+                RefAABB.Maximum = DVector3.Zero;
             }
             if (BoundVolume != null)
-                DBoundingBox.TransformNoScale(in AABB, in Placement.AbsTransform, out AbsAABB);
+                DBoundingBox.TransformNoScale(in RefAABB, in Placement.AbsTransform, out RefAbsAABB);
             if (Parent != null)
             {
                 Parent.UpdateAABB();
@@ -1272,7 +1341,7 @@ namespace EngineNS.GamePlay.Scene
             unsafe
             {
                 //var aabb = AABB.ToSingleAABB();
-                fixed (DBoundingBox* pBox = &AABB)
+                fixed (DBoundingBox* pBox = &RefAABB)
                 {
                     //BoundingBox* pBox = &aabb;
                     var dir = localEnd - localStart;
@@ -1401,25 +1470,17 @@ namespace EngineNS.GamePlay.Scene
                 {
                     var numTask = Math.Max(1, NodeBFSParameters.InputNodes.Count / NumOfParralelLimit);
                     NodeBFSParameters.TaskNum = numTask;
-                    TtEngine.Instance.EventPoster.ParallelFor(numTask, static (Thread.Async.TtAsyncTaskStateBase state) =>
+                    TtEngine.Instance.EventPoster.ParallelFor(NodeBFSParameters.InputNodes.Count, numTask, static (nn, state) =>
                     {
-                        int index = state.IndexOfParallelFor;
                         var parameters = state.GetForArgument0<TtNodeBFSParameters>();
-                        int stride = parameters.InputNodes.Count / (int)parameters.TaskNum + 1;
-                        var start = index * stride;
-                        for (int n = 0; n < stride; n++)
+
+                        var node = parameters.InputNodes[nn];
+                        var t = parameters.Callback(node, parameters.Arg);
+                        if (t == true && node.Children.Count > 0)
                         {
-                            var nn = start + n;
-                            if (nn >= parameters.InputNodes.Count)
-                                break;
-                            var node = parameters.InputNodes[nn];
-                            var t = parameters.Callback(node, parameters.Arg);
-                            if (t == true && node.Children.Count > 0)
+                            lock (parameters.OutputNodes)
                             {
-                                lock (parameters.OutputNodes)
-                                {
-                                    parameters.OutputNodes.AddRange(node.Children);
-                                }
+                                parameters.OutputNodes.AddRange(node.Children);
                             }
                         }
                     }, NodeBFSParameters);
@@ -1470,6 +1531,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 OctreeNode.Remove(this);
             }
+            mWorld = null;
         }
         public void SetIsTickable(bool isTickable, bool isRecursive)
         {
@@ -1535,7 +1597,11 @@ namespace EngineNS.GamePlay.Scene
 
         }
     }
-    public partial class TtGpuSceneNode : TtSceneActorNode
+    public partial class TtVisual : TtSceneActorNode
+    {
+        public override bool HashVisual => true;
+    }
+    public partial class TtGpuSceneNode : TtVisual
     {
         public TtGpuSceneNode()
         {

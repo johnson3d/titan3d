@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
                 PhyShape.AddToActor(PhyActor, CollisionNodeData.Center, Quaternion.FromEuler(CollisionNodeData.Rotator));
             }
         }
-
+        public override bool HashVisual => true;
         public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             if ((rp.CullFilters & GamePlay.TtWorld.TtVisParameter.EVisCullFilter.PhyxDebug) == 0)

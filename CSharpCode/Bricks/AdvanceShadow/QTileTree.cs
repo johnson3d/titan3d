@@ -464,7 +464,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                 ShadowObjectDictionary.Add(node, shadowObj);
             }
 
-            ref var aabb = ref node.AbsAABB;
+            ref var aabb = ref node.RefAbsAABB;
             
             shadowObj.SceneNode = node;
             shadowObj.AABB = node.BoundVolume.AbsAABB;

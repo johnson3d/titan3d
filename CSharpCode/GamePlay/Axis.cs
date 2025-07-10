@@ -757,18 +757,18 @@ namespace EngineNS.GamePlay
                         mSelectedNodes[i].Node.GetWorldSpaceBoundingBox(out nodeAABB);
                         mEdgeAxisBB = DBoundingBox.Merge(in mEdgeAxisBB, in nodeAABB);
                     }
-                    mRootNode.AABB = mEdgeAxisBB;
+                    mRootNode.RefAABB = mEdgeAxisBB;
                     break;
                 case enAxisSpace.Local:
                     {
                         var posNode = GetPosNode().Node;
-                        mEdgeAxisBB = posNode.AABB;
-                        posNode.GetWorldSpaceBoundingBox(out mRootNode.AABB);
+                        mEdgeAxisBB = posNode.RefAABB;
+                        posNode.GetWorldSpaceBoundingBox(out mRootNode.RefAABB);
                         var mat = posNode.Placement.AbsTransform;
                         //var invMat = posNode.Placement.AbsTransformInv;
                         for (int i=0; i<mSelectedNodes.Count - 1; i++)
                         {
-                            var nodeAABB = mSelectedNodes[i].Node.AABB;
+                            var nodeAABB = mSelectedNodes[i].Node.RefAABB;
                             var localPos = nodeAABB.GetCorners();
                             for(int posIdx = 0; posIdx < localPos.Length; posIdx++)
                             {
@@ -781,9 +781,9 @@ namespace EngineNS.GamePlay
 
                             DBoundingBox nodeWorldAABB;
                             mSelectedNodes[i].Node.GetWorldSpaceBoundingBox(out nodeWorldAABB);
-                            mRootNode.AABB = DBoundingBox.Merge(in mRootNode.AABB, in nodeWorldAABB);
+                            mRootNode.RefAABB = DBoundingBox.Merge(in mRootNode.RefAABB, in nodeWorldAABB);
                         }
-                        mRootNode.AABB = mEdgeAxisBB;
+                        mRootNode.RefAABB = mEdgeAxisBB;
                     }
                     break;
             }
@@ -980,6 +980,7 @@ namespace EngineNS.GamePlay
             mRootNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
             mRootNode.IsCastShadow = false;
             mRootNode.Parent = world.Root;
+            mRootNode.SetStyle(TtNode.ENodeStyles.VisibleFollowParent);
             ((GamePlay.TtPlacement)mRootNode.Placement).InheritScale = true;
 
             var rotArrowAssetMat = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d);
@@ -1196,7 +1197,10 @@ namespace EngineNS.GamePlay
         public void SetAxisOperationType(enAxisOperationType type)
         {
             for (int i = 0; i < mAxisMeshDatas.Count; i++)
+            {
                 mAxisMeshDatas[i].MeshNode.Parent = null;
+                mAxisMeshDatas[i].MeshNode.SetStyle(TtNode.ENodeStyles.VisibleFollowParent);
+            }
 
             mAxisOperationType = type;
             switch(mAxisOperationType)

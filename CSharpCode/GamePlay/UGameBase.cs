@@ -214,7 +214,7 @@ namespace EngineNS.GamePlay
             if (scene != null && bSetToWorld)
             {
                 world.Root.ClearChildren();
-                world.Root.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
+                world.Root.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleAlways);
                 scene.Parent = world.Root;
                 return scene;
             }
@@ -227,7 +227,7 @@ namespace EngineNS.GamePlay
             var world = viewport.World;
 
             //world.Root.ClearChildren();
-            world.Root.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
+            world.Root.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleAlways);
             scene.Parent = world.Root;
         }
         [Rtti.Meta("")]
@@ -310,7 +310,7 @@ namespace EngineNS.GamePlay
             ChiefPlayer.NodeData.Name = "TtActor";
             ChiefPlayer.HitproxyType = EngineNS.Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
             ChiefPlayer.IsCastShadow = true;
-            ChiefPlayer.SetStyle(EngineNS.GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
+            ChiefPlayer.SetStyle(EngineNS.GamePlay.Scene.TtNode.ENodeStyles.VisibleAlways);
             if(playerStart == null)
             {
                 ChiefPlayer.Placement.SetTransform(new DVector3(0, 0, 0), Vector3.One, Quaternion.Identity);

@@ -169,12 +169,12 @@ namespace EngineNS.UI
 
         public override void UpdateAABB()
         {
-            AABB = DBoundingBox.EmptyBox();
+            RefAABB = DBoundingBox.EmptyBox();
             for(int i=0; i<mUIHost.Count; i++)
             {
                 if(mUIHost[i].DrawMesh != null)
                 {
-                    AABB.Merge(mUIHost[i].DrawMesh.WorldAABB);
+                    RefAABB.Merge(mUIHost[i].DrawMesh.WorldAABB);
                 }
             }
         }

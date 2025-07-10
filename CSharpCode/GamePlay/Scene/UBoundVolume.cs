@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Assimp;
+using NPOI.SS.Formula.Functions;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,11 +13,20 @@ namespace EngineNS.GamePlay.Scene
         Sphere,
     }
 
-    public class TtBoundVolume : IO.ISerializer
+    public class TtBoundVolume : IO.ISerializer, ECS.IEntity, IDisposable
     {
         public TtBoundVolume()
         {
             
+        }
+        public virtual void Dispose()
+        {
+            HostNode = null;
+            if (EntityManager!=null)
+            {
+                EntityManager.RemoveEntity(Id);
+                EntityManager = null;
+            }
         }
         public virtual EBoundVolumeType BVType
         {
@@ -38,32 +49,41 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         public DBoundingBox AABB;//包含HostNode Child的AABB
-        public DBoundingBox AbsAABB;//经过AbsTransform变换的AABB
+        private DBoundingBox mAbsAABB;//经过AbsTransform变换的AABB
+        public ref DBoundingBox AbsAABB
+        {
+            get
+            {
+                if (EntityManager == null || Id < 0)
+                {
+                    return ref mAbsAABB;
+                }
+                return ref (EntityManager as TtEntityManager).BoundingValues.GetValue(Id);
+            }
+        }
         protected virtual void OnVolumeChanged()
         {
             HostNode.UpdateAABB();
         }
-        //public UBoundVolume ContainCheck(ref Vector3 pos)
-        //{
-        //    var aabb = AABB;
-        //    if (aabb.Contains(ref pos) == ContainmentType.Disjoint)
-        //        return null;
-        //    var localPos = WorldToLocal(ref pos);
-        //    if (mLocalAABB.Contains(localPos) != ContainmentType.Disjoint)
-        //        return this;
+        #region ECS
+        public ECS.TtEntityManager EntityManager { get; set; } = null;
+        public int Id { get; set; } = -1;
+        public ECS.TtComponentValues<T> GetComponentValues<T>() where T : struct
+        {
+            if (EntityManager==null)
+                return null;
 
-        //    foreach (var i in HostNode.Children)
-        //    {
-        //        var cldbv = i.Placement?.BoundVolume;
-        //        if (cldbv != null)
-        //        {
-        //            var result = cldbv.ContainCheck(ref pos);
-        //            if (result != null)
-        //                return result;
-        //        }
-        //    }
-        //    return null;
-        //}
+            return EntityManager.FindComponentValues<T>();
+        }
+        public void OnAddToManager()
+        {
+            (EntityManager as TtEntityManager).BoundingValues.SetValue(Id, mAbsAABB);
+        }
+        public void OnRemoveFromManager()
+        {
+            mAbsAABB = (EntityManager as TtEntityManager).BoundingValues.GetValue(Id);
+        }
+        #endregion
     }
     public class UBoxBV : TtBoundVolume
     {     
@@ -113,4 +133,147 @@ namespace EngineNS.GamePlay.Scene
             HostNode.UpdateAABB();
         }
     }
+
+
+    public class TtCullingSystem : ECS.ISystem
+    {
+        public GamePlay.TtWorld World;
+        public GamePlay.TtWorld.TtVisParameter VisParameter;
+        public bool IsParalle { get; set; } = true;
+        public void Process(ECS.TtEntityManager manager, float deltaTime)
+        {
+            var values = (manager as TtEntityManager).BoundingValues;
+
+            if (IsParalle == false)
+            {
+                var t1 = Support.TtTime.HighPrecision_GetTickCount();
+                VisParameter.ClearVisibles();
+                {
+                    int Count = 0;
+                    for (int i = 0; i<manager.Entities.Count; i++)
+                    {
+                        var bv = manager.GetEntity<TtBoundVolume>(i);
+                        if (bv == null)
+                            continue;
+                        Count++;
+
+                        var node = bv.HostNode;
+                        if (node.RootNode != World.Root)
+                            continue;
+                        if (VisParameter.OnVisitNode != null && VisParameter.OnVisitNode(bv.HostNode, VisParameter) == false)
+                            continue;
+                        if (node.HasStyle(TtNode.ENodeStyles.VisibleFollowParent))
+                            continue;
+
+                        ref var aabb = ref values.GetValue(bv.Id);
+                        if (!node.HasStyle(TtNode.ENodeStyles.VisibleAlways))
+                        {
+                            if (VisParameter.CullCamera != null)
+                            {
+                                var type = VisParameter.CullCamera.WhichContainTypeFast(World, in aabb, true);
+                                if (type == CONTAIN_TYPE.CONTAIN_TEST_OUTER)
+                                    continue;
+                            }
+                            else
+                            {
+                                var ct = DBoundingBox.Contains(in VisParameter.CullBox, in aabb);
+                                if (ct == ContainmentType.Disjoint)
+                                    continue;
+                            }
+                        }
+
+                        if (node.HasStyle(TtNode.ENodeStyles.Invisible) == false)
+                        {
+                            node.OnGatherVisibleMeshes(VisParameter);
+                        }
+                        if (node.HasStyle(TtNode.ENodeStyles.ChildrenInvisible) == false)
+                        {
+                            node.GatherFollowVisibleMeshes(VisParameter);
+                        }
+                    }
+                }
+                var t2 = Support.TtTime.HighPrecision_GetTickCount();
+                if (t2-t1>100)
+                {
+
+                }
+            }
+            else
+            {
+                var t3 = Support.TtTime.HighPrecision_GetTickCount();
+                var taskGroupNum = Math.Min(TtEngine.Instance.EventPoster.PooledThreadNum, 16);
+                VisParameter.ClearVisibles();
+                TtEngine.Instance.EventPoster.ParallelFor(manager.Entities.Count, taskGroupNum, static (i, state) =>
+                {
+                    var pThis = state.GetForArgument0<TtCullingSystem>();
+                    var manager = pThis.World.EntityManager;
+                    var VisParameter = pThis.VisParameter;
+                    var World = pThis.World;
+                    var values = manager.BoundingValues;
+
+                    var bv = manager.GetEntity<TtBoundVolume>(i);
+                    if (bv == null)
+                        return;
+
+                    var node = bv.HostNode;
+                    if (node.RootNode != World.Root)
+                        return;
+                    if (VisParameter.OnVisitNode != null && VisParameter.OnVisitNode(bv.HostNode, VisParameter) == false)
+                        return;
+                    if (node.HasStyle(TtNode.ENodeStyles.VisibleFollowParent))
+                        return;
+
+                    ref var aabb = ref values.GetValue(bv.Id);
+                    if (!node.HasStyle(TtNode.ENodeStyles.VisibleAlways))
+                    {
+                        if (VisParameter.CullCamera != null)
+                        {
+                            var type = VisParameter.CullCamera.WhichContainTypeFast(World, in aabb, true);
+                            if (type == CONTAIN_TYPE.CONTAIN_TEST_OUTER)
+                                return;
+                        }
+                        else
+                        {
+                            var ct = DBoundingBox.Contains(in VisParameter.CullBox, in aabb);
+                            if (ct == ContainmentType.Disjoint)
+                                return;
+                        }
+                    }
+
+                    if (node.HasStyle(TtNode.ENodeStyles.Invisible) == false)
+                    {
+                        node.OnGatherVisibleMeshes(VisParameter);
+                    }
+                    if (node.HasStyle(TtNode.ENodeStyles.ChildrenInvisible) == false)
+                    {
+                        node.GatherFollowVisibleMeshes(VisParameter);
+                    }
+                }, this);
+                var t4 = Support.TtTime.HighPrecision_GetTickCount();
+                if (t4-t3>100)
+                {
+
+                }
+            }
+        }
+    }
+    public class TtEntityManager : ECS.TtEntityManager
+    {
+        internal ECS.TtComponentValues<DBoundingBox> BoundingValues = new ECS.TtComponentValues<DBoundingBox>();
+        internal TtCullingSystem CullingSystem = new TtCullingSystem();
+        public TtEntityManager()
+        {
+            this.RegisterComponent(BoundingValues);
+            this.Systems.Add(CullingSystem);
+        }
+    }
 }
+
+namespace EngineNS.GamePlay
+{
+    partial class TtWorld
+    {
+        public Scene.TtEntityManager EntityManager { get; } = new Scene.TtEntityManager();
+    }
+}
+

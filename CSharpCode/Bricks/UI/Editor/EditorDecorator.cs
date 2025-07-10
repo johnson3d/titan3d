@@ -79,12 +79,12 @@ namespace EngineNS.UI.Editor
             if(SelectedRect.GetUIHost(0).MeshDirty && (SelectedRect.Parent != null))
             {
                 var mesh = await SelectedRect.GetUIHost(0).BuildMesh();
-                SelectedRect.AABB = new DBoundingBox(mesh.MaterialMesh.AABB);
+                SelectedRect.RefAABB = new DBoundingBox(mesh.MaterialMesh.AABB);
             }
             if(PointAtRect.GetUIHost(0).MeshDirty && (PointAtRect.Parent != null))
             {
                 var mesh = await PointAtRect.GetUIHost(0).BuildMesh();
-                PointAtRect.AABB = new DBoundingBox(mesh.MaterialMesh.AABB);
+                PointAtRect.RefAABB = new DBoundingBox(mesh.MaterialMesh.AABB);
             }
 
             CurrentDecorator?.UpdateDecorator();

@@ -208,6 +208,9 @@ namespace EngineNS
         public bool IsTryUnloadMacrossAssembly { get; set; } = true;
         [Rtti.Meta("")]
         [Category("Option")]
+        public bool UseECS { get; set; } = false;
+        [Rtti.Meta("")]
+        [Category("Option")]
         public List<string> Plugins { get; set; } = new List<string>() { "SourceGit", "Survivor" };
         public TtEngineConfig()
         {

@@ -54,7 +54,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             aabb.InitEmptyBox();
             foreach (var i in HostNode.ShadowObjects)
             {
-                aabb.Merge(in i.SceneNode.AbsAABB);
+                aabb.Merge(in i.SceneNode.RefAbsAABB);
             }
 
             DVector2 c2d = HostNode.AABB.GetCenter();

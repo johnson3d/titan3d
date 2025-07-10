@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AuxPtrType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CNativeString.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Command.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ECS\ECSInterface.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\DynConfigData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\IStreaming.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\JsonOptions.cs" />
@@ -77,5 +78,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Base.brick" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)ECS\" />
   </ItemGroup>
 </Project>

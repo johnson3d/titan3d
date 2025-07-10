@@ -276,7 +276,7 @@ namespace EngineNS.Bricks.Particle.Editor
             //    meshNode.IsCastShadow = true;
             //}
 
-            var aabb = meshNode.AABB;
+            var aabb = meshNode.RefAABB;
             var radius = (float)aabb.GetMaxSide();
             DBoundingSphere sphere;
             sphere.Center = aabb.GetCenter();

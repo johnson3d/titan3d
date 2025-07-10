@@ -8,7 +8,7 @@ namespace EngineNS.GamePlay.Scene
 {
     [Bricks.CodeBuilder.ContextMenu("Sun", "Sun", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtSunNode.TtSunNodeData), DefaultNamePrefix = "Sun")]
-    public class TtSunNode : TtSceneActorNode
+    public class TtSunNode : TtVisual
     {
         public class TtSunNodeData : TtNodeData
         {

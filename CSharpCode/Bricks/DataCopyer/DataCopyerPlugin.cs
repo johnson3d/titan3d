@@ -584,26 +584,17 @@ namespace EngineNS.Bricks.DataCopyer
             {
                 var klsCodes = new string[metas.Count];
                 var numTask = TtEngine.Instance.EventPoster.NumOfPool;
-                TtEngine.Instance.EventPoster.ParallelFor(numTask, (state) =>
+                TtEngine.Instance.EventPoster.ParallelFor(metas.Count, numTask, (index, state) =>
                 {
-                    var i = state.IndexOfParallelFor;
-                    int stride = (int)metas.Count / (int)state.NumOfParallelFor + 1;
-                    var start = i * stride;
-                    for (int n = 0; n < stride; n++)
-                    {
-                        var nn = start + n;
-                        if (nn >= metas.Count)
-                            break;
-                        var met = metas[nn];
-                        if (met.ClassType.IsValueType)
-                            continue;
-                        
-                        string klsCode = "";
-                        var klsCreator = new TtCodeWriter();
-                        klsCreator.IntentCount = creator.IntentCount;
-                        GenCode(met, klsCreator, ref klsCode);
-                        klsCodes[nn] = klsCode;
-                    }
+                    var met = metas[index];
+                    if (met.ClassType.IsValueType)
+                        return;
+
+                    string klsCode = "";
+                    var klsCreator = new TtCodeWriter();
+                    klsCreator.IntentCount = creator.IntentCount;
+                    GenCode(met, klsCreator, ref klsCode);
+                    klsCodes[index] = klsCode;
                 }, null);
                 foreach(var c in klsCodes)
                 {

@@ -218,7 +218,7 @@ namespace EngineNS.GamePlay.Scene
         bool IsCaptureVisible = false;
         public void TickLogic(float ellapse)
         {
-            var absAABB = DBoundingBox.TransformNoScale(in AABB, in Placement.AbsTransform);
+            var absAABB = DBoundingBox.TransformNoScale(in RefAABB, in Placement.AbsTransform);
             var type = CameraController.Camera.WhichContainTypeFast(CaptureWorld, in absAABB, false);
 
             if (type == CONTAIN_TYPE.CONTAIN_TEST_OUTER)

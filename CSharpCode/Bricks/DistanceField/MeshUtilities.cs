@@ -414,9 +414,8 @@ namespace EngineNS.DistanceField
                 }
                 if(bUseMultiThread == true)
                 {
-                    TtEngine.Instance.EventPoster.ParallelFor(sdfTaskList.Count, static (state) =>
+                    TtEngine.Instance.EventPoster.ParallelFor(sdfTaskList.Count, sdfTaskList.Count, static (index, state) =>
                     {
-                        var index = state.IndexOfParallelFor;
                         var pTaskList = state.GetForArgument0<List<FSparseMeshDistanceFieldAsyncTask>>();
                         var task = pTaskList[(int)index];
 

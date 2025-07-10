@@ -646,7 +646,7 @@ namespace EngineNS.Editor.Forms
                         for (int i = 0; i < mWorldOutliner.SelectedNodes.Count; i++)
                         {
                             var transform = mWorldOutliner.SelectedNodes[i].Placement.AbsTransform;
-                            var corners = mWorldOutliner.SelectedNodes[i].AABB.GetCorners();
+                            var corners = mWorldOutliner.SelectedNodes[i].RefAABB.GetCorners();
                             for (int cornerIdx = 0; cornerIdx < corners.Length; cornerIdx++)
                             {
                                 var absPos = transform.TransformPosition(in corners[cornerIdx]);
