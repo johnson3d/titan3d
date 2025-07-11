@@ -171,7 +171,7 @@ namespace EngineNS.Editor
                 {
                     return null;
                 }
-                public bool DrawNode(TtTreeNodeDrawer tree, int index, int NumOfChild)
+                public bool DrawNode(INodeUIProvider parent, TtTreeNodeDrawer tree, int index, int NumOfChild)
                 {
                     ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
                     if (this.Selected)
@@ -223,7 +223,7 @@ namespace EngineNS.Editor
                     TotalVersionCount+= i.Value.MetaVersions.Count;
                 }
 
-                DrawTree(RootNode, 0);
+                DrawTree(null,RootNode, 0);
 
                 ImGuiAPI.Separator();
                 ImGuiAPI.Text($"Total Version Count: {TotalVersionCount}");

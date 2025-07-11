@@ -234,17 +234,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
 
         [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
-        {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtDeferredBasePassNode), nameof(TickLogic));
-                return mScopeTick;
-            }
-        }
-        [ThreadStatic]
         private static Profiler.TimeScope mScopePushGpuDraw;
         private static Profiler.TimeScope ScopePushGpuDraw
         {
@@ -268,101 +257,98 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public unsafe override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            using (new Profiler.TimeScopeHelper(ScopeTick))
+            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();//BasePass.DrawCmdList
+            var bgCmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();//BackgroundPass.DrawCmdList
+
+            using (new NxRHI.TtCmdListScope(cmdlist))
+            using (new NxRHI.TtCmdListScope(bgCmdlist))
             {
-                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();//BasePass.DrawCmdList
-                var bgCmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();//BackgroundPass.DrawCmdList
-
-                using (new NxRHI.TtCmdListScope(cmdlist))
-                using (new NxRHI.TtCmdListScope(bgCmdlist))
+                using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
                 {
-                    using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
+                    if (GpuCullNode != null)
                     {
-                        if (GpuCullNode != null)
-                        {
-                            GpuCullNode.Commit(policy, cmdlist, GBuffers);
-                        }
+                        GpuCullNode.Commit(policy, cmdlist, GBuffers);
+                    }
 
-                        var visibleMeshes = CpuCullNode.VisParameter.VisibleMeshes;
-                        var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
-                        //todo:ParrallelFor
-                        foreach (var i in visibleMeshes)
+                    var visibleMeshes = CpuCullNode.VisParameter.VisibleMeshes;
+                    var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
+                                                      //todo:ParrallelFor
+                    foreach (var i in visibleMeshes)
+                    {
+                        if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
+                            continue;
+                        foreach (var j in i.Mesh.SubMeshes)
                         {
-                            if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
-                                continue;
-                            foreach (var j in i.Mesh.SubMeshes)
+                            foreach (var k in j.Atoms)
                             {
-                                foreach (var k in j.Atoms)
+                                if (k == null || k.Material == null)
+                                    continue;
+
+                                var layer = k.Material.RenderLayer;
+                                if (layer == ERenderLayer.RL_Background)
                                 {
-                                    if (k == null || k.Material == null)
+                                    var cmd = bgCmdlist;
+                                    var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
+                                    if (drawcall != null)
+                                    {
+                                        drawcall.BindGBuffer(camera, GBuffers);
+                                        cmd.PushGpuDraw(drawcall);
+                                    }
+                                }
+                                else if (layer == ERenderLayer.RL_Opaque)
+                                {
+                                    if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
                                         continue;
 
-                                    var layer = k.Material.RenderLayer;
-                                    if (layer == ERenderLayer.RL_Background)
+                                    var cmd = cmdlist;
+                                    var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
+                                    if (drawcall != null)
                                     {
-                                        var cmd = bgCmdlist;
-                                        var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
-                                        if (drawcall != null)
-                                        {
-                                            drawcall.BindGBuffer(camera, GBuffers);
-                                            cmd.PushGpuDraw(drawcall);
-                                        }
-                                    }
-                                    else if (layer == ERenderLayer.RL_Opaque)
-                                    {
-                                        if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
-                                            continue;
-
-                                        var cmd = cmdlist;
-                                        var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
-                                        if (drawcall != null)
-                                        {
-                                            drawcall.BindGBuffer(camera, GBuffers);
-                                            cmd.PushGpuDraw(drawcall);
-                                        }
+                                        drawcall.BindGBuffer(camera, GBuffers);
+                                        cmd.PushGpuDraw(drawcall);
                                     }
                                 }
                             }
                         }
                     }
-
-                    var passClears = new NxRHI.FRenderPassClears();
-                    passClears.SetDefault();
-                    passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
-                    passClears.SetClearColor(1, new Color4f(1, 0, 0, 0));
-                    passClears.SetClearColor(2, new Color4f(1, 0, 0, 0));
-                    if (Rt3PinOut.Attachement.Format == EPixelFormat.PXF_R16G16_FLOAT)
-                        passClears.SetClearColor(3, new Color4f(0, 0, 0, 0));
-                    else
-                        passClears.SetClearColor(3, new Color4f(0, 0.5f, 0.5f, 0));
-
-                    GBuffers.BuildFrameBuffers(policy);
-
-                    using (new Profiler.TimeScopeHelper(ScopeFlushDraw))
-                    {
-                        bgCmdlist.SetViewport(in GBuffers.Viewport);
-                        var scissor = new NxRHI.FScissorRect();
-                        scissor.MinX = 0;
-                        scissor.MinY = 0;
-                        scissor.MaxX = (int)GBuffers.Viewport.Width;
-                        scissor.MaxY = (int)GBuffers.Viewport.Height;
-                        cmdlist.SetScissor(in scissor);
-                        bgCmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Background.ToString());
-                        bgCmdlist.FlushDraws();
-                        bgCmdlist.EndPass();
-
-                        cmdlist.SetViewport(in GBuffers.Viewport);
-                        cmdlist.SetScissor(in scissor);
-                        passClears.ClearFlags = (NxRHI.ERenderPassClearFlags)0;
-                        cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
-                        cmdlist.FlushDraws();
-                        cmdlist.EndPass();
-                    }
                 }
 
-                policy.CommitCommandList(bgCmdlist, "DSNodeBackground");
-                policy.CommitCommandList(cmdlist, "DSNodeBase");
+                var passClears = new NxRHI.FRenderPassClears();
+                passClears.SetDefault();
+                passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
+                passClears.SetClearColor(1, new Color4f(1, 0, 0, 0));
+                passClears.SetClearColor(2, new Color4f(1, 0, 0, 0));
+                if (Rt3PinOut.Attachement.Format == EPixelFormat.PXF_R16G16_FLOAT)
+                    passClears.SetClearColor(3, new Color4f(0, 0, 0, 0));
+                else
+                    passClears.SetClearColor(3, new Color4f(0, 0.5f, 0.5f, 0));
+
+                GBuffers.BuildFrameBuffers(policy);
+
+                using (new Profiler.TimeScopeHelper(ScopeFlushDraw))
+                {
+                    bgCmdlist.SetViewport(in GBuffers.Viewport);
+                    var scissor = new NxRHI.FScissorRect();
+                    scissor.MinX = 0;
+                    scissor.MinY = 0;
+                    scissor.MaxX = (int)GBuffers.Viewport.Width;
+                    scissor.MaxY = (int)GBuffers.Viewport.Height;
+                    cmdlist.SetScissor(in scissor);
+                    bgCmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Background.ToString());
+                    bgCmdlist.FlushDraws();
+                    bgCmdlist.EndPass();
+
+                    cmdlist.SetViewport(in GBuffers.Viewport);
+                    cmdlist.SetScissor(in scissor);
+                    passClears.ClearFlags = (NxRHI.ERenderPassClearFlags)0;
+                    cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
+                    cmdlist.FlushDraws();
+                    cmdlist.EndPass();
+                }
             }
+
+            policy.CommitCommandList(bgCmdlist, "DSNodeBackground");
+            policy.CommitCommandList(cmdlist, "DSNodeBase");
         }
         public override void TickSync(TtRenderPolicy policy)
         {

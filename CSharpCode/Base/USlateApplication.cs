@@ -273,7 +273,7 @@ namespace EngineNS
             get
             {
                 if (mScopeImGuiRender == null)
-                    mScopeImGuiRender = new Profiler.TimeScope(typeof(ImGuiAPI), "Render");
+                    mScopeImGuiRender = new Profiler.TimeScope(typeof(TtSlateApplication), "RenderImData");
                 return mScopeImGuiRender;
             }
         }

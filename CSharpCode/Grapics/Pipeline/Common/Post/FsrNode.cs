@@ -131,7 +131,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Fsr", "Post\\Fsr", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtFsrNode : TtRenderGraphNode
+    public class TtFsrNode : TAuxRenderGraphNode<TtFsrNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin UpSamplePinOut = TtRenderGraphPin.CreateOutput("UpSample", false, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);

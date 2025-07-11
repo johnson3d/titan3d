@@ -8,7 +8,7 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("ClearMRT", "ClearMRT", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtClearMRTNode : TtRenderGraphNode
+    public class TtClearMRTNode : TAuxRenderGraphNode<TtClearMRTNode>
     {
         public TtRenderGraphPin[] RtPinOut;
         public TtRenderGraphPin DepthStencilPinOut = TtRenderGraphPin.CreateInputOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);

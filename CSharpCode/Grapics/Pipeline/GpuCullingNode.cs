@@ -109,7 +109,7 @@ namespace EngineNS.Graphics.Pipeline
         }
     }
     [Bricks.CodeBuilder.ContextMenu("GpuCulling", "Culling\\GpuCulling", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtGpuCullingNode : TtRenderGraphNode
+    public class TtGpuCullingNode : TAuxRenderGraphNode<TtGpuCullingNode>
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
         public TtRenderGraphPin HzbPinIn = TtRenderGraphPin.CreateInput("Hzb", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);

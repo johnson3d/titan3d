@@ -340,7 +340,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     }
     [Bricks.CodeBuilder.ContextMenu("DirLighting", "Deferred\\DirLighting", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.UDeferredDirLightingNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.UDeferredDirLightingNode" })]
-    public partial class TtDeferredDirLightingNode : Common.TtSceenSpaceNode
+    public partial class TtDeferredDirLightingNode : TAuxSceenSpaceNode<TtDeferredDirLightingNode>
     {
         public TtRenderGraphPin Rt0PinIn = TtRenderGraphPin.CreateInput("MRT0", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin Rt1PinIn = TtRenderGraphPin.CreateInput("MRT1", NxRHI.EBufferType.BFT_SRV);
@@ -423,25 +423,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 if (AdvanceShadowMapNode.Enable)
                     mBasePassShading.ShadowMode = EShadowMode.Advance;
             }
-        }
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
-        {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtDeferredDirLightingNode), nameof(TickLogic));
-                return mScopeTick;
-            }
         } 
         public override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            using (new Profiler.TimeScopeHelper(ScopeTick))
-            {
-                GBuffers?.SetViewportCBuffer(world, policy);
-                base.TickLogic(world, policy, frameCmdList, bClear);
-            }
+            GBuffers?.SetViewportCBuffer(world, policy);
+            base.TickLogic(world, policy, frameCmdList, bClear);
         }
         public override void TickSync(TtRenderPolicy policy)
         {

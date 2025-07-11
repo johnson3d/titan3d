@@ -6,7 +6,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("ScreenTiling", "ScreenTiling", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UScreenTilingNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UScreenTilingNode" })]
-    public class TtScreenTilingNode : Graphics.Pipeline.TtRenderGraphNode
+    public class TtScreenTilingNode : TAuxRenderGraphNode<TtScreenTilingNode>
     {
         public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth", NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin PointLightsPinIn = TtRenderGraphPin.CreateInputOutput("PointLights", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
@@ -226,66 +226,52 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             ResetComputeDrawcall(policy);
         }
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
-        {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtScreenTilingNode), nameof(TickLogic));
-                return mScopeTick;
-            }
-        }
         public override unsafe void TickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            using (new Profiler.TimeScopeHelper(ScopeTick))
+            if (TileX == 0 || TileY == 0)
+                return;
+            var gpuScene = policy.GetGpuSceneNode();// .FindNode("GpuSceneNode") as Common.UGpuSceneNode;
+
+            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            using (new NxRHI.TtCmdListScope(cmd))
             {
-                if (TileX == 0 || TileY == 0)
-                    return;
-                var gpuScene = policy.GetGpuSceneNode();// .FindNode("GpuSceneNode") as Common.UGpuSceneNode;
-
-                var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-                using (new NxRHI.TtCmdListScope(cmd))
+                var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCbv;
+                if (ConfigCBuffer != null)
                 {
-                    var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCbv;
-                    if (ConfigCBuffer != null)
+                    var idx = ConfigCBuffer.ShaderBinder.FindField("LightNum");
+                    if (gpuScene != null)
                     {
-                        var idx = ConfigCBuffer.ShaderBinder.FindField("LightNum");
-                        if (gpuScene != null)
-                        {
-                            var LightNum = gpuScene.PointLights.DataArray.Count;
-                            ConfigCBuffer.SetValue(idx, in LightNum);
-                        }
-                        Vector2ui tile;
-                        tile.X = TileX;
-                        tile.Y = TileY;
-                        idx = ConfigCBuffer.ShaderBinder.FindField("TileNum");
-                        ConfigCBuffer.SetValue(idx, in tile);
-
-                        //ConfigCBuffer.FlushDirty(false);
+                        var LightNum = gpuScene.PointLights.DataArray.Count;
+                        ConfigCBuffer.SetValue(idx, in LightNum);
                     }
+                    Vector2ui tile;
+                    tile.X = TileX;
+                    tile.Y = TileY;
+                    idx = ConfigCBuffer.ShaderBinder.FindField("TileNum");
+                    ConfigCBuffer.SetValue(idx, in tile);
 
-                    #region Setup
-                    {
-                        SetupTileData.SetDrawcallDispatch(this, policy, SetupTileDataDrawcall, TileX, TileY, 1, true);
-
-                        cmd.PushGpuDraw(SetupTileDataDrawcall);
-                    }
-                    #endregion
-
-                    #region PushLights
-                    {
-                        PushLightToTileData.SetDrawcallDispatch(this, policy, PushLightToTileDataDrawcall, TileX, TileY, 1, true);
-                        cmd.PushGpuDraw(PushLightToTileDataDrawcall);
-                    }
-                    #endregion
-
-                    cmd.FlushDraws();
+                    //ConfigCBuffer.FlushDirty(false);
                 }
 
-                policy.CommitCommandList(cmd);
-            }   
+                #region Setup
+                {
+                    SetupTileData.SetDrawcallDispatch(this, policy, SetupTileDataDrawcall, TileX, TileY, 1, true);
+
+                    cmd.PushGpuDraw(SetupTileDataDrawcall);
+                }
+                #endregion
+
+                #region PushLights
+                {
+                    PushLightToTileData.SetDrawcallDispatch(this, policy, PushLightToTileDataDrawcall, TileX, TileY, 1, true);
+                    cmd.PushGpuDraw(PushLightToTileDataDrawcall);
+                }
+                #endregion
+
+                cmd.FlushDraws();
+            }
+
+            policy.CommitCommandList(cmd);
         }
     }
 }

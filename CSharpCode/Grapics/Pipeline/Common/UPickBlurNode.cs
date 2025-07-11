@@ -52,7 +52,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
     [Bricks.CodeBuilder.ContextMenu("PickBlur", "Pick\\PickBlur", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UPickBlurNode : TtSceenSpaceNode
+    public class UPickBlurNode : TAuxSceenSpaceNode<UPickBlurNode>
     {
         public TtRenderGraphPin PickedPinIn = TtRenderGraphPin.CreateInput("Picked", NxRHI.EBufferType.BFT_SRV);
         public UPickBlurNode()

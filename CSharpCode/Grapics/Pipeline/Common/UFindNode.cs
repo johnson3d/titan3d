@@ -7,7 +7,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("Find", "Find", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UFindNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UFindNode" })]
-    public class TtFindNode : TtRenderGraphNode
+    public class TtFindNode : TAuxRenderGraphNode<TtFindNode>
     {
         public TtRenderGraphPin InputPinInOut = TtRenderGraphPin.CreateInputOutput("Input", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin ResultPinOut = TtRenderGraphPin.CreateOutput("Result", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);

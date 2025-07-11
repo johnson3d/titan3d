@@ -28,7 +28,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     }
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     [Bricks.CodeBuilder.ContextMenu("ScreenUI", "ScreenUI", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public partial class TtScreenSpaceUINode : TtSceenSpaceNode
+    public partial class TtScreenSpaceUINode : TAuxSceenSpaceNode<TtScreenSpaceUINode>
     {
         public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth", NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
@@ -92,68 +92,54 @@ namespace EngineNS.Graphics.Pipeline.Common
                 GBuffers.SetSize(x * OutputScaleFactor, y * OutputScaleFactor);
             }
         }
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
-        {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtScreenSpaceUINode), nameof(TickLogic));
-                return mScopeTick;
-            }
-        } 
         public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            using (new Profiler.TimeScopeHelper(ScopeTick))
+            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            using (new NxRHI.TtCmdListScope(cmdlist))
             {
-                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-                using (new NxRHI.TtCmdListScope(cmdlist))
+                var hud = policy.ViewportSlate?.HUD;
+                if (hud != null)
                 {
-                    var hud = policy.ViewportSlate?.HUD;
-                    if (hud != null)
+                    var host = hud;
+                    host.UpdateCameraOffset(world);
+                    if (host.DrawMesh != null)
                     {
-                        var host = hud;
-                        host.UpdateCameraOffset(world);
-                        if(host.DrawMesh != null)
+                        foreach (var i in host.DrawMesh.SubMeshes)
                         {
-                            foreach (var i in host.DrawMesh.SubMeshes)
+                            foreach (var j in i.Atoms)
                             {
-                                foreach (var j in i.Atoms)
-                                {
-                                    var drawCall = j.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
-                                    if (drawCall == null)
-                                        continue;
-                                    drawCall.TagObject = this;
-                                    drawCall.BindCBV(drawCall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
-                                    drawCall.BindCBV(drawCall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
-                                    cmdlist.PushGpuDraw(drawCall);
-                                }
+                                var drawCall = j.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
+                                if (drawCall == null)
+                                    continue;
+                                drawCall.TagObject = this;
+                                drawCall.BindCBV(drawCall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
+                                drawCall.BindCBV(drawCall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
+                                cmdlist.PushGpuDraw(drawCall);
                             }
                         }
                     }
-
-                    {
-                        cmdlist.SetViewport(in GBuffers.Viewport);
-                        FScissorRect scissor = new FScissorRect();
-                        scissor.MinX = 0;
-                        scissor.MinY = 0;
-                        scissor.MaxX = (int)GBuffers.Viewport.Width;
-                        scissor.MaxY = (int)GBuffers.Viewport.Height;
-                        cmdlist.SetScissor(in scissor);
-                        var passClears = new NxRHI.FRenderPassClears();
-                        passClears.SetDefault();
-                        passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));
-                        passClears.ClearFlags = ERenderPassClearFlags.CLEAR_NONE;
-                        GBuffers.BuildFrameBuffers(policy);
-                        cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, DebugName);
-                        cmdlist.FlushDraws();
-                        cmdlist.EndPass();
-                    }
                 }
 
-                policy.CommitCommandList(cmdlist);
+                {
+                    cmdlist.SetViewport(in GBuffers.Viewport);
+                    FScissorRect scissor = new FScissorRect();
+                    scissor.MinX = 0;
+                    scissor.MinY = 0;
+                    scissor.MaxX = (int)GBuffers.Viewport.Width;
+                    scissor.MaxY = (int)GBuffers.Viewport.Height;
+                    cmdlist.SetScissor(in scissor);
+                    var passClears = new NxRHI.FRenderPassClears();
+                    passClears.SetDefault();
+                    passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));
+                    passClears.ClearFlags = ERenderPassClearFlags.CLEAR_NONE;
+                    GBuffers.BuildFrameBuffers(policy);
+                    cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, DebugName);
+                    cmdlist.FlushDraws();
+                    cmdlist.EndPass();
+                }
             }
+
+            policy.CommitCommandList(cmdlist);
         }
     }
 }

@@ -10,22 +10,22 @@ namespace EngineNS.Editor
         INodeUIProvider GetChildUI(int index);
         string NodeName { get; }
         bool Selected { get; set; }
-        bool DrawNode(TtTreeNodeDrawer tree, int index, int NumOfChild);
+        bool DrawNode(INodeUIProvider parent, TtTreeNodeDrawer tree, int index, int NumOfChild);
         GamePlay.TtWorld GetWorld();
     }
     public class TtTreeNodeDrawer
     {
-        public void DrawTree(INodeUIProvider provider, int index)
+        public void DrawTree(INodeUIProvider parent, INodeUIProvider provider, int index)
         {
             int count = provider.NumOfChildUI();
-            var drawed = OnDrawNode(provider, index, count);
-            AfterNodeShow(provider, index);
+            var drawed = OnDrawNode(parent, provider, index, count);
+            AfterNodeShow(parent, provider, index);
             if (drawed)
             {
                 for (int i = 0; i < count; i++)
                 {
                     var cld = provider.GetChildUI(i);
-                    DrawTree(cld, i);
+                    DrawTree(provider, cld, i);
                 }
                 ImGuiAPI.TreePop();
             }
@@ -42,12 +42,12 @@ namespace EngineNS.Editor
         {
 
         }
-        protected virtual bool OnDrawNode(INodeUIProvider provider, int index, int NumOfChild)
+        protected virtual bool OnDrawNode(INodeUIProvider parent, INodeUIProvider provider, int index, int NumOfChild)
         {
-            return provider.DrawNode(this, index, NumOfChild);
+            return provider.DrawNode(parent, this, index, NumOfChild);
             //return ImGuiAPI.TreeNode(index.ToString(), provider.NodeName);
         }
-        public virtual void AfterNodeShow(INodeUIProvider provider, int index)
+        public virtual void AfterNodeShow(INodeUIProvider parent, INodeUIProvider provider, int index)
         {
 
         }
@@ -72,7 +72,7 @@ namespace EngineNS.GamePlay.Scene
         {
             return Children[index];
         }
-        public virtual bool DrawNode(Editor.TtTreeNodeDrawer tree, int index, int NumOfChild)
+        public virtual bool DrawNode(Editor.INodeUIProvider parent, Editor.TtTreeNodeDrawer tree, int index, int NumOfChild)
         {
             ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
             if (this.Selected)

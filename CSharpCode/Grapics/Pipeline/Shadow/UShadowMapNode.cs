@@ -38,7 +38,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
     }
     [Bricks.CodeBuilder.ContextMenu("CSM", "Shadow\\CSM", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shadow.UShadowMapNode@EngineCore", "EngineNS.Graphics.Pipeline.Shadow.UShadowMapNode" })]
-    public class TtShadowMapNode : TtRenderGraphNode
+    public class TtShadowMapNode : TAuxRenderGraphNode<TtShadowMapNode>
     {
         public TtRenderGraphPin[] VisiblePinIn = new TtRenderGraphPin[]{
             TtRenderGraphPin.CreateInput("Visible0", EBufferType.BFT_NONE),
@@ -314,17 +314,6 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             return X < Min ? Min : X < Max ? X : Max;
         }
         [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
-        {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtShadowMapNode), nameof(TickLogic));
-                return mScopeTick;
-            }
-        }
-        [ThreadStatic]
         private static Profiler.TimeScope mScopePushGpuDraw;
         private static Profiler.TimeScope ScopePushGpuDraw
         {
@@ -369,216 +358,213 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 }
             }
             DVector3* AABBCorners = stackalloc DVector3[8];
-            using (new Profiler.TimeScopeHelper(ScopeTick))
+            mDirLightDirection = world.DirectionLight.Direction;
+
+            ViewerCamera = policy.DefaultCamera;
+
+            //ViewCamera.UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext);
+            //calculate viewer camera frustum bounding sphere and shadow camera data;
+            for (UInt32 CsmIdx = 0; CsmIdx < mCsmNum; CsmIdx++)
             {
-                mDirLightDirection = world.DirectionLight.Direction;
+                float ShadowDistance = mSumDistanceFarArray[CsmIdx];
+                var shadowCamera = mShadowCameraArray[CsmIdx].mCoreObject;
 
-                ViewerCamera = policy.DefaultCamera;
-                
-                //ViewCamera.UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext);
-                //calculate viewer camera frustum bounding sphere and shadow camera data;
-                for (UInt32 CsmIdx = 0; CsmIdx < mCsmNum; CsmIdx++)
+                float HalfFoV = ViewerCamera.mCoreObject.mFov * 0.5f;
+                float zNear = 0.0f;
+                if (CsmIdx == 0)
                 {
-                    float ShadowDistance = mSumDistanceFarArray[CsmIdx];
-                    var shadowCamera = mShadowCameraArray[CsmIdx].mCoreObject;
+                    zNear = ViewerCamera.ZNear;
+                }
+                else
+                {
+                    zNear = mSumDistanceFarArray[CsmIdx - 1];
+                }
+                //先得到阴影裁剪摄像机，确保CSM区段内看得到的对象都产生投影 
+                var aabb = new DBoundingBox();
+                using (new Profiler.TimeScopeHelper(ScopeCull))
+                {
+                    CullCamera.PerspectiveFovLH(ViewerCamera.Fov, ViewerCamera.Width, ViewerCamera.Height, ViewerCamera.ZNear, mSumDistanceFarArray[CsmIdx]);
+                    CullCamera.LookAtLH(ViewerCamera.GetPosition(), ViewerCamera.GetLookAt(), in Vector3.UnitY);
+                    //收集本csm阶段可投影Mesh
+                    mVisParameter.CullType = GamePlay.TtWorld.TtVisParameter.EVisCull.Shadow;
+                    mVisParameter.IsBuildAABB = true;
+                    mVisParameter.World = world;
+                    mVisParameter.CullCamera = CullCamera;
+                    mVisParameter.IsGatherVisibleNodes = false;
+                    mVisParameter.IsGatherVisibleMeshes = static (node, arg) =>
+                    {
+                        return node.IsCastShadow;
+                    };
+                    world.GatherVisibleMeshes(mVisParameter);
 
-                    float HalfFoV = ViewerCamera.mCoreObject.mFov * 0.5f;
-                    float zNear = 0.0f;
-                    if (CsmIdx == 0)
+                    aabb = mVisParameter.AABB;
+                }
+
+                //先按照方向光构建一个阴影摄像机坐标系 
+                var viewSpaceMatrix = new DMatrix();
+                var invViewSpaceMatrix = new DMatrix();
+                var cameralStart = CullCamera.GetMatrixStartPosition();
+                var pFrustumVerts = CullCamera.Frustum.GetFrustumVertices();
+                var frstAABB = new BoundingBox();
+                CullCamera.Frustum.GetAABB(ref frstAABB);
+                var eyeAt = cameralStart + frstAABB.GetCenter();
+                var lookAt = eyeAt + mDirLightDirection;
+                DMatrix.LookAtLH(in eyeAt, in lookAt, in DVector3.UnitY, out viewSpaceMatrix);
+                DMatrix.Invert(in viewSpaceMatrix, out invViewSpaceMatrix);
+
+                //CSM本阶段能看到的frustum在阴影摄像机空间的shadowCameraBox1
+                var shadowCameraBox1 = new DBoundingBox();
+                {
+                    shadowCameraBox1.InitEmptyBox();
+                    for (int i = 0; i < 8; i++)
                     {
-                        zNear = ViewerCamera.ZNear;
+                        var vert = cameralStart + pFrustumVerts[i];
+                        shadowCameraBox1.Merge(DVector3.TransformCoordinate(in vert, in viewSpaceMatrix));
                     }
-                    else
+                }
+
+                //对裁剪出来的aabb变换到阴影摄像机空间shadowCameraBox2
+                var shadowCameraBox2 = new DBoundingBox();
+                {
+                    shadowCameraBox2.InitEmptyBox();
+                    aabb.UnsafeGetCorners(AABBCorners);
+                    for (int i = 0; i < 8; i++)
                     {
-                        zNear = mSumDistanceFarArray[CsmIdx - 1];
+                        shadowCameraBox2.Merge(DVector3.TransformCoordinate(in AABBCorners[i], in viewSpaceMatrix));
                     }
-                    //先得到阴影裁剪摄像机，确保CSM区段内看得到的对象都产生投影 
-                    var aabb = new DBoundingBox();
-                    using (new Profiler.TimeScopeHelper(ScopeCull))
+                }
+
+                //shadowCameraBox1和shadowCameraBox2的交集就是最佳的阴影投射区间 
+                var shadowCameraBox = DBoundingBox.IntersectBox(in shadowCameraBox1, in shadowCameraBox2);
+                //将阴影投射区间变换到世界坐标
+                var center = shadowCameraBox.GetCenter();
+                var extent = shadowCameraBox.GetSize() * 0.5;
+                center = DVector3.TransformCoordinate(in center, in invViewSpaceMatrix);
+                var AABB = new DBoundingBox(center - extent, center + extent);
+
+                //根据AABB制作最终真正的阴影摄像机
+                float BoxExt = 1.2f;
+                var FrustumSphereDiameter = (float)AABB.GetMaxSide() * BoxExt;
+                shadowCamera.LookAtLH(center - mDirLightDirection.AsDVector() * FrustumSphereDiameter * 0.5f, center, in Vector3.UnitY);
+                //这里 0.3 - 1000是为了配合后面PCF的时候mShadowTransitionScale设置的1000做的
+                //因为采用的非线性Depth，作比较的时候做了放大mShadowTransitionScale倍做的比较->return saturate((ShadowmapDepth - SFD.mViewer2ShadowDepth) * SFD.mShadowTransitionScale + 1.0h);
+                var shadowZNear = 0.3f;// (\float)shadowCameraBox.Minimum.Z;
+                var shadowZFar = 1000.0f;
+                shadowCamera.DoOrthoProjectionForShadow(FrustumSphereDiameter, FrustumSphereDiameter, shadowZNear, shadowZFar, 0, 0);
+
+                Matrix vp = shadowCamera.GetViewProjection();
+                mViewer2ShadowMtxArray[CsmIdx] = vp * mOrtho2UVMtx * mUVAdjustedMtxArray[CsmIdx];//mShadowCameraArray[CsmIdx].CameraData.ViewProjection * mOrtho2UVMtx * mUVAdjustedMtxArray[CsmIdx];
+
+                float PerObjCustomDepthBias = 1.5f;
+                float DepthBiasClipSpace = UniformDepthBias / (shadowZFar - shadowZNear) * (FrustumSphereDiameter / mInnerResolutionY) * PerObjCustomDepthBias;
+                //float DepthBiasClipSpace = UniformDepthBias / (ShadowCameraZFar - ShadowCameraZNear) * PerObjCustomDepthBias;
+
+                var cBuffer = GBuffersArray[CsmIdx].PerViewportCBuffer;
+                if (cBuffer != null)
+                {
+                    var tmp = new Vector2(0.0f, 1.0f / shadowZFar);
+                    cBuffer.SetValue(TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gDepthBiasAndZFarRcp, in tmp);
+                }
+
+                //mShadowTransitionScale = 1.0f / (DepthBiasClipSpace + 0.00001f);
+                mShadowTransitionScaleArray[CsmIdx] = 1.0f / (DepthBiasClipSpace + 0.00001f);
+                mShadowTransitionScale = mShadowTransitionScaleArray[CsmIdx];
+                float FadeStartDistance = ShadowDistance - ShadowDistance * mFadeStrength;
+                mFadeParam.X = 1.0f / (ShadowDistance - FadeStartDistance + 0.0001f);
+                mFadeParam.Y = -FadeStartDistance * mFadeParam.X;
+
+                mShadowCameraArray[CsmIdx].UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext);
+                CSMPass[CsmIdx].SwapBuffer();
+
+                var cmdlist = CSMPass[CsmIdx].DrawCmdList;
+                using (new NxRHI.TtCmdListScope(cmdlist))
+                {
+                    using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
                     {
-                        CullCamera.PerspectiveFovLH(ViewerCamera.Fov, ViewerCamera.Width, ViewerCamera.Height, ViewerCamera.ZNear, mSumDistanceFarArray[CsmIdx]);
-                        CullCamera.LookAtLH(ViewerCamera.GetPosition(), ViewerCamera.GetLookAt(), in Vector3.UnitY);
-                        //收集本csm阶段可投影Mesh
-                        mVisParameter.CullType = GamePlay.TtWorld.TtVisParameter.EVisCull.Shadow;
-                        mVisParameter.IsBuildAABB = true;
-                        mVisParameter.World = world;
-                        mVisParameter.CullCamera = CullCamera;
-                        mVisParameter.IsGatherVisibleNodes = false;
-                        mVisParameter.IsGatherVisibleMeshes = static (node, arg) =>
+                        foreach (var i in mVisParameter.VisibleMeshes)
                         {
-                            return node.IsCastShadow;
-                        };
-                        world.GatherVisibleMeshes(mVisParameter);
-
-                        aabb = mVisParameter.AABB;
-                    }
-
-                    //先按照方向光构建一个阴影摄像机坐标系 
-                    var viewSpaceMatrix = new DMatrix();
-                    var invViewSpaceMatrix = new DMatrix();
-                    var cameralStart = CullCamera.GetMatrixStartPosition();
-                    var pFrustumVerts = CullCamera.Frustum.GetFrustumVertices();
-                    var frstAABB = new BoundingBox();
-                    CullCamera.Frustum.GetAABB(ref frstAABB);
-                    var eyeAt = cameralStart + frstAABB.GetCenter();
-                    var lookAt = eyeAt + mDirLightDirection;
-                    DMatrix.LookAtLH(in eyeAt, in lookAt, in DVector3.UnitY, out viewSpaceMatrix);
-                    DMatrix.Invert(in viewSpaceMatrix, out invViewSpaceMatrix);
-
-                    //CSM本阶段能看到的frustum在阴影摄像机空间的shadowCameraBox1
-                    var shadowCameraBox1 = new DBoundingBox();
-                    {
-                        shadowCameraBox1.InitEmptyBox();
-                        for (int i = 0; i < 8; i++)
-                        {
-                            var vert = cameralStart + pFrustumVerts[i];
-                            shadowCameraBox1.Merge(DVector3.TransformCoordinate(in vert, in viewSpaceMatrix));
-                        }
-                    }
-
-                    //对裁剪出来的aabb变换到阴影摄像机空间shadowCameraBox2
-                    var shadowCameraBox2 = new DBoundingBox();
-                    {
-                        shadowCameraBox2.InitEmptyBox();
-                        aabb.UnsafeGetCorners(AABBCorners);
-                        for (int i = 0; i < 8; i++)
-                        {
-                            shadowCameraBox2.Merge(DVector3.TransformCoordinate(in AABBCorners[i], in viewSpaceMatrix));
-                        }
-                    }
-
-                    //shadowCameraBox1和shadowCameraBox2的交集就是最佳的阴影投射区间 
-                    var shadowCameraBox = DBoundingBox.IntersectBox(in shadowCameraBox1, in shadowCameraBox2);
-                    //将阴影投射区间变换到世界坐标
-                    var center = shadowCameraBox.GetCenter();
-                    var extent = shadowCameraBox.GetSize() * 0.5;
-                    center = DVector3.TransformCoordinate(in center, in invViewSpaceMatrix);
-                    var AABB = new DBoundingBox(center - extent, center + extent);
-
-                    //根据AABB制作最终真正的阴影摄像机
-                    float BoxExt = 1.2f;
-                    var FrustumSphereDiameter = (float)AABB.GetMaxSide() * BoxExt;
-                    shadowCamera.LookAtLH(center - mDirLightDirection.AsDVector() * FrustumSphereDiameter * 0.5f, center, in Vector3.UnitY);
-                    //这里 0.3 - 1000是为了配合后面PCF的时候mShadowTransitionScale设置的1000做的
-                    //因为采用的非线性Depth，作比较的时候做了放大mShadowTransitionScale倍做的比较->return saturate((ShadowmapDepth - SFD.mViewer2ShadowDepth) * SFD.mShadowTransitionScale + 1.0h);
-                    var shadowZNear = 0.3f;// (\float)shadowCameraBox.Minimum.Z;
-                    var shadowZFar = 1000.0f;
-                    shadowCamera.DoOrthoProjectionForShadow(FrustumSphereDiameter, FrustumSphereDiameter, shadowZNear, shadowZFar, 0, 0);
-
-                    Matrix vp = shadowCamera.GetViewProjection();
-                    mViewer2ShadowMtxArray[CsmIdx] = vp * mOrtho2UVMtx * mUVAdjustedMtxArray[CsmIdx];//mShadowCameraArray[CsmIdx].CameraData.ViewProjection * mOrtho2UVMtx * mUVAdjustedMtxArray[CsmIdx];
-
-                    float PerObjCustomDepthBias = 1.5f;
-                    float DepthBiasClipSpace = UniformDepthBias / (shadowZFar - shadowZNear) * (FrustumSphereDiameter / mInnerResolutionY) * PerObjCustomDepthBias;
-                    //float DepthBiasClipSpace = UniformDepthBias / (ShadowCameraZFar - ShadowCameraZNear) * PerObjCustomDepthBias;
-
-                    var cBuffer = GBuffersArray[CsmIdx].PerViewportCBuffer;
-                    if (cBuffer != null)
-                    {
-                        var tmp = new Vector2(0.0f, 1.0f / shadowZFar);
-                        cBuffer.SetValue(TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gDepthBiasAndZFarRcp, in tmp);
-                    }
-
-                    //mShadowTransitionScale = 1.0f / (DepthBiasClipSpace + 0.00001f);
-                    mShadowTransitionScaleArray[CsmIdx] = 1.0f / (DepthBiasClipSpace + 0.00001f);
-                    mShadowTransitionScale = mShadowTransitionScaleArray[CsmIdx];
-                    float FadeStartDistance = ShadowDistance - ShadowDistance * mFadeStrength;
-                    mFadeParam.X = 1.0f / (ShadowDistance - FadeStartDistance + 0.0001f);
-                    mFadeParam.Y = -FadeStartDistance * mFadeParam.X;
-
-                    mShadowCameraArray[CsmIdx].UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext);
-                    CSMPass[CsmIdx].SwapBuffer();
-
-                    var cmdlist = CSMPass[CsmIdx].DrawCmdList;
-                    using (new NxRHI.TtCmdListScope(cmdlist))
-                    {
-                        using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
-                        {
-                            foreach (var i in mVisParameter.VisibleMeshes)
+                            if (i.Mesh.IsCastShadow == false)
+                                continue;
+                            if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
+                                continue;
+                            foreach (var j in i.Mesh.SubMeshes)
                             {
-                                if (i.Mesh.IsCastShadow == false)
-                                    continue;
-                                if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
-                                    continue;
-                                foreach (var j in i.Mesh.SubMeshes)
+                                foreach (var k in j.Atoms)
                                 {
-                                    foreach (var k in j.Atoms)
+                                    var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffersArray[CsmIdx], policy, this);
+
+                                    if (drawcall != null)
                                     {
-                                        var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffersArray[CsmIdx], policy, this);
+                                        drawcall.BindGBuffer(mShadowCameraArray[CsmIdx], GBuffersArray[CsmIdx]);
 
-                                        if (drawcall != null)
-                                        {
-                                            drawcall.BindGBuffer(mShadowCameraArray[CsmIdx], GBuffersArray[CsmIdx]);
-
-                                            cmdlist.PushGpuDraw(drawcall);
-                                        }
+                                        cmdlist.PushGpuDraw(drawcall);
                                     }
                                 }
                             }
                         }
-
-                        using (new Profiler.TimeScopeHelper(ScopeFlushDraw)) 
-                        {
-                            FViewPort Viewport = new FViewPort();
-                            Viewport.MinDepth = GBuffersArray[CsmIdx].Viewport.MinDepth;
-                            Viewport.MaxDepth = GBuffersArray[CsmIdx].Viewport.MaxDepth;
-                            Viewport.TopLeftX = GBuffersArray[CsmIdx].Viewport.TopLeftX + (GBuffersArray[CsmIdx].Viewport.Width * CsmIdx);
-                            Viewport.TopLeftY = GBuffersArray[CsmIdx].Viewport.TopLeftY;
-
-                            Viewport.Width = (GBuffersArray[CsmIdx].Viewport.Width);// GBuffers.Viewport.Width;
-                            Viewport.Height = GBuffersArray[CsmIdx].Viewport.Height;
-
-                            cmdlist.SetViewport(in Viewport);
-                            var scissor = new NxRHI.FScissorRect();
-                            scissor.MinX = 0;
-                            scissor.MinY = 0;
-                            scissor.MaxX = (int)Viewport.Width;
-                            scissor.MaxY = (int)Viewport.Height;
-                            cmdlist.SetScissor(in scissor);
-
-                            var passClear = new NxRHI.FRenderPassClears();
-                            //if (CsmIdx == 0)
-                            {
-                                passClear.SetDefault();
-                                passClear.SetClearColor(0, new Color4f(1, 0, 0, 0));
-                            }
-
-                            GBuffersArray[CsmIdx].BuildFrameBuffers(policy);
-                            string PassName = "ShadowDepth";
-                            if (CsmIdx == 1)
-                            {
-                                PassName = "ShadowDepth1";
-                            }
-                            else if (CsmIdx == 2)
-                            {
-                                PassName = "ShadowDepth2";
-                            }
-                            else if (CsmIdx == 3)
-                            {
-                                PassName = "ShadowDepth3";
-                            }
-                            cmdlist.BeginPass(GBuffersArray[CsmIdx].FrameBuffers, in passClear, PassName);
-                            //if (bClear)
-                            //    cmdlist.BeginRenderPass(policy, GBuffers, in passClear, "ShadowDepth");
-                            //else
-                            //    cmdlist.BeginRenderPass(policy, GBuffers, "ShadowDepth");
-                            cmdlist.FlushDraws();
-                            cmdlist.EndPass();
-                        }
-
                     }
 
-                    policy.CommitCommandList(cmdlist);
+                    using (new Profiler.TimeScopeHelper(ScopeFlushDraw))
+                    {
+                        FViewPort Viewport = new FViewPort();
+                        Viewport.MinDepth = GBuffersArray[CsmIdx].Viewport.MinDepth;
+                        Viewport.MaxDepth = GBuffersArray[CsmIdx].Viewport.MaxDepth;
+                        Viewport.TopLeftX = GBuffersArray[CsmIdx].Viewport.TopLeftX + (GBuffersArray[CsmIdx].Viewport.Width * CsmIdx);
+                        Viewport.TopLeftY = GBuffersArray[CsmIdx].Viewport.TopLeftY;
+
+                        Viewport.Width = (GBuffersArray[CsmIdx].Viewport.Width);// GBuffers.Viewport.Width;
+                        Viewport.Height = GBuffersArray[CsmIdx].Viewport.Height;
+
+                        cmdlist.SetViewport(in Viewport);
+                        var scissor = new NxRHI.FScissorRect();
+                        scissor.MinX = 0;
+                        scissor.MinY = 0;
+                        scissor.MaxX = (int)Viewport.Width;
+                        scissor.MaxY = (int)Viewport.Height;
+                        cmdlist.SetScissor(in scissor);
+
+                        var passClear = new NxRHI.FRenderPassClears();
+                        //if (CsmIdx == 0)
+                        {
+                            passClear.SetDefault();
+                            passClear.SetClearColor(0, new Color4f(1, 0, 0, 0));
+                        }
+
+                        GBuffersArray[CsmIdx].BuildFrameBuffers(policy);
+                        string PassName = "ShadowDepth";
+                        if (CsmIdx == 1)
+                        {
+                            PassName = "ShadowDepth1";
+                        }
+                        else if (CsmIdx == 2)
+                        {
+                            PassName = "ShadowDepth2";
+                        }
+                        else if (CsmIdx == 3)
+                        {
+                            PassName = "ShadowDepth3";
+                        }
+                        cmdlist.BeginPass(GBuffersArray[CsmIdx].FrameBuffers, in passClear, PassName);
+                        //if (bClear)
+                        //    cmdlist.BeginRenderPass(policy, GBuffers, in passClear, "ShadowDepth");
+                        //else
+                        //    cmdlist.BeginRenderPass(policy, GBuffers, "ShadowDepth");
+                        cmdlist.FlushDraws();
+                        cmdlist.EndPass();
+                    }
+
                 }
 
-                //TODO  Global Value...
-                mShadowTransitionScaleVec.X = 1000.0f;// mShadowTransitionScaleArray[0];
-                mShadowTransitionScaleVec.Y = 1000.0f;//mShadowTransitionScaleArray[1];
-                mShadowTransitionScaleVec.Z = 1000.0f;//mShadowTransitionScaleArray[2];
-                mShadowTransitionScaleVec.W = 1000.0f;//mShadowTransitionScaleArray[3];
+                policy.CommitCommandList(cmdlist);
+            }
 
-                mVisParameter.Reset();
-            }   
+            //TODO  Global Value...
+            mShadowTransitionScaleVec.X = 1000.0f;// mShadowTransitionScaleArray[0];
+            mShadowTransitionScaleVec.Y = 1000.0f;//mShadowTransitionScaleArray[1];
+            mShadowTransitionScaleVec.Z = 1000.0f;//mShadowTransitionScaleArray[2];
+            mShadowTransitionScaleVec.W = 1000.0f;//mShadowTransitionScaleArray[3];
+
+            mVisParameter.Reset();
         }
 
         public override void TickSync(TtRenderPolicy policy)

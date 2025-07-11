@@ -56,7 +56,8 @@
   "EditorEffectFont": "fonts/fa-solid-900.ttf:Engine",
   "EditorLanguage": "English",
   "UIDefaultTexture": "texture/white.srv:Engine",
-  "IsWriteShaderDebugFile": false,
+  "IsWriteShaderDebugFile": true,
+  "UseECS": false,
   "Plugins": [
     "SourceGit",
     "DataCopyer",

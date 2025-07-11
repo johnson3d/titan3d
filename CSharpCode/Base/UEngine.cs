@@ -131,6 +131,9 @@ namespace EngineNS
         public bool IsAftermath { get; set; } = false;//if true, engine will disable debuglayer&renderdoc
         [Rtti.Meta("")]
         [Category("Option")]
+        public bool IsScopeWithSource { get; set; } = false;
+        [Rtti.Meta("")]
+        [Category("Option")]
         public string MainWindowType { get; set; }// = Rtti.TypeManager.Instance.GetTypeStringFromType(typeof(Editor.MainEditorWindow));
         [Rtti.Meta("")]
         [Category("Option")]

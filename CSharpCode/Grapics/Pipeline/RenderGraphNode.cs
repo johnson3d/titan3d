@@ -97,7 +97,7 @@ namespace EngineNS.Graphics.Pipeline
         }
     }
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public class TtRenderGraphNode : IO.BaseSerializer, IDisposable
+    public abstract class TtRenderGraphNode : IO.BaseSerializer, IDisposable
     {
         ~TtRenderGraphNode()
         {
@@ -105,7 +105,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual void Dispose()
         {
-            
+
         }
         internal int mMaxLeafDistance = 0;
         [Category("Option")]
@@ -114,9 +114,9 @@ namespace EngineNS.Graphics.Pipeline
             get => mMaxLeafDistance;
         }
         public int TempRootDistance = 0;
-        public virtual bool IsUsed 
-        { 
-            get; 
+        public virtual bool IsUsed
+        {
+            get;
             set;
         } = true;
         [Category("Option")]
@@ -294,16 +294,17 @@ namespace EngineNS.Graphics.Pipeline
         {
 
         }
-        public Profiler.TimeScope mRDGTickLogicScope = null;
+        public abstract ref Profiler.TimeScope GetThreadStaticRDGTickLogicScope();
         public Profiler.TimeScope RDGTickLogicScope
         {
             get
             {
-                if (mRDGTickLogicScope == null)
+                ref var scorp = ref GetThreadStaticRDGTickLogicScope();
+                if (scorp == null)
                 {
-                    mRDGTickLogicScope = new Profiler.TimeScope(this.GetType(), nameof(TickLogic));
+                    scorp = new Profiler.TimeScope(this.GetType(), nameof(TickLogic));
                 }
-                return mRDGTickLogicScope;
+                return scorp;
             }
         }
         public virtual void BeforeTickLogic(TtRenderPolicy policy)
@@ -316,7 +317,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual void TickSync(TtRenderPolicy policy)
         {
-            
+
         }
 
         public void TryReleaseBufers(List<TtRenderGraphLinker> linkers, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
@@ -401,6 +402,16 @@ namespace EngineNS.Graphics.Pipeline
         public virtual void OnDrawCall(Shader.TtGraphicsShadingEnv shading, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
 
+        }
+    }
+
+    public abstract class TAuxRenderGraphNode<T> : TtRenderGraphNode
+    {
+        [ThreadStatic]
+        private static Profiler.TimeScope mRDGTickLogicScope = null;
+        public override ref Profiler.TimeScope GetThreadStaticRDGTickLogicScope()
+        {
+            return ref mRDGTickLogicScope;
         }
     }
 }

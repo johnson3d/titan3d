@@ -124,9 +124,23 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.BeginFrame();
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopePresent;
+        private static Profiler.TimeScope ScopePresent
+        {
+            get
+            {
+                if (mScopePresent == null)
+                    mScopePresent = new Profiler.TimeScope(typeof(TtSwapChain), "Present");
+                return mScopePresent;
+            }
+        }
         public void Present(uint SyncInterval, uint Flags)
         {
-            mCoreObject.Present(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, SyncInterval, Flags);
+            using (new Profiler.TimeScopeHelper(ScopePresent))
+            {
+                mCoreObject.Present(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, SyncInterval, Flags);
+            }   
         }
 
         TtFrameBuffers[] mBackFrameBuffers;

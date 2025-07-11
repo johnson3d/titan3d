@@ -8,7 +8,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("GpuScene", "GpuScene", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UGpuSceneNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UGpuSceneNode" })]
-    public partial class TtGpuSceneNode : Graphics.Pipeline.TtRenderGraphNode
+    public partial class TtGpuSceneNode : TAuxRenderGraphNode<TtGpuSceneNode>
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
         public TtRenderGraphPin GpuScenePinOut = TtRenderGraphPin.CreateOutput("GpuScene", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
@@ -173,33 +173,19 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
 
         }
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
-        {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtGpuSceneNode), nameof(TickLogic));
-                return mScopeTick;
-            }
-        } 
         public override unsafe void TickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            using (new Profiler.TimeScopeHelper(ScopeTick))
-            {
-                if (CpuCullNode.VisParameter.VisibleNodes == null)
-                    return;
+            if (CpuCullNode.VisParameter.VisibleNodes == null)
+                return;
 
-                var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-                using (new NxRHI.TtCmdListScope(cmd))
-                {
-                    TickLogic_Light(world, policy, cmd);
-                    TickLogic_Instance(world, policy, cmd);
-                }
-                
-                policy.CommitCommandList(cmd);
-            }   
+            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            using (new NxRHI.TtCmdListScope(cmd))
+            {
+                TickLogic_Light(world, policy, cmd);
+                TickLogic_Instance(world, policy, cmd);
+            }
+
+            policy.CommitCommandList(cmd);
         }
         public unsafe override void TickSync(Graphics.Pipeline.TtRenderPolicy policy)
         {

@@ -88,7 +88,7 @@ namespace EngineNS.Editor.Forms
                     ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.TVHeader);
                     ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.TVHeaderActive);
                     ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.TVHeaderHovered);
-                    DrawTree(World.Root, 0);
+                    DrawTree(null, World.Root, 0);
                     ImGuiAPI.PopStyleColor(3);
                 }
             }
@@ -115,7 +115,7 @@ namespace EngineNS.Editor.Forms
                     ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.TVHeader);
                     ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.TVHeaderActive);
                     ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.TVHeaderHovered);
-                    DrawTree(World.Root, 0);
+                    DrawTree(null, World.Root, 0);
                     ImGuiAPI.PopStyleColor(3);
                 }
             }
@@ -123,9 +123,9 @@ namespace EngineNS.Editor.Forms
                 OnDrawMenu();
             EGui.UIProxy.DockProxy.EndMainForm(result);
         }
-        protected override bool OnDrawNode(INodeUIProvider provider, int index, int NumOfChild)
+        protected override bool OnDrawNode(INodeUIProvider parent, INodeUIProvider provider, int index, int NumOfChild)
         {
-            return provider.DrawNode(this, index, NumOfChild);
+            return provider.DrawNode(parent,this, index, NumOfChild);
             //ImGuiTreeNodeFlags_ flags = 0;
             //if (provider.Selected)
             //    flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;

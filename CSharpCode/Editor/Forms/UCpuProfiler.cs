@@ -335,25 +335,30 @@ namespace EngineNS.Editor.Forms
                     }
                     ImGuiAPI.TableSetColumnIndex(4);
                     Vector4 clr = new Vector4(0.5f, 0.69f, 0.93f, 1);
-                    if (j.Parent != "null")
+                    if (j.Callers != null)
                     {
-                        ImGuiAPI.TextColored(in clr, j.Parent);
-                        if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                        foreach (var k in j.Callers)
                         {
-                            ImGuiAPI.SetTooltip(j.Parent);
-                        }
-                        var min = ImGuiAPI.GetItemRectMin();
-                        var max = ImGuiAPI.GetItemRectMax();
-                        min.Y = max.Y;
-                        var cmdlist = ImGuiAPI.GetWindowDrawList();
-                        cmdlist.AddLine(in min, in max, EGui.UIProxy.StyleConfig.Instance.LinkStringColor, 1);
-                        if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
-                        {
-                            CurrentName = j.Parent;
+                            ImGuiAPI.TextColored(in clr, $"[{k.Value}]" + k.Key);
+                            if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                            {
+                                ImGuiAPI.SetTooltip(k.Key);
+                            }
+                            var min = ImGuiAPI.GetItemRectMin();
+                            var max = ImGuiAPI.GetItemRectMax();
+                            min.Y = max.Y;
+                            var cmdlist = ImGuiAPI.GetWindowDrawList();
+                            cmdlist.AddLine(in min, in max, EGui.UIProxy.StyleConfig.Instance.LinkStringColor, 1);
+                            if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                            {
+                                CurrentName = k.Key;
+                            }
                         }
                     }
                     else
+                    {
                         ImGuiAPI.TextColored(in clr, "null");
+                    }
                     if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
                     {
                         PopItemMenu(i, j, "Parent");
@@ -387,7 +392,7 @@ namespace EngineNS.Editor.Forms
                     }
                 }
                 public bool Selected { get; set; }
-                public bool DrawNode(TtTreeNodeDrawer tree, int index, int NumOfChild)
+                public bool DrawNode(INodeUIProvider parent, TtTreeNodeDrawer tree, int index, int NumOfChild)
                 {
                     ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
                     if (this.Selected)
@@ -399,15 +404,6 @@ namespace EngineNS.Editor.Forms
                         flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
                     }
                     ret = ImGuiAPI.TreeNodeEx(name, flags);
-                    ImGuiAPI.SameLine(0, -1);
-                    var txt = $"[Time={TimeInfo.AvgTime},Hit={TimeInfo.AvgHit}]";
-                    ImGuiAPI.TextColored(Color4b.DarkGoldenrod.ToColor4Float(), txt);
-                    if (this.Children.Count > 0)
-                    {
-                        txt = $"NC={NotCountedTime}";
-                        ImGuiAPI.SameLine(0, -1);
-                        ImGuiAPI.TextColored(Color4b.OrangeRed.ToColor4Float(), txt);
-                    }
                     if (ImGuiAPI.IsItemActivated())
                     {
                         tree.OnNodeUI_Activated(this);
@@ -423,6 +419,29 @@ namespace EngineNS.Editor.Forms
                     {
                         tree.OnNodeUI_RClick(this);
                     }
+                    ImGuiAPI.SameLine(0, -1);
+                    float ratio = 1;
+                    var pnode = parent as TtTimeScopeNode;
+                    if (pnode!=null && TimeInfo.Callers!=null && TimeInfo.Callers.Length>1)
+                    {
+                        foreach(var i in TimeInfo.Callers)
+                        {
+                            if (i.Key == pnode.TimeInfo.Name)
+                            {
+                                ratio = i.Value;
+                                break;
+                            }
+                        }
+                    }
+                    var txt = $"[Time={TimeInfo.AvgTime},Hit={TimeInfo.AvgHit},Ratio={ratio}]";
+                    ImGuiAPI.TextColored(Color4b.DarkGoldenrod.ToColor4Float(), txt);
+                    if (this.Children.Count > 0)
+                    {
+                        txt = $"NC={NotCountedTime}";
+                        ImGuiAPI.SameLine(0, -1);
+                        ImGuiAPI.TextColored(Color4b.OrangeRed.ToColor4Float(), txt);
+                    }
+                    
                     return ret;
                 }
                 public GamePlay.TtWorld GetWorld()
@@ -432,6 +451,8 @@ namespace EngineNS.Editor.Forms
             }
             internal TtTimeScopeNode TimeScopeRootNode = new TtTimeScopeNode();
             internal Dictionary<string, TtTimeScopeNode> TreeNodes = new Dictionary<string, TtTimeScopeNode>();
+            internal TtCpuProfiler Host;
+            internal string Thread;
             internal TtTimeScopeTree()
             {
                 TimeScopeRootNode.TimeInfo.ShowName = "Root";
@@ -441,15 +462,17 @@ namespace EngineNS.Editor.Forms
                 TimeScopeRootNode.Children.Clear();
                 TreeNodes.Clear();
             }
-            internal unsafe void OnDraw()
+            internal unsafe void OnDraw(TtCpuProfiler host, string thread)
             {
-                DrawTree(TimeScopeRootNode, 0);
+                Host = host;
+                Thread = thread;
+                DrawTree(null, TimeScopeRootNode, 0);
             }
             private List<string> rmvNodes = new List<string>();
             internal void SetTreeNodes(List<Profiler.TtRpcProfiler.RpcProfilerData.ScopeInfo> src)
             {
                 var now = System.DateTime.UtcNow;
-                bool bAdd = false;
+                //bool bAdd = false;
                 //update
                 foreach (var i in src)
                 {
@@ -465,7 +488,7 @@ namespace EngineNS.Editor.Forms
                         node.TimeInfo = i;
                         node.LastAccessTime = now;
                         TreeNodes.Add(i.ShowName, node);
-                        bAdd = true;
+                        //bAdd = true;
                     }
                 }
 
@@ -487,7 +510,7 @@ namespace EngineNS.Editor.Forms
                 }
 
                 //rebuild tree
-                if (bAdd || rmvNodes.Count > 0)
+                //if (bAdd || rmvNodes.Count > 0)
                 {
                     TimeScopeRootNode.Children.Clear();
                     foreach (var i in TreeNodes)
@@ -496,15 +519,25 @@ namespace EngineNS.Editor.Forms
                     }
                     foreach (var i in TreeNodes)
                     {
-                        TtTimeScopeNode node;
-                        if (TreeNodes.TryGetValue(i.Value.TimeInfo.Parent, out node))
+                        if (i.Value.TimeInfo.Callers!=null)
                         {
-                            node.Children.Add(i.Value);
+                            foreach (var j in i.Value.TimeInfo.Callers)
+                            {
+                                TtTimeScopeNode node;
+                                if (TreeNodes.TryGetValue(j.Key, out node))
+                                {
+                                    node.Children.Add(i.Value);
+                                }
+                                else
+                                {
+                                    TimeScopeRootNode.Children.Add(i.Value);
+                                }
+                            }
                         }
                         else
                         {
                             TimeScopeRootNode.Children.Add(i.Value);
-                        }
+                        }   
                     }
                 }
                 rmvNodes.Clear();
@@ -530,13 +563,18 @@ namespace EngineNS.Editor.Forms
                     });
                 }
             }
+
+            public override void OnNodeUI_RClick(INodeUIProvider provider)
+            {
+                Host.PopItemMenu(Thread, (provider as TtTimeScopeNode).TimeInfo, "GotoSource");
+            }
         }
         TtTimeScopeTree TimeScopeTree = new TtTimeScopeTree();
         
         private void DrawByTree(ImDrawList cmdlst, string i)
         {
             TimeScopeTree.SortNodes();
-            TimeScopeTree.OnDraw();
+            TimeScopeTree.OnDraw(this, i);
         }
         bool mMenuShow = false;
         private unsafe void PopItemMenu(string watchingThread, Profiler.TtRpcProfiler.RpcProfilerData.ScopeInfo scope, string column)
@@ -565,17 +603,14 @@ namespace EngineNS.Editor.Forms
                                     var arg = new Profiler.TtRpcProfiler.ResetMaxTimeArg();
                                     arg.ThreadName = watchingThread;
                                     arg.ScopeName = scope.ShowName;
-                                    Profiler.TtRpcProfiler_RpcCaller.ResetMaxTime(arg,new());
+                                    Profiler.TtRpcProfiler_RpcCaller.ResetMaxTime(arg, new());
                                     OnDrawMenu = null;
                                 }
                                 ImGuiAPI.EndPopup();
                             }
                             else
                             {
-                                if (mMenuShow)
-                                {
-                                    OnDrawMenu = null;
-                                }
+                                OnDrawMenu = null;
                                 mMenuShow = false;
                             }
                         };
@@ -586,12 +621,42 @@ namespace EngineNS.Editor.Forms
                         OnDrawMenu = null;
                     }
                     break;
+                case "GotoSource":
+                    {
+                        OnDrawMenu = () =>
+                        {
+                            ImGuiAPI.OpenPopup($"ScopeGotoSource", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                            if (ImGuiAPI.BeginPopupContextWindow("ScopeGotoSource", ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
+                            {
+                                mMenuShow = true;
+                                if (ImGuiAPI.MenuItem($"GotoSource", null, false, true))
+                                {
+                                    var plugin = Bricks.DevIDE.TtDevIDEPlugin.FindDevIDEPlugin();
+                                    if (plugin!=null)
+                                    {
+                                        var file = scope.SourceFile;
+                                        plugin.OpenFileAtLine(file, scope.SourceLine);
+                                    }
+                                    OnDrawMenu = null;
+                                }
+                                ImGuiAPI.EndPopup();
+                            }
+                            else
+                            {
+                                OnDrawMenu = null;
+                                mMenuShow = false;
+                            }
+                            ImGuiAPI.CloseCurrentPopup();
+                        };
+                    }
+                    break;
                 default:
                     {
                         OnDrawMenu = null;
                     }
                     break;
             }
+            
         }
         System.Action OnDrawMenu = null;
     }

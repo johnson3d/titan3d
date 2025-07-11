@@ -32,6 +32,7 @@
   "IsDebugShader": true,
   "IsGpuDred": false,
   "IsAftermath": false,
+  "IsScopeWithSource": true,
   "MainWindowType": "EngineNS.Editor.TtMainEditorApplication@EngineCore",
   "MainRPolicyName": "utest/deferred.rpolicy:Game",
   "SimpleRPolicyName": "graphics/deferred_simple.rpolicy:Engine",
@@ -58,6 +59,7 @@
   "UIDefaultTexture": "texture/white.srv:Engine",
   "IsWriteShaderDebugFile": false,
   "IsTryUnloadMacrossAssembly": true,
+  "UseECS": true,
   "Plugins": [
     "SourceGit",
     "DataCopyer",

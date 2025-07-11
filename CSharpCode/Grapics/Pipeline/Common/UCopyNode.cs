@@ -8,7 +8,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("Copy", "Copy", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UCopyNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UCopyNode" })]
-    public class TtCopyNode : Graphics.Pipeline.TtRenderGraphNode
+    public class TtCopyNode : TAuxRenderGraphNode<TtCopyNode>
     {
         public TtRenderGraphPin SrcPinIn = TtRenderGraphPin.CreateInput("Src", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin DestPinOut = TtRenderGraphPin.CreateOutput("Dest", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_SRV);
@@ -66,72 +66,58 @@ namespace EngineNS.Graphics.Pipeline.Common
                 attachement.Uav = ResultBuffer.Uav;
             }
         }
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
-        {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtCopyNode), nameof(TickLogic));
-                return mScopeTick;
-            }
-        }
         public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            using (new Profiler.TimeScopeHelper(ScopeTick))
+            if (mCopyDrawcall == null)
+                return;
+            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+
+            using (new NxRHI.TtCmdListScope(cmdlist))
             {
-                if (mCopyDrawcall == null)
-                    return;
-                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                var srcPin = GetAttachBuffer(SrcPinIn);
+                var tarPin = GetAttachBuffer(DestPinOut);
 
-                using (new NxRHI.TtCmdListScope(cmdlist))
+                if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
                 {
-                    var srcPin = GetAttachBuffer(SrcPinIn);
-                    var tarPin = GetAttachBuffer(DestPinOut);
-
-                    if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
-                    {
-                        mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
-                    }
-                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtTexture))
-                    {
-                        mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
-                    }
-                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
-                    {
-                        mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
-                    }
-                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
-                    {
-                        mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Texture;
-                    }
-                    mCopyDrawcall.BindSrc(srcPin.GpuResource);
-                    mCopyDrawcall.BindDest(tarPin.GpuResource);
-
-                    //if (SrcPinIn.Attachement.Format == EPixelFormat.PXF_UNKNOWN)
-                    //{
-                    //    //SetCopyBuffer(srcPin.Buffer.mCoreObject, 0, tarPin.Buffer.mCoreObject, 0, SrcPinIn.Attachement.Width * SrcPinIn.Attachement.Height);
-                    //}
-                    //else
-                    //{   
-                    //    mCopyDrawcall.SetCopyTexture2D(srcPin.Buffer.mCoreObject, 0, 0, 0, tarPin.Buffer.mCoreObject, 0, 0, 0, SrcPinIn.Attachement.Width, SrcPinIn.Attachement.Height);
-                    //}
-
-                    cmdlist.PushGpuDraw(mCopyDrawcall);
-                    cmdlist.BeginEvent(Name);
-                    cmdlist.FlushDraws();
-                    cmdlist.EndEvent();
+                    mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
                 }
-                
-                policy.CommitCommandList(cmdlist);
-            }   
+                else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtTexture))
+                {
+                    mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
+                }
+                else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
+                {
+                    mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
+                }
+                else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
+                {
+                    mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Texture;
+                }
+                mCopyDrawcall.BindSrc(srcPin.GpuResource);
+                mCopyDrawcall.BindDest(tarPin.GpuResource);
+
+                //if (SrcPinIn.Attachement.Format == EPixelFormat.PXF_UNKNOWN)
+                //{
+                //    //SetCopyBuffer(srcPin.Buffer.mCoreObject, 0, tarPin.Buffer.mCoreObject, 0, SrcPinIn.Attachement.Width * SrcPinIn.Attachement.Height);
+                //}
+                //else
+                //{   
+                //    mCopyDrawcall.SetCopyTexture2D(srcPin.Buffer.mCoreObject, 0, 0, 0, tarPin.Buffer.mCoreObject, 0, 0, 0, SrcPinIn.Attachement.Width, SrcPinIn.Attachement.Height);
+                //}
+
+                cmdlist.PushGpuDraw(mCopyDrawcall);
+                cmdlist.BeginEvent(Name);
+                cmdlist.FlushDraws();
+                cmdlist.EndEvent();
+            }
+
+            policy.CommitCommandList(cmdlist);
         }
     }
 
     [Bricks.CodeBuilder.ContextMenu("Copy", "Copy2NextFrame", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode" })]
-    public class TtCopy2NextFrameNode : Graphics.Pipeline.TtRenderGraphNode
+    public class TtCopy2NextFrameNode : TAuxRenderGraphNode<TtCopy2NextFrameNode>
     {
         public TtRenderGraphPin SrcPinIn = TtRenderGraphPin.CreateInput("Src", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin PrevPinOut = TtRenderGraphPin.CreateOutput("Prev", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_SRV);
@@ -198,58 +184,44 @@ namespace EngineNS.Graphics.Pipeline.Common
             attachement.Dsv = Previos.Dsv;
             attachement.Uav = Previos.Uav;
         }
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
-        {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtCopyNode), nameof(TickLogic));
-                return mScopeTick;
-            }
-        }
         public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            using (new Profiler.TimeScopeHelper(ScopeTick))
+            if (mCopyDrawcall == null)
+                return;
+            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            using (new NxRHI.TtCmdListScope(cmdlist))
             {
-                if (mCopyDrawcall == null)
-                    return;
-                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-                using (new NxRHI.TtCmdListScope(cmdlist))
+                var srcPin = GetAttachBuffer(SrcPinIn);
+
+                if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer) && Current.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
                 {
-                    var srcPin = GetAttachBuffer(SrcPinIn);
-
-                    if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer) && Current.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
-                    {
-                        mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
-                    }
-                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && Current.GpuResource.GetType() == typeof(NxRHI.TtTexture))
-                    {
-                        mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
-                    }
-                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && Current.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
-                    {
-                        mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
-                    }
-                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && Current.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
-                    {
-                        mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Texture;
-                    }
-                    mCopyDrawcall.BindSrc(srcPin.GpuResource);
-                    mCopyDrawcall.BindDest(Current.GpuResource);
-
-                    //var fp = new NxRHI.FSubResourceFootPrint();
-                    //fp.SetDefault();
-                    //mCopyDrawcall.mCoreObject.FootPrint = fp;
-                    
-                    cmdlist.PushGpuDraw(mCopyDrawcall);
-                    cmdlist.BeginEvent(Name);
-                    cmdlist.FlushDraws();
-                    cmdlist.EndEvent();
+                    mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
                 }
-                policy.CommitCommandList(cmdlist);
+                else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && Current.GpuResource.GetType() == typeof(NxRHI.TtTexture))
+                {
+                    mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
+                }
+                else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && Current.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
+                {
+                    mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
+                }
+                else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && Current.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
+                {
+                    mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Texture;
+                }
+                mCopyDrawcall.BindSrc(srcPin.GpuResource);
+                mCopyDrawcall.BindDest(Current.GpuResource);
+
+                //var fp = new NxRHI.FSubResourceFootPrint();
+                //fp.SetDefault();
+                //mCopyDrawcall.mCoreObject.FootPrint = fp;
+
+                cmdlist.PushGpuDraw(mCopyDrawcall);
+                cmdlist.BeginEvent(Name);
+                cmdlist.FlushDraws();
+                cmdlist.EndEvent();
             }
+            policy.CommitCommandList(cmdlist);
         }
 
         public override unsafe void TickSync(TtRenderPolicy policy)
@@ -260,7 +232,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     }
 
     [Bricks.CodeBuilder.ContextMenu("Debugger", "Debugger", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtDebuggerNode : Graphics.Pipeline.TtRenderGraphNode
+    public class TtDebuggerNode : TAuxRenderGraphNode<TtDebuggerNode>
     {
         public class TtRDGDebugger : IRootForm
         {
@@ -370,65 +342,51 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             
         }
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
-        {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtCopyNode), nameof(TickLogic));
-                return mScopeTick;
-            }
-        }
         public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            using (new Profiler.TimeScopeHelper(ScopeTick))
+            if (mCopyDrawcall == null)
+                return;
+
+            var srcPin = GetAttachBuffer(SrcPinIn);
+            if (ResultBuffer == null || SrcPinIn.Attachement.Format != ResultBuffer.BufferDesc.Format ||
+                SrcPinIn.Attachement.Width != ResultBuffer.BufferDesc.Width ||
+                SrcPinIn.Attachement.Height != ResultBuffer.BufferDesc.Height)
             {
-                if (mCopyDrawcall == null)
-                    return;
-
-                var srcPin = GetAttachBuffer(SrcPinIn);
-                if (ResultBuffer == null || SrcPinIn.Attachement.Format != ResultBuffer.BufferDesc.Format ||
-                    SrcPinIn.Attachement.Width != ResultBuffer.BufferDesc.Width ||
-                    SrcPinIn.Attachement.Height != ResultBuffer.BufferDesc.Height)
-                {
-                    ResultBuffer = srcPin.Clone();
-                }
-
-                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-
-                using (new NxRHI.TtCmdListScope(cmdlist))
-                {
-                    var tarPin = ResultBuffer;
-
-                    if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
-                    {
-                        mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
-                    }
-                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtTexture))
-                    {
-                        mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
-                    }
-                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
-                    {
-                        mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
-                    }
-                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
-                    {
-                        mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Texture;
-                    }
-                    mCopyDrawcall.BindSrc(srcPin.GpuResource);
-                    mCopyDrawcall.BindDest(tarPin.GpuResource);
-
-                    cmdlist.PushGpuDraw(mCopyDrawcall);
-                    cmdlist.BeginEvent(Name);
-                    cmdlist.FlushDraws();
-                    cmdlist.EndEvent();
-                }
-
-                policy.CommitCommandList(cmdlist);
+                ResultBuffer = srcPin.Clone();
             }
+
+            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+
+            using (new NxRHI.TtCmdListScope(cmdlist))
+            {
+                var tarPin = ResultBuffer;
+
+                if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
+                {
+                    mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
+                }
+                else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtTexture))
+                {
+                    mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
+                }
+                else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
+                {
+                    mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
+                }
+                else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
+                {
+                    mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Texture;
+                }
+                mCopyDrawcall.BindSrc(srcPin.GpuResource);
+                mCopyDrawcall.BindDest(tarPin.GpuResource);
+
+                cmdlist.PushGpuDraw(mCopyDrawcall);
+                cmdlist.BeginEvent(Name);
+                cmdlist.FlushDraws();
+                cmdlist.EndEvent();
+            }
+
+            policy.CommitCommandList(cmdlist);
         }
     }
 }

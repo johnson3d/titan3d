@@ -94,15 +94,22 @@ namespace MainEditor
             dynCfgData.LoadConfigData(mBin + "/../cache/DynConfigData.dcd", true);
             if (dynCfgData.TryGetConfig<string>("NativeDLL", out var NativeDLL))
             {
+                Console.WriteLine($"NativeDLL={NativeDLL}");
                 EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/{NativeDLL}");
             }
             else
             {
                 var cfg = FindArgument(args, "NativeDLL=");
                 if (cfg != null && cfg == "debug")
+                {
+                    Console.WriteLine($"NativeDLL=debug");
                     EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/debug");
+                }
                 else
+                {
+                    Console.WriteLine($"NativeDLL=release");
                     EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
+                }
             }
 
             {

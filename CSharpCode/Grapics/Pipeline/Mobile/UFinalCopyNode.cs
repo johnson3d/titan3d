@@ -125,7 +125,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
     }
     [Bricks.CodeBuilder.ContextMenu("FinalCopy", "Mobile\\FinalCopy", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtFinalCopyNode : Common.TtSceenSpaceNode
+    public class TtFinalCopyNode : Common.TAuxSceenSpaceNode<TtFinalCopyNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
         //public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");

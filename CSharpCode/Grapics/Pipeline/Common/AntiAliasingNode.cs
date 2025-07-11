@@ -143,7 +143,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
     [Bricks.CodeBuilder.ContextMenu("AntiAliasing", "Post\\AntiAliasing", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtAntiAliasingNode : TtSceenSpaceNode
+    public class TtAntiAliasingNode : TAuxSceenSpaceNode<TtAntiAliasingNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin PreColorPinIn = TtRenderGraphPin.CreateInput("PreColor", NxRHI.EBufferType.BFT_SRV);
@@ -345,32 +345,18 @@ namespace EngineNS.Graphics.Pipeline.Common
             //mCopyDrawcall.mCoreObject.FootPrint = fp;
         }
 
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
-        {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtAntiAliasingNode), nameof(TickCopyLogic));
-                return mScopeTick;
-            }
-        }
         public unsafe void TickCopyLogic(TtRenderPolicy policy)
         {
-            using (new Profiler.TimeScopeHelper(ScopeTick))
-            {
-                if (mCopyColorDrawcall == null || mCopyDepthDrawcall == null)
-                    return;
+            if (mCopyColorDrawcall == null || mCopyDepthDrawcall == null)
+                return;
 
-                var cmdlist = CopyPass.DrawCmdList;
-                using (new NxRHI.TtCmdListScope(cmdlist))
-                {
-                    CopyAttachBuff(ResultPinOut, PreColor, mCopyColorDrawcall, cmdlist);
-                    cmdlist.FlushDraws();
-                }
-                policy.CommitCommandList(cmdlist);
+            var cmdlist = CopyPass.DrawCmdList;
+            using (new NxRHI.TtCmdListScope(cmdlist))
+            {
+                CopyAttachBuff(ResultPinOut, PreColor, mCopyColorDrawcall, cmdlist);
+                cmdlist.FlushDraws();
             }
+            policy.CommitCommandList(cmdlist);
         }
         public override void TickSync(TtRenderPolicy policy)
         {

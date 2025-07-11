@@ -57,7 +57,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public partial class TtFogNode : TtSceenSpaceNode
+    public partial class TtFogNode : TAuxSceenSpaceNode<TtFogNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth", NxRHI.EBufferType.BFT_SRV);

@@ -20,7 +20,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Picked", "Pick\\Picked", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UPickedNode : TtRenderGraphNode
+    public class UPickedNode : TAuxRenderGraphNode<UPickedNode>
     {
         public TtRenderGraphPin PickedPinOut = TtRenderGraphPin.CreateOutput("Picked", false, EPixelFormat.PXF_R16G16_FLOAT, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_RTV);
         public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D16_UNORM, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
@@ -102,76 +102,63 @@ namespace EngineNS.Graphics.Pipeline.Common
             base.Dispose();
         }
         List<Mesh.TtMesh> mPickedMeshes = new List<Mesh.TtMesh>();
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
-        {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UPickedNode), nameof(TickLogic));
-                return mScopeTick;
-            }
-        } 
+        
         public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            using (new Profiler.TimeScopeHelper(ScopeTick))
+            mPickedMeshes.Clear();
+            policy.SetOptionData("PickedManager", PickedManager);
+            if (PickedManager.PickedProxies.Count == 0)
             {
-                mPickedMeshes.Clear();
-                policy.SetOptionData("PickedManager", PickedManager);
-                if (PickedManager.PickedProxies.Count == 0)
+                return;
+            }
+            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            using (new NxRHI.TtCmdListScope(cmdlist))
+            {
+                foreach (var i in PickedManager.PickedProxies)
                 {
-                    return;
+                    i.GetHitProxyDrawMesh(mPickedMeshes);
                 }
-                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-                using (new NxRHI.TtCmdListScope(cmdlist))
+                foreach (var mesh in mPickedMeshes)
                 {
-                    foreach (var i in PickedManager.PickedProxies)
+                    if (mesh == null)
+                        continue;
+                    foreach (var i in mesh.SubMeshes)
                     {
-                        i.GetHitProxyDrawMesh(mPickedMeshes);
-                    }
-                    foreach (var mesh in mPickedMeshes)
-                    {
-                        if (mesh == null)
-                            continue;
-                        foreach (var i in mesh.SubMeshes)
+                        foreach (var k in i.Atoms)
                         {
-                            foreach (var k in i.Atoms)
+                            var drawcall = k.GetDrawCall(cmdlist.mCoreObject, PickedBuffer, policy, this);
+                            if (drawcall != null)
                             {
-                                var drawcall = k.GetDrawCall(cmdlist.mCoreObject, PickedBuffer, policy, this);
-                                if (drawcall != null)
-                                {
-                                    if (PickedBuffer.PerViewportCBuffer != null)
-                                        drawcall.BindCBV(drawcall.Effect.BindIndexer.cbPerViewport, PickedBuffer.PerViewportCBuffer);
-                                    if (policy.DefaultCamera.PerCameraCBuffer != null)
-                                        drawcall.BindCBV(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
+                                if (PickedBuffer.PerViewportCBuffer != null)
+                                    drawcall.BindCBV(drawcall.Effect.BindIndexer.cbPerViewport, PickedBuffer.PerViewportCBuffer);
+                                if (policy.DefaultCamera.PerCameraCBuffer != null)
+                                    drawcall.BindCBV(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
 
-                                    cmdlist.PushGpuDraw(drawcall);
-                                }
+                                cmdlist.PushGpuDraw(drawcall);
                             }
                         }
                     }
-
-                    {
-                        cmdlist.SetViewport(in PickedBuffer.Viewport);
-                        var scissor = new NxRHI.FScissorRect();
-                        scissor.MinX = 0;
-                        scissor.MinY = 0;
-                        scissor.MaxX = (int)PickedBuffer.Viewport.Width;
-                        scissor.MaxY = (int)PickedBuffer.Viewport.Height;
-                        cmdlist.SetScissor(in scissor);
-                        var passClears = new NxRHI.FRenderPassClears();
-                        passClears.SetDefault();
-                        passClears.SetClearColor(0, new Color4f(1, 0, 1, 0));
-                        PickedBuffer.BuildFrameBuffers(policy);
-                        cmdlist.BeginPass(PickedBuffer.FrameBuffers, in passClears, "Picked");
-                        cmdlist.FlushDraws();
-                        cmdlist.EndPass();
-                    }
                 }
 
-                policy.CommitCommandList(cmdlist);
-            }   
+                {
+                    cmdlist.SetViewport(in PickedBuffer.Viewport);
+                    var scissor = new NxRHI.FScissorRect();
+                    scissor.MinX = 0;
+                    scissor.MinY = 0;
+                    scissor.MaxX = (int)PickedBuffer.Viewport.Width;
+                    scissor.MaxY = (int)PickedBuffer.Viewport.Height;
+                    cmdlist.SetScissor(in scissor);
+                    var passClears = new NxRHI.FRenderPassClears();
+                    passClears.SetDefault();
+                    passClears.SetClearColor(0, new Color4f(1, 0, 1, 0));
+                    PickedBuffer.BuildFrameBuffers(policy);
+                    cmdlist.BeginPass(PickedBuffer.FrameBuffers, in passClears, "Picked");
+                    cmdlist.FlushDraws();
+                    cmdlist.EndPass();
+                }
+            }
+
+            policy.CommitCommandList(cmdlist);
         }
     }
 }

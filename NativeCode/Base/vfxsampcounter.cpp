@@ -77,9 +77,14 @@ ThreadInstanceManager* ThreadInstanceManager::Instance = nullptr;
 
 thread_local AutoRef<v3dSampMgr> v3dSampMgr::ThreadInstance = nullptr;
 
-INT64 SampResult::Begin(v3dSampMgr* mgr, bool bPushParent)
+INT64 SampResult::Begin(v3dSampMgr* mgr, const char* file, int line)
 {
-	return mgr->Begin(this, bPushParent);
+	if (file != nullptr)
+	{
+		this->mDebugSourceFile = file;
+		this->mDebugSourceLine = line;
+	}
+	return mgr->Begin(this);
 }
 
 void SampResult::End(v3dSampMgr* mgr, INT64 begin)

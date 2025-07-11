@@ -57,7 +57,7 @@ namespace EngineNS.Bricks.GpuDriven
 
         }
     }
-    public class TtCullClusterNode : TtRenderGraphNode
+    public class TtCullClusterNode : TAuxRenderGraphNode<TtCullClusterNode>
     {
         public TtRenderGraphPin HzbPinIn = TtRenderGraphPin.CreateInput("Hzb", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin SrcClustersPin = TtRenderGraphPin.CreateInput("SrcClusters", NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);

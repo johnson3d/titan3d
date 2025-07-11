@@ -19,7 +19,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
 
-    public class TtEndingNode : TtRenderGraphNode
+    public class TtEndingNode : TAuxRenderGraphNode<TtEndingNode>
     {
         public TtAttachBuffer ColorAttachement = null;
     }

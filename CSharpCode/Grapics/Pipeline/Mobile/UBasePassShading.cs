@@ -277,78 +277,64 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 GGizmosBuffers.SetSize(x, y);
             }
         }
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
-        {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtMobileOpaqueNode), nameof(TickLogic));
-                return mScopeTick;
-            }
-        }
         public unsafe override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            using (new Profiler.TimeScopeHelper(ScopeTick))
+            var mobilePolicy = policy;
+            GBuffers?.SetViewportCBuffer(world, policy);
+
+            using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
             {
-                var mobilePolicy = policy;
-                GBuffers?.SetViewportCBuffer(world, policy);
+                var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
+                LayerBasePass.SetViewport(in GBuffers.Viewport);
 
-                using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
+                foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
                 {
-                    var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
-                    LayerBasePass.SetViewport(in GBuffers.Viewport);
-
-                    foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
+                    foreach (var j in i.Mesh.SubMeshes)
                     {
-                        foreach (var j in i.Mesh.SubMeshes)
+                        foreach (var k in j.Atoms)
                         {
-                            foreach (var k in j.Atoms)
+                            var layer = k.Material.RenderLayer;
+                            if (layer != ERenderLayer.RL_Opaque)
+                                continue;
+                            var cmdlist = LayerBasePass.GetCmdList(layer);
+                            var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
+                            if (drawcall != null)
                             {
-                                var layer = k.Material.RenderLayer;
-                                if (layer != ERenderLayer.RL_Opaque)
-                                    continue;
-                                var cmdlist = LayerBasePass.GetCmdList(layer);
-                                var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
-                                if (drawcall != null)
-                                {
-                                    drawcall.BindGBuffer(camera, GBuffers);
-                                    //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+                                drawcall.BindGBuffer(camera, GBuffers);
+                                //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
 
-                                    cmdlist.PushGpuDraw(drawcall);
-                                }
+                                cmdlist.PushGpuDraw(drawcall);
                             }
                         }
                     }
-
-                    var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
-                    for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
-                    {
-                        passClears[i].SetDefault();
-                        passClears[i].SetClearColor(0, new Color4f(0, 0, 0, 0));
-                        passClears[i].ClearFlags = 0;
-                    }
-
-                    GBuffers.BuildFrameBuffers(policy);
-                    LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GBuffers, "Mobile:");
                 }
 
-                LayerBasePass.ExecuteCommands(policy);
+                var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
+                for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
+                {
+                    passClears[i].SetDefault();
+                    passClears[i].SetClearColor(0, new Color4f(0, 0, 0, 0));
+                    passClears[i].ClearFlags = 0;
+                }
 
-                //var cmdlist = LayerBasePass.PassBuffers[(int)ERenderLayer.RL_Opaque].DrawCmdList;
-
-                //var passClears = new NxRHI.FRenderPassClears();
-                //passClears.SetDefault();
-                //passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
-                //GBuffers.BuildFrameBuffers(policy);
-
-                //LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, )
-                //cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
-                //cmdlist.FlushDraws();
-                //cmdlist.EndPass();
-                //cmdlist.EndCommand();
+                GBuffers.BuildFrameBuffers(policy);
+                LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GBuffers, "Mobile:");
             }
+
+            LayerBasePass.ExecuteCommands(policy);
+
+            //var cmdlist = LayerBasePass.PassBuffers[(int)ERenderLayer.RL_Opaque].DrawCmdList;
+
+            //var passClears = new NxRHI.FRenderPassClears();
+            //passClears.SetDefault();
+            //passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
+            //GBuffers.BuildFrameBuffers(policy);
+
+            //LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, )
+            //cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
+            //cmdlist.FlushDraws();
+            //cmdlist.EndPass();
+            //cmdlist.EndCommand();
         }
         public override void TickSync(TtRenderPolicy policy)
         {
@@ -477,69 +463,55 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             }
             base.OnResize(policy, x, y);
         }
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
-        {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtMobileTranslucentNode), nameof(TickLogic));
-                return mScopeTick;
-            }
-        }
         public unsafe override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            using (new Profiler.TimeScopeHelper(ScopeTick))
+            var mobilePolicy = policy as TtMobileFSPolicy;
+            GBuffers?.SetViewportCBuffer(world, policy);
+
+            using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
             {
-                var mobilePolicy = policy as TtMobileFSPolicy;
-                GBuffers?.SetViewportCBuffer(world, policy);
+                LayerBasePass.SetViewport(in GBuffers.Viewport);
 
-                using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
+                var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
+                foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
                 {
-                    LayerBasePass.SetViewport(in GBuffers.Viewport);
-
-                    var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
-                    foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
+                    foreach (var j in i.Mesh.SubMeshes)
                     {
-                        foreach (var j in i.Mesh.SubMeshes)
+                        foreach (var k in j.Atoms)
                         {
-                            foreach (var k in j.Atoms)
+                            if (k.Material == null)
+                                continue;
+                            var layer = k.Material.RenderLayer;
+                            if (layer == ERenderLayer.RL_Opaque)
+                                continue;
+                            var cmdlist = LayerBasePass.GetCmdList(layer);
+                            var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
+                            if (drawcall != null)
                             {
-                                if (k.Material == null)
-                                    continue;
-                                var layer = k.Material.RenderLayer;
-                                if (layer == ERenderLayer.RL_Opaque)
-                                    continue;
-                                var cmdlist = LayerBasePass.GetCmdList(layer);
-                                var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
-                                if (drawcall != null)
-                                {
-                                    drawcall.BindGBuffer(camera, GBuffers);
-                                    //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+                                drawcall.BindGBuffer(camera, GBuffers);
+                                //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
 
-                                    cmdlist.PushGpuDraw(drawcall);
-                                }
+                                cmdlist.PushGpuDraw(drawcall);
                             }
                         }
                     }
-                    var passClears = new NxRHI.FRenderPassClears();
-                    passClears.SetDefault();
-                    passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
-                    LayerBasePass.BuildTranslucentRenderPass(policy, in passClears, GBuffers, GGizmosBuffers);
                 }
-                LayerBasePass.ExecuteCommands(policy);
-                //var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
-                //for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
-                //{
-                //    passClears[i].SetDefault();
-                //    passClears[i].SetClearColor(0, new Color4f(0, 0, 0, 0));
-                //    passClears[i].ClearFlags = 0;
-                //}
-                //passClears[(int)ERenderLayer.RL_Background].ClearFlags = NxRHI.ERenderPassClearFlags.CLEAR_ALL;
-                //passClears[(int)ERenderLayer.RL_Gizmos].ClearFlags = NxRHI.ERenderPassClearFlags.CLEAR_DEPTH;
-                //LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GGizmosBuffers, "Forward:");
-            }   
+                var passClears = new NxRHI.FRenderPassClears();
+                passClears.SetDefault();
+                passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
+                LayerBasePass.BuildTranslucentRenderPass(policy, in passClears, GBuffers, GGizmosBuffers);
+            }
+            LayerBasePass.ExecuteCommands(policy);
+            //var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
+            //for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
+            //{
+            //    passClears[i].SetDefault();
+            //    passClears[i].SetClearColor(0, new Color4f(0, 0, 0, 0));
+            //    passClears[i].ClearFlags = 0;
+            //}
+            //passClears[(int)ERenderLayer.RL_Background].ClearFlags = NxRHI.ERenderPassClearFlags.CLEAR_ALL;
+            //passClears[(int)ERenderLayer.RL_Gizmos].ClearFlags = NxRHI.ERenderPassClearFlags.CLEAR_DEPTH;
+            //LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GGizmosBuffers, "Forward:");
         }
         public override void TickSync(TtRenderPolicy policy)
         {

@@ -7,7 +7,7 @@ using System.Text;
 namespace EngineNS.Bricks.Particle
 {
     [Bricks.CodeBuilder.ContextMenu("Particle", "Particle\\Particle", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UParticleGraphNode : Graphics.Pipeline.TtRenderGraphNode
+    public class UParticleGraphNode : TAuxRenderGraphNode<UParticleGraphNode>
     {
         public Graphics.Pipeline.TtRenderGraphPin ColorPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
         public Graphics.Pipeline.TtRenderGraphPin DepthPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Depth", NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);

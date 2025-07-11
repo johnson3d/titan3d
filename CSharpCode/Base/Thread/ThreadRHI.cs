@@ -30,7 +30,7 @@ namespace EngineNS.Thread
 
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                ScopeTickAwaitEvent.Begin();
+                ScopeTickAwaitEvent.Begin(null, 0);
                 this.TickAwaitEvent();
                 ScopeTickAwaitEvent.End();
 

@@ -336,7 +336,7 @@ namespace EngineNS.Bricks.GpuDriven
         }
     }
 
-    public class TtSwRasterizeNode : TtRenderGraphNode
+    public class TtSwRasterizeNode : TAuxRenderGraphNode<TtSwRasterizeNode>
     {
         public TtRenderGraphPin VerticesPinIn = TtRenderGraphPin.CreateInput("Vertices", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin IndicesPinIn = TtRenderGraphPin.CreateInput("Indices", NxRHI.EBufferType.BFT_SRV);
@@ -520,7 +520,7 @@ namespace EngineNS.Bricks.GpuDriven
             base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
-    public class TtQuarkResolveNode : TtSceenSpaceNode
+    public class TtQuarkResolveNode : TAuxSceenSpaceNode<TtQuarkResolveNode>
     {
         public TtRenderGraphPin QuarkRTPinIn = TtRenderGraphPin.CreateInput("QuarkRT", NxRHI.EBufferType.BFT_SRV);
 

@@ -68,7 +68,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Additive", "Post\\Additive", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtAdditiveNode : TtSceenSpaceNode
+    public class TtAdditiveNode : TAuxSceenSpaceNode<TtAdditiveNode>
     {
         public TtRenderGraphPin Color1PinIn = TtRenderGraphPin.CreateInput("Color1", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin Color2PinIn = TtRenderGraphPin.CreateInput("Color2", NxRHI.EBufferType.BFT_SRV);

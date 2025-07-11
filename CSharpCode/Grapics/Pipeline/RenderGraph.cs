@@ -363,7 +363,7 @@ namespace EngineNS.Graphics.Pipeline
                 return mScopeTickLogic;
             }
         }
-        public virtual void TickLogic(GamePlay.TtWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
+        public virtual unsafe void TickLogic(GamePlay.TtWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
         {
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new Profiler.TimeScopeHelper(ScopeTickLogic))
@@ -378,7 +378,8 @@ namespace EngineNS.Graphics.Pipeline
                             if (j.IsUsed == false || j.Enable == false)
                                 continue;
 
-                            using (new Profiler.TimeScopeHelper(j.RDGTickLogicScope))
+                            var scope = j.RDGTickLogicScope;
+                            using (new Profiler.TimeScopeHelper(scope))
                             {
                                 j.BeforeTickLogic((TtRenderPolicy)this);
 
@@ -386,6 +387,7 @@ namespace EngineNS.Graphics.Pipeline
 
                                 j.TryReleaseBufers(mTempTryReleaseLinkers, onRemove);
                             }
+                            //System.Diagnostics.Debug.Assert(j.RDGTickLogicScope.mCoreObject.mParent.CppPointer == ScopeTickLogic.mCoreObject.CppPointer);
                             //int NunOfRefZero = 0; 
                             //foreach (var ca in this.AttachmentCache.CachedAttachments)
                             //{

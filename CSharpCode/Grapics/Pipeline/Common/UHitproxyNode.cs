@@ -19,7 +19,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     }
     [Bricks.CodeBuilder.ContextMenu("Hitproxy", "Hitproxy", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UHitproxyNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UHitproxyNode" })]
-    public class TtHitproxyNode : TtRenderGraphNode
+    public class TtHitproxyNode : TAuxRenderGraphNode<TtHitproxyNode>
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
         public TtRenderGraphPin HitIdPinOut = TtRenderGraphPin.CreateOutput("HitId", false, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
@@ -268,12 +268,12 @@ namespace EngineNS.Graphics.Pipeline.Common
         bool IsHitproxyBuilding = false;
         [ThreadStatic]
         private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
+        private static Profiler.TimeScope ScopeDraw
         {
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtHitproxyNode), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtHitproxyNode), "Draw");
                 return mScopeTick;
             }
         }
@@ -285,7 +285,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             IsHitproxyBuilding = true;
 
-            using (new Profiler.TimeScopeHelper(ScopeTick))
+            using (new Profiler.TimeScopeHelper(ScopeDraw))
             {
                 using(new TtLayerDrawBuffers.TtLayerDrawBuffersScope(HitproxyPass))
                 {

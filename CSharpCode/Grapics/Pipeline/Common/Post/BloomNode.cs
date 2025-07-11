@@ -8,7 +8,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 {
     //Bloom: https://zhuanlan.zhihu.com/p/525500877
     [Bricks.CodeBuilder.ContextMenu("Bloom", "Post\\Bloom", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtBloomNode : TtRenderGraphNode
+    public class TtBloomNode : TAuxRenderGraphNode<TtBloomNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin ResultPinOut = TtRenderGraphPin.CreateOutput("Result", true, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);

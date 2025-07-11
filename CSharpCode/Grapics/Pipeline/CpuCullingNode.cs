@@ -6,7 +6,7 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline
 {
     [Bricks.CodeBuilder.ContextMenu("CpuCulling", "Culling\\CpuCulling", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtCpuCullingNode : TtRenderGraphNode
+    public class TtCpuCullingNode : TAuxRenderGraphNode<TtCpuCullingNode>
     {
         public TtRenderGraphPin VisiblesOut = TtRenderGraphPin.CreateOutput("Visibles", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_NONE);
         public TtCpuCullingNode()
@@ -77,14 +77,25 @@ namespace EngineNS.Graphics.Pipeline
             get => mVisParameter;
         }
         [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
+        private static Profiler.TimeScope mScopeGatherMesh;
+        private static Profiler.TimeScope ScopeGatherMesh
         {
             get
             {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtCpuCullingNode), nameof(TickLogic));
-                return mScopeTick;
+                if (mScopeGatherMesh == null)
+                    mScopeGatherMesh = new Profiler.TimeScope(typeof(TtCpuCullingNode), "GatherMesh");
+                return mScopeGatherMesh;
+            }
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeUserTick;
+        private static Profiler.TimeScope ScopeUserTick
+        {
+            get
+            {
+                if (mScopeUserTick == null)
+                    mScopeUserTick = new Profiler.TimeScope(typeof(TtCpuCullingNode), "UserTick");
+                return mScopeUserTick;
             }
         }
         public delegate void FTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear);
@@ -97,8 +108,11 @@ namespace EngineNS.Graphics.Pipeline
             //}
             if (UserTickLogic!=null)
             {
-                UserTickLogic(world, policy, frameCmdList, bClear);
-                return;
+                using (new Profiler.TimeScopeHelper(ScopeGatherMesh))
+                {
+                    UserTickLogic(world, policy, frameCmdList, bClear);
+                    return;
+                }   
             }
             if (FrozenCullCameral != null)
             {
@@ -108,7 +122,7 @@ namespace EngineNS.Graphics.Pipeline
             {
                 mVisParameter.CullCamera = CullCameral;
             }
-            using (new Profiler.TimeScopeHelper(ScopeTick))
+            using (new Profiler.TimeScopeHelper(ScopeGatherMesh))
             {
                 mVisParameter.World = world;
                 world.GatherVisibleMeshes(mVisParameter);

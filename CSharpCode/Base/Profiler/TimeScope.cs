@@ -1,22 +1,31 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.ComponentModel;
+using EngineNS.Bricks.Network.RPC;
 using EngineNS.IO;
 using EngineNS.Rtti;
-using EngineNS.Bricks.Network.RPC;
-using Org.BouncyCastle.Asn1.Mozilla;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace EngineNS.Profiler
 {
     public struct TimeScopeHelper : IDisposable//Waiting for C#8 ,ref struct -> Dispose
     {
         public TimeScope mTime;
-        public TimeScopeHelper(TimeScope t)
+        public TimeScopeHelper(TimeScope t, [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
+                [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
         {
             mTime = t;
-            mTime?.Begin(true);
+            if (TtEngine.Instance.Config.IsScopeWithSource)
+            {
+                var SourceFilePath = sourceFilePath;
+                var SourceLineNumber = sourceLineNumber;
+                mTime?.Begin(SourceFilePath, SourceLineNumber);
+            }
+            else
+            {
+                mTime?.Begin(null, 0);
+            }
         }
         public void Dispose()
         {
@@ -56,6 +65,10 @@ namespace EngineNS.Profiler
             this.Core_AddRef();
             NeedDispose = true;
         }
+        public string GetName()
+        {
+            return mCoreObject.GetName();
+        }
         public string GetFriendName()
         {
             if (string.IsNullOrEmpty(ShowName))
@@ -79,7 +92,7 @@ namespace EngineNS.Profiler
             }
         }
         Int64 mBeginTime;
-        public void Begin(bool bPushParent = true)
+        public void Begin(string file, int line)
         {
             if (TimeScopeManager.IsFinalCleanup)
                 return;
@@ -93,7 +106,7 @@ namespace EngineNS.Profiler
             if (mEnable == false)
                 return;
 
-            mBeginTime = mCoreObject.Begin(TimeScopeManager.Instance.mCoreObject, bPushParent);
+            mBeginTime = mCoreObject.Begin(TimeScopeManager.Instance.mCoreObject, file, line);
         }
         public void End()
         {
@@ -104,6 +117,16 @@ namespace EngineNS.Profiler
                 return;
 
             mCoreObject.End(TimeScopeManager.Instance.mCoreObject, mBeginTime);
+        }
+        public string ParentName
+        {
+            get
+            {
+                if (mCoreObject.mParent.IsValidPointer)
+                    return mCoreObject.mParent.GetName();
+                else
+                    return "null";
+            }
         }
     }
     public class TimeScopeManager
@@ -375,23 +398,39 @@ namespace EngineNS.Profiler
                 ar.Write((int)Manager.Scopes.Count);
                 foreach (var i in Manager.Scopes)
                 {
+                    ar.Write(i.Value.GetName());
                     ar.Write(i.Value.GetFriendName());
                     ar.Write(i.Value.mCoreObject.mAvgTime);
                     ar.Write(i.Value.mCoreObject.mAvgHit);
                     ar.Write(i.Value.mCoreObject.mMaxTimeInLife);
-                    if (i.Value.mCoreObject.IsValidPointer)
-                        ar.Write(i.Value.mCoreObject.mParent.GetName());
+                    ar.Write(i.Value.mCoreObject.GetDebugSourceLine());
+                    ar.Write(i.Value.mCoreObject.GetDebugSourceFile());
+                    var num = i.Value.mCoreObject.GetNunOfCaller();
+                    if(i.Value.mCoreObject.mParent.IsValidPointer == false)
+                    {
+                        ar.Write((int)0);
+                    }
                     else
-                        ar.Write("null");
+                    {
+                        ar.Write(num);
+                        for (int j = 0; j < num; j++)
+                        {
+                            ar.Write(i.Value.mCoreObject.GetCaller(j).GetName());
+                            ar.Write(i.Value.mCoreObject.GetCallerRatio(j));
+                        }
+                    }   
                 }
             }
             public struct ScopeInfo
             {
+                public string Name;
                 public string ShowName;
                 public long AvgTime;
                 public int AvgHit;
                 public long MaxTime;
-                public string Parent;
+                public string SourceFile;
+                public int SourceLine;
+                public KeyValuePair<string, float>[] Callers;
             }
             public List<ScopeInfo> Scopes = new List<ScopeInfo>();
             public override void OnReadMember(IReader ar, ISerializer obj, TtMetaVersion metaVersion)
@@ -402,12 +441,31 @@ namespace EngineNS.Profiler
                 for (int i = 0; i < count; i++)
                 {
                     ScopeInfo tmp;
+                    ar.Read(out tmp.Name);
                     ar.Read(out tmp.ShowName);
                     ar.Read(out tmp.AvgTime);
                     ar.Read(out tmp.AvgHit);
                     ar.Read(out tmp.MaxTime);
-                    ar.Read(out tmp.Parent);
-
+                    ar.Read(out tmp.SourceLine);
+                    ar.Read(out tmp.SourceFile); 
+                    int num = 0;
+                    ar.Read(out num);
+                    if (num>0)
+                    {
+                        tmp.Callers = new KeyValuePair<string, float>[num];
+                        for (int j = 0; j < num; j++)
+                        {
+                            string n;
+                            ar.Read(out n);
+                            float r;
+                            ar.Read(out r);
+                            tmp.Callers[j] = new KeyValuePair<string, float>(n, r);
+                        }
+                    }
+                    else
+                    {
+                        tmp.Callers = null;
+                    }
                     Scopes.Add(tmp);
                 }
             }

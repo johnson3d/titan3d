@@ -7,7 +7,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("Hzb", "Hzb", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UHzbNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UHzbNode" })]
-    public class TtHzbNode : Graphics.Pipeline.TtRenderGraphNode
+    public class TtHzbNode : TAuxRenderGraphNode<TtHzbNode>
     {
         public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
         public TtRenderGraphPin HzbPinOut = TtRenderGraphPin.CreateOutput("Hzb", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_SRV);
@@ -250,48 +250,35 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             ResetComputeDrawcall(policy);
         }
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
-        {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtHzbNode), nameof(TickLogic));
-                return mScopeTick;
-            }
-        }
         public override unsafe void TickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             if (SetupDrawcall == null)
                 return;
-            using (new Profiler.TimeScopeHelper(ScopeTick))
+
+            if (Setup == null)
+                return;
+            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            using (new NxRHI.TtCmdListScope(cmd))
             {
-                if (Setup == null)
-                    return;
-                var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-                using (new NxRHI.TtCmdListScope(cmd))
+                var srvIdx = SetupDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "DepthBuffer");
+                if (srvIdx.IsValidPointer)
                 {
-                    var srvIdx = SetupDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "DepthBuffer");
-                    if (srvIdx.IsValidPointer)
-                    {
-                        var depth = this.GetAttachBuffer(this.DepthPinIn).Srv;
-                        SetupDrawcall.BindSrv(srvIdx, depth);
-                    }
-                    cmd.PushGpuDraw(SetupDrawcall);
-
-                    if (MipsDrawcalls != null)
-                    {
-                        for (int i = 0; i < MipsDrawcalls.Length; i++)
-                        {
-                            cmd.PushGpuDraw(MipsDrawcalls[i]);
-                        }
-                    }
-                    cmd.FlushDraws();
+                    var depth = this.GetAttachBuffer(this.DepthPinIn).Srv;
+                    SetupDrawcall.BindSrv(srvIdx, depth);
                 }
+                cmd.PushGpuDraw(SetupDrawcall);
 
-                policy.CommitCommandList(cmd);
-            }   
+                if (MipsDrawcalls != null)
+                {
+                    for (int i = 0; i < MipsDrawcalls.Length; i++)
+                    {
+                        cmd.PushGpuDraw(MipsDrawcalls[i]);
+                    }
+                }
+                cmd.FlushDraws();
+            }
+
+            policy.CommitCommandList(cmd);
         }
     }
 }

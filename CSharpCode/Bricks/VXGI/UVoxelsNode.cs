@@ -7,7 +7,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.VXGI
 {
-    public partial class UVoxelsNode : Graphics.Pipeline.TtRenderGraphNode
+    public partial class UVoxelsNode : TAuxRenderGraphNode<UVoxelsNode>
     {
         public Graphics.Pipeline.TtRenderGraphPin GpuScenePinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("GpuScene", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         public Graphics.Pipeline.TtRenderGraphPin AlbedoPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Albedo", NxRHI.EBufferType.BFT_SRV);

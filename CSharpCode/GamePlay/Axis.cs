@@ -190,7 +190,7 @@ namespace EngineNS.GamePlay
                 SetStyle(ENodeStyles.Transient);
                 await base.OnPostInitNode(parent);
             }
-            public override bool DrawNode(EngineNS.Editor.TtTreeNodeDrawer tree, int index, int NumOfChild)
+            public override bool DrawNode(EngineNS.Editor.INodeUIProvider parent, EngineNS.Editor.TtTreeNodeDrawer tree, int index, int NumOfChild)
             {
                 return false;
             }

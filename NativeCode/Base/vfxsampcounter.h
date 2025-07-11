@@ -15,6 +15,8 @@ NS_BEGIN
 
 class v3dSampMgr;
 
+struct SampResult;
+
 struct TR_CLASS()
 	SampResult : public IWeakRefObject
 {
@@ -44,43 +46,76 @@ struct TR_CLASS()
 
 	VStringA		mName;
 	VStringA		mDescribe;
+	VStringA		mDebugSourceFile;
+	int				mDebugSourceLine = 0;
 
 	SampResult*		mParent;
 
-	struct ParentSamp
+	struct FParentSamp
 	{
 		SampResult*		Samp;
 		int				HitCount;
-		void Reset()
+		float			Ratio;
+		FParentSamp()
 		{
+			Samp = nullptr;
 			HitCount = 0;
+			Ratio = 0;
 		}
 	};
-	typedef std::map<SampResult*, ParentSamp> ParentMap;
-	ParentMap	m_Parents;
+	std::vector<FParentSamp>	m_Parents;
 
 	void PushParent(SampResult* p)
 	{
-		auto it = m_Parents.find(p);
-		if (it != m_Parents.end())
+		for (auto& i : m_Parents)
 		{
-			it->second.HitCount++;
+			if (i.Samp == p)
+			{
+				i.HitCount++;
+				return;
+			}
 		}
-		ParentSamp temp;
-		temp.Samp = p;
-		temp.HitCount = 1;
-		m_Parents.insert(std::make_pair(p, temp));
+		FParentSamp tmp;
+		tmp.Samp = p;
+		tmp.HitCount++;
+		m_Parents.push_back(tmp);
 	}
 
 	void ResetParents()
 	{
-		for (auto it = m_Parents.begin(); it != m_Parents.end(); ++it)
+		int total = 0;
+		for (auto& i : m_Parents)
 		{
-			it->second.Reset();
+			total += i.HitCount;
+		}
+
+		for (auto& i : m_Parents)
+		{
+			i.Ratio = (float)i.HitCount / total;
+			i.HitCount = 0;
 		}
 	}
 
-	INT64 Begin(v3dSampMgr* mgr, bool bPushParent = true);
+	int GetNunOfCaller()
+	{
+		return (int)m_Parents.size();
+	}
+	SampResult* GetCaller(int index)
+	{
+		return m_Parents[index].Samp;
+	}
+	float GetCallerRatio(int index)
+	{
+		return m_Parents[index].Ratio;
+	}
+	const char* GetDebugSourceFile() {
+		return mDebugSourceFile.c_str();
+	}
+	int GetDebugSourceLine() {
+		return mDebugSourceLine;
+	}
+
+	INT64 Begin(v3dSampMgr* mgr, const char* file, int line);
 	void End(v3dSampMgr* mgr, INT64 begin);
 
 	INT64			mAvgTime;
@@ -165,19 +200,16 @@ public:
 	}
 	static void FinalCleanup();
 
-	inline INT64 Begin(SampResult* pSampResult, bool bPushParent)
+	inline INT64 Begin(SampResult* pSampResult)
 	{
+		ASSERT(m_CurSamp != pSampResult);
+		pSampResult->mParent = m_CurSamp;
+		m_CurSamp = pSampResult;
 		if (pSampResult->mEnable)
 		{
-			if (bPushParent)
+			if (m_CurSamp != nullptr)
 			{
-				/*if (m_CurSamp != nullptr)
-				{
-					m_CurSamp->mParent = pSampResult;
-					m_CurSamp->PushParent(pSampResult);
-				}*/
-				pSampResult->mParent = m_CurSamp;
-				m_CurSamp = pSampResult;
+				pSampResult->PushParent(pSampResult->mParent);
 			}
 
 			INT64 qpc = GetHighCounter();
@@ -188,9 +220,9 @@ public:
 
 	inline void End(INT64 begin, SampResult* pSamp)
 	{
+		m_CurSamp = pSamp->mParent;
 		if (pSamp->mEnable == FALSE)
 		{
-			m_CurSamp = pSamp->mParent;
 			return;
 		}
 
@@ -198,8 +230,6 @@ public:
 
 		INT64 elapse = end - begin;
 		//INT64 time = elapse;//*1000000/m_Freq;
-
-		m_CurSamp = pSamp->mParent;
 
 		pSamp->mHitInCurFrame++;
 		pSamp->mHitInCounter++;
@@ -247,14 +277,14 @@ class v3dAutoSampEx
 	INT64			m_Begin;
 	SampResult*		m_SampResult;
 public:
-	v3dAutoSampEx(SampResult* pSampResult, bool bPushParent = true)
+	v3dAutoSampEx(SampResult* pSampResult)
 	{
 		m_SampResult = pSampResult;
-		m_Begin = v3dSampMgr::GetThreadInstance()->Begin(m_SampResult, bPushParent);
+		m_Begin = v3dSampMgr::GetThreadInstance()->Begin(m_SampResult);
 	}
 	~v3dAutoSampEx()
 	{
-		v3dSampMgr::GetThreadInstance()->End( m_Begin , m_SampResult);
+		v3dSampMgr::GetThreadInstance()->End(m_Begin, m_SampResult);
 	}
 };
 

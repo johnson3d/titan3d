@@ -8,7 +8,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("AvgBrightness", "AvgBrightness", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UAvgBrightnessNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UAvgBrightnessNode" })]
-    public class TtAvgBrightnessNode : Graphics.Pipeline.TtRenderGraphNode
+    public class TtAvgBrightnessNode : TAuxRenderGraphNode<TtAvgBrightnessNode>
     {
         public override void Dispose()
         {
@@ -140,56 +140,42 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             ResetComputeDrawcall(policy);
         }
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
-        {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtAvgBrightnessNode), nameof(TickLogic));
-                return mScopeTick;
-            }
-        }
         public unsafe override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            using (new Profiler.TimeScopeHelper(ScopeTick))
+            var gpuScene = policy.GetGpuSceneNode();
+
+            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+
+            using (new NxRHI.TtCmdListScope(cmd))
             {
-                var gpuScene = policy.GetGpuSceneNode();
-
-                var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-
-                using (new NxRHI.TtCmdListScope(cmd))
+                #region Setup
                 {
-                    #region Setup
-                    {
-                        SetupAvgBrightness.SetDrawcallDispatch(this, policy, SetupAvgBrightnessDrawcall, 1, 1, 1, true);
-                        cmd.PushGpuDraw(SetupAvgBrightnessDrawcall);
-                    }
-                    #endregion
-
-                    #region Count
-                    {
-                        if (CountAvgBrightnessDrawcall != null)
-                        {
-                            var attachment = this.GetAttachBuffer(this.ColorPinIn);
-                            uint targetWidth = (uint)attachment.BufferDesc.Width;
-                            uint targetHeight = (uint)attachment.BufferDesc.Height;
-                            CountAvgBrightness.SetDrawcallDispatch(this, policy, CountAvgBrightnessDrawcall, 
-                                targetWidth,
-                                targetHeight,
-                                1, true);
-                            //CountAvgBrightnessDrawcall.Commit(cmd);
-                            cmd.PushGpuDraw(CountAvgBrightnessDrawcall);
-                        }
-                    }
-                    #endregion
-
-                    cmd.FlushDraws();
+                    SetupAvgBrightness.SetDrawcallDispatch(this, policy, SetupAvgBrightnessDrawcall, 1, 1, 1, true);
+                    cmd.PushGpuDraw(SetupAvgBrightnessDrawcall);
                 }
+                #endregion
 
-                policy.CommitCommandList(cmd);
-            }   
+                #region Count
+                {
+                    if (CountAvgBrightnessDrawcall != null)
+                    {
+                        var attachment = this.GetAttachBuffer(this.ColorPinIn);
+                        uint targetWidth = (uint)attachment.BufferDesc.Width;
+                        uint targetHeight = (uint)attachment.BufferDesc.Height;
+                        CountAvgBrightness.SetDrawcallDispatch(this, policy, CountAvgBrightnessDrawcall,
+                            targetWidth,
+                            targetHeight,
+                            1, true);
+                        //CountAvgBrightnessDrawcall.Commit(cmd);
+                        cmd.PushGpuDraw(CountAvgBrightnessDrawcall);
+                    }
+                }
+                #endregion
+
+                cmd.FlushDraws();
+            }
+
+            policy.CommitCommandList(cmd);
         }
         
     }
