@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using static EngineNS.Thread.TtThreadPool;
 
 namespace EngineNS.Thread
 {
@@ -10,21 +11,6 @@ namespace EngineNS.Thread
         {
             return Async.EAsyncTarget.TPools;
         }
-        private static int mNumOfActiveThreads = 0;
-        public static int NumOfActiveThreads { get => mNumOfActiveThreads; }
-        private static int mMaxActiveThreads = 0;
-        internal static int MaxActiveThreads
-        {
-            get
-            {
-                return mMaxActiveThreads;
-            }
-        }
-        internal static void ResetMaxActiveThreads()
-        {
-            mMaxActiveThreads = 0;
-        }
-        private static object mLocker = "lockObject";
         public override bool IsTaskPoolThread() { return true; }
         public int PoolIndex { get; private set; } = -1;
         public TtThreadPool(int index)
@@ -33,61 +19,179 @@ namespace EngineNS.Thread
             Interval = 0;
         }
         private List<Async.TtAsyncTaskStateBase> Suspended = new List<Async.TtAsyncTaskStateBase>();
+        #region WaitTaskFast
+        public int LoadBalance
+        {
+            get
+            {
+                return PrivateTasks.Count + ((mPoolThreadState == EPoolThreadState.Wait) ? 0 : 1);
+            }
+        }
+        public void PushTask(Async.TtAsyncTaskStateBase e)
+        {
+            lock (PrivateTasks)
+            {
+                PrivateTasks.Enqueue(e);
+            }
+        }
+        public Async.TtAsyncTaskStateBase PopTask()
+        {
+            lock (PrivateTasks)
+            {
+                if (PrivateTasks.Count == 0)
+                    return null;
+                var e = PrivateTasks.Dequeue();
+                Async.TtContextThreadManager.TaskLatency(e);
+                return e;
+            }
+        }
+        internal Queue<Async.TtAsyncTaskStateBase> PrivateTasks = new Queue<Async.TtAsyncTaskStateBase>();
+        internal System.Threading.ManualResetEventSlim Trigger = new System.Threading.ManualResetEventSlim(false);
+        
+        int mHasWork;
+        public int NumPrivateTasks
+        {
+            get { return PrivateTasks.Count; }
+        }
+        public bool HasWork
+        {
+            get
+            {
+                if (PrivateTasks.Count > 0 || TtEngine.Instance.EventPoster.GlobalTasks.Count > 0)
+                    return true;
+                return System.Threading.Interlocked.CompareExchange(ref mHasWork, 1, 1) == 1;
+            }
+            set
+            {
+                System.Threading.Interlocked.Exchange(ref mHasWork, value ? 1 : 0);
+                Trigger.Set();
+            }
+        }
+        public enum EPoolThreadState
+        {
+            DoPrivate,
+            DoGlobal,
+            DoTakeOther,
+            Wait,
+        }
+        EPoolThreadState mPoolThreadState = EPoolThreadState.Wait;
+        public EPoolThreadState PoolThreadState
+        {
+            get { return mPoolThreadState; }
+        }
         public override void Tick()
         {
-            //TtEngine.Instance.ContextThreadManager.mTPoolTrigger.WaitOne();
-            var e = TtEngine.Instance.ContextThreadManager.PopPoolEvent();
-            if (e == null)
-            {
-                System.Threading.Interlocked.Decrement(ref mNumOfActiveThreads);
-                TtEngine.Instance.EventPoster.IdleThreads.SetBit((uint)PoolIndex);
-                TtEngine.Instance.ContextThreadManager.mTPoolTrigger.Wait();
-                TtEngine.Instance.EventPoster.IdleThreads.UnsetBit((uint)PoolIndex);
-                System.Threading.Interlocked.Increment(ref mNumOfActiveThreads);
+            ref var alive = ref Async.TtContextThreadManager.mAliveThread;
+            System.Threading.Interlocked.Increment(ref alive);
+            mPoolThreadState = EPoolThreadState.DoPrivate;
+            Async.TtAsyncTaskStateBase e = PopTask();
+            while (e != null)
+            {   
+                ExecutePostEvent(e);
+                e = PopTask();
             }
 
-            
-#if DEBUG
-            lock (mLocker)
-            {
-                if (mNumOfActiveThreads > mMaxActiveThreads)
-                    mMaxActiveThreads = mNumOfActiveThreads;
-            }
-#endif
-
+            mPoolThreadState = EPoolThreadState.DoGlobal;
+            e = TtEngine.Instance.ContextThreadManager.PopGlobalTask();
             while (e != null)
             {
-                Async.TtAsyncTaskStateBase state = null;
-                try
-                {
-                    state = e.ExecutePostEvent();
-                }
-                catch (Exception ex)
-                {
-                    Profiler.Log.WriteException(ex);
-                    e.ExceptionInfo = ex;
-                }
-                if (state.TaskState == Async.EAsyncTaskState.Suspended)
-                {
-                    Suspended.Add(e);
-                }
-                else
-                {
-                    e.TaskState = Async.EAsyncTaskState.Completed;
-                    e.CompletedEvent?.Set();
-                    e.Dispose();
-                }
-                e = TtEngine.Instance.ContextThreadManager.PopPoolEvent();
+                ExecutePostEvent(e);
+                e = TtEngine.Instance.ContextThreadManager.PopGlobalTask();
             }
 
-            foreach(var i in Suspended)
+            mPoolThreadState = EPoolThreadState.DoTakeOther;
+            e = TakeFromOtherThreads();
+            while (e != null)
             {
-                TtEngine.Instance.ContextThreadManager.PushPoolEvent(i);
+                ExecutePostEvent(e);
+                e = TakeFromOtherThreads();
+            }
+
+            foreach (var i in Suspended)
+            {
+                //PushTask(i);
+                TtEngine.Instance.ContextThreadManager.PushGlobalTask(i);
             }
             Suspended.Clear();
 
-            
+            WaitTask();
         }
+        internal Async.TtAsyncTaskStateBase ExecutePostEvent(Async.TtAsyncTaskStateBase e)
+        {
+            Async.TtAsyncTaskStateBase state = null;
+            try
+            {
+                state = e.ExecutePostEvent();
+            }
+            catch (Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+                e.ExceptionInfo = ex;
+            }
+            if (state.TaskState == Async.EAsyncTaskState.Suspended)
+            {
+                Suspended.Add(e);
+            }
+            else
+            {
+                e.TaskState = Async.EAsyncTaskState.Completed;
+                e.CompletedEvent?.Set();
+                e.Dispose();
+            }
+            return state;
+        }
+        Async.TtAsyncTaskStateBase TakeFromOtherThreads()
+        {
+            foreach (var i in TtEngine.Instance.EventPoster.ContextPools)
+            {
+                if (i == null)
+                    continue;
+                var e = i.PopTask();
+                if (e != null)
+                    return e;
+            }
+            return null;
+        }
+        const int SpinTimes = 20;
+        const int YieldTimes = 40;
+        const int SleepTimes = int.MaxValue;
+        const int TriggerTimeout = 3;
+        public void WaitTask()
+        {
+            HasWork = false;
+            mPoolThreadState = EPoolThreadState.Wait;
+            ref var alive = ref Async.TtContextThreadManager.mAliveThread;
+            System.Threading.Interlocked.Decrement(ref alive);
+            while (true)
+            {
+                //CPU自旋
+                for (int i = 0; i < SpinTimes; i++)
+                {
+                    if (HasWork)
+                        return;
+                    System.Threading.Volatile.Read(ref i);
+                }
+                //尝试主动交出线程
+                int yieldCount = 0;
+                for (int i = 0; i < YieldTimes; i++)
+                {
+                    if (HasWork)
+                        return;
+                    if (System.Threading.Thread.Yield())
+                        yieldCount++;
+                    else
+                        System.Threading.Volatile.Read(ref i);
+                }
+                for (int i = 0; i < SleepTimes; i++)
+                {
+                    if (HasWork)
+                        return;
+                    if (Trigger.Wait(TriggerTimeout))
+                        Trigger.Reset();
+                }
+            }
+        }
+        #endregion
         protected override void OnThreadStart()
         {
             this.LimitTime = long.MaxValue;

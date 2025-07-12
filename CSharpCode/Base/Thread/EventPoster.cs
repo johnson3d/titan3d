@@ -99,6 +99,13 @@ namespace EngineNS.Thread
         {
             return System.Threading.Interlocked.Exchange(ref mCount, mCount);
         }
+        public void WaitSpin()
+        {
+            while (System.Threading.Interlocked.CompareExchange(ref mCount, 0, 0) != 0)
+            {
+
+            }
+        }
         public void Wait(int milliseconds)
         {
             if (Waiter != null)
@@ -125,6 +132,17 @@ namespace EngineNS.Thread
         {
             Semaphore.Reset(num);
             WaitEvent.Reset();
+        }
+        public void Wait(bool bFast)
+        {
+            if (bFast)
+            {
+                Semaphore.WaitSpin();
+            }
+            else
+            {
+                WaitEvent.WaitOne(int.MaxValue);
+            }   
         }
     }
     public class TtPooledSemaphoreAllocator : TtObjectPool<TtPooledSemaphore>

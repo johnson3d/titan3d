@@ -185,8 +185,7 @@ namespace EngineNS.Editor.Forms
                 var cmdlst = ImGuiAPI.GetWindowDrawList();
                 var stats = TtEngine.Instance.GfxDevice.RenderSwapQueue.GetStat();
                 var fps = string.Format("fps={0:F2}", TtEngine.Instance.FPS);
-                ImGuiAPI.Text($"Fps({fps}) CmdList = {stats.NumOfCmdlist};Drawcall = {stats.NumOfDrawcall};Primitive = {stats.NumOfPrimitive}; WorkThreads = {Thread.TtThreadPool.MaxActiveThreads}");
-                Thread.TtThreadPool.ResetMaxActiveThreads();
+                ImGuiAPI.Text($"Fps({fps}) CmdList = {stats.NumOfCmdlist};Drawcall = {stats.NumOfDrawcall};Primitive = {stats.NumOfPrimitive}; WorkThreads = {Thread.Async.TtContextThreadManager.mAliveThread}");
                 EGui.UIProxy.SearchBarProxy.OnDraw(ref mFilterFocusd, cmdlst, "filter", ref mFilter, ImGuiAPI.GetWindowContentRegionWidth());
                 DockId = ImGuiAPI.GetWindowDockID();
                 if (ImGuiAPI.BeginTabBar("CPU", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
@@ -576,7 +575,7 @@ namespace EngineNS.Editor.Forms
             TimeScopeTree.SortNodes();
             TimeScopeTree.OnDraw(this, i);
         }
-        bool mMenuShow = false;
+        internal bool mMenuShow = false;
         private unsafe void PopItemMenu(string watchingThread, Profiler.TtRpcProfiler.RpcProfilerData.ScopeInfo scope, string column)
         {
             switch (column)

@@ -513,7 +513,6 @@ namespace EngineNS.Thread
         }
 
         #region Payload
-        public bool IsWaiting = false;
         #endregion
     }
 }

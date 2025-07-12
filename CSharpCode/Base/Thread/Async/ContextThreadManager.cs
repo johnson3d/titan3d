@@ -259,7 +259,7 @@ namespace EngineNS.Thread.Async
         }
     }
 
-    public class TtContextThreadManager
+    public partial class TtContextThreadManager
     {
         public static bool ImmidiateMode = false;
 
@@ -279,71 +279,6 @@ namespace EngineNS.Thread.Async
                     return TtEngine.Instance.IsThread(target);
             }
             return false;
-        }
-
-        private Stack<TtAsyncTaskStateBase> mTPoolEvents = new Stack<TtAsyncTaskStateBase>();
-        internal System.Threading.ManualResetEventSlim mTPoolTrigger = new System.Threading.ManualResetEventSlim(false);
-        private bool IsWaiting = true;
-        internal void PushPoolEvent(TtAsyncTaskStateBase ev)
-        {
-            lock (mTPoolEvents)
-            {
-                mTPoolEvents.Push(ev);
-#if STATE_TIME
-                ev.CreateTime = Support.TtTime.HighPrecision_GetTickCount();
-#endif
-                if (IsWaiting)
-                {
-                    IsWaiting = false;
-                    var t1 = Support.TtTime.HighPrecision_GetTickCount();
-                    mTPoolTrigger.Set();
-                    var t2 = Support.TtTime.HighPrecision_GetTickCount();
-                    if (t2 - t1 > 2)
-                    {
-                        return;
-                    }
-                }
-            }
-        }
-        internal TtAsyncTaskStateBase PopPoolEvent()
-        {
-            var t1 = Support.TtTime.HighPrecision_GetTickCount();
-            TtAsyncTaskStateBase result;
-            lock (mTPoolEvents)
-            {
-                if (mTPoolEvents.Count == 0)
-                {
-                    result = null;
-                    IsWaiting = true;
-                    mTPoolTrigger.Reset();
-                }
-                else
-                {
-                    result = mTPoolEvents.Pop();
-                    if (IsWaiting)
-                    {
-                        IsWaiting = false;
-                        mTPoolTrigger.Set();
-                    }
-                }
-            }
-
-#if STATE_TIME
-            if(result!=null)
-            {
-                var time = Support.TtTime.HighPrecision_GetTickCount();
-                if (time - result.CreateTime > 20)
-                {
-                    return result;
-                }
-            }
-#endif
-            var t2 = Support.TtTime.HighPrecision_GetTickCount();
-            if (t2 - t1 > 2)
-            {
-                return result;
-            }
-            return result;
         }
         internal Support.TtBitset IdleThreads;
         internal TtThreadPool[] ContextPools;
@@ -410,9 +345,7 @@ namespace EngineNS.Thread.Async
             }
             using (new Profiler.TimeScopeHelper(ScopeParrallelForWait))
             {
-                Thread.TtContextThread.CurrentContext.IsWaiting = true;
-                smp.WaitEvent.WaitOne(int.MaxValue);
-                Thread.TtContextThread.CurrentContext.IsWaiting = false;
+                smp.Wait(true);
             }
             ParallelForSmpAllocator.ReleaseObject(smp);
         }
@@ -449,13 +382,75 @@ namespace EngineNS.Thread.Async
             {
                 i.StopThread(()=>
                 {
-                    lock (mTPoolEvents)
-                    {
-                        mTPoolTrigger.Set();
-                    }   
+                    i.HasWork = true;
                 });
             }
         }
+        #region WaitTaskFast
+        internal static int mAliveThread = 0;
+        internal Queue<Async.TtAsyncTaskStateBase> GlobalTasks = new Queue<Async.TtAsyncTaskStateBase>();
+        internal void PushGlobalTask(Async.TtAsyncTaskStateBase t)
+        {
+            lock (GlobalTasks)
+            {
+                GlobalTasks.Enqueue(t);
+            }
+        }
+        internal Async.TtAsyncTaskStateBase PopGlobalTask()
+        {
+            lock (GlobalTasks)
+            {
+                if (GlobalTasks.Count == 0)
+                    return null;
+                var e = GlobalTasks.Dequeue();
+                TaskLatency(e);
+                return e;
+            }
+        }
+        internal static void TaskLatency(Async.TtAsyncTaskStateBase e)
+        {
+#if STATE_TIME
+            var now = Support.TtTime.HighPrecision_GetTickCount();
+            if (now - e.CreateTime > 10)
+            {
+                System.Threading.Volatile.Read(ref now);
+            }
+#endif
+        }
+
+        public void PushTask(Async.TtAsyncTaskStateBase e)
+        {
+            var thread = SelectBestThread();
+            thread.HasWork = true;
+#if STATE_TIME
+            e.CreateTime = Support.TtTime.HighPrecision_GetTickCount();
+#endif
+            if (thread.LoadBalance > 2)
+            {
+                PushGlobalTask(e);
+            }
+            else
+            {
+                thread.PushTask(e);
+            }
+        }
+        private TtThreadPool SelectBestThread()
+        {
+            TtThreadPool result = null;
+            int LoadBalance = int.MaxValue;
+            foreach (var t in ContextPools)
+            {
+                if (t.LoadBalance < LoadBalance)
+                {
+                    LoadBalance = t.LoadBalance;
+                    result = t;
+                    if (LoadBalance == 0)
+                        return t;
+                }
+            }
+            return result;
+        }
+        #endregion
         public TtContextThread GetContext(EAsyncTarget target)
         {
             switch (target)
@@ -511,7 +506,7 @@ namespace EngineNS.Thread.Async
                 }
                 else
                 {
-                    this.PushPoolEvent(eh);
+                    this.PushTask(eh);
                 }
             }
         }
@@ -533,7 +528,7 @@ namespace EngineNS.Thread.Async
 
             if (target == EAsyncTarget.TPools)
             {
-                this.PushPoolEvent(eh);
+                this.PushTask(eh);
             }
             else
             {
@@ -704,7 +699,7 @@ namespace EngineNS.Thread.Async
                     break;
                 case EAsyncType.ParallelTasks:
                     {
-                        TtEngine.Instance.ContextThreadManager.PushPoolEvent(PEvent);
+                        TtEngine.Instance.ContextThreadManager.PushTask(PEvent);
                     }
                     break;
             }
