@@ -5,6 +5,7 @@
 #include "DX12GpuState.h"
 #include "DX12CommandList.h"
 #include "DX12Drawcall.h"
+#include "../../Base/vfxsampcounter.h"
 
 #include "../../3rd/native/NVAftermath/include/GFSDK_Aftermath.h"
 #define new VNEW
@@ -233,6 +234,7 @@ namespace NxRHI
 	{
 		//ASSERT(destIndex < dest->RefResources.size());
 		//dest->RefResources[destIndex] = this->RefResources[srcIndex];
+		AUTO_SAMP("DX12PagedHeap.BindToHeap");
 		device->mDevice->CopyDescriptorsSimple(1, dest->GetCpuAddress(destIndex),
 			this->GetCpuAddress(srcIndex), HeapType);
 	}

@@ -9,9 +9,14 @@ namespace NxRHI
 {
 	class VKGpuDevice;
 	class VKShader;
-	struct VKDescriptorSetPagedObject : public MemAlloc::FPagedObject<VkDescriptorSet>
+	class VKDescriptorSetPagedObject : public MemAlloc::FPagedObject<VkDescriptorSet>
 	{
 
+	};
+	class VKDescriptorSetHolder : public IGpuResource
+	{
+	public:
+		AutoRef<MemAlloc::FPagedObject<VkDescriptorSet>> DescriptorSet;
 	};
 	template<>
 	struct AuxGpuResourceDestroyer<AutoRef<VKDescriptorSetPagedObject>>
@@ -60,7 +65,13 @@ namespace NxRHI
 	};
 	class FDescriptorSetAllocator : public MemAlloc::FPagedObjectAllocator<VkDescriptorSet, VKDescriptorSetCreator, true>
 	{
-
+	public:
+		VKDescriptorSetHolder* AllocDecriptorSet()
+		{
+			auto result = new VKDescriptorSetHolder();
+			result->DescriptorSet = this->Alloc();
+			return result;
+		}
 	};
 
 	class VKShader : public IShader

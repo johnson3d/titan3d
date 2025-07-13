@@ -18,16 +18,8 @@ namespace NxRHI
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
-		if (mDescriptorSetVS != nullptr)
-		{
-			device->DelayDestroy(mDescriptorSetVS);
-			mDescriptorSetVS = nullptr;
-		}
-		if (mDescriptorSetPS != nullptr)
-		{
-			device->DelayDestroy(mDescriptorSetPS);
-			mDescriptorSetPS = nullptr;
-		}
+		mDescriptorSetVS = nullptr;
+		mDescriptorSetPS = nullptr;
 	}
 	void VKGraphicDraw::OnGpuDrawStateUpdated()
 	{
@@ -45,21 +37,20 @@ namespace NxRHI
 	{
 		IsDirty = true;
 	}
-	void VKGraphicDraw::BindResourceToDescriptSets(VKGpuDevice* device, AutoRef<VKDescriptorSetPagedObject>& dsSetVS,
-						AutoRef<VKDescriptorSetPagedObject>& dsSetPS,
-						const FEffectBinder* binder, IGpuResource* resource)
+	void VKGraphicDraw::BindResourceToDescriptSets(VKGpuDevice* device, 
+						const FEffectBinder* binder, IGpuResource* resource, std::vector<VkWriteDescriptorSet>& dsWriteSets)
 	{
 		VkDescriptorImageInfo tmpVS{};
 		VkDescriptorBufferInfo tmpStructureBufferVS{};
 		VkDescriptorImageInfo tmpPS{};
 		VkDescriptorBufferInfo tmpStructureBufferPS{};
-		std::vector<VkWriteDescriptorSet>	dsWriteSets;
+		
 		auto pBinder = binder->VSBinder;
 		if (pBinder != nullptr)
 		{
 			VkWriteDescriptorSet descriptorWrite = {};
 			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = dsSetVS->RealObject;
+			descriptorWrite.dstSet = mDescriptorSetVS->DescriptorSet->RealObject;
 
 			descriptorWrite.dstBinding = pBinder->Slot;
 			descriptorWrite.dstArrayElement = 0;
@@ -138,7 +129,7 @@ namespace NxRHI
 		{
 			VkWriteDescriptorSet descriptorWrite = {};
 			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = dsSetPS->RealObject;
+			descriptorWrite.dstSet = mDescriptorSetPS->DescriptorSet->RealObject;
 
 			descriptorWrite.dstBinding = pBinder->Slot;
 			descriptorWrite.dstArrayElement = 0;
@@ -212,43 +203,28 @@ namespace NxRHI
 
 			dsWriteSets.push_back(descriptorWrite);
 		}
-		
-		vkUpdateDescriptorSets(device->mDevice, (UINT)dsWriteSets.size(), &dsWriteSets[0], 0, nullptr);
 	}
-	void VKGraphicDraw::RebuildDescriptorSets()
+	void VKGraphicDraw::UpdateDescriptorSets(VKCommandList* vkCmd)
 	{
-		if (IsDirty == false)
-		{
-			UINT finger = 0;
-			for (auto& i : BindResources)
-			{
-				finger += i.second.Resource->GetFingerPrint();
-			}
-			if (finger == FingerPrient)
-				return;
-			FingerPrient = finger;
-		}
-			
-		IsDirty = false;
 		auto device = mDeviceRef.GetPtr();
-		if (mDescriptorSetVS != nullptr)
-		{
-			device->DelayDestroy(mDescriptorSetVS);
-			mDescriptorSetVS = nullptr;
-		}
-		if (mDescriptorSetPS != nullptr)
-		{
-			device->DelayDestroy(mDescriptorSetPS);
-			mDescriptorSetPS = nullptr;
-		}
 
-		mDescriptorSetVS = ShaderEffect->mVertexShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.Alloc<VKDescriptorSetPagedObject>();
-		mDescriptorSetPS = ShaderEffect->mPixelShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.Alloc<VKDescriptorSetPagedObject>();
+		mDescriptorSetVS = ShaderEffect->mVertexShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.AllocDecriptorSet();
+		mDescriptorSetPS = ShaderEffect->mPixelShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.AllocDecriptorSet();
+		vkCmd->GetCmdRecorder()->UseResource(mDescriptorSetVS);
+		vkCmd->GetCmdRecorder()->UseResource(mDescriptorSetPS);
 
+		std::vector<VkWriteDescriptorSet> dsWriteSets;
 		for (auto& i : BindResources)
 		{
-			BindResourceToDescriptSets(device, mDescriptorSetVS, mDescriptorSetPS, i.first, i.second.Resource);
+			BindResourceToDescriptSets(device, i.first, i.second.Resource, dsWriteSets);
 		}
+		vkUpdateDescriptorSets(device->mDevice, (UINT)dsWriteSets.size(), &dsWriteSets[0], 0, nullptr);
+	}
+	void VKGraphicDraw::BindDescriptorSets(VKCommandList* vkCmd)
+	{
+		auto effect = (VKGraphicsEffect*)GetGraphicsEffect();
+		VkDescriptorSet dsSets[2] = { mDescriptorSetVS->DescriptorSet->RealObject, mDescriptorSetPS->DescriptorSet->RealObject };
+		vkCmdBindDescriptorSets(vkCmd->mCommandBuffer->RealObject, VK_PIPELINE_BIND_POINT_GRAPHICS, effect->mPipelineLayout, 0, 2, dsSets, 0, nullptr);
 	}
 	void VKGraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
@@ -289,9 +265,7 @@ namespace NxRHI
 		}
 
 		auto effect = (VKGraphicsEffect*)GetGraphicsEffect();
-
-		effect->Commit(cmdlist, this);
-
+		//effect->Commit(cmdlist, this);
 		for (auto& i : BindResources)
 		{
 			switch (i.first->BindType)
@@ -325,11 +299,9 @@ namespace NxRHI
 			}
 		}
 
-		RebuildDescriptorSets();
-
-		VkDescriptorSet dsSets[2] = { mDescriptorSetVS->RealObject, mDescriptorSetPS->RealObject };
 		auto vkCmd = (VKCommandList*)cmdlist;
-		vkCmdBindDescriptorSets(vkCmd->mCommandBuffer->RealObject, VK_PIPELINE_BIND_POINT_GRAPHICS, effect->mPipelineLayout, 0, 2, dsSets, 0, nullptr);
+		UpdateDescriptorSets(vkCmd);
+		BindDescriptorSets(vkCmd);
 
 		auto pDrawDesc = Mesh->GetAtomDesc(MeshAtom, MeshLOD);
 		ASSERT(pDrawDesc);
@@ -355,18 +327,17 @@ namespace NxRHI
 	{
 		IsDirty = true;
 	}
-	void CSBindResourceToDescriptSets(VKGpuDevice* device, AutoRef<MemAlloc::FPagedObject<VkDescriptorSet>>& dsSetVS,
-		const FShaderBinder* binder, IGpuResource* resource)
+	void VKComputeDraw::BindResourceToDescriptSets(VKGpuDevice* device,
+		const FShaderBinder* binder, IGpuResource* resource, std::vector<VkWriteDescriptorSet>& dsWriteSets)
 	{
 		VkDescriptorImageInfo tmpVS{};
 		VkDescriptorBufferInfo tmpStructureBufferVS{};
-		std::vector<VkWriteDescriptorSet>	dsWriteSets;
 		auto pBinder = binder;
 		if (pBinder != nullptr)
 		{
 			VkWriteDescriptorSet descriptorWrite = {};
 			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = dsSetVS->RealObject;
+			descriptorWrite.dstSet = mDescriptorSetCS->DescriptorSet->RealObject;
 
 			descriptorWrite.dstBinding = pBinder->Slot;
 			descriptorWrite.dstArrayElement = 0;
@@ -450,47 +421,37 @@ namespace NxRHI
 
 			dsWriteSets.push_back(descriptorWrite);
 		}
-		
-		vkUpdateDescriptorSets(device->mDevice, (UINT)dsWriteSets.size(), &dsWriteSets[0], 0, nullptr);
 	}
-	void VKComputeDraw::RebuildDescriptorSets()
+
+	void VKComputeDraw::UpdateDescriptorSets(VKCommandList* vkCmd)
 	{
-		if (IsDirty == false)
-		{
-			UINT finger = 0;
-			for (auto& i : BindResources)
-			{
-				finger += i.second.Resource->GetFingerPrint();
-			}
-			if (finger == FingerPrient)
-				return;
-			FingerPrient = finger;
-		}
-
-		IsDirty = false;
 		auto device = mDeviceRef.GetPtr();
-		auto cs = mEffect->mComputeShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.Alloc();
+		mDescriptorSetCS = mEffect->mComputeShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.AllocDecriptorSet();
+		vkCmd->GetCmdRecorder()->UseResource(mDescriptorSetCS);
 
+		std::vector<VkWriteDescriptorSet> dsWriteSets;
 		for (auto& i : BindResources)
 		{
-			CSBindResourceToDescriptSets(device, cs, i.first, i.second.Resource);
+			BindResourceToDescriptSets(device, i.first, i.second.Resource, dsWriteSets);
 		}
-		if (mDescriptorSetCS != nullptr)
-		{
-			device->DelayDestroy(mDescriptorSetCS);
-			mDescriptorSetCS = nullptr;
-		}
-		mDescriptorSetCS = cs;
+		vkUpdateDescriptorSets(device->mDevice, (UINT)dsWriteSets.size(), &dsWriteSets[0], 0, nullptr);
+	}
+	void VKComputeDraw::BindDescriptorSets(VKCommandList* vkCmd)
+	{
+		auto vkEffect = mEffect.UnsafeConvertTo<VKComputeEffect>();
+		VkDescriptorSet dsSets = mDescriptorSetCS->DescriptorSet->RealObject;
+		vkCmdBindDescriptorSets(vkCmd->mCommandBuffer->RealObject, VK_PIPELINE_BIND_POINT_COMPUTE, vkEffect->mPipelineLayout, 0, 1, &dsSets, 0, nullptr);
 	}
 	void VKComputeDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
 		if (mEffect == nullptr)
 			return;
 
-		//cmdlist->SetShader(mEffect->mComputeShader);
+		auto vkCmd = (VKCommandList*)cmdlist;
+
 		cmdlist->SetComputePipeline(mEffect);
 		
-		mEffect->Commit(cmdlist);
+		//mEffect->Commit(cmdlist);
 		for (auto& i : BindResources)
 		{
 			switch (i.first->Type)
@@ -524,12 +485,8 @@ namespace NxRHI
 			}
 		}
 
-		RebuildDescriptorSets();
-
-		auto vkEffect = mEffect.UnsafeConvertTo<VKComputeEffect>();
-		VkDescriptorSet dsSets = mDescriptorSetCS->RealObject;
-		auto vkCmd = (VKCommandList*)cmdlist;
-		vkCmdBindDescriptorSets(vkCmd->mCommandBuffer->RealObject, VK_PIPELINE_BIND_POINT_COMPUTE, vkEffect->mPipelineLayout, 0, 1, &dsSets, 0, nullptr);
+		UpdateDescriptorSets(vkCmd);
+		BindDescriptorSets(vkCmd);
 
 		if (IndirectDispatchArgsBuffer != nullptr)
 		{

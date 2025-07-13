@@ -7,6 +7,7 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	class VKCommandList;
 	class VKGraphicDraw : public IGraphicDraw
 	{
 	public:
@@ -17,14 +18,15 @@ namespace NxRHI
 
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 
-		void RebuildDescriptorSets();
-		static void BindResourceToDescriptSets(VKGpuDevice* device, AutoRef<VKDescriptorSetPagedObject>& dsSetVS,
-			AutoRef<VKDescriptorSetPagedObject>& dsSetPS,
-			const FEffectBinder* binder, IGpuResource* resource);
+		void UpdateDescriptorSets(VKCommandList* vkCmd);
+		void BindDescriptorSets(VKCommandList* cmdlist);
+	private:
+		void BindResourceToDescriptSets(VKGpuDevice* device, 
+			const FEffectBinder* binder, IGpuResource* resource, std::vector<VkWriteDescriptorSet>& dsWriteSets);
 	public:
 		TWeakRefHandle<VKGpuDevice>				mDeviceRef;
-		AutoRef<VKDescriptorSetPagedObject>		mDescriptorSetVS;
-		AutoRef<VKDescriptorSetPagedObject>		mDescriptorSetPS;
+		AutoRef<VKDescriptorSetHolder>			mDescriptorSetVS;
+		AutoRef<VKDescriptorSetHolder>			mDescriptorSetPS;
 		bool									IsDirty = false;
 		UINT									FingerPrient = 0;
 	};
@@ -35,10 +37,15 @@ namespace NxRHI
 		virtual void OnBindResource(const FShaderBinder* binder, FBindResource& resource) override;
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 
-		void RebuildDescriptorSets();
+	protected:
+		void UpdateDescriptorSets(VKCommandList* vkCmd);
+		void BindDescriptorSets(VKCommandList* cmdlist);
+	private:
+		void BindResourceToDescriptSets(VKGpuDevice* device,
+			const FShaderBinder* binder, IGpuResource* resource, std::vector<VkWriteDescriptorSet>& dsWriteSets);
 	public:
 		TWeakRefHandle<VKGpuDevice>				mDeviceRef;
-		AutoRef<MemAlloc::FPagedObject<VkDescriptorSet>>		mDescriptorSetCS;
+		AutoRef<VKDescriptorSetHolder>			mDescriptorSetCS;
 		bool									IsDirty = false;
 		UINT									FingerPrient = 0;
 	};
