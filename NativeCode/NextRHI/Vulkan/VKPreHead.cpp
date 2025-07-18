@@ -15,15 +15,6 @@ NS_BEGIN
 
 namespace NxRHI
 {
-	template<>
-	struct AuxGpuResourceDestroyer<VkCommandPool>
-	{
-		static void Destroy(VkCommandPool obj, IGpuDevice* device1)
-		{
-			auto device = (VKGpuDevice*)device1;
-			vkDestroyCommandPool(device->mDevice, obj, device->GetVkAllocCallBacks());
-		}
-	};
 	/// <summary>
 	/// 
 	/// </summary>
@@ -33,17 +24,23 @@ namespace NxRHI
 	}
 	void FVKDefaultGpuMemory::FreeMemory()
 	{
-		
+		auto vkHeap = (VKGpuHeap*)GpuHeap;
+		if (vkHeap && vkHeap->Memory != nullptr)
+		{
+			vkFreeMemory(mDevice->mDevice, vkHeap->Memory, mDevice->GetVkAllocCallBacks());
+			vkHeap->Memory = nullptr;
+		}
 	}
 	
 	AutoRef<FGpuMemory> VKGpuDefaultMemAllocator::Alloc(IGpuDevice* device1, UINT typeIndex, UINT64 size, const char* name)
 	{
+		auto device = (VKGpuDevice*)device1;
 		auto result = MakeWeakRef(new FVKDefaultGpuMemory());
 		result->Offset = 0;
-
-		auto device = (VKGpuDevice*)device1;
-		auto heap = new VKGpuHeap();
-
+		result->mDevice = device;
+		
+		VKGpuHeap* heap = new VKGpuHeap();
+		
 		VkMemoryAllocateInfo ainfo{};
 		ainfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		ainfo.memoryTypeIndex = typeIndex;

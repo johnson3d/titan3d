@@ -12,6 +12,8 @@ namespace NxRHI
 	class VKCmdQueue;
 	class VKRenderTargetView;
 	class VKDepthStencilView;
+	class VKCmdRecorder;
+	class VKCommandList;
 
 	enum EPagedCmdBufferState
 	{
@@ -20,50 +22,60 @@ namespace NxRHI
 		PCBS_Commiting,
 		PCBS_WaitFree,
 	};
-
-	struct VKCommandBufferPagedObject : public MemAlloc::FPagedObject<VkCommandBuffer>
-	{
-		
-	};
-	struct VKCommandBufferPage : public MemAlloc::FPage<VkCommandBuffer>
-	{
-		~VKCommandBufferPage();
-		VkCommandPool					mCommandPool = (VkCommandPool)nullptr;
-	};
-	struct VKCommandBufferCreator
-	{
-		TWeakRefHandle<VKGpuDevice>		mDeviceRef;
-		
-		using ObjectType = VkCommandBuffer;
-		using PagedObjectType = MemAlloc::FPagedObject<ObjectType>;
-		using PageType = MemAlloc::FPage<VkCommandBuffer>;
-		using AllocatorType = MemAlloc::FAllocatorBase<ObjectType>;
-
-		UINT GetPageSize() const {
-			return PageSize;
-		}
-		UINT PageSize = 128;
-		PageType* CreatePage(UINT pageSize);
-		PagedObjectType* CreatePagedObject(PageType* page, UINT index);
-		void OnAlloc(AllocatorType* pAllocator, PagedObjectType* obj);
-		void OnFree(AllocatorType* pAllocator, PagedObjectType* obj);
-		void FinalCleanup(MemAlloc::FPage<ObjectType>* page);
-	};
-
-	struct VKCommandbufferAllocator : public MemAlloc::FPagedObjectAllocator<VkCommandBuffer, VKCommandBufferCreator>
-	{
-		~VKCommandbufferAllocator();
-	};
-
-	class VKCmdBufferManager : public VThreadDispatcher<VKCommandbufferAllocator>
-	{
-	public:
-		VKGpuDevice*				mDevice = nullptr;
+	
+	class VKThreadCmdBufferManager
+	{	
 	public:
 		void Initialize(VKGpuDevice* device);
-		virtual void InitContext(VKCommandbufferAllocator* context) override;
+		AutoRef<VKCmdRecorder> Alloc(VKCommandList* cmdlist);
+		void Free(const AutoRef<VKCmdRecorder>& allocator, UINT64 waitValue, AutoRef<IFence>& fence);
+		void TickRecycle();
+		void FinalCleanup();
+
+		void UnsafeDirectFree(const AutoRef<VKCmdRecorder>& allocator);
+	public:
+		VKThreadCmdBufferManager** mThreadStaticAddr = nullptr;
+		VKGpuDevice*		mDevice = nullptr;
+		//VkCommandPool is not thread safe, so we need to make instance for each thread
+		VkCommandPool		mCmdPool = (VkCommandPool)nullptr;
+		VSLLock				mLocker;
+		std::queue<AutoRef<VKCmdRecorder>>		CmdAllocators;
+		struct FWaitRecycle
+		{
+			UINT64							WaitValue = 0;
+			AutoRef<IFence>					Fence;
+			AutoRef<VKCmdRecorder>			Allocator;
+			int								WaitFrameCount = 0;
+		};
+		std::vector<FWaitRecycle>	Recycles;
 	};
 
+	class VKCmdBufferManager : public VIUnknown
+	{
+		thread_local static VKThreadCmdBufferManager* mThreadManager;
+		std::vector<VKThreadCmdBufferManager*> mAllManagers;
+	public:
+		void Initialize(VKGpuDevice* device)
+		{
+			mDevice = device;
+		}
+		AutoRef<VKCmdRecorder> Alloc(VKCommandList* cmdlist);
+		void Free(const AutoRef<VKCmdRecorder>& allocator, UINT64 waitValue, AutoRef<IFence>& fence);
+		void TickRecycle();
+		bool FinalCleanup();
+	public:
+		VKGpuDevice* mDevice = nullptr;
+	};
+
+	class VKCmdRecorder : public ICmdRecorder
+	{
+	public:
+		VkCommandBuffer						mCommandBuffer;
+		AutoRef<VKCommandList>				mCmdlist;
+		bool								mIsRecording = false;
+		virtual void ResetGpuDraws() override;
+		void FinalCleanup(VKThreadCmdBufferManager* manager);
+	};
 	class VKCommandList : public ICommandList
 	{
 	public:
@@ -72,10 +84,8 @@ namespace NxRHI
 		bool Init(VKGpuDevice* device);
 		virtual ICmdRecorder* BeginCommand() override;
 		virtual void EndCommand() override;
-		ICmdRecorder* BeginCommand(VkCommandBufferUsageFlagBits flags);
-		void EndCommand(bool bRecycle);
 		virtual bool IsRecording() const override {
-			return mIsRecording;
+			return mCmdListState == ECmdListState::Recording;
 		}
 		void Commit(VKCmdQueue* queue, EQueueType type);
 		virtual void SetShader(IShader* shader) override;
@@ -121,19 +131,27 @@ namespace NxRHI
 	public:
 		void UseCurrentViewports();
 		void UseCurrentScissors();
-		inline VKGpuDevice* GetVKDevice()
-		{
-			return (VKGpuDevice*)mDevice.GetNakedPtr();
-		}
-		AutoRef<VKCommandBufferPagedObject>			mCommandBuffer;
 		
-		bool						mIsRecording = false;
-
 		std::vector<std::pair<EGpuResourceState, AutoRef<VKRenderTargetView>>>	mCurRtvs;
 		std::pair<EGpuResourceState, AutoRef<VKDepthStencilView>>	mCurDsv;
 
 		std::vector<VkViewport>						mCurrentViewports;
 		std::vector<VkRect2D>						mCurrentScissorRects;
+
+		ECmdListState				mCmdListState = ECmdListState::None;
+	public:
+		inline VKGpuDevice* GetVKDevice()
+		{
+			return (VKGpuDevice*)mDevice.GetNakedPtr();
+		}
+		VKCmdRecorder* GetVKCmdRecorder()
+		{
+			if (mCmdRecorder == nullptr)
+			{
+				return nullptr;
+			}
+			return mCmdRecorder.UnsafeConvertTo<VKCmdRecorder>();
+		}
 	};
 }
 

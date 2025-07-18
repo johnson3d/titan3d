@@ -68,6 +68,9 @@ namespace NxRHI
 	}
 	bool VKGpuSystem::InitGpuSystem(ERhiType type, const FGpuSystemDesc* desc)
 	{
+		uint32_t apiVersion = 0;
+		VkResult result = vkEnumerateInstanceVersion(&apiVersion);
+
 		VkApplicationInfo appInfo = {};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 		appInfo.pApplicationName = "Titan3D";
@@ -99,6 +102,8 @@ namespace NxRHI
 			extensionNames.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 		if (FindExtension(VK_KHR_SURFACE_EXTENSION_NAME))
 			extensionNames.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+		if (FindExtension(VK_NV_RAY_TRACING_EXTENSION_NAME))
+			extensionNames.push_back(VK_NV_RAY_TRACING_EXTENSION_NAME);
 #if defined(PLATFORM_WIN)
 		if (FindExtension(VK_KHR_WIN32_SURFACE_EXTENSION_NAME))
 			extensionNames.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
@@ -107,8 +112,7 @@ namespace NxRHI
 			extensionNames.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
 #endif
 		
-		createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionNames.size());
-		createInfo.ppEnabledExtensionNames = extensionNames.data();
+		
 
 		VkValidationFeaturesEXT validationFeatures{};
 		validationFeatures.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
@@ -142,8 +146,13 @@ namespace NxRHI
 			debugCreateInfo.pUserData = this;
 			createInfo.pNext = &debugCreateInfo;
 			debugCreateInfo.pNext = &validationFeatures;
+
+			if (FindExtension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME))
+				extensionNames.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 		}
 
+		createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionNames.size());
+		createInfo.ppEnabledExtensionNames = extensionNames.data();
 		createInfo.enabledLayerCount = static_cast<uint32_t>(mValidationLayers.size());
 		if (mValidationLayers.size() > 0)
 			createInfo.ppEnabledLayerNames = mValidationLayers.data();
@@ -157,6 +166,8 @@ namespace NxRHI
 		vkEnumeratePhysicalDevices(mVKInstance, &mDeviceNumber, nullptr);
 		mHwDevices.resize(mDeviceNumber);
 		vkEnumeratePhysicalDevices(mVKInstance, &mDeviceNumber, mHwDevices.data());
+
+		//volkLoadInstance(mVKInstance);
 
 #define GetVKFunctionPtr(name) name = (PFN_##name)vkGetInstanceProcAddr(mVKInstance, #name);
 
@@ -237,10 +248,6 @@ namespace NxRHI
 		}
 		
 		mCBufferAllocator = nullptr;
-		mSsboAllocator = nullptr;
-		mVbIbAllocator = nullptr;
-		mUploadBufferAllocator = nullptr;
-		mReadBackAllocator = nullptr;
 		mDefaultBufferAllocator = nullptr;
 		mPipelineManager = nullptr;
 		mFrameFence = nullptr;
@@ -389,10 +396,19 @@ namespace NxRHI
 			extensions.push_back(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME);
 			extensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
 			extensions.push_back(VK_EXT_TOOLING_INFO_EXTENSION_NAME);
+			
 			if (HasExtension(VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_EXTENSION_NAME))
 				extensions.push_back(VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_EXTENSION_NAME);
 			if (HasExtension(VK_NV_DEVICE_DIAGNOSTICS_CONFIG_EXTENSION_NAME))
 				extensions.push_back(VK_NV_DEVICE_DIAGNOSTICS_CONFIG_EXTENSION_NAME);
+			if (HasExtension(VK_NV_RAY_TRACING_EXTENSION_NAME))
+				extensions.push_back(VK_NV_RAY_TRACING_EXTENSION_NAME);
+			if (HasExtension(VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME))
+				extensions.push_back(VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME);
+			if (HasExtension("VK_NV_per_stage_descriptor_set"))
+				extensions.push_back("VK_NV_per_stage_descriptor_set");
+			if (HasExtension(VK_EXT_ROBUSTNESS_2_EXTENSION_NAME))
+				extensions.push_back(VK_EXT_ROBUSTNESS_2_EXTENSION_NAME);
 			
 			//extensions.push_back(VK_GOOGLE_HLSL_FUNCTIONALITY1_EXTENSION_NAME);
 			/*extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
@@ -403,53 +419,56 @@ namespace NxRHI
 			//mDeviceExtensions.push_back("SPV_GOOGLE_user_type");
 		}
 
+		vkGetPhysicalDeviceProperties(mPhysicalDevice, &mDeviceProperties);
+		if (mDeviceProperties.apiVersion < VK_API_VERSION_1_2)
+		{
+			ASSERT(false);
+		}
+
 		VkPhysicalDeviceInheritedViewportScissorFeaturesNV dynScissorFeatures{};
 		dynScissorFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INHERITED_VIEWPORT_SCISSOR_FEATURES_NV;
 		dynScissorFeatures.inheritedViewportScissor2D = VK_TRUE;
 
-		/*VkPhysicalDeviceRobustness2FeaturesEXT robustFeatures{};
-		robustFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_PROPERTIES_EXT;
-		robustFeatures.pNext = &dynScissorFeatures;*/
-
-		/*VkPhysicalDeviceShaderFloat16Int8Features f16i8Features{};
-		f16i8Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR;
-		f16i8Features.pNext = &robustFeatures;*/
-
-		VkPhysicalDeviceFeatures2 features2{};
-		features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
-		features2.pNext = &dynScissorFeatures;// &f16i8Features;
-		vkGetPhysicalDeviceFeatures2(mPhysicalDevice, &features2);
-		features2.features.robustBufferAccess = VK_TRUE;
-
-		vkGetPhysicalDeviceProperties(mPhysicalDevice, &mDeviceProperties);
-		//f16i8Features.shaderFloat16 = VK_TRUE;
-		//robustFeatures.nullDescriptor = VK_TRUE;
-		//robustFeatures.robustBufferAccess2 = VK_TRUE;
-		//robustFeatures.robustImageAccess2 = VK_TRUE;
-		//robustFeatures.pNext = &devfeatures11;
+		VkPhysicalDeviceRobustness2FeaturesEXT robustness2Features = {
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT
+		};
+		robustness2Features.nullDescriptor = VK_TRUE;
 
 		VkPhysicalDeviceVulkan11Features devfeatures11{};
 		devfeatures11.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
-		devfeatures11.pNext = nullptr;//&dynScissorFeatures;
 		devfeatures11.multiview = VK_TRUE;
-		//devfeatures11.storageInputOutput16 = VK_TRUE;
 		devfeatures11.uniformAndStorageBuffer16BitAccess = VK_TRUE;
-		//devfeatures11.storagePushConstant16 = VK_TRUE;	
+		devfeatures11.shaderDrawParameters = VK_TRUE;
 
 		VkPhysicalDeviceVulkan12Features devfeatures12{};
 		devfeatures12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
 		devfeatures12.timelineSemaphore = VK_TRUE;
 		devfeatures12.shaderFloat16 = VK_TRUE;
 		devfeatures12.shaderInt8 = VK_TRUE;
-		//devfeatures12.pNext = &devfeatures11;
-		devfeatures12.pNext = &features2;
 
+		VkPhysicalDeviceFeatures2 features2{};
+		features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
+		vkGetPhysicalDeviceFeatures2(mPhysicalDevice, &features2);
+		features2.features.robustBufferAccess = VK_TRUE;
+		features2.features.geometryShader = VK_TRUE;
+		features2.features.multiViewport = VK_TRUE;
+
+		VkPhysicalDeviceFeatures features1{};
+		vkGetPhysicalDeviceFeatures(mPhysicalDevice, &features1);
+		features1.robustBufferAccess = VK_TRUE;
+		features1.geometryShader = VK_TRUE;
+		features1.multiViewport = VK_TRUE;
+
+		features2.pNext = &devfeatures12;
+		devfeatures12.pNext = &devfeatures11;
+		devfeatures11.pNext = &robustness2Features;
+		robustness2Features.pNext = &dynScissorFeatures;
 		VkDeviceCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		createInfo.pNext = &devfeatures12;
+		createInfo.pNext = &features2;
 
 		[[maybe_unused]]VkStructureHead* curDeviceCreateChainTail = nullptr;
-		curDeviceCreateChainTail = (VkStructureHead*)&devfeatures12;
+		curDeviceCreateChainTail = (VkStructureHead*)&dynScissorFeatures;
 		float queuePriority = 1.0f;
 		VkDeviceQueueCreateInfo queueCreateInfos[2]{};
 		{
@@ -480,8 +499,10 @@ namespace NxRHI
 			}
 		}
 
+		if (false)
 		{
-			mDeviceFeatures.shaderInt16 = VK_TRUE;
+			//warning: createInfo.pNext is set, pEnabledFeatures must be nullptr
+			/*mDeviceFeatures.shaderInt16 = VK_TRUE;
 			mDeviceFeatures.samplerAnisotropy = VK_TRUE;
 			mDeviceFeatures.depthClamp = VK_TRUE;
 			mDeviceFeatures.fillModeNonSolid = VK_TRUE;
@@ -490,11 +511,9 @@ namespace NxRHI
 			mDeviceFeatures.shaderStorageBufferArrayDynamicIndexing = VK_TRUE;
 			mDeviceFeatures.shaderStorageImageArrayDynamicIndexing = VK_TRUE;
 			mDeviceFeatures.robustBufferAccess = VK_TRUE;
-			createInfo.pEnabledFeatures = &mDeviceFeatures;
-		}
 
-		createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-		createInfo.ppEnabledExtensionNames = extensions.data();
+			createInfo.pEnabledFeatures = &mDeviceFeatures;*/
+		}
 
 		std::vector<const char*>	mValidationLayers;
 		if (desc->CreateDebugLayer)
@@ -504,8 +523,8 @@ namespace NxRHI
 			{
 				mValidationLayers.push_back("VK_LAYER_KHRONOS_validation");
 			}
-			createInfo.enabledLayerCount = static_cast<uint32_t>(mValidationLayers.size());
-			createInfo.ppEnabledLayerNames = mValidationLayers.data();
+			if (HasExtension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME))
+				extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 		}
 		else
 		{
@@ -513,10 +532,10 @@ namespace NxRHI
 		}
 
 #if defined(HasModule_GpuDump)
+		VkDeviceDiagnosticsConfigCreateInfoNV nvDiagnosticsInfo{};
 		if (desc->IsAftermath && desc->IsNVIDIA())
 		{
 			GpuDump::NvAftermath::InitDump(NxRHI::RHI_VK);
-			VkDeviceDiagnosticsConfigCreateInfoNV nvDiagnosticsInfo{};
 			curDeviceCreateChainTail->pNext = &nvDiagnosticsInfo;
 			nvDiagnosticsInfo.sType = VK_STRUCTURE_TYPE_DEVICE_DIAGNOSTICS_CONFIG_CREATE_INFO_NV;
 			nvDiagnosticsInfo.flags = VkDeviceDiagnosticsConfigFlagBitsNV::VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_RESOURCE_TRACKING_BIT_NV |
@@ -524,6 +543,17 @@ namespace NxRHI
 				VkDeviceDiagnosticsConfigFlagBitsNV::VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_SHADER_DEBUG_INFO_BIT_NV;
 		}
 #endif
+
+		if (extensions.size() > 0)
+		{
+			createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+			createInfo.ppEnabledExtensionNames = extensions.data();
+		}
+		if (mValidationLayers.size() > 0)
+		{
+			createInfo.enabledLayerCount = static_cast<uint32_t>(mValidationLayers.size());
+			createInfo.ppEnabledLayerNames = mValidationLayers.data();
+		}
 		if (vkCreateDevice(mPhysicalDevice, &createInfo, GetVkAllocCallBacks(), &mDevice) != VK_SUCCESS)
 		{
 			ASSERT(false);
@@ -577,55 +607,6 @@ namespace NxRHI
 
 		vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &mMemProperties);
 
-		UINT memTypeIndex, memAlignment;
-		if (GetAllocatorInfo(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			memTypeIndex, memAlignment))
-		{
-			mCBufferAllocator = MakeWeakRef(new VKGpuPooledMemAllocator());
-			mCBufferAllocator->mBatchPoolSize = 128 * 1024 * 1024;//128k
-			mCBufferAllocator->mMemTypeIndex = memTypeIndex;
-			mGpuResourceAlignment.CBufferAlignment = memAlignment;
-		}
-		if (GetAllocatorInfo(VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			memTypeIndex, memAlignment))
-		{
-			mSsboAllocator = MakeWeakRef(new VKGpuLinearMemAllocator());
-			mSsboAllocator->PoolSize = 1024 * 1204 * 8;//8 mbytes per block;
-			mSsboAllocator->mAlignment = memAlignment;
-			mSsboAllocator->mMemTypeIndex = memTypeIndex;
-			mGpuResourceAlignment.SsbAlignment = memAlignment;
-		}
-		if (GetAllocatorInfo(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			memTypeIndex, memAlignment))
-		{
-			mVbIbAllocator = MakeWeakRef(new VKGpuLinearMemAllocator());
-			mVbIbAllocator->PoolSize = 1024 * 1204 * 8;//8 mbytes per block;
-			mVbIbAllocator->mAlignment = memAlignment;
-			mVbIbAllocator->mMemTypeIndex = memTypeIndex;
-			mGpuResourceAlignment.VbIbAlignment = memAlignment;
-		}
-		if (GetAllocatorInfo(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			memTypeIndex, memAlignment))
-		{
-			mUploadBufferAllocator = MakeWeakRef(new VKGpuLinearMemAllocator());
-			mUploadBufferAllocator->PoolSize = 1024 * 1204 * 8;//8 mbytes per block;
-			mUploadBufferAllocator->mAlignment = memAlignment;
-			mUploadBufferAllocator->mMemTypeIndex = memTypeIndex;
-		}
-		if (GetAllocatorInfo(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			memTypeIndex, memAlignment))
-		{
-			mReadBackAllocator = MakeWeakRef(new VKGpuLinearMemAllocator());
-			mReadBackAllocator->PoolSize = 1024 * 1204 * 8;//8 mbytes per block;
-			mReadBackAllocator->mAlignment = memAlignment;
-			mReadBackAllocator->mMemTypeIndex = memTypeIndex;
-		}
-
 		mDefaultBufferAllocator = MakeWeakRef(new VKGpuDefaultMemAllocator());
 
 		CreateNullObjects();
@@ -671,6 +652,7 @@ namespace NxRHI
 			FSrvDesc srvDesc{};
 			srvDesc.SetTexture2D();
 			srvDesc.Format = texDesc.Format;
+			srvDesc.Texture2D.MipLevels = 1;
 			mNullSampledImage = MakeWeakRef((VKSrView*)this->CreateSRV(pTex, &srvDesc));
 			mNullSampledImage->SetDebugName("NullSampledImage");
 		}
@@ -707,7 +689,7 @@ namespace NxRHI
 	}
 	void VKGpuDevice::QueryDevice()
 	{
-		
+		mCaps.IsSupportRayTracing = HasExtension(VK_NV_RAY_TRACING_EXTENSION_NAME);
 	}
 	IBuffer* VKGpuDevice::CreateBuffer(const FBufferDesc* desc)
 	{
@@ -939,12 +921,28 @@ namespace NxRHI
 	void VKGpuDevice::TickPostEvents()
 	{
 		IsSyncStage = true;
+
+		if (mCmdQueue != nullptr)
+			mCmdQueue->TryRecycle();
+		mCmdAllocatorManager->TickRecycle();
+
 		IGpuDevice::TickPostEvents();
-		/*auto delta = (UINT)(aspect - completed);
-		if (delta > 1)
+		
+		if (mIsTryFinalize)
 		{
-			VFX_LTRACE(ELTT_Graphics, "Aspect - Completed = %d\r\n", delta);
-		}*/
+			mFrameFence->WaitToExpect();
+			mCmdQueue->Flush(EQueueType::QU_ALL);
+			bool allocatorRecycle = mCmdAllocatorManager->FinalCleanup();
+			bool cmdRecycle = mCmdQueue->mWaitRecycleCmdlists.size() == 0;
+			bool post = mTickingPostEvents.size() == 0 && mPostEvents.size() == 0;
+
+			if (cmdRecycle && allocatorRecycle && post)
+			{
+				mCmdQueue->ClearIdleCmdlists();
+				mIsFinalized = true;
+			}
+		}
+
 		IsSyncStage = false;
 	}
 
@@ -961,7 +959,7 @@ namespace NxRHI
 	}
 	void VKCmdQueue::ClearIdleCmdlists()
 	{
-		if (mIdleCmdlist.empty() == false)
+		while (mIdleCmdlist.empty() == false)
 		{
 			mIdleCmdlist.pop();
 		}
@@ -970,54 +968,6 @@ namespace NxRHI
 	{
 		FFenceDesc fcDesc{};
 		mFlushFence = MakeWeakRef(device->CreateFence(&fcDesc, "CmdQueue Fence"));
-		
-		mDummyCmdList = MakeWeakRef((VKCommandList*)device->CreateCommandList());
-		mDummyCmdList->BeginCommand(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);
-		/*mDummyCmdList->BeginEvent("dummy");
-		mDummyCmdList->EndEvent();*/
-		mDummyCmdList->EndCommand(false);
-	}
-	void VKCmdQueue::QueueExecuteCommandList(ICommandList* Cmdlist, EQueueType type)
-	{
-		auto dx11Cmd = (VKCommandList*)Cmdlist;
-		auto cmdFence = dx11Cmd->mCommitFence.UnsafeConvertTo<VKFence>();
-		if (dx11Cmd->mCommandBuffer == nullptr)
-			return;
-
-		{
-			VAutoVSLLock lk(mGraphicsQueueLocker);
-			VkSubmitInfo submitInfo{};
-			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-			submitInfo.commandBufferCount = 1;
-			submitInfo.pCommandBuffers = &dx11Cmd->mCommandBuffer->RealObject;
-			submitInfo.waitSemaphoreCount = 0;
-			submitInfo.pWaitSemaphores = nullptr;
-			VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;/*VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT |
-				VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT |
-				VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;*/
-			submitInfo.pWaitDstStageMask = &waitStage;
-			submitInfo.signalSemaphoreCount = 1;
-			VkSemaphore signalSemas[1]{};
-			signalSemas[0] = cmdFence->mSemaphore;
-			submitInfo.pSignalSemaphores = signalSemas;
-
-			VkTimelineSemaphoreSubmitInfo timelineInfo{};
-			submitInfo.pNext = &timelineInfo;
-			timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
-
-			timelineInfo.waitSemaphoreValueCount = 0;
-			timelineInfo.pWaitSemaphoreValues = nullptr;
-
-			UINT64 signalValues[1]{};
-			signalValues[0] = ++cmdFence->ExpectValue;
-			timelineInfo.signalSemaphoreValueCount = 2;
-			timelineInfo.pSignalSemaphoreValues = signalValues;
-
-			auto hr = vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, nullptr);
-			ASSERT(hr == VK_SUCCESS);
-			//dx11Cmd->mCommandBuffer = nullptr;
-			dx11Cmd->Commit(this, type);
-		}
 	}
 	void VKCmdQueue::ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type)
 	{
@@ -1029,23 +979,20 @@ namespace NxRHI
 		for (UINT i = 0; i < NumOfExe; i++)
 		{
 			auto vkCmd = (VKCommandList*)Cmdlist[i];
-			//vkCmd->Commit(this);
-			QueueExecuteCommandList(vkCmd, type);
+			vkCmd->Commit(this, type);
 			this->IncreaseSignal(vkCmd->mCommitFence, type);
 			//vkCmd->ResetGpuDraws();
 		}
 	}
-	void VKCmdQueue::WaitFence(IFence* fence, UINT64 value)
+	
+	void VKCmdQueue::WaitFence(IFence* fence, UINT64 value, EQueueType type)
 	{
 		auto waitFence = (VKFence*)fence;
-
-		VAutoVSLLock lk(mGraphicsQueueLocker);
-
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &mDummyCmdList->mCommandBuffer->RealObject;
-		
+		submitInfo.commandBufferCount = 0;
+		//submitInfo.pCommandBuffers = &mDummyCmdList->mCommandBuffer->RealObject;
+
 		VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;/*VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT |
 			VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT |
 			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;*/
@@ -1066,68 +1013,39 @@ namespace NxRHI
 
 		UINT64 waitValue[1]{};
 		waitValue[0] = value;
-		timelineInfo.waitSemaphoreValueCount = 2;
+		timelineInfo.waitSemaphoreValueCount = 1;
 		timelineInfo.pWaitSemaphoreValues = waitValue;
 
 		timelineInfo.signalSemaphoreValueCount = 0;
 		timelineInfo.pSignalSemaphoreValues = nullptr;
 
-		auto hr = vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, nullptr);
+		auto hr = SafeQueueSubmit(1, &submitInfo, nullptr, type);
 		ASSERT(hr == VK_SUCCESS);
 	}
-	UINT64 VKCmdQueue::QueueSignal(IFence* fence, UINT64 value, VkFence g2hFence, EQueueType type)
+
+	void VKCmdQueue::TryRecycle()
 	{
-		ASSERT(value != UINT64_MAX);
-		auto signalFence = (VKFence*)fence;
-
-		VAutoVSLLock lk(mGraphicsQueueLocker);
-
-		if (signalFence->IsBinary() == false)
+		VAutoVSLLock locker(mCmdLocker);
+		for (size_t i = 0; i < mWaitRecycleCmdlists.size(); i++)
 		{
-			if (signalFence->ExpectValue >= value)
+			auto& cur = mWaitRecycleCmdlists[i];
+			auto fenceValue = cur.CmdList->GetCommitFence()->GetCompletedValue();
+			if (fenceValue >= cur.WaitFenceValue)
 			{
-				ASSERT(false);
-				return signalFence->GetCompletedValue();
+				auto pRecorder = mWaitRecycleCmdlists[i].CmdList->GetCmdRecorder();
+				if (pRecorder != nullptr)
+					pRecorder->ResetGpuDraws();
+				mIdleCmdlist.push(mWaitRecycleCmdlists[i].CmdList);
+				mWaitRecycleCmdlists.erase(mWaitRecycleCmdlists.begin() + i);
+				i--;
 			}
-			signalFence->ExpectValue = value;
 		}
-
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &mDummyCmdList->mCommandBuffer->RealObject;
-
-		submitInfo.waitSemaphoreCount = 0;
-		submitInfo.pWaitSemaphores = nullptr;
-		VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT |
-			VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT |
-			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-		submitInfo.pWaitDstStageMask = &waitStage;
-		submitInfo.signalSemaphoreCount = 1;
-		VkSemaphore signalSmp[1]{};
-		signalSmp[0] = signalFence->mSemaphore;
-		submitInfo.pSignalSemaphores = signalSmp;
-
-		VkTimelineSemaphoreSubmitInfo timelineInfo{};
-		submitInfo.pNext = &timelineInfo;
-		timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
-
-		timelineInfo.waitSemaphoreValueCount = 0;
-		timelineInfo.pWaitSemaphoreValues = nullptr;
-
-		UINT64 signalValue[1]{};
-		signalValue[0] = value;
-		timelineInfo.signalSemaphoreValueCount = 1;
-		timelineInfo.pSignalSemaphoreValues = signalValue;
-
-		auto hr = vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, g2hFence);
-		ASSERT(hr == VK_SUCCESS);
-
-		return 0;
 	}
 	ICommandList* VKCmdQueue::GetIdleCmdlist()
 	{
-		VAutoVSLLock locker(mQueueLocker);
+		//TryRecycle();
+
+		VAutoVSLLock locker(mCmdLocker);
 		if (mIdleCmdlist.empty())
 		{
 			mIdleCmdlist.push(MakeWeakRef(mDevice->CreateCommandList()));
@@ -1139,14 +1057,27 @@ namespace NxRHI
 	}
 	void VKCmdQueue::ReleaseIdleCmdlist(ICommandList* cmd)
 	{
-		VAutoVSLLock locker(mQueueLocker);
-		mIdleCmdlist.push(cmd);
+		VAutoVSLLock locker(mCmdLocker);
+		FWaitRecycle tmp;
+		tmp.CmdList = cmd;
+		tmp.WaitFenceValue = cmd->GetCommitFence()->GetExpectValue();
+		mWaitRecycleCmdlists.push_back(tmp);
 		cmd->Release();
 		return;
 	}
 	UINT64 VKCmdQueue::Flush(EQueueType type)
 	{
 		return mFlushFence->WaitToExpect();
+	}
+	VkResult VKCmdQueue::SafeQueueSubmit(uint32_t submitCount, const VkSubmitInfo* pSubmits, VkFence fence, EQueueType type)
+	{
+		VAutoVSLLock locker(mQueueLocker);
+		return vkQueueSubmit(mGraphicsQueue, submitCount, pSubmits, fence);
+	}
+	VkResult VKCmdQueue::SafeQueuePresentKHR(const VkPresentInfoKHR* pPresentInfo, EQueueType type)
+	{
+		VAutoVSLLock locker(mQueueLocker);
+		return vkQueuePresentKHR(mPresentQueue, pPresentInfo);
 	}
 }
 

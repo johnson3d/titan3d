@@ -180,7 +180,7 @@ namespace NxRHI
 	}
 	bool DX12CommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		//mDebugName = name;
 		BeginEvent((mDebugName + ":" + name).c_str());
 		mCurrentFrameBuffers = fb;
@@ -312,7 +312,7 @@ namespace NxRHI
 		}
 		mCurrentFrameBuffers = nullptr;
 		EndEvent();
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 	}
 
 	void DX12CommandList::BeginEvent(std::wstring& info)
@@ -338,12 +338,12 @@ namespace NxRHI
 
 	void DX12CommandList::SetViewport(UINT Num, const FViewPort* pViewports)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		mContext->RSSetViewports(Num, (const D3D12_VIEWPORT*)pViewports);
 	}
 	void DX12CommandList::SetScissor(UINT Num, const FScissorRect* pScissor)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		if (Num == 0)
 		{
 			mContext->RSSetScissorRects(0, nullptr);
@@ -355,7 +355,7 @@ namespace NxRHI
 	}
 	void DX12CommandList::SetShader(IShader* shader)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		/*switch (shader->Desc->Type)
 		{
 			case EShaderType::SDT_ComputeShader:
@@ -372,7 +372,7 @@ namespace NxRHI
 
 	void DX12CommandList::SetCBV(EShaderType type, const FShaderBinder* binder, ICbView* buffer)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		if (buffer == nullptr)
 			return;
 		//buffer->FlushDirty(this);
@@ -396,7 +396,7 @@ namespace NxRHI
 	}
 	void DX12CommandList::SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		if (view == nullptr)
 			return;
 		view->GetResourceState()->SetAccessFrame(IWeakRefObject::EngineCurrentFrame);
@@ -423,7 +423,7 @@ namespace NxRHI
 	}
 	void DX12CommandList::SetUav(EShaderType type, const FShaderBinder* binder, IUaView* view)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		if (view == nullptr)
 			return;
 		/*auto pAddr = ((ID3D12Resource*)view->Buffer->GetHWBuffer())->GetGPUVirtualAddress();
@@ -444,7 +444,7 @@ namespace NxRHI
 	}
 	void DX12CommandList::SetSampler(EShaderType type, const FShaderBinder* binder, ISampler* sampler)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 #ifndef DESCRIPTOR_IN_DRAWCALL
 		auto handle = ((DX12Sampler*)sampler)->mView;
 		auto device = GetDX12Device()->mDevice;
@@ -462,7 +462,7 @@ namespace NxRHI
 	{
 		ASSERT(false);
 		Offset = Offset + (UINT)buffer->Desc.Offset;
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		D3D12_VERTEX_BUFFER_VIEW tmp{};
 		tmp.StrideInBytes = Stride;
 		
@@ -475,7 +475,7 @@ namespace NxRHI
 	}
 	void DX12CommandList::SetIndexBuffer(IIbView* buffer, bool IsBit32)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		//GetCmdRecorder()->UseResource(buffer);
 		D3D12_INDEX_BUFFER_VIEW tmp{};
 		if (IsBit32)
@@ -495,17 +495,17 @@ namespace NxRHI
 	}
 	void DX12CommandList::SetGraphicsPipeline(const IGpuDrawState* drawState)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		mContext->SetPipelineState(((DX12GpuDrawState*)drawState)->mDxState);
 	}
 	void DX12CommandList::SetComputePipeline(const IComputeEffect* drawState)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		mContext->SetPipelineState(((DX12ComputeEffect*)drawState)->mPipelineState);
 	}
 	void DX12CommandList::SetInputLayout(IInputLayout* layout)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		//mContext->IASetInputLayout(((DX12InputLayout*)layout)->mLayout);
 	}
 	void DX12CommandList::SetViewInstanceMask(UINT Mask)
@@ -534,14 +534,14 @@ namespace NxRHI
 	}
 	void DX12CommandList::Draw(EPrimitiveType topology, UINT BaseVertex, UINT DrawCount, UINT Instance)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		UINT dpCount = 0;
 		mContext->IASetPrimitiveTopology(PrimitiveTypeToDX12(topology, DrawCount, &dpCount));
 		mContext->DrawInstanced(dpCount, Instance, BaseVertex, 0);
 	}
 	void DX12CommandList::IndirectDraw(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset, IBuffer* countBuffer)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		auto device = mDevice.GetCastPtr<DX12GpuDevice>();
 		if (mCurrentCmdSig == nullptr)
 			return;
@@ -569,14 +569,14 @@ namespace NxRHI
 	}
 	void DX12CommandList::DrawIndexed(EPrimitiveType topology, UINT BaseVertex, UINT StartIndex, UINT DrawCount, UINT Instance)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		UINT dpCount = 0;
 		mContext->IASetPrimitiveTopology(PrimitiveTypeToDX12(topology, DrawCount, &dpCount));
 		mContext->DrawIndexedInstanced(dpCount, Instance, StartIndex, BaseVertex, 0);
 	}
 	void DX12CommandList::IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset, IBuffer* countBuffer)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		auto device = mDevice.GetCastPtr<DX12GpuDevice>();
 		if (mCurrentCmdSig == nullptr)
 			return;
@@ -604,12 +604,12 @@ namespace NxRHI
 	}
 	void DX12CommandList::Dispatch(UINT x, UINT y, UINT z)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		mContext->Dispatch(x, y, z);
 	}
 	void DX12CommandList::IndirectDispatch(IBuffer* indirectArg, UINT indirectArgOffset)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		//mContext->ExecuteIndirect()
 		//mContext->DispatchIndirect(((DX12Buffer*)indirectArg)->mBuffer, indirectArgOffset);
 		auto device = mDevice.GetCastPtr<DX12GpuDevice>();
@@ -626,12 +626,12 @@ namespace NxRHI
 	}
 	void DX12CommandList::DispatchMesh(UINT x, UINT y, UINT z)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		mLastContext->DispatchMesh(x, y, z);
 	}
 	void DX12CommandList::IndirectDispatchMesh(IBuffer* indirectArg, UINT indirectArgOffset)
 	{
-		ASSERT(mCmdListState = ECmdListState::Recording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		//mContext->ExecuteIndirect()
 		//mContext->DispatchIndirect(((DX12Buffer*)indirectArg)->mBuffer, indirectArgOffset);
 		auto device = mDevice.GetCastPtr<DX12GpuDevice>();

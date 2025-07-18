@@ -4,11 +4,34 @@
 #include "VKGpuState.h"
 #include "../NxRHIDefine.h"
 #include "../../Bricks/CrossShaderCompiler/IShaderConductor.h"
-#include "../../../3rd/native/spirv-cross/spirv_cross_c.h"
+#include "../../../3rd/native/SpirvCross/spirv_cross_c.h"
+
+#if defined(HAS_SPIRV_TOOLS)
+#include "../../../3rd/native/SpirvTools/include/libspirv.h"
+#include "../../../3rd/native/SpirvTools/include/libspirv.hpp"
+#include "../../../3rd/native/SpirvTools/include/optimizer.hpp"
+#endif
+
+#if defined(HAS_GLSLANG)
+#include "../../../3rd/native/glslang/include/glslang/Public/ShaderLang.h"
+#include "../../../3rd/native/glslang/include/glslang/SPIRV/GlslangToSpv.h"
+#endif
 //#include <spirv_cross/spirv_cross_c.h>
 
 #if defined(HasModule_GpuDump)
 #include "../../Bricks/GpuDump/NvAftermath.h"
+#endif
+
+#if defined(PLATFORM_WIN)
+	#if defined(HAS_SPIRV_TOOLS)
+	#pragma comment(lib, "SPIRV-Tools.lib")
+	#endif
+
+	#if defined(HAS_GLSLANG)
+	#pragma comment(lib, "glslangd.lib")
+	#pragma comment(lib, "SPIRV-Toolsd.lib")
+	#pragma comment(lib, "SPIRV-Tools-optd.lib")
+#endif
 #endif
 
 #define new VNEW
@@ -16,24 +39,6 @@
 NS_BEGIN
 namespace NxRHI
 {
-	template<>
-	struct AuxGpuResourceDestroyer<VkShaderModule>
-	{
-		static void Destroy(VkShaderModule obj, IGpuDevice* device1)
-		{
-			auto device = (VKGpuDevice*)device1;
-			vkDestroyShaderModule(device->mDevice, obj, device->GetVkAllocCallBacks());
-		}
-	};
-	template<>
-	struct AuxGpuResourceDestroyer<VkDescriptorSetLayout>
-	{
-		static void Destroy(VkDescriptorSetLayout obj, IGpuDevice* device1)
-		{
-			auto device = (VKGpuDevice*)device1;
-			vkDestroyDescriptorSetLayout(device->mDevice, obj, device->GetVkAllocCallBacks());
-		}
-	};
 	VKDescriptorSetCreator::PageType* VKDescriptorSetCreator::CreatePage(UINT pageSize)
 	{
 		std::vector<VkDescriptorPoolSize> psz;
@@ -113,7 +118,7 @@ namespace NxRHI
 			return nullptr;
 		}
 
-		auto result = new VKDescriptorSetPagedObject();
+		auto result = new VKDescriptorSetCreator::PagedObjectType();
 		result->RealObject = ds;
 
 		return result;
@@ -143,7 +148,8 @@ namespace NxRHI
 			{
 				case VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
 				{
-					tmpStructureBuffer.buffer = device->mNullUBO->mBuffer;
+					//tmpStructureBuffer.buffer = device->mNullUBO->mBuffer;
+					tmpStructureBuffer.buffer = nullptr;
 					tmpStructureBuffer.range = VK_WHOLE_SIZE;
 					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 					descriptorWrite.pBufferInfo = &tmpStructureBuffer;
@@ -152,7 +158,8 @@ namespace NxRHI
 				}
 				case VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
 				{
-					tmpStructureBuffer.buffer = device->mNullSSBO->mBuffer;
+					//tmpStructureBuffer.buffer = device->mNullSSBO->mBuffer;
+					tmpStructureBuffer.buffer = nullptr;
 					tmpStructureBuffer.range = VK_WHOLE_SIZE;
 					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 					descriptorWrite.pBufferInfo = &tmpStructureBuffer;
@@ -162,17 +169,19 @@ namespace NxRHI
 				case VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
 				{
 					tmp.imageLayout = ((VKTexture*)device->mNullSampledImage->GetBuffer())->GetImageLayout();
-					tmp.imageView = (VkImageView)device->mNullSampledImage->GetHWBuffer();
+					//tmp.imageView = (VkImageView)device->mNullSampledImage->GetHWBuffer();
+					tmp.imageView = nullptr;
 					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
 					descriptorWrite.pImageInfo = &tmp;
 					vkUpdateDescriptorSets(device->mDevice, 1, &descriptorWrite, 0, nullptr);
 					break;
 				}
-				case VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:
+				case VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
 				{
 					tmp.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-					tmp.imageView = (VkImageView)device->mNullSampledImage->GetHWBuffer();
-					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
+					//tmp.imageView = (VkImageView)device->mNullSampledImage->GetHWBuffer();
+					tmp.imageView = nullptr;
+					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 					descriptorWrite.pImageInfo = &tmp;
 					vkUpdateDescriptorSets(device->mDevice, 1, &descriptorWrite, 0, nullptr);
 					break;
@@ -232,12 +241,15 @@ namespace NxRHI
 		if (device == nullptr)
 			return;
 
-		device->DelayDestroy(mShader);
-		mShader = nullptr;
+		if (mShader)
+		{
+			vkDestroyShaderModule(device->mDevice, mShader, device->GetVkAllocCallBacks());
+			mShader = nullptr;
+		}
 
 		if (mLayout != nullptr)
 		{
-			device->DelayDestroy(mLayout);
+			vkDestroyDescriptorSetLayout(device->mDevice, mLayout, device->GetVkAllocCallBacks());
 			mLayout = nullptr;
 		}
 	}
@@ -320,6 +332,7 @@ namespace NxRHI
 
 		VkDescriptorSetLayoutCreateInfo layoutInfo{};
 		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		//layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_PER_STAGE_BIT_NV;
 		layoutInfo.bindingCount = (UINT)mLayoutBindings.size();
 		if (layoutInfo.bindingCount != 0)
 		{
@@ -391,7 +404,105 @@ namespace NxRHI
 
 		return true;
 	}
-	
+#if defined(HAS_SPIRV_TOOLS)
+	class VKSpirvOptimizer
+	{
+
+	public:
+		static spv_result_t modify_binding_callback(
+			void* user_data,
+			const spv_parsed_instruction_t* inst) {
+
+			// 获取用户数据（包含绑定修改信息）
+			uint32_t* bindings = static_cast<uint32_t*>(user_data);
+			uint32_t old_binding = bindings[0];
+			uint32_t new_binding = bindings[1];
+
+			// 检查是否是 OpDecorate 指令
+			if (inst->opcode == SPV_OPERAND_TYPE_DECORATION) {
+				
+			}
+
+			return SPV_SUCCESS;
+		}
+		void PostSpirvIR(const std::vector<BYTE>& src, std::vector<BYTE>& target)
+		{
+			spv_context context = spvContextCreate(SPV_ENV_VULKAN_1_2);
+
+			spv_diagnostic diagnostic = nullptr;
+			spv_result_t result = spvBinaryParse(
+				context,
+				this, // 用户数据
+				(UINT*)src.data(),
+				src.size()/sizeof(UINT),
+				nullptr, // 头部回调
+				modify_binding_callback, // 指令回调
+				&diagnostic
+			);
+		}
+	};
+#endif
+
+#if defined(HAS_GLSLANG)
+	class FGLSlangUtility
+	{
+	public:
+		static bool initGlslang() {
+			if (!glslang::InitializeProcess()) {
+				std::cerr << "Failed to initialize glslang" << std::endl;
+				return false;
+			}
+			return true;
+		}
+		static bool compileGLSL(const char* shaderCode, const char* entry, EShLanguage stage, std::vector<uint32_t>& spirv) {
+			// 1. 创建着色器对象
+			glslang::TShader shader(stage);
+			shader.setStrings(&shaderCode, 1);
+			shader.setEntryPoint(entry);
+			shader.setSourceEntryPoint(entry);
+
+			// 2. 设置编译选项
+			const TBuiltInResource* resources = nullptr;// GetDefaultResources();
+			EShMessages messages = (EShMessages)(EShMsgSpvRules | EShMsgVulkanRules); // 目标规则
+
+			// 3. 预处理 + 解析
+			if (!shader.parse(resources, 450, false, messages)) { // 450 = GLSL版本
+				std::cerr << "Parse failed:\n" << shader.getInfoLog() << std::endl;
+				return false;
+			}
+
+			// 4. 链接到程序
+			glslang::TProgram program;
+			program.addShader(&shader);
+			if (!program.link(messages)) {
+				std::cerr << "Link failed:\n" << program.getInfoLog() << std::endl;
+				return false;
+			}
+
+			// 5. 生成 SPIR-V
+			glslang::SpvOptions spvOptions;
+			glslang::GlslangToSpv(*program.getIntermediate(stage), spirv, &spvOptions);
+			return true;
+		}
+		static void finalizeGlslang() {
+			glslang::FinalizeProcess();
+		}
+		static void CompileShaderToSpirv(
+			const char* shaderCode, const char* entry,
+			EShLanguage stage,
+			std::vector<uint32_t>& spirv)
+		{
+			if (!initGlslang()) {
+				return;
+			}
+			if (!compileGLSL(shaderCode, entry, stage, spirv)) {
+				finalizeGlslang();
+				return;
+			}
+			finalizeGlslang();
+		}
+	};
+#endif
 	bool VKShader::Reflect(FShaderDesc* desc)
 	{
 		desc->SpirvReflector = MakeWeakRef(new IShaderReflector());
@@ -462,6 +573,9 @@ namespace NxRHI
 			std::string name = spvc_compiler_get_name(compiler_glsl, list[i].id);
 			auto descriptorSet = spvc_compiler_get_decoration(compiler_glsl, list[i].id, SpvDecorationDescriptorSet);
 			auto binding = spvc_compiler_get_decoration(compiler_glsl, list[i].id, SpvDecorationBinding);
+
+			//spvc_compiler_set_decoration(compiler_glsl, list[i].id, SpvDecorationBinding, 100);
+
 			size_t sz;
 			spvc_compiler_get_declared_struct_size(compiler_glsl, spv_type, &sz);
 
@@ -766,6 +880,63 @@ namespace NxRHI
 			binder->IsStructuredBuffer = FALSE;
 			Reflector->Samplers.push_back(binder);
 		}
+
+		const char* output_str = NULL;
+		spvc_compiler_compile(compiler_glsl, &output_str);
+		if (output_str)
+		{
+			auto len = strlen(output_str);
+		}
+
+#if defined(HAS_SPIRV_TOOLS)
+		std::vector<uint32_t> spirvBinary;
+		EShLanguage lang;
+		switch (desc->Type)
+		{
+		case EShaderType::SDT_VertexShader:
+			lang = EShLanguage::EShLangVertex;
+			break;
+		case EShaderType::SDT_PixelShader:
+			lang = EShLanguage::EShLangFragment;
+			break;
+		}
+#endif
+
+#if defined(HAS_GLSLANG)
+		FGLSlangUtility::CompileShaderToSpirv(output_str, desc->FunctionName.c_str(), lang, spirvBinary);
+		std::vector<BYTE> tmp;
+		tmp.resize(spirvBinary.size() * 4);
+		memcpy(tmp.data(), spirvBinary.data(), spirvBinary.size() * 4);
+		if (tmp != desc->SpirV)
+		{
+			return true;
+		}
+#endif
+
+#if defined(HAS_SPIRV_TOOLS)
+		{
+			spv_binary binary;
+			spv_context ctx = spvContextCreate(SPV_ENV_VULKAN_1_2);
+			spv_diagnostic diagnostic = nullptr;
+
+			spv_result_t result = spvTextToBinary(
+				ctx,
+				output_str,
+				len,
+				&binary,
+				&diagnostic
+			);
+
+			std::vector<BYTE> spirvBinary;
+			spirvBinary.resize(binary->wordCount);
+			memcpy(spirvBinary.data(), binary->code, binary->wordCount);
+			spvBinaryDestroy(binary);
+			if (spirvBinary != desc->SpirV)
+			{
+				return true;
+			}
+		}
+#endif
 
 		spvc_context_destroy(context);
 

@@ -89,13 +89,7 @@ namespace NxRHI
 
 		std::wstring				mDebugNameW;
 
-		enum ECmdListState
-		{
-			None = 0,
-			Recording,
-			ExecuteWaiting,
-			Executing,
-		};
+		
 		ECmdListState				mCmdListState = ECmdListState::None;
 	private:
 		DX12CmdRecorder* GetDX12CmdRecorder()

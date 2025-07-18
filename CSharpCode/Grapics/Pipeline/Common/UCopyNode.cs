@@ -130,6 +130,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             AddInput(SrcPinIn);
             AddOutput(PrevPinOut);
+            SrcPinIn.Attachement.BufferDesc.Flags = NxRHI.EResourceMiscFlag.RM_COPY_SRC;
         }
         public override Color4b GetTileColor()
         {

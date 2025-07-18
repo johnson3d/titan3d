@@ -324,64 +324,73 @@ namespace NxRHI
 		//if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
 			auto device = mDeviceRef.GetPtr();
-			D3D12_RESOURCE_DESC resDesc{};
-			resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-			//resDesc.Width = desc.Size;
-			resDesc.Width = pFootPrint->Width;
-			resDesc.Height = 1;
-			resDesc.DepthOrArraySize = 1;
-			resDesc.MipLevels = 1;
-			resDesc.SampleDesc.Count = 1;
-			resDesc.SampleDesc.Quality = 0;
-			resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-			resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-			resDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+			//D3D12_RESOURCE_DESC resDesc{};
+			//resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+			////resDesc.Width = desc.Size;
+			//resDesc.Width = pFootPrint->Width;
+			//resDesc.Height = 1;
+			//resDesc.DepthOrArraySize = 1;
+			//resDesc.MipLevels = 1;
+			//resDesc.SampleDesc.Count = 1;
+			//resDesc.SampleDesc.Quality = 0;
+			//resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+			//resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+			//resDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
 
-			auto pAlignment = device->GetGpuResourceAlignment();
-			if (Desc.Type & EBufferType::BFT_CBuffer)
-			{
-				//resDesc.Alignment = pAlignment->CBufferAlignment;
-				if (resDesc.Width % pAlignment->CBufferAlignment)
-				{
-					resDesc.Width = (resDesc.Width / pAlignment->CBufferAlignment + 1) * pAlignment->CBufferAlignment;
-				}
-			}
-			if (Desc.Type & EBufferType::BFT_RTV)
-			{
-				ASSERT(false);
-				resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-			}
-			if (Desc.Type & EBufferType::BFT_DSV)
-			{
-				ASSERT(false);
-				resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-			}
-			if (Desc.Type & EBufferType::BFT_UAV)
-			{
-				resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-			}
+			//auto pAlignment = device->GetGpuResourceAlignment();
+			//if (Desc.Type & EBufferType::BFT_CBuffer)
+			//{
+			//	//resDesc.Alignment = pAlignment->CBufferAlignment;
+			//	if (resDesc.Width % pAlignment->CBufferAlignment)
+			//	{
+			//		resDesc.Width = (resDesc.Width / pAlignment->CBufferAlignment + 1) * pAlignment->CBufferAlignment;
+			//	}
+			//}
+			//if (Desc.Type & EBufferType::BFT_RTV)
+			//{
+			//	ASSERT(false);
+			//	resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+			//}
+			//if (Desc.Type & EBufferType::BFT_DSV)
+			//{
+			//	ASSERT(false);
+			//	resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+			//}
+			//if (Desc.Type & EBufferType::BFT_UAV)
+			//{
+			//	resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+			//}
 
-			D3D12_PLACED_SUBRESOURCE_FOOTPRINT footPrint{};
-			UINT numX = 0;
-			UINT64 rowSize = 0, totalSize = 0;
-			device->mDevice->GetCopyableFootprints(&resDesc, 0, 1, 0, &footPrint, &numX, &rowSize, &totalSize);
+			//D3D12_PLACED_SUBRESOURCE_FOOTPRINT footPrint{};
+			//UINT numX = 0;
+			//UINT64 rowSize = 0, totalSize = 0;
+			//device->mDevice->GetCopyableFootprints(&resDesc, 0, 1, 0, &footPrint, &numX, &rowSize, &totalSize);
 
-			auto bf = CreateUploadBuffer(device, pData, totalSize, pFootPrint->RowPitch, "Upload Buffer 2");//.Size);
+			//auto bf = CreateUploadBuffer(device, pData, totalSize, pFootPrint->RowPitch, "Upload Buffer 2");//.Size);
+
+			auto copyDesc = this->Desc;
+			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
+			copyDesc.Type = EBufferType::BFT_NONE;
+			copyDesc.Size = pFootPrint->TotalSize;
+			copyDesc.InitData = pData;
+			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+
+			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
 
 			{
 				AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
 				cpDraw->BindBufferDest(this);
 				cpDraw->BindBufferSrc(bf);
 				cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
-				cpDraw->FootPrint.Format = DX12FormatToFormat(footPrint.Footprint.Format);
+				cpDraw->FootPrint.Format = pFootPrint->Format;
 				cpDraw->FootPrint.X = 0;
 				cpDraw->FootPrint.Y = 0;
 				cpDraw->FootPrint.Z = 0;
-				cpDraw->FootPrint.Width = footPrint.Footprint.Width;
-				cpDraw->FootPrint.Height = footPrint.Footprint.Height;
-				cpDraw->FootPrint.Depth = footPrint.Footprint.Depth;
-				cpDraw->FootPrint.RowPitch = footPrint.Footprint.RowPitch;
-				cpDraw->FootPrint.TotalSize = footPrint.Footprint.RowPitch * footPrint.Footprint.Height;
+				cpDraw->FootPrint.Width = pFootPrint->Width;
+				cpDraw->FootPrint.Height = pFootPrint->Height;
+				cpDraw->FootPrint.Depth = pFootPrint->Depth;
+				cpDraw->FootPrint.RowPitch = pFootPrint->RowPitch;
+				cpDraw->FootPrint.TotalSize = pFootPrint->RowPitch * pFootPrint->Height;
 				cpDraw->DstX = pFootPrint->X;
 
 				cmd->PushGpuDraw(cpDraw);
@@ -402,49 +411,58 @@ namespace NxRHI
 		if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
 			auto device = mDeviceRef.GetPtr();
-			D3D12_RESOURCE_DESC resDesc{};
-			resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-			//resDesc.Width = desc.Size;
-			resDesc.Width = Desc.Size;
-			resDesc.Height = 1;
-			resDesc.DepthOrArraySize = 1;
-			resDesc.MipLevels = 1;
-			resDesc.SampleDesc.Count = 1;
-			resDesc.SampleDesc.Quality = 0;
-			resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-			resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-			resDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+			//D3D12_RESOURCE_DESC resDesc{};
+			//resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+			////resDesc.Width = desc.Size;
+			//resDesc.Width = Desc.Size;
+			//resDesc.Height = 1;
+			//resDesc.DepthOrArraySize = 1;
+			//resDesc.MipLevels = 1;
+			//resDesc.SampleDesc.Count = 1;
+			//resDesc.SampleDesc.Quality = 0;
+			//resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+			//resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+			//resDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
 
-			auto pAlignment = device->GetGpuResourceAlignment();
-			if (Desc.Type & EBufferType::BFT_CBuffer)
-			{
-				//resDesc.Alignment = pAlignment->CBufferAlignment;
-				if (resDesc.Width % pAlignment->CBufferAlignment)
-				{
-					resDesc.Width = (resDesc.Width / pAlignment->CBufferAlignment + 1) * pAlignment->CBufferAlignment;
-				}
-			}
-			if (Desc.Type & EBufferType::BFT_RTV)
-			{
-				ASSERT(false);
-				resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-			}
-			if (Desc.Type & EBufferType::BFT_DSV)
-			{
-				ASSERT(false);
-				resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-			}
-			if (Desc.Type & EBufferType::BFT_UAV)
-			{
-				resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-			}
+			//auto pAlignment = device->GetGpuResourceAlignment();
+			//if (Desc.Type & EBufferType::BFT_CBuffer)
+			//{
+			//	//resDesc.Alignment = pAlignment->CBufferAlignment;
+			//	if (resDesc.Width % pAlignment->CBufferAlignment)
+			//	{
+			//		resDesc.Width = (resDesc.Width / pAlignment->CBufferAlignment + 1) * pAlignment->CBufferAlignment;
+			//	}
+			//}
+			//if (Desc.Type & EBufferType::BFT_RTV)
+			//{
+			//	ASSERT(false);
+			//	resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+			//}
+			//if (Desc.Type & EBufferType::BFT_DSV)
+			//{
+			//	ASSERT(false);
+			//	resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+			//}
+			//if (Desc.Type & EBufferType::BFT_UAV)
+			//{
+			//	resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+			//}
 
-			D3D12_PLACED_SUBRESOURCE_FOOTPRINT footPrint{};
-			UINT numX = 0;
-			UINT64 rowSize = 0, totalSize = 0;
-			device->mDevice->GetCopyableFootprints(&resDesc, 0, 1, 0, &footPrint, &numX, &rowSize, &totalSize);
+			//D3D12_PLACED_SUBRESOURCE_FOOTPRINT footPrint{};
+			//UINT numX = 0;
+			//UINT64 rowSize = 0, totalSize = 0;
+			//device->mDevice->GetCopyableFootprints(&resDesc, 0, 1, 0, &footPrint, &numX, &rowSize, &totalSize);
 
-			auto bf = CreateUploadBuffer(device, pData, totalSize, pFootPrint->RowPitch, "Upload Buffer 2");//.Size);
+			//auto bf = CreateUploadBuffer(device, pData, totalSize, pFootPrint->RowPitch, "Upload Buffer 2");//.Size);
+
+			auto copyDesc = this->Desc;
+			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
+			copyDesc.Type = EBufferType::BFT_NONE;
+			copyDesc.Size = pFootPrint->TotalSize;
+			copyDesc.InitData = pData;
+			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+
+			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
 
 			FTransientCmd tsCmd(device, EQueueType::QU_Transfer, "UpdateGpuData");
 			auto cmd = tsCmd.GetCmdList();
@@ -453,15 +471,15 @@ namespace NxRHI
 				cpDraw->BindBufferDest(this);
 				cpDraw->BindBufferSrc(bf);
 				cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
-				cpDraw->FootPrint.Format = DX12FormatToFormat(footPrint.Footprint.Format);
+				cpDraw->FootPrint.Format = pFootPrint->Format;
 				cpDraw->FootPrint.X = 0;
 				cpDraw->FootPrint.Y = 0;
 				cpDraw->FootPrint.Z = 0;
-				cpDraw->FootPrint.Width = footPrint.Footprint.Width;
-				cpDraw->FootPrint.Height = footPrint.Footprint.Height;
-				cpDraw->FootPrint.Depth = footPrint.Footprint.Depth;
-				cpDraw->FootPrint.RowPitch = footPrint.Footprint.RowPitch;
-				cpDraw->FootPrint.TotalSize = footPrint.Footprint.RowPitch * footPrint.Footprint.Height;
+				cpDraw->FootPrint.Width = pFootPrint->Width;
+				cpDraw->FootPrint.Height = pFootPrint->Height;
+				cpDraw->FootPrint.Depth = pFootPrint->Depth;
+				cpDraw->FootPrint.RowPitch = pFootPrint->RowPitch;
+				cpDraw->FootPrint.TotalSize = pFootPrint->RowPitch * pFootPrint->Height;
 
 				cmd->PushGpuDraw(cpDraw);
 			}
@@ -893,7 +911,7 @@ namespace NxRHI
 		if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
 			auto device = mDeviceRef.GetPtr();
-			D3D12_PLACED_SUBRESOURCE_FOOTPRINT footPrint{};
+			/*D3D12_PLACED_SUBRESOURCE_FOOTPRINT footPrint{};
 			UINT numX;
 			UINT64 rowSize, totalSize;
 			D3D12_RESOURCE_DESC resDesc{};
@@ -943,22 +961,32 @@ namespace NxRHI
 			initData.pData = pData;
 			initData.RowPitch = pFootPrint->RowPitch;
 			initData.DepthPitch = pFootPrint->TotalSize;
-			auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, Desc.Format, &initData, "Upload Texture 2");
+			auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, Desc.Format, &initData, "Upload Texture 2");*/
 			
+			FBufferDesc copyDesc{};
+			copyDesc.SetDefault();
+			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
+			copyDesc.Type = EBufferType::BFT_NONE;
+			copyDesc.Size = pFootPrint->TotalSize;
+			copyDesc.InitData = pData;
+			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+
+			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
+
 			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
 			cpDraw->BindTextureDest(this);
 			cpDraw->BindBufferSrc(bf);
 			cpDraw->DestSubResource = subRes;
 			cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Texture;
-			cpDraw->FootPrint.Format = DX12FormatToFormat(footPrint.Footprint.Format);
+			cpDraw->FootPrint.Format = pFootPrint->Format;
 			cpDraw->FootPrint.X = 0;
 			cpDraw->FootPrint.Y = 0;
 			cpDraw->FootPrint.Z = 0;
-			cpDraw->FootPrint.Width = footPrint.Footprint.Width;
-			cpDraw->FootPrint.Height = footPrint.Footprint.Height;
-			cpDraw->FootPrint.Depth = footPrint.Footprint.Depth;
-			cpDraw->FootPrint.RowPitch = footPrint.Footprint.RowPitch;
-			cpDraw->FootPrint.TotalSize = footPrint.Footprint.RowPitch * footPrint.Footprint.Height;
+			cpDraw->FootPrint.Width = pFootPrint->Width;
+			cpDraw->FootPrint.Height = pFootPrint->Height;
+			cpDraw->FootPrint.Depth = pFootPrint->Depth;
+			cpDraw->FootPrint.RowPitch = pFootPrint->RowPitch;
+			cpDraw->FootPrint.TotalSize = pFootPrint->RowPitch * pFootPrint->Height;
 
 			cmd->PushGpuDraw(cpDraw);
 		}
@@ -969,6 +997,10 @@ namespace NxRHI
 			void* pTarData = nullptr;
 			if (mGpuResource->Map(0, &range, &pTarData) == S_OK)
 			{
+				for(UINT i = 0; i < pFootPrint->Height; i++)
+				{
+					//copy row by row
+				}
 				memcpy(pTarData, pData, pFootPrint->RowPitch);
 				mGpuResource->Unmap(0, nullptr);
 			}
@@ -981,7 +1013,7 @@ namespace NxRHI
 		if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
 			auto device = mDeviceRef.GetPtr();
-			D3D12_PLACED_SUBRESOURCE_FOOTPRINT footPrint{};
+			/*D3D12_PLACED_SUBRESOURCE_FOOTPRINT footPrint{};
 			UINT numX;
 			UINT64 rowSize, totalSize;
 			D3D12_RESOURCE_DESC resDesc{};
@@ -1031,22 +1063,31 @@ namespace NxRHI
 			initData.pData = pData;
 			initData.RowPitch = pFootPrint->RowPitch;
 			initData.DepthPitch = pFootPrint->TotalSize;
-			auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, Desc.Format, &initData, "Upload Texture 2");
+			auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, Desc.Format, &initData, "Upload Texture 2");*/
+			FBufferDesc copyDesc{};
+			copyDesc.SetDefault();
+			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
+			copyDesc.Type = EBufferType::BFT_NONE;
+			copyDesc.Size = pFootPrint->TotalSize;
+			copyDesc.InitData = pData;
+			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+
+			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
 
 			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
 			cpDraw->BindTextureDest(this);
 			cpDraw->BindBufferSrc(bf);
 			cpDraw->DestSubResource = subRes;
 			cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Texture;
-			cpDraw->FootPrint.Format = DX12FormatToFormat(footPrint.Footprint.Format);
+			cpDraw->FootPrint.Format = pFootPrint->Format;
 			cpDraw->FootPrint.X = 0;
 			cpDraw->FootPrint.Y = 0;
 			cpDraw->FootPrint.Z = 0;
-			cpDraw->FootPrint.Width = footPrint.Footprint.Width;
-			cpDraw->FootPrint.Height = footPrint.Footprint.Height;
-			cpDraw->FootPrint.Depth = footPrint.Footprint.Depth;
-			cpDraw->FootPrint.RowPitch = footPrint.Footprint.RowPitch;
-			cpDraw->FootPrint.TotalSize = footPrint.Footprint.RowPitch * footPrint.Footprint.Height;
+			cpDraw->FootPrint.Width = pFootPrint->Width;
+			cpDraw->FootPrint.Height = pFootPrint->Height;
+			cpDraw->FootPrint.Depth = pFootPrint->Depth;
+			cpDraw->FootPrint.RowPitch = pFootPrint->RowPitch;
+			cpDraw->FootPrint.TotalSize = pFootPrint->RowPitch * pFootPrint->Height;
 
 			FTransientCmd tsCmd(device, EQueueType::QU_Transfer, "Texture.UpdateGpuData");
 			auto cmd = tsCmd.GetCmdList();

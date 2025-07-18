@@ -117,9 +117,25 @@ namespace NxRHI
 			}
 			copyBuffer->Unmap(0);
 		}
+		auto device = GetGpuDevice();
 		for (UINT i = 0; i < Count; i++)
 		{
-			CopyBufferRegion(BufferWriters[i].Buffer, BufferWriters[i].Offset, copyBuffer, i * sizeof(UINT), sizeof(UINT));
+			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+			cpDraw->BindBufferDest(BufferWriters[i].Buffer);
+			cpDraw->BindBufferSrc(copyBuffer);
+			cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
+			cpDraw->FootPrint.Format = EPixelFormat::PXF_UNKNOWN;
+			cpDraw->FootPrint.X = 0;
+			cpDraw->FootPrint.Y = 0;
+			cpDraw->FootPrint.Z = 0;
+			cpDraw->FootPrint.Width = sizeof(UINT);
+			cpDraw->FootPrint.Height = 1;
+			cpDraw->FootPrint.Depth = 1;
+			cpDraw->FootPrint.RowPitch = sizeof(UINT);
+			cpDraw->FootPrint.TotalSize = sizeof(UINT);
+			cpDraw->DstX = BufferWriters[i].Offset;
+
+			this->PushGpuDraw(cpDraw);
 		}
 	}
 }

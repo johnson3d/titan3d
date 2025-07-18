@@ -537,6 +537,10 @@ namespace NxRHI
 		}
 		mDefaultQueueFrequence = disjoint.Frequency;
 	}
+	void DX11CmdQueue::WaitFence(IFence* fence, UINT64 value, EQueueType type)
+	{
+		mHardwareContext->mContext4->Wait(((DX11Fence*)fence)->mFence, value);
+	}
 	void DX11CmdQueue::ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type)
 	{
 		VAutoVSLLock locker(mImmCmdListLocker);

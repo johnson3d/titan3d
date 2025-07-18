@@ -62,10 +62,10 @@ namespace NxRHI
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
-		if (mView != nullptr)
+		if (mSamplder != nullptr)
 		{
-			vkDestroySampler(device->mDevice, mView, device->GetVkAllocCallBacks());
-			mView = nullptr;
+			vkDestroySampler(device->mDevice, mSamplder, device->GetVkAllocCallBacks());
+			mSamplder = nullptr;
 		}
 	}
 	bool VKSampler::Init(VKGpuDevice* device, const FSamplerDesc& desc)
@@ -230,7 +230,7 @@ namespace NxRHI
 		samplerInfo.unnormalizedCoordinates = VK_FALSE;
 		samplerInfo.compareOp = CompareOp2VKCompareOp(desc.CmpMode);
 
-		if (vkCreateSampler(device->mDevice, &samplerInfo, nullptr, &mView) != VK_SUCCESS)
+		if (vkCreateSampler(device->mDevice, &samplerInfo, nullptr, &mSamplder) != VK_SUCCESS)
 		{
 			return false;
 		}
@@ -546,7 +546,7 @@ namespace NxRHI
 			return false;
 		}
 
-		//VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT , mGraphicsPipeline, "PipeLine1");
+		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT , mGraphicsPipeline, "PipeLine1");
 
 		return true;
 	}

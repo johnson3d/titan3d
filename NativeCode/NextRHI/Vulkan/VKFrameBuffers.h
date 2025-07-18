@@ -29,11 +29,19 @@ namespace NxRHI
 		VKFrameBuffers();
 		~VKFrameBuffers();
 		virtual void FlushModify() override;
-
-		void DestroyFrameBuffer();
 	public:
 		TWeakRefHandle<VKGpuDevice>		mDeviceRef;
-		VkFramebuffer		mFrameBuffer = nullptr;
+
+		class FrameBufferWrapper : public IGpuResource
+		{
+		public:
+			FrameBufferWrapper(VKGpuDevice* device, VkFramebuffer ptr);
+			~FrameBufferWrapper();
+			VKGpuDevice*		mDevice = nullptr;
+			VkFramebuffer		mFrameBuffer = nullptr;
+		};
+		AutoRef<FrameBufferWrapper>		mFrameBuffer;
+		//todo: use VK_KHR_dynamic_rendering extension, VkFramebuffer is not necessary,we can call vkCmdBeginRenderingKHR like dx12
 	}; 
 
 	class VKSwapChain : public ISwapChain
@@ -64,19 +72,16 @@ namespace NxRHI
 		VkSurfaceCapabilitiesKHR		mCapabilities{};
 		struct FBackBuffer : public IWeakRefObject
 		{
-			FBackBuffer();
-			void CleanupVK(VKGpuDevice* device);
-			AutoRef<VKBinaryFence>		AcquireSemaphore;
-			AutoRef<VKBinaryFence>		RenderFinishSemaphore;
-			AutoRef<VKGpuToHostFence>	RenderFinishFence;
-			AutoRef<ITexture>			Texture;
-			AutoRef<IRenderTargetView>	Rtv;
-			void CreateRtvAndSrv(IGpuDevice* device);
+			AutoRef<VKTexture>	Texture;
+			AutoRef<VKRenderTargetView>	Rtv;
+			UINT64				FenceValue = 0;
+			void CreateRtvAndSrv(IGpuDevice* device, UINT index);
 		};
-		std::vector<AutoRef<FBackBuffer>>		BackBuffers;
+		std::vector<FBackBuffer>		BackBuffers;
+		VkFence							AcquireFence = VK_NULL_HANDLE;
 		UINT							CurrentBackBuffer = 0;
 		UINT							CurrentFrame = 0;
-		AutoRef<IFence>					PresentFence;
+		AutoRef<IFence>					FramePresentFence;
 	};
 }
 

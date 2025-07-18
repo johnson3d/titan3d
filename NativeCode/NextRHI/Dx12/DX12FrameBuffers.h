@@ -26,7 +26,7 @@ namespace NxRHI
 		DX12SwapChain();
 		~DX12SwapChain();
 		virtual void* GetHWBuffer() override {
-			return mView;
+			return mSwapChain;
 		}
 		bool Init(DX12GpuDevice* device, const FSwapChainDesc& desc);
 		virtual UINT GetBackBufferCount() const override
@@ -43,8 +43,8 @@ namespace NxRHI
 		bool Create(IGpuDevice* device, UINT w, UINT h);
 	public:
 		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
-		IDXGISwapChain* mView = nullptr;
-		AutoRef<IDXGISwapChain3> mView3 = nullptr;
+		IDXGISwapChain* mSwapChain = nullptr;
+		AutoRef<IDXGISwapChain3> mSwapChain3 = nullptr;
 		struct FBackBuffer
 		{
 			AutoRef<ITexture>	Texture;

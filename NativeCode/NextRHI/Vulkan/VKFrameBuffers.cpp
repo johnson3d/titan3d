@@ -10,61 +10,6 @@ NS_BEGIN
 
 namespace NxRHI
 {
-	template<>
-	struct AuxGpuResourceDestroyer<VkFramebuffer>
-	{
-		static void Destroy(VkFramebuffer obj, IGpuDevice* device1)
-		{
-			VKGpuDevice* device = (VKGpuDevice*)device1;
-			vkDestroyFramebuffer(device->mDevice, obj, device->GetVkAllocCallBacks());
-		}
-	};
-	template<>
-	struct AuxGpuResourceDestroyer<VkSurfaceKHR>
-	{
-		static void Destroy(VkSurfaceKHR obj, IGpuDevice* device1)
-		{
-			VKGpuDevice* device = (VKGpuDevice*)device1;
-			vkDestroySurfaceKHR(device->GetVkInstance(), obj, device->GetVkAllocCallBacks());
-		}
-	}; 
-	template<>
-	struct AuxGpuResourceDestroyer<VkSwapchainKHR>
-	{
-		static void Destroy(VkSwapchainKHR obj, IGpuDevice* device1)
-		{
-			VKGpuDevice* device = (VKGpuDevice*)device1;
-			vkDestroySwapchainKHR(device->mDevice, obj, device->GetVkAllocCallBacks());
-		}
-	}; 
-	template<>
-	struct AuxGpuResourceDestroyer<VkRenderPass>
-	{
-		static void Destroy(VkRenderPass obj, IGpuDevice* device1)
-		{
-			VKGpuDevice* device = (VKGpuDevice*)device1;
-			vkDestroyRenderPass(device->mDevice, obj, device->GetVkAllocCallBacks());
-		}
-	};
-	template<>
-	struct AuxGpuResourceDestroyer<VkSemaphore>
-	{
-		static void Destroy(VkSemaphore obj, IGpuDevice* device1)
-		{
-			VKGpuDevice* device = (VKGpuDevice*)device1;
-			vkDestroySemaphore(device->mDevice, obj, device->GetVkAllocCallBacks());
-		}
-	};
-	template<>
-	struct AuxGpuResourceDestroyer<VkFence>
-	{
-		static void Destroy(VkFence obj, IGpuDevice* device1)
-		{
-			VKGpuDevice* device = (VKGpuDevice*)device1;
-			vkDestroyFence(device->mDevice, obj, device->GetVkAllocCallBacks());
-		}
-	};
-
 	inline VkAttachmentLoadOp FrameBufferLoadAction2VK(EFrameBufferLoadAction action)
 	{
 		switch (action)
@@ -107,8 +52,11 @@ namespace NxRHI
 		if (device == nullptr)
 			return;
 
-		device->DelayDestroy(mRenderPass);
-		mRenderPass = nullptr;
+		if (mRenderPass)
+		{
+			vkDestroyRenderPass(device->mDevice, mRenderPass, device->GetVkAllocCallBacks());
+			mRenderPass = nullptr;
+		}
 	}
 	bool VKRenderPass::Init(VKGpuDevice* device, const FRenderPassDesc& desc)
 	{
@@ -130,7 +78,7 @@ namespace NxRHI
 			colorAttachment.storeOp = FrameBufferStoreAction2VK(desc.AttachmentMRTs[i].StoreAction);
 			colorAttachment.stencilLoadOp = FrameBufferLoadAction2VK(desc.AttachmentMRTs[i].StencilLoadAction);
 			colorAttachment.stencilStoreOp = FrameBufferStoreAction2VK(desc.AttachmentMRTs[i].StencilStoreAction);
-			colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			colorAttachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;// VK_IMAGE_LAYOUT_UNDEFINED;
 			if (desc.AttachmentMRTs[i].IsSwapChain)
 			{
 				colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
@@ -156,7 +104,7 @@ namespace NxRHI
 			depthAttachment.storeOp = FrameBufferStoreAction2VK(desc.AttachmentDepthStencil.StoreAction);
 			depthAttachment.stencilLoadOp = FrameBufferLoadAction2VK(desc.AttachmentDepthStencil.StencilLoadAction);;
 			depthAttachment.stencilStoreOp = FrameBufferStoreAction2VK(desc.AttachmentDepthStencil.StencilStoreAction);;
-			depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			depthAttachment.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 			depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 			depthAttachmentRef.attachment = (UINT)attachments.size();
@@ -229,30 +177,37 @@ namespace NxRHI
 		return true;
 
 	}
+
+	VKFrameBuffers::FrameBufferWrapper::FrameBufferWrapper(VKGpuDevice* device, VkFramebuffer ptr)
+	{
+		mDevice = device;
+		mFrameBuffer = ptr;
+	}
+	VKFrameBuffers::FrameBufferWrapper::~FrameBufferWrapper()
+	{
+		if (mFrameBuffer != nullptr)
+		{
+			vkDestroyFramebuffer(mDevice->mDevice, mFrameBuffer, mDevice->GetVkAllocCallBacks());
+			mFrameBuffer = nullptr;
+		}
+	}
+
 	VKFrameBuffers::VKFrameBuffers()
 	{
 
 	}
 	VKFrameBuffers::~VKFrameBuffers()
 	{
-		DestroyFrameBuffer();
-	}
-	void VKFrameBuffers::DestroyFrameBuffer()
-	{
-		auto device = mDeviceRef.GetPtr();
-		if (device == nullptr)
-			return;
-
-		device->DelayDestroy(mFrameBuffer);
 		mFrameBuffer = nullptr;
 	}
+	
 	void VKFrameBuffers::FlushModify()
 	{
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
 		
-		DestroyFrameBuffer();
+		mFrameBuffer = nullptr;
 
 		auto NumRTV = mRenderPass->Desc.NumOfMRT;
 		std::vector<VkImageView> attachments;
@@ -299,29 +254,13 @@ namespace NxRHI
 		framebufferInfo.height = height;
 		framebufferInfo.layers = 1;
 
-		if (vkCreateFramebuffer(device->mDevice, &framebufferInfo, device->GetVkAllocCallBacks(), &mFrameBuffer) != VK_SUCCESS)
+		VkFramebuffer ptr;
+		if (vkCreateFramebuffer(device->mDevice, &framebufferInfo, device->GetVkAllocCallBacks(), &ptr) != VK_SUCCESS)
 		{
 			ASSERT(false);
 			return;
 		}
-	}
-
-	VKSwapChain::FBackBuffer::FBackBuffer()
-	{
-
-	}
-	void VKSwapChain::FBackBuffer::CleanupVK(VKGpuDevice* device)
-	{
-		if (AcquireSemaphore != nullptr)
-		{
-			device->DelayDestroy(AcquireSemaphore);
-			AcquireSemaphore = nullptr;
-		}
-		if (RenderFinishSemaphore != nullptr)
-		{
-			device->DelayDestroy(RenderFinishSemaphore);
-			RenderFinishSemaphore = nullptr;
-		}
+		mFrameBuffer = MakeWeakRef(new FrameBufferWrapper(device, ptr));
 	}
 
 	VKSwapChain::VKSwapChain()
@@ -335,20 +274,29 @@ namespace NxRHI
 		if (device == nullptr)
 			return;
 		
-		for (auto i : BackBuffers)
+		for (auto& i : BackBuffers)
 		{
-			i->CleanupVK(device);
+			i.Texture->mImage = nullptr;
 		}
 		BackBuffers.clear();
 
-		device->DelayDestroy(mSwapChain);
-		mSurface = nullptr;
+		if (AcquireFence)
+		{
+			vkDestroyFence(device->mDevice, AcquireFence, device->GetVkAllocCallBacks());
+			AcquireFence = nullptr;
+		}
 
-		device->DelayDestroy(mSurface);
-		mSurface = nullptr;
+		if (mSwapChain)
+		{
+			vkDestroySwapchainKHR(device->mDevice, mSwapChain, device->GetVkAllocCallBacks());
+			mSwapChain = nullptr;
+		}
 
-		//device->DelayDestroy(AcquireImageFence);
-		//AcquireImageFence = nullptr;
+		if (mSurface)
+		{
+			vkDestroySurfaceKHR(device->GetVkInstance(), mSurface, device->GetVkAllocCallBacks());
+			mSurface = nullptr;
+		}
 	}
 
 	bool VKSwapChain::Init(VKGpuDevice* device, const FSwapChainDesc& desc)
@@ -375,7 +323,7 @@ namespace NxRHI
 
 		FFenceDesc fcdesc{};
 		fcdesc.InitValue = 0;
-		PresentFence = MakeWeakRef(device->CreateFence(&fcdesc, "SwapChain Fence"));
+		FramePresentFence = MakeWeakRef(device->CreateFence(&fcdesc, VStringA_FormatV("SwapChain Frame Fence").c_str()));
 		return Create(device, Desc.Width, Desc.Height);
 	}
 	bool CheckSwapSurfaceFormat(const VkSurfaceFormatKHR& format, const std::vector<VkSurfaceFormatKHR>& availableFormats)
@@ -465,27 +413,29 @@ namespace NxRHI
 	{
 		if (Desc.Width == w && Desc.Height == h)
 			return true;
+		
+		if (BackBuffers.size() != Desc.BufferCount)
+		{
+			for (auto& i : BackBuffers)
+			{
+				i.Texture->mImage = nullptr;
+			}
+			BackBuffers.clear();
+			BackBuffers.resize(Desc.BufferCount);
+			for (auto& i : BackBuffers)
+			{
+				i.Texture = MakeWeakRef(new VKTexture());
+				i.Texture->mImage = nullptr;
+			}
+		}
 
 		VKGpuDevice* device = (VKGpuDevice*)device1;
 		
-		vkDestroySwapchainKHR(device->mDevice, mSwapChain, device->GetVkAllocCallBacks());
-		mSwapChain = nullptr;
-
-		//device->DelayDestroy(mSurface);
-		vkDestroySurfaceKHR(device->GetVkInstance(), mSurface, device->GetVkAllocCallBacks());
-		mSurface = nullptr;
-
-#ifdef PLATFORM_WIN
+		if (mSwapChain)
 		{
-			VkWin32SurfaceCreateInfoKHR createInfo_surf = {};
-			createInfo_surf.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-			createInfo_surf.pNext = nullptr;
-			createInfo_surf.hinstance = nullptr;
-			createInfo_surf.hwnd = (HWND)Desc.OutputWindow;
-			vkCreateWin32SurfaceKHR(device->GetVkInstance(), &createInfo_surf, nullptr, &mSurface);
+			vkDestroySwapchainKHR(device->mDevice, mSwapChain, device->GetVkAllocCallBacks());
+			mSwapChain = nullptr;
 		}
-#endif
-		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device->mPhysicalDevice, mSurface, &mCapabilities);
 
 		Desc.Width = w;
 		Desc.Height = h;
@@ -555,25 +505,16 @@ namespace NxRHI
 		auto cmd = tsCmd.GetCmdList();
 		for (UINT i = 0; i < Desc.BufferCount; i++)
 		{
-			ASSERT(BackBuffers[i]->Texture);
-			ASSERT(BackBuffers[i]->AcquireSemaphore);
-			ASSERT(BackBuffers[i]->RenderFinishSemaphore);
-
 			auto pDx12Texture = (VKTexture*)GetBackBuffer(i);
 			pDx12Texture->mDeviceRef.FromObject(device);
-			if (pDx12Texture != nullptr)
-			{
-				pDx12Texture->Desc.Width = Desc.Width;
-				pDx12Texture->Desc.Height = Desc.Height;
-				pDx12Texture->mImage = swapChainImages[i];
-				pDx12Texture->GpuState = EGpuResourceState::GRS_Undefine;
-				pDx12Texture->TransitionTo(cmd, EGpuResourceState::GRS_Present);
-			}
-			else
-			{
-				ASSERT(false);
-			}
-			BackBuffers[i]->CreateRtvAndSrv(device);
+			
+			pDx12Texture->Desc.Width = Desc.Width;
+			pDx12Texture->Desc.Height = Desc.Height;
+			pDx12Texture->mImage = swapChainImages[i];
+			pDx12Texture->GpuState = EGpuResourceState::GRS_Undefine;
+			pDx12Texture->TransitionTo(cmd, EGpuResourceState::GRS_Present);
+
+			BackBuffers[i].CreateRtvAndSrv(device, i);
 		}
 
 		//CurrentBackBuffer = 0;
@@ -582,130 +523,116 @@ namespace NxRHI
 	}
 	bool VKSwapChain::Create(IGpuDevice* device1, UINT w, UINT h)
 	{
-		Desc.Width = w;
-		Desc.Height = h;
-		if (BackBuffers.size() != Desc.BufferCount)
-		{
-			BackBuffers.clear();
-			BackBuffers.resize(Desc.BufferCount);
-			for (UINT i = 0; i < Desc.BufferCount; i++)
-			{
-				BackBuffers[i] = MakeWeakRef(new FBackBuffer());
-			}
-		}
+		VkFenceCreateInfo fenceCreateInfo = {
+			.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+			.pNext = nullptr,
+			.flags = 0
+		};
+		VkResult result = vkCreateFence(((VKGpuDevice*)device1)->mDevice, &fenceCreateInfo, nullptr, &AcquireFence);
+		ASSERT(result == VK_SUCCESS);
 
-		VKGpuDevice* device = (VKGpuDevice*)device1;
-		VkSurfaceFormatKHR surfaceFormat;
-		surfaceFormat.format = Format2VKFormat(Desc.Format);
-		surfaceFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;// ColorSpace2VKFormat(desc.ColorSpace);
+		Desc.Width = w + 1;
+		Desc.Height = h + 1;
+		return Resize(device1, w, h);
+		//VKGpuDevice* device = (VKGpuDevice*)device1;
+		//VkSurfaceFormatKHR surfaceFormat;
+		//surfaceFormat.format = Format2VKFormat(Desc.Format);
+		//surfaceFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;// ColorSpace2VKFormat(desc.ColorSpace);
 
-		SwapChainSupportDetails scs;
-		QuerySwapChainSupport(device->mPhysicalDevice, mSurface, scs);
-		if (false == CheckSwapSurfaceFormat(surfaceFormat, scs.formats))
-			return false;
+		//SwapChainSupportDetails scs;
+		//QuerySwapChainSupport(device->mPhysicalDevice, mSurface, scs);
+		//if (false == CheckSwapSurfaceFormat(surfaceFormat, scs.formats))
+		//	return false;
 
-		VkPresentModeKHR presentMode = VkPresentModeKHR::VK_PRESENT_MODE_FIFO_KHR;
+		//VkPresentModeKHR presentMode = VkPresentModeKHR::VK_PRESENT_MODE_FIFO_KHR;
 
-		VkExtent2D extent;
-		extent.width = Desc.Width;
-		extent.height = Desc.Height;
+		//VkExtent2D extent;
+		//extent.width = Desc.Width;
+		//extent.height = Desc.Height;
 
-		VkSwapchainCreateInfoKHR createInfo = {};
-		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-		createInfo.surface = mSurface;
+		//VkSwapchainCreateInfoKHR createInfo = {};
+		//createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+		//createInfo.surface = mSurface;
 
-		createInfo.minImageCount = Desc.BufferCount;
-		createInfo.imageFormat = surfaceFormat.format;
-		createInfo.imageColorSpace = surfaceFormat.colorSpace;
-		createInfo.imageExtent = extent;
-		createInfo.imageArrayLayers = 1;
-		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		//createInfo.minImageCount = Desc.BufferCount;
+		//createInfo.imageFormat = surfaceFormat.format;
+		//createInfo.imageColorSpace = surfaceFormat.colorSpace;
+		//createInfo.imageExtent = extent;
+		//createInfo.imageArrayLayers = 1;
+		//createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-		auto queueFamilies = FindQueueFamilies(device->mPhysicalDevice, mSurface);
-		uint32_t queueFamilyIndices[] = { device->mCmdQueue->mGraphicsQueueIndex, device->mCmdQueue->mPresentQueueIndex };
-		queueFamilyIndices[0] = queueFamilies.graphicsFamily;
-		queueFamilyIndices[1] = queueFamilies.presentFamily;
-		if (device->mCmdQueue->GraphicsEqualPresentQueue())
-		{
-			createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-			/*createInfo.queueFamilyIndexCount = 1;
-			createInfo.pQueueFamilyIndices = queueFamilyIndices;*/
-		}
-		else
-		{
-			createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-			createInfo.queueFamilyIndexCount = 2;
-			createInfo.pQueueFamilyIndices = queueFamilyIndices;
-		}
+		//auto queueFamilies = FindQueueFamilies(device->mPhysicalDevice, mSurface);
+		//uint32_t queueFamilyIndices[] = { device->mCmdQueue->mGraphicsQueueIndex, device->mCmdQueue->mPresentQueueIndex };
+		//queueFamilyIndices[0] = queueFamilies.graphicsFamily;
+		//queueFamilyIndices[1] = queueFamilies.presentFamily;
+		//if (device->mCmdQueue->GraphicsEqualPresentQueue())
+		//{
+		//	createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		//	/*createInfo.queueFamilyIndexCount = 1;
+		//	createInfo.pQueueFamilyIndices = queueFamilyIndices;*/
+		//}
+		//else
+		//{
+		//	createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+		//	createInfo.queueFamilyIndexCount = 2;
+		//	createInfo.pQueueFamilyIndices = queueFamilyIndices;
+		//}
 
-		createInfo.preTransform = mCapabilities.currentTransform;
-		createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-		createInfo.presentMode = presentMode;
-		createInfo.clipped = VK_TRUE;
+		//createInfo.preTransform = mCapabilities.currentTransform;
+		//createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+		//createInfo.presentMode = presentMode;
+		//createInfo.clipped = VK_TRUE;
 
-		createInfo.oldSwapchain = VK_NULL_HANDLE;
+		//createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-		if (vkCreateSwapchainKHR(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mSwapChain) != VK_SUCCESS)
-		{
-			return false;
-		}
+		//if (vkCreateSwapchainKHR(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mSwapChain) != VK_SUCCESS)
+		//{
+		//	return false;
+		//}
 
-		std::vector<VkImage> swapChainImages;
-		{
-			swapChainImages.resize(Desc.BufferCount);
-			vkGetSwapchainImagesKHR(((VKGpuDevice*)device)->mDevice, mSwapChain, &Desc.BufferCount, swapChainImages.data());
-		}
+		//std::vector<VkImage> swapChainImages;
+		//{
+		//	swapChainImages.resize(Desc.BufferCount);
+		//	vkGetSwapchainImagesKHR(((VKGpuDevice*)device)->mDevice, mSwapChain, &Desc.BufferCount, swapChainImages.data());
+		//}
 
-		FTransientCmd tsCmd(device, QU_Default, "transition");
-		auto cmd = tsCmd.GetCmdList();
-		for (UINT i = 0; i < Desc.BufferCount; i++)
-		{
-			if (BackBuffers[i]->Texture == nullptr)
-			{
-				BackBuffers[i]->Texture = MakeWeakRef(new VKTexture());
-			}
-			if (BackBuffers[i]->RenderFinishSemaphore == nullptr)
-			{
-				/*FFenceDesc fcDesc{};
-				BackBuffers[i].PresentFence = MakeWeakRef((VKFence*)device->CreateFence(&fcDesc, "Swapchain present fence"));*/
+		//FTransientCmd tsCmd(device, QU_Default, "transition");
+		//auto cmd = tsCmd.GetCmdList();
+		//for (UINT i = 0; i < Desc.BufferCount; i++)
+		//{
+		//	if (BackBuffers[i].Texture == nullptr)
+		//	{
+		//		BackBuffers[i].Texture = MakeWeakRef(new VKTexture());
+		//	}
+		//	auto pDx12Texture = (VKTexture*)GetBackBuffer(i);
+		//	pDx12Texture->mDeviceRef.FromObject(device);
+		//	if (pDx12Texture != nullptr)
+		//	{
+		//		pDx12Texture->Desc.Format = Desc.Format;
+		//		pDx12Texture->Desc.Width = Desc.Width;
+		//		pDx12Texture->Desc.Height = Desc.Height;
+		//		pDx12Texture->mImage = swapChainImages[i];
+		//		//pDx12Texture->GpuState = EGpuResourceState::GRS_Present;
+		//		pDx12Texture->TransitionTo(cmd, EGpuResourceState::GRS_Present);
+		//	}
+		//	else
+		//	{
+		//		ASSERT(false);
+		//	}
+		//	BackBuffers[i].CreateRtvAndSrv(device, i);
+		//}
 
-				VkSemaphoreCreateInfo info{};
-				info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-				info.flags = 0;
+		////CurrentBackBuffer = 0;
 
-				BackBuffers[i]->AcquireSemaphore = MakeWeakRef(new VKBinaryFence(device));
-				BackBuffers[i]->RenderFinishSemaphore = MakeWeakRef(new VKBinaryFence(device));
-				BackBuffers[i]->RenderFinishFence = MakeWeakRef(new VKGpuToHostFence(device, true));
-			}
-			auto pDx12Texture = (VKTexture*)GetBackBuffer(i);
-			pDx12Texture->mDeviceRef.FromObject(device);
-			if (pDx12Texture != nullptr)
-			{
-				pDx12Texture->Desc.Format = Desc.Format;
-				pDx12Texture->Desc.Width = Desc.Width;
-				pDx12Texture->Desc.Height = Desc.Height;
-				pDx12Texture->mImage = swapChainImages[i];
-				//pDx12Texture->GpuState = EGpuResourceState::GRS_Present;
-				pDx12Texture->TransitionTo(cmd, EGpuResourceState::GRS_Present);
-			}
-			else
-			{
-				ASSERT(false);
-			}
-			BackBuffers[i]->CreateRtvAndSrv(device);
-		}
-
-		//CurrentBackBuffer = 0;
-
-		return true;
+		//return true;
 	}
 	ITexture* VKSwapChain::GetBackBuffer(UINT index)
 	{
-		return BackBuffers[index]->Texture;
+		return BackBuffers[index].Texture;
 	}
 	IRenderTargetView* VKSwapChain::GetBackRTV(UINT index)
 	{
-		return BackBuffers[index]->Rtv;
+		return BackBuffers[index].Rtv;
 	}
 	UINT VKSwapChain::GetCurrentBackBuffer()
 	{
@@ -717,31 +644,23 @@ namespace NxRHI
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
-		auto semaphore = BackBuffers[CurrentFrame]->AcquireSemaphore;
-		auto result = vkAcquireNextImageKHR(device->mDevice, mSwapChain, UINT64_MAX, semaphore->mSemaphore, VK_NULL_HANDLE, &CurrentBackBuffer);
+		
+		auto result = vkAcquireNextImageKHR(device->mDevice, mSwapChain, UINT64_MAX, VK_NULL_HANDLE, AcquireFence, &CurrentBackBuffer);
 		ASSERT(result == VK_SUCCESS);
-		auto rfinishFence = BackBuffers[CurrentBackBuffer]->RenderFinishFence;
-		
-		rfinishFence->Wait();
-		rfinishFence->Reset();
-		
-		auto cmdQueue = (VKCmdQueue*)device->GetCmdQueue();
-		cmdQueue->WaitFence(semaphore, 0);// semaphore->GetAspectValue());
+
+		vkWaitForFences(device->mDevice, 1, &AcquireFence, VK_TRUE, UINT64_MAX);
+		vkResetFences(device->mDevice, 1, &AcquireFence);
+		//Sure previos CurrentBackBuffer finished
+		FramePresentFence->Wait(BackBuffers[CurrentBackBuffer].FenceValue);
 	}
 	void VKSwapChain::Present(IGpuDevice* device, UINT SyncInterval, UINT Flags)
 	{
 		auto cmdQueue = (VKCmdQueue*)device->GetCmdQueue();
 
-		auto rfinishSemaphore = BackBuffers[CurrentFrame]->RenderFinishSemaphore;
-		auto rfinishFence = BackBuffers[CurrentBackBuffer]->RenderFinishFence;
-		
-		//cmdQueue->SignalFence(semaphore, 0);// semaphore->GetAspectValue());
-		
-		//rfinishFence->Reset();
+		device->GetCmdQueue()->IncreaseSignal(FramePresentFence, EQueueType::QU_Default);
+		BackBuffers[CurrentBackBuffer].FenceValue = FramePresentFence->GetExpectValue();
 
-		cmdQueue->QueueSignal(rfinishSemaphore, 0, rfinishFence->mFence, EQueueType::QU_Default);
-		
-		//cmdQueue->Flush();//temp code
+		cmdQueue->WaitFence(FramePresentFence, BackBuffers[CurrentBackBuffer].FenceValue, EQueueType::QU_Default);
 		
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -752,17 +671,14 @@ namespace NxRHI
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = swapChains;
 		presentInfo.pImageIndices = &CurrentBackBuffer;
-		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = &rfinishSemaphore->mSemaphore;
-		auto result = vkQueuePresentKHR(cmdQueue->mPresentQueue, &presentInfo);
+		presentInfo.waitSemaphoreCount = 0;
+		//presentInfo.pWaitSemaphores = &rfinishSemaphore->mSemaphore;
+		auto result = cmdQueue->SafeQueuePresentKHR(&presentInfo, EQueueType::QU_Default);
 		ASSERT(result == VK_SUCCESS);
 		
 		CurrentFrame = (CurrentFrame + 1) % (UINT)BackBuffers.size();
-
-		//device->mFrameFence->WaitToAspect();
-		device->GetCmdQueue()->IncreaseSignal(PresentFence, EQueueType::QU_Default);
 	}
-	void VKSwapChain::FBackBuffer::CreateRtvAndSrv(IGpuDevice* device)
+	void VKSwapChain::FBackBuffer::CreateRtvAndSrv(IGpuDevice* device, UINT index)
 	{
 		FRtvDesc rtvDesc{};
 		rtvDesc.SetTexture2D();
@@ -770,7 +686,7 @@ namespace NxRHI
 		rtvDesc.Height = Texture->Desc.Height;
 		rtvDesc.Format = Texture->Desc.Format;
 		rtvDesc.Texture2D.MipSlice = 0;
-		Rtv = MakeWeakRef(device->CreateRTV(Texture, &rtvDesc));
+		Rtv = MakeWeakRef((VKRenderTargetView*)device->CreateRTV(Texture, &rtvDesc));
 	}
 }
 

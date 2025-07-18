@@ -19,6 +19,7 @@ namespace NxRHI
 		}
 		virtual bool Map(UINT index, FMappedSubResource* res, bool forRead) override;
 		virtual void Unmap(UINT index) override;
+		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) override;
 		virtual void SetDebugName(const char* name) override;
@@ -45,6 +46,7 @@ namespace NxRHI
 		virtual bool Map(UINT subRes, FMappedSubResource* res, bool forRead) override;
 		virtual void Unmap(UINT subRes) override;
 		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
+		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) override;
 		virtual void SetDebugName(const char* name) override;
 		virtual IGpuBufferData* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) override;
@@ -126,7 +128,11 @@ namespace NxRHI
 	public:
 		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
 		
-		VkImageView					mImageView = (VkImageView)nullptr;
+		union
+		{
+			VkBufferView				mBufferView;
+			VkImageView					mImageView;
+		};
 		UINT						mFingerPrint = 0;
 	};
 
@@ -152,9 +158,14 @@ namespace NxRHI
 		}
 		bool Init(VKGpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc);
 		virtual void SetDebugName(const char* name) override;
+		void FreeView();
 	public:
 		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
-		VkImageView					mImageView = (VkImageView)nullptr;
+		union
+		{
+			VkBufferView				mBufferView;
+			VkImageView					mImageView;
+		};
 	};
 
 	class VKRenderTargetView : public IRenderTargetView

@@ -37,54 +37,76 @@ namespace NxRHI
 	{
 		IsDirty = true;
 	}
-	void VKGraphicDraw::BindResourceToDescriptSets(VKGpuDevice* device, 
-						const FEffectBinder* binder, IGpuResource* resource, std::vector<VkWriteDescriptorSet>& dsWriteSets)
+	void BindStageResourceToDescriptSets(VKGpuDevice* device,
+		const FShaderBinder* pBinder, IGpuResource* resource, VKDescriptorSetHolder* pDescriptorSet, std::vector<VkWriteDescriptorSet>& dsWriteSets, std::vector<FDescriptorSetInfo>& dsSetInfos, int index)
 	{
-		VkDescriptorImageInfo tmpVS{};
-		VkDescriptorBufferInfo tmpStructureBufferVS{};
-		VkDescriptorImageInfo tmpPS{};
-		VkDescriptorBufferInfo tmpStructureBufferPS{};
-		
-		auto pBinder = binder->VSBinder;
+		/*if (resource == nullptr)
+			return;*/
+		pDescriptorSet->UseResource(resource);
+		dsSetInfos[index] = FDescriptorSetInfo{};
+		VkDescriptorImageInfo& imageInfo = dsSetInfos[index].imageInfo;
+		VkDescriptorBufferInfo& bufferInfo = dsSetInfos[index].bufferInfo;
 		if (pBinder != nullptr)
 		{
 			VkWriteDescriptorSet descriptorWrite = {};
 			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = mDescriptorSetVS->DescriptorSet->RealObject;
+			descriptorWrite.dstSet = pDescriptorSet->DescriptorSet->RealObject;
 
 			descriptorWrite.dstBinding = pBinder->Slot;
 			descriptorWrite.dstArrayElement = 0;
 			descriptorWrite.descriptorCount = 1;
 
-			switch (binder->BindType)
+			switch (pBinder->Type)
 			{
 				case EShaderBindType::SBT_CBV:
 				{
-					auto pBuffer = ((VKCbView*)resource)->Buffer.UnsafeConvertTo<VKBuffer>();
-					tmpStructureBufferVS.buffer = pBuffer->mBuffer;
-					tmpStructureBufferVS.offset = 0;
-					tmpStructureBufferVS.range = pBuffer->Desc.Size;
+					if (resource)
+					{
+						auto pBuffer = ((VKCbView*)resource)->Buffer.UnsafeConvertTo<VKBuffer>();
+						bufferInfo.buffer = pBuffer->mBuffer;
+						bufferInfo.range = pBuffer->Desc.Size;
+					}
+					else
+					{
+						bufferInfo.buffer = nullptr;
+						bufferInfo.range = VK_WHOLE_SIZE;
+					}
+					
 					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-					descriptorWrite.pBufferInfo = &tmpStructureBufferVS;
+					descriptorWrite.pBufferInfo = &bufferInfo;
 					break;
 				}
 				case EShaderBindType::SBT_SRV:
 				{
 					if (pBinder->IsStructuredBuffer)
 					{
-						auto pBuffer = ((VKSrView*)resource)->Buffer.UnsafeConvertTo<VKBuffer>();
-						tmpStructureBufferVS.buffer = pBuffer->mBuffer;
-						tmpStructureBufferVS.offset = 0;
-						tmpStructureBufferVS.range = pBuffer->Desc.Size;
+						if (resource)
+						{
+							VKBuffer* pBuffer = ((VKSrView*)resource)->Buffer.UnsafeConvertTo<VKBuffer>();
+							bufferInfo.buffer = pBuffer->mBuffer;
+							bufferInfo.range = pBuffer->Desc.Size;
+						}
+						else
+						{
+							bufferInfo.buffer = nullptr;
+							bufferInfo.range = VK_WHOLE_SIZE;
+						}
+						bufferInfo.offset = 0;
 						descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-						descriptorWrite.pBufferInfo = &tmpStructureBufferVS;
+						descriptorWrite.pBufferInfo = &bufferInfo;
 					}
 					else
 					{
-						tmpVS.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-						tmpVS.imageView = ((VKSrView*)resource)->mImageView;
+						imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+						if (resource)
+						{
+							imageInfo.imageView = ((VKSrView*)resource)->mImageView;
+							pDescriptorSet->UseResource(((VKSrView*)resource)->Buffer);
+						}
+						else
+							imageInfo.imageView = nullptr;
 						descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-						descriptorWrite.pImageInfo = &tmpVS;
+						descriptorWrite.pImageInfo = &imageInfo;
 					}
 					break;
 				}
@@ -92,20 +114,33 @@ namespace NxRHI
 				{
 					if (pBinder->IsStructuredBuffer)
 					{
-						auto pBuffer = ((VKUaView*)resource)->Buffer.UnsafeConvertTo<VKBuffer>();
-						tmpStructureBufferVS.buffer = pBuffer->mBuffer;
-						tmpStructureBufferVS.offset = 0;
-						tmpStructureBufferVS.range = pBuffer->Desc.Size;
+						if (resource)
+						{
+							VKBuffer* pBuffer = ((VKUaView*)resource)->Buffer.UnsafeConvertTo<VKBuffer>();
+							bufferInfo.buffer = pBuffer->mBuffer;
+							bufferInfo.range = pBuffer->Desc.Size;
+						}
+						else
+						{
+							bufferInfo.buffer = nullptr;
+							bufferInfo.range = VK_WHOLE_SIZE;
+						}
+						bufferInfo.offset = 0;
 						descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-						descriptorWrite.pBufferInfo = &tmpStructureBufferVS;
+						descriptorWrite.pBufferInfo = &bufferInfo;
 					}
 					else
 					{
-						ASSERT(false);
-						tmpVS.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-						tmpVS.imageView = ((VKSrView*)resource)->mImageView;
-						descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
-						descriptorWrite.pImageInfo = &tmpVS;
+						//ASSERT(false);
+						imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+						descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+						if (resource)
+						{
+							imageInfo.imageView = ((VKUaView*)resource)->mImageView;
+						}
+						else
+							imageInfo.imageView = nullptr;
+						descriptorWrite.pImageInfo = &imageInfo;
 					}
 					break;
 				}
@@ -113,118 +148,114 @@ namespace NxRHI
 				{
 					//tmp.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 					//tmp.imageView = ((VKSrView*)resource)->mImageView;
-					tmpVS.sampler = ((VKSampler*)resource)->mView;
+					if (resource)
+						imageInfo.sampler = ((VKSampler*)resource)->mSamplder;
+					else
+						imageInfo.sampler = device->mNullSampler->mSamplder;
 					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-					descriptorWrite.pImageInfo = &tmpVS;
+					descriptorWrite.pImageInfo = &imageInfo;
 					break;
 				}
 				default:
 					break;
-			}
-
-			dsWriteSets.push_back(descriptorWrite);
-		}
-		pBinder = binder->PSBinder;
-		if (pBinder != nullptr)
-		{
-			VkWriteDescriptorSet descriptorWrite = {};
-			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = mDescriptorSetPS->DescriptorSet->RealObject;
-
-			descriptorWrite.dstBinding = pBinder->Slot;
-			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorCount = 1;
-
-			switch (binder->BindType)
-			{
-				case EShaderBindType::SBT_CBV:
-				{
-					auto pBuffer = ((VKCbView*)resource)->Buffer.UnsafeConvertTo<VKBuffer>();
-					tmpStructureBufferPS.buffer = pBuffer->mBuffer;
-					tmpStructureBufferPS.offset = 0;
-					tmpStructureBufferPS.range = pBuffer->Desc.Size;
-					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-					descriptorWrite.pBufferInfo = &tmpStructureBufferPS;
-					break;
 				}
-				case EShaderBindType::SBT_SRV:
-				{
-					if (pBinder->IsStructuredBuffer)
-					{
-						auto pBuffer = ((VKSrView*)resource)->Buffer.UnsafeConvertTo<VKBuffer>();
-						tmpStructureBufferPS.buffer = pBuffer->mBuffer;
-						tmpStructureBufferPS.offset = 0;
-						tmpStructureBufferPS.range = pBuffer->Desc.Size;
-						descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-						descriptorWrite.pBufferInfo = &tmpStructureBufferPS;
-					}
-					else
-					{
-						tmpPS.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-						tmpPS.imageView = ((VKSrView*)resource)->mImageView;
-						descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-						descriptorWrite.pImageInfo = &tmpPS;
-					}
-					break;
-				}
-				case EShaderBindType::SBT_UAV:
-				{
-					if (pBinder->IsStructuredBuffer)
-					{
-						auto pBuffer = ((VKUaView*)resource)->Buffer.UnsafeConvertTo<VKBuffer>();
-						tmpStructureBufferPS.buffer = pBuffer->mBuffer;
-						tmpStructureBufferPS.offset = 0;
-						tmpStructureBufferPS.range = pBuffer->Desc.Size;
-						descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-						descriptorWrite.pBufferInfo = &tmpStructureBufferPS;
-					}
-					else
-					{
-						ASSERT(false);
-						tmpPS.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-						tmpPS.imageView = ((VKSrView*)resource)->mImageView;
-						descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
-						descriptorWrite.pImageInfo = &tmpPS;
-					}
-					break;
-				}
-				case EShaderBindType::SBT_Sampler:
-				{
-					//tmp.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-					//tmp.imageView = ((VKSrView*)resource)->mImageView;
-					tmpPS.sampler = ((VKSampler*)resource)->mView;
-					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-					descriptorWrite.pImageInfo = &tmpPS;
-					break;
-				}
-				default:
-					break;
-			}
 
 			dsWriteSets.push_back(descriptorWrite);
 		}
 	}
+	void VKGraphicDraw::BindResourceToDescriptSets(VKGpuDevice* device, 
+						const FEffectBinder* binder, IGpuResource* resource, std::vector<VkWriteDescriptorSet>& dsWriteSets, int index)
+	{
+		BindStageResourceToDescriptSets(device, binder->VSBinder, resource, mDescriptorSetVS, dsWriteSets, mDescriptorSetInfos, index);
+		
+		BindStageResourceToDescriptSets(device, binder->PSBinder, resource, mDescriptorSetPS, dsWriteSets, mDescriptorSetInfos, index);
+	}
+	
 	void VKGraphicDraw::UpdateDescriptorSets(VKCommandList* vkCmd)
 	{
 		auto device = mDeviceRef.GetPtr();
 
-		mDescriptorSetVS = ShaderEffect->mVertexShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.AllocDecriptorSet();
-		mDescriptorSetPS = ShaderEffect->mPixelShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.AllocDecriptorSet();
+		mDescriptorSetVS = MakeWeakRef(ShaderEffect->mVertexShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.AllocDecriptorSet());
+		mDescriptorSetPS = MakeWeakRef(ShaderEffect->mPixelShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.AllocDecriptorSet());
 		vkCmd->GetCmdRecorder()->UseResource(mDescriptorSetVS);
 		vkCmd->GetCmdRecorder()->UseResource(mDescriptorSetPS);
 
-		std::vector<VkWriteDescriptorSet> dsWriteSets;
+		
+		mDsWriteSets.clear();
+		mDescriptorSetInfos.resize(BindResources.size());
+		int index = 0;
 		for (auto& i : BindResources)
 		{
-			BindResourceToDescriptSets(device, i.first, i.second.Resource, dsWriteSets);
+			switch (i.first->BindType)
+			{
+				case SBT_CBV:
+				{
+					IGpuResource* t = i.second.Resource;
+					if (i.first->VSBinder)
+					{
+						vkCmd->SetCBV(EShaderType::SDT_VertexShader, i.first->VSBinder, (ICbView*)t);
+					}
+					else if (i.first->PSBinder)
+					{
+						vkCmd->SetCBV(EShaderType::SDT_PixelShader, i.first->VSBinder, (ICbView*)t);
+					}
+				}
+				break;
+				case SBT_SRV:
+				{
+					IGpuResource* t = i.second.Resource;
+					if (i.first->VSBinder)
+					{
+						vkCmd->SetSrv(EShaderType::SDT_VertexShader, i.first->VSBinder, (ISrView*)t);
+					}
+					else if (i.first->PSBinder)
+					{
+						vkCmd->SetSrv(EShaderType::SDT_PixelShader, i.first->VSBinder, (ISrView*)t);
+					}
+				}
+				break;
+				case SBT_UAV:
+				{
+					IGpuResource* t = i.second.Resource;
+					if (i.first->VSBinder)
+					{
+						vkCmd->SetUav(EShaderType::SDT_VertexShader, i.first->VSBinder, (IUaView*)t);
+					}
+					else if (i.first->PSBinder)
+					{
+						vkCmd->SetUav(EShaderType::SDT_PixelShader, i.first->VSBinder, (IUaView*)t);
+					}
+				}
+				break;
+				case SBT_Sampler:
+				{
+					IGpuResource* t = i.second.Resource;
+					if (i.first->VSBinder)
+					{
+						vkCmd->SetSampler(EShaderType::SDT_VertexShader, i.first->VSBinder, (ISampler*)t);
+					}
+					else if (i.first->PSBinder)
+					{
+						vkCmd->SetSampler(EShaderType::SDT_PixelShader, i.first->VSBinder, (ISampler*)t);
+					}
+				}
+				break;
+				default:
+					break;
+			}
+			BindResourceToDescriptSets(device, i.first, i.second.Resource, mDsWriteSets, index++);
 		}
-		vkUpdateDescriptorSets(device->mDevice, (UINT)dsWriteSets.size(), &dsWriteSets[0], 0, nullptr);
+		if (mDsWriteSets.size() > 0)
+		{
+			vkUpdateDescriptorSets(device->mDevice, (UINT)mDsWriteSets.size(), &mDsWriteSets[0], 0, nullptr);
+		}
+		mDsWriteSets.clear();
 	}
 	void VKGraphicDraw::BindDescriptorSets(VKCommandList* vkCmd)
 	{
 		auto effect = (VKGraphicsEffect*)GetGraphicsEffect();
 		VkDescriptorSet dsSets[2] = { mDescriptorSetVS->DescriptorSet->RealObject, mDescriptorSetPS->DescriptorSet->RealObject };
-		vkCmdBindDescriptorSets(vkCmd->mCommandBuffer->RealObject, VK_PIPELINE_BIND_POINT_GRAPHICS, effect->mPipelineLayout, 0, 2, dsSets, 0, nullptr);
+		vkCmdBindDescriptorSets(vkCmd->GetVKCmdRecorder()->mCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, effect->mPipelineLayout, 0, 2, dsSets, 0, nullptr);
 	}
 	void VKGraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
@@ -256,47 +287,12 @@ namespace NxRHI
 				vkVBuffers[i] = pVertexArray->VertexBuffers[i]->Buffer.UnsafeConvertTo<VKBuffer>()->mBuffer;
 			}
 		}
-		vkCmdBindVertexBuffers(((VKCommandList*)cmdlist)->mCommandBuffer->RealObject, 0, VST_Number, vkVBuffers, vkOffsets);
+		vkCmdBindVertexBuffers(((VKCommandList*)cmdlist)->GetVKCmdRecorder()->mCommandBuffer, 0, VST_Number, vkVBuffers, vkOffsets);
 		cmdlist->SetIndexBuffer(Mesh->IndexBuffer, Mesh->IsIndex32);
 
 		if (AttachVB != nullptr)
 		{
 			AttachVB->Commit(cmdlist);
-		}
-
-		auto effect = (VKGraphicsEffect*)GetGraphicsEffect();
-		//effect->Commit(cmdlist, this);
-		for (auto& i : BindResources)
-		{
-			switch (i.first->BindType)
-			{
-				case SBT_CBV:
-				{
-					IGpuResource* t = i.second.Resource;
-					effect->BindCBV(cmdlist, i.first, (ICbView*)t);
-				}
-				break;
-				case SBT_SRV:
-				{
-					IGpuResource* t = i.second.Resource;
-					effect->BindSrv(cmdlist, i.first, (ISrView*)t);
-				}
-				break;
-				case SBT_UAV:
-				{
-					IGpuResource* t = i.second.Resource;
-					effect->BindUav(cmdlist, i.first, (IUaView*)t);
-				}
-				break;
-				case SBT_Sampler:
-				{
-					IGpuResource* t = i.second.Resource;
-					effect->BindSampler(cmdlist, i.first, (ISampler*)t);
-				}
-				break;
-				default:
-					break;
-			}
 		}
 
 		auto vkCmd = (VKCommandList*)cmdlist;
@@ -328,119 +324,64 @@ namespace NxRHI
 		IsDirty = true;
 	}
 	void VKComputeDraw::BindResourceToDescriptSets(VKGpuDevice* device,
-		const FShaderBinder* binder, IGpuResource* resource, std::vector<VkWriteDescriptorSet>& dsWriteSets)
+		const FShaderBinder* binder, IGpuResource* resource, std::vector<VkWriteDescriptorSet>& dsWriteSets, int index)
 	{
-		VkDescriptorImageInfo tmpVS{};
-		VkDescriptorBufferInfo tmpStructureBufferVS{};
-		auto pBinder = binder;
-		if (pBinder != nullptr)
-		{
-			VkWriteDescriptorSet descriptorWrite = {};
-			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = mDescriptorSetCS->DescriptorSet->RealObject;
-
-			descriptorWrite.dstBinding = pBinder->Slot;
-			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorCount = 1;
-
-			switch (binder->Type)
-			{
-				case EShaderBindType::SBT_CBV:
-				{
-					auto pBuffer = ((VKCbView*)resource)->Buffer.UnsafeConvertTo<VKBuffer>();
-					tmpStructureBufferVS.buffer = pBuffer->mBuffer;
-					tmpStructureBufferVS.offset = 0;
-					tmpStructureBufferVS.range = pBuffer->Desc.Size;
-					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-					descriptorWrite.pBufferInfo = &tmpStructureBufferVS;
-					break;
-				}
-				case EShaderBindType::SBT_SRV:
-				{
-					if (pBinder->IsStructuredBuffer)
-					{
-						auto pBuffer = ((VKSrView*)resource)->Buffer.UnsafeConvertTo<VKBuffer>();
-						tmpStructureBufferVS.buffer = pBuffer->mBuffer;
-						tmpStructureBufferVS.offset = 0;
-						tmpStructureBufferVS.range = pBuffer->Desc.Size;
-						descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-						descriptorWrite.pBufferInfo = &tmpStructureBufferVS;
-					}
-					else
-					{
-						/*auto pTexture = ((VKSrView*)resource)->Buffer.UnsafeConvertTo<VKTexture>();
-						if (pTexture->Desc.BindFlags & EBufferType::BFT_DSV)
-						{
-							tmpVS.imageLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
-						}
-						else
-						{
-							tmpVS.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-						}*/
-						tmpVS.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-						
-						tmpVS.imageView = ((VKSrView*)resource)->mImageView;
-						descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-						descriptorWrite.pImageInfo = &tmpVS;
-					}
-					break;
-				}
-				case EShaderBindType::SBT_UAV:
-				{
-					if (pBinder->IsStructuredBuffer)
-					{
-						auto pBuffer = ((VKUaView*)resource)->Buffer.UnsafeConvertTo<VKBuffer>();
-						tmpStructureBufferVS.buffer = pBuffer->mBuffer;
-						tmpStructureBufferVS.offset = 0;
-						tmpStructureBufferVS.range = pBuffer->Desc.Size;
-						descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-						descriptorWrite.pBufferInfo = &tmpStructureBufferVS;
-					}
-					else
-					{
-						ASSERT(false);
-						tmpVS.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-						tmpVS.imageView = ((VKSrView*)resource)->mImageView;
-						descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
-						descriptorWrite.pImageInfo = &tmpVS;
-					}
-					break;
-				}
-				case EShaderBindType::SBT_Sampler:
-				{
-					//tmp.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-					//tmp.imageView = ((VKSrView*)resource)->mImageView;
-					tmpVS.sampler = ((VKSampler*)resource)->mView;
-					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-					descriptorWrite.pImageInfo = &tmpVS;
-					break;
-				}
-				default:
-					break;
-			}
-
-			dsWriteSets.push_back(descriptorWrite);
-		}
+		BindStageResourceToDescriptSets(device, binder, resource, mDescriptorSetCS, dsWriteSets, mDescriptorSetInfos, index);
 	}
 
 	void VKComputeDraw::UpdateDescriptorSets(VKCommandList* vkCmd)
 	{
 		auto device = mDeviceRef.GetPtr();
-		mDescriptorSetCS = mEffect->mComputeShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.AllocDecriptorSet();
+		mDescriptorSetCS = MakeWeakRef(mEffect->mComputeShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.AllocDecriptorSet());
 		vkCmd->GetCmdRecorder()->UseResource(mDescriptorSetCS);
 
-		std::vector<VkWriteDescriptorSet> dsWriteSets;
+		mDsWriteSets.clear();
+		mDescriptorSetInfos.resize(BindResources.size());
+		int index = 0;
 		for (auto& i : BindResources)
 		{
-			BindResourceToDescriptSets(device, i.first, i.second.Resource, dsWriteSets);
+			switch (i.first->Type)
+			{
+				case SBT_CBV:
+				{
+					IGpuResource* t = i.second.Resource;
+					vkCmd->SetCBV(EShaderType::SDT_ComputeShader, i.first, (ICbView*)t);
+				}
+				break;
+				case SBT_SRV:
+				{
+					IGpuResource* t = i.second.Resource;
+					vkCmd->SetSrv(EShaderType::SDT_ComputeShader, i.first, (ISrView*)t);
+				}
+				break;
+				case SBT_UAV:
+				{
+					IGpuResource* t = i.second.Resource;
+					vkCmd->SetUav(EShaderType::SDT_ComputeShader, i.first, (IUaView*)t);
+				}
+				break;
+				case SBT_Sampler:
+				{
+					IGpuResource* t = i.second.Resource;
+					vkCmd->SetSampler(EShaderType::SDT_ComputeShader, i.first, (ISampler*)t);
+				}
+				break;
+				default:
+					break;
+			}
+			BindResourceToDescriptSets(device, i.first, i.second.Resource, mDsWriteSets, index++);
 		}
-		vkUpdateDescriptorSets(device->mDevice, (UINT)dsWriteSets.size(), &dsWriteSets[0], 0, nullptr);
+		if (mDsWriteSets.size() > 0)
+		{
+			vkUpdateDescriptorSets(device->mDevice, (UINT)mDsWriteSets.size(), &mDsWriteSets[0], 0, nullptr);
+		}
+		mDsWriteSets.clear();
 	}
 	void VKComputeDraw::BindDescriptorSets(VKCommandList* vkCmd)
 	{
 		auto vkEffect = mEffect.UnsafeConvertTo<VKComputeEffect>();
 		VkDescriptorSet dsSets = mDescriptorSetCS->DescriptorSet->RealObject;
-		vkCmdBindDescriptorSets(vkCmd->mCommandBuffer->RealObject, VK_PIPELINE_BIND_POINT_COMPUTE, vkEffect->mPipelineLayout, 0, 1, &dsSets, 0, nullptr);
+		vkCmdBindDescriptorSets(vkCmd->GetVKCmdRecorder()->mCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vkEffect->mPipelineLayout, 0, 1, &dsSets, 0, nullptr);
 	}
 	void VKComputeDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
@@ -451,40 +392,6 @@ namespace NxRHI
 
 		cmdlist->SetComputePipeline(mEffect);
 		
-		//mEffect->Commit(cmdlist);
-		for (auto& i : BindResources)
-		{
-			switch (i.first->Type)
-			{
-				case SBT_CBV:
-				{
-					IGpuResource* t = i.second.Resource;
-					cmdlist->SetCBV(EShaderType::SDT_ComputeShader, i.first, (ICbView*)t);
-				}
-				break;
-				case SBT_SRV:
-				{
-					IGpuResource* t = i.second.Resource;
-					cmdlist->SetSrv(EShaderType::SDT_ComputeShader, i.first, (ISrView*)t);
-				}
-				break;
-				case SBT_UAV:
-				{
-					IGpuResource* t = i.second.Resource;
-					cmdlist->SetUav(EShaderType::SDT_ComputeShader, i.first, (IUaView*)t);
-				}
-				break;
-				case SBT_Sampler:
-				{
-					IGpuResource* t = i.second.Resource;
-					cmdlist->SetSampler(EShaderType::SDT_ComputeShader, i.first, (ISampler*)t);
-				}
-				break;
-				default:
-					break;
-			}
-		}
-
 		UpdateDescriptorSets(vkCmd);
 		BindDescriptorSets(vkCmd);
 

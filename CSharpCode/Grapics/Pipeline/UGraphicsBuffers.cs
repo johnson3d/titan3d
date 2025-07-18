@@ -1,5 +1,4 @@
-﻿using NPOI.SS.Formula.Functions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Mail;
@@ -12,6 +11,7 @@ namespace EngineNS.Graphics.Pipeline
     {
         public NxRHI.EBufferType BufferViewTypes;// = NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV
         public EPixelFormat Format;
+        public NxRHI.EResourceMiscFlag Flags;
         public uint Width;
         public uint Height;
         public bool IsMatch(in FAttachBufferDesc desc)
@@ -176,6 +176,7 @@ namespace EngineNS.Graphics.Pipeline
                 desc.m_Width = BufferDesc.Width;
                 desc.m_Height = BufferDesc.Height;
                 desc.m_Format = BufferDesc.Format;
+                desc.MiscFlags = abfdesc.Flags;
 
                 if ((types & NxRHI.EBufferType.BFT_DSV) != 0)
                 {
@@ -252,6 +253,7 @@ namespace EngineNS.Graphics.Pipeline
             {
                 var desc = new NxRHI.FBufferDesc();
                 desc.SetDefault(false, types);
+                desc.MiscFlags = abfdesc.Flags;
                 desc.Size = BufferDesc.Width * BufferDesc.Height;
                 desc.StructureStride = BufferDesc.Width;
                 GpuResource = rc.CreateBuffer(in desc);

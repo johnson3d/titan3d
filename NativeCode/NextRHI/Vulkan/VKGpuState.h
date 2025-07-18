@@ -14,11 +14,11 @@ namespace NxRHI
 		~VKSampler();
 		bool Init(VKGpuDevice* device, const FSamplerDesc& desc);
 		virtual void* GetHWBuffer() override {
-			return mView;
+			return mSamplder;
 		}
 	public:
 		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
-		VkSampler		mView = nullptr;
+		VkSampler		mSamplder = nullptr;
 	};
 
 	class VKGpuPipeline : public IGpuPipeline

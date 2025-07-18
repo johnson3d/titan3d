@@ -118,6 +118,13 @@ namespace NxRHI
 		ICommandList : public IWeakRefObject
 	{
 	public:
+		enum ECmdListState
+		{
+			None = 0,
+			Recording,
+			ExecuteWaiting,
+			Executing,
+		};
 		ENGINE_RTTI(ICommandList);
 		virtual ICmdRecorder* BeginCommand() = 0;
 		virtual void EndCommand() = 0;

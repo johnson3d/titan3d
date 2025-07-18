@@ -1519,9 +1519,8 @@ namespace EngineNS.NxRHI
             {
                 height = height / 2;
                 width = width / 2;
-                mipLevel++;
 
-                if (height % Divisible != 0)
+                if (height % Divisible != 0 || width % Divisible != 0)
                 {
                     break;
                 }
@@ -1533,14 +1532,8 @@ namespace EngineNS.NxRHI
                         break;
                     }
                 }
-                else
-                {
-                    if ((height == 0 && width == 0))
-                    {
-                        break;
-                    }
-                }
 
+                mipLevel++;
                 if (height == 0)
                 {
                     height = 1;
@@ -2765,6 +2758,19 @@ namespace EngineNS.NxRHI
                 {
                     ar.Read(out desc.BlockSize);
                 }
+
+                for (int i = 0; i < desc.MipLevel; i++)
+                {
+                    if (i > (desc.BlockDimenstions.Count-1))
+                        continue;
+                    var blockWidth = desc.BlockDimenstions[i].X;
+                    var blockHeight = desc.BlockDimenstions[i].Y;
+                    if (blockWidth % 4!=0 || blockHeight %4!=0)
+                    {
+                        desc.MipLevel = i;
+                        break;
+                    }
+                }
             }
         }
         public static unsafe TtPicDesc LoadPictureDesc(IO.TtXndNode node)
@@ -3236,10 +3242,12 @@ namespace EngineNS.NxRHI
                         int dataIndex = (int)(j * mipLevel + i);
                         handles[dataIndex] = System.Runtime.InteropServices.GCHandle.Alloc(data, System.Runtime.InteropServices.GCHandleType.Pinned);
                         pInitData[dataIndex].m_pData = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(data, 0).ToPointer();
-                        if(desc.BlockSize==0)
+                        if (desc.BlockSize==0)
                         {
                             pInitData[dataIndex].m_RowPitch = (uint)desc.MipSizes[(int)realLevel].Z;
-                            pInitData[dataIndex].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.MipSizes[(int)realLevel].Y;
+                            //pInitData[dataIndex].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.MipSizes[(int)realLevel].Y;
+                            //System.Diagnostics.Debug.Assert(data.Length>=pInitData[dataIndex].m_DepthPitch);
+                            pInitData[dataIndex].m_DepthPitch = (uint)data.Length;
                         }
                         else
                         {
@@ -3248,7 +3256,9 @@ namespace EngineNS.NxRHI
                             var blockWidth = desc.BlockDimenstions[(int)realLevel].X;
                             var blockHeight = desc.BlockDimenstions[(int)realLevel].Y;
                             pInitData[dataIndex].m_RowPitch = (uint)(blockWidth * desc.BlockSize);
-                            pInitData[dataIndex].m_DepthPitch = pInitData[dataIndex].m_RowPitch * (uint)blockHeight;
+                            //pInitData[dataIndex].m_DepthPitch = pInitData[dataIndex].m_RowPitch * (uint)blockHeight;
+                            //System.Diagnostics.Debug.Assert(data.Length>=pInitData[dataIndex].m_DepthPitch);
+                            pInitData[dataIndex].m_DepthPitch = (uint)data.Length;
                         }
                     }
                 }

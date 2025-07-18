@@ -14,96 +14,199 @@
 NS_BEGIN
 
 namespace NxRHI
-{
-	template<>
-	struct AuxGpuResourceDestroyer<AutoRef<VKCommandBufferPagedObject>>
-	{
-		static void Destroy(AutoRef<VKCommandBufferPagedObject> obj, IGpuDevice* device1)
-		{
-			//ASSERT(false);
-			//vkResetCommandBuffer(obj->RealObject, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
-			obj->Free();
-		}
-	};
-	template<>
-	struct AuxGpuResourceDestroyer<VkCommandPool>
-	{
-		static void Destroy(VkCommandPool obj, IGpuDevice* device1)
-		{
-			auto device = (VKGpuDevice*)device1;
-			vkDestroyCommandPool(device->mDevice, obj, device->GetVkAllocCallBacks());
-		}
-	};
-	VKCommandbufferAllocator::~VKCommandbufferAllocator()
-	{
-		
-	}
-	void VKCmdBufferManager::Initialize(VKGpuDevice* device)
+{	
+	void VKThreadCmdBufferManager::Initialize(VKGpuDevice* device)
 	{
 		mDevice = device;
-	}
-	void VKCmdBufferManager::InitContext(VKCommandbufferAllocator* context)
-	{
-		context->Creator.mDeviceRef.FromObject(mDevice);
-	}
-	VKCommandBufferPage::~VKCommandBufferPage()
-	{
-		//Allocator.GetPtr();
-	}
-	VKCommandBufferCreator::PageType* VKCommandBufferCreator::CreatePage(UINT pageSize)
-	{
-		auto device = mDeviceRef.GetPtr();
 		VkCommandPoolCreateInfo poolInfo = {};
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		poolInfo.queueFamilyIndex = ((VKCmdQueue*)device->GetCmdQueue())->mGraphicsQueueIndex;
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-		VkCommandPool descPool;
-		if (vkCreateCommandPool(device->mDevice, &poolInfo, device->GetVkAllocCallBacks(), &descPool) != VK_SUCCESS)
+		if (vkCreateCommandPool(device->mDevice, &poolInfo, device->GetVkAllocCallBacks(), &mCmdPool) != VK_SUCCESS)
 		{
-			return nullptr;
+			ASSERT(false);
+			return;
 		}
+	}
+	AutoRef<VKCmdRecorder> VKThreadCmdBufferManager::Alloc(VKCommandList* cmdlist)
+	{
+		VAutoVSLLock lk(mLocker);
+		if (CmdAllocators.size() == 0)
+		{
+			for (int i = 0; i < 10; i++)
+			{
+				AutoRef<VKCmdRecorder> tmp = MakeWeakRef(new VKCmdRecorder());
+				VkCommandBufferAllocateInfo allocInfo{};
+				allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+				allocInfo.commandPool = mCmdPool;
+				allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+				allocInfo.commandBufferCount = 1;
 
-		auto result = new VKCommandBufferPage();
-		result->mCommandPool = descPool;
+				VkCommandBuffer buffer = nullptr;
+				auto hr = vkAllocateCommandBuffers(mDevice->mDevice, &allocInfo, &buffer);
+				if (hr != VK_SUCCESS)
+				{
+					return nullptr;
+				}
+				tmp->mCommandBuffer = buffer;
+				CmdAllocators.push(tmp);
+			}
+		}
+		auto result = CmdAllocators.front();
+		ASSERT(result->GetDrawcallNumber() == 0);
+		result->mCmdlist = cmdlist;
+		result->ResetGpuDraws();
+
+		CmdAllocators.pop();
 		return result;
 	}
-	VKCommandBufferCreator::PagedObjectType* VKCommandBufferCreator::CreatePagedObject(PageType* page, UINT index)
+	void VKThreadCmdBufferManager::Free(const AutoRef<VKCmdRecorder>& allocator, UINT64 waitValue, AutoRef<IFence>& fence)
 	{
-		auto device = mDeviceRef.GetPtr();
-
-		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.commandPool = ((VKCommandBufferPage*)page)->mCommandPool;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandBufferCount = 1;
-
-		VkCommandBuffer tmp = nullptr;
-		auto hr = vkAllocateCommandBuffers(device->mDevice, &allocInfo, &tmp);
-		if (hr != VK_SUCCESS)
+		ASSERT(waitValue > 0);
+		VAutoVSLLock lk(mLocker);
+		ASSERT(allocator != nullptr);
+		if (allocator->GetDrawcallNumber() == 0)
 		{
-			return nullptr;
+			allocator->ResetGpuDraws();
+			allocator->mCmdlist = nullptr;
+			CmdAllocators.push(allocator);
+			return;
 		}
-
-		auto result = new VKCommandBufferPagedObject();
-		result->RealObject = tmp;
-
-		return result;
+		allocator->mCmdlist = nullptr;
+		FWaitRecycle tmp;
+		tmp.Allocator = allocator;
+		tmp.WaitValue = waitValue;
+		tmp.Fence = fence;
+		tmp.WaitFrameCount = 5;
+		Recycles.push_back(tmp);
 	}
-	void VKCommandBufferCreator::OnAlloc(AllocatorType* pAllocator, PagedObjectType* obj)
+	void VKThreadCmdBufferManager::UnsafeDirectFree(const AutoRef<VKCmdRecorder>& allocator)
+	{//never used
+		ASSERT(allocator != nullptr);
+		VAutoVSLLock lk(mLocker);
+		CmdAllocators.push(allocator);
+	}
+	void VKThreadCmdBufferManager::TickRecycle()
 	{
+		VAutoVSLLock lk(mLocker);
+		for (auto i = Recycles.begin(); i != Recycles.end(); )
+		{
+			auto value = i->Fence->GetCompletedValue();
+			auto waitValue = i->WaitValue;
+			ASSERT(waitValue > 0);
+			//fuck off: d12 or driver reference the resource but didn't AddRef
+			if (value >= waitValue)
+			{
+				ASSERT(i->Allocator->GetDrawcallNumber() != 0);
+				i->Allocator->ResetGpuDraws();
+				CmdAllocators.push(i->Allocator);
+				i = Recycles.erase(i);
+			}
+			else
+			{
+				i->WaitFrameCount--;
+				if (i->WaitFrameCount == 0)
+				{
+					VFX_LTRACE(ELTT_Warning, "VKCmdAllocator always alive %d / %d\r\n", value, waitValue);
+				}
+				i++;
+			}
+		}
+	}
+	void VKThreadCmdBufferManager::FinalCleanup()
+	{
+		VAutoVSLLock lk(mLocker);
+		for (auto i = Recycles.begin(); i != Recycles.end(); )
+		{
+			auto value = i->Fence->GetCompletedValue();
+			auto waitValue = i->WaitValue;
+			ASSERT(waitValue > 0);
+			if (value >= waitValue)
+			{
+				i->Allocator->FinalCleanup(this);
 
+				CmdAllocators.push(i->Allocator);
+				i = Recycles.erase(i);
+			}
+			else
+			{
+				i++;
+			}
+		}
+		//ASSERT(Recycles.size() == 0);
+		while (CmdAllocators.size() > 0)
+		{
+			auto recorder = CmdAllocators.front();
+			CmdAllocators.pop();
+			recorder->FinalCleanup(this);
+		}
+		if (Recycles.size() == 0)
+		{
+			vkDestroyCommandPool(mDevice->mDevice, mCmdPool, mDevice->GetVkAllocCallBacks());
+			mCmdPool = nullptr;
+		}
+		//mDevice = nullptr;
 	}
-	void VKCommandBufferCreator::OnFree(AllocatorType* pAllocator, PagedObjectType* obj)
+
+	thread_local VKThreadCmdBufferManager* VKCmdBufferManager::mThreadManager = nullptr;
+
+	AutoRef<VKCmdRecorder> VKCmdBufferManager::Alloc(VKCommandList* cmdlist)
 	{
-		//vkResetCommandBuffer(obj->RealObject, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+		if (mThreadManager == nullptr)
+		{
+			mThreadManager = new VKThreadCmdBufferManager();
+			mThreadManager->Initialize(mDevice);
+			mThreadManager->mThreadStaticAddr = &mThreadManager;
+			mAllManagers.push_back(mThreadManager);
+		}
+		return mThreadManager->Alloc(cmdlist);
 	}
-	void VKCommandBufferCreator::FinalCleanup(MemAlloc::FPage<VkCommandBuffer>* page)
+	void VKCmdBufferManager::Free(const AutoRef<VKCmdRecorder>& allocator, UINT64 waitValue, AutoRef<IFence>& fence)
 	{
-		auto device = mDeviceRef.GetPtr();
-		auto pPage = (VKCommandBufferPage*)page;
-		vkDestroyCommandPool(device->mDevice, pPage->mCommandPool, device->GetVkAllocCallBacks());
-		pPage->mCommandPool = nullptr;
+		mThreadManager->Free(allocator, waitValue, fence);
+	}
+	void VKCmdBufferManager::TickRecycle()
+	{
+		for (auto i : mAllManagers)
+		{
+			i->TickRecycle();
+		}
+	}
+	bool VKCmdBufferManager::FinalCleanup()
+	{
+		int remain = 0;
+		for (auto i : mAllManagers)
+		{
+			i->FinalCleanup();
+			remain += (int)i->Recycles.size();
+		}
+		if (remain == 0)
+		{
+			for (auto i : mAllManagers)
+			{
+				(*i->mThreadStaticAddr) = nullptr;
+				delete i;
+			}
+			mAllManagers.clear();
+		}
+		return remain == 0;
+	}
+
+	void VKCmdRecorder::ResetGpuDraws()
+	{
+		//When main thread call TickRecycle(),[VkCommandPool mCmdPool] maybe used by other thread, so we can't reset command buffer here.
+		// VKCommandList::BeginCommand() will reset command buffer.And every thing is fine
+		//vkResetCommandBuffer(mCommandBuffer, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+		ICmdRecorder::ResetGpuDraws();
+		mCmdlist = nullptr;
+	}
+
+	void VKCmdRecorder::FinalCleanup(VKThreadCmdBufferManager* manager)
+	{
+		ResetGpuDraws();
+		vkResetCommandBuffer(mCommandBuffer, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+		vkFreeCommandBuffers(manager->mDevice->mDevice, manager->mCmdPool, 1, &mCommandBuffer);
 	}
 
 	VKCommandList::VKCommandList()
@@ -118,11 +221,7 @@ namespace NxRHI
 			return;
 		}
 
-		if (mCommandBuffer != nullptr)
-		{
-			GetVKDevice()->DelayDestroy(mCommandBuffer);
-			mCommandBuffer = nullptr;
-		}
+		mCmdRecorder = nullptr;
 	}
 	bool VKCommandList::Init(VKGpuDevice* device)
 	{
@@ -130,73 +229,133 @@ namespace NxRHI
 		
 		FFenceDesc desc;
 		desc.InitValue = 0;
-		mCommitFence = MakeWeakRef(device->CreateFence(&desc, "Dx12Cmdlist Commit fence"));
+		mCommitFence = MakeWeakRef(device->CreateFence(&desc, "VKCmdlist Commit fence"));
 		
 		//mCommandBuffer = device->mCmdAllocatorManager->Alloc(device);
 
-		mIsRecording = false;
 		return true;
 	}
+
 	ICmdRecorder* VKCommandList::BeginCommand()
 	{
-		return BeginCommand(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-	}
-	ICmdRecorder* VKCommandList::BeginCommand(VkCommandBufferUsageFlagBits flags)
-	{
-		if (mIsRecording)
+		if (mCmdListState != ECmdListState::None)
 		{
 			ASSERT(false);
-			return nullptr;
+			SetMemoryBarrier(EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, EBarrierAccess::BAS_MemoryWrite, (EBarrierAccess)(EBarrierAccess::BAS_MemoryRead | EBarrierAccess::BAS_MemoryWrite));
+			vkEndCommandBuffer(mCmdRecorder.UnsafeConvertTo<VKCmdRecorder>()->mCommandBuffer);
 		}
-		ICommandList::BeginCommand();
-		ASSERT(mCommandBuffer == nullptr);
-		/*if (mCommandBuffer != nullptr)
+
+		ASSERT(mCmdRecorder == nullptr);
+		if (mCmdRecorder == nullptr)
+		{
+			mCmdRecorder = GetVKDevice()->mCmdAllocatorManager->Alloc(this);
+		}
+		else
 		{
 			ASSERT(false);
-			auto targetValue = mCommitFence->GetAspectValue() + 1;
-			GetVKDevice()->mCmdAllocatorManager->GetThreadContext()->PushRecycle(mCommitFence, targetValue, mCommandBuffer);
-			mCommandBuffer = nullptr;
-		}*/
-		auto vkCmdBuffer = GetVKDevice()->mCmdAllocatorManager->GetThreadContext()->Alloc();;
-		mCommandBuffer = (VKCommandBufferPagedObject*)vkCmdBuffer.GetPtr();
-		//MemAlloc::FPagedObject<VkCommandBuffer>* pTmp = mCommandBuffer;
+			mCmdRecorder->ResetGpuDraws();
+		}
+
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-		vkResetCommandBuffer(mCommandBuffer->RealObject, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
-		vkBeginCommandBuffer(mCommandBuffer->RealObject, &beginInfo);
+		vkResetCommandBuffer(GetVKCmdRecorder()->mCommandBuffer, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+		vkBeginCommandBuffer(GetVKCmdRecorder()->mCommandBuffer, &beginInfo);
 		
-		mIsRecording = true;
-		return nullptr;
+		mCmdListState = ECmdListState::Recording;
+		GetVKCmdRecorder()->mIsRecording = true;
+		this->BeginEvent(mDebugName.c_str());
+
+		return mCmdRecorder;
 	}
+	
 	void VKCommandList::EndCommand()
 	{
-		EndCommand(true);
-	}
-	void VKCommandList::EndCommand(bool bRecycle)
-	{
+		//this->EndEvent();
+		this->EndEvent();
 		ICommandList::EndCommand();
-		if (mIsRecording)
+		if (mCmdListState == ECmdListState::Recording)
 		{
 			SetMemoryBarrier(EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, EBarrierAccess::BAS_MemoryWrite, (EBarrierAccess)(EBarrierAccess::BAS_MemoryRead | EBarrierAccess::BAS_MemoryWrite));
-			vkEndCommandBuffer(mCommandBuffer->RealObject);
+			vkEndCommandBuffer(mCmdRecorder.UnsafeConvertTo<VKCmdRecorder>()->mCommandBuffer);
 		}
-		mIsRecording = false;
-	}
-		
-	void VKCommandList::Commit(VKCmdQueue* queue, EQueueType type)
-	{
-		auto device = GetVKDevice();
-		if (mCommandBuffer != nullptr)
+		else
 		{
-			device->DelayDestroy(mCommandBuffer);
-			mCommandBuffer = nullptr;
+			ASSERT(false);
 		}
+		mCmdListState = ECmdListState::ExecuteWaiting;
+		GetVKCmdRecorder()->mIsRecording = false;
+	}
+
+	void VKCommandList::Commit(VKCmdQueue* cmdQueue, EQueueType type)
+	{
+		ASSERT(mCmdListState == ECmdListState::ExecuteWaiting);
+		if (GetVKCmdRecorder() == nullptr)
+			return;
+		ASSERT(GetVKCmdRecorder()->mIsRecording == false);
+		auto device = mDevice.GetCastPtr<VKGpuDevice>();
+		//device->EnableImmExecute = true;
+		if (device->EnableImmExecute)
+		{
+			cmdQueue->Flush(type);//copy to
+		}
+
+		auto vkFence = mCommitFence.UnsafeConvertTo<VKFence>();
+		if (GetCmdRecorder()->GetDrawcallNumber() > 0)
+		{
+			VkSubmitInfo submitInfo{};
+			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+			submitInfo.commandBufferCount = 1;
+			submitInfo.pCommandBuffers = &GetVKCmdRecorder()->mCommandBuffer;
+			submitInfo.waitSemaphoreCount = 0;
+			submitInfo.pWaitSemaphores = nullptr;
+			VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;/*VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT |
+				VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT |
+				VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;*/
+			submitInfo.pWaitDstStageMask = &waitStage;
+			submitInfo.signalSemaphoreCount = 1;
+			VkSemaphore signalSemas[1]{};
+			signalSemas[0] = vkFence->mSemaphore;
+			submitInfo.pSignalSemaphores = signalSemas;
+
+			VkTimelineSemaphoreSubmitInfo timelineInfo{};
+			submitInfo.pNext = &timelineInfo;
+			timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
+
+			timelineInfo.waitSemaphoreValueCount = 0;
+			timelineInfo.pWaitSemaphoreValues = nullptr;
+
+			UINT64 signalValues[1]{};
+			signalValues[0] = ++vkFence->ExpectValue;
+			timelineInfo.signalSemaphoreValueCount = 1;
+			timelineInfo.pSignalSemaphoreValues = signalValues;
+
+			cmdQueue->SafeQueueSubmit(1, &submitInfo, nullptr, EQueueType::QU_Default);
+		}
+		else
+		{
+			//PIXBeginEvent(cmdQueue->mCmdQueue.GetPtr(), 0, mDebugNameW.c_str());
+			//cmdQueue->mCmdQueue->ExecuteCommandLists(1, (ID3D12CommandList**)&mContext);
+			//PIXEndEvent(cmdQueue->mCmdQueue.GetPtr());
+		}
+		mCmdListState = ECmdListState::None;
+
+		//EndEvent();
+		if (device->EnableImmExecute)
+		{
+			cmdQueue->Flush(type);
+			//device->mDeviceRemovedCallback = nullptr;
+		}
+
+		auto targetValue = cmdQueue->IncreaseSignal(mCommitFence, type);
+		GetVKDevice()->mCmdAllocatorManager->Free(GetVKCmdRecorder(), targetValue, mCommitFence);
+
+		mCmdRecorder = nullptr;
 	}
 
 	bool VKCommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
 	{
-		ASSERT(mIsRecording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		mDebugName = name;
 		BeginEvent(name);
 		mCurRtvs.clear();
@@ -222,14 +381,15 @@ namespace NxRHI
 			}
 		}
 		mCurrentFrameBuffers = fb;
-		[[maybe_unused]] auto dxFB = ((VKFrameBuffers*)fb);
+		GetCmdRecorder()->UseResource(fb);
+		GetCmdRecorder()->UseResource(((VKFrameBuffers*)fb)->mFrameBuffer);
 
 		auto pVKFrameBuffers = ((VKFrameBuffers*)fb);
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		auto pRenderPass = fb->mRenderPass.UnsafeConvertTo<VKRenderPass>();
 		renderPassInfo.renderPass = pRenderPass->mRenderPass;
-		renderPassInfo.framebuffer = pVKFrameBuffers->mFrameBuffer;
+		renderPassInfo.framebuffer = pVKFrameBuffers->mFrameBuffer->mFrameBuffer;
 		if (renderPassInfo.framebuffer == nullptr)
 			return false;
 
@@ -274,13 +434,13 @@ namespace NxRHI
 		renderPassInfo.pClearValues = clearValues;
 
 		//BeginEvent(debugName);
-		vkCmdBeginRenderPass(mCommandBuffer->RealObject, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+		vkCmdBeginRenderPass(GetVKCmdRecorder()->mCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 		return true;
 	}
 	void VKCommandList::SetViewport(UINT Num, const FViewPort* pViewports)
 	{
-		ASSERT(mIsRecording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		//mContext->RSSetViewports(Num, (const D3D12_VIEWPORT*)pViewports);
 		mCurrentViewports.resize(Num);
 		for (UINT i = 0; i < Num; i++)
@@ -296,23 +456,23 @@ namespace NxRHI
 			mVkViewport.minDepth = pViewports->MinDepth;
 			mVkViewport.maxDepth = pViewports->MaxDepth;
 		}
-		vkCmdSetViewport(mCommandBuffer->RealObject, 0, Num, (const VkViewport*)pViewports);
+		vkCmdSetViewport(GetVKCmdRecorder()->mCommandBuffer, 0, Num, (const VkViewport*)pViewports);
 	}
 	void VKCommandList::UseCurrentViewports()
 	{
 		if (mCurrentViewports.size() == 0)
 			return;
-		vkCmdSetViewport(mCommandBuffer->RealObject, 0, (UINT)mCurrentViewports.size(), (const VkViewport*)&mCurrentViewports[0]);
+		vkCmdSetViewport(GetVKCmdRecorder()->mCommandBuffer, 0, (UINT)mCurrentViewports.size(), (const VkViewport*)&mCurrentViewports[0]);
 	}
 	void VKCommandList::SetScissor(UINT Num, const FScissorRect* pScissor)
 	{
-		ASSERT(mIsRecording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		//mContext->RSSetScissorRects(Num, (const D3D12_RECT*)pScissor);
 		ASSERT(Num < 32);
 		mCurrentScissorRects.resize(Num);
 		if (Num == 0)
 		{
-			vkCmdSetScissor(mCommandBuffer->RealObject, 0, 0, nullptr);
+			vkCmdSetScissor(GetVKCmdRecorder()->mCommandBuffer, 0, 0, nullptr);
 		}
 		else
 		{
@@ -341,21 +501,21 @@ namespace NxRHI
 					return;
 				}
 			}
-			vkCmdSetScissor(mCommandBuffer->RealObject, 0, Num, &mCurrentScissorRects[0]);
+			vkCmdSetScissor(GetVKCmdRecorder()->mCommandBuffer, 0, Num, &mCurrentScissorRects[0]);
 		}
 	}
 	void VKCommandList::UseCurrentScissors()
 	{
 		if (mCurrentScissorRects.size() == 0)
 			return;
-		vkCmdSetScissor(mCommandBuffer->RealObject, 0, (UINT)mCurrentScissorRects.size(), &mCurrentScissorRects[0]);
+		vkCmdSetScissor(GetVKCmdRecorder()->mCommandBuffer, 0, (UINT)mCurrentScissorRects.size(), &mCurrentScissorRects[0]);
 	}
 	void VKCommandList::EndPass()
 	{
-		if (mIsRecording)
-		{
-			vkCmdEndRenderPass(mCommandBuffer->RealObject);
-		}
+		ASSERT(mCurrentFrameBuffers != nullptr);
+		ASSERT(mCmdListState == ECmdListState::Recording);
+
+		vkCmdEndRenderPass(GetVKCmdRecorder()->mCommandBuffer);
 		mCurrentFrameBuffers = nullptr;
 		for (auto& i : mCurRtvs)
 		{
@@ -371,26 +531,26 @@ namespace NxRHI
 		}
 
 		EndEvent();
-		ASSERT(mIsRecording);
 	}
 	void VKCommandList::BeginEvent(const char* info)
 	{
-		ASSERT(mIsRecording);
-		
+		ASSERT(mCmdListState == ECmdListState::Recording);
+		GetCmdRecorder()->mDirectDrawNum++;
 		VkDebugMarkerMarkerInfoEXT markerInfo{};
 		markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
 		markerInfo.pMarkerName = info;
-		VKGpuSystem::vkCmdDebugMarkerBeginEXT(mCommandBuffer->RealObject, &markerInfo);
+		VKGpuSystem::vkCmdDebugMarkerBeginEXT(GetVKCmdRecorder()->mCommandBuffer, &markerInfo);
 	}
 	void VKCommandList::EndEvent()
 	{
-		ASSERT(mIsRecording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
+		GetCmdRecorder()->mDirectDrawNum++;
 		
-		VKGpuSystem::vkCmdDebugMarkerEndEXT(mCommandBuffer->RealObject);
+		VKGpuSystem::vkCmdDebugMarkerEndEXT(GetVKCmdRecorder()->mCommandBuffer);
 	}
 	void VKCommandList::SetShader(IShader* shader)
 	{
-		ASSERT(mIsRecording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		/*switch (shader->Desc->Type)
 		{
 			case EShaderType::SDT_ComputeShader:
@@ -405,91 +565,50 @@ namespace NxRHI
 	}
 	void VKCommandList::SetCBV(EShaderType type, const FShaderBinder* binder, ICbView* buffer)
 	{
-		ASSERT(mIsRecording);
-		//buffer->FlushDirty(this);
-		
-		//buffer->Buffer->TransitionTo(this, EGpuResourceState::GRS_GenericRead);
-		//auto handle = ((VKCbView*)buffer)->mView;
-		/*auto device = GetDX12Device()->mDevice;
-		if (type == EShaderType::SDT_ComputeShader)
-		{
-			device->CopyDescriptorsSimple(1, mCurrentComputeSrvTable->GetHandle(binder->DescriptorIndex), handle->Handle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		}
-		else
-		{
-			device->CopyDescriptorsSimple(1, mCurrentSrvTable->GetHandle(binder->DescriptorIndex), handle->Handle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		}*/
-		//vkUpdateDescriptorSets
+		ASSERT(mCmdListState == ECmdListState::Recording);
 	}
 	void VKCommandList::SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view)
 	{
-		ASSERT(mIsRecording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
+		if (view == nullptr)
+			return;
 		view->GetResourceState()->SetAccessFrame(IWeakRefObject::EngineCurrentFrame);
-		/*if (type == EShaderType::SDT_PixelShader)
-			view->Buffer->TransitionTo(this, EGpuResourceState::GRS_SrvPS);
+		ASSERT(view->Buffer->GetGpuResourceState() != EGpuResourceState::GRS_RenderTarget);
+
+		if (type == EShaderType::SDT_PixelShader)
+			view->Buffer->TransitionTo(this, (EGpuResourceState)(EGpuResourceState::GRS_SrvPS));
+		else if (type == EShaderType::SDT_VertexShader)
+			view->Buffer->TransitionTo(this, (EGpuResourceState)(EGpuResourceState::GRS_GenericRead));
 		else
-			view->Buffer->TransitionTo(this, EGpuResourceState::GRS_GenericRead);*/
-		//auto handle = ((VKSrView*)view)->mBufferView;
-		/*auto device = GetDX12Device()->mDevice;
-		if (type == EShaderType::SDT_ComputeShader)
-		{
-			device->CopyDescriptorsSimple(1, mCurrentComputeSrvTable->GetHandle(binder->DescriptorIndex), handle->Handle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		}
-		else
-		{
-			device->CopyDescriptorsSimple(1, mCurrentSrvTable->GetHandle(binder->DescriptorIndex), handle->Handle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		}*/
-		//vkUpdateDescriptorSets
+			view->Buffer->TransitionTo(this, (EGpuResourceState)(EGpuResourceState::GRS_GenericRead));
 	}
 	void VKCommandList::SetUav(EShaderType type, const FShaderBinder* binder, IUaView* view)
 	{
-		ASSERT(mIsRecording);
-		/*auto pAddr = ((ID3D12Resource*)view->Buffer->GetHWBuffer())->GetGPUVirtualAddress();
-		mContext->SetGraphicsRootUnorderedAccessView(binder->DescriptorIndex, pAddr);*/
-		//view->Buffer->TransitionTo(this, EGpuResourceState::GRS_Uav);
-		
-		/*auto device = GetDX12Device()->mDevice;
-		if (type == EShaderType::SDT_ComputeShader)
-		{
-			device->CopyDescriptorsSimple(1, mCurrentComputeSrvTable->GetHandle(binder->DescriptorIndex), handle->Handle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		}
-		else
-		{
-			device->CopyDescriptorsSimple(1, mCurrentSrvTable->GetHandle(binder->DescriptorIndex), handle->Handle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		}*/
-		//vkUpdateDescriptorSets
+		ASSERT(mCmdListState == ECmdListState::Recording);
+		if (view == nullptr)
+			return;
+		view->Buffer->TransitionTo(this, EGpuResourceState::GRS_Uav);
 	}
 	void VKCommandList::SetSampler(EShaderType type, const FShaderBinder* binder, ISampler* sampler)
 	{
-		ASSERT(mIsRecording);
-		[[maybe_unused]] auto handle = ((VKSampler*)sampler)->mView;
-		/*auto device = GetDX12Device()->mDevice;
-		if (type == EShaderType::SDT_ComputeShader) 
-		{
-			device->CopyDescriptorsSimple(1, mCurrentComputeSamplerTable->GetHandle(binder->DescriptorIndex), handle->Handle, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-		}
-		else 
-		{
-			device->CopyDescriptorsSimple(1, mCurrentSamplerTable->GetHandle(binder->DescriptorIndex), handle->Handle, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-		}*/
-		//vkUpdateDescriptorSets
+		ASSERT(mCmdListState == ECmdListState::Recording);
 	}
 	void VKCommandList::SetVertexBuffer(UINT slot, IVbView* buffer, UINT Offset, UINT Stride)
 	{
-		ASSERT(mIsRecording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		VkDeviceSize vkOffset = Offset;
 
 		if (buffer == nullptr)
 		{
 			auto device = (VKGpuDevice*)mDevice.GetNakedPtr();
-			vkCmdBindVertexBuffers(mCommandBuffer->RealObject, slot, 1, &device->mNullVB->mBuffer, &vkOffset);
+			vkCmdBindVertexBuffers(GetVKCmdRecorder()->mCommandBuffer, slot, 1, &device->mNullVB->mBuffer, &vkOffset);
 			return;
 		}
-		vkCmdBindVertexBuffers(mCommandBuffer->RealObject, slot, 1, &buffer->Buffer.UnsafeConvertTo<VKBuffer>()->mBuffer, &vkOffset);
+		vkCmdBindVertexBuffers(GetVKCmdRecorder()->mCommandBuffer, slot, 1, &buffer->Buffer.UnsafeConvertTo<VKBuffer>()->mBuffer, &vkOffset);
 	}
 	void VKCommandList::SetIndexBuffer(IIbView* buffer, bool IsBit32)
 	{
-		ASSERT(mIsRecording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		VkIndexType type;
 		if (IsBit32)
 		{
@@ -500,21 +619,21 @@ namespace NxRHI
 			type = VkIndexType::VK_INDEX_TYPE_UINT16;
 		}
 
-		vkCmdBindIndexBuffer(mCommandBuffer->RealObject, buffer->Buffer.UnsafeConvertTo<VKBuffer>()->mBuffer, 0, type);
+		vkCmdBindIndexBuffer(GetVKCmdRecorder()->mCommandBuffer, buffer->Buffer.UnsafeConvertTo<VKBuffer>()->mBuffer, 0, type);
 	}
 	void VKCommandList::SetGraphicsPipeline(const IGpuDrawState* drawState)
 	{
-		ASSERT(mIsRecording);
-		vkCmdBindPipeline(mCommandBuffer->RealObject, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, ((VKGpuDrawState*)drawState)->mGraphicsPipeline);
+		ASSERT(mCmdListState == ECmdListState::Recording);
+		vkCmdBindPipeline(GetVKCmdRecorder()->mCommandBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, ((VKGpuDrawState*)drawState)->mGraphicsPipeline);
 	}
 	void VKCommandList::SetComputePipeline(const IComputeEffect* drawState)
 	{
-		ASSERT(mIsRecording);
-		vkCmdBindPipeline(mCommandBuffer->RealObject, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, ((VKComputeEffect*)drawState)->mComputePipeline);
+		ASSERT(mCmdListState == ECmdListState::Recording);
+		vkCmdBindPipeline(GetVKCmdRecorder()->mCommandBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, ((VKComputeEffect*)drawState)->mComputePipeline);
 	}
 	void VKCommandList::SetInputLayout(IInputLayout* layout)
 	{
-		ASSERT(mIsRecording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		//mContext->IASetInputLayout(((VKInputLayout*)layout)->mLayout);
 	}
 	void VKCommandList::SetViewInstanceMask(UINT Mask)
@@ -550,58 +669,58 @@ namespace NxRHI
 	}
 	void VKCommandList::Draw(EPrimitiveType topology, UINT BaseVertex, UINT DrawCount, UINT Instance)
 	{
-		ASSERT(mIsRecording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		
 		UINT dpCount = 0;
 		PrimitiveTopology2VK(topology, DrawCount, dpCount);
 
-		vkCmdDraw(mCommandBuffer->RealObject, dpCount, Instance, BaseVertex, 0);
+		vkCmdDraw(GetVKCmdRecorder()->mCommandBuffer, dpCount, Instance, BaseVertex, 0);
 	}
 	void VKCommandList::IndirectDraw(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset, IBuffer* countBuffer)
 	{
-		ASSERT(mIsRecording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 
 		const auto argOffset = offsetof(FIndirectDrawArgument, VertexCountPerInstance);
 
 		if (countBuffer == nullptr)
-			vkCmdDrawIndirect(mCommandBuffer->RealObject, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset, 1, sizeof(UINT) * 4);
+			vkCmdDrawIndirect(GetVKCmdRecorder()->mCommandBuffer, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset, 1, sizeof(UINT) * 4);
 		else
-			vkCmdDrawIndirectCount(mCommandBuffer->RealObject, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset,
+			vkCmdDrawIndirectCount(GetVKCmdRecorder()->mCommandBuffer, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset,
 				((VKBuffer*)countBuffer)->mBuffer, 0, 1024, sizeof(UINT) * 4);
 	}
 	void VKCommandList::DrawIndexed(EPrimitiveType topology, UINT BaseVertex, UINT StartIndex, UINT DrawCount, UINT Instance)
 	{
-		ASSERT(mIsRecording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		
 		UINT dpCount = 0;
 		PrimitiveTopology2VK(topology, DrawCount, dpCount);
 
-		vkCmdDrawIndexed(mCommandBuffer->RealObject, dpCount, Instance, StartIndex, BaseVertex, 0);
+		vkCmdDrawIndexed(GetVKCmdRecorder()->mCommandBuffer, dpCount, Instance, StartIndex, BaseVertex, 0);
 	}
 	void VKCommandList::IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset, IBuffer* countBuffer)
 	{
-		ASSERT(mIsRecording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		
 		const auto argOffset = offsetof(FIndirectDrawIndexArgument, VertexCountPerInstance);
 		
 		if (countBuffer == nullptr)
-			vkCmdDrawIndexedIndirect(mCommandBuffer->RealObject, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset, 1, sizeof(UINT) * 5);
+			vkCmdDrawIndexedIndirect(GetVKCmdRecorder()->mCommandBuffer, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset, 1, sizeof(UINT) * 5);
 		else
-			vkCmdDrawIndexedIndirectCount(mCommandBuffer->RealObject, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset,
+			vkCmdDrawIndexedIndirectCount(GetVKCmdRecorder()->mCommandBuffer, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset,
 				((VKBuffer*)countBuffer)->mBuffer, 0, 1024, sizeof(UINT) * 5);
 	}
 	void VKCommandList::Dispatch(UINT x, UINT y, UINT z)
 	{
-		ASSERT(mIsRecording);
-		vkCmdDispatch(mCommandBuffer->RealObject, x, y, z);
+		ASSERT(mCmdListState == ECmdListState::Recording);
+		vkCmdDispatch(GetVKCmdRecorder()->mCommandBuffer, x, y, z);
 	}
 	void VKCommandList::IndirectDispatch(IBuffer* indirectArg, UINT indirectArgOffset)
 	{
-		ASSERT(mIsRecording);
+		ASSERT(mCmdListState == ECmdListState::Recording);
 		
 		const auto argOffset = offsetof(FIndirectDispatchArgument, X);
 
-		vkCmdDispatchIndirect(mCommandBuffer->RealObject, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset);
+		vkCmdDispatchIndirect(GetVKCmdRecorder()->mCommandBuffer, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset);
 	}
 	void VKCommandList::DispatchMesh(UINT x, UINT y, UINT z)
 	{
@@ -736,7 +855,7 @@ namespace NxRHI
 			outPipelineStages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 			return;
 		case EngineNS::NxRHI::GRS_DepthStencil:
-			outAccessFlags = VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+			outAccessFlags = VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
 			outPipelineStages = (VkPipelineStageFlagBits)(VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
 			return;
 		case EngineNS::NxRHI::GRS_DepthRead:
@@ -770,7 +889,7 @@ namespace NxRHI
 		auto _srcStages = PipelineStateToVK(srcStage);
 		auto _dstStages = PipelineStateToVK(dstStage);
 		vkCmdPipelineBarrier(
-			mCommandBuffer->RealObject,
+			GetVKCmdRecorder()->mCommandBuffer,
 			_srcStages, 
 			_dstStages,
 			0,
@@ -797,7 +916,7 @@ namespace NxRHI
 		GpuResourceStateToVKAccessAndPipeline(dstAccess, barrier.dstAccessMask, dstStages);
 
 		vkCmdPipelineBarrier(
-			mCommandBuffer->RealObject,
+			GetVKCmdRecorder()->mCommandBuffer,
 			srcStages,
 			dstStages,//VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,//VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 			0,
@@ -835,7 +954,7 @@ namespace NxRHI
 			GpuResourceStateToVKAccessAndPipeline(dstAccess, barrier.dstAccessMask, dstStages);
 
 			vkCmdPipelineBarrier(
-				mCommandBuffer->RealObject,
+				GetVKCmdRecorder()->mCommandBuffer,
 				srcStages, //VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 				dstStages, //VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,//VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 				0,
@@ -847,7 +966,7 @@ namespace NxRHI
 	}
 	//UINT64 VKCommandList::SignalFence(IFence* fence, UINT64 value, IEvent* evt)
 	//{
-	//	ASSERT(mIsRecording);
+	//	ASSERT(mCmdListState == ECmdListState::Recording);
 	//	auto dxFence = ((VKFence*)fence);
 	//	/*if (evt != nullptr)
 	//	{
@@ -870,7 +989,7 @@ namespace NxRHI
 	//}
 	//void VKCommandList::WaitGpuFence(IFence* fence, UINT64 value)
 	//{
-	//	ASSERT(mIsRecording);
+	//	ASSERT(mCmdListState == ECmdListState::Recording);
 	//	auto dxFence = ((VKFence*)fence);
 	//	//mContext->Wait(dxFence->mFence, value);
 	//	//vkCmdWaitEvents(mCommandBuffer, )
@@ -888,7 +1007,7 @@ namespace NxRHI
 		copyRegion.dstOffset = DstOffset;
 		copyRegion.size = Size;
 
-		vkCmdCopyBuffer(mCommandBuffer->RealObject, (VkBuffer)src->GetHWBuffer(), (VkBuffer)target->GetHWBuffer(), 1, &copyRegion);
+		vkCmdCopyBuffer(GetVKCmdRecorder()->mCommandBuffer, (VkBuffer)src->GetHWBuffer(), (VkBuffer)target->GetHWBuffer(), 1, &copyRegion);
 
 		target->TransitionTo(this, tarSave);
 		src->TransitionTo(this, srcSave);
@@ -908,14 +1027,23 @@ namespace NxRHI
 		region.srcSubresource.layerCount = 1;
 		region.srcSubresource.mipLevel = 0;
 		// (0, 0, 0) in the first image corresponds to (0, 0, 0) in the second image:
-		region.srcOffset = { (int)box->Left, (int)box->Top, (int)box->Front };
+		if (box != nullptr)
+		{
+			region.srcOffset = { (int)box->Left, (int)box->Top, (int)box->Front };
+			region.extent = { box->Right - box->Left, box->Bottom - box->Top, box->Back - box->Front };
+		}
+		else
+		{
+			region.srcOffset = { 0, 0, 0 };
+			region.extent = { source->Desc.Width, 
+				source->Desc.Height == 0 ? 1 : source->Desc.Height,
+				source->Desc.Depth == 0 ? 1 : source->Desc.Depth };
+		}
 		region.dstSubresource = region.srcSubresource;
 		region.dstSubresource.baseArrayLayer = tarSubRes;
 		region.dstOffset = { (int)DstX, (int)DstY, (int)DstZ };
 
-		region.extent = { box->Right - box->Left, box->Bottom - box->Top, box->Back - box->Front };
-
-		vkCmdCopyImage(mCommandBuffer->RealObject, (VkImage)source->GetHWBuffer(), ((VKTexture*)source)->GetImageLayout(), (VkImage)target->GetHWBuffer(), ((VKTexture*)target)->GetImageLayout(), 1, &region);
+		vkCmdCopyImage(GetVKCmdRecorder()->mCommandBuffer, (VkImage)source->GetHWBuffer(), ((VKTexture*)source)->GetImageLayout(), (VkImage)target->GetHWBuffer(), ((VKTexture*)target)->GetImageLayout(), 1, &region);
 		
 		target->TransitionTo(this, tarSave);
 		source->TransitionTo(this, srcSave);
@@ -940,7 +1068,7 @@ namespace NxRHI
 		region.imageOffset = { (int)footprint->X, (int)footprint->Y, (int)footprint->Z };
 		region.imageExtent = { footprint->Width, footprint->Height, footprint->Depth };
 
-		vkCmdCopyBufferToImage(mCommandBuffer->RealObject, (VkBuffer)src->GetHWBuffer(), (VkImage)target->GetHWBuffer(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+		vkCmdCopyBufferToImage(GetVKCmdRecorder()->mCommandBuffer, (VkBuffer)src->GetHWBuffer(), (VkImage)target->GetHWBuffer(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
 		target->TransitionTo(this, tarSave);
 		src->TransitionTo(this, srcSave);
@@ -969,7 +1097,7 @@ namespace NxRHI
 		/*VkMemoryRequirements memRequirements;
 		auto device = (VKGpuDevice*)mDevice.GetPtr();
 		vkGetImageMemoryRequirements(device->mDevice, vkSource->mImage, &memRequirements);*/
-		vkCmdCopyImageToBuffer(mCommandBuffer->RealObject, vkSource->mImage, vkSource->GetImageLayout(), (VkBuffer)target->GetHWBuffer(), 1, &region);
+		vkCmdCopyImageToBuffer(GetVKCmdRecorder()->mCommandBuffer, vkSource->mImage, vkSource->GetImageLayout(), (VkBuffer)target->GetHWBuffer(), 1, &region);
 
 		target->TransitionTo(this, tarSave);
 		source->TransitionTo(this, srcSave);

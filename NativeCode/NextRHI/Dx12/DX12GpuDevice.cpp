@@ -1288,6 +1288,10 @@ namespace NxRHI
 			dx11Cmd->Commit(this, type);
 		}
 	}
+	void DX12CmdQueue::WaitFence(IFence* fence, UINT64 value, EQueueType type)
+	{
+		mCmdQueue->Wait(((DX12Fence*)fence)->mFence, value);
+	}
 	void DX12CmdQueue::TryRecycle()
 	{
 		VAutoVSLLock locker(mQueueLocker);

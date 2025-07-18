@@ -1300,6 +1300,7 @@ namespace NxRHI
 		{
 			return fence->IncreaseExpect(this, 1, type);
 		}
+		virtual void WaitFence(IFence* fence, UINT64 value, EQueueType type) = 0;
 	public:
 		VCritical						mGraphicsQueueLocker;
 		

@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="spirv-cross-c">
+      <UniqueIdentifier>{22d1cf2c-cc92-4163-a154-36e1744de571}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="spirv-cross-core">
+      <UniqueIdentifier>{539ad51d-1f9a-439e-89dc-8ba07af43ccd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="spirv-cross-cpp">
+      <UniqueIdentifier>{420e5ff7-cb66-43a9-bb54-62a6b93dc543}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="spirv-cross-glsl">
+      <UniqueIdentifier>{bf0102ad-321f-4bf5-a6f9-dc45dae455ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="spirv-cross-hlsl">
+      <UniqueIdentifier>{91064856-681b-4cc8-a7d7-5931af557cf7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="spirv-cross-msl">
+      <UniqueIdentifier>{79cf5485-371c-470e-b0f0-70c6cf1f5a62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="spirv-cross-reflect">
+      <UniqueIdentifier>{bef89a60-df74-4235-b3d5-ce3e21b3472b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_cross_c.cpp">
+      <Filter>spirv-cross-c</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_cfg.cpp">
+      <Filter>spirv-cross-core</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_cross.cpp">
+      <Filter>spirv-cross-core</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_cross_parsed_ir.cpp">
+      <Filter>spirv-cross-core</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_cpp.cpp">
+      <Filter>spirv-cross-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_glsl.cpp">
+      <Filter>spirv-cross-glsl</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_hlsl.cpp">
+      <Filter>spirv-cross-hlsl</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_msl.cpp">
+      <Filter>spirv-cross-msl</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_reflect.cpp">
+      <Filter>spirv-cross-reflect</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_parser.cpp">
+      <Filter>spirv-cross-core</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_cfg.hpp">
+      <Filter>spirv-cross-core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_cross.hpp">
+      <Filter>spirv-cross-core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_cross_parsed_ir.hpp">
+      <Filter>spirv-cross-core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)GLSL.std.450.h">
+      <Filter>spirv-cross-core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv.h">
+      <Filter>spirv-cross-core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_common.hpp">
+      <Filter>spirv-cross-core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_cross_containers.hpp">
+      <Filter>spirv-cross-core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_cross_error_handling.hpp">
+      <Filter>spirv-cross-core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_cpp.hpp">
+      <Filter>spirv-cross-cpp</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_glsl.hpp">
+      <Filter>spirv-cross-glsl</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_hlsl.hpp">
+      <Filter>spirv-cross-hlsl</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_msl.hpp">
+      <Filter>spirv-cross-msl</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_reflect.hpp">
+      <Filter>spirv-cross-reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_parser.hpp">
+      <Filter>spirv-cross-core</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" />
+  </ItemGroup>
+</Project>

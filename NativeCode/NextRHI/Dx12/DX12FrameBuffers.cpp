@@ -39,13 +39,13 @@ namespace NxRHI
 
 	DX12SwapChain::DX12SwapChain()
 	{
-		mView = nullptr;
+		mSwapChain = nullptr;
 	}
 
 	DX12SwapChain::~DX12SwapChain()
 	{
 		BackBuffers.clear();
-		Safe_Release(mView);
+		Safe_Release(mSwapChain);
 	}
 
 	static DXGI_MODE_DESC SetupDXGI_MODE_DESC(UINT w, UINT h, EPixelFormat format)
@@ -86,7 +86,7 @@ namespace NxRHI
 		Desc.Width = w;
 		Desc.Height = h;
 
-		auto hr = mView->ResizeBuffers(Desc.BufferCount, w, h, FormatToDX12Format(Desc.Format), DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
+		auto hr = mSwapChain->ResizeBuffers(Desc.BufferCount, w, h, FormatToDX12Format(Desc.Format), DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
 		if (hr != S_OK)
 			return false;
 
@@ -94,7 +94,7 @@ namespace NxRHI
 		{
 			auto pDx12Texture = (DX12Texture*)GetBackBuffer(i);
 			ID3D12Resource* pBackBuffer = nullptr;
-			hr = mView->GetBuffer(i, IID_PPV_ARGS(&pBackBuffer));
+			hr = mSwapChain->GetBuffer(i, IID_PPV_ARGS(&pBackBuffer));
 			if (hr == S_OK)
 			{
 				pDx12Texture->Desc.Width = Desc.Width;
@@ -109,8 +109,8 @@ namespace NxRHI
 			BackBuffers[i].CreateRtvAndSrv(device, i);
 		}
 
-		if (mView3 != nullptr)
-			CurrentBackBuffer = mView3->GetCurrentBackBufferIndex();
+		if (mSwapChain3 != nullptr)
+			CurrentBackBuffer = mSwapChain3->GetCurrentBackBufferIndex();
 		else
 			CurrentBackBuffer = 0;
 		return true;
@@ -125,7 +125,7 @@ namespace NxRHI
 			BackBuffers.clear();
 			BackBuffers.resize(Desc.BufferCount);
 		}
-		Safe_Release(mView);
+		Safe_Release(mSwapChain);
 
 		DX12GpuDevice* device = (DX12GpuDevice*)device1;
 		DXGI_SWAP_CHAIN_DESC	mSwapChainDesc{};
@@ -143,10 +143,10 @@ namespace NxRHI
 		mSwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		mSwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-		auto hr = device->mGpuSystem.GetPtr()->mDXGIFactory->CreateSwapChain(device->mCmdQueue->mCmdQueue, &mSwapChainDesc, (IDXGISwapChain**)&mView);
+		auto hr = device->mGpuSystem.GetPtr()->mDXGIFactory->CreateSwapChain(device->mCmdQueue->mCmdQueue, &mSwapChainDesc, (IDXGISwapChain**)&mSwapChain);
 		if (FAILED(hr))
 			return false;
-		mView->QueryInterface(IID_IDXGISwapChain3, (void**)mView3.GetAddressOf());
+		mSwapChain->QueryInterface(IID_IDXGISwapChain3, (void**)mSwapChain3.GetAddressOf());
 
 		for (UINT i = 0; i < Desc.BufferCount; i++)
 		{
@@ -157,7 +157,7 @@ namespace NxRHI
 			auto pDx12Texture = (DX12Texture*)GetBackBuffer(i);
 			pDx12Texture->mDeviceRef.FromObject(device);
 			ID3D12Resource* pBackBuffer = nullptr;
-			hr = mView->GetBuffer(i, IID_PPV_ARGS(&pBackBuffer));
+			hr = mSwapChain->GetBuffer(i, IID_PPV_ARGS(&pBackBuffer));
 			if (hr == S_OK)
 			{
 				pDx12Texture->Desc.Format = Desc.Format;
@@ -173,8 +173,8 @@ namespace NxRHI
 			BackBuffers[i].CreateRtvAndSrv(device, i);
 		}
 		
-		if (mView3 != nullptr)
-			CurrentBackBuffer = mView3->GetCurrentBackBufferIndex();
+		if (mSwapChain3 != nullptr)
+			CurrentBackBuffer = mSwapChain3->GetCurrentBackBufferIndex();
 		else
 			CurrentBackBuffer = (CurrentBackBuffer + 1) % (UINT)BackBuffers.size();
 
@@ -200,12 +200,15 @@ namespace NxRHI
 			FramePresentFence->WaitToExpect();
 		}*/
 
-		if (mView3 != nullptr)
+		if (mSwapChain3 != nullptr)
 		{
-			CurrentBackBuffer = mView3->GetCurrentBackBufferIndex();
+			CurrentBackBuffer = mSwapChain3->GetCurrentBackBufferIndex();
 		}
 		else
 			CurrentBackBuffer = (CurrentBackBuffer + 1) % (UINT)BackBuffers.size();
+
+		//Sure previos CurrentBackBuffer finished
+		FramePresentFence->Wait(BackBuffers[CurrentBackBuffer].FenceValue);
 	}
 	void DX12SwapChain::Present(IGpuDevice* device, UINT SyncInterval, UINT Flags)
 	{
@@ -214,8 +217,9 @@ namespace NxRHI
 		device->GetCmdQueue()->IncreaseSignal(FramePresentFence, EQueueType::QU_Default);
 		BackBuffers[CurrentBackBuffer].FenceValue = FramePresentFence->GetExpectValue();
 
-		FramePresentFence->Wait(BackBuffers[CurrentBackBuffer].FenceValue);
-		auto hr = mView->Present(SyncInterval, Flags);
+		device->GetCmdQueue()->WaitFence(FramePresentFence, BackBuffers[CurrentBackBuffer].FenceValue, EQueueType::QU_Default);
+		//FramePresentFence->Wait(BackBuffers[CurrentBackBuffer].FenceValue); this will block and wait immidiately, so we use the cmdqueue to wait
+		auto hr = mSwapChain->Present(SyncInterval, Flags);
 		if (hr != S_OK)
 		{
 			VFX_LTRACE(ELTT_Graphics, "SwapChain::Present");

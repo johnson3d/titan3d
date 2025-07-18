@@ -268,6 +268,10 @@ namespace NxRHI
 	{
 
 	}
+	void NullCmdQueue::WaitFence(IFence* fence, UINT64 value, EQueueType type)
+	{
+
+	}
 	ICommandList* NullCmdQueue::GetIdleCmdlist()
 	{
 		VAutoVSLLock locker(mImmCmdListLocker);

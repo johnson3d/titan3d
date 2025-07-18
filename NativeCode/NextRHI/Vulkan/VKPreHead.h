@@ -4,14 +4,15 @@
 #include "../NxRHIDefine.h"
 #include "../NxBuffer.h"
 
-#include <vulkan/vulkan.h>
-
 #ifdef PLATFORM_WIN
     #define VK_USE_PLATFORM_WIN32_KHR
-    #include <vulkan/vulkan_win32.h>
+    //#include <vulkan/vulkan_win32.h>
 #elif defined(PLATFORM_DROID)
-    #include <vulkan/vulkan_android.h>
+    #define VK_USE_PLATFORM_ANDROID_KHR
+    //#include <vulkan/vulkan_android.h>
 #endif
+
+#include <vulkan/vulkan.h>
 
 NS_BEGIN
 
@@ -856,7 +857,7 @@ namespace NxRHI
 		case EngineNS::NxRHI::GRS_GenericRead:
 			return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		case EngineNS::NxRHI::GRS_Uav:
-			return VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+			return VK_IMAGE_LAYOUT_GENERAL;
 		case EngineNS::NxRHI::GRS_RenderTarget:
 			return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		case EngineNS::NxRHI::GRS_DepthStencil:
@@ -886,7 +887,7 @@ namespace NxRHI
 		case VK_IMAGE_LAYOUT_UNDEFINED:
 			return EGpuResourceState::GRS_Undefine;
 		case VK_IMAGE_LAYOUT_GENERAL:
-			return EGpuResourceState::GRS_GenericRead;
+			return EGpuResourceState::GRS_Uav;
 		case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
 			return EGpuResourceState::GRS_RenderTarget;
 		case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
@@ -951,6 +952,7 @@ namespace NxRHI
 			return (VKGpuHeap*)GpuHeap;
 		}
 		virtual void FreeMemory();
+        VKGpuDevice*    mDevice = nullptr;
 	};
 
 	class VKGpuDefaultMemAllocator : public IGpuMemAllocator

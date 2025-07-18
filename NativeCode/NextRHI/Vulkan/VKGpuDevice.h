@@ -164,12 +164,7 @@ namespace NxRHI
 		AutoRef<VKCmdBufferManager>		mCmdAllocatorManager;
 
 		AutoRef<VKGpuPooledMemAllocator>	mCBufferAllocator;
-		AutoRef<VKGpuLinearMemAllocator>	mSsboAllocator;
-		AutoRef<VKGpuLinearMemAllocator>	mVbIbAllocator;
 
-		AutoRef<VKGpuLinearMemAllocator>	mUploadBufferAllocator;
-		AutoRef<VKGpuLinearMemAllocator>	mReadBackAllocator;
-		
 		AutoRef<VKGpuDefaultMemAllocator>	mDefaultBufferAllocator;
 
 		AutoRef<VKBuffer>					mNullUBO;
@@ -189,24 +184,28 @@ namespace NxRHI
 		virtual ICommandList* GetIdleCmdlist() override;
 		virtual void ReleaseIdleCmdlist(ICommandList* cmd) override;
 		virtual UINT64 Flush(EQueueType type) override;
-
+		virtual void WaitFence(IFence* fence, UINT64 value, EQueueType type) override;
 		bool GraphicsEqualPresentQueue() const {
 			return mGraphicsQueueIndex == mPresentQueueIndex;
 		}
-
-		UINT64 QueueSignal(IFence* fence, UINT64 value, VkFence g2hFence, EQueueType type);
-		void WaitFence(IFence* fence, UINT64 value);
-	private:
-		void QueueExecuteCommandList(ICommandList* Cmdlist, EQueueType type);
+		VkResult SafeQueueSubmit(uint32_t submitCount, const VkSubmitInfo* pSubmits, VkFence fence, EQueueType type);
+		VkResult SafeQueuePresentKHR(const VkPresentInfoKHR* pPresentInfo, EQueueType type);
 	public:
 		VKCmdQueue();
 		~VKCmdQueue();
 		void Init(VKGpuDevice* device);
 		void ClearIdleCmdlists();
+		void TryRecycle();
 		VKGpuDevice*					mDevice = nullptr;
 		VCritical						mQueueLocker;
+		VCritical						mCmdLocker;
 		std::queue<AutoRef<ICommandList>>	mIdleCmdlist;
-		AutoRef<VKCommandList>			mDummyCmdList;
+		struct FWaitRecycle
+		{
+			UINT64						WaitFenceValue = 0;
+			AutoRef<ICommandList>		CmdList;
+		};
+		std::vector<FWaitRecycle>		mWaitRecycleCmdlists;
 		
 		UINT							mGraphicsQueueIndex = -1;
 		UINT							mPresentQueueIndex = -1;

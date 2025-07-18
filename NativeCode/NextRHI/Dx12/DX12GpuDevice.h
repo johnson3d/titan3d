@@ -161,6 +161,7 @@ namespace NxRHI
 		virtual ICommandList* GetIdleCmdlist() override;
 		virtual void ReleaseIdleCmdlist(ICommandList* cmd) override;
 		virtual UINT64 Flush(EQueueType type) override;
+		virtual void WaitFence(IFence* fence, UINT64 value, EQueueType type) override;
 	public:
 		DX12CmdQueue();
 		~DX12CmdQueue();

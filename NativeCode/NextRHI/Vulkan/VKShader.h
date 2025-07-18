@@ -9,25 +9,23 @@ namespace NxRHI
 {
 	class VKGpuDevice;
 	class VKShader;
-	class VKDescriptorSetPagedObject : public MemAlloc::FPagedObject<VkDescriptorSet>
-	{
-
-	};
+	
 	class VKDescriptorSetHolder : public IGpuResource
 	{
 	public:
-		AutoRef<MemAlloc::FPagedObject<VkDescriptorSet>> DescriptorSet;
-	};
-	template<>
-	struct AuxGpuResourceDestroyer<AutoRef<VKDescriptorSetPagedObject>>
-	{
-		static void Destroy(AutoRef<VKDescriptorSetPagedObject> obj, IGpuDevice* device1)
+		~VKDescriptorSetHolder()
 		{
-			//auto device = (VKGpuDevice*)device1;
-			//vkDestroyBuffer(device->mDevice, obj, device->GetVkAllocCallBacks());
-			// auto pAllocator = (FDescriptorSetAllocator*)obj->HostPage.GetPtr()->Allocator.GetPtr();
-			//pAllocator->Creator.OnFree(obj);
-			obj->Free();
+			DescriptorSet->Free();
+			UsedResources.clear();
+		}
+		AutoRef<MemAlloc::FPagedObject<VkDescriptorSet>> DescriptorSet;
+		std::vector<AutoRef<IGpuResource>>		UsedResources;
+		void UseResource(IGpuResource* resource)
+		{
+			if (resource != nullptr)
+			{
+				UsedResources.push_back(resource);
+			}
 		}
 	};
 	
