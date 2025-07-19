@@ -5,33 +5,48 @@
 #include "../NxRHIDefine.h"
 #include "../../Bricks/CrossShaderCompiler/IShaderConductor.h"
 #include "../../../3rd/native/SpirvCross/spirv_cross_c.h"
+//#include <spirv_cross/spirv_cross_c.h>//link problem
 
-#if defined(HAS_SPIRV_TOOLS)
-#include "../../../3rd/native/SpirvTools/include/libspirv.h"
-#include "../../../3rd/native/SpirvTools/include/libspirv.hpp"
-#include "../../../3rd/native/SpirvTools/include/optimizer.hpp"
-#endif
-
-#if defined(HAS_GLSLANG)
-#include "../../../3rd/native/glslang/include/glslang/Public/ShaderLang.h"
-#include "../../../3rd/native/glslang/include/glslang/SPIRV/GlslangToSpv.h"
-#endif
-//#include <spirv_cross/spirv_cross_c.h>
+#include <spirv-tools/libspirv.h>
+#include <spirv-tools/libspirv.hpp>
+#include <spirv-tools/optimizer.hpp>
+#include <glslang/Public/ShaderLang.h>
+#include <glslang/SPIRV/GlslangToSpv.h>
+#include <shaderc/shaderc.hpp>
 
 #if defined(HasModule_GpuDump)
 #include "../../Bricks/GpuDump/NvAftermath.h"
 #endif
 
 #if defined(PLATFORM_WIN)
-	#if defined(HAS_SPIRV_TOOLS)
-	#pragma comment(lib, "SPIRV-Tools.lib")
-	#endif
+//__declspec(dllexport) double __imp_exp2(double x) {
+//	return std::exp2(x);
+//}
+	#pragma comment(lib, "SPIRV.lib")
+	#pragma comment(lib, "glslang.lib")
+	
+	#pragma comment(lib, "shaderc.lib")
+	#pragma comment(lib, "shaderc_combined.lib")
+	#pragma comment(lib, "shaderc_shared.lib")
+	#pragma comment(lib, "shaderc_util.lib")
 
-	#if defined(HAS_GLSLANG)
-	#pragma comment(lib, "glslangd.lib")
-	#pragma comment(lib, "SPIRV-Toolsd.lib")
-	#pragma comment(lib, "SPIRV-Tools-optd.lib")
-#endif
+	#pragma comment(lib, "SPIRV-Tools.lib")
+	#pragma comment(lib, "SPIRV-Tools-diff.lib")
+	#pragma comment(lib, "SPIRV-Tools-link.lib")
+	#pragma comment(lib, "SPIRV-Tools-lint.lib")
+	#pragma comment(lib, "SPIRV-Tools-opt.lib")
+	#pragma comment(lib, "SPIRV-Tools-reduce.lib")
+	#pragma comment(lib, "SPIRV-Tools-shared.lib")
+
+	/*#pragma comment(lib, "spirv-cross-c.lib")
+	#pragma comment(lib, "spirv-cross-core.lib")
+	#pragma comment(lib, "spirv-cross-cpp.lib")
+	#pragma comment(lib, "spirv-cross-c-shared.lib")
+	#pragma comment(lib, "spirv-cross-glsl.lib")
+	#pragma comment(lib, "spirv-cross-hlsl.lib")
+	#pragma comment(lib, "spirv-cross-msl.lib")
+	#pragma comment(lib, "spirv-cross-reflect.lib")
+	#pragma comment(lib, "spirv-cross-util.lib")*/
 #endif
 
 #define new VNEW
@@ -404,7 +419,6 @@ namespace NxRHI
 
 		return true;
 	}
-#if defined(HAS_SPIRV_TOOLS)
 	class VKSpirvOptimizer
 	{
 
@@ -441,9 +455,7 @@ namespace NxRHI
 			);
 		}
 	};
-#endif
 
-#if defined(HAS_GLSLANG)
 	class FGLSlangUtility
 	{
 	public:
@@ -502,7 +514,7 @@ namespace NxRHI
 			finalizeGlslang();
 		}
 	};
-#endif
+
 	bool VKShader::Reflect(FShaderDesc* desc)
 	{
 		desc->SpirvReflector = MakeWeakRef(new IShaderReflector());
@@ -888,7 +900,6 @@ namespace NxRHI
 			auto len = strlen(output_str);
 		}
 
-#if defined(HAS_SPIRV_TOOLS)
 		std::vector<uint32_t> spirvBinary;
 		EShLanguage lang;
 		switch (desc->Type)
@@ -900,43 +911,8 @@ namespace NxRHI
 			lang = EShLanguage::EShLangFragment;
 			break;
 		}
-#endif
 
-#if defined(HAS_GLSLANG)
-		FGLSlangUtility::CompileShaderToSpirv(output_str, desc->FunctionName.c_str(), lang, spirvBinary);
-		std::vector<BYTE> tmp;
-		tmp.resize(spirvBinary.size() * 4);
-		memcpy(tmp.data(), spirvBinary.data(), spirvBinary.size() * 4);
-		if (tmp != desc->SpirV)
-		{
-			return true;
-		}
-#endif
 
-#if defined(HAS_SPIRV_TOOLS)
-		{
-			spv_binary binary;
-			spv_context ctx = spvContextCreate(SPV_ENV_VULKAN_1_2);
-			spv_diagnostic diagnostic = nullptr;
-
-			spv_result_t result = spvTextToBinary(
-				ctx,
-				output_str,
-				len,
-				&binary,
-				&diagnostic
-			);
-
-			std::vector<BYTE> spirvBinary;
-			spirvBinary.resize(binary->wordCount);
-			memcpy(spirvBinary.data(), binary->code, binary->wordCount);
-			spvBinaryDestroy(binary);
-			if (spirvBinary != desc->SpirV)
-			{
-				return true;
-			}
-		}
-#endif
 
 		spvc_context_destroy(context);
 

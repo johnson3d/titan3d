@@ -131,7 +131,7 @@ namespace NxRHI
 			auto pLayer = FindLayer("VK_LAYER_RENDERDOC_Capture");
 			if (pLayer != nullptr)
 			{
-				mValidationLayers.push_back("VK_LAYER_RENDERDOC_Capture");
+				//mValidationLayers.push_back("VK_LAYER_RENDERDOC_Capture");
 			}
 		}
 		if (desc->CreateDebugLayer)

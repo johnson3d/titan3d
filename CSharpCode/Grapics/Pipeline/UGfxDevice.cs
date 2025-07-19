@@ -196,7 +196,7 @@ namespace EngineNS.Graphics.Pipeline
                 rcDesc.SetDefault();
                 if (Adapter < 0)
                 {
-                    int AdapterScore = 0;
+                    int AdapterScore = int.MinValue;
                     for (int i = 0; i < RenderSystem.NumOfContext; i++)
                     {
                         var caps = new NxRHI.FGpuDeviceDesc();
