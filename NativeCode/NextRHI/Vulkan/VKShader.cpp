@@ -54,189 +54,6 @@
 NS_BEGIN
 namespace NxRHI
 {
-	VKDescriptorSetCreator::PageType* VKDescriptorSetCreator::CreatePage(UINT pageSize)
-	{
-		std::vector<VkDescriptorPoolSize> psz;
-		if (NumOfUbo > 0)
-		{
-			VkDescriptorPoolSize tmp{};
-			tmp.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			tmp.descriptorCount = NumOfUbo * pageSize;
-			psz.push_back(tmp);
-		}
-
-		if (NumOfSampler > 0)
-		{
-			VkDescriptorPoolSize tmp{};
-			tmp.type = VK_DESCRIPTOR_TYPE_SAMPLER;
-			tmp.descriptorCount = NumOfSampler * pageSize;
-			psz.push_back(tmp);
-		}
-
-		if (NumOfSsbo > 0)
-		{
-			VkDescriptorPoolSize tmp{};
-			tmp.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-			tmp.descriptorCount = NumOfSsbo * pageSize;
-			psz.push_back(tmp);
-		}
-
-		if (NumOfImage > 0)
-		{
-			VkDescriptorPoolSize tmp{};
-			tmp.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-			tmp.descriptorCount = NumOfImage * pageSize;
-			psz.push_back(tmp);
-		}
-
-		if (NumOfStorageImage > 0)
-		{
-			VkDescriptorPoolSize tmp{};
-			tmp.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-			tmp.descriptorCount = NumOfStorageImage * pageSize;
-			psz.push_back(tmp);
-		}
-
-		VkDescriptorPoolCreateInfo poolInfo = {};
-		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		poolInfo.poolSizeCount = (UINT)psz.size();
-		if (poolInfo.poolSizeCount > 0)
-			poolInfo.pPoolSizes = &psz[0];
-		poolInfo.maxSets = pageSize;
-
-		auto device = mDeviceRef.GetPtr();
-		if (device == nullptr)
-			return nullptr;
-		VkDescriptorPool descPool;
-		if (vkCreateDescriptorPool(device->mDevice, &poolInfo, device->GetVkAllocCallBacks(), &descPool) != VK_SUCCESS)
-		{
-			return nullptr;
-		}
-
-		auto result = new VKDescriptorSetPage();
-		result->mDescriptorPool = descPool;
-		return result;
-	}
-	VKDescriptorSetCreator::PagedObjectType* VKDescriptorSetCreator::CreatePagedObject(VKDescriptorSetCreator::PageType* page, UINT index)
-	{
-		auto device = mDeviceRef.GetPtr();
-
-		VkDescriptorSetAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		allocInfo.descriptorPool = ((VKDescriptorSetPage*)page)->mDescriptorPool;
-		allocInfo.descriptorSetCount = 1;
-		allocInfo.pSetLayouts = &Shader->mLayout;
-
-		VkDescriptorSet ds;
-		if (vkAllocateDescriptorSets(device->mDevice, &allocInfo, &ds) != VK_SUCCESS)
-		{
-			return nullptr;
-		}
-
-		auto result = new VKDescriptorSetCreator::PagedObjectType();
-		result->RealObject = ds;
-
-		return result;
-	}
-	void VKDescriptorSetCreator::OnAlloc(VKDescriptorSetCreator::AllocatorType* pAllocator, VKDescriptorSetCreator::PagedObjectType* obj)
-	{
-
-	}
-	void VKDescriptorSetCreator::OnFree(VKDescriptorSetCreator::AllocatorType* pAllocator, VKDescriptorSetCreator::PagedObjectType* obj)
-	{
-		auto device = mDeviceRef.GetPtr();
-		if (device == nullptr)
-			return;
-		for (auto& i : Shader->mLayoutBindings)
-		{
-			VkWriteDescriptorSet descriptorWrite = {};
-			VkDescriptorImageInfo tmp{};
-			VkDescriptorBufferInfo tmpStructureBuffer{};
-			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = obj->RealObject;
-
-			descriptorWrite.dstBinding = i.binding;
-			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorCount = 1;
-
-			switch (i.descriptorType)
-			{
-				case VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-				{
-					//tmpStructureBuffer.buffer = device->mNullUBO->mBuffer;
-					tmpStructureBuffer.buffer = nullptr;
-					tmpStructureBuffer.range = VK_WHOLE_SIZE;
-					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-					descriptorWrite.pBufferInfo = &tmpStructureBuffer;
-					vkUpdateDescriptorSets(device->mDevice, 1, &descriptorWrite, 0, nullptr);
-					break;
-				}
-				case VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
-				{
-					//tmpStructureBuffer.buffer = device->mNullSSBO->mBuffer;
-					tmpStructureBuffer.buffer = nullptr;
-					tmpStructureBuffer.range = VK_WHOLE_SIZE;
-					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-					descriptorWrite.pBufferInfo = &tmpStructureBuffer;
-					vkUpdateDescriptorSets(device->mDevice, 1, &descriptorWrite, 0, nullptr);
-					break;
-				}
-				case VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
-				{
-					tmp.imageLayout = ((VKTexture*)device->mNullSampledImage->GetBuffer())->GetImageLayout();
-					//tmp.imageView = (VkImageView)device->mNullSampledImage->GetHWBuffer();
-					tmp.imageView = nullptr;
-					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-					descriptorWrite.pImageInfo = &tmp;
-					vkUpdateDescriptorSets(device->mDevice, 1, &descriptorWrite, 0, nullptr);
-					break;
-				}
-				case VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
-				{
-					tmp.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-					//tmp.imageView = (VkImageView)device->mNullSampledImage->GetHWBuffer();
-					tmp.imageView = nullptr;
-					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-					descriptorWrite.pImageInfo = &tmp;
-					vkUpdateDescriptorSets(device->mDevice, 1, &descriptorWrite, 0, nullptr);
-					break;
-				}
-				case VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLER:
-				{
-					tmp.sampler = (VkSampler)device->mNullSampler->GetHWBuffer();
-					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-					descriptorWrite.pImageInfo = &tmp;
-					vkUpdateDescriptorSets(device->mDevice, 1, &descriptorWrite, 0, nullptr);
-					break;
-				}
-				default:
-					break;
-			}
-		}
-	}
-	void VKDescriptorSetCreator::FinalCleanup(MemAlloc::FPage<VkDescriptorSet>* page)
-	{
-		auto device = mDeviceRef.GetPtr();
-		if (device == nullptr)
-			return;
-		auto pPage = (VKDescriptorSetPage*)page;
-		vkDestroyDescriptorPool(device->mDevice, pPage->mDescriptorPool, device->GetVkAllocCallBacks());
-		pPage->mDescriptorPool = nullptr;
-	}
-
-	static void FillRangeVK(std::vector<VkDescriptorSetLayoutBinding>* pOutRanges, FShaderBinder* pBinder, VkDescriptorType type, VkShaderStageFlagBits shaderStage)
-	{
-		if (pBinder == nullptr)
-			return;
-		VkDescriptorSetLayoutBinding binding{};
-		binding.binding = pBinder->Slot;
-		binding.descriptorCount = 1;
-		binding.descriptorType = type;
-		binding.pImmutableSamplers = nullptr;
-		binding.stageFlags = shaderStage;
-		pOutRanges->push_back(binding);
-	}
-
 	bool VKShader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion, const char* dxcArgs, IBlobObject* output, bool asModule)
 	{
 		desc->FunctionName = entry;
@@ -249,9 +66,6 @@ namespace NxRHI
 	}
 	VKShader::~VKShader()
 	{
-		mDescriptorSetAllocator.FinalCleanup();
-		mDescriptorSetAllocator.Creator.Shader = nullptr;
-
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
@@ -260,12 +74,6 @@ namespace NxRHI
 		{
 			vkDestroyShaderModule(device->mDevice, mShader, device->GetVkAllocCallBacks());
 			mShader = nullptr;
-		}
-
-		if (mLayout != nullptr)
-		{
-			vkDestroyDescriptorSetLayout(device->mDevice, mLayout, device->GetVkAllocCallBacks());
-			mLayout = nullptr;
 		}
 	}
 	bool VKShader::Init(VKGpuDevice* device, FShaderDesc* desc)
@@ -290,132 +98,6 @@ namespace NxRHI
 #if defined(HasModule_GpuDump)
 		GpuDump::NvAftermath::RegByteCode(desc->DebugName.c_str(), &desc->SpirV[0], (UINT)createInfo.codeSize);
 #endif
-
-		VkShaderStageFlagBits shaderStage = (VkShaderStageFlagBits)0;
-		switch (Desc->Type)
-		{
-			case EShaderType::SDT_VertexShader:
-				shaderStage = (VkShaderStageFlagBits)(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
-				break;
-			case EShaderType::SDT_PixelShader:
-				shaderStage = (VkShaderStageFlagBits)(VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT);
-				break;
-			case EShaderType::SDT_ComputeShader:
-				shaderStage = VK_SHADER_STAGE_COMPUTE_BIT;
-				break;
-			default:
-				break;
-		} 
-		
-		for (auto& i : Reflector->CBuffers)
-		{
-			auto pBinder = (FShaderBinder*)i;
-			FillRangeVK(&mLayoutBindings, pBinder, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, shaderStage);
-		}
-
-		for (auto& i : Reflector->Srvs)
-		{
-			auto pBinder = (FShaderBinder*)i;
-			if (pBinder->IsStructuredBuffer)
-			{
-				FillRangeVK(&mLayoutBindings, pBinder, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, shaderStage);
-			}
-			else
-			{
-				FillRangeVK(&mLayoutBindings, pBinder, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, shaderStage);
-			}
-		}
-
-		for (auto& i : Reflector->Uavs)
-		{
-			auto pBinder = (FShaderBinder*)i;
-			if (pBinder->IsStructuredBuffer)
-			{
-				FillRangeVK(&mLayoutBindings, pBinder, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, shaderStage);
-			}
-			else
-			{
-				FillRangeVK(&mLayoutBindings, pBinder, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, shaderStage);
-			}
-		}
-
-		for (auto& i : Reflector->Samplers)
-		{
-			auto pBinder = (FShaderBinder*)i;
-			FillRangeVK(&mLayoutBindings, pBinder, VK_DESCRIPTOR_TYPE_SAMPLER, shaderStage);
-		}
-
-		VkDescriptorSetLayoutCreateInfo layoutInfo{};
-		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		//layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_PER_STAGE_BIT_NV;
-		layoutInfo.bindingCount = (UINT)mLayoutBindings.size();
-		if (layoutInfo.bindingCount != 0)
-		{
-			layoutInfo.pBindings = &mLayoutBindings[0];
-			if (vkCreateDescriptorSetLayout(device->mDevice, &layoutInfo, device->GetVkAllocCallBacks(), &mLayout) != VK_SUCCESS)
-			{
-				ASSERT(false);
-				return false;
-			}
-		}
-		else
-		{
-			layoutInfo.pBindings = nullptr;
-			if (vkCreateDescriptorSetLayout(device->mDevice, &layoutInfo, device->GetVkAllocCallBacks(), &mLayout) != VK_SUCCESS)
-			{
-				ASSERT(false);
-				return false;
-			}
-		}
-
-		if (mLayout != nullptr)
-		{
-			mDescriptorSetAllocator.Creator.NumOfUbo = 0;
-			for (const auto& i : mLayoutBindings)
-			{
-				if (i.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-				{
-					mDescriptorSetAllocator.Creator.NumOfUbo++;
-				}
-			}
-			mDescriptorSetAllocator.Creator.NumOfSsbo = 0;
-			for (const auto& i : mLayoutBindings)
-			{
-				if (i.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-				{
-					mDescriptorSetAllocator.Creator.NumOfSsbo++;
-				}
-			}
-			mDescriptorSetAllocator.Creator.NumOfSampler = 0;
-			for (const auto& i : mLayoutBindings)
-			{
-				if (i.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLER)
-				{
-					mDescriptorSetAllocator.Creator.NumOfSampler++;
-				}
-			}
-			mDescriptorSetAllocator.Creator.NumOfImage = 0;
-			for (const auto& i : mLayoutBindings)
-			{
-				if (i.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE)
-				{
-					mDescriptorSetAllocator.Creator.NumOfImage++;
-				}
-			}
-			mDescriptorSetAllocator.Creator.NumOfStorageImage = 0;
-			for (const auto& i : mLayoutBindings)
-			{
-				if (i.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
-				{
-					mDescriptorSetAllocator.Creator.NumOfStorageImage++;
-				}
-			}
-		}
-
-		mDescriptorSetAllocator.Creator.mDeviceRef.FromObject(device);
-		mDescriptorSetAllocator.Creator.Shader = this;
-		/*auto obj = testAllocator.Alloc();
-		testAllocator.Free(obj);*/
 
 		return true;
 	}
@@ -591,7 +273,7 @@ namespace NxRHI
 			size_t sz;
 			spvc_compiler_get_declared_struct_size(compiler_glsl, spv_type, &sz);
 
-			auto binder = MakeWeakRef(new FShaderBinder());
+			auto binder = MakeWeakRef(new FShaderBinder(desc->Type));
 			binder->Name = name;
 			binder->Space = descriptorSet;
 			binder->Size = (UINT)sz;
@@ -708,7 +390,7 @@ namespace NxRHI
 			spvc_compiler_get_buffer_block_decorations(compiler_glsl, list[i].id, decoration, &num);*/
 			auto constant = spvc_compiler_get_decoration(compiler_glsl, list[i].id, SpvDecorationNonWritable);
 
-			auto binder = MakeWeakRef(new FShaderBinder());
+			auto binder = MakeWeakRef(new FShaderBinder(desc->Type));
 			binder->Name = name;
 			binder->Space = descriptorSet;
 			binder->Size = 0;
@@ -822,7 +504,7 @@ namespace NxRHI
 			auto spv_type = spvc_compiler_get_type_handle(compiler_glsl, list[i].base_type_id);
 			SpvAccessQualifier access = spvc_type_get_image_access_qualifier(spv_type);
 
-			auto binder = MakeWeakRef(new FShaderBinder());
+			auto binder = MakeWeakRef(new FShaderBinder(desc->Type));
 			
 			binder->Name = name;
 			binder->Space = descriptorSet;
@@ -841,7 +523,7 @@ namespace NxRHI
 			auto binding = spvc_compiler_get_decoration(compiler_glsl, list[i].id, SpvDecorationBinding);
 
 			{
-				auto binder = MakeWeakRef(new FShaderBinder());
+				auto binder = MakeWeakRef(new FShaderBinder(desc->Type));
 				binder->Name = name;
 				binder->Space = descriptorSet;
 				binder->Size = 0;
@@ -851,7 +533,7 @@ namespace NxRHI
 				Reflector->Srvs.push_back(binder);
 			}
 			{
-				auto binder = MakeWeakRef(new FShaderBinder());
+				auto binder = MakeWeakRef(new FShaderBinder(desc->Type));
 				binder->Name = name;
 				binder->Space = descriptorSet;
 				binder->Size = 0;
@@ -867,7 +549,7 @@ namespace NxRHI
 			auto descriptorSet = spvc_compiler_get_decoration(compiler_glsl, list[i].id, SpvDecorationDescriptorSet);
 			auto binding = spvc_compiler_get_decoration(compiler_glsl, list[i].id, SpvDecorationBinding);
 
-			auto binder = MakeWeakRef(new FShaderBinder());
+			auto binder = MakeWeakRef(new FShaderBinder(desc->Type));
 			binder->Name = name;
 			binder->Space = descriptorSet;
 			binder->Size = 0;
@@ -883,7 +565,7 @@ namespace NxRHI
 			auto descriptorSet = spvc_compiler_get_decoration(compiler_glsl, list[i].id, SpvDecorationDescriptorSet);
 			auto binding = spvc_compiler_get_decoration(compiler_glsl, list[i].id, SpvDecorationBinding);
 
-			auto binder = MakeWeakRef(new FShaderBinder());
+			auto binder = MakeWeakRef(new FShaderBinder(desc->Type));
 			binder->Name = name;
 			binder->Space = descriptorSet;
 			binder->Size = 0;

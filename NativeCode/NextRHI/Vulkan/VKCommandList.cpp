@@ -185,7 +185,7 @@ namespace NxRHI
 		{
 			for (auto i : mAllManagers)
 			{
-				(*i->mThreadStaticAddr) = nullptr;
+				//(*i->mThreadStaticAddr) = nullptr;
 				delete i;
 			}
 			mAllManagers.clear();

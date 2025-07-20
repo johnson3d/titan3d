@@ -356,7 +356,7 @@ namespace NxRHI
 					continue;
 				}
 			}
-			auto binder = MakeWeakRef(new FShaderBinder());
+			auto binder = MakeWeakRef(new FShaderBinder(desc->Type));
 			binder->Space = desc->Type;
 			switch (csibDesc.Type)
 			{

@@ -1228,6 +1228,8 @@ namespace NxRHI
 		inline IFence* GetFrameFence() {
 			return mFrameFence;
 		}
+		virtual void BeginFrame() {}
+		virtual void EndFrame() {}
 	public:
 		FGpuDeviceDesc		Desc;
 		FGpuDeviceCaps		mCaps;

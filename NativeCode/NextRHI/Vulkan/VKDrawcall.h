@@ -27,14 +27,8 @@ namespace NxRHI
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 
 		void UpdateDescriptorSets(VKCommandList* vkCmd);
-		void BindDescriptorSets(VKCommandList* cmdlist);
-	private:
-		void BindResourceToDescriptSets(VKGpuDevice* device, 
-			const FEffectBinder* binder, IGpuResource* resource, std::vector<VkWriteDescriptorSet>& dsWriteSets, int index);
 	public:
 		TWeakRefHandle<VKGpuDevice>				mDeviceRef;
-		AutoRef<VKDescriptorSetHolder>			mDescriptorSetVS;
-		AutoRef<VKDescriptorSetHolder>			mDescriptorSetPS;
 		bool									IsDirty = false;
 		UINT									FingerPrient = 0;
 
@@ -50,13 +44,8 @@ namespace NxRHI
 
 	protected:
 		void UpdateDescriptorSets(VKCommandList* vkCmd);
-		void BindDescriptorSets(VKCommandList* cmdlist);
-	private:
-		void BindResourceToDescriptSets(VKGpuDevice* device,
-			const FShaderBinder* binder, IGpuResource* resource, std::vector<VkWriteDescriptorSet>& dsWriteSets, int index);
 	public:
 		TWeakRefHandle<VKGpuDevice>				mDeviceRef;
-		AutoRef<VKDescriptorSetHolder>			mDescriptorSetCS;
 		bool									IsDirty = false;
 		UINT									FingerPrient = 0;
 

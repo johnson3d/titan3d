@@ -73,6 +73,14 @@ namespace EngineNS.Graphics.Pipeline
 
             return true;
         }
+        public void BeginFrame()
+        {
+            RenderContext?.BeginFrame();
+        }
+        public void EndFrame()
+        {
+            RenderContext?.EndFrame();
+        }
         public override void TickModule(TtEngine engine)
         {
             if (PerFrameCBuffer != null)

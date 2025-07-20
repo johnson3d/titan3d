@@ -6,6 +6,15 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	class VKGraphicsEffect;
+	class VKComputeEffect;
+	class VKDescriptorSetLayoutBuilder
+	{
+	public:
+		static VkDescriptorSetLayout Build(VKGpuDevice* device, VKGraphicsEffect* effect, std::vector<VkDescriptorSetLayoutBinding>& bindings);
+		static VkDescriptorSetLayout Build(VKGpuDevice* device, VKComputeEffect* effect, std::vector<VkDescriptorSetLayoutBinding>& bindings);
+		static VkDescriptorType GetDescriptorType(const FShaderBinder* binder);
+	};
 	class VKGraphicsEffect : public IGraphicsEffect
 	{
 	public:
@@ -16,6 +25,8 @@ namespace NxRHI
 	public:
 		TWeakRefHandle<VKGpuDevice>		mDeviceRef;
 		
+		std::vector<VkDescriptorSetLayoutBinding> mBindings;
+		VkDescriptorSetLayout			mLayout = nullptr;
 		VkPipelineLayout				mPipelineLayout = nullptr;
 	};
 
@@ -29,6 +40,8 @@ namespace NxRHI
 	public:
 		TWeakRefHandle<VKGpuDevice>		mDeviceRef;
 
+		std::vector<VkDescriptorSetLayoutBinding> mBindings;
+		VkDescriptorSetLayout			mLayout = nullptr;
 		VkPipelineLayout				mPipelineLayout = nullptr;
 		VkPipeline						mComputePipeline = nullptr;
 	};

@@ -18,8 +18,6 @@ namespace NxRHI
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
-		mDescriptorSetVS = nullptr;
-		mDescriptorSetPS = nullptr;
 	}
 	void VKGraphicDraw::OnGpuDrawStateUpdated()
 	{
@@ -38,11 +36,11 @@ namespace NxRHI
 		IsDirty = true;
 	}
 	void BindStageResourceToDescriptSets(VKGpuDevice* device,
-		const FShaderBinder* pBinder, IGpuResource* resource, VKDescriptorSetHolder* pDescriptorSet, std::vector<VkWriteDescriptorSet>& dsWriteSets, std::vector<FDescriptorSetInfo>& dsSetInfos, int index)
+		const FShaderBinder* pBinder, IGpuResource* resource, VkDescriptorSet pDescriptorSet, std::vector<VkWriteDescriptorSet>& dsWriteSets, std::vector<FDescriptorSetInfo>& dsSetInfos, int& index)
 	{
+		index++;
 		/*if (resource == nullptr)
 			return;*/
-		pDescriptorSet->UseResource(resource);
 		dsSetInfos[index] = FDescriptorSetInfo{};
 		VkDescriptorImageInfo& imageInfo = dsSetInfos[index].imageInfo;
 		VkDescriptorBufferInfo& bufferInfo = dsSetInfos[index].bufferInfo;
@@ -50,7 +48,7 @@ namespace NxRHI
 		{
 			VkWriteDescriptorSet descriptorWrite = {};
 			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = pDescriptorSet->DescriptorSet->RealObject;
+			descriptorWrite.dstSet = pDescriptorSet;
 
 			descriptorWrite.dstBinding = pBinder->Slot;
 			descriptorWrite.dstArrayElement = 0;
@@ -101,7 +99,6 @@ namespace NxRHI
 						if (resource)
 						{
 							imageInfo.imageView = ((VKSrView*)resource)->mImageView;
-							pDescriptorSet->UseResource(((VKSrView*)resource)->Buffer);
 						}
 						else
 							imageInfo.imageView = nullptr;
@@ -163,99 +160,90 @@ namespace NxRHI
 			dsWriteSets.push_back(descriptorWrite);
 		}
 	}
-	void VKGraphicDraw::BindResourceToDescriptSets(VKGpuDevice* device, 
-						const FEffectBinder* binder, IGpuResource* resource, std::vector<VkWriteDescriptorSet>& dsWriteSets, int index)
-	{
-		BindStageResourceToDescriptSets(device, binder->VSBinder, resource, mDescriptorSetVS, dsWriteSets, mDescriptorSetInfos, index);
-		
-		BindStageResourceToDescriptSets(device, binder->PSBinder, resource, mDescriptorSetPS, dsWriteSets, mDescriptorSetInfos, index);
-	}
 	
 	void VKGraphicDraw::UpdateDescriptorSets(VKCommandList* vkCmd)
 	{
 		auto device = mDeviceRef.GetPtr();
-
-		mDescriptorSetVS = MakeWeakRef(ShaderEffect->mVertexShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.AllocDecriptorSet());
-		mDescriptorSetPS = MakeWeakRef(ShaderEffect->mPixelShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.AllocDecriptorSet());
-		vkCmd->GetCmdRecorder()->UseResource(mDescriptorSetVS);
-		vkCmd->GetCmdRecorder()->UseResource(mDescriptorSetPS);
-
-		
+		auto pool = device->mDescriptorPoolManager->GetCurrentFramePool();
+		auto effect = this->ShaderEffect.UnsafeConvertTo<VKGraphicsEffect>();
+		VkDescriptorSet ds = pool->AllocDescriptorSet(effect->mLayout);
 		mDsWriteSets.clear();
-		mDescriptorSetInfos.resize(BindResources.size());
+		mDescriptorSetInfos.resize(effect->mBindings.size());
 		int index = 0;
 		for (auto& i : BindResources)
 		{
-			switch (i.first->BindType)
+			auto binder = i.first;
+			auto resource = i.second.Resource;
+			switch (binder->BindType)
 			{
 				case SBT_CBV:
 				{
-					IGpuResource* t = i.second.Resource;
-					if (i.first->VSBinder)
+					if (binder->VSBinder)
 					{
-						vkCmd->SetCBV(EShaderType::SDT_VertexShader, i.first->VSBinder, (ICbView*)t);
+						vkCmd->SetCBV(EShaderType::SDT_VertexShader, binder->VSBinder, (ICbView*)resource);
 					}
-					else if (i.first->PSBinder)
+					if (binder->PSBinder)
 					{
-						vkCmd->SetCBV(EShaderType::SDT_PixelShader, i.first->VSBinder, (ICbView*)t);
+						vkCmd->SetCBV(EShaderType::SDT_PixelShader, binder->VSBinder, (ICbView*)resource);
 					}
 				}
 				break;
 				case SBT_SRV:
 				{
-					IGpuResource* t = i.second.Resource;
-					if (i.first->VSBinder)
+					if (binder->VSBinder)
 					{
-						vkCmd->SetSrv(EShaderType::SDT_VertexShader, i.first->VSBinder, (ISrView*)t);
+						vkCmd->SetSrv(EShaderType::SDT_VertexShader, binder->VSBinder, (ISrView*)resource);
 					}
-					else if (i.first->PSBinder)
+					if (binder->PSBinder)
 					{
-						vkCmd->SetSrv(EShaderType::SDT_PixelShader, i.first->VSBinder, (ISrView*)t);
+						vkCmd->SetSrv(EShaderType::SDT_PixelShader, binder->VSBinder, (ISrView*)resource);
 					}
 				}
 				break;
 				case SBT_UAV:
 				{
-					IGpuResource* t = i.second.Resource;
-					if (i.first->VSBinder)
+					if (binder->VSBinder)
 					{
-						vkCmd->SetUav(EShaderType::SDT_VertexShader, i.first->VSBinder, (IUaView*)t);
+						vkCmd->SetUav(EShaderType::SDT_VertexShader, binder->VSBinder, (IUaView*)resource);
 					}
-					else if (i.first->PSBinder)
+					if (binder->PSBinder)
 					{
-						vkCmd->SetUav(EShaderType::SDT_PixelShader, i.first->VSBinder, (IUaView*)t);
+						vkCmd->SetUav(EShaderType::SDT_PixelShader, binder->VSBinder, (IUaView*)resource);
 					}
 				}
 				break;
 				case SBT_Sampler:
 				{
-					IGpuResource* t = i.second.Resource;
-					if (i.first->VSBinder)
+					if (binder->VSBinder)
 					{
-						vkCmd->SetSampler(EShaderType::SDT_VertexShader, i.first->VSBinder, (ISampler*)t);
+						vkCmd->SetSampler(EShaderType::SDT_VertexShader, binder->VSBinder, (ISampler*)resource);
 					}
-					else if (i.first->PSBinder)
+					if (binder->PSBinder)
 					{
-						vkCmd->SetSampler(EShaderType::SDT_PixelShader, i.first->VSBinder, (ISampler*)t);
+						vkCmd->SetSampler(EShaderType::SDT_PixelShader, binder->VSBinder, (ISampler*)resource);
 					}
 				}
 				break;
 				default:
 					break;
 			}
-			BindResourceToDescriptSets(device, i.first, i.second.Resource, mDsWriteSets, index++);
+
+			if (binder->VSBinder)
+			{
+				BindStageResourceToDescriptSets(device, binder->VSBinder, resource, ds, mDsWriteSets, mDescriptorSetInfos, index);
+			}
+			if (binder->PSBinder)
+			{
+				BindStageResourceToDescriptSets(device, binder->PSBinder, resource, ds, mDsWriteSets, mDescriptorSetInfos, index);
+			}
 		}
 		if (mDsWriteSets.size() > 0)
 		{
 			vkUpdateDescriptorSets(device->mDevice, (UINT)mDsWriteSets.size(), &mDsWriteSets[0], 0, nullptr);
 		}
 		mDsWriteSets.clear();
-	}
-	void VKGraphicDraw::BindDescriptorSets(VKCommandList* vkCmd)
-	{
-		auto effect = (VKGraphicsEffect*)GetGraphicsEffect();
-		VkDescriptorSet dsSets[2] = { mDescriptorSetVS->DescriptorSet->RealObject, mDescriptorSetPS->DescriptorSet->RealObject };
-		vkCmdBindDescriptorSets(vkCmd->GetVKCmdRecorder()->mCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, effect->mPipelineLayout, 0, 2, dsSets, 0, nullptr);
+
+		vkCmdBindDescriptorSets(vkCmd->GetVKCmdRecorder()->mCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, effect->mPipelineLayout, 0, 1, &ds, 0, nullptr);
 	}
 	void VKGraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
@@ -297,7 +285,6 @@ namespace NxRHI
 
 		auto vkCmd = (VKCommandList*)cmdlist;
 		UpdateDescriptorSets(vkCmd);
-		BindDescriptorSets(vkCmd);
 
 		auto pDrawDesc = Mesh->GetAtomDesc(MeshAtom, MeshLOD);
 		ASSERT(pDrawDesc);
@@ -323,65 +310,54 @@ namespace NxRHI
 	{
 		IsDirty = true;
 	}
-	void VKComputeDraw::BindResourceToDescriptSets(VKGpuDevice* device,
-		const FShaderBinder* binder, IGpuResource* resource, std::vector<VkWriteDescriptorSet>& dsWriteSets, int index)
-	{
-		BindStageResourceToDescriptSets(device, binder, resource, mDescriptorSetCS, dsWriteSets, mDescriptorSetInfos, index);
-	}
 
 	void VKComputeDraw::UpdateDescriptorSets(VKCommandList* vkCmd)
 	{
 		auto device = mDeviceRef.GetPtr();
-		mDescriptorSetCS = MakeWeakRef(mEffect->mComputeShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.AllocDecriptorSet());
-		vkCmd->GetCmdRecorder()->UseResource(mDescriptorSetCS);
-
+		auto pool = device->mDescriptorPoolManager->GetCurrentFramePool();
+		auto effect = this->mEffect.UnsafeConvertTo<VKComputeEffect>();
+		auto ds = pool->AllocDescriptorSet(effect->mLayout);
+		
 		mDsWriteSets.clear();
-		mDescriptorSetInfos.resize(BindResources.size());
+		mDescriptorSetInfos.resize(effect->mBindings.size());
 		int index = 0;
 		for (auto& i : BindResources)
 		{
+			auto binder = i.first;
+			auto resource = i.second.Resource;
 			switch (i.first->Type)
 			{
 				case SBT_CBV:
 				{
-					IGpuResource* t = i.second.Resource;
-					vkCmd->SetCBV(EShaderType::SDT_ComputeShader, i.first, (ICbView*)t);
+					vkCmd->SetCBV(EShaderType::SDT_ComputeShader, binder, (ICbView*)resource);
 				}
 				break;
 				case SBT_SRV:
 				{
-					IGpuResource* t = i.second.Resource;
-					vkCmd->SetSrv(EShaderType::SDT_ComputeShader, i.first, (ISrView*)t);
+					vkCmd->SetSrv(EShaderType::SDT_ComputeShader, binder, (ISrView*)resource);
 				}
 				break;
 				case SBT_UAV:
 				{
-					IGpuResource* t = i.second.Resource;
-					vkCmd->SetUav(EShaderType::SDT_ComputeShader, i.first, (IUaView*)t);
+					vkCmd->SetUav(EShaderType::SDT_ComputeShader, binder, (IUaView*)resource);
 				}
 				break;
 				case SBT_Sampler:
 				{
-					IGpuResource* t = i.second.Resource;
-					vkCmd->SetSampler(EShaderType::SDT_ComputeShader, i.first, (ISampler*)t);
+					vkCmd->SetSampler(EShaderType::SDT_ComputeShader, binder, (ISampler*)resource);
 				}
 				break;
 				default:
 					break;
 			}
-			BindResourceToDescriptSets(device, i.first, i.second.Resource, mDsWriteSets, index++);
+			BindStageResourceToDescriptSets(device, binder, resource, ds, mDsWriteSets, mDescriptorSetInfos, index);
 		}
 		if (mDsWriteSets.size() > 0)
 		{
 			vkUpdateDescriptorSets(device->mDevice, (UINT)mDsWriteSets.size(), &mDsWriteSets[0], 0, nullptr);
 		}
 		mDsWriteSets.clear();
-	}
-	void VKComputeDraw::BindDescriptorSets(VKCommandList* vkCmd)
-	{
-		auto vkEffect = mEffect.UnsafeConvertTo<VKComputeEffect>();
-		VkDescriptorSet dsSets = mDescriptorSetCS->DescriptorSet->RealObject;
-		vkCmdBindDescriptorSets(vkCmd->GetVKCmdRecorder()->mCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vkEffect->mPipelineLayout, 0, 1, &dsSets, 0, nullptr);
+		vkCmdBindDescriptorSets(vkCmd->GetVKCmdRecorder()->mCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, effect->mPipelineLayout, 0, 1, &ds, 0, nullptr);
 	}
 	void VKComputeDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
@@ -393,7 +369,6 @@ namespace NxRHI
 		cmdlist->SetComputePipeline(mEffect);
 		
 		UpdateDescriptorSets(vkCmd);
-		BindDescriptorSets(vkCmd);
 
 		if (IndirectDispatchArgsBuffer != nullptr)
 		{

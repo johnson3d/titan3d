@@ -308,6 +308,7 @@ namespace EngineNS
             {
                 try
                 {
+                    GfxDevice?.BeginFrame();
                     for (int i = 0; i < TickableManager.Tickables.Count; i++)
                     {
                         try
@@ -417,6 +418,8 @@ namespace EngineNS
             }
 
             this.TaskCollector.Tick();
+
+            GfxDevice?.EndFrame();
         }
 
         public static async System.Threading.Tasks.Task RunCoroutine<T>(IAsyncEnumerable<T> enumerable)

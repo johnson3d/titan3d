@@ -386,7 +386,7 @@ namespace NxRHI
 	{
 		HRESULT hr = S_OK;
 		auto Reflector = desc->DxILReflector;
-		auto binder = MakeWeakRef(new FShaderBinder());
+		auto binder = MakeWeakRef(new FShaderBinder(desc->Type));
 		binder->Space = desc->Type;
 		switch (csibDesc.Type)
 		{

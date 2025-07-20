@@ -840,7 +840,8 @@ namespace NxRHI
 		target->TransitionTo(this, EGpuResourceState::GRS_CopyDst);
 		auto srcSave = src->GetGpuResourceState();
 		src->TransitionTo(this, EGpuResourceState::GRS_CopySrc);
-
+		ASSERT (target->GetGpuResourceState() == EGpuResourceState::GRS_CopyDst)
+		
 		if (Size == 0 && DstOffset == 0 && SrcOffset == 0 && target->GetRtti() == src->GetRtti())
 		{
 			mContext->CopyResource((ID3D12Resource*)target->GetHWBuffer(), (ID3D12Resource*)src->GetHWBuffer());
@@ -949,6 +950,9 @@ namespace NxRHI
 
 	void DX12CommandList::WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters)
 	{
+		ICommandList::WriteBufferUINT32(Count, BufferWriters);
+		return;
+
 		if (mLastContext == nullptr)
 		{
 			ICommandList::WriteBufferUINT32(Count, BufferWriters);

@@ -19,6 +19,20 @@ namespace NxRHI
 			SBT_VBV,
 			SBT_IBV,
 	};
+
+	enum TR_ENUM()
+		EShaderType
+	{
+		SDT_Unknown = 0,
+			SDT_VertexShader = 1,
+			SDT_PixelShader = (1 << 1),
+			SDT_ComputeShader = (1 << 2),
+			SDT_AmplificationShader = (1 << 3),
+			SDT_MeshShader = (1 << 4),
+			SDT_RayTracing = (1 << 5),
+
+			SDT_AllStages = SDT_VertexShader | SDT_PixelShader | SDT_ComputeShader | SDT_AmplificationShader | SDT_MeshShader | SDT_RayTracing,
+	};
 	
 	struct TR_CLASS()
 		FShaderVarDesc : public VIUnknown
@@ -50,13 +64,26 @@ namespace NxRHI
 
 		FShaderBinder()
 		{
+			ASSERT(false);
 			Space = 0;
 			Slot = -1;
 			BindCount = 1;
 			Size = 0;
 			DescriptorIndex = -1;
 			IsStructuredBuffer = FALSE;
+			ShaderStage = EShaderType::SDT_Unknown;
 		}
+		FShaderBinder(EShaderType stage)
+		{
+			Space = 0;
+			Slot = -1;
+			BindCount = 1;
+			Size = 0;
+			DescriptorIndex = -1;
+			IsStructuredBuffer = FALSE;
+			ShaderStage = stage;
+		}
+		EShaderType ShaderStage = EShaderType::SDT_Unknown;
 		VNameString			Name;
 		EShaderBindType		Type;
 		int					Space = 0;
@@ -104,20 +131,7 @@ namespace NxRHI
 		std::vector<AutoRef<FShaderBinder>>		Srvs;
 		std::vector<AutoRef<FShaderBinder>>		Samplers;
 		void SaveXnd(XndAttribute* pAttr);
-		bool LoadXnd(IGpuDevice * device, XndAttribute * pAttr);
-	};
-	enum TR_ENUM()
-		EShaderType
-	{
-		SDT_Unknown = 0,
-			SDT_VertexShader = 1,
-			SDT_PixelShader = (1 << 1),
-			SDT_ComputeShader = (1 << 2),
-			SDT_AmplificationShader = (1 << 3),
-			SDT_MeshShader = (1 << 4),
-			SDT_RayTracing = (1 << 5),
-
-			SDT_AllStages = SDT_VertexShader | SDT_PixelShader | SDT_ComputeShader | SDT_AmplificationShader | SDT_MeshShader | SDT_RayTracing,
+		bool LoadXnd(IGpuDevice * device, XndAttribute * pAttr, EShaderType stage);
 	};
 	class TR_CLASS()
 		IShader : public IWeakRefObject
@@ -142,7 +156,7 @@ namespace NxRHI
 		{
 			
 		}
-		EShaderType		Type;
+		EShaderType		Type = EShaderType::SDT_Unknown;
 		VNameString		DebugName;
 		VNameString		FunctionName;
 		std::vector<EVertexStreamType>	InputStreams;

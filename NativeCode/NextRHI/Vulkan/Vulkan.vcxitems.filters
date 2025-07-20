@@ -1,21 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Label="Globals">
-    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-    <HasSharedItems>true</HasSharedItems>
-    <ItemsProjectGuid>{2508205e-97e6-40b9-9bc1-32e602967674}</ItemsProjectGuid>
-  </PropertyGroup>
-  <ItemDefinitionGroup>
-    <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
-    </ClCompile>
-  </ItemDefinitionGroup>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ProjectCapability Include="SourceItemsFromImports" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Utility\DescriptorSetManager.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)Utility\SpirvProcessor.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)VKBuffer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)VKCommandList.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)VKDrawcall.cpp" />
@@ -27,10 +12,14 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)VKInputAssembly.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)VKPreHead.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)VKShader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Utility\SpirvProcessor.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Utility\DescriptorSetManager.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Utility\DescriptorSetManager.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)Utility\SpirvProcessor.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)VKBuffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)VKCommandList.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)VKDrawcall.h" />
@@ -42,5 +31,16 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)VKInputAssembly.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)VKPreHead.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)VKShader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Utility\SpirvProcessor.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Utility\DescriptorSetManager.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{542c3766-d5fb-4232-884c-1cb87a267a3d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

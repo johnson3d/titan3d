@@ -218,7 +218,6 @@ namespace NxRHI
 	{
 		
 	}
-	static bool GVKGpuDeviceValid = true;
 	VKGpuDevice::~VKGpuDevice()
 	{
 		for (int i = 0; i < 5; i++)
@@ -251,10 +250,10 @@ namespace NxRHI
 		mDefaultBufferAllocator = nullptr;
 		mPipelineManager = nullptr;
 		mFrameFence = nullptr;
+		mDescriptorPoolManager = nullptr;
 
 		if (mDevice != nullptr)
 		{
-			GVKGpuDeviceValid = false;
 			vkDestroyDevice(mDevice, nullptr);
 			mDevice = nullptr;
 		}
@@ -282,7 +281,7 @@ namespace NxRHI
 		const char* pMessage,
 		void* pUserData)
 	{
-		if (GVKGpuDeviceValid == false)
+		if (IGpuDevice::IsTryFinalize())
 			return FALSE;
 		const char* Mode = "Default";
 		//auto device = (VKGpuDevice*)pUserData;
@@ -609,6 +608,8 @@ namespace NxRHI
 
 		mDefaultBufferAllocator = MakeWeakRef(new VKGpuDefaultMemAllocator());
 
+		mDescriptorPoolManager = MakeWeakRef(new VKDesriptorPoolManager());
+		mDescriptorPoolManager->Initialize(this);
 		CreateNullObjects();
 		return true;
 	}

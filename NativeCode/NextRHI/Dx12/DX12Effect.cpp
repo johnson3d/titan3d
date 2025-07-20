@@ -197,7 +197,12 @@ namespace NxRHI
 		std::vector<FSignatureBinder>& OutCbvSrvUav, std::vector<FSignatureBinder>& OutSampler)
 	{
 		typedef D3D12_ROOT_PARAMETER1 RootParameterType;
-		typedef D3D12_DESCRIPTOR_RANGE1 DiscriptorRangeType;
+
+		struct DiscriptorRangeType
+		{
+			D3D12_DESCRIPTOR_RANGE1 Range{};
+			FShaderBinder* Binder = nullptr;
+		};
 
 		std::vector<RootParameterType>	dxRootParameters;
 		std::vector<DiscriptorRangeType> dxCbvSrvUavRanges;
@@ -219,12 +224,13 @@ namespace NxRHI
 					{
 						SamplerBinders.push_back(binder);
 						DiscriptorRangeType rg{};
-						rg.Flags = rgFlags;
-						rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
-						rg.NumDescriptors = binder->IsBindless() ? IBindless::MaxBindless : 1;
-						rg.BaseShaderRegister = binder->Slot;
-						rg.RegisterSpace = binder->Space;
-						rg.OffsetInDescriptorsFromTableStart = 0;
+						rg.Range.Flags = rgFlags;
+						rg.Range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
+						rg.Range.NumDescriptors = binder->IsBindless() ? IBindless::MaxBindless : 1;
+						rg.Range.BaseShaderRegister = binder->Slot;
+						rg.Range.RegisterSpace = binder->Space;
+						rg.Range.OffsetInDescriptorsFromTableStart = 0;
+						rg.Binder = binder;
 						dxSamplerRanges.push_back(rg);
 
 						if (pOutReflector)
@@ -235,12 +241,13 @@ namespace NxRHI
 					{
 						CbvSrvUavBinders.push_back(binder);
 						DiscriptorRangeType rg{};
-						rg.Flags = rgFlags;
-						rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-						rg.NumDescriptors = binder->IsBindless() ? IBindless::MaxBindless : 1;
-						rg.BaseShaderRegister = binder->Slot;
-						rg.RegisterSpace = binder->Space;
-						rg.OffsetInDescriptorsFromTableStart = 0;
+						rg.Range.Flags = rgFlags;
+						rg.Range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+						rg.Range.NumDescriptors = binder->IsBindless() ? IBindless::MaxBindless : 1;
+						rg.Range.BaseShaderRegister = binder->Slot;
+						rg.Range.RegisterSpace = binder->Space;
+						rg.Range.OffsetInDescriptorsFromTableStart = 0;
+						rg.Binder = binder;
 						dxCbvSrvUavRanges.push_back(rg);
 
 						if (pOutReflector)
@@ -251,12 +258,13 @@ namespace NxRHI
 					{
 						CbvSrvUavBinders.push_back(binder);
 						DiscriptorRangeType rg{};
-						rg.Flags = rgFlags;
-						rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-						rg.NumDescriptors = binder->IsBindless() ? IBindless::MaxBindless : 1;
-						rg.BaseShaderRegister = binder->Slot;
-						rg.RegisterSpace = binder->Space;
-						rg.OffsetInDescriptorsFromTableStart = 0;
+						rg.Range.Flags = rgFlags;
+						rg.Range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+						rg.Range.NumDescriptors = binder->IsBindless() ? IBindless::MaxBindless : 1;
+						rg.Range.BaseShaderRegister = binder->Slot;
+						rg.Range.RegisterSpace = binder->Space;
+						rg.Range.OffsetInDescriptorsFromTableStart = 0;
+						rg.Binder = binder;
 						dxCbvSrvUavRanges.push_back(rg);
 
 						if (pOutReflector)
@@ -267,12 +275,13 @@ namespace NxRHI
 					{
 						CbvSrvUavBinders.push_back(binder);
 						DiscriptorRangeType rg{};
-						rg.Flags = rgFlags;
-						rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
-						rg.NumDescriptors = binder->IsBindless() ? IBindless::MaxBindless : 1;
-						rg.BaseShaderRegister = binder->Slot;
-						rg.RegisterSpace = binder->Space;
-						rg.OffsetInDescriptorsFromTableStart = 0;
+						rg.Range.Flags = rgFlags;
+						rg.Range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+						rg.Range.NumDescriptors = binder->IsBindless() ? IBindless::MaxBindless : 1;
+						rg.Range.BaseShaderRegister = binder->Slot;
+						rg.Range.RegisterSpace = binder->Space;
+						rg.Range.OffsetInDescriptorsFromTableStart = 0;
+						rg.Binder = binder;
 						dxCbvSrvUavRanges.push_back(rg);
 
 						if (pOutReflector)
@@ -314,9 +323,40 @@ namespace NxRHI
 		{
 			RootParameterType rp{};
 			rp.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-			rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+			switch (dxCbvSrvUavRanges[i].Binder->ShaderStage)
+			{
+				case EShaderType::SDT_VertexShader:
+				{
+					rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+				}
+				break;
+				case EShaderType::SDT_PixelShader:
+				{
+					rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+				}
+				break;
+				case EShaderType::SDT_ComputeShader:
+				{
+					rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+				}
+				break;
+				case EShaderType::SDT_AmplificationShader:
+				{
+					rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_AMPLIFICATION;
+				}
+				break;
+				case EShaderType::SDT_MeshShader:
+				{
+					rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_MESH;
+				}
+				break;
+				default:
+					ASSERT(false);
+					break;
+			}
+			//rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 			rp.DescriptorTable.NumDescriptorRanges = 1;
-			rp.DescriptorTable.pDescriptorRanges = &dxCbvSrvUavRanges[i];
+			rp.DescriptorTable.pDescriptorRanges = &dxCbvSrvUavRanges[i].Range;
 
 			FSignatureBinder sb{};
 			sb.Binder = (FShaderBinder*)CbvSrvUavBinders[i];
@@ -330,9 +370,40 @@ namespace NxRHI
 		{
 			RootParameterType rp{};
 			rp.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-			rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+			switch (dxSamplerRanges[i].Binder->ShaderStage)
+			{
+				case EShaderType::SDT_VertexShader:
+				{
+					rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+				}
+				break;
+				case EShaderType::SDT_PixelShader:
+				{
+					rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+				}
+				break;
+				case EShaderType::SDT_ComputeShader:
+				{
+					rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+				}
+				break;
+				case EShaderType::SDT_AmplificationShader:
+				{
+					rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_AMPLIFICATION;
+				}
+				break;
+				case EShaderType::SDT_MeshShader:
+				{
+					rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_MESH;
+				}
+				break;
+				default:
+					ASSERT(false);
+					break;
+			}
+			//rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 			rp.DescriptorTable.NumDescriptorRanges = 1;
-			rp.DescriptorTable.pDescriptorRanges = &dxSamplerRanges[i];
+			rp.DescriptorTable.pDescriptorRanges = &dxSamplerRanges[i].Range;
 
 			FSignatureBinder sb{};
 			sb.Binder = (FShaderBinder*)SamplerBinders[i];

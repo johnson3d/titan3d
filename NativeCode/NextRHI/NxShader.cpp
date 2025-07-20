@@ -103,14 +103,14 @@ namespace NxRHI
 			i->SaveXnd(pAttr);
 		}
 	}
-	bool IShaderReflector::LoadXnd(IGpuDevice* device, XndAttribute* pAttr)
+	bool IShaderReflector::LoadXnd(IGpuDevice* device, XndAttribute* pAttr, EShaderType stage)
 	{
 		UINT count = 0;
 
 		pAttr->Read(count);
 		for (UINT i = 0; i < count; i++)
 		{
-			auto tmp = MakeWeakRef(new FShaderBinder());
+			auto tmp = MakeWeakRef(new FShaderBinder(stage));
 			tmp->LoadXnd(device, pAttr);
 			CBuffers.push_back(tmp);
 		}
@@ -118,7 +118,7 @@ namespace NxRHI
 		pAttr->Read(count);
 		for (UINT i = 0; i < count; i++)
 		{
-			auto tmp = MakeWeakRef(new FShaderBinder());
+			auto tmp = MakeWeakRef(new FShaderBinder(stage));
 			tmp->LoadXnd(device, pAttr);
 			Uavs.push_back(tmp);
 		}
@@ -126,7 +126,7 @@ namespace NxRHI
 		pAttr->Read(count);
 		for (UINT i = 0; i < count; i++)
 		{
-			auto tmp = MakeWeakRef(new FShaderBinder());
+			auto tmp = MakeWeakRef(new FShaderBinder(stage));
 			tmp->LoadXnd(device, pAttr);
 			Srvs.push_back(tmp);
 		}
@@ -134,7 +134,7 @@ namespace NxRHI
 		pAttr->Read(count);
 		for (UINT i = 0; i < count; i++)
 		{
-			auto tmp = MakeWeakRef(new FShaderBinder());
+			auto tmp = MakeWeakRef(new FShaderBinder(stage));
 			tmp->LoadXnd(device, pAttr);
 			Samplers.push_back(tmp);
 		}
@@ -341,7 +341,7 @@ namespace NxRHI
 					{
 						DxbcReflector = MakeWeakRef(new IShaderReflector());
 						pAttr->BeginRead();
-						DxbcReflector->LoadXnd(device, pAttr);
+						DxbcReflector->LoadXnd(device, pAttr, this->Type);
 						pAttr->EndRead();
 					}
 					else
@@ -370,7 +370,7 @@ namespace NxRHI
 					{
 						DxILReflector = MakeWeakRef(new IShaderReflector());
 						pAttr->BeginRead();
-						DxILReflector->LoadXnd(device, pAttr);
+						DxILReflector->LoadXnd(device, pAttr, this->Type);
 						pAttr->EndRead();
 					}
 					else
@@ -399,7 +399,7 @@ namespace NxRHI
 					{
 						SpirvReflector = MakeWeakRef(new IShaderReflector());
 						pAttr->BeginRead();
-						SpirvReflector->LoadXnd(device, pAttr);
+						SpirvReflector->LoadXnd(device, pAttr, this->Type);
 						pAttr->EndRead();
 					}
 					else

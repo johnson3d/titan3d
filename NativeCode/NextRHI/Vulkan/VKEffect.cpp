@@ -9,70 +9,123 @@ NS_BEGIN
 
 namespace NxRHI
 {
-	template<>
-	struct AuxGpuResourceDestroyer<VkPipelineLayout>
+	static void FillRangeVK(std::vector<VkDescriptorSetLayoutBinding>* pOutRanges, const FShaderBinder* pBinder, VkDescriptorType type, VkShaderStageFlagBits shaderStage)
 	{
-		static void Destroy(VkPipelineLayout obj, IGpuDevice* device1)
-		{
-			auto device = (VKGpuDevice*)device1;
-			vkDestroyPipelineLayout(device->mDevice, obj, device->GetVkAllocCallBacks());
-		}
-	};
-	/*static void FillRangeVK(std::vector<VkDescriptorSetLayoutBinding>* pOutRanges, FShaderBinder* pVSBinder, FShaderBinder* pPSBinder, VkDescriptorType type)
-	{
-		if (pVSBinder != nullptr && pPSBinder == nullptr)
-		{
-			VkDescriptorSetLayoutBinding binding{};
-			binding.binding = pVSBinder->Slot;
-			binding.descriptorCount = 1;
-			binding.descriptorType = type;
-			binding.pImmutableSamplers = nullptr;
-			binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-			pOutRanges->push_back(binding);
-		}
-		else if (pVSBinder == nullptr && pPSBinder != nullptr)
-		{
-			VkDescriptorSetLayoutBinding binding{};
-			binding.binding = pPSBinder->Slot;
-			binding.descriptorCount = 1;
-			binding.descriptorType = type;
-			binding.pImmutableSamplers = nullptr;
-			binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-			pOutRanges->push_back(binding);
-		}
-		else if (pVSBinder->Slot == pPSBinder->Slot && pVSBinder->Space == pPSBinder->Space)
-		{
-			VkDescriptorSetLayoutBinding binding{};
-			binding.binding = pPSBinder->Slot;
-			binding.descriptorCount = 1;
-			binding.descriptorType = type;
-			binding.pImmutableSamplers = nullptr;
-			binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-			pOutRanges->push_back(binding);
-		}
-		else
-		{
-			{
-				VkDescriptorSetLayoutBinding binding{};
-				binding.binding = pVSBinder->Slot;
-				binding.descriptorCount = 1;
-				binding.descriptorType = type;
-				binding.pImmutableSamplers = nullptr;
-				binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-				pOutRanges->push_back(binding);
-			}
+		if (pBinder == nullptr)
+			return;
+		VkDescriptorSetLayoutBinding binding{};
+		binding.binding = pBinder->Slot;
+		binding.descriptorCount = 1;
+		binding.descriptorType = type;
+		binding.pImmutableSamplers = nullptr;
+		binding.stageFlags = shaderStage;
+		pOutRanges->push_back(binding);
+	}
 
-			{
-				VkDescriptorSetLayoutBinding binding{};
-				binding.binding = pPSBinder->Slot;
-				binding.descriptorCount = 1;
-				binding.descriptorType = type;
-				binding.pImmutableSamplers = nullptr;
-				binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-				pOutRanges->push_back(binding);
-			}
+	VkDescriptorType VKDescriptorSetLayoutBuilder::GetDescriptorType(const FShaderBinder* binder)
+	{
+		VkDescriptorType type = VK_DESCRIPTOR_TYPE_MAX_ENUM;
+		switch (binder->Type)
+		{
+		case EShaderBindType::SBT_CBV:
+			type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			break;
+		case EShaderBindType::SBT_Sampler:
+			type = VK_DESCRIPTOR_TYPE_SAMPLER;
+			break;
+		case EShaderBindType::SBT_SRV:
+			if (binder->IsStructuredBuffer)
+				type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+			else
+				type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+			break;
+		case EShaderBindType::SBT_UAV:
+			if (binder->IsStructuredBuffer)
+				type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+			else
+				type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+			break;
+		default:
+			ASSERT(false);
+			break;
 		}
-	}*/
+		return type;
+	}
+
+	VkDescriptorSetLayout VKDescriptorSetLayoutBuilder::Build(VKGpuDevice* device, VKGraphicsEffect* effect, std::vector<VkDescriptorSetLayoutBinding>& bindings)
+	{
+		auto& binders = effect->mBinders;
+		for (auto& i : binders)
+		{
+			FEffectBinder* binder = i.second;
+			auto pBinder = binder->GetShaderBinder();
+			
+			auto type = GetDescriptorType(pBinder);
+			if (binder->VSBinder)
+				FillRangeVK(&bindings, binder->VSBinder, type, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT);
+			if (binder->VSBinder)
+				FillRangeVK(&bindings, binder->PSBinder, type, VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
+			if (binder->ASBinder)
+				FillRangeVK(&bindings, binder->VSBinder, type, VkShaderStageFlagBits::VK_SHADER_STAGE_TASK_BIT_NV);
+			if (binder->MSBinder)
+				FillRangeVK(&bindings, binder->VSBinder, type, VkShaderStageFlagBits::VK_SHADER_STAGE_MESH_BIT_NV);
+		}
+
+		VkDescriptorSetLayoutCreateInfo layoutInfo{};
+		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		//layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_PER_STAGE_BIT_NV;
+		layoutInfo.bindingCount = (UINT)bindings.size();
+		if (layoutInfo.bindingCount != 0)
+		{
+			layoutInfo.pBindings = &bindings[0];
+		}
+		VkDescriptorSetLayout result = nullptr;
+		if (vkCreateDescriptorSetLayout(device->mDevice, &layoutInfo, device->GetVkAllocCallBacks(), &result) != VK_SUCCESS)
+		{
+			ASSERT(false);
+			return nullptr;
+		}
+		return result;
+	}
+
+	VkDescriptorSetLayout VKDescriptorSetLayoutBuilder::Build(VKGpuDevice* device, VKComputeEffect* effect, std::vector<VkDescriptorSetLayoutBinding>& bindings)
+	{
+		for (auto& i : effect->mComputeShader->Reflector->CBuffers)
+		{
+			auto type = GetDescriptorType(i);
+			FillRangeVK(&bindings, i, type, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
+		}
+		for (auto& i : effect->mComputeShader->Reflector->Srvs)
+		{
+			auto type = GetDescriptorType(i);
+			FillRangeVK(&bindings, i, type, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
+		}
+		for (auto& i : effect->mComputeShader->Reflector->Uavs)
+		{
+			auto type = GetDescriptorType(i);
+			FillRangeVK(&bindings, i, type, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
+		}
+		for (auto& i : effect->mComputeShader->Reflector->Samplers)
+		{
+			auto type = GetDescriptorType(i);
+			FillRangeVK(&bindings, i, type, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
+		}
+		VkDescriptorSetLayoutCreateInfo layoutInfo{};
+		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		//layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_PER_STAGE_BIT_NV;
+		layoutInfo.bindingCount = (UINT)bindings.size();
+		if (layoutInfo.bindingCount != 0)
+		{
+			layoutInfo.pBindings = &bindings[0];
+		}
+		VkDescriptorSetLayout result = nullptr;
+		if (vkCreateDescriptorSetLayout(device->mDevice, &layoutInfo, device->GetVkAllocCallBacks(), &result) != VK_SUCCESS)
+		{
+			ASSERT(false);
+			return nullptr;
+		}
+		return result;
+	}
 	
 	VKGraphicsEffect::VKGraphicsEffect()
 	{
@@ -84,9 +137,14 @@ namespace NxRHI
 		if (device == nullptr)
 			return;
 
+		if (mLayout)
+		{
+			vkDestroyDescriptorSetLayout(device->mDevice, mLayout, device->GetVkAllocCallBacks());
+			mLayout = nullptr;
+		}
 		if (mPipelineLayout != nullptr)
 		{
-			device->DelayDestroy(mPipelineLayout);
+			vkDestroyPipelineLayout(device->mDevice, mPipelineLayout, device->GetVkAllocCallBacks());
 			mPipelineLayout = nullptr;
 		}
 	}
@@ -97,18 +155,8 @@ namespace NxRHI
 		//vkAllocateDescriptorSets
 		//vkUpdateDescriptorSets
 		
-		std::vector<VkDescriptorSetLayout> validSetLayout;
-
-		auto layout = mVertexShader.UnsafeConvertTo<VKShader>()->mLayout;
-		if (layout!=nullptr)
-		{
-			validSetLayout.push_back(layout);
-		}
-		layout = mPixelShader.UnsafeConvertTo<VKShader>()->mLayout;
-		if (layout != nullptr)
-		{
-			validSetLayout.push_back(layout);
-		}
+		mBindings.clear();
+		mLayout = VKDescriptorSetLayoutBuilder::Build(device, this, mBindings);
 
 		VkPipelineShaderStageCreateInfo mVSCreateInfo{};
 		memset(&mVSCreateInfo, 0, sizeof(mVSCreateInfo));
@@ -128,8 +176,8 @@ namespace NxRHI
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = (UINT)validSetLayout.size(); //BDS_Number;
-		pipelineLayoutInfo.pSetLayouts = &validSetLayout[0];//mDescriptorSetLayout;
+		pipelineLayoutInfo.setLayoutCount = (UINT)1; //BDS_Number;
+		pipelineLayoutInfo.pSetLayouts = &mLayout;//mDescriptorSetLayout;
 		if (vkCreatePipelineLayout(device->mDevice, &pipelineLayoutInfo, device->GetVkAllocCallBacks(), &mPipelineLayout) != VK_SUCCESS)
 		{
 			ASSERT(false);
@@ -194,9 +242,15 @@ namespace NxRHI
 		if (device == nullptr)
 			return;
 
+		if (mLayout)
+		{
+			vkDestroyDescriptorSetLayout(device->mDevice, mLayout, device->GetVkAllocCallBacks());
+			mLayout = nullptr;
+		}
+
 		if (mPipelineLayout != nullptr)
 		{
-			device->DelayDestroy(mPipelineLayout);
+			vkDestroyPipelineLayout(device->mDevice, mPipelineLayout, device->GetVkAllocCallBacks());
 			mPipelineLayout = nullptr;
 		}
 	}
@@ -206,12 +260,12 @@ namespace NxRHI
 		auto device = (VKGpuDevice*)device1;
 		mDeviceRef.FromObject(device);
 		
-		auto pShader = mComputeShader.UnsafeConvertTo<VKShader>();
-
+		mBindings.clear();
+		mLayout = VKDescriptorSetLayoutBuilder::Build(device, this, mBindings);
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutInfo.setLayoutCount = 1; //BDS_Number;
-		pipelineLayoutInfo.pSetLayouts = &pShader->mLayout;//mDescriptorSetLayout;
+		pipelineLayoutInfo.pSetLayouts = &mLayout;//mDescriptorSetLayout;
 		if (vkCreatePipelineLayout(device->mDevice, &pipelineLayoutInfo, device->GetVkAllocCallBacks(), &mPipelineLayout) != VK_SUCCESS)
 		{
 			ASSERT(false);
@@ -220,7 +274,7 @@ namespace NxRHI
 		VkPipelineShaderStageCreateInfo shaderStages{};
 		shaderStages.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		shaderStages.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-		shaderStages.module = pShader->mShader;
+		shaderStages.module = mComputeShader.UnsafeConvertTo<VKShader>()->mShader;
 		shaderStages.pName = mComputeShader->Desc->FunctionName.c_str();
 
 		VkComputePipelineCreateInfo pipelineInfo{};

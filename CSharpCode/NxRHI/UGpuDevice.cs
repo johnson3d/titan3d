@@ -118,6 +118,14 @@ namespace EngineNS.NxRHI
             }
             mGlobalEnvHash = Hash160.CreateHash160(GlobalEnvDefines.ToString());
         }
+        public void BeginFrame()
+        {
+            mCoreObject.BeginFrame();
+        }
+        public void EndFrame()
+        {
+            mCoreObject.EndFrame();
+        }
         public TtCommandList CreateCommandList()
         {
             var result = new TtCommandList();
