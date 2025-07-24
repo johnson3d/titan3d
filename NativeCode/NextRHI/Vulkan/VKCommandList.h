@@ -34,6 +34,7 @@ namespace NxRHI
 
 		void UnsafeDirectFree(const AutoRef<VKCmdRecorder>& allocator);
 	public:
+		std::string mThreadName;
 		VKThreadCmdBufferManager** mThreadStaticAddr = nullptr;
 		VKGpuDevice*		mDevice = nullptr;
 		//VkCommandPool is not thread safe, so we need to make instance for each thread
@@ -76,6 +77,11 @@ namespace NxRHI
 		bool								mIsRecording = false;
 		virtual void ResetGpuDraws() override;
 		void FinalCleanup(VKThreadCmdBufferManager* manager);
+
+		void Free(UINT64 waitValue, AutoRef<IFence>& fence)
+		{
+			mManager->Free(this, waitValue, fence);
+		}
 	};
 	class VKCommandList : public ICommandList
 	{

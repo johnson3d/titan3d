@@ -1,5 +1,6 @@
 #pragma once
 #include "../BaseHead.h"
+#include <thread>
 
 #if defined WIN
 #define PT_CDECL __cdecl
@@ -45,6 +46,41 @@ public:
 		return (void*)pthread_self().p;
 #else
 		return (void*)pthread_self();
-#endif
+#endif  
 	}
+
+    static std::string GetCurrentThreadName()
+    {
+#if defined(PLATFORM_WIN)
+    // Windows 10 1607+ 方式
+        using GetThreadDescriptionFunc = HRESULT(WINAPI*)(HANDLE, PWSTR*);
+        static auto pGetThreadDescription =
+            reinterpret_cast<GetThreadDescriptionFunc>(
+                GetProcAddress(GetModuleHandle("kernel32.dll"), "GetThreadDescription"));
+
+        if (pGetThreadDescription) {
+            PWSTR wname;
+            if (SUCCEEDED(pGetThreadDescription(GetCurrentThread(), &wname))) {
+                char name[256];
+                wcstombs(name, wname, 256);
+                LocalFree(wname);
+                return name;
+            }
+        }
+
+#elif defined(__linux__)
+        char name[16] = { 0 }; // Linux 限制为 16 字符
+        if (pthread_getname_np(pthread_self(), name, 16) == 0) {
+            return name;
+        }
+
+#elif defined(__APPLE__)
+        char name[64] = { 0 }; // macOS 限制为 64 字符
+        pthread_getname_np(pthread_self(), name, 64);
+        return name;
+#endif
+
+        return "Thread-" + std::to_string(
+            std::hash<std::thread::id>{}(std::this_thread::get_id()));
+    }
 };

@@ -17,6 +17,7 @@ namespace NxRHI
 {	
 	void VKThreadCmdBufferManager::Initialize(VKGpuDevice* device)
 	{
+		mThreadName = vfxThread::GetCurrentThreadName();
 		mDevice = device;
 		VkCommandPoolCreateInfo poolInfo = {};
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -349,7 +350,7 @@ namespace NxRHI
 		}
 
 		auto targetValue = cmdQueue->IncreaseSignal(mCommitFence, type);
-		GetVKDevice()->mCmdAllocatorManager->Free(GetVKCmdRecorder(), targetValue, mCommitFence);
+		GetVKCmdRecorder()->Free(targetValue, mCommitFence);
 
 		mCmdRecorder = nullptr;
 	}
