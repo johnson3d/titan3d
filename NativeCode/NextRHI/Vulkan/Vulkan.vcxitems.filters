@@ -15,9 +15,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Utility\SpirvProcessor.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Utility\DescriptorSetManager.cpp">
-      <Filter>Utility</Filter>
-    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)VKDescriptorSet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)VKBuffer.h" />
@@ -34,13 +32,11 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Utility\SpirvProcessor.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Utility\DescriptorSetManager.h">
-      <Filter>Utility</Filter>
-    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)VKDescriptorSet.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Utility">
-      <UniqueIdentifier>{542c3766-d5fb-4232-884c-1cb87a267a3d}</UniqueIdentifier>
+      <UniqueIdentifier>{b3764785-ac77-47e4-bb15-067ccc9b35a1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

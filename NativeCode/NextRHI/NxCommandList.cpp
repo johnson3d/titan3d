@@ -11,6 +11,9 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	ICmdRecorder::ICmdRecorder()
+	{
+	}
 	ICmdRecorder::~ICmdRecorder()
 	{
 		ResetGpuDraws();
@@ -23,6 +26,10 @@ namespace NxRHI
 		mDrawcallArray.push_back(draw);
 		mPrimitiveNum += draw->GetPrimitiveNum();
 	}
+	void ICmdRecorder::PushGpuDraw(ICopyDraw* draw)
+	{
+		return PushGpuDraw((IGpuDraw*)draw);
+	}
 	void ICmdRecorder::ResetGpuDraws()
 	{
 		VAutoVSLLock lk(mLocker);
@@ -34,17 +41,31 @@ namespace NxRHI
 		mRefBuffers.clear();
 		mDirectDrawNum = 0;
 		mPrimitiveNum = 0;
+		mFlushStart = 0;
 		//mCmdList.FromObject(nullptr);
+	}
+	void ICmdRecorder::AppendRecorder(ICmdRecorder* pCmdRecorder)
+	{
+		VAutoVSLLock lk(mLocker);
+		mDrawcallArray.insert(mDrawcallArray.end(), pCmdRecorder->mDrawcallArray.begin(), pCmdRecorder->mDrawcallArray.end());
+		mRefBuffers.insert(mRefBuffers.end(), pCmdRecorder->mRefBuffers.begin(), pCmdRecorder->mRefBuffers.end());
+		mDirectDrawNum += pCmdRecorder->mDirectDrawNum;
+		mPrimitiveNum += pCmdRecorder->mPrimitiveNum;
 	}
 	void ICmdRecorder::FlushDraws(ICommandList* cmdlist)
 	{
 		//mCmdList.FromObject(cmdlist);
 		//AUTO_SAMP("NxRHI.ICmdRecorder.FlushDraws");
 		VAutoVSLLock lk(mLocker);
-		for (auto i : mDrawcallArray)
+		for (UINT i = mFlushStart; i < (UINT)mDrawcallArray.size(); i++)
 		{
-			i->Commit(cmdlist, false);
+			mDrawcallArray[i]->BuildDrawcall(cmdlist);
 		}
+		for (UINT i = mFlushStart; i < (UINT)mDrawcallArray.size(); i++)
+		{
+			mDrawcallArray[i]->Commit(cmdlist, false);
+		}
+		mFlushStart = (UINT)mDrawcallArray.size();
 	}
 	ICmdRecorder* ICommandList::BeginCommand()
 	{
@@ -64,8 +85,19 @@ namespace NxRHI
 			return;
 		}
 	}
+	IRenderPass* ICommandList::GetCurrentRenderPass() 
+	{
+		if (mCurrentFrameBuffers != nullptr)
+			return mCurrentFrameBuffers->GetRenderPass();
+		return nullptr;
+	}
 	bool ICommandList::PushGpuDrawImpl(IGpuDraw* draw, bool bCheck)
 	{
+		if (mIsDirectGpuDraw)
+		{
+			this->DirectGpuDraw(draw);
+			return true;
+		}
 		auto pCmdRecorder = mCmdRecorder;
 		if (pCmdRecorder == nullptr || IsRecording() == false)
 		{
@@ -76,9 +108,39 @@ namespace NxRHI
 		pCmdRecorder->PushGpuDraw(draw);
 		return true;
 	}
+	bool ICommandList::PushGpuDraw(IGraphicDraw* draw)
+	{
+		return PushGpuDrawImpl(draw, true);
+	}
+	bool ICommandList::PushGpuDraw(IComputeDraw* draw)
+	{
+		return PushGpuDrawImpl(draw, true);
+	}
+	bool ICommandList::PushGpuDraw(IRayTracingDraw* draw)
+	{
+		return PushGpuDrawImpl(draw, true);
+	}
+	bool ICommandList::PushGpuDraw(IActionDraw* draw)
+	{
+		return PushGpuDrawImpl(draw, true);
+	}
+	bool ICommandList::PushGpuDraw(ICopyDraw* draw)
+	{
+		auto pass = GetCurrentRenderPass();
+		if (pass)
+		{
+			pass->PushBeginCopyDraw(draw);
+			return true;
+		}
+		else
+		{
+			return PushGpuDrawImpl(draw, true);
+		}
+	}
 	void ICommandList::AppendDraws(ICmdRecorder* pCmdRecorder)
 	{
-		mCmdRecorder->mDrawcallArray.insert(mCmdRecorder->mDrawcallArray.end(), pCmdRecorder->mDrawcallArray.begin(), pCmdRecorder->mDrawcallArray.end());
+		mCmdRecorder->AppendRecorder(pCmdRecorder);
+		
 	}
 	void ICommandList::DirectGpuDraw(IGpuDraw* draw)
 	{
@@ -135,7 +197,43 @@ namespace NxRHI
 			cpDraw->FootPrint.TotalSize = sizeof(UINT);
 			cpDraw->DstX = BufferWriters[i].Offset;
 
-			this->PushGpuDraw(cpDraw);
+			this->PushGpuDraw(cpDraw.GetPtr());
+		}
+	}
+	EGpuResourceState FTransitionScope::Transition(ICommandList* cmd, IGpuBufferData* resource, EGpuResourceState toState, bool bTryRenderPass)
+	{
+		auto save = resource->GpuState;
+		auto bNeedTransition = resource->GpuState != toState;
+		if (bNeedTransition)
+		{
+			auto pass = cmd->GetCurrentRenderPass();
+			if (bTryRenderPass && pass)
+			{
+				pass->PushBeginBarrier(resource, toState);
+			}
+			else
+			{
+				resource->TransitionTo(cmd, toState);
+			}
+		}
+		return save;
+	}
+	FTransitionScope::FTransitionScope(ICommandList* cmd, IGpuBufferData* resource, EGpuResourceState toState)
+	{
+		CmdList = cmd;
+		Resource = resource;
+		SaveState = resource->GpuState;
+		bNeedTransition = SaveState != toState;
+		if (bNeedTransition)
+		{
+			resource->TransitionTo(cmd, toState);
+		}
+	}
+	FTransitionScope::~FTransitionScope()
+	{
+		if (bNeedTransition)
+		{
+			Resource->TransitionTo(CmdList, SaveState);
 		}
 	}
 }

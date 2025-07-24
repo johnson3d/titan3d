@@ -13,7 +13,7 @@ namespace EngineNS.Plugins.ServerCommon
         public Bricks.Network.INetConnect Connect { get; set; } = null;
         public Guid ServerId { get; set; } = Guid.NewGuid();
         public Bricks.Network.FNetworkPoint ListenPoint { get; } = new Bricks.Network.FNetworkPoint();
-        public Bricks.TcpServer.UTcpServer TcpServer { get; protected set; } = null;
+        public Bricks.TcpServer.TtTcpServer TcpServer { get; protected set; } = null;
         public long Payload { get; set; } = 0;
         public ServerCommon.UClientManager ClientManager { get; set; } = new ServerCommon.UClientManager();
 
@@ -21,7 +21,7 @@ namespace EngineNS.Plugins.ServerCommon
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
             TtEngine.Instance.TickableManager.AddTickable(this);
-            TcpServer = new Bricks.TcpServer.UTcpServer();
+            TcpServer = new Bricks.TcpServer.TtTcpServer();
             return TcpServer.StartServer(ip, port);
         }
         public virtual void StopServer()

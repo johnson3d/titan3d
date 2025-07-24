@@ -3,6 +3,7 @@
 #include "NxShader.h"
 #include "NxGeomMesh.h"
 #include "NxGpuState.h"
+#include "NxDrawcall.h"
 
 NS_BEGIN
 
@@ -94,11 +95,13 @@ namespace NxRHI
 		ICmdRecorder : public VIUnknown
 	{
 	public:
+		ICmdRecorder();
 		~ICmdRecorder();
 		std::vector<AutoRef<IGpuDraw>>			mDrawcallArray;
 		std::vector<AutoRef<IGpuResource>>		mRefBuffers;
 		UINT									mDirectDrawNum = 0;
 		UINT									mPrimitiveNum = 0;
+		UINT									mFlushStart = 0;
 
 		VSLLock									mLocker;
 	public:
@@ -110,6 +113,8 @@ namespace NxRHI
 			mRefBuffers.push_back(res);
 		}
 		void PushGpuDraw(IGpuDraw * draw);
+		void PushGpuDraw(ICopyDraw* draw);
+		void AppendRecorder(ICmdRecorder* recorder);
 		virtual void ResetGpuDraws();
 		void FlushDraws(ICommandList* cmdlist);
 	};
@@ -189,19 +194,16 @@ namespace NxRHI
 		ICmdRecorder* GetCmdRecorder() {
 			return mCmdRecorder;
 		}
-		bool PushGpuDrawImpl(IGpuDraw * draw, bool bCheck);
-		bool PushGpuDraw(IGpuDraw* draw)
-		{
-			return PushGpuDrawImpl(draw, true);
-		}
-		void PushGpuDrawUntilSuccessed(IGpuDraw* draw)
-		{
-			while (PushGpuDrawImpl(draw, false) == false)
-			{
 
-			}
-		}
 		void DirectGpuDraw(IGpuDraw* draw);
+		bool PushGpuDrawImpl(IGpuDraw * draw, bool bCheck = true);
+
+		bool PushGpuDraw(IGraphicDraw* draw);
+		bool PushGpuDraw(IComputeDraw* draw);
+		bool PushGpuDraw(IRayTracingDraw* draw);
+		bool PushGpuDraw(IActionDraw* draw);
+		bool PushGpuDraw(ICopyDraw* draw);
+		
 		/*void ResetGpuDraws()
 		{
 			ASSERT(mCmdRecorder != nullptr);
@@ -240,6 +242,10 @@ namespace NxRHI
 		IFence* GetCommitFence() {
 			return mCommitFence;
 		}
+		IFrameBuffers* GetCurrentFrameBuffers() {
+			return mCurrentFrameBuffers;
+		}
+		IRenderPass* GetCurrentRenderPass();
 	public:
 		TWeakRefHandle<IGpuDevice>			mDevice;
 		AutoRef<ICmdRecorder>				mCmdRecorder;
@@ -250,6 +256,8 @@ namespace NxRHI
 		AutoRef<IFrameBuffers>				mCurrentFrameBuffers;
 
 		AutoRef<IFence>						mCommitFence;
+
+		bool								mIsDirectGpuDraw = false;
 	};
 
 	class TR_CLASS()
@@ -291,6 +299,20 @@ namespace NxRHI
 		inline ICommandList* GetCmdList() {
 			return mCmdList;
 		}
+	};
+
+	struct FTransitionScope
+	{
+	private:
+		bool bTryRenderPass;
+		bool bNeedTransition;
+		EGpuResourceState SaveState;
+		IGpuBufferData* Resource;
+		ICommandList* CmdList;
+	public:
+		FTransitionScope(ICommandList* cmd, IGpuBufferData* resource, EGpuResourceState toState);
+		~FTransitionScope();
+		static EGpuResourceState Transition(ICommandList* cmd, IGpuBufferData* resource, EGpuResourceState toState, bool bTryRenderPass);
 	};
 }
 

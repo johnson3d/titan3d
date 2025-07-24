@@ -88,7 +88,6 @@
     <Import Project="..\NativeCode\NextRHI\Dx12\Dx12.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\NextRHI\Vulkan\Vulkan.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\Canvas\Canvas.vcxitems" Label="Shared" />
-    <Import Project="..\3rd\native\spirv-cross\spirv-cross.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\GpuDump\GpuDump.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\EtcLib\EtcLib.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Platform\Windows\Windows.vcxitems" Label="Shared" />
@@ -111,6 +110,7 @@
     <Import Project="..\NativeCode\Bricks\DistanceField\DistanceField.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\xatlas\xatlas.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\PhysicsCore\NvPhysX\NvPhysX.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\SpirvCross\SpirvCross.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -191,7 +191,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>Core.Window.def</ModuleDefinitionFile>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>../3rd/native/Python3/Win64/libs;../3rd/native/pthread/lib/x64;../3rd/native/NVAftermath/lib/x64;../3rd/native/crunch/lib/$(Configuration);../3rd/native/atlmfc/lib/x64;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;..\3rd\native\PhysX-4.1\physx\Lib\windows\debug;../3rd/native/ShaderConductor/Lib/Debug;..\3rd\native\metis\5.1.0\libmetis\Debug;..\3rd\native\embree\Embree3122\Win64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../3rd/native/Python3/Win64/libs;../3rd/native/pthread/lib/x64;../3rd/native/NVAftermath/lib/x64;../3rd/native/crunch/lib/$(Configuration);../3rd/native/atlmfc/lib/x64;../3rd/native/SpirvTools/lib/win64;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;..\3rd\native\PhysX-4.1\physx\Lib\windows\debug;../3rd/native/ShaderConductor/Lib/Debug;..\3rd\native\metis\5.1.0\libmetis\Debug;..\3rd\native\embree\Embree3122\Win64\lib;%(AdditionalLibraryDirectories);../3rd/native/glslang/lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk.lib;renderdoc.lib;metis.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
@@ -254,7 +254,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>../3rd/native/Python3/Win64/libs;../3rd/native/pthread/lib/x64;../3rd/native/NVAftermath/lib/x64;../3rd/native/crunch/lib/$(Configuration);../3rd/native/atlmfc/lib/x64;../3rd/native/eigen;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;../3rd/native/eigen-3.4.0;..\3rd\native\PhysX-4.1\physx\Lib\windows\release;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\metis\5.1.0\libmetis\Release;..\3rd\native\embree\Embree3122\Win64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../3rd/native/Python3/Win64/libs;../3rd/native/pthread/lib/x64;../3rd/native/NVAftermath/lib/x64;../3rd/native/crunch/lib/$(Configuration);../3rd/native/atlmfc/lib/x64;../3rd/native/SpirvTools/lib/win64;../3rd/native/eigen;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;../3rd/native/eigen-3.4.0;..\3rd\native\PhysX-4.1\physx\Lib\windows\release;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\metis\5.1.0\libmetis\Release;..\3rd\native\embree\Embree3122\Win64\lib;%(AdditionalLibraryDirectories);../3rd/native/glslang/lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk.lib;renderdoc.lib;metis.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>

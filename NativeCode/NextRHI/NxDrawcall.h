@@ -26,6 +26,7 @@ namespace NxRHI
 	{
 	public:
 		ENGINE_RTTI(IGpuDraw);
+		virtual void BuildDrawcall(ICommandList* cmdlist) {}
 		virtual void Commit(ICommandList * cmdlist, bool bRefResource) = 0;
 		virtual UINT GetPrimitiveNum() = 0;
 		virtual void ResetResources() = 0;
@@ -53,10 +54,7 @@ namespace NxRHI
 	{
 	public:
 		ENGINE_RTTI(IGraphicDraw);
-		IGraphicDraw()
-		{
-			NumOfInstance++;
-		}
+		IGraphicDraw();
 		~IGraphicDraw();
 		virtual void ResetResources() override {
 			BindResources.clear();
@@ -329,6 +327,48 @@ namespace NxRHI
 			}
 		}
 		virtual UINT GetPrimitiveNum() override { return 0; }
+	};
+
+	struct FBarrierDesc
+	{
+		FBarrierDesc(IGpuBufferData* bf, EGpuResourceState state) {
+			Buffer = bf;
+			ToState = state;
+		}
+		AutoRef<IGpuBufferData> Buffer;
+		EGpuResourceState ToState = EGpuResourceState::GRS_Undefine;
+	};
+
+	class IBarriersDraw : public IGpuDraw
+	{
+	public:
+		std::vector<FBarrierDesc> Barriers;
+
+		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
+		virtual UINT GetPrimitiveNum() override
+		{
+			return 0;
+		}
+		virtual void ResetResources() override
+		{
+
+		}
+	};
+
+	class IRenderPassCopyDraw : public IGpuDraw
+	{
+	public:
+		std::vector<AutoRef<ICopyDraw>> CopyDraws;
+
+		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
+		virtual UINT GetPrimitiveNum() override
+		{
+			return 0;
+		}
+		virtual void ResetResources() override
+		{
+
+		}
 	};
 }
 

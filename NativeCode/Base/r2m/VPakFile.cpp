@@ -180,7 +180,7 @@ VPackFile2Memory::VPackFile2Memory()
 	mPtrOffset = 0;
 }
 
-void VPackFile2Memory::Release()
+void VPackFile2Memory::Release() const
 {
 	VRes2Memory::Release();
 }

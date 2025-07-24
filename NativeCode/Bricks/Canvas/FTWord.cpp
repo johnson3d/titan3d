@@ -317,7 +317,7 @@ namespace Canvas
 			cpDraw->FootPrint.RowPitch = bfDesc.RowPitch;
 			cpDraw->FootPrint.TotalSize = bfDesc.RowPitch * PixelHeight;
 
-			cmdlist->PushGpuDraw(cpDraw);
+			cmdlist->PushGpuDraw(cpDraw.GetPtr());
 		}
 	}
 

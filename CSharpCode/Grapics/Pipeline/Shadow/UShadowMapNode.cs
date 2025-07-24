@@ -80,8 +80,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         public TtCamera ViewerCamera;
         public TtCamera CullCamera;
         public TtGraphicsBuffers[] GBuffersArray;
-        public TtDrawBuffers[] CSMPass = new TtDrawBuffers[4];
-
+        
         TtCpuCullingNode[] CSMCullingNode = new TtCpuCullingNode[4];
 
         public NxRHI.TtGpuPipeline DepthRaster;
@@ -206,12 +205,6 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                     GBuffersArray[CamIdx].TargetViewIdentifier = new TtGraphicsBuffers.TtTargetViewIdentifier();
                     GBuffersArray[CamIdx].SetSize(mResolutionX, mResolutionY);
                 }
-            }
-
-            for (UInt32 CamIdx = 0; CamIdx < mCsmNum; CamIdx++)
-            {
-                CSMPass[CamIdx] = new TtDrawBuffers();
-                CSMPass[CamIdx].Initialize(rc, debugName);
             }
 
             mShadowMapSizeAndRcp.X = mWholeReslutionX;
@@ -474,36 +467,10 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 mFadeParam.Y = -FadeStartDistance * mFadeParam.X;
 
                 mShadowCameraArray[CsmIdx].UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext);
-                CSMPass[CsmIdx].SwapBuffer();
-
-                var cmdlist = CSMPass[CsmIdx].DrawCmdList;
+                
+                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
                 using (new NxRHI.TtCmdListScope(cmdlist))
                 {
-                    using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
-                    {
-                        foreach (var i in mVisParameter.VisibleMeshes)
-                        {
-                            if (i.Mesh.IsCastShadow == false)
-                                continue;
-                            if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
-                                continue;
-                            foreach (var j in i.Mesh.SubMeshes)
-                            {
-                                foreach (var k in j.Atoms)
-                                {
-                                    var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffersArray[CsmIdx], policy, this);
-
-                                    if (drawcall != null)
-                                    {
-                                        drawcall.BindGBuffer(mShadowCameraArray[CsmIdx], GBuffersArray[CsmIdx]);
-
-                                        cmdlist.PushGpuDraw(drawcall);
-                                    }
-                                }
-                            }
-                        }
-                    }
-
                     using (new Profiler.TimeScopeHelper(ScopeFlushDraw))
                     {
                         FViewPort Viewport = new FViewPort();
@@ -545,10 +512,30 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                             PassName = "ShadowDepth3";
                         }
                         cmdlist.BeginPass(GBuffersArray[CsmIdx].FrameBuffers, in passClear, PassName);
-                        //if (bClear)
-                        //    cmdlist.BeginRenderPass(policy, GBuffers, in passClear, "ShadowDepth");
-                        //else
-                        //    cmdlist.BeginRenderPass(policy, GBuffers, "ShadowDepth");
+                        using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
+                        {
+                            foreach (var i in mVisParameter.VisibleMeshes)
+                            {
+                                if (i.Mesh.IsCastShadow == false)
+                                    continue;
+                                if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
+                                    continue;
+                                foreach (var j in i.Mesh.SubMeshes)
+                                {
+                                    foreach (var k in j.Atoms)
+                                    {
+                                        var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffersArray[CsmIdx], policy, this);
+
+                                        if (drawcall != null)
+                                        {
+                                            drawcall.BindGBuffer(mShadowCameraArray[CsmIdx], GBuffersArray[CsmIdx]);
+
+                                            cmdlist.PushGpuDraw(drawcall);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         cmdlist.FlushDraws();
                         cmdlist.EndPass();
                     }

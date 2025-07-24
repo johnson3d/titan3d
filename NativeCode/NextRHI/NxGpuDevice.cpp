@@ -3,6 +3,7 @@
 #include "NxGeomMesh.h"
 #include "NxDrawcall.h"
 #include "NxCommandList.h"
+#include "NxDescriptorSet.h"
 #include "NullDevice/NullGpuDevice.h"
 
 #if defined(HasModule_RenderDoc)
@@ -128,6 +129,10 @@ namespace NxRHI
 	FGpuPipelineManager* IGpuDevice::GetGpuPipelineManager()
 	{
 		return mPipelineManager;
+	}
+	NxDesriptorPoolManager* IGpuDevice::GetDescriptorPoolManager() 
+	{
+		return mDescriptorPoolManager;
 	}
 	IGraphicDraw* IGpuDevice::CreateGraphicDraw()
 	{

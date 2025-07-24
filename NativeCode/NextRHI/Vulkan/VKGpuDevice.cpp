@@ -8,6 +8,7 @@
 #include "VKFrameBuffers.h"
 #include "VKEffect.h"
 #include "VKDrawcall.h"
+#include "VKDescriptorSet.h"
 #include "../NxEffect.h"
 #include "../../Base/thread/vfxthread.h"
 
@@ -408,6 +409,10 @@ namespace NxRHI
 				extensions.push_back("VK_NV_per_stage_descriptor_set");
 			if (HasExtension(VK_EXT_ROBUSTNESS_2_EXTENSION_NAME))
 				extensions.push_back(VK_EXT_ROBUSTNESS_2_EXTENSION_NAME);
+			if (HasExtension(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME))
+				extensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
+			if (HasExtension(VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME))
+				extensions.push_back(VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME);
 			
 			//extensions.push_back(VK_GOOGLE_HLSL_FUNCTIONALITY1_EXTENSION_NAME);
 			/*extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
@@ -428,9 +433,19 @@ namespace NxRHI
 		dynScissorFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INHERITED_VIEWPORT_SCISSOR_FEATURES_NV;
 		dynScissorFeatures.inheritedViewportScissor2D = VK_TRUE;
 
-		VkPhysicalDeviceRobustness2FeaturesEXT robustness2Features = {
-			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT
-		};
+		VkPhysicalDeviceSynchronization2Features sync2Features = {};
+		sync2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
+		//sync2Features.synchronization2 = VK_TRUE;
+
+		VkPhysicalDeviceDynamicRenderingLocalReadFeatures localReadFeatures = {};
+		localReadFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_LOCAL_READ_FEATURES;
+		
+		VkPhysicalDeviceDynamicRenderingFeatures dynamicRenderingFeatures = {};
+		dynamicRenderingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
+		//dynamicRenderingFeatures.dynamicRendering = VK_TRUE;
+
+		VkPhysicalDeviceRobustness2FeaturesEXT robustness2Features = {};
+		robustness2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT;
 		robustness2Features.nullDescriptor = VK_TRUE;
 
 		VkPhysicalDeviceVulkan11Features devfeatures11{};
@@ -447,10 +462,17 @@ namespace NxRHI
 
 		VkPhysicalDeviceFeatures2 features2{};
 		features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
+		features2.pNext = &dynamicRenderingFeatures;
+		dynamicRenderingFeatures.pNext = &localReadFeatures;
+		localReadFeatures.pNext = &sync2Features;
 		vkGetPhysicalDeviceFeatures2(mPhysicalDevice, &features2);
 		features2.features.robustBufferAccess = VK_TRUE;
 		features2.features.geometryShader = VK_TRUE;
 		features2.features.multiViewport = VK_TRUE;
+
+		ASSERT(localReadFeatures.dynamicRenderingLocalRead = VK_TRUE);
+		ASSERT(dynamicRenderingFeatures.dynamicRendering == VK_TRUE);
+		ASSERT(sync2Features.synchronization2 = VK_TRUE);
 
 		VkPhysicalDeviceFeatures features1{};
 		vkGetPhysicalDeviceFeatures(mPhysicalDevice, &features1);
@@ -461,7 +483,11 @@ namespace NxRHI
 		features2.pNext = &devfeatures12;
 		devfeatures12.pNext = &devfeatures11;
 		devfeatures11.pNext = &robustness2Features;
-		robustness2Features.pNext = &dynScissorFeatures;
+		robustness2Features.pNext = &dynamicRenderingFeatures;
+		dynamicRenderingFeatures.pNext = &localReadFeatures;
+		localReadFeatures.pNext = &sync2Features;
+		sync2Features.pNext = &dynScissorFeatures;
+
 		VkDeviceCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 		createInfo.pNext = &features2;
@@ -977,9 +1003,10 @@ namespace NxRHI
 			ppWaitCmdlists[i]->mCommitFence->WaitToExpect();
 		}
 
+		VKCommandList* vkCmd = nullptr;
 		for (UINT i = 0; i < NumOfExe; i++)
 		{
-			auto vkCmd = (VKCommandList*)Cmdlist[i];
+			vkCmd = (VKCommandList*)Cmdlist[i];
 			vkCmd->Commit(this, type);
 			this->IncreaseSignal(vkCmd->mCommitFence, type);
 			//vkCmd->ResetGpuDraws();

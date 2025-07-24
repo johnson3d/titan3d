@@ -372,7 +372,7 @@ namespace NxRHI
 					cpDraw->FootPrint.RowPitch = copyDesc.RowPitch;
 					cpDraw->FootPrint.TotalSize = copyDesc.RowPitch * 1;
 
-					cmd.GetCmdList()->PushGpuDraw(cpDraw);
+					cmd.GetCmdList()->PushGpuDraw(cpDraw.GetPtr());
 				}
 				device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
 				copyVB->FetchGpuData(0, &ibBuffer);
@@ -479,7 +479,7 @@ namespace NxRHI
                 cpDraw->FootPrint.RowPitch = copyDesc.RowPitch;
                 cpDraw->FootPrint.TotalSize = copyDesc.RowPitch * 1;
 
-                cmd.GetCmdList()->PushGpuDraw(cpDraw);
+                cmd.GetCmdList()->PushGpuDraw(cpDraw.GetPtr());
             }
 
             device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
@@ -947,7 +947,7 @@ namespace NxRHI
 				cpDraw->FootPrint.RowPitch = copyDesc.RowPitch;
 				cpDraw->FootPrint.TotalSize = copyDesc.RowPitch * 1;
 
-				cmd.GetCmdList()->PushGpuDraw(cpDraw);
+				cmd.GetCmdList()->PushGpuDraw(cpDraw.GetPtr());
 			}
 			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
 			copyVB->FetchGpuData(0, &buffData);

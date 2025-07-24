@@ -82,25 +82,25 @@ namespace NxRHI
 		pAttr->Write((UINT)CBuffers.size());
 		for (auto& i : CBuffers)
 		{
-			i->SaveXnd(pAttr);
+			const_cast<FShaderBinder*>(i.GetPtr())->SaveXnd(pAttr);
 		}
 
 		pAttr->Write((UINT)Uavs.size());
 		for (auto& i : Uavs)
 		{
-			i->SaveXnd(pAttr);
+			const_cast<FShaderBinder*>(i.GetPtr())->SaveXnd(pAttr);
 		}
 
 		pAttr->Write((UINT)Srvs.size());
 		for (auto& i : Srvs)
 		{
-			i->SaveXnd(pAttr);
+			const_cast<FShaderBinder*>(i.GetPtr())->SaveXnd(pAttr);
 		}
 
 		pAttr->Write((UINT)Samplers.size());
 		for (auto& i : Samplers)
 		{
-			i->SaveXnd(pAttr);
+			const_cast<FShaderBinder*>(i.GetPtr())->SaveXnd(pAttr);
 		}
 	}
 	bool IShaderReflector::LoadXnd(IGpuDevice* device, XndAttribute* pAttr, EShaderType stage)

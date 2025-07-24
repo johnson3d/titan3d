@@ -3330,7 +3330,7 @@ namespace EngineNS.NxRHI
                         cpDraw.BindTextureDest(result);
                         cpDraw.DestSubResource = i;
                         cpDraw.SrcSubResource = i;
-                        tsCmd.CmdList.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                        tsCmd.CmdList.PushGpuDraw(cpDraw.mCoreObject);
                         cpDraw.Dispose();
                     }
                 }
@@ -3392,7 +3392,7 @@ namespace EngineNS.NxRHI
                                 cpDraw.BindTextureDest(result);
                                 cpDraw.DestSubResource = i;
                                 cpDraw.SrcSubResource = 0;
-                                tsCmd.CmdList.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                                tsCmd.CmdList.PushGpuDraw(cpDraw.mCoreObject);
                                 cpDraw.Dispose();
                             }
                         }

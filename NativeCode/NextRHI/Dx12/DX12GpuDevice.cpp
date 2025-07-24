@@ -49,14 +49,22 @@ namespace NxRHI
 		Desc = *desc;
 		//SafeCreateDXGIFactory(mDXGIFactory.GetAddressOf(), 0);
 		UINT dxgiFlags = 0;
-		if (desc->CreateDebugLayer && D3D12GetDebugInterface(IID_PPV_ARGS(mDebugLayer.GetAddressOf())) == S_OK)
+		if (desc->CreateDebugLayer)
 		{
-			mDebugLayer->EnableDebugLayer();
-			mDebugLayer->SetEnableGPUBasedValidation(desc->GpuBaseValidation);
-			//https://shikihuiku.github.io/post/cedec2020_prescriptions_for_deviceremoval/
-			
-			//debugLayer->SetGPUBasedValidationFlags(D3D12_GPU_BASED_VALIDATION_FLAGS_NONE);
-			dxgiFlags |= DXGI_CREATE_FACTORY_DEBUG;
+			if (D3D12GetDebugInterface(IID_PPV_ARGS(mDebugLayer.GetAddressOf())) == S_OK)
+			{
+				mDebugLayer->EnableDebugLayer();
+				mDebugLayer->SetEnableGPUBasedValidation(desc->GpuBaseValidation);
+				//https://shikihuiku.github.io/post/cedec2020_prescriptions_for_deviceremoval/
+
+				//debugLayer->SetGPUBasedValidationFlags(D3D12_GPU_BASED_VALIDATION_FLAGS_NONE);
+				dxgiFlags |= DXGI_CREATE_FACTORY_DEBUG;
+				VFX_LTRACE(ELTT_Warning, "D3D12GetDebugInterface: ok\r\n");
+			}
+			else
+			{
+				VFX_LTRACE(ELTT_Warning, "D3D12GetDebugInterface: failed, please install Graphics Tools\r\n");
+			}
 		}
 		CreateDXGIFactory2(dxgiFlags, IID_PPV_ARGS(mDXGIFactory.GetAddressOf()));
 

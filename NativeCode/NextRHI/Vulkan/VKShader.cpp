@@ -229,8 +229,11 @@ namespace NxRHI
 		// Hand it off to a compiler instance and give it ownership of the IR.
 		spvc_context_create_compiler(context, SPVC_BACKEND_GLSL, ir, SPVC_CAPTURE_MODE_TAKE_OWNERSHIP, &compiler_glsl);
 
+		spvc_set active_variables;
+		spvc_compiler_get_active_interface_variables(compiler_glsl, &active_variables);
+
 		// Do some basic reflection.
-		spvc_compiler_create_shader_resources(compiler_glsl, &resources);
+		spvc_compiler_create_shader_resources_for_active_variables(compiler_glsl, &resources, active_variables);
 		spvc_resources_get_resource_list_for_type(resources, SPVC_RESOURCE_TYPE_STAGE_INPUT, &list, &count);
 		for (i = 0; i < count; i++)
 		{

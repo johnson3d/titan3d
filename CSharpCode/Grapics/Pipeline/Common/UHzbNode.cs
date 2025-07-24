@@ -228,7 +228,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             dsTexDesc.MipLevels = (uint)HzbMipsUAVs.Length;
             dsTexDesc.Format = EPixelFormat.PXF_R16G16_TYPELESS;
             dsTexDesc.BindFlags = NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV;
+            var count1 = HzbTexture?.UnsafeRefCount;
             HzbTexture?.Dispose();
+            var count2 = HzbTexture?.UnsafeRefCount;
             HzbTexture = rc.CreateTexture(in dsTexDesc);
 
             var srvDesc = new NxRHI.FSrvDesc();

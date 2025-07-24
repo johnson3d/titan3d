@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.TcpServer
 {
-    public class UTcpConnect : AuxPtrType<EngineNS.TcpConnect>, Bricks.Network.INetConnect
+    public class TtTcpConnect : AuxPtrType<EngineNS.TcpConnect>, Bricks.Network.INetConnect
     {
         internal static unsafe EngineNS.TcpConnect.FDelegate_FOnTcpConnectRcvData OnTcpConnectRcvData = OnTcpConnectRcvDataImpl;
         private static unsafe void OnTcpConnectRcvDataImpl(EngineNS.TcpConnect arg0, byte* arg1, int arg2)
@@ -13,13 +13,13 @@ namespace EngineNS.Bricks.TcpServer
                 return;
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)arg0.GCHandle);
 
-            var connect = gcHandle.Target as UTcpConnect;
+            var connect = gcHandle.Target as TtTcpConnect;
             connect.OnRcvData(arg1, arg2);
         }
-        public unsafe UTcpConnect(EngineNS.TcpConnect coreObject)
+        public unsafe TtTcpConnect(EngineNS.TcpConnect coreObject)
         {
             mCoreObject = coreObject;
-            mCoreObject.NativeSuper.AddRef();
+            mCoreObject.NativeSuper.NativeSuper.AddRef();
             mCoreObject.GCHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(this)).ToPointer();
 
             mPkgBuilder.NetPackageManager = NetPackageManager;

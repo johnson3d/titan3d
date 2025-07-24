@@ -101,7 +101,7 @@ public:
 	ENGINE_RTTI(VFile2Memory);
 	VPackFile2Memory();
 
-	virtual void Release() override;
+	virtual void Release() const override;
 
 	virtual  VResPtr	Ptr(UINT64 offset, UINT64 size = -1) override;
 	/*!	\copydoc VRes2Memory::Free */

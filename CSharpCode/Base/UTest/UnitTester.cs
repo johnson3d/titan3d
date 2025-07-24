@@ -44,6 +44,9 @@ namespace EngineNS.UnitTest
                     var types = i.GetTypes();
                     foreach (var j in types)
                     {
+                        var assDesc = Rtti.TtTypeDescManager.Instance.FindAssemblyDesc(j.Assembly);
+                        if (assDesc == null)
+                            continue;
                         var attrs = j.GetCustomAttributes(typeof(TtTestAttribute), false);
                         if (attrs.Length == 0)
                             continue;

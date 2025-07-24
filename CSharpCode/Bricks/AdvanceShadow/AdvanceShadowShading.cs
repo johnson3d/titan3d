@@ -363,8 +363,10 @@ namespace EngineNS.Bricks.AdvanceShadow
             }
             policy.CommitCommandList(cmdlist);
         }
+        NxRHI.TtCmdRecorder mBasePassRecorder = new NxRHI.TtCmdRecorder();
         private void DrawDepth(NxRHI.TtCommandList cmdlist, GamePlay.TtWorld world, TtRenderPolicy policy)
         {
+            mBasePassRecorder.ResetGpuDraws();
             foreach (var i in mVisParameter.VisibleMeshes)
             {
                 if (i.Mesh.IsCastShadow == false)
@@ -381,7 +383,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                         {
                             drawcall.BindGBuffer(mVisParameter.CullCamera, mGBuffer);
 
-                            cmdlist.PushGpuDraw(drawcall);
+                            mBasePassRecorder.PushGpuDraw(drawcall);
                         }
                     }
                 }
@@ -410,28 +412,13 @@ namespace EngineNS.Bricks.AdvanceShadow
                 passClear.SetClearColor(0, new Color4f(1, 1, 0, 0));
             }
             cmdlist.BeginPass(mGBuffer.FrameBuffers, in passClear, "AdvShadowDepth");
+            cmdlist.AppendDraws(mBasePassRecorder);
             cmdlist.FlushDraws();
             cmdlist.EndPass();
+            mBasePassRecorder.ResetGpuDraws();
         }
         private void DrawESM(TtQNode node, NxRHI.TtCommandList cmdlist, GamePlay.TtWorld world, TtRenderPolicy policy)
         {
-            if (ESMScreenMesh != null)
-            {
-                foreach (var i in ESMScreenMesh.SubMeshes)
-                {
-                    foreach (var j in i.Atoms)
-                    {
-                        var drawcall = j.GetDrawCall(cmdlist.mCoreObject, mDrawScreenGBuffers, policy, this);
-                        if (drawcall == null)
-                            continue;
-                        drawcall.TagObject = this;
-                        drawcall.BindCBV(drawcall.Effect.BindIndexer.cbPerViewport, mDrawScreenGBuffers.PerViewportCBuffer);
-                        drawcall.BindCBV(drawcall.Effect.BindIndexer.cbPerCamera, node.Leaf.ShadowCamera.PerCameraCBuffer);
-
-                        cmdlist.PushGpuDraw(drawcall);
-                    }
-                }
-            }
             {
                 cmdlist.SetViewport(in mDrawScreenGBuffers.Viewport);
                 var scissor = new NxRHI.FScissorRect();
@@ -445,6 +432,23 @@ namespace EngineNS.Bricks.AdvanceShadow
                 passClears.ClearFlags = ERenderPassClearFlags.CLEAR_NONE;
                 passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));
                 cmdlist.BeginPass(mDrawScreenGBuffers.FrameBuffers, in passClears, "ESM");
+                if (ESMScreenMesh != null)
+                {
+                    foreach (var i in ESMScreenMesh.SubMeshes)
+                    {
+                        foreach (var j in i.Atoms)
+                        {
+                            var drawcall = j.GetDrawCall(cmdlist.mCoreObject, mDrawScreenGBuffers, policy, this);
+                            if (drawcall == null)
+                                continue;
+                            drawcall.TagObject = this;
+                            drawcall.BindCBV(drawcall.Effect.BindIndexer.cbPerViewport, mDrawScreenGBuffers.PerViewportCBuffer);
+                            drawcall.BindCBV(drawcall.Effect.BindIndexer.cbPerCamera, node.Leaf.ShadowCamera.PerCameraCBuffer);
+
+                            cmdlist.PushGpuDraw(drawcall);
+                        }
+                    }
+                }
                 cmdlist.FlushDraws();
                 cmdlist.EndPass();
             }

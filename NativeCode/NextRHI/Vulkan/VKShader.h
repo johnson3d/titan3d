@@ -2,7 +2,6 @@
 #include "../NxShader.h"
 #include "VKPreHead.h"
 #include "../../Base/allocator/PagedAllocator.h"
-#include "Utility/DescriptorSetManager.h"
 
 NS_BEGIN
 

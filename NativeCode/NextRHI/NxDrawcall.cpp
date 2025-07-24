@@ -15,7 +15,7 @@ namespace NxRHI
 	std::atomic<int>		IGraphicDraw::NumOfInstance;
 	std::atomic<int>		IComputeDraw::NumOfInstance;
 	std::atomic<int>		ICopyDraw::NumOfInstance;
-	
+
 	void IGraphicDraw::UpdateGpuDrawState(IGpuDevice* device, ICommandList* cmdlist, IRenderPass* rpass)
 	{
 		auto topo = EPrimitiveType::EPT_TriangleList;
@@ -100,6 +100,10 @@ namespace NxRHI
 		BindResource(binder, resource);
 		
 		return true;
+	}
+	IGraphicDraw::IGraphicDraw()
+	{
+		NumOfInstance++;
 	}
 	IGraphicDraw::~IGraphicDraw()
 	{
@@ -371,6 +375,7 @@ namespace NxRHI
 
 	void ICopyDraw::BindBufferSrc(IBuffer* res)
 	{
+		ASSERT(res->GpuState != EGpuResourceState::GRS_Undefine);
 		mSrc = res;
 	}
 	void ICopyDraw::BindBufferDest(IBuffer* res)
@@ -389,13 +394,9 @@ namespace NxRHI
 	{
 		auto device = cmdlist->GetGpuDevice();
 		device->CheckDeviceThread();
-		/*cmdlist->GetCmdRecorder()->UseResource(mDest);
-		cmdlist->GetCmdRecorder()->UseResource(mSrc);*/
-
-		/*auto saveDst = mDest->GpuState;
-		auto saveSrc = mSrc->GpuState;
-		mDest->TransitionTo(cmdlist, EGpuResourceState::GRS_CopyDst);
-		mSrc->TransitionTo(cmdlist, EGpuResourceState::GRS_CopySrc);*/
+		
+		FTransitionScope targetTransition(cmdlist, mDest, EGpuResourceState::GRS_CopyDst);
+		FTransitionScope sourceTransition(cmdlist, mSrc, EGpuResourceState::GRS_CopySrc);
 
 		cmdlist->BeginEvent("CopyDraw");
 		switch (Mode)
@@ -518,6 +519,22 @@ namespace NxRHI
 			BindResources.insert(std::make_pair(binder, bs));
 			OnBindResource(binder, bs);
 		}
+	}
+	void IBarriersDraw::Commit(ICommandList* cmdlist, bool bRefResource)
+	{
+		for (UINT i = 0; i < (UINT)Barriers.size(); i++)
+		{
+			Barriers[i].Buffer->TransitionTo(cmdlist, Barriers[i].ToState);
+		}
+		Barriers.clear();
+	}
+	void IRenderPassCopyDraw::Commit(ICommandList* cmdlist, bool bRefResource)
+	{
+		for (UINT i = 0; i < (UINT)CopyDraws.size(); i++)
+		{
+			CopyDraws[i]->Commit(cmdlist, bRefResource);
+		}
+		CopyDraws.clear();
 	}
 }
 

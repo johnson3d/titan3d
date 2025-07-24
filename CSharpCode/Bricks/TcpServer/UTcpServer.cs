@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.TcpServer
 {
-    public class UTcpServer : AuxPtrType<EngineNS.TcpServer>
+    public class TtTcpServer : AuxPtrType<EngineNS.TcpServer>
     {
         #region Natvie Callback
         static EngineNS.TcpServer.FDelegate_FOnTcpConnectAccept OnTcpConnectAccept = OnTcpConnectAcceptImpl;
@@ -17,7 +17,7 @@ namespace EngineNS.Bricks.TcpServer
             if (arg0.GCHandle == (void*)0)
                 return;
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)arg0.GCHandle);
-            var server = gcHandle.Target as UTcpServer;
+            var server = gcHandle.Target as TtTcpServer;
 
             var connect = server.CreateTcpConnect(arg1);
             server.OnConnectAccept(connect);
@@ -27,9 +27,9 @@ namespace EngineNS.Bricks.TcpServer
             if (arg0.GCHandle == (void*)0 || arg1.GCHandle == (void*)0)
                 return;
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)arg0.GCHandle);
-            var server = gcHandle.Target as UTcpServer;
+            var server = gcHandle.Target as TtTcpServer;
             var gcHandle1 = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)arg1.GCHandle);
-            var connect = gcHandle1.Target as UTcpConnect;
+            var connect = gcHandle1.Target as TtTcpConnect;
             server.OnConnectClosed(connect);
             connect.Dispose();
         }
@@ -39,7 +39,7 @@ namespace EngineNS.Bricks.TcpServer
                 return;
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)arg0.GCHandle);
 
-            var server = gcHandle.Target as UTcpServer;
+            var server = gcHandle.Target as TtTcpServer;
             server.OnListen();
         }
         static unsafe void OnTcpServerShutdownImpl(EngineNS.TcpServer arg0)
@@ -48,20 +48,20 @@ namespace EngineNS.Bricks.TcpServer
                 return;
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)arg0.GCHandle);
 
-            var server = gcHandle.Target as UTcpServer;
+            var server = gcHandle.Target as TtTcpServer;
             server.OnShutdown();
             server.Dispose();
         }
-        static UTcpServer()
+        static TtTcpServer()
         {
-            EngineNS.TcpConnect.SetOnTcpConnectRcvData(UTcpConnect.OnTcpConnectRcvData);
+            EngineNS.TcpConnect.SetOnTcpConnectRcvData(TtTcpConnect.OnTcpConnectRcvData);
             EngineNS.TcpServer.SetOnTcpConnectAccept(OnTcpConnectAccept);
             EngineNS.TcpServer.SetOnTcpConnectClosed(OnTcpConnectClosed);
             EngineNS.TcpServer.SetOnTcpServerListen(OnTcpServerListen);
             EngineNS.TcpServer.SetOnTcpServerShutdown(OnTcpServerShutdown);
         }
         #endregion
-        public UTcpServer()
+        public TtTcpServer()
         {
             unsafe
             {
@@ -79,7 +79,7 @@ namespace EngineNS.Bricks.TcpServer
             base.Dispose();
         }
         public bool IsListened { get; protected set; }
-        public Dictionary<ulong, UTcpConnect> mTcpConnects = new Dictionary<ulong, UTcpConnect>();
+        public Dictionary<ulong, TtTcpConnect> mTcpConnects = new Dictionary<ulong, TtTcpConnect>();
         public bool StartServer(string ip, UInt16 port)
         {
             return mCoreObject.StartServer(ip, port);
@@ -100,16 +100,16 @@ namespace EngineNS.Bricks.TcpServer
                 mTcpConnects.Clear();
             }
         }
-        public delegate void FOnConnectAction(string action, UTcpConnect conn);
+        public delegate void FOnConnectAction(string action, TtTcpConnect conn);
         public FOnConnectAction OnConnectAction = null;
-        protected virtual UTcpConnect CreateTcpConnect(EngineNS.TcpConnect conn)
+        protected virtual TtTcpConnect CreateTcpConnect(EngineNS.TcpConnect conn)
         {
-            var result = new UTcpConnect(conn);
+            var result = new TtTcpConnect(conn);
             if (OnConnectAction != null)
                 OnConnectAction("OnCreate", result);
             return result;
         }
-        protected virtual void OnConnectAccept(UTcpConnect connect)
+        protected virtual void OnConnectAccept(TtTcpConnect connect)
         {
             lock (mTcpConnects)
             {
@@ -118,7 +118,7 @@ namespace EngineNS.Bricks.TcpServer
                     OnConnectAction("OnAccept", connect);
             }
         }
-        protected virtual void OnConnectClosed(UTcpConnect connect)
+        protected virtual void OnConnectClosed(TtTcpConnect connect)
         {
             lock (mTcpConnects)
             {

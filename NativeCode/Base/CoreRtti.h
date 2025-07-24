@@ -19,7 +19,7 @@ class TR_CLASS()
 	VIUnknown
 {
 protected:
-	std::atomic<int>	RefCount;
+	mutable std::atomic<int>	RefCount;
 public:
 	VIUnknown(const VIUnknown & rh)
 	{
@@ -35,17 +35,17 @@ public:
 	}
 	virtual ~VIUnknown() {}
 
-	virtual long AddRef()
+	virtual long AddRef() const
 	{
 		return ++RefCount;
 	}
 
-	virtual void Release()
+	virtual void Release() const
 	{
 		RefCount--;
 		if (RefCount == 0)
 		{
-			DeleteThis();
+			(const_cast<VIUnknown*>(this))->DeleteThis();
 		}
 		return;
 	}

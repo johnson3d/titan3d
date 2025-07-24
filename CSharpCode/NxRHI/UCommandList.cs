@@ -34,7 +34,42 @@ namespace EngineNS.NxRHI
     }
     public class TtCmdRecorder : AuxPtrType<NxRHI.ICmdRecorder>
     {
-
+        public TtCmdRecorder()
+        {
+            mCoreObject = ICmdRecorder.CreateInstance();
+        }
+        public IntPtr DrawcallNumber
+        {
+            get => mCoreObject.GetDrawcallNumber();
+        }
+        public void PushGpuDraw(TtGraphicDraw draw)
+        {
+            mCoreObject.PushGpuDraw(draw.mCoreObject.NativeSuper);
+        }
+        public void PushGpuDraw(TtComputeDraw draw)
+        {
+            mCoreObject.PushGpuDraw(draw.mCoreObject.NativeSuper);
+        }
+        public void PushGpuDraw(TtRayTracingDraw draw)
+        {
+            mCoreObject.PushGpuDraw(draw.mCoreObject.NativeSuper);
+        }
+        public void PushGpuDraw(TtCopyDraw draw)
+        {
+            mCoreObject.PushGpuDraw(draw.mCoreObject);
+        }
+        public void PushGpuDraw(TtActionDraw draw)
+        {
+            mCoreObject.PushGpuDraw(draw.mCoreObject.NativeSuper);
+        }
+        public void PushGpuDraw(IActionDraw draw)
+        {
+            mCoreObject.PushGpuDraw(draw);
+        }
+        public void ResetGpuDraws()
+        {
+            mCoreObject.ResetGpuDraws();
+        }
     }
 
     public enum ECommandListState
@@ -247,7 +282,10 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.DirectGpuDraw(draw.mCoreObject.NativeSuper);
         }
-
+        public void AppendDraws(TtCmdRecorder pCmdRecorder)
+        {
+            mCoreObject.AppendDraws(pCmdRecorder.mCoreObject);
+        }
         public void PushGpuDraw(TtGraphicDraw draw)
         {
             mCoreObject.GetCmdRecorder().PushGpuDraw(draw);
@@ -262,7 +300,7 @@ namespace EngineNS.NxRHI
         }
         public void PushGpuDraw(TtCopyDraw draw)
         {
-            mCoreObject.GetCmdRecorder().PushGpuDraw(draw);
+            mCoreObject.PushGpuDraw(draw.mCoreObject);
         }
         public void PushGpuDraw(TtActionDraw draw)
         {
@@ -277,7 +315,7 @@ namespace EngineNS.NxRHI
             var draw = TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.CreateActionDraw();
             draw.OnActionDraw = action;
             draw.Arg = arg;
-            mCoreObject.PushGpuDraw(draw.NativeSuper);
+            mCoreObject.PushGpuDraw(draw);
             draw.NativeSuper.NativeSuper.Release();
         }
         #endregion

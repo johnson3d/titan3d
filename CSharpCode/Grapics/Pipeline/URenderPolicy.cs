@@ -3,6 +3,7 @@ using EngineNS.Thread;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
@@ -405,6 +406,15 @@ namespace EngineNS.Graphics.Pipeline
         }
         public void CommitCommandList(NxRHI.TtCommandList cmd, string name = null, NxRHI.EQueueType qType = NxRHI.EQueueType.QU_Default)
         {
+            if (name==null)
+            {
+                var stackTrace = new StackTrace();
+                var method = stackTrace.GetFrame(1)?.GetMethod();
+                if (method != null)
+                {
+                    name = method.DeclaringType.FullName + "." + method.Name;
+                }
+            }
             if (CmdQueue != null)
             {
                 //TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(cmd, qType);

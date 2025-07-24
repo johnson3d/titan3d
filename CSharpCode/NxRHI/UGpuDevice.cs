@@ -24,6 +24,15 @@ namespace EngineNS.NxRHI
             result.mCoreObject = mCoreObject.CreateDevice(in desc);
             result.mGpuQueue = new TtGpuQueue(result, result.mCoreObject.GetCmdQueue());
             result.InitShaderGlobalEnv();
+            var ptr = result.mCoreObject.GetDescriptorPoolManager();
+            if (ptr.IsValidPointer)
+            {
+                result.mDescriptorPoolManager = new TtDescriptorPoolManager(ptr);
+            }
+            else
+            {
+                result.mDescriptorPoolManager = null;
+            }
             return result;
         }
         public int NumOfContext
@@ -59,10 +68,16 @@ namespace EngineNS.NxRHI
     }
     public partial class TtGpuDevice : AuxPtrType<NxRHI.IGpuDevice>
     {
+        internal TtDescriptorPoolManager mDescriptorPoolManager;
+        public TtDescriptorPoolManager DescriptorPoolManager
+        {
+            get => mDescriptorPoolManager;
+        }
         public override void Dispose()
         {
             this.CmdListManager.Dispose();
             this.GpuQueue.Dispose();
+            this.mDescriptorPoolManager?.Dispose();
             base.Dispose();
         }
         public unsafe NxRHI.DX12GpuDevice AsDX12Deivce
@@ -121,10 +136,22 @@ namespace EngineNS.NxRHI
         public void BeginFrame()
         {
             mCoreObject.BeginFrame();
+            DescriptorPoolManager?.mCoreObject.AllocFramePool();
         }
         public void EndFrame()
         {
             mCoreObject.EndFrame();
+            if (DescriptorPoolManager!=null)
+            {
+                var save = DescriptorPoolManager.mCoreObject.GetCurrentFramePool();
+                CoreSDK.PtrType_Add(save);
+                DescriptorPoolManager.mCoreObject.NullCurrentFramePool();
+                TtEngine.Instance.GfxDevice?.RenderSwapQueue?.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
+                {
+                    DescriptorPoolManager.mCoreObject.FreePool(this.GpuQueue.mCoreObject, save);
+                    CoreSDK.PtrType_Release(save);
+                }, "#EndFrame#", save);
+            }
         }
         public TtCommandList CreateCommandList()
         {
@@ -560,7 +587,7 @@ namespace EngineNS.NxRHI
         public TtGpuQueue(TtGpuDevice device, ICmdQueue ptr)
         {
             mCoreObject = ptr;
-            mCoreObject.NativeSuper.AddRef();
+            mCoreObject.NativeSuper.NativeSuper.AddRef();
             //FramePostCmdList = device.CreateCommandList();
         }
         public void Flush(EngineNS.NxRHI.EQueueType type = EQueueType.QU_Default)
@@ -628,6 +655,15 @@ namespace EngineNS.NxRHI
             mCmdList.EndCommand();
             TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, mType);
             TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ReleaseIdleCmdlist(mCmdList);
+        }
+    }
+
+    public class TtDescriptorPoolManager : AuxPtrType<NxRHI.NxDesriptorPoolManager>
+    {
+        public TtDescriptorPoolManager(NxRHI.NxDesriptorPoolManager self)
+        {
+            mCoreObject = self;
+            mCoreObject.NativeSuper.AddRef();
         }
     }
 }

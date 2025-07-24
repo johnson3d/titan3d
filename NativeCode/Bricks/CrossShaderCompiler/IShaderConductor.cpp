@@ -211,25 +211,34 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 	auto ar = compiler->GetShaderCodeStream(hlsl, hlsl);
 	std::string codeText((const char*)ar->GetSourceCode(), (size_t)ar->GetSize());
 	
+	const int typeMaxBinding = 50;
+	const int spirvShiftStride = 4 * typeMaxBinding;
+	int spirvShiftBase = 0;
 	ShaderConductor::ShaderStage stage = ShaderConductor::ShaderStage::VertexShader;
 	switch (type)
 	{
 	case NxRHI::EShaderType::SDT_VertexShader:
 		stage = ShaderConductor::ShaderStage::VertexShader;
+		spirvShiftBase = 0 * spirvShiftStride;
 		break;
 	case NxRHI::EShaderType::SDT_PixelShader:
 		stage = ShaderConductor::ShaderStage::PixelShader;
+		spirvShiftBase = 1 * spirvShiftStride;
 		break;
 	case NxRHI::EShaderType::SDT_ComputeShader:
 		stage = ShaderConductor::ShaderStage::ComputeShader;
+		spirvShiftBase = 0 * spirvShiftStride;
 		break;
 	case NxRHI::EShaderType::SDT_AmplificationShader:
 		stage = ShaderConductor::ShaderStage::AmplificationShader;
+		spirvShiftBase = 2 * spirvShiftStride;
 		break;
 	case NxRHI::EShaderType::SDT_MeshShader:
 		stage = ShaderConductor::ShaderStage::MeshShader;
+		spirvShiftBase = 0 * spirvShiftStride;
 		break;
 	case NxRHI::EShaderType::SDT_RayTracing:
+		spirvShiftBase = 0 * spirvShiftStride;
 		//stage = ShaderConductor::ShaderStage:;
 		break;
 	default:
@@ -331,10 +340,14 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 	auto f2 = sm.substr(_pos + 1);
 	opt.shaderModel.major_ver = atoi(f1.c_str());
 	opt.shaderModel.minor_ver = atoi(f2.c_str());
-	opt.shiftAllTexturesBindings = 0;
-	opt.shiftAllSamplersBindings = 0;
-	opt.shiftAllCBuffersBindings = 0;
-	opt.shiftAllUABuffersBindings = 0;
+	opt.shiftAllCBuffersBindings = spirvShiftBase + typeMaxBinding * 0;
+	//opt.shiftAllCBuffersSet = 1;
+	opt.shiftAllTexturesBindings = spirvShiftBase + typeMaxBinding * 1;
+	//opt.shiftAllTexturesSet = 1;
+	opt.shiftAllSamplersBindings = spirvShiftBase + typeMaxBinding * 2;
+	//opt.shiftAllSamplersSet = 1;
+	opt.shiftAllUABuffersBindings = spirvShiftBase + typeMaxBinding * 3;
+	//opt.shiftAllUABuffersSet = 1;
 	opt.needReflection = true;
 
 	std::vector<ShaderConductor::Compiler::TargetDesc> dest;

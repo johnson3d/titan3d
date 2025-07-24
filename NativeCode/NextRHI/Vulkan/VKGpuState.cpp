@@ -448,6 +448,7 @@ namespace NxRHI
 	{
 		auto device = (VKGpuDevice*)device1;
 		auto effect = ShaderEffect.UnsafeConvertTo<VKGraphicsEffect>();
+		auto pVKRenderPass = this->RenderPass.UnsafeConvertTo<VKRenderPass>();
 
 		VkPipelineShaderStageCreateInfo shaderStages[2]{};
 		shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -502,8 +503,21 @@ namespace NxRHI
 		dynStateInfo.dynamicStateCount = 2;
 		dynStateInfo.pDynamicStates = dynVPState;
 
+		std::vector<VkFormat> colorFormats;
+		for (UINT i = 0; i < pVKRenderPass->Desc.NumOfMRT; i++)
+		{
+			colorFormats.push_back(Format2VKFormat(pVKRenderPass->Desc.AttachmentMRTs[i].Format));
+		}
+		VkPipelineRenderingCreateInfo pipelineRenderingCreateInfo = {};
+		pipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+		pipelineRenderingCreateInfo.pNext = nullptr; 
+		pipelineRenderingCreateInfo.colorAttachmentCount = (UINT)colorFormats.size();
+		pipelineRenderingCreateInfo.pColorAttachmentFormats = colorFormats.data();
+		pipelineRenderingCreateInfo.depthAttachmentFormat = Format2VKFormat(pVKRenderPass->Desc.AttachmentDepthStencil.Format);
+
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+		pipelineInfo.pNext = &pipelineRenderingCreateInfo;
 		pipelineInfo.flags = 0;
 		pipelineInfo.stageCount = 2;
 		pipelineInfo.pStages = shaderStages;
@@ -536,7 +550,7 @@ namespace NxRHI
 		pipelineInfo.pVertexInputState = &effect->mInputLayout.UnsafeConvertTo<VKInputLayout>()->mInfo;
 
 		pipelineInfo.layout = effect->mPipelineLayout;
-		pipelineInfo.renderPass = this->RenderPass.UnsafeConvertTo<VKRenderPass>()->mRenderPass;
+		pipelineInfo.renderPass = VK_NULL_HANDLE;// this->RenderPass.UnsafeConvertTo<VKRenderPass>()->mRenderPass;
 		pipelineInfo.subpass = 0;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 

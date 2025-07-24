@@ -250,7 +250,7 @@ namespace EngineNS.NxRHI
                 {
                     mReflector = new TtShaderReflector();
                     mReflector.mCoreObject = mCoreObject.GetReflector();
-                    mReflector.mCoreObject.NativeSuper.AddRef();
+                    mReflector.mCoreObject.NativeSuper.NativeSuper.AddRef();
                 }
                 return mReflector;
             }

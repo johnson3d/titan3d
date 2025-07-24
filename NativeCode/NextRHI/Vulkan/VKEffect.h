@@ -6,15 +6,22 @@ NS_BEGIN
 
 namespace NxRHI
 {
-	class VKGraphicsEffect;
-	class VKComputeEffect;
-	class VKDescriptorSetLayoutBuilder
+	class VKLayoutWrapper : public IGpuResource
 	{
 	public:
-		static VkDescriptorSetLayout Build(VKGpuDevice* device, VKGraphicsEffect* effect, std::vector<VkDescriptorSetLayoutBinding>& bindings);
-		static VkDescriptorSetLayout Build(VKGpuDevice* device, VKComputeEffect* effect, std::vector<VkDescriptorSetLayoutBinding>& bindings);
+		VKGpuDevice* mDeviceRef = nullptr;
+		std::vector<VkDescriptorSetLayoutBinding> mBindings;
+		VkDescriptorSetLayout mLayout = nullptr;
+
 		static VkDescriptorType GetDescriptorType(const FShaderBinder* binder);
+		static VkShaderStageFlagBits GetShaderStage(const FShaderBinder* binder);
+		static void BuildBindings(std::vector<VkDescriptorSetLayoutBinding>& bindings, const std::vector<AutoRef<const FShaderBinder>>& binders);
+		static void BuildBindings(std::vector<VkDescriptorSetLayoutBinding>& bindings, const FShaderBinder* pBinder);
+;
+		~VKLayoutWrapper();
+		bool Initialize(VKGpuDevice* device, std::vector<VkDescriptorSetLayoutBinding>& bindings);
 	};
+
 	class VKGraphicsEffect : public IGraphicsEffect
 	{
 	public:
@@ -22,11 +29,16 @@ namespace NxRHI
 		~VKGraphicsEffect();
 		virtual void BuildState(IGpuDevice* device) override;
 		virtual void Commit(ICommandList* cmdlist, IGraphicDraw* drawcall) override;
+
+		void PushLayout(AutoRef<VKLayoutWrapper>& tmp, const FShaderBinder* pBinder)
+		{
+			((FShaderBinder*)pBinder)->DescriptorIndex = (UINT)mLayouts.size();
+			mLayouts.push_back(tmp);
+		}
 	public:
 		TWeakRefHandle<VKGpuDevice>		mDeviceRef;
 		
-		std::vector<VkDescriptorSetLayoutBinding> mBindings;
-		VkDescriptorSetLayout			mLayout = nullptr;
+		std::vector<AutoRef<VKLayoutWrapper>> mLayouts;
 		VkPipelineLayout				mPipelineLayout = nullptr;
 	};
 
@@ -37,11 +49,17 @@ namespace NxRHI
 		~VKComputeEffect();
 		virtual void BuildState(IGpuDevice* device) override;
 		virtual void Commit(ICommandList* cmdlist) override;
+
+		void PushLayout(AutoRef<VKLayoutWrapper>& tmp, const FShaderBinder* pBinder)
+		{
+			((FShaderBinder*)pBinder)->DescriptorIndex = (UINT)mLayouts.size();
+			mLayouts.push_back(tmp);
+		}
 	public:
 		TWeakRefHandle<VKGpuDevice>		mDeviceRef;
 
-		std::vector<VkDescriptorSetLayoutBinding> mBindings;
-		VkDescriptorSetLayout			mLayout = nullptr;
+		std::vector<AutoRef<VKLayoutWrapper>> mLayouts;
+		
 		VkPipelineLayout				mPipelineLayout = nullptr;
 		VkPipeline						mComputePipeline = nullptr;
 	};

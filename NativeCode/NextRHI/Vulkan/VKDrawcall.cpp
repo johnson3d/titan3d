@@ -6,6 +6,7 @@
 #include "VKCommandList.h"
 #include "VKFrameBuffers.h"
 #include "VKShader.h"
+#include "VKDescriptorSet.h"
 
 #define new VNEW
 
@@ -35,15 +36,17 @@ namespace NxRHI
 	{
 		IsDirty = true;
 	}
-	void BindStageResourceToDescriptSets(VKGpuDevice* device,
-		const FShaderBinder* pBinder, IGpuResource* resource, VkDescriptorSet pDescriptorSet, std::vector<VkWriteDescriptorSet>& dsWriteSets, std::vector<FDescriptorSetInfo>& dsSetInfos, int& index)
+	VkDescriptorSet BindStageResourceToDescriptSets(VKGpuDevice* device, VkDescriptorSet pDescriptorSet, 
+		const FShaderBinder* pBinder, IGpuResource* resource, std::vector<VkWriteDescriptorSet>& dsWriteSets, std::vector<FDescriptorSetInfo>& dsSetInfos, int& index)
 	{
-		index++;
 		/*if (resource == nullptr)
 			return;*/
+
 		dsSetInfos[index] = FDescriptorSetInfo{};
 		VkDescriptorImageInfo& imageInfo = dsSetInfos[index].imageInfo;
-		VkDescriptorBufferInfo& bufferInfo = dsSetInfos[index].bufferInfo;
+		VkDescriptorBufferInfo& bufferInfo = dsSetInfos[index].bufferInfo;\
+		index++;
+
 		if (pBinder != nullptr)
 		{
 			VkWriteDescriptorSet descriptorWrite = {};
@@ -98,7 +101,7 @@ namespace NxRHI
 						imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 						if (resource)
 						{
-							imageInfo.imageView = ((VKSrView*)resource)->mImageView;
+							imageInfo.imageView = ((VKSrView*)resource)->mView->mImageView;
 						}
 						else
 							imageInfo.imageView = nullptr;
@@ -133,7 +136,7 @@ namespace NxRHI
 						descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 						if (resource)
 						{
-							imageInfo.imageView = ((VKUaView*)resource)->mImageView;
+							imageInfo.imageView = ((VKUaView*)resource)->mView->mImageView;
 						}
 						else
 							imageInfo.imageView = nullptr;
@@ -159,16 +162,29 @@ namespace NxRHI
 
 			dsWriteSets.push_back(descriptorWrite);
 		}
+		return pDescriptorSet;
+	}
+
+	void PushDS(std::vector<VkDescriptorSet>& sets, VkDescriptorSet ds)
+	{
+		for(auto i : sets)
+		{
+			if (i == ds)
+				return; // already in the list
+		}
+		sets.push_back(ds);
 	}
 	
 	void VKGraphicDraw::UpdateDescriptorSets(VKCommandList* vkCmd)
 	{
 		auto device = mDeviceRef.GetPtr();
-		auto pool = device->mDescriptorPoolManager->GetCurrentFramePool();
 		auto effect = this->ShaderEffect.UnsafeConvertTo<VKGraphicsEffect>();
-		VkDescriptorSet ds = pool->AllocDescriptorSet(effect->mLayout);
+		const auto& layouts = effect->mLayouts;
 		mDsWriteSets.clear();
-		mDescriptorSetInfos.resize(effect->mBindings.size());
+		mDescriptorSetInfos.resize(layouts[0]->mBindings.size());
+		mDescriptorSets.clear();
+		auto pPool = (VKDescriptorPool*)device->GetDescriptorPoolManager()->GetCurrentFramePool();
+		VkDescriptorSet pDescriptorSet = pPool->AllocDescriptorSet(layouts[0]->mLayout);
 		int index = 0;
 		for (auto& i : BindResources)
 		{
@@ -180,35 +196,43 @@ namespace NxRHI
 				{
 					if (binder->VSBinder)
 					{
-						vkCmd->SetCBV(EShaderType::SDT_VertexShader, binder->VSBinder, (ICbView*)resource);
+						BindStageResourceToDescriptSets(device, pDescriptorSet, binder->VSBinder, resource, mDsWriteSets, mDescriptorSetInfos, index);
 					}
 					if (binder->PSBinder)
 					{
-						vkCmd->SetCBV(EShaderType::SDT_PixelShader, binder->VSBinder, (ICbView*)resource);
+						BindStageResourceToDescriptSets(device, pDescriptorSet, binder->PSBinder, resource, mDsWriteSets, mDescriptorSetInfos, index);
 					}
 				}
 				break;
 				case SBT_SRV:
 				{
+					if (resource)
+					{
+						vkCmd->GetCmdRecorder()->UseResource(((VKSrView*)resource)->mView);
+					}
 					if (binder->VSBinder)
 					{
-						vkCmd->SetSrv(EShaderType::SDT_VertexShader, binder->VSBinder, (ISrView*)resource);
+						BindStageResourceToDescriptSets(device, pDescriptorSet, binder->VSBinder, resource, mDsWriteSets, mDescriptorSetInfos, index);
 					}
 					if (binder->PSBinder)
 					{
-						vkCmd->SetSrv(EShaderType::SDT_PixelShader, binder->VSBinder, (ISrView*)resource);
+						BindStageResourceToDescriptSets(device, pDescriptorSet, binder->PSBinder, resource, mDsWriteSets, mDescriptorSetInfos, index);
 					}
 				}
 				break;
 				case SBT_UAV:
 				{
+					if (resource)
+					{
+						vkCmd->GetCmdRecorder()->UseResource(((VKUaView*)resource)->mView);
+					}
 					if (binder->VSBinder)
 					{
-						vkCmd->SetUav(EShaderType::SDT_VertexShader, binder->VSBinder, (IUaView*)resource);
+						BindStageResourceToDescriptSets(device, pDescriptorSet, binder->VSBinder, resource, mDsWriteSets, mDescriptorSetInfos, index);
 					}
 					if (binder->PSBinder)
 					{
-						vkCmd->SetUav(EShaderType::SDT_PixelShader, binder->VSBinder, (IUaView*)resource);
+						BindStageResourceToDescriptSets(device, pDescriptorSet, binder->PSBinder, resource, mDsWriteSets, mDescriptorSetInfos, index);
 					}
 				}
 				break;
@@ -216,25 +240,16 @@ namespace NxRHI
 				{
 					if (binder->VSBinder)
 					{
-						vkCmd->SetSampler(EShaderType::SDT_VertexShader, binder->VSBinder, (ISampler*)resource);
+						BindStageResourceToDescriptSets(device, pDescriptorSet, binder->VSBinder, resource, mDsWriteSets, mDescriptorSetInfos, index);
 					}
 					if (binder->PSBinder)
 					{
-						vkCmd->SetSampler(EShaderType::SDT_PixelShader, binder->VSBinder, (ISampler*)resource);
+						BindStageResourceToDescriptSets(device, pDescriptorSet, binder->PSBinder, resource, mDsWriteSets, mDescriptorSetInfos, index);
 					}
 				}
 				break;
 				default:
 					break;
-			}
-
-			if (binder->VSBinder)
-			{
-				BindStageResourceToDescriptSets(device, binder->VSBinder, resource, ds, mDsWriteSets, mDescriptorSetInfos, index);
-			}
-			if (binder->PSBinder)
-			{
-				BindStageResourceToDescriptSets(device, binder->PSBinder, resource, ds, mDsWriteSets, mDescriptorSetInfos, index);
 			}
 		}
 		if (mDsWriteSets.size() > 0)
@@ -243,7 +258,43 @@ namespace NxRHI
 		}
 		mDsWriteSets.clear();
 
-		vkCmdBindDescriptorSets(vkCmd->GetVKCmdRecorder()->mCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, effect->mPipelineLayout, 0, 1, &ds, 0, nullptr);
+		vkCmdBindDescriptorSets(vkCmd->GetVKCmdRecorder()->mCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, effect->mPipelineLayout, 0, (UINT)1, &pDescriptorSet, 0, nullptr);
+		mDescriptorSets.clear();
+	}
+	void VKGraphicDraw::BuildDrawcall(ICommandList* cmdlist)
+	{
+		auto vkCmd = (VKCommandList*)cmdlist;
+		for (auto& i : BindResources)
+		{
+			auto binder = i.first;
+			auto resource = i.second.Resource;
+			auto shaderBinder = binder->GetShaderBinder();
+			switch (binder->BindType)
+			{
+				case SBT_CBV:
+				{
+					vkCmd->SetCBV(EShaderType::SDT_Unknown, shaderBinder, (ICbView*)resource);
+				}
+				break;
+				case SBT_SRV:
+				{
+					vkCmd->SetSrv(EShaderType::SDT_Unknown, shaderBinder, (ISrView*)resource);
+				}
+				break;
+				case SBT_UAV:
+				{
+					vkCmd->SetUav(EShaderType::SDT_Unknown, shaderBinder, (IUaView*)resource);
+				}
+				break;
+				case SBT_Sampler:
+				{
+					vkCmd->SetSampler(EShaderType::SDT_Unknown, shaderBinder, (ISampler*)resource);
+				}
+				break;
+				default:
+					break;
+			}
+		}
 	}
 	void VKGraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
@@ -314,12 +365,13 @@ namespace NxRHI
 	void VKComputeDraw::UpdateDescriptorSets(VKCommandList* vkCmd)
 	{
 		auto device = mDeviceRef.GetPtr();
-		auto pool = device->mDescriptorPoolManager->GetCurrentFramePool();
 		auto effect = this->mEffect.UnsafeConvertTo<VKComputeEffect>();
-		auto ds = pool->AllocDescriptorSet(effect->mLayout);
-		
+		const auto& layouts = effect->mLayouts;
+		auto pPool = (VKDescriptorPool*)device->GetDescriptorPoolManager()->GetCurrentFramePool();
+		VkDescriptorSet pDescriptorSet = pPool->AllocDescriptorSet(layouts[0]->mLayout);
 		mDsWriteSets.clear();
-		mDescriptorSetInfos.resize(effect->mBindings.size());
+		mDescriptorSetInfos.resize(layouts[0]->mBindings.size());
+		mDescriptorSets.clear();
 		int index = 0;
 		for (auto& i : BindResources)
 		{
@@ -330,34 +382,47 @@ namespace NxRHI
 				case SBT_CBV:
 				{
 					vkCmd->SetCBV(EShaderType::SDT_ComputeShader, binder, (ICbView*)resource);
+					BindStageResourceToDescriptSets(device, pDescriptorSet, binder, resource, mDsWriteSets, mDescriptorSetInfos, index);
 				}
 				break;
 				case SBT_SRV:
 				{
+					if (resource)
+					{
+						vkCmd->GetCmdRecorder()->UseResource(((VKSrView*)resource)->mView);
+					}
 					vkCmd->SetSrv(EShaderType::SDT_ComputeShader, binder, (ISrView*)resource);
+					BindStageResourceToDescriptSets(device, pDescriptorSet, binder, resource, mDsWriteSets, mDescriptorSetInfos, index);
 				}
 				break;
 				case SBT_UAV:
 				{
+					if (resource)
+					{
+						vkCmd->GetCmdRecorder()->UseResource(((VKUaView*)resource)->mView);
+					}
 					vkCmd->SetUav(EShaderType::SDT_ComputeShader, binder, (IUaView*)resource);
+					BindStageResourceToDescriptSets(device, pDescriptorSet, binder, resource, mDsWriteSets, mDescriptorSetInfos, index);
 				}
 				break;
 				case SBT_Sampler:
 				{
 					vkCmd->SetSampler(EShaderType::SDT_ComputeShader, binder, (ISampler*)resource);
+					BindStageResourceToDescriptSets(device, pDescriptorSet, binder, resource, mDsWriteSets, mDescriptorSetInfos, index);
 				}
 				break;
 				default:
 					break;
 			}
-			BindStageResourceToDescriptSets(device, binder, resource, ds, mDsWriteSets, mDescriptorSetInfos, index);
 		}
 		if (mDsWriteSets.size() > 0)
 		{
 			vkUpdateDescriptorSets(device->mDevice, (UINT)mDsWriteSets.size(), &mDsWriteSets[0], 0, nullptr);
 		}
 		mDsWriteSets.clear();
-		vkCmdBindDescriptorSets(vkCmd->GetVKCmdRecorder()->mCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, effect->mPipelineLayout, 0, 1, &ds, 0, nullptr);
+
+		vkCmdBindDescriptorSets(vkCmd->GetVKCmdRecorder()->mCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, effect->mPipelineLayout, 0, (UINT)1, &pDescriptorSet, 0, nullptr);
+		mDescriptorSets.clear();
 	}
 	void VKComputeDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{

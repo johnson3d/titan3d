@@ -17,6 +17,7 @@ namespace NxRHI
 		~DX12GraphicDraw();
 		virtual void ResetResources() override;
 		virtual IBindless* CreateBindless(const char* name) const override;
+		virtual void BuildDrawcall(ICommandList* cmdlist) override;
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 
 		virtual void OnGpuDrawStateUpdated() override;

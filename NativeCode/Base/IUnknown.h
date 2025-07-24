@@ -29,18 +29,6 @@ public:
 public:	
 	IWeakRefObject();
 	virtual ~IWeakRefObject();
-	virtual long AddRef() override
-	{
-		return ++RefCount;
-	}
-	virtual void Release() override
-	{
-		RefCount--;
-		if (RefCount == 0)
-		{
-			DeleteThis();
-		}
-	}
 	long UnsafeGetRefCount() {
 		return RefCount;
 	}

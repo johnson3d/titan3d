@@ -25,7 +25,7 @@ namespace EngineNS.Editor
             var readable = tex.CreateReadable(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, 0, cpDraw.mCoreObject);
             TtEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
             {
-                im_cmd.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                im_cmd.PushGpuDraw(cpDraw.mCoreObject);
                 im_cmd.FlushDraws();
                 TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(fence);
                 cpDraw.Dispose();

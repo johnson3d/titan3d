@@ -3,6 +3,7 @@
 #include "../NxGpuDevice.h"
 #include "../NxRHIDefine.h"
 #include "../NxBuffer.h"
+#include "../NxFrameBuffers.h"
 
 #ifdef PLATFORM_WIN
     #define VK_USE_PLATFORM_WIN32_KHR
@@ -933,6 +934,39 @@ namespace NxRHI
 		}
 		return EGpuResourceState::GRS_Undefine;
 	}
+
+    inline VkAttachmentLoadOp FrameBufferLoadAction2VK(EFrameBufferLoadAction action)
+    {
+        switch (action)
+        {
+        case EFrameBufferLoadAction::LoadActionDontCare:
+            return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        case EFrameBufferLoadAction::LoadActionLoad:
+            return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_LOAD;
+        case EFrameBufferLoadAction::LoadActionClear:
+            return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR;
+        default:
+            return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        }
+    }
+    inline VkAttachmentStoreOp FrameBufferStoreAction2VK(EFrameBufferStoreAction action)
+    {
+        switch (action)
+        {
+        case EFrameBufferStoreAction::StoreActionDontCare:
+            return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        case EFrameBufferStoreAction::StoreActionStore:
+            return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE;
+        case EFrameBufferStoreAction::StoreActionMultisampleResolve:
+            return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_MAX_ENUM;
+        case EFrameBufferStoreAction::StoreActionStoreAndMultisampleResolve:
+            return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_MAX_ENUM;
+        case EFrameBufferStoreAction::StoreActionUnknown:
+            return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_MAX_ENUM;
+        default:
+            return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_MAX_ENUM;
+        }
+    }
 
 	struct VKGpuHeap : public IGpuHeap
 	{

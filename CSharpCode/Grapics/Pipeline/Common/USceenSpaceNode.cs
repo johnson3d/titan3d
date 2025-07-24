@@ -112,21 +112,6 @@ namespace EngineNS.Graphics.Pipeline.Common
                 ResultPinOut.Attachement.Height = (uint)(y * OutputScaleFactor);
             }
         }
-        public unsafe void ClearGBuffer(TtRenderPolicy policy)
-        {
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmdlist))
-            {
-                var passClears = new NxRHI.FRenderPassClears();
-                passClears.SetDefault();
-                passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));
-                GBuffers.BuildFrameBuffers(policy);
-                cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, "ClearScreen");
-                cmdlist.FlushDraws();
-                cmdlist.EndPass();
-            }
-            policy.CommitCommandList(cmdlist);
-        }
         public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             base.FrameBuild(policy);
@@ -136,6 +121,18 @@ namespace EngineNS.Graphics.Pipeline.Common
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist))
             {
+                cmdlist.SetViewport(in GBuffers.Viewport);
+                var scissor = new NxRHI.FScissorRect();
+                scissor.MinX = 0;
+                scissor.MinY = 0;
+                scissor.MaxX = (int)GBuffers.Viewport.Width;
+                scissor.MaxY = (int)GBuffers.Viewport.Height;
+                cmdlist.SetScissor(in scissor);
+                var passClears = new NxRHI.FRenderPassClears();
+                passClears.SetDefault();
+                passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));
+                GBuffers.BuildFrameBuffers(policy);
+                cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, DebugName);
                 if (ScreenMesh != null)
                 {
                     foreach (var i in ScreenMesh.SubMeshes)
@@ -152,22 +149,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                         }
                     }
                 }
-                {
-                    cmdlist.SetViewport(in GBuffers.Viewport);
-                    var scissor = new NxRHI.FScissorRect();
-                    scissor.MinX = 0;
-                    scissor.MinY = 0;
-                    scissor.MaxX = (int)GBuffers.Viewport.Width;
-                    scissor.MaxY = (int)GBuffers.Viewport.Height;
-                    cmdlist.SetScissor(in scissor);
-                    var passClears = new NxRHI.FRenderPassClears();
-                    passClears.SetDefault();
-                    passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));
-                    GBuffers.BuildFrameBuffers(policy);
-                    cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, DebugName);
-                    cmdlist.FlushDraws();
-                    cmdlist.EndPass();
-                }
+                cmdlist.FlushDraws();
+                cmdlist.EndPass();
             }
             policy.CommitCommandList(cmdlist);
         }

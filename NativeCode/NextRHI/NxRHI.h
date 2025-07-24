@@ -11,3 +11,4 @@
 #include "NxGpuState.h"
 #include "NxInputAssembly.h"
 #include "NxShader.h"
+#include "NxDescriptorSet.h"

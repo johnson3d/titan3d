@@ -14,10 +14,10 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Utility\DescriptorSetManager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Utility\SpirvProcessor.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)VKBuffer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)VKCommandList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)VKDescriptorSet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)VKDrawcall.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)VKEffect.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)VKEvent.cpp" />
@@ -29,10 +29,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)VKShader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Utility\DescriptorSetManager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Utility\SpirvProcessor.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)VKBuffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)VKCommandList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)VKDescriptorSet.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)VKDrawcall.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)VKEffect.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)VKEvent.h" />

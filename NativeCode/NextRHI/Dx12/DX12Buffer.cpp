@@ -4,6 +4,7 @@
 #include "DX12Event.h"
 #include "DX12Effect.h"
 #include "DX12Drawcall.h"
+#include "DX12FrameBuffers.h"
 
 #define new VNEW
 
@@ -282,7 +283,7 @@ namespace NxRHI
 					{
 						FTransientCmd tsCmd(device, QU_Transfer, "BufferInit");
 						auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
-						cmd->PushGpuDraw(cpDraw);
+						cmd->PushGpuDraw(cpDraw.GetPtr());
 
 						//device->mPostCmdRecorder->PushGpuDraw(cpDraw);
 					}
@@ -352,7 +353,7 @@ namespace NxRHI
 				cpDraw->FootPrint.TotalSize = pFootPrint->RowPitch * pFootPrint->Height;
 				cpDraw->DstX = pFootPrint->X;
 
-				cmd->PushGpuDraw(cpDraw);
+				cmd->PushGpuDraw(cpDraw.GetPtr());
 			}
 		}
 		else
@@ -440,7 +441,7 @@ namespace NxRHI
 				cpDraw->FootPrint.RowPitch = pFootPrint->RowPitch;
 				cpDraw->FootPrint.TotalSize = pFootPrint->RowPitch * pFootPrint->Height;
 
-				cmd->PushGpuDraw(cpDraw);
+				cmd->PushGpuDraw(cpDraw.GetPtr());
 			}
 		}
 		else
@@ -710,6 +711,9 @@ namespace NxRHI
 				}
 				return false;
 			}	
+			/*FTransientCmd tsCmd(device, QU_Transfer, "TextureInit");
+			auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
+			TransitionTo(cmd, EGpuResourceState::GRS_DepthStencil);*/
 		}
 		else
 		{
@@ -757,7 +761,7 @@ namespace NxRHI
 					cpDraw->FootPrint.RowPitch = footPrint.Footprint.RowPitch;
 					cpDraw->FootPrint.TotalSize = footPrint.Footprint.RowPitch * footPrint.Footprint.Height;
 					//device->mPostCmdRecorder->PushGpuDraw(cpDraw);
-					cmd->PushGpuDraw(cpDraw);
+					cmd->PushGpuDraw(cpDraw.GetPtr());
 
 					w = w / 2;
 					h = h / 2;
@@ -896,7 +900,7 @@ namespace NxRHI
 			cpDraw->FootPrint.RowPitch = pFootPrint->RowPitch;
 			cpDraw->FootPrint.TotalSize = pFootPrint->RowPitch * pFootPrint->Height;
 
-			cmd->PushGpuDraw(cpDraw);
+			cmd->PushGpuDraw(cpDraw.GetPtr());
 		}
 		else //if (Desc.Usage == EGpuUsage::USAGE_DYNAMIC || Desc.Usage == EGpuUsage::USAGE_STAGING)
 		{
@@ -999,7 +1003,7 @@ namespace NxRHI
 
 			FTransientCmd tsCmd(device, EQueueType::QU_Transfer, "Texture.UpdateGpuData");
 			auto cmd = tsCmd.GetCmdList();
-			cmd->PushGpuDraw(cpDraw);
+			cmd->PushGpuDraw(cpDraw.GetPtr());
 		}
 		else //if (Desc.Usage == EGpuUsage::USAGE_DYNAMIC || Desc.Usage == EGpuUsage::USAGE_STAGING)
 		{
@@ -1018,8 +1022,16 @@ namespace NxRHI
 	{
 		/*if (state == GpuState)
 			return;*/
+		/*if (state == EGpuResourceState::GRS_DepthStencil)
+		{
+			int xx = 0;
+		}
+		if (GpuState == EGpuResourceState::GRS_DepthStencil)
+		{
+			int xx = 0;
+		}*/
 		cmd->GetCmdRecorder()->UseResource(this);
-		
+
 		cmd->SetTextureBarrier(this, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, GpuState, state);
 
 		GpuState = state;
@@ -1737,8 +1749,8 @@ namespace NxRHI
 		{
 			FTransientCmd cmd(device, EQueueType::QU_Default, "BuildBLAStructure");
 			auto cmdlist = (DX12CommandList*)cmd.GetCmdList();
-			//pScratchBuffer->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_Uav);
-			//mGpuBuffer->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_RTAS);
+			//FTransitionScope::Transition(cmdlist, pScratchBuffer, EGpuResourceState::GRS_Uav);
+			//FTransitionScope::Transition(cmdlist, mGpuBuffer, EGpuResourceState::GRS_RTAS);
 			cmdlist->GetCmdRecorder()->UseResource(this);
 			cmdlist->GetCmdRecorder()->UseResource(pScratchBuffer);
 			cmdlist->mLastContext->BuildRaytracingAccelerationStructure(&mBuildDesc, 0, nullptr);

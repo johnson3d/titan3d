@@ -313,6 +313,8 @@ namespace EngineNS.EGui
                     passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
 
                     var swapChain = presentWindow.SwapChain;
+                    drawCmd.mCoreObject.mIsDirectGpuDraw = true;
+
                     if (drawCmd.BeginPass(swapChain.BeginFrameBuffers(drawCmd), in passClears, "ImGui"))
                     {
                         if (swapChain.Viewport.Width != 0 && swapChain.Viewport.Height != 0)
@@ -399,6 +401,7 @@ namespace EngineNS.EGui
                         drawCmd.EndPass();
                     }
 
+                    drawCmd.mCoreObject.mIsDirectGpuDraw = false;
                     NxRHI.FScissorRect fullRect;
                     var fwSize = presentWindow.GetWindowSize();
                     fullRect.m_MinX = 0;

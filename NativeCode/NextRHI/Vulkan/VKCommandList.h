@@ -70,6 +70,7 @@ namespace NxRHI
 	class VKCmdRecorder : public ICmdRecorder
 	{
 	public:
+		VKThreadCmdBufferManager*			mManager;
 		VkCommandBuffer						mCommandBuffer;
 		AutoRef<VKCommandList>				mCmdlist;
 		bool								mIsRecording = false;
@@ -152,6 +153,27 @@ namespace NxRHI
 			}
 			return mCmdRecorder.UnsafeConvertTo<VKCmdRecorder>();
 		}
+	private:
+		bool BeginRendering(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name);
+		void EndRendering();
+		class VKCmdBeginRenderingDraw : public IGpuDraw
+		{
+		public:
+			VKCommandList* CmdList;
+			std::vector<VkRenderingAttachmentInfo> mColorAttachments;
+			VkRenderingAttachmentInfo mDepthAttachment;
+			VkRenderingInfo mRenderingInfo = {};
+
+			virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
+			virtual UINT GetPrimitiveNum() override
+			{
+				return 0;
+			}
+			virtual void ResetResources() override
+			{
+
+			}
+		};
 	};
 }
 

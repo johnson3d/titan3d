@@ -289,39 +289,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 using(new TtLayerDrawBuffers.TtLayerDrawBuffersScope(HitproxyPass))
                 {
-                    var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
-                    foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
-                    {
-                        if (i.Mesh.IsDrawHitproxy == false)
-                        {
-                            continue;
-                        }
-                        if (world.IsGameWorld && i.Mesh.HostNode.IsEnableHitproxyInGame == false)
-                        {
-                            continue;
-                        }
-                        if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
-                            continue;
-                        foreach (var j in i.Mesh.SubMeshes)
-                        {
-                            foreach (var k in j.Atoms)
-                            {
-                                if (k.Material == null)
-                                    continue;
-
-                                var layer = k.Material.RenderLayer;
-                                var cmd = HitproxyPass.GetCmdList(layer);
-                                var hpDrawcall = k.GetDrawCall(cmd.mCoreObject, GHitproxyBuffers, policy, this);
-                                if (hpDrawcall != null)
-                                {
-                                    hpDrawcall.BindGBuffer(camera, GHitproxyBuffers);
-
-                                    cmd.PushGpuDraw(hpDrawcall);
-                                }
-                            }
-                        }
-                    }
-
+                    var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                    using (new NxRHI.TtCmdListScope(cmdlist))
                     {
                         //draw mesh first
                         var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
@@ -336,16 +305,49 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                         GHitproxyBuffers.BuildFrameBuffers(policy);
                         GGizmosBuffers.BuildFrameBuffers(policy);
-                        HitproxyPass.BuildRenderPass(policy, in GHitproxyBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GHitproxyBuffers, GGizmosBuffers, "Hitproxy:");
+                       
+                        var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
+                        foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
+                        {
+                            if (i.Mesh.IsDrawHitproxy == false)
+                            {
+                                continue;
+                            }
+                            if (world.IsGameWorld && i.Mesh.HostNode.IsEnableHitproxyInGame == false)
+                            {
+                                continue;
+                            }
+                            if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
+                                continue;
+                            foreach (var j in i.Mesh.SubMeshes)
+                            {
+                                foreach (var k in j.Atoms)
+                                {
+                                    if (k.Material == null)
+                                        continue;
+
+                                    var layer = k.Material.RenderLayer;
+                                    var recorder = HitproxyPass.GetCmdRecorder(layer);
+                                    var hpDrawcall = k.GetDrawCall(cmdlist.mCoreObject, GHitproxyBuffers, policy, this);
+                                    if (hpDrawcall != null)
+                                    {
+                                        hpDrawcall.BindGBuffer(camera, GHitproxyBuffers);
+
+                                        recorder.PushGpuDraw(hpDrawcall);
+                                    }
+                                }
+                            }
+                        }
+
+                        HitproxyPass.BuildRenderPass(cmdlist, policy, in GHitproxyBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GHitproxyBuffers, GGizmosBuffers, "Hitproxy:");
                     }
+
+                    policy.CommitCommandList(cmdlist);
                 }
-                
-                HitproxyPass.ExecuteCommands(policy);
             }
-            
-            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+
             //copy to sys memory after draw all meshesr
-            var cmdlist_post = HitproxyPass.PostCmds.DrawCmdList.mCoreObject;
+            //var cmdlist_post = HitproxyPass.PostCmds;
             var attachBuffer = RenderGraph.AttachmentCache.FindAttachement(GHitproxyBuffers.RenderTargets[0].Attachement.AttachmentName);
             attachBuffer.Srv.mCoreObject.GetBufferAsTexture().SetDebugName("Hitproxy Source Texture");
 
@@ -355,35 +357,41 @@ namespace EngineNS.Graphics.Pipeline.Common
                 mReadableHitproxyTexture = rtTex.CreateBufferData(0, NxRHI.ECpuAccess.CAS_READ, ref CopyBufferFootPrint);
             }
             var readTexture = mReadableHitproxyTexture;
-            cmdlist_post.BeginCommand();
-            fixed(NxRHI.FSubResourceFootPrint* pFootprint = &CopyBufferFootPrint)
-            {
-                var cpDraw = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
-                var dstTex = readTexture as NxRHI.TtTexture;
-                var dstBf = readTexture as NxRHI.TtBuffer;
-                if (dstTex != null)
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+
+            {   
+                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                using (new NxRHI.TtCmdListScope(cmdlist))
                 {
-                    //cmdlist_post.CopyTextureRegion(dstTex.mCoreObject, 0, 0, 0, 0, attachBuffer.Srv.mCoreObject.GetBufferAsTexture(), 0, (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer());
-                    cpDraw.mCoreObject.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
-                    cpDraw.BindTextureDest(dstTex);
-                    cpDraw.mCoreObject.BindTextureSrc(attachBuffer.Srv.mCoreObject.GetBufferAsTexture());
-                    cmdlist_post.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
-                    cmdlist_post.FlushDraws();
+                    fixed (NxRHI.FSubResourceFootPrint* pFootprint = &CopyBufferFootPrint)
+                    {
+                        var cpDraw = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
+                        var dstTex = readTexture as NxRHI.TtTexture;
+                        var dstBf = readTexture as NxRHI.TtBuffer;
+                        if (dstTex != null)
+                        {
+                            //cmdlist_post.CopyTextureRegion(dstTex.mCoreObject, 0, 0, 0, 0, attachBuffer.Srv.mCoreObject.GetBufferAsTexture(), 0, (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer());
+                            cpDraw.mCoreObject.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
+                            cpDraw.BindTextureDest(dstTex);
+                            cpDraw.mCoreObject.BindTextureSrc(attachBuffer.Srv.mCoreObject.GetBufferAsTexture());
+                            cmdlist.PushGpuDraw(cpDraw);
+                            cmdlist.FlushDraws();
+                        }
+                        else if (dstBf != null)
+                        {
+                            //cmdlist_post.CopyTextureToBuffer(dstBf.mCoreObject, pFootprint, attachBuffer.Srv.mCoreObject.GetBufferAsTexture(), 0);
+                            cpDraw.mCoreObject.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
+                            cpDraw.BindBufferDest(dstBf);
+                            cpDraw.mCoreObject.BindTextureSrc(attachBuffer.Srv.mCoreObject.GetBufferAsTexture());
+                            cpDraw.mCoreObject.FootPrint = CopyBufferFootPrint;
+                            cmdlist.PushGpuDraw(cpDraw);
+                            cmdlist.FlushDraws();
+                        }
+                        cpDraw.Dispose();
+                    }
                 }
-                else if (dstBf != null)
-                {
-                    //cmdlist_post.CopyTextureToBuffer(dstBf.mCoreObject, pFootprint, attachBuffer.Srv.mCoreObject.GetBufferAsTexture(), 0);
-                    cpDraw.mCoreObject.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
-                    cpDraw.BindBufferDest(dstBf);
-                    cpDraw.mCoreObject.BindTextureSrc(attachBuffer.Srv.mCoreObject.GetBufferAsTexture());
-                    cpDraw.mCoreObject.FootPrint = CopyBufferFootPrint;
-                    cmdlist_post.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
-                    cmdlist_post.FlushDraws();
-                }
-                cpDraw.Dispose();
+                policy.CommitCommandList(cmdlist);
             }
-            cmdlist_post.EndCommand();
-            policy.CommitCommandList(HitproxyPass.PostCmds.DrawCmdList);
 
             var fence = mCopyFence;
             TtEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmd((NxRHI.FRenderCmd)((NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
@@ -454,7 +462,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public unsafe override void TickSync(TtRenderPolicy policy)
         {
-            HitproxyPass.SwapBuffer();
+            
         }
     }
 }

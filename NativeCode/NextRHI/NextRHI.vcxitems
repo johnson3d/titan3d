@@ -16,6 +16,7 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)NxBuffer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxCommandList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxDescriptorSet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxDrawcall.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxEffect.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxFrameBuffers.cpp" />
@@ -31,6 +32,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)DXCommon.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxBuffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxCommandList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxDescriptorSet.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxDrawcall.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxEffect.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxFrameBuffers.h" />

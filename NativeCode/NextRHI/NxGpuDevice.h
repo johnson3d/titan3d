@@ -3,6 +3,7 @@
 #include "../Base/thread/vfxcritical.h"
 #include "../Base/thread/vfxthread.h"
 #include "NxEvent.h"
+#include "NxDescriptorSet.h"
 #include "NxRHIDefine.h"
 
 NS_BEGIN
@@ -70,6 +71,9 @@ namespace NxRHI
 	class IAStructureInstance;
 	struct FTopAccelerationStructureDesc;
 	class ITopAccelerationStructure;
+
+	class IDescriptorPool;
+	class NxDesriptorPoolManager;
 
 	enum TR_ENUM(SV_EnumNoFlags)
 		ERhiType
@@ -1221,6 +1225,7 @@ namespace NxRHI
 			return mCaps.IsSupportSwapchainFormat(format);
 		}
 		FGpuPipelineManager* GetGpuPipelineManager();
+		NxDesriptorPoolManager* GetDescriptorPoolManager();
 
 		virtual void SetBreakOnID(int id, bool open) = 0;
 		virtual void ShowDeviceMessage(int id, bool show){}
@@ -1230,6 +1235,8 @@ namespace NxRHI
 		}
 		virtual void BeginFrame() {}
 		virtual void EndFrame() {}
+	protected:
+		AutoRef<NxDesriptorPoolManager>	mDescriptorPoolManager;
 	public:
 		FGpuDeviceDesc		Desc;
 		FGpuDeviceCaps		mCaps;

@@ -116,7 +116,7 @@ namespace NxRHI
 		mSamplerNumber = 0;
 		for (auto& i : reflector->CBuffers)
 		{
-			auto binder = i.UnsafeConvertTo<FShaderBinder>();
+			auto binder = const_cast<FShaderBinder*>(i.GetPtr());
 			binder->DescriptorIndex = mCbvSrvUavNumber;
 			if (binder->IsBindless())
 				mCbvSrvUavNumber += IBindless::MaxBindless;
@@ -126,7 +126,7 @@ namespace NxRHI
 		}
 		for (auto& i : reflector->Srvs)
 		{
-			auto binder = i.UnsafeConvertTo<FShaderBinder>();
+			auto binder = const_cast<FShaderBinder*>(i.GetPtr());
 			binder->DescriptorIndex = mCbvSrvUavNumber;
 			if (binder->IsBindless())
 				mCbvSrvUavNumber += IBindless::MaxBindless;
@@ -136,7 +136,7 @@ namespace NxRHI
 		}
 		for (auto& i : reflector->Uavs)
 		{
-			auto binder = i.UnsafeConvertTo<FShaderBinder>();
+			auto binder = const_cast<FShaderBinder*>(i.GetPtr());
 			binder->DescriptorIndex = mCbvSrvUavNumber;
 			if (binder->IsBindless())
 				mCbvSrvUavNumber += IBindless::MaxBindless;
@@ -146,7 +146,7 @@ namespace NxRHI
 		}
 		for (auto& i : reflector->Samplers)
 		{
-			auto binder = i.UnsafeConvertTo<FShaderBinder>();
+			auto binder = const_cast<FShaderBinder*>(i.GetPtr());
 			binder->DescriptorIndex = mSamplerNumber;
 			if (binder->IsBindless())
 				mSamplerNumber += IBindless::MaxBindless;

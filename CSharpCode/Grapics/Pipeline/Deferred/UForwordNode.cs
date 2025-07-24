@@ -223,35 +223,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
             {
-                var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
-                foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
-                {
-                    if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
-                        continue;
-                    foreach (var j in i.Mesh.SubMeshes)
-                    {
-                        foreach (var k in j.Atoms)
-                        {
-                            if (k == null || k.Material == null)
-                                continue;
-
-                            var layer = k.Material.RenderLayer;
-                            if (IsFilters(layer))
-                            {
-                                var cmdlist = LayerBasePass.GetCmdList(layer);
-                                var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
-                                if (drawcall != null)
-                                {
-                                    drawcall.BindGBuffer(camera, GBuffers);
-                                    //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
-
-                                    cmdlist.PushGpuDraw(drawcall);
-                                }
-                            }
-                        }
-                    }
-                }
-
                 var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
                 for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
                 {
@@ -261,16 +232,47 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 }
 
                 GBuffers.BuildFrameBuffers(policy);
-                LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GBuffers, "Forword:");
-            }
+                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                using (new NxRHI.TtCmdListScope(cmdlist))
+                {
+                    var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
+                    foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
+                    {
+                        if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
+                            continue;
+                        foreach (var j in i.Mesh.SubMeshes)
+                        {
+                            foreach (var k in j.Atoms)
+                            {
+                                if (k == null || k.Material == null)
+                                    continue;
 
-            LayerBasePass.ExecuteCommands(policy);
+                                var layer = k.Material.RenderLayer;
+                                if (IsFilters(layer))
+                                {
+                                    var recorder = LayerBasePass.GetCmdRecorder(layer);
+                                    var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
+                                    if (drawcall != null)
+                                    {
+                                        drawcall.BindGBuffer(camera, GBuffers);
+                                        //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+
+                                        recorder.PushGpuDraw(drawcall);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    LayerBasePass.BuildRenderPass(cmdlist, policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GBuffers, "Forword:");
+                }
+
+                policy.CommitCommandList(cmdlist);
+            }
         }
         public override void TickSync(TtRenderPolicy policy)
         {
             if (mOpaqueShading == null)
                 return;
-            LayerBasePass.SwapBuffer();
             //GBuffers?.Camera?.mCoreObject.UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, 1);
         }
         public override void FrameBuild(TtRenderPolicy policy)
@@ -438,38 +440,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
             {
-                var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
-                foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
-                {
-                    foreach (var j in i.Mesh.SubMeshes)
-                    {
-                        if (j == null)
-                            continue;
-                        foreach (var k in j.Atoms)
-                        {
-                            if (k == null)
-                                continue;
-
-                            if (k.Material == null)
-                                continue;
-                            var layer = k.Material.RenderLayer;
-                            if (layer == ERenderLayer.RL_PostOpaque || layer == ERenderLayer.RL_PostTranslucent
-                                || layer == ERenderLayer.RL_TranslucentGizmos || layer == ERenderLayer.RL_Gizmos)
-                            {
-                                var cmdlist = LayerBasePass.GetCmdList(layer);
-                                var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
-                                if (drawcall != null)
-                                {
-                                    drawcall.BindGBuffer(camera, GBuffers);
-                                    //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
-
-                                    cmdlist.PushGpuDraw(drawcall);
-                                }
-                            }
-                        }
-                    }
-                }
-
                 var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
                 for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
                 {
@@ -481,16 +451,51 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                 WithDepthGBuffers.BuildFrameBuffers(policy);
                 GBuffers.BuildFrameBuffers(policy);
-                LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, WithDepthGBuffers, GBuffers, "Gizmos:");
-            }
 
-            LayerBasePass.ExecuteCommands(policy);
+                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                using (new NxRHI.TtCmdListScope(cmdlist))
+                {
+                    var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
+                    foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
+                    {
+                        foreach (var j in i.Mesh.SubMeshes)
+                        {
+                            if (j == null)
+                                continue;
+                            foreach (var k in j.Atoms)
+                            {
+                                if (k == null)
+                                    continue;
+
+                                if (k.Material == null)
+                                    continue;
+                                var layer = k.Material.RenderLayer;
+                                if (layer == ERenderLayer.RL_PostOpaque || layer == ERenderLayer.RL_PostTranslucent
+                                    || layer == ERenderLayer.RL_TranslucentGizmos || layer == ERenderLayer.RL_Gizmos)
+                                {
+                                    var recorder = LayerBasePass.GetCmdRecorder(layer);
+                                    var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
+                                    if (drawcall != null)
+                                    {
+                                        drawcall.BindGBuffer(camera, GBuffers);
+                                        //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+
+                                        recorder.PushGpuDraw(drawcall);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    LayerBasePass.BuildRenderPass(cmdlist, policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, WithDepthGBuffers, GBuffers, "Gizmos:");
+                }
+                policy.CommitCommandList(cmdlist);
+            }
         }
         public override void TickSync(TtRenderPolicy policy)
         {
             if (mOpaqueShading == null)
                 return;
-            LayerBasePass.SwapBuffer();
             //GBuffers?.Camera?.mCoreObject.UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, 1);
         }
     }

@@ -153,7 +153,6 @@ namespace EngineNS.Graphics.Pipeline.Common
 
         public NxRHI.TtCopyDraw mCopyColorDrawcall;
         public NxRHI.TtCopyDraw mCopyDepthDrawcall;
-        public TtDrawBuffers CopyPass = new TtDrawBuffers();
 
         public TtAttachBuffer[] ResultBuffer = new TtAttachBuffer[2];
         public TtAttachBuffer PreColor { get => ResultBuffer[0]; }
@@ -197,8 +196,6 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             mCopyColorDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
             mCopyDepthDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
-
-            CopyPass.Initialize(rc, debugName + ".CopyPrev");
         }
 
         public NxRHI.TtCbView CBShadingEnv;
@@ -257,7 +254,6 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 policy.DefaultCamera.JitterOffset = new Vector2(0.5f, 0.5f);
             }
-            CopyPass.SwapBuffer();
         }
 
         public override void FrameBuild(TtRenderPolicy policy)
@@ -350,7 +346,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             if (mCopyColorDrawcall == null || mCopyDepthDrawcall == null)
                 return;
 
-            var cmdlist = CopyPass.DrawCmdList;
+            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist))
             {
                 CopyAttachBuff(ResultPinOut, PreColor, mCopyColorDrawcall, cmdlist);

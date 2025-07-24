@@ -53,12 +53,13 @@ namespace EngineNS
         {
             get => Core_UnsafeGetRefCount();
         }
-        public int Core_UnsafeGetRefCount()
+        public unsafe int Core_UnsafeGetRefCount()
         {
-            unsafe
+            if(mCoreObject.NativePointer==IntPtr.Zero)
             {
-                return CoreSDK.IUnknown_UnsafeGetRefCount(mCoreObject.NativePointer.ToPointer());
+                return 0;
             }
+            return CoreSDK.IUnknown_UnsafeGetRefCount(mCoreObject.NativePointer.ToPointer());
         }
         public unsafe void Core_SetMemDebugInfo(string info)
         {

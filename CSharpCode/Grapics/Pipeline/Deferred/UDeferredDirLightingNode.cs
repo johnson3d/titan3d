@@ -576,12 +576,15 @@ namespace EngineNS
 
                 PreIntegratedDFTexture = TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
                 var srvDesc = new NxRHI.FSrvDesc();
-                srvDesc.SetTexture2DArray();
+                //srvDesc.SetTexture2DArray();
+                //srvDesc.Format = desc.Format;
+                //srvDesc.Texture2DArray.ArraySize = desc.ArraySize;
+                //srvDesc.Texture2DArray.FirstArraySlice = 0;
+                //srvDesc.Texture2DArray.MipLevels = desc.MipLevels;
+                //srvDesc.Texture2DArray.MostDetailedMip = 0;
+                srvDesc.SetTexture2D();
                 srvDesc.Format = desc.Format;
-                srvDesc.Texture2DArray.ArraySize = desc.ArraySize;
-                srvDesc.Texture2DArray.FirstArraySlice = 0;
-                srvDesc.Texture2DArray.MipLevels = desc.MipLevels;
-                srvDesc.Texture2DArray.MostDetailedMip = 0;
+                srvDesc.Texture2D.MipLevels = desc.MipLevels;
                 PreIntegratedDFSrv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(PreIntegratedDFTexture, in srvDesc);
 
                 var fp = new NxRHI.FSubResourceFootPrint();

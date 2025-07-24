@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.TcpServer
 {
-    public class UDedicatedServer : TtModule<TtEngine>
+    public class TtDedicatedServer : TtModule<TtEngine>
     {
         public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine engine)
         {
@@ -21,12 +21,12 @@ namespace EngineNS.Bricks.TcpServer
             mServer?.Tick();
         }
 
-        UTcpServer mServer;
+        TtTcpServer mServer;
         public bool StartServer(string ip, UInt16 port)
         {
             if (mServer != null)
                 return false;
-            mServer = new UTcpServer();
+            mServer = new TtTcpServer();
             return mServer.StartServer(ip, port);
         }
         public void StopServer()
@@ -43,15 +43,15 @@ namespace EngineNS
 {
     public partial class TtEngine
     {
-        public static System.Type UDedicatedServerType = typeof(Bricks.TcpServer.UDedicatedServer);
-        private Bricks.TcpServer.UDedicatedServer mDedicatedServer;
-        public Bricks.TcpServer.UDedicatedServer DedicatedServer
+        public static System.Type UDedicatedServerType = typeof(Bricks.TcpServer.TtDedicatedServer);
+        private Bricks.TcpServer.TtDedicatedServer mDedicatedServer;
+        public Bricks.TcpServer.TtDedicatedServer DedicatedServer
         {
             get
             {
                 if (mDedicatedServer == null)
                 {
-                    mDedicatedServer = Rtti.TtTypeDescManager.CreateInstance(UDedicatedServerType) as Bricks.TcpServer.UDedicatedServer;
+                    mDedicatedServer = Rtti.TtTypeDescManager.CreateInstance(UDedicatedServerType) as Bricks.TcpServer.TtDedicatedServer;
                 }
                 return mDedicatedServer;
             }

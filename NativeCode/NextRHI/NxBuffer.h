@@ -193,7 +193,7 @@ namespace NxRHI
 	{
 	public:
 		ENGINE_RTTI(IGpuBufferData);
-		virtual void Release() override{
+		virtual void Release() const override{
 			IGpuResource::Release();
 		}
 		virtual EGpuResourceState GetGpuResourceState() {
@@ -883,8 +883,8 @@ namespace NxRHI
 		virtual FResourceState* GetResourceState() override{
 			return &ResourceState;
 		}
-		virtual long AddRef() override;
-		virtual void Release() override;
+		virtual long AddRef() const override;
+		virtual void Release() const override;
 		
 	public:
 		TR_MEMBER(SV_NoBind)

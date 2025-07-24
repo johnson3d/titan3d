@@ -150811,23 +150811,6 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5470286241272553349 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtCopy2NextFrameNode;
-			System.Boolean t_IsUsed;
-			ar.Read(out t_IsUsed);
-			srcObj.IsUsed = t_IsUsed;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsUsed", false);
-				}
-			}
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9524687136534877311 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtCopy2NextFrameNode;
-		};
 	}
 	static class EngineNS_Graphics_Pipeline_Common_TtCopy2SwapChainNode
 	{
@@ -209867,8 +209850,6 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Graphics_Pipeline_Common_TtCopy2NextFrameNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Common_TtCopy2NextFrameNode.CopyCurrentVersion;
 				kls.RegVersion(1031439478003122711, EngineNS_Graphics_Pipeline_Common_TtCopy2NextFrameNode.Read_1031439478003122711);
-				kls.RegVersion(5470286241272553349, EngineNS_Graphics_Pipeline_Common_TtCopy2NextFrameNode.Read_5470286241272553349);
-				kls.RegVersion(9524687136534877311, EngineNS_Graphics_Pipeline_Common_TtCopy2NextFrameNode.Read_9524687136534877311);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.TtCopy2SwapChainNode@EngineCore");
@@ -211026,7 +211007,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(10759720178659608122, Survivor_TtWeaponProxyNode.Read_10759720178659608122);
 				kls.RegVersion(12507694465426579364, Survivor_TtWeaponProxyNode.Read_12507694465426579364);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("A3_48_D8_9A_B3_73_AE_FA_6A_35_31_9B_1A_AE_E0_7E_19_5A_33_7B");
+			this.VersionHash = EngineNS.Hash160.Parse("6A_09_E5_D8_24_20_AD_6D_EF_A7_7A_B8_88_D5_50_C4_01_94_A7_65");
 		}
 	}
 }

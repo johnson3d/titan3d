@@ -367,12 +367,12 @@ namespace NxRHI
 	public:
 		ENGINE_RTTI(IGpuResource);
 		~IGpuResource();
-		virtual long AddRef() override
+		virtual long AddRef() const override
 		{
 			return IResourceBase::AddRef();
 		}
 
-		virtual void Release() override
+		virtual void Release() const override
 		{
 			IResourceBase::Release();
 		}

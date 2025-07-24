@@ -10,6 +10,41 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	void VKMemoryViewWrapper::Initialize(VKGpuDevice* device)
+	{
+		mDeviceRef.FromObject(device);
+	}
+	void VKMemoryViewWrapper::FreeView()
+	{
+		auto device = mDeviceRef.GetPtr();
+		if (device == nullptr)
+			return;
+		if (mIsBufferView)
+		{
+			if (mBufferView != nullptr)
+			{
+				vkDestroyBufferView(device->mDevice, mBufferView, device->GetVkAllocCallBacks());
+				mBufferView = nullptr;
+			}
+		}
+		else
+		{
+			if (mImageView != nullptr)
+			{
+				vkDestroyImageView(device->mDevice, mImageView, device->GetVkAllocCallBacks());
+				mImageView = nullptr;
+			}
+		}
+	}
+	void VKMemoryViewWrapper::SetDebugName(const char* name)
+	{
+		auto device = mDeviceRef.GetPtr();
+		if (mIsBufferView)
+			VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_VIEW_EXT, mBufferView, name);
+		else
+			VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT, mImageView, name);
+	}
+
 	VKBuffer::VKBuffer()
 	{
 	}
@@ -194,6 +229,28 @@ namespace NxRHI
 
 		vkBindBufferMemory(device->mDevice, mBuffer, (VkDeviceMemory)mGpuMemory->GetHWBuffer(), mGpuMemory->Offset);
 
+		FTransientCmd tsCmd(device, QU_Transfer, "TextureInit");
+		auto cmd = (VKCommandList*)tsCmd.GetCmdList();
+		if (Desc.Type & EBufferType::BFT_SRV)
+		{
+			FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_GenericRead, false);
+		}
+		else if (Desc.Type & EBufferType::BFT_UAV)
+		{
+			FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_Uav, false);
+		}
+		else if (Desc.Type & EBufferType::BFT_RTV)
+		{
+			FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_RenderTarget, false);
+		}
+		else if (Desc.Type & EBufferType::BFT_DSV)
+		{
+			FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_DepthStencil, false);
+		}
+		else
+		{
+			FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_GenericRead, false);
+		}
 		//GpuState = VKImageLayoutToGpuState(imageInfo.initialLayout);
 		if (desc.InitData != nullptr)
 		{
@@ -224,7 +281,7 @@ namespace NxRHI
 				cpDraw->FootPrint.TotalSize = desc.Size;
 				cpDraw->DstX = 0;
 
-				cmd->PushGpuDraw(cpDraw);
+				cmd->PushGpuDraw(cpDraw.GetPtr());
 			}
 			else
 			{
@@ -318,7 +375,7 @@ namespace NxRHI
 				cpDraw->FootPrint.TotalSize = footPrint->RowPitch * footPrint->Height;
 				cpDraw->DstX = footPrint->X;
 
-				cmd->PushGpuDraw(cpDraw);
+				cmd->PushGpuDraw(cpDraw.GetPtr());
 			}
 		}
 		else
@@ -360,7 +417,7 @@ namespace NxRHI
 			cpDraw->FootPrint.TotalSize = footPrint->RowPitch * footPrint->Height;
 			cpDraw->DstX = footPrint->X;
 
-			cmd->PushGpuDraw(cpDraw);
+			cmd->PushGpuDraw(cpDraw.GetPtr());
 		}
 	}
 
@@ -631,19 +688,23 @@ namespace NxRHI
 				auto cmd = (VKCommandList*)tsCmd.GetCmdList();
 				if (Desc.BindFlags & EBufferType::BFT_SRV)
 				{
-					this->TransitionTo(cmd, EGpuResourceState::GRS_GenericRead);
+					FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_GenericRead, false);
 				}
 				else if (Desc.BindFlags & EBufferType::BFT_UAV)
 				{
-					this->TransitionTo(cmd, EGpuResourceState::GRS_Uav);
+					FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_Uav, false);
 				}
 				else if (Desc.BindFlags & EBufferType::BFT_RTV)
 				{
-					this->TransitionTo(cmd, EGpuResourceState::GRS_RenderTarget);
+					FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_RenderTarget, false);
 				}
 				else if (Desc.BindFlags & EBufferType::BFT_DSV)
 				{
-					this->TransitionTo(cmd, EGpuResourceState::GRS_DepthStencil);
+					FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_DepthStencil, false);
+				}
+				else
+				{
+					ASSERT(false);
 				}
 				for (UINT i = 0; i < desc.ArraySize; i++)
 				{
@@ -668,7 +729,7 @@ namespace NxRHI
 						copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
 						auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
-						bf->TransitionTo(cmd, EGpuResourceState::GRS_CopySrc);
+						FTransitionScope::Transition(cmd, bf, EGpuResourceState::GRS_CopySrc, false);
 
 						AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
 						cpDraw->BindTextureDest(this);
@@ -685,7 +746,7 @@ namespace NxRHI
 						cpDraw->FootPrint.RowPitch = desc.InitData[j].RowPitch;
 						cpDraw->FootPrint.TotalSize = copyDesc.Size; //desc.InitData[k].RowPitch * footPrint.Footprint.Height;
 						//device->mPostCmdRecorder->PushGpuDraw(cpDraw);
-						cmd->PushGpuDraw(cpDraw);
+						cmd->PushGpuDraw(cpDraw.GetPtr());
 
 						w = w / 2;
 						h = h / 2;
@@ -771,10 +832,9 @@ namespace NxRHI
 
 							//todo: CopyDraw
 							FTransientCmd cmd(device, EQueueType::QU_Transfer, "Buffer.Update");
-							this->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_CopyDst);
+							FTransitionScope transition(cmd.GetCmdList(), this, EGpuResourceState::GRS_CopyDst);
 							VkBuffer srcBuffer = bf[i]->mBuffer;
 							vkCmdCopyBufferToImage(((VKCommandList*)cmd.GetCmdList())->GetVKCmdRecorder()->mCommandBuffer, srcBuffer, mImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
-							this->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_GenericRead);
 						}
 					}
 				}
@@ -788,19 +848,23 @@ namespace NxRHI
 				auto cmd = (VKCommandList*)tsCmd.GetCmdList();
 				if (Desc.BindFlags & EBufferType::BFT_SRV)
 				{
-					this->TransitionTo(cmd, EGpuResourceState::GRS_GenericRead);
+					FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_GenericRead, false);
 				}
 				else if (Desc.BindFlags & EBufferType::BFT_UAV)
 				{
-					this->TransitionTo(cmd, EGpuResourceState::GRS_Uav);
+					FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_Uav, false);
 				}
 				else if (Desc.BindFlags & EBufferType::BFT_RTV)
 				{
-					this->TransitionTo(cmd, EGpuResourceState::GRS_RenderTarget);
+					FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_RenderTarget, false);
 				}
 				else if (Desc.BindFlags & EBufferType::BFT_DSV)
 				{
-					this->TransitionTo(cmd, EGpuResourceState::GRS_DepthStencil);
+					FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_DepthStencil, false);
+				}
+				else
+				{
+					ASSERT(false);
 				}
 			}
 		}
@@ -918,7 +982,7 @@ namespace NxRHI
 		cpDraw->FootPrint.RowPitch = footPrint->RowPitch;
 		cpDraw->FootPrint.TotalSize = footPrint->RowPitch * footPrint->Height;
 
-		cmd->PushGpuDraw(cpDraw);
+		cmd->PushGpuDraw(cpDraw.GetPtr());
 	}
 	void VKTexture::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
 	{
@@ -953,7 +1017,7 @@ namespace NxRHI
 
 			FTransientCmd tsCmd(device, EQueueType::QU_Transfer, "Texture.UpdateGpuData");
 			auto cmd = tsCmd.GetCmdList();
-			cmd->PushGpuDraw(cpDraw);
+			cmd->PushGpuDraw(cpDraw.GetPtr());
 		}
 		else //if (Desc.Usage == EGpuUsage::USAGE_DYNAMIC || Desc.Usage == EGpuUsage::USAGE_STAGING)
 		{
@@ -1188,37 +1252,13 @@ namespace NxRHI
 	VKSrView::VKSrView()
 	{
 		//mBufferView = nullptr;
-		mImageView = nullptr;
 	}
 
 	VKSrView::~VKSrView()
 	{
-		FreeView();
+		mView = nullptr;
 	}
-
-	void VKSrView::FreeView()
-	{
-		auto device = mDeviceRef.GetPtr();
-		if (device == nullptr)
-			return;
-		if (Desc.Type == ESrvType::ST_BufferSRV || Desc.Type == ESrvType::ST_RTAS)
-		{
-			if (mBufferView != nullptr)
-			{
-				vkDestroyBufferView(device->mDevice, mBufferView, device->GetVkAllocCallBacks());
-				mBufferView = nullptr;
-			}
-		}
-		else
-		{
-			if (mImageView != nullptr)
-			{
-				vkDestroyImageView(device->mDevice, mImageView, device->GetVkAllocCallBacks());
-				mImageView = nullptr;
-			}
-		}
-	}
-
+	
 	VkImageViewType SrvTypeToVK(ESrvType type)
 	{
 		switch (type)
@@ -1253,7 +1293,10 @@ namespace NxRHI
 	void VKSrView::SetDebugName(const char* name)
 	{
 		auto device = mDeviceRef.GetPtr();
-		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT, mImageView, name);
+		if (mView->mIsBufferView)
+			VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_VIEW_EXT, mView->mBufferView, name);
+		else
+			VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT, mView->mImageView, name);
 	}
 
 	bool VKSrView::Init(VKGpuDevice* device, IGpuBufferData* pBuffer, const FSrvDesc& desc)
@@ -1262,8 +1305,12 @@ namespace NxRHI
 		Buffer = pBuffer;
 		mDeviceRef.FromObject(device);
 
+		mView = MakeWeakRef(new VKMemoryViewWrapper());
+		mView->Initialize(device);
+
 		if (Desc.Type == ESrvType::ST_BufferSRV || Desc.Type == ESrvType::ST_RTAS)
 		{
+			mView->AsBufferView((VKBuffer*)pBuffer);
 			UINT alignedSize = ((VKBuffer*)pBuffer)->Desc.Size;
 			VkBufferViewCreateInfo createInfo = {};
 			createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
@@ -1280,12 +1327,13 @@ namespace NxRHI
 			{
 				createInfo.format = Format2VKFormat(Desc.Format);
 				//createInfo.flags = VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT;
-				if (VK_SUCCESS != vkCreateBufferView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mBufferView))
+				if (VK_SUCCESS != vkCreateBufferView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mView->mBufferView))
 					return false;
 			}
 		}
 		else
 		{
+			mView->AsTextureView((VKTexture*)pBuffer);
 			auto pTexture = (VKTexture*)pBuffer;
 			auto pImage = pTexture->mImage;
 			VkImageViewCreateInfo createInfo = {};
@@ -1344,7 +1392,7 @@ namespace NxRHI
 					createInfo.subresourceRange.layerCount = desc.Texture2DMSArray.ArraySize;
 					break;
 			}
-			if (vkCreateImageView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mImageView) != VK_SUCCESS)
+			if (vkCreateImageView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mView->mImageView) != VK_SUCCESS)
 			{
 				return false;
 			}
@@ -1357,10 +1405,13 @@ namespace NxRHI
 		if (Buffer == pBuffer)
 			return true;
 
-		Buffer = pBuffer;
-		mFingerPrint++;
+		auto device = (VKGpuDevice*)device1;
 
-		FreeView();
+		//device->DelayDestroy(mView);
+		Buffer = pBuffer;
+
+		mView = MakeWeakRef(new VKMemoryViewWrapper());
+		mView->Initialize(device);
 
 		switch (Desc.Type)
 		{
@@ -1389,11 +1440,10 @@ namespace NxRHI
 				break;
 		}
 
-		auto device = (VKGpuDevice*)device1;
-		
 		auto& desc = Desc;
 		if (Desc.Type == ESrvType::ST_BufferSRV)
 		{
+			mView->AsBufferView((VKBuffer*)pBuffer);
 			UINT alignedSize = ((VKBuffer*)pBuffer)->Desc.Size;
 			VkBufferViewCreateInfo createInfo = {};
 			createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
@@ -1410,12 +1460,13 @@ namespace NxRHI
 			{
 				createInfo.format = Format2VKFormat(Desc.Format);
 				//createInfo.flags = VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT;
-				if (VK_SUCCESS != vkCreateBufferView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mBufferView))
+				if (VK_SUCCESS != vkCreateBufferView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mView->mBufferView))
 					return false;
 			}
 		}
 		else
 		{
+			mView->AsTextureView((VKTexture*)pBuffer);
 			auto pTexture = (VKTexture*)pBuffer;
 			auto pImage = pTexture->mImage;
 			VkImageViewCreateInfo createInfo = {};
@@ -1474,7 +1525,7 @@ namespace NxRHI
 				createInfo.subresourceRange.layerCount = desc.Texture2DMSArray.ArraySize;
 				break;
 			}
-			if (vkCreateImageView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mImageView) != VK_SUCCESS)
+			if (vkCreateImageView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mView->mImageView) != VK_SUCCESS)
 			{
 				return false;
 			}
@@ -1484,36 +1535,12 @@ namespace NxRHI
 
 	VKUaView::VKUaView()
 	{
-		mBufferView = nullptr;
-		mImageView = nullptr;
+		mView = nullptr;
 	}
 
 	VKUaView::~VKUaView()
 	{
-		FreeView();
-	}
-
-	void VKUaView::FreeView()
-	{
-		auto device = mDeviceRef.GetPtr();
-		if (device == nullptr)
-			return;
-		if (Desc.ViewDimension == EDimensionUAV::UAV_DIMENSION_BUFFER)
-		{
-			if (mBufferView != nullptr)
-			{
-				vkDestroyBufferView(device->mDevice, mBufferView, device->GetVkAllocCallBacks());
-				mBufferView = nullptr;
-			}
-		}
-		else
-		{
-			if (mImageView != nullptr)
-			{
-				vkDestroyImageView(device->mDevice, mImageView, device->GetVkAllocCallBacks());
-				mImageView = nullptr;
-			}
-		}
+		mView = nullptr;
 	}
 
 	VkImageViewType UavTypeToVK(EDimensionUAV type)
@@ -1542,18 +1569,20 @@ namespace NxRHI
 	}
 	void VKUaView::SetDebugName(const char* name)
 	{
-		auto device = mDeviceRef.GetPtr();
-		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT, mImageView, name);
+		mView->SetDebugName(name);
 	}
 	bool VKUaView::Init(VKGpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc)
 	{
 		Desc = desc;
 		Buffer = pBuffer;
 		mDeviceRef.FromObject(device);
-		FreeView();
+		
+		mView = MakeWeakRef(new VKMemoryViewWrapper());
+		mView->Initialize(device);
 
 		if (Desc.ViewDimension == EDimensionUAV::UAV_DIMENSION_BUFFER)
 		{
+			mView->AsBufferView((VKBuffer*)pBuffer);
 			UINT alignedSize = ((VKBuffer*)pBuffer)->Desc.Size;
 			VkBufferViewCreateInfo createInfo = {};
 			createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
@@ -1570,12 +1599,13 @@ namespace NxRHI
 			{
 				createInfo.format = Format2VKFormat(Desc.Format);
 				//createInfo.flags = VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT;
-				if (VK_SUCCESS != vkCreateBufferView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mBufferView))
+				if (VK_SUCCESS != vkCreateBufferView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mView->mBufferView))
 					return false;
 			}
 		}
 		else
 		{
+			mView->AsTextureView((VKTexture*)pBuffer);
 			auto pTexture = (VKTexture*)pBuffer;
 			auto pImage = pTexture->mImage;
 			VkImageViewCreateInfo createInfo = {};
@@ -1621,7 +1651,7 @@ namespace NxRHI
 				createInfo.subresourceRange.layerCount = desc.Texture2DArray.ArraySize;
 				break;
 			}
-			if (vkCreateImageView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mImageView) != VK_SUCCESS)
+			if (vkCreateImageView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mView->mImageView) != VK_SUCCESS)
 			{
 				return false;
 			}
@@ -1636,14 +1666,7 @@ namespace NxRHI
 
 	VKRenderTargetView::~VKRenderTargetView()
 	{
-		auto device = mDeviceRef.GetPtr();
-		if (device == nullptr)
-			return;
-		if (mView != nullptr)
-		{
-			vkDestroyImageView(device->mDevice, mView, device->GetVkAllocCallBacks());
-			mView = nullptr;
-		}
+		mView = nullptr;
 	}
 
 	void VKRenderTargetView::SetDebugName(const char* name)
@@ -1675,7 +1698,11 @@ namespace NxRHI
 		createInfo.subresourceRange.levelCount = 1;
 		createInfo.subresourceRange.baseArrayLayer = 0;
 		createInfo.subresourceRange.layerCount = 1;
-		if (vkCreateImageView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mView) != VK_SUCCESS)
+		
+		mView = MakeWeakRef(new VKMemoryViewWrapper());
+		mView->Initialize(device);
+		mView->AsTextureView(pBuffer);
+		if (vkCreateImageView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mView->mImageView) != VK_SUCCESS)
 		{
 			return false;
 		}
@@ -1690,15 +1717,7 @@ namespace NxRHI
 
 	VKDepthStencilView::~VKDepthStencilView()
 	{
-		auto device = mDeviceRef.GetPtr();
-		if (device == nullptr)
-			return;
-
-		if (mView != nullptr)
-		{
-			vkDestroyImageView(device->mDevice, mView, device->GetVkAllocCallBacks());
-			mView = nullptr;
-		}
+		mView = nullptr;
 	}
 
 	void VKDepthStencilView::SetDebugName(const char* name)
@@ -1729,7 +1748,11 @@ namespace NxRHI
 		createInfo.subresourceRange.levelCount = 1;
 		createInfo.subresourceRange.baseArrayLayer = 0;
 		createInfo.subresourceRange.layerCount = 1;
-		if (vkCreateImageView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mView) != VK_SUCCESS)
+
+		mView = MakeWeakRef(new VKMemoryViewWrapper());
+		mView->Initialize(device);
+		mView->AsTextureView(pBuffer);
+		if (vkCreateImageView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mView->mImageView) != VK_SUCCESS)
 		{
 			return false;
 		}

@@ -451,7 +451,7 @@ namespace EngineNS.Bricks.GpuDriven
                 cpDraw.Copy(cpBuffer, MeshLetsBuffer.GpuBuffer);
                 using (var cmd = new FTransientCmd(EQueueType.QU_Transfer, ""))
                 {
-                    cmd.CmdList.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                    cmd.CmdList.PushGpuDraw(cpDraw.mCoreObject);
                 }
                 cpDraw.Dispose();
                 cpBuffer.FetchGpuData(0, blob.mCoreObject);
@@ -473,7 +473,7 @@ namespace EngineNS.Bricks.GpuDriven
                 cpDraw.Copy(cpBuffer, VerticesBuffer.GpuBuffer);
                 using (var cmd = new FTransientCmd(EQueueType.QU_Transfer, ""))
                 {   
-                    cmd.CmdList.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                    cmd.CmdList.PushGpuDraw(cpDraw.mCoreObject);
                 }
                 cpDraw.Dispose();
                 cpBuffer.FetchGpuData(0, blob.mCoreObject);
@@ -495,7 +495,7 @@ namespace EngineNS.Bricks.GpuDriven
                 cpDraw.Copy(cpBuffer, TrianglesBuffer.GpuBuffer);
                 using (var cmd = new FTransientCmd(EQueueType.QU_Transfer, ""))
                 {
-                    cmd.CmdList.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                    cmd.CmdList.PushGpuDraw(cpDraw.mCoreObject);
                 }
                 cpDraw.Dispose();
                 cpBuffer.FetchGpuData(0, blob.mCoreObject);

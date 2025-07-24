@@ -255,13 +255,15 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 return mScopeFlushDraw;
             }
         }
+        NxRHI.TtCmdRecorder mBasePassRecorder = new NxRHI.TtCmdRecorder();
+        NxRHI.TtCmdRecorder mBackgroundPassRecorder = new NxRHI.TtCmdRecorder();
         public unsafe override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();//BasePass.DrawCmdList
-            var bgCmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();//BackgroundPass.DrawCmdList
+            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            mBasePassRecorder.ResetGpuDraws();
+            mBackgroundPassRecorder.ResetGpuDraws();
 
             using (new NxRHI.TtCmdListScope(cmdlist))
-            using (new NxRHI.TtCmdListScope(bgCmdlist))
             {
                 using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
                 {
@@ -287,12 +289,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                 var layer = k.Material.RenderLayer;
                                 if (layer == ERenderLayer.RL_Background)
                                 {
-                                    var cmd = bgCmdlist;
-                                    var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
+                                    var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
                                     if (drawcall != null)
                                     {
                                         drawcall.BindGBuffer(camera, GBuffers);
-                                        cmd.PushGpuDraw(drawcall);
+                                        mBackgroundPassRecorder.PushGpuDraw(drawcall);
                                     }
                                 }
                                 else if (layer == ERenderLayer.RL_Opaque)
@@ -300,12 +301,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                     if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
                                         continue;
 
-                                    var cmd = cmdlist;
-                                    var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
+                                    var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
                                     if (drawcall != null)
                                     {
                                         drawcall.BindGBuffer(camera, GBuffers);
-                                        cmd.PushGpuDraw(drawcall);
+                                        mBackgroundPassRecorder.PushGpuDraw(drawcall);
                                     }
                                 }
                             }
@@ -327,28 +327,32 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                 using (new Profiler.TimeScopeHelper(ScopeFlushDraw))
                 {
-                    bgCmdlist.SetViewport(in GBuffers.Viewport);
+                    cmdlist.SetViewport(in GBuffers.Viewport);
                     var scissor = new NxRHI.FScissorRect();
                     scissor.MinX = 0;
                     scissor.MinY = 0;
                     scissor.MaxX = (int)GBuffers.Viewport.Width;
                     scissor.MaxY = (int)GBuffers.Viewport.Height;
                     cmdlist.SetScissor(in scissor);
-                    bgCmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Background.ToString());
-                    bgCmdlist.FlushDraws();
-                    bgCmdlist.EndPass();
+                    cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Background.ToString());
+                    cmdlist.AppendDraws(mBackgroundPassRecorder);
+                    cmdlist.FlushDraws();
+                    cmdlist.EndPass();
 
                     cmdlist.SetViewport(in GBuffers.Viewport);
                     cmdlist.SetScissor(in scissor);
                     passClears.ClearFlags = (NxRHI.ERenderPassClearFlags)0;
                     cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
+                    cmdlist.AppendDraws(mBasePassRecorder);
                     cmdlist.FlushDraws();
                     cmdlist.EndPass();
                 }
             }
 
-            policy.CommitCommandList(bgCmdlist, "DSNodeBackground");
             policy.CommitCommandList(cmdlist, "DSNodeBase");
+
+            mBasePassRecorder.ResetGpuDraws();
+            mBackgroundPassRecorder.ResetGpuDraws();
         }
         public override void TickSync(TtRenderPolicy policy)
         {

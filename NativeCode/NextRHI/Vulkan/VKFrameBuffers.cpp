@@ -10,38 +10,6 @@ NS_BEGIN
 
 namespace NxRHI
 {
-	inline VkAttachmentLoadOp FrameBufferLoadAction2VK(EFrameBufferLoadAction action)
-	{
-		switch (action)
-		{
-			case EFrameBufferLoadAction::LoadActionDontCare:
-				return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-			case EFrameBufferLoadAction::LoadActionLoad:
-				return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_LOAD;
-			case EFrameBufferLoadAction::LoadActionClear:
-				return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR;
-			default:
-				return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		}
-	}
-	inline VkAttachmentStoreOp FrameBufferStoreAction2VK(EFrameBufferStoreAction action)
-	{
-		switch (action)
-		{
-			case EFrameBufferStoreAction::StoreActionDontCare:
-				return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE;
-			case EFrameBufferStoreAction::StoreActionStore:
-				return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE;
-			case EFrameBufferStoreAction::StoreActionMultisampleResolve:
-				return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_MAX_ENUM;
-			case EFrameBufferStoreAction::StoreActionStoreAndMultisampleResolve:
-				return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_MAX_ENUM;
-			case EFrameBufferStoreAction::StoreActionUnknown:
-				return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_MAX_ENUM;
-			default:
-				return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_MAX_ENUM;
-		}
-	}
 	VKRenderPass::VKRenderPass()
 	{
 
@@ -129,22 +97,57 @@ namespace NxRHI
 		//https://zhuanlan.zhihu.com/p/131392827
 		//https://stackoverflow.com/questions/66461389/vksubpassdependency-required-for-depth-attachment-but-not-for-color-attachment
 
-		VkSubpassDependency dependency[2]{};
-		dependency[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-		dependency[0].srcSubpass = VK_SUBPASS_EXTERNAL;
-		dependency[0].dstSubpass = 0;
-		dependency[0].srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT; //VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-		dependency[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-		dependency[0].srcAccessMask = 0;// VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;		
-		dependency[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;// VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;//VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		
-		dependency[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-		dependency[1].srcSubpass = VK_SUBPASS_EXTERNAL;
-		dependency[1].dstSubpass = 0;
-		dependency[1].srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT; //VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-		dependency[1].dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-		dependency[1].srcAccessMask = 0;// VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;		
-		dependency[1].dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;// VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;//VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		std::vector<VkSubpassDependency> dependencies;
+
+		// 1. 外部到子通道0的依赖 (渲染通道开始前)
+		VkSubpassDependency externalToSubpass = {};
+		externalToSubpass.srcSubpass = VK_SUBPASS_EXTERNAL;
+		externalToSubpass.dstSubpass = 0;
+		externalToSubpass.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		externalToSubpass.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		externalToSubpass.srcAccessMask = 0;
+		externalToSubpass.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		externalToSubpass.dependencyFlags = 0;
+		dependencies.push_back(externalToSubpass);
+
+		// 2. 子通道0的自依赖 (子通道内部同步)
+		VkSubpassDependency selfDependency = {};
+		selfDependency.srcSubpass = 0;
+		selfDependency.dstSubpass = 0;
+		selfDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		selfDependency.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		selfDependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		selfDependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		selfDependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+		dependencies.push_back(selfDependency);
+
+		// 3. 子通道0到外部的依赖 (渲染通道结束后)
+		VkSubpassDependency subpassToExternal = {};
+		subpassToExternal.srcSubpass = 0;
+		subpassToExternal.dstSubpass = VK_SUBPASS_EXTERNAL;
+		subpassToExternal.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		subpassToExternal.dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+		subpassToExternal.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		subpassToExternal.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+		subpassToExternal.dependencyFlags = 0;
+		dependencies.push_back(subpassToExternal);
+
+		//VkSubpassDependency dependency[2]{};
+		//dependency[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+		//dependency[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+		//dependency[0].dstSubpass = 0;
+		//dependency[0].srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT; //VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		//dependency[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		//dependency[0].srcAccessMask = 0;// VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;		
+		//dependency[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;// VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;//VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		//
+		//dependency[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+		//dependency[1].srcSubpass = VK_SUBPASS_EXTERNAL;
+		//dependency[1].dstSubpass = 0;
+		//dependency[1].srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT; //VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		//dependency[1].dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		//dependency[1].srcAccessMask = 0;// VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;		
+		//dependency[1].dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;// VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;//VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
 		VkRenderPassCreateInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
@@ -152,7 +155,11 @@ namespace NxRHI
 		renderPassInfo.pAttachments = &attachments[0];
 		renderPassInfo.subpassCount = 1;
 		renderPassInfo.pSubpasses = &subpass;
-		if (desc.AttachmentDepthStencil.Format != PXF_UNKNOWN)
+
+		renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
+		renderPassInfo.pDependencies = dependencies.data();
+
+		/*if (desc.AttachmentDepthStencil.Format != PXF_UNKNOWN)
 		{
 			if (desc.NumOfMRT == 0)
 			{
@@ -169,7 +176,7 @@ namespace NxRHI
 		{
 			renderPassInfo.dependencyCount = 1;
 			renderPassInfo.pDependencies = dependency;
-		}
+		}*/
 		
 
 		if (vkCreateRenderPass(device->mDevice, &renderPassInfo, device->GetVkAllocCallBacks(), &mRenderPass) != VK_SUCCESS)
@@ -512,7 +519,7 @@ namespace NxRHI
 			pDx12Texture->Desc.Height = Desc.Height;
 			pDx12Texture->mImage = swapChainImages[i];
 			pDx12Texture->GpuState = EGpuResourceState::GRS_Undefine;
-			pDx12Texture->TransitionTo(cmd, EGpuResourceState::GRS_Present);
+			FTransitionScope::Transition(cmd, pDx12Texture, EGpuResourceState::GRS_Present, false);
 
 			BackBuffers[i].CreateRtvAndSrv(device, i);
 		}

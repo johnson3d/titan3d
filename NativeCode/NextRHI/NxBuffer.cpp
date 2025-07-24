@@ -71,13 +71,13 @@ namespace NxRHI
 		return cpBuffer;
 	}
 
-	long ISrView::AddRef()
+	long ISrView::AddRef() const
 	{
 		/*if (Buffer != nullptr)
 			Buffer->AddRef();*/
 		return IGpuResource::AddRef();
 	}
-	void ISrView::Release()
+	void ISrView::Release() const
 	{
 		/*if (Buffer != nullptr)
 			Buffer->Release();*/

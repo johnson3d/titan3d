@@ -6,6 +6,7 @@
 #include "NullEvent.h"
 #include "NullInputAssembly.h"
 #include "NullFrameBuffers.h"
+#include "../NxDescriptorSet.h"
 #include "../NxEffect.h"
 
 #define new VNEW

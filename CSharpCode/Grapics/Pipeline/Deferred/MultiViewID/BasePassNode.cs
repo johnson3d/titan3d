@@ -258,74 +258,76 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
 
             using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
             {
-                var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
-                foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
+                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                using (new NxRHI.TtCmdListScope(cmdlist))
                 {
-                    if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
-                        continue;
-                    foreach (var j in i.Mesh.SubMeshes)
+                    var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
+                    for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
                     {
-                        foreach (var k in j.Atoms)
+                        passClears[i].SetDefault();
+                        passClears[i].SetClearColor(0, new Color4f(0, 0, 0, 0));
+                        if (i == (int)ERenderLayer.RL_Opaque)
+                            passClears[i].ClearFlags = ERenderPassClearFlags.CLEAR_DEPTH | ERenderPassClearFlags.CLEAR_STENCIL | ERenderPassClearFlags.CLEAR_RT0 | ERenderPassClearFlags.CLEAR_RT1;
+                        else
+                            passClears[i].ClearFlags = 0;
+                    }
+
+                    GBuffers.BuildFrameBuffers(policy);
+                    Viewports[0].TopLeftX = 0;
+                    Viewports[0].TopLeftY = 0;
+                    Viewports[0].Width = GBuffers.Viewport.Width * 0.5f;
+                    Viewports[0].Height = GBuffers.Viewport.Height * 0.5f;
+                    Viewports[0].MinDepth = GBuffers.Viewport.MinDepth;
+                    Viewports[0].MaxDepth = GBuffers.Viewport.MaxDepth;
+
+                    Viewports[1].TopLeftX = GBuffers.Viewport.Width * 0.5f;
+                    Viewports[1].TopLeftY = 0;
+                    Viewports[1].Width = Viewports[0].Width;
+                    Viewports[1].Height = Viewports[0].Height;
+                    Viewports[1].MinDepth = GBuffers.Viewport.MinDepth;
+                    Viewports[1].MaxDepth = GBuffers.Viewport.MaxDepth;
+
+                    fixed (NxRHI.FViewPort* pVp = &Viewports[0])
+                    {
+                        var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
+                        foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
                         {
-                            if (k == null || k.Material == null)
+                            if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
                                 continue;
-
-                            var layer = k.Material.RenderLayer;
-                            if (IsFilters(layer))
+                            foreach (var j in i.Mesh.SubMeshes)
                             {
-                                var cmdlist = LayerBasePass.GetCmdList(layer);
-                                var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
-                                if (drawcall != null)
+                                foreach (var k in j.Atoms)
                                 {
-                                    drawcall.BindGBuffer(camera, GBuffers);
-                                    //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+                                    if (k == null || k.Material == null)
+                                        continue;
 
-                                    cmdlist.PushGpuDraw(drawcall);
+                                    var layer = k.Material.RenderLayer;
+                                    if (IsFilters(layer))
+                                    {
+                                        var recorder = LayerBasePass.GetCmdRecorder(layer);
+                                        var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
+                                        if (drawcall != null)
+                                        {
+                                            drawcall.BindGBuffer(camera, GBuffers);
+                                            //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+
+                                            recorder.PushGpuDraw(drawcall);
+                                        }
+                                    }
                                 }
                             }
                         }
+
+                        LayerBasePass.BuildRenderPass(cmdlist, policy, 2, pVp, passClears, (int)ERenderLayer.RL_Num, GBuffers, GBuffers, "Forword:");
                     }
                 }
-
-                var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
-                for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
-                {
-                    passClears[i].SetDefault();
-                    passClears[i].SetClearColor(0, new Color4f(0, 0, 0, 0));
-                    if (i == (int)ERenderLayer.RL_Opaque)
-                        passClears[i].ClearFlags = ERenderPassClearFlags.CLEAR_DEPTH | ERenderPassClearFlags.CLEAR_STENCIL | ERenderPassClearFlags.CLEAR_RT0 | ERenderPassClearFlags.CLEAR_RT1;
-                    else
-                        passClears[i].ClearFlags = 0;
-                }
-
-                GBuffers.BuildFrameBuffers(policy);
-                Viewports[0].TopLeftX = 0;
-                Viewports[0].TopLeftY = 0;
-                Viewports[0].Width = GBuffers.Viewport.Width * 0.5f;
-                Viewports[0].Height = GBuffers.Viewport.Height * 0.5f;
-                Viewports[0].MinDepth = GBuffers.Viewport.MinDepth;
-                Viewports[0].MaxDepth = GBuffers.Viewport.MaxDepth;
-
-                Viewports[1].TopLeftX = GBuffers.Viewport.Width * 0.5f;
-                Viewports[1].TopLeftY = 0;
-                Viewports[1].Width = Viewports[0].Width;
-                Viewports[1].Height = Viewports[0].Height;
-                Viewports[1].MinDepth = GBuffers.Viewport.MinDepth;
-                Viewports[1].MaxDepth = GBuffers.Viewport.MaxDepth;
-
-                fixed (NxRHI.FViewPort* pVp = &Viewports[0])
-                {
-                    LayerBasePass.BuildRenderPass(policy, 2, pVp, passClears, (int)ERenderLayer.RL_Num, GBuffers, GBuffers, "Forword:");
-                }
+                policy.CommitCommandList(cmdlist);
             }
-
-            LayerBasePass.ExecuteCommands(policy);
         }
         public override void TickSync(TtRenderPolicy policy)
         {
             if (mOpaqueShading == null)
                 return;
-            LayerBasePass.SwapBuffer();
 
             //foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
             //{

@@ -24,6 +24,7 @@ namespace NxRHI
 		virtual void OnGpuDrawStateUpdated() override;
 		virtual void OnBindResource(const FEffectBinder* binder, FBindResource& resource) override;
 
+		virtual void BuildDrawcall(ICommandList* cmdlist) override;
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 
 		void UpdateDescriptorSets(VKCommandList* vkCmd);
@@ -34,6 +35,7 @@ namespace NxRHI
 
 		std::vector<FDescriptorSetInfo>			mDescriptorSetInfos;
 		std::vector<VkWriteDescriptorSet>		mDsWriteSets;
+		std::vector<VkDescriptorSet>			mDescriptorSets;
 	};
 
 	class VKComputeDraw : public IComputeDraw
@@ -51,6 +53,7 @@ namespace NxRHI
 
 		std::vector<FDescriptorSetInfo>			mDescriptorSetInfos;
 		std::vector<VkWriteDescriptorSet>		mDsWriteSets;
+		std::vector<VkDescriptorSet>			mDescriptorSets;
 	};
 }
 

@@ -3,7 +3,6 @@
 #include "../NxEvent.h"
 #include "VKPreHead.h"
 #include "../../Base/allocator/PagedAllocator.h"
-#include "Utility/DescriptorSetManager.h"
 
 NS_BEGIN
 
@@ -119,20 +118,9 @@ namespace NxRHI
 		virtual void SetBreakOnID(int id, bool open) override;
 
 		virtual void TickPostEvents() override;
-		virtual void BeginFrame() override
-		{
-			if (mDescriptorPoolManager)
-				mDescriptorPoolManager->BeginFrame();
-		}
-		virtual void EndFrame() override
-		{
-			if (mDescriptorPoolManager)
-				mDescriptorPoolManager->EndFrame();
-		}
 	private: 
 		void QueryDevice();
 	public:
-		AutoRef<VKDesriptorPoolManager>	mDescriptorPoolManager;
 		VkAllocationCallbacks			mAllocCallback{};
 		VkAllocationCallbacks* GetVkAllocCallBacks() {
 			return nullptr;

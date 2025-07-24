@@ -347,6 +347,13 @@ namespace NxRHI
 		((DX12GraphicDraw*)this)->BindResource(binder, result);
 		return result;
 	}
+	void DX12GraphicDraw::BuildDrawcall(ICommandList* cmdlist)
+	{
+		for (auto& i : BindResources)
+		{
+			CommitResource((DX12CommandList*)cmdlist, EShaderType::SDT_Unknown, i.first->GetValidShaderBinder(), i.second.Resource);
+		}
+	}
 	void DX12GraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
 		AUTO_SAMP("NxRHI.GraphicDraw.Commit");
@@ -380,11 +387,6 @@ namespace NxRHI
 		{
 			AUTO_SAMP("NxRHI.GraphicDraw.Commit.BindResouces");
 			BindDescriptorHeaps(device, dx12Cmd);
-		
-			for (auto& i : BindResources)
-			{
-				CommitResource((DX12CommandList*)cmdlist, EShaderType::SDT_Unknown, i.first->GetValidShaderBinder(), i.second.Resource);
-			}
 		}
 		
 		if (ViewInstanceMask != 0)
@@ -398,7 +400,7 @@ namespace NxRHI
 			ASSERT(pDrawDesc);
 			if (IndirectDrawArgsBuffer)
 			{
-				IndirectDrawArgsBuffer->TransitionTo(cmdlist, GRS_UavIndirect);
+				FTransitionScope::Transition(cmdlist, IndirectDrawArgsBuffer, GRS_UavIndirect, true);
 				if (pDrawDesc->IsDispatchMesh())
 				{
 					ASSERT(false);
@@ -565,7 +567,7 @@ namespace NxRHI
 
 		if (IndirectDispatchArgsBuffer != nullptr)
 		{
-			IndirectDispatchArgsBuffer->TransitionTo(cmdlist, GRS_UavIndirect);
+			FTransitionScope::Transition(cmdlist, IndirectDispatchArgsBuffer, GRS_UavIndirect, true);
 			auto effect = this->mEffect.UnsafeConvertTo<DX12ComputeEffect>();
 			dx12Cmd->mCurrentCmdSig = effect->GetIndirectDispatchCmdSig(device, dx12Cmd);
 			dx12Cmd->mCurrentIndirectOffset = effect->mIndirectOffset;

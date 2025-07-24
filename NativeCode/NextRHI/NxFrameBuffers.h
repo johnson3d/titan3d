@@ -11,6 +11,8 @@ namespace NxRHI
 
 	class IRenderTargetView;
 	class IDepthStencilView;
+	class IBarriersDraw;
+	class IRenderPassCopyDraw;
 	enum TR_ENUM()
 		EFrameBufferLoadAction
 	{
@@ -172,6 +174,15 @@ namespace NxRHI
 		{
 			
 		}
+		IRenderPass();
+		~IRenderPass();
+		int ActionState = 0;
+		void PushBeginBarrier(IGpuBufferData* buffer, EGpuResourceState state);
+		AutoRef<IBarriersDraw> BeginBarriers;
+
+		//Vulkan requires that the copy operation must be before beginrendering 
+		void PushBeginCopyDraw(ICopyDraw* draw);
+		AutoRef<IRenderPassCopyDraw> BeginCopyDraws;
 	};
 
 

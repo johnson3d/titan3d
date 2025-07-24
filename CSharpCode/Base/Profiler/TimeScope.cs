@@ -205,7 +205,7 @@ namespace EngineNS.Profiler
             unsafe
             {
                 mCoreObject = new v3dSampMgr(v3dSampMgr.GetThreadInstance());
-                mCoreObject.NativeSuper.AddRef();
+                mCoreObject.NativeSuper.NativeSuper.AddRef();
             }
             ThreadName = System.Threading.Thread.CurrentThread.Name;
             lock (AllThreadInstance)
@@ -226,7 +226,7 @@ namespace EngineNS.Profiler
             mCoreObject.Cleanup();
             unsafe
             {
-                mCoreObject.NativeSuper.Release();
+                mCoreObject.NativeSuper.NativeSuper.Release();
                 mCoreObject.NativePointer = IntPtr.Zero;
             }
             mInstance = null;

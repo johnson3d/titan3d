@@ -126,10 +126,10 @@ namespace NxRHI
 			return nullptr;
 		}
 
-		std::vector<AutoRef<FShaderBinder>>		CBuffers;
-		std::vector<AutoRef<FShaderBinder>>		Uavs;
-		std::vector<AutoRef<FShaderBinder>>		Srvs;
-		std::vector<AutoRef<FShaderBinder>>		Samplers;
+		std::vector<AutoRef<const FShaderBinder>>		CBuffers;
+		std::vector<AutoRef<const FShaderBinder>>		Uavs;
+		std::vector<AutoRef<const FShaderBinder>>		Srvs;
+		std::vector<AutoRef<const FShaderBinder>>		Samplers;
 		void SaveXnd(XndAttribute* pAttr);
 		bool LoadXnd(IGpuDevice * device, XndAttribute * pAttr, EShaderType stage);
 	};

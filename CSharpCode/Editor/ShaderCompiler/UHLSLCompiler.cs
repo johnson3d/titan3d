@@ -583,6 +583,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     {
                         compile_sm = $"{CP_SM_major}_{CP_SM_minor}";
                     }
+                    //var vkArgs = "-fvk-t-shift 100 0 -fvk-u-shift 200 0 -fvk-s-shift 300 0 -fvk-b-shift 0 0";
                     var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_SPIRV, bDebugShader,
                         extHlslVersion, null, asModule);// "-fspv-extension=SPV_KHR_shader_draw_parameters");
                     if (ok == false)

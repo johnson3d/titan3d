@@ -1,6 +1,6 @@
 #pragma once
-#include "../VKPreHead.h"
-#include "../../NxRHIDefine.h"
+#include "../NxDescriptorSet.h"
+#include "VKPreHead.h"
 
 NS_BEGIN
 
@@ -8,7 +8,7 @@ namespace NxRHI
 {
 	class VKFence;
 
-	class VKDescriptorPoolWrapper : public IGpuResource
+	class VkDescriptorPoolWrapper : public IGpuResource
 	{
 	public:
 		VKGpuDevice* mDeviceRef = nullptr;
@@ -24,43 +24,29 @@ namespace NxRHI
 		VkDescriptorSet Alloc(VkDescriptorSetLayout layout);
 	};
 
+	class VKGpuDevice;
 	class VKDesriptorPoolManager;
-	class VKDescriptorSetFrame : public VIUnknown
+	class VKDescriptorPool : public IDescriptorPool
 	{
 	private:
 		VKGpuDevice* mDeviceRef;
 		VKDesriptorPoolManager* mManagerRef;
-		std::vector<AutoRef<VKDescriptorPoolWrapper>> mDescriptorPools;
+		std::vector<AutoRef<VkDescriptorPoolWrapper>> mDescriptorPools;
 		int mCurrentFreePoolIndex{};
 		int GetCurrentPoolIndex();
 		int IncreaseCurrentPoolIndex();
 	public:
 		void Initialize(VKGpuDevice* device, VKDesriptorPoolManager* manager);
-		void Reset();
 		VkDescriptorSet AllocDescriptorSet(VkDescriptorSetLayout layout);
-		
-		UINT64 mFrameFenceValue = 0;
+		virtual void Reset() override;
 	};
 
-	class VKDesriptorPoolManager : public VIUnknown
+	class VKDesriptorPoolManager : public NxDesriptorPoolManager
 	{
 		VKGpuDevice* mDeviceRef;
-		std::stack<AutoRef<VKDescriptorSetFrame>> mFreeFramePools;
-		std::vector<AutoRef<VKDescriptorSetFrame>> mUsingFramePools;
-		AutoRef<VKDescriptorSetFrame> mCurrentFramePool;
-		AutoRef<VKFence> mFrameFence;
-		AutoRef<VKDescriptorSetFrame> Pop();
-		void TickRecycle();
 	public:
-		void Initialize(VKGpuDevice* device);
-		
-		VKDescriptorSetFrame* GetCurrentFramePool()
-		{
-			return mCurrentFramePool;
-		}
-		void BeginFrame();
-		
-		void EndFrame();
+		virtual void Initialize(IGpuDevice* device) override;
+		virtual IDescriptorPool* CreateDescriptorPool() override;
 	};
 }
 

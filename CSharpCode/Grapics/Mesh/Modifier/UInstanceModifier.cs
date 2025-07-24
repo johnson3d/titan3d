@@ -192,7 +192,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
             }
             GpuCullSetupDrawcall.BindUav("IndirectArgsBuffer", DrawArgsBuffer.Uav);
             //GpuCullSetupDrawcall.SetDebugName("InstanceCulling.Setup");
-            cmd.PushGpuDraw(GpuCullSetupDrawcall.mCoreObject.NativeSuper);
+            cmd.PushGpuDraw(GpuCullSetupDrawcall.mCoreObject);
 
             GpuCullShading.SetDrawcallDispatch(this, policy, GpuCullDrawcall, (uint)mdf.InstanceBuffers.InstanceBuffer.DataArray.Count, 1, 1, true);
             GpuCullDrawcall.BindCBV("cbGPUCulling", ref GPUCullingCBV);
@@ -205,13 +205,13 @@ namespace EngineNS.Graphics.Mesh.Modifier
             GpuCullDrawcall.BindUav("CullInstanceDataArray", CullingBuffer.Uav);
             GpuCullDrawcall.BindUav("IndirectArgsBuffer", DrawArgsBuffer.Uav);
             //GpuCullDrawcall.SetDebugName("InstanceCulling");
-            cmd.PushGpuDraw(GpuCullDrawcall.mCoreObject.NativeSuper);
+            cmd.PushGpuDraw(GpuCullDrawcall.mCoreObject);
 
             GpuCullFlushShading.SetDrawcallDispatch(this, policy, GpuCullFlushDrawcall, (uint)(NumOfIndirectDraw - 1), 1, 1, true);
             GpuCullFlushDrawcall.BindCBV("cbGPUCulling", ref GPUCullingCBV);
             GpuCullFlushDrawcall.BindUav("IndirectArgsBuffer", DrawArgsBuffer.Uav);
             //GpuCullFlushDrawcall.SetDebugName("InstanceCulling.Flush");
-            cmd.PushGpuDraw(GpuCullFlushDrawcall.mCoreObject.NativeSuper);
+            cmd.PushGpuDraw(GpuCullFlushDrawcall.mCoreObject);
         }
 
         //static bool bIndirect = true;

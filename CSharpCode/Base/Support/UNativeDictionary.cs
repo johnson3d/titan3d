@@ -28,7 +28,7 @@ namespace EngineNS.Support
         {
             if (mCoreObject.NativePointer != IntPtr.Zero)
             {
-                mCoreObject.NativeSuper.Release();
+                mCoreObject.NativeSuper.NativeSuper.Release();
                 mCoreObject.NativePointer = IntPtr.Zero;
             }
         }

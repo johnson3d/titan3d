@@ -50,6 +50,7 @@ namespace NxRHI
 					return nullptr;
 				}
 				tmp->mCommandBuffer = buffer;
+				tmp->mManager = this;
 				CmdAllocators.push(tmp);
 			}
 		}
@@ -352,55 +353,77 @@ namespace NxRHI
 
 		mCmdRecorder = nullptr;
 	}
-
-	bool VKCommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
+	
+	bool VKCommandList::BeginRendering(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
 	{
-		ASSERT(mCmdListState == ECmdListState::Recording);
-		mDebugName = name;
-		BeginEvent(name);
+		mCurrentFrameBuffers = fb;
+
+		AutoRef<VKCmdBeginRenderingDraw>	mBeginRenderingDraw;
+		if (mBeginRenderingDraw == nullptr)
+		{
+			mBeginRenderingDraw = MakeWeakRef(new VKCmdBeginRenderingDraw());
+			mBeginRenderingDraw->CmdList = this;
+		}
+
+		GetCmdRecorder()->UseResource(fb);
+		GetCmdRecorder()->UseResource(((VKFrameBuffers*)fb)->mFrameBuffer);
+
 		mCurRtvs.clear();
 		mCurRtvs.resize(fb->mRenderPass->Desc.NumOfMRT);
+		
+		mBeginRenderingDraw->mColorAttachments.clear();
+		auto pass = GetCurrentRenderPass();
 		for (UINT i = 0; i < fb->mRenderPass->Desc.NumOfMRT; i++)
 		{
+			VkRenderingAttachmentInfo colorAttachment = {};
+			colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
 			auto rtv = fb->mRenderTargets[i].UnsafeConvertTo<VKRenderTargetView>();
 			mCurRtvs[i] = std::make_pair(rtv->GpuResource->GpuState, rtv);
 			if (rtv != nullptr)
 			{
-				auto pDxTexture = rtv->GpuResource.UnsafeConvertTo<VKTexture>();
-				pDxTexture->TransitionTo(this, EGpuResourceState::GRS_RenderTarget);
+				FTransitionScope::Transition(this, rtv->GpuResource, EGpuResourceState::GRS_RenderTarget, false);
+				colorAttachment.imageView = rtv->mView->mImageView;
 			}
+			else
+			{
+				colorAttachment.imageView = nullptr;
+			}
+			colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+			colorAttachment.loadOp = FrameBufferLoadAction2VK(fb->mRenderPass->Desc.AttachmentMRTs[i].LoadAction);
+			colorAttachment.storeOp = FrameBufferStoreAction2VK(fb->mRenderPass->Desc.AttachmentMRTs[i].StoreAction);
+			memcpy(colorAttachment.clearValue.color.float32, &passClears->ClearColor[i], sizeof(float)*4);
+
+			mBeginRenderingDraw->mColorAttachments.push_back(colorAttachment);
 		}
+		
+		VkRenderingAttachmentInfo& depthAttachment = mBeginRenderingDraw->mDepthAttachment;
+		depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
 		if (fb->mDepthStencilView != nullptr)
 		{
 			auto dsv = fb->mDepthStencilView.UnsafeConvertTo<VKDepthStencilView>();
 			if (dsv != nullptr)
 			{
-				auto pDxTexture = dsv->GpuResource.UnsafeConvertTo<VKTexture>();
-				mCurDsv = std::make_pair(pDxTexture->GpuState, dsv);
-				pDxTexture->TransitionTo(this, EGpuResourceState::GRS_DepthStencil);
+				FTransitionScope::Transition(this, dsv->GpuResource, EGpuResourceState::GRS_DepthStencil, false);
+				pass->PushBeginBarrier(dsv->GpuResource, EGpuResourceState::GRS_DepthStencil);
+				depthAttachment.imageView = dsv->mView->mImageView;
 			}
+			depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+			depthAttachment.loadOp = FrameBufferLoadAction2VK(fb->mRenderPass->Desc.AttachmentDepthStencil.LoadAction);;
+			depthAttachment.storeOp = FrameBufferStoreAction2VK(fb->mRenderPass->Desc.AttachmentDepthStencil.StoreAction);;
 		}
-		mCurrentFrameBuffers = fb;
-		GetCmdRecorder()->UseResource(fb);
-		GetCmdRecorder()->UseResource(((VKFrameBuffers*)fb)->mFrameBuffer);
 
-		auto pVKFrameBuffers = ((VKFrameBuffers*)fb);
-		VkRenderPassBeginInfo renderPassInfo{};
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		auto pRenderPass = fb->mRenderPass.UnsafeConvertTo<VKRenderPass>();
-		renderPassInfo.renderPass = pRenderPass->mRenderPass;
-		renderPassInfo.framebuffer = pVKFrameBuffers->mFrameBuffer->mFrameBuffer;
-		if (renderPassInfo.framebuffer == nullptr)
-			return false;
-
-		//UINT width = pVKFrameBuffers->mRenderTargets[0]->Desc.Width;
-		//UINT height = pVKFrameBuffers->mRenderTargets[0]->Desc.Height;
+		else
+		{
+			depthAttachment.imageView = nullptr;
+		}
+		VkRenderingInfo& renderingInfo = mBeginRenderingDraw->mRenderingInfo;
+		renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
 		UINT width = 0;
 		UINT height = 0;
 		if (fb->mRenderPass->Desc.NumOfMRT > 0)
 		{
-			width = pVKFrameBuffers->mRenderTargets[0]->Desc.Width;
-			height = pVKFrameBuffers->mRenderTargets[0]->Desc.Height;
+			width = fb->mRenderTargets[0]->Desc.Width;
+			height = fb->mRenderTargets[0]->Desc.Height;
 		}
 		else if (fb->mDepthStencilView != nullptr)
 		{
@@ -411,32 +434,143 @@ namespace NxRHI
 		{
 			ASSERT(false);
 		}
-		renderPassInfo.renderArea.offset = { 0, 0 };
-		renderPassInfo.renderArea.extent.width = width;
-		renderPassInfo.renderArea.extent.height = height;
+		renderingInfo.renderArea = { {0, 0}, {width, height} };
+		renderingInfo.layerCount = 1;
+		renderingInfo.colorAttachmentCount = (UINT)mBeginRenderingDraw->mColorAttachments.size();
+		renderingInfo.pColorAttachments = mBeginRenderingDraw->mColorAttachments.data();
+		renderingInfo.pDepthAttachment = &depthAttachment;
 
-		VkClearValue clearValues[9]{};
-		int NumOfClear = pRenderPass->Desc.NumOfMRT;
-		if (passClears != nullptr)
-		{
-			for (int i = 0; i < NumOfClear; i++)
-			{
-				memcpy(&clearValues[i].color, &passClears->ClearColor[i], sizeof(v3dxColor4));
-			}
-			if (pRenderPass->Desc.AttachmentDepthStencil.Format != PXF_UNKNOWN)
-			{
-				clearValues[NumOfClear].depthStencil = { passClears->DepthClearValue, passClears->StencilClearValue };
-				NumOfClear++;
-			}
-		}
-
-		renderPassInfo.clearValueCount = NumOfClear;// pRenderPass->mDesc.NumOfMRT;
-		renderPassInfo.pClearValues = clearValues;
-
-		//BeginEvent(debugName);
-		vkCmdBeginRenderPass(GetVKCmdRecorder()->mCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+		this->PushGpuDrawImpl(pass->BeginCopyDraws);
+		this->PushGpuDrawImpl(pass->BeginBarriers);
+		this->PushGpuDrawImpl(mBeginRenderingDraw);
+		//vkCmdBeginRendering(GetVKCmdRecorder()->mCommandBuffer, &renderingInfo);
 
 		return true;
+	}
+	void VKCommandList::VKCmdBeginRenderingDraw::Commit(ICommandList* cmdlist, bool bRefResource)
+	{
+		vkCmdBeginRendering(CmdList->GetVKCmdRecorder()->mCommandBuffer, &mRenderingInfo);
+	}
+	void VKCommandList::EndRendering()
+	{
+		vkCmdEndRendering(GetVKCmdRecorder()->mCommandBuffer);
+		
+		auto pass = GetCurrentRenderPass();
+
+		mCurrentFrameBuffers = nullptr;
+	}
+	bool VKCommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
+	{
+		if (true)
+		{
+			return BeginRendering(fb, passClears, name);
+		}
+		else
+		{
+			ASSERT(mCmdListState == ECmdListState::Recording);
+			mDebugName = name;
+			BeginEvent(name);
+			mCurRtvs.clear();
+			mCurRtvs.resize(fb->mRenderPass->Desc.NumOfMRT);
+			
+			mCurrentFrameBuffers = fb;
+			auto pass = GetCurrentRenderPass();
+			for (UINT i = 0; i < fb->mRenderPass->Desc.NumOfMRT; i++)
+			{
+				auto rtv = fb->mRenderTargets[i].UnsafeConvertTo<VKRenderTargetView>();
+				mCurRtvs[i] = std::make_pair(rtv->GpuResource->GpuState, rtv);
+				if (rtv != nullptr)
+				{
+					FTransitionScope::Transition(this, rtv->GpuResource, EGpuResourceState::GRS_RenderTarget, false);
+				}
+			}
+			if (fb->mDepthStencilView != nullptr)
+			{
+				auto dsv = fb->mDepthStencilView.UnsafeConvertTo<VKDepthStencilView>();
+				if (dsv != nullptr)
+				{
+					FTransitionScope::Transition(this, dsv->GpuResource, EGpuResourceState::GRS_DepthStencil, false);
+				}
+			}
+			
+			GetCmdRecorder()->UseResource(fb);
+			GetCmdRecorder()->UseResource(((VKFrameBuffers*)fb)->mFrameBuffer);
+
+			auto pVKFrameBuffers = ((VKFrameBuffers*)fb);
+			VkRenderPassBeginInfo renderPassInfo{};
+			renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+			auto pRenderPass = fb->mRenderPass.UnsafeConvertTo<VKRenderPass>();
+			renderPassInfo.renderPass = pRenderPass->mRenderPass;
+			renderPassInfo.framebuffer = pVKFrameBuffers->mFrameBuffer->mFrameBuffer;
+			if (renderPassInfo.framebuffer == nullptr)
+				return false;
+
+			//UINT width = pVKFrameBuffers->mRenderTargets[0]->Desc.Width;
+			//UINT height = pVKFrameBuffers->mRenderTargets[0]->Desc.Height;
+			UINT width = 0;
+			UINT height = 0;
+			if (fb->mRenderPass->Desc.NumOfMRT > 0)
+			{
+				width = pVKFrameBuffers->mRenderTargets[0]->Desc.Width;
+				height = pVKFrameBuffers->mRenderTargets[0]->Desc.Height;
+			}
+			else if (fb->mDepthStencilView != nullptr)
+			{
+				width = fb->mDepthStencilView->Desc.Width;
+				height = fb->mDepthStencilView->Desc.Height;
+			}
+			else
+			{
+				ASSERT(false);
+			}
+			renderPassInfo.renderArea.offset = { 0, 0 };
+			renderPassInfo.renderArea.extent.width = width;
+			renderPassInfo.renderArea.extent.height = height;
+
+			VkClearValue clearValues[9]{};
+			int NumOfClear = pRenderPass->Desc.NumOfMRT;
+			if (passClears != nullptr)
+			{
+				for (int i = 0; i < NumOfClear; i++)
+				{
+					memcpy(&clearValues[i].color, &passClears->ClearColor[i], sizeof(v3dxColor4));
+				}
+				if (pRenderPass->Desc.AttachmentDepthStencil.Format != PXF_UNKNOWN)
+				{
+					clearValues[NumOfClear].depthStencil = { passClears->DepthClearValue, passClears->StencilClearValue };
+					NumOfClear++;
+				}
+			}
+
+			renderPassInfo.clearValueCount = NumOfClear;// pRenderPass->mDesc.NumOfMRT;
+			renderPassInfo.pClearValues = clearValues;
+
+			//BeginEvent(debugName);
+			this->PushGpuDrawImpl(pass->BeginBarriers);
+			vkCmdBeginRenderPass(GetVKCmdRecorder()->mCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+			//vkCmdBeginRendering()
+
+			return true;
+		}
+	}
+	void VKCommandList::EndPass()
+	{
+		if (true)
+		{
+			EndRendering();
+		}
+		else
+		{
+			ASSERT(mCurrentFrameBuffers != nullptr);
+			ASSERT(mCmdListState == ECmdListState::Recording);
+
+			vkCmdEndRenderPass(GetVKCmdRecorder()->mCommandBuffer);
+
+			auto pass = GetCurrentRenderPass();
+			mCurrentFrameBuffers = nullptr;
+			
+			EndEvent();
+		}
 	}
 	void VKCommandList::SetViewport(UINT Num, const FViewPort* pViewports)
 	{
@@ -510,28 +644,7 @@ namespace NxRHI
 			return;
 		vkCmdSetScissor(GetVKCmdRecorder()->mCommandBuffer, 0, (UINT)mCurrentScissorRects.size(), &mCurrentScissorRects[0]);
 	}
-	void VKCommandList::EndPass()
-	{
-		ASSERT(mCurrentFrameBuffers != nullptr);
-		ASSERT(mCmdListState == ECmdListState::Recording);
-
-		vkCmdEndRenderPass(GetVKCmdRecorder()->mCommandBuffer);
-		mCurrentFrameBuffers = nullptr;
-		for (auto& i : mCurRtvs)
-		{
-			auto pDxTexture = i.second->GpuResource.UnsafeConvertTo<VKTexture>();
-			pDxTexture->TransitionTo(this, i.first);
-		}
-		mCurRtvs.clear();
-		if (mCurDsv.second != nullptr)
-		{
-			auto pDxTexture = mCurDsv.second->GpuResource.UnsafeConvertTo<VKTexture>();
-			pDxTexture->TransitionTo(this, mCurDsv.first);
-			mCurDsv.second = nullptr;
-		}
-
-		EndEvent();
-	}
+	
 	void VKCommandList::BeginEvent(const char* info)
 	{
 		ASSERT(mCmdListState == ECmdListState::Recording);
@@ -573,21 +686,15 @@ namespace NxRHI
 		if (view == nullptr)
 			return;
 		view->GetResourceState()->SetAccessFrame(IWeakRefObject::EngineCurrentFrame);
-		ASSERT(view->Buffer->GetGpuResourceState() != EGpuResourceState::GRS_RenderTarget);
 
-		if (type == EShaderType::SDT_PixelShader)
-			view->Buffer->TransitionTo(this, (EGpuResourceState)(EGpuResourceState::GRS_SrvPS));
-		else if (type == EShaderType::SDT_VertexShader)
-			view->Buffer->TransitionTo(this, (EGpuResourceState)(EGpuResourceState::GRS_GenericRead));
-		else
-			view->Buffer->TransitionTo(this, (EGpuResourceState)(EGpuResourceState::GRS_GenericRead));
+		FTransitionScope::Transition(this, view->Buffer, EGpuResourceState::GRS_GenericRead, true);
 	}
 	void VKCommandList::SetUav(EShaderType type, const FShaderBinder* binder, IUaView* view)
 	{
 		ASSERT(mCmdListState == ECmdListState::Recording);
 		if (view == nullptr)
 			return;
-		view->Buffer->TransitionTo(this, EGpuResourceState::GRS_Uav);
+		FTransitionScope::Transition(this, view->Buffer, EGpuResourceState::GRS_Uav, true);
 	}
 	void VKCommandList::SetSampler(EShaderType type, const FShaderBinder* binder, ISampler* sampler)
 	{
@@ -878,6 +985,60 @@ namespace NxRHI
 			return;
 		}
 	}
+	void GpuResourceStateToVKAccessAndPipeline2(EGpuResourceState state, VkAccessFlags2& outAccessFlags, VkPipelineStageFlagBits2& outPipelineStages)
+	{
+		outPipelineStages = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+		switch (state)
+		{
+		case EngineNS::NxRHI::GRS_Undefine:
+			outAccessFlags = VK_ACCESS_2_NONE;
+			outPipelineStages = VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT;
+			return;
+		case EngineNS::NxRHI::GRS_Present:
+		case EngineNS::NxRHI::GRS_SrvPS:
+			outAccessFlags = VK_ACCESS_2_SHADER_READ_BIT;
+			outPipelineStages = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+			return;
+		case EngineNS::NxRHI::GRS_GenericRead:
+			outAccessFlags = VK_ACCESS_2_SHADER_READ_BIT;
+			outPipelineStages = (VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
+			return;
+		case EngineNS::NxRHI::GRS_Uav:
+			outAccessFlags = (VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_SHADER_WRITE_BIT);
+			outPipelineStages = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+			return;
+		case EngineNS::NxRHI::GRS_UavIndirect:
+			outAccessFlags = (VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT);
+			outPipelineStages = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
+			return;
+		case EngineNS::NxRHI::GRS_RenderTarget:
+			outAccessFlags = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+			outPipelineStages = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+			return;
+		case EngineNS::NxRHI::GRS_DepthStencil:
+			outAccessFlags = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+			outPipelineStages = (VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT);
+			return;
+		case EngineNS::NxRHI::GRS_DepthRead:
+		case EngineNS::NxRHI::GRS_StencilRead:
+		case EngineNS::NxRHI::GRS_DepthStencilRead:
+			outAccessFlags = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+			outPipelineStages = (VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT);
+			return;
+		case EngineNS::NxRHI::GRS_CopySrc:
+			outAccessFlags = VK_ACCESS_2_TRANSFER_READ_BIT;
+			outPipelineStages = (VK_PIPELINE_STAGE_2_TRANSFER_BIT | VK_PIPELINE_STAGE_2_ACCELERATION_STRUCTURE_BUILD_BIT_KHR);
+			return;
+		case EngineNS::NxRHI::GRS_CopyDst:
+			outAccessFlags = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+			outPipelineStages = (VK_PIPELINE_STAGE_2_TRANSFER_BIT | VK_PIPELINE_STAGE_2_ACCELERATION_STRUCTURE_BUILD_BIT_KHR);
+			return;
+		default:
+			outAccessFlags = VK_ACCESS_2_SHADER_READ_BIT;
+			outPipelineStages = (VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
+			return;
+		}
+	}
 	void VKCommandList::SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess)
 	{
 		VkMemoryBarrier mb{};
@@ -927,41 +1088,74 @@ namespace NxRHI
 	}
 	void VKCommandList::SetTextureBarrier(ITexture* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
 	{
-		VkImageMemoryBarrier barrier{};
-		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		barrier.oldLayout = GpuStateToVKImageLayout(srcAccess);
-		barrier.newLayout = GpuStateToVKImageLayout(dstAccess);
-		//barrier.srcAccessMask
-
-		if (barrier.oldLayout != barrier.newLayout)
+		auto oldLayout = GpuStateToVKImageLayout(srcAccess);
+		auto newLayout = GpuStateToVKImageLayout(dstAccess);
+		if (oldLayout != newLayout)
 		{
-			barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			barrier.image = (VkImage)pResource->GetHWBuffer();
+			if (false)
+			{
+				VkImageMemoryBarrier barrier{};
+				barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+				barrier.oldLayout = oldLayout;
+				barrier.newLayout = newLayout;
+				barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+				barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+				barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+				barrier.image = (VkImage)pResource->GetHWBuffer();
+				barrier.subresourceRange.baseArrayLayer = 0;
+				barrier.subresourceRange.layerCount = pResource->Desc.ArraySize;
+				barrier.subresourceRange.baseMipLevel = 0;//All
+				barrier.subresourceRange.levelCount = pResource->Desc.MipLevels;
+				
+				if (pResource->Desc.BindFlags & EBufferType::BFT_SRV)
+					barrier.subresourceRange.aspectMask = FormatToVKImageAspectFlags(pResource->Desc.Format, true, false);
+				else
+					barrier.subresourceRange.aspectMask = FormatToVKImageAspectFlags(pResource->Desc.Format, true, true);
+				
+				VkPipelineStageFlagBits srcStages, dstStages;
+				GpuResourceStateToVKAccessAndPipeline(srcAccess, barrier.srcAccessMask, srcStages);
+				GpuResourceStateToVKAccessAndPipeline(dstAccess, barrier.dstAccessMask, dstStages);
 
-			if (pResource->Desc.BindFlags & EBufferType::BFT_SRV)
-				barrier.subresourceRange.aspectMask = FormatToVKImageAspectFlags(pResource->Desc.Format, true, false);
+				vkCmdPipelineBarrier(
+					GetVKCmdRecorder()->mCommandBuffer,
+					srcStages, //VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+					dstStages, //VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,//VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+					VK_DEPENDENCY_BY_REGION_BIT,
+					0, nullptr,
+					0, nullptr,
+					1, &barrier
+				);
+			}
 			else
-				barrier.subresourceRange.aspectMask = FormatToVKImageAspectFlags(pResource->Desc.Format, true, true);
-			barrier.subresourceRange.baseArrayLayer = 0;
-			barrier.subresourceRange.layerCount = pResource->Desc.ArraySize;
-			barrier.subresourceRange.baseMipLevel = 0;//All
-			barrier.subresourceRange.levelCount = pResource->Desc.MipLevels;
+			{
+				VkImageMemoryBarrier2 barrier2 = {};
+				barrier2.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+				barrier2.oldLayout = oldLayout;
+				barrier2.newLayout = newLayout;
+				barrier2.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+				barrier2.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+				barrier2.image = (VkImage)pResource->GetHWBuffer();
+				barrier2.subresourceRange.baseArrayLayer = 0;
+				barrier2.subresourceRange.layerCount = pResource->Desc.ArraySize;
+				barrier2.subresourceRange.baseMipLevel = 0;//All
+				barrier2.subresourceRange.levelCount = pResource->Desc.MipLevels;
 
-			VkPipelineStageFlagBits srcStages, dstStages;
-			GpuResourceStateToVKAccessAndPipeline(srcAccess, barrier.srcAccessMask, srcStages);
-			GpuResourceStateToVKAccessAndPipeline(dstAccess, barrier.dstAccessMask, dstStages);
+				if (pResource->Desc.BindFlags & EBufferType::BFT_SRV)
+					barrier2.subresourceRange.aspectMask = FormatToVKImageAspectFlags(pResource->Desc.Format, true, false);
+				else
+					barrier2.subresourceRange.aspectMask = FormatToVKImageAspectFlags(pResource->Desc.Format, true, true);
 
-			vkCmdPipelineBarrier(
-				GetVKCmdRecorder()->mCommandBuffer,
-				srcStages, //VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-				dstStages, //VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,//VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-				0,
-				0, nullptr,
-				0, nullptr,
-				1, &barrier
-			);
+				GpuResourceStateToVKAccessAndPipeline2(srcAccess, barrier2.srcAccessMask, barrier2.srcStageMask);
+				GpuResourceStateToVKAccessAndPipeline2(dstAccess, barrier2.dstAccessMask, barrier2.dstStageMask);
+				
+				VkDependencyInfo dependencyInfo = {};
+				dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+				dependencyInfo.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT; 
+				dependencyInfo.imageMemoryBarrierCount = 1;
+				dependencyInfo.pImageMemoryBarriers = &barrier2;
+
+				vkCmdPipelineBarrier2(GetVKCmdRecorder()->mCommandBuffer, &dependencyInfo);
+			}
 		}
 	}
 	//UINT64 VKCommandList::SignalFence(IFence* fence, UINT64 value, IEvent* evt)
@@ -997,10 +1191,8 @@ namespace NxRHI
 	//}
 	void VKCommandList::CopyBufferRegion(IBuffer* target, UINT64 DstOffset, IBuffer* src, UINT64 SrcOffset, UINT64 Size)
 	{
-		auto tarSave = target->GetGpuResourceState();
-		target->TransitionTo(this, EGpuResourceState::GRS_CopyDst);
-		auto srcSave = src->GetGpuResourceState();
-		src->TransitionTo(this, EGpuResourceState::GRS_CopySrc);
+		GetCmdRecorder()->UseResource(target);
+		GetCmdRecorder()->UseResource(src);
 
 		VkBufferCopy copyRegion{};
 		copyRegion.srcOffset = SrcOffset;
@@ -1008,17 +1200,11 @@ namespace NxRHI
 		copyRegion.size = Size;
 
 		vkCmdCopyBuffer(GetVKCmdRecorder()->mCommandBuffer, (VkBuffer)src->GetHWBuffer(), (VkBuffer)target->GetHWBuffer(), 1, &copyRegion);
-
-		target->TransitionTo(this, tarSave);
-		src->TransitionTo(this, srcSave);
 	}
 	void VKCommandList::CopyTextureRegion(ITexture* target, UINT tarSubRes, UINT DstX, UINT DstY, UINT DstZ, ITexture* source, UINT srcSubRes, const FSubresourceBox* box)
 	{
-		auto tarSave = target->GetGpuResourceState();
-		target->TransitionTo(this, EGpuResourceState::GRS_CopyDst);
-		auto srcSave = source->GetGpuResourceState();
-
-		source->TransitionTo(this, EGpuResourceState::GRS_CopySrc);
+		GetCmdRecorder()->UseResource(target);
+		GetCmdRecorder()->UseResource(source);
 		
 		VkImageCopy region{};
 		// We copy the image aspect, layer 0, mip 0:
@@ -1044,18 +1230,11 @@ namespace NxRHI
 		region.dstOffset = { (int)DstX, (int)DstY, (int)DstZ };
 
 		vkCmdCopyImage(GetVKCmdRecorder()->mCommandBuffer, (VkImage)source->GetHWBuffer(), ((VKTexture*)source)->GetImageLayout(), (VkImage)target->GetHWBuffer(), ((VKTexture*)target)->GetImageLayout(), 1, &region);
-		
-		target->TransitionTo(this, tarSave);
-		source->TransitionTo(this, srcSave);
 	}
 	void VKCommandList::CopyBufferToTexture(ITexture* target, UINT subRes, IBuffer* src, const FSubResourceFootPrint* footprint)
 	{
-		auto tarSave = target->GetGpuResourceState();
-		target->TransitionTo(this, EGpuResourceState::GRS_CopyDst);
-
-		auto srcSave = src->GetGpuResourceState();
-		ASSERT(srcSave != EGpuResourceState::GRS_Undefine);
-		src->TransitionTo(this, EGpuResourceState::GRS_CopySrc);
+		GetCmdRecorder()->UseResource(target);
+		GetCmdRecorder()->UseResource(src);
 
 		VkBufferImageCopy region{};
 		region.imageSubresource.baseArrayLayer = (UINT)subRes / target->Desc.MipLevels;
@@ -1069,18 +1248,11 @@ namespace NxRHI
 		region.imageExtent = { footprint->Width, footprint->Height, footprint->Depth };
 
 		vkCmdCopyBufferToImage(GetVKCmdRecorder()->mCommandBuffer, (VkBuffer)src->GetHWBuffer(), (VkImage)target->GetHWBuffer(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
-
-		target->TransitionTo(this, tarSave);
-		src->TransitionTo(this, srcSave);
 	}
 	void VKCommandList::CopyTextureToBuffer(IBuffer* target, const FSubResourceFootPrint* footprint, ITexture* source, UINT subRes)
 	{
-		auto tarSave = target->GetGpuResourceState();
-		target->TransitionTo(this, EGpuResourceState::GRS_CopyDst);
-
-		auto srcSave = source->GetGpuResourceState();
-		ASSERT(srcSave != EGpuResourceState::GRS_Undefine);
-		source->TransitionTo(this, EGpuResourceState::GRS_CopySrc);
+		GetCmdRecorder()->UseResource(target);
+		GetCmdRecorder()->UseResource(source);
 		
 		VkBufferImageCopy region{};
 		region.imageSubresource.baseArrayLayer = (UINT)subRes / source->Desc.MipLevels;
@@ -1098,9 +1270,6 @@ namespace NxRHI
 		auto device = (VKGpuDevice*)mDevice.GetPtr();
 		vkGetImageMemoryRequirements(device->mDevice, vkSource->mImage, &memRequirements);*/
 		vkCmdCopyImageToBuffer(GetVKCmdRecorder()->mCommandBuffer, vkSource->mImage, vkSource->GetImageLayout(), (VkBuffer)target->GetHWBuffer(), 1, &region);
-
-		target->TransitionTo(this, tarSave);
-		source->TransitionTo(this, srcSave);
 	}
 }
 

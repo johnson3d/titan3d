@@ -97,6 +97,19 @@ namespace EngineNS.Graphics.Pipeline.Common
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist))
             {
+                cmdlist.SetViewport(in GBuffers.Viewport);
+                FScissorRect scissor = new FScissorRect();
+                scissor.MinX = 0;
+                scissor.MinY = 0;
+                scissor.MaxX = (int)GBuffers.Viewport.Width;
+                scissor.MaxY = (int)GBuffers.Viewport.Height;
+                cmdlist.SetScissor(in scissor);
+                var passClears = new NxRHI.FRenderPassClears();
+                passClears.SetDefault();
+                passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));
+                passClears.ClearFlags = ERenderPassClearFlags.CLEAR_NONE;
+                GBuffers.BuildFrameBuffers(policy);
+                cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, DebugName);
                 var hud = policy.ViewportSlate?.HUD;
                 if (hud != null)
                 {
@@ -119,24 +132,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                         }
                     }
                 }
-
-                {
-                    cmdlist.SetViewport(in GBuffers.Viewport);
-                    FScissorRect scissor = new FScissorRect();
-                    scissor.MinX = 0;
-                    scissor.MinY = 0;
-                    scissor.MaxX = (int)GBuffers.Viewport.Width;
-                    scissor.MaxY = (int)GBuffers.Viewport.Height;
-                    cmdlist.SetScissor(in scissor);
-                    var passClears = new NxRHI.FRenderPassClears();
-                    passClears.SetDefault();
-                    passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));
-                    passClears.ClearFlags = ERenderPassClearFlags.CLEAR_NONE;
-                    GBuffers.BuildFrameBuffers(policy);
-                    cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, DebugName);
-                    cmdlist.FlushDraws();
-                    cmdlist.EndPass();
-                }
+                cmdlist.FlushDraws();
+                cmdlist.EndPass();
             }
 
             policy.CommitCommandList(cmdlist);
