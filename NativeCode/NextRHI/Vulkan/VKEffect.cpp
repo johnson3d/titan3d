@@ -57,13 +57,12 @@ namespace NxRHI
 	}
 	VKLayoutWrapper::~VKLayoutWrapper()
 	{
-		auto device = mDeviceRef;
-		if (device == nullptr)
+		if (IGpuDevice::IsFinalized())
 			return;
 
 		if (mLayout)
 		{
-			vkDestroyDescriptorSetLayout(device->mDevice, mLayout, device->GetVkAllocCallBacks());
+			vkDestroyDescriptorSetLayout(mDeviceRef->mDevice, mLayout, mDeviceRef->GetVkAllocCallBacks());
 			mLayout = nullptr;
 		}
 	}

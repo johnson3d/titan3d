@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -324,14 +325,26 @@ namespace EngineNS.NxRHI
     public struct TtCmdListScope : IDisposable
     {
         TtCommandList mCmdList;
-        public TtCmdListScope(TtCommandList cmdlist)
+        public TtCmdListScope(TtCommandList cmdlist, string name)
         {
+            if (name == null)
+            {
+                var stackTrace = new StackTrace();
+                var method = stackTrace.GetFrame(1)?.GetMethod();
+                if (method != null)
+                {
+                    name = method.DeclaringType.FullName + "." + method.Name;
+                }
+            }
             mCmdList = cmdlist;
             mCmdList.BeginCommand();
+            mCmdList.BeginEvent(name);
         }
         public void Dispose()
         {
+            mCmdList.EndEvent();
             mCmdList.EndCommand();
+            
             mCmdList = null;
         }
     }

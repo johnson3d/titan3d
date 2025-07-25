@@ -2,7 +2,7 @@
 #define __VARBASE_PERCAMERA_SHADERINC__
 #include "../Inc/GlobalDefine.cginc"
 
-VK_BIND(0) cbuffer cbPerCamera DX_BIND_B(0)
+cbuffer cbPerCamera DX_BIND_B(0)
 {
 	matrix CameraViewMatrix;
 	matrix CameraViewInverse;

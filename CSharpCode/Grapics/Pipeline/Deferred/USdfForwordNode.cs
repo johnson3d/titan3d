@@ -225,7 +225,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
             {
                 var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-                using (new NxRHI.TtCmdListScope(cmdlist))
+                using (new NxRHI.TtCmdListScope(cmdlist, "Sdf"))
                 {
                     var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
                     for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
@@ -268,7 +268,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                     LayerBasePass.BuildRenderPass(cmdlist, policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GBuffers, "Forword:");
                 }
-                policy.CommitCommandList(cmdlist);
+                policy.CommitCommandList(cmdlist, "Sdf");
             }
         }
         public override void TickSync(TtRenderPolicy policy)

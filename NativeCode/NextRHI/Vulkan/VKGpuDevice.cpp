@@ -132,6 +132,9 @@ namespace NxRHI
 			auto pLayer = FindLayer("VK_LAYER_RENDERDOC_Capture");
 			if (pLayer != nullptr)
 			{
+				//RenderDoc's layer should NEVER be activated manually. Do not include it in vkCreateInstance's instance layers.
+				//Vulkan: RenderDoc's layer should NEVER be activated manually. Do not include it in vkCreateInstance's instance layers.
+
 				//mValidationLayers.push_back("VK_LAYER_RENDERDOC_Capture");
 			}
 		}

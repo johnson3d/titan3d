@@ -5,7 +5,7 @@
 #include "../Inc/LightCommon.cginc"
 #include "../Inc/Math.cginc"
 
-VK_BIND(1) cbuffer cbPerViewport DX_BIND_B(1)
+cbuffer cbPerViewport DX_BIND_B(1)
 {	
     FDirLight DirLight;
 	

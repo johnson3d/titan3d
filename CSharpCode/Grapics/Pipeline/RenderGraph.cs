@@ -367,7 +367,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new Profiler.TimeScopeHelper(ScopeTickLogic))
-            using (new NxRHI.TtCmdListScope(cmdlist))
+            using (new NxRHI.TtCmdListScope(cmdlist, "RenderGraphFrame"))
             {
                 if (NodeLayers != null)
                 {
@@ -407,7 +407,7 @@ namespace EngineNS.Graphics.Pipeline
 
                 mTempTryReleaseLinkers.Clear();
             }
-            ((TtRenderPolicy)this).CommitCommandList(cmdlist, "Frame");
+            ((TtRenderPolicy)this).CommitCommandList(cmdlist, "RenderGraphFrame");
         }
         public virtual void TickSync()
         {

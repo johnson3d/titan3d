@@ -168,6 +168,7 @@ namespace NxRHI
 			VKCommandList* CmdList;
 			std::vector<VkRenderingAttachmentInfo> mColorAttachments;
 			VkRenderingAttachmentInfo mDepthAttachment;
+			VkRenderingAttachmentInfo mStencilAttachment;
 			VkRenderingInfo mRenderingInfo = {};
 
 			virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;

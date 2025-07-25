@@ -2,7 +2,7 @@
 #define __VARBASE_PERMESH_SHADERINC__
 #include "../Inc/GlobalDefine.cginc"
 
-VK_BIND(5) cbuffer cbPerMesh DX_BIND_B(5)
+cbuffer cbPerMesh DX_BIND_B(5)
 {
 	matrix WorldMatrix;
 	matrix WorldMatrixInverse;

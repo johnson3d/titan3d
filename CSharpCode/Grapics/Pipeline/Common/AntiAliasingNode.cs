@@ -347,12 +347,12 @@ namespace EngineNS.Graphics.Pipeline.Common
                 return;
 
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmdlist))
+            using (new NxRHI.TtCmdListScope(cmdlist, "AA"))
             {
                 CopyAttachBuff(ResultPinOut, PreColor, mCopyColorDrawcall, cmdlist);
                 cmdlist.FlushDraws();
             }
-            policy.CommitCommandList(cmdlist);
+            policy.CommitCommandList(cmdlist, "AA");
         }
         public override void TickSync(TtRenderPolicy policy)
         {

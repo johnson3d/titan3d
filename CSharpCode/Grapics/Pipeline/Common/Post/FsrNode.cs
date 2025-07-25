@@ -227,7 +227,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             var dispatchY = MathHelper.Roundup(UpSamplePinOut.Attachement.Height, threadGroupWorkRegionDim);
 
             var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmd))
+            using (new NxRHI.TtCmdListScope(cmd, "Fsr"))
             {
                 UpSampleShadingEnv.SetDrawcallDispatch(this, policy, UpSampleDrawcall, dispatchX,
                             dispatchY, 1, false);
@@ -239,7 +239,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 cmd.PushGpuDraw(RCASDrawcall);
                 cmd.FlushDraws();
             }
-            policy.CommitCommandList(cmd);
+            policy.CommitCommandList(cmd, "Fsr");
         }
         private static float ARcpF1(float v)
         {

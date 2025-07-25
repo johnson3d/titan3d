@@ -33,6 +33,7 @@ struct FRasterTri
 
 ByteAddressBuffer VisibleClusterBuffer;
 RWByteAddressBuffer IndirectArgBuffer;
+VK_IMAGE(rgba8)
 RWTexture2D<float4> OutputQuarkTexture;
 
 struct FShadingStruct

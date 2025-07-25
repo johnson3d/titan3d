@@ -263,7 +263,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             mBasePassRecorder.ResetGpuDraws();
             mBackgroundPassRecorder.ResetGpuDraws();
 
-            using (new NxRHI.TtCmdListScope(cmdlist))
+            using (new NxRHI.TtCmdListScope(cmdlist, "DefferredBassPass"))
             {
                 using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
                 {
@@ -334,7 +334,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                     scissor.MaxX = (int)GBuffers.Viewport.Width;
                     scissor.MaxY = (int)GBuffers.Viewport.Height;
                     cmdlist.SetScissor(in scissor);
-                    cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Background.ToString());
+                    cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, "RL_Background");
                     cmdlist.AppendDraws(mBackgroundPassRecorder);
                     cmdlist.FlushDraws();
                     cmdlist.EndPass();
@@ -342,14 +342,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                     cmdlist.SetViewport(in GBuffers.Viewport);
                     cmdlist.SetScissor(in scissor);
                     passClears.ClearFlags = (NxRHI.ERenderPassClearFlags)0;
-                    cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
+                    cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, "RL_Opaque");
                     cmdlist.AppendDraws(mBasePassRecorder);
                     cmdlist.FlushDraws();
                     cmdlist.EndPass();
                 }
             }
 
-            policy.CommitCommandList(cmdlist, "DSNodeBase");
+            policy.CommitCommandList(cmdlist, "DefferredBassPass");
 
             mBasePassRecorder.ResetGpuDraws();
             mBackgroundPassRecorder.ResetGpuDraws();

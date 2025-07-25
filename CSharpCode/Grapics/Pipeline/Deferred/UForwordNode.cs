@@ -233,7 +233,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                 GBuffers.BuildFrameBuffers(policy);
                 var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-                using (new NxRHI.TtCmdListScope(cmdlist))
+                using (new NxRHI.TtCmdListScope(cmdlist, "Forword"))
                 {
                     var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
                     foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
@@ -266,7 +266,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                     LayerBasePass.BuildRenderPass(cmdlist, policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GBuffers, "Forword:");
                 }
 
-                policy.CommitCommandList(cmdlist);
+                policy.CommitCommandList(cmdlist, "Forword");
             }
         }
         public override void TickSync(TtRenderPolicy policy)
@@ -453,7 +453,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 GBuffers.BuildFrameBuffers(policy);
 
                 var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-                using (new NxRHI.TtCmdListScope(cmdlist))
+                using (new NxRHI.TtCmdListScope(cmdlist, "Gizmos"))
                 {
                     var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
                     foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
@@ -489,7 +489,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                     LayerBasePass.BuildRenderPass(cmdlist, policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, WithDepthGBuffers, GBuffers, "Gizmos:");
                 }
-                policy.CommitCommandList(cmdlist);
+                policy.CommitCommandList(cmdlist, "Gizmos");
             }
         }
         public override void TickSync(TtRenderPolicy policy)

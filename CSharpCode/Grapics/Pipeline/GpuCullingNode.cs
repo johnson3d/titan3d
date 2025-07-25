@@ -154,7 +154,7 @@ namespace EngineNS.Graphics.Pipeline
         public override unsafe void TickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmd))
+            using (new NxRHI.TtCmdListScope(cmd, "GpuCulling"))
             {
                 Culling(policy, cmd);
 

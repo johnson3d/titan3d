@@ -103,7 +103,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             if (mCopyDrawcall == null)
                 return;
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmdlist))
+            using (new NxRHI.TtCmdListScope(cmdlist, "Copy2SwapChain"))
             {
                 var srcPin = GetAttachBuffer(ColorPinIn);
                 var tarPin = GetAttachBuffer(ColorPinOut);
@@ -117,7 +117,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmdlist.FlushDraws();
                 cmdlist.EndEvent();
             }
-            policy.CommitCommandList(cmdlist);
+            policy.CommitCommandList(cmdlist, "Copy2SwapChain");
         }
     }
 }

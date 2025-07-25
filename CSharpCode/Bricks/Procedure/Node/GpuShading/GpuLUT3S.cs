@@ -108,7 +108,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         }
         public unsafe override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            using (new NxRHI.TtCmdListScope(mCmdList))
+            using (new NxRHI.TtCmdListScope(mCmdList, "PCG.kinLUT3SGen"))
             {
                 ShadingEnv.SetDrawcallDispatch(this, policy, mDrawcall, DispatchThread.X, DispatchThread.Y, DispatchThread.Z, true);
 

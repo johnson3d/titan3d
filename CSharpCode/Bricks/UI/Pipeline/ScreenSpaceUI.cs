@@ -95,7 +95,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmdlist))
+            using (new NxRHI.TtCmdListScope(cmdlist, "ScreenSpaceUI"))
             {
                 cmdlist.SetViewport(in GBuffers.Viewport);
                 FScissorRect scissor = new FScissorRect();
@@ -136,7 +136,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmdlist.EndPass();
             }
 
-            policy.CommitCommandList(cmdlist);
+            policy.CommitCommandList(cmdlist, "ScreenSpaceUI");
         }
     }
 }

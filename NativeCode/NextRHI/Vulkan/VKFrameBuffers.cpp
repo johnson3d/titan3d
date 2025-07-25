@@ -192,6 +192,8 @@ namespace NxRHI
 	}
 	VKFrameBuffers::FrameBufferWrapper::~FrameBufferWrapper()
 	{
+		if (IGpuDevice::IsFinalized())
+			return;
 		if (mFrameBuffer != nullptr)
 		{
 			vkDestroyFramebuffer(mDevice->mDevice, mFrameBuffer, mDevice->GetVkAllocCallBacks());

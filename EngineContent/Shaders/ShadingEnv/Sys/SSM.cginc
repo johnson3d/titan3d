@@ -54,7 +54,7 @@ struct PS_OUTPUT
 /**Meta Begin:(PS_Main)
 HLSL=none
 Meta End:(PS_Main)**/
-PS_OUTPUT PS_Main(PS_INPUT input)
+void PS_Main(PS_INPUT input)
 {
 	PS_OUTPUT output = (PS_OUTPUT)0;
 
@@ -73,10 +73,10 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	clip(mtl.mAlpha - mtl.mAlphaTest);
 #endif 
 
-	output.RT0.rgb = mtl.mAlbedo;
-	output.RT0.a = mtl.mAlpha;
+	//output.RT0.rgb = mtl.mAlbedo;
+	//output.RT0.a = mtl.mAlpha;
 	
-	return output;
+	//return output;
 }
 
 #endif//#ifndef _SSM_

@@ -112,7 +112,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 return;
             }
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmdlist))
+            using (new NxRHI.TtCmdListScope(cmdlist, "Pick"))
             {
                 cmdlist.SetViewport(in PickedBuffer.Viewport);
                 var scissor = new NxRHI.FScissorRect();
@@ -155,7 +155,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmdlist.EndPass();
             }
 
-            policy.CommitCommandList(cmdlist);
+            policy.CommitCommandList(cmdlist, "Pick");
         }
     }
 }

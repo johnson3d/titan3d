@@ -1161,7 +1161,7 @@ namespace NxRHI
 	{
 	protected:
 		static bool mIsTryFinalize;
-		bool mIsFinalized = false;
+		static bool mIsFinalized;
 	public:
 		ENGINE_RTTI(IGpuDevice);
 		IGpuDevice();
@@ -1173,7 +1173,7 @@ namespace NxRHI
 		static bool IsTryFinalize() {
 			return mIsTryFinalize;
 		}
-		bool IsFinalized() const{
+		static bool IsFinalized(){
 			return mIsFinalized;
 		}
 		virtual IBuffer* CreateBuffer(const FBufferDesc * desc) = 0;

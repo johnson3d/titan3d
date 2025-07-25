@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         }
         public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            using (new NxRHI.TtCmdListScope(mCmdList))
+            using (new NxRHI.TtCmdListScope(mCmdList, "PCG.ErosionIncWater"))
             {
                 ShadingEnv.SetDrawcallDispatch(this, policy, mDrawcall, DispatchThread.X, DispatchThread.Y, DispatchThread.Z, true);
                 mCmdList.PushGpuDraw(mDrawcall);
@@ -211,7 +211,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         }
         public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            using (new NxRHI.TtCmdListScope(mCmdList))
+            using (new NxRHI.TtCmdListScope(mCmdList, "PCG.Height2Flow"))
             {
                 ShadingEnv.SetDrawcallDispatch(this, policy, mDrawcall, DispatchThread.X, DispatchThread.Y, DispatchThread.Z, true);
                 mCmdList.PushGpuDraw(mDrawcall);
@@ -327,7 +327,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         }
         public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            using (new NxRHI.TtCmdListScope(mCmdList))
+            using (new NxRHI.TtCmdListScope(mCmdList, "PCG.WaterBasin"))
             {
                 ShadingEnv.SetDrawcallDispatch(this, policy, mDrawcall, DispatchThread.X, DispatchThread.Y, DispatchThread.Z, true);
                 

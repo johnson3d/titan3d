@@ -294,7 +294,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
                 GBuffers.BuildFrameBuffers(policy);
                 var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-                using (new NxRHI.TtCmdListScope(cmdlist))
+                using (new NxRHI.TtCmdListScope(cmdlist, "Opaque"))
                 {
                     var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
                     cmdlist.SetViewport(in GBuffers.Viewport);
@@ -323,7 +323,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                     LayerBasePass.BuildRenderPass(cmdlist, policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GBuffers, "Mobile:");
                 }
 
-                policy.CommitCommandList(cmdlist);
+                policy.CommitCommandList(cmdlist, "Opaque");
             }
 
             //var cmdlist = LayerBasePass.PassBuffers[(int)ERenderLayer.RL_Opaque].DrawCmdList;
@@ -474,7 +474,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
             {
                 var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-                using (new NxRHI.TtCmdListScope(cmdlist))
+                using (new NxRHI.TtCmdListScope(cmdlist, "BassPass"))
                 {
                     cmdlist.SetViewport(in GBuffers.Viewport);
 
@@ -507,7 +507,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                     passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
                     LayerBasePass.BuildTranslucentRenderPass(cmdlist, policy, in passClears, GBuffers, GGizmosBuffers);
                 }
-                policy.CommitCommandList(cmdlist);
+                policy.CommitCommandList(cmdlist, "BassPass");
             }
             //var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
             //for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)

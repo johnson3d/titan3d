@@ -260,7 +260,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             if (Setup == null)
                 return;
             var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmd))
+            using (new NxRHI.TtCmdListScope(cmd, "Hzb"))
             {
                 var srvIdx = SetupDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "DepthBuffer");
                 if (srvIdx.IsValidPointer)
@@ -280,7 +280,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmd.FlushDraws();
             }
 
-            policy.CommitCommandList(cmd);
+            policy.CommitCommandList(cmd, "Hzb");
         }
     }
 }

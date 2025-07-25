@@ -146,7 +146,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
 
-            using (new NxRHI.TtCmdListScope(cmd))
+            using (new NxRHI.TtCmdListScope(cmd, "AvgBrightness"))
             {
                 #region Setup
                 {
@@ -175,7 +175,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmd.FlushDraws();
             }
 
-            policy.CommitCommandList(cmd);
+            policy.CommitCommandList(cmd, "AvgBrightness");
         }
         
     }

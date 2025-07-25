@@ -290,7 +290,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 using(new TtLayerDrawBuffers.TtLayerDrawBuffersScope(HitproxyPass))
                 {
                     var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-                    using (new NxRHI.TtCmdListScope(cmdlist))
+                    using (new NxRHI.TtCmdListScope(cmdlist, "HitProxy"))
                     {
                         //draw mesh first
                         var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
@@ -342,7 +342,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                         HitproxyPass.BuildRenderPass(cmdlist, policy, in GHitproxyBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GHitproxyBuffers, GGizmosBuffers, "Hitproxy:");
                     }
 
-                    policy.CommitCommandList(cmdlist);
+                    policy.CommitCommandList(cmdlist, "HitProxy");
                 }
             }
 
@@ -361,7 +361,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             {   
                 var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-                using (new NxRHI.TtCmdListScope(cmdlist))
+                using (new NxRHI.TtCmdListScope(cmdlist, "HitProxy-Copy"))
                 {
                     fixed (NxRHI.FSubResourceFootPrint* pFootprint = &CopyBufferFootPrint)
                     {
@@ -390,7 +390,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                         cpDraw.Dispose();
                     }
                 }
-                policy.CommitCommandList(cmdlist);
+                policy.CommitCommandList(cmdlist, "HitProxy-Copy");
             }
 
             var fence = mCopyFence;

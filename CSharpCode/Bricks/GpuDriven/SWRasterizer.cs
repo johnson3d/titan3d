@@ -463,7 +463,7 @@ namespace EngineNS.Bricks.GpuDriven
             }
             
             var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmd))
+            using (new NxRHI.TtCmdListScope(cmd, "SwRasterize"))
             {
                 // get total dispatch param
                 DispatchArgShading.SetDrawcallDispatch(this, policy, DispatchArgShadingDrawcall, 1, 1, 1, true);
@@ -482,7 +482,7 @@ namespace EngineNS.Bricks.GpuDriven
                 cmd.FlushDraws();
                 cmd.EndEvent();
             }
-            policy.CommitCommandList(cmd);
+            policy.CommitCommandList(cmd, "SwRasterize");
         }
     }
 

@@ -266,7 +266,7 @@ namespace NxRHI
 		
 		mCmdListState = ECmdListState::Recording;
 		GetVKCmdRecorder()->mIsRecording = true;
-		this->BeginEvent(mDebugName.c_str());
+		//this->BeginEvent(mDebugName.c_str());
 
 		return mCmdRecorder;
 	}
@@ -274,7 +274,6 @@ namespace NxRHI
 	void VKCommandList::EndCommand()
 	{
 		//this->EndEvent();
-		this->EndEvent();
 		ICommandList::EndCommand();
 		if (mCmdListState == ECmdListState::Recording)
 		{
@@ -376,6 +375,7 @@ namespace NxRHI
 		auto pass = GetCurrentRenderPass();
 		for (UINT i = 0; i < fb->mRenderPass->Desc.NumOfMRT; i++)
 		{
+			UINT flags = ((UINT)passClears->ClearFlags) & (1 << (i + 2));
 			VkRenderingAttachmentInfo colorAttachment = {};
 			colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
 			auto rtv = fb->mRenderTargets[i].UnsafeConvertTo<VKRenderTargetView>();
@@ -390,7 +390,15 @@ namespace NxRHI
 				colorAttachment.imageView = nullptr;
 			}
 			colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-			colorAttachment.loadOp = FrameBufferLoadAction2VK(fb->mRenderPass->Desc.AttachmentMRTs[i].LoadAction);
+			if (flags == 0)
+			{
+				colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			}
+			else
+			{
+				colorAttachment.loadOp = FrameBufferLoadAction2VK(fb->mRenderPass->Desc.AttachmentMRTs[i].LoadAction);
+			}
+			
 			colorAttachment.storeOp = FrameBufferStoreAction2VK(fb->mRenderPass->Desc.AttachmentMRTs[i].StoreAction);
 			memcpy(colorAttachment.clearValue.color.float32, &passClears->ClearColor[i], sizeof(float)*4);
 
@@ -398,7 +406,9 @@ namespace NxRHI
 		}
 		
 		VkRenderingAttachmentInfo& depthAttachment = mBeginRenderingDraw->mDepthAttachment;
+		VkRenderingAttachmentInfo& stencilAttachment = mBeginRenderingDraw->mStencilAttachment;
 		depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+		stencilAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
 		if (fb->mDepthStencilView != nullptr)
 		{
 			auto dsv = fb->mDepthStencilView.UnsafeConvertTo<VKDepthStencilView>();
@@ -409,10 +419,27 @@ namespace NxRHI
 				depthAttachment.imageView = dsv->mView->mImageView;
 			}
 			depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-			depthAttachment.loadOp = FrameBufferLoadAction2VK(fb->mRenderPass->Desc.AttachmentDepthStencil.LoadAction);;
-			depthAttachment.storeOp = FrameBufferStoreAction2VK(fb->mRenderPass->Desc.AttachmentDepthStencil.StoreAction);;
-		}
+			if (passClears->ClearFlags & (ERenderPassClearFlags::CLEAR_DEPTH))
+			{
+				depthAttachment.loadOp = FrameBufferLoadAction2VK(fb->mRenderPass->Desc.AttachmentDepthStencil.LoadAction);
+			}
+			else
+			{
+				depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			}
+			depthAttachment.storeOp = FrameBufferStoreAction2VK(fb->mRenderPass->Desc.AttachmentDepthStencil.StoreAction);
 
+			stencilAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+			if (passClears->ClearFlags & (ERenderPassClearFlags::CLEAR_STENCIL))
+			{
+				stencilAttachment.loadOp = FrameBufferLoadAction2VK(fb->mRenderPass->Desc.AttachmentDepthStencil.LoadAction);
+			}
+			else
+			{
+				stencilAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			}
+			stencilAttachment.storeOp = FrameBufferStoreAction2VK(fb->mRenderPass->Desc.AttachmentDepthStencil.StoreAction);
+		}
 		else
 		{
 			depthAttachment.imageView = nullptr;
@@ -440,6 +467,7 @@ namespace NxRHI
 		renderingInfo.colorAttachmentCount = (UINT)mBeginRenderingDraw->mColorAttachments.size();
 		renderingInfo.pColorAttachments = mBeginRenderingDraw->mColorAttachments.data();
 		renderingInfo.pDepthAttachment = &depthAttachment;
+		renderingInfo.pStencilAttachment = &stencilAttachment;
 
 		this->PushGpuDrawImpl(pass->BeginCopyDraws);
 		this->PushGpuDrawImpl(pass->BeginBarriers);
@@ -464,9 +492,10 @@ namespace NxRHI
 	{
 		if (true)
 		{
+			this->BeginEvent(name);
 			return BeginRendering(fb, passClears, name);
 		}
-		else
+		/*else
 		{
 			ASSERT(mCmdListState == ECmdListState::Recording);
 			mDebugName = name;
@@ -552,15 +581,16 @@ namespace NxRHI
 			//vkCmdBeginRendering()
 
 			return true;
-		}
+		}*/
 	}
 	void VKCommandList::EndPass()
 	{
 		if (true)
 		{
 			EndRendering();
+			this->EndEvent();
 		}
-		else
+		/*else
 		{
 			ASSERT(mCurrentFrameBuffers != nullptr);
 			ASSERT(mCmdListState == ECmdListState::Recording);
@@ -571,7 +601,7 @@ namespace NxRHI
 			mCurrentFrameBuffers = nullptr;
 			
 			EndEvent();
-		}
+		}*/
 	}
 	void VKCommandList::SetViewport(UINT Num, const FViewPort* pViewports)
 	{

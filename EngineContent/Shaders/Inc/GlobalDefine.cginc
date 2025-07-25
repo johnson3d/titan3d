@@ -21,50 +21,27 @@
 #define Combine3(a,b,c) a##b##c
 #define Combine2(a,b) Combine3(a,b,)
 
-#if RHI_TYPE == RHI_DX11
-	#define DX_AUTOBIND
-	#define DX_BIND_B(n) : register(b##n)
-	#define DX_BIND_T(n) : register(t##n)
-	#define DX_BIND_S(s) : register(s##n)
-	#define DX_BIND_U(n) : register(u##n)
-#elif RHI_TYPE == RHI_DX12
-	#define DX_AUTOBIND : register(Combine2(space,ShaderStage))
-	#define DX_BIND_B(n) : register(b##n, Combine2(space,ShaderStage))
-	#define DX_BIND_T(n) : register(t##n, Combine2(space,ShaderStage))
-	#define DX_BIND_S(n) : register(s##n, Combine2(space,ShaderStage))
-	#define DX_BIND_U(n) : register(u##n, Combine2(space,ShaderStage))
-#elif RHI_TYPE == RHI_VK
-	#define DX_AUTOBIND : register(Combine2(space,ShaderStage))
-	#define DX_BIND_B(n) : register(b##n, Combine2(space,ShaderStage))
-	#define DX_BIND_T(n) : register(t##n, Combine2(space,ShaderStage))
-	#define DX_BIND_S(n) : register(s##n, Combine2(space,ShaderStage))
-	#define DX_BIND_U(n) : register(u##n, Combine2(space,ShaderStage))
-#elif RHI_TYPE == RHI_MTL
-	#define DX_AUTOBIND : register(Combine2(space,ShaderStage))
-	#define DX_BIND_B(n) : register(b##n, Combine2(space,ShaderStage))
-	#define DX_BIND_T(n) : register(t##n, Combine2(space,ShaderStage))
-	#define DX_BIND_S(n) : register(s##n, Combine2(space,ShaderStage))
-	#define DX_BIND_U(n) : register(u##n, Combine2(space,ShaderStage))
-#else
-	#define DX_AUTOBIND 
-	#define DX_BIND_B(n) 
-	#define DX_BIND_T(n) 
-	#define DX_BIND_S(n) 
-	#define DX_BIND_U(n) 
-#endif
+#define DX_AUTOBIND 
+#define DX_BIND_B(n) : register(b##n)
+#define DX_BIND_T(n) : register(t##n)
+#define DX_BIND_S(s) : register(s##n)
+#define DX_BIND_U(n) : register(u##n)
 
 #if RHI_TYPE == RHI_DX11
 	#define VK_BIND(n) 
 	#define VK_LOCATION(n) 
 	#define VK_OFFSET(n) 
+	#define VK_IMAGE(n)
 #elif RHI_TYPE == RHI_DX12
 	#define VK_BIND(n) 
 	#define VK_LOCATION(n) 
 	#define VK_OFFSET(n) 
+	#define VK_IMAGE(n)
 #else
-	#define VK_BIND(n) [[vk::binding(n, ShaderStage)]]
+	#define VK_BIND(n) [[vk::binding(n)]]
 	#define VK_LOCATION(n) [[vk::location(n)]]
 	#define VK_OFFSET(n) [[vk::offset(n)]]
+	#define VK_IMAGE(n) [[vk::image_format(#n)]]
 #endif
 
 #include "@engine_preprocessors.cginc"

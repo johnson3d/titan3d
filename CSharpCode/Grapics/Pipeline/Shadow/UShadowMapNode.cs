@@ -469,7 +469,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 mShadowCameraArray[CsmIdx].UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext);
                 
                 var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-                using (new NxRHI.TtCmdListScope(cmdlist))
+                using (new NxRHI.TtCmdListScope(cmdlist, "ShadowMap"))
                 {
                     using (new Profiler.TimeScopeHelper(ScopeFlushDraw))
                     {
@@ -542,7 +542,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
                 }
 
-                policy.CommitCommandList(cmdlist);
+                policy.CommitCommandList(cmdlist, "ShadowMap");
             }
 
             //TODO  Global Value...

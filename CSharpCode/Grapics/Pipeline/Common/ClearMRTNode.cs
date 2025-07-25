@@ -139,7 +139,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             {
-                using (new NxRHI.TtCmdListScope(cmdlist))
+                using (new NxRHI.TtCmdListScope(cmdlist, "ClearMRT"))
                 {
                     var passClears = new NxRHI.FRenderPassClears();
                     passClears.SetDefault();
@@ -169,7 +169,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     }
                 }
 
-                policy.CommitCommandList(cmdlist, "ClearRT");
+                policy.CommitCommandList(cmdlist, "ClearMRT");
             }
         }
         public override void TickSync(TtRenderPolicy policy)

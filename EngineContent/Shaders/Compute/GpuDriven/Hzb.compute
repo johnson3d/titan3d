@@ -1,9 +1,12 @@
 #ifndef _HZB_H_
 #define _HZB_H_
+#include "../../Inc/GlobalDefine.cginc"
 
 Texture2D<float2> DepthBuffer;
 
+VK_IMAGE(rg16f)
 RWTexture2D<float2> SrcBuffer;
+VK_IMAGE(rg16f)
 RWTexture2D<float2> DstBuffer;
 
 [numthreads(DispatchX, DispatchY, DispatchZ)]

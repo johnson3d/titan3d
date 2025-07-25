@@ -153,7 +153,7 @@ namespace EngineNS.Graphics.Pipeline
             Editor.ShaderCompiler.TtShaderCodeManager.Instance.Dispose();
 
             RenderContext.mCoreObject.TryFinalizeDevice(RenderSystem.mCoreObject);
-            while (RenderContext.mCoreObject.IsFinalized() == false)
+            while (IGpuDevice.IsFinalized() == false)
             {
                 AttachBufferManager.Tick();
                 var testTime = Support.TtTime.GetTickCount();

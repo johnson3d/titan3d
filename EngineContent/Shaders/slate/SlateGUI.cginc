@@ -1,6 +1,6 @@
 #include "../Inc/GlobalDefine.cginc"
 
-VK_BIND(0) cbuffer ProjectionMatrixBuffer DX_BIND_B(0)
+cbuffer ProjectionMatrixBuffer DX_BIND_B(0)
 {
     float4x4 ProjectionMatrix;
 };
@@ -19,8 +19,8 @@ struct PS_INPUT_SLATE
     VK_LOCATION(3) float2 uv  : TEXCOORD0;
 };
 
-VK_BIND(0) Texture2D FontTexture DX_AUTOBIND;
-VK_BIND(1) sampler Samp_FontTexture DX_AUTOBIND;
+Texture2D FontTexture DX_AUTOBIND;
+sampler Samp_FontTexture DX_AUTOBIND;
 
 PS_INPUT_SLATE VS_Main(VS_INPUT_SLATE input)
 {

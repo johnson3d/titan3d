@@ -345,23 +345,18 @@ namespace EngineNS.Bricks.AdvanceShadow
                 j.SceneNode.OnGatherVisibleMeshes(mVisParameter);
             }
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmdlist))
+            using (new NxRHI.TtCmdListScope(cmdlist, "AdvShadow"))
             {
                 mGBuffer.SetDepthStencil(PageDepthTextureDSV);
                 mGBuffer.FlushModify();
                 DrawDepth(cmdlist, world, policy);
-            }
-            policy.CommitCommandList(cmdlist);
-
-            cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmdlist))
-            {   
+            
                 mDrawScreenGBuffers.SetRenderTarget(0, mRtViews[node.PageIndex]);
                 mDrawScreenGBuffers.FlushModify();
                 DrawESM(node, cmdlist, world, policy);
                 //DrawGaussion(cmdlist, world, policy);
             }
-            policy.CommitCommandList(cmdlist);
+            policy.CommitCommandList(cmdlist, "AdvShadow");
         }
         NxRHI.TtCmdRecorder mBasePassRecorder = new NxRHI.TtCmdRecorder();
         private void DrawDepth(NxRHI.TtCommandList cmdlist, GamePlay.TtWorld world, TtRenderPolicy policy)

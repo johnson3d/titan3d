@@ -175,12 +175,12 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
             //TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
 
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmdlist))
+            using (new NxRHI.TtCmdListScope(cmdlist, "RayTracing"))
             {
                 cmdlist.PushGpuDraw(mRayTracingDraw);
                 cmdlist.FlushDraws();
             }
-            policy.CommitCommandList(cmdlist);
+            policy.CommitCommandList(cmdlist, "RayTracing");
             //TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
         }
     }

@@ -119,7 +119,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmdlist))
+            using (new NxRHI.TtCmdListScope(cmdlist, this.GetType().FullName))
             {
                 cmdlist.SetViewport(in GBuffers.Viewport);
                 var scissor = new NxRHI.FScissorRect();
@@ -152,7 +152,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmdlist.FlushDraws();
                 cmdlist.EndPass();
             }
-            policy.CommitCommandList(cmdlist);
+            policy.CommitCommandList(cmdlist, this.GetType().FullName);
         }
     }
 

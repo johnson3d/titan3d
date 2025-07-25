@@ -522,18 +522,22 @@ namespace NxRHI
 	}
 	void IBarriersDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
+		cmdlist->BeginEvent("RenderPassBarriers");
 		for (UINT i = 0; i < (UINT)Barriers.size(); i++)
 		{
 			Barriers[i].Buffer->TransitionTo(cmdlist, Barriers[i].ToState);
 		}
+		cmdlist->EndEvent();
 		Barriers.clear();
 	}
 	void IRenderPassCopyDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
+		cmdlist->BeginEvent("RenderPassCopy");
 		for (UINT i = 0; i < (UINT)CopyDraws.size(); i++)
 		{
 			CopyDraws[i]->Commit(cmdlist, bRefResource);
 		}
+		cmdlist->EndEvent();
 		CopyDraws.clear();
 	}
 }

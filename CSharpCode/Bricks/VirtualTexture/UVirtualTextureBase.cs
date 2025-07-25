@@ -225,7 +225,7 @@ namespace EngineNS.Bricks.VirtualTexture
                 Rvts[(int)i].Slot = null;
             }
             RemoveTexIDs.Clear();
-            using (new NxRHI.TtCmdListScope(cmd))
+            using (new NxRHI.TtCmdListScope(cmd, "RVT"))
             {
                 foreach (var i in AddTexIDs)
                 {

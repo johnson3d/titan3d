@@ -72,7 +72,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 return;
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
 
-            using (new NxRHI.TtCmdListScope(cmdlist))
+            using (new NxRHI.TtCmdListScope(cmdlist, "Copy"))
             {
                 var srcPin = GetAttachBuffer(SrcPinIn);
                 var tarPin = GetAttachBuffer(DestPinOut);
@@ -111,7 +111,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmdlist.EndEvent();
             }
 
-            policy.CommitCommandList(cmdlist);
+            policy.CommitCommandList(cmdlist, "Copy");
         }
     }
 
@@ -190,7 +190,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             if (mCopyDrawcall == null)
                 return;
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmdlist))
+            using (new NxRHI.TtCmdListScope(cmdlist, "Copy2Next"))
             {
                 var srcPin = GetAttachBuffer(SrcPinIn);
 
@@ -222,7 +222,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmdlist.FlushDraws();
                 cmdlist.EndEvent();
             }
-            policy.CommitCommandList(cmdlist);
+            policy.CommitCommandList(cmdlist, "Copy2Next");
         }
 
         public override unsafe void TickSync(TtRenderPolicy policy)
@@ -358,7 +358,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
 
-            using (new NxRHI.TtCmdListScope(cmdlist))
+            using (new NxRHI.TtCmdListScope(cmdlist, "Debugger"))
             {
                 var tarPin = ResultBuffer;
 
@@ -387,7 +387,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmdlist.EndEvent();
             }
 
-            policy.CommitCommandList(cmdlist);
+            policy.CommitCommandList(cmdlist, "Debugger");
         }
     }
 }

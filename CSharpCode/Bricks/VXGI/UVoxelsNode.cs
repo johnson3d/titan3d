@@ -407,15 +407,14 @@ namespace EngineNS.Bricks.VXGI
                         CBuffer.SetValue(idx, in VxDebugger_IndexCountPerInstance);
                     }
                 }
-                switch (mCurStep)
+                var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                using (new NxRHI.TtCmdListScope(cmd, "Voxel"))
                 {
-                    case EStep.Setup:
-                        {
-                            if (SetupVoxelGroupAllocator != null)
+                    switch (mCurStep)
+                    {
+                        case EStep.Setup:
                             {
-                                var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-
-                                using (new NxRHI.TtCmdListScope(cmd))
+                                if (SetupVoxelGroupAllocator != null)
                                 {
                                     SetupVoxelGroupAllocator.SetDrawcallDispatch(this, policy, SetupVoxelGroupAllocatorDrawcall, VxGroupPoolSize, 1, 1, true);
                                     cmd.PushGpuDraw(SetupVoxelGroupAllocatorDrawcall);
@@ -424,23 +423,17 @@ namespace EngineNS.Bricks.VXGI
                                     cmd.FlushDraws();
                                     cmd.EndEvent();
                                 }
-                                policy.CommitCommandList(cmd);
+                                mCurStep = EStep.InjectVoxels;
                             }
-                            mCurStep = EStep.InjectVoxels;
-                        }
-                        break;
-                    case EStep.InjectVoxels:
-                        {
-                            if (InjectVoxels != null)
+                            break;
+                        case EStep.InjectVoxels:
                             {
-                                var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-
-                                using (new NxRHI.TtCmdListScope(cmd))
+                                if (InjectVoxels != null)
                                 {
                                     #region erase voxelgroups
                                     if (VxEraseGroupSize != Vector3ui.Zero)
                                     {
-                                        EraseVoxelGroup.SetDrawcallDispatch(this, policy, EraseVoxelGroupDrawcall, 
+                                        EraseVoxelGroup.SetDrawcallDispatch(this, policy, EraseVoxelGroupDrawcall,
                                             VxEraseGroupSize.X,
                                             VxEraseGroupSize.Y,
                                             VxEraseGroupSize.Z,
@@ -466,11 +459,11 @@ namespace EngineNS.Bricks.VXGI
 
                                     cmd.FlushDraws();
                                 }
-                                policy.CommitCommandList(cmd);
                             }
-                        }
-                        break;
+                            break;
+                    }
                 }
+                policy.CommitCommandList(cmd, "Voxel");
             }   
         }
     }

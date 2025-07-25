@@ -233,7 +233,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             var gpuScene = policy.GetGpuSceneNode();// .FindNode("GpuSceneNode") as Common.UGpuSceneNode;
 
             var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmd))
+            using (new NxRHI.TtCmdListScope(cmd, "ScreenTiling"))
             {
                 var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCbv;
                 if (ConfigCBuffer != null)
@@ -271,7 +271,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmd.FlushDraws();
             }
 
-            policy.CommitCommandList(cmd);
+            policy.CommitCommandList(cmd, "ScreenTiling");
         }
     }
 }

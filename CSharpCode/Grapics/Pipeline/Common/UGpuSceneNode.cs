@@ -179,13 +179,13 @@ namespace EngineNS.Graphics.Pipeline.Common
                 return;
 
             var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmd))
+            using (new NxRHI.TtCmdListScope(cmd, "GpuScene"))
             {
                 TickLogic_Light(world, policy, cmd);
                 TickLogic_Instance(world, policy, cmd);
             }
 
-            policy.CommitCommandList(cmd);
+            policy.CommitCommandList(cmd, "GpuScene");
         }
         public unsafe override void TickSync(Graphics.Pipeline.TtRenderPolicy policy)
         {

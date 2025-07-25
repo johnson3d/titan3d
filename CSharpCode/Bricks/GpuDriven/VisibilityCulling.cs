@@ -272,7 +272,7 @@ namespace EngineNS.Bricks.GpuDriven
             }
 
             var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmd))
+            using (new NxRHI.TtCmdListScope(cmd, "CullCluster"))
             {
                 VisParameter.World = world;
                 VisParameter.ClearVisibles();
@@ -293,7 +293,7 @@ namespace EngineNS.Bricks.GpuDriven
                 cmd.EndEvent();
             }
             
-            policy.CommitCommandList(cmd);
+            policy.CommitCommandList(cmd, "CullCluster");
         }
 
         public Vector4 TransformViewProj(in Vector3 coord, in Matrix transform)
