@@ -23,12 +23,16 @@ NS_BEGIN
 namespace NxRHI
 {
 #define ImplVKFunctionPtr(name) PFN_##name VKGpuSystem::name = VK_NULL_HANDLE;
-	
+#define GetVKFunctionPtr(name) name = (PFN_##name)vkGetInstanceProcAddr(mVKInstance, #name);
+
+	ImplVKFunctionPtr(vkSetDebugUtilsObjectNameEXT);
 	ImplVKFunctionPtr(vkCmdBeginDebugUtilsLabelEXT);
 	ImplVKFunctionPtr(vkCmdEndDebugUtilsLabelEXT);
+
 	ImplVKFunctionPtr(vkDebugMarkerSetObjectNameEXT);
 	ImplVKFunctionPtr(vkCmdDebugMarkerBeginEXT);
 	ImplVKFunctionPtr(vkCmdDebugMarkerEndEXT);
+	
 	ImplVKFunctionPtr(vkQueueSubmit2);
 	ImplVKFunctionPtr(vkGetSemaphoreCounterValue);
 	ImplVKFunctionPtr(vkSignalSemaphore);
@@ -61,6 +65,22 @@ namespace NxRHI
 			vkDestroyInstance(mVKInstance, nullptr);
 			mVKInstance = nullptr;
 		}
+	}
+	bool isDebugSafe()
+	{
+		// 最简单但可靠的检测：只有明确检测到调试工具时才启用
+		static bool checked = false;
+		static bool safe = false;
+
+		if (!checked) {
+			safe = (::GetModuleHandleA("renderdoc.dll") != nullptr) ||
+				(::GetModuleHandleA("Nsight.Graphics.Hook.dll") != nullptr) ||
+				(std::getenv("VK_INSTANCE_LAYERS") &&
+					strstr(std::getenv("VK_INSTANCE_LAYERS"), "validation"));
+			checked = true;
+		}
+
+		return safe;
 	}
 	vBOOL VKGpuSystem::OnVKDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData)
 	{
@@ -126,6 +146,7 @@ namespace NxRHI
 		validationFeatures.pEnabledValidationFeatures = enableFeatures;
 
 		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
+		debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 		std::vector<const char*>	mValidationLayers;
 		if (desc->UseRenderDoc)
 		{
@@ -150,9 +171,6 @@ namespace NxRHI
 			debugCreateInfo.pUserData = this;
 			createInfo.pNext = &debugCreateInfo;
 			debugCreateInfo.pNext = &validationFeatures;
-
-			if (FindExtension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME))
-				extensionNames.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 		}
 
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionNames.size());
@@ -173,15 +191,21 @@ namespace NxRHI
 
 		//volkLoadInstance(mVKInstance);
 
-#define GetVKFunctionPtr(name) name = (PFN_##name)vkGetInstanceProcAddr(mVKInstance, #name);
-
 		//vkCmdBeginDebugUtilsLabelEXT
-		GetVKFunctionPtr(vkCmdBeginDebugUtilsLabelEXT);
-		GetVKFunctionPtr(vkCmdEndDebugUtilsLabelEXT);
-		GetVKFunctionPtr(vkDebugMarkerSetObjectNameEXT);
-		GetVKFunctionPtr(vkDebugMarkerSetObjectNameEXT);
-		GetVKFunctionPtr(vkCmdDebugMarkerBeginEXT);
-		GetVKFunctionPtr(vkCmdDebugMarkerEndEXT);
+		
+
+		if (isDebugSafe())
+		{
+			GetVKFunctionPtr(vkDebugMarkerSetObjectNameEXT);
+			GetVKFunctionPtr(vkCmdDebugMarkerBeginEXT);
+			GetVKFunctionPtr(vkCmdDebugMarkerEndEXT);
+		}
+		else
+		{
+			GetVKFunctionPtr(vkSetDebugUtilsObjectNameEXT);
+			GetVKFunctionPtr(vkCmdBeginDebugUtilsLabelEXT);
+			GetVKFunctionPtr(vkCmdEndDebugUtilsLabelEXT);
+		}
 		GetVKFunctionPtr(vkQueueSubmit2);
 		GetVKFunctionPtr(vkGetSemaphoreCounterValue);
 		GetVKFunctionPtr(vkSignalSemaphore);
@@ -392,15 +416,29 @@ namespace NxRHI
 			{
 				extensions.push_back(i.extensionName);
 			}*/
-			extensions.push_back(VK_KHR_16BIT_STORAGE_EXTENSION_NAME);
-			extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-			extensions.push_back(VK_KHR_16BIT_STORAGE_EXTENSION_NAME);
-			extensions.push_back(VK_KHR_SHADER_FLOAT16_INT8_EXTENSION_NAME);
-			extensions.push_back(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME);
-			extensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
-			extensions.push_back(VK_EXT_TOOLING_INFO_EXTENSION_NAME);
+			if (HasExtension(VK_KHR_16BIT_STORAGE_EXTENSION_NAME))
+				extensions.push_back(VK_KHR_16BIT_STORAGE_EXTENSION_NAME);
+			if (HasExtension(VK_KHR_SWAPCHAIN_EXTENSION_NAME))
+				extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+			if (HasExtension(VK_KHR_16BIT_STORAGE_EXTENSION_NAME))
+				extensions.push_back(VK_KHR_16BIT_STORAGE_EXTENSION_NAME);
+			if (HasExtension(VK_KHR_SHADER_FLOAT16_INT8_EXTENSION_NAME))
+				extensions.push_back(VK_KHR_SHADER_FLOAT16_INT8_EXTENSION_NAME);
+			if (HasExtension(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME))
+				extensions.push_back(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME);
+			if (HasExtension(VK_EXT_DEBUG_MARKER_EXTENSION_NAME))
+			{
+				extensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
+			}
+			else
+			{
+				if (HasExtension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME))
+					extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+			}
+			if (HasExtension(VK_EXT_TOOLING_INFO_EXTENSION_NAME))
+				extensions.push_back(VK_EXT_TOOLING_INFO_EXTENSION_NAME);
 			
-			if (HasExtension(VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_EXTENSION_NAME))
+			if (HasExtension(VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_EXTENSION_NAME))	
 				extensions.push_back(VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_EXTENSION_NAME);
 			if (HasExtension(VK_NV_DEVICE_DIAGNOSTICS_CONFIG_EXTENSION_NAME))
 				extensions.push_back(VK_NV_DEVICE_DIAGNOSTICS_CONFIG_EXTENSION_NAME);
@@ -551,12 +589,6 @@ namespace NxRHI
 			{
 				mValidationLayers.push_back("VK_LAYER_KHRONOS_validation");
 			}
-			if (HasExtension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME))
-				extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-		}
-		else
-		{
-			createInfo.enabledLayerCount = 0;
 		}
 
 #if defined(HasModule_GpuDump)
@@ -582,7 +614,12 @@ namespace NxRHI
 			createInfo.enabledLayerCount = static_cast<uint32_t>(mValidationLayers.size());
 			createInfo.ppEnabledLayerNames = mValidationLayers.data();
 		}
-		if (vkCreateDevice(mPhysicalDevice, &createInfo, GetVkAllocCallBacks(), &mDevice) != VK_SUCCESS)
+		else
+		{
+			createInfo.enabledLayerCount = 0;
+		}
+		auto hr = vkCreateDevice(mPhysicalDevice, &createInfo, GetVkAllocCallBacks(), &mDevice);
+		if (hr != VK_SUCCESS)
 		{
 			ASSERT(false);
 			return false;

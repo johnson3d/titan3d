@@ -54,6 +54,7 @@ namespace NxRHI
 		std::vector<VkLayerProperties>	mLayerProperties;
 
 		#define DefineVKFunctionPtr(name) static PFN_##name name;
+		DefineVKFunctionPtr(vkSetDebugUtilsObjectNameEXT);
 		DefineVKFunctionPtr(vkCmdBeginDebugUtilsLabelEXT);
 		DefineVKFunctionPtr(vkCmdEndDebugUtilsLabelEXT);
 		DefineVKFunctionPtr(vkDebugMarkerSetObjectNameEXT);
@@ -64,14 +65,43 @@ namespace NxRHI
 		DefineVKFunctionPtr(vkSignalSemaphore);
 		DefineVKFunctionPtr(vkWaitSemaphores);
 
+		static VkObjectType VKDebugReportObjectTypeToObjectType(VkDebugReportObjectTypeEXT type)
+		{
+			switch (type)
+			{
+			case VkDebugReportObjectTypeEXT::VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT:
+				return VkObjectType::VK_OBJECT_TYPE_BUFFER;
+			case VkDebugReportObjectTypeEXT::VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT:
+				return VkObjectType::VK_OBJECT_TYPE_IMAGE;
+			case VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_VIEW_EXT:
+				return VkObjectType::VK_OBJECT_TYPE_BUFFER_VIEW;
+			case VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT:
+				return VkObjectType::VK_OBJECT_TYPE_IMAGE_VIEW;
+			default:
+				ASSERT(false);
+				break;
+			}
+			return VkObjectType::VK_OBJECT_TYPE_UNKNOWN;
+		}
 		static void SetVkObjectDebugName(VkDevice device, VkDebugReportObjectTypeEXT type, void* pObj, const char* name)
 		{
-			VkDebugMarkerObjectNameInfoEXT dbgNameInfo{};
-			dbgNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT;
-			dbgNameInfo.pObjectName = name;
-			dbgNameInfo.objectType = type;
-			dbgNameInfo.object = (uint64_t)pObj;
-			VKGpuSystem::vkDebugMarkerSetObjectNameEXT(device, &dbgNameInfo);
+			if (VKGpuSystem::vkDebugMarkerSetObjectNameEXT != nullptr)
+			{
+				VkDebugMarkerObjectNameInfoEXT dbgNameInfo{};
+				dbgNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT;
+				dbgNameInfo.pObjectName = name;
+				dbgNameInfo.objectType = type;
+				dbgNameInfo.object = (uint64_t)pObj;
+				VKGpuSystem::vkDebugMarkerSetObjectNameEXT(device, &dbgNameInfo);
+			}
+			else if (VKGpuSystem::vkSetDebugUtilsObjectNameEXT != nullptr)
+			{
+				VkDebugUtilsObjectNameInfoEXT dbgNameInfo{};
+				dbgNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+				dbgNameInfo.pObjectName = name;
+				dbgNameInfo.objectType = VKDebugReportObjectTypeToObjectType(type);
+				dbgNameInfo.objectHandle = (uint64_t)pObj;
+			}
 		}
 	public:
 		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);

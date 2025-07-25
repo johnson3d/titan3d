@@ -54,6 +54,7 @@
 #include <shlwapi.h>
 #include <direct.h>
 #include <io.h>
+#include <libloaderapi.h>
 
 #define HAVE_STRUCT_TIMESPEC
 #define _TIMESPEC_DEFINED
