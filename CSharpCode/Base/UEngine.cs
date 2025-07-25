@@ -397,6 +397,7 @@ namespace EngineNS
             EngineNS.Profiler.Log.InitLogger();
             EngineNS.IO.TtMemWriter.InitNativeCallback();
             EngineNS.IO.TtMemReader.InitNativeCallback();
+            VParallelTaskManager.SetFunction(Thread.Async.TtContextThreadManager.mNativeRunTasks);
             TtEngine.Instance.AssetMetaManager.LoadMetas();
             var t4 = Support.TtTime.HighPrecision_GetTickCount();
 
@@ -677,6 +678,7 @@ namespace EngineNS
             EngineNS.Profiler.Log.FinalLogger();
             EngineNS.IO.TtMemWriter.FinalNativeCallback();
             EngineNS.IO.TtMemReader.FinalNativeCallback();
+            VParallelTaskManager.SetFunction(null);
 
             EngineNS.UCs2CppBase.FinalCleanupNativeCoreProvider();
             CoreSDK.FinalF2MManager();

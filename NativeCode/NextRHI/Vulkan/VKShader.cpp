@@ -229,7 +229,7 @@ namespace NxRHI
 		// Hand it off to a compiler instance and give it ownership of the IR.
 		spvc_context_create_compiler(context, SPVC_BACKEND_GLSL, ir, SPVC_CAPTURE_MODE_TAKE_OWNERSHIP, &compiler_glsl);
 
-		spvc_set active_variables;
+		spvc_set active_variables = nullptr;
 		spvc_compiler_get_active_interface_variables(compiler_glsl, &active_variables);
 
 		const int typeMaxBinding = IShaderConductor::typeMaxBinding;

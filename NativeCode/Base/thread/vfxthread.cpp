@@ -77,3 +77,4 @@ extern "C"
 		GLoadThreadId = vfxThread::GetCurrentThreadId();
 	}
 }
+

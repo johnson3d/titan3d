@@ -11,6 +11,7 @@
 #include "DX12GeomMesh.h"
 #include "../NxEffect.h"
 #include "../../Base/thread/vfxthread.h"
+#include "../../Base/thread/vfxThreadDispatcher.h"
 #include <dxgi1_3.h>
 #include <pix3.h>
 

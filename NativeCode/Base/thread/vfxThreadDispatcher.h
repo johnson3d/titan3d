@@ -69,4 +69,46 @@ public:
 	}
 };
 
+class FTaskSession;
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void(*FRunTasks)(FTaskSession* session);
+
+class TR_CLASS()
+	IParallelTask : public VIUnknown
+{
+public:
+	virtual void DoWork(FTaskSession* session) = 0;
+};
+
+class TR_CLASS()
+	FTaskSession : public VIUnknown
+{
+	std::vector<IParallelTask*> Tasks;
+public:
+	std::vector<IParallelTask*>& GetTasks() {
+		return Tasks;
+	}
+	UINT GetNumOfTasks() {
+		return (UINT)Tasks.size();
+	}
+	void Execute(int index)
+	{
+		Tasks[index]->DoWork(this);
+		Count--;
+	}
+	std::atomic<int> Count;
+};
+
+class TR_CLASS()
+	VParallelTaskManager : public VIUnknown
+{
+	static FRunTasks mRunTaskFunction;
+public:
+	static bool RunTasks(FTaskSession * session);
+	static void Wait(FTaskSession* session);
+	static void SetFunction(FRunTasks ptr) {
+		mRunTaskFunction = ptr;
+	}
+};
+
 NS_END

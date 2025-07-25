@@ -57,13 +57,19 @@ namespace NxRHI
 		//mCmdList.FromObject(cmdlist);
 		//AUTO_SAMP("NxRHI.ICmdRecorder.FlushDraws");
 		VAutoVSLLock lk(mLocker);
-		for (UINT i = mFlushStart; i < (UINT)mDrawcallArray.size(); i++)
 		{
-			mDrawcallArray[i]->BuildDrawcall(cmdlist);
+			AUTO_SAMP("NxRHI.ICmdRecorder.FlushDraws.Build");
+			for (UINT i = mFlushStart; i < (UINT)mDrawcallArray.size(); i++)
+			{
+				mDrawcallArray[i]->BuildDrawcall(cmdlist);
+			}
 		}
-		for (UINT i = mFlushStart; i < (UINT)mDrawcallArray.size(); i++)
 		{
-			mDrawcallArray[i]->Commit(cmdlist, false);
+			AUTO_SAMP("NxRHI.ICmdRecorder.FlushDraws.Commit");
+			for (UINT i = mFlushStart; i < (UINT)mDrawcallArray.size(); i++)
+			{
+				mDrawcallArray[i]->Commit(cmdlist, false);
+			}
 		}
 		mFlushStart = (UINT)mDrawcallArray.size();
 	}

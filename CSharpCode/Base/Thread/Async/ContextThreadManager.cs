@@ -61,6 +61,7 @@ namespace EngineNS.Thread.Async
         public struct FUserArguments : IDisposable
         {
             public Vector4ui Value0;
+            public IntPtr Pointer;
             public object Obj0;
             public object Obj1;
             public object Obj2;
@@ -348,6 +349,24 @@ namespace EngineNS.Thread.Async
                 smp.Wait(true);
             }
             ParallelForSmpAllocator.ReleaseObject(smp);
+        }
+        internal static VParallelTaskManager.FDelegate_FRunTasks mNativeRunTasks = NativeRunTasks;
+        static unsafe void NativeRunTasks(FTaskSession session)
+        {
+            var num = (int)session.GetNumOfTasks();
+            TtAsyncTaskStateBase.FUserArguments args = new TtAsyncTaskStateBase.FUserArguments();
+            args.Pointer = session.NativePointer;
+            for (int i = 0; i<num; i++) 
+            {
+                args.Value0.X = (uint)i;
+                TtEngine.Instance.EventPoster.RunParallel(static (state) =>
+                {
+                    var pSession = (FTaskSession*)state.UserArguments.Pointer.ToPointer();
+                    FTaskSession session = new FTaskSession(pSession);
+                    session.Execute((int)state.UserArguments.Value0.X);
+                    return true;
+                }, in args);
+            }
         }
         #endregion
         public int NumOfPool
