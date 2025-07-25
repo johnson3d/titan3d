@@ -4,7 +4,7 @@
 #define new VNEW
 
 Hash64 Hash64::Empty;
-Hash128 Hash128::GetHash128(const char* s, UINT len)
+Hash128 Hash128::GetHash128(const char* s, unsigned int len)
 {
 	Hash128 result;
 	result.Value = CityHash128(s, len);

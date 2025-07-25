@@ -31,7 +31,7 @@ struct Hash128
 		Value.second = 0;
 	}
 	uint128		Value;
-	static Hash128 GetHash128(const char* s, UINT len);
+	static Hash128 GetHash128(const char* s, unsigned int len);
 	friend bool operator == (const Hash128& a, const Hash128& b) {
 		return a.Value.first == b.Value.first && a.Value.second == b.Value.second;
 	}

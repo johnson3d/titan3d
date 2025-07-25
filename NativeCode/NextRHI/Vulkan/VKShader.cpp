@@ -232,6 +232,8 @@ namespace NxRHI
 		spvc_set active_variables;
 		spvc_compiler_get_active_interface_variables(compiler_glsl, &active_variables);
 
+		const int typeMaxBinding = IShaderConductor::typeMaxBinding;
+
 		// Do some basic reflection.
 		spvc_compiler_create_shader_resources_for_active_variables(compiler_glsl, &resources, active_variables);
 		spvc_resources_get_resource_list_for_type(resources, SPVC_RESOURCE_TYPE_STAGE_INPUT, &list, &count);
@@ -264,6 +266,7 @@ namespace NxRHI
 			}*/
 		}
 		spvc_resources_get_resource_list_for_type(resources, SPVC_RESOURCE_TYPE_UNIFORM_BUFFER, &list, &count);
+		ASSERT(count < typeMaxBinding);
 		for (i = 0; i < count; i++)
 		{
 			auto spv_type = spvc_compiler_get_type_handle(compiler_glsl, list[i].base_type_id);
@@ -381,6 +384,7 @@ namespace NxRHI
 		}
 
 		spvc_resources_get_resource_list_for_type(resources, SPVC_RESOURCE_TYPE_STORAGE_BUFFER, &list, &count);
+		ASSERT(count < typeMaxBinding);
 		for (i = 0; i < count; i++)
 		{//UAV buffer:rwstructuredbuffer
 			auto spv_type = spvc_compiler_get_type_handle(compiler_glsl, list[i].base_type_id);
@@ -496,7 +500,9 @@ namespace NxRHI
 				binder->Fields.push_back(v);
 			}
 		}
+
 		spvc_resources_get_resource_list_for_type(resources, SPVC_RESOURCE_TYPE_STORAGE_IMAGE, &list, &count);
+		ASSERT(count < typeMaxBinding);
 		for (i = 0; i < count; i++)
 		{//UAV texture:rwtexture
 			std::string decl_block_name = spvc_compiler_get_remapped_declared_block_name(compiler_glsl, list[i].id);
@@ -518,7 +524,9 @@ namespace NxRHI
 
 			Reflector->Uavs.push_back(binder);
 		}
+
 		spvc_resources_get_resource_list_for_type(resources, SPVC_RESOURCE_TYPE_SAMPLED_IMAGE, &list, &count);
+		ASSERT(count < typeMaxBinding);
 		for (i = 0; i < count; i++)
 		{//For GL:combine sampler&texture
 			auto name = spvc_compiler_get_name(compiler_glsl, list[i].id);
@@ -545,7 +553,9 @@ namespace NxRHI
 				Reflector->Samplers.push_back(binder);
 			}
 		}
+
 		spvc_resources_get_resource_list_for_type(resources, SPVC_RESOURCE_TYPE_SEPARATE_IMAGE, &list, &count);
+		ASSERT(count < typeMaxBinding);
 		for (i = 0; i < count; i++)
 		{//srv:texture 
 			std::string name = spvc_compiler_get_name(compiler_glsl, list[i].id);
@@ -561,7 +571,9 @@ namespace NxRHI
 			binder->IsStructuredBuffer = FALSE;
 			Reflector->Srvs.push_back(binder);
 		}
+
 		spvc_resources_get_resource_list_for_type(resources, SPVC_RESOURCE_TYPE_SEPARATE_SAMPLERS, &list, &count);
+		ASSERT(count < typeMaxBinding);
 		for (i = 0; i < count; i++)
 		{//samplers
 			auto name = spvc_compiler_get_name(compiler_glsl, list[i].id);
@@ -594,6 +606,16 @@ namespace NxRHI
 			break;
 		case EShaderType::SDT_PixelShader:
 			lang = EShLanguage::EShLangFragment;
+			break;
+		case EShaderType::SDT_AmplificationShader:
+			lang = EShLanguage::EShLangTask;
+			break;
+		case EShaderType::SDT_MeshShader:
+			lang = EShLanguage::EShLangMesh;
+			break;
+		case EShaderType::SDT_RayTracing:
+		default:
+			ASSERT(false);
 			break;
 		}
 

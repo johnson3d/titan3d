@@ -137,26 +137,26 @@ public:
 	ENGINE_RTTI(PhySceneDesc);
 	NvPhySceneDesc();
 	~NvPhySceneDesc();
-	void Init();
+	virtual void Init() override;
 	physx::PxSceneDesc* GetDesc() {
 		return mDesc;
 	}
-	void SetFlags(EPhySceneFlag flags) {
+	virtual void SetFlags(EPhySceneFlag flags) override{
 		mDesc->flags = (physx::PxSceneFlag::Enum)flags;
 	}
-	EPhySceneFlag GetFlags() {
+	virtual EPhySceneFlag GetFlags() override{
 		return (EPhySceneFlag)((physx::PxU32)mDesc->flags);
 	}
-	void SetContactDataBlocks(physx::PxU32 nb) {
+	virtual void SetContactDataBlocks(physx::PxU32 nb) override{
 		mDesc->nbContactDataBlocks = nb;
 	}
-	physx::PxU32 GetContactDataBlocks() {
+	virtual physx::PxU32 GetContactDataBlocks() override{
 		return mDesc->nbContactDataBlocks;
 	}
-	void SetGravity(const v3dxVector3* gravity) {
+	virtual void SetGravity(const v3dxVector3* gravity) override{
 		mDesc->gravity = *(physx::PxVec3*)gravity;
 	}
-	void GetGravity(v3dxVector3* gravity) {
+	virtual void GetGravity(v3dxVector3* gravity) override{
 		*gravity = *(v3dxVector3*)(&mDesc->gravity);
 	}
 	void SetSimulationEventCallback(void* handle,
@@ -170,10 +170,10 @@ public:
 	void SetHandle(void* handle) {
 		mSimulationEventCallback.Handle = handle;
 	}
-	void SetOnTrigger(FonTrigger onTrigger) {
+	virtual void SetOnTrigger(FonTrigger onTrigger) override{
 		mSimulationEventCallback._onTrigger = onTrigger;
 	}
-	void SetOnContact(FonContact onContact) {
+	virtual void SetOnContact(FonContact onContact) override{
 		mSimulationEventCallback._onContact = onContact;
 	}
 	
@@ -192,47 +192,47 @@ public:
 	NvPhyScene();
 	~NvPhyScene();
 	virtual void Cleanup() override;
-	void BindPhysX();
+	virtual void BindPhysX() override;
 
-	void LockRead() {
+	virtual void LockRead() override {
 		mScene->lockRead();
 	}
-	void UnlockRead() {
+	virtual void UnlockRead() override {
 		mScene->unlockRead();
 	}
-	void LockWrite() {
+	virtual void LockWrite() override {
 		mScene->lockWrite();
 	}
-	void UnlockWrite() {
+	virtual void UnlockWrite() override {
 		mScene->unlockWrite();
 	}
-	void* UpdateActorTransforms(UINT* activeActorCount);
-	PhyActor* GetActor(void* updatedActors, UINT index);
+	virtual void* UpdateActorTransforms(UINT* activeActorCount) override;
+	virtual PhyActor* GetActor(void* updatedActors, UINT index) override;
 
-	void Simulate(physx::PxReal elapsedTime,
-		void* scratchMemBlock = 0, physx::PxU32 scratchMemBlockSize = 0, bool controlSimulation = true)
+	virtual void Simulate(physx::PxReal elapsedTime,
+		void* scratchMemBlock = 0, physx::PxU32 scratchMemBlockSize = 0, bool controlSimulation = true) override
 	{
 		physx::PxSceneWriteLock writeLock(*mScene);
 		mScene->simulate(elapsedTime, CompletionTask, scratchMemBlock, scratchMemBlockSize, controlSimulation);
 	}
-	vBOOL FetchResults(bool block = false, physx::PxU32* errorState = 0)
+	virtual vBOOL FetchResults(bool block = false, physx::PxU32* errorState = 0) override
 	{
 		physx::PxSceneWriteLock writeLock(*mScene);
 		return mScene->fetchResults(block, errorState) ? 1 : 0;
 	}
-	vBOOL Raycast(const v3dxVector3* origin, const v3dxVector3* unitDir, float maxDistance, OUT VHitResult* hitResult);
-	vBOOL Sweep(const PhyShape* shape, const v3dxVector3* position, const v3dxVector3* unitDir, float maxDistance, OUT VHitResult* hitResult);
-	vBOOL Overlap(const PhyShape* shape, const v3dxVector3* position, const v3dxQuaternion* rotation, OUT VHitResult* hitResult);
-	vBOOL RaycastWithFilter(const v3dxVector3* origin, const v3dxVector3* unitDir, float maxDistance, FPhyQueryFilterData* queryFilterData,OUT VHitResult* hitResult);
-	vBOOL SweepWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxVector3* unitDir, float maxDistance, FPhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult);
-	vBOOL OverlapWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxQuaternion* rotation, FPhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult);
-	PhyController* CreateBoxController(const PhyBoxControllerDesc* desc);
-	PhyController* CreateCapsuleController(const PhyCapsuleControllerDesc* desc);
-	int GetNbControllers() {
+	virtual vBOOL Raycast(const v3dxVector3* origin, const v3dxVector3* unitDir, float maxDistance, OUT VHitResult* hitResult) override;
+	virtual vBOOL Sweep(const PhyShape* shape, const v3dxVector3* position, const v3dxVector3* unitDir, float maxDistance, OUT VHitResult* hitResult) override;
+	virtual vBOOL Overlap(const PhyShape* shape, const v3dxVector3* position, const v3dxQuaternion* rotation, OUT VHitResult* hitResult) override;
+	virtual vBOOL RaycastWithFilter(const v3dxVector3* origin, const v3dxVector3* unitDir, float maxDistance, FPhyQueryFilterData* queryFilterData,OUT VHitResult* hitResult) override;
+	virtual vBOOL SweepWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxVector3* unitDir, float maxDistance, FPhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult) override;
+	virtual vBOOL OverlapWithFilter(const PhyShape* shape, const v3dxVector3* position, const v3dxQuaternion* rotation, FPhyQueryFilterData* queryFilterData, OUT VHitResult* hitResult) override;
+	virtual PhyController* CreateBoxController(const PhyBoxControllerDesc* desc) override;
+	virtual PhyController* CreateCapsuleController(const PhyCapsuleControllerDesc* desc) override;
+	virtual int GetNbControllers() override{
 		return ControllerManager->getNbControllers();
 	}
-	PhyController* GetController(UINT index);
-	PhyObstacleContext* CreateObstacleContext();
+	virtual PhyController* GetController(UINT index) override;
+	virtual PhyObstacleContext* CreateObstacleContext() override;
 public:
 	physx::PxScene*			mScene;
 	physx::PxControllerManager* ControllerManager;

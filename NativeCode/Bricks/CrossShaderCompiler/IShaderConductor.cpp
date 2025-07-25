@@ -211,7 +211,6 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 	auto ar = compiler->GetShaderCodeStream(hlsl, hlsl);
 	std::string codeText((const char*)ar->GetSourceCode(), (size_t)ar->GetSize());
 	
-	const int typeMaxBinding = 50;
 	const int spirvShiftStride = 4 * typeMaxBinding;
 	int spirvShiftBase = 0;
 	ShaderConductor::ShaderStage stage = ShaderConductor::ShaderStage::VertexShader;

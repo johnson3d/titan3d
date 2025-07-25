@@ -155,7 +155,7 @@ float Math::InvSqrt(float fValue)
 float Math::UnitRandom()
 {
 	auto sr = rand();
-	return ((float)(sr % RAND_MAX)) / RAND_MAX;
+	return ((float)(sr % RAND_MAX)) / (float)RAND_MAX;
 }
 
 //-----------------------------------------------------------------------

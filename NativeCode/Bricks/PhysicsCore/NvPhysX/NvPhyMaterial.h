@@ -16,24 +16,24 @@ public:
 	NvPhyMaterial();
 	~NvPhyMaterial();
 	virtual void Cleanup() override;
-	void BindPhysX();
+	virtual void BindPhysX() override;
 
-	float GetDynamicFriction() {
+	virtual float GetDynamicFriction() override {
 		return mMaterial->getDynamicFriction();
 	}
-	void SetDynamicFriction(float v) {
+	virtual void SetDynamicFriction(float v) override {
 		mMaterial->setDynamicFriction(v);
 	}
-	float GetStaticFriction() {
+	virtual float GetStaticFriction() override {
 		return mMaterial->getStaticFriction();
 	}
-	void SetStaticFriction(float v) {
+	virtual void SetStaticFriction(float v) override {
 		mMaterial->setStaticFriction(v);
 	}
-	float GetRestitution() {
+	virtual float GetRestitution() override {
 		return mMaterial->getRestitution();
 	}
-	void SetRestitution(float v) {
+	virtual void SetRestitution(float v) override {
 		mMaterial->setRestitution(v);
 	}
 };

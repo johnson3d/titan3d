@@ -222,7 +222,7 @@ namespace Canvas
 		using FVInput = const v3dxVector2&;
 		using FIsInFunc = std::function<bool(FVInput)>;
 		using FInscFunc = std::function<v3dxVector2(FVInput, FVInput, float&)>;
-		auto ClipByLine = [&Vertices, &UVs, Rect, bHasUV](FIsInFunc IsInside, FInscFunc Intersect)
+		auto ClipByLine = [&Vertices, &UVs, bHasUV](FIsInFunc IsInside, FInscFunc Intersect)
 		{
 			const UINT NumVerts = (UINT)Vertices.size();
 			std::vector<v3dxVector2> NewVerts;

@@ -30,12 +30,12 @@ public:
 		return &mRotation;
 	}
 	virtual void Cleanup() override;
-	void BindPhysX();
-	bool AddToScene(PhyScene* scene);
-	bool RemoveFromScene(PhyScene* scene);
-	virtual void UpdateTransform();
+	virtual void BindPhysX() override;
+	virtual bool AddToScene(PhyScene* scene) override;
+	virtual bool RemoveFromScene(PhyScene* scene) override;
+	virtual void UpdateTransform() override;
 
-	bool SetPose2Physics(const v3dxVector3* p, const v3dxQuaternion* q, bool autowake)
+	virtual bool SetPose2Physics(const v3dxVector3* p, const v3dxQuaternion* q, bool autowake) override
 	{
 		physx::PxTransform trf;
 		trf.p.x = p->X;
@@ -48,7 +48,7 @@ public:
 		return SetPose2Physics(&trf, autowake ? TRUE : FALSE);
 	}
 	bool SetPose2Physics(const physx::PxTransform* transform, bool autowake);
-	bool AttachShape(PhyShape* shape, const v3dxVector3* p, const v3dxQuaternion* q)
+	virtual bool AttachShape(PhyShape* shape, const v3dxVector3* p, const v3dxQuaternion* q) override
 	{
 		physx::PxTransform trf;
 		trf.p.x = p->X;
@@ -61,19 +61,19 @@ public:
 		return AttachShape(shape, &trf);
 	}
 	bool AttachShape(PhyShape* shape, const physx::PxTransform* relativePose);
-	void DetachShape(PhyShape* shape, bool wakeOnLostTouch);
+	virtual void DetachShape(PhyShape* shape, bool wakeOnLostTouch) override;
 
-	bool SetRigidBodyFlag(EPhyRigidBodyFlag flag, bool value);
-	bool SetActorFlag(EPhyActorFlag flag, bool value);
+	virtual bool SetRigidBodyFlag(EPhyRigidBodyFlag flag, bool value) override;
+	virtual bool SetActorFlag(EPhyActorFlag flag, bool value) override;
 
-	void SetMass(float mass)
+	virtual void SetMass(float mass) override
 	{
 		if (mActorType == EPhyActorType::PAT_Dynamic)
 		{
 			((physx::PxRigidDynamic*)mActor)->setMass(mass);
 		}
 	}
-	float GetMass() const 
+	virtual float GetMass() const override
 	{
 		if (mActorType == EPhyActorType::PAT_Dynamic)
 		{
@@ -81,14 +81,14 @@ public:
 		}
 		return 0;
 	}
-	void SetMassSpaceInertiaTensor(const v3dxVector3* m)
+	virtual void SetMassSpaceInertiaTensor(const v3dxVector3* m) override
 	{
 		if (mActorType == EPhyActorType::PAT_Dynamic)
 		{
 			((physx::PxRigidDynamic*)mActor)->setMassSpaceInertiaTensor(*(physx::PxVec3*)m);
 		}
 	}
-	v3dxVector3 GetMassSpaceInertiaTensor() const
+	virtual v3dxVector3 GetMassSpaceInertiaTensor() const override
 	{
 		if (mActorType == EPhyActorType::PAT_Dynamic)
 		{
@@ -97,8 +97,8 @@ public:
 		}
 		return v3dxVector3::ZERO;
 	}
-	float GetMinCCDAdvanceCoefficient();
-	void SetMinCCDAdvanceCoefficient(float advanceCoefficient);
+	virtual float GetMinCCDAdvanceCoefficient() override;
+	virtual void SetMinCCDAdvanceCoefficient(float advanceCoefficient) override;
 };
 
 NS_END

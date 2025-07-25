@@ -13,6 +13,7 @@ class TR_CLASS()
 {
 public:
 	static IShaderConductor* GetInstance();	
+	static const int typeMaxBinding = 50;
 	IShaderConductor()
 	{
 

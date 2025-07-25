@@ -16,10 +16,9 @@ ENGINE_RTTI_IMPL(VFile2Memory);
 
 //------------------------------------------------------------------------
 VFile2Memory::VFile2Memory()
-	: mCachedBuffer(NULL)
-	, mCachedStarter(0)
-	, mPtrRef(0)
+	: mPtrRef(0)
 {
+	mCachedStarter = 0;
 	mIsClosing = FALSE;
 }
 

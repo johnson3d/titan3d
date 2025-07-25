@@ -304,7 +304,6 @@ namespace NxRHI
 	struct FTransitionScope
 	{
 	private:
-		bool bTryRenderPass;
 		bool bNeedTransition;
 		EGpuResourceState SaveState;
 		IGpuBufferData* Resource;

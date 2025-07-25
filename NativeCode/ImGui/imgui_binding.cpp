@@ -156,7 +156,8 @@ static const char* PatchFormatStringFloatToInt(const char* fmt)
 		if (fmt_start == fmt && fmt_end[0] == 0)
 			return "%d";
 		ImGuiContext* g = GImGui;
-		ImFormatString(GImGui->TempBuffer.Data, IM_ARRAYSIZE(GImGui->TempBuffer.Data), "%.*s%%d%s", (int)(fmt_start - fmt), fmt, fmt_end); // Honor leading and trailing decorations, but lose alignment/precision.
+		//ImFormatString(GImGui->TempBuffer.Data, IM_ARRAYSIZE(GImGui->TempBuffer.Data), "%.*s%%d%s", (int)(fmt_start - fmt), fmt, fmt_end); // Honor leading and trailing decorations, but lose alignment/precision.
+		ImFormatString(GImGui->TempBuffer.Data, GImGui->TempBuffer.Size * sizeof(decltype(GImGui->TempBuffer.Data)), "%.*s%%d%s", (int)(fmt_start - fmt), fmt, fmt_end); // Honor leading and trailing decorations, but lose alignment/precision.
 		return GImGui->TempBuffer.Data;
 #else
 		IM_ASSERT(0 && "DragInt(): Invalid format string!"); // Old versions used a default parameter of "%.0f", please replace with e.g. "%d"

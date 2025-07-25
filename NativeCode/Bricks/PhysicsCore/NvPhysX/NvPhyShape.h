@@ -27,9 +27,9 @@ public:
 	NvPhyShape();
 	~NvPhyShape();
 	virtual void Cleanup() override;
-	void BindPhysX();
+	virtual void BindPhysX() override;
 	vBOOL AddToActor(PhyActor* actor, const physx::PxTransform* relativePose);
-	bool AddToActor(PhyActor * actor, const v3dxVector3 * p, const v3dxQuaternion * q)
+	virtual bool AddToActor(PhyActor * actor, const v3dxVector3 * p, const v3dxQuaternion * q) override
 	{
 		physx::PxTransform tm;
 		tm.p.x = p->X;
@@ -43,9 +43,9 @@ public:
 
 		return AddToActor(actor, &tm) ? true : false;
 	}
-	void RemoveFromActor();
+	virtual void RemoveFromActor() override;
 	void SetLocalPose(const physx::PxTransform* relativePose);
-	void SetLocalPose(const v3dxVector3* p, const v3dxQuaternion* q)
+	virtual void SetLocalPose(const v3dxVector3* p, const v3dxQuaternion* q) override
 	{
 		physx::PxTransform tm;
 		tm.p.x = p->X;
@@ -59,7 +59,7 @@ public:
 		SetLocalPose(&tm);
 	}
 	void GetLocalPose(physx::PxTransform* relativePose);
-	void GetLocalPose(v3dxVector3* p, v3dxQuaternion* q)
+	virtual void GetLocalPose(v3dxVector3* p, v3dxQuaternion* q) override
 	{
 		physx::PxTransform tm;
 		GetLocalPose(&tm);
@@ -72,29 +72,29 @@ public:
 		q->Z = tm.q.z;
 		q->W = tm.q.w;
 	}
-	void SetQueryFilterData(const FPhyFilterData* filterData);
-	void SetSimulationFilterData(const FPhyFilterData* filterData);
-	void SetFlag(EPhysShapeFlag flag, bool value);
-	bool HaveFlag(EPhysShapeFlag flag);
+	virtual void SetQueryFilterData(const FPhyFilterData* filterData) override;
+	virtual void SetSimulationFilterData(const FPhyFilterData* filterData) override;
+	virtual void SetFlag(EPhysShapeFlag flag, bool value) override;
+	virtual bool HaveFlag(EPhysShapeFlag flag) override;
 
-	void GetMaterials(PhyMaterial** materials, int count);
-	void SetMaterials(PhyMaterial** materials, int count);
+	virtual void GetMaterials(PhyMaterial** materials, int count) override;
+	virtual void SetMaterials(PhyMaterial** materials, int count) override;
 
-	bool IfGetBox(v3dxVector3* halfExtent);
-	bool IfSetBox(const v3dxVector3* halfExtent);
-	bool IfGetSphere(float* radius);
-	bool IfSetSphere(float radius);
-	bool IfGetCapsule(float* radius, float* halfHeight);
-	bool IfSetCapsule(float radius, float halfHeight);
-	bool IfGetTriMeshScaling(v3dxVector3* scale, v3dxQuaternion* scaleRot);
-	bool IfSetTriMeshScaling(const v3dxVector3* scale, const v3dxQuaternion* scaleRot);
+	virtual bool IfGetBox(v3dxVector3* halfExtent) override;
+	virtual bool IfSetBox(const v3dxVector3* halfExtent) override;
+	virtual bool IfGetSphere(float* radius) override;
+	virtual bool IfSetSphere(float radius) override;
+	virtual bool IfGetCapsule(float* radius, float* halfHeight) override;
+	virtual bool IfSetCapsule(float radius, float halfHeight) override;
+	virtual bool IfGetTriMeshScaling(v3dxVector3* scale, v3dxQuaternion* scaleRot) override;
+	virtual bool IfSetTriMeshScaling(const v3dxVector3* scale, const v3dxQuaternion* scaleRot) override;
 
 	TR_MEMBER(SV_NoBind = true)
-	NxRHI::FMeshPrimitives* IfGetTriMesh(NxRHI::IGpuDevice* rc);
+		virtual NxRHI::FMeshPrimitives* IfGetTriMesh(NxRHI::IGpuDevice* rc) override;
 	TR_MEMBER(SV_NoBind = true)
-	NxRHI::FMeshPrimitives* IfGetConvexMesh(NxRHI::IGpuDevice* rc);
+		virtual NxRHI::FMeshPrimitives* IfGetConvexMesh(NxRHI::IGpuDevice* rc) override;
 
-	int GetTrianglesRemap(int index);
+	virtual int GetTrianglesRemap(int index) override;
 };
 
 NS_END

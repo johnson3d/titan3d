@@ -134,11 +134,11 @@ InputGeom::InputGeom() :
 	m_mesh(0),
 	m_offMeshConCount(0),
 	m_volumeCount(0),
-	m_npts(0),
-	m_nhull(0),
 	m_polyOffset(0.0f),
 	m_boxHeight(6.0f),
-	m_boxDescent(1.0f)
+	m_boxDescent(1.0f),
+	m_npts(0),
+	m_nhull(0)
 {
 }
 

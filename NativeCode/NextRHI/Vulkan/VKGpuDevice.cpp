@@ -473,9 +473,9 @@ namespace NxRHI
 		features2.features.geometryShader = VK_TRUE;
 		features2.features.multiViewport = VK_TRUE;
 
-		ASSERT(localReadFeatures.dynamicRenderingLocalRead = VK_TRUE);
+		ASSERT(localReadFeatures.dynamicRenderingLocalRead == VK_TRUE);
 		ASSERT(dynamicRenderingFeatures.dynamicRendering == VK_TRUE);
-		ASSERT(sync2Features.synchronization2 = VK_TRUE);
+		ASSERT(sync2Features.synchronization2 == VK_TRUE);
 
 		VkPhysicalDeviceFeatures features1{};
 		vkGetPhysicalDeviceFeatures(mPhysicalDevice, &features1);

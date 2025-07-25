@@ -1476,7 +1476,7 @@ struct AuxRttiBuilder<CombineFullName(ns, Type)> : public AuxRttiBuilderBase\
 		using VectorType = decltype(((ThisType*)0)->name);\
 		auto prop = new AuxVectorEnumatorProperty<VectorType::value_type>();\
 		prop->MemberName = #name;\
-		prop->Offset = offsetof(ThisType, name);\
+		prop->Offset = (unsigned int)member_offset(&ThisType::name);\
 		prop->MemberType.BuildType<VectorType>();\
 		pRtti->PushMember(prop);\
 		__current_member = prop;\

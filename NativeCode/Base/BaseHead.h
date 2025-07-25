@@ -176,3 +176,10 @@ inline void _vfxTraceA(LPCSTR lpszFormat, ...)
 
 //#define NEW_INHEAD new(__FILE__, __LINE__)
 #define NEW_INHEAD new
+
+template<typename T, typename M>
+constexpr std::size_t member_offset(M T::* member) noexcept {
+	return reinterpret_cast<std::size_t>(
+		&(static_cast<T*>(nullptr)->*member)
+		);
+}

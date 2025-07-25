@@ -118,7 +118,6 @@
     <Import Project="..\NativeCode\NextRHI\NextRHI.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\NextRHI\Vulkan\Vulkan.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\iconv\iconv.vcxitems" Label="Shared" />
-    <Import Project="..\3rd\native\spirv-cross\spirv-cross.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\Recast\Recast\Recast.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\RecastRuntime\RecastRuntime.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\RecastBuilder\RecastBuilder.vcxitems" Label="Shared" />
@@ -130,6 +129,9 @@
     <Import Project="..\3rd\native\zstd\zstd.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\zlib\zlib.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\miniz\miniz.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\PhysicsCore\NvPhysX\NvPhysX.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\SpirvCross\SpirvCross.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\xatlas\xatlas.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
@@ -240,7 +242,7 @@
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <ExceptionHandling>Enabled</ExceptionHandling>
       <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-frtti -Wno-format-security -Wno-unused-variable -Wno-unused-command-line-argument %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;android;EGL;GLESv2;vulkan;%(LibraryDependencies)</LibraryDependencies>
@@ -254,7 +256,7 @@
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
       <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-frtti -Wno-format-security -Wno-unused-variable -Wno-unused-command-line-argument %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;android;EGL;GLESv2;vulkan;%(LibraryDependencies)</LibraryDependencies>
