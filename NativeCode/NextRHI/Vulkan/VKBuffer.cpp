@@ -40,9 +40,9 @@ namespace NxRHI
 	{
 		auto device = mDeviceRef.GetPtr();
 		if (mIsBufferView)
-			VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_VIEW_EXT, mBufferView, name);
+			VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_OBJECT_TYPE_BUFFER_VIEW, mBufferView, name);
 		else
-			VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT, mImageView, name);
+			VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_OBJECT_TYPE_IMAGE_VIEW, mImageView, name);
 	}
 
 	VKBuffer::VKBuffer()
@@ -444,7 +444,7 @@ namespace NxRHI
 	void VKBuffer::SetDebugName(const char* name)
 	{
 		auto device = mDeviceRef.GetPtr();
-		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT, (void*)mBuffer, name);
+		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_OBJECT_TYPE_BUFFER, (void*)mBuffer, name);
 	}
 	
 	VKTexture::VKTexture()
@@ -1085,7 +1085,7 @@ namespace NxRHI
 	void VKTexture::SetDebugName(const char* name)
 	{
 		auto device = mDeviceRef.GetPtr();
-		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT, mImage, name);
+		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_OBJECT_TYPE_IMAGE, mImage, name);
 	}
 
 	VKCbView::VKCbView()
@@ -1294,9 +1294,9 @@ namespace NxRHI
 	{
 		auto device = mDeviceRef.GetPtr();
 		if (mView->mIsBufferView)
-			VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_VIEW_EXT, mView->mBufferView, name);
+			VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_OBJECT_TYPE_BUFFER_VIEW, mView->mBufferView, name);
 		else
-			VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT, mView->mImageView, name);
+			VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_OBJECT_TYPE_IMAGE_VIEW, mView->mImageView, name);
 	}
 
 	bool VKSrView::Init(VKGpuDevice* device, IGpuBufferData* pBuffer, const FSrvDesc& desc)
@@ -1672,7 +1672,7 @@ namespace NxRHI
 	void VKRenderTargetView::SetDebugName(const char* name)
 	{
 		auto device = mDeviceRef.GetPtr();
-		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT, mView, name);
+		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_OBJECT_TYPE_IMAGE_VIEW, mView, name);
 	}
 	bool VKRenderTargetView::Init(VKGpuDevice* device, ITexture* pBuffer, const FRtvDesc* desc)
 	{
@@ -1723,7 +1723,7 @@ namespace NxRHI
 	void VKDepthStencilView::SetDebugName(const char* name)
 	{
 		auto device = mDeviceRef.GetPtr();
-		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT, mView, name);
+		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_OBJECT_TYPE_IMAGE_VIEW, mView, name);
 	}
 	bool VKDepthStencilView::Init(VKGpuDevice* device, ITexture* pBuffer, const FDsvDesc& desc)
 	{

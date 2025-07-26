@@ -680,32 +680,32 @@ namespace NxRHI
 	{
 		ASSERT(mCmdListState == ECmdListState::Recording);
 		GetCmdRecorder()->mDirectDrawNum++;
-		if (VKGpuSystem::vkCmdDebugMarkerBeginEXT != nullptr)
-		{
-			VkDebugMarkerMarkerInfoEXT markerInfo{};
-			markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
-			markerInfo.pMarkerName = info;
-			VKGpuSystem::vkCmdDebugMarkerBeginEXT(GetVKCmdRecorder()->mCommandBuffer, &markerInfo);
-		}
-		else if (VKGpuSystem::vkCmdBeginDebugUtilsLabelEXT != nullptr)
+		if (VKGpuSystem::vkCmdBeginDebugUtilsLabelEXT != nullptr)
 		{
 			VkDebugUtilsLabelEXT markerInfo{};
 			markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
 			markerInfo.pLabelName = info;
 			VKGpuSystem::vkCmdBeginDebugUtilsLabelEXT(GetVKCmdRecorder()->mCommandBuffer, &markerInfo);
 		}
+		else if (VKGpuSystem::vkCmdDebugMarkerBeginEXT != nullptr)
+		{
+			VkDebugMarkerMarkerInfoEXT markerInfo{};
+			markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
+			markerInfo.pMarkerName = info;
+			VKGpuSystem::vkCmdDebugMarkerBeginEXT(GetVKCmdRecorder()->mCommandBuffer, &markerInfo);
+		}
 	}
 	void VKCommandList::EndEvent()
 	{
 		ASSERT(mCmdListState == ECmdListState::Recording);
 		GetCmdRecorder()->mDirectDrawNum++;
-		if (VKGpuSystem::vkCmdDebugMarkerEndEXT != nullptr)
-		{
-			VKGpuSystem::vkCmdDebugMarkerEndEXT(GetVKCmdRecorder()->mCommandBuffer);
-		}
-		else if (VKGpuSystem::vkCmdEndDebugUtilsLabelEXT != nullptr)
+		if (VKGpuSystem::vkCmdEndDebugUtilsLabelEXT != nullptr)
 		{
 			VKGpuSystem::vkCmdEndDebugUtilsLabelEXT(GetVKCmdRecorder()->mCommandBuffer);
+		}
+		else if (VKGpuSystem::vkCmdDebugMarkerEndEXT != nullptr)
+		{
+			VKGpuSystem::vkCmdDebugMarkerEndEXT(GetVKCmdRecorder()->mCommandBuffer);
 		}
 	}
 	void VKCommandList::SetShader(IShader* shader)

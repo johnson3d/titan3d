@@ -613,6 +613,9 @@ namespace NxRHI
 		case EShaderType::SDT_MeshShader:
 			lang = EShLanguage::EShLangMesh;
 			break;
+		case EShaderType::SDT_ComputeShader:
+			lang = EShLanguage::EShLangCompute;
+			break;
 		case EShaderType::SDT_RayTracing:
 		default:
 			ASSERT(false);

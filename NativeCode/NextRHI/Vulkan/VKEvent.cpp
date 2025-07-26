@@ -169,7 +169,7 @@ namespace NxRHI
 	void VKFence::SetDebugName(const char* name)
 	{
 		auto device = mDeviceRef.GetPtr();
-		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_SEMAPHORE_EXT, mSemaphore, name);
+		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_OBJECT_TYPE_SEMAPHORE, mSemaphore, name);
 	}
 	/// ====================================
 	VKBinaryFence::VKBinaryFence(VKGpuDevice* device)

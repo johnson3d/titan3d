@@ -65,42 +65,46 @@ namespace NxRHI
 		DefineVKFunctionPtr(vkSignalSemaphore);
 		DefineVKFunctionPtr(vkWaitSemaphores);
 
-		static VkObjectType VKDebugReportObjectTypeToObjectType(VkDebugReportObjectTypeEXT type)
+		static VkDebugReportObjectTypeEXT VKObjectTypeToDebugReportObjectType(VkObjectType type)
 		{
 			switch (type)
 			{
-			case VkDebugReportObjectTypeEXT::VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT:
-				return VkObjectType::VK_OBJECT_TYPE_BUFFER;
-			case VkDebugReportObjectTypeEXT::VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT:
-				return VkObjectType::VK_OBJECT_TYPE_IMAGE;
-			case VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_VIEW_EXT:
-				return VkObjectType::VK_OBJECT_TYPE_BUFFER_VIEW;
-			case VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT:
-				return VkObjectType::VK_OBJECT_TYPE_IMAGE_VIEW;
+			case VkObjectType::VK_OBJECT_TYPE_BUFFER:
+				return VkDebugReportObjectTypeEXT::VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT;
+			case VkObjectType::VK_OBJECT_TYPE_IMAGE:
+				return VkDebugReportObjectTypeEXT::VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT;
+			case VkObjectType::VK_OBJECT_TYPE_BUFFER_VIEW:
+				return VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_VIEW_EXT;
+			case VkObjectType::VK_OBJECT_TYPE_IMAGE_VIEW:
+				return VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT;
+			case VkObjectType::VK_OBJECT_TYPE_PIPELINE:
+				return VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT;
+			case VkObjectType::VK_OBJECT_TYPE_SEMAPHORE:
+				return VK_DEBUG_REPORT_OBJECT_TYPE_SEMAPHORE_EXT;
 			default:
 				ASSERT(false);
 				break;
 			}
-			return VkObjectType::VK_OBJECT_TYPE_UNKNOWN;
+			return VkDebugReportObjectTypeEXT::VK_DEBUG_REPORT_OBJECT_TYPE_UNKNOWN_EXT;
 		}
-		static void SetVkObjectDebugName(VkDevice device, VkDebugReportObjectTypeEXT type, void* pObj, const char* name)
+		static void SetVkObjectDebugName(VkDevice device, VkObjectType type, void* pObj, const char* name)
 		{
-			if (VKGpuSystem::vkDebugMarkerSetObjectNameEXT != nullptr)
-			{
-				VkDebugMarkerObjectNameInfoEXT dbgNameInfo{};
-				dbgNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT;
-				dbgNameInfo.pObjectName = name;
-				dbgNameInfo.objectType = type;
-				dbgNameInfo.object = (uint64_t)pObj;
-				VKGpuSystem::vkDebugMarkerSetObjectNameEXT(device, &dbgNameInfo);
-			}
-			else if (VKGpuSystem::vkSetDebugUtilsObjectNameEXT != nullptr)
+			if (VKGpuSystem::vkSetDebugUtilsObjectNameEXT != nullptr)
 			{
 				VkDebugUtilsObjectNameInfoEXT dbgNameInfo{};
 				dbgNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
 				dbgNameInfo.pObjectName = name;
-				dbgNameInfo.objectType = VKDebugReportObjectTypeToObjectType(type);
+				dbgNameInfo.objectType = type;
 				dbgNameInfo.objectHandle = (uint64_t)pObj;
+			}
+			else if (VKGpuSystem::vkDebugMarkerSetObjectNameEXT != nullptr)
+			{
+				VkDebugMarkerObjectNameInfoEXT dbgNameInfo{};
+				dbgNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT;
+				dbgNameInfo.pObjectName = name;
+				dbgNameInfo.objectType = VKObjectTypeToDebugReportObjectType(type);
+				dbgNameInfo.object = (uint64_t)pObj;
+				VKGpuSystem::vkDebugMarkerSetObjectNameEXT(device, &dbgNameInfo);
 			}
 		}
 	public:

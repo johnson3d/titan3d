@@ -27,7 +27,7 @@
   "SupportMultWindows": true,
   "DoUnitTest": true,
   "RHIType": "RHI_D3D12",
-  "HasDebugLayer": false,
+  "HasDebugLayer": true,
   "IsGpuBaseValidation": false,
   "IsDebugShader": true,
   "IsGpuDred": false,

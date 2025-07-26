@@ -560,7 +560,7 @@ namespace NxRHI
 			return false;
 		}
 
-		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT , mGraphicsPipeline, "PipeLine1");
+		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_OBJECT_TYPE_PIPELINE, mGraphicsPipeline, "PipeLine1");
 
 		return true;
 	}

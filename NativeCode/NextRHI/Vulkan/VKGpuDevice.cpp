@@ -194,18 +194,17 @@ namespace NxRHI
 		//vkCmdBeginDebugUtilsLabelEXT
 		
 
+		GetVKFunctionPtr(vkSetDebugUtilsObjectNameEXT);
+		GetVKFunctionPtr(vkCmdBeginDebugUtilsLabelEXT);
+		GetVKFunctionPtr(vkCmdEndDebugUtilsLabelEXT);
+
 		if (isDebugSafe())
 		{
 			GetVKFunctionPtr(vkDebugMarkerSetObjectNameEXT);
 			GetVKFunctionPtr(vkCmdDebugMarkerBeginEXT);
 			GetVKFunctionPtr(vkCmdDebugMarkerEndEXT);
 		}
-		else
-		{
-			GetVKFunctionPtr(vkSetDebugUtilsObjectNameEXT);
-			GetVKFunctionPtr(vkCmdBeginDebugUtilsLabelEXT);
-			GetVKFunctionPtr(vkCmdEndDebugUtilsLabelEXT);
-		}
+		
 		GetVKFunctionPtr(vkQueueSubmit2);
 		GetVKFunctionPtr(vkGetSemaphoreCounterValue);
 		GetVKFunctionPtr(vkSignalSemaphore);
