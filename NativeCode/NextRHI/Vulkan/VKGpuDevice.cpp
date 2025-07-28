@@ -279,6 +279,12 @@ namespace NxRHI
 		mFrameFence = nullptr;
 		mDescriptorPoolManager = nullptr;
 
+		if (mVmaAllocator)
+		{
+			vmaDestroyAllocator(mVmaAllocator);
+			mVmaAllocator = nullptr;
+		}
+		
 		if (mDevice != nullptr)
 		{
 			vkDestroyDevice(mDevice, nullptr);
@@ -624,6 +630,19 @@ namespace NxRHI
 			return false;
 		}
 		QueryDevice();
+
+		VmaAllocatorCreateInfo allocatorInfo = {};
+		allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_2;
+		allocatorInfo.physicalDevice = mPhysicalDevice;
+		allocatorInfo.device = mDevice;
+		allocatorInfo.instance = GetVkInstance();
+		if (vmaCreateAllocator(&allocatorInfo, &mVmaAllocator) != VK_SUCCESS) 
+		{
+			std::cerr << "Failed to create VMA allocator!" << std::endl;
+			return false;
+		}
+		//vmaCreateBuffer,vmaDestroyBuffer,vmaMapMemory,vmaUnmapMemory
+		//vmaCreateImage,vmaDestroyAllocator
 		
 		auto fn_vkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(GetVkInstance(), "vkCreateDebugReportCallbackEXT");
 		if (fn_vkCreateDebugReportCallbackEXT != nullptr)

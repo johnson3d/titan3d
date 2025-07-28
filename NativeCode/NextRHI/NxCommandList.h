@@ -105,8 +105,8 @@ namespace NxRHI
 
 		VSLLock									mLocker;
 	public:
-		inline size_t GetDrawcallNumber() const {
-			return mDrawcallArray.size() + mDirectDrawNum;
+		inline UINT GetDrawcallNumber() const {
+			return (UINT)mDrawcallArray.size() + mDirectDrawNum;
 		}
 		inline void UseResource(IGpuResource* res) {
 			res->AddCmdRefCount();

@@ -5,6 +5,7 @@
 #include "NxEffect.h"
 #include "NxCommandList.h"
 #include "NxFrameBuffers.h"
+#include "../../Base/vfxsampcounter.h"
 
 #define new VNEW
 
@@ -111,6 +112,7 @@ namespace NxRHI
 	}
 	void IGraphicDraw::BindResource(const FEffectBinder* binder, IGpuResource* resource)
 	{
+		AUTO_SAMP("NxRHI.IGraphicDraw.BindResource");
 		auto iter = BindResources.find(binder);
 		if (iter != BindResources.end())
 		{

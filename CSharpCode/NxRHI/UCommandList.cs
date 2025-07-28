@@ -39,7 +39,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject = ICmdRecorder.CreateInstance();
         }
-        public IntPtr DrawcallNumber
+        public uint DrawcallNumber
         {
             get => mCoreObject.GetDrawcallNumber();
         }

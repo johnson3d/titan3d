@@ -414,14 +414,14 @@ namespace EngineNS.DistanceField
                 }
                 if(bUseMultiThread == true)
                 {
-                    TtEngine.Instance.EventPoster.ParallelFor(sdfTaskList.Count, sdfTaskList.Count, static (index, state) =>
+                    TtEngine.Instance.EventPoster.ParallelFor(sdfTaskList.Count, static (index, state) =>
                     {
                         var pTaskList = state.GetForArgument0<List<FSparseMeshDistanceFieldAsyncTask>>();
                         var task = pTaskList[(int)index];
 
                         task.DoWork();
 
-                    }, sdfTaskList);
+                    }, -1, sdfTaskList);
                 }
                 else
                 {

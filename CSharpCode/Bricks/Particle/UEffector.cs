@@ -168,7 +168,7 @@ namespace EngineNS.Bricks.Particle
                     if (ForParameters.aliveNum > 0)
                     {
                         var numTask = Math.Max(1, (int)ForParameters.aliveNum / nebula.ParticleNumOfTask);
-                        TtEngine.Instance.EventPoster.ParallelFor((int)ForParameters.aliveNum, (int)numTask, static (nn, state) =>
+                        TtEngine.Instance.EventPoster.ParallelFor((int)ForParameters.aliveNum, static (nn, state) =>
                         {
                             var ForParameters = state.GetForArgument0<TtForParameters>();
                             var index = ForParameters.pAlives[nn];
@@ -179,7 +179,7 @@ namespace EngineNS.Bricks.Particle
                                 return;
                             }
                             ForParameters.effector.DoEffect(ForParameters.emitter, ForParameters.elapsed, cur);
-                        }, ForParameters);
+                        }, (int)numTask, ForParameters);
                     }
                     ForParameters.effector = null;
                 }
@@ -201,7 +201,7 @@ namespace EngineNS.Bricks.Particle
                 {
                     //var numTask = Math.Min(TtEngine.Instance.EventPoster.NumOfPool, (int)ForParameters.aliveNum);
                     var numTask = Math.Max(1, (int)ForParameters.aliveNum / nebula.ParticleNumOfTask);
-                    TtEngine.Instance.EventPoster.ParallelFor((int)ForParameters.aliveNum, numTask, static (nn, state) =>
+                    TtEngine.Instance.EventPoster.ParallelFor((int)ForParameters.aliveNum, static (nn, state) =>
                     {
                         var ForParameters = state.GetForArgument0<TtForParameters>();
 
@@ -209,7 +209,7 @@ namespace EngineNS.Bricks.Particle
                         var cur = (FParticle*)&ForParameters.pParticles[index];
                         ForParameters.emitter.OnParticleTick(ForParameters.emitter, ForParameters.elapsed, ref *cur);
                         cur->Location += cur->Velocity * ForParameters.elapsed;
-                    }, ForParameters);
+                    }, numTask, ForParameters);
                 }
             }
             ForParameters.Reset();

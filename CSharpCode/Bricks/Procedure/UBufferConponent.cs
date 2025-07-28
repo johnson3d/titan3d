@@ -911,8 +911,7 @@ namespace EngineNS.Bricks.Procedure
             else
             {
                 int TotalNum = (int)(Width * Height * Depth);
-                var numTask = TtEngine.Instance.EventPoster.NumOfPool;
-                TtEngine.Instance.EventPoster.ParallelFor(TotalNum, numTask, static (nn, state) =>
+                TtEngine.Instance.EventPoster.ParallelFor(TotalNum, static (nn, state) =>
                 {
                     var pThis = state.GetForArgument0<UBufferComponent>();
                     var onPerPiexel = state.GetForArgument1<FOnPerPixel>();
@@ -923,7 +922,7 @@ namespace EngineNS.Bricks.Procedure
                     int x = (nn % pitch) % pThis.Width;
 
                     onPerPiexel(pThis, x, y, z);
-                }, this, onPerPiexel);
+                }, -1, this, onPerPiexel);
 
                 //var evt = new System.Threading.AutoResetEvent(false);
                 //var smp = Thread.TtSemaphore.CreateSemaphore(Depth * Height * Width, evt);

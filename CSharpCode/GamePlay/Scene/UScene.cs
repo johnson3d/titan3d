@@ -509,9 +509,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 if (TtEngine.Instance.Config.IsParrallelWorldGather)
                 {
-                    var numTask = TtEngine.Instance.EventPoster.NumOfPool;
-                    numTask = Math.Min(ManagedNodes.Length, numTask);
-                    TtEngine.Instance.EventPoster.ParallelFor(ManagedNodes.Length, numTask, static (nn, state) =>
+                    TtEngine.Instance.EventPoster.ParallelFor(ManagedNodes.Length, static (nn, state) =>
                     {
                         var node = state.GetForArgument0<TtScene>();
                         var rp = state.GetForArgument1<TtWorld.TtVisParameter>();
@@ -537,7 +535,7 @@ namespace EngineNS.GamePlay.Scene
                                 }
                                 break;
                         }
-                    }, this, rp);
+                    }, -1, this, rp);
                 }
                 else
                 {

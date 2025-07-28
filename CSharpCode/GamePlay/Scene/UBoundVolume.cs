@@ -201,9 +201,9 @@ namespace EngineNS.GamePlay.Scene
             else
             {
                 var t3 = Support.TtTime.HighPrecision_GetTickCount();
-                var taskGroupNum = Math.Min(TtEngine.Instance.EventPoster.PooledThreadNum, 16);
+                //var taskGroupNum = Math.Min(TtEngine.Instance.EventPoster.PooledThreadNum, 16);
                 VisParameter.ClearVisibles();
-                TtEngine.Instance.EventPoster.ParallelFor(manager.Entities.Count, taskGroupNum, static (i, state) =>
+                TtEngine.Instance.EventPoster.ParallelFor(manager.Entities.Count, static (i, state) =>
                 {
                     var pThis = state.GetForArgument0<TtCullingSystem>();
                     var manager = pThis.World.EntityManager;
@@ -248,7 +248,7 @@ namespace EngineNS.GamePlay.Scene
                     {
                         node.GatherFollowVisibleMeshes(VisParameter);
                     }
-                }, this);
+                }, -1, this);
                 var t4 = Support.TtTime.HighPrecision_GetTickCount();
                 if (t4-t3>100)
                 {

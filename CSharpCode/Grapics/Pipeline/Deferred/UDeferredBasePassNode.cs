@@ -292,7 +292,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                     var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
                                     if (drawcall != null)
                                     {
-                                        drawcall.BindGBuffer(camera, GBuffers);
+                                        //drawcall.BindGBuffer(camera, GBuffers);
                                         mBackgroundPassRecorder.PushGpuDraw(drawcall);
                                     }
                                 }
@@ -304,7 +304,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                     var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
                                     if (drawcall != null)
                                     {
-                                        drawcall.BindGBuffer(camera, GBuffers);
+                                        //drawcall.BindGBuffer(camera, GBuffers);
                                         mBackgroundPassRecorder.PushGpuDraw(drawcall);
                                     }
                                 }

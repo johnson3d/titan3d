@@ -387,7 +387,7 @@ namespace EngineNS.GamePlay.Scene
             SceneManaged = (1 << 11),
             Transient = (1 << 12),
             NoTick = (1 << 13),
-            NoUsed0 = (1 << 14),
+            ParallelTick = (1 << 14),
             ForceGatherNode = (1 << 15),
             BuildNavMesh = (1 << 16),
             EnableHitproxyInGame = (1 << 17),
@@ -443,7 +443,7 @@ namespace EngineNS.GamePlay.Scene
             NodeStyles &= ~style;
         }
         [Category("Option")]
-        public bool IsNoTick
+        public virtual bool IsNoTick
         {
             get
             {
@@ -1409,7 +1409,8 @@ namespace EngineNS.GamePlay.Scene
         }
         public virtual Profiler.TimeScope GetScopeTickLogic()
         {
-            return TtOnTickLogicScope<TtNode>.Scope;
+            return null;
+            //return TtOnTickLogicScope<TtNode>.Scope;
         }
         
         public delegate bool FVisitNode(TtNode node, object arg);
@@ -1452,7 +1453,7 @@ namespace EngineNS.GamePlay.Scene
                 return mNodeBFSParameters;
             }
         }
-        public void IterateNodesBFS(FVisitNode fn, object arg, int NumOfParralelLimit = int.MaxValue)
+        public void IterateNodesBFS(FVisitNode fn, object arg, int NumOfParallelLimit = 1)
         {
             if (fn(this, arg) == false) 
                 return;
@@ -1466,11 +1467,11 @@ namespace EngineNS.GamePlay.Scene
             
             while (NodeBFSParameters.InputNodes.Count > 0)
             {
-                if (NodeBFSParameters.InputNodes.Count > NumOfParralelLimit)
+                if (NodeBFSParameters.InputNodes.Count > NumOfParallelLimit)
                 {
-                    var numTask = Math.Max(1, NodeBFSParameters.InputNodes.Count / NumOfParralelLimit);
+                    var numTask = Math.Max(1, NodeBFSParameters.InputNodes.Count / NumOfParallelLimit);
                     NodeBFSParameters.TaskNum = numTask;
-                    TtEngine.Instance.EventPoster.ParallelFor(NodeBFSParameters.InputNodes.Count, numTask, static (nn, state) =>
+                    TtEngine.Instance.EventPoster.ParallelFor(NodeBFSParameters.InputNodes.Count, static (nn, state) =>
                     {
                         var parameters = state.GetForArgument0<TtNodeBFSParameters>();
 
@@ -1483,7 +1484,7 @@ namespace EngineNS.GamePlay.Scene
                                 parameters.OutputNodes.AddRange(node.Children);
                             }
                         }
-                    }, NodeBFSParameters);
+                    }, numTask, NodeBFSParameters);
                 }
                 else
                 {

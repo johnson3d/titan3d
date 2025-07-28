@@ -14,6 +14,7 @@
 #endif
 
 #include <vulkan/vulkan.h>
+#include <vma/vk_mem_alloc.h>
 
 NS_BEGIN
 

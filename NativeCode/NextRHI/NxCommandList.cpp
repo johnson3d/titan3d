@@ -21,6 +21,7 @@ namespace NxRHI
 	
 	void ICmdRecorder::PushGpuDraw(IGpuDraw* draw)
 	{
+		AUTO_SAMP("NxRHI.ICmdRecorder.PushGpuDraw");
 		ASSERT(draw != nullptr);
 		VAutoVSLLock lk(mLocker);
 		mDrawcallArray.push_back(draw);

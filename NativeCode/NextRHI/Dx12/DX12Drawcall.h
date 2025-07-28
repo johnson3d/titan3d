@@ -26,7 +26,7 @@ namespace NxRHI
 		void BindDescriptorHeaps(DX12GpuDevice* device, DX12CommandList* dx12Cmd);
 	private:
 		void BindResourceToHeap(DX12GpuDevice* device, const FEffectBinder* binder, FBindResource& resource, 
-			AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap);
+			AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap, FCopyDescriptors& cbvsrvuavDescriptors, FCopyDescriptors& samplerDescriptors);
 	public:
 		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
 	};
@@ -44,7 +44,7 @@ namespace NxRHI
 		void BindDescriptorHeaps(DX12GpuDevice* device, DX12CommandList* dx12Cmd);
 	private:
 		void BindResourceToHeap(DX12GpuDevice* device, const FShaderBinder* binder, FBindResource& resource,
-			AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap);
+			AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap, FCopyDescriptors& cbvsrvuavDescriptors, FCopyDescriptors& samplerDescriptors);
 	public:
 		TWeakRefHandle<DX12GpuDevice>			mDeviceRef;
 	};
@@ -63,7 +63,7 @@ namespace NxRHI
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 	private:
 		void BindResourceToHeap(DX12GpuDevice* device, const FShaderBinder* binder, FBindResource& resource,
-			AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap);
+			AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap, FCopyDescriptors& cbvsrvuavDescriptors, FCopyDescriptors& samplerDescriptors);
 	public:
 		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
 		virtual void OnBindResource(const FShaderBinder* binder, FBindResource& resource) override;

@@ -583,8 +583,7 @@ namespace EngineNS.Bricks.DataCopyer
             creator.PushSegment(ref code);
             {
                 var klsCodes = new string[metas.Count];
-                var numTask = TtEngine.Instance.EventPoster.NumOfPool;
-                TtEngine.Instance.EventPoster.ParallelFor(metas.Count, numTask, (index, state) =>
+                TtEngine.Instance.EventPoster.ParallelFor(metas.Count, (index, state) =>
                 {
                     var met = metas[index];
                     if (met.ClassType.IsValueType)
@@ -595,7 +594,7 @@ namespace EngineNS.Bricks.DataCopyer
                     klsCreator.IntentCount = creator.IntentCount;
                     GenCode(met, klsCreator, ref klsCode);
                     klsCodes[index] = klsCode;
-                }, null);
+                }, -1, null);
                 foreach(var c in klsCodes)
                 {
                     if (c == null)

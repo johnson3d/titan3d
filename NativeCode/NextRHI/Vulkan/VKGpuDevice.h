@@ -206,6 +206,8 @@ namespace NxRHI
 		AutoRef<VKBuffer>					mNullVB;
 		AutoRef<VKSrView>					mNullSampledImage;
 		AutoRef<VKSampler>					mNullSampler;
+
+		VmaAllocator						mVmaAllocator = nullptr;
 	private:
 		bool GetAllocatorInfo(VkBufferUsageFlags flags, VkMemoryPropertyFlags prop, UINT& typeIndex, UINT& alignment);
 		void CreateNullObjects();

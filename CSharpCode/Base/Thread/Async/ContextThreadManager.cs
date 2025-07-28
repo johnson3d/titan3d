@@ -1,5 +1,5 @@
 ﻿//#define HAS_DebugInfo
-#define STATE_TIME
+//#define STATE_TIME
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -291,7 +291,6 @@ namespace EngineNS.Thread.Async
 
         #region for each
         public delegate void Delegate_ParrallelForAction(int index, TtAsyncTaskStateBase state);
-        public bool EnableMTForeach = true;
         internal TtPooledSemaphoreAllocator ParallelForSmpAllocator = new TtPooledSemaphoreAllocator();
         [ThreadStatic]
         private static Profiler.TimeScope mScopeParrallelForWait;
@@ -304,11 +303,33 @@ namespace EngineNS.Thread.Async
                 return mScopeParrallelForWait;
             }
         }
-        public void ParallelFor(int numTask, int numTaskGroup, Delegate_ParrallelForAction action, object userData1 = null, object userData2 = null)
+        public void ParallelFor(int numTask, Delegate_ParrallelForAction action, int numMicroThread = -1, object userData1 = null, object userData2 = null)
         {
+            if (numMicroThread<=0)
+            {
+                numMicroThread = TtEngine.Instance.EventPoster.PooledThreadNum;
+            }
             System.Diagnostics.Debug.Assert(Thread.TtContextThread.CurrentContext.GetThreadType()!= EAsyncTarget.TPools);
             if (numTask == 0)
+            {
                 return;
+            }
+            else if (numMicroThread == 1)
+            {
+                var eh = TtAsyncTaskState<bool>.CreateInstance();
+                eh.UserArguments.Obj0 = action;
+                eh.UserArguments.Obj1 = null;
+                eh.UserArguments.Obj2 = userData1;
+                eh.UserArguments.Obj3 = userData2;
+                eh.UserArguments.Value0.Y = (uint)numTask;
+                eh.UserArguments.Value0.Z = (uint)(numTask / numMicroThread);
+                for (int i = 0; i < numTask; i++)
+                {
+                    action(i, eh);
+                }
+                eh.Dispose();
+                return;
+            }
 
             var smp = ParallelForSmpAllocator.QueryObjectSync();
             smp.Reset(numTask);
@@ -318,12 +339,12 @@ namespace EngineNS.Thread.Async
             userArgs.Obj2 = userData1;
             userArgs.Obj3 = userData2;
             userArgs.Value0.Y = (uint)numTask;
-            userArgs.Value0.Z = (uint)(numTask / numTaskGroup);
-            if (numTask % numTaskGroup!=0)
+            userArgs.Value0.Z = (uint)(numTask / numMicroThread);
+            if (numTask % numMicroThread!=0)
             {
                 userArgs.Value0.Z += 1;
             }
-            for (int i = 0; i < numTaskGroup; i++)
+            for (int i = 0; i < numMicroThread; i++)
             {
                 userArgs.Value0.X = (uint)i;
                 this.RunParallel(static (state) =>
@@ -353,6 +374,7 @@ namespace EngineNS.Thread.Async
         internal static VParallelTaskManager.FDelegate_FRunTasks mNativeRunTasks = NativeRunTasks;
         static unsafe void NativeRunTasks(FTaskSession session)
         {
+            System.Diagnostics.Debug.Assert(Thread.TtContextThread.CurrentContext.GetThreadType()!= EAsyncTarget.TPools);
             var num = (int)session.GetNumOfTasks();
             TtAsyncTaskStateBase.FUserArguments args = new TtAsyncTaskStateBase.FUserArguments();
             args.Pointer = session.NativePointer;
@@ -436,22 +458,37 @@ namespace EngineNS.Thread.Async
             }
 #endif
         }
-
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopePushTask;
+        private static Profiler.TimeScope ScopePushTask
+        {
+            get
+            {
+                if (mScopePushTask == null)
+                    mScopePushTask = new Profiler.TimeScope(typeof(TtContextThreadManager), nameof(PushTask));
+                return mScopePushTask;
+            }
+        }
         public void PushTask(Async.TtAsyncTaskStateBase e)
         {
-            var thread = SelectBestThread();
-            thread.HasWork = true;
+            //using (new Profiler.TimeScopeHelper(ScopePushTask))
+            {
+                TtThreadPool thread = null;
+                thread = SelectBestThread();
+                thread.HasWork = true;
 #if STATE_TIME
-            e.CreateTime = Support.TtTime.HighPrecision_GetTickCount();
+                e.CreateTime = Support.TtTime.HighPrecision_GetTickCount();
 #endif
-            if (thread.LoadBalance > 2)
-            {
-                PushGlobalTask(e);
-            }
-            else
-            {
-                thread.PushTask(e);
-            }
+
+                if (thread.LoadBalance > 2)
+                {
+                    PushGlobalTask(e);
+                }
+                else
+                {
+                    thread.PushTask(e);
+                }
+            }  
         }
         private TtThreadPool SelectBestThread()
         {
@@ -516,14 +553,14 @@ namespace EngineNS.Thread.Async
                 eh.UserArguments = userArgs;
                 eh.CompletedEvent = completedEvent;
 
-                if (EnableMTForeach == false || TtContextThread.CurrentContext.IsTaskPoolThread())
-                {
-                    eh.ExecutePostEvent();
-                    eh.TaskState = Async.EAsyncTaskState.Completed;
-                    eh.CompletedEvent?.Set();
-                    eh.Dispose();
-                }
-                else
+                //if (TtContextThread.CurrentContext.IsTaskPoolThread())
+                //{
+                //    eh.ExecutePostEvent();
+                //    eh.TaskState = Async.EAsyncTaskState.Completed;
+                //    eh.CompletedEvent?.Set();
+                //    eh.Dispose();
+                //}
+                //else
                 {
                     this.PushTask(eh);
                 }

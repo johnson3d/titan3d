@@ -469,6 +469,28 @@ namespace EngineNS.GamePlay
             }
         }
         [ThreadStatic]
+        private static Profiler.TimeScope mScopeTick_ParallelTick;
+        private static Profiler.TimeScope ScopeTick_ParallelTick
+        {
+            get
+            {
+                if (mScopeTick_ParallelTick == null)
+                    mScopeTick_ParallelTick = new Profiler.TimeScope(typeof(TtWorld), nameof(TickLogic) + ".Parallel");
+                return mScopeTick_ParallelTick;
+            }
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeTick_SyncTick;
+        private static Profiler.TimeScope ScopeTick_SyncTick
+        {
+            get
+            {
+                if (mScopeTick_SyncTick == null)
+                    mScopeTick_SyncTick = new Profiler.TimeScope(typeof(TtWorld), nameof(TickLogic) + ".Sync");
+                return mScopeTick_SyncTick;
+            }
+        }
+        [ThreadStatic]
         private static Profiler.TimeScope mScopeTick_After;
         private static Profiler.TimeScope ScopeTick_After
         {
@@ -481,6 +503,7 @@ namespace EngineNS.GamePlay
         } 
         private TtNode.TtNodeTickParameters NodeTickParameters = new TtNode.TtNodeTickParameters();
         private List<TtNode> TickNodes = new List<TtNode>();
+        private List<TtNode> ParallelTickNodes = new List<TtNode>();
         public virtual void TickLogic(Graphics.Pipeline.TtRenderPolicy policy, float ellapse)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
@@ -496,27 +519,42 @@ namespace EngineNS.GamePlay
                 //Root.TickLogic(NodeTickParameters);
 
                 TickNodes.Clear();
+                ParallelTickNodes.Clear();
                 using (new Profiler.TimeScopeHelper(ScopeTick_Iterate))
                 {
                     Root.IterateNodes(static (nd, arg) =>
                     {
-                        var tp = (List<TtNode>)arg;
-                        tp.Add(nd);
+                        if (nd.IsNoTick)
+                            return true;
+
+                        var world = ((TtWorld)arg);
+                        var list = nd.HasStyle(TtNode.ENodeStyles.ParallelTick) ? world.ParallelTickNodes : world.TickNodes;
+                        list.Add(nd);
                         return true;
-                    }, TickNodes);
+                    }, this);
                 }
 
-                foreach (var i in TickNodes)
+                using (new Profiler.TimeScopeHelper(ScopeTick_ParallelTick))
                 {
-                    if (i.IsNoTick)
-                        continue;
-
-                    using (new Profiler.TimeScopeHelper(i.GetScopeTickLogic()))
+                    TtEngine.Instance.EventPoster.ParallelFor(ParallelTickNodes.Count, static (index, state) =>
                     {
-                        i.OnTickLogic(NodeTickParameters);
-                    }
+                        var world = state.GetForArgument0<TtWorld>();
+                        world.ParallelTickNodes[index].TickLogic(world.NodeTickParameters);
+                    }, -1, this);
+                    ParallelTickNodes.Clear();
                 }
-                TickNodes.Clear();
+
+                using (new Profiler.TimeScopeHelper(ScopeTick_SyncTick))
+                {
+                    foreach (var i in TickNodes)
+                    {
+                        using (new Profiler.TimeScopeHelper(i.GetScopeTickLogic()))
+                        {
+                            i.OnTickLogic(NodeTickParameters);
+                        }
+                    }
+                    TickNodes.Clear();
+                }
 
                 using (new Profiler.TimeScopeHelper(ScopeTick_After))
                 {

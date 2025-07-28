@@ -84,6 +84,7 @@ namespace EngineNS.GamePlay.Scene
                 this.Mesh = mesh;
                 //await materialMesh.Mesh.TryLoadClusteredMesh();
             }
+            this.SetStyle(ENodeStyles.ParallelTick);
             
             return true;
         }
@@ -418,8 +419,27 @@ namespace EngineNS.GamePlay.Scene
         {
             get => MdfQueue == TtTypeDescGetter<TtMdfSkinMesh>.TypeDesc;
         }
-
-        public Animation.SkeletonAnimation.Runtime.Pose.TtLocalSpaceRuntimePose RuntimePose { get; set; } = null;        
+        public override Profiler.TimeScope GetScopeTickLogic()
+        {
+            return null;
+            //return TtOnTickLogicScope<TtMeshNode>.Scope;
+        }
+        public Animation.SkeletonAnimation.Runtime.Pose.TtLocalSpaceRuntimePose RuntimePose { get; set; } = null;
+        public override bool IsNoTick
+        {
+            get
+            {
+                if (HasSkin && Mesh.MdfQueue is TtMdfSkinMesh mdfSkin)
+                {
+                    return HasStyle(ENodeStyles.NoTick);
+                }
+                return true;
+            }
+            set
+            {
+                base.IsNoTick = value;
+            }
+        }
         public unsafe override bool OnTickLogic(TtNodeTickParameters args)
         {
             if (HasSkin && Mesh.MdfQueue is TtMdfSkinMesh mdfSkin)

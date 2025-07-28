@@ -139,12 +139,27 @@ namespace NxRHI
 
 	///-----------------------------------------------------------
 	///DX12DescriptorSetPagedObject
+	
+	struct FCopyDescriptors
+	{
+		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> Src;
+		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> Dest;
+		std::vector<UINT> Sizes;
+		void Reset()
+		{
+			Src.clear();
+			Dest.clear();
+			Sizes.clear();
+		}
+	};
+
 	struct DX12PagedHeap : public MemAlloc::FPagedObject<AutoRef<ID3D12DescriptorHeap>>
 	{
 		static DX12PagedHeap* GetNullHeap(DX12GpuDevice* device, EShaderBindType type);
 		//DX12ShaderEffect*		ShaderEffect = nullptr;
 		D3D12_GPU_DESCRIPTOR_HANDLE	GetGpuAddress(int index = 0);
 		D3D12_CPU_DESCRIPTOR_HANDLE	GetCpuAddress(int index);
+		void PushDescriptorCopy(FCopyDescriptors& descriptors, DX12PagedHeap* dest, UINT destIndex);
 		void BindToHeap(DX12GpuDevice* device, DX12PagedHeap* dest, UINT destIndex, UINT srcIndex, D3D12_DESCRIPTOR_HEAP_TYPE HeapType);
 		//D3D12_DESCRIPTOR_HEAP_TYPE	HeapType = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		SIZE_T						OffsetInPage = 0;

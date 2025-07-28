@@ -114,7 +114,7 @@ namespace NxRHI
 	}
 	
 	static void Bind2Heap(DX12GpuDevice* device, const FShaderBinder* binder, IGpuResource* resource,
-		AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap)
+		AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap, FCopyDescriptors& cbvsrvuavDescriptors, FCopyDescriptors& samplerDescriptors)
 	{
 		if (binder->IsBindless())
 		{
@@ -149,12 +149,14 @@ namespace NxRHI
 			if (binder->Type == EShaderBindType::SBT_Sampler)
 			{
 				ASSERT(mSamplerHeap != nullptr);
-				handle->BindToHeap(device, mSamplerHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+				//handle->BindToHeap(device, mSamplerHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+				handle->PushDescriptorCopy(samplerDescriptors, mSamplerHeap->Heap, binder->DescriptorIndex);
 			}
 			else
 			{
 				ASSERT(mCbvSrvUavHeap != nullptr);
-				handle->BindToHeap(device, mCbvSrvUavHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				//handle->BindToHeap(device, mCbvSrvUavHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				handle->PushDescriptorCopy(cbvsrvuavDescriptors, mCbvSrvUavHeap->Heap, binder->DescriptorIndex);
 			}
 		}
 	}
@@ -284,6 +286,10 @@ namespace NxRHI
 			dx12Cmd->mContext->SetGraphicsRootDescriptorTable(i.RootIndex,
 				mSamplerHeap->Heap->GetGpuAddress(i.DescriptorStart));
 		}
+		thread_local static FCopyDescriptors cbvsrvuavDescriptors;
+		thread_local static FCopyDescriptors samplerDescriptors;
+		cbvsrvuavDescriptors.Reset();
+		samplerDescriptors.Reset();
 		for (auto& i : BindResources)
 		{
 			auto binder = i.first->GetShaderBinder();
@@ -299,7 +305,7 @@ namespace NxRHI
 			}	
 			else
 			{
-				BindResourceToHeap(device, i.first, i.second, mCbvSrvUavHeap, mSamplerHeap);
+				BindResourceToHeap(device, i.first, i.second, mCbvSrvUavHeap, mSamplerHeap, cbvsrvuavDescriptors, samplerDescriptors);
 			}
 			/*if (i.second.Resource)
 			{
@@ -309,25 +315,39 @@ namespace NxRHI
 				}
 			}*/
 		}
+		
+		if (cbvsrvuavDescriptors.Dest.size() > 0)
+		{
+			device->mDevice->CopyDescriptors((UINT)cbvsrvuavDescriptors.Dest.size(), cbvsrvuavDescriptors.Dest.data(), cbvsrvuavDescriptors.Sizes.data(),
+				(UINT)cbvsrvuavDescriptors.Src.size(), cbvsrvuavDescriptors.Src.data(), cbvsrvuavDescriptors.Sizes.data(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		}
+		if (samplerDescriptors.Dest.size() > 0)
+		{
+			device->mDevice->CopyDescriptors((UINT)samplerDescriptors.Dest.size(), samplerDescriptors.Dest.data(), samplerDescriptors.Sizes.data(),
+				(UINT)samplerDescriptors.Src.size(), samplerDescriptors.Src.data(), samplerDescriptors.Sizes.data(), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+		}
+
+		cbvsrvuavDescriptors.Reset();
+		samplerDescriptors.Reset();
 	}
 	void DX12GraphicDraw::BindResourceToHeap(DX12GpuDevice* device, const FEffectBinder* binder, FBindResource& resource,
-		AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap)
+		AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap, FCopyDescriptors& cbvsrvuavDescriptors, FCopyDescriptors& samplerDescriptors)
 	{
 		if (binder->ASBinder)
 		{
-			Bind2Heap(device, binder->ASBinder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap);
+			Bind2Heap(device, binder->ASBinder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap, cbvsrvuavDescriptors, samplerDescriptors);
 		}
 		if (binder->MSBinder)
 		{
-			Bind2Heap(device, binder->MSBinder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap);
+			Bind2Heap(device, binder->MSBinder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap, cbvsrvuavDescriptors, samplerDescriptors);
 		}
 		if (binder->VSBinder)
 		{
-			Bind2Heap(device, binder->VSBinder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap);
+			Bind2Heap(device, binder->VSBinder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap, cbvsrvuavDescriptors, samplerDescriptors);
 		}
 		if (binder->PSBinder)
 		{
-			Bind2Heap(device, binder->PSBinder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap);
+			Bind2Heap(device, binder->PSBinder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap, cbvsrvuavDescriptors, samplerDescriptors);
 		}
 		if (resource.Resource)
 			resource.FingerPrint = resource.Resource->GetFingerPrint();
@@ -471,9 +491,9 @@ namespace NxRHI
 		//IsDirty = true;
 	}
 	void DX12ComputeDraw::BindResourceToHeap(DX12GpuDevice* device, const FShaderBinder* binder, FBindResource& resource,
-		AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap)
+		AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap, FCopyDescriptors& cbvsrvuavDescriptors, FCopyDescriptors& samplerDescriptors)
 	{
-		Bind2Heap(device, binder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap);
+		Bind2Heap(device, binder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap, cbvsrvuavDescriptors, samplerDescriptors);
 		if (resource.Resource)
 			resource.FingerPrint = resource.Resource->GetFingerPrint();
 		else
@@ -514,6 +534,10 @@ namespace NxRHI
 				mSamplerHeap->Heap->GetGpuAddress(i.DescriptorStart));
 		}
 
+		thread_local static FCopyDescriptors cbvsrvuavDescriptors;
+		thread_local static FCopyDescriptors samplerDescriptors;
+		cbvsrvuavDescriptors.Reset();
+		samplerDescriptors.Reset();
 		for (auto& i : BindResources)
 		{
 			auto binder = i.first;
@@ -529,7 +553,7 @@ namespace NxRHI
 			}
 			else
 			{
-				BindResourceToHeap(device, i.first, i.second, mCbvSrvUavHeap, mSamplerHeap);
+				BindResourceToHeap(device, i.first, i.second, mCbvSrvUavHeap, mSamplerHeap, cbvsrvuavDescriptors, samplerDescriptors);
 			}
 			/*if (i.second.Resource)
 			{
@@ -539,6 +563,20 @@ namespace NxRHI
 				}
 			}*/
 		}
+		
+		if (cbvsrvuavDescriptors.Dest.size() > 0)
+		{
+			device->mDevice->CopyDescriptors((UINT)cbvsrvuavDescriptors.Dest.size(), cbvsrvuavDescriptors.Dest.data(), cbvsrvuavDescriptors.Sizes.data(),
+				(UINT)cbvsrvuavDescriptors.Src.size(), cbvsrvuavDescriptors.Src.data(), cbvsrvuavDescriptors.Sizes.data(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		}
+		if (samplerDescriptors.Dest.size() > 0)
+		{
+			device->mDevice->CopyDescriptors((UINT)samplerDescriptors.Dest.size(), samplerDescriptors.Dest.data(), samplerDescriptors.Sizes.data(),
+				(UINT)samplerDescriptors.Src.size(), samplerDescriptors.Src.data(), samplerDescriptors.Sizes.data(), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+		}
+
+		cbvsrvuavDescriptors.Reset();
+		samplerDescriptors.Reset();
 	}
 	void DX12ComputeDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
@@ -594,9 +632,9 @@ namespace NxRHI
 		resource.FingerPrint = -1;
 	}
 	void DX12RayTracingDraw::BindResourceToHeap(DX12GpuDevice* device, const FShaderBinder* binder, FBindResource& resource,
-		AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap)
+		AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap, FCopyDescriptors& cbvsrvuavDescriptors, FCopyDescriptors& samplerDescriptors)
 	{
-		Bind2Heap(device, binder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap);
+		Bind2Heap(device, binder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap, cbvsrvuavDescriptors, samplerDescriptors);
 		if (resource.Resource)
 			resource.FingerPrint = resource.Resource->GetFingerPrint();
 		else
@@ -633,6 +671,10 @@ namespace NxRHI
 				mSamplerHeap->Heap->GetGpuAddress(i.DescriptorStart));
 		}
 
+		thread_local static FCopyDescriptors cbvsrvuavDescriptors;
+		thread_local static FCopyDescriptors samplerDescriptors;
+		cbvsrvuavDescriptors.Reset();
+		samplerDescriptors.Reset();
 		for (auto& i : BindResources)
 		{
 			auto binder = i.first;
@@ -648,7 +690,7 @@ namespace NxRHI
 			}
 			else
 			{
-				BindResourceToHeap(device, i.first, i.second, mCbvSrvUavHeap, mSamplerHeap);
+				BindResourceToHeap(device, i.first, i.second, mCbvSrvUavHeap, mSamplerHeap, cbvsrvuavDescriptors, samplerDescriptors);
 			}
 			/*if (i.second.Resource)
 			{
@@ -658,6 +700,20 @@ namespace NxRHI
 				}
 			}*/
 		}
+
+		if (cbvsrvuavDescriptors.Dest.size() > 0)
+		{
+			device->mDevice->CopyDescriptors((UINT)cbvsrvuavDescriptors.Dest.size(), cbvsrvuavDescriptors.Dest.data(), cbvsrvuavDescriptors.Sizes.data(),
+				(UINT)cbvsrvuavDescriptors.Src.size(), cbvsrvuavDescriptors.Src.data(), cbvsrvuavDescriptors.Sizes.data(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		}
+		if (samplerDescriptors.Dest.size() > 0)
+		{
+			device->mDevice->CopyDescriptors((UINT)samplerDescriptors.Dest.size(), samplerDescriptors.Dest.data(), samplerDescriptors.Sizes.data(),
+				(UINT)samplerDescriptors.Src.size(), samplerDescriptors.Src.data(), samplerDescriptors.Sizes.data(), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+		}
+
+		cbvsrvuavDescriptors.Reset();
+		samplerDescriptors.Reset();
 	}
 	IBindless* DX12RayTracingDraw::CreateBindless(const char* name) const
 	{

@@ -1,3 +1,5 @@
+#define VMA_IMPLEMENTATION 
+
 #include "VKPreHead.h"
 #include "VKEvent.h"
 #include "VKGpuDevice.h"

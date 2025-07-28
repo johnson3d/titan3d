@@ -16,6 +16,8 @@ namespace EngineNS.Profiler
                 [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
         {
             mTime = t;
+            if (t==null)
+                return;
             if (TtEngine.Instance.Config.IsScopeWithSource)
             {
                 var SourceFilePath = sourceFilePath;

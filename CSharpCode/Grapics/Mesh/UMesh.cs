@@ -1,8 +1,10 @@
+using Assimp;
 using EngineNS.Bricks.Terrain.CDLOD;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.Graphics.Pipeline.Deferred;
 using Org.BouncyCastle.Asn1.Mozilla;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -229,7 +231,7 @@ namespace EngineNS.Graphics.Mesh
             }
             public List<ViewDrawCalls> TargetViews;
             
-            private async Thread.Async.TtTask BuildDrawCall(ViewDrawCalls vdc, Pipeline.TtRenderPolicy policy,
+            private async Thread.Async.TtTask BuildDrawCall(ViewDrawCalls vdc, Pipeline.TtGraphicsBuffers targetView, Pipeline.TtRenderPolicy policy,
                 Pipeline.TtRenderGraphNode node)
             {
                 vdc.State = -1;
@@ -252,6 +254,7 @@ namespace EngineNS.Graphics.Mesh
                         drawcall.BindShaderEffect(effect);
                         drawcall.BindGeomMesh(MeshPrimitives.mCoreObject.GetGeomtryMesh());
                         drawcall.BindPipeline(Material.Pipeline);
+                        drawcall.BindGBuffer(policy.DefaultCamera, targetView);
                         drawcall.PermutationId = shading.mCurrentPermutationId;
 
                         #region Textures
@@ -439,7 +442,7 @@ namespace EngineNS.Graphics.Mesh
                         break;
                     case 0:
                         {
-                            var task = BuildDrawCall(drawCalls, policy, node);
+                            var task = BuildDrawCall(drawCalls, targetView, policy, node);
                             if (bForce)
                             {
                                 task.WaitCompleted();
