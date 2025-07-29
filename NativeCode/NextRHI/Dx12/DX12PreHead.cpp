@@ -38,7 +38,7 @@ namespace NxRHI
 		{
 			for (int i = 0; i < 10; i++)
 			{
-				AutoRef<DX12CmdRecorder> tmp = MakeWeakRef(new DX12CmdRecorder(device));
+				AutoRef<DX12CmdRecorder> tmp = MakeWeakRef(new DX12CmdRecorder(device, ECmdRecorderType::CRT_All));
 				auto hr = device->mDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(tmp->mAllocator.GetAddressOf()));
 				ASSERT(hr == S_OK);
 

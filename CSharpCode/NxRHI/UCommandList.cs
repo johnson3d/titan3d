@@ -35,9 +35,9 @@ namespace EngineNS.NxRHI
     }
     public class TtCmdRecorder : AuxPtrType<NxRHI.ICmdRecorder>
     {
-        public TtCmdRecorder()
+        public TtCmdRecorder(NxRHI.ECmdRecorderType types = ECmdRecorderType.CRT_Graphics)
         {
-            mCoreObject = ICmdRecorder.CreateInstance(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject);
+            mCoreObject = ICmdRecorder.CreateInstance(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, types);
         }
         public uint DrawcallNumber
         {
@@ -45,15 +45,15 @@ namespace EngineNS.NxRHI
         }
         public void PushGpuDraw(TtGraphicDraw draw)
         {
-            mCoreObject.PushGpuDraw(draw.mCoreObject.NativeSuper);
+            mCoreObject.PushGpuDraw(draw.mCoreObject);
         }
         public void PushGpuDraw(TtComputeDraw draw)
         {
-            mCoreObject.PushGpuDraw(draw.mCoreObject.NativeSuper);
+            mCoreObject.PushGpuDraw(draw.mCoreObject);
         }
         public void PushGpuDraw(TtRayTracingDraw draw)
         {
-            mCoreObject.PushGpuDraw(draw.mCoreObject.NativeSuper);
+            mCoreObject.PushGpuDraw(draw.mCoreObject);
         }
         public void PushGpuDraw(TtCopyDraw draw)
         {

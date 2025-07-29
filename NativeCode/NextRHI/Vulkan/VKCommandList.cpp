@@ -37,7 +37,7 @@ namespace NxRHI
 		{
 			for (int i = 0; i < 10; i++)
 			{
-				AutoRef<VKCmdRecorder> tmp = MakeWeakRef(new VKCmdRecorder(mDevice));
+				AutoRef<VKCmdRecorder> tmp = MakeWeakRef(new VKCmdRecorder(mDevice, ECmdRecorderType::CRT_All));
 				VkCommandBufferAllocateInfo allocInfo{};
 				allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 				allocInfo.commandPool = mCmdPool;

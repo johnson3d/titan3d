@@ -21,6 +21,8 @@ namespace NxRHI
 	struct FRenderPassClears;
 	class IFrameBuffers;
 	class IGpuDraw;
+	class IComputeDraw;
+	class IGraphicDraw;
 	struct FViewPort;
 	struct FScissorRect;
 	struct FSubResourceFootPrint;
@@ -91,11 +93,21 @@ namespace NxRHI
 			PPLS_FLAG_BITS_MAX_ENUM = 0x7FFFFFFF
 	};
 
+	enum TR_ENUM()
+		ECmdRecorderType : unsigned int
+	{
+		CRT_Graphics = 1,
+		CRT_Compute = (1 << 1),
+		CRT_Copy = (1 << 2),
+		CRT_RayTracing = (1 << 3),
+		CRT_All = CRT_Graphics | CRT_Compute | CRT_Copy | CRT_RayTracing,
+	};
+
 	class TR_CLASS()
 		ICmdRecorder : public VIUnknown
 	{
 	public:
-		ICmdRecorder(IGpuDevice* device);
+		ICmdRecorder(IGpuDevice* device, ECmdRecorderType types = ECmdRecorderType::CRT_All);
 		~ICmdRecorder();
 		IGpuDevice* mDeviceRef = nullptr;
 		std::vector<AutoRef<IGpuDraw>>			mDrawcallArray;
@@ -105,7 +117,7 @@ namespace NxRHI
 		UINT									mFlushStart = 0;
 
 		VSLLock									mLocker;
-		bool mIsRenderPass = false;
+		ECmdRecorderType RecorderTypes = (ECmdRecorderType)0;
 	public:
 		inline UINT GetDrawcallNumber() const {
 			return (UINT)mDrawcallArray.size() + mDirectDrawNum;
@@ -116,6 +128,8 @@ namespace NxRHI
 		}
 		void PushGpuDraw(IGpuDraw * draw);
 		void PushGpuDraw(IGraphicDraw* draw);
+		void PushGpuDraw(IComputeDraw* draw);
+		void PushGpuDraw(IRayTracingDraw* draw);
 		void PushGpuDraw(ICopyDraw* draw);
 		void AppendRecorder(ICmdRecorder* recorder);
 		virtual void ResetGpuDraws();

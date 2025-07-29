@@ -11,9 +11,10 @@ NS_BEGIN
 
 namespace NxRHI
 {
-	ICmdRecorder::ICmdRecorder(IGpuDevice* device)
+	ICmdRecorder::ICmdRecorder(IGpuDevice* device, ECmdRecorderType types)
 	{
 		mDeviceRef = device;
+		RecorderTypes = types;
 	}
 	ICmdRecorder::~ICmdRecorder()
 	{
@@ -30,12 +31,22 @@ namespace NxRHI
 	}
 	void ICmdRecorder::PushGpuDraw(IGraphicDraw* draw)
 	{
-		mIsRenderPass = true;
+		ASSERT(RecorderTypes & ECmdRecorderType::CRT_Graphics);
 		return PushGpuDraw((IGpuDraw*)draw);
 	}
 	void ICmdRecorder::PushGpuDraw(ICopyDraw* draw)
 	{
-		ASSERT(mDeviceRef->GetGpuDeviceCaps()->IsSupportCSInRenderPass || mIsRenderPass == false);
+		ASSERT(RecorderTypes & ECmdRecorderType::CRT_Copy);
+		return PushGpuDraw((IGpuDraw*)draw);
+	}
+	void ICmdRecorder::PushGpuDraw(IComputeDraw* draw)
+	{
+		ASSERT(RecorderTypes & ECmdRecorderType::CRT_Compute);
+		return PushGpuDraw((IGpuDraw*)draw);
+	}
+	void ICmdRecorder::PushGpuDraw(IRayTracingDraw* draw)
+	{
+		ASSERT(RecorderTypes & ECmdRecorderType::CRT_RayTracing);
 		return PushGpuDraw((IGpuDraw*)draw);
 	}
 	void ICmdRecorder::ResetGpuDraws()
@@ -50,7 +61,6 @@ namespace NxRHI
 		mDirectDrawNum = 0;
 		mPrimitiveNum = 0;
 		mFlushStart = 0;
-		mIsRenderPass = false;
 		//mCmdList.FromObject(nullptr);
 	}
 	void ICmdRecorder::AppendRecorder(ICmdRecorder* pCmdRecorder)
@@ -86,7 +96,7 @@ namespace NxRHI
 	{
 		if (mCmdRecorder == nullptr)
 		{
-			mCmdRecorder = MakeWeakRef(new ICmdRecorder(mDevice.GetPtr()));
+			mCmdRecorder = MakeWeakRef(new ICmdRecorder(mDevice.GetPtr(), ECmdRecorderType::CRT_All));
 		}
 		mCmdRecorder->ResetGpuDraws();
 		mPrimitiveNum = 0;

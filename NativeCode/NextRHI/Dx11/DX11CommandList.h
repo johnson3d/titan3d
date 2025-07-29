@@ -9,8 +9,8 @@ namespace NxRHI
 	class DX11CmdRecorder : public ICmdRecorder
 	{
 	public:
-		DX11CmdRecorder(IGpuDevice* device)
-			: ICmdRecorder(device)
+		DX11CmdRecorder(IGpuDevice* device, ECmdRecorderType type)
+			: ICmdRecorder(device, type)
 		{
 
 		}

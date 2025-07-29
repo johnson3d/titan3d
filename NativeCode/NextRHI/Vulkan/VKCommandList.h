@@ -71,8 +71,8 @@ namespace NxRHI
 	class VKCmdRecorder : public ICmdRecorder
 	{
 	public:
-		VKCmdRecorder(IGpuDevice* device)
-			: ICmdRecorder(device)
+		VKCmdRecorder(IGpuDevice* device, ECmdRecorderType type)
+			: ICmdRecorder(device, type)
 		{
 
 		}
