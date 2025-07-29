@@ -16,6 +16,8 @@ namespace NxRHI
 	class VKCmdQueue;
 	class VKCmdBufferManager;
 	class VKBinaryFence;
+	class VKFrameBufferCache;
+
 	class VKGpuSystem : public IGpuSystem
 	{
 	public:
@@ -201,6 +203,8 @@ namespace NxRHI
 
 		AutoRef<VKGpuDefaultMemAllocator>	mDefaultBufferAllocator;
 
+		AutoRef<VKFrameBufferCache>			mFrameBufferCache;
+
 		AutoRef<VKBuffer>					mNullUBO;
 		AutoRef<VKBuffer>					mNullSSBO;
 		AutoRef<VKBuffer>					mNullVB;
@@ -208,6 +212,14 @@ namespace NxRHI
 		AutoRef<VKSampler>					mNullSampler;
 
 		VmaAllocator						mVmaAllocator = nullptr;
+
+		struct FVulkanExt
+		{
+			bool IsDynamicRendering = false;
+			bool IsDynamicRenderingLocalRead = false;
+			bool IsSynchronization2 = false;
+		};
+		FVulkanExt mVulkanExt;
 	private:
 		bool GetAllocatorInfo(VkBufferUsageFlags flags, VkMemoryPropertyFlags prop, UINT& typeIndex, UINT& alignment);
 		void CreateNullObjects();

@@ -68,6 +68,7 @@ namespace NxRHI
 	}
 	bool isDebugSafe()
 	{
+#if PLATFORM_WIN
 		// 最简单但可靠的检测：只有明确检测到调试工具时才启用
 		static bool checked = false;
 		static bool safe = false;
@@ -81,6 +82,9 @@ namespace NxRHI
 		}
 
 		return safe;
+#else
+		return false;
+#endif
 	}
 	vBOOL VKGpuSystem::OnVKDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData)
 	{
@@ -278,6 +282,7 @@ namespace NxRHI
 		mPipelineManager = nullptr;
 		mFrameFence = nullptr;
 		mDescriptorPoolManager = nullptr;
+		mFrameBufferCache = nullptr;
 
 		if (mVmaAllocator)
 		{
@@ -516,9 +521,12 @@ namespace NxRHI
 		features2.features.geometryShader = VK_TRUE;
 		features2.features.multiViewport = VK_TRUE;
 
-		ASSERT(localReadFeatures.dynamicRenderingLocalRead == VK_TRUE);
-		ASSERT(dynamicRenderingFeatures.dynamicRendering == VK_TRUE);
-		ASSERT(sync2Features.synchronization2 == VK_TRUE);
+		mVulkanExt.IsDynamicRendering = (dynamicRenderingFeatures.dynamicRendering == VK_TRUE);
+		mVulkanExt.IsDynamicRenderingLocalRead = (localReadFeatures.dynamicRenderingLocalRead == VK_TRUE);
+		mVulkanExt.IsSynchronization2 = (sync2Features.synchronization2 == VK_TRUE);
+		ASSERT(mVulkanExt.IsDynamicRendering);
+		ASSERT(mVulkanExt.IsDynamicRenderingLocalRead);
+		ASSERT(mVulkanExt.IsSynchronization2);
 
 		VkPhysicalDeviceFeatures features1{};
 		vkGetPhysicalDeviceFeatures(mPhysicalDevice, &features1);
@@ -694,6 +702,8 @@ namespace NxRHI
 
 		mDescriptorPoolManager = MakeWeakRef(new VKDesriptorPoolManager());
 		mDescriptorPoolManager->Initialize(this);
+
+		mFrameBufferCache = MakeWeakRef(new VKFrameBufferCache());
 		CreateNullObjects();
 		return true;
 	}
@@ -775,6 +785,7 @@ namespace NxRHI
 	void VKGpuDevice::QueryDevice()
 	{
 		mCaps.IsSupportRayTracing = HasExtension(VK_NV_RAY_TRACING_EXTENSION_NAME);
+		mCaps.IsSupportCSInRenderPass = mVulkanExt.IsDynamicRendering;
 	}
 	IBuffer* VKGpuDevice::CreateBuffer(const FBufferDesc* desc)
 	{

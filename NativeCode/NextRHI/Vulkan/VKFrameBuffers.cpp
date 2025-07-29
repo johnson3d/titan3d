@@ -185,10 +185,66 @@ namespace NxRHI
 
 	}
 
-	VKFrameBuffers::FrameBufferWrapper::FrameBufferWrapper(VKGpuDevice* device, VkFramebuffer ptr)
+	void VKFrameBuffers::FrameBufferWrapper::Initialize(VKGpuDevice* device, VKFrameBuffers* fb)
 	{
+		mDepthStencilView.FromObject(fb->mDepthStencilView);
+		for (UINT j = 0; j < fb->GetRenderPass()->Desc.NumOfMRT; j++)
+		{
+			mRenderTargets[j].FromObject(fb->mRenderTargets[j]);
+		}
+
 		mDevice = device;
-		mFrameBuffer = ptr;
+
+		auto NumRTV = fb->mRenderPass->Desc.NumOfMRT;
+		std::vector<VkImageView> attachments;
+
+		UINT width, height;
+		if (NumRTV > 0)
+		{
+			width = fb->mRenderTargets[0]->Desc.Width;
+			height = fb->mRenderTargets[0]->Desc.Height;
+		}
+		else if (fb->mRenderPass->Desc.AttachmentDepthStencil.Format != PXF_UNKNOWN && fb->mDepthStencilView != nullptr)
+		{
+			width = fb->mDepthStencilView->Desc.Width;
+			height = fb->mDepthStencilView->Desc.Height;
+		}
+		else
+		{
+			ASSERT(false);
+		}
+		for (UINT RTVIdx = 0; RTVIdx < NumRTV; RTVIdx++)
+		{
+			auto refRTV = fb->mRenderTargets[RTVIdx];
+			if (refRTV == nullptr)
+			{
+				break;
+			}
+			ASSERT(refRTV->GetHWBuffer() != nullptr);
+			auto dxRtv = (VkImageView)refRTV->GetHWBuffer();
+			attachments.push_back(dxRtv);
+		}
+
+		if (fb->mRenderPass->Desc.AttachmentDepthStencil.Format != PXF_UNKNOWN && fb->mDepthStencilView != nullptr)
+		{
+			auto dxDsv = (VkImageView)fb->mDepthStencilView->GetHWBuffer();
+			attachments.push_back(dxDsv);
+		}
+
+		VkFramebufferCreateInfo framebufferInfo{};
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.renderPass = fb->mRenderPass.UnsafeConvertTo<VKRenderPass>()->mRenderPass;
+		framebufferInfo.attachmentCount = (UINT)attachments.size(); //mRenderPass->Desc.NumOfMRT;
+		framebufferInfo.pAttachments = &attachments[0];
+		framebufferInfo.width = width;
+		framebufferInfo.height = height;
+		framebufferInfo.layers = 1;
+
+		if (vkCreateFramebuffer(device->mDevice, &framebufferInfo, device->GetVkAllocCallBacks(), &mFrameBuffer) != VK_SUCCESS)
+		{
+			ASSERT(false);
+			return;
+		}
 	}
 	VKFrameBuffers::FrameBufferWrapper::~FrameBufferWrapper()
 	{
@@ -198,6 +254,60 @@ namespace NxRHI
 		{
 			vkDestroyFramebuffer(mDevice->mDevice, mFrameBuffer, mDevice->GetVkAllocCallBacks());
 			mFrameBuffer = nullptr;
+		}
+	}
+
+	VKFrameBuffers::FrameBufferWrapper* VKFrameBufferCache::FFrameBufferList::GetOrCreate(VKFrameBuffers* fb)
+	{
+		for (int i = 0; i < (int)FramBuffers.size(); i++)
+		{
+			auto test = FramBuffers[i]->mDepthStencilView.GetPtr();
+			if (test != fb->mDepthStencilView)
+			{
+				if (test == nullptr)
+				{
+					FramBuffers.erase(FramBuffers.begin() + i);
+					i--;
+					break;
+				}
+				continue;
+			}
+			bool notMatch = false;
+			for (UINT j = 0; j < fb->GetRenderPass()->Desc.NumOfMRT; j++)
+			{
+				auto test1 = FramBuffers[i]->mRenderTargets[j].GetPtr();
+				if (test1 != fb->mRenderTargets[j])
+				{
+					notMatch = true;
+					if (test1 == nullptr)
+					{
+						FramBuffers.erase(FramBuffers.begin() + i);
+						i--;
+						break;
+					}
+					break;
+				}
+			}
+			if (notMatch == false)
+				return FramBuffers[i];
+		}
+		auto mFrameBuffer = MakeWeakRef(new VKFrameBuffers::FrameBufferWrapper());
+		mFrameBuffer->Initialize(fb->mDeviceRef.GetPtr(), fb);
+		FramBuffers.push_back(mFrameBuffer);
+		return mFrameBuffer;
+	}
+	VKFrameBuffers::FrameBufferWrapper* VKFrameBufferCache::GetOrCreate(VKFrameBuffers* fb)
+	{
+		auto iter = mCache.find((VKRenderPass*)fb->GetRenderPass());
+		if (iter == mCache.end()) 
+		{
+			AutoRef<FFrameBufferList> lst = MakeWeakRef(new FFrameBufferList());
+			mCache.insert(std::make_pair((VKRenderPass*)fb->GetRenderPass(), lst));
+			return lst->GetOrCreate(fb);
+		}
+		else
+		{
+			return iter->second->GetOrCreate(fb);
 		}
 	}
 
@@ -216,60 +326,10 @@ namespace NxRHI
 		if (device == nullptr)
 			return;
 		
-		mFrameBuffer = nullptr;
+		//mFrameBuffer = MakeWeakRef(new FrameBufferWrapper());
+		//mFrameBuffer->Initialize(device, this);
 
-		auto NumRTV = mRenderPass->Desc.NumOfMRT;
-		std::vector<VkImageView> attachments;
-
-		UINT width, height;
-		if (NumRTV > 0)
-		{
-			width = mRenderTargets[0]->Desc.Width;
-			height = mRenderTargets[0]->Desc.Height;
-		}
-		else if (mRenderPass->Desc.AttachmentDepthStencil.Format != PXF_UNKNOWN && mDepthStencilView != nullptr)
-		{
-			width = mDepthStencilView->Desc.Width;
-			height = mDepthStencilView->Desc.Height;
-		}
-		else
-		{
-			ASSERT(false);
-		}
-		for (UINT RTVIdx = 0; RTVIdx < NumRTV; RTVIdx++)
-		{
-			auto refRTV = mRenderTargets[RTVIdx];
-			if (refRTV == nullptr)
-			{
-				break;
-			}
-			ASSERT(refRTV->GetHWBuffer() != nullptr);
-			auto dxRtv = (VkImageView)refRTV->GetHWBuffer();
-			attachments.push_back(dxRtv);
-		}
-
-		if (mRenderPass->Desc.AttachmentDepthStencil.Format != PXF_UNKNOWN && mDepthStencilView != nullptr)
-		{
-			auto dxDsv = (VkImageView)mDepthStencilView->GetHWBuffer();
-			attachments.push_back(dxDsv);
-		}
-
-		VkFramebufferCreateInfo framebufferInfo{};
-		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferInfo.renderPass = mRenderPass.UnsafeConvertTo<VKRenderPass>()->mRenderPass;
-		framebufferInfo.attachmentCount = (UINT)attachments.size(); //mRenderPass->Desc.NumOfMRT;
-		framebufferInfo.pAttachments = &attachments[0];
-		framebufferInfo.width = width;
-		framebufferInfo.height = height;
-		framebufferInfo.layers = 1;
-
-		VkFramebuffer ptr;
-		if (vkCreateFramebuffer(device->mDevice, &framebufferInfo, device->GetVkAllocCallBacks(), &ptr) != VK_SUCCESS)
-		{
-			ASSERT(false);
-			return;
-		}
-		mFrameBuffer = MakeWeakRef(new FrameBufferWrapper(device, ptr));
+		mFrameBuffer = device->mFrameBufferCache->GetOrCreate(this);
 	}
 
 	VKSwapChain::VKSwapChain()

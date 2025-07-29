@@ -33,7 +33,11 @@ void NoWin_Assert(const char* str, const char* file, int line);
 #pragma clang diagnostic ignored "-Wundefined-bool-conversion"
 #endif
 
+#if defined(FINAL_SHIPPING)
+# define ASSERT(d) 
+#else
 # define ASSERT(d) if(d){  } else {NoWin_Assert(#d,__FILE__,__LINE__);}
+#endif
 
 #if !defined(PLATFORM_WIN)
 #pragma clang diagnostic pop

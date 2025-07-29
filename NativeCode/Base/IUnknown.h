@@ -229,7 +229,7 @@ struct TR_CLASS(SV_LayoutStruct = 8)
 };
 
 class TR_CLASS()
-	IResourceBase : public VIUnknown
+	IResourceBase : public IWeakRefObject
 {
 public:
 	virtual FResourceState* GetResourceState() {

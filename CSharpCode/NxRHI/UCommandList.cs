@@ -37,7 +37,7 @@ namespace EngineNS.NxRHI
     {
         public TtCmdRecorder()
         {
-            mCoreObject = ICmdRecorder.CreateInstance();
+            mCoreObject = ICmdRecorder.CreateInstance(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject);
         }
         public uint DrawcallNumber
         {

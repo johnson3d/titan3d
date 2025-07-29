@@ -40,7 +40,7 @@ namespace NxRHI
 		DX12CommandAllocatorManager : public VIUnknown
 	{
 	public:
-		AutoRef<DX12CmdRecorder> Alloc(ID3D12Device* device, DX12CommandList* cmdlist);
+		AutoRef<DX12CmdRecorder> Alloc(DX12GpuDevice* device, DX12CommandList* cmdlist);
 		void Free(const AutoRef<DX12CmdRecorder>& allocator, UINT64 waitValue, AutoRef<IFence>& fence);
 		void TickRecycle();
 		void FinalCleanup();

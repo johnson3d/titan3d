@@ -55,7 +55,7 @@ namespace NxRHI
 		mIsRecording = true;
 		if (mCmdRecorder == nullptr)
 		{
-			mCmdRecorder = MakeWeakRef(new DX11CmdRecorder());
+			mCmdRecorder = MakeWeakRef(new DX11CmdRecorder(mDevice.GetPtr()));
 		}
 		mCmdRecorder->ResetGpuDraws();
 		mPrimitiveNum = 0;

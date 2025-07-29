@@ -31,15 +31,15 @@ namespace NxRHI
 		}
 		return count;
 	}
-	AutoRef<DX12CmdRecorder> DX12CommandAllocatorManager::Alloc(ID3D12Device* device, DX12CommandList* cmdlist)
+	AutoRef<DX12CmdRecorder> DX12CommandAllocatorManager::Alloc(DX12GpuDevice* device, DX12CommandList* cmdlist)
 	{
 		VAutoVSLLock lk(mLocker);
 		if (CmdAllocators.size() == 0)
 		{
 			for (int i = 0; i < 10; i++)
 			{
-				AutoRef<DX12CmdRecorder> tmp = MakeWeakRef(new DX12CmdRecorder());
-				auto hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(tmp->mAllocator.GetAddressOf()));
+				AutoRef<DX12CmdRecorder> tmp = MakeWeakRef(new DX12CmdRecorder(device));
+				auto hr = device->mDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(tmp->mAllocator.GetAddressOf()));
 				ASSERT(hr == S_OK);
 
 				CmdAllocators.push(tmp);

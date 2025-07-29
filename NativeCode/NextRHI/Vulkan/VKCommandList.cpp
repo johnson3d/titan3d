@@ -37,7 +37,7 @@ namespace NxRHI
 		{
 			for (int i = 0; i < 10; i++)
 			{
-				AutoRef<VKCmdRecorder> tmp = MakeWeakRef(new VKCmdRecorder());
+				AutoRef<VKCmdRecorder> tmp = MakeWeakRef(new VKCmdRecorder(mDevice));
 				VkCommandBufferAllocateInfo allocInfo{};
 				allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 				allocInfo.commandPool = mCmdPool;
@@ -362,7 +362,6 @@ namespace NxRHI
 		if (mBeginRenderingDraw == nullptr)
 		{
 			mBeginRenderingDraw = MakeWeakRef(new VKCmdBeginRenderingDraw());
-			mBeginRenderingDraw->CmdList = this;
 		}
 
 		GetCmdRecorder()->UseResource(fb);
@@ -478,7 +477,7 @@ namespace NxRHI
 	}
 	void VKCommandList::VKCmdBeginRenderingDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
-		vkCmdBeginRendering(CmdList->GetVKCmdRecorder()->mCommandBuffer, &mRenderingInfo);
+		vkCmdBeginRendering(((VKCommandList*)cmdlist)->GetVKCmdRecorder()->mCommandBuffer, &mRenderingInfo);
 	}
 	void VKCommandList::EndRendering()
 	{
@@ -488,18 +487,22 @@ namespace NxRHI
 
 		mCurrentFrameBuffers = nullptr;
 	}
+	void VKCommandList::VKCmdBeginRenderPassDraw::Commit(ICommandList* cmdlist, bool bRefResource)
+	{
+		vkCmdBeginRenderPass(((VKCommandList*)cmdlist)->GetVKCmdRecorder()->mCommandBuffer, &mRenderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	}
 	bool VKCommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
 	{
-		if (true)
+		if (GetVKDevice()->mVulkanExt.IsDynamicRendering)
 		{
 			this->BeginEvent(name);
 			return BeginRendering(fb, passClears, name);
 		}
-		/*else
+		else
 		{
 			ASSERT(mCmdListState == ECmdListState::Recording);
+			this->BeginEvent(name);
 			mDebugName = name;
-			BeginEvent(name);
 			mCurRtvs.clear();
 			mCurRtvs.resize(fb->mRenderPass->Desc.NumOfMRT);
 			
@@ -526,8 +529,14 @@ namespace NxRHI
 			GetCmdRecorder()->UseResource(fb);
 			GetCmdRecorder()->UseResource(((VKFrameBuffers*)fb)->mFrameBuffer);
 
+			AutoRef<VKCmdBeginRenderPassDraw>	mBeginRenderingDraw;
+			if (mBeginRenderingDraw == nullptr)
+			{
+				mBeginRenderingDraw = MakeWeakRef(new VKCmdBeginRenderPassDraw());
+			}
+
 			auto pVKFrameBuffers = ((VKFrameBuffers*)fb);
-			VkRenderPassBeginInfo renderPassInfo{};
+			VkRenderPassBeginInfo& renderPassInfo = mBeginRenderingDraw->mRenderPassInfo;
 			renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 			auto pRenderPass = fb->mRenderPass.UnsafeConvertTo<VKRenderPass>();
 			renderPassInfo.renderPass = pRenderPass->mRenderPass;
@@ -576,21 +585,23 @@ namespace NxRHI
 			renderPassInfo.pClearValues = clearValues;
 
 			//BeginEvent(debugName);
+			this->PushGpuDrawImpl(pass->BeginCopyDraws);
 			this->PushGpuDrawImpl(pass->BeginBarriers);
-			vkCmdBeginRenderPass(GetVKCmdRecorder()->mCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+			this->PushGpuDrawImpl(mBeginRenderingDraw);
+			//vkCmdBeginRenderPass(GetVKCmdRecorder()->mCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 			//vkCmdBeginRendering()
 
 			return true;
-		}*/
+		}
 	}
 	void VKCommandList::EndPass()
 	{
-		if (true)
+		if (GetVKDevice()->mVulkanExt.IsDynamicRendering)
 		{
 			EndRendering();
 			this->EndEvent();
 		}
-		/*else
+		else
 		{
 			ASSERT(mCurrentFrameBuffers != nullptr);
 			ASSERT(mCmdListState == ECmdListState::Recording);
@@ -600,8 +611,8 @@ namespace NxRHI
 			auto pass = GetCurrentRenderPass();
 			mCurrentFrameBuffers = nullptr;
 			
-			EndEvent();
-		}*/
+			this->EndEvent();
+		}
 	}
 	void VKCommandList::SetViewport(UINT Num, const FViewPort* pViewports)
 	{

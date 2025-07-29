@@ -71,6 +71,11 @@ namespace NxRHI
 	class VKCmdRecorder : public ICmdRecorder
 	{
 	public:
+		VKCmdRecorder(IGpuDevice* device)
+			: ICmdRecorder(device)
+		{
+
+		}
 		VKThreadCmdBufferManager*			mManager;
 		VkCommandBuffer						mCommandBuffer;
 		AutoRef<VKCommandList>				mCmdlist;
@@ -165,11 +170,25 @@ namespace NxRHI
 		class VKCmdBeginRenderingDraw : public IGpuDraw
 		{
 		public:
-			VKCommandList* CmdList;
 			std::vector<VkRenderingAttachmentInfo> mColorAttachments;
 			VkRenderingAttachmentInfo mDepthAttachment;
 			VkRenderingAttachmentInfo mStencilAttachment;
 			VkRenderingInfo mRenderingInfo = {};
+
+			virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
+			virtual UINT GetPrimitiveNum() override
+			{
+				return 0;
+			}
+			virtual void ResetResources() override
+			{
+
+			}
+		};
+		class VKCmdBeginRenderPassDraw : public IGpuDraw
+		{
+		public:
+			VkRenderPassBeginInfo mRenderPassInfo;
 
 			virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 			virtual UINT GetPrimitiveNum() override

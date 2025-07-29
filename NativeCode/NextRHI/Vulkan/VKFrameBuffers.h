@@ -35,14 +35,31 @@ namespace NxRHI
 		class FrameBufferWrapper : public IGpuResource
 		{
 		public:
-			FrameBufferWrapper(VKGpuDevice* device, VkFramebuffer ptr);
+			void Initialize(VKGpuDevice* device, VKFrameBuffers* fb);
 			~FrameBufferWrapper();
 			VKGpuDevice*		mDevice = nullptr;
 			VkFramebuffer		mFrameBuffer = nullptr;
+			
+			TWeakRefHandle<IRenderTargetView>		mRenderTargets[C_MAX_MRT_NUM];
+			TWeakRefHandle<IDepthStencilView>		mDepthStencilView;
 		};
+		
 		AutoRef<FrameBufferWrapper>		mFrameBuffer;
-		//todo: use VK_KHR_dynamic_rendering extension, VkFramebuffer is not necessary,we can call vkCmdBeginRenderingKHR like dx12
+		//mVulkanExt.IsDynamicRendering: use VK_KHR_dynamic_rendering extension, VkFramebuffer is not necessary,we can call vkCmdBeginRenderingKHR like dx12
 	}; 
+
+	class VKFrameBufferCache : public VIUnknown
+	{
+	public:
+		struct FFrameBufferList : public VIUnknown
+		{
+			std::vector<AutoRef<VKFrameBuffers::FrameBufferWrapper>> FramBuffers;
+			VKFrameBuffers::FrameBufferWrapper* GetOrCreate(VKFrameBuffers* fb);
+		};
+		std::map<VKRenderPass*, AutoRef<FFrameBufferList>> mCache;
+
+		VKFrameBuffers::FrameBufferWrapper* GetOrCreate(VKFrameBuffers* fb);
+	};
 
 	class VKSwapChain : public ISwapChain
 	{

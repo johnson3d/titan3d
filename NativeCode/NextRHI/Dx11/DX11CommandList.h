@@ -9,6 +9,11 @@ namespace NxRHI
 	class DX11CmdRecorder : public ICmdRecorder
 	{
 	public:
+		DX11CmdRecorder(IGpuDevice* device)
+			: ICmdRecorder(device)
+		{
+
+		}
 		AutoRef<ID3D11CommandList> mCmdList;
 
 		virtual void ResetGpuDraws() override;

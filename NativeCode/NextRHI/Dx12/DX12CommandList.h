@@ -12,6 +12,11 @@ namespace NxRHI
 	class DX12CmdRecorder : public ICmdRecorder
 	{
 	public:
+		DX12CmdRecorder(IGpuDevice* device)
+			: ICmdRecorder(device)
+		{
+
+		}
 		AutoRef<ID3D12CommandAllocator>		mAllocator;
 		AutoRef<DX12CommandList>			mCmdlist;
 		bool								mIsRecording = false;

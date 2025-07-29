@@ -95,8 +95,9 @@ namespace NxRHI
 		ICmdRecorder : public VIUnknown
 	{
 	public:
-		ICmdRecorder();
+		ICmdRecorder(IGpuDevice* device);
 		~ICmdRecorder();
+		IGpuDevice* mDeviceRef = nullptr;
 		std::vector<AutoRef<IGpuDraw>>			mDrawcallArray;
 		std::vector<AutoRef<IGpuResource>>		mRefBuffers;
 		UINT									mDirectDrawNum = 0;
@@ -104,6 +105,7 @@ namespace NxRHI
 		UINT									mFlushStart = 0;
 
 		VSLLock									mLocker;
+		bool mIsRenderPass = false;
 	public:
 		inline UINT GetDrawcallNumber() const {
 			return (UINT)mDrawcallArray.size() + mDirectDrawNum;
@@ -113,6 +115,7 @@ namespace NxRHI
 			mRefBuffers.push_back(res);
 		}
 		void PushGpuDraw(IGpuDraw * draw);
+		void PushGpuDraw(IGraphicDraw* draw);
 		void PushGpuDraw(ICopyDraw* draw);
 		void AppendRecorder(ICmdRecorder* recorder);
 		virtual void ResetGpuDraws();

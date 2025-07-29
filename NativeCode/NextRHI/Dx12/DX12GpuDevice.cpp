@@ -570,7 +570,7 @@ namespace NxRHI
 
 		mPostCmdList = MakeWeakRef((DX12CommandList*)this->CreateCommandList());
 		mPostCmdList->SetDebugName("PostCmdList");
-		mPostCmdRecorder = MakeWeakRef(new ICmdRecorder());
+		mPostCmdRecorder = MakeWeakRef(new ICmdRecorder(this));
 
 		return true;
 	}

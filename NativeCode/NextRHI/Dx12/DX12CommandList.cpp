@@ -103,7 +103,7 @@ namespace NxRHI
 		//ASSERT(mAllocator == nullptr);
 		if (mCmdRecorder == nullptr)
 		{
-			mCmdRecorder = GetDX12Device()->mCmdAllocatorManager->Alloc(GetDX12Device()->mDevice, this);
+			mCmdRecorder = GetDX12Device()->mCmdAllocatorManager->Alloc(GetDX12Device(), this);
 		}
 		else
 		{

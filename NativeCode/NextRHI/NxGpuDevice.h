@@ -1117,6 +1117,7 @@ namespace NxRHI
 		bool	IsSupportMeshShader = false;
 		bool	IsSupportRayTracing = false;
 		bool	IsSuppprtBindless = false;
+		bool	IsSupportCSInRenderPass = true;
 		UINT			MaxViewInstanceCount = 0;
 		UINT			NumOfSwapchainFormats = 0;
 		EPixelFormat	SwapchainFormats[16] = {};
