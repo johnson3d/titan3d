@@ -180,6 +180,11 @@ namespace NxRHI
 			{
 				bufferInfo.usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 			}
+			memFlags |= (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+		}
+		else if (desc.Usage == EGpuUsage::USAGE_DYNAMIC)
+		{
+			memFlags |= (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 		}
 		else if(desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
@@ -192,6 +197,7 @@ namespace NxRHI
 			{
 				bufferInfo.usage |= (VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 			}
+			memFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		}
 
 		if (Desc.MiscFlags & EResourceMiscFlag::RM_COPY_SRC)
@@ -202,15 +208,6 @@ namespace NxRHI
 		if (vkCreateBuffer(device->mDevice, &bufferInfo, device->GetVkAllocCallBacks(), &mBuffer) != VK_SUCCESS)
 		{
 			return false;
-		}
-
-		if (desc.Usage == EGpuUsage::USAGE_DYNAMIC)
-		{
-			memFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-		}
-		else if (desc.Usage == EGpuUsage::USAGE_STAGING)
-		{
-			memFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 		}
 
 		VkMemoryRequirements memRequirements;

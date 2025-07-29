@@ -107,19 +107,32 @@ namespace EngineNS.Graphics.Pipeline
         {
             RenderSwapQueue.TickRender(host.ElapsedSecond);
         }
-        //bool bSetBreakOnId = false;
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeTickSync;
+        private static Profiler.TimeScope ScopeTickSync
+        {
+            get
+            {
+                if (mScopeTickSync == null)
+                    mScopeTickSync = new Profiler.TimeScope(typeof(TtGfxDevice), nameof(TickSync));
+                return mScopeTickSync;
+            }
+        }
         public void TickSync(TtEngine host)
         {
-            var testTime = Support.TtTime.GetTickCount();
-            TtEngine.Instance.EventPoster.TickPostTickSyncEvents(testTime);
-            TtEngine.Instance.GfxDevice.RenderContext.TickPostEvents();
+            using (new Profiler.TimeScopeHelper(ScopeTickSync))
+            {
+                var testTime = Support.TtTime.GetTickCount();
+                TtEngine.Instance.EventPoster.TickPostTickSyncEvents(testTime);
+                TtEngine.Instance.GfxDevice.RenderContext.TickPostEvents();
 
-            AttachBufferManager.Tick();
+                AttachBufferManager.Tick();
 
-            RenderSwapQueue.TickSync(host.ElapsedSecond);
-            CbvUpdater.UpdateCBVs();
+                RenderSwapQueue.TickSync(host.ElapsedSecond);
+                CbvUpdater.UpdateCBVs();
 
-            //RenderContext.SetDX12BreakOnId(EDx12MessageId.CREATE_HEAP, bSetBreakOnId);
+                //RenderContext.SetDX12BreakOnId(EDx12MessageId.CREATE_HEAP, bSetBreakOnId);
+            }
         }
         public override void EndFrame(TtEngine engine)
         {

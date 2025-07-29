@@ -26,6 +26,19 @@ namespace NxRHI
 {
 	std::atomic<int> ITexture::AliveCount;
 	std::atomic<int> ITexture::AliveAttachBufferCount;
+	bool IBuffer::FetchGpuData(UINT index, IBlobObject* blob)
+	{
+		FMappedSubResource subRes;
+		if (Map(index, &subRes, true))
+		{
+			blob->PushData(&subRes.RowPitch, sizeof(UINT));
+			blob->PushData(&subRes.DepthPitch, sizeof(UINT));
+			blob->PushData(subRes.pData, this->Desc.Size);
+			Unmap(index);
+			return true;
+		}
+		return false;
+	}
 	IBuffer* IBuffer::CreateReadable(IGpuDevice* device, int subRes, ICopyDraw* cpDraw)
 	{
 		auto cpDesc = this->Desc;

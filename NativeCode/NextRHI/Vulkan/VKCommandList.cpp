@@ -8,6 +8,7 @@
 #include "VKFrameBuffers.h"
 #include "VKEffect.h"
 #include "../NxDrawcall.h"
+#include "../../../Base/vfxsampcounter.h"
 
 #define new VNEW
 
@@ -91,7 +92,9 @@ namespace NxRHI
 	}
 	void VKThreadCmdBufferManager::TickRecycle()
 	{
+		AUTO_SAMP("NxRHI.VKThreadCmdBufferManager.TickRecycle");
 		VAutoVSLLock lk(mLocker);
+		auto nRecycle = Recycles.size();
 		for (auto i = Recycles.begin(); i != Recycles.end(); )
 		{
 			auto value = i->Fence->GetCompletedValue();
@@ -113,6 +116,16 @@ namespace NxRHI
 					VFX_LTRACE(ELTT_Warning, "VKCmdAllocator always alive %d / %d\r\n", value, waitValue);
 				}
 				i++;
+			}
+		}
+		if (CmdAllocators.size() > nRecycle * 2)
+		{
+			auto rmv = (CmdAllocators.size() - nRecycle * 2);
+			for (size_t i = 0; i < rmv; i++)
+			{
+				auto cmd = CmdAllocators.front();
+				cmd->FinalCleanup(this);
+				CmdAllocators.pop();
 			}
 		}
 	}
@@ -203,12 +216,17 @@ namespace NxRHI
 		ICmdRecorder::ResetGpuDraws();
 		mCmdlist = nullptr;
 	}
-
 	void VKCmdRecorder::FinalCleanup(VKThreadCmdBufferManager* manager)
 	{
 		ResetGpuDraws();
-		vkResetCommandBuffer(mCommandBuffer, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
-		vkFreeCommandBuffers(manager->mDevice->mDevice, manager->mCmdPool, 1, &mCommandBuffer);
+		if (mCommandBuffer)
+		{
+			vkResetCommandBuffer(mCommandBuffer, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+			vkFreeCommandBuffers(manager->mDevice->mDevice, manager->mCmdPool, 1, &mCommandBuffer);
+			mCommandBuffer = nullptr;
+		}
+		mCmdlist = nullptr;
+		mManager = nullptr;
 	}
 
 	VKCommandList::VKCommandList()

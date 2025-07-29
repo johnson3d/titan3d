@@ -257,19 +257,7 @@ namespace NxRHI
 		//virtual bool FetchGpuData(UINT subRes, IBlobObject * blob) override;
 		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint * footPrint) override = 0;
 		virtual void SetDebugName(const char* name) override {}
-		virtual bool FetchGpuData(UINT index, IBlobObject* blob) override
-		{
-			FMappedSubResource subRes;
-			if (Map(index, &subRes, true))
-			{
-				blob->PushData(&subRes.RowPitch, sizeof(UINT));
-				blob->PushData(&subRes.DepthPitch, sizeof(UINT));
-				blob->PushData(subRes.pData, this->Desc.Size);
-				Unmap(index);
-				return true;
-			}
-			return false;
-		}
+		virtual bool FetchGpuData(UINT index, IBlobObject* blob) override;
 		virtual IBuffer* CreateReadable(IGpuDevice* device, int subRes, ICopyDraw* cpDraw) override;
 		template<class _T>
 		void SetValue(const FShaderVarDesc& binder, const _T& v)

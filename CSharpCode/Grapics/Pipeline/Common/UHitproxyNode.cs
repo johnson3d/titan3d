@@ -406,28 +406,34 @@ namespace EngineNS.Graphics.Pipeline.Common
                         IsHitproxyBuilding = false;
                         return true;
                     }
-                    if (fence.CompletedValue >= targetValue)
+                    using (new Profiler.TimeScopeHelper(ScopeHitproxyFetch))
                     {
-                        FetchGpuDataBlob.mCoreObject.ReSize(0);
-                        readTexture.GetGpuBufferDataPointer().FetchGpuData(0, (IBlobObject)FetchGpuDataBlob.mCoreObject);
-                        //var ptr = (uint*)gpuDataBlob.mCoreObject.GetData();
-                        //var num = gpuDataBlob.mCoreObject.GetSize() / 4;
-                        //for (int i = 2; i < num; i++)
-                        //{
-                        //    if (ptr[i] != 0)
-                        //    {
-                        //        int xxx = 0;
-                        //    }
-                        //}
-                        NxRHI.ITexture.BuildImage2DBlob(mHitProxyData.mCoreObject, (IBlobObject)FetchGpuDataBlob.mCoreObject, in CopyTexDesc);
-                        IsHitproxyBuilding = false;
+                        if (fence.CompletedValue >= targetValue)
+                        {
+                            FetchGpuDataBlob.mCoreObject.ReSize(0);
+                            using (new Profiler.TimeScopeHelper(ScopeHitproxyFetchGPU))
+                            {
+                                readTexture.GetGpuBufferDataPointer().FetchGpuData(0, (IBlobObject)FetchGpuDataBlob.mCoreObject);
+                            }   
+                            //var ptr = (uint*)gpuDataBlob.mCoreObject.GetData();
+                            //var num = gpuDataBlob.mCoreObject.GetSize() / 4;
+                            //for (int i = 2; i < num; i++)
+                            //{
+                            //    if (ptr[i] != 0)
+                            //    {
+                            //        int xxx = 0;
+                            //    }
+                            //}
+                            NxRHI.ITexture.BuildImage2DBlob(mHitProxyData.mCoreObject, (IBlobObject)FetchGpuDataBlob.mCoreObject, in CopyTexDesc);
+                            IsHitproxyBuilding = false;
 
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }   
                 }));
             }), "Signal Ready");
 
@@ -442,7 +448,28 @@ namespace EngineNS.Graphics.Pipeline.Common
             //    IsHitproxyBuilding = false;
             //}, "Fetch Image");
         }
-
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeHitproxyFetch;
+        private static Profiler.TimeScope ScopeHitproxyFetch
+        {
+            get
+            {
+                if (mScopeHitproxyFetch == null)
+                    mScopeHitproxyFetch = new Profiler.TimeScope(typeof(TtHitproxyNode), "HitproxyFetch");
+                return mScopeHitproxyFetch;
+            }
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeHitproxyFetchGPU;
+        private static Profiler.TimeScope ScopeHitproxyFetchGPU
+        {
+            get
+            {
+                if (mScopeHitproxyFetchGPU == null)
+                    mScopeHitproxyFetchGPU = new Profiler.TimeScope(typeof(TtHitproxyNode), "HitproxyFetchGPU");
+                return mScopeHitproxyFetchGPU;
+            }
+        }
         public override void BeforeTickLogic(TtRenderPolicy policy)
         {
             var buffer = this.FindAttachBuffer(DepthPinInOut);

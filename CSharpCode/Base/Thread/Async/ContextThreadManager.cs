@@ -651,19 +651,33 @@ namespace EngineNS.Thread.Async
                 mPostTickSyncEvents.Add(evt);
             }
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeTickPostTickSyncEvents;
+        private static Profiler.TimeScope ScopeTickPostTickSyncEvents
+        {
+            get
+            {
+                if (mScopeTickPostTickSyncEvents == null)
+                    mScopeTickPostTickSyncEvents = new Profiler.TimeScope(typeof(TtContextThreadManager), nameof(TickPostTickSyncEvents));
+                return mScopeTickPostTickSyncEvents;
+            }
+        }
         public void TickPostTickSyncEvents(long tickCount)
         {
-            lock (mPostTickSyncEvents)
+            using (new Profiler.TimeScopeHelper(ScopeTickPostTickSyncEvents))
             {
-                for (int i = 0; i < mPostTickSyncEvents.Count; i++)
+                lock (mPostTickSyncEvents)
                 {
-                    if (mPostTickSyncEvents[i](tickCount))
+                    for (int i = 0; i < mPostTickSyncEvents.Count; i++)
                     {
-                        mPostTickSyncEvents.RemoveAt(i);
-                        i--;
+                        if (mPostTickSyncEvents[i](tickCount))
+                        {
+                            mPostTickSyncEvents.RemoveAt(i);
+                            i--;
+                        }
                     }
                 }
-            }
+            }   
         }
         #endregion
     }

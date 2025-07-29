@@ -570,10 +570,24 @@ namespace EngineNS.NxRHI
         internal TtGpuQueue mGpuQueue;
         public TtGpuQueue GpuQueue { get => mGpuQueue; }
 
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeTickPostEvents;
+        private static Profiler.TimeScope ScopeTickPostEvents
+        {
+            get
+            {
+                if (mScopeTickPostEvents == null)
+                    mScopeTickPostEvents = new Profiler.TimeScope(typeof(TtGpuDevice), nameof(TickPostEvents));
+                return mScopeTickPostEvents;
+            }
+        }
         public void TickPostEvents()
         {
-            mCoreObject.TickPostEvents();
-            CmdListManager.Tick();
+            using (new Profiler.TimeScopeHelper(ScopeTickPostEvents))
+            {
+                mCoreObject.TickPostEvents();
+                CmdListManager.Tick();
+            }   
         }
     }
     public class TtGpuQueue : AuxPtrType<NxRHI.ICmdQueue>

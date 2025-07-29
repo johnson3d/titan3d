@@ -387,40 +387,54 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         private List<FAttachBufferDesc> mRmvPools = new List<FAttachBufferDesc>();
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(TtAttachBufferManager), nameof(Tick));
+                return mScopeTick;
+            }
+        }
         public void Tick()
         {
-            TryPrintCachedBuffer();
-            mRmvPools.Clear();
-            foreach (var i in Pools)
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                if (i.Value.FrameAllocCount == 0)
-                {//本帧内，这个Pool没有分配过Buffer，可能需要丢弃
-                    i.Value.NoHitFrameCount++;
-                    if (i.Value.NoHitFrameCount >= 5)
-                    {//连续5帧没有命中使用，丢弃
-                        i.Value.Dispose();
-                        mRmvPools.Add(i.Key);
-                        continue;
-                    }
-                }
-                else
+                TryPrintCachedBuffer();
+                mRmvPools.Clear();
+                foreach (var i in Pools)
                 {
-                    i.Value.NoHitFrameCount = 0;
-
-                    if (i.Value.PoolSize > i.Value.FrameMaxLiveCount + 2)
-                    {
-                        i.Value.Shrink(i.Value.FrameMaxLiveCount);
+                    if (i.Value.FrameAllocCount == 0)
+                    {//本帧内，这个Pool没有分配过Buffer，可能需要丢弃
+                        i.Value.NoHitFrameCount++;
+                        if (i.Value.NoHitFrameCount >= 5)
+                        {//连续5帧没有命中使用，丢弃
+                            i.Value.Dispose();
+                            mRmvPools.Add(i.Key);
+                            continue;
+                        }
                     }
+                    else
+                    {
+                        i.Value.NoHitFrameCount = 0;
+
+                        if (i.Value.PoolSize > i.Value.FrameMaxLiveCount + 2)
+                        {
+                            i.Value.Shrink(i.Value.FrameMaxLiveCount);
+                        }
+                    }
+                    i.Value.FrameLiveCount = 0;
+                    i.Value.FrameAllocCount = 0;
+                    i.Value.FrameMaxLiveCount = 0;
                 }
-                i.Value.FrameLiveCount = 0;
-                i.Value.FrameAllocCount = 0;
-                i.Value.FrameMaxLiveCount = 0;
-            }
-            foreach (var i in mRmvPools)
-            {
-                Pools.Remove(i);
-            }
-            mRmvPools.Clear();
+                foreach (var i in mRmvPools)
+                {
+                    Pools.Remove(i);
+                }
+                mRmvPools.Clear();
+            }   
         }
         public bool PrintCachedBuffer { get; set; } = false;
         public void TryPrintCachedBuffer()

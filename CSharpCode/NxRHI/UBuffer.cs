@@ -405,9 +405,23 @@ namespace EngineNS.NxRHI
             {
                 mCoreObject = FCbvUpdater.CreateInstance();
             }
+            [ThreadStatic]
+            private static Profiler.TimeScope mScopeUpdateCBVs;
+            private static Profiler.TimeScope ScopeUpdateCBVs
+            {
+                get
+                {
+                    if (mScopeUpdateCBVs == null)
+                        mScopeUpdateCBVs = new Profiler.TimeScope(typeof(TrCbcUpdater), nameof(UpdateCBVs));
+                    return mScopeUpdateCBVs;
+                }
+            }
             public void UpdateCBVs()
             {
-                mCoreObject.UpdateCBVs();
+                using (new Profiler.TimeScopeHelper(ScopeUpdateCBVs))
+                {
+                    mCoreObject.UpdateCBVs();
+                }   
             }
         }
     }
