@@ -73,8 +73,9 @@ namespace NxRHI
 		}
 	public:
 		TWeakRefHandle<VKGpuDevice>		mDeviceRef;
-		VkBuffer						mBuffer = (VkBuffer)nullptr;
-		AutoRef<FGpuMemory>				mGpuMemory;
+		VkBuffer mBuffer = nullptr;
+		VmaAllocation mAllocation = nullptr;
+		VmaAllocationInfo mAllocationInfo{};
 	};
 
 	class VKTexture : public ITexture
@@ -98,9 +99,9 @@ namespace NxRHI
 		VkImageAspectFlagBits GetImageAspect();
 	public:
 		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
-		VkImage						mImage = (VkImage)nullptr;
-		//VkImageLayout				mLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-		AutoRef<FGpuMemory>			mGpuMemory;
+		VkImage mImage = (VkImage)nullptr;
+		VmaAllocation mAllocation = nullptr;
+		VmaAllocationInfo mAllocationInfo{};
 		EShaderType					mShaderStages = EShaderType::SDT_AllStages;
 	};
 

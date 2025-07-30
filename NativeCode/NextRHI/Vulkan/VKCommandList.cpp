@@ -1316,7 +1316,11 @@ namespace NxRHI
 		region.imageSubresource.baseArrayLayer = (UINT)subRes / target->Desc.MipLevels;
 		region.imageSubresource.mipLevel = (UINT)subRes % target->Desc.MipLevels;
 		region.bufferOffset = 0;
-		region.bufferRowLength = 0;// desc.InitData[i].RowPitch;
+		auto pixelWidth = GetPixelByteWidth(footprint->Format);
+		if (pixelWidth > 0)
+			region.bufferRowLength = footprint->RowPitch / pixelWidth;
+		else
+			region.bufferRowLength = 0;
 		region.bufferImageHeight = 0;// height;
 		region.imageSubresource.aspectMask = ((VKTexture*)src)->GetImageAspect();
 		region.imageSubresource.layerCount = 1;// Desc.ArraySize;
@@ -1334,7 +1338,11 @@ namespace NxRHI
 		region.imageSubresource.baseArrayLayer = (UINT)subRes / source->Desc.MipLevels;
 		region.imageSubresource.mipLevel = (UINT)subRes % source->Desc.MipLevels;
 		region.bufferOffset = 0;
-		region.bufferRowLength = 0;// footprint->RowPitch;
+		auto pixelWidth = GetPixelByteWidth(footprint->Format);
+		if (pixelWidth > 0)
+			region.bufferRowLength = footprint->RowPitch / pixelWidth;
+		else
+			region.bufferRowLength = 0;
 		region.bufferImageHeight = 0;// footprint->Height;
 		region.imageSubresource.aspectMask = ((VKTexture*)source)->GetImageAspect();
 		region.imageSubresource.layerCount = 1;// Desc.ArraySize;

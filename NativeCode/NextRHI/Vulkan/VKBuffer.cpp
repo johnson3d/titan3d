@@ -57,58 +57,12 @@ namespace NxRHI
 		
 		if (mBuffer)
 		{
-			vkDestroyBuffer(device->mDevice, mBuffer, device->GetVkAllocCallBacks());
+			vmaDestroyBuffer(device->mVmaAllocator, mBuffer, mAllocation);
 			mBuffer = nullptr;
-		}
-
-		if (mGpuMemory)
-		{
-			mGpuMemory->FreeMemory();
-			mGpuMemory = nullptr;
+			mAllocation = nullptr;
 		}
 	}
 
-	AutoRef<VKBuffer> CreateUploadBuffer(VKGpuDevice* device, void* pData, UINT64 totalSize, UINT size)
-	{
-		auto result = MakeWeakRef(new VKBuffer());
-		
-		VkBuffer buffer;
-		VkBufferCreateInfo bufferInfo = {};
-		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferInfo.size = size;
-		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-		if (vkCreateBuffer(device->mDevice, &bufferInfo, device->GetVkAllocCallBacks(), &buffer) != VK_SUCCESS)
-		{
-			return nullptr;
-		}
-		VkMemoryRequirements memRequires{};
-		vkGetBufferMemoryRequirements(device->mDevice, buffer, &memRequires);
-		result->Desc.CpuAccess = ECpuAccess::CAS_WRITE;
-		result->Desc.Type = BFT_NONE;
-		result->Desc.Size = size;
-		result->Desc.RowPitch = (UINT)totalSize;
-		result->Desc.DepthPitch = (UINT)totalSize;
-		result->Desc.StructureStride = 0;
-		result->Desc.Usage = EGpuUsage::USAGE_DYNAMIC;
-		result->mDeviceRef.FromObject(device);
-
-		result->mBuffer = buffer;
-
-		auto typeIndex = device->FindMemoryType(memRequires.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-		result->mGpuMemory = device->mDefaultBufferAllocator->Alloc(device, typeIndex, memRequires.size, "UploadBuffer");
-		vkBindBufferMemory(device->mDevice, result->mBuffer, (VkDeviceMemory)result->mGpuMemory->GetHWBuffer(), result->mGpuMemory->Offset);
-
-		FMappedSubResource subRes{};
-		if (result->Map(0, &subRes, false))
-		{
-			memcpy(subRes.pData, pData, size);
-			result->Unmap(0);
-		}
-
-		return result;
-	}
 	bool VKBuffer::Init(VKGpuDevice* device, const FBufferDesc& desc)
 	{
 		Desc = desc;
@@ -119,25 +73,17 @@ namespace NxRHI
 		Desc.InitData = nullptr;
 		mDeviceRef.FromObject(device);
 
-		/*UINT alignedSize = desc.Size;
-		auto pAlignment = device->GetGpuResourceAlignment();
-		if (alignedSize % pAlignment->VbIbAlignment)
-		{
-			alignedSize = (alignedSize / pAlignment->VbIbAlignment + 1) * pAlignment->VbIbAlignment;
-		}*/
-		
 		UINT memFlags = 0;
 		VkBufferCreateInfo bufferInfo = {};
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferInfo.size = desc.Size;
 
-		IGpuMemAllocator* allocator = nullptr;
+		VmaAllocationCreateInfo vmaInfo{};
+
 		if (desc.Type & EBufferType::BFT_CBuffer)
 		{
 			bufferInfo.usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 			memFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-			
-			allocator = device->mCBufferAllocator;
 		}
 		if (desc.Type & EBufferType::BFT_UAV)
 		{
@@ -175,16 +121,21 @@ namespace NxRHI
 			if (desc.CpuAccess == ECpuAccess::CAS_WRITE)
 			{
 				bufferInfo.usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+				vmaInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 			}
 			if (desc.CpuAccess == ECpuAccess::CAS_READ)
 			{
 				bufferInfo.usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+				vmaInfo.usage = VMA_MEMORY_USAGE_GPU_TO_CPU;
 			}
 			memFlags |= (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+			
 		}
 		else if (desc.Usage == EGpuUsage::USAGE_DYNAMIC)
 		{
 			memFlags |= (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+			vmaInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+			vmaInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
 		}
 		else if(desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
@@ -198,6 +149,7 @@ namespace NxRHI
 				bufferInfo.usage |= (VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 			}
 			memFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+			vmaInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 		}
 
 		if (Desc.MiscFlags & EResourceMiscFlag::RM_COPY_SRC)
@@ -205,26 +157,12 @@ namespace NxRHI
 			bufferInfo.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 		}
 
-		if (vkCreateBuffer(device->mDevice, &bufferInfo, device->GetVkAllocCallBacks(), &mBuffer) != VK_SUCCESS)
+		if (vmaCreateBuffer(device->mVmaAllocator, &bufferInfo, &vmaInfo, &mBuffer, &mAllocation, &mAllocationInfo) != VK_SUCCESS)
+			return false;
+		/*if (vkCreateBuffer(device->mDevice, &bufferInfo, device->GetVkAllocCallBacks(), &mBuffer) != VK_SUCCESS)
 		{
 			return false;
-		}
-
-		VkMemoryRequirements memRequirements;
-		vkGetBufferMemoryRequirements(device->mDevice, mBuffer, &memRequirements);
-		auto memSize = memRequirements.size;//((memRequirements.size + memRequirements.alignment - 1) / memRequirements.alignment) * memRequirements.alignment;
-		auto memoryTypeIndex = device->FindMemoryType(memRequirements.memoryTypeBits, memFlags);
-
-		if (allocator != nullptr)
-		{
-			mGpuMemory = allocator->Alloc(device, memSize, "Buffer");
-		}
-		else
-		{
-			mGpuMemory = device->mDefaultBufferAllocator->Alloc(device, memoryTypeIndex, memSize, "Buffer");
-		}
-
-		vkBindBufferMemory(device->mDevice, mBuffer, (VkDeviceMemory)mGpuMemory->GetHWBuffer(), mGpuMemory->Offset);
+		}*/
 
 		FTransientCmd tsCmd(device, QU_Transfer, "TextureInit");
 		auto cmd = (VKCommandList*)tsCmd.GetCmdList();
@@ -314,29 +252,6 @@ namespace NxRHI
 			return;
 		
 		cmd->SetBufferBarrier(this, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, GpuState, state);
-		//VkBufferMemoryBarrier barrier{};
-		//barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-		//barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		//barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		//barrier.buffer = mBuffer;
-		//barrier.offset = 0;
-		//barrier.size = Desc.Size;
-
-		//VkPipelineStageFlagBits srcStages,dstStages;
-		//GpuResourceStateToVKAccessAndPipeline(GpuState, barrier.srcAccessMask, srcStages);
-		//GpuResourceStateToVKAccessAndPipeline(state, barrier.dstAccessMask, dstStages);
-
-		//auto vkCmd = (VKCommandList*)cmd;
-
-		//vkCmdPipelineBarrier(
-		//	vkCmd->mCommandBuffer->RealObject,
-		//	srcStages,
-		//	dstStages,//VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,//VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-		//	0,
-		//	0, nullptr,
-		//	1, &barrier,
-		//	0, nullptr
-		//);
 		GpuState = state;
 	}
 	void VKBuffer::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
@@ -422,7 +337,8 @@ namespace NxRHI
 	{
 		auto device = mDeviceRef.GetPtr();
 		void* data;
-		auto hr = vkMapMemory(device->mDevice, (VkDeviceMemory)mGpuMemory->GetHWBuffer(), mGpuMemory->Offset, Desc.Size, (VkMemoryMapFlags)0, &data);
+		//auto hr = vkMapMemory(device->mDevice, (VkDeviceMemory)mGpuMemory->GetHWBuffer(), mGpuMemory->Offset, Desc.Size, (VkMemoryMapFlags)0, &data);
+		auto hr = vmaMapMemory(device->mVmaAllocator, mAllocation, &data);
 		if (VK_SUCCESS != hr)
 			return false;
 		
@@ -435,7 +351,15 @@ namespace NxRHI
 	void VKBuffer::Unmap(UINT index)
 	{
 		auto device = mDeviceRef.GetPtr();
-		vkUnmapMemory(device->mDevice, (VkDeviceMemory)mGpuMemory->GetHWBuffer());
+		//vkUnmapMemory(device->mDevice, (VkDeviceMemory)mGpuMemory->GetHWBuffer());
+
+		VkMemoryPropertyFlags memFlags;
+		vmaGetMemoryTypeProperties(device->mVmaAllocator, mAllocationInfo.memoryType, &memFlags);
+		if (!(memFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+		{
+			vmaFlushAllocation(device->mVmaAllocator, mAllocation, 0, Desc.Size);
+		}
+		vmaUnmapMemory(device->mVmaAllocator, mAllocation);
 	}
 
 	void VKBuffer::SetDebugName(const char* name)
@@ -456,74 +380,10 @@ namespace NxRHI
 		
 		if (mImage)
 		{
-			vkDestroyImage(device->mDevice, mImage, device->GetVkAllocCallBacks());
+			//vkDestroyImage(device->mDevice, mImage, device->GetVkAllocCallBacks());
+			vmaDestroyImage(device->mVmaAllocator, mImage, mAllocation);
 			mImage = nullptr;
 		}
-		if (mGpuMemory)
-		{
-			mGpuMemory->FreeMemory();
-			mGpuMemory = nullptr;
-		}
-	}
-	AutoRef<VKTexture> CreateUploadTexure(VKGpuDevice* device, const FTextureDesc& srcDesc)
-	{
-		FTextureDesc desc = srcDesc;
-		desc.BindFlags = EBufferType::BFT_NONE;
-		desc.Usage = EGpuUsage::USAGE_STAGING;
-		desc.CpuAccess = ECpuAccess::CAS_WRITE;
-		desc.InitData = nullptr;
-
-		auto result = MakeWeakRef(new VKTexture());
-		result->Init(device, desc);
-
-		for (UINT i = 0; i < desc.MipLevels; i++)
-		{
-			auto& data = srcDesc.InitData[i];
-			if (result->Map(i, &data, false))
-			{
-				result->Unmap(i);
-			}
-		}
-		
-		return result;
-	}
-	std::vector<AutoRef<VKBuffer>> CreateUploadTexureBuffers(VKGpuDevice* device, VKTexture* texture, const FTextureDesc& desc)
-	{
-		std::vector<AutoRef<VKBuffer>> result;
-		//FBufferDesc bfDesc{};
-		//bfDesc.SetDefault();
-		//bfDesc.CpuAccess = ECpuAccess::CAS_WRITE;
-		//bfDesc.Usage = EGpuUsage::USAGE_STAGING;
-
-		//VkImageSubresource imgSubRes{};
-		//imgSubRes.aspectMask = FormatToVKImageAspectFlags(desc.Format);
-
-		for (UINT i = 0; i < desc.ArraySize; i++)
-		{
-			//UINT height = desc.Height;
-			for (UINT j = 0; j < desc.MipLevels; j++)
-			{	
-				auto pData = desc.InitData[i * desc.MipLevels + j].pData;
-				UINT size = desc.InitData[i * desc.MipLevels + j].DepthPitch;
-				//auto tmp = CreateUploadBuffer(device, pData, size, size);
-
-				FBufferDesc copyDesc{};
-				copyDesc.SetDefault();
-				copyDesc.Usage = EGpuUsage::USAGE_STAGING;
-				copyDesc.Type = EBufferType::BFT_NONE;
-				copyDesc.Size = size;
-				copyDesc.InitData = pData;
-				copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
-				auto bf = MakeWeakRef((VKBuffer*)device->CreateBuffer(&copyDesc));
-
-				result.push_back(bf);
-
-				//height = height / 2;
-				//if (height == 0)
-					//height = 1;
-			}
-		}
-		return result;
 	}
 	
 	VkImageLayout VKTexture::GetImageLayout()
@@ -540,6 +400,7 @@ namespace NxRHI
 		mDeviceRef.FromObject(device);
 		
 		VkImageCreateInfo imageInfo = {};
+		VmaAllocationCreateInfo vmaInfo{};
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		switch (this->GetDimension())
 		{
@@ -635,10 +496,13 @@ namespace NxRHI
 		if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
 			memFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+			vmaInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 		}
 		else if (Desc.Usage == EGpuUsage::USAGE_DYNAMIC)
 		{
 			memFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+			vmaInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+			vmaInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
 		}
 		else if (Desc.Usage == EGpuUsage::USAGE_STAGING)
 		{
@@ -647,11 +511,13 @@ namespace NxRHI
 			{
 				imageInfo.initialLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 				imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+				vmaInfo.usage = VMA_MEMORY_USAGE_GPU_TO_CPU;
 			}
 			else if (Desc.CpuAccess == CAS_WRITE)
 			{
 				imageInfo.initialLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 				imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+				vmaInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 			}
 			else
 			{
@@ -659,7 +525,9 @@ namespace NxRHI
 			}
 		}
 		
-		if (VK_SUCCESS != vkCreateImage(device->mDevice, &imageInfo, device->GetVkAllocCallBacks(), &mImage))
+		if (VK_SUCCESS != vmaCreateImage(device->mVmaAllocator, &imageInfo, &vmaInfo, &mImage, &mAllocation, &mAllocationInfo))
+			return false;
+		/*if (VK_SUCCESS != vkCreateImage(device->mDevice, &imageInfo, device->GetVkAllocCallBacks(), &mImage))
 			return false;
 
 		VkMemoryRequirements memRequirements;
@@ -673,167 +541,82 @@ namespace NxRHI
 			return false;
 		}
 
-		vkBindImageMemory(device->mDevice, mImage, (VkDeviceMemory)mGpuMemory->GetHWBuffer(), mGpuMemory->Offset);
+		vkBindImageMemory(device->mDevice, mImage, (VkDeviceMemory)mGpuMemory->GetHWBuffer(), mGpuMemory->Offset);*/
 
 		GpuState = VKImageLayoutToGpuState(imageInfo.initialLayout);
 		
 		if (desc.InitData != nullptr)
 		{
-			if (true)
+			FTransientCmd tsCmd(device, QU_Transfer, "TextureInit");
+			auto cmd = (VKCommandList*)tsCmd.GetCmdList();
+			if (Desc.BindFlags & EBufferType::BFT_SRV)
 			{
-				FTransientCmd tsCmd(device, QU_Transfer, "TextureInit");
-				auto cmd = (VKCommandList*)tsCmd.GetCmdList();
-				if (Desc.BindFlags & EBufferType::BFT_SRV)
-				{
-					FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_GenericRead, false);
-				}
-				else if (Desc.BindFlags & EBufferType::BFT_UAV)
-				{
-					FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_Uav, false);
-				}
-				else if (Desc.BindFlags & EBufferType::BFT_RTV)
-				{
-					FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_RenderTarget, false);
-				}
-				else if (Desc.BindFlags & EBufferType::BFT_DSV)
-				{
-					FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_DepthStencil, false);
-				}
-				else
-				{
-					ASSERT(false);
-				}
-				for (UINT i = 0; i < desc.ArraySize; i++)
-				{
-					UINT w = Desc.Width;
-					UINT h = Desc.Height;
-					for (UINT k = 0; k < desc.MipLevels; k++)
-					{
-						UINT j = i * Desc.MipLevels + k;
-						/*VkImageSubresource subresource = {
-							.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-							.mipLevel = k,
-							.arrayLayer = i
-						};
-						VkSubresourceLayout layout;
-						vkGetImageSubresourceLayout(device->mDevice, mImage, &subresource, &layout);*/
-						FBufferDesc copyDesc{};
-						copyDesc.SetDefault();
-						copyDesc.Usage = EGpuUsage::USAGE_STAGING;
-						copyDesc.Type = EBufferType::BFT_NONE;
-						copyDesc.Size = desc.InitData[j].DepthPitch;
-						copyDesc.InitData = desc.InitData[j].pData;
-						copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
-
-						auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
-						FTransitionScope::Transition(cmd, bf, EGpuResourceState::GRS_CopySrc, false);
-
-						AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
-						cpDraw->BindTextureDest(this);
-						cpDraw->BindBufferSrc(bf);
-						cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Texture;
-						cpDraw->DestSubResource = j;
-						cpDraw->FootPrint.Format = desc.Format;
-						cpDraw->FootPrint.X = 0;
-						cpDraw->FootPrint.Y = 0;
-						cpDraw->FootPrint.Z = 0;
-						cpDraw->FootPrint.Width = w;
-						cpDraw->FootPrint.Height = h;
-						cpDraw->FootPrint.Depth = (Desc.Depth == 0) ? 1 : Desc.Depth;
-						cpDraw->FootPrint.RowPitch = desc.InitData[j].RowPitch;
-						cpDraw->FootPrint.TotalSize = copyDesc.Size; //desc.InitData[k].RowPitch * footPrint.Footprint.Height;
-						//device->mPostCmdRecorder->PushGpuDraw(cpDraw);
-						cmd->PushGpuDraw(cpDraw.GetPtr());
-
-						w = w / 2;
-						h = h / 2;
-						if (w == 0)
-							w = 1;
-						if (h == 0)
-							h = 1;
-					}
-				}
+				FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_GenericRead, false);
+			}
+			else if (Desc.BindFlags & EBufferType::BFT_UAV)
+			{
+				FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_Uav, false);
+			}
+			else if (Desc.BindFlags & EBufferType::BFT_RTV)
+			{
+				FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_RenderTarget, false);
+			}
+			else if (Desc.BindFlags & EBufferType::BFT_DSV)
+			{
+				FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_DepthStencil, false);
 			}
 			else
 			{
-				if (desc.Usage == EGpuUsage::USAGE_DYNAMIC)
+				ASSERT(false);
+			}
+			for (UINT i = 0; i < desc.ArraySize; i++)
+			{
+				UINT w = Desc.Width;
+				UINT h = Desc.Height;
+				for (UINT k = 0; k < desc.MipLevels; k++)
 				{
-					for (UINT i = 0; i < desc.ArraySize; i++)
-					{
+					UINT j = i * Desc.MipLevels + k;
+					/*VkImageSubresource subresource = {
+						.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+						.mipLevel = k,
+						.arrayLayer = i
+					};
+					VkSubresourceLayout layout;
+					vkGetImageSubresourceLayout(device->mDevice, mImage, &subresource, &layout);*/
+					FBufferDesc copyDesc{};
+					copyDesc.SetDefault();
+					copyDesc.Usage = EGpuUsage::USAGE_STAGING;
+					copyDesc.Type = EBufferType::BFT_NONE;
+					copyDesc.Size = desc.InitData[j].DepthPitch;
+					copyDesc.InitData = desc.InitData[j].pData;
+					copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
-					}
-					for (UINT i = 0; i < desc.MipLevels; i++)
-					{
-						FMappedSubResource mapped{};
-						if (this->Map(i, &mapped, false))
-						{
-							memcpy(mapped.pData, &desc.InitData[i], desc.InitData[i].DepthPitch);
-							this->Unmap(i);
-						}
-					}
-				}
-				else
-				{
-					auto bf = CreateUploadTexureBuffers(device, this, desc);
-					if (bf.size() > 0)
-					{
-						auto width = desc.Width;
-						auto height = desc.Height;
-						if (height == 0)
-							height = 1;
-						auto depth = desc.Depth;
-						if (depth == 0)
-							depth = 1;
-						UINT layer = 0;
-						for (size_t i = 0; i < bf.size(); i++)
-						{
-							VkBufferImageCopy region{};
-							region.imageSubresource.baseArrayLayer = (UINT)i / desc.MipLevels;
-							if (region.imageSubresource.baseArrayLayer != layer)
-							{
-								width = desc.Width;
-								auto height = desc.Height;
-								if (height == 0)
-									height = 1;
-								auto depth = desc.Depth;
-								if (depth == 0)
-									depth = 1;
-								layer = region.imageSubresource.baseArrayLayer;
-							}
-							region.imageSubresource.mipLevel = (UINT)i % desc.MipLevels;
-							region.bufferOffset = 0;
-							region.bufferRowLength = 0;// desc.InitData[i].RowPitch;
-							region.bufferImageHeight = 0;// height;
-							if (Desc.BindFlags & EBufferType::BFT_SRV)
-								region.imageSubresource.aspectMask = FormatToVKImageAspectFlags(Desc.Format, true, true);
-							else
-								region.imageSubresource.aspectMask = FormatToVKImageAspectFlags(Desc.Format, true, true);
-							region.imageSubresource.layerCount = 1;// Desc.ArraySize;
-							region.imageOffset = { 0, 0, 0 };
-							region.imageExtent =
-							{
-								width,
-								height,
-								depth
-							};
+					auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
+					FTransitionScope::Transition(cmd, bf, EGpuResourceState::GRS_CopySrc, false);
 
-							height = height / 2;
-							if (height == 0)
-								height = 1;
-							width = width / 2;
-							if (width == 0)
-								width = 1;
-							depth = depth / 2;
-							if (depth == 0)
-								depth = 1;
+					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+					cpDraw->BindTextureDest(this);
+					cpDraw->BindBufferSrc(bf);
+					cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Texture;
+					cpDraw->DestSubResource = j;
+					cpDraw->FootPrint.Format = desc.Format;
+					cpDraw->FootPrint.X = 0;
+					cpDraw->FootPrint.Y = 0;
+					cpDraw->FootPrint.Z = 0;
+					cpDraw->FootPrint.Width = w;
+					cpDraw->FootPrint.Height = h;
+					cpDraw->FootPrint.Depth = (Desc.Depth == 0) ? 1 : Desc.Depth;
+					cpDraw->FootPrint.RowPitch = desc.InitData[j].RowPitch;
+					cpDraw->FootPrint.TotalSize = copyDesc.Size; //desc.InitData[k].RowPitch * footPrint.Footprint.Height;
+					//device->mPostCmdRecorder->PushGpuDraw(cpDraw);
+					cmd->PushGpuDraw(cpDraw.GetPtr());
 
-							//todo: CopyDraw
-							FTransientCmd cmd(device, EQueueType::QU_Transfer, "Buffer.Update");
-							FTransitionScope transition(cmd.GetCmdList(), this, EGpuResourceState::GRS_CopyDst);
-							VkBuffer srcBuffer = bf[i]->mBuffer;
-							vkCmdCopyBufferToImage(((VKCommandList*)cmd.GetCmdList())->GetVKCmdRecorder()->mCommandBuffer, srcBuffer, mImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
-						}
-					}
+					w = w / 2;
+					h = h / 2;
+					if (w == 0)
+						w = 1;
+					if (h == 0)
+						h = 1;
 				}
 			}
 		}
@@ -932,7 +715,8 @@ namespace NxRHI
 		vkGetImageSubresourceLayout(device->mDevice, mImage, &imgSubRes, &subLayout);
 
 		void* data;
-		auto hr = vkMapMemory(device->mDevice, (VkDeviceMemory)mGpuMemory->GetHWBuffer(), mGpuMemory->Offset, subLayout.size, (VkMemoryMapFlags)0, &data);
+		//auto hr = vkMapMemory(device->mDevice, (VkDeviceMemory)mGpuMemory->GetHWBuffer(), mGpuMemory->Offset, subLayout.size, (VkMemoryMapFlags)0, &data);
+		auto hr = vmaMapMemory(device->mVmaAllocator, mAllocation, &data);
 		if (hr != VK_SUCCESS)
 		{
 			return false;
@@ -948,7 +732,24 @@ namespace NxRHI
 		//mGpuResource->Unmap(subRes, nullptr);
 		auto device = mDeviceRef.GetPtr();
 
-		vkUnmapMemory(device->mDevice, (VkDeviceMemory)mGpuMemory->GetHWBuffer());
+		VkImageSubresource imgSubRes{};
+		if (Desc.BindFlags & EBufferType::BFT_SRV)
+			imgSubRes.aspectMask = FormatToVKImageAspectFlags(Desc.Format, true, false);
+		else
+			imgSubRes.aspectMask = FormatToVKImageAspectFlags(Desc.Format, true, true);
+		imgSubRes.mipLevel = subRes % Desc.MipLevels;
+		imgSubRes.arrayLayer = subRes / Desc.MipLevels;
+		VkSubresourceLayout subLayout{};
+		vkGetImageSubresourceLayout(device->mDevice, mImage, &imgSubRes, &subLayout);
+
+		//vkUnmapMemory(device->mDevice, (VkDeviceMemory)mGpuMemory->GetHWBuffer());
+		VkMemoryPropertyFlags memFlags;
+		vmaGetMemoryTypeProperties(device->mVmaAllocator, mAllocationInfo.memoryType, &memFlags);
+		if (!(memFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+		{
+			vmaFlushAllocation(device->mVmaAllocator, mAllocation, subLayout.offset, subLayout.depthPitch);
+		}
+		vmaUnmapMemory(device->mVmaAllocator, mAllocation);
 	}
 	void VKTexture::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
 	{
