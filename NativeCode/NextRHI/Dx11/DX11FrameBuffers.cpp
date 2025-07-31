@@ -72,7 +72,8 @@ namespace NxRHI
 	bool DX11SwapChain::Init(DX11GpuDevice* device, const FSwapChainDesc& desc)
 	{
 		Desc = desc;
-		
+		Desc.BufferCount = 1;
+
 		return Resize(device, Desc.Width, Desc.Height);
 	}
 	bool DX11SwapChain::Resize(IGpuDevice* device1, UINT w, UINT h)

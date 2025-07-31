@@ -174,6 +174,12 @@ namespace EngineNS.Graphics.Pipeline
                 RenderContext.GpuQueue.Flush(NxRHI.EQueueType.QU_ALL);
                 RenderContext.TickPostEvents();
             }
+
+            RenderContext = null;
+            RenderSystem = null;
+        }
+        public static void DestroyRenderSystem(NxRHI.TtGpuSystem RenderSystem, NxRHI.TtGpuDevice RenderContext)
+        {
             RenderContext?.Dispose();
             RenderContext = null;
             RenderSystem?.Dispose();

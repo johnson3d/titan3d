@@ -110,6 +110,7 @@ NvPhyCapsuleControllerDesc::NvPhyCapsuleControllerDesc()
 NvPhyController::NvPhyController(PhyScene* scene, physx::PxController* ctr)
 {
 	mController = ctr;
+	ASSERT(mController);
 	mScene.FromObject(scene);
 	EntityType = Phy_Controller;
 

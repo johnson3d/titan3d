@@ -371,7 +371,7 @@ namespace NxRHI
 	bool VKSwapChain::Init(VKGpuDevice* device, const FSwapChainDesc& desc)
 	{
 		Desc = desc;
-		Desc.BufferCount = 3;
+		//Desc.BufferCount = 3;
 		mDeviceRef.FromObject(device);
 
 #ifdef PLATFORM_WIN

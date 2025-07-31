@@ -116,10 +116,11 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             base.OnParentSceneChanged(prev, cur);
             if (cur != null)
             {
-                if(PhyController != null)
+                if (PhyController != null)
                 {
                     //clean and remove from scene
-                    PhyController.Cleanup();
+                    PhyController.Dispose();
+                    PhyController = null;
                 }
                 CreateController();
                 PhyController.TagNode = Parent;
@@ -129,7 +130,8 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             }
             else
             {
-                PhyController.Cleanup();
+                PhyController?.Dispose();
+                PhyController = null;
             }
         }
     }

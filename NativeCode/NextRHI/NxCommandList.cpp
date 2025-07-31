@@ -176,6 +176,7 @@ namespace NxRHI
 			return;
 		}
 		mCmdRecorder->mDirectDrawNum++;
+		draw->BuildDrawcall(this);
 		draw->Commit(this, false);
 	}
 	void ICommandList::InheritPass(ICommandList* cmdlist)

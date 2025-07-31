@@ -84,7 +84,7 @@ namespace EngineNS.GamePlay.Scene
                 this.Mesh = mesh;
                 //await materialMesh.Mesh.TryLoadClusteredMesh();
             }
-            this.SetStyle(ENodeStyles.ParallelTick);
+           // this.SetStyle(ENodeStyles.ParallelTick);
             
             return true;
         }

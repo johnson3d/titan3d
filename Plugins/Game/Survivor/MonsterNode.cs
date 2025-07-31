@@ -21,7 +21,7 @@ namespace Survivor
         public TtMonsterStateNode StateNode { get; set; } = null;
         public TtMonsterController Controller { get; set; } = null;
         public TtPrefabNode MonsterPrefab { get; set; } = null;
-        public TtPlacementBase MonseterPlacement { get => MonsterPrefab.Placement; }
+        public TtPlacementBase MonseterPlacement { get => MonsterPrefab?.Placement; }
         public TtMonsterData MonsterData { get; set; } = null;
 
         protected override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)

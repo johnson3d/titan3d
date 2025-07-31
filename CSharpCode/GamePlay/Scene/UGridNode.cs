@@ -98,6 +98,10 @@ namespace EngineNS.GamePlay.Scene
         {
             return TtOnTickLogicScope<TtGridNode>.Scope;
         }
+        public override bool IsNoTick 
+        { 
+            get => HasStyle(ENodeStyles.NoTick); 
+        }
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
             if (mGridlineMaterial == null || mGridlineMaterial.PerMaterialCBuffer == null)

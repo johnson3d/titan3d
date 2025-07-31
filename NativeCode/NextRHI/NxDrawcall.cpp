@@ -174,8 +174,6 @@ namespace NxRHI
 		for (auto& i : BindResources)
 		{
 			IGpuResource* t = i.second.Resource;
-			if (t == nullptr)
-				continue;
 			switch (i.first->BindType)
 			{
 				case SBT_CBV:
@@ -322,8 +320,6 @@ namespace NxRHI
 		for (auto& i : BindResources)
 		{
 			IGpuResource* t = i.second.Resource;
-			if (t == nullptr)
-				continue;
 			switch (i.first->Type)
 			{
 				case SBT_CBV:
@@ -537,6 +533,7 @@ namespace NxRHI
 		cmdlist->BeginEvent("RenderPassCopy");
 		for (UINT i = 0; i < (UINT)CopyDraws.size(); i++)
 		{
+			CopyDraws[i]->BuildDrawcall(cmdlist);
 			CopyDraws[i]->Commit(cmdlist, bRefResource);
 		}
 		cmdlist->EndEvent();

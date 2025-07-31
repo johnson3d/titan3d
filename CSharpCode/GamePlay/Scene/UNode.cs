@@ -253,6 +253,7 @@ namespace EngineNS.GamePlay.Scene
                 mBehaviorGetter = new TtBehaviorGetter();
             }
 
+            this.UnsetStyle(ENodeStyles.NoTick);
             return true;
         }
         //Callback: Children ready!
@@ -1526,24 +1527,12 @@ namespace EngineNS.GamePlay.Scene
         public void RemoveFromWorld()
         {
             Parent = null;
-            SetIsTickable(false, true);
             this.IsCollide = false;
             if(this.OctreeNode != null)
             {
                 OctreeNode.Remove(this);
             }
             mWorld = null;
-        }
-        public void SetIsTickable(bool isTickable, bool isRecursive)
-        {
-            IsNoTick = !isTickable;
-            if(isRecursive)
-            {
-                foreach(var child in Children)
-                {
-                    child.SetIsTickable(isTickable, isRecursive);
-                }
-            }
         }
         #endregion
 

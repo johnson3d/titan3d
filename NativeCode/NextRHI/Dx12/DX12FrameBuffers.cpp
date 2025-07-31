@@ -65,7 +65,7 @@ namespace NxRHI
 	bool DX12SwapChain::Init(DX12GpuDevice* device, const FSwapChainDesc& desc)
 	{
 		Desc = desc;
-		Desc.BufferCount = 3;
+		//Desc.BufferCount = 3;
 	
 		FFenceDesc fcdesc{};
 		fcdesc.InitValue = 0;

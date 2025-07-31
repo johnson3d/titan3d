@@ -214,52 +214,75 @@ namespace NxRHI
 		{
 			case EShaderType::SDT_ComputeShader:
 			{
-				auto d11View = buffer->Buffer.UnsafeConvertTo<DX11Buffer>();
-				auto pSrv = d11View->mBuffer;
-				mContext->CSSetConstantBuffers(binder->Slot, 1, &pSrv);
+				ID3D11Buffer* pView = nullptr;
+				if (buffer != nullptr)
+				{
+					auto d11View = buffer->Buffer.UnsafeConvertTo<DX11Buffer>();
+					pView = d11View->mBuffer;
+				}
+				mContext->CSSetConstantBuffers(binder->Slot, 1, &pView);
 			}
 			break;
 			case EShaderType::SDT_VertexShader:
 			{
-				auto d11View = buffer->Buffer.UnsafeConvertTo<DX11Buffer>();
-				auto pSrv = d11View->mBuffer;
-				mContext->VSSetConstantBuffers(binder->Slot, 1, &pSrv);
+				ID3D11Buffer* pView = nullptr;
+				if (buffer != nullptr)
+				{
+					auto d11View = buffer->Buffer.UnsafeConvertTo<DX11Buffer>();
+					pView = d11View->mBuffer;
+				}
+				mContext->VSSetConstantBuffers(binder->Slot, 1, &pView);
 			}
 			break;
 			case EShaderType::SDT_PixelShader:
 			{
-				auto d11View = buffer->Buffer.UnsafeConvertTo<DX11Buffer>();
-				auto pSrv = d11View->mBuffer;
-				mContext->PSSetConstantBuffers(binder->Slot, 1, &pSrv);
+				ID3D11Buffer* pView = nullptr;
+				if (buffer != nullptr)
+				{
+					auto d11View = buffer->Buffer.UnsafeConvertTo<DX11Buffer>();
+					pView = d11View->mBuffer;
+				}
+				mContext->PSSetConstantBuffers(binder->Slot, 1, &pView);
 			}
 			break;
 		}
 	}
 	void DX11CommandList::SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view)
 	{
-		if (view == nullptr)
-			return;
-		view->GetResourceState()->SetAccessFrame(IWeakRefObject::EngineCurrentFrame);
+		if (view)
+			view->GetResourceState()->SetAccessFrame(IWeakRefObject::EngineCurrentFrame);
 		switch (type)
 		{
 			case EShaderType::SDT_ComputeShader:
 			{
-				auto d11View = (DX11SrView*)view;
-				ID3D11ShaderResourceView* pSrv = d11View->mView;
+				ID3D11ShaderResourceView* pSrv = nullptr;
+				if (view != nullptr)
+				{
+					auto d11View = (DX11SrView*)view;
+					pSrv = d11View->mView;
+				}
 				mContext->CSSetShaderResources(binder->Slot, 1, &pSrv);
 			}
 			break;
 			case EShaderType::SDT_VertexShader:
 			{
-				auto d11View = (DX11SrView*)view;
-				ID3D11ShaderResourceView* pSrv = d11View->mView;
+				ID3D11ShaderResourceView* pSrv = nullptr;
+				if (view != nullptr)
+				{
+					auto d11View = (DX11SrView*)view;
+					pSrv = d11View->mView;
+				}
 				mContext->VSSetShaderResources(binder->Slot, 1, &pSrv);
 			}
 			break;
 			case EShaderType::SDT_PixelShader:
 			{
-				auto d11View = (DX11SrView*)view;
-				ID3D11ShaderResourceView* pSrv = d11View->mView;
+				ID3D11ShaderResourceView* pSrv = nullptr;
+				if (view != nullptr)
+				{
+					auto d11View = (DX11SrView*)view;
+					pSrv = d11View->mView;
+				}
 				mContext->PSSetShaderResources(binder->Slot, 1, &pSrv);
 			}
 			break;
@@ -272,10 +295,10 @@ namespace NxRHI
 		{
 			case EShaderType::SDT_ComputeShader:
 			{
-				auto d11View = (DX11UaView*)view;
 				ID3D11UnorderedAccessView* pSrv = nullptr;
-				if (d11View != nullptr)
+				if (view != nullptr)
 				{
+					auto d11View = (DX11UaView*)view;
 					pSrv = d11View->mView;
 				}
 				mContext->CSSetUnorderedAccessViews(binder->Slot, 1, &pSrv, &nUavInitialCounts);
@@ -297,24 +320,39 @@ namespace NxRHI
 	{
 		switch (type)
 		{
-		case EShaderType::SDT_ComputeShader:
-		{
-			auto d11Sampler = (DX11Sampler*)sampler;
-			mContext->CSSetSamplers(binder->Slot, 1, &d11Sampler->mState);
-		}
-		break;
-		case EShaderType::SDT_VertexShader:
-		{
-			auto d11Sampler = (DX11Sampler*)sampler;
-			mContext->VSSetSamplers(binder->Slot, 1, &d11Sampler->mState);
-		}
-		break;
-		case EShaderType::SDT_PixelShader:
-		{
-			auto d11Sampler = (DX11Sampler*)sampler;
-			mContext->PSSetSamplers(binder->Slot, 1, &d11Sampler->mState);
-		}
-		break;
+			case EShaderType::SDT_ComputeShader:
+			{
+				ID3D11SamplerState* pSrv = nullptr;
+				if (sampler != nullptr)
+				{
+					auto d11View = (DX11Sampler*)sampler;
+					pSrv = d11View->mState;
+				}
+				mContext->CSSetSamplers(binder->Slot, 1, &pSrv);
+			}
+			break;
+			case EShaderType::SDT_VertexShader:
+			{
+				ID3D11SamplerState* pSrv = nullptr;
+				if (sampler != nullptr)
+				{
+					auto d11View = (DX11Sampler*)sampler;
+					pSrv = d11View->mState;
+				}
+				mContext->VSSetSamplers(binder->Slot, 1, &pSrv);
+			}
+			break;
+			case EShaderType::SDT_PixelShader:
+			{
+				ID3D11SamplerState* pSrv = nullptr;
+				if (sampler != nullptr)
+				{
+					auto d11View = (DX11Sampler*)sampler;
+					pSrv = d11View->mState;
+				}
+				mContext->PSSetSamplers(binder->Slot, 1, &pSrv);
+			}
+			break;
 		}
 	}
 	void DX11CommandList::SetVertexBuffer(UINT slot, IVbView* buffer, UINT Offset, UINT Stride)

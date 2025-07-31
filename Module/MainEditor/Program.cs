@@ -8,44 +8,10 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using EngineNS.EGui.UIProxy;
+using EngineNS.Graphics.Pipeline;
 
 namespace MainEditor
 {
-    interface ISample
-    {
-        int Add(int a, int b);
-    }
-    class SampleA : ISample
-    {
-        public int Add(int a, int b)
-        {
-            return a + b;
-        }
-        public static void Test()
-        {
-            ISample a = new SampleA();
-            a.Add(1, 2);
-            a = new SampleB();
-            a.Add(1, 2);
-            DoTest(a);
-
-            ISample b = new SampleB();
-            b.Add(2, 3);
-            DoTest(b);
-        }
-        public static void DoTest(ISample a)
-        {
-            a.Add(1, 2);
-        }
-    }
-    class SampleB : ISample
-    {
-        public int Add(int a, int b)
-        {
-            return a - b;
-        }
-    }
-
     class Program
     {
 #if PWindow
@@ -141,28 +107,19 @@ namespace MainEditor
             //EngineNS.EigenUtility.TestJacobi();
 #endif
 
-            WeakReference wr = Main_Impl(args);
+            EngineNS.NxRHI.TtGpuSystem renderSys;
+            EngineNS.NxRHI.TtGpuDevice gpuDevice;
+            WeakReference wr = Main_Impl(args, out renderSys, out gpuDevice);
+            
+            //wait gc
             while (wr.IsAlive)
             {
                 System.GC.Collect();
                 System.GC.WaitForPendingFinalizers();
             }
-
-            //int GCTimes = 0;
-            //while (EngineNS.NxRHI.TtSrView.NumOfInstance > 0)
-            //{
-            //    if (GCTimes >= 20)
-            //    {
-            //        Console.WriteLine($"CSV.NumOfInstance = {EngineNS.NxRHI.TtSrView.NumOfInstance}/{EngineNS.NxRHI.TtSrView.NumOfGCHandle}");
-            //        System.Diagnostics.Trace.WriteLine($"CSV.NumOfInstance = {EngineNS.NxRHI.TtSrView.NumOfInstance}/{EngineNS.NxRHI.TtSrView.NumOfGCHandle}");
-            //        //Thread.Sleep(1000 * 30);
-            //        break;
-            //    }
-            //    System.GC.Collect();
-            //    System.GC.WaitForPendingFinalizers();
-            //    GCTimes++;
-            //}
-
+            
+            TtGfxDevice.DestroyRenderSystem(renderSys, gpuDevice);
+            
             if (consoleWriter != null)
             {
                 consoleWriter.Close();
@@ -178,7 +135,7 @@ namespace MainEditor
             //Open for MemoryProfiler
             //CoreSDK.MessageDialog("ExitApp");
         }
-        static WeakReference Main_Impl(string[] args)
+        static WeakReference Main_Impl(string[] args, out EngineNS.NxRHI.TtGpuSystem gpuSystem, out EngineNS.NxRHI.TtGpuDevice gpuDevice)
         {
             var cfg = FindArgument(args, "config=");
             if (cfg == null)
@@ -211,6 +168,8 @@ namespace MainEditor
             }
             
             var wr = new WeakReference(EngineNS.TtEngine.Instance);
+            gpuDevice = EngineNS.TtEngine.Instance.GfxDevice.RenderContext;
+            gpuSystem = EngineNS.TtEngine.Instance.GfxDevice.RenderSystem;
             EngineNS.TtEngine.Instance.FinalCleanup();
             return wr;
         }

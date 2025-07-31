@@ -184,12 +184,14 @@ namespace NxRHI
 		mDevice->QueryInterface(IID_ID3D11InfoQueue, (void**)mDebugInfoQueue.GetAddressOf());
 		if (mDebugInfoQueue != nullptr)
 		{
+			mDebugInfoQueue->SetMuteDebugOutput(FALSE);
 			//mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_CORRUPTED_PARAMETER1, TRUE);
 			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_DEVICE_UNORDEREDACCESSVIEW_RETURN_TYPE_MISMATCH, TRUE);
 			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_COPYSUBRESOURCEREGION_INVALIDSOURCE, TRUE); 
 			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_DEVICE_CSSETUNORDEREDACCESSVIEWS_HAZARD, TRUE);
 			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_DEVICE_DRAW_SAMPLER_MISMATCH, TRUE);
 			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_CORRUPTED_MULTITHREADING, TRUE);
+			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_DEVICE_DRAW_VIEW_DIMENSION_MISMATCH, TRUE);
 		}
 		mCaps.NumOfSwapchainFormats = 6;
 		mCaps.SwapchainFormats[0] = EPixelFormat::PXF_R8G8B8A8_UNORM;

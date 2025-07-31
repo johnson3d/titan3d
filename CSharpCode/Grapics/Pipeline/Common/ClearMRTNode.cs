@@ -165,6 +165,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                         }
                         cmdlist.BeginPass(GBuffers[MrtNum - 1].FrameBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
 
+                        cmdlist.FlushDraws();
                         cmdlist.EndPass();
                     }
                 }

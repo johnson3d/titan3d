@@ -93,8 +93,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     public class TtForwordNode : Common.TtBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
-        public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-        public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth", NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color", true, EPixelFormat.PXF_R10G10B10A2_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth", true, EPixelFormat.PXF_D16_UNORM, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         public TtForwordNode()
         {
             Name = "UForwordNode";

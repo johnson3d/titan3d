@@ -81,7 +81,10 @@ namespace Survivor
             Vector3 hostPosition = Vector3.Zero;
             if(WeaponNode.Parent is TtMonsterNode monsterNode)
             {
-                hostPosition = monsterNode.MonseterPlacement.Position.ToSingleVector3();
+                if (monsterNode.MonseterPlacement!=null)
+                {
+                    hostPosition = monsterNode.MonseterPlacement.Position.ToSingleVector3();
+                }
             }
             else
             {

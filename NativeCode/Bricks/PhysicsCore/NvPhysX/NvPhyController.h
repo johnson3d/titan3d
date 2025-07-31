@@ -59,8 +59,8 @@ public:
 
 class NvPhyController : public PhyController
 {
-	NvPhyActor*					mActor;
-	physx::PxController*		mController;
+	NvPhyActor*					mActor = nullptr;
+	physx::PxController*		mController = nullptr;
 	TWeakRefHandle<PhyScene>		mScene;
 public:
 	ENGINE_RTTI(NvPhyController);

@@ -279,7 +279,7 @@ namespace NxRHI
 			Format = PXF_R8G8B8A8_UNORM;
 			SampleDesc.Count = 1;
 			SampleDesc.Quality = 0;
-			BufferCount = 1;
+			BufferCount = 3;
 			OutputWindow = nullptr;
 			Windowed = TRUE;
 		}
