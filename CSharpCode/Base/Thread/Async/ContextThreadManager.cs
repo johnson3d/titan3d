@@ -566,6 +566,35 @@ namespace EngineNS.Thread.Async
                 }
             }
         }
+        public TtAsyncTaskState<bool> CreatePostTask()
+        {
+            var eh = TtAsyncTaskState<bool>.CreateInstance();
+            eh.ContinueThread = null;
+            eh.AsyncType = EAsyncType.ParallelTasks;
+            return eh;
+        }
+        public void PostTask(EAsyncTarget target, TtAsyncTaskState<bool> task)
+        {
+            if (target == EAsyncTarget.TPools)
+            {
+                this.PushTask(task);
+            }
+            else
+            {
+                TtContextThread ctx = GetContext(target);
+                if (ctx != null)
+                {
+                    if (ctx == TtContextThread.CurrentContext)
+                    {
+                        task.ExecutePostEvent();
+                        task.TaskState = EAsyncTaskState.Completed;
+                        task.Dispose();
+                        return;
+                    }
+                    ctx.EnqueuePriority(task);
+                }
+            }
+        }
         public void RunOn<T>(FPostEvent<T> evt, EAsyncTarget target = EAsyncTarget.AsyncIO, object userArgs = null, System.Threading.AutoResetEvent completedEvent = null)
         {
             var eh = TtAsyncTaskState<T>.CreateInstance();

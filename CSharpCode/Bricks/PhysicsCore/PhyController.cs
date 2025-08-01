@@ -29,30 +29,21 @@ namespace EngineNS.Bricks.PhysicsCore
     public class TtPhyController : AuxPtrType<PhyController>
     {
         public GamePlay.Scene.TtNode TagNode;
-        public unsafe TtPhyController(PhyController self)
+        public TtPhyScene mScene;
+        public TtPhyController(TtPhyScene scene, PhyController self)
         {
             mCoreObject = self;
-            var gchandle = System.Runtime.InteropServices.GCHandle.Alloc(this, System.Runtime.InteropServices.GCHandleType.Weak);
-            var super = mCoreObject.NativeSuper;
-            super.mCSharpHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(gchandle).ToPointer();
+            mScene = scene;
+            mCoreObject.NativeSuper.BindObject(mScene, this);
         }
         public unsafe static TtPhyController GetPhyController(PhyController controller)
         {
-            var ptr = (IntPtr)controller.NativeSuper.mCSharpHandle;
-            if (ptr == IntPtr.Zero)
-                return null;
-            var gchandle = System.Runtime.InteropServices.GCHandle.FromIntPtr(ptr);
-            return gchandle.Target as TtPhyController;
+            return controller.NativeSuper.GetCSharpHandle() as TtPhyController;
         }
         public unsafe override void Dispose()
         {
-            if (mCoreObject.IsValidPointer)
-            {
-                var super = mCoreObject.NativeSuper;
-                var gchandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)super.mCSharpHandle);
-                super.mCSharpHandle = (void*)0;
-                gchandle.Free();
-            }
+            mCoreObject.NativeSuper.UnbindObject(mScene);
+            mScene = null;
             base.Dispose();
             TagNode = null;
         }

@@ -40,6 +40,8 @@ namespace NxRHI
 		{
 		case EngineNS::PXF_UNKNOWN:
 			return VK_FORMAT_UNDEFINED;
+        case PXF_A8_UNORM:
+            return VK_FORMAT_A8_UNORM;
 		case EngineNS::PXF_R16_FLOAT:
 			return VK_FORMAT_R16_SFLOAT;
 		case EngineNS::PXF_R16_UINT:

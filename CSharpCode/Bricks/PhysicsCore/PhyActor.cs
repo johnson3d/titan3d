@@ -11,39 +11,25 @@ namespace EngineNS.Bricks.PhysicsCore
         public unsafe TtPhyActor(PhyActor self)
         {
             mCoreObject = self;
-            var gchandle = System.Runtime.InteropServices.GCHandle.Alloc(this, System.Runtime.InteropServices.GCHandleType.Weak);
-
-            var super = mCoreObject.NativeSuper;
-            super.mCSharpHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(gchandle).ToPointer();
+            self.NativeSuper.BindObject(null, this);
         }
-        unsafe ~TtPhyActor()
+        public override void Dispose()
         {
-            var scene = mCoreObject.GetScene();
-            if (scene.IsValidPointer)
+            var scene = this.GetScene();
+            if (scene!=null)
             {
-                scene.LockWrite();
-                mCoreObject.RemoveFromScene(mCoreObject.GetScene());
-                var super = mCoreObject.NativeSuper;
-                var gchandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)super.mCSharpHandle);
-                super.mCSharpHandle = (void*)0;
-                gchandle.Free();
-                scene.UnlockWrite();
+                mCoreObject.RemoveFromScene(scene.mCoreObject);
+                mCoreObject.NativeSuper.UnbindObject(scene);
             }
             else
             {
-                var super = mCoreObject.NativeSuper;
-                var gchandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)super.mCSharpHandle);
-                super.mCSharpHandle = (void*)0;
-                gchandle.Free();
+                mCoreObject.NativeSuper.UnbindObject(scene);
             }
+            base.Dispose();
         }
         public unsafe static TtPhyActor GetActor(PhyActor actor)
         {
-            var ptr = (IntPtr)actor.NativeSuper.mCSharpHandle;
-            if (ptr == IntPtr.Zero)
-                return null;
-            var gchandle = System.Runtime.InteropServices.GCHandle.FromIntPtr(ptr);
-            return gchandle.Target as TtPhyActor;
+            return actor.NativeSuper.GetCSharpHandle() as TtPhyActor;
         }
         public List<TtPhyShape> Shapes { get; } = new List<TtPhyShape>();
         public bool AddToScene(TtPhyScene scene)
@@ -66,18 +52,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public TtPhyScene GetScene()
         {
-            unsafe
-            {
-                var scene = mCoreObject.GetScene();
-                if (scene.IsValidPointer == false)
-                    return null;
-                if (scene.NativeSuper.mCSharpHandle == (void*)0)
-                {
-                    return null;
-                }
-                var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)scene.NativeSuper.mCSharpHandle);
-                return handle.Target as TtPhyScene;
-            }
+            return mCoreObject.NativeSuper.GetCSharpHandle() as TtPhyScene;
         }
         public ref Vector3 Position
         {
