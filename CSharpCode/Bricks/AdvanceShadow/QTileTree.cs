@@ -7,6 +7,7 @@ using EngineNS.GamePlay;
 using System.ComponentModel;
 using EngineNS.UI.Controls;
 using Org.BouncyCastle.Asn1.Mozilla;
+using EngineNS.Profiler;
 
 namespace EngineNS.Bricks.AdvanceShadow
 {
@@ -55,12 +56,14 @@ namespace EngineNS.Bricks.AdvanceShadow
         }
         public void MarkAllLeafDirty()
         {
-            List<TtQNode> leafs = new List<TtQNode>();
-            Root.GatherLeafs(leafs);
-            foreach (var i in leafs)
+            Root.Iterate(static (node) =>
             {
-                i.Leaf.IsDirty = true;
-            }
+                if (node.NodeType == TtQNode.ENodeType.Leaf)
+                {
+                    node.Leaf.IsDirty = true;
+                }
+                return true;
+            });
         }
         [Category("Debug")]
         public int AlivePage
@@ -209,15 +212,18 @@ namespace EngineNS.Bricks.AdvanceShadow
                 CheckShadowObjectChanged();
 
                 UpdateQTree(in CameralPosition, Root);
+
                 QTreeBuilder.BuildNodeArray();
+
                 fixed (FAdvShadowNodeData* p = &QTreeBuilder.AdvShadowNodeDatas[0])
                 {
                     AdvShadowNodeDatas.UpdateData(0, p, QTreeBuilder.AdvShadowNodeDatas.Length * sizeof(FAdvShadowNodeData));
                     //AdvShadowNodeDatas.Flush2GPU();
                 }
+
                 mUpdateShadowMapNodes.Clear();
                 GetDirtyLeafs(world, Root, mUpdateShadowMapNodes);
-                mUpdateShadowMapNodes.Sort((x,y)=>
+                mUpdateShadowMapNodes.Sort((x, y) =>
                 {
                     //todo: compare AABB size
                     //x.AABB.GetSize()
@@ -233,12 +239,13 @@ namespace EngineNS.Bricks.AdvanceShadow
                             return -1;
                         else
                             return y.ShadowObjects.Count.CompareTo(x.ShadowObjects.Count);
-                    }   
+                    }
                 });
                 if (mUpdateShadowMapNodes.Count > limitLeaf)
                 {
                     mUpdateShadowMapNodes.RemoveRange(limitLeaf, mUpdateShadowMapNodes.Count - limitLeaf);
                 }
+
                 var count = mUpdateShadowMapNodes.Count;
                 for (int i = 0; i < count; i++)
                 {
@@ -544,28 +551,48 @@ namespace EngineNS.Bricks.AdvanceShadow
             ShowDebugger = false;
             base.Dispose();
         }
+        public override TimeScope GetScopeTickLogic()
+        {
+            return TtOnTickLogicScope<TtAdvanceShadowNode>.Scope;
+        }
         bool mPushShadowNode = false;
+
+        [ThreadStatic]
+        static Profiler.TimeScope mScopeTree;
+        static Profiler.TimeScope ScopeTree
+        {
+            get
+            {
+                if (mScopeTree == null)
+                    mScopeTree = new Profiler.TimeScope(typeof(TtAdvanceShadowNode), nameof(QTree));
+                return mScopeTree;
+            }
+        }
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
             base.OnTickLogic(args);
 
             if (mShadowMapTree != null)
             {
-                UpdateLightDirection(this.GetWorld());
-                if (mPushShadowNode == false)
+                using (new Profiler.TimeScopeHelper(ScopeTree))
                 {
-                    this.GetWorld().Root.IterateNodes((node, arg) =>
+                    UpdateLightDirection(this.GetWorld());
+                    if (mPushShadowNode == false)
                     {
-                        if (node.IsCastShadow)
+                        this.GetWorld().Root.IterateNodes(static (node, arg) =>
                         {
-                            mShadowMapTree.PushShadowNode(node, false);
-                        }
-                        return true;
-                    }, null);
-                    mPushShadowNode = true;
+                            var mShadowMapTree = arg as TtQTree;
+                            if (node.IsCastShadow)
+                            {
+                                mShadowMapTree.PushShadowNode(node, false);
+                            }
+                            return true;
+                        }, mShadowMapTree);
+                        mPushShadowNode = true;
+                    }
+                    //test code,for renderdoc capture
+                    //mShadowMapTree.MarkAllLeafDirty();
                 }
-                //test code,for renderdoc capture
-                mShadowMapTree.MarkAllLeafDirty();
 
                 var cullingNode = args.Policy.FindFirstNode<TtCpuCullingNode>();
                 if (cullingNode != null && cullingNode.VisParameter.CullCamera != null)

@@ -26,6 +26,7 @@ namespace NxRHI
 	{
 		Desc = desc;
 		Name = name;
+		mDeviceRef = pDevice;
 
 		if (pDevice->mDevice5 == nullptr)
 			return false;
@@ -40,7 +41,12 @@ namespace NxRHI
 	}
 	UINT64 DX11Fence::GetCompletedValue()
 	{
-		return mFence->GetCompletedValue();
+		auto result = mFence->GetCompletedValue();
+		if (result == 0xffffffffffffffff)
+		{
+			mDeviceRef->OnDeviceRemoved();
+		}
+		return result;
 	}
 	void DX11Fence::CpuSignal(UINT64 value)
 	{

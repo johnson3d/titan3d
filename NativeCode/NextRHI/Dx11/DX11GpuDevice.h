@@ -64,6 +64,7 @@ namespace NxRHI
 		virtual void SetBreakOnID(int id, bool open) override;
 
 		virtual void TickPostEvents() override;
+		void OnDeviceRemoved();
 	private:
 		void QueryDevice();
 	public:

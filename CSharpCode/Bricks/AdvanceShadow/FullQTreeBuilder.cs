@@ -107,19 +107,46 @@ namespace EngineNS.Bricks.AdvanceShadow
                 }
             }
         }
+        [ThreadStatic]
+        static Profiler.TimeScope mScopeTree;
+        static Profiler.TimeScope ScopeTree
+        {
+            get
+            {
+                if (mScopeTree == null)
+                    mScopeTree = new Profiler.TimeScope(typeof(TtFullQTreeBuilder), nameof(BuildNodeArray));
+                return mScopeTree;
+            }
+        }
         public void BuildNodeArray()
         {
-            for (int i = 0; i < Layers.Length; i++)
+            using (new Profiler.TimeScopeHelper(ScopeTree))
             {
-                BuildNodeArray(i);
+                for (int i = 0; i < Layers.Length; i++)
+                {
+                    BuildNodeArray(i);
+                }
             }
         }
         private void BuildNodeArray(int layer)
         {
             var curLayer = Layers[layer];
-            foreach(var i in curLayer.Nodes)
+            if (curLayer.Nodes.Length > 1024)
             {
-                i.SetToGpuData(ref AdvShadowNodeDatas[i.NodeIndex]);
+                TtEngine.Instance.EventPoster.ParallelFor(curLayer.Nodes.Length, static (index, state) =>
+                {
+                    var This = state.GetForArgument0<TtFullQTreeBuilder>();
+                    var curLayer = state.GetForArgument1<TtFullQTreeLayer>();
+                    var node = curLayer.Nodes[index];
+                    node.SetToGpuData(ref This.AdvShadowNodeDatas[node.NodeIndex]);
+                }, -1, this, curLayer);
+            }
+            else
+            {
+                foreach (var i in curLayer.Nodes)
+                {
+                    i.SetToGpuData(ref AdvShadowNodeDatas[i.NodeIndex]);
+                }
             }
         }
     }

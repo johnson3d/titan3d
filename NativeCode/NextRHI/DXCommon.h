@@ -539,6 +539,8 @@ namespace NxRHI
 	{
 		switch (pixel_fmt)
 		{
+			case EngineNS::PXF_D32_FLOAT:
+				return EngineNS::PXF_R32_TYPELESS;
 			case EngineNS::PXF_D24_UNORM_S8_UINT:
 				return EngineNS::PXF_R24_UNORM_X8_TYPELESS;
 			case EngineNS::PXF_D32_FLOAT_S8X24_UINT:

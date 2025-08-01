@@ -134,6 +134,7 @@ void NvPhyController::Cleanup()
 {
 	if (mController != nullptr)
 	{
+		mActor->mActor->userData = nullptr;
 		mActor->mActor = nullptr;
 		Safe_Release(mActor);
 		//destroy pxActor
@@ -141,6 +142,7 @@ void NvPhyController::Cleanup()
 		if (pScene != nullptr)
 		{
 			physx::PxSceneWriteLock Lock(*pScene->mScene);
+			mController->setUserData(nullptr);
 			mController->release();
 		}
 		mController = nullptr;

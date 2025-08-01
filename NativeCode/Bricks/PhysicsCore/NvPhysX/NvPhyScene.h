@@ -32,7 +32,7 @@ typedef USHORT(*FSimulationFilterShader)(//void* self,
 class PhySimulationEventCallback : public physx::PxSimulationEventCallback
 {
 public:
-	void* Handle;
+	void* Handle = nullptr;
 	FonContact _onContact = nullptr;
 	FonTrigger _onTrigger;
 	FonConstraintBreak _onConstraintBreak;

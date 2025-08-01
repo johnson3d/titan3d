@@ -147,8 +147,8 @@ namespace NxRHI
 			createDeviceFlags |= (D3D11_CREATE_DEVICE_DEBUG | D3D11_CREATE_DEVICE_DISABLE_GPU_TIMEOUT);
 		D3D_FEATURE_LEVEL featureLevels[] =
 		{
-			D3D_FEATURE_LEVEL_11_0,
 			D3D_FEATURE_LEVEL_11_1,
+			D3D_FEATURE_LEVEL_11_0,
 			D3D_FEATURE_LEVEL_10_0,
 		};
 		UINT numFeatureLevels = ARRAYSIZE(featureLevels);
@@ -184,6 +184,7 @@ namespace NxRHI
 		mDevice->QueryInterface(IID_ID3D11InfoQueue, (void**)mDebugInfoQueue.GetAddressOf());
 		if (mDebugInfoQueue != nullptr)
 		{
+			mDebugInfoQueue->ClearStorageFilter();
 			mDebugInfoQueue->SetMuteDebugOutput(FALSE);
 			//mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_CORRUPTED_PARAMETER1, TRUE);
 			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_DEVICE_UNORDEREDACCESSVIEW_RETURN_TYPE_MISMATCH, TRUE);
@@ -192,6 +193,10 @@ namespace NxRHI
 			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_DEVICE_DRAW_SAMPLER_MISMATCH, TRUE);
 			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_CORRUPTED_MULTITHREADING, TRUE);
 			mDebugInfoQueue->SetBreakOnID(D3D11_MESSAGE_ID_DEVICE_DRAW_VIEW_DIMENSION_MISMATCH, TRUE);
+			/*for (int i = D3D11_MESSAGE_ID_UNKNOWN; i < D3D11_MESSAGE_ID_D3D11_5_MESSAGES_END; i++)
+			{
+				mDebugInfoQueue->SetBreakOnID((D3D11_MESSAGE_ID)i, TRUE);
+			}*/
 		}
 		mCaps.NumOfSwapchainFormats = 6;
 		mCaps.SwapchainFormats[0] = EPixelFormat::PXF_R8G8B8A8_UNORM;
@@ -233,6 +238,15 @@ namespace NxRHI
 		if (mDevice->QueryInterface(IID_ID3D11Device5, (void**)&mDevice5) == S_OK)
 		{
 			mCaps.IsSupportFence = true;
+
+			HANDLE hDeviceRemovedEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+			DWORD dwCookie;
+			mDevice5->RegisterDeviceRemovedEvent(hDeviceRemovedEvent, &dwCookie);
+
+			std::thread([hDeviceRemovedEvent]() {
+				WaitForSingleObject(hDeviceRemovedEvent, INFINITE);
+				::MessageBoxA(NULL, "", "", MB_OK);
+				}).detach();
 		}
 		else
 		{
@@ -241,6 +255,17 @@ namespace NxRHI
 		if (mCmdQueue->mHardwareContext->mContext->QueryInterface(__uuidof(ID3DUserDefinedAnnotation), reinterpret_cast<void**>(&mDefinedAnnotation)) == S_OK)
 		{
 			
+		}
+	}
+	void DX11GpuDevice::OnDeviceRemoved()
+	{
+		//VAutoVSLLock locker(mDredLocker);
+
+		if (CoreSDK::OnGpuDeviceRemoved != nullptr)
+		{
+			GpuDump::NvAftermath::OnDredDump(this, nullptr);
+			CoreSDK::OnGpuDeviceRemoved(this);
+			//GpuDump::NvAftermath::OnDredDump(this);
 		}
 	}
 	IBuffer* DX11GpuDevice::CreateBuffer(const FBufferDesc* desc)

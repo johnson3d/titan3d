@@ -340,6 +340,38 @@ namespace GpuDump
 		}
 		return opStr;
 	}
+	void DX11_OnDredDump(ID3D11Device* mDevice)
+	{
+		auto err = ::GetLastError();
+		auto reason = mDevice->GetDeviceRemovedReason();
+		switch (reason)
+		{
+			case DXGI_ERROR_DEVICE_HUNG:
+				VFX_LTRACE(ELTT_Error, "GPU hung - device stopped responding\n");
+				break;
+
+			case DXGI_ERROR_DEVICE_REMOVED:
+				VFX_LTRACE(ELTT_Error, "Device removed\n");
+				break;
+
+			case DXGI_ERROR_DEVICE_RESET:
+				VFX_LTRACE(ELTT_Error, "Device reset\n");
+				break;
+
+			case DXGI_ERROR_DRIVER_INTERNAL_ERROR:
+				VFX_LTRACE(ELTT_Error, "Driver internal error\n");
+				break;
+
+			case DXGI_ERROR_INVALID_CALL:
+				VFX_LTRACE(ELTT_Error, "Invalid API call\n");
+				break;
+
+			default:
+				VFX_LTRACE(ELTT_Error, "Unknown device error: 0x%08X\n", reason);
+				break;
+		}
+		
+	}
 	void DX12_OnDredDump(ID3D12Device* mDevice, ID3D12DeviceRemovedExtendedDataSettings1* mDredSettings, const char* GDredDir)
 	{
 		auto err = ::GetLastError();
@@ -550,6 +582,11 @@ namespace GpuDump
 	{
 		switch (device->Desc.RhiType)
 		{
+			case EngineNS::NxRHI::RHI_D3D11:
+			{
+				DX11_OnDredDump(((NxRHI::DX11GpuDevice*)device)->mDevice);
+			}
+			break;
 			case EngineNS::NxRHI::RHI_D3D12:
 			{
 				DX12_OnDredDump(((NxRHI::DX12GpuDevice*)device)->mDevice, ((NxRHI::DX12GpuDevice*)device)->mDredSettings, GDredDir);

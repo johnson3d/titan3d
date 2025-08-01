@@ -181,18 +181,22 @@ namespace EngineNS.Graphics.Pipeline
                 if ((types & NxRHI.EBufferType.BFT_DSV) != 0)
                 {
                     desc.m_BindFlags |= NxRHI.EBufferType.BFT_DSV;
+                    //types |= NxRHI.EBufferType.BFT_DSV;
                 }
                 if ((types & NxRHI.EBufferType.BFT_RTV) != 0)
                 {
                     desc.m_BindFlags |= NxRHI.EBufferType.BFT_RTV;
+                    //types |= NxRHI.EBufferType.BFT_RTV;
                 }
                 if ((types & NxRHI.EBufferType.BFT_SRV) != 0)
                 {
                     desc.m_BindFlags |= NxRHI.EBufferType.BFT_SRV;
+                    //types |= NxRHI.EBufferType.BFT_SRV;
                 }
                 if ((types & NxRHI.EBufferType.BFT_UAV) != 0)
                 {
                     desc.m_BindFlags |= NxRHI.EBufferType.BFT_UAV;
+                    //types |= NxRHI.EBufferType.BFT_UAV;
                 }
                 if (desc.Format == EPixelFormat.PXF_D24_UNORM_S8_UINT ||
                     desc.Format == EPixelFormat.PXF_D16_UNORM ||
@@ -202,6 +206,7 @@ namespace EngineNS.Graphics.Pipeline
                     )
                 {
                     desc.m_BindFlags |= NxRHI.EBufferType.BFT_DSV;
+                    //types |= NxRHI.EBufferType.BFT_DSV;
                 }
                 GpuResource = rc.CreateTexture(in desc);
                 GpuResource.SetDebugName("TtAttachBuffer");

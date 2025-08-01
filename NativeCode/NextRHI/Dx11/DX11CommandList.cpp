@@ -76,6 +76,8 @@ namespace NxRHI
 		}
 		BeginEvent(mDebugName.c_str());
 		imContex->ExecuteCommandList(GetDX11CmdRecorder()->mCmdList, 0);
+		imContex->Flush();
+		//GetDX11Device()->OnDeviceRemoved();
 		EndEvent();
 	}
 	bool DX11CommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)

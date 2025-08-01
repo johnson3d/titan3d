@@ -87,6 +87,7 @@ namespace EngineNS.Bricks.PhysicsCore
             float fm = elapse % StepTime;
             using (new Profiler.TimeScopeHelper(ScopeTickSimulate))
             {
+                mCoreObject.LockWrite();
                 for (int i = 0; i < count; i++)
                 {
                     mCoreObject.Simulate(StepTime, scratchMemBlock, scratchMemBlockSize, true);
@@ -97,6 +98,7 @@ namespace EngineNS.Bricks.PhysicsCore
                     mCoreObject.Simulate(fm, scratchMemBlock, scratchMemBlockSize, true);
                     mCoreObject.FetchResults(true, &errorState);
                 }
+                mCoreObject.UnlockWrite();
             }
 
             //todo: Execute on logic thread
@@ -374,7 +376,14 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                PxScene?.Tick(ellapse * 0.001f);
+                try
+                {
+                    PxScene?.Tick(ellapse * 0.001f);
+                }
+                catch(Exception ex)
+                {
+                    return;
+                }
             }
         }
         public void OnHostNotify(object host, in FHostNotify notify)

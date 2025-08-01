@@ -252,21 +252,22 @@ namespace EngineNS.Bricks.AdvanceShadow
                 this.PushObject(i);
             }
         }
-
-        public void GatherLeafs(List<TtQNode> leafs)
+        public bool Iterate(Func<TtQNode, bool> visit)
         {
-            if (this.NodeType == ENodeType.Leaf)
-            {
-                leafs.Add(this);
-                return;
-            }
+            if (visit(this)==false)
+                return false;
             if (Child00 != null)
             {
-                Child00.GatherLeafs(leafs);
-                Child01.GatherLeafs(leafs);
-                Child10.GatherLeafs(leafs);
-                Child11.GatherLeafs(leafs);
+                if (Child00.Iterate(visit)==false)
+                    return false;
+                if (Child01.Iterate(visit)==false)
+                    return false;
+                if (Child10.Iterate(visit)==false)
+                    return false;
+                if (Child11.Iterate(visit)==false)
+                    return false;
             }
+            return true;
         }
     }
 }

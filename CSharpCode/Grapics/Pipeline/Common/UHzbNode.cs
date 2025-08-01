@@ -268,13 +268,13 @@ namespace EngineNS.Graphics.Pipeline.Common
                     var depth = this.GetAttachBuffer(this.DepthPinIn).Srv;
                     SetupDrawcall.BindSrv(srvIdx, depth);
                 }
-                cmd.PushGpuDraw(SetupDrawcall);
+                //cmd.PushGpuDraw(SetupDrawcall);
 
                 if (MipsDrawcalls != null)
                 {
                     for (int i = 0; i < MipsDrawcalls.Length; i++)
                     {
-                        cmd.PushGpuDraw(MipsDrawcalls[i]);
+                        //cmd.PushGpuDraw(MipsDrawcalls[i]);
                     }
                 }
                 cmd.FlushDraws();
