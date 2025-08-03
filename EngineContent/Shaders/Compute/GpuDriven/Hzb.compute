@@ -2,8 +2,9 @@
 #define _HZB_H_
 #include "../../Inc/GlobalDefine.cginc"
 
-Texture2D<float2> DepthBuffer;
+Texture2D<float> DepthBuffer;
 
+//d24_unorm_s8_uint,d16_unorm,d32_sfloat
 VK_IMAGE(rg16f)
 RWTexture2D<float2> SrcBuffer;
 VK_IMAGE(rg16f)
@@ -19,11 +20,19 @@ void CS_Setup(uint3 id : SV_DispatchThreadID,
 	DstBuffer.GetDimensions(texSize.x, texSize.y);
 	if (any(id.xy >= texSize))
 		return;
-
-	float d1 = DepthBuffer[id.xy * 2].r;
-	float d2 = DepthBuffer[id.xy * 2 + int2(0, 1)].r;
-	float d3 = DepthBuffer[id.xy * 2 + int2(1, 0)].r;
-	float d4 = DepthBuffer[id.xy * 2 + int2(1, 1)].r;
+    //uint2 dsSize;
+    //DepthBuffer.GetDimensions(dsSize.x, dsSize.y);
+    //if (any(id.xy * 2 + 1 >= dsSize))
+    //    return;
+	
+    float d1 = DepthBuffer[id.xy * 2].r;
+    float d2 = DepthBuffer[id.xy * 2 + int2(0, 1)].r;
+    float d3 = DepthBuffer[id.xy * 2 + int2(1, 0)].r;
+    float d4 = DepthBuffer[id.xy * 2 + int2(1, 1)].r;
+    //float d1 = DepthBuffer.Load(0, 0).r;
+    //float d2 = d1;
+    //float d3 = d1;
+    //float d4 = d1;
 	float2 value;
 	value.r = min(min(d1, d2), min(d3, d4));
 	value.g = max(max(d1, d2), max(d3, d4));

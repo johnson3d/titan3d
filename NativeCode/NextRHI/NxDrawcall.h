@@ -343,7 +343,7 @@ namespace NxRHI
 	{
 	public:
 		std::vector<FBarrierDesc> Barriers;
-
+		void PushBarrier(IGpuBufferData* buffer, EGpuResourceState state);
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 		virtual UINT GetPrimitiveNum() override
 		{
@@ -353,13 +353,16 @@ namespace NxRHI
 		{
 
 		}
+		void OnBeginPass(ICommandList* cmdlist);
+		void OnEndPass(ICommandList* cmdlist);
+		int Step = 0;
 	};
 
 	class IRenderPassCopyDraw : public IGpuDraw
 	{
 	public:
 		std::vector<AutoRef<ICopyDraw>> CopyDraws;
-
+		void PushCopyDraw(ICopyDraw* draw);
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 		virtual UINT GetPrimitiveNum() override
 		{
@@ -369,6 +372,9 @@ namespace NxRHI
 		{
 
 		}
+		void OnBeginPass(ICommandList* cmdlist);
+		void OnEndPass(ICommandList* cmdlist);
+		int Step = 0;
 	};
 }
 

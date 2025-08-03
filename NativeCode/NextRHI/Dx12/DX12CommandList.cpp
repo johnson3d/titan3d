@@ -188,9 +188,7 @@ namespace NxRHI
 		GetCmdRecorder()->UseResource(fb);
 		GetCmdRecorder()->mDirectDrawNum++;
 		auto pass = GetCurrentRenderPass();
-		ASSERT(pass->ActionState == 0 && pass->BeginBarriers->Barriers.size() == 0 && pass->BeginCopyDraws->CopyDraws.size() == 0);
-		pass->ActionState = 1;
-
+		
 		for (UINT i = 0; i < fb->mRenderPass->Desc.NumOfMRT; i++)
 		{
 			auto rtv = fb->mRenderTargets[i].UnsafeConvertTo<DX12RenderTargetView>();
@@ -209,7 +207,9 @@ namespace NxRHI
 				FTransitionScope::Transition(this, dsv->GpuResource, EGpuResourceState::GRS_DepthStencil, false);
 			}
 		}
+		pass->BeginCopyDraws->OnBeginPass(this);
 		this->PushGpuDrawImpl(pass->BeginCopyDraws);
+		pass->BeginBarriers->OnBeginPass(this);
 		this->PushGpuDrawImpl(pass->BeginBarriers);
 
 		auto dxFB = ((DX12FrameBuffers*)fb);
@@ -300,10 +300,9 @@ namespace NxRHI
 	{
 		ASSERT(mCurrentFrameBuffers != nullptr);
 		auto pass = GetCurrentRenderPass();
+		pass->BeginCopyDraws->OnEndPass(this);
+		pass->BeginBarriers->OnEndPass(this);
 		
-		pass->ActionState = 0;
-		ASSERT(pass->ActionState == 0 && pass->BeginBarriers->Barriers.size() == 0 && pass->BeginCopyDraws->CopyDraws.size() == 0);
-
 		mCurrentFrameBuffers = nullptr;
 		EndEvent();
 		ASSERT(mCmdListState == ECmdListState::Recording);

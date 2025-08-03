@@ -295,6 +295,8 @@ namespace NxRHI
 					break;
 			}
 		}
+		if (IndirectDrawArgsBuffer)
+			FTransitionScope::Transition(cmdlist, IndirectDrawArgsBuffer, GRS_UavIndirect, true);
 	}
 	void VKGraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{

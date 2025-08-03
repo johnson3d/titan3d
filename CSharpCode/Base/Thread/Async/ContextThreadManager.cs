@@ -305,11 +305,17 @@ namespace EngineNS.Thread.Async
         }
         public void ParallelFor(int numTask, Delegate_ParrallelForAction action, int numMicroThread = -1, object userData1 = null, object userData2 = null)
         {
-            if (numMicroThread<=0)
+            System.Diagnostics.Debug.Assert(Thread.TtContextThread.CurrentContext.GetThreadType() != EAsyncTarget.TPools);
+
+            if (numMicroThread < 0)
             {
                 numMicroThread = TtEngine.Instance.EventPoster.PooledThreadNum;
             }
-            System.Diagnostics.Debug.Assert(Thread.TtContextThread.CurrentContext.GetThreadType()!= EAsyncTarget.TPools);
+            else if (numMicroThread == 0)
+            {
+                numMicroThread = 1;
+            }
+            
             if (numTask == 0)
             {
                 return;

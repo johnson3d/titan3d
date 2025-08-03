@@ -259,6 +259,12 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             if (Setup == null)
                 return;
+
+            if (TtEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_D3D11)
+            {
+                //这里莫名其妙的，在dx11下访问Texture2D<float> DepthBuffer;会导致device remove
+                return;
+            }
             var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmd, "Hzb"))
             {
@@ -268,13 +274,13 @@ namespace EngineNS.Graphics.Pipeline.Common
                     var depth = this.GetAttachBuffer(this.DepthPinIn).Srv;
                     SetupDrawcall.BindSrv(srvIdx, depth);
                 }
-                //cmd.PushGpuDraw(SetupDrawcall);
+                cmd.PushGpuDraw(SetupDrawcall);
 
                 if (MipsDrawcalls != null)
                 {
                     for (int i = 0; i < MipsDrawcalls.Length; i++)
                     {
-                        //cmd.PushGpuDraw(MipsDrawcalls[i]);
+                        cmd.PushGpuDraw(MipsDrawcalls[i]);
                     }
                 }
                 cmd.FlushDraws();

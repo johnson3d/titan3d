@@ -518,8 +518,42 @@ namespace NxRHI
 			OnBindResource(binder, bs);
 		}
 	}
+	
+	void IBarriersDraw::PushBarrier(IGpuBufferData* buffer, EGpuResourceState state)
+	{
+		ASSERT(Step == 1);
+		//ASSERT(state != EGpuResourceState::GRS_CopyDst);
+		FBarrierDesc tmp(buffer, state);
+		for (const auto& i : Barriers)
+		{
+			if (i.Buffer == buffer)
+			{
+				if (i.ToState != state)
+				{
+					ASSERT(false);
+				}
+				else
+				{
+					return;
+				}
+			}
+		}
+		Barriers.push_back(tmp);
+	}
+	void IBarriersDraw::OnBeginPass(ICommandList* cmdlist)
+	{
+		ASSERT(Step == 0);
+		Step = 1;
+	}
+	void IBarriersDraw::OnEndPass(ICommandList* cmdlist)
+	{
+		ASSERT(Step == 2);
+		ASSERT(Barriers.size() == 0);
+		Step = 0;
+	}
 	void IBarriersDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
+		ASSERT(Step == 1);
 		cmdlist->BeginEvent("RenderPassBarriers");
 		for (UINT i = 0; i < (UINT)Barriers.size(); i++)
 		{
@@ -527,9 +561,27 @@ namespace NxRHI
 		}
 		cmdlist->EndEvent();
 		Barriers.clear();
+		Step = 2;
+	}
+	void IRenderPassCopyDraw::OnBeginPass(ICommandList* cmdlist)
+	{
+		ASSERT(Step == 0);
+		Step = 1;
+	}
+	void IRenderPassCopyDraw::OnEndPass(ICommandList* cmdlist)
+	{
+		ASSERT(Step == 2);
+		Step = 0;
+		ASSERT(CopyDraws.size() == 0);
+	}
+	void IRenderPassCopyDraw::PushCopyDraw(ICopyDraw* draw)
+	{
+		ASSERT(Step == 1);
+		CopyDraws.push_back(draw);
 	}
 	void IRenderPassCopyDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
+		ASSERT(Step == 1);
 		cmdlist->BeginEvent("RenderPassCopy");
 		for (UINT i = 0; i < (UINT)CopyDraws.size(); i++)
 		{
@@ -538,6 +590,7 @@ namespace NxRHI
 		}
 		cmdlist->EndEvent();
 		CopyDraws.clear();
+		Step = 2;
 	}
 }
 

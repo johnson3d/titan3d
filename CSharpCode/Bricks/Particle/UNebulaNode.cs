@@ -18,6 +18,11 @@ namespace EngineNS.Bricks.Particle
             CoreSDK.DisposeObject(ref mNebulaParticle);
             base.Dispose();
         }
+        public override bool IsNoTick 
+        {
+            get => HasStyle(ENodeStyles.NoTick);
+            set => base.IsNoTick = value; 
+        }
         public class TtNebulaNodeData : GamePlay.Scene.TtMeshNode.TtMeshNodeData
         {
             public TtNebulaNodeData()
@@ -55,6 +60,8 @@ namespace EngineNS.Bricks.Particle
                 mNebulaParticle = GetNodeData<TtNebulaNodeData>().NebulaParticle; 
             else
                 mNebulaParticle = await TtEngine.Instance.NebulaTemplateManager.GetParticle(GetNodeData<TtNebulaNodeData>().NebulaName);
+
+            this.UnsetStyle(ENodeStyles.ParallelTick);
             return ret;
         }
         public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)

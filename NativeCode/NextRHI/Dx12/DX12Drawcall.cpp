@@ -373,6 +373,8 @@ namespace NxRHI
 		{
 			CommitResource((DX12CommandList*)cmdlist, EShaderType::SDT_Unknown, i.first->GetValidShaderBinder(), i.second.Resource);
 		}
+		if (IndirectDrawArgsBuffer)
+			FTransitionScope::Transition(cmdlist, IndirectDrawArgsBuffer, GRS_UavIndirect, true);
 	}
 	void DX12GraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
@@ -419,8 +421,7 @@ namespace NxRHI
 			auto pDrawDesc = Mesh->GetAtomDesc(MeshAtom, MeshLOD);
 			ASSERT(pDrawDesc);
 			if (IndirectDrawArgsBuffer)
-			{
-				FTransitionScope::Transition(cmdlist, IndirectDrawArgsBuffer, GRS_UavIndirect, true);
+			{	
 				if (pDrawDesc->IsDispatchMesh())
 				{
 					ASSERT(false);

@@ -176,7 +176,7 @@ namespace NxRHI
 		}
 		IRenderPass();
 		~IRenderPass();
-		int ActionState = 0;
+
 		void PushBeginBarrier(IGpuBufferData* buffer, EGpuResourceState state);
 		AutoRef<IBarriersDraw> BeginBarriers;
 

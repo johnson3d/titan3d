@@ -29,27 +29,11 @@ namespace NxRHI
 	}
 	void IRenderPass::PushBeginCopyDraw(ICopyDraw* draw)
 	{
-		BeginCopyDraws->CopyDraws.push_back(draw);
+		BeginCopyDraws->PushCopyDraw(draw);
 	}
 	void IRenderPass::PushBeginBarrier(IGpuBufferData* buffer, EGpuResourceState state)
 	{
-		//ASSERT(state != EGpuResourceState::GRS_CopyDst);
-		FBarrierDesc tmp(buffer, state);
-		for (const auto& i : BeginBarriers->Barriers)
-		{
-			if (i.Buffer == buffer)
-			{
-				if (i.ToState != state)
-				{
-					ASSERT(false);
-				}
-				else
-				{
-					return;
-				}
-			}
-		}
-		BeginBarriers->Barriers.push_back(tmp);
+		BeginBarriers->PushBarrier(buffer, state);
 	}
 }
 

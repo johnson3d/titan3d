@@ -486,7 +486,9 @@ namespace NxRHI
 		renderingInfo.pDepthAttachment = &depthAttachment;
 		renderingInfo.pStencilAttachment = &stencilAttachment;
 
+		pass->BeginCopyDraws->OnBeginPass(this);
 		this->PushGpuDrawImpl(pass->BeginCopyDraws);
+		pass->BeginBarriers->OnBeginPass(this);
 		this->PushGpuDrawImpl(pass->BeginBarriers);
 		this->PushGpuDrawImpl(mBeginRenderingDraw);
 		//vkCmdBeginRendering(GetVKCmdRecorder()->mCommandBuffer, &renderingInfo);
@@ -502,6 +504,8 @@ namespace NxRHI
 		vkCmdEndRendering(GetVKCmdRecorder()->mCommandBuffer);
 		
 		auto pass = GetCurrentRenderPass();
+		pass->BeginCopyDraws->OnEndPass(this);
+		pass->BeginBarriers->OnEndPass(this);
 
 		mCurrentFrameBuffers = nullptr;
 	}
@@ -603,7 +607,9 @@ namespace NxRHI
 			renderPassInfo.pClearValues = clearValues;
 
 			//BeginEvent(debugName);
+			pass->BeginCopyDraws->OnBeginPass(this);
 			this->PushGpuDrawImpl(pass->BeginCopyDraws);
+			pass->BeginBarriers->OnBeginPass(this);
 			this->PushGpuDrawImpl(pass->BeginBarriers);
 			this->PushGpuDrawImpl(mBeginRenderingDraw);
 			//vkCmdBeginRenderPass(GetVKCmdRecorder()->mCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
@@ -627,6 +633,8 @@ namespace NxRHI
 			vkCmdEndRenderPass(GetVKCmdRecorder()->mCommandBuffer);
 
 			auto pass = GetCurrentRenderPass();
+			pass->BeginCopyDraws->OnEndPass(this);
+			pass->BeginBarriers->OnEndPass(this);
 			mCurrentFrameBuffers = nullptr;
 			
 			this->EndEvent();
