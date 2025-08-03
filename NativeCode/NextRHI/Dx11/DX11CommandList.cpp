@@ -165,6 +165,7 @@ namespace NxRHI
 	}
 	void DX11CommandList::EndPass()
 	{
+		this->FlushDraws();
 		mCurrentFrameBuffers = nullptr;
 	}
 	void DX11CommandList::BeginEvent(const char* info)
