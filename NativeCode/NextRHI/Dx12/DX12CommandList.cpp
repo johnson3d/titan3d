@@ -298,6 +298,7 @@ namespace NxRHI
 	}
 	void DX12CommandList::EndPass()
 	{
+		this->FlushDraws();
 		ASSERT(mCurrentFrameBuffers != nullptr);
 		auto pass = GetCurrentRenderPass();
 		pass->BeginCopyDraws->OnEndPass(this);

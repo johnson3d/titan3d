@@ -620,6 +620,7 @@ namespace NxRHI
 	}
 	void VKCommandList::EndPass()
 	{
+		this->FlushDraws();
 		if (GetVKDevice()->mVulkanExt.IsDynamicRendering)
 		{
 			EndRendering();
