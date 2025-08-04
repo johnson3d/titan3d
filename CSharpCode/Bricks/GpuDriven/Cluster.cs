@@ -2,6 +2,7 @@
 using EngineNS.Graphics.Pipeline;
 using EngineNS.NxRHI;
 using EngineNS.Support;
+using Microsoft.Toolkit.HighPerformance.Buffers;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
@@ -442,69 +443,72 @@ namespace EngineNS.Bricks.GpuDriven
             var attr = node.GetOrAddAttribute("MeshLets", 0, 0, true);
             
             using (var blob = new Support.TtBlobObject())
-            {   
-                var desc = MeshLetsBuffer.GpuBuffer.mCoreObject.Desc;
-                desc.CpuAccess = NxRHI.ECpuAccess.CAS_READ;
-                desc.Usage = NxRHI.EGpuUsage.USAGE_STAGING;
-                var cpBuffer = rc.CreateBuffer(in desc);
-                var cpDraw = rc.CreateCopyDraw();
-                cpDraw.Copy(cpBuffer, MeshLetsBuffer.GpuBuffer);
-                using (var cmd = new FTransientCmd(EQueueType.QU_Transfer, ""))
-                {
-                    cmd.CmdList.PushGpuDraw(cpDraw.mCoreObject);
-                }
-                cpDraw.Dispose();
-                cpBuffer.FetchGpuData(0, blob.mCoreObject);
+            {
+                //var desc = MeshLetsBuffer.GpuBuffer.mCoreObject.Desc;
+                //desc.CpuAccess = NxRHI.ECpuAccess.CAS_READ;
+                //desc.Usage = NxRHI.EGpuUsage.USAGE_STAGING;
+                //var cpBuffer = rc.CreateBuffer(in desc);
+                //var cpDraw = rc.CreateCopyDraw();
+                //cpDraw.Copy(cpBuffer, MeshLetsBuffer.GpuBuffer);
+                //using (var cmd = new FTransientCmd(EQueueType.QU_Transfer, ""))
+                //{
+                //    cmd.CmdList.PushGpuDraw(cpDraw.mCoreObject);
+                //}
+                //cpDraw.Dispose();
+                //cpBuffer.FetchGpuData(0, blob.mCoreObject);
+                MeshLetsBuffer.GpuBuffer.FetchGpuData(0, blob.mCoreObject);
                 using (var ar = attr.GetWriter(blob.Size))
                 {
                     var p = (FMeshlet*)((byte*)blob.DataPointer + 8);
                     ar.WritePtr(p, (int)blob.Size - 8);
                 }
-                cpBuffer.Dispose();
+                //cpBuffer.Dispose();
             }
             attr = node.GetOrAddAttribute("Vertices", 0, 0, true);
             using (var blob = new Support.TtBlobObject())
             {
-                var desc = VerticesBuffer.GpuBuffer.mCoreObject.Desc;
-                desc.CpuAccess = NxRHI.ECpuAccess.CAS_READ;
-                desc.Usage = NxRHI.EGpuUsage.USAGE_STAGING;
-                var cpBuffer = rc.CreateBuffer(in desc);
-                var cpDraw = rc.CreateCopyDraw();
-                cpDraw.Copy(cpBuffer, VerticesBuffer.GpuBuffer);
-                using (var cmd = new FTransientCmd(EQueueType.QU_Transfer, ""))
-                {   
-                    cmd.CmdList.PushGpuDraw(cpDraw.mCoreObject);
-                }
-                cpDraw.Dispose();
-                cpBuffer.FetchGpuData(0, blob.mCoreObject);
+                //var desc = VerticesBuffer.GpuBuffer.mCoreObject.Desc;
+                //desc.CpuAccess = NxRHI.ECpuAccess.CAS_READ;
+                //desc.Usage = NxRHI.EGpuUsage.USAGE_STAGING;
+                //var cpBuffer = rc.CreateBuffer(in desc);
+                //var cpDraw = rc.CreateCopyDraw();
+                //cpDraw.Copy(cpBuffer, VerticesBuffer.GpuBuffer);
+                //using (var cmd = new FTransientCmd(EQueueType.QU_Transfer, ""))
+                //{   
+                //    cmd.CmdList.PushGpuDraw(cpDraw.mCoreObject);
+                //}
+                //cpDraw.Dispose();
+                //cpBuffer.FetchGpuData(0, blob.mCoreObject);
+                VerticesBuffer.GpuBuffer.FetchGpuData(0, blob.mCoreObject);
                 using (var ar = attr.GetWriter(blob.Size))
                 {
                     var p = (uint*)((byte*)blob.DataPointer + 8);
                     ar.WritePtr(p, (int)blob.Size - 8);
                 }
-                cpBuffer.Dispose();
+                //cpBuffer.Dispose();
             }
             attr = node.GetOrAddAttribute("Triangles", 0, 0, true);
             using (var blob = new Support.TtBlobObject())
             {
-                var desc = TrianglesBuffer.GpuBuffer.mCoreObject.Desc;
-                desc.CpuAccess = NxRHI.ECpuAccess.CAS_READ;
-                desc.Usage = NxRHI.EGpuUsage.USAGE_STAGING;
-                var cpBuffer = rc.CreateBuffer(in desc);
-                var cpDraw = rc.CreateCopyDraw();
-                cpDraw.Copy(cpBuffer, TrianglesBuffer.GpuBuffer);
-                using (var cmd = new FTransientCmd(EQueueType.QU_Transfer, ""))
-                {
-                    cmd.CmdList.PushGpuDraw(cpDraw.mCoreObject);
-                }
-                cpDraw.Dispose();
-                cpBuffer.FetchGpuData(0, blob.mCoreObject);
+                //var desc = TrianglesBuffer.GpuBuffer.mCoreObject.Desc;
+                //desc.CpuAccess = NxRHI.ECpuAccess.CAS_READ;
+                //desc.Usage = NxRHI.EGpuUsage.USAGE_STAGING;
+                //var cpBuffer = rc.CreateBuffer(in desc);
+                //var cpDraw = rc.CreateCopyDraw();
+                //cpDraw.Copy(cpBuffer, TrianglesBuffer.GpuBuffer);
+                //using (var cmd = new FTransientCmd(EQueueType.QU_Transfer, ""))
+                //{
+                //    cmd.CmdList.PushGpuDraw(cpDraw.mCoreObject);
+                //}
+                //cpDraw.Dispose();
+                //cpBuffer.FetchGpuData(0, blob.mCoreObject);
+                TrianglesBuffer.GpuBuffer.FetchGpuData(0, blob.mCoreObject);
                 using (var ar = attr.GetWriter(blob.Size))
                 {
                     var p = (uint*)((byte*)blob.DataPointer + 8);
                     ar.WritePtr(p, (int)blob.Size - 8);
                 }
-                cpBuffer.Dispose();
+                //cpBuffer.Dispose();
             }
         }
     }

@@ -454,7 +454,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         foreach(var j in i.MethodDatas)
                         {
                             var mtd = DefClass.FindMethod(j.GetMethodName());
-                            if (mtd.OverrideMethod != null)
+                            if (mtd!= null &&mtd.OverrideMethod != null)
                             {
                                 var meta = mtd.OverrideMethod.GetFirstCustomAttribute<Rtti.MetaAttribute>(false);
                                 if (meta.ShaderName == null)

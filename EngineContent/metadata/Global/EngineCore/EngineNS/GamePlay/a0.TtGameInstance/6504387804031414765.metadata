@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_6504387804031414765 Type="EngineNS.GamePlay.TtGameInstance@EngineCore">
-  <DefaultCamera Type="EngineNS.Graphics.Pipeline.TtCamera@EngineCore" Order="0" />
-  <GameWorld Type="EngineNS.GamePlay.TtWorld@EngineCore" Order="0" />
-  <MacrossGame Type="EngineNS.GamePlay.TtMacrossGame@EngineCore" Order="0" />
-  <WorldViewportSlate Type="EngineNS.GamePlay.TtGameViewportSlate@EngineCore" Order="0" />
-</Hash_6504387804031414765>

@@ -325,7 +325,7 @@ namespace NxRHI
 			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
 
 			IBlobObject buffData;
-			copyVB->FetchGpuData(0, &buffData);
+			copyVB->FetchGpuData(device, 0, &buffData);
 
 			mVertexBuffers[i]->PushData((BYTE*)buffData.GetData() + sizeof(UINT) * 2, vb->Buffer->Desc.Size);
 		}
@@ -348,7 +348,7 @@ namespace NxRHI
 			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
 
 			IBlobObject buffData;
-			copyIB->FetchGpuData(0, &buffData);
+			copyIB->FetchGpuData(device, 0, &buffData);
 			IndexBuffer->PushData((BYTE*)buffData.GetData() + sizeof(UINT) * 2, ib->Buffer->Desc.Size);
 		}
 

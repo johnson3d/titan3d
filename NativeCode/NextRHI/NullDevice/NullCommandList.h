@@ -58,6 +58,9 @@ namespace NxRHI
 
 		virtual void BeginEvent(const char* info) override;
 		virtual void EndEvent() override;
+
+		AutoRef<ICmdRecorder> mCmdRecorder;
+		ECmdListState mCmdListState = ECmdListState::None;
 	};
 }
 

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_4912632745228573480 Type="EngineNS.Animation.SceneNode.TtSkeletonAnimPlayNode@EngineCore">
-  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
-  <NodeId Type="System.Guid@Unknown" Order="0" />
-  <ParentScene Type="EngineNS.GamePlay.Scene.TtScene@EngineCore" Order="0" />
-</Hash_4912632745228573480>

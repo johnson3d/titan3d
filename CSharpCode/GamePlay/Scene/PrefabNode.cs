@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.ComponentModel;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using EngineNS.Thread.Async;
 
 namespace EngineNS.GamePlay.Scene
 {
@@ -52,6 +53,11 @@ namespace EngineNS.GamePlay.Scene
         }
 
         public bool IsAlloc { get; set; }
+        protected async override TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        {
+            var ret = await base.InitializeNode(world, data, bvType, placementType);
+            return ret;
+        }
 
         private async Thread.Async.TtTask UpdatePrefab(RName save, RName value)
         {
@@ -70,8 +76,10 @@ namespace EngineNS.GamePlay.Scene
         protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent)
         {
             await base.OnPostInitNode(parent);
-            if (PrefabName != null)
+            if (PrefabName!=null)
+            {
                 await UpdatePrefab(null, PrefabName);
+            }
         }
         protected override void OnParentChanged(TtNode prev, TtNode cur)
         {

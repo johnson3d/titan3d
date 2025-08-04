@@ -1,2 +1,0 @@
-EngineCore
-EngineNS.Bricks.PhysicsCore.SceneNode.TtPhyMutiShapesCollisionNode@EngineCore

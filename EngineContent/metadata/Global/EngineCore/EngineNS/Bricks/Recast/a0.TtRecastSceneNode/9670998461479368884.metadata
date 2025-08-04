@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_9670998461479368884 Type="EngineNS.Bricks.Recast.TtRecastSceneNode@EngineCore">
-  <Parent Type="EngineNS.GamePlay.Scene.TtNode@EngineCore" Order="0" />
-  <ParentScene Type="EngineNS.GamePlay.Scene.TtScene@EngineCore" Order="0" />
-</Hash_9670998461479368884>

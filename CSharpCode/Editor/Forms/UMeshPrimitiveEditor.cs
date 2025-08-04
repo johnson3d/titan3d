@@ -356,7 +356,7 @@ namespace EngineNS.Editor.Forms
                 SdfDebugMesh.MdfQueue.MdfDatas = this;
 
                 var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, world.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), SdfDebugMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
-                meshNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
+                meshNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleAlways);
                 meshNode.NodeData.Name = "Debug_SdfMeshNode";
                 meshNode.IsAcceptShadow = false;
                 meshNode.IsCastShadow = false;

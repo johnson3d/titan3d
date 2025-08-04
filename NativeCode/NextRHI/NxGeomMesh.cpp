@@ -345,7 +345,7 @@ namespace NxRHI
 			}
 
 			AutoRef<NxRHI::IBuffer> copyVB;
-			if (false == ib->Buffer->FetchGpuData(0, &ibBuffer))
+			if (false == ib->Buffer->FetchGpuData(device, 0, &ibBuffer))
 			{
 				{
 					FTransientCmd cmd(device, NxRHI::QU_Transfer, "Mesh.ReadIB");
@@ -375,7 +375,7 @@ namespace NxRHI
 					cmd.GetCmdList()->PushGpuDraw(cpDraw.GetPtr());
 				}
 				device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
-				copyVB->FetchGpuData(0, &ibBuffer);
+				copyVB->FetchGpuData(device, 0, &ibBuffer);
 			}
 			
 			pAttr->Write((BYTE*)ibBuffer.GetData() + sizeof(UINT) * 2, desc.Size);
@@ -447,13 +447,13 @@ namespace NxRHI
             cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, pos_vb->Buffer, 0, copyDesc.Size);
         }
         device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
-        copyVB->FetchGpuData(0, &vbBuffer);
+        copyVB->FetchGpuData(device, 0, &vbBuffer);
 
 		// ib
         auto ib = mGeometryMesh->GetIndexBuffer();
 		if (ib)
 		{
-            if (false == ib->Buffer->FetchGpuData(0, &ibBuffer))
+            if (false == ib->Buffer->FetchGpuData(device, 0, &ibBuffer))
             {
                 FTransientCmd cmd(device, NxRHI::QU_Transfer, "Mesh.ReadIB");
                 auto copyDesc = ib->Buffer->Desc;
@@ -483,7 +483,7 @@ namespace NxRHI
             }
 
             device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
-            copyVB->FetchGpuData(0, &ibBuffer);
+            copyVB->FetchGpuData(device, 0, &ibBuffer);
 		}
 		ASSERT(mDesc.VertexNumber > 0);
 		Verts.resize(mDesc.VertexNumber);
@@ -920,7 +920,7 @@ namespace NxRHI
 	{
 		AutoRef<NxRHI::IBuffer> copyVB;
 		IBlobObject buffData;
-		if (false == vb->Buffer->FetchGpuData(0, &buffData))
+		if (false == vb->Buffer->FetchGpuData(device, 0, &buffData))
 		{
 			{
 				FTransientCmd cmd(device, NxRHI::QU_Transfer, "Mesh.ReadVB");
@@ -950,7 +950,7 @@ namespace NxRHI
 				cmd.GetCmdList()->PushGpuDraw(cpDraw.GetPtr());
 			}
 			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
-			copyVB->FetchGpuData(0, &buffData);
+			copyVB->FetchGpuData(device, 0, &buffData);
 		}
 
 		if (buffData.GetSize() == 0)

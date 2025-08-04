@@ -22,6 +22,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta("")]
         [Category("Option")]
         public string TextureVarName { get; set; }
+        RName mAssetName;
         [Rtti.Meta("")]
         [Category("Option")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
@@ -29,12 +30,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         {
             get
             {
-                if (TextureSRV == null)
-                    return null;
-                return TextureSRV.AssetName;
+                return mAssetName;
             }
             set
             {
+                mAssetName = value;
                 if (value == null)
                 {
                     TextureSRV = null;
@@ -145,6 +145,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta("")]
         [Category("Option")]
         public string TextureVarName { get; set; }
+
+        RName mAssetName;
         [Rtti.Meta("")]
         [Category("Option")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
@@ -152,12 +154,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         {
             get
             {
-                if (TextureSRV == null)
-                    return null;
-                return TextureSRV.AssetName;
+                return mAssetName;
             }
             set
             {
+                mAssetName = value;
                 if (value == null)
                 {
                     TextureSRV = null;
@@ -280,6 +281,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta("")]
         [Category("Option")]
         public string TextureVarName { get; set; }
+        RName mAssetName;
         [Rtti.Meta("")]
         [Category("Option")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
@@ -287,12 +289,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         {
             get
             {
-                if (TextureSRV == null)
-                    return null;
-                return TextureSRV.AssetName;
+                return mAssetName;
             }
             set
             {
+                mAssetName = value;
                 if (value == null)
                 {
                     TextureSRV = null;
@@ -406,6 +407,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta("")]
         [Category("Option")]
         public string TextureVarName { get; set; }
+        RName mAssetName;
         [Rtti.Meta("")]
         [Category("Option")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
@@ -413,12 +415,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         {
             get
             {
-                if (TextureSRV == null)
-                    return null;
-                return TextureSRV.AssetName;
+                return mAssetName;
             }
             set
             {
+                mAssetName = value;
                 if (value == null)
                 {
                     TextureSRV = null;
@@ -527,6 +528,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta("")]
         [Category("Option")]
         public string TextureVarName { get; set; }
+        RName mAssetName;
         [Rtti.Meta("")]
         [Category("Option")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
@@ -534,12 +536,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         {
             get
             {
-                if (TextureSRV == null)
-                    return null;
-                return TextureSRV.AssetName;
+                return mAssetName;
             }
             set
             {
+                mAssetName = value;
                 if (value == null)
                 {
                     TextureSRV = null;

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_17762989901401458121 Type="EngineNS.GamePlay.Scene.TtBehaviorNode@EngineCore">
-  <CodeName Type="EngineNS.RName@EngineCore" Order="0" />
-  <NodeId Type="System.Guid@Unknown" Order="0" />
-  <Parent Type="EngineNS.GamePlay.Scene.TtNode@EngineCore" Order="0" />
-  <ParentScene Type="EngineNS.GamePlay.Scene.TtScene@EngineCore" Order="0" />
-</Hash_17762989901401458121>

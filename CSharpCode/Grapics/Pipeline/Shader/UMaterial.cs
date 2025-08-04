@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.NodeGraph;
-using EnumsNET;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
@@ -50,11 +49,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
             mPipelineDesc.SetDefault();
         }
         public bool IsEditingMaterial { get; set; }
-
-        #region SystemVar
-        
-        
-        #endregion
 
         public override string ToString()
         {

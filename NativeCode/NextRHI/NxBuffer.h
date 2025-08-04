@@ -202,7 +202,7 @@ namespace NxRHI
 		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) {
 			GpuState = state;
 		}
-		virtual bool FetchGpuData(UINT subRes, IBlobObject* blob) = 0;
+		virtual bool FetchGpuData(IGpuDevice* device, UINT subRes, IBlobObject* blob) = 0;
 		virtual IBuffer* CreateReadable(IGpuDevice* device, int subRes, ICopyDraw* cpDraw) = 0;
 		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) {
 			ASSERT(false);
@@ -257,7 +257,7 @@ namespace NxRHI
 		//virtual bool FetchGpuData(UINT subRes, IBlobObject * blob) override;
 		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint * footPrint) override = 0;
 		virtual void SetDebugName(const char* name) override {}
-		virtual bool FetchGpuData(UINT index, IBlobObject* blob) override;
+		virtual bool FetchGpuData(IGpuDevice* device, UINT index, IBlobObject* blob) override;
 		virtual IBuffer* CreateReadable(IGpuDevice* device, int subRes, ICopyDraw* cpDraw) override;
 		template<class _T>
 		void SetValue(const FShaderVarDesc& binder, const _T& v)
@@ -479,7 +479,7 @@ namespace NxRHI
 			return &mResourceState;
 		}
 		virtual IGpuBufferData* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) = 0;
-		virtual bool FetchGpuData(UINT index, IBlobObject* blob) override
+		virtual bool FetchGpuData(IGpuDevice* device, UINT index, IBlobObject* blob) override
 		{
 			FMappedSubResource subRes;
 			if (Map(index, &subRes, true))

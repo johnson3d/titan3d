@@ -55,7 +55,7 @@
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
             <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
-            <VariableName Type="System.String@Unknown" Value="tmp_r_InitViewportSlateWithScene_2166288321" />
+            <VariableName Type="System.String@Unknown" Value="tmp_r_InitViewportSlateWithScene_1907725321" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
               <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />

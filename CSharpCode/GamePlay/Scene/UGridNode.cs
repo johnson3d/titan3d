@@ -20,7 +20,7 @@ namespace EngineNS.GamePlay.Scene
                 data = new TtGridNodeData();
             }
             await base.InitializeNode(world, data, EBoundVolumeType.Box, placementType);
-            SetStyle(ENodeStyles.DiscardAABB | ENodeStyles.VisibleFollowParent | ENodeStyles.Transient);
+            SetStyle(ENodeStyles.DiscardAABB | ENodeStyles.VisibleAlways | ENodeStyles.Transient);
 
             //this.ViewportSlate = world.;
             return true;
@@ -80,7 +80,7 @@ namespace EngineNS.GamePlay.Scene
             meshNode.mGridlineMaterial = materialInstance;
             meshNode.IsAcceptShadow = false;
             meshNode.IsCastShadow = false;
-            meshNode.SetStyle(ENodeStyles.VisibleFollowParent);
+            meshNode.SetStyle(ENodeStyles.VisibleAlways);
 
             meshNode.GridUVModifier = gridMesh.MdfQueue as Graphics.Mesh.UMdfGridUVMesh;
 

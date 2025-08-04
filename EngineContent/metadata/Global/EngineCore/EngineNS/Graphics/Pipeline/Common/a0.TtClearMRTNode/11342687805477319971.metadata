@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_11342687805477319971 Type="EngineNS.Graphics.Pipeline.Common.TtClearMRTNode@EngineCore">
-  <IsUsed Type="System.Boolean@Unknown" Order="0" />
-  <OutputDS Type="System.Boolean@Unknown" Order="0" />
-  <OutputRT Type="System.Int32@Unknown" Order="0" />
-</Hash_11342687805477319971>

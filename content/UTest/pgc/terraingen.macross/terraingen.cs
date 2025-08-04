@@ -1,6 +1,7 @@
 ﻿namespace NS_utest.pgc
 {
     [EngineNS.Macross.TtMacross]
+    [EngineNS.Macross.TtMacrossSign(RName_Name = "utest/pgc/terraingen.macross", RName_Type = EngineNS.RName.ERNameType.Game)]
     public partial class terraingen : EngineNS.Bricks.Procedure.UPgcGraphProgram
     {
         public EngineNS.Macross.TtMacrossBreak breaker_FindPgcNodeByName_1051611981 = new EngineNS.Macross.TtMacrossBreak("breaker_FindPgcNodeByName_1051611981");
@@ -8,6 +9,7 @@
         EngineNS.Macross.TtMacrossStackFrame mFrame_OnNodeInitialized_1538527227 = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("utest/pgc/terraingen.macross", EngineNS.RName.ERNameType.Game));
         public override System.Boolean OnNodeInitialized(EngineNS.Bricks.Procedure.UPgcGraph graph,EngineNS.Bricks.Procedure.UPgcNodeBase node)
         {
+            #if !disable_macross_318c3ff6_c3c8_4e00_bb54_c3c2abaa73a2
             using(var guard_OnNodeInitialized = new EngineNS.Macross.TtMacrossStackGuard(mFrame_OnNodeInitialized_1538527227))
             {
                 System.Boolean ret_2298037646 = default(System.Boolean);
@@ -31,6 +33,10 @@
                 }
                 return ret_2298037646;
             }
+            #elif !(!disable_macross_318c3ff6_c3c8_4e00_bb54_c3c2abaa73a2)
+            System.Boolean ret_2298037646 = default(System.Boolean);
+            return ret_2298037646;
+            #endif //!disable_macross_318c3ff6_c3c8_4e00_bb54_c3c2abaa73a2
         }
     }
 }

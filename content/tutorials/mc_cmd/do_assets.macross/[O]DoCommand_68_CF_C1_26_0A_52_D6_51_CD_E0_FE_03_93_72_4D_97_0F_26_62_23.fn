@@ -2,6 +2,7 @@
 <Root Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossMethodGraph@EngineCore">
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/mc_cmd/do_assets.macross,60e09289-a0ad-47ca-a513-b8e6415a8f64" />
   <GraphName Type="System.String@Unknown" Value="DoCommand" />
+  <IsAsync Type="System.Boolean@Unknown" Value="False" />
   <IsUseCustumCode Type="System.Boolean@Unknown" Value="False" />
   <LocalVars Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
   <MethodDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData@EngineCore,&gt;@Unknown" Count="1">
@@ -40,10 +41,13 @@
             </AttributeType>
           </e_0>
         </Attributes>
+        <Id Type="System.Guid@Unknown" Value="00000000-0000-0000-0000-000000000000" />
+        <IsManual Type="System.Boolean@Unknown" Value="False" />
         <IsOverride Type="System.Boolean@Unknown" Value="True" />
         <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="1">
           <e_0 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
             <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+            <Category Type="System.String@Unknown" Value="Macross" />
             <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
               <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                 <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -53,6 +57,7 @@
             </InitValue>
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
+            <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="tmp_r_FindArgument_2126302734" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -69,14 +74,16 @@
   </MethodDatas>
   <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="4">
     <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode@EngineCore">
-      <MethodDecKeyword Type="System.String@Unknown" Value=" DoCommand(EngineNS.TtMcCommand)" />
+      <MethodId Type="System.Guid@Unknown" Value="00000000-0000-0000-0000-000000000000" />
       <Name Type="System.String@Unknown" Value="DoCommand" />
       <NodeId Type="System.Guid@Unknown" Value="664ee86c-80ba-4733-bb8b-beb51ee4e66d" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="567,396" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <MethodDecKeyword Type="System.String@Unknown" Value=" DoCommand(EngineNS.TtMcCommand)" />
     </e_0>
     <e_1 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
       <InputControlWidth Type="System.Single@Unknown" Value="60" />
+      <IsNodeAsync Type="System.Boolean@Unknown" Value="False" />
       <Label Type="System.String@Unknown" Value="FindArgument" />
       <MethodMeta Type="System.String@Unknown" Value="EngineNS.TtMcCommand@EngineCore#System.String FindArgument(System.String)" />
       <Name Type="System.String@Unknown" Value="FindArgument" />
@@ -108,6 +115,7 @@
     </e_2>
     <e_3 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
       <InputControlWidth Type="System.Single@Unknown" Value="60" />
+      <IsNodeAsync Type="System.Boolean@Unknown" Value="False" />
       <Label Type="System.String@Unknown" Value="IterateDirectory" />
       <MethodMeta Type="System.String@Unknown" Value="EngineNS.TtCommandMacross@EngineCore#System.Void IterateDirectory(System.String,System.String,EngineNS.TtCommandMacross+OnProcAsset,System.Boolean)" />
       <Name Type="System.String@Unknown" Value="IterateDirectory" />
@@ -148,6 +156,7 @@
             <ArgumentName Type="System.String@Unknown" Value="fun" />
             <DelegateGraph Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossMethodGraph@EngineCore">
               <GraphName Type="System.String@Unknown" Value="dm_fun_IterateDirectory_366745237" />
+              <IsAsync Type="System.Boolean@Unknown" Value="False" />
               <IsUseCustumCode Type="System.Boolean@Unknown" Value="False" />
               <LocalVars Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
               <MethodDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData@EngineCore,&gt;@Unknown" Count="1">
@@ -177,10 +186,13 @@
                     </Arguments>
                     <AsyncType Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration.EAsyncType@EngineCore" Value="None" />
                     <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+                    <Id Type="System.Guid@Unknown" Value="00000000-0000-0000-0000-000000000000" />
+                    <IsManual Type="System.Boolean@Unknown" Value="False" />
                     <IsOverride Type="System.Boolean@Unknown" Value="False" />
                     <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="4">
                       <e_0 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
                         <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+                        <Category Type="System.String@Unknown" Value="Macross" />
                         <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
                           <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                             <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -190,6 +202,7 @@
                         </InitValue>
                         <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
                         <IsBindable Type="System.Boolean@Unknown" Value="False" />
+                        <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
                         <VariableName Type="System.String@Unknown" Value="tmp_r_FindMaterial_771818083" />
                         <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                           <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -200,6 +213,7 @@
                       </e_0>
                       <e_1 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
                         <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+                        <Category Type="System.String@Unknown" Value="Macross" />
                         <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
                           <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                             <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -209,6 +223,7 @@
                         </InitValue>
                         <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
                         <IsBindable Type="System.Boolean@Unknown" Value="False" />
+                        <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
                         <VariableName Type="System.String@Unknown" Value="tmp_r_CreateMaterialInstance_312885784" />
                         <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                           <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -219,6 +234,7 @@
                       </e_1>
                       <e_2 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
                         <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+                        <Category Type="System.String@Unknown" Value="Macross" />
                         <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
                           <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                             <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -228,6 +244,7 @@
                         </InitValue>
                         <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
                         <IsBindable Type="System.Boolean@Unknown" Value="False" />
+                        <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
                         <VariableName Type="System.String@Unknown" Value="tmp_r_SetSrv_1308319261" />
                         <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                           <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -238,6 +255,7 @@
                       </e_2>
                       <e_3 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
                         <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+                        <Category Type="System.String@Unknown" Value="Macross" />
                         <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
                           <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                             <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -247,6 +265,7 @@
                         </InitValue>
                         <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
                         <IsBindable Type="System.Boolean@Unknown" Value="False" />
+                        <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
                         <VariableName Type="System.String@Unknown" Value="tmp_r_GetRName_1223778736" />
                         <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                           <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -259,6 +278,7 @@
                     <MethodName Type="System.String@Unknown" Value="dm_fun_IterateDirectory_366745237" />
                     <ReturnValue Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
                       <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+                      <Category Type="System.String@Unknown" Value="Macross" />
                       <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
                         <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                           <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -268,6 +288,7 @@
                       </InitValue>
                       <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
                       <IsBindable Type="System.Boolean@Unknown" Value="False" />
+                      <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
                       <VariableName Type="System.String@Unknown" Value="ret_361208570" />
                       <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                         <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -282,11 +303,12 @@
               </MethodDatas>
               <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="14">
                 <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode@EngineCore">
-                  <MethodDecKeyword Type="System.String@Unknown" Value="System.Boolean dm_fun_IterateDirectory_366745237(EngineNS.IO.IAssetMeta)" />
+                  <MethodId Type="System.Guid@Unknown" Value="00000000-0000-0000-0000-000000000000" />
                   <Name Type="System.String@Unknown" Value="dm_fun_IterateDirectory_366745237" />
                   <NodeId Type="System.Guid@Unknown" Value="5fe67172-af94-437c-bb1c-dbb37439252d" />
                   <Position Type="EngineNS.Vector2@EngineCore" Value="619.00006,164" />
                   <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+                  <MethodDecKeyword Type="System.String@Unknown" Value="System.Boolean dm_fun_IterateDirectory_366745237(EngineNS.IO.IAssetMeta)" />
                 </e_0>
                 <e_1 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassPropertyVar@EngineCore">
                   <IsGet Type="System.Boolean@Unknown" Value="True" />
@@ -320,6 +342,7 @@
                 </e_3>
                 <e_4 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
                   <InputControlWidth Type="System.Single@Unknown" Value="60" />
+                  <IsNodeAsync Type="System.Boolean@Unknown" Value="False" />
                   <Label Type="System.String@Unknown" Value="CreateMaterialInstance" />
                   <MethodMeta Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceManager@EngineCore#EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance CreateMaterialInstance(EngineNS.Graphics.Pipeline.Shader.TtMaterial)" />
                   <Name Type="System.String@Unknown" Value="CreateMaterialInstance" />
@@ -344,6 +367,7 @@
                 </e_5>
                 <e_6 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
                   <InputControlWidth Type="System.Single@Unknown" Value="60" />
+                  <IsNodeAsync Type="System.Boolean@Unknown" Value="False" />
                   <Label Type="System.String@Unknown" Value="FindMaterial" />
                   <MethodMeta Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialManager@EngineCore#EngineNS.Graphics.Pipeline.Shader.TtMaterial FindMaterial(EngineNS.RName)" />
                   <Name Type="System.String@Unknown" Value="FindMaterial" />
@@ -368,6 +392,7 @@
                 </e_6>
                 <e_7 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
                   <InputControlWidth Type="System.Single@Unknown" Value="60" />
+                  <IsNodeAsync Type="System.Boolean@Unknown" Value="False" />
                   <Label Type="System.String@Unknown" Value="SetSrv" />
                   <MethodMeta Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore#System.Boolean SetSrv(System.String,EngineNS.RName)" />
                   <Name Type="System.String@Unknown" Value="SetSrv" />
@@ -409,6 +434,7 @@
                 </e_8>
                 <e_9 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
                   <InputControlWidth Type="System.Single@Unknown" Value="60" />
+                  <IsNodeAsync Type="System.Boolean@Unknown" Value="False" />
                   <Label Type="System.String@Unknown" Value="SaveAssetTo" />
                   <MethodMeta Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore#System.Void SaveAssetTo(EngineNS.RName)" />
                   <Name Type="System.String@Unknown" Value="SaveAssetTo" />
@@ -442,6 +468,7 @@
                 </e_10>
                 <e_11 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
                   <InputControlWidth Type="System.Single@Unknown" Value="60" />
+                  <IsNodeAsync Type="System.Boolean@Unknown" Value="False" />
                   <Label Type="System.String@Unknown" Value="GetRName" />
                   <MethodMeta Type="System.String@Unknown" Value="EngineNS.TtEngine@EngineCore#EngineNS.RName GetRName(System.String,EngineNS.RName+ERNameType)" />
                   <Name Type="System.String@Unknown" Value="GetRName" />

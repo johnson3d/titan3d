@@ -1,2 +1,0 @@
-EngineCore
-EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig@EngineCore

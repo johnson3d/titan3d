@@ -408,6 +408,7 @@ namespace NxRHI
 		
 		{
 			AUTO_SAMP("NxRHI.GraphicDraw.Commit.BindResouces");
+			//todo: move copy descriptor heap to BuildDrawcall,and parallel build them
 			BindDescriptorHeaps(device, dx12Cmd);
 		}
 		

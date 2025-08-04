@@ -206,7 +206,7 @@ namespace EngineNS.Editor.Forms
                 PlaneMeshNode.NodeData.Name = "Plane";
                 PlaneMeshNode.IsAcceptShadow = true;
                 PlaneMeshNode.IsCastShadow = false;
-                PlaneMeshNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
+                PlaneMeshNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleAlways);
             }
 
             GridNode = await GamePlay.Scene.TtGridNode.AddGridNode(viewport.World, viewport.World.Root);

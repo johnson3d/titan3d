@@ -9,7 +9,9 @@
       <Name Type="System.String@Unknown" Value="Copy2SwapChainNode" />
       <NodeId Type="System.Guid@Unknown" Value="9f1f1cbc-9cfe-4392-93a3-fbf7f992c628" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="865,223.99998" />
-      <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtCopy2SwapChainNode@EngineCore" />
+      <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtCopy2SwapChainNode@EngineCore">
+        <Enable Type="System.Boolean@Unknown" Value="True" />
+      </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
     <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
@@ -26,7 +28,7 @@
     <DisableAO Type="System.Boolean@Unknown" Value="False" />
     <DisableHDR Type="System.Boolean@Unknown" Value="False" />
     <DisablePointLight Type="System.Boolean@Unknown" Value="False" />
-    <DisableShadow Type="System.Boolean@Unknown" Value="False" />
+    <ShadowMode Type="EngineNS.Graphics.Pipeline.EShadowMode@EngineCore" Value="Csm" />
     <TypeAA Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA@EngineCore" Value="Taa" />
     <TypeFog Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog@EngineCore" Value="None" />
   </RenderPolicy>

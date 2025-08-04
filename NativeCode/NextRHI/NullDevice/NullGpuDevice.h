@@ -55,6 +55,13 @@ namespace NxRHI
 		{
 
 		}
+		virtual void TickPostEvents() override
+		{
+			if (mIsTryFinalize)
+			{
+				mIsFinalized = true;
+			}
+		}
 	private:
 		void QueryDevice();
 	public:

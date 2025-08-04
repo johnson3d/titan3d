@@ -1,6 +1,7 @@
 ﻿namespace NS_tutorials.mc_cmd
 {
     [EngineNS.Macross.TtMacross]
+    [EngineNS.Macross.TtMacrossSign(RName_Name = "tutorials/mc_cmd/do_assets.macross", RName_Type = EngineNS.RName.ERNameType.Game)]
     public partial class do_assets : EngineNS.TtCommandMacross
     {
         public EngineNS.Macross.TtMacrossBreak breaker_FindArgument_2126302734 = new EngineNS.Macross.TtMacrossBreak("breaker_FindArgument_2126302734");
@@ -15,6 +16,7 @@
         public override async EngineNS.Thread.Async.TtTask DoCommand(EngineNS.TtMcCommand host)
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
+            #if !disable_macross_60e09289_a0ad_47ca_a513_b8e6415a8f64
             using(var guard_DoCommand = new EngineNS.Macross.TtMacrossStackGuard(mFrame_DoCommand_3281139277))
             {
                 mFrame_DoCommand_3281139277.SetWatchVariable("host", host);
@@ -56,6 +58,7 @@
                     return default(System.Boolean);
                 }),true);
             }
+            #endif //!disable_macross_60e09289_a0ad_47ca_a513_b8e6415a8f64
         }
     }
 }

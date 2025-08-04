@@ -65,7 +65,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
             ending.mFinishFence.WaitToExpect();
             var readTexture = ending.ReadableTexture;
             var blob = new Support.TtBlobObject();
-            readTexture.FetchGpuData(0, blob.mCoreObject);
+            readTexture.FetchGpuData(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, 0, blob.mCoreObject);
             using (var reader = IO.TtMemReader.CreateInstance((byte*)blob.DataPointer, blob.Size))
             {
                 uint rowPitch, depthPitch;

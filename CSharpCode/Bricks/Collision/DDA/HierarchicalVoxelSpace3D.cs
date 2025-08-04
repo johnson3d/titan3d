@@ -147,7 +147,7 @@ namespace EngineNS.Bricks.Collision.DDA
             VxDebugMesh.MdfQueue.MdfDatas = this;
 
             var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, world.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), VxDebugMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
-            meshNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
+            meshNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleAlways);
             meshNode.NodeData.Name = "Debug_HVXMeshNode";
             meshNode.IsAcceptShadow = false;
             meshNode.IsCastShadow = false;
@@ -216,7 +216,7 @@ namespace EngineNS.Bricks.Collision.DDA
                 sphereDebugMesh.MdfQueue.MdfDatas = this;
 
                 var meshNode1 = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, this, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), sphereDebugMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
-                meshNode1.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
+                meshNode1.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleAlways);
                 meshNode1.NodeData.Name = "Debug_HVXHitNode";
                 meshNode1.IsAcceptShadow = false;
                 meshNode1.IsCastShadow = false;
@@ -233,7 +233,7 @@ namespace EngineNS.Bricks.Collision.DDA
             lineMesh.MdfQueue.MdfDatas = this;
 
             var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, this, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), lineMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
-            meshNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
+            meshNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleAlways);
             meshNode.NodeData.Name = "Debug_HVXLineNode";
             meshNode.IsAcceptShadow = false;
             meshNode.IsCastShadow = false;

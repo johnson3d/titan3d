@@ -137,7 +137,7 @@ namespace EngineNS.NxRHI
         }
         public bool FetchGpuData(uint index, EngineNS.IBlobObject blob)
         {
-            return mCoreObject.FetchGpuData(index, blob);
+            return mCoreObject.FetchGpuData(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, index, blob);
         }
         public NxRHI.IBuffer CreateReadable(int subRes, EngineNS.NxRHI.ICopyDraw cpDraw)
         {
@@ -228,7 +228,7 @@ namespace EngineNS.NxRHI
         }
         public bool FetchGpuData(uint index, EngineNS.IBlobObject blob)
         {
-            return mCoreObject.FetchGpuData(index, blob);
+            return mCoreObject.FetchGpuData(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, index, blob);
         }
         public NxRHI.IBuffer CreateReadable(int subRes, EngineNS.NxRHI.ICopyDraw cpDraw)
         {

@@ -39,7 +39,7 @@ namespace EngineNS.Editor
                 {
                     var gpuDataBlob = new Support.TtBlobObject();
                     var bufferData = new Support.TtBlobObject();
-                    readable.FetchGpuData(0, (IBlobObject)gpuDataBlob.mCoreObject);
+                    readable.FetchGpuData(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, 0, (IBlobObject)gpuDataBlob.mCoreObject);
                     NxRHI.ITexture.BuildImage2DBlob((IBlobObject)bufferData.mCoreObject, (IBlobObject)gpuDataBlob.mCoreObject, tex.Desc);
                     TtEngine.Instance.EventPoster.RunOn((Thread.Async.FPostEvent<bool>)((state) =>
                     {

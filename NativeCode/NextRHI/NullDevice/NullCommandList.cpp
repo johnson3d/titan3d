@@ -20,20 +20,25 @@ namespace NxRHI
 	}
 	NullCommandList::~NullCommandList()
 	{
-		
+		mCmdRecorder = nullptr;
 	}
 	bool NullCommandList::Init(NullGpuDevice* device)
 	{
 		mDevice.FromObject(device);
+
+		mCmdRecorder = MakeWeakRef(new ICmdRecorder(device));
 		return true;
 	}
 	ICmdRecorder* NullCommandList::BeginCommand()
 	{
-		return nullptr;
+		mCmdListState = ECmdListState::Recording;
+		mCmdRecorder->ResetGpuDraws();
+		return mCmdRecorder;
 	}
 	void NullCommandList::EndCommand()
 	{
-		
+		mCmdRecorder->ResetGpuDraws();
+		mCmdListState = ECmdListState::None;
 	}
 	bool NullCommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
 	{

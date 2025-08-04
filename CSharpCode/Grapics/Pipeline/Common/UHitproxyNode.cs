@@ -413,7 +413,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                             FetchGpuDataBlob.mCoreObject.ReSize(0);
                             using (new Profiler.TimeScopeHelper(ScopeHitproxyFetchGPU))
                             {
-                                readTexture.GetGpuBufferDataPointer().FetchGpuData(0, (IBlobObject)FetchGpuDataBlob.mCoreObject);
+                                readTexture.GetGpuBufferDataPointer().FetchGpuData(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, 0, (IBlobObject)FetchGpuDataBlob.mCoreObject);
                             }   
                             //var ptr = (uint*)gpuDataBlob.mCoreObject.GetData();
                             //var num = gpuDataBlob.mCoreObject.GetSize() / 4;

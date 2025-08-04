@@ -6,6 +6,7 @@
 #include "NxCommandList.h"
 #include "NxFrameBuffers.h"
 #include "../../Base/vfxsampcounter.h"
+#include "../../Base/thread/vfxcritical.h"
 
 #define new VNEW
 
@@ -373,7 +374,7 @@ namespace NxRHI
 
 	void ICopyDraw::BindBufferSrc(IBuffer* res)
 	{
-		ASSERT(res->GpuState != EGpuResourceState::GRS_Undefine);
+		//ASSERT(res->GpuState != EGpuResourceState::GRS_Undefine);
 		mSrc = res;
 	}
 	void ICopyDraw::BindBufferDest(IBuffer* res)
@@ -521,6 +522,7 @@ namespace NxRHI
 	
 	void IBarriersDraw::PushBarrier(IGpuBufferData* buffer, EGpuResourceState state)
 	{
+		VAutoVSLLock lk(mLocker);
 		ASSERT(Step == 1);
 		//ASSERT(state != EGpuResourceState::GRS_CopyDst);
 		FBarrierDesc tmp(buffer, state);
@@ -576,6 +578,7 @@ namespace NxRHI
 	}
 	void IRenderPassCopyDraw::PushCopyDraw(ICopyDraw* draw)
 	{
+		VAutoVSLLock lk(mLocker);
 		ASSERT(Step == 1);
 		CopyDraws.push_back(draw);
 	}

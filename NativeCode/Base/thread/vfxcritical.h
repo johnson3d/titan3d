@@ -55,9 +55,9 @@ struct VSLLock
 	}
 };
 
-struct VSLLockNoSleep
+struct VSLLockSpin
 {
-	VSLLockNoSleep()
+	VSLLockSpin()
 	{
 		mLocker = 0;
 	}

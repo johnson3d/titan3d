@@ -1,2 +1,0 @@
-GameTasks
-EngineNS.Plugins.GameTasks.AGameTaskDescriptor@GameTasks

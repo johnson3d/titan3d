@@ -25,6 +25,8 @@
     <NoWarn>1701;1702;1998;8632</NoWarn>
     <DebugType>full</DebugType>
     <Optimize>True</Optimize>
+	<DebugSymbols>true</DebugSymbols>
+	<IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
 
   <Import Project="..\..\CSharpCode\Base\Base.projitems" Label="Shared" />

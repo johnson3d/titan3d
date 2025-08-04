@@ -26,7 +26,7 @@ namespace NxRHI
 {
 	std::atomic<int> ITexture::AliveCount;
 	std::atomic<int> ITexture::AliveAttachBufferCount;
-	bool IBuffer::FetchGpuData(UINT index, IBlobObject* blob)
+	bool IBuffer::FetchGpuData(IGpuDevice* device, UINT index, IBlobObject* blob)
 	{
 		FMappedSubResource subRes;
 		if (Map(index, &subRes, true))
@@ -37,7 +37,32 @@ namespace NxRHI
 			Unmap(index);
 			return true;
 		}
-		return false;
+		else
+		{
+			if (device == nullptr)
+				return false;
+
+			auto desc = Desc;
+			desc.CpuAccess = ECpuAccess::CAS_READ;
+			desc.Usage = EGpuUsage::USAGE_STAGING;
+			auto cpBuffer = device->CreateBuffer(&desc);
+			auto cpDraw = device->CreateCopyDraw();
+			
+			cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
+			cpDraw->BindBufferSrc(this);
+			cpDraw->BindBufferDest(cpBuffer);
+			cpDraw->SrcSubResource = 0;
+			cpDraw->DestSubResource = 0;
+			cpDraw->DstX = 0;
+			cpDraw->FootPrint.X = 0;
+			cpDraw->FootPrint.Width = Desc.Size;
+
+			{
+				FTransientCmd cmd(device, EQueueType::QU_Transfer, "");
+				cmd.GetCmdList()->PushGpuDraw(cpDraw);
+			}
+			return cpBuffer->FetchGpuData(device, index, blob);
+		}
 	}
 	IBuffer* IBuffer::CreateReadable(IGpuDevice* device, int subRes, ICopyDraw* cpDraw)
 	{

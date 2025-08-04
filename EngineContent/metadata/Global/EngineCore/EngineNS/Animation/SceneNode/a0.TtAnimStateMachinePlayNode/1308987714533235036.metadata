@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_1308987714533235036 Type="EngineNS.Animation.SceneNode.TtAnimStateMachinePlayNode@EngineCore">
-  <NodeId Type="System.Guid@Unknown" Order="0" />
-  <ParentScene Type="EngineNS.GamePlay.Scene.TtScene@EngineCore" Order="0" />
-</Hash_1308987714533235036>

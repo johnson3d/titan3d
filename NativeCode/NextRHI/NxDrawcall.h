@@ -342,6 +342,7 @@ namespace NxRHI
 	class IBarriersDraw : public IGpuDraw
 	{
 	public:
+		VSLLock mLocker;
 		std::vector<FBarrierDesc> Barriers;
 		void PushBarrier(IGpuBufferData* buffer, EGpuResourceState state);
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
@@ -361,6 +362,7 @@ namespace NxRHI
 	class IRenderPassCopyDraw : public IGpuDraw
 	{
 	public:
+		VSLLock mLocker;
 		std::vector<AutoRef<ICopyDraw>> CopyDraws;
 		void PushCopyDraw(ICopyDraw* draw);
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;

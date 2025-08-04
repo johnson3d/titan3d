@@ -18,15 +18,39 @@ namespace ProjectCooker
         static void Main(string[] args)
         {
             var mBin = System.IO.Directory.GetCurrentDirectory();
-#if DEBUG
-            var cfg = TtCookCommand.FindArgument(args, "NativeDLL=");
-            if (cfg != null && cfg == "debug")
-                EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/debug");
+
+            var dynCfgData = new EngineNS.IO.TtDynConfigData();
+            dynCfgData.LoadConfigData(mBin + "/../cache/DynConfigData.dcd", true);
+            if (dynCfgData.TryGetConfig<string>("NativeDLL", out var NativeDLL))
+            {
+                Console.WriteLine($"NativeDLL={NativeDLL}");
+                EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/{NativeDLL}");
+            }
             else
-                EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
-#else
-            EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
-#endif
+            {
+                var cfg = TtCookCommand.FindArgument(args, "NativeDLL=");
+                if (cfg != null && cfg == "debug")
+                {
+                    Console.WriteLine($"NativeDLL=debug");
+                    EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/debug");
+                }
+                else
+                {
+                    Console.WriteLine($"NativeDLL=release");
+                    EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
+                }
+            }
+            if (dynCfgData.TryGetConfig<string>("AssetType", out var AssetType))
+            {
+                for (int i = 0; i < args.Length; i++)
+                {
+                    if (args[i].StartsWith("AssetType="))
+                    {
+                        args[i] = "AssetType=" + AssetType;
+                        break;
+                    }
+                }
+            }
 
             var handle = GetConsoleWindow();
             ShowWindow(handle, 1);

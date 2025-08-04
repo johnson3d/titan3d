@@ -490,6 +490,7 @@ namespace EngineNS.Editor.ShaderCompiler
                 int CP_SM_major = 6;
                 int CP_SM_minor = 5;
                 var cfg = TtEngine.Instance.Config;
+                int CompileCount = 0;
                 if (cfg.CookDXBC && ignoreDXBC == false)
                 {
                     if (type == NxRHI.EShaderType.SDT_MeshShader || type == NxRHI.EShaderType.SDT_AmplificationShader)
@@ -505,6 +506,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion, null, asModule);
                     if (ok == false)
                         return null;
+                    CompileCount++;
                 }
                 if (cfg.CookDXIL && ignoreDXIR == false)
                 {
@@ -525,6 +527,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXIL, bDebugShader, extHlslVersion, null, asModule);
                     if (ok == false)
                         return null;
+                    CompileCount++;
                 }
                 if (cfg.CookGLSL && ignoreSpirv == false)
                 {
@@ -545,6 +548,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion, null, asModule);
                     if (ok == false)
                         return null;
+                    CompileCount++;
                 }
                 if (cfg.CookMETAL && ignoreSpirv == false)
                 {
@@ -566,6 +570,7 @@ namespace EngineNS.Editor.ShaderCompiler
                         extHlslVersion, null, asModule);
                     if (ok == false)
                         return null;
+                    CompileCount++;
                 }
                 if (cfg.CookSPIRV && ignoreSpirv == false)
                 {
@@ -588,8 +593,11 @@ namespace EngineNS.Editor.ShaderCompiler
                         extHlslVersion, null, asModule);// "-fspv-extension=SPV_KHR_shader_draw_parameters");
                     if (ok == false)
                         return null;
+                    CompileCount++;
                 }
 
+                if (CompileCount == 0)
+                    return null;
                 return desc;
             }
         }

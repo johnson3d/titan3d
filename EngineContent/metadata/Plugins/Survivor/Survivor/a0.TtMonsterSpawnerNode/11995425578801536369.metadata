@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_11995425578801536369 Type="Survivor.TtMonsterSpawnerNode@Survivor">
-  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
-  <NodeId Type="System.Guid@Unknown" Order="0" />
-  <ParentScene Type="EngineNS.GamePlay.Scene.TtScene@EngineCore" Order="0" />
-  <BehaviorSaver Type="EngineNS.GamePlay.Scene.TtBehavior@EngineCore" Order="1" />
-</Hash_11995425578801536369>

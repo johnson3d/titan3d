@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_6583179453454095010 Type="Survivor.TtWeaponNode@Survivor">
-  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
-  <NodeId Type="System.Guid@Unknown" Order="0" />
-  <Parent Type="EngineNS.GamePlay.Scene.TtNode@EngineCore" Order="0" />
-  <ParentScene Type="EngineNS.GamePlay.Scene.TtScene@EngineCore" Order="0" />
-</Hash_6583179453454095010>

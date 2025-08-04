@@ -167,9 +167,11 @@ namespace EngineNS.GamePlay.Scene
         public static async Thread.Async.TtTask<TtNode> ConcreateNode(TtWorld world, TtNode tarNode, TtNode node)
         {
             TtNode result = tarNode;
+            bool isNewObj = false;
             if (result == null)
             {
                 result = Rtti.TtTypeDescManager.CreateInstance(node.GetType()) as TtNode;
+                isNewObj = true;
             }
             else
             {
@@ -190,7 +192,8 @@ namespace EngineNS.GamePlay.Scene
                 cnode.Parent = result;
             }
 
-            await result.OnPostInitNode(result.Parent);
+            if (isNewObj)
+                await result.OnPostInitNode(result.Parent);
 
             return result;
         }

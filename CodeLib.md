@@ -65,17 +65,17 @@ namespace EngineNS.Rtti
 2.插件编译结果路径
 binaries\Plugins\Debug\net7.0
 3.在插件目录还要添加插件同名.plugin文件，内容大致如下：
-```XML
-<?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Bricks.AssemblyLoader.UPluginDescriptor@EngineCore">
-  <LoadOnInit Type="System.Boolean@Unknown" Value="False" />
-  <Platforms Type="System.Collections.Generic.List&lt;EngineNS.EPlatformType@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Value="PLTF_Windows" />
-  </Platforms>
-  <Dependencies Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
-    <e_0 Value="GameServer" />
-  </Dependencies>
-</Root>
+```JSON
+{
+  "Enable": true,
+  "LoadOnInit": true,
+  "Platforms": [
+    "PLTF_Windows"
+  ],
+  "Dependencies": [
+    "Survivor"
+  ]
+}
 ```
 Plugins目录下CopyPlugins.bat在修改*.plugin后目前需要手工执行，刷新到插件目录
 ## 3.Native Bricks开发
