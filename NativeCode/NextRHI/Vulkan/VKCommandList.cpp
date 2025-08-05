@@ -390,6 +390,8 @@ namespace NxRHI
 		
 		mBeginRenderingDraw->mColorAttachments.clear();
 		auto pass = GetCurrentRenderPass();
+		pass->BeginCopyDraws->OnBeginPass(this);
+		pass->BeginBarriers->OnBeginPass(this);
 		for (UINT i = 0; i < fb->mRenderPass->Desc.NumOfMRT; i++)
 		{
 			UINT flags = ((UINT)passClears->ClearFlags) & (1 << (i + 2));
@@ -432,7 +434,6 @@ namespace NxRHI
 			if (dsv != nullptr)
 			{
 				FTransitionScope::Transition(this, dsv->GpuResource, EGpuResourceState::GRS_DepthStencil, false);
-				pass->PushBeginBarrier(dsv->GpuResource, EGpuResourceState::GRS_DepthStencil);
 				depthAttachment.imageView = dsv->mView->mImageView;
 			}
 			depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -486,9 +487,8 @@ namespace NxRHI
 		renderingInfo.pDepthAttachment = &depthAttachment;
 		renderingInfo.pStencilAttachment = &stencilAttachment;
 
-		pass->BeginCopyDraws->OnBeginPass(this);
+		
 		this->PushGpuDrawImpl(pass->BeginCopyDraws);
-		pass->BeginBarriers->OnBeginPass(this);
 		this->PushGpuDrawImpl(pass->BeginBarriers);
 		this->PushGpuDrawImpl(mBeginRenderingDraw);
 		//vkCmdBeginRendering(GetVKCmdRecorder()->mCommandBuffer, &renderingInfo);
@@ -530,6 +530,8 @@ namespace NxRHI
 			
 			mCurrentFrameBuffers = fb;
 			auto pass = GetCurrentRenderPass();
+			pass->BeginCopyDraws->OnBeginPass(this);
+			pass->BeginBarriers->OnBeginPass(this);
 			for (UINT i = 0; i < fb->mRenderPass->Desc.NumOfMRT; i++)
 			{
 				auto rtv = fb->mRenderTargets[i].UnsafeConvertTo<VKRenderTargetView>();
@@ -607,9 +609,8 @@ namespace NxRHI
 			renderPassInfo.pClearValues = clearValues;
 
 			//BeginEvent(debugName);
-			pass->BeginCopyDraws->OnBeginPass(this);
+			
 			this->PushGpuDrawImpl(pass->BeginCopyDraws);
-			pass->BeginBarriers->OnBeginPass(this);
 			this->PushGpuDrawImpl(pass->BeginBarriers);
 			this->PushGpuDrawImpl(mBeginRenderingDraw);
 			//vkCmdBeginRenderPass(GetVKCmdRecorder()->mCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
