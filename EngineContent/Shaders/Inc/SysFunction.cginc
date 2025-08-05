@@ -1082,7 +1082,12 @@ void Pivot_WindAnimation(
 	// swap y z
 	windTurbulenceVector.rgb = float3(windTurbulenceVector.x, windTurbulenceVector.z, -windTurbulenceVector.y);
 
-	float3 rotationAxis = normalize(windTurbulenceVector + cross(xAxis, pow(dot(localWindAxisX, xAxis), 5.0f) * float3(0, -0.2f, 0) + localWindAxisX));
+    float t1 = dot(localWindAxisX, xAxis);
+	//Fuck!Under DirectX 12, certain GPUs produce NaN results when computing pow() functions with negative base values
+    //float t2 = pow(t1, 5.0f);
+    float t11 = t1 * t1;
+    float t2 = t11 * t11 * t1;
+	float3 rotationAxis = normalize(windTurbulenceVector + cross(xAxis, t2 * float3(0, -0.2f, 0) + localWindAxisX));
 
 	// rotation angle
 	float outputRotationMask = saturate(dot((localPos - pivotPos), xAxis) / xExtent);
