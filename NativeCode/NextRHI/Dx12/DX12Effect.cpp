@@ -170,7 +170,7 @@ namespace NxRHI
 			//if (OutCbvSrvUavHeap == nullptr || OutCbvSrvUavHeap->NumOfDescriptor != mCbvSrvUavNumber)
 			{
 				OutCbvSrvUavHeap = pPool->AllocDescriptorSet(mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
+				ASSERT(OutCbvSrvUavHeap.Num == mCbvSrvUavNumber);
 				created = true;
 			}
 		}
@@ -183,6 +183,7 @@ namespace NxRHI
 			//if (OutSamplerHeap == nullptr || OutSamplerHeap->NumOfDescriptor != mSamplerNumber)
 			{
 				OutSamplerHeap = pPool->AllocDescriptorSet(mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+				ASSERT(OutSamplerHeap.Num == mSamplerNumber);
 				created = true;
 			}
 		}
@@ -350,6 +351,11 @@ namespace NxRHI
 					rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_MESH;
 				}
 				break;
+				case EShaderType::SDT_RayTracing:
+				{
+					rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+				}
+				break;
 				default:
 					ASSERT(false);
 					break;
@@ -395,6 +401,11 @@ namespace NxRHI
 				case EShaderType::SDT_MeshShader:
 				{
 					rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_MESH;
+				}
+				break;
+				case EShaderType::SDT_RayTracing:
+				{
+					rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 				}
 				break;
 				default:

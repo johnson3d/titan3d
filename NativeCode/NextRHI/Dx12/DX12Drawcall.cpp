@@ -16,66 +16,6 @@ NS_BEGIN
 
 namespace NxRHI
 {
-	
-	static void ResetHeapToNullByEffect(DX12GpuDevice* device, DX12GraphicsEffect* effect,
-		FDX12DescriptorHeap& mCbvSrvUavHeap, FDX12DescriptorHeap& mSamplerHeap)
-	{
-		/*auto SetBinder = [&](const FShaderBinder* binder)
-		{
-			if (binder->IsBindless())
-				return;
-			switch (binder->Type)
-			{
-				case EShaderBindType::SBT_Sampler:
-				{
-					auto handle = device->mNullSampler->mView;
-					handle->BindToHeap(device, mSamplerHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-				}
-				break;
-				case EShaderBindType::SBT_CBV:
-				{
-					auto handle = device->mNullCBV->mView;
-					handle->BindToHeap(device, mCbvSrvUavHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				}
-				break;
-				case EShaderBindType::SBT_SRV:
-				{
-					auto handle = device->mNullSRV->mView;
-					handle->BindToHeap(device, mCbvSrvUavHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				}
-				break;
-				case EShaderBindType::SBT_UAV:
-				{
-					auto handle = device->mNullUAV->mView;
-					handle->BindToHeap(device, mCbvSrvUavHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				}
-				break;
-				default:
-					break;
-			}
-		};
-		for (auto& b : effect->mBinders)
-		{
-			auto binder = b.second;
-			if (binder->ASBinder) 
-			{
-				SetBinder(binder->ASBinder);
-			}
-			if (binder->MSBinder)
-			{
-				SetBinder(binder->MSBinder);
-			}
-			if (binder->VSBinder)
-			{
-				SetBinder(binder->VSBinder);
-			}
-			if (binder->PSBinder)
-			{
-				SetBinder(binder->PSBinder);
-			}
-		}*/
-	}
-	
 	static void Bind2Heap(DX12GpuDevice* device, const FShaderBinder* binder, IGpuResource* resource,
 		FDX12DescriptorHeap& mCbvSrvUavHeap, FDX12DescriptorHeap& mSamplerHeap, FCopyDescriptors& cbvsrvuavDescriptors, FCopyDescriptors& samplerDescriptors)
 	{
