@@ -2,6 +2,7 @@
 #include "DX12GpuDevice.h"
 #include "DX12CommandList.h"
 #include "DX12Buffer.h"
+#include "DX12DescriptorSet.h"
 #include "../NxDrawcall.h"
 
 #define new VNEW
@@ -158,37 +159,36 @@ namespace NxRHI
 		//mCbvSrvUavNumber = (UINT)mCbvSrvUavBinders.size();
 		//mSamplerNumber = (UINT)mSamplerBinders.size();
 	}
-	bool DX12ShaderSignatureBuilder::CreateHeap(DX12GpuDevice* device, AutoRef<DX12HeapHolder>& OutCbvSrvUavHeap, AutoRef<DX12HeapHolder>& OutSamplerHeap)
+	bool DX12ShaderSignatureBuilder::CreateHeap(DX12GpuDevice* device, FDX12DescriptorHeap& OutCbvSrvUavHeap, FDX12DescriptorHeap& OutSamplerHeap)
 	{
 		//we must allocate a new heap for every frame
 		//When gpu execute commandlist, CopyDescriptorHeap will parrallel set view to heap
+		auto pPool = (DX12DescriptorPool*)device->GetDescriptorPoolManager()->GetCurrentFramePool();
 		bool created = false;
 		if (mCbvSrvUavNumber > 0)
 		{
 			//if (OutCbvSrvUavHeap == nullptr || OutCbvSrvUavHeap->NumOfDescriptor != mCbvSrvUavNumber)
 			{
-				OutCbvSrvUavHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device,
-					mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+				OutCbvSrvUavHeap = pPool->AllocDescriptorSet(mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 				created = true;
 			}
 		}
 		else
 		{
-			OutCbvSrvUavHeap = nullptr;
+			OutCbvSrvUavHeap.Num = 0;
 		}
 		if (mSamplerNumber > 0)
 		{
 			//if (OutSamplerHeap == nullptr || OutSamplerHeap->NumOfDescriptor != mSamplerNumber)
 			{
-				OutSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device,
-					mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
+				OutSamplerHeap = pPool->AllocDescriptorSet(mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 				created = true;
 			}
 		}
 		else
 		{
-			OutSamplerHeap = nullptr;
+			OutSamplerHeap.Num = 0;
 		}
 		return created;
 	}

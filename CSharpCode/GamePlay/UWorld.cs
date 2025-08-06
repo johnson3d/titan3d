@@ -520,18 +520,36 @@ namespace EngineNS.GamePlay
 
                 TickNodes.Clear();
                 ParallelTickNodes.Clear();
+
+                var it = new TtNode.TtIterateParameters();//todo: no gc
                 using (new Profiler.TimeScopeHelper(ScopeTick_Iterate))
                 {
-                    Root.IterateNodes(static (nd, arg) =>
+                    //Root.IterateNodes(static (nd, arg) =>
+                    //{
+                    //    if (nd.IsNoTick)
+                    //        return true;
+
+                    //    var world = ((TtWorld)arg);
+                    //    var list = nd.HasStyle(TtNode.ENodeStyles.ParallelTick) ? world.ParallelTickNodes : world.TickNodes;
+                    //    list.Add(nd);
+                    //    return true;
+                    //}, this);
+                    it.Callback = static (nd, arg) =>
                     {
                         if (nd.IsNoTick)
                             return true;
 
                         var world = ((TtWorld)arg);
                         var list = nd.HasStyle(TtNode.ENodeStyles.ParallelTick) ? world.ParallelTickNodes : world.TickNodes;
-                        list.Add(nd);
+                        lock (list)
+                        {
+                            list.Add(nd);
+                        }
                         return true;
-                    }, this);
+                    };
+                    it.Arg = this;
+                    it.NodeNumLimit = 1000;
+                    Root.ParallelIterateChildren(it);
                 }
 
                 using (new Profiler.TimeScopeHelper(ScopeTick_ParallelTick))
@@ -539,7 +557,7 @@ namespace EngineNS.GamePlay
                     TtEngine.Instance.EventPoster.ParallelFor(ParallelTickNodes.Count, static (index, state) =>
                     {
                         var world = state.GetForArgument0<TtWorld>();
-                        world.ParallelTickNodes[index].TickLogic(world.NodeTickParameters);
+                        world.ParallelTickNodes[index].OnTickLogic(world.NodeTickParameters);
                     }, -1, this);
                     ParallelTickNodes.Clear();
                 }

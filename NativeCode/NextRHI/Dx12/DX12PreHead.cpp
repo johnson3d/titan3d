@@ -236,12 +236,28 @@ namespace NxRHI
 		descriptors.Dest.push_back(dest->GetCpuAddress(destIndex));
 		descriptors.Src.push_back(this->GetCpuAddress(0));
 	}
+	void DX12PagedHeap::PushDescriptorCopy(FCopyDescriptors& descriptors, FDX12DescriptorHeap& dest, UINT destIndex)
+	{
+		descriptors.Sizes.push_back(1);
+		descriptors.Dest.push_back(dest.GetCpuAddress(destIndex));
+		descriptors.Src.push_back(this->GetCpuAddress(0));
+
+		dest.Set(destIndex);
+	}
 	void DX12PagedHeap::BindToHeap(DX12GpuDevice* device, DX12PagedHeap* dest, UINT destIndex, UINT srcIndex, D3D12_DESCRIPTOR_HEAP_TYPE HeapType)
 	{
 		//ASSERT(destIndex < dest->RefResources.size());
 		//dest->RefResources[destIndex] = this->RefResources[srcIndex];
 		AUTO_SAMP("DX12PagedHeap.BindToHeap");
 		device->mDevice->CopyDescriptorsSimple(1, dest->GetCpuAddress(destIndex),
+			this->GetCpuAddress(srcIndex), HeapType);
+	}
+	void DX12PagedHeap::BindToHeap(DX12GpuDevice* device, FDX12DescriptorHeap& dest, UINT destIndex, UINT srcIndex, D3D12_DESCRIPTOR_HEAP_TYPE HeapType)
+	{
+		//ASSERT(destIndex < dest->RefResources.size());
+		//dest->RefResources[destIndex] = this->RefResources[srcIndex];
+		AUTO_SAMP("DX12PagedHeap.BindToHeap");
+		device->mDevice->CopyDescriptorsSimple(1, dest.GetCpuAddress(destIndex),
 			this->GetCpuAddress(srcIndex), HeapType);
 	}
 	D3D12_GPU_DESCRIPTOR_HANDLE	DX12PagedHeap::GetGpuAddress(int index)
@@ -369,6 +385,8 @@ namespace NxRHI
 	DX12HeapHolder* DX12HeapAllocatorManager::AllocDX12Heap(DX12GpuDevice* pDevice,
 		UINT numOfDescriptor, D3D12_DESCRIPTOR_HEAP_TYPE type)
 	{
+		//todo:Alloc Like Vulkan DescriptorPool!
+		//AUTO_SAMP("DX12HeapAllocatorManager.AllocDX12Heap");
 		UINT64 key = (((UINT64)type) << 32) | numOfDescriptor;
 		AutoRef<DX12HeapAllocator> allocator;
 		auto iter = mAllocators.find(key);

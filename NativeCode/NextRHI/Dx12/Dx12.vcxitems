@@ -16,6 +16,7 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)DX12Buffer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DX12CommandList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX12DescriptorSet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DX12Drawcall.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DX12Effect.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DX12Event.cpp" />
@@ -30,6 +31,7 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)DX12Buffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DX12CommandList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX12DescriptorSet.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DX12Drawcall.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DX12Effect.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DX12Event.h" />

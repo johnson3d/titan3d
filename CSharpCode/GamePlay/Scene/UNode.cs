@@ -1430,6 +1430,28 @@ namespace EngineNS.GamePlay.Scene
             }
             return true;
         }
+        public class TtIterateParameters
+        {
+            public FVisitNode Callback;
+            public object Arg;
+            public int NodeNumLimit = 100;
+        }
+        public void ParallelIterateChildren(TtIterateParameters it)
+        {
+            var microThread = Children.Count / it.NodeNumLimit;
+            TtEngine.Instance.EventPoster.ParallelFor(Children.Count, static (index, state) =>
+            {
+                var This = state.GetForArgument0<TtNode>();
+                var it = state.GetForArgument1<TtIterateParameters>();
+                it.Callback(This.Children[index], it.Arg);
+            }, microThread, this, it);
+            foreach (var i in Children)
+            {
+                if (i.Children.Count == 0)
+                    continue;
+                i.ParallelIterateChildren(it);
+            }
+        }
         private class TtNodeBFSParameters
         {
             public int TaskNum;

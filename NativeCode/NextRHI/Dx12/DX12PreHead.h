@@ -139,7 +139,7 @@ namespace NxRHI
 
 	///-----------------------------------------------------------
 	///DX12DescriptorSetPagedObject
-	
+	struct FDX12DescriptorHeap;
 	struct FCopyDescriptors
 	{
 		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> Src;
@@ -161,6 +161,9 @@ namespace NxRHI
 		D3D12_CPU_DESCRIPTOR_HANDLE	GetCpuAddress(int index);
 		void PushDescriptorCopy(FCopyDescriptors& descriptors, DX12PagedHeap* dest, UINT destIndex);
 		void BindToHeap(DX12GpuDevice* device, DX12PagedHeap* dest, UINT destIndex, UINT srcIndex, D3D12_DESCRIPTOR_HEAP_TYPE HeapType);
+
+		void PushDescriptorCopy(FCopyDescriptors& descriptors, FDX12DescriptorHeap& dest, UINT destIndex);
+		void BindToHeap(DX12GpuDevice* device, FDX12DescriptorHeap& dest, UINT destIndex, UINT srcIndex, D3D12_DESCRIPTOR_HEAP_TYPE HeapType);
 		//D3D12_DESCRIPTOR_HEAP_TYPE	HeapType = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		SIZE_T						OffsetInPage = 0;
 
@@ -284,6 +287,44 @@ namespace NxRHI
 		}
 	};
 	///-----------------------------------------------------------
+
+	struct FDX12DescriptorHeap
+	{
+		int Start = 0;
+		int Stride = 0;
+		int Num = 0;
+		UINT DescriptorMask = 0;
+		UINT DescriptorState = 0;
+		ID3D12DescriptorHeap* Heap = nullptr;
+		inline void Set(int index)
+		{
+			if (Num > 32)
+				return;
+			DescriptorState |= (1 << index);
+		}
+		inline bool IsSet(int index)
+		{
+			if (Num > 32)
+				return false;
+			return (DescriptorState & (1 << index)) != 0;
+		}
+		inline void CheckCompletion()
+		{
+			ASSERT(DescriptorState == DescriptorMask);
+		}
+		D3D12_GPU_DESCRIPTOR_HANDLE GetGpuAddress(int index)
+		{
+			auto result = Heap->GetGPUDescriptorHandleForHeapStart();
+			result.ptr += (Start + index) * Stride;
+			return result;
+		}
+		D3D12_CPU_DESCRIPTOR_HANDLE GetCpuAddress(int index)
+		{
+			auto result = Heap->GetCPUDescriptorHandleForHeapStart();
+			result.ptr += (Start + index) * Stride;
+			return result;
+		}
+	};
 
 	class DX12ResourceDebugMapper
 	{

@@ -187,7 +187,7 @@ namespace NxRHI
 	{
 	public:
 		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
-		AutoRef<DX12HeapHolder>		mHeap;
+		FDX12DescriptorHeap			mHeap;
 		UINT						mStartIndex;
 		virtual void OnBind(UINT index, IGpuResource* resource) override;
 	};

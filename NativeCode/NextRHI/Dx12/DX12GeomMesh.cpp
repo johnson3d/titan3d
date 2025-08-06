@@ -11,6 +11,7 @@ namespace NxRHI
 	void DX12VertexArray::Commit(DX12CommandList* dx12Cmd, UINT NumOfVA, DX12VertexArray** VAs)
 	{
 		D3D12_VERTEX_BUFFER_VIEW dxVBs[VST_Number]{};
+		int maxSlot = 0;
 		for (UINT i = 0; i < NumOfVA; i++)
 		{
 			if (VAs[i] == nullptr)
@@ -19,18 +20,20 @@ namespace NxRHI
 			//dx12Cmd->GetCmdRecorder()->UseResource(VAs[i]);
 			for (int j = 0; j < VST_Number; j++)
 			{
-				auto vbv = VAs[i]->VertexBuffers[j];
+				const auto& vbv = VAs[i]->VertexBuffers[j];
 				if (vbv != nullptr)
 				{
-					auto vb = vbv->Buffer.UnsafeConvertTo<DX12Buffer>();
+					auto vb = (DX12Buffer*)vbv->Buffer.GetPtr();//vbv->Buffer.UnsafeConvertTo<DX12Buffer>();
 					auto& dxvbv = dxVBs[j];
 					dxvbv.BufferLocation = vb->GetGPUVirtualAddress() + vbv->Desc.Offset;
 					dxvbv.StrideInBytes = vbv->Desc.Stride;// vb->Desc.StructureStride;
 					dxvbv.SizeInBytes = vbv->Desc.Size;
+					if (j > maxSlot)
+						maxSlot = j;
 				}
 			}
 		}
-		dx12Cmd->mContext->IASetVertexBuffers(0, VST_Number, dxVBs);
+		dx12Cmd->mContext->IASetVertexBuffers(0, maxSlot + 1, dxVBs);
 	}
 	void DX12VertexArray::Commit(ICommandList* cmdlist)
 	{

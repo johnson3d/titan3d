@@ -303,13 +303,24 @@ namespace EngineNS.Thread.Async
                 return mScopeParrallelForWait;
             }
         }
-        public void ParallelFor(int numTask, Delegate_ParrallelForAction action, int numMicroThread = -1, object userData1 = null, object userData2 = null)
+        public void ParallelFor(int numTask, Delegate_ParrallelForAction action, int numMicroThread = -1, object userData1 = null, object userData2 = null, int maxNumPerMicroThread = -1)
         {
             System.Diagnostics.Debug.Assert(Thread.TtContextThread.CurrentContext.GetThreadType() != EAsyncTarget.TPools);
 
             if (numMicroThread < 0)
             {
-                numMicroThread = TtEngine.Instance.EventPoster.PooledThreadNum;
+                if (maxNumPerMicroThread>0)
+                {
+                    numMicroThread = numTask / maxNumPerMicroThread;
+                    if (numTask % maxNumPerMicroThread != 0)
+                    {
+                        numMicroThread++;
+                    }
+                }
+                else
+                {
+                    numMicroThread = TtEngine.Instance.EventPoster.PooledThreadNum;
+                }
             }
             else if (numMicroThread == 0)
             {
@@ -320,7 +331,7 @@ namespace EngineNS.Thread.Async
             {
                 return;
             }
-            else if (numMicroThread == 1)
+            else if (numMicroThread == 1 || numTask==1)
             {
                 var eh = TtAsyncTaskState<bool>.CreateInstance();
                 eh.UserArguments.Obj0 = action;
@@ -331,6 +342,7 @@ namespace EngineNS.Thread.Async
                 eh.UserArguments.Value0.Z = (uint)(numTask / numMicroThread);
                 for (int i = 0; i < numTask; i++)
                 {
+                    eh.UserArguments.Value0.X = (uint)i;
                     action(i, eh);
                 }
                 eh.Dispose();

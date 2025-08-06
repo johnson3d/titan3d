@@ -1911,7 +1911,7 @@ namespace NxRHI
 
 	void DX12Bindless::OnBind(UINT index, IGpuResource* resource)
 	{
-		if (mHeap == nullptr)
+		if (mHeap.Num == 0)
 			return;
 		auto device = mDeviceRef.GetPtr();
 		DX12PagedHeap* handle;
@@ -1924,7 +1924,7 @@ namespace NxRHI
 			handle = DX12PagedHeap::GetNullHeap(device, mBindType);
 		}
 		auto Flags = mBindType == EShaderBindType::SBT_Sampler ? D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER : D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		handle->BindToHeap(device, mHeap->Heap, mStartIndex + index, 0, Flags);
+		handle->BindToHeap(device, mHeap, mStartIndex + index, 0, Flags);
 	}
 }
 NS_END

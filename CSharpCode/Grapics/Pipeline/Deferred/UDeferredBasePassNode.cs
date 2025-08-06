@@ -305,7 +305,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                     if (drawcall != null)
                                     {
                                         //drawcall.BindGBuffer(camera, GBuffers);
-                                        mBackgroundPassRecorder.PushGpuDraw(drawcall);
+                                        mBasePassRecorder.PushGpuDraw(drawcall);
                                     }
                                 }
                             }

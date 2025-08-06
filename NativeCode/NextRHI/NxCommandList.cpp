@@ -25,7 +25,7 @@ namespace NxRHI
 	{
 		AUTO_SAMP("NxRHI.ICmdRecorder.PushGpuDraw");
 		ASSERT(draw != nullptr);
-		VAutoVSLLock lk(mLocker);
+		//VAutoVSLLock lk(mLocker);
 		mDrawcallArray.push_back(draw);
 		mPrimitiveNum += draw->GetPrimitiveNum();
 	}
@@ -51,7 +51,7 @@ namespace NxRHI
 	}
 	void ICmdRecorder::ResetGpuDraws()
 	{
-		VAutoVSLLock lk(mLocker);
+		//VAutoVSLLock lk(mLocker);
 		mDrawcallArray.clear();
 		for (auto& i : mRefBuffers)
 		{
@@ -65,7 +65,7 @@ namespace NxRHI
 	}
 	void ICmdRecorder::AppendRecorder(ICmdRecorder* pCmdRecorder)
 	{
-		VAutoVSLLock lk(mLocker);
+		//VAutoVSLLock lk(mLocker);
 		mDrawcallArray.insert(mDrawcallArray.end(), pCmdRecorder->mDrawcallArray.begin(), pCmdRecorder->mDrawcallArray.end());
 		mRefBuffers.insert(mRefBuffers.end(), pCmdRecorder->mRefBuffers.begin(), pCmdRecorder->mRefBuffers.end());
 		mDirectDrawNum += pCmdRecorder->mDirectDrawNum;
@@ -75,7 +75,7 @@ namespace NxRHI
 	{
 		//mCmdList.FromObject(cmdlist);
 		//AUTO_SAMP("NxRHI.ICmdRecorder.FlushDraws");
-		VAutoVSLLock lk(mLocker);
+		//VAutoVSLLock lk(mLocker);
 		{
 			AUTO_SAMP("NxRHI.ICmdRecorder.FlushDraws.Build");
 			for (UINT i = mFlushStart; i < (UINT)mDrawcallArray.size(); i++)

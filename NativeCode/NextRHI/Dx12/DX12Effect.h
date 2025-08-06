@@ -11,6 +11,7 @@ namespace NxRHI
 	class DX12GraphicsEffect;
 	class DX12ComputeEffect;
 	class DX12Buffer;
+	struct FDX12DescriptorHeap;
 
 	class DX12ShaderSignatureBuilder
 	{
@@ -35,7 +36,7 @@ namespace NxRHI
 		}
 		void Build(IShaderReflector* reflector);
 		void Build(std::map<VNameString, AutoRef<FEffectBinder>>& binders);
-		bool CreateHeap(DX12GpuDevice* device, AutoRef<DX12HeapHolder>& OutCbvSrvUavHeap, AutoRef<DX12HeapHolder>& OutSamplerHeap);
+		bool CreateHeap(DX12GpuDevice* device, FDX12DescriptorHeap& OutCbvSrvUavHeap, FDX12DescriptorHeap& OutSamplerHeap);
 
 		struct FSignatureBinder
 		{

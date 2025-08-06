@@ -9,6 +9,7 @@
 #include "DX12Effect.h"
 #include "DX12Drawcall.h"
 #include "DX12GeomMesh.h"
+#include "DX12DescriptorSet.h"
 #include "../NxEffect.h"
 #include "../../Base/thread/vfxthread.h"
 #include "../../Base/thread/vfxThreadDispatcher.h"
@@ -146,6 +147,7 @@ namespace NxRHI
 		mDefaultBufferMemAllocator = nullptr;
 		mUploadBufferMemAllocator = nullptr;
 		mUavBufferMemAllocator = nullptr;
+		mDescriptorPoolManager = nullptr;
 
 		mRtvAllocator = nullptr;
 		mDsvAllocator = nullptr;
@@ -340,12 +342,14 @@ namespace NxRHI
 			D3D12_INFO_QUEUE_FILTER filter{};
 			mDenyMessages.clear();
 			mDenyMessages.push_back(D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE);
-			/*mDenyMessages.push_back(D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE);
-			mDenyMessages.push_back(D3D12_MESSAGE_ID_DRAW_EMPTY_SCISSOR_RECTANGLE);
 			mDenyMessages.push_back(D3D12_MESSAGE_ID_CREATE_COMMANDLIST12);
 			mDenyMessages.push_back(D3D12_MESSAGE_ID_DESTROY_COMMANDLIST12);
 			mDenyMessages.push_back(D3D12_MESSAGE_ID_CREATE_RESOURCE);
 			mDenyMessages.push_back(D3D12_MESSAGE_ID_DESTROY_RESOURCE);
+			mDenyMessages.push_back(D3D12_MESSAGE_ID_CREATE_HEAP);
+			mDenyMessages.push_back(D3D12_MESSAGE_ID_DESTROY_HEAP);
+			/*mDenyMessages.push_back(D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE);
+			mDenyMessages.push_back(D3D12_MESSAGE_ID_DRAW_EMPTY_SCISSOR_RECTANGLE);
 			mDenyMessages.push_back(D3D12_MESSAGE_ID_GPU_BASED_VALIDATION_INCOMPATIBLE_RESOURCE_STATE);
 			mDenyMessages.push_back(D3D12_MESSAGE_ID_CREATEGRAPHICSPIPELINESTATE_RENDERTARGETVIEW_NOT_SET);*/
 			
@@ -541,6 +545,10 @@ namespace NxRHI
 			desc.ShaderBinder = nullptr;
 			mNullCBV = MakeWeakRef((DX12CbView*)this->CreateCBV(nullptr, &desc));
 		}
+		
+		mDescriptorPoolManager = MakeWeakRef(new DX12DesriptorPoolManager());
+		mDescriptorPoolManager->Initialize(this);
+
 		FBufferDesc bfDesc{};
 		bfDesc.SetDefault(true, (EBufferType)(EBufferType::BFT_SRV | EBufferType::BFT_UAV));
 		bfDesc.Size = sizeof(float);

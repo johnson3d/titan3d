@@ -116,7 +116,7 @@ namespace NxRHI
 		UINT									mPrimitiveNum = 0;
 		UINT									mFlushStart = 0;
 
-		VSLLock									mLocker;
+		//VSLLock									mLocker;
 		ECmdRecorderType RecorderTypes = (ECmdRecorderType)0;
 	public:
 		inline UINT GetDrawcallNumber() const {
