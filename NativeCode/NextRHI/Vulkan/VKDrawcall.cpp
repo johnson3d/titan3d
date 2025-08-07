@@ -383,33 +383,25 @@ namespace NxRHI
 			{
 				case SBT_CBV:
 				{
-					vkCmd->SetCBV(EShaderType::SDT_ComputeShader, binder, (ICbView*)resource);
+					//vkCmd->SetCBV(EShaderType::SDT_ComputeShader, binder, (ICbView*)resource);
 					BindStageResourceToDescriptSets(device, pDescriptorSet, binder, resource, mDsWriteSets, mDescriptorSetInfos, index);
 				}
 				break;
 				case SBT_SRV:
 				{
-					if (resource)
-					{
-						vkCmd->GetCmdRecorder()->UseResource(((VKSrView*)resource)->mView);
-					}
-					vkCmd->SetSrv(EShaderType::SDT_ComputeShader, binder, (ISrView*)resource);
+					//vkCmd->SetSrv(EShaderType::SDT_ComputeShader, binder, (ISrView*)resource);
 					BindStageResourceToDescriptSets(device, pDescriptorSet, binder, resource, mDsWriteSets, mDescriptorSetInfos, index);
 				}
 				break;
 				case SBT_UAV:
 				{
-					if (resource)
-					{
-						vkCmd->GetCmdRecorder()->UseResource(((VKUaView*)resource)->mView);
-					}
-					vkCmd->SetUav(EShaderType::SDT_ComputeShader, binder, (IUaView*)resource);
+					//vkCmd->SetUav(EShaderType::SDT_ComputeShader, binder, (IUaView*)resource);
 					BindStageResourceToDescriptSets(device, pDescriptorSet, binder, resource, mDsWriteSets, mDescriptorSetInfos, index);
 				}
 				break;
 				case SBT_Sampler:
 				{
-					vkCmd->SetSampler(EShaderType::SDT_ComputeShader, binder, (ISampler*)resource);
+					//vkCmd->SetSampler(EShaderType::SDT_ComputeShader, binder, (ISampler*)resource);
 					BindStageResourceToDescriptSets(device, pDescriptorSet, binder, resource, mDsWriteSets, mDescriptorSetInfos, index);
 				}
 				break;

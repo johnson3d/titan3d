@@ -238,6 +238,7 @@ namespace NxRHI
 				VFX_LTRACE(ELTT_Error, "Try CreatePSO without cache blob successed: VS(%s) PS(%s)", ShaderEffect->mVertexShader->Desc->DebugName.c_str(),
 					ShaderEffect->mPixelShader->Desc->DebugName.c_str());
 			}
+			bCached = false;
 		}
 		mDxState = pState;
 		
