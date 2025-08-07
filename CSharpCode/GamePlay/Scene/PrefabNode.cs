@@ -114,7 +114,7 @@ namespace EngineNS.GamePlay.Scene
                     try
                     {
                         ar.ReadTo(desc, node);
-                        nodeData.IsDirty = true;
+                        node.IsDirty = true;
                         if (await node.InitializeNode(world, nodeData, EBoundVolumeType.None, null) == false)
                         {
                             Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");

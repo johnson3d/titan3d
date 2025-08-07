@@ -62,8 +62,6 @@ namespace EngineNS.GamePlay.Scene
         {
 
         }
-        [System.ComponentModel.Browsable(false)]
-        public bool Selected { get; set; }
         public int NumOfChildUI()
         {
             return Children.Count;

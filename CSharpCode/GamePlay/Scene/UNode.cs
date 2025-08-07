@@ -24,15 +24,6 @@ namespace EngineNS.GamePlay.Scene
             //return System.Runtime.InteropServices.Marshal.SizeOf(this.GetType());
             return 1024;
         }
-        public bool IsDirty { get; set; } = false;
-        public void CheckDirty(TtNode node)
-        {
-            if (IsDirty)
-            {
-                node.UpdateAbsTransform();
-                IsDirty = false;
-            }
-        }
         [Rtti.Meta("")]
         public TtNode.ENodeStyles NodeStyles { get; set; } = 0;
         [Rtti.Meta("",Order = 0)]
@@ -429,6 +420,14 @@ namespace EngineNS.GamePlay.Scene
             IsCollide = (1 << 18),
             Invisible = SelfInvisible | ChildrenInvisible,
         }
+        [Flags]
+        public enum ENodeRuntimeStyles : uint
+        {
+            IsDirty = (1 << 0),
+            IsSelected = (1 << 1),
+            IsPrefab = (1 << 2),
+        }
+        public uint RuntimeStyles { get; set; } = 0;
         public ENodeStyles NodeStyles
         {
             get
@@ -477,6 +476,73 @@ namespace EngineNS.GamePlay.Scene
         {
             NodeStyles &= ~style;
         }
+        #region RuntimeStyle
+        public void UnsetRuntimeStyle(ENodeRuntimeStyles style)
+        {
+            RuntimeStyles &= ~(uint)style;
+        }
+        public bool HasRuntimeStyle(ENodeRuntimeStyles style)
+        {
+            return (RuntimeStyles & (uint)style) == (uint)style;
+        }
+        public void SetRuntimeStyle(ENodeRuntimeStyles style)
+        {
+            RuntimeStyles |= (uint)style;
+        }
+        [Category("Option")]
+        public bool IsPrefab
+        {
+            get => this.HasRuntimeStyle(ENodeRuntimeStyles.IsPrefab);// && (mTemplateNodeData != null);
+            set
+            {
+                if (value)
+                {
+                    this.SetRuntimeStyle(ENodeRuntimeStyles.IsPrefab);
+                }
+                else
+                {
+                    this.UnsetRuntimeStyle(ENodeRuntimeStyles.IsPrefab);
+                }
+            }
+        }
+        [Browsable(false)]
+        public bool Selected
+        {
+            get => HasRuntimeStyle(ENodeRuntimeStyles.IsSelected);
+            set
+            {
+                if (value)
+                {
+                    SetRuntimeStyle(ENodeRuntimeStyles.IsSelected);
+                }
+                else
+                {
+                    UnsetRuntimeStyle(ENodeRuntimeStyles.IsSelected);
+                }
+            }
+        }
+        [Browsable(false)]
+        public bool IsDirty 
+        {
+            get => HasRuntimeStyle(ENodeRuntimeStyles.IsDirty);
+            set
+            {
+                if (value)
+                    SetRuntimeStyle(ENodeRuntimeStyles.IsDirty);
+                else
+                    UnsetRuntimeStyle(ENodeRuntimeStyles.IsDirty);
+            }
+        }
+        public void CheckDirty()
+        {
+            if (IsDirty)
+            {
+                UpdateAbsTransform();
+                IsDirty = false;
+            }
+        }
+        #endregion
+
         [Category("Option")]
         public virtual bool IsNoTick
         {
@@ -790,23 +856,13 @@ namespace EngineNS.GamePlay.Scene
         public void SetPrefabTemplate(TtNodeData data)
         {
             mTemplateNodeData = data;
-            mIsPrefab = true;
+            this.SetRuntimeStyle(ENodeRuntimeStyles.IsPrefab);
             OnSetPrefabTemplate();
             OnAbsTransformChanged();
         }
         protected virtual void OnSetPrefabTemplate()
         {
 
-        }
-        internal bool mIsPrefab = false;
-        [Category("Option")]
-        public bool IsPrefab
-        {
-            get => mIsPrefab;// && (mTemplateNodeData != null);
-            set
-            {
-                mIsPrefab = value;
-            }
         }
         [Category("Option")]
         public TtNodeData NodeData
@@ -1090,7 +1146,7 @@ namespace EngineNS.GamePlay.Scene
                     if (i.NodeData != null)
                     {
                         uint nodeFlags = (uint)ENodeFlags.IsNodeDesc;
-                        if (this.mIsPrefab)
+                        if (this.IsPrefab)
                         {
                             nodeFlags |= (uint)ENodeFlags.IgnoreNodeDesc;
                         }
@@ -1132,7 +1188,7 @@ namespace EngineNS.GamePlay.Scene
                 }
                 if ((attr.Flags & (uint)ENodeFlags.IgnoreNodeDesc) != 0)
                 {
-                    this.mIsPrefab = true;
+                    this.IsPrefab = true;
                 }
                 var nodeTypeDesc = Rtti.TtTypeDesc.TypeOf(attr.Name);
                 TtNodeData nodeData = Rtti.TtTypeDescManager.CreateInstance(nodeTypeDesc) as TtNodeData;
@@ -1150,7 +1206,7 @@ namespace EngineNS.GamePlay.Scene
                     {
                         //ar.Tag = nd;
                         System.Type placementType = typeof(TtPlacement);
-                        if (this.mIsPrefab == false)
+                        if (this.IsPrefab == false)
                         {
                             if (false == ar.ReadTo(data, this))
                             {
@@ -1166,7 +1222,7 @@ namespace EngineNS.GamePlay.Scene
                                     var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
                                     meta.CopyObjectMetaField(old.NodeData, nodeData);
                                     nodeData = old.NodeData;
-                                    nodeData.IsDirty = true;
+                                    nd.IsDirty = true;
                                 }
                             }
                         }

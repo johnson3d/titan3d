@@ -384,7 +384,7 @@ namespace EngineNS.GamePlay.Scene
             if (mMesh == null)
                 return;
 
-            NodeData.CheckDirty(this);
+            this.CheckDirty();
 
             rp.AddVisibleMesh(mMesh);
             rp.AddVisibleNode(this);

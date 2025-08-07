@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Channels;
 using static EngineNS.EGui.UIProxy.SingleInputDialog;
@@ -197,6 +198,32 @@ namespace EngineNS.Rtti
         public bool IsRemoved = false;
         public Type SystemType;
         public TtAssemblyDesc Assembly;
+        int mDirectSize = 0;
+        public int DirectSize
+        {
+            get
+            {
+                if (SystemType == null)
+                    return 0;
+                if (mDirectSize==0)
+                {
+                    var fields = SystemType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                    foreach (var field in fields)
+                    {
+                        if (field.FieldType.IsValueType)
+                        {
+                            mDirectSize += Marshal.SizeOf(field.FieldType);
+                        }
+                        else
+                        {
+                            // 引用类型字段仅统计引用本身的指针大小
+                            mDirectSize += IntPtr.Size;
+                        }
+                    }
+                }
+                return mDirectSize;
+            }
+        }
 
         public bool IsClass
         {

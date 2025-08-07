@@ -288,7 +288,7 @@ namespace EngineNS.GamePlay.Scene
         {
             UpdateCameralOffset(rp.World);
 
-            NodeData.CheckDirty(this);
+            this.CheckDirty();
 
             foreach (var mesh in mCurrMeshMatrix)
             {

@@ -382,6 +382,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 }
                 catch(Exception ex)
                 {
+                    Profiler.Log.WriteException(ex);
                     return;
                 }
             }
