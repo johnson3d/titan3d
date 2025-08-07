@@ -1130,19 +1130,19 @@ namespace EngineNS.Editor.Forms
         public override bool IsAssetLoaed { get => Prefab != null; }
         public async override Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg)
         {
-            Prefab = await TtEngine.Instance.PrefabManager.CreatePrefab(name);
-            if (Prefab == null)
-                return false;
-            var rpolicy = Prefab.RPolicyName;
-            if (rpolicy == null)
-                rpolicy = TtEngine.Instance.Config.MainRPolicyName;
-
             AssetName = name;
             //PreviewViewport.PreviewAsset = name;
             PreviewViewport.Title = $"Prefab:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewScene;
             PreviewViewport.CameralWheelMoveWithLookAt = false;
             await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.SimpleRPolicyName, 0, 1);
+
+            Prefab = await TtEngine.Instance.PrefabManager.CreatePrefab(PreviewViewport.World, name);
+            if (Prefab == null)
+                return false;
+            var rpolicy = Prefab.RPolicyName;
+            if (rpolicy == null)
+                rpolicy = TtEngine.Instance.Config.MainRPolicyName;
 
             Prefab.Root.Parent = PreviewViewport.World.Root;
             Prefab.Root.NodeName = name.Name;
@@ -1172,7 +1172,7 @@ namespace EngineNS.Editor.Forms
             System.Action action = async () =>
             {
                 var saved = Prefab;
-                Prefab = await TtEngine.Instance.PrefabManager.CreatePrefab(AssetName);
+                Prefab = await TtEngine.Instance.PrefabManager.CreatePrefab(PreviewViewport.World,AssetName);
                 Prefab.Root.Parent = PreviewViewport.World.Root;
             };
             action();

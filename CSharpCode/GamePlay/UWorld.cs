@@ -24,9 +24,9 @@ namespace EngineNS.GamePlay
             mBoundingDebugMaterial = null;
 
             mMemberTickables.CleanupMembers(this);
-            this.EntityManager.Dispose();
+            EntityManager?.Dispose();
         }
-        public TtWorld(Graphics.Pipeline.TtViewportSlate viewport)
+        public TtWorld(Graphics.Pipeline.TtViewportSlate viewport, bool hasEntityManager = true)
         {
             mMemberTickables.CollectMembers(this);
 
@@ -35,6 +35,11 @@ namespace EngineNS.GamePlay
             //mRoot = new Scene.TtScene();
             //mRoot.SetWorld(this);
             System.Threading.Interlocked.Increment(ref mNodeAliveNumber);
+
+            if (hasEntityManager)
+                this.EntityManager = new TtEntityManager();
+            else
+                this.EntityManager = null;
         }
         ~TtWorld()
         {
@@ -78,7 +83,7 @@ namespace EngineNS.GamePlay
                 mRoot = value;
                 if (mRoot!=null)
                 {
-                    mRoot.World.EntityManager.AddEntity(mRoot.BoundVolume);
+                    mRoot.World.EntityManager.AddEntity(mRoot);
                 }
             }
         }

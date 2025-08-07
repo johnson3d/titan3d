@@ -82,8 +82,34 @@ namespace EngineNS.GamePlay.Scene
     }
     [Rtti.Meta("")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public partial class TtNode
+    public partial class TtNode : ECS.IEntity
     {
+        #region ECS
+        public ECS.TtEntityManager EntityManager { get; set; } = null;
+        public int Id { get; set; } = -1;
+        public ECS.TtComponentValues<T> GetComponentValues<T>() where T : struct
+        {
+            if (EntityManager==null)
+                return null;
+
+            return EntityManager.FindComponentValues<T>();
+        }
+        public void OnAddToManager()
+        {
+            if (BoundVolume!=null)
+            {
+                (EntityManager as TtEntityManager).BoundingValues.SetValue(Id, in BoundVolume.AbsAABB);
+            }
+        }
+        public void OnRemoveFromManager()
+        {
+            if (BoundVolume!=null)
+            {
+                BoundVolume.AbsAABB = (EntityManager as TtEntityManager).BoundingValues.GetValue(Id);
+            }
+        }
+        #endregion
+
         static int mNodeAliveNumber = 0;
         public static int NodeAliveNumber
         {
@@ -143,6 +169,11 @@ namespace EngineNS.GamePlay.Scene
         }
         public virtual void Dispose()
         {
+            if (EntityManager!=null)
+            {
+                EntityManager.RemoveEntity(Id);
+                EntityManager = null;
+            }
             if (OctreeNode != null)
             {
                 OctreeNode.Remove(this);
@@ -870,15 +901,15 @@ namespace EngineNS.GamePlay.Scene
         protected virtual void OnRootParentChanged(TtNode root, TtNode prev, TtNode cur)
         {
             var world = GetWorld();
-            if (world != null && this.BoundVolume!=null)
+            if (world != null && world.EntityManager != null && this.BoundVolume!=null)
             {   
                 if (cur == null)
                 {
-                    world.EntityManager.RemoveEntity(this.BoundVolume.Id);
+                    world.EntityManager.RemoveEntity(this.Id);
                 }
                 else
                 {
-                    world.EntityManager.AddEntity(this.BoundVolume);
+                    world.EntityManager.AddEntity(this);
                 }
             }
         }

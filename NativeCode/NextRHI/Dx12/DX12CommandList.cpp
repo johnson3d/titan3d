@@ -379,6 +379,7 @@ namespace NxRHI
 		if (view == nullptr)
 			return;
 		view->GetResourceState()->SetAccessFrame(IWeakRefObject::EngineCurrentFrame);
+		this->GetCmdRecorder()->UseResource(view->Buffer);
 
 		FTransitionScope::Transition(this, view->Buffer, EGpuResourceState::GRS_GenericRead, true);
 	}
@@ -389,6 +390,7 @@ namespace NxRHI
 			return;
 		/*auto pAddr = ((ID3D12Resource*)view->Buffer->GetHWBuffer())->GetGPUVirtualAddress();
 		mContext->SetGraphicsRootUnorderedAccessView(binder->DescriptorIndex, pAddr);*/
+		this->GetCmdRecorder()->UseResource(view->Buffer);
 
 		FTransitionScope::Transition(this, view->Buffer, EGpuResourceState::GRS_Uav, true);
 	}

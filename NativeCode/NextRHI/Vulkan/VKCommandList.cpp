@@ -771,6 +771,8 @@ namespace NxRHI
 		ASSERT(mCmdListState == ECmdListState::Recording);
 		if (view == nullptr)
 			return;
+
+		GetCmdRecorder()->UseResource(view->Buffer);
 		view->GetResourceState()->SetAccessFrame(IWeakRefObject::EngineCurrentFrame);
 
 		FTransitionScope::Transition(this, view->Buffer, EGpuResourceState::GRS_GenericRead, true);
@@ -780,6 +782,8 @@ namespace NxRHI
 		ASSERT(mCmdListState == ECmdListState::Recording);
 		if (view == nullptr)
 			return;
+
+		GetCmdRecorder()->UseResource(view->Buffer);
 		FTransitionScope::Transition(this, view->Buffer, EGpuResourceState::GRS_Uav, true);
 	}
 	void VKCommandList::SetSampler(EShaderType type, const FShaderBinder* binder, ISampler* sampler)

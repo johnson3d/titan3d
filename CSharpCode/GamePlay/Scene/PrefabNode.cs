@@ -382,7 +382,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine host)
         {
-            PrefabWorld = new TtWorld(null);
+            PrefabWorld = new TtWorld(null, false);
             return await PrefabWorld.InitWorld();
         }
         public Dictionary<RName, TtPrefab> Prefabs { get; } = new Dictionary<RName, TtPrefab>();
@@ -439,9 +439,9 @@ namespace EngineNS.GamePlay.Scene
             Prefabs.Add(name, scene);
             return scene;
         }
-        public async Thread.Async.TtTask<TtPrefab> CreatePrefab(RName name)
+        public async Thread.Async.TtTask<TtPrefab> CreatePrefab(TtWorld world, RName name)
         {
-            var scene = await TtPrefabNode.LoadPrefab(PrefabWorld, name);
+            var scene = await TtPrefabNode.LoadPrefab(world, name);
             if (scene == null)
                 return null;
 

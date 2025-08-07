@@ -13,7 +13,7 @@ namespace EngineNS.GamePlay.Scene
         Sphere,
     }
 
-    public class TtBoundVolume : IO.ISerializer, ECS.IEntity, IDisposable
+    public class TtBoundVolume : IO.ISerializer, IDisposable
     {
         public TtBoundVolume()
         {
@@ -22,11 +22,6 @@ namespace EngineNS.GamePlay.Scene
         public virtual void Dispose()
         {
             HostNode = null;
-            if (EntityManager!=null)
-            {
-                EntityManager.RemoveEntity(Id);
-                EntityManager = null;
-            }
         }
         public virtual EBoundVolumeType BVType
         {
@@ -54,36 +49,17 @@ namespace EngineNS.GamePlay.Scene
         {
             get
             {
-                if (EntityManager == null || Id < 0)
+                if (HostNode.EntityManager == null || HostNode.Id < 0)
                 {
                     return ref mAbsAABB;
                 }
-                return ref (EntityManager as TtEntityManager).BoundingValues.GetValue(Id);
+                return ref (HostNode.EntityManager as TtEntityManager).BoundingValues.GetValue(HostNode.Id);
             }
         }
         protected virtual void OnVolumeChanged()
         {
             HostNode.UpdateAABB();
         }
-        #region ECS
-        public ECS.TtEntityManager EntityManager { get; set; } = null;
-        public int Id { get; set; } = -1;
-        public ECS.TtComponentValues<T> GetComponentValues<T>() where T : struct
-        {
-            if (EntityManager==null)
-                return null;
-
-            return EntityManager.FindComponentValues<T>();
-        }
-        public void OnAddToManager()
-        {
-            (EntityManager as TtEntityManager).BoundingValues.SetValue(Id, mAbsAABB);
-        }
-        public void OnRemoveFromManager()
-        {
-            mAbsAABB = (EntityManager as TtEntityManager).BoundingValues.GetValue(Id);
-        }
-        #endregion
     }
     public class UBoxBV : TtBoundVolume
     {     
@@ -152,12 +128,14 @@ namespace EngineNS.GamePlay.Scene
                     int Count = 0;
                     for (int i = 0; i<manager.Entities.Count; i++)
                     {
-                        var bv = manager.GetEntity<TtBoundVolume>(i);
-                        if (bv == null)
+                        var node = manager.GetEntity<TtNode>(i);
+                        if (node == null)
+                            continue;
+                        if (node.HashVisual==false)
                             continue;
                         Count++;
 
-                        var node = bv.HostNode;
+                        var bv = node.BoundVolume;
                         if (node.RootNode != World.Root)
                             continue;
                         if (VisParameter.OnVisitNode != null && VisParameter.OnVisitNode(bv.HostNode, VisParameter) == false)
@@ -165,7 +143,7 @@ namespace EngineNS.GamePlay.Scene
                         if (node.HasStyle(TtNode.ENodeStyles.VisibleFollowParent))
                             continue;
 
-                        ref var aabb = ref values.GetValue(bv.Id);
+                        ref var aabb = ref values.GetValue(node.Id);
                         if (!node.HasStyle(TtNode.ENodeStyles.VisibleAlways))
                         {
                             if (VisParameter.CullCamera != null)
@@ -211,11 +189,13 @@ namespace EngineNS.GamePlay.Scene
                     var World = pThis.World;
                     var values = manager.BoundingValues;
 
-                    var bv = manager.GetEntity<TtBoundVolume>(i);
-                    if (bv == null)
+                    var node = manager.GetEntity<TtNode>(i);
+                    if (node == null)
+                        return;
+                    if (node.HashVisual==false)
                         return;
 
-                    var node = bv.HostNode;
+                    var bv = node.BoundVolume;
                     if (node.RootNode != World.Root)
                         return;
                     if (VisParameter.OnVisitNode != null && VisParameter.OnVisitNode(bv.HostNode, VisParameter) == false)
@@ -223,7 +203,7 @@ namespace EngineNS.GamePlay.Scene
                     if (node.HasStyle(TtNode.ENodeStyles.VisibleFollowParent))
                         return;
 
-                    ref var aabb = ref values.GetValue(bv.Id);
+                    ref var aabb = ref values.GetValue(node.Id);
                     if (!node.HasStyle(TtNode.ENodeStyles.VisibleAlways))
                     {
                         if (VisParameter.CullCamera != null)
@@ -273,7 +253,7 @@ namespace EngineNS.GamePlay
 {
     partial class TtWorld
     {
-        public Scene.TtEntityManager EntityManager { get; } = new Scene.TtEntityManager();
+        public Scene.TtEntityManager EntityManager { get; private set; }
     }
 }
 
