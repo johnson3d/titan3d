@@ -14,6 +14,23 @@ NS_BEGIN
 
 ENGINE_RTTI_IMPL(VFile2Memory);
 
+FResPointerGuard::FResPointerGuard(VRes2Memory* res, UINT64 offset, UINT64 size)
+{
+	Resource = res;
+	Offset = offset;
+	Size = size;
+	Pointer = Resource->Ptr(offset, size);
+}
+
+FResPointerGuard::~FResPointerGuard()
+{
+	Resource->Free();
+	Pointer = nullptr;
+	Resource = nullptr;
+	Offset = 0;
+	Size = 0;
+}
+
 //------------------------------------------------------------------------
 VFile2Memory::VFile2Memory()
 	: mPtrRef(0)

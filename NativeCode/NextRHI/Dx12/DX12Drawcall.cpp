@@ -164,7 +164,7 @@ namespace NxRHI
 		effect->mSignatureBuilder.CreateHeap(device, mCbvSrvUavHeap, mSamplerHeap);
 		//ResetHeapToNullByEffect(device, effect, mCbvSrvUavHeap, mSamplerHeap);
 
-		ID3D12DescriptorHeap* descriptorHeaps[4] = {};
+		ID3D12DescriptorHeap* descriptorHeaps[2] = {};
 		int NumOfHeaps = 0;
 		if (mCbvSrvUavHeap.Num != 0)
 		{
@@ -176,8 +176,18 @@ namespace NxRHI
 			descriptorHeaps[NumOfHeaps++] = mSamplerHeap.Heap;
 		}
 
-		dx12Cmd->mContext->SetGraphicsRootSignature(effect->mSignature);
-		dx12Cmd->mContext->SetDescriptorHeaps(NumOfHeaps, descriptorHeaps);
+		if (dx12Cmd->mCurrentGraphicsRootSignature != effect->mSignature)
+		{
+			dx12Cmd->mCurrentGraphicsRootSignature = effect->mSignature;
+			dx12Cmd->mContext->SetGraphicsRootSignature(effect->mSignature);
+		}
+		if (dx12Cmd->mCurrentNumOfHeaps != NumOfHeaps || dx12Cmd->mCurrentBindHeap[0]!= descriptorHeaps[0] || dx12Cmd->mCurrentBindHeap[1] != descriptorHeaps[1])
+		{
+			dx12Cmd->mCurrentNumOfHeaps = NumOfHeaps;
+			dx12Cmd->mCurrentBindHeap[0] = descriptorHeaps[0];
+			dx12Cmd->mCurrentBindHeap[1] = descriptorHeaps[1];
+			dx12Cmd->mContext->SetDescriptorHeaps(NumOfHeaps, descriptorHeaps);
+		}
 
 		for (auto& i : effect->mCbvSrvUavBinders)
 		{
@@ -419,7 +429,13 @@ namespace NxRHI
 		}
 
 		dx12Cmd->mContext->SetComputeRootSignature(effect->mSignature);
-		dx12Cmd->mContext->SetDescriptorHeaps(NumOfHeaps, descriptorHeaps);
+		if (dx12Cmd->mCurrentNumOfHeaps != NumOfHeaps || dx12Cmd->mCurrentBindHeap[0] != descriptorHeaps[0] || dx12Cmd->mCurrentBindHeap[1] != descriptorHeaps[1])
+		{
+			dx12Cmd->mCurrentNumOfHeaps = NumOfHeaps;
+			dx12Cmd->mCurrentBindHeap[0] = descriptorHeaps[0];
+			dx12Cmd->mCurrentBindHeap[1] = descriptorHeaps[1];
+			dx12Cmd->mContext->SetDescriptorHeaps(NumOfHeaps, descriptorHeaps);
+		}
 
 		for (auto& i : effect->mCbvSrvUavBinders)
 		{
@@ -556,7 +572,13 @@ namespace NxRHI
 		}
 
 		dx12Cmd->mContext->SetComputeRootSignature(effect->mGlobalSignature);
-		dx12Cmd->mContext->SetDescriptorHeaps(NumOfHeaps, descriptorHeaps);
+		if (dx12Cmd->mCurrentNumOfHeaps != NumOfHeaps || dx12Cmd->mCurrentBindHeap[0] != descriptorHeaps[0] || dx12Cmd->mCurrentBindHeap[1] != descriptorHeaps[1])
+		{
+			dx12Cmd->mCurrentNumOfHeaps = NumOfHeaps;
+			dx12Cmd->mCurrentBindHeap[0] = descriptorHeaps[0];
+			dx12Cmd->mCurrentBindHeap[1] = descriptorHeaps[1];
+			dx12Cmd->mContext->SetDescriptorHeaps(NumOfHeaps, descriptorHeaps);
+		}
 
 		for (auto& i : effect->mGlobalCbvSrvUavBinders)
 		{

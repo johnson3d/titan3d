@@ -18,21 +18,23 @@ bool XndAttribute::BeginRead()
 		mMemReader = MakeWeakRef(new MemStreamReader());
 	}
 	auto holder = mHolder.GetPtr();
-	if (holder == nullptr)
-		return false;
-	BYTE* p = (BYTE*)holder->GetResouce()->Ptr(mOffsetInResource, mAttrLength);
-	//mMemReader->ProxyPointer(p, holder->GetResouce()->Length());
+	ASSERT(holder != nullptr);
+	ReadingCount++;
+	ASSERT(mReadingResource == nullptr);
+	mReadingResource = holder->GetResource();
+	BYTE* p = (BYTE*)mReadingResource->Ptr(mOffsetInResource, mAttrLength);
 	mMemReader->ProxyPointer(p, mAttrLength);
+	
 	return true;
 }
 
 void XndAttribute::EndRead()
 {
-	auto holder = mHolder.GetPtr();
-	if (holder == nullptr)
-		return;
-	holder->GetResouce()->Free();
+	ASSERT(mReadingResource);
+	mReadingResource->Free();
+	mReadingResource = nullptr;
 	mMemReader->Cleanup();
+	ReadingCount--;
 }
 
 void XndAttribute::BeginWrite(UINT64 length)
@@ -129,19 +131,22 @@ bool XndHolder::LoadXnd(const char* file)
 			return false;
 		UINT64 length = (UINT64)mResource->Length();
 
-		auto ptr = mResource->Ptr(length - sizeof(UINT64), sizeof(UINT64));
-		//auto treeOffset = *(UINT64*)ptr; ndk:BUS_ADRALN
 		UINT64 treeOffset = 0;
-		memcpy(&treeOffset, ptr, sizeof(UINT64));
-		mResource->Free();
+		{
+			FResPointerGuard guard(mResource, length - sizeof(UINT64), sizeof(UINT64));
+			auto ptr = guard.Pointer;
+			memcpy(&treeOffset, ptr, sizeof(UINT64));
+		}
 
-		ptr = mResource->Ptr(treeOffset, length - treeOffset);
-		MemStreamReader ar;
-		ar.ProxyPointer((BYTE*)ptr, length - treeOffset);
-		mRootNode = MakeWeakRef(new XndNode());
-		ReadNodeTree(ar, mRootNode);
-		mResource->Free();
-
+		{
+			FResPointerGuard guard(mResource, treeOffset, length - treeOffset);
+			auto ptr = guard.Pointer;
+			MemStreamReader ar;
+			ar.ProxyPointer((BYTE*)ptr, length - treeOffset);
+			mRootNode = MakeWeakRef(new XndNode());
+			ReadNodeTree(ar, mRootNode);
+		}
+		
 		mResource->TryReleaseHolder();
 
 		return true;

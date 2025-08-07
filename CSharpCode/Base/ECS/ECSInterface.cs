@@ -91,6 +91,7 @@ namespace EngineNS.ECS
                 if (AddToManager(entity))
                     return true;
 
+                GrowthStep = Math.Max(GrowthStep, Entities.Count/2);
                 Entities.AddRange(new WeakReference<IEntity>[GrowthStep]);
                 foreach (var c in ComponentValues)
                 {

@@ -61,14 +61,14 @@ VRes2Memory* F2MManager::GetF2M(LPCSTR file)
 			return it->second;
 		}
 	}
-	auto pMem = it->second->Ptr(0, 1);
+	/*auto pMem = it->second->Ptr(0, 1);
 
 	if (pMem == NULL)
 	{
 		it->second->Free();
 		return NULL;
 	}
-	it->second->Free();
+	it->second->Free();*/
 
 	it->second->AddRef();
 	return it->second;

@@ -117,7 +117,10 @@ namespace NxRHI
 		ASSERT(hr == S_OK);
 		mCmdListState = ECmdListState::Recording;
 		GetDX12CmdRecorder()->mIsRecording = true;
-
+		mCurrentGraphicsRootSignature = nullptr;
+		mCurrentBindHeap[0] = nullptr;
+		mCurrentBindHeap[1] = nullptr;
+		mCurrentNumOfHeaps = 0;
 		//this->BeginEvent(mDebugName.c_str());
 
 		return mCmdRecorder;
@@ -137,6 +140,10 @@ namespace NxRHI
 		}
 		mCmdListState = ECmdListState::ExecuteWaiting;
 		GetDX12CmdRecorder()->mIsRecording = false;
+		mCurrentGraphicsRootSignature = nullptr;
+		mCurrentBindHeap[0] = nullptr;
+		mCurrentBindHeap[1] = nullptr;
+		mCurrentNumOfHeaps = 0;
 	}
 	void DX12CommandList::Commit(DX12CmdQueue* cmdQueue, EQueueType type)
 	{

@@ -16,10 +16,26 @@ typedef const void * VResPtr;
 
 NS_BEGIN
 
+struct VRes2Memory;
+class XndAttribute;
+struct FResPointerGuard
+{
+	VRes2Memory* Resource = nullptr;
+	UINT64 Offset = 0;
+	UINT64 Size = 0;
+	VResPtr Pointer = nullptr;
+	FResPointerGuard(VRes2Memory* res, UINT64 offset = 0, UINT64 size = 0);
+	~FResPointerGuard();
+};
+
 struct VRes2Memory : public EngineNS::IWeakRefObject
 {
+protected:
 	virtual VResPtr		Ptr(UINT64 offset=0, UINT64 size=0 ) = 0;
 	virtual vBOOL		Free() = 0;
+	friend struct FResPointerGuard;
+	friend class XndAttribute;
+public:
 	virtual UINT64		Length() const = 0;
 	virtual LPCSTR		Name() const = 0; 
 

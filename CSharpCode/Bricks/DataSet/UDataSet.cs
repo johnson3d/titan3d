@@ -271,22 +271,22 @@ namespace EngineNS.Bricks.DataSet
                         var attr = xnd.RootNode.TryGetAttribute("Desc");
                         if (attr.IsValidPointer)
                         {
+                            byte[] hash;
+                            string SheetName;
+                            int HeadRow;
+                            int DataStartRow;
                             using (var ar = attr.GetReader(attr))
                             {
-                                byte[] hash;
                                 ar.Read(out hash);
-                                string SheetName;
                                 ar.Read(out SheetName);
-                                int HeadRow;
                                 ar.Read(out HeadRow);
-                                int DataStartRow;
                                 ar.Read(out DataStartRow);
-                                var dtAttr = objType.GetCustomAttribute<TtDataTableAttribute>();
-                                if (IsEqual(hash, XlsMd5) && dtAttr.SheetName == SheetName && dtAttr.HeadRow == HeadRow && dtAttr.DataStartRow == DataStartRow)
-                                {
-                                    LoadDataSetFromXnd(xnd.RootNode);
-                                    return true;
-                                }
+                            }
+                            var dtAttr = objType.GetCustomAttribute<TtDataTableAttribute>();
+                            if (IsEqual(hash, XlsMd5) && dtAttr.SheetName == SheetName && dtAttr.HeadRow == HeadRow && dtAttr.DataStartRow == DataStartRow)
+                            {
+                                LoadDataSetFromXnd(xnd.RootNode);
+                                return true;
                             }
                         }
                         bSaveXnd = true;

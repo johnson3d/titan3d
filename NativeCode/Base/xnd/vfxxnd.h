@@ -46,6 +46,8 @@ protected:
 	AutoRef<MemStreamReader>	mMemReader;
 	UINT64						mOffsetInResource;
 	UINT						mAttrLength;
+	AutoRef<VRes2Memory> mReadingResource;
+	std::atomic<int> ReadingCount;
 public:
 	XndAttribute()
 	{
@@ -226,7 +228,7 @@ public:
 	XndHolder() 
 	{
 	}
-	VRes2Memory* GetResouce() {
+	VRes2Memory* GetResource() {
 		return mResource;
 	}
 	XndAttribute* NewAttribute(const char* name, UINT ver, UINT flags);

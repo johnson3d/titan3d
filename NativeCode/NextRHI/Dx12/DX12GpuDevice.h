@@ -17,6 +17,7 @@ namespace NxRHI
 	class DX12CmdQueue;
 	struct DX12PagedHeap;
 	struct DX12HeapAllocator;
+	class DX12RootSignatureCache;
 	
 	class DX12GpuSystem : public IGpuSystem
 	{
@@ -126,6 +127,7 @@ namespace NxRHI
 		AutoRef<ID3D12DeviceRemovedExtendedDataSettings1>	mDredSettings;
 		AutoRef<DX12CmdQueue>			mCmdQueue;
 		
+		AutoRef<DX12RootSignatureCache> mRootSignatureCache;
 		AutoRef<DX12CommandAllocatorManager>	mCmdAllocatorManager;
 		AutoRef<DX12PagedGpuMemAllocator>		mCBufferMemAllocator;
 		AutoRef<DX12DefaultGpuMemAllocator>		mDefaultBufferMemAllocator;

@@ -92,6 +92,10 @@ namespace NxRHI
 		UINT								mCurrentIndirectOffset = 0;
 		AutoRef<ID3D12CommandSignature>		mCurrentCmdSig;
 
+		AutoRef<ID3D12RootSignature> mCurrentGraphicsRootSignature;
+		ID3D12DescriptorHeap* mCurrentBindHeap[2]{};
+		int mCurrentNumOfHeaps;
+
 		std::wstring				mDebugNameW;
 
 		

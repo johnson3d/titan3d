@@ -21,15 +21,12 @@ NS_BEGIN
 class VFile2Memory : public VRes2Memory
 {
 	VCritical					mLocker;
+protected:
+	virtual  VResPtr	Ptr(UINT64 offset, UINT64 size = -1) override;
+	virtual  vBOOL		Free() override;
 public:
 	ENGINE_RTTI(VFile2Memory);
-	/*!	\copydoc VRes2Memory::Ptr */
-	virtual  VResPtr	Ptr(UINT64 offset , UINT64 size=-1) override;
-	/*!	\copydoc VRes2Memory::Free */
-	virtual  vBOOL		Free() override;
-	/*!	\copydoc VRes2Memory::Length */
 	virtual  UINT64		Length() const override;
-	/*!	\copydoc VRes2Memory::Name */
 	virtual  LPCSTR		Name() const override; 
 
 	virtual  void		TryReleaseHolder() override;
@@ -61,9 +58,10 @@ private:
 
 class VMemoryResPtr : public VRes2Memory
 {
-public:
-	virtual  VResPtr	Ptr(UINT64 offset=0 , UINT64 size=0);
+protected:
+	virtual  VResPtr	Ptr(UINT64 offset = 0, UINT64 size = 0);
 	virtual  vBOOL		Free();
+public:
 	virtual  UINT64		Length() const;
 	virtual  LPCSTR		Name() const; 
 

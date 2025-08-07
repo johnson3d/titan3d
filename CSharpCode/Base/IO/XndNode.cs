@@ -6,8 +6,10 @@ namespace EngineNS.IO
 {
     public class TtXndNode : AuxPtrType<XndNode>
     {
-        public TtXndNode(XndNode ptr)
+        public TtXndHolder Holder { get; private set; }
+        public TtXndNode(TtXndHolder holder, XndNode ptr)
         {
+            Holder = holder;
             mCoreObject = ptr;
         }
         public string Name
@@ -76,7 +78,7 @@ namespace EngineNS.IO
         }
         public TtXndNode GetNode(UInt32 index)
         {
-            var result = new TtXndNode(GetNodePtr(index));
+            var result = new TtXndNode(Holder, GetNodePtr(index));
             result.Core_AddRef();
             return result;
         }

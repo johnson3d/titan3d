@@ -54,7 +54,7 @@ namespace EngineNS.IO
                 return null;
             unsafe
             {
-                result.mRootNode = new TtXndNode(new XndNode(result.mCoreObject.GetRootNode()));
+                result.mRootNode = new TtXndNode(result, new XndNode(result.mCoreObject.GetRootNode()));
                 result.mRootNode.Core_AddRef();
                 return result;
             }
@@ -64,7 +64,7 @@ namespace EngineNS.IO
             mCoreObject = XndHolder.CreateInstance();
             using (var ptr = NewNode(name, ver, flags))
             {
-                mRootNode = new TtXndNode(ptr);
+                mRootNode = new TtXndNode(this, ptr);
                 mRootNode.Core_AddRef();
                 unsafe
                 {

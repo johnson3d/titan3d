@@ -154,6 +154,8 @@ namespace NxRHI
 		mSamplerAllocator = nullptr;
 		mCbvSrvUavAllocator = nullptr;
 		mDescriptorSetAllocator = nullptr;
+
+		mRootSignatureCache = nullptr;
 	}
 	void DX12GpuDevice::TryFinalizeDevice(IGpuSystem* pGpuSystem) 
 	{
@@ -369,6 +371,8 @@ namespace NxRHI
 
 		mCmdQueue->Init(this);
 		mCmdQueue->mCmdQueue->SetName(L"DefaultQueue");
+
+		mRootSignatureCache = MakeWeakRef(new DX12RootSignatureCache());
 		
 		QueryDevice();
 

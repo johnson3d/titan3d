@@ -446,13 +446,15 @@ namespace NxRHI
 				ASSERT(false);
 			}
 
-			auto bfSize = serializedRootSig->GetBufferSize();
+			return device->mRootSignatureCache->GetOrCreate(device, serializedRootSig);
+
+			/*auto bfSize = serializedRootSig->GetBufferSize();
 			ID3D12RootSignature* pRootSig = nullptr;
 			device->mDevice->CreateRootSignature(0,
 				serializedRootSig->GetBufferPointer(),
 				bfSize,
 				IID_PPV_ARGS(&pRootSig));
-			return MakeWeakRef(pRootSig);
+			return MakeWeakRef(pRootSig);*/
 		}
 		else
 		{
@@ -482,6 +484,24 @@ namespace NxRHI
 				IID_PPV_ARGS(&pRootSig));
 			return MakeWeakRef(pRootSig);
 		}
+	}
+
+	AutoRef<ID3D12RootSignature> DX12RootSignatureCache::GetOrCreate(DX12GpuDevice* device, ID3DBlob* blob)
+	{
+		auto hash = CityHash128((const char*)blob->GetBufferPointer(), blob->GetBufferSize());
+		auto iter = mSignatureCache.find(hash);
+		if (iter != mSignatureCache.end())
+		{
+			return iter->second;
+		}
+		ID3D12RootSignature* pRootSig = nullptr;
+		device->mDevice->CreateRootSignature(0,
+			blob->GetBufferPointer(),
+			blob->GetBufferSize(),
+			IID_PPV_ARGS(&pRootSig));
+		auto result = MakeWeakRef(pRootSig);
+		mSignatureCache.insert(std::make_pair(hash, result));
+		return result;
 	}
 
 	DX12GraphicsEffect::~DX12GraphicsEffect()

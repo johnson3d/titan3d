@@ -1,6 +1,7 @@
 #pragma once
 #include "../NxEffect.h"
 #include "DX12PreHead.h"
+#include "../../Base/cityhash/city.h"
 
 NS_BEGIN
 
@@ -12,6 +13,14 @@ namespace NxRHI
 	class DX12ComputeEffect;
 	class DX12Buffer;
 	struct FDX12DescriptorHeap;
+
+	class DX12RootSignatureCache : public VIUnknown
+	{
+	public:
+		std::map<uint128, AutoRef<ID3D12RootSignature>> mSignatureCache;
+
+		AutoRef<ID3D12RootSignature> GetOrCreate(DX12GpuDevice* device, ID3DBlob* blob);
+	};
 
 	class DX12ShaderSignatureBuilder
 	{
