@@ -95,6 +95,9 @@ namespace NxRHI
 		AutoRef<ID3D12RootSignature> mCurrentGraphicsRootSignature;
 		ID3D12DescriptorHeap* mCurrentBindHeap[2]{};
 		int mCurrentNumOfHeaps;
+		FGeomMesh* mCurrentGeomMesh = nullptr;
+		FVertexArray* mCurrentAttachVA = nullptr;
+		EPrimitiveType mCurrentTopology = (EPrimitiveType)0;
 
 		std::wstring				mDebugNameW;
 

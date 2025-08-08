@@ -1,6 +1,7 @@
 #include "DX12GeomMesh.h"
 #include "DX12CommandList.h"
 #include "DX12Buffer.h"
+#include "../../Base/vfxsampcounter.h"
 
 #define new VNEW
 
@@ -12,24 +13,27 @@ namespace NxRHI
 	{
 		D3D12_VERTEX_BUFFER_VIEW dxVBs[VST_Number]{};
 		int maxSlot = 0;
-		for (UINT i = 0; i < NumOfVA; i++)
 		{
-			if (VAs[i] == nullptr)
-				continue;
-
-			//dx12Cmd->GetCmdRecorder()->UseResource(VAs[i]);
-			for (int j = 0; j < VST_Number; j++)
+			//AUTO_SAMP("NxRHI.DX12VertexArray.Commit");
+			for (UINT i = 0; i < NumOfVA; i++)
 			{
-				const auto& vbv = VAs[i]->VertexBuffers[j];
-				if (vbv != nullptr)
+				if (VAs[i] == nullptr)
+					continue;
+
+				//dx12Cmd->GetCmdRecorder()->UseResource(VAs[i]);
+				for (int j = 0; j < VST_Number; j++)
 				{
-					auto vb = (DX12Buffer*)vbv->Buffer.GetPtr();//vbv->Buffer.UnsafeConvertTo<DX12Buffer>();
-					auto& dxvbv = dxVBs[j];
-					dxvbv.BufferLocation = vb->GetGPUVirtualAddress() + vbv->Desc.Offset;
-					dxvbv.StrideInBytes = vbv->Desc.Stride;// vb->Desc.StructureStride;
-					dxvbv.SizeInBytes = vbv->Desc.Size;
-					if (j > maxSlot)
-						maxSlot = j;
+					const auto& vbv = VAs[i]->VertexBuffers[j];
+					if (vbv != nullptr)
+					{
+						auto vb = (DX12Buffer*)vbv->Buffer.GetPtr();//vbv->Buffer.UnsafeConvertTo<DX12Buffer>();
+						auto& dxvbv = dxVBs[j];
+						dxvbv.BufferLocation = vb->GetGPUVirtualAddress() + vbv->Desc.Offset;
+						dxvbv.StrideInBytes = vbv->Desc.Stride;// vb->Desc.StructureStride;
+						dxvbv.SizeInBytes = vbv->Desc.Size;
+						if (j > maxSlot)
+							maxSlot = j;
+					}
 				}
 			}
 		}

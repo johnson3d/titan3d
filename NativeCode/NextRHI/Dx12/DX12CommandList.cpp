@@ -121,6 +121,9 @@ namespace NxRHI
 		mCurrentBindHeap[0] = nullptr;
 		mCurrentBindHeap[1] = nullptr;
 		mCurrentNumOfHeaps = 0;
+		mCurrentGeomMesh = nullptr;
+		mCurrentAttachVA = nullptr;
+		mCurrentTopology = (EPrimitiveType)0;
 		//this->BeginEvent(mDebugName.c_str());
 
 		return mCmdRecorder;
@@ -144,6 +147,9 @@ namespace NxRHI
 		mCurrentBindHeap[0] = nullptr;
 		mCurrentBindHeap[1] = nullptr;
 		mCurrentNumOfHeaps = 0;
+		mCurrentGeomMesh = nullptr;
+		mCurrentAttachVA = nullptr;
+		mCurrentTopology = (EPrimitiveType)0;
 	}
 	void DX12CommandList::Commit(DX12CmdQueue* cmdQueue, EQueueType type)
 	{
@@ -483,7 +489,12 @@ namespace NxRHI
 	{
 		ASSERT(mCmdListState == ECmdListState::Recording);
 		UINT dpCount = 0;
-		mContext->IASetPrimitiveTopology(PrimitiveTypeToDX12(topology, DrawCount, &dpCount));
+		auto dx12 = PrimitiveTypeToDX12(topology, DrawCount, &dpCount);
+		if (mCurrentTopology != topology)
+		{
+			mCurrentTopology = topology;
+			mContext->IASetPrimitiveTopology(dx12);
+		}
 		mContext->DrawInstanced(dpCount, Instance, BaseVertex, 0);
 	}
 	void DX12CommandList::IndirectDraw(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset, IBuffer* countBuffer)
@@ -496,7 +507,12 @@ namespace NxRHI
 		indirectArgOffset += mCurrentIndirectOffset;
 
 		UINT dpCount = 0;
-		mContext->IASetPrimitiveTopology(PrimitiveTypeToDX12(topology, 0, &dpCount));
+		auto dx12 = PrimitiveTypeToDX12(topology, 0, &dpCount);
+		if (mCurrentTopology != topology)
+		{
+			mCurrentTopology = topology;
+			mContext->IASetPrimitiveTopology(dx12);
+		}
 		auto dx12Buffer = (DX12Buffer*)indirectArg;
 		auto offset = (UINT)dx12Buffer->mGpuMemory->GpuMem->Offset + indirectArgOffset;
 
@@ -518,7 +534,12 @@ namespace NxRHI
 	{
 		ASSERT(mCmdListState == ECmdListState::Recording);
 		UINT dpCount = 0;
-		mContext->IASetPrimitiveTopology(PrimitiveTypeToDX12(topology, DrawCount, &dpCount));
+		auto dx12 = PrimitiveTypeToDX12(topology, DrawCount, &dpCount);
+		if (mCurrentTopology != topology)
+		{
+			mCurrentTopology = topology;
+			mContext->IASetPrimitiveTopology(dx12);
+		}
 		mContext->DrawIndexedInstanced(dpCount, Instance, StartIndex, BaseVertex, 0);
 	}
 	void DX12CommandList::IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset, IBuffer* countBuffer)
@@ -531,7 +552,13 @@ namespace NxRHI
 		indirectArgOffset += mCurrentIndirectOffset;
 
 		UINT dpCount = 0;
-		mContext->IASetPrimitiveTopology(PrimitiveTypeToDX12(topology, 0, &dpCount));
+		auto dx12 = PrimitiveTypeToDX12(topology, 0, &dpCount);
+		if (mCurrentTopology != topology)
+		{
+			mCurrentTopology = topology;
+			mContext->IASetPrimitiveTopology(dx12);
+		}
+		//mContext->IASetPrimitiveTopology(PrimitiveTypeToDX12(topology, 0, &dpCount));
 		auto dx12Buffer = (DX12Buffer*)indirectArg;
 		auto offset = (UINT)dx12Buffer->mGpuMemory->GpuMem->Offset + indirectArgOffset;
 

@@ -241,21 +241,26 @@ namespace NxRHI
 	void DX12GraphicDraw::BindResourceToHeap(DX12GpuDevice* device, const FEffectBinder* binder, FBindResource& resource,
 		FDX12DescriptorHeap& mCbvSrvUavHeap, FDX12DescriptorHeap& mSamplerHeap, FCopyDescriptors& cbvsrvuavDescriptors, FCopyDescriptors& samplerDescriptors)
 	{
+		//Every FShaderBinder's DescriptorIndex is same with FEffectBinder's DescriptorIndex
 		if (binder->ASBinder)
 		{
 			Bind2Heap(device, binder->ASBinder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap, cbvsrvuavDescriptors, samplerDescriptors);
+			return;
 		}
 		if (binder->MSBinder)
 		{
 			Bind2Heap(device, binder->MSBinder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap, cbvsrvuavDescriptors, samplerDescriptors);
+			return;
 		}
 		if (binder->VSBinder)
 		{
 			Bind2Heap(device, binder->VSBinder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap, cbvsrvuavDescriptors, samplerDescriptors);
+			return;
 		}
 		if (binder->PSBinder)
 		{
 			Bind2Heap(device, binder->PSBinder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap, cbvsrvuavDescriptors, samplerDescriptors);
+			return;
 		}
 		/*if (resource.Resource)
 			resource.FingerPrint = resource.Resource->GetFingerPrint();
@@ -301,10 +306,14 @@ namespace NxRHI
 		
 		{
 			AUTO_SAMP("NxRHI.GraphicDraw.Commit.Geom");
-			DX12VertexArray* VAs[2] = { Mesh->VertexArray , AttachVB };
-			DX12VertexArray::Commit(dx12Cmd, 2, VAs);
-
-			dx12Cmd->SetIndexBuffer(Mesh->IndexBuffer, Mesh->IsIndex32);
+			if (dx12Cmd->mCurrentGeomMesh != Mesh || AttachVB != dx12Cmd->mCurrentAttachVA)
+			{
+				dx12Cmd->mCurrentGeomMesh = Mesh;
+				dx12Cmd->mCurrentAttachVA = AttachVB;
+				DX12VertexArray* VAs[2] = { Mesh->VertexArray , AttachVB };
+				DX12VertexArray::Commit(dx12Cmd, 2, VAs);
+				dx12Cmd->SetIndexBuffer(Mesh->IndexBuffer, Mesh->IsIndex32);
+			}
 		}
 		{
 			AUTO_SAMP("NxRHI.GraphicDraw.Commit.UpdateDrawState");
