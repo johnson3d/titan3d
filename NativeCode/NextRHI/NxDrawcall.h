@@ -333,9 +333,12 @@ namespace NxRHI
 	{
 		FBarrierDesc(IGpuBufferData* bf, EGpuResourceState state) {
 			Buffer = bf;
+			FromState = bf->GpuState;
 			ToState = state;
+			bf->GpuState = state;
 		}
 		AutoRef<IGpuBufferData> Buffer;
+		EGpuResourceState FromState = EGpuResourceState::GRS_Undefine;
 		EGpuResourceState ToState = EGpuResourceState::GRS_Undefine;
 	};
 

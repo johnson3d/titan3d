@@ -181,7 +181,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             int NumOfActiveLevel = 1 + trData.ActiveLevel * 2;
             ActiveLevels = new UTerrainLevel[NumOfActiveLevel, NumOfActiveLevel];
 
-            SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
+            SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleAlways);
 
             MorphRange = new Vector2[(data as TtTerrainData).LODRangeFloat.Count];
 

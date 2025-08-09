@@ -58,6 +58,7 @@ namespace EngineNS.EGui.UIProxy
                 //itemSpacing = ToolbarItems[i].NextItemSpacing;
             }
             ImGuiAPI.SetCursorScreenPos(in rectMax);
+            ImGuiAPI.Dummy(in Vector2.Zero);
             ImGuiAPI.EndGroup();
             return true;
         }
@@ -238,6 +239,7 @@ namespace EngineNS.EGui.UIProxy
                 hitRectMax.Y = System.Math.Max(hitRectMax.Y, tempScrPos.Y + textSize.Y);
             }
             ImGuiAPI.SetCursorScreenPos(in tempScrPos);
+            ImGuiAPI.Dummy(in Vector2.Zero);
 
             Vector4 color = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor);
 

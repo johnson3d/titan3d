@@ -223,6 +223,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 Vector2 offset = Vector2.Zero;
                 curPos += new Vector2(0, (size.Y - mOpenInPropertyMatrix.Size.Y) * 0.5f);
                 ImGuiAPI.SetCursorScreenPos(in curPos);
+                ImGuiAPI.Dummy(in Vector2.Zero);
                 mOpenInPropertyMatrix.OnDraw(in drawList, in Support.TtAnyPointer.Default);
             }
             if (mConfig != null)
@@ -233,6 +234,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 Vector2 offset = Vector2.Zero;
                 curPos += new Vector2(0, (size.Y - mOpenInPropertyMatrix.Size.Y) * 0.5f);
                 ImGuiAPI.SetCursorScreenPos(in curPos);
+                ImGuiAPI.Dummy(in Vector2.Zero);
                 mConfig.OnDraw(in drawList, in Support.TtAnyPointer.Default);
             }
             ImGuiAPI.EndGroup();

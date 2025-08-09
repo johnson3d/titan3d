@@ -219,7 +219,7 @@ namespace EngineNS.Bricks.VXGI
         public async System.Threading.Tasks.Task AddDebugMeshNodeToWorld(GamePlay.TtWorld world)
         {
             var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, world.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), VxDebugMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
-            meshNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
+            meshNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleAlways);
             meshNode.NodeData.Name = "Debug_VoxelDebugMeshNode";
             meshNode.IsAcceptShadow = false;
             meshNode.IsCastShadow = false;

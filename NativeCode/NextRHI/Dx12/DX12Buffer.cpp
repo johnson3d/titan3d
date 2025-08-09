@@ -595,7 +595,7 @@ namespace NxRHI
 		GpuState = EGpuResourceState::GRS_GenericRead;
 		D3D12_HEAP_PROPERTIES properties{};
 		properties.Type = D3D12_HEAP_TYPE_DEFAULT;
-		D3D12_RESOURCE_DESC resDesc{};
+		D3D12_RESOURCE_DESC& resDesc = mDX12ResourceDesc;
 		resDesc.SampleDesc.Count = desc.SamplerDesc.Count;
 		resDesc.SampleDesc.Quality = desc.SamplerDesc.Quality;
 		resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
@@ -875,16 +875,17 @@ namespace NxRHI
 		{
 			auto device = mDeviceRef.GetPtr();
 			
-			FBufferDesc copyDesc{};
-			copyDesc.SetDefault();
-			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
-			copyDesc.Type = EBufferType::BFT_NONE;
-			copyDesc.Size = pFootPrint->TotalSize;
-			copyDesc.InitData = pData;
-			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+			D3D12_PLACED_SUBRESOURCE_FOOTPRINT footPrint{};
+			UINT numX;
+			UINT64 rowSize, totalSize;
+			device->mDevice->GetCopyableFootprints(&mDX12ResourceDesc, subRes, 1, 0, &footPrint, &numX, &rowSize, &totalSize);
 
-			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
-
+			FMappedSubResource initData{};
+			initData.pData = pData;
+			initData.RowPitch = pFootPrint->RowPitch;
+			initData.DepthPitch = pFootPrint->TotalSize;
+			auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, Desc.Format, &initData, "Upload Texture");
+			
 			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
 			cpDraw->BindTextureDest(this);
 			cpDraw->BindBufferSrc(bf);
@@ -894,11 +895,11 @@ namespace NxRHI
 			cpDraw->FootPrint.X = 0;
 			cpDraw->FootPrint.Y = 0;
 			cpDraw->FootPrint.Z = 0;
-			cpDraw->FootPrint.Width = pFootPrint->Width;
-			cpDraw->FootPrint.Height = pFootPrint->Height;
-			cpDraw->FootPrint.Depth = pFootPrint->Depth;
-			cpDraw->FootPrint.RowPitch = pFootPrint->RowPitch;
-			cpDraw->FootPrint.TotalSize = pFootPrint->RowPitch * pFootPrint->Height;
+			cpDraw->FootPrint.Width = footPrint.Footprint.Width;
+			cpDraw->FootPrint.Height = footPrint.Footprint.Height;
+			cpDraw->FootPrint.Depth = footPrint.Footprint.Depth;
+			cpDraw->FootPrint.RowPitch = footPrint.Footprint.RowPitch;
+			cpDraw->FootPrint.TotalSize = footPrint.Footprint.RowPitch * footPrint.Footprint.Height;
 
 			cmd->PushGpuDraw(cpDraw.GetPtr());
 		}

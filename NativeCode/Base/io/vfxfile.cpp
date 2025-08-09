@@ -145,6 +145,7 @@ vBOOL  VFile::Open(LPCSTR lpszFileName, UINT nOpenFlags)
 {
 	Close();
 
+	VAutoVSLLock lk(mLocker);
 	m_bCloseOnDelete = FALSE;
 	m_strFileName = lpszFileName;
 	
@@ -280,6 +281,7 @@ vBOOL  VFile::Flush()
 
 void  VFile::Close()
 {
+	VAutoVSLLock lk(mLocker);
 	if (m_hFile)
 	{
 		GFileOpenNumber--;
@@ -292,6 +294,7 @@ void  VFile::Close()
 
 void  VFile::Abort()
 {
+	VAutoVSLLock lk(mLocker);
 	if (m_hFile)
 	{
 		fclose(m_hFile);

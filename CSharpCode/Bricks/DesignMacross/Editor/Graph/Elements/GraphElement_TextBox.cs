@@ -146,6 +146,7 @@ namespace EngineNS.DesignMacross.Editor
             var cmd = ImGuiAPI.GetWindowDrawList();
             var start = context.ViewportTransform(textBox.AbsLocation);
             ImGuiAPI.SetCursorScreenPos(in start);
+            ImGuiAPI.Dummy(in Vector2.Zero);
             ImGuiAPI.SetNextItemWidth(textBox.Size.Width);
             string inputValue = "";
             var oldScale = ImGuiAPI.GetFont().Scale;

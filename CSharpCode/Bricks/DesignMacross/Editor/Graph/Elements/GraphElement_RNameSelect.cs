@@ -167,6 +167,7 @@ namespace EngineNS.DesignMacross.Editor
             var cmd = ImGuiAPI.GetWindowDrawList();
             var start = context.ViewportTransform(element.AbsLocation);
             ImGuiAPI.SetCursorScreenPos(in start);
+            ImGuiAPI.Dummy(in Vector2.Zero);
             //ImGuiAPI.SetNextItemWidth(element.Size.Width);
 
             if (element.GetBrowserRNameValueFunc() != null)
@@ -188,6 +189,7 @@ namespace EngineNS.DesignMacross.Editor
                 var textPos = new Vector2(start.X, end.Y);
                 cmdList.AddText(cmdListFont, cmdListFont.FontSize, &textPos, 0xFFFFFFFF, element.GetBrowserRNameValueFunc(), null, 0.0f, null);
                 ImGuiAPI.SetCursorScreenPos(new Vector2(start.X + iconSize.X, start.Y));
+                ImGuiAPI.Dummy(in Vector2.Zero);
             }
             else
             {

@@ -563,6 +563,44 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         [Category("Option")]
+        public virtual bool IsVisibleAlways
+        {
+            get
+            {
+                return HasStyle(ENodeStyles.VisibleAlways);
+            }
+            set
+            {
+                if (value)
+                {
+                    SetStyle(ENodeStyles.VisibleAlways);
+                }
+                else
+                {
+                    UnsetStyle(ENodeStyles.VisibleAlways);
+                }
+            }
+        }
+        [Category("Option")]
+        public virtual bool IsVisibleFollowParent
+        {
+            get
+            {
+                return HasStyle(ENodeStyles.VisibleFollowParent);
+            }
+            set
+            {
+                if (value)
+                {
+                    SetStyle(ENodeStyles.VisibleFollowParent);
+                }
+                else
+                {
+                    UnsetStyle(ENodeStyles.VisibleFollowParent);
+                }
+            }
+        }
+        [Category("Option")]
         public virtual bool IsCastShadow
         {
             get

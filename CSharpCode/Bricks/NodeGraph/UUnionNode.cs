@@ -442,7 +442,8 @@ namespace EngineNS.Bricks.NodeGraph
                 ImGuiAPI.SameLine(0, -1);
                 var posX = size.X - 120;
                 ImGuiAPI.SetCursorPosX(posX);
-                if(EGui.UIProxy.CustomButton.ToolButton("Accept", in Vector2.Zero))
+                ImGuiAPI.Dummy(in Vector2.Zero);
+                if (EGui.UIProxy.CustomButton.ToolButton("Accept", in Vector2.Zero))
                 {
                     mUnionNode.PropertyDatas.Clear();
                     for(int i=0; i<mEditingDatas.Count; i++)

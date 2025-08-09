@@ -554,6 +554,7 @@ namespace EngineNS.Bricks.NodeGraph
                 var textPos = new Vector2(pos.X, end.Y);
                 cmdList.AddText(cmdListFont, cmdListFont.FontSize * fScale, &textPos, 0xFFFFFFFF, AssetName.Name, null, 0.0f, null);
                 ImGuiAPI.SetCursorScreenPos(new Vector2(pos.X + iconSize.X, pos.Y));
+                ImGuiAPI.Dummy(in Vector2.Zero);
             }
             else
             {

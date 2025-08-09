@@ -492,6 +492,7 @@ namespace EngineNS.Bricks.NodeGraph
                     var pos = CanvasToDraw(inPin.EditValuePosition) - ImGuiAPI.GetWindowPos();
                     pos.Y -= style->FramePadding.Y;
                     ImGuiAPI.SetCursorPos(pos);
+                    ImGuiAPI.Dummy(in Vector2.Zero);
                     inPin.EditValue.OnDraw(node, inPin, styles, 1/mGraph.ScaleVPWithDpiScale, false);
                 }
             }

@@ -101,7 +101,7 @@ namespace EngineNS.Bricks.Procedure
             PreviewRoot = await viewport.World.Root.SpawnSceneActor<GamePlay.Scene.TtSubTreeRootNode>(viewport.World.Root, null, 
                 new GamePlay.Scene.TtNodeData() { Name = "PreviewRoot" },
                 GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
-            PreviewRoot.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
+            PreviewRoot.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleAlways);
             return true;
         }
         public GamePlay.Scene.TtSceneActorNode PreviewRoot { get; private set; }
@@ -309,7 +309,7 @@ namespace EngineNS.Bricks.Procedure
                     NodePropGrid.Target = GraphRenderer.Graph.SelectedNodes.ToArray();
                     GraphRenderer.Graph.SelectedNodesDirty = false;
                 }
-                NodePropGrid.OnDraw(true, false, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize);
+                NodePropGrid.OnDraw(true, false, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar, ImGuiChildFlags_.ImGuiChildFlags_AutoResizeX|ImGuiChildFlags_.ImGuiChildFlags_AutoResizeY);
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }

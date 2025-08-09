@@ -14,6 +14,7 @@
 
 #pragma once
 #include "../string/vfxstring.h"
+#include "../thread/vfxcritical.h"
 
 class VTime
 {
@@ -224,6 +225,7 @@ protected:
 	FILE* m_hFile;
 	vBOOL m_bCloseOnDelete;
 	VStringA m_strFileName;
+	VCritical mLocker;
 };
 
 #if defined(PLATFORM_DROID)

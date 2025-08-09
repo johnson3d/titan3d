@@ -64,6 +64,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var cursorPos = ImGuiAPI.GetCursorScreenPos();
             cursorPos.Y += offsetY;
             ImGuiAPI.SetCursorScreenPos(in cursorPos);
+            ImGuiAPI.Dummy(in Vector2.Zero);
             //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGCheckboxFramePadding);
             var name = "##" + info.Name;
             var multiValue = info.Value as PropertyMultiValue;

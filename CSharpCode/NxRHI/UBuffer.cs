@@ -318,6 +318,8 @@ namespace EngineNS.NxRHI
         }
         public void SetValue<T>(FShaderVarDesc binder, int elemIndex, in T v, bool bFlush = true, EUpdateMode mode = EUpdateMode.Auto) where T : unmanaged
         {
+            if (binder.IsValidPointer == false)
+                return;
             unsafe
             {
                 fixed (T* p = &v)

@@ -2781,6 +2781,7 @@ namespace EngineNS.GamePlay
 
             bool retValue = false;
             ImGuiAPI.SetCursorScreenPos(startDrawPos);
+            ImGuiAPI.Dummy(in Vector2.Zero);
 
             slate.IsHoverGuiItem = false;
 

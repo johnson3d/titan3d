@@ -196,6 +196,7 @@ namespace EngineNS.Bricks.Procedure.Node
             var ctrlPos = prevStart;
             ctrlPos -= ImGuiAPI.GetWindowPos();
             ImGuiAPI.SetCursorPos(in ctrlPos);
+            ImGuiAPI.Dummy(in Vector2.Zero);
             ImGuiAPI.PushID($"{this.NodeId.ToString()}");
             if (ImGuiAPI.Button("OpenMacross"))
             {

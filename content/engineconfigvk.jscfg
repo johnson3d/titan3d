@@ -28,7 +28,7 @@
   "SupportMultWindows": true,
   "DoUnitTest": true,
   "RHIType": "RHI_VK",
-  "HasDebugLayer": true,
+  "HasDebugLayer": false,
   "IsGpuBaseValidation": false,
   "IsDebugShader": true,
   "IsGpuDred": false,

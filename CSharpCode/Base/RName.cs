@@ -85,6 +85,7 @@ namespace EngineNS
                 var textSize = ImGuiAPI.CalcTextSize(preViewStr, false, 0);
                 var preViewStrDrawPos = cursorPos + new Vector2(snapSize.X + 8, 0);
                 ImGuiAPI.SetCursorScreenPos(in preViewStrDrawPos);
+                ImGuiAPI.Dummy(in Vector2.Zero);
                 Support.TtAnyPointer anyPt = new Support.TtAnyPointer()
                 {
                     RefObject = mDrawData,
@@ -113,6 +114,7 @@ namespace EngineNS
                 var pos = ImGuiAPI.GetCursorScreenPos();
                 pos.X += snapSize.X + 8;
                 ImGuiAPI.SetCursorScreenPos(in pos);
+                ImGuiAPI.Dummy(in Vector2.Zero);
                 if (info.Readonly)
                 {
                     Vector4 color = new Vector4(0.5f, 0.5f, 0.5f, 1.0f);

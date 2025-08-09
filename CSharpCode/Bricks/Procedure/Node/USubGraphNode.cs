@@ -535,6 +535,7 @@ namespace EngineNS.Bricks.Procedure.Node
             var ctrlPos = prevStart;
             ctrlPos -= ImGuiAPI.GetWindowPos();
             ImGuiAPI.SetCursorPos(in ctrlPos);
+            ImGuiAPI.Dummy(in Vector2.Zero);
             ImGuiAPI.PushID($"{this.NodeId.ToString()}");
             if (ImGuiAPI.Button("OpenSubGraph"))
             {
@@ -550,6 +551,7 @@ namespace EngineNS.Bricks.Procedure.Node
             var btSize = ImGuiAPI.GetItemRectSize();
             ctrlPos.Y += btSize.Y;
             ImGuiAPI.SetCursorPos(in ctrlPos);
+            ImGuiAPI.Dummy(in Vector2.Zero);
             if (ImGuiAPI.Button("SaveSubGraph"))
             {
                 if (GraphAsset != null)
@@ -570,6 +572,7 @@ namespace EngineNS.Bricks.Procedure.Node
             {
                 var pureName = IO.TtFileManager.GetPureName(GraphName.Name);
                 ImGuiAPI.SetCursorPos(in ctrlPos);
+                ImGuiAPI.Dummy(in Vector2.Zero);
                 ImGuiAPI.Text(pureName);
             }
             ImGuiAPI.PopID();

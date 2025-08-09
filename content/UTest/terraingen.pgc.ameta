@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.Procedure.UPgcAssetAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="39025ad5-415f-4585-9357-fac812394c3f" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/terraingen.pgc,39025ad5-415f-4585-9357-fac812394c3f" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.Procedure.UPgcAsset&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
@@ -21,15 +22,15 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="9">
-    <e_0 Value="Game,utest/pgc/terrain_bz_height.macross,ba13d1ec-8f3a-48b7-9f86-031cc04d5742" />
-    <e_1 Value="Game,utest/pgc/terraingen.macross,318c3ff6-c3c8-4e00-bb54-c3c2abaa73a2" />
-    <e_2 Value="Game,utest/texture/ground_04_n.srv,5dd02f78-48fa-4a60-a493-dba2adda11c1" />
-    <e_3 Value="Game,utest/texture/ground_04.srv,cc988da2-f1c5-4240-a3ec-78bc46536197" />
-    <e_4 Value="Game,utest/texture/ground6_nmp.srv,21738ef9-7f8d-41fa-8297-78502837377b" />
-    <e_5 Value="Game,utest/texture/ground6.srv,3125efdc-5049-4bf7-a1dc-31130e26ff1e" />
-    <e_6 Value="Game,utest/texture/ground8_nmp.srv,4eedbc20-2934-4718-9736-b4467d9b7cab" />
-    <e_7 Value="Game,utest/texture/ground8.srv,414040a2-11a8-4b59-9516-90e39ed0c3c7" />
-    <e_8 Value="Engine,uestyle/graph/regularnode_color_spill.srv,1e394184-d69b-4622-ad58-f4ceadeab7e0" />
+    <e_0 Value="Game,utest/texture/ground_04_n.srv,5dd02f78-48fa-4a60-a493-dba2adda11c1" />
+    <e_1 Value="Game,utest/texture/ground6_nmp.srv,21738ef9-7f8d-41fa-8297-78502837377b" />
+    <e_2 Value="Game,utest/texture/ground6.srv,3125efdc-5049-4bf7-a1dc-31130e26ff1e" />
+    <e_3 Value="Game,utest/texture/ground8_nmp.srv,4eedbc20-2934-4718-9736-b4467d9b7cab" />
+    <e_4 Value="Game,utest/texture/ground8.srv,414040a2-11a8-4b59-9516-90e39ed0c3c7" />
+    <e_5 Value="Engine,uestyle/graph/regularnode_color_spill.srv,1e394184-d69b-4622-ad58-f4ceadeab7e0" />
+    <e_6 Value="Game,utest/pgc/terrain_bz_height.macross,00000000-0000-0000-0000-000000000000" />
+    <e_7 Value="Game,utest/pgc/terraingen.macross,318c3ff6-c3c8-4e00-bb54-c3c2abaa73a2" />
+    <e_8 Value="Game,utest/texture/ground_04.srv,cc988da2-f1c5-4240-a3ec-78bc46536197" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.UPgcAsset@EngineCore" />
 </Root>

@@ -51,6 +51,7 @@ namespace NxRHI
 		virtual IGpuBufferData* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) override;
 	public:
 		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
+		D3D12_RESOURCE_DESC mDX12ResourceDesc{};
 		AutoRef<ID3D12Resource>		mGpuResource;
 	};
 

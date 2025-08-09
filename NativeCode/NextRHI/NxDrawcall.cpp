@@ -559,7 +559,10 @@ namespace NxRHI
 		cmdlist->BeginEvent("RenderPassBarriers");
 		for (UINT i = 0; i < (UINT)Barriers.size(); i++)
 		{
+			auto save = Barriers[i].Buffer->GpuState;
+			Barriers[i].Buffer->GpuState = Barriers[i].FromState;
 			Barriers[i].Buffer->TransitionTo(cmdlist, Barriers[i].ToState);
+			Barriers[i].Buffer->GpuState = save;
 		}
 		cmdlist->EndEvent();
 		Barriers.clear();

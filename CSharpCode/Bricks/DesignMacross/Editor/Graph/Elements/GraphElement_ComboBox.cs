@@ -150,6 +150,7 @@ namespace EngineNS.DesignMacross.Editor
             var start = context.ViewportTransform(comboBoxElement.AbsLocation);
             
             ImGuiAPI.SetCursorScreenPos(in start);
+            ImGuiAPI.Dummy(in Vector2.Zero);
             //ImGuiAPI.PushStyleColor();
             if (EGui.UIProxy.ComboBox.BeginCombo("##DMCComboBoxe", comboBoxElement.CurrentSelected == null? "None" : comboBoxElement.CurrentSelected.ToString(), comboBoxElement.Size.Width))
             {

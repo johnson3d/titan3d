@@ -358,113 +358,99 @@ namespace EngineNS.Bricks.VXGI
             
         }
         bool bTestErase = false;
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
-        {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UVoxelsNode), nameof(TickLogic));
-                return mScopeTick;
-            }
-        } 
         public override unsafe void TickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            using (new Profiler.TimeScopeHelper(ScopeTick))
+            if (bTestErase)
             {
-                if (bTestErase)
+                SetEraseBox(in VxSceneBox);
+            }
+            if (CBuffer != null)
+            {
+                var idx = CBuffer.ShaderBinder.FindField("GBufferSize");
+                Vector2 GBufferSize;
+                GBufferSize.X = DiffuseRTWidth;
+                GBufferSize.Y = DiffuseRTHeight;
+                CBuffer.SetValue(idx, in GBufferSize);
+
+                var zNear = policy.DefaultCamera.mCoreObject.mZNear;
+                var zfar = policy.DefaultCamera.mCoreObject.mZFar;
+
+                var ReconstructPosArg = new Vector2(zfar / (zfar - zNear), zNear * zfar / (zNear - zfar));
+                idx = CBuffer.ShaderBinder.FindField("ReconstructPosArg");
+                CBuffer.SetValue(idx, in ReconstructPosArg);
+
+                idx = CBuffer.ShaderBinder.FindField("VxStartPosition");
+                var VxStartPosition = VxSceneBox.Minimum;
+                CBuffer.SetValue(idx, in VxStartPosition);
+
+                idx = CBuffer.ShaderBinder.FindField("EraseVxStart");
+                CBuffer.SetValue(idx, in EraseVxStart);
+
+                if (VxDebugMesh != null)
                 {
-                    SetEraseBox(in VxSceneBox);
+                    idx = CBuffer.ShaderBinder.FindField("VxDebugger_IndexCountPerInstance");
+                    var meshAtomDesc = VxDebugMesh.SubMeshes[0].Atoms[0].GetMeshAtomDesc(0);
+                    var VxDebugger_IndexCountPerInstance = meshAtomDesc->NumPrimitives * 3;
+                    CBuffer.SetValue(idx, in VxDebugger_IndexCountPerInstance);
                 }
-                if (CBuffer != null)
+            }
+            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            using (new NxRHI.TtCmdListScope(cmd, "Voxel"))
+            {
+                switch (mCurStep)
                 {
-                    var idx = CBuffer.ShaderBinder.FindField("GBufferSize");
-                    Vector2 GBufferSize;
-                    GBufferSize.X = DiffuseRTWidth;
-                    GBufferSize.Y = DiffuseRTHeight;
-                    CBuffer.SetValue(idx, in GBufferSize);
-
-                    var zNear = policy.DefaultCamera.mCoreObject.mZNear;
-                    var zfar = policy.DefaultCamera.mCoreObject.mZFar;
-
-                    var ReconstructPosArg = new Vector2(zfar / (zfar - zNear), zNear * zfar / (zNear - zfar));
-                    idx = CBuffer.ShaderBinder.FindField("ReconstructPosArg");
-                    CBuffer.SetValue(idx, in ReconstructPosArg);
-
-                    idx = CBuffer.ShaderBinder.FindField("VxStartPosition");
-                    var VxStartPosition = VxSceneBox.Minimum;
-                    CBuffer.SetValue(idx, in VxStartPosition);
-
-                    idx = CBuffer.ShaderBinder.FindField("EraseVxStart");
-                    CBuffer.SetValue(idx, in EraseVxStart);
-
-                    if (VxDebugMesh != null)
-                    {
-                        idx = CBuffer.ShaderBinder.FindField("VxDebugger_IndexCountPerInstance");                        
-                        var meshAtomDesc = VxDebugMesh.SubMeshes[0].Atoms[0].GetMeshAtomDesc(0);
-                        var VxDebugger_IndexCountPerInstance = meshAtomDesc->NumPrimitives * 3;
-                        CBuffer.SetValue(idx, in VxDebugger_IndexCountPerInstance);
-                    }
-                }
-                var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-                using (new NxRHI.TtCmdListScope(cmd, "Voxel"))
-                {
-                    switch (mCurStep)
-                    {
-                        case EStep.Setup:
+                    case EStep.Setup:
+                        {
+                            if (SetupVoxelGroupAllocator != null)
                             {
-                                if (SetupVoxelGroupAllocator != null)
-                                {
-                                    SetupVoxelGroupAllocator.SetDrawcallDispatch(this, policy, SetupVoxelGroupAllocatorDrawcall, VxGroupPoolSize, 1, 1, true);
-                                    cmd.PushGpuDraw(SetupVoxelGroupAllocatorDrawcall);
+                                SetupVoxelGroupAllocator.SetDrawcallDispatch(this, policy, SetupVoxelGroupAllocatorDrawcall, VxGroupPoolSize, 1, 1, true);
+                                cmd.PushGpuDraw(SetupVoxelGroupAllocatorDrawcall);
 
-                                    cmd.BeginEvent(Name + "Setup");
-                                    cmd.FlushDraws();
-                                    cmd.EndEvent();
-                                }
-                                mCurStep = EStep.InjectVoxels;
+                                cmd.BeginEvent(Name + "Setup");
+                                cmd.FlushDraws();
+                                cmd.EndEvent();
                             }
-                            break;
-                        case EStep.InjectVoxels:
+                            mCurStep = EStep.InjectVoxels;
+                        }
+                        break;
+                    case EStep.InjectVoxels:
+                        {
+                            if (InjectVoxels != null)
                             {
-                                if (InjectVoxels != null)
+                                #region erase voxelgroups
+                                if (VxEraseGroupSize != Vector3ui.Zero)
                                 {
-                                    #region erase voxelgroups
-                                    if (VxEraseGroupSize != Vector3ui.Zero)
-                                    {
-                                        EraseVoxelGroup.SetDrawcallDispatch(this, policy, EraseVoxelGroupDrawcall,
-                                            VxEraseGroupSize.X,
-                                            VxEraseGroupSize.Y,
-                                            VxEraseGroupSize.Z,
-                                            true);
-                                        cmd.PushGpuDraw(EraseVoxelGroupDrawcall);
-                                        VxEraseGroupSize = Vector3ui.Zero;
-                                    }
-                                    #endregion
-
-                                    #region inject voxels
-                                    {
-                                        InjectVoxels.SetDrawcallDispatch(this, policy, InjectVoxelsDrawcall,
-                                            DiffuseRTWidth,
-                                            DiffuseRTHeight,
-                                            1,
-                                            true);
-                                        //InjectVoxelsDrawcall.Commit(cmd);
-                                        cmd.PushGpuDraw(InjectVoxelsDrawcall);
-                                    }
-                                    #endregion
-
-                                    TickVxDebugger(cmd, world, policy);
-
-                                    cmd.FlushDraws();
+                                    EraseVoxelGroup.SetDrawcallDispatch(this, policy, EraseVoxelGroupDrawcall,
+                                        VxEraseGroupSize.X,
+                                        VxEraseGroupSize.Y,
+                                        VxEraseGroupSize.Z,
+                                        true);
+                                    cmd.PushGpuDraw(EraseVoxelGroupDrawcall);
+                                    VxEraseGroupSize = Vector3ui.Zero;
                                 }
+                                #endregion
+
+                                #region inject voxels
+                                {
+                                    InjectVoxels.SetDrawcallDispatch(this, policy, InjectVoxelsDrawcall,
+                                        DiffuseRTWidth,
+                                        DiffuseRTHeight,
+                                        1,
+                                        true);
+                                    //InjectVoxelsDrawcall.Commit(cmd);
+                                    cmd.PushGpuDraw(InjectVoxelsDrawcall);
+                                }
+                                #endregion
+
+                                TickVxDebugger(cmd, world, policy);
+
+                                cmd.FlushDraws();
                             }
-                            break;
-                    }
+                        }
+                        break;
                 }
-                policy.CommitCommandList(cmd, "Voxel");
-            }   
+            }
+            policy.CommitCommandList(cmd, "Voxel");
         }
     }
 }
