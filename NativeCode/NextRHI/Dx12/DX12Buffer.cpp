@@ -1149,6 +1149,8 @@ namespace NxRHI
 			bfDesc.Type = EBufferType::BFT_Vertex;
 			bfDesc.Usage = desc->Usage;
 			bfDesc.CpuAccess = desc->CpuAccess;
+			bfDesc.RowPitch = desc->Size;
+			bfDesc.DepthPitch = desc->Size;
 			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
 			ASSERT(Buffer != nullptr);
 			Buffer->SetDebugName("VBV");
@@ -1186,6 +1188,8 @@ namespace NxRHI
 			bfDesc.Type = EBufferType::BFT_Index;
 			bfDesc.Usage = desc->Usage;
 			bfDesc.CpuAccess = desc->CpuAccess;
+			bfDesc.RowPitch = desc->Size;
+			bfDesc.DepthPitch = desc->Size;
 			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
 			ASSERT(Buffer != nullptr);
 			Buffer->SetDebugName("IBV");

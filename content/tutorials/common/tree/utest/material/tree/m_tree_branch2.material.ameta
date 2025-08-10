@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="c5b0eb40-cb5a-4191-8f6a-29292c978f90" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/tree/utest/material/tree/m_tree_branch2.material,c5b0eb40-cb5a-4191-8f6a-29292c978f90" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterial&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
+    <e_0 Value="Game,tutorials/common/tree/utest/texture/tree/t_bark_autumn_01_c.srv,1fe045b3-9a01-428e-961e-978e26c4e1ee" />
+    <e_1 Value="Game,tutorials/common/tree/utest/texture/tree/t_bark_autumn_01_n.srv,0c2ed445-cf62-4a37-a98d-fdff01bf0640" />
+    <e_2 Value="Game,tutorials/common/tree/utest/texture/tree/t_bark_autumn_01_orm.srv,8fa52ab3-676f-4946-8ff8-4a59f16abf34" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
+</Root>

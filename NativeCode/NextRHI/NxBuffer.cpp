@@ -45,22 +45,31 @@ namespace NxRHI
 			auto desc = Desc;
 			desc.CpuAccess = ECpuAccess::CAS_READ;
 			desc.Usage = EGpuUsage::USAGE_STAGING;
+			desc.RowPitch = Desc.Size;
+			desc.DepthPitch = Desc.Size;
 			auto cpBuffer = device->CreateBuffer(&desc);
 			auto cpDraw = device->CreateCopyDraw();
 			
 			cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
+			cpDraw->FootPrint.Format = PXF_UNKNOWN;
+			cpDraw->FootPrint.X = 0;
+			cpDraw->FootPrint.Y = 0;
+			cpDraw->FootPrint.Z = 0;
+			cpDraw->FootPrint.Width = Desc.Size;
+			cpDraw->FootPrint.Height = 1;
+			cpDraw->FootPrint.Depth = 1;
+			cpDraw->FootPrint.RowPitch = desc.RowPitch;
+			cpDraw->FootPrint.TotalSize = desc.RowPitch;
 			cpDraw->BindBufferSrc(this);
 			cpDraw->BindBufferDest(cpBuffer);
 			cpDraw->SrcSubResource = 0;
 			cpDraw->DestSubResource = 0;
-			cpDraw->DstX = 0;
-			cpDraw->FootPrint.X = 0;
-			cpDraw->FootPrint.Width = Desc.Size;
 
 			{
-				FTransientCmd cmd(device, EQueueType::QU_Transfer, "");
+				FTransientCmd cmd(device, EQueueType::QU_Transfer, "FetchBuffer");
 				cmd.GetCmdList()->PushGpuDraw(cpDraw);
 			}
+			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
 			return cpBuffer->FetchGpuData(device, index, blob);
 		}
 	}

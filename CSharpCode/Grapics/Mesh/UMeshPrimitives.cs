@@ -164,7 +164,7 @@ namespace EngineNS.Graphics.Mesh
             }
             //这里需要存盘的情况很少，正常来说vms是fbx导入的时候生成的，不是保存出来的
             var rc = TtEngine.Instance?.GfxDevice.RenderContext;
-            var xnd = new IO.TtXndHolder("UMeshPrimitives", 0, 0);
+            var xnd = new IO.TtXndHolder("TtMeshPrimitives", 0, 0);
             unsafe
             {
                 mCoreObject.Save2Xnd(rc.mCoreObject, xnd.RootNode.mCoreObject);
@@ -196,13 +196,13 @@ namespace EngineNS.Graphics.Mesh
             get;
             set;
         }
-        public unsafe static TtMeshPrimitives LoadXnd(TtMeshPrimitiveManager manager, IO.TtXndHolder xnd, bool bTryLoadMeshlets)
+        public unsafe static TtMeshPrimitives LoadXnd(RName name, TtMeshPrimitiveManager manager, IO.TtXndHolder xnd, bool bTryLoadMeshlets)
         {
             var result = new TtMeshPrimitives();
             
             try
             {
-                var ret = result.mCoreObject.LoadXnd(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, "", xnd.mCoreObject, true);
+                var ret = result.mCoreObject.LoadXnd(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, name.ToString(), xnd.mCoreObject, true);
                 if (ret == false)
                     return null;
                 var attr = xnd.RootNode.TryGetAttribute("PartialSkeleton");
@@ -395,7 +395,7 @@ namespace EngineNS.Graphics.Mesh
                 {
                     if (xnd != null)
                     {
-                        var mesh = TtMeshPrimitives.LoadXnd(this, xnd, bTryLoadMeshlets);
+                        var mesh = TtMeshPrimitives.LoadXnd(name, this, xnd, bTryLoadMeshlets);
                         if (mesh == null)
                             return null;
 

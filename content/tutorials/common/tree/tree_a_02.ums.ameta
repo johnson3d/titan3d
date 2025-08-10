@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="8c2556e6-fea0-429a-9ffb-fbf7129902fb" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/tree/tree_a_02.ums,8c2556e6-fea0-429a-9ffb-fbf7129902fb" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMaterialMesh&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
+    <e_0 Value="Game,tutorials/common/tree/utest/mesh/tree/sm_tree_a_02.vms,e07273e0-b211-4906-a0ee-8c2f0da9daf9" />
+    <e_1 Value="Game,tutorials/common/tree/utest/material/tree/m_tree_leave.material,313d091a-60b7-4d05-9053-2b5382b5260e" />
+    <e_2 Value="Game,tutorials/common/tree/utest/material/tree/m_tree_branch2.material,f4efdc32-de06-405b-b309-28da9d421a4a" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
+</Root>
