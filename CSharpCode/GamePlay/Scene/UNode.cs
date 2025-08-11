@@ -306,7 +306,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public static TtNodeData CreateNodeData<T>() where T : TtNode
         {
-            var attr = typeof(TtNode).GetCustomAttribute(typeof(TtNodeAttribute)) as TtNodeAttribute;
+            var attr = typeof(T).GetCustomAttribute(typeof(TtNodeAttribute)) as TtNodeAttribute;
             if (attr == null || attr.NodeDataType == null)
             {
                 return null;

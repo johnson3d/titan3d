@@ -148,7 +148,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var patchSide = Level.PatchSide;
             var terrainGen = Level.Node.TerrainGen;
             var IdMapNode = terrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.UMaterialIdMapNode;
-            IdMapNode.InitProcedure(terrainGen.AssetGraph);
+            if (IdMapNode!=null)
+                IdMapNode.InitProcedure(terrainGen.AssetGraph);
 
             var hMap = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
             var norMap = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>>(1, 1, 1));
@@ -670,7 +671,17 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             terrainGen.Compile(root);
             var hMap = root.GetResultBuffer("Height");
             var norMap = root.GetResultBuffer("Normal") as Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>;
+            if (norMap == null)
+            {
+                var creator = Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>>(nodeData.LevelSideX, nodeData.LevelSideZ, 1);
+                norMap = Procedure.UBufferComponent.CreateInstance(creator) as Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>;
+            }
             var idMap = root.GetResultBuffer("MatId") as Procedure.USuperBuffer<float, Procedure.FFloatOperator>;
+            if (idMap==null)
+            {
+                var creator = Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(nodeData.LevelSideX, nodeData.LevelSideZ, 1);
+                idMap = Procedure.UBufferComponent.CreateInstance(creator) as Procedure.USuperBuffer<float, Procedure.FFloatOperator>;
+            }
             var waterMap = root.GetResultBuffer("Water") as Procedure.USuperBuffer<float, Procedure.FFloatOperator>;
             var transform = root.GetResultBuffer("Transform") as Procedure.USuperBuffer<FTransform, Procedure.FTransformOperator>;
             var plants = root.GetResultBuffer("Plants") as Procedure.USuperBuffer<Vector2i, Procedure.FInt2Operator>;
@@ -755,6 +766,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             foreach (var i in TiledPatch)
             {
+                if (i==null)
+                    continue;
                 i.SetAcceptShadow(value);
             }
         }
@@ -762,6 +775,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             foreach (var i in TiledPatch)
             {
+                if (i==null)
+                    continue;
                 i.OnAbsTransformChanged(node, world);
             }
         }
@@ -769,6 +784,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             foreach (var i in TiledPatch)
             {
+                if (i==null)
+                    continue;
                 i.UpdateCameraOffset(world);
             }
         }
@@ -776,6 +793,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             foreach (var i in TiledPatch)
             {
+                if (i==null)
+                    continue;
                 if (rp.CullCamera.WhichContainTypeFast(rp.World, i.AABB, false) == CONTAIN_TYPE.CONTAIN_TEST_OUTER)
                     continue;
                 i.OnGatherVisibleMeshes(rp);
@@ -785,6 +804,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             foreach (var i in TiledPatch)
             {
+                if (i==null)
+                    continue;
                 i.Tick(world, policy);
             }
         }
@@ -812,6 +833,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             foreach (var i in TiledPatch)
             {
+                if (i==null)
+                    continue;
                 if (rp.CullCamera.WhichContainTypeFast(rp.World, i.AABB, false) == CONTAIN_TYPE.CONTAIN_TEST_OUTER)
                     continue;
 

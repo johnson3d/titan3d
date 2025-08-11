@@ -1161,6 +1161,10 @@ namespace NxRHI
 		}
 		return true;
 	}
+	void DX12VbView::SetDebugName(const char* name)
+	{
+		Buffer->SetDebugName(name);
+	}
 	template<>
 	struct AuxGpuResourceDestroyer<DX12IbView*>
 	{
@@ -1200,7 +1204,10 @@ namespace NxRHI
 		}
 		return true;
 	}
-
+	void DX12IbView::SetDebugName(const char* name)
+	{
+		Buffer->SetDebugName(name);
+	}
 	DX12SrView::DX12SrView()
 	{
 	}

@@ -2,6 +2,7 @@
 using EngineNS.Graphics.Mesh;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Bricks.Terrain.CDLOD
@@ -44,20 +45,28 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 LODRangeFloat.Add(600.0f);
                 LODRangeFloat.Add(950.0f);
             }
+            [Category("Option")]
             [Rtti.Meta("")]
             public int MipLevels { get; set; } = 6;
+            [Category("Option")]
             [Rtti.Meta("")]
             public int NumOfLevelX { get; set; } = 100;
+            [Category("Option")]
             [Rtti.Meta("")]
             public int NumOfLevelZ { get; set; } = 100;
+            [Category("Option")]
             [Rtti.Meta("")]
             public int PatchSide { get; set; } = 16;
+            [Category("Option")]
             [Rtti.Meta("")]
             public float PatchSize { get; set; } = 64.0f;
+            [Category("Option")]
             [Rtti.Meta("")]
             public int ActiveLevel { get; set; } = 1;
+            [Category("Option")]
             [Rtti.Meta("")]
             public List<float> LODRangeFloat { get; set; } = new List<float>();
+            [Category("Option")]
             [Rtti.Meta("")]
             [RName.PGRName(FilterExts = Procedure.UPgcAsset.AssetExt)]
             public RName PgcName { get; set; }

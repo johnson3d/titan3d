@@ -20,6 +20,31 @@ namespace NxRHI
 	{
 		ResetGpuDraws();
 	}
+
+	void ICmdRecorder::SortGraphicDrawWithEffect()
+	{
+		std::sort(mDrawcallArray.begin(), mDrawcallArray.end(), [](const AutoRef<IGpuDraw>& a, const AutoRef<IGpuDraw>& b)
+			{
+				ASSERT(a.UnsafeConvertTo<IGraphicDraw>() != nullptr && b.UnsafeConvertTo<IGraphicDraw>() != nullptr);
+				auto lh = (const IGraphicDraw*)a.GetPtr();
+				auto rh = (const IGraphicDraw*)b.GetPtr();
+				if (lh->ShaderEffect.GetPtr() > rh->ShaderEffect.GetPtr())
+					return true;
+				else if (lh->ShaderEffect.GetPtr() < rh->ShaderEffect.GetPtr())
+					return false;
+				else
+				{
+					if (lh->Mesh.GetPtr() > rh->Mesh.GetPtr())
+						return true;
+					else if (lh->Mesh.GetPtr() < rh->Mesh.GetPtr())
+						return false;
+					else
+					{
+						return lh->MeshAtom > rh->MeshAtom;
+					}
+				}
+			});
+	}
 	
 	void ICmdRecorder::PushGpuDraw(IGpuDraw* draw)
 	{

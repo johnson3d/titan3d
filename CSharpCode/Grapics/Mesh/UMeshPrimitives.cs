@@ -20,6 +20,24 @@ namespace EngineNS.Graphics.Mesh
         {
             return await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(GetAssetName());
         }
+        public override async System.Threading.Tasks.Task CopyTo(string name, RName.ERNameType type)
+        {
+            if (mAssetName.Name == name && mAssetName.RNameType == type)
+                return;
+            var tarName = RName.GetRName(name, type);
+            var ameta = TtEngine.Instance.AssetMetaManager.NewAMeta(tarName, typeof(TtMeshPrimitivesAMeta));
+            ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
+            foreach (var i in this.RefAssetRNames)
+            {
+                ameta.RefAssetRNames.Add(i);
+            }
+            ameta.SaveAMeta((IO.IAsset)null);
+
+            var targetSnapName = TtEngine.Instance.FileManager.GetRoot(type) + name;
+            IO.TtFileManager.CopyFile(mAssetName.Address, targetSnapName);
+            if (IO.TtFileManager.FileExists(targetSnapName))
+                TtEngine.Instance.SourceControlModule.AddFile(targetSnapName, true);
+        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             return false;

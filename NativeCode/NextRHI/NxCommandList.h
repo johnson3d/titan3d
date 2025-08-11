@@ -122,6 +122,10 @@ namespace NxRHI
 		inline UINT GetDrawcallNumber() const {
 			return (UINT)mDrawcallArray.size() + mDirectDrawNum;
 		}
+		inline const IGpuDraw* GetDrawcall(UINT index) const {
+			return mDrawcallArray[index];
+		}
+		void SortGraphicDrawWithEffect();
 		inline void UseResource(IGpuResource* res) {
 			res->AddCmdRefCount();
 			mRefBuffers.push_back(res);

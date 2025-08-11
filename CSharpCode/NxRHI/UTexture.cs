@@ -80,6 +80,24 @@ namespace EngineNS.NxRHI
         {
             return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
         }
+        public override async System.Threading.Tasks.Task CopyTo(string name, RName.ERNameType type)
+        {
+            if (mAssetName.Name == name && mAssetName.RNameType == type)
+                return;
+            var tarName = RName.GetRName(name, type);
+            var ameta = TtEngine.Instance.AssetMetaManager.NewAMeta(tarName, typeof(TtSrViewAMeta));
+            ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtSrView));
+            foreach (var i in this.RefAssetRNames)
+            {
+                ameta.RefAssetRNames.Add(i);
+            }
+            ameta.SaveAMeta((IAsset)null);
+
+            var targetSnapName = TtEngine.Instance.FileManager.GetRoot(type) + name;
+            IO.TtFileManager.CopyFile(mAssetName.Address, targetSnapName);
+            if (IO.TtFileManager.FileExists(targetSnapName))
+                TtEngine.Instance.SourceControlModule.AddFile(targetSnapName, true);
+        }
         public override async System.Threading.Tasks.Task MoveTo(string name, RName.ERNameType type)
         {
             if (mAssetName.Name == name && mAssetName.RNameType == type)

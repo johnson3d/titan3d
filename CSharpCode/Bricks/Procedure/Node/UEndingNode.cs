@@ -108,6 +108,15 @@ namespace EngineNS.Bricks.Procedure.Node
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
             return null;
+            //var graph = ParentGraph as UPgcGraph;
+            //foreach (var i in Inputs)
+            //{
+            //    if (i.Name==pin.Name)
+            //    {
+            //        return i.Tag as UBufferCreator;
+            //    }
+            //}
+            //return null;
         }
         public override bool IsMatchLinkedPin(UBufferCreator input, UBufferCreator output)
         {

@@ -1374,7 +1374,12 @@ namespace EngineNS.Bricks.Procedure
             if (oPin != null)
             {
                 UPgcGraph graph = oPin.HostNode.ParentGraph as UPgcGraph;
-                var creator = node.GetOutBufferCreator(oPin).Clone();
+                var src = node.GetOutBufferCreator(oPin);
+                if (src == null)
+                {
+                    return null;
+                }
+                var creator = src.Clone();
                 if (creator.XSize == -1)
                 {
                     creator.XSize = graph.DefaultCreator.XSize;

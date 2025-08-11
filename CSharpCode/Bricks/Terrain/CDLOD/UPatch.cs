@@ -317,14 +317,20 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             foreach (var i in TerrainMesh)
             {
+                if (i==null)
+                    continue;
                 i.UpdateCameraOffset(world);
             }
             foreach (var i in WireFrameTerrainMesh)
             {
+                if (i==null)
+                    continue;
                 i.UpdateCameraOffset(world);
             }
             foreach (var i in WaterMesh)
             {
+                if (i==null)
+                    continue;
                 i.UpdateCameraOffset(world);
             }
         }

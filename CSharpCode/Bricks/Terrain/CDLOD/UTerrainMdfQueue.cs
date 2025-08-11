@@ -203,7 +203,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             instance.HitProxyId = cb.GetValue<uint>(Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.HitProxyId);
 
             var patch = mdfQueue.Patch;
-            if(mdfQueue.TerrainModifier.IsWater)
+            if (mdfQueue.TerrainModifier.IsWater && patch.Level.WaterHMap!=null)
                 instance.UserData.X = patch.Level.GetWaterHeightmapRVT().UniqueTexID;
             else
                 instance.UserData.X = patch.Level.GetHeightmapRVT().UniqueTexID;

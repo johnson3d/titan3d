@@ -43,6 +43,14 @@ namespace EngineNS.NxRHI
         {
             get => mCoreObject.GetDrawcallNumber();
         }
+        public void SortGraphicDrawWithEffect()
+        {
+            mCoreObject.SortGraphicDrawWithEffect();
+        }
+        public IGpuDraw GetDrawcall(uint index)
+        {
+            return mCoreObject.GetDrawcall(index);
+        }
         public void PushGpuDraw(TtGraphicDraw draw)
         {
             mCoreObject.PushGpuDraw(draw.mCoreObject);

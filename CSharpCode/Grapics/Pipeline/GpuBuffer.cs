@@ -115,6 +115,8 @@ namespace EngineNS.Graphics.Pipeline
                 var bfDesc = new NxRHI.FBufferDesc();
                 bfDesc.SetDefault(isRaw, BufferTypes);
                 bfDesc.Size = (uint)sizeof(T) * GpuCapacity;
+                bfDesc.RowPitch = bfDesc.Size;
+                bfDesc.DepthPitch = bfDesc.Size;
                 bfDesc.StructureStride = (uint)sizeof(T);
                 bfDesc.InitData = DataArray.UnsafeGetElementAddress(0);
                 bfDesc.Type = BufferTypes;

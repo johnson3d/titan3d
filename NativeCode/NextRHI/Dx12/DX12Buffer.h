@@ -76,6 +76,7 @@ namespace NxRHI
 	public:
 		virtual void DeleteThis() override;
 		bool Init(DX12GpuDevice* device, IBuffer* pBuffer, const FVbvDesc* desc);
+		virtual void SetDebugName(const char* name) override;
 	};
 
 	class DX12IbView : public IIbView
@@ -84,6 +85,7 @@ namespace NxRHI
 	public:
 		virtual void DeleteThis() override;
 		bool Init(DX12GpuDevice* device, IBuffer* pBuffer, const FIbvDesc* desc);
+		virtual void SetDebugName(const char* name) override;
 	};
 
 	class DX12SrView : public ISrView
