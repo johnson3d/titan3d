@@ -144,10 +144,6 @@ namespace EngineNS.Bricks.Collision.Octree
         /// <returns>True if there was a collision.</returns>
         public bool IsColliding(in Aabb checkBounds)
         {
-            //#if UNITY_EDITOR
-            // For debugging
-            //AddCollisionCheck(checkBounds);
-            //#endif
             return RootNode.IsColliding(in checkBounds);
         }
 
@@ -159,10 +155,6 @@ namespace EngineNS.Bricks.Collision.Octree
         /// <returns>True if there was a collision.</returns>
         public bool IsColliding(in DRay checkRay, double maxDistance)
         {
-            //#if UNITY_EDITOR
-            // For debugging
-            //AddCollisionCheck(checkRay);
-            //#endif
             return RootNode.IsColliding(in checkRay, maxDistance);
         }
 
@@ -173,12 +165,7 @@ namespace EngineNS.Bricks.Collision.Octree
         /// <param name="checkBounds">bounds to check.</param>
         /// <returns>Objects that intersect with the specified bounds.</returns>
         public void GetColliding(List<T> collidingWith, in Aabb checkBounds)
-        {
-            //#if UNITY_EDITOR
-            // For debugging
-            //AddCollisionCheck(checkBounds);
-            //#endif
-            RootNode.GetColliding(in checkBounds, collidingWith);
+        {            RootNode.GetColliding(in checkBounds, collidingWith);
         }
 
         /// <summary>
@@ -190,10 +177,6 @@ namespace EngineNS.Bricks.Collision.Octree
         /// <returns>Objects that intersect with the specified ray.</returns>
         public void GetColliding(List<T> collidingWith,in DRay checkRay, double maxDistance = double.PositiveInfinity)
         {
-            //#if UNITY_EDITOR
-            // For debugging
-            //AddCollisionCheck(checkRay);
-            //#endif
             RootNode.GetColliding(in checkRay, collidingWith, maxDistance);
         }
 

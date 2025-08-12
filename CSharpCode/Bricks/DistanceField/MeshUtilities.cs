@@ -12,8 +12,8 @@ namespace EngineNS.DistanceField
     {
 	    public FSparseMeshDistanceFieldAsyncTask(
             DistanceFieldConfig InSdfConfig,
-            DistanceField.UEmbreeManager InEmbreeManager,
-            UEmbreeScene InEmbreeScene,
+            DistanceField.TtEmbreeManager InEmbreeManager,
+            TtEmbreeScene InEmbreeScene,
             List<Vector3> InSampleDirections,
             float InLocalSpaceTraceDistance,
             BoundingBox InVolumeBounds,
@@ -45,8 +45,8 @@ namespace EngineNS.DistanceField
 
         // Readonly inputs
         DistanceFieldConfig SdfConfig;
-        DistanceField.UEmbreeManager EmbreeManager;
-        UEmbreeScene EmbreeScene;
+        DistanceField.TtEmbreeManager EmbreeManager;
+        TtEmbreeScene EmbreeScene;
     	List<Vector3> SampleDirections;
         float LocalSpaceTraceDistance;
         BoundingBox VolumeBounds;
@@ -292,8 +292,8 @@ namespace EngineNS.DistanceField
 
             var StartTime = Support.TtTime.GetTickCount();
 
-            var embreeScene = new DistanceField.UEmbreeScene();
-            var embreeManager = new DistanceField.UEmbreeManager();
+            var embreeScene = new DistanceField.TtEmbreeScene();
+            var embreeManager = new DistanceField.TtEmbreeManager();
             embreeManager.SetupEmbreeScene(MeshName, meshProvider, DistanceFieldResolutionScale, embreeScene);
 
             // Whether to use an Embree Point Query to compute the closest unsigned distance.  Rays will only be traced to determine backfaces visible for sign.

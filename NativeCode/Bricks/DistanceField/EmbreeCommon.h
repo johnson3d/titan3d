@@ -6,6 +6,10 @@
 
 NS_BEGIN
 
+struct FEmbreeGeometryInstance;
+class FEmbreeScene;
+class EmbreeManager;
+
 struct FEmbreeTriangleDesc
 {
 	INT16 ElementIndex;
@@ -18,16 +22,50 @@ struct FEmbreeTriangleDesc
 };
 
 struct TR_CLASS()
-FEmbreeGeometry : public VIUnknown
+	FEmbreeGeometry : public VIUnknown
 {
 	std::vector<UINT> IndexArray;
 	std::vector<v3dxVector3> VertexArray;
 	std::vector<FEmbreeTriangleDesc> TriangleDescs; // The material ID of each triangle.
-	RTCGeometry InternalGeometry;
+	RTCGeometry InternalGeometry = nullptr;
+	unsigned int GeomID = 0;
+	~FEmbreeGeometry();
+
+	virtual void SetGeometryTransform(const v3dxMatrix4& matrix);
+
+	FEmbreeScene* AsTemplateScene(EmbreeManager* device);
+	AutoRef<FEmbreeScene> TemplateScene;
+
+	virtual std::vector<v3dxVector3>& GetVertexArray() {
+		return VertexArray;
+	}
+	virtual std::vector<UINT> GetIndexArray() {
+		return IndexArray;
+	}
+	virtual std::vector<FEmbreeTriangleDesc>& GetTriangleDescs() {
+		return TriangleDescs;
+	}
+};
+
+struct TR_CLASS()
+	FEmbreeGeometryInstance : public FEmbreeGeometry
+{
+	~FEmbreeGeometryInstance();
+	AutoPtr<FEmbreeGeometry> TemplateGeometry;
+
+	virtual std::vector<v3dxVector3>& GetVertexArray() override {
+		return TemplateGeometry->GetVertexArray();
+	}
+	virtual std::vector<UINT> GetIndexArray() override {
+		return TemplateGeometry->GetIndexArray();
+	}
+	virtual std::vector<FEmbreeTriangleDesc>& GetTriangleDescs() override {
+		return TemplateGeometry->GetTriangleDescs();
+	}
 };
 
 class TR_CLASS()
-FEmbreeScene : public VIUnknown
+	FEmbreeScene : public VIUnknown
 {
 public:
 	FEmbreeScene() :
@@ -35,16 +73,25 @@ public:
 		bMostlyTwoSided(false),
 		EmbreeDevice(nullptr),
 		EmbreeScene(nullptr)
-	{}
+	{
+}
+~FEmbreeScene();
 
-	INT32 NumIndices = 0;
-	bool bMostlyTwoSided = false;
+INT32 NumIndices = 0;
+bool bMostlyTwoSided = false;
 
-	// Embree
-	RTCDevice EmbreeDevice = nullptr;
-	RTCScene EmbreeScene = nullptr;
-	TR_MEMBER(SV_NoBind)
-	FEmbreeGeometry Geometry;
+// Embree
+RTCDevice EmbreeDevice = nullptr;
+RTCScene EmbreeScene = nullptr;
+TR_MEMBER(SV_NoBind)
+FEmbreeGeometry Geometry;
+void AttachGeometry(FEmbreeGeometry* Geometry);
+void DetachGeometry(unsigned int geomID);
+void AttachGeometryInstance(FEmbreeGeometryInstance* Geometry);
+void CommitScene();
+FEmbreeGeometry* FindGeometry(unsigned int geomID);
+void EmbreePointQuery(v3dxVector3 VoxelPosition, float LocalSpaceTraceDistance, bool& bOutNeedTracyRays, float& OutClosestDistance);
+void EmbreeRayTrace(v3dxVector3 StartPosition, v3dxVector3 RayDirection, bool& bOutHit, bool& bOutHitTwoSided, v3dxVector3& OutHitNormal, float& OutTFar);
 };
 
 class FEmbreeRay : public RTCRayHit
@@ -81,7 +128,8 @@ struct FEmbreeIntersectionContext : public RTCIntersectContext
 {
 	FEmbreeIntersectionContext() :
 		ElementIndex(-1)
-	{}
+	{
+	}
 
 	bool IsHitTwoSided() const
 	{
@@ -97,16 +145,23 @@ struct FEmbreeIntersectionContext : public RTCIntersectContext
 };
 
 class TR_CLASS()
-EmbreeManager : public VIUnknown
+	EmbreeManager : public VIUnknown
 {
 public:
+	RTCDevice EmbreeDevice = nullptr;
+	UINT GeomIDAllocator = 0;
 	EmbreeManager() {}
+	~EmbreeManager();
+	bool Initialize();
+	FEmbreeScene* CreateScene();
+	FEmbreeGeometry* CreateGeometry(VNameString meshName, NxRHI::FMeshDataProvider& meshProvider);
+	FEmbreeGeometryInstance* CreateGeometryInstance(FEmbreeGeometry* geometry);
 
 	void SetupEmbreeScene(VNameString meshName, NxRHI::FMeshDataProvider& meshProvider, float DistanceFieldResolutionScale, FEmbreeScene& embreeScene);
 
 	void DeleteEmbreeScene(FEmbreeScene& embreeScene);
 
-	void EmbreePointQuery(FEmbreeScene& embreeScene, v3dxVector3 VoxelPosition, float LocalSpaceTraceDistance, bool &bOutNeedTracyRays, float &OutClosestDistance);
+	void EmbreePointQuery(FEmbreeScene& embreeScene, v3dxVector3 VoxelPosition, float LocalSpaceTraceDistance, bool& bOutNeedTracyRays, float& OutClosestDistance);
 	void EmbreeRayTrace(FEmbreeScene& embreeScene, v3dxVector3 StartPosition, v3dxVector3 RayDirection, bool& bOutHit, bool& bOutHitTwoSided, v3dxVector3& OutHitNormal, float& OutTFar);
 };
 

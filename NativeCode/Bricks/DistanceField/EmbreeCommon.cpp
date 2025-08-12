@@ -10,10 +10,18 @@
 
 NS_BEGIN
 
+class FEmbreePointQueryContext : public RTCPointQueryContext
+{
+public:
+	RTCGeometry MeshGeometry;
+	INT32 NumTriangles;
+	FEmbreeScene* Scene = nullptr;
+};
+
 void EmbreeFilterFunc(const struct RTCFilterFunctionNArguments* args)
 {
 	FEmbreeGeometry* EmbreeGeometry = (FEmbreeGeometry*)args->geometryUserPtr;
-	FEmbreeTriangleDesc Desc = EmbreeGeometry->TriangleDescs[RTCHitN_primID(args->hit, 1, 0)];
+	FEmbreeTriangleDesc Desc = EmbreeGeometry->GetTriangleDescs()[RTCHitN_primID(args->hit, 1, 0)];
 
 	FEmbreeIntersectionContext& IntersectionContext = *static_cast<FEmbreeIntersectionContext*>(args->context);
 	IntersectionContext.ElementIndex = Desc.ElementIndex;
@@ -29,6 +37,262 @@ void EmbreeFilterFunc(const struct RTCFilterFunctionNArguments* args)
 void EmbreeErrorFunc(void* userPtr, RTCError code, const char* str)
 {
 	VFX_LTRACE(ELTT_Error, "Embree error: %s Code=%u", str, (UINT)code);
+}
+
+FEmbreeGeometry::~FEmbreeGeometry()
+{
+	if (InternalGeometry)
+	{
+		rtcReleaseGeometry(InternalGeometry);
+		InternalGeometry = nullptr;
+	}
+}
+
+FEmbreeScene* FEmbreeGeometry::AsTemplateScene(EmbreeManager* device)
+{
+	if (TemplateScene == nullptr)
+	{
+		TemplateScene = MakeWeakRef(device->CreateScene());
+		TemplateScene->AttachGeometry(this);
+		TemplateScene->CommitScene();
+	}
+	return TemplateScene;
+}
+
+void FEmbreeGeometry::SetGeometryTransform(const v3dxMatrix4& matrix)
+{
+	rtcSetGeometryTransform(InternalGeometry, 0, RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR, &matrix);
+}
+
+FEmbreeGeometryInstance::~FEmbreeGeometryInstance()
+{
+	if (InternalGeometry)
+	{
+		rtcReleaseGeometry(InternalGeometry);
+		InternalGeometry = nullptr;
+	}
+}
+
+FEmbreeScene::~FEmbreeScene()
+{
+	if (EmbreeScene)
+	{
+		rtcReleaseScene(EmbreeScene);
+		EmbreeScene = nullptr;
+	}
+}
+
+void FEmbreeScene::AttachGeometry(FEmbreeGeometry* Geometry)
+{
+	rtcAttachGeometryByID(EmbreeScene, Geometry->InternalGeometry, Geometry->GeomID);
+}
+
+void FEmbreeScene::DetachGeometry(unsigned int geomID)
+{
+	rtcDetachGeometry(EmbreeScene, geomID);
+}
+
+void FEmbreeScene::AttachGeometryInstance(FEmbreeGeometryInstance* Geometry)
+{
+	rtcAttachGeometryByID(EmbreeScene, Geometry->InternalGeometry, Geometry->GeomID);
+}
+
+void FEmbreeScene::CommitScene()
+{
+	rtcCommitScene(EmbreeScene);
+}
+
+FEmbreeGeometry* FEmbreeScene::FindGeometry(unsigned int geomID)
+{
+	auto geom = rtcGetGeometry(EmbreeScene, geomID);
+	if (geom == nullptr)
+		return nullptr;
+	return (FEmbreeGeometry*)rtcGetGeometryUserData(geom);
+}
+
+bool EmbreePointQueryFunction2(RTCPointQueryFunctionArguments* args)
+{
+	return true;
+}
+
+void FEmbreeScene::EmbreePointQuery(v3dxVector3 VoxelPosition, float LocalSpaceTraceDistance, bool& bOutNeedTracyRays, float& OutClosestDistance)
+{
+	RTCPointQuery PointQuery;
+	PointQuery.x = VoxelPosition.X;
+	PointQuery.y = VoxelPosition.Y;
+	PointQuery.z = VoxelPosition.Z;
+	PointQuery.time = 0;
+	PointQuery.radius = LocalSpaceTraceDistance;
+
+	FEmbreePointQueryContext QueryContext;
+	rtcInitPointQueryContext(&QueryContext);
+	QueryContext.Scene = this;
+	float ClosestUnsignedDistanceSq = (LocalSpaceTraceDistance * 2.0f) * (LocalSpaceTraceDistance * 2.0f);
+	rtcPointQuery(EmbreeScene, &PointQuery, &QueryContext, EmbreePointQueryFunction2, &ClosestUnsignedDistanceSq);
+
+	OutClosestDistance = Math::Sqrt(ClosestUnsignedDistanceSq);
+	bOutNeedTracyRays = OutClosestDistance <= LocalSpaceTraceDistance;
+}
+
+void FEmbreeScene::EmbreeRayTrace(v3dxVector3 StartPosition, v3dxVector3 RayDirection, bool& bOutHit, bool& bOutHitTwoSided, v3dxVector3& OutHitNormal, float& OutTFar)
+{
+	FEmbreeRay EmbreeRay;
+
+	EmbreeRay.ray.org_x = StartPosition.X;
+	EmbreeRay.ray.org_y = StartPosition.Y;
+	EmbreeRay.ray.org_z = StartPosition.Z;
+	EmbreeRay.ray.dir_x = RayDirection.X;
+	EmbreeRay.ray.dir_y = RayDirection.Y;
+	EmbreeRay.ray.dir_z = RayDirection.Z;
+	EmbreeRay.ray.tnear = 0;
+	EmbreeRay.ray.tfar = 1.0f;
+
+	FEmbreeIntersectionContext EmbreeContext;
+	rtcInitIntersectContext(&EmbreeContext);
+	rtcIntersect1(EmbreeScene, &EmbreeContext, &EmbreeRay);
+
+	bOutHit = false;
+	bOutHitTwoSided = false;
+	if (EmbreeRay.hit.geomID != RTC_INVALID_GEOMETRY_ID && EmbreeRay.hit.primID != RTC_INVALID_GEOMETRY_ID)
+	{
+		bOutHit = true;
+		OutHitNormal = EmbreeRay.GetHitNormal();
+		bOutHitTwoSided = EmbreeContext.IsHitTwoSided();
+		OutTFar = EmbreeRay.ray.tfar;
+	}
+}
+
+EmbreeManager::~EmbreeManager()
+{
+	if (EmbreeDevice)
+	{
+		rtcReleaseDevice(EmbreeDevice);
+		EmbreeDevice = nullptr;
+	}
+}
+
+bool EmbreeManager::Initialize()
+{
+	EmbreeDevice = rtcNewDevice(nullptr);
+	rtcSetDeviceErrorFunction(EmbreeDevice, EmbreeErrorFunc, nullptr);
+	RTCError ReturnErrorNewDevice = rtcGetDeviceError(EmbreeDevice);
+	if (ReturnErrorNewDevice != RTC_ERROR_NONE)
+	{
+		return false;
+	}
+	return true;
+}
+
+FEmbreeScene* EmbreeManager::CreateScene()
+{
+	auto EmbreeScene = rtcNewScene(EmbreeDevice);
+	rtcSetSceneFlags(EmbreeScene, RTC_SCENE_FLAG_NONE);
+	RTCError ReturnErrorNewScene = rtcGetDeviceError(EmbreeDevice);
+	if (ReturnErrorNewScene != RTC_ERROR_NONE)
+	{
+		return nullptr;
+	}
+	auto result = new FEmbreeScene();
+	result->EmbreeScene = EmbreeScene;
+	result->EmbreeDevice = EmbreeDevice;
+	return result;
+}
+
+FEmbreeGeometry* EmbreeManager::CreateGeometry(VNameString meshName, NxRHI::FMeshDataProvider& meshProvider)
+{
+	UINT NumVertices = meshProvider.GetVertexNumber();
+	UINT NumTriangles = meshProvider.GetPrimitiveNumber();
+	UINT NumIndices = NumTriangles * 3;
+
+	// 2, calculate valid triangles
+	std::vector<INT32> FilteredTriangles;
+	FilteredTriangles.reserve(NumTriangles);
+	auto pPos = (v3dxVector3*)meshProvider.GetStream(NxRHI::VST_Position)->GetData();
+	for (UINT triangleIndex = 0; triangleIndex < NumTriangles; ++triangleIndex)
+	{
+		UINT i0, i1, i2;
+		if (meshProvider.GetTriangle(triangleIndex, &i0, &i1, &i2))
+		{
+			v3dxVector3 v0 = pPos[i0];
+			v3dxVector3 v1 = pPos[i1];
+			v3dxVector3 v2 = pPos[i2];
+
+			v3dxVector3 triangleNormal = (v0 - v2).crossProduct(v1 - v2);
+			bool bDegenerateTriangle = triangleNormal.getLengthSq() < SMALL_EPSILON;
+			if (!bDegenerateTriangle)
+				FilteredTriangles.push_back(triangleIndex);
+		}
+	}
+
+	// 3, fill RTCGeometry(vertices,indices,triangleDesc) in embreeScene
+	const INT32 NumBufferVerts = 1; // Reserve extra space at the end of the array, as embree has an internal bug where they read and discard 4 bytes off the end of the array
+	FEmbreeGeometry* result = new FEmbreeGeometry();
+	result->VertexArray.resize(NumVertices + NumBufferVerts);
+
+	const auto NumFilteredIndices = FilteredTriangles.size() * 3;
+
+	result->IndexArray.resize(NumFilteredIndices);
+
+	v3dxVector3* EmbreeVertices = result->VertexArray.data();
+	UINT* EmbreeIndices = result->IndexArray.data();
+	result->TriangleDescs.reserve(FilteredTriangles.size());
+
+	for (INT32 FilteredTriangleIndex = 0; FilteredTriangleIndex < FilteredTriangles.size(); FilteredTriangleIndex++)
+	{
+		UINT I0, I1, I2;
+		v3dxVector3 V0, V1, V2;
+
+		const INT32 TriangleIndex = FilteredTriangles[FilteredTriangleIndex];
+		if (meshProvider.GetTriangle(TriangleIndex, &I0, &I1, &I2))
+		{
+			V0 = pPos[I0];
+			V1 = pPos[I1];
+			V2 = pPos[I2];
+		}
+
+		// TODO calculate bTriangleIsTwoSided from materials
+		bool bTriangleIsTwoSided = false;
+
+		EmbreeIndices[FilteredTriangleIndex * 3 + 0] = I0;
+		EmbreeIndices[FilteredTriangleIndex * 3 + 1] = I1;
+		EmbreeIndices[FilteredTriangleIndex * 3 + 2] = I2;
+
+		EmbreeVertices[I0] = V0;
+		EmbreeVertices[I1] = V1;
+		EmbreeVertices[I2] = V2;
+
+		FEmbreeTriangleDesc Desc;
+		// Store bGenerateAsIfTwoSided in material index
+		bool bGenerateAsIfTwoSided = false;
+		Desc.ElementIndex = bGenerateAsIfTwoSided || bTriangleIsTwoSided ? 1 : 0;
+		result->TriangleDescs.push_back(Desc);
+	}
+
+	RTCGeometry rtcGeometry = rtcNewGeometry(EmbreeDevice, RTC_GEOMETRY_TYPE_TRIANGLE);
+	result->InternalGeometry = rtcGeometry;
+
+	rtcSetSharedGeometryBuffer(rtcGeometry, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, EmbreeVertices, 0, sizeof(v3dxVector3), NumVertices);
+	rtcSetSharedGeometryBuffer(rtcGeometry, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, EmbreeIndices, 0, sizeof(UINT) * 3, FilteredTriangles.size());
+
+	rtcSetGeometryUserData(rtcGeometry, result);
+	rtcSetGeometryIntersectFilterFunction(rtcGeometry, EmbreeFilterFunc);
+
+	rtcCommitGeometry(rtcGeometry);
+
+	result->GeomID = GeomIDAllocator++;
+	return result;
+}
+
+FEmbreeGeometryInstance* EmbreeManager::CreateGeometryInstance(FEmbreeGeometry* geometry)
+{
+	auto result = new FEmbreeGeometryInstance();
+	result->TemplateGeometry = geometry;
+	result->InternalGeometry = rtcNewGeometry(EmbreeDevice, RTC_GEOMETRY_TYPE_INSTANCE);
+	rtcSetGeometryInstancedScene(result->InternalGeometry, geometry->AsTemplateScene(this)->EmbreeScene);
+	rtcSetGeometryUserData(result->InternalGeometry, result);
+	rtcSetGeometryIntersectFilterFunction(result->InternalGeometry, EmbreeFilterFunc);
+	result->GeomID = GeomIDAllocator++;
+	return result;
 }
 
 void EmbreeManager::SetupEmbreeScene(VNameString meshName, NxRHI::FMeshDataProvider& meshProvider, float DistanceFieldResolutionScale, FEmbreeScene& embreeScene)
@@ -154,12 +418,6 @@ void EmbreeManager::DeleteEmbreeScene(FEmbreeScene& embreeScene)
 	rtcReleaseDevice(embreeScene.EmbreeDevice);
 }
 
-class FEmbreePointQueryContext : public RTCPointQueryContext
-{
-public:
-	RTCGeometry MeshGeometry;
-	INT32 NumTriangles;
-};
 bool EmbreePointQueryFunction(RTCPointQueryFunctionArguments* args)
 {
 	const FEmbreePointQueryContext* Context = (const FEmbreePointQueryContext*)args->context;

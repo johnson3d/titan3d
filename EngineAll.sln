@@ -525,6 +525,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpirvCross", "3rd\native\Sp
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "TencentAIGC", "Plugins\AIGC\TencentAIGC\TencentAIGC\TencentAIGC.shproj", "{C29EC9F5-FFC9-4086-B1C7-58FAC9534BA6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GI", "GI", "{DCF0A0FD-04EA-4E6D-B0D1-3EB6842ED2BA}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PRT", "CSharpCode\Bricks\GI\PRT\PRT.shproj", "{A3FF4562-9387-4786-9DC2-575E5A3C30A3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1272,6 +1276,8 @@ Global
 		{B6CAB0AA-E7D9-4F42-BE02-92F6A6EC6E33} = {A2A724BD-935F-4689-9329-2FB28BA900C2}
 		{DBB39279-6FDE-4555-8E65-5C24B4130CDF} = {4A69F69C-6D09-4798-838A-BCE0C8C785F9}
 		{C29EC9F5-FFC9-4086-B1C7-58FAC9534BA6} = {88993F88-10BC-4F3A-ADD1-E499EAFE4CC2}
+		{DCF0A0FD-04EA-4E6D-B0D1-3EB6842ED2BA} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
+		{A3FF4562-9387-4786-9DC2-575E5A3C30A3} = {DCF0A0FD-04EA-4E6D-B0D1-3EB6842ED2BA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
@@ -1328,6 +1334,7 @@ Global
 		CSharpCode\Bricks\Font\Font.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\FX\Hair\Hair.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\FX\Skin\Skin.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		CSharpCode\Bricks\GI\PRT\PRT.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\GpuDriven\GpuDriven.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\ImageDecoder\ImageDecoder.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Input\Input.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -1544,6 +1551,7 @@ Global
 		NativeCode\Bricks\TcpClient\TcpClient.vcxitems*{9f919c6f-01e0-4560-9706-7f9cdea2c1c9}*SharedItemsImports = 9
 		3rd\csharp\NvTriStrip\NvTriStrip.projitems*{a2ec9f38-402e-4af3-b718-dbbbbae41e33}*SharedItemsImports = 13
 		CSharpCode\Bricks\ImageDecoder\ImageDecoder.projitems*{a3697ce8-7369-4d92-84e6-6f5667d03c79}*SharedItemsImports = 13
+		CSharpCode\Bricks\GI\PRT\PRT.projitems*{a3ff4562-9387-4786-9dc2-575e5a3c30a3}*SharedItemsImports = 13
 		NativeCode\Bricks\Animation\Animation.vcxitems*{a415eb90-cf3a-4cbc-bd98-14eed4d0fcd1}*SharedItemsImports = 9
 		CSharpCode\Bricks\FX\Hair\Hair.projitems*{a62536f2-65fa-4ff1-8485-706bc637f585}*SharedItemsImports = 13
 		CSharpCode\Bricks\UI\UI.projitems*{a78776fc-f5ba-4eec-b8f6-f17b2202e1b0}*SharedItemsImports = 13
