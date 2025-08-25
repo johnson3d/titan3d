@@ -12,7 +12,7 @@ namespace EngineNS.Bricks.GI.PRT
     {
         public fixed float Coeffs[9 * 3];//RGB coeffs
     }
-    public class TtPrtNode : TtLightWeightNodeBase
+    public class TtVertexPrtNode : TtLightWeightNodeBase
     {
         public class TtPrtNodeData : TtNodeData
         {

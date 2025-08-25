@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace EngineNS.DistanceField
+namespace EngineNS.Bricks.Collision.Embree
 {
     public interface IEmbreeGeometry
     {

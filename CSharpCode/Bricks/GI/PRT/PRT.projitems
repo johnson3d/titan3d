@@ -9,6 +9,7 @@
     <Import_RootNamespace>EngineNS.Bricks.GI.PRT</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)PrtData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PrtProbeVolume.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VertexPrtData.cs" />
   </ItemGroup>
 </Project>
