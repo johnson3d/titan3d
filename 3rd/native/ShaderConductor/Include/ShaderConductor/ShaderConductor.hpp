@@ -448,10 +448,14 @@ namespace ShaderConductor
             int optimizationLevel = 3; // 0 to 3, no optimization to most optimization
             ShaderModel shaderModel = {6, 0};
 
-            int shiftAllTexturesBindings = 0;
-            int shiftAllSamplersBindings = 0;
-            int shiftAllCBuffersBindings = 0;
-            int shiftAllUABuffersBindings = 0;
+            int shiftAllTexturesBindings = -1;
+            int shiftAllTexturesSet = -1;
+            int shiftAllSamplersBindings = -1;
+            int shiftAllSamplersSet = -1;
+            int shiftAllCBuffersBindings = -1;
+            int shiftAllCBuffersSet = -1;
+            int shiftAllUABuffersBindings = -1;
+            int shiftAllUABuffersSet = -1;
 
             bool needReflection = false;
             bool stripReflection = false;               //renderdoc needs those infomations, default value is false

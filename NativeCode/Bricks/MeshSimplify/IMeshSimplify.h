@@ -41,4 +41,11 @@ public:
 		UINT max_vertices, UINT max_triangles, float cone_weight = 0);
 };
 
+class TR_CLASS()
+	VPointCloud : public VIUnknown
+{
+public:
+	
+};
+
 NS_END

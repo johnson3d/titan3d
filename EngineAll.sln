@@ -529,6 +529,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GI", "GI", "{DCF0A0FD-04EA-
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PRT", "CSharpCode\Bricks\GI\PRT\PRT.shproj", "{A3FF4562-9387-4786-9DC2-575E5A3C30A3}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wykobi", "3rd\native\wykobi\wykobi.vcxitems", "{176139B1-26BB-4CDD-897B-B934BEE034E2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1278,6 +1280,7 @@ Global
 		{C29EC9F5-FFC9-4086-B1C7-58FAC9534BA6} = {88993F88-10BC-4F3A-ADD1-E499EAFE4CC2}
 		{DCF0A0FD-04EA-4E6D-B0D1-3EB6842ED2BA} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{A3FF4562-9387-4786-9DC2-575E5A3C30A3} = {DCF0A0FD-04EA-4E6D-B0D1-3EB6842ED2BA}
+		{176139B1-26BB-4CDD-897B-B934BEE034E2} = {4A69F69C-6D09-4798-838A-BCE0C8C785F9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
@@ -1374,6 +1377,7 @@ Global
 		Plugins\GameServer\ClientRobot\ClientRobot\ClientRobot.projitems*{12f552ba-c1ba-49a1-a7db-f32d98761d1c}*SharedItemsImports = 5
 		Plugins\GameServer\CSCommon\CSCommon.projitems*{12f552ba-c1ba-49a1-a7db-f32d98761d1c}*SharedItemsImports = 5
 		CSharpCode\Bricks\DesignMacross\DesignMacross.projitems*{14aa6ea6-9c49-459b-8242-0e509fd2fcb2}*SharedItemsImports = 13
+		3rd\native\wykobi\wykobi.vcxitems*{176139b1-26bb-4cdd-897b-b934bee034e2}*SharedItemsImports = 9
 		Plugins\GameServer\Root\RootServer\RootServer.projitems*{17aa8006-bb92-4396-8fab-5eb9a54eec0d}*SharedItemsImports = 5
 		CSharpCode\Bricks\VirtualTexture\VirtualTexture.projitems*{1ca2814e-c99c-419b-a83a-33bf1b1088c9}*SharedItemsImports = 13
 		NativeCode\Bricks\TTStrip\TTStrip.vcxitems*{1dfd86bc-f082-409c-a396-ca30902519b5}*SharedItemsImports = 9

@@ -5,6 +5,14 @@ using System.Text;
 
 namespace EngineNS.NxRHI
 {
+    public partial class TtMeshAtomDesc : AuxPtrType<NxRHI.TMeshAtomDesc>
+    {
+        public TtMeshAtomDesc()
+        {
+            mCoreObject = NxRHI.TMeshAtomDesc.CreateInstance();
+        }
+    }
+
     public partial class TtGraphicDraw : AuxPtrType<NxRHI.IGraphicDraw>
     {
         public object TagObject = null;

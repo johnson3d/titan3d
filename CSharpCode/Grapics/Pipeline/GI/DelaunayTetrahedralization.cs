@@ -215,7 +215,7 @@ namespace EngineNS.Graphics.Pipeline.GI
                 var initialTetra = FindInitialTetrahedron(points);
                 if (initialTetra == null)
                 {
-                    //Debug.LogError("Could not find valid initial tetrahedron");
+                    Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Error, "Could not find valid initial tetrahedron");
                     return tetrahedra;
                 }
 
@@ -242,17 +242,18 @@ namespace EngineNS.Graphics.Pipeline.GI
                 foreach (int pointIndex in remainingPoints)
                 {
                     var conflictingFaces = conflictGraph.GetConflictingFaces(pointIndex);
-                    if (conflictingFaces.Count == 0) continue;
+                    if (conflictingFaces.Count == 0) 
+                        continue;
 
                     AddPointToHull(pointIndex, points, hull, conflictingFaces, conflictGraph, tetrahedra);
                     usedPoints.Add(pointIndex);
                 }
 
-                //Debug.Log($"Successfully built {tetrahedra.Count} tetrahedra from {points.Count} points");
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, $"Successfully built {tetrahedra.Count} tetrahedra from {points.Count} points");
             }
             catch (Exception e)
             {
-                //Debug.LogError($"Error in tetrahedralization: {e.Message}");
+                Profiler.Log.WriteException(e);
             }
             finally
             {
@@ -271,7 +272,8 @@ namespace EngineNS.Graphics.Pipeline.GI
         {
             for (int i = 0; i < points.Count; i++)
             {
-                if (usedPoints.Contains(i)) continue;
+                if (usedPoints.Contains(i)) 
+                    continue;
 
                 foreach (var face in hull)
                 {
@@ -284,8 +286,8 @@ namespace EngineNS.Graphics.Pipeline.GI
         }
 
         private void AddPointToHull(int pointIndex, List<Vector3> points, List<Face> hull,
-                                  HashSet<Face> conflictingFaces, ConflictGraph conflictGraph,
-                                  List<TetrahedronData> tetrahedra)
+                          HashSet<Face> conflictingFaces, ConflictGraph conflictGraph,
+                          List<TetrahedronData> tetrahedra)
         {
             var point = points[pointIndex];
 
@@ -293,11 +295,21 @@ namespace EngineNS.Graphics.Pipeline.GI
             var boundaryEdges = FindBoundaryEdges(conflictingFaces.ToList());
             if (boundaryEdges.Count == 0)
             {
-                //Debug.LogWarning($"No boundary edges found for point {pointIndex}");
                 return;
             }
 
-            // 2. 收集需要重新分配的点
+            // 2. 在删除冲突面之前，先为每条边界边找到第三个顶点
+            var edgeToThirdVertex = new Dictionary<Edge, int>();
+            foreach (var edge in boundaryEdges)
+            {
+                var thirdVertex = FindThirdVertexOfEdge(edge, conflictingFaces, points);
+                if (thirdVertex != -1)
+                {
+                    edgeToThirdVertex[edge] = thirdVertex;
+                }
+            }
+
+            // 3. 收集需要重新分配的点
             var orphanedPoints = new HashSet<int>();
             foreach (var face in conflictingFaces)
             {
@@ -309,14 +321,14 @@ namespace EngineNS.Graphics.Pipeline.GI
                 }
             }
 
-            // 3. 移除冲突面
+            // 4. 现在可以安全地移除冲突面
             foreach (var face in conflictingFaces.ToList())
             {
                 hull.Remove(face);
                 conflictGraph.RemoveFace(face);
             }
 
-            // 4. 为每条边界边创建新面和四面体
+            // 5. 为每条边界边创建新面和四面体
             var newFaces = new List<Face>();
             foreach (var edge in boundaryEdges)
             {
@@ -326,9 +338,8 @@ namespace EngineNS.Graphics.Pipeline.GI
                 hull.Add(newFace);
                 newFaces.Add(newFace);
 
-                // 创建对应的四面体
-                var thirdVertex = FindThirdVertexOfEdge(edge, conflictingFaces, points);
-                if (thirdVertex != -1)
+                // 使用之前保存的第三个顶点信息创建四面体
+                if (edgeToThirdVertex.TryGetValue(edge, out int thirdVertex))
                 {
                     var tetra = CreateTetrahedron(edge.v1, edge.v2, thirdVertex, pointIndex, points);
                     if (tetra != null && tetra.IsValid())
@@ -338,7 +349,7 @@ namespace EngineNS.Graphics.Pipeline.GI
                 }
             }
 
-            // 5. 重新分配孤立的点
+            // 6. 重新分配孤立的点
             foreach (var orphanPoint in orphanedPoints)
             {
                 foreach (var newFace in newFaces)
@@ -350,6 +361,7 @@ namespace EngineNS.Graphics.Pipeline.GI
                 }
             }
         }
+
 
         private TetrahedronData CreateTetrahedron(int v1, int v2, int v3, int v4, List<Vector3> points)
         {
@@ -386,10 +398,10 @@ namespace EngineNS.Graphics.Pipeline.GI
             {
                 var edges = new[]
                 {
-                new Edge(face.Vertices[0], face.Vertices[1]),
-                new Edge(face.Vertices[1], face.Vertices[2]),
-                new Edge(face.Vertices[2], face.Vertices[0])
-            };
+                    new Edge(face.Vertices[0], face.Vertices[1]),
+                    new Edge(face.Vertices[1], face.Vertices[2]),
+                    new Edge(face.Vertices[2], face.Vertices[0])
+                };
 
                 foreach (var edge in edges)
                 {

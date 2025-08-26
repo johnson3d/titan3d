@@ -339,7 +339,11 @@ namespace NxRHI
 		auto vkCmd = (VKCommandList*)cmdlist;
 		UpdateDescriptorSets(vkCmd);
 
-		auto pDrawDesc = Mesh->GetAtomDesc(MeshAtom, MeshLOD);
+		FMeshAtomDesc* pDrawDesc;
+		if (AtomDesc == nullptr)
+			pDrawDesc = Mesh->GetAtomDesc(MeshAtom, MeshLOD);
+		else
+			pDrawDesc = &AtomDesc->AtomDesc;
 		ASSERT(pDrawDesc);
 		if (IndirectDrawArgsBuffer)
 		{

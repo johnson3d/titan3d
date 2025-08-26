@@ -105,7 +105,11 @@ namespace NxRHI
 
 		{
 			AUTO_SAMP("NxRHI.GraphicDraw.Commit.Draw");
-			auto pDrawDesc = Mesh->GetAtomDesc(MeshAtom, MeshLOD);
+			FMeshAtomDesc* pDrawDesc;
+			if (AtomDesc == nullptr)
+				pDrawDesc = Mesh->GetAtomDesc(MeshAtom, MeshLOD);
+			else
+				pDrawDesc = &AtomDesc->AtomDesc;
 			ASSERT(pDrawDesc);
 			if (IndirectDrawArgsBuffer)
 			{

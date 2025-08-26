@@ -29,6 +29,25 @@ namespace EngineNS.Graphics.Mesh
         {
             mCoreObject.Reset();
         }
+        public unsafe void PushAtom(in FMeshAtomDesc desc)
+        {
+            fixed (FMeshAtomDesc* p = &desc)
+            {
+                mCoreObject.PushAtom(p, 1, new VIUnknown());
+            }
+        }
+        public void PushAtomLOD(uint index, in FMeshAtomDesc desc)
+        {
+            mCoreObject.PushAtomLOD(index, in desc);
+        }
+        public unsafe void AddVertex(FMeshVertex* pVertex, uint num)
+        {
+            mCoreObject.AddVertex(pVertex, num);
+        }
+        public bool AddLine(uint a, uint b)
+        {
+            return mCoreObject.AddLine(a, b);
+        }
         public unsafe bool MergeFromMesh(TtMeshDataProvider mesh)
         {
             return mCoreObject.MergeFromMesh(mesh.mCoreObject, (Matrix*)IntPtr.Zero.ToPointer());

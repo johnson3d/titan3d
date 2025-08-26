@@ -22,6 +22,20 @@ namespace NxRHI
 	class IBindless;
 
 	class TR_CLASS()
+		TMeshAtomDesc : public VIUnknown
+	{
+	public:
+		TMeshAtomDesc()
+		{
+			AtomDesc.SetDefault();
+		}
+		FMeshAtomDesc AtomDesc;
+		FMeshAtomDesc* GetAtomDescPtr() {
+			return &AtomDesc;
+		}
+	};
+
+	class TR_CLASS()
 		IGpuDraw : public VIUnknown
 	{
 	public:
@@ -85,6 +99,8 @@ namespace NxRHI
 		}
 		void BindIndirectDrawArgsBuffer(IBuffer* buffer, UINT offset);
 		const FMeshAtomDesc* GetMeshAtomDesc() {
+			if (AtomDesc != nullptr)
+				return AtomDesc->GetAtomDescPtr();
 			return Mesh->GetAtomDesc(MeshAtom, MeshLOD);
 		}
 		virtual UINT GetPrimitiveNum() override{
@@ -127,8 +143,8 @@ namespace NxRHI
 		BYTE						MeshAtom = 0;//Maybe: bit12
 		BYTE						MeshLOD = 0;//Maybe: bit6
 		UINT						ViewInstanceMask = 0;
-
 		const IGpuDrawState*		GpuDrawState = nullptr;
+		AutoRef<TMeshAtomDesc> AtomDesc;
 	protected:
 		void UpdateGpuDrawState(IGpuDevice* device, ICommandList* cmdlist, IRenderPass* rpass);
 		virtual void OnGpuDrawStateUpdated() {}

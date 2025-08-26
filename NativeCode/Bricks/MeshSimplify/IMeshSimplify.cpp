@@ -2,6 +2,7 @@
 #include "Simplify.h"
 #include "../../Graphics/Mesh/MeshDataProvider.h"
 #include "meshoptimizer.h"
+#include "../../../3rd/native/wykobi/wykobi.hpp"
 
 #define new VNEW
 
@@ -120,8 +121,8 @@ UINT IMeshOptimizer::BuildMeshlets(IBlobObject* meshlets, IBlobObject* meshletMa
 		//temp code
 		break;
 	}
-	
-	
+		
 	return result;
 }
+
 NS_END

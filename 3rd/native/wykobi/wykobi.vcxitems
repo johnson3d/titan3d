@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{176139b1-26bb-4cdd-897b-b934bee034e2}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Makefile" />
+    <None Include="$(MSBuildThisFileDirectory)readme.md" />
+    <None Include="$(MSBuildThisFileDirectory)wykobi.inl" />
+    <None Include="$(MSBuildThisFileDirectory)wykobi_axis_projection_descriptor.inl" />
+    <None Include="$(MSBuildThisFileDirectory)wykobi_clipping.inl" />
+    <None Include="$(MSBuildThisFileDirectory)wykobi_duplicates.inl" />
+    <None Include="$(MSBuildThisFileDirectory)wykobi_earclipping.inl" />
+    <None Include="$(MSBuildThisFileDirectory)wykobi_hull.inl" />
+    <None Include="$(MSBuildThisFileDirectory)wykobi_matrix.inl" />
+    <None Include="$(MSBuildThisFileDirectory)wykobi_minimum_bounding_ball.inl" />
+    <None Include="$(MSBuildThisFileDirectory)wykobi_naive_group_intersections.inl" />
+    <None Include="$(MSBuildThisFileDirectory)wykobi_nd.inl" />
+    <None Include="$(MSBuildThisFileDirectory)wykobi_normalization.inl" />
+    <None Include="$(MSBuildThisFileDirectory)wykobi_ordered_polygon.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="$(MSBuildThisFileDirectory)release-notes.txt" />
+    <Text Include="$(MSBuildThisFileDirectory)wykobi_license.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)wykobi.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)wykobi_algorithm.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)wykobi_graphics_net.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)wykobi_graphics_opengl.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)wykobi_graphics_vcl.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)wykobi_gui.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)wykobi_instantiate.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)wykobi_math.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)wykobi_matrix.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)wykobi_nd.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)wykobi_utilities.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)wykobi_build.cpp" />
+  </ItemGroup>
+</Project>

@@ -146,6 +146,8 @@ namespace EngineNS.Graphics.Mesh
             mPerMeshCBuffer = cbv;
         }
         public bool IsDrawHitproxy = false;
+        public delegate void FOnBuildDrawcall(NxRHI.TtGraphicDraw drawcall);
+        public FOnBuildDrawcall OnBuildDrawcall = null;
         public object Tag { get; set; }
         public class TtAtom : IDisposable
         {
@@ -230,7 +232,7 @@ namespace EngineNS.Graphics.Mesh
                 public Pipeline.TtRenderPolicy Policy;                
             }
             public List<ViewDrawCalls> TargetViews;
-            
+
             private async Thread.Async.TtTask BuildDrawCall(ViewDrawCalls vdc, Pipeline.TtGraphicsBuffers targetView, Pipeline.TtRenderPolicy policy,
                 Pipeline.TtRenderGraphNode node)
             {
@@ -256,7 +258,7 @@ namespace EngineNS.Graphics.Mesh
                         drawcall.BindPipeline(Material.Pipeline);
                         drawcall.BindGBuffer(policy.DefaultCamera, targetView);
                         drawcall.PermutationId = shading.mCurrentPermutationId;
-
+                        
                         #region Textures
                         for (int j = 0; j < Material.NumOfSRV; j++)
                         {
@@ -321,6 +323,11 @@ namespace EngineNS.Graphics.Mesh
 
                         MdfQueue.OnBuildDrawCall(policy, drawcall, this);
                         shading.OnBuildDrawCall(policy, drawcall);
+
+                        if (this.SubMesh.Mesh.OnBuildDrawcall!=null)
+                        {
+                            this.SubMesh.Mesh.OnBuildDrawcall(drawcall);
+                        }
 
                         vdc.DrawCalls = drawcall;
                         vdc.State = 1;
