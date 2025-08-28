@@ -531,6 +531,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PRT", "CSharpCode\Bricks\GI
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wykobi", "3rd\native\wykobi\wykobi.vcxitems", "{176139B1-26BB-4CDD-897B-B934BEE034E2}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Meshly", "CSharpCode\Bricks\Meshly\Meshly.shproj", "{BAFED495-15B8-4113-BC81-AC9DF10D3619}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1281,6 +1283,7 @@ Global
 		{DCF0A0FD-04EA-4E6D-B0D1-3EB6842ED2BA} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{A3FF4562-9387-4786-9DC2-575E5A3C30A3} = {DCF0A0FD-04EA-4E6D-B0D1-3EB6842ED2BA}
 		{176139B1-26BB-4CDD-897B-B934BEE034E2} = {4A69F69C-6D09-4798-838A-BCE0C8C785F9}
+		{BAFED495-15B8-4113-BC81-AC9DF10D3619} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
@@ -1342,6 +1345,7 @@ Global
 		CSharpCode\Bricks\ImageDecoder\ImageDecoder.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Input\Input.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Localization\Localization.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		CSharpCode\Bricks\Meshly\Meshly.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Network\Network.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\NodeGraph\NodeGraph.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Particle\Particle.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -1629,6 +1633,7 @@ Global
 		NativeCode\Bricks\PhysicsCore\NvPhysX\NvPhysX.vcxitems*{b6cab0aa-e7d9-4f42-be02-92f6a6ec6e33}*SharedItemsImports = 9
 		3rd\native\zstd\zstd.vcxitems*{b788d96b-fbce-4746-ae5b-e82a6993e5f5}*SharedItemsImports = 9
 		CSharpCode\Math\Math.projitems*{ba72ed15-3c3c-4a4c-8d57-5a9f181a59d0}*SharedItemsImports = 13
+		CSharpCode\Bricks\Meshly\Meshly.projitems*{bafed495-15b8-4113-bc81-ac9df10d3619}*SharedItemsImports = 13
 		3rd\native\miniz\miniz.vcxitems*{bb5c9f78-44f7-4300-8c3e-0502f529e1cc}*SharedItemsImports = 9
 		3rd\native\Recast\Recast\Recast.vcxitems*{bccbb13c-8f09-42ab-b3c9-da9a40c43e0b}*SharedItemsImports = 9
 		Plugins\GameServer\ClientRobot\ClientRobot\ClientRobot.projitems*{beb33a99-ad2a-475e-87c1-0699e0032286}*SharedItemsImports = 13

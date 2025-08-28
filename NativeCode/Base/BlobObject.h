@@ -44,6 +44,11 @@ struct TR_CLASS()
 			memcpy(&mDatas[oldSize], data, size);
 	}
 	template<typename T>
+	void PushData(const T& v)
+	{
+		PushData(&v, sizeof(T));
+	}
+	template<typename T>
 	void SetValueToOffset(UINT offset, T v)
 	{
 		memcpy(&mDatas[offset], &v, sizeof(T));

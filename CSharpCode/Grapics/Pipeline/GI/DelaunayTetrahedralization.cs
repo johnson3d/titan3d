@@ -4,65 +4,63 @@ using System.Linq;
 
 namespace EngineNS.Graphics.Pipeline.GI
 {
+    public class TtTetrahedronData
+    {
+        public int[] ProbeIndices { get; set; } = new int[4];
+        public Vector3[] Vertices { get; set; } = new Vector3[4];
+        public Matrix BarycentricMatrix { get; set; }
+        public float Volume { get; set; }
+        public BoundingBox Bounds { get; set; }
+
+        public void Precompute()
+        {
+            // 计算重心坐标转换矩阵
+            var m = new Matrix(
+                Vertices[0].x, Vertices[1].x, Vertices[2].x, Vertices[3].x,
+                Vertices[0].y, Vertices[1].y, Vertices[2].y, Vertices[3].y,
+                Vertices[0].z, Vertices[1].z, Vertices[2].z, Vertices[3].z,
+                1f, 1f, 1f, 1f
+            );
+
+            Volume = MathF.Abs(m.Determinant()) / 6f;
+
+            if (Volume > 1e-10f)
+            {
+                BarycentricMatrix = Matrix.Invert(m);
+            }
+            else
+            {
+                BarycentricMatrix = Matrix.Identity;
+            }
+
+            // 计算包围盒
+            Bounds = new BoundingBox(Vertices[0], Vector3.Zero);
+            for (int i = 1; i < 4; i++)
+            {
+                Bounds.Merge(Vertices[i]);
+            }
+        }
+
+        public bool IsValid() => Volume > 1e-10f;
+
+        public Vector4 GetBarycentricCoords(Vector3 worldPos)
+        {
+            var homogeneousPos = new Vector4(worldPos.x, worldPos.y, worldPos.z, 1f);
+            return Vector4.Transform(homogeneousPos, BarycentricMatrix);
+        }
+
+        public bool ContainsPoint(Vector3 worldPos)
+        {
+            var baryCoords = GetBarycentricCoords(worldPos);
+            return baryCoords.X >= -1e-6f && baryCoords.Y >= -1e-6f &&
+                   baryCoords.Z >= -1e-6f && baryCoords.W >= -1e-6f;
+        }
+    }
+
     //todo: https://github.com/CGAL/cgal
     public class TtDelaunayTetrahedralization
     {
         #region Data Structures
-
-        [Serializable]
-        public class TetrahedronData
-        {
-            public int[] ProbeIndices { get; set; } = new int[4];
-            public Vector3[] Vertices { get; set; } = new Vector3[4];
-            public Matrix BarycentricMatrix { get; set; }
-            public float Volume { get; set; }
-            public BoundingBox Bounds { get; set; }
-
-            public void Precompute()
-            {
-                // 计算重心坐标转换矩阵
-                var m = new Matrix(
-                    Vertices[0].x, Vertices[1].x, Vertices[2].x, Vertices[3].x,
-                    Vertices[0].y, Vertices[1].y, Vertices[2].y, Vertices[3].y,
-                    Vertices[0].z, Vertices[1].z, Vertices[2].z, Vertices[3].z,
-                    1f, 1f, 1f, 1f
-                );
-
-                Volume = MathF.Abs(m.Determinant()) / 6f;
-
-                if (MathF.Abs(m.Determinant()) > 1e-10f)
-                {
-                    BarycentricMatrix = Matrix.Invert(m);
-                }
-                else
-                {
-                    BarycentricMatrix = Matrix.Identity;
-                }
-
-                // 计算包围盒
-                Bounds = new BoundingBox(Vertices[0], Vector3.Zero);
-                for (int i = 1; i < 4; i++)
-                {
-                    Bounds.Merge(Vertices[i]);
-                }
-            }
-
-            public bool IsValid() => Volume > 1e-10f;
-
-            public Vector4 GetBarycentricCoords(Vector3 worldPos)
-            {
-                var homogeneousPos = new Vector4(worldPos.x, worldPos.y, worldPos.z, 1f);
-                return Vector4.Transform(homogeneousPos, BarycentricMatrix);
-            }
-
-            public bool ContainsPoint(Vector3 worldPos)
-            {
-                var baryCoords = GetBarycentricCoords(worldPos);
-                return baryCoords.X >= -1e-6f && baryCoords.Y >= -1e-6f &&
-                       baryCoords.Z >= -1e-6f && baryCoords.W >= -1e-6f;
-            }
-        }
-
         public class Face
         {
             public int[] Vertices { get; set; } = new int[3];
@@ -191,21 +189,21 @@ namespace EngineNS.Graphics.Pipeline.GI
 
         #region Main Algorithm
 
-        public static List<TetrahedronData> ComputeDelaunayTetrahedralization(List<Vector3> points)
+        public static List<TtTetrahedronData> ComputeDelaunayTetrahedralization(List<Vector3> points)
         {
             if (points.Count < 4)
             {
                 //Debug.LogWarning("Need at least 4 points for tetrahedralization");
-                return new List<TetrahedronData>();
+                return new List<TtTetrahedronData>();
             }
 
             var instance = new TtDelaunayTetrahedralization();
             return instance.BuildTetrahedralization(points);
         }
 
-        private List<TetrahedronData> BuildTetrahedralization(List<Vector3> points)
+        private List<TtTetrahedronData> BuildTetrahedralization(List<Vector3> points)
         {
-            var tetrahedra = new List<TetrahedronData>();
+            var tetrahedra = new List<TtTetrahedronData>();
             var hull = new List<Face>();
             var conflictGraph = new ConflictGraph();
 
@@ -287,7 +285,7 @@ namespace EngineNS.Graphics.Pipeline.GI
 
         private void AddPointToHull(int pointIndex, List<Vector3> points, List<Face> hull,
                           HashSet<Face> conflictingFaces, ConflictGraph conflictGraph,
-                          List<TetrahedronData> tetrahedra)
+                          List<TtTetrahedronData> tetrahedra)
         {
             var point = points[pointIndex];
 
@@ -363,9 +361,9 @@ namespace EngineNS.Graphics.Pipeline.GI
         }
 
 
-        private TetrahedronData CreateTetrahedron(int v1, int v2, int v3, int v4, List<Vector3> points)
+        private TtTetrahedronData CreateTetrahedron(int v1, int v2, int v3, int v4, List<Vector3> points)
         {
-            var tetra = new TetrahedronData
+            var tetra = new TtTetrahedronData
             {
                 ProbeIndices = new[] { v1, v2, v3, v4 },
                 Vertices = new[] { points[v1], points[v2], points[v3], points[v4] }
@@ -375,7 +373,7 @@ namespace EngineNS.Graphics.Pipeline.GI
             return tetra;
         }
 
-        private List<Face> GetTetrahedronFaces(TetrahedronData tetrahedron)
+        private List<Face> GetTetrahedronFaces(TtTetrahedronData tetrahedron)
         {
             var faces = new List<Face>();
             var indices = tetrahedron.ProbeIndices;
@@ -444,11 +442,11 @@ namespace EngineNS.Graphics.Pipeline.GI
             return -1;
         }
 
-        private TetrahedronData FindInitialTetrahedron(List<Vector3> points)
+        private TtTetrahedronData FindInitialTetrahedron(List<Vector3> points)
         {
             // 找到体积最大的初始四面体，限制搜索范围提高性能
             float maxVolume = 0f;
-            TetrahedronData bestTetra = null;
+            TtTetrahedronData bestTetra = null;
             int searchLimit = Math.Min(points.Count, 50); // 限制搜索范围
 
             for (int i = 0; i < searchLimit - 3; i++)
@@ -459,7 +457,7 @@ namespace EngineNS.Graphics.Pipeline.GI
                     {
                         for (int l = k + 1; l < searchLimit; l++)
                         {
-                            var tetra = new TetrahedronData
+                            var tetra = new TtTetrahedronData
                             {
                                 ProbeIndices = new[] { i, j, k, l },
                                 Vertices = new[] { points[i], points[j], points[k], points[l] }
@@ -484,7 +482,7 @@ namespace EngineNS.Graphics.Pipeline.GI
 
         #region Public Utility Methods
 
-        public static int FindBestTetrahedron(Vector3 queryPoint, List<TetrahedronData> tetrahedra)
+        public static int FindBestTetrahedron(Vector3 queryPoint, List<TtTetrahedronData> tetrahedra)
         {
             // 首先查找包含该点的四面体
             for (int i = 0; i < tetrahedra.Count; i++)

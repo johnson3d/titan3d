@@ -23,7 +23,7 @@ namespace EngineNS.Bricks.GI.PRT
 
         //EngineNS.Graphics.Pipeline.GI.TtTetrahedron
         public TtGpuBuffer<FProbeData>[] ProbeBuffer;
-        List<Graphics.Pipeline.GI.TtDelaunayTetrahedralization.TetrahedronData> TetrahedronData = null;
+        List<Graphics.Pipeline.GI.TtTetrahedronData> TetrahedronData = new List<Graphics.Pipeline.GI.TtTetrahedronData>();
         public Graphics.Mesh.TtMesh mDebugMesh;
         public TtMeshAtomDesc mAtomDesc = new TtMeshAtomDesc();
         protected override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
@@ -35,6 +35,8 @@ namespace EngineNS.Bricks.GI.PRT
         }
         int NumOfVertices = 5;
         float Scale = 5.0f;
+        int ShowTetrahedronIndex = 0;
+        int ShowTetrahedronCount = 1;
         public unsafe void BuildMesh()
         {
             var lst = new List<Vector3>();
@@ -45,7 +47,28 @@ namespace EngineNS.Bricks.GI.PRT
                 pos = dir * (MathHelper.RandomFloat() * Scale);
                 lst.Add(pos);
             }
-            TetrahedronData = Graphics.Pipeline.GI.TtDelaunayTetrahedralization.ComputeDelaunayTetrahedralization(lst);
+            var Tetra = new List<FTetrahedron>();
+            if (Meshly.TtPointCloud.BuildTetrahedron(lst.ToArray(), Tetra))
+            {
+                for (int i = 0; i < Tetra.Count; i++)
+                {
+                    var t = new Graphics.Pipeline.GI.TtTetrahedronData();
+                    var v = Tetra[i].m_VertexIndex0;
+                    t.Vertices[0] = lst[v];
+                    v = Tetra[i].m_VertexIndex1;
+                    t.Vertices[1] = lst[v];
+                    v = Tetra[i].m_VertexIndex2;
+                    t.Vertices[2] = lst[v];
+                    v = Tetra[i].m_VertexIndex3;
+                    t.Vertices[3] = lst[v];
+
+                    t.Precompute();
+                    if (t.Volume > 1e-10f)
+                    {
+                        TetrahedronData.Add(t);
+                    }
+                }
+            }
             var mMeshDataProvider = new Graphics.Mesh.TtMeshDataProvider();
             mMeshDataProvider.Init((1 << (int)NxRHI.EVertexStreamType.VST_Position), true, 0);
             var atom = new FMeshAtomDesc();
@@ -74,15 +97,17 @@ namespace EngineNS.Bricks.GI.PRT
             mDebugMesh = mMeshDataProvider.ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialManager.NavMeshDebugMaterial);
             var ptr = mAtomDesc.mCoreObject.GetAtomDescPtr();
             ptr->PrimitiveType = EPrimitiveType.EPT_LineList;
-            ptr->m_StartIndex = 0;
-            ptr->m_NumPrimitives = 6;
-            //mDebugMesh.OnBuildDrawcall = (drawcall) =>
-            //{
-            //    drawcall.mCoreObject.AtomDesc = mAtomDesc.mCoreObject;
-            //};
+            ptr->m_NumPrimitives = 6 * (uint)ShowTetrahedronCount;
+            mDebugMesh.OnBuildDrawcall = (drawcall) =>
+            {
+                drawcall.mCoreObject.AtomDesc = mAtomDesc.mCoreObject;
+            };
         }
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public unsafe override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
+            var ptr = mAtomDesc.mCoreObject.GetAtomDescPtr();
+            ptr->m_StartIndex = 6 * 2 * (uint)ShowTetrahedronIndex;
+            ptr->m_NumPrimitives = 6 * (uint)ShowTetrahedronCount; ;
             if (mDebugMesh != null)
             {
                 rp.AddVisibleMesh(mDebugMesh);

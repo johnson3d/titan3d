@@ -2,7 +2,13 @@
 #include "Simplify.h"
 #include "../../Graphics/Mesh/MeshDataProvider.h"
 #include "meshoptimizer.h"
-#include "../../../3rd/native/wykobi/wykobi.hpp"
+
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/point_generators_3.h>
+#include <CGAL/Triangulation_vertex_base_with_info_3.h>
+
+#pragma comment(lib,"gmp.lib")
 
 #define new VNEW
 
@@ -123,6 +129,67 @@ UINT IMeshOptimizer::BuildMeshlets(IBlobObject* meshlets, IBlobObject* meshletMa
 	}
 		
 	return result;
+}
+
+typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+
+typedef CGAL::Triangulation_vertex_base_with_info_3<int, K> Vb;
+typedef CGAL::Triangulation_cell_base_3<K> Cb;
+typedef CGAL::Triangulation_data_structure_3<Vb, Cb> Tds;
+
+// 定义Delaunay三角剖分类型，带int的info 
+typedef CGAL::Delaunay_triangulation_3<K, Tds> Delaunay;
+//typedef CGAL::Delaunay_triangulation_3<K> Delaunay;
+// 定义点类型
+typedef K::Point_3 Point_3;
+// 定义四面体（单元）类型
+typedef Delaunay::Cell_handle Cell_handle;
+typedef Delaunay::Vertex_handle Vertex_handle;
+
+bool VPointCloud::BuildTetrahedron(v3dxVector3* positions, int num, IBlobObject* outTraahedrons)
+{
+	// 创建一个随机点云作为示例
+	std::vector<std::pair<Point_3, int>> points;
+	for (int i = 0; i < num; ++i) 
+	{
+		Point_3 t(positions[i].X, positions[i].Y, positions[i].Z);
+		points.push_back({ t, i});
+	}
+
+	// 创建Delaunay三角剖分
+	Delaunay dt(points.begin(), points.end());
+
+	// 验证三角剖分是否有效
+	if (dt.is_valid() == false)
+		return false;
+
+	// 输出基本信息
+	std::cout << "Number of vertices: " << dt.number_of_vertices() << std::endl;
+	std::cout << "Number of finite cells (tetrahedra): " << dt.number_of_finite_cells() << std::endl;
+	std::cout << "Number of infinite cells: " << dt.number_of_cells() - dt.number_of_finite_cells() << std::endl;
+
+	outTraahedrons->ReSize(0);
+	// 迭代遍历所有有限四面体（单元）
+	for (Cell_handle cell : dt.finite_cell_handles()) 
+	{
+		outTraahedrons->PushData((UINT)dt.number_of_finite_cells());
+		// 每个四面体有4个顶点
+		for (int i = 0; i < 4; ++i) 
+		{
+			Vertex_handle vh = cell->vertex(i);
+			// 确保顶点有效（无限顶点不存在）
+			if (dt.is_infinite(vh)) 
+			{
+				outTraahedrons->PushData((int)-1);
+			}
+			else 
+			{
+				auto index = vh->info();
+				outTraahedrons->PushData((int)index);
+			}
+		}
+	}
+	return true;
 }
 
 NS_END

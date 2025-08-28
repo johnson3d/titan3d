@@ -118,6 +118,7 @@
   <Import Project="..\..\CSharpCode\Bricks\AIGC\AIGC.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\DevIDE\DevIDE.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\GI\PRT\PRT.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\Meshly\Meshly.projitems" Label="Shared" />
   <ItemGroup>
     <Content Remove="C:\Users\johnsonsong\.nuget\packages\microsoft.codeanalysis.workspaces.msbuild\4.11.0\contentFiles\any\any\BuildHost-net472\cs\System.CommandLine.resources.dll" />
     <Content Remove="C:\Users\johnsonsong\.nuget\packages\microsoft.codeanalysis.workspaces.msbuild\4.11.0\contentFiles\any\any\BuildHost-net472\de\System.CommandLine.resources.dll" />

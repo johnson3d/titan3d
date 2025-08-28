@@ -41,11 +41,20 @@ public:
 		UINT max_vertices, UINT max_triangles, float cone_weight = 0);
 };
 
+struct TR_CLASS(SV_LayoutStruct = 8)
+	FTetrahedron
+{
+	int VertexIndex0;
+	int VertexIndex1;
+	int VertexIndex2;
+	int VertexIndex3;
+};
+
 class TR_CLASS()
 	VPointCloud : public VIUnknown
 {
 public:
-	
+	static bool BuildTetrahedron(v3dxVector3* points, int num, IBlobObject* outTraahedrons);
 };
 
 NS_END
