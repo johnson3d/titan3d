@@ -95,3 +95,5 @@ ExeCmd=SaveAsLastest AssetType=Scene+Mesh+Material+MaterialInst+Texture CookCfg=
 ## 升级CppWeavingTools
 - 升级Nuget的libclang，本机查找Microsoft Visual Studio\2022\Enterprise\VC\Tools\Llvm\x64\bin拷贝到binaries\Tools\对应.net版本
 - 右键libClangSharp查看nuget文件位置
+## 授权许可证
+- 采用[LGPL v3 许可](LICENSE.md)

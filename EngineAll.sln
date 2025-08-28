@@ -244,6 +244,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{
 	ProjectSection(SolutionItems) = preProject
 		CodeLib.md = CodeLib.md
 		Documents\Index.md = Documents\Index.md
+		LICENSE.md = LICENSE.md
 		Readme.md = Readme.md
 		Documents\Roadmap.md = Documents\Roadmap.md
 	EndProjectSection
