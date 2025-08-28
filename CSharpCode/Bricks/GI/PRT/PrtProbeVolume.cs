@@ -97,6 +97,8 @@ namespace EngineNS.Bricks.GI.PRT
             mDebugMesh = mMeshDataProvider.ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialManager.NavMeshDebugMaterial);
             var ptr = mAtomDesc.mCoreObject.GetAtomDescPtr();
             ptr->PrimitiveType = EPrimitiveType.EPT_LineList;
+            ShowTetrahedronIndex = 0;
+            ShowTetrahedronCount = TetrahedronData.Count;
             ptr->m_NumPrimitives = 6 * (uint)ShowTetrahedronCount;
             mDebugMesh.OnBuildDrawcall = (drawcall) =>
             {

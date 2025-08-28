@@ -169,10 +169,10 @@ bool VPointCloud::BuildTetrahedron(v3dxVector3* positions, int num, IBlobObject*
 	std::cout << "Number of infinite cells: " << dt.number_of_cells() - dt.number_of_finite_cells() << std::endl;
 
 	outTraahedrons->ReSize(0);
+	outTraahedrons->PushData((UINT)dt.number_of_finite_cells());
 	// 迭代遍历所有有限四面体（单元）
 	for (Cell_handle cell : dt.finite_cell_handles()) 
-	{
-		outTraahedrons->PushData((UINT)dt.number_of_finite_cells());
+	{	
 		// 每个四面体有4个顶点
 		for (int i = 0; i < 4; ++i) 
 		{
@@ -185,6 +185,7 @@ bool VPointCloud::BuildTetrahedron(v3dxVector3* positions, int num, IBlobObject*
 			else 
 			{
 				auto index = vh->info();
+				ASSERT(index < num);
 				outTraahedrons->PushData((int)index);
 			}
 		}
