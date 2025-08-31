@@ -104,6 +104,11 @@ namespace EngineNS.Bricks.Collision.Embree
         {
             return new TtEmbreeGeometry(mCoreObject.CreateGeometry(VNameString.FromString(name), meshProvider.mCoreObject));
         }
+        public TtEmbreeGeometryInstance CreateGeometryInstance(TtEmbreeGeometry geometry)
+        {
+            FEmbreeGeometryInstance ptr = mCoreObject.CreateGeometryInstance(geometry.mCoreObject);
+            return new TtEmbreeGeometryInstance(ptr);
+        }
 
         #region Old API
         public void SetupEmbreeScene(string name, TtMeshDataProvider meshProvider, float DistanceFieldResolutionScale, TtEmbreeScene embreeScene)

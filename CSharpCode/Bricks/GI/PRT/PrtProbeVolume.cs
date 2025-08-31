@@ -4,6 +4,7 @@ using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.NxRHI;
+using EngineNS.Support;
 using EngineNS.Thread.Async;
 
 namespace EngineNS.Bricks.GI.PRT
@@ -21,11 +22,13 @@ namespace EngineNS.Bricks.GI.PRT
         {
         }
 
-        //EngineNS.Graphics.Pipeline.GI.TtTetrahedron
-        public TtGpuBuffer<FProbeData>[] ProbeBuffer;
+        public TtCpu2GpuBuffer<FProbeData> ProbeBuffer = new TtCpu2GpuBuffer<FProbeData>();
+        public TtCpu2GpuBuffer<FTetrahedron> TetraBuffer = new TtCpu2GpuBuffer<FTetrahedron>();
         List<Graphics.Pipeline.GI.TtTetrahedronData> TetrahedronData = new List<Graphics.Pipeline.GI.TtTetrahedronData>();
         public Graphics.Mesh.TtMesh mDebugMesh;
         public TtMeshAtomDesc mAtomDesc = new TtMeshAtomDesc();
+        public Collision.Embree.TtEmbreeManager mEmbreeManager = new Collision.Embree.TtEmbreeManager();
+        public Collision.Embree.TtEmbreeScene mEmbreeScene = new Collision.Embree.TtEmbreeScene();
         protected override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var result = await base.InitializeNode(world, data, bvType, placementType);
@@ -33,41 +36,55 @@ namespace EngineNS.Bricks.GI.PRT
             BuildMesh();
             return result;
         }
-        int NumOfVertices = 5;
+        int NumOfVertices = 10;
         float Scale = 5.0f;
         int ShowTetrahedronIndex = 0;
         int ShowTetrahedronCount = 1;
         public unsafe void BuildMesh()
         {
             var lst = new List<Vector3>();
+            ProbeBuffer.Initialize(EBufferType.BFT_SRV);
             for (int i = 0; i<NumOfVertices; i++)
             {
                 var pos = new Vector3();
                 var dir = MathHelper.RandomDirection();
                 pos = dir * (MathHelper.RandomFloat() * Scale);
                 lst.Add(pos);
+                
+                var pd = new FProbeData();
+                pd.Position = pos;
+                ProbeBuffer.PushData(in pd);
             }
+            ProbeBuffer.Flush2GPU(null);
+
             var Tetra = new List<FTetrahedron>();
+            TetraBuffer.Initialize(EBufferType.BFT_SRV);
             if (Meshly.TtPointCloud.BuildTetrahedron(lst.ToArray(), Tetra))
             {
                 for (int i = 0; i < Tetra.Count; i++)
                 {
                     var t = new Graphics.Pipeline.GI.TtTetrahedronData();
                     var v = Tetra[i].m_VertexIndex0;
+                    t.ProbeIndices[0] = v;
                     t.Vertices[0] = lst[v];
                     v = Tetra[i].m_VertexIndex1;
+                    t.ProbeIndices[1] = v;
                     t.Vertices[1] = lst[v];
                     v = Tetra[i].m_VertexIndex2;
+                    t.ProbeIndices[2] = v;
                     t.Vertices[2] = lst[v];
                     v = Tetra[i].m_VertexIndex3;
+                    t.ProbeIndices[3] = v;
                     t.Vertices[3] = lst[v];
 
                     t.Precompute();
                     if (t.Volume > 1e-10f)
                     {
                         TetrahedronData.Add(t);
+                        TetraBuffer.PushData(Tetra[i]);
                     }
                 }
+                TetraBuffer.Flush2GPU(null);
             }
             var mMeshDataProvider = new Graphics.Mesh.TtMeshDataProvider();
             mMeshDataProvider.Init((1 << (int)NxRHI.EVertexStreamType.VST_Position), true, 0);
@@ -113,6 +130,33 @@ namespace EngineNS.Bricks.GI.PRT
             if (mDebugMesh != null)
             {
                 rp.AddVisibleMesh(mDebugMesh);
+            }
+        }
+
+        private void BuildProbe()
+        {
+            this.GetWorld().Root.IterateNodes((node, arg) =>
+            {
+                var meshNode = node as TtMeshNode;
+                if (meshNode != null && meshNode.Mesh != null)
+                {
+                    var mesh = meshNode.Mesh;
+                    var meshdata = mesh.MaterialMesh.SubMeshes[0].Mesh;
+                    var embreeGeom = mEmbreeManager.CreateGeometry(meshdata.AssetName.Name, meshdata.MeshDataProvider);
+                    var geomInst = mEmbreeManager.CreateGeometryInstance(embreeGeom);
+                    geomInst.SetTransform(meshNode.Placement.AbsTransform.ToMatrixWithScale(this.Placement.Position));
+                    mEmbreeScene.AttachGeometryInstance(geomInst);
+                }
+                return true;
+            }, null);
+            mEmbreeScene.CommitScene();
+
+            foreach (var i in ProbeBuffer.DataArray)
+            {
+                //mEmbreeScene.EmbreeRayTrace()
+                //
+                //Graphics.Pipeline.GI.TtSHCoefficient.PrecomputeSHCoefficients
+                //i.Coeffs = PrecomputeSHCoefficients(i.Position);
             }
         }
     }
