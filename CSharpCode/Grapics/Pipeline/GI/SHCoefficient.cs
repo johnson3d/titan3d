@@ -5,6 +5,95 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.GI
 {
+    public struct FCubemapResult
+    {
+        public NxRHI.ECubeFace Face;
+        public Vector2 UV;
+
+        public FCubemapResult(NxRHI.ECubeFace face, Vector2 uv)
+        {
+            Face = face;
+            UV = uv;
+        }
+        public static FCubemapResult DirectionToCubemap(Vector3 direction)
+        {
+            // 标准化方向向量
+            //direction = Vector3.Normalize(in direction);
+
+            float absX = Math.Abs(direction.x);
+            float absY = Math.Abs(direction.y);
+            float absZ = Math.Abs(direction.z);
+
+            NxRHI.ECubeFace face;
+            Vector2 uv;
+
+            // 确定主要轴和对应的面
+            if (absX >= absY && absX >= absZ)
+            {
+                // X轴为主要轴
+                if (direction.x > 0)
+                {
+                    // Positive X (Right face)
+                    face = NxRHI.ECubeFace.CBFC_Right;
+                    uv.X = -direction.z / direction.x;
+                    uv.Y = -direction.y / direction.x;
+                }
+                else
+                {
+                    // Negative X (Left face)
+                    face = NxRHI.ECubeFace.CBFC_Left;
+                    uv.X = direction.z / (-direction.x);
+                    uv.Y = -direction.y / (-direction.x);
+                }
+            }
+            else if (absY >= absX && absY >= absZ)
+            {
+                // Y轴为主要轴
+                if (direction.y > 0)
+                {
+                    // Positive Y (Top face)
+                    face = NxRHI.ECubeFace.CBFC_Top;
+                    uv.X = direction.x / direction.y;
+                    uv.Y = direction.z / direction.y;
+                }
+                else
+                {
+                    // Negative Y (Bottom face)
+                    face = NxRHI.ECubeFace.CBFC_Bottom;
+                    uv.X = direction.x / (-direction.y);
+                    uv.Y = -direction.z / (-direction.y);
+                }
+            }
+            else
+            {
+                // Z轴为主要轴
+                if (direction.z > 0)
+                {
+                    // Positive Z (Front face)
+                    face = NxRHI.ECubeFace.CBFC_Bac;
+                    uv.X = direction.x / direction.z;
+                    uv.Y = -direction.y / direction.z;
+                }
+                else
+                {
+                    // Negative Z (Back face)
+                    face = NxRHI.ECubeFace.CBFC_Front;
+                    uv.X = -direction.x / (-direction.z);
+                    uv.Y = -direction.y / (-direction.z);
+                }
+            }
+
+            // 将UV坐标从[-1,1]范围转换到[0,1]范围
+            uv.X = (uv.X + 1.0f) * 0.5f;
+            uv.Y = (uv.Y + 1.0f) * 0.5f;
+
+            // 确保UV坐标在有效范围内
+            uv.X = Math.Max(0.0f, Math.Min(1.0f, uv.X));
+            uv.Y = Math.Max(0.0f, Math.Min(1.0f, uv.Y));
+
+            return new FCubemapResult(face, uv);
+        }
+    }
     public class TtSHCoefficient
     {
         public static Vector2 Hammersley(uint idx, uint num)
@@ -80,13 +169,13 @@ namespace EngineNS.Graphics.Pipeline.GI
 
             return basis;
         }
-        public static float[] SHEval3(Vector3 dir)
+        public static void SHEval3(float[] shBasis, Vector3 dir)
         {
+            System.Diagnostics.Debug.Assert(shBasis.Length >= 9);
             // 归一化方向
             Vector3 d = dir;
             d.Normalize();
             float x = d.x, y = d.y, z = d.z;
-            var shBasis = new float[9];
 
             // 第0阶 (l=0)
             shBasis[0] = 0.2820947918f; // Y00: 1/(2*sqrt(π))
@@ -104,13 +193,12 @@ namespace EngineNS.Graphics.Pipeline.GI
             shBasis[8] = 0.5462742153f * (x * x - y * y); // Y22
 
             // 第3阶 (l=3) 可根据需要扩展
-
-            return shBasis;
         }
         public static float[] PrecomputeSHCoefficients(Func<Vector3, float> sampleEnvironment, uint sampleCount = 100000)
         {
-            float[] coefficients = new float[0];
+            float[] coefficients = new float[9];
 
+            float[] basis = new float[9];
             for (uint i = 0; i < sampleCount; i++)
             {
                 // 生成均匀分布的随机方向（蒙特卡洛采样）
@@ -120,7 +208,7 @@ namespace EngineNS.Graphics.Pipeline.GI
                 float radiance = sampleEnvironment(dir);
 
                 // 计算球谐基函数值
-                float[] basis = SHEval3(dir);
+                SHEval3(basis, dir);
 
                 // 累加到系数
                 for (int j = 0; j < 9; j++)
@@ -142,7 +230,8 @@ namespace EngineNS.Graphics.Pipeline.GI
             if (coefficients.Length != 9)
                 throw new ArgumentException("Coefficients must have 9 elements for 3rd-order SH.");
 
-            float[] basis = SHEval3(normal);
+            float[] basis = new float[9];
+            SHEval3(basis, normal);
             float result = 0.0f;
 
             for (int i = 0; i < 9; i++)

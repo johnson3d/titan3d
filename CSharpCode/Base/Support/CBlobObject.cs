@@ -18,6 +18,10 @@ namespace EngineNS.Support
         {
             get => mCoreObject.GetData();
         }
+        public void ReSize(uint size)
+        {
+            mCoreObject.ReSize(size);
+        }
         public unsafe T* PushValue<T>(in T v) where T : unmanaged
         {
             fixed (T* p = &v)

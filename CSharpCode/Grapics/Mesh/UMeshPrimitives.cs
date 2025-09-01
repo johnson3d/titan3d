@@ -274,13 +274,6 @@ namespace EngineNS.Graphics.Mesh
                     {
                         if (xnd != null)
                         {
-
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-                            var tmp = new UMeshDataProvider();
-在此之后:
-                            var tmp = new Mesh.UMeshDataProvider();
-*/
                             var tmp = new TtMeshDataProvider();
 
                             var ok = tmp.mCoreObject.LoadFromMeshPrimitive(xnd.RootNode.mCoreObject, NxRHI.EVertexStreamType.VST_FullMask);
@@ -308,6 +301,21 @@ namespace EngineNS.Graphics.Mesh
             {
                 return mMeshDataProvider;
             }
+        }
+        public unsafe Support.TtBlobObject BuildFaceDataWithMaterialIds()
+        {
+            var result = new Support.TtBlobObject();
+            result.ReSize(0);
+            for (int i = 0; i< NumAtom; i++)
+            {
+                var atom = mCoreObject.GetAtom((uint)i, 0);
+                for (int j = 0; j< atom->NumPrimitives; j++)
+                {
+                    result.PushValue(i);
+                }
+            }
+            //mMeshDataProvider.mCoreObject.SetUserBuffer(result.mCoreObject);
+            return result;
         }
     }
     public class TtMeshPrimitiveManager

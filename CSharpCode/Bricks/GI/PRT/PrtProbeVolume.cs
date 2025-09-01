@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using EngineNS.Bricks.Collision.Embree;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
@@ -133,17 +134,35 @@ namespace EngineNS.Bricks.GI.PRT
             }
         }
 
-        private void BuildProbe()
+        class TtGeometryUserData
         {
+            public Graphics.Mesh.TtMaterialMesh.TtSubMaterialedMesh Mesh;
+            public TtEmbreeGeometry Geometry;
+            public TtBlobObject FaceBuffer;
+        }
+        private unsafe void BuildProbe()
+        {
+            Dictionary<IntPtr, TtGeometryUserData> meshUserBuffers = new Dictionary<IntPtr, TtGeometryUserData>();
             this.GetWorld().Root.IterateNodes((node, arg) =>
             {
                 var meshNode = node as TtMeshNode;
                 if (meshNode != null && meshNode.Mesh != null)
                 {
                     var mesh = meshNode.Mesh;
-                    var meshdata = mesh.MaterialMesh.SubMeshes[0].Mesh;
-                    var embreeGeom = mEmbreeManager.CreateGeometry(meshdata.AssetName.Name, meshdata.MeshDataProvider);
-                    var geomInst = mEmbreeManager.CreateGeometryInstance(embreeGeom);
+                    Graphics.Mesh.TtMaterialMesh.TtSubMaterialedMesh subMesh = mesh.MaterialMesh.SubMeshes[0];
+                    var meshdata = subMesh.Mesh;
+                    var key = meshdata.MeshDataProvider.mCoreObject.NativePointer;
+                    TtGeometryUserData geometryUserData;
+                    if (meshUserBuffers.TryGetValue(key, out geometryUserData) == false)
+                    {
+                        geometryUserData = new TtGeometryUserData();
+                        geometryUserData.Mesh = subMesh;
+                        var faceData = meshdata.BuildFaceDataWithMaterialIds();
+                        geometryUserData.FaceBuffer = faceData;
+                        geometryUserData.Geometry = mEmbreeManager.CreateGeometry(meshdata.AssetName.Name, meshdata.MeshDataProvider);
+                        meshUserBuffers.Add(key, geometryUserData);
+                    }
+                    var geomInst = mEmbreeManager.CreateGeometryInstance(geometryUserData.Geometry);
                     geomInst.SetTransform(meshNode.Placement.AbsTransform.ToMatrixWithScale(this.Placement.Position));
                     mEmbreeScene.AttachGeometryInstance(geomInst);
                 }
@@ -153,7 +172,21 @@ namespace EngineNS.Bricks.GI.PRT
 
             foreach (var i in ProbeBuffer.DataArray)
             {
-                //mEmbreeScene.EmbreeRayTrace()
+                FHitResult hit = new FHitResult();
+                if (mEmbreeScene.EmbreeRayTrace(i.Position, Vector3.UnitX, ref hit)==false)
+                    continue;
+                if (meshUserBuffers.TryGetValue(hit.m_Geometry->GetMeshProvider().NativePointer, out var geometryUserData))
+                {
+                    var ptr = (int*)geometryUserData.FaceBuffer.DataPointer;
+                    var materialId = ptr[hit.m_PrimID];
+                    var mtl = geometryUserData.Mesh.Materials[materialId];
+                    //take albedo from mtl;
+                }
+                else
+                {
+                    var sky = Graphics.Pipeline.GI.FCubemapResult.DirectionToCubemap(Vector3.UnitX);
+                    //take albedo from skybox
+                }
                 //
                 //Graphics.Pipeline.GI.TtSHCoefficient.PrecomputeSHCoefficients
                 //i.Coeffs = PrecomputeSHCoefficients(i.Position);

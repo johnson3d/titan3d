@@ -47,7 +47,7 @@ namespace NxRHI
 		v3dxBox3				mAABB;
 		AutoRef<IBlobObject>	mVertexBuffers[VST_Number];
 		AutoRef<IBlobObject>	IndexBuffer;
-		AutoRef<IBlobObject>	FaceBuffer = nullptr;
+		AutoRef<IBlobObject>	UserBuffer;
 		bool					IsIndex32 = false;
 		UINT					VertexNumber = 0;
 		UINT					PrimitiveNumber = 0;
@@ -116,9 +116,15 @@ namespace NxRHI
 
 		//alternative interface for same mesh
 		bool AddTriangle(UINT a, UINT b, UINT c);
-		bool AddTriangle(UINT a, UINT b, UINT c, USHORT faceData);
 		bool AddTriangle(UINT* pTri, UINT numOfTri);
 		bool GetTriangle(UINT& a, UINT& b, UINT& c, UINT index);
+
+		IBlobObject* GetUserBuffer() {
+			return UserBuffer;
+		}
+		void SetUserBuffer(IBlobObject* buffer) {
+			UserBuffer = buffer;
+		}
 
 		bool AddLine(UINT a, UINT b);
 

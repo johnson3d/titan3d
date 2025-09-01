@@ -4,7 +4,7 @@
     <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
     <ItemsProjectGuid>{579066ea-1563-47f7-b50e-acaea875ddf6}</ItemsProjectGuid>
-    <ItemsProjectName>DistanceField</ItemsProjectName>
+    <ItemsProjectName>Collision</ItemsProjectName>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

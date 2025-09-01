@@ -44,7 +44,7 @@
 #define HasModule_PythonRuntime
 #define HasModule_Quark
 #define HasModule_NxPhysics
-#define HasModule_DistanceField
+#define HasModule_Collision
 #define HasModule_RecastRuntime
 #define HasModule_RecastBuilder
 

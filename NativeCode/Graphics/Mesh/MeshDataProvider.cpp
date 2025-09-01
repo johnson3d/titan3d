@@ -12,6 +12,7 @@ namespace NxRHI
 
 	FMeshDataProvider::FMeshDataProvider()
 	{
+		
 	}
 
 	FMeshDataProvider::~FMeshDataProvider()
@@ -26,8 +27,7 @@ namespace NxRHI
 			mVertexBuffers[i] = nullptr;
 		}
 		IndexBuffer = nullptr;
-		FaceBuffer = nullptr;
-
+		
 		mAtoms.clear();
 	}
 	void FMeshDataProvider::ConvertToIndex32()
@@ -1291,21 +1291,7 @@ namespace NxRHI
 			IndexBuffer->PushData(&c, sizeof(USHORT));
 		}
 
-		if (FaceBuffer != nullptr)
-		{
-			USHORT faceData = 0;
-			FaceBuffer->PushData(&faceData, sizeof(USHORT));
-		}
-
 		PrimitiveNumber++;
-		return TRUE;
-	}
-
-	bool FMeshDataProvider::AddTriangle(UINT a, UINT b, UINT c, USHORT faceData)
-	{
-		FaceBuffer->PushData(&faceData, sizeof(USHORT));
-		if (FALSE == AddTriangle(a, b, c))
-			return FALSE;
 		return TRUE;
 	}
 
@@ -1327,11 +1313,6 @@ namespace NxRHI
 				IndexBuffer->PushData(&b, sizeof(USHORT));
 				IndexBuffer->PushData(&c, sizeof(USHORT));
 			}
-		}
-
-		if (FaceBuffer)
-		{
-			FaceBuffer->PushData(nullptr, sizeof(USHORT) * numOfTri);
 		}
 
 		PrimitiveNumber += numOfTri;

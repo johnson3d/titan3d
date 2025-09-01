@@ -75,9 +75,9 @@ namespace EngineNS.Bricks.Collision.Embree
         {
             mCoreObject.EmbreePointQuery(VoxelPosition, LocalSpaceTraceDistance, ref bOutNeedTracyRays, ref OutClosestDistance);
         }
-        public void EmbreeRayTrace(Vector3 StartPosition, Vector3 RayDirection, ref bool bOutHit, ref bool bOutHitTwoSided, ref Vector3 OutHitNormal, ref float OutTFar)
+        public bool EmbreeRayTrace(Vector3 StartPosition, Vector3 RayDirection, ref EngineNS.FHitResult OutHit)
         {
-            mCoreObject.EmbreeRayTrace(StartPosition, RayDirection, ref bOutHit, ref bOutHitTwoSided, ref OutHitNormal, ref OutTFar);
+            return mCoreObject.EmbreeRayTrace(StartPosition, RayDirection, ref OutHit);
         }
 
         #region Old API
