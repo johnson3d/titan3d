@@ -254,6 +254,7 @@ namespace EngineNS.Graphics.Mesh
         {
 
         }
+        public virtual void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         public bool Initialize(List<TtMeshPrimitives> mesh, List<Pipeline.Shader.TtMaterial[]> materials)
         {
             if (mesh.Count != materials.Count)

@@ -17,6 +17,9 @@ namespace EngineNS.Bricks.NodeGraph
         {
 
         }
+        public virtual void OnPostRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
         TtNodeGraph mGraph;
         public PinIn InPin { get; set; }
         public PinOut OutPin { get; set; }

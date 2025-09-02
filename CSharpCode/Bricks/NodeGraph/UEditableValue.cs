@@ -17,6 +17,9 @@ namespace EngineNS.Bricks.NodeGraph
         {
 
         }
+        public virtual void OnPostRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
         public virtual void OnWriteMember(IO.IWriter ar, IO.ISerializer obj, Rtti.TtMetaVersion metaVersion)
         {
             IO.SerializerHelper.WriteMember(ar, obj, metaVersion);

@@ -59,6 +59,9 @@ namespace EngineNS.Bricks.CodeBuilder
         public virtual void OnPropertyRead(object tagObject, string prop, bool fromXml)
         {
         }
+        public virtual void OnPostRead(object tagObj, object hostObj, bool fromXml)
+        {
+        }
 
         public virtual void GetReferenceMacrossRNames(HashSet<RName> rNames)
         {
@@ -75,6 +78,7 @@ namespace EngineNS.Bricks.CodeBuilder
             }
             return null;
         }
+
     }
 
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore", "EngineNS.Bricks.CodeBuilder.UExpressionBase" })]
@@ -237,6 +241,9 @@ namespace EngineNS.Bricks.CodeBuilder
         public virtual void OnPropertyRead(object tagObject, string prop, bool fromXml)
         {
         }
+        public void OnPostRead(object tagObj, object hostObj, bool fromXml)
+        {
+        }
 
         public virtual void GetReferenceMacrossRName(HashSet<RName> rNames)
         {
@@ -256,6 +263,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 return mTypeDesc.GetGenericArguments().Length;
             return 0;
         }
+
     }
 
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UDebuggerSetWatchVariable@EngineCore", "EngineNS.Bricks.CodeBuilder.UDebuggerSetWatchVariable" })]

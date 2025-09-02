@@ -114,6 +114,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
         public void OnPropertyRead(object root, string prop, bool fromXml) { }
+        public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         [Rtti.Meta("",Order = 0)]
         public TtClassDeclaration DefClass { get; } = new TtClassDeclaration();
         //public DefineClass DefClass { get; } = new DefineClass();

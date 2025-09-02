@@ -40,7 +40,7 @@ struct TR_CLASS()
 	FEmbreeGeometryInstance : public FEmbreeGeometry
 {
 	~FEmbreeGeometryInstance();
-	AutoPtr<FEmbreeGeometry> TemplateGeometry;
+	AutoRef<FEmbreeGeometry> TemplateGeometry;
 	
 	virtual std::vector<v3dxVector3>& GetVertexArray() override {
 		return TemplateGeometry->GetVertexArray();

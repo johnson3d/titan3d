@@ -65,6 +65,9 @@ namespace EngineNS.Bricks.PhysicsCore
         {
 
         }
+        public void OnPostRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
         #endregion
 
         #region IAsset

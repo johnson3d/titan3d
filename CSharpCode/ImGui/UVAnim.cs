@@ -99,6 +99,9 @@ namespace EngineNS.EGui
         {
 
         }
+        public void OnPostRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
         #endregion
         public class ImportAttribute : IO.CommonCreateAttribute
         {

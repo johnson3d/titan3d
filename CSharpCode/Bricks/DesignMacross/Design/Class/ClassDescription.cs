@@ -104,6 +104,7 @@ namespace EngineNS.DesignMacross.Design
         {
             
         }
+        public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         #endregion ISerializer
     }
 }

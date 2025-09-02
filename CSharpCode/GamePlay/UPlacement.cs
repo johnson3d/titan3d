@@ -16,6 +16,7 @@ namespace EngineNS.GamePlay
             HostNode = tagObject as Scene.TtNode;
         }
         public virtual void OnPropertyRead(object root, string prop, bool fromXml) { }
+        public virtual void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         public virtual DVector3 Position
         {
             get

@@ -261,7 +261,7 @@ namespace EngineNS.Graphics.Mesh
         }
 
         private TtMeshDataProvider mMeshDataProvider;
-        public async System.Threading.Tasks.Task LoadMeshDataProvider()
+        public async Thread.Async.TtTask LoadMeshDataProvider()
         {
             if (mMeshDataProvider != null || AssetName == null)
                 return;

@@ -40,6 +40,7 @@ namespace EngineNS.Bricks.NodeGraph
     {
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
         public virtual void OnPropertyRead(object root, string prop, bool fromXml) { }
+        public virtual void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         public virtual unsafe void Initialize()
         {
             //UpdateCanvasMenus();

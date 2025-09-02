@@ -21,6 +21,7 @@ namespace EngineNS.IO
         void OnPreRead(object tagObject, object hostObject, bool fromXml);
         //第一个参数通常传入一个Root一类的对象，用于查找对象关系
         void OnPropertyRead(object tagObject, string prop, bool fromXml);
+        void OnPostRead(object tagObj, object hostObj, bool fromXml);
     }
     public partial class BaseSerializer : ISerializer
     {
@@ -31,6 +32,9 @@ namespace EngineNS.IO
         public virtual void OnPropertyRead(object tagObject, string prop, bool fromXml)
         {
 
+        }
+        public virtual void OnPostRead(object tagObj, object hostObj, bool fromXml)
+        {
         }
         public virtual void OnWriteMember(IWriter ar, ISerializer obj, Rtti.TtMetaVersion metaVersion)
         {
@@ -123,7 +127,9 @@ namespace EngineNS.IO
             }
             obj = Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as ISerializer;
             obj.OnPreRead(ar.Tag, hostObject, false);
-            return Read(ar, obj, metaVersion);
+            var retValue = Read(ar, obj, metaVersion);
+            obj.OnPostRead(ar.Tag, hostObject, false);
+            return retValue;
         }
         public static void Write(IWriter ar, ISerializer obj)
         {
@@ -593,6 +599,7 @@ namespace EngineNS.IO
                     var obj = Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as ISerializer;
                     obj.OnPreRead(ar.Tag, hostObject, false);
                     Read(ar, obj, metaVersion);
+                    obj.OnPostRead(ar.Tag, hostObject, false);
                     return obj;
                 }
                 else
@@ -1181,6 +1188,7 @@ namespace EngineNS.IO
                 }
                 (obj as ISerializer)?.OnPropertyRead(paramObject, prop.Name, true);
             }
+            (obj as ISerializer)?.OnPostRead(paramObject, hostObject, true);
         }
 
         public static string SaveAsJson(object obj)
@@ -1205,6 +1213,11 @@ namespace EngineNS.UnitTest
         {
             public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
             public void OnPropertyRead(object root, string prop, bool fromXml) { }
+
+            public void OnPostRead(object tagObj, object hostObj, bool fromXml)
+            {
+            }
+
             [Rtti.Meta("")]
             public int A { get; set; }
             [Rtti.Meta("")]
@@ -1274,6 +1287,10 @@ namespace EngineNS.UnitTest
             {
                 return;
             }
+        }
+
+        public void OnPostRead(object tagObj, object hostObj, bool fromXml)
+        {
         }
     }
 

@@ -234,6 +234,9 @@ namespace EngineNS.Bricks.PhysicsCore
             {
 
             }
+            public virtual void OnPostRead(object tagObject, object hostObject, bool fromXml)
+            {
+            }
             #endregion
 
             [Rtti.Meta("")]

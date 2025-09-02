@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    public partial class UAxis : GamePlay.Action.IActionRecordable
+    public partial class TtAxis : GamePlay.Action.IActionRecordable
     {
         public readonly static RName mAxisMaterial_Focus = RName.GetRName(@"axis\axis_focus_matins.uminst", RName.ERNameType.Engine);
         public readonly static RName mAxisMaterial_Face_Focus = RName.GetRName(@"axis\axis_face_focus_matins.uminst", RName.ERNameType.Engine);
@@ -177,7 +177,7 @@ namespace EngineNS.GamePlay
         float mSnapGridSize = 0.1f;
         #endregion
 
-        public class UAxisNode : Scene.TtSceneActorNode
+        public class TtAxisNode : Scene.TtVisual
         {
             protected override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, Scene.TtNodeData data, Scene.EBoundVolumeType bvType, Type placementType)                
             {
@@ -897,8 +897,8 @@ namespace EngineNS.GamePlay
         #endregion
 
         GamePlay.TtWorld mHostWorld;
-        UAxisNode mRootNode;
-        public UAxisNode RootNode { get => mRootNode; }
+        TtAxisNode mRootNode;
+        public TtAxisNode RootNode { get => mRootNode; }
         float mRootNodeScaleValue = 1.0f;
         Scene.TtMeshNode mRotArrowAssetNode;
         bool mInitialized = false;
@@ -971,7 +971,7 @@ namespace EngineNS.GamePlay
             }
             mAxisMeshDatas = tmpAxis;
 
-            mRootNode = (UAxisNode)await world.Root.SpawnSceneActor<UAxisNode>(world.Root, null,
+            mRootNode = (TtAxisNode)await world.Root.SpawnSceneActor<TtAxisNode>(world.Root, null,
                 new GamePlay.Scene.TtNodeData()
                 {
                     Name = "AxisRootNode"
@@ -980,7 +980,7 @@ namespace EngineNS.GamePlay
             mRootNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
             mRootNode.IsCastShadow = false;
             mRootNode.Parent = world.Root;
-            mRootNode.SetStyle(TtNode.ENodeStyles.VisibleFollowParent);
+            mRootNode.SetStyle(TtNode.ENodeStyles.VisibleAlways);
             ((GamePlay.TtPlacement)mRootNode.Placement).InheritScale = true;
 
             var rotArrowAssetMat = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d);

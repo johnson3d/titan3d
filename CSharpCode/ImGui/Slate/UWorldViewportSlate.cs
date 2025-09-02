@@ -10,8 +10,8 @@ namespace EngineNS.EGui.Slate
     {
         public NxRHI.TtRenderPass SwapChainPassDesc;
 
-        protected GamePlay.UAxis mAxis;
-        public GamePlay.UAxis Axis
+        protected GamePlay.TtAxis mAxis;
+        public GamePlay.TtAxis Axis
         {
             get => mAxis;
         }
@@ -79,7 +79,7 @@ namespace EngineNS.EGui.Slate
             //this.PushHUD(mDefaultHUD);
             //SetCameraOffset(new DVector3(-300, 0, 0));
 
-            mAxis = new GamePlay.UAxis();
+            mAxis = new GamePlay.TtAxis();
             await mAxis.Initialize(this.World, CameraController);
 
             return true;
@@ -171,7 +171,7 @@ namespace EngineNS.EGui.Slate
             {
                 var viewportPoint = new Vector2(e.MouseMotion.X, e.MouseMotion.Y) + ViewportPos;
                 if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT && mAxis != null &&
-                    mAxis.CurrentAxisType == GamePlay.UAxis.enAxisType.Null &&
+                    mAxis.CurrentAxisType == GamePlay.TtAxis.enAxisType.Null &&
                     ((new Vector2(e.MouseMotion.X, e.MouseMotion.Y) - mStartMousePt).Length() < 1.0f) &&
                     !mUIOperated &&
                     IsMouseIn &&

@@ -202,7 +202,9 @@ namespace EngineNS.Graphics.Pipeline.GI
             for (uint i = 0; i < sampleCount; i++)
             {
                 // 生成均匀分布的随机方向（蒙特卡洛采样）
-                Vector3 dir = CosineSampleHemisphere(Hammersley(i, sampleCount));
+                Vector3 dir = UniformSampleSphere(Hammersley(i, sampleCount));//CosineSampleHemisphere
+                //System.Diagnostics.Debug.Assert(Vector3.GreatEqual(dir, Vector3.Zero).All());
+                //System.Diagnostics.Debug.Assert(dir.Z>0);
 
                 // 采样环境光照颜色（返回值为float，范围[0,1]）
                 float radiance = sampleEnvironment(dir);

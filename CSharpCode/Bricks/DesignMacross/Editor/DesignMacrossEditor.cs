@@ -218,6 +218,7 @@ namespace EngineNS.DesignMacross.Editor
         #region IO.ISerializer
         public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
         public void OnPropertyRead(object root, string prop, bool fromXml) { }
+        public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         #endregion IO.ISerializer
 
         #region DrawToolbar

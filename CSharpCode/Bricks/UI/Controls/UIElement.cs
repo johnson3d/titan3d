@@ -48,13 +48,17 @@ namespace EngineNS.UI.Controls
             TtUIELement_Template();
         }
 
-        [Rtti.Meta("")]
+        RName mAssetName;
+        [Rtti.Meta()]
         [Browsable(false)]
         [RName.PGRName(FilterExts = TtUIAsset.AssetExt)]
         public RName AssetName
         {
-            get;
-            set;
+            get => mAssetName;
+            set
+            {
+                mAssetName = value;
+            }
         }
 
         [Flags]
@@ -310,9 +314,24 @@ namespace EngineNS.UI.Controls
 
         }
 
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
+        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
 
-        public void OnPropertyRead(object tagObject, string prop, bool fromXml) { }
+        public virtual void OnPropertyRead(object tagObject, string prop, bool fromXml) { }
+        public virtual void OnPostRead(object tagObj, object hostObj, bool fromXml)
+        {
+            if (mAssetName != null)
+            {
+                MacrossGetter = Macross.TtMacrossGetter<TtUIMacrossBase>.NewInstance();
+                MacrossGetter.Name = mAssetName;
+                var mc = MacrossGetter.Get();
+                if (mc != null)
+                {
+                    mc.HostElement = this;
+                    mc.SimulateMode = EngineNS.TtEngine.Instance.UIManager.IsLoadInSimulateMode;
+                    mc.Initialize();
+                }
+            }
+        }
 
         Visibility mVisibility = Visibility.Visible;
         [BindProperty]

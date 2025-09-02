@@ -268,6 +268,8 @@ namespace EngineNS.Bricks.DataCopyer
                         if (serial != null)
                             serial.OnPreRead(ar.Tag, hostObject, false);
                         ReadMember(ar, v, ver, hasSkip);
+                        if(serial != null)
+                            serial.OnPostRead(ar.Tag, hostObject, false);
                     }
                     else
                     {
@@ -503,6 +505,8 @@ namespace EngineNS.Bricks.DataCopyer
                     if (serial != null)
                         serial.OnPreRead(ar.Tag, hostObject, false);
                     ReadMember(ar, v, ver, hasSkipPoint);
+                    if (serial != null)
+                        serial.OnPostRead(ar.Tag, hostObject, false);
                     return v;
                 }
                 else

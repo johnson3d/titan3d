@@ -34,6 +34,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         {
 
         }
+        public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         #endregion ISerializer
     }
     [GraphElement(typeof(TtGraphElement_ExecutionPin))]
@@ -87,6 +88,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         {
 
         }
+        public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         #endregion ISerializer
     }
 }

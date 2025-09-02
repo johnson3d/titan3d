@@ -99,6 +99,7 @@ namespace EngineNS.UI.Controls
             public void OnPropertyRead(object tagObject, string prop, bool fromXml)
             {
             }
+            public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         }
         public abstract class BindingDataBase : IO.BaseSerializer
         {

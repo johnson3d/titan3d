@@ -361,6 +361,7 @@ namespace EngineNS.IO
             
             SerializerHelper.Read(this, v, metaVersion);
             //SerializerHelper.Read(this, out v, hostObject);
+            v.OnPostRead(this.Tag, hostObject, false);
         }
 
         public bool ReadTo(ISerializer v, object hostObject = null)
@@ -416,6 +417,7 @@ namespace EngineNS.IO
 
             SerializerHelper.Read(this, v, metaVersion);
             //SerializerHelper.Read(this, out v, hostObject);
+            v.OnPostRead(this.Tag, hostObject, false);
             return true;
         }
     }

@@ -36,6 +36,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
 
             }
+            public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
             public const uint CurrentEffectVersion = 6;
             [Rtti.Meta("")]
             public uint EffectVersion { get; set; } = CurrentEffectVersion;

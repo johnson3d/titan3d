@@ -237,6 +237,7 @@ namespace EngineNS.Bricks.NodeGraph
             OnPreReadAction?.Invoke(this, tagObject, hostObject, fromXml);
         }
         public virtual void OnPropertyRead(object root, string prop, bool fromXml) { }
+        public virtual void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         string mName = "NoName";
         [Rtti.Meta("")]
         [Category("Option")]

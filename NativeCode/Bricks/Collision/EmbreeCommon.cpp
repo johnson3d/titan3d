@@ -60,6 +60,7 @@ FEmbreeScene* FEmbreeGeometry::AsTemplateScene(EmbreeManager* device)
 void FEmbreeGeometry::SetGeometryTransform(const v3dxMatrix4& matrix)
 {
 	rtcSetGeometryTransform(InternalGeometry, 0, RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR, &matrix);
+	rtcCommitGeometry(InternalGeometry);
 }
 
 FEmbreeGeometryInstance::~FEmbreeGeometryInstance()
@@ -294,7 +295,8 @@ FEmbreeGeometryInstance* EmbreeManager::CreateGeometryInstance(FEmbreeGeometry* 
 	result->InternalGeometry = rtcNewGeometry(EmbreeDevice, RTC_GEOMETRY_TYPE_INSTANCE);
 	rtcSetGeometryInstancedScene(result->InternalGeometry, geometry->AsTemplateScene(this)->EmbreeScene);
 	rtcSetGeometryUserData(result->InternalGeometry, result);
-	rtcSetGeometryIntersectFilterFunction(result->InternalGeometry, EmbreeFilterFunc);
+	rtcCommitGeometry(result->InternalGeometry);
+
 	result->GeomID = GeomIDAllocator++;
 	return result;
 }

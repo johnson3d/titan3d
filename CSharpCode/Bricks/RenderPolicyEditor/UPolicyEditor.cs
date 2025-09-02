@@ -50,6 +50,9 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         {
 
         }
+        public void OnPostRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
         #endregion
         #region IAssetEditor
         bool IsStarting = false;

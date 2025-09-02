@@ -92,7 +92,7 @@ namespace EngineNS.Editor
             //mDefaultHUD.RenderCamera = this.RenderPolicy.DefaultCamera;
             //this.PushHUD(mDefaultHUD);
 
-            mAxis = new GamePlay.UAxis();
+            mAxis = new GamePlay.TtAxis();
             await mAxis.Initialize(this.World, CameraController);
 
             IsInlitialized = true;

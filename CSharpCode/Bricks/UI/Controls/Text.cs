@@ -110,6 +110,7 @@ namespace EngineNS.UI.Controls
             {
                 OnValueChange(value, mFontSize);
                 mFontSize = value;
+                MeshDirty = true;
                 UpdateLayout();
             }
         }
@@ -124,6 +125,7 @@ namespace EngineNS.UI.Controls
             {
                 OnValueChange(value, mText);
                 mText = value;
+                MeshDirty = true;
                 UpdateLayout();
             }
         }

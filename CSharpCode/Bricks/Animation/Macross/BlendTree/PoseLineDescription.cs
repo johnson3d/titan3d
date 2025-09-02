@@ -63,6 +63,7 @@ namespace EngineNS.Animation.Macross.BlendTree
         {
 
         }
+        public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         #endregion ISerializer
     }
 }

@@ -380,6 +380,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public void OnPropertyRead(object tagObject, string prop, bool fromXml)
         {
         }
+        public void OnPostRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
     }
     public partial class UMacrossMethodGraph : TtNodeGraph, IPropertyCustomization
     {

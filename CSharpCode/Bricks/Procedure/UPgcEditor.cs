@@ -114,6 +114,9 @@ namespace EngineNS.Bricks.Procedure
         {
 
         }
+        public void OnPostRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
         #endregion
         #region Tickable
         public void TickLogic(float ellapse)

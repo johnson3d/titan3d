@@ -73,6 +73,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
 
         }
+        public virtual void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         #endregion
         #region IAsset
         public virtual IO.IAssetMeta CreateAMeta()

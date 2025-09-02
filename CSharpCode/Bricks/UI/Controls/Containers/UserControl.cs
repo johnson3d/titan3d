@@ -5,6 +5,7 @@ using EngineNS.Thread.Async;
 using EngineNS.UI.Bind;
 using EngineNS.UI.Canvas;
 using NPOI.OpenXmlFormats.Dml;
+using NPOI.XSSF.Model;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,7 +29,18 @@ namespace EngineNS.UI.Controls.Containers
             set
             {
                 mChildRName = value;
-                OnSetChildRName().AddWaitTask();
+
+                var childCount = VisualTreeHelper.GetChildrenCount(this);
+                for (int i = 0; i < childCount; i++)
+                {
+                    var child = VisualTreeHelper.GetChild(this, i);
+                    if (child.AssetName == mChildRName)
+                    {
+                        mChildElement = child;
+                        break;
+                    }
+                }
+                IsPropertyVisibleDirty = true;
             }
         }
         // check source is dirty
@@ -65,16 +77,19 @@ namespace EngineNS.UI.Controls.Containers
         {
             return "[" + ChildRName.PureName + "]" + Name;
         }
-
-        async TtTask OnSetChildRName()
+        public async TtTask CreateChildElement(RName childRName)
         {
-            var tempElement = await TtEngine.Instance.UIManager.AsyncLoad(ChildRName);
+            mChildRName = childRName;
             if(mChildElement != null)
             {
                 Children.Remove(mChildElement);
+                mChildElement = null;
             }
-            mChildElement = tempElement;
+            mChildElement = await TtEngine.Instance.UIManager.AsyncLoad(mChildRName);
             Children.Add(mChildElement);
+            UpdateLayout();
+            MeshDirty = true;
+            IsPropertyVisibleDirty = true;
         }
 
         public override TtUIElement GetPointAtElement(ref PointAtProcessData data)

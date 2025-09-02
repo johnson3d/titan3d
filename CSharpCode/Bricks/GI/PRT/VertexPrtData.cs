@@ -10,7 +10,10 @@ namespace EngineNS.Bricks.GI.PRT
 {
     public unsafe struct FSHCoefficients
     {
-        public fixed float Coeffs[9 * 3];//RGB coeffs
+        //public fixed float Coeffs[9 * 3];//RGB coeffs
+        public fixed float RCoeffs[9];
+        public fixed float GCoeffs[9];
+        public fixed float BCoeffs[9];
     }
     public class TtVertexPrtNode : TtLightWeightNodeBase
     {

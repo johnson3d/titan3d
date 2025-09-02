@@ -38,6 +38,7 @@ namespace EngineNS.Graphics.Pipeline
         {
 
         }
+        public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         #endregion
         public TtRenderPolicy()
         {

@@ -174,6 +174,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                 public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
                 public void OnPropertyRead(object tagObject, string prop, bool fromXml) { }
+                public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
             }
             [Rtti.Meta("")]
             public List<ExtPinData> ExtPinDatas { get; set; } = new List<ExtPinData>();
@@ -181,6 +182,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
 
             public void OnPropertyRead(object tagObject, string prop, bool fromXml) { }
+            public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         }
 
         [Rtti.Meta("")]

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using EngineNS.Bricks.Collision.Embree;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
@@ -21,6 +22,8 @@ namespace EngineNS.Bricks.GI.PRT
     {
         public class TtPrtProbeVolumeData : TtNodeData
         {
+            [Rtti.Meta]
+            public Vector3 Extend { get; set; } = Vector3.One;
         }
 
         public TtCpu2GpuBuffer<FProbeData> ProbeBuffer = new TtCpu2GpuBuffer<FProbeData>();
@@ -28,15 +31,42 @@ namespace EngineNS.Bricks.GI.PRT
         List<Graphics.Pipeline.GI.TtTetrahedronData> TetrahedronData = new List<Graphics.Pipeline.GI.TtTetrahedronData>();
         public Graphics.Mesh.TtMesh mDebugMesh;
         public TtMeshAtomDesc mAtomDesc = new TtMeshAtomDesc();
-        public Collision.Embree.TtEmbreeManager mEmbreeManager = new Collision.Embree.TtEmbreeManager();
-        public Collision.Embree.TtEmbreeScene mEmbreeScene = new Collision.Embree.TtEmbreeScene();
+        public Collision.Embree.TtEmbreeManager mEmbreeManager = null;
+        public Collision.Embree.TtEmbreeScene mEmbreeScene = null;
         protected override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var result = await base.InitializeNode(world, data, bvType, placementType);
+            
+            mEmbreeManager = new Collision.Embree.TtEmbreeManager();
+            mEmbreeManager.Initialize();
+            mEmbreeScene = mEmbreeManager.CreateScene();
+            
+            this.BoundVolume.LocalAABB = new BoundingBox(-GetNodeData<TtPrtProbeVolumeData>().Extend, GetNodeData<TtPrtProbeVolumeData>().Extend);  
 
             BuildMesh();
             return result;
         }
+        [Category("Option")]
+        [Rtti.Meta]
+        public Vector3 Extend
+        {
+            get
+            {
+                var data = GetNodeData<TtPrtProbeVolumeData>();
+                if (data==null)
+                    return Vector3.Zero;
+                return data.Extend;
+            }
+            set
+            {
+                var data = GetNodeData<TtPrtProbeVolumeData>();
+                if (data==null)
+                    return;
+                data.Extend = value;
+                this.BoundVolume.LocalAABB = new BoundingBox(-value, value);
+            }
+        }
+        public override bool HashVisual => base.HashVisual;
         int NumOfVertices = 10;
         float Scale = 5.0f;
         int ShowTetrahedronIndex = 0;
@@ -140,8 +170,18 @@ namespace EngineNS.Bricks.GI.PRT
             public TtEmbreeGeometry Geometry;
             public TtBlobObject FaceBuffer;
         }
+        [Category("Option")]
+        public bool TestBuildProbe
+        {
+            get => false;
+            set
+            {
+                BuildProbe();
+            }
+        }
         private unsafe void BuildProbe()
         {
+            var center = DVector3.Zero;// Placement.Position;
             Dictionary<IntPtr, TtGeometryUserData> meshUserBuffers = new Dictionary<IntPtr, TtGeometryUserData>();
             this.GetWorld().Root.IterateNodes((node, arg) =>
             {
@@ -151,6 +191,9 @@ namespace EngineNS.Bricks.GI.PRT
                     var mesh = meshNode.Mesh;
                     Graphics.Mesh.TtMaterialMesh.TtSubMaterialedMesh subMesh = mesh.MaterialMesh.SubMeshes[0];
                     var meshdata = subMesh.Mesh;
+                    meshdata.LoadMeshDataProvider().WaitCompleted();
+                    if (meshdata.MeshDataProvider==null)
+                        return true;
                     var key = meshdata.MeshDataProvider.mCoreObject.NativePointer;
                     TtGeometryUserData geometryUserData;
                     if (meshUserBuffers.TryGetValue(key, out geometryUserData) == false)
@@ -163,33 +206,49 @@ namespace EngineNS.Bricks.GI.PRT
                         meshUserBuffers.Add(key, geometryUserData);
                     }
                     var geomInst = mEmbreeManager.CreateGeometryInstance(geometryUserData.Geometry);
-                    geomInst.SetTransform(meshNode.Placement.AbsTransform.ToMatrixWithScale(this.Placement.Position));
+                    geomInst.SetTransform(meshNode.Placement.AbsTransform.ToMatrixWithScale(center));
                     mEmbreeScene.AttachGeometryInstance(geomInst);
                 }
                 return true;
             }, null);
             mEmbreeScene.CommitScene();
 
-            foreach (var i in ProbeBuffer.DataArray)
+            ProbeBuffer.SetSize(0);
+            var t = new FProbeData();
+            t.Position = Placement.Position.ToLocalPosition(center);
+            ProbeBuffer.PushData(t);
+            for (int i = 0; i<ProbeBuffer.DataArray.Count; i++)
             {
-                FHitResult hit = new FHitResult();
-                if (mEmbreeScene.EmbreeRayTrace(i.Position, Vector3.UnitX, ref hit)==false)
-                    continue;
-                if (meshUserBuffers.TryGetValue(hit.m_Geometry->GetMeshProvider().NativePointer, out var geometryUserData))
+                var coeffs = Graphics.Pipeline.GI.TtSHCoefficient.PrecomputeSHCoefficients((dir)=>
                 {
-                    var ptr = (int*)geometryUserData.FaceBuffer.DataPointer;
-                    var materialId = ptr[hit.m_PrimID];
-                    var mtl = geometryUserData.Mesh.Materials[materialId];
-                    //take albedo from mtl;
-                }
-                else
+                    FHitResult hit = new FHitResult();
+                    var bHit = mEmbreeScene.EmbreeRayTrace(ProbeBuffer.DataArray[i].Position, dir, ref hit);
+                    if (bHit && meshUserBuffers.TryGetValue(hit.m_Geometry->GetMeshProvider().NativePointer, out var geometryUserData))
+                    {
+                        var ptr = (int*)geometryUserData.FaceBuffer.DataPointer;
+                        var materialId = ptr[hit.m_PrimID];
+                        var mtl = geometryUserData.Mesh.Materials[materialId];
+                        //take albedo from mtl;
+
+                        float ao = 1;
+                        return ao;//todo ao * albedo
+                    }
+                    else
+                    {
+                        var sky = Graphics.Pipeline.GI.FCubemapResult.DirectionToCubemap(dir);
+                        //take albedo from skybox
+
+                        float ao = 0;
+                        return ao;
+                    }
+                }, 1000);
+                FProbeData tmp = new FProbeData();
+                tmp.Position = ProbeBuffer.DataArray[i].Position;
+                for (int j = 0; j < 9; j++)
                 {
-                    var sky = Graphics.Pipeline.GI.FCubemapResult.DirectionToCubemap(Vector3.UnitX);
-                    //take albedo from skybox
+                    tmp.Coeffs.RCoeffs[j] = coeffs[j];
                 }
-                //
-                //Graphics.Pipeline.GI.TtSHCoefficient.PrecomputeSHCoefficients
-                //i.Coeffs = PrecomputeSHCoefficients(i.Position);
+                ProbeBuffer.DataArray[i] = tmp;
             }
         }
     }

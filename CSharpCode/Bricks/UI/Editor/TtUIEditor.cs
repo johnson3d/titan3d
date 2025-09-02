@@ -978,11 +978,12 @@ namespace EngineNS.UI.Editor
                     var rName = RName.ParseFrom(data.RNameString);
                     var userControl = new TtUserControl()
                     {
-                        ChildRName = rName,
+                        //ChildRName = rName,
                         Name = rName.PureName,
                         Width = size.X,
                         Height = size.Y,
                     };
+                    userControl.CreateChildElement(rName).AddWaitTask();
                     if(Math.Abs(size.X) > MathHelper.Epsilon)
                     {
                         userControl.WidthAuto = false;

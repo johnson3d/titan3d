@@ -296,8 +296,10 @@ namespace EngineNS.UI
             return result;
         }
 
+        public bool IsLoadInSimulateMode = false;
         public TtUIElement LoadWithSimulateMode(RName name, bool simulateMode = false)
         {
+            IsLoadInSimulateMode = simulateMode;
             using (var xnd = IO.TtXndHolder.LoadXnd(name.Address + "/" + name.PureName + name.ExtName))
             {
                 if (xnd == null)
@@ -313,17 +315,7 @@ namespace EngineNS.UI
                     try
                     {
                         ar.ReadObject(out element);
-
                         element.AssetName = name;
-                        element.MacrossGetter = TtMacrossGetter<TtUIMacrossBase>.NewInstance();
-                        element.MacrossGetter.Name = name;
-                        var mc = element.MacrossGetter.Get();
-                        if (mc != null)
-                        {
-                            mc.HostElement = element;
-                            mc.SimulateMode = simulateMode;
-                            mc.Initialize();
-                        }
                     }
                     catch (Exception ex)
                     {

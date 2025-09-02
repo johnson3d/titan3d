@@ -2447,6 +2447,11 @@ namespace {namespaceName}
                         source += $@"
         public {(baseHasBindObjectInterface ? "override" : "virtual")} void OnPropertyRead(object tagObject, string prop, bool fromXml) {{}}";
                     }
+                    if (!classSymbol.MemberNames.Any(name => "OnPostRead" == name))
+                    {
+                        source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void OnPostRead(object tagObject, object hostObject, bool fromXml) {{}}";
+                    }
                 }
                 if (!classSymbol.MemberNames.Any(name => "InitialMethodDeclaration" == name))
                 {
