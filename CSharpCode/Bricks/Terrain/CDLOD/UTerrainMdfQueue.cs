@@ -105,11 +105,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 return mScopeOnDrawCall;
             }
         }
-        public void OnBuildDrawCall(Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Graphics.Mesh.TtMesh.TtAtom atom)
+        public void OnBuildDrawCall(Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Graphics.Mesh.TtRenderMesh.TtAtom atom)
         {
 
         }
-        public unsafe void OnDrawCall(TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtRenderMesh.TtAtom atom)
         {
             bool bUseRVT = TtEngine.Instance.Config.Feature_UseRVT;
             using (new Profiler.TimeScopeHelper(ScopeOnDrawCall))
@@ -192,7 +192,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 drawcall.BindSampler(effectBinder.Samp_NormalTextureArray, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
             }
         }
-        public static void SetInstanceData(Graphics.Mesh.TtMesh mesh, Bricks.Terrain.CDLOD.UTerrainMdfQueue mdfQueue, ref Graphics.Pipeline.Shader.FVSInstanceData instance)
+        public static void SetInstanceData(Graphics.Mesh.TtRenderMesh mesh, Bricks.Terrain.CDLOD.UTerrainMdfQueue mdfQueue, ref Graphics.Pipeline.Shader.FVSInstanceData instance)
         {
             var cb =  mesh.PerMeshCBuffer;
             var matrix = cb.GetMatrix(Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.WorldMatrix);

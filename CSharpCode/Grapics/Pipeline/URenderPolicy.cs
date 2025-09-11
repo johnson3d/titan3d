@@ -16,7 +16,7 @@ namespace EngineNS.Graphics.Pipeline
             Instance,
         }
         public EDrawMode DrawMode;
-        public Mesh.TtMesh Mesh;
+        public Mesh.TtRenderMesh Mesh;
     }
     [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "EShadowMode")]
     public enum EShadowMode : uint
@@ -270,7 +270,7 @@ namespace EngineNS.Graphics.Pipeline
         #endregion
         public Common.TtPickedProxiableManager PickedProxiableManager { get; protected set; } = new Common.TtPickedProxiableManager();
         
-        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
+        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Mesh.TtRenderMesh.TtAtom atom)
         {
             atom.MdfQueue.OnDrawCall(cmd, drawcall, this, atom);
         }

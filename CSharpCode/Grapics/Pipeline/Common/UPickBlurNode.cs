@@ -33,7 +33,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             //    drawcall.mCoreObject.BindCBufferAll(cbIndex, PerShadingCBuffer.mCoreObject.Ptr);
             //}
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtRenderMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
@@ -68,7 +68,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             base.InitNodePins();
         }
         public UPickBlurShading mBasePassShading;
-        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtRenderMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }

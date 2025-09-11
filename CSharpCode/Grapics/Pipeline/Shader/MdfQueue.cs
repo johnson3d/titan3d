@@ -148,8 +148,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public unsafe NxRHI.FShaderCode* GetHLSLCode(string includeName, string includeOriName);
         public string GetUniqueText();
         public void Initialize(Graphics.Mesh.TtMaterialMesh materialMesh);
-        public void OnDrawCall(TtMdfQueueBase mdfQueue, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom);
-        public void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom);
+        public void OnDrawCall(TtMdfQueueBase mdfQueue, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtRenderMesh.TtAtom atom);
+        public void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Mesh.TtRenderMesh.TtAtom atom);
     }
 
     public abstract class TtMdfQueueBase : AuxPtrType<IMdfQueue>, IShaderCodeProvider
@@ -317,9 +317,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             OnDrawCallCallback = mdf.OnDrawCallCallback;
         }
         
-        public delegate void FOnDrawCall(NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom);
+        public delegate void FOnDrawCall(NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtRenderMesh.TtAtom atom);
         public FOnDrawCall OnDrawCallCallback = null;
-        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtRenderMesh.TtAtom atom)
         {
             if (OnDrawCallCallback != null)
                 OnDrawCallCallback(drawcall, policy, atom);
@@ -328,7 +328,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 i.OnDrawCall(this, cmd, drawcall, policy, atom);
             }
         }
-        public virtual void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom) 
+        public virtual void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Mesh.TtRenderMesh.TtAtom atom) 
         {
             foreach (var i in Modifiers)
             {

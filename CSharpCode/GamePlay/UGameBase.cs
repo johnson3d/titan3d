@@ -323,7 +323,7 @@ namespace EngineNS.GamePlay
             var meshData1 = new EngineNS.GamePlay.Scene.TtMeshNode.TtMeshNodeData();
             meshData1.MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
             meshData1.MdfQueueType = EngineNS.Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.Graphics.Mesh.TtMdfSkinMesh)).TypeString;
-            meshData1.AtomType = EngineNS.Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.Graphics.Mesh.TtMesh.TtAtom)).TypeString;
+            meshData1.AtomType = EngineNS.Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.Graphics.Mesh.TtRenderMesh.TtAtom)).TypeString;
             var meshNode1 = await TtNode.SpawnNode<EngineNS.GamePlay.Scene.TtMeshNode>(ChiefPlayer, null,
                 meshData1, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             meshNode1.NodeData.Name = "Robot1";

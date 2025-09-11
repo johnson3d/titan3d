@@ -69,7 +69,7 @@ namespace EngineNS.Bricks.PhysicsCore
             ShowMesh.Initialize(new List<Graphics.Mesh.TtMeshPrimitives>() { meshPrimitve, meshPrimitve },
                 new List<Graphics.Pipeline.Shader.TtMaterial[]>() { matrials, matrials1 });
             
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
             var ok = mesh.Initialize(ShowMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
             if (ok)
             {

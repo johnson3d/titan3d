@@ -473,7 +473,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 }
             }
         }
-        public override void GetHitProxyDrawMesh(List<TtMesh> meshes)
+        public override void GetHitProxyDrawMesh(List<TtRenderMesh> meshes)
         {
             foreach (var i in ActiveLevels)
             {

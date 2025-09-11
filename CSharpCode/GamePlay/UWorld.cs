@@ -49,7 +49,7 @@ namespace EngineNS.GamePlay
         public bool IsGameWorld { get; set; } = false;
         TtMemberTickables mMemberTickables = new TtMemberTickables();
         Graphics.Pipeline.Shader.TtMaterialInstance mBoundingDebugMaterial;
-        public async System.Threading.Tasks.Task<bool> InitWorld()
+        public async Thread.Async.TtTask<bool> InitWorld()
         {
             Scene.TtNodeData data = new Scene.TtNodeData();
             mRoot = await TtNode.SpawnNode<Scene.TtScene>(null, null, data, Scene.EBoundVolumeType.Box, typeof(TtPlacement), this);
@@ -182,7 +182,7 @@ namespace EngineNS.GamePlay
                     AABB = DBoundingBox.Merge(in AABB, in aabb);
                 }
             }
-            public void AddVisibleMesh(Graphics.Mesh.TtMesh mesh, bool bAABB = true)
+            public void AddVisibleMesh(Graphics.Mesh.TtRenderMesh mesh, bool bAABB = true)
             {
                 if (CullType == EVisCull.Shadow && mesh.IsCastShadow == false)
                 {
@@ -395,7 +395,7 @@ namespace EngineNS.GamePlay
             var size = aabb.GetSize();
             var cookedMesh = Graphics.Mesh.TtMeshDataProvider.MakeBoxWireframe((float)aabb.Minimum.X, (float)aabb.Minimum.Y, (float)aabb.Minimum.Z,
                 (float)size.X, (float)size.Y, (float)size.Z).ToMesh();
-            var mesh2 = new Graphics.Mesh.TtMesh();
+            var mesh2 = new Graphics.Mesh.TtRenderMesh();
 
             var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
             materials1[0] = mBoundingDebugMaterial;// TtEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("utest/box_wite.uminst"));

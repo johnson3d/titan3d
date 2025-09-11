@@ -119,9 +119,9 @@ namespace EngineNS.Graphics.Mesh
                 return result;
             }
         }
-        public Graphics.Mesh.TtMesh ToDrawMesh(Graphics.Pipeline.Shader.TtMaterial material)
+        public Graphics.Mesh.TtRenderMesh ToDrawMesh(Graphics.Pipeline.Shader.TtMaterial material)
         {
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = material;
             mesh.Initialize(ToMesh(), materials, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);

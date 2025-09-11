@@ -289,7 +289,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             };
         }
         public virtual void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall) { }
-        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtRenderMesh.TtAtom atom)
         {
 
         }

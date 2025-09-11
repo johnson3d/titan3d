@@ -21,7 +21,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtRenderMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtRenderGraphNode;
             aaNode.OnDrawCall(this, cmd, drawcall, policy, atom);
@@ -71,7 +71,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             base.InitNodePins();
         }
         public TtGaussShading mBasePassShading;
-        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtRenderMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }
@@ -154,7 +154,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
         }
 
-        public override void OnDrawCall(Shader.TtGraphicsShadingEnv shading, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(Shader.TtGraphicsShadingEnv shading, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtRenderMesh.TtAtom atom)
         {
             var index = drawcall.FindBinder("ColorBuffer");
             if (index.IsValidPointer)
@@ -191,7 +191,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtRenderMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtGaussAdditiveNode;
             if (aaNode == null)
@@ -252,7 +252,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             base.InitNodePins();
         }
         public TtGaussAdditiveShading mBasePassShading;
-        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtRenderMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }

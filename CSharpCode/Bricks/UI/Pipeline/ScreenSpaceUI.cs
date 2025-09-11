@@ -44,7 +44,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             AddInputOutput(ColorPinInOut);
             AddInputOutput(DepthPinInOut);
         }
-        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom)
+        public override TtGraphicsShadingEnv GetPassShading(TtRenderMesh.TtAtom atom)
         {
             return mBasePassShading;
         }

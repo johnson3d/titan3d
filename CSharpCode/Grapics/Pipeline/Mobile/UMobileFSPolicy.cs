@@ -65,7 +65,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             CoreSDK.DisposeObject(ref BasePassNode);
             base.Dispose();
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Mesh.TtRenderMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, atom);
             BasePassNode.mOpaqueShading.OnDrawCall(cmd, drawcall, this, atom);

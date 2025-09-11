@@ -38,7 +38,7 @@ namespace EngineNS.Graphics.Mesh
             renderer.SetSize(256, 256);
             
             Graphics.Mesh.TtMaterialMesh Mesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.CreateMaterialMesh(GetAssetName());
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
             var ok = mesh.Initialize(Mesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
             if (ok)
             {

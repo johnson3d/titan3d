@@ -176,7 +176,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 GBuffers.SetSize(x, y);
             }
         }
-        public override Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
+        public override Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtRenderMesh.TtAtom atom)
         {
             switch (atom.Material.RenderLayer)
             {
@@ -408,7 +408,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 WithDepthGBuffers.SetSize(x, y);
             }
         }
-        public override Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
+        public override Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtRenderMesh.TtAtom atom)
         {
             switch (atom.Material.RenderLayer)
             {

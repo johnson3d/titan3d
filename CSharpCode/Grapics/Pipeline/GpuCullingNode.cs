@@ -1,6 +1,4 @@
 ﻿using EngineNS.Graphics.Pipeline.Shader;
-using Microsoft.Toolkit.HighPerformance;
-using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,7 +10,7 @@ namespace EngineNS.Graphics.Pipeline
         public Mesh.TtMeshPrimitives Mesh;
         public List<TtMaterial> Materials;
         public Graphics.Mesh.TtMaterialMesh MaterialMesh;
-        public Graphics.Mesh.TtMesh RenderMesh;
+        public Graphics.Mesh.TtRenderMesh RenderMesh;
         public Graphics.Mesh.Modifier.TtGpuDrivenData GpuDrivenData = new Graphics.Mesh.Modifier.TtGpuDrivenData();
         public virtual Graphics.Mesh.Modifier.TtInstanceModifier GetInstanceModifier()
         {
@@ -25,7 +23,7 @@ namespace EngineNS.Graphics.Pipeline
             MaterialMesh = new Mesh.TtMaterialMesh();
             MaterialMesh.Initialize(new List<Mesh.TtMeshPrimitives>() { Mesh }, new List<List<Pipeline.Shader.TtMaterial>> { Materials });
 
-            RenderMesh = new Graphics.Mesh.TtMesh();
+            RenderMesh = new Graphics.Mesh.TtRenderMesh();
             RenderMesh.Initialize(MaterialMesh, Rtti.TtTypeDescGetter<T>.TypeDesc );
             return RenderMesh.MdfQueue as T;
         }
@@ -33,12 +31,12 @@ namespace EngineNS.Graphics.Pipeline
     public class TtInstanceStaticMeshBatch
     {
         public bool IsDraw = false;
-        public Graphics.Mesh.TtMesh RenderMesh;
+        public Graphics.Mesh.TtRenderMesh RenderMesh;
         public Mesh.TtMdfInstanceStaticMesh MdfQueue;
         public Graphics.Mesh.Modifier.TtGpuDrivenData GpuDrivenData = new Graphics.Mesh.Modifier.TtGpuDrivenData();
         public void Initialize(Graphics.Pipeline.TtGpuCullingNode node, Mesh.TtMaterialMesh mesh, Mesh.TtMdfInstanceStaticMesh mdfQueue)
         {
-            RenderMesh = new Graphics.Mesh.TtMesh();
+            RenderMesh = new Graphics.Mesh.TtRenderMesh();
             RenderMesh.Initialize(mesh, Rtti.TtTypeDescGetter<Mesh.TtMdfInstanceStaticMesh>.TypeDesc);
 
             MdfQueue = RenderMesh.MdfQueue as Mesh.TtMdfInstanceStaticMesh;
@@ -46,7 +44,7 @@ namespace EngineNS.Graphics.Pipeline
             MdfQueue.InstanceModifier.GpuDrivenData = GpuDrivenData;
             IsDraw = true;
         }
-        public static unsafe Hash64 MeshBatchHash(Mesh.TtMesh mesh)
+        public static unsafe Hash64 MeshBatchHash(Mesh.TtRenderMesh mesh)
         {
             var data = stackalloc int[1];
             data[0] = mesh.GetHashCode();
@@ -162,7 +160,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             policy.CommitCommandList(cmd, "GpuCulling");
         }
-        public override Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
+        public override Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtRenderMesh.TtAtom atom)
         {
             return mOpaqueShading;
         }
@@ -302,7 +300,7 @@ namespace EngineNS.Graphics.Pipeline
                 i.IsDraw = false;
             }
         }
-        private FVisibleMesh PushInstanceMesh(Mesh.TtMesh mesh, Mesh.TtMdfInstanceStaticMesh mdfQueue)
+        private FVisibleMesh PushInstanceMesh(Mesh.TtRenderMesh mesh, Mesh.TtMdfInstanceStaticMesh mdfQueue)
         {
             var hash = TtInstanceStaticMeshBatch.MeshBatchHash(mesh);
             TtInstanceStaticMeshBatch batch;
@@ -330,7 +328,7 @@ namespace EngineNS.Graphics.Pipeline
                 i.Value.GetInstanceModifier().InstanceBuffers.ResetInstance();
             }
         }
-        private FVisibleMesh PushStaticMeshBatch(Mesh.TtMesh mesh)
+        private FVisibleMesh PushStaticMeshBatch(Mesh.TtRenderMesh mesh)
         {
             foreach (var i in mesh.MaterialMesh.SubMeshes)
             {
@@ -361,7 +359,7 @@ namespace EngineNS.Graphics.Pipeline
                 i.Value.GetInstanceModifier().InstanceBuffers.ResetInstance();
             }
         }
-        private FVisibleMesh PushTerrainMeshBatch(Mesh.TtMesh mesh, Bricks.Terrain.CDLOD.UTerrainMdfQueue mdfQueue)
+        private FVisibleMesh PushTerrainMeshBatch(Mesh.TtRenderMesh mesh, Bricks.Terrain.CDLOD.UTerrainMdfQueue mdfQueue)
         {
             foreach (var i in mesh.MaterialMesh.SubMeshes)
             {
@@ -391,12 +389,5 @@ namespace EngineNS.Graphics.Pipeline
             return new FVisibleMesh() { Mesh = mesh, DrawMode = FVisibleMesh.EDrawMode.Instance };
         }
         #endregion
-    }
-}
-
-namespace EngineNS.Graphics.Mesh
-{
-    public partial class TtMeshPrimitives
-    {
     }
 }

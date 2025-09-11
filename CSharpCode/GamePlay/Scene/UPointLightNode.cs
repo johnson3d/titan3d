@@ -82,8 +82,8 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        Graphics.Mesh.TtMesh mDebugMesh;
-        public Graphics.Mesh.TtMesh DebugMesh
+        Graphics.Mesh.TtRenderMesh mDebugMesh;
+        public Graphics.Mesh.TtRenderMesh DebugMesh
         {
             get
             {
@@ -92,7 +92,7 @@ namespace EngineNS.GamePlay.Scene
                     var cookedMesh = TtEngine.Instance.GfxDevice.MeshPrimitiveManager.UnitSphere;
                     var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
                     materials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria.CloneMaterialInstance();
-                    var mesh2 = new Graphics.Mesh.TtMesh();
+                    var mesh2 = new Graphics.Mesh.TtRenderMesh();
                     var ok1 = mesh2.Initialize(cookedMesh, materials1,
                         Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
                     if (ok1)
@@ -120,7 +120,7 @@ namespace EngineNS.GamePlay.Scene
             this.BoundVolume.LocalAABB = new BoundingBox(Vector3.Zero, 1.0f);
             UpdateAbsTransform();
         }
-        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
+        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtRenderMesh> meshes)
         {
             meshes.Add(mDebugMesh);
             foreach (var i in Children)

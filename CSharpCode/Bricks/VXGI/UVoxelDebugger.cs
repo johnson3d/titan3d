@@ -42,11 +42,11 @@ namespace EngineNS.Bricks.VXGI
         {
 
         }
-        public void OnBuildDrawCall(Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Graphics.Mesh.TtMesh.TtAtom atom)
+        public void OnBuildDrawCall(Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Graphics.Mesh.TtRenderMesh.TtAtom atom)
         {
 
         }
-        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtRenderMesh.TtAtom atom)
         {
             UMdfVoxelDebugMesh mdfQueue = mdfQueue1 as UMdfVoxelDebugMesh;
             var vxNode = mdfQueue.MdfDatas as UVoxelsNode;
@@ -182,7 +182,7 @@ namespace EngineNS.Bricks.VXGI
         private CollectVxDebuggerShading CollectVxDebugger;
         private NxRHI.TtComputeDraw CollectVxDebuggerDrawcall;
 
-        public Graphics.Mesh.TtMesh VxDebugMesh;
+        public Graphics.Mesh.TtRenderMesh VxDebugMesh;
         public GamePlay.Scene.TtMeshNode VxDebugMeshNode;
 
         private unsafe void ResetComputeDrawcall()
@@ -205,7 +205,7 @@ namespace EngineNS.Bricks.VXGI
             if (VxDebugMesh != null)
             {
                 var material = VxDebugMesh.MaterialMesh.SubMeshes[0].Materials[0];
-                VxDebugMesh = new Graphics.Mesh.TtMesh();
+                VxDebugMesh = new Graphics.Mesh.TtRenderMesh();
                 var rect = Graphics.Mesh.TtMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
                 var rectMesh = rect.ToMesh();
                 var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
@@ -247,7 +247,7 @@ namespace EngineNS.Bricks.VXGI
             
             CollectVxDebugger = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<CollectVxDebuggerShading>();
 
-            VxDebugMesh = new Graphics.Mesh.TtMesh();
+            VxDebugMesh = new Graphics.Mesh.TtRenderMesh();
             var rect = Graphics.Mesh.TtMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
             var rectMesh = rect.ToMesh();
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];

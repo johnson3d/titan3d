@@ -232,7 +232,7 @@ namespace EngineNS.GamePlay
                 }
             }
 
-            async System.Threading.Tasks.Task<Graphics.Mesh.TtMesh> GetAxisMesh(RName meshName, params RName[] materialNames)
+            async System.Threading.Tasks.Task<Graphics.Mesh.TtRenderMesh> GetAxisMesh(RName meshName, params RName[] materialNames)
             {
                 var materials = new List<Graphics.Pipeline.Shader.TtMaterial>(materialNames.Length);
                 for (int i = 0; i < materialNames.Length; i++)
@@ -242,7 +242,7 @@ namespace EngineNS.GamePlay
                         return null;
                     materials.Add(mtl);
                 }
-                var mesh = new Graphics.Mesh.TtMesh();
+                var mesh = new Graphics.Mesh.TtRenderMesh();
                 var ok = await mesh.Initialize(new List<RName>() { meshName }, 
                     new List<List<Graphics.Pipeline.Shader.TtMaterial>>() { materials },
                     Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
@@ -251,7 +251,7 @@ namespace EngineNS.GamePlay
             }
             public async System.Threading.Tasks.Task Initialize(enAxisType type, GamePlay.TtWorld world)
             {
-                Graphics.Mesh.TtMesh axisMesh = null;
+                Graphics.Mesh.TtRenderMesh axisMesh = null;
                 var meshNodeData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
                 DVector3 pos = DVector3.Zero;
                 Quaternion rot = Quaternion.Identity;
@@ -984,7 +984,7 @@ namespace EngineNS.GamePlay
             ((GamePlay.TtPlacement)mRootNode.Placement).InheritScale = true;
 
             var rotArrowAssetMat = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d);
-            var rotArrowAssetMesh = new Graphics.Mesh.TtMesh();
+            var rotArrowAssetMesh = new Graphics.Mesh.TtRenderMesh();
             var ok = await rotArrowAssetMesh.Initialize(mAxisMeshMoveX, 
                 new List<Graphics.Pipeline.Shader.TtMaterial>() { rotArrowAssetMat },
                 Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
@@ -1014,7 +1014,7 @@ namespace EngineNS.GamePlay
         Scene.TtMeshNode mPointNode;
         async System.Threading.Tasks.Task InitializeDebugAssit()
         {
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
             var plane = Graphics.Mesh.TtMeshDataProvider.MakePlane(1, 1);
             var planeMesh = plane.ToMesh();
             var planeMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d);
@@ -1040,7 +1040,7 @@ namespace EngineNS.GamePlay
                 mPlaneNode.Parent = mHostWorld.Root;
             }
 
-            mesh = new Graphics.Mesh.TtMesh();
+            mesh = new Graphics.Mesh.TtRenderMesh();
             var point = Graphics.Mesh.TtMeshDataProvider.MakeBox(-0.05f, -0.05f, -0.05f, 0.1f, 0.1f, 0.1f);
             var pointMesh = point.ToMesh();
             var pointMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Center);

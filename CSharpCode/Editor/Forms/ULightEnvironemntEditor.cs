@@ -26,7 +26,7 @@ namespace EngineNS.Editor.Forms
             mArrowRadius = arrowRasius;
             EnvDirLight = viewport.World.DirectionLight;
             var arrowMaterialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(RName.GetRName("mesh/base/arrow.ums", RName.ERNameType.Engine));
-            var arrowMesh = new Graphics.Mesh.TtMesh();
+            var arrowMesh = new Graphics.Mesh.TtRenderMesh();
             var ok = arrowMesh.Initialize(arrowMaterialMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
             if (ok)
             {

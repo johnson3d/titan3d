@@ -166,7 +166,7 @@ namespace EngineNS.Editor.Forms
             DebugShowTool = new TtDebugShowTool();
             await DebugShowTool.Initialize(MeshPrimitivesList, PreviewViewport.World);
 
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
 
             var ok = mesh.Initialize(Mesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
             if (ok)
@@ -196,7 +196,7 @@ namespace EngineNS.Editor.Forms
                 boxStart.Y -= aabb.GetSize().Y * 0.5f + meshSize.Y * 0.5f + 0.001f;
                 var box = Graphics.Mesh.TtMeshDataProvider.MakePlane(meshSize.X, meshSize.Z).ToMesh();
 
-                var PlaneMesh = new Graphics.Mesh.TtMesh();
+                var PlaneMesh = new Graphics.Mesh.TtRenderMesh();
                 var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
                 tMaterials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
                 PlaneMesh.Initialize(box, tMaterials,
@@ -244,7 +244,7 @@ namespace EngineNS.Editor.Forms
             //sdfViewport.Title = $"MaterialMesh:{name}";
             sdfViewport.OnInitialize = Initialize_SdfViewport;
             await sdfViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, sdfRPolicyName, 0, 1);
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
             var ok = mesh.Initialize(Mesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
             if (ok)
             {

@@ -808,7 +808,7 @@ namespace EngineNS.Editor
                 }, meshData);
 
                 {
-                    var mesh1 = new Graphics.Mesh.TtMesh();
+                    var mesh1 = new Graphics.Mesh.TtRenderMesh();
                     await mesh1.Initialize(RName.GetRName("utest/puppet/mesh/puppet.ums"), Rtti.TtTypeDesc.TypeOf(typeof(Graphics.Mesh.TtMdfSkinMesh)));
                     var meshData1 = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
                     var meshNode1 = await TtNode.SpawnNode<GamePlay.Scene.TtMeshNode>(meshNode, async (nd) =>
@@ -823,7 +823,7 @@ namespace EngineNS.Editor
 
                         nd.MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
                         (nd.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).MdfQueueType = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMdfSkinMesh));
-                        (nd.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).AtomType = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMesh.TtAtom));
+                        (nd.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).AtomType = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtRenderMesh.TtAtom));
                     }, meshData1);
                 }
             }

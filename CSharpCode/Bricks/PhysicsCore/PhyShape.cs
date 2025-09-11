@@ -144,8 +144,8 @@ namespace EngineNS.Bricks.PhysicsCore
             }
             mCoreObject.SetMaterials((PhyMaterial**)pxMtls, Materials.Count);
         }        
-        protected Graphics.Mesh.TtMesh mDebugMesh;
-        public virtual Graphics.Mesh.TtMesh DebugMesh
+        protected Graphics.Mesh.TtRenderMesh mDebugMesh;
+        public virtual Graphics.Mesh.TtRenderMesh DebugMesh
         {
             get
             {
@@ -198,7 +198,7 @@ namespace EngineNS.Bricks.PhysicsCore
                         var ShowMesh = new Graphics.Mesh.TtMaterialMesh();
                         ShowMesh.Initialize(new List<Graphics.Mesh.TtMeshPrimitives>() { meshPrimitive },
                                 new List<Graphics.Pipeline.Shader.TtMaterial[]>() { matrials });
-                        mDebugMesh = new Graphics.Mesh.TtMesh();
+                        mDebugMesh = new Graphics.Mesh.TtRenderMesh();
                         mDebugMesh.Initialize(ShowMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
                     }
                 }

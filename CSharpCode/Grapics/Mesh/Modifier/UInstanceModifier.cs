@@ -215,7 +215,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
         }
 
         //static bool bIndirect = true;
-        public void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Pipeline.TtRenderPolicy policy, TtMesh.TtAtom atom)
+        public void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Pipeline.TtRenderPolicy policy, TtRenderMesh.TtAtom atom)
         {
             uint key = ((uint)(drawcall.SubMesh << 16) | drawcall.MeshAtom);
             TtGpuDrivenData.FDrawArgs drawArgs;
@@ -292,7 +292,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
             }
         }
 
-        public void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Pipeline.TtRenderPolicy policy, TtMesh.TtAtom atom)
+        public void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Pipeline.TtRenderPolicy policy, TtRenderMesh.TtAtom atom)
         {
             drawcall.mCoreObject.DrawInstance = (ushort)NumOfInstance;
 
@@ -404,11 +404,11 @@ namespace EngineNS.Graphics.Mesh.Modifier
         {
             InstanceBuffers.SetInstance(index, instance);
         }
-        public void OnBuildDrawCall(Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Graphics.Mesh.TtMesh.TtAtom atom)
+        public void OnBuildDrawCall(Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Graphics.Mesh.TtRenderMesh.TtAtom atom)
         {
 
         }
-        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Pipeline.TtRenderPolicy policy, TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Pipeline.TtRenderPolicy policy, TtRenderMesh.TtAtom atom)
         {
             InstanceBuffers.OnDrawCall(this, cmd, drawcall, policy, atom);
         }

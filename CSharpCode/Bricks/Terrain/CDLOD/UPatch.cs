@@ -78,9 +78,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             get => Level.Level.Node;
         }
-        public Graphics.Mesh.TtMesh[] TerrainMesh;
-        public Graphics.Mesh.TtMesh[] WaterMesh;
-        public Graphics.Mesh.TtMesh[] WireFrameTerrainMesh;
+        public Graphics.Mesh.TtRenderMesh[] TerrainMesh;
+        public Graphics.Mesh.TtRenderMesh[] WaterMesh;
+        public Graphics.Mesh.TtRenderMesh[] WireFrameTerrainMesh;
         //public Graphics.Pipeline.Shader.UMaterialInstance Material;
         //public Graphics.Pipeline.Shader.UMaterialInstance WaterMaterial;
         public NxRHI.TtCbView PatchCBuffer;
@@ -177,27 +177,27 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var twMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
             twMaterials[0] = terrain.WaterMaterial;
 
-            TerrainMesh = new Graphics.Mesh.TtMesh[terrain.GridMipLevels.Length];
-            WaterMesh = new Graphics.Mesh.TtMesh[terrain.GridMipLevels.Length];
-            WireFrameTerrainMesh = new Graphics.Mesh.TtMesh[terrain.GridMipLevels.Length];
+            TerrainMesh = new Graphics.Mesh.TtRenderMesh[terrain.GridMipLevels.Length];
+            WaterMesh = new Graphics.Mesh.TtRenderMesh[terrain.GridMipLevels.Length];
+            WireFrameTerrainMesh = new Graphics.Mesh.TtRenderMesh[terrain.GridMipLevels.Length];
             
             for (int i = 0; i < terrain.GridMipLevels.Length; i++)
             {
-                TerrainMesh[i] = new Graphics.Mesh.TtMesh();
+                TerrainMesh[i] = new Graphics.Mesh.TtRenderMesh();
                 TerrainMesh[i].Initialize(terrain.GridMipLevels[i], tMaterials, mdfType);
                 var trMdfQueue = TerrainMesh[i].MdfQueue as UTerrainMdfQueue;
                 trMdfQueue.TerrainModifier.TerrainNode = this.TerrainNode;
                 trMdfQueue.TerrainModifier.Patch = this;
                 trMdfQueue.TerrainModifier.Dimension = (int)Math.Pow(2, terrain.GridMipLevels.Length - i - 1);
 
-                WireFrameTerrainMesh[i] = new Graphics.Mesh.TtMesh();
+                WireFrameTerrainMesh[i] = new Graphics.Mesh.TtRenderMesh();
                 WireFrameTerrainMesh[i].Initialize(terrain.GridMipLevels[i], tWireFrameMaterials, mdfType);
                 trMdfQueue = WireFrameTerrainMesh[i].MdfQueue as UTerrainMdfQueue;
                 trMdfQueue.TerrainModifier.TerrainNode = this.TerrainNode;
                 trMdfQueue.TerrainModifier.Patch = this;
                 trMdfQueue.TerrainModifier.Dimension = (int)Math.Pow(2, terrain.GridMipLevels.Length - i - 1);
 
-                WaterMesh[i] = new Graphics.Mesh.TtMesh();
+                WaterMesh[i] = new Graphics.Mesh.TtRenderMesh();
                 WaterMesh[i].Initialize(terrain.GridMipLevels[i], twMaterials, mdfType);
                 trMdfQueue = WaterMesh[i].MdfQueue as UTerrainMdfQueue;
                 trMdfQueue.TerrainModifier.TerrainNode = this.TerrainNode;

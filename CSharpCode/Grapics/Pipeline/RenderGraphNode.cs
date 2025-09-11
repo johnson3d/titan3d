@@ -395,11 +395,11 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
 
-        public virtual Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom = null)
+        public virtual Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtRenderMesh.TtAtom atom = null)
         {
             return null;
         }
-        public virtual void OnDrawCall(Shader.TtGraphicsShadingEnv shading, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public virtual void OnDrawCall(Shader.TtGraphicsShadingEnv shading, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtRenderMesh.TtAtom atom)
         {
 
         }

@@ -67,11 +67,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 base.OnHitProxyChanged();
             }
-            public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
+            public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtRenderMesh> meshes)
             {
                 if (DebugHitproxyMesh == null)
                 {
-                    DebugHitproxyMesh = new Graphics.Mesh.TtMesh();
+                    DebugHitproxyMesh = new Graphics.Mesh.TtRenderMesh();
                     DebugHitproxyMesh.Initialize(PlantType.MaterialMesh,
                         Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
                     DebugHitproxyMesh.SetWorldTransform(Placement.TransformData, PlantType.Terrain.GetWorld(), false);
@@ -82,7 +82,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             public UPlantType PlantType;
             //public uint InstanceIndex = uint.MaxValue;
             //public FTransform Transform = FTransform.Identity;
-            public Graphics.Mesh.TtMesh DebugHitproxyMesh;
+            public Graphics.Mesh.TtRenderMesh DebugHitproxyMesh;
         }
         public class UPlantType
         {
@@ -90,7 +90,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             public UTerrainPlant PlantDesc { get; set; }
             public List<UPlantInstance> ObjInstances { get; } = new List<UPlantInstance>();
             public Graphics.Mesh.TtMaterialMesh MaterialMesh;
-            public Graphics.Mesh.TtMesh Mesh;
+            public Graphics.Mesh.TtRenderMesh Mesh;
             public Graphics.Mesh.TtMdfInstanceStaticMesh InstanceMdf;
             public DVector3 InstanceOffset;
             public bool CreateFinished = false;
@@ -99,7 +99,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 Terrain = trn;
                 PlantDesc = desc;
                 MaterialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(desc.MeshName);
-                Mesh = new Graphics.Mesh.TtMesh();
+                Mesh = new Graphics.Mesh.TtRenderMesh();
                 Mesh.Initialize(MaterialMesh, 
                     Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfInstanceStaticMesh>.TypeDesc);
 
@@ -203,7 +203,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
             CameralOffsetSerialId = rp.World.CameralOffsetSerialId;
         }
-        public void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
+        public void GetHitProxyDrawMesh(List<Graphics.Mesh.TtRenderMesh> meshes)
         {
             foreach (var i in PlantTypes.Values)
             {

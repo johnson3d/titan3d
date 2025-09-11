@@ -316,7 +316,7 @@ namespace EngineNS.Bricks.Procedure.Node
             graph.GraphEditor.PreviewRoot.ClearChildren();
             var viewport = graph.GraphEditor.PreviewViewport;
 
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
             var ok = mesh.Initialize(PreviewMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
             if (ok)
             {

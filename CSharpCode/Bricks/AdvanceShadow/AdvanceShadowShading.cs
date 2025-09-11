@@ -42,7 +42,7 @@ namespace EngineNS.Bricks.AdvanceShadow
 
             drawcall.mCoreObject.BindPipeline(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, shadowMapNode.DepthRaster.mCoreObject);
         }
-        public override void OnDrawCall(ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtRenderMesh.TtAtom atom)
         {
             var rdgnd = drawcall.TagObject as TtRenderGraphNode;
 
@@ -64,7 +64,7 @@ namespace EngineNS.Bricks.AdvanceShadow
         {
             
         }
-        public override void OnDrawCall(ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtRenderMesh.TtAtom atom)
         {
             var rdgnd = drawcall.TagObject as TtRenderGraphNode;
 
@@ -109,8 +109,8 @@ namespace EngineNS.Bricks.AdvanceShadow
 
         public TtCbView mDirLightingCBV = null;
 
-        public Graphics.Mesh.TtMesh ESMScreenMesh;
-        public Graphics.Mesh.TtMesh BlurScreenMesh;
+        public Graphics.Mesh.TtRenderMesh ESMScreenMesh;
+        public Graphics.Mesh.TtRenderMesh BlurScreenMesh;
         public TtGraphicsBuffers mDrawScreenGBuffers { get; protected set; } = new TtGraphicsBuffers();
         public TtAdvanceShadowMapNode()
         {
@@ -135,7 +135,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             AddOutput(SelfNodePinOut);
             SelfNodePinOut.LinkType = "AdvShadow";
         }
-        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtRenderMesh.TtAtom atom = null)
         {
             var esm = atom.SubMesh.Mesh.Tag as TtESMShading;
             if (esm != null)
@@ -448,7 +448,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                 cmdlist.EndPass();
             }
         }
-        public override void OnDrawCall(TtGraphicsShadingEnv shading, ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(TtGraphicsShadingEnv shading, ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtRenderMesh.TtAtom atom)
         {
             if (shading == mEsmShading)
             {
@@ -469,7 +469,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                 }
             }
         }
-        public unsafe void OnDirLightingDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnDirLightingDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtRenderMesh.TtAtom atom)
         {
             if (mShadowQTree == null)
                 return;

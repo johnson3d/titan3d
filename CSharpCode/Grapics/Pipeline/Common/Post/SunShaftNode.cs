@@ -42,7 +42,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtRenderMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtSunShaftDepthThresholeNode;
             if (aaNode == null)
@@ -103,7 +103,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16_FLOAT;
         }
         public TtDepthThresholeShading mBasePassShading;
-        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtRenderMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }
@@ -191,7 +191,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtRenderMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtSunShaftRadialBlurNode;
             if (aaNode == null)
@@ -241,7 +241,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16_FLOAT;
         }
         public TtRadialBlurShading mBasePassShading;
-        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtRenderMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }

@@ -39,16 +39,16 @@ namespace EngineNS.GamePlay.Scene
                 return GetNodeData<TtBezierSplineNodeData>()?.Spline;
             }
         }
-        Graphics.Mesh.TtMesh mDebugSplineMesh;
-        public Graphics.Mesh.TtMesh DebugSplineMesh
+        Graphics.Mesh.TtRenderMesh mDebugSplineMesh;
+        public Graphics.Mesh.TtRenderMesh DebugSplineMesh
         {
             get
             {
                 return mDebugSplineMesh;
             }
         }
-        Graphics.Mesh.TtMesh mDebugPointMesh;
-        public Graphics.Mesh.TtMesh DebugPointMesh
+        Graphics.Mesh.TtRenderMesh mDebugPointMesh;
+        public Graphics.Mesh.TtRenderMesh DebugPointMesh
         {
             get
             {
@@ -101,7 +101,7 @@ namespace EngineNS.GamePlay.Scene
             {
 
             }
-            public void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
+            public void GetHitProxyDrawMesh(List<Graphics.Mesh.TtRenderMesh> meshes)
             {
 
             }
@@ -138,7 +138,7 @@ namespace EngineNS.GamePlay.Scene
                     return;
                 var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
                 materials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
-                var mesh2 = new Graphics.Mesh.TtMesh();
+                var mesh2 = new Graphics.Mesh.TtRenderMesh();
                 var ok1 = mesh2.Initialize(cookedMesh, materials1,
                     Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
                 if (ok1)
@@ -170,7 +170,7 @@ namespace EngineNS.GamePlay.Scene
                     return;
                 var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
                 materials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
-                var mesh2 = new Graphics.Mesh.TtMesh();
+                var mesh2 = new Graphics.Mesh.TtRenderMesh();
                 var ok1 = mesh2.Initialize(cookedMesh, materials1,
                     Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfInstanceStaticMesh>.TypeDesc);
                 if (ok1)
@@ -232,7 +232,7 @@ namespace EngineNS.GamePlay.Scene
             await base.OnPostInitNode(parent);
             UpdateAbsTransform();
         }
-        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
+        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtRenderMesh> meshes)
         {
             if (mDebugSplineMesh == null)
                 return;

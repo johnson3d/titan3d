@@ -1,8 +1,6 @@
-using Assimp;
 using EngineNS.Bricks.Terrain.CDLOD;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.Graphics.Pipeline.Deferred;
-using Org.BouncyCastle.Asn1.Mozilla;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
@@ -14,7 +12,7 @@ namespace EngineNS.NxRHI
     public partial class TtGraphicDraw
     {
         public byte SubMesh;
-        public void SetSourceAtom(Graphics.Mesh.TtMesh.TtAtom atom)
+        public void SetSourceAtom(Graphics.Mesh.TtRenderMesh.TtAtom atom)
         {
             SubMesh = (byte)atom.SubMesh.MeshIndex;
             MeshAtom = (byte)atom.AtomIndex;
@@ -25,7 +23,7 @@ namespace EngineNS.NxRHI
 
 namespace EngineNS.Graphics.Mesh
 {
-    public partial class TtMesh : IDisposable
+    public partial class TtRenderMesh : IDisposable
     {
         public void Dispose()
         {
@@ -510,7 +508,7 @@ namespace EngineNS.Graphics.Mesh
                     Atoms = null;
                 }
             }
-            public TtMesh Mesh;
+            public TtRenderMesh Mesh;
             public int MeshIndex;
             public List<TtAtom> Atoms = new List<TtAtom>();
         }
@@ -909,9 +907,9 @@ namespace EngineNS.Graphics.Mesh
 
 namespace EngineNS.Graphics.Mesh
 {
-	partial class TtMesh
+	partial class TtRenderMesh
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetMaterial_899003873 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Mesh.TtMesh->Pipeline.Shader.TtMaterial GetMaterial(uint subMesh, uint atom)");
+		private static EngineNS.Macross.TtMacrossBreak macross_break_GetMaterial_899003873 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Mesh.TtRenderMesh->Pipeline.Shader.TtMaterial GetMaterial(uint subMesh, uint atom)");
 		public unsafe Pipeline.Shader.TtMaterial macross_GetMaterial (string nodeName, uint subMesh, uint atom) 
 		{
 			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)

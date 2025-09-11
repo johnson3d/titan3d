@@ -70,8 +70,8 @@ namespace EngineNS.UI
             get => ReadInternalFlag(eInternalFlags.MeshDirty);
             set => WriteInternalFlag(eInternalFlags.MeshDirty, value);
         }
-        Graphics.Mesh.TtMesh mDrawMesh;
-        public Graphics.Mesh.TtMesh DrawMesh => mDrawMesh;
+        Graphics.Mesh.TtRenderMesh mDrawMesh;
+        public Graphics.Mesh.TtRenderMesh DrawMesh => mDrawMesh;
 
         internal class TransformedUIElementData
         {
@@ -221,7 +221,7 @@ namespace EngineNS.UI
         {
 
         }
-        public async Thread.Async.TtTask<Graphics.Mesh.TtMesh> BuildMesh()
+        public async Thread.Async.TtTask<Graphics.Mesh.TtRenderMesh> BuildMesh()
         {
             var mesh = await OnBuildMesh();
             foreach (var i in mPopupUIHost)
@@ -237,7 +237,7 @@ namespace EngineNS.UI
             var winSize = WindowSize;
             mCanvas.SetClientClip(winSize.Width, winSize.Height);
         }
-        protected virtual async Thread.Async.TtTask<Graphics.Mesh.TtMesh> OnBuildMesh()
+        protected virtual async Thread.Async.TtTask<Graphics.Mesh.TtRenderMesh> OnBuildMesh()
         {
             if (!MeshDirty)
                 return mDrawMesh;
@@ -346,7 +346,7 @@ namespace EngineNS.UI
             }
             if(mDrawMesh == null)
             {
-                mDrawMesh = new Graphics.Mesh.TtMesh();
+                mDrawMesh = new Graphics.Mesh.TtRenderMesh();
                 var ok = mDrawMesh.Initialize(mMesh,
                     materials,
                     Rtti.TtTypeDescGetter<TtMdfUIMesh>.TypeDesc);

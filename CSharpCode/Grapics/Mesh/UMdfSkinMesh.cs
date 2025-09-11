@@ -29,7 +29,7 @@ namespace EngineNS.Graphics.Mesh
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
             public NxRHI.TtEffectBinder cbSkinMesh;
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Pipeline.TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Pipeline.TtRenderPolicy policy, Mesh.TtRenderMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 

@@ -55,7 +55,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public UPickSetupShading PickedShading = null;
         public TtGraphicsBuffers PickedBuffer { get; protected set; } = new TtGraphicsBuffers();
         public NxRHI.TtRenderPass RenderPass;
-        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtRenderMesh.TtAtom atom = null)
         {
             return PickedShading;
         }
@@ -101,7 +101,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             base.Dispose();
         }
-        List<Mesh.TtMesh> mPickedMeshes = new List<Mesh.TtMesh>();
+        List<Mesh.TtRenderMesh> mPickedMeshes = new List<Mesh.TtRenderMesh>();
         
         public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {

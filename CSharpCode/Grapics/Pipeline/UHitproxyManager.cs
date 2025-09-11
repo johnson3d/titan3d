@@ -39,7 +39,7 @@ namespace EngineNS.Graphics.Pipeline
         TtHitProxy.EHitproxyType HitproxyType { get; set; }
         bool Selected { get; set; }
         void OnHitProxyChanged();
-        void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes);
+        void GetHitProxyDrawMesh(List<Graphics.Mesh.TtRenderMesh> meshes);
     }
     public class TtHitproxyManager
     {

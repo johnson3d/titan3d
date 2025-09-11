@@ -67,7 +67,7 @@ namespace EngineNS.Editor.Forms
             materials[0] = Material;
             if (materials[0] == null)
                 return false;
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
             //var rect = Graphics.Mesh.TtMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
             //var rectMesh = rect.ToMesh();
             var rectMesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.CreateMeshPrimitive(RName.GetRName("mesh/base/sphere.vms", RName.ERNameType.Engine));
@@ -109,7 +109,7 @@ namespace EngineNS.Editor.Forms
         {
             materials[0] = Material.CloneMaterialInstance();
             materials[0].RenderLayer = ERenderLayer.RL_Translucent;
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
             var ok = mesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
             if (ok)
             {

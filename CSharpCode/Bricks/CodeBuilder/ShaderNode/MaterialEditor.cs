@@ -106,7 +106,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             materials[0] = Material;
             if (materials[0] == null)
                 return false;
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
             //var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
             //var rectMesh = rect.ToMesh();
             var rectMesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.CreateMeshPrimitive(RName.GetRName("mesh/base/sphere.vms", RName.ERNameType.Engine));

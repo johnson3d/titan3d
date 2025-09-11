@@ -141,8 +141,8 @@ namespace EngineNS.Bricks.Recast
             return true;
         }
         public TtNavMesh mNavMesh;
-        public Graphics.Mesh.TtMesh mDebugMesh;
-        public Graphics.Mesh.TtMesh mDebugMeshWireFrame;
+        public Graphics.Mesh.TtRenderMesh mDebugMesh;
+        public Graphics.Mesh.TtRenderMesh mDebugMeshWireFrame;
         public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             if ((rp.CullFilters & GamePlay.TtWorld.TtVisParameter.EVisCullFilter.NavMesh) == 0)

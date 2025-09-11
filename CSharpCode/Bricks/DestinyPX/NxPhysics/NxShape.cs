@@ -7,18 +7,18 @@ namespace EngineNS.NxPhysics
     public interface TtShape
     {
         EngineNS.NxPhysics.NxShape NativeShape { get; }
-        Graphics.Mesh.TtMesh DebugMesh { get; }
+        Graphics.Mesh.TtRenderMesh DebugMesh { get; }
     }
     public class TtSphereShape : AuxPtrType<EngineNS.NxPhysics.NxSphereShape>, TtShape
     {
-        Graphics.Mesh.TtMesh mDebugMesh = null;
-        public Graphics.Mesh.TtMesh DebugMesh 
+        Graphics.Mesh.TtRenderMesh mDebugMesh = null;
+        public Graphics.Mesh.TtRenderMesh DebugMesh 
         {
             get
             {
                 if (mDebugMesh == null)
                 {
-                    mDebugMesh = new Graphics.Mesh.TtMesh();
+                    mDebugMesh = new Graphics.Mesh.TtRenderMesh();
                     var clr = ((uint)TtEngine.Instance.PxSystem.Random.Next()) | 0xff000000;
                     var radius = mCoreObject.mDesc.Radius.AsSingle();
                     var stack = (uint)(radius / TtEngine.Instance.PxSystem.DebugTriangleSize);
@@ -44,14 +44,14 @@ namespace EngineNS.NxPhysics
     }
     public class TtBoxShape : AuxPtrType<EngineNS.NxPhysics.NxBoxShape>, TtShape
     {
-        Graphics.Mesh.TtMesh mDebugMesh = null;
-        public unsafe Graphics.Mesh.TtMesh DebugMesh
+        Graphics.Mesh.TtRenderMesh mDebugMesh = null;
+        public unsafe Graphics.Mesh.TtRenderMesh DebugMesh
         {
             get
             {
                 if (mDebugMesh == null)
                 {
-                    mDebugMesh = new Graphics.Mesh.TtMesh();
+                    mDebugMesh = new Graphics.Mesh.TtRenderMesh();
                     var clr = ((uint)TtEngine.Instance.PxSystem.Random.Next()) | 0xff000000;
                     Vector3 halfExt = new Vector3();
                     Vector3 start = -halfExt;

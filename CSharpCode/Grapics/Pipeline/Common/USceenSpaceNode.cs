@@ -29,7 +29,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         [Rtti.Meta("")]
         [Category("Option")]
         public float OutputScaleFactor { get; set; } = 1.0f;
-        public Graphics.Mesh.TtMesh ScreenMesh;
+        public Graphics.Mesh.TtRenderMesh ScreenMesh;
         public TtGraphicsBuffers GBuffers { get; protected set; } = new TtGraphicsBuffers();
         public NxRHI.TtRenderPass RenderPass;
         public string DebugName;
@@ -57,14 +57,14 @@ namespace EngineNS.Graphics.Pipeline.Common
             //    ScreenMesh = mesh;
             //}
         }
-        public static Graphics.Mesh.TtMesh CreateScreenMesh()
+        public static Graphics.Mesh.TtRenderMesh CreateScreenMesh()
         {
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial;
             if (materials[0] == null)
                 return null;
 
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
             var rect = Graphics.Mesh.TtMeshDataProvider.MakeRect2D(-1, -1, 2, 2, 0.5F, false);
             var rectMesh = rect.ToMesh();
             var ok = mesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);

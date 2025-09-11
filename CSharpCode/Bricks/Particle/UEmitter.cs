@@ -266,7 +266,7 @@ namespace EngineNS.Bricks.Particle
         {
             var emt = Rtti.TtTypeDescManager.CreateInstance(this.GetType()) as TtEmitter;
             emt.IsGpuDriven = IsGpuDriven;
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
             mesh.Initialize(Mesh.MaterialMesh, Rtti.TtTypeDescGetter<TtParticleMdfQueue>.TypeDesc); //mesh.MdfQueue
             emt.InitEmitter(TtEngine.Instance.GfxDevice.RenderContext, mesh, 1024);
 
@@ -312,8 +312,8 @@ namespace EngineNS.Bricks.Particle
         }
         
         public uint MaxParticle { get; set; }
-        Graphics.Mesh.TtMesh mMesh;
-        public Graphics.Mesh.TtMesh Mesh { get => mMesh; set => mMesh = value; }
+        Graphics.Mesh.TtRenderMesh mMesh;
+        public Graphics.Mesh.TtRenderMesh Mesh { get => mMesh; set => mMesh = value; }
         #region HLSL
         public virtual string GetCBufferDefines()
         {
@@ -380,12 +380,12 @@ namespace EngineNS.Bricks.Particle
             var umesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshName);
             if (umesh == null)
                 return false;
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
             mesh.Initialize(umesh, Rtti.TtTypeDescGetter<TtParticleMdfQueue>.TypeDesc);
             InitEmitter(rc, mesh, maxParticle);
             return true;
         }
-        public virtual unsafe void InitEmitter(NxRHI.TtGpuDevice rc, Graphics.Mesh.TtMesh mesh, uint maxParticle)
+        public virtual unsafe void InitEmitter(NxRHI.TtGpuDevice rc, Graphics.Mesh.TtRenderMesh mesh, uint maxParticle)
         {
             MaxParticle = maxParticle;
             mCoreObject.InitEmitter((uint)sizeof(FParticle), maxParticle);

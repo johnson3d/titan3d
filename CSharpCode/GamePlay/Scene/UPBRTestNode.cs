@@ -40,7 +40,7 @@ namespace EngineNS.GamePlay.Scene
             public string MdfQueueType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMdfStaticMesh));
             [Rtti.Meta("")]
             [ReadOnly(true)]
-            public string AtomType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMesh.TtAtom));
+            public string AtomType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtRenderMesh.TtAtom));
 
             [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Pipeline.Shader.TtMdfQueueBase))]
             public Rtti.TtTypeDesc MdfQueue
@@ -54,7 +54,7 @@ namespace EngineNS.GamePlay.Scene
                     MdfQueueType = Rtti.TtTypeDesc.TypeStr(value);
                 }
             }
-            [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Mesh.TtMesh.TtAtom))]
+            [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Mesh.TtRenderMesh.TtAtom))]
             public Rtti.TtTypeDesc Atom
             {
                 get
@@ -103,7 +103,7 @@ namespace EngineNS.GamePlay.Scene
                     var mtlInstList = new List<Graphics.Pipeline.Shader.TtMaterial>();
                     mtlInstList.Add(mtlInst);
                     {
-                        var meshSphere = new Graphics.Mesh.TtMesh();
+                        var meshSphere = new Graphics.Mesh.TtRenderMesh();
                         meshSphere.Initialize(meshPrimitive, mtlInstList, Rtti.TtTypeDesc.TypeOf(meshData.MdfQueueType), Rtti.TtTypeDesc.TypeOf(meshData.AtomType));
                         var mtl = meshSphere.GetMaterial(0, 0);
                         var roughness = mtl.FindVar("Roughness");
@@ -157,7 +157,7 @@ namespace EngineNS.GamePlay.Scene
 
             return true;
         }
-        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
+        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtRenderMesh> meshes)
         {
             meshes.AddRange(mMeshMatrix);
             foreach(var i in Children)
@@ -218,7 +218,7 @@ namespace EngineNS.GamePlay.Scene
 
             }
         }
-        public static async System.Threading.Tasks.Task<TtMeshNode> AddMeshNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, Graphics.Mesh.TtMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
+        public static async System.Threading.Tasks.Task<TtMeshNode> AddMeshNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, Graphics.Mesh.TtRenderMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
             var meshNode = await scene.SpawnSceneActor<TtMeshNode>(parent, null, data, EBoundVolumeType.Box, placementType);
@@ -238,7 +238,7 @@ namespace EngineNS.GamePlay.Scene
             var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
             if (materialMesh == null)
                 return null;
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
             
             var ok = mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
             if (ok == false)
@@ -263,8 +263,8 @@ namespace EngineNS.GamePlay.Scene
         {
             return BoundVolume as UBoxBV;
         }
-        List<Graphics.Mesh.TtMesh> mCurrMeshMatrix = new List<Graphics.Mesh.TtMesh>();
-        List<Graphics.Mesh.TtMesh> mMeshMatrix = new List<Graphics.Mesh.TtMesh>();
+        List<Graphics.Mesh.TtRenderMesh> mCurrMeshMatrix = new List<Graphics.Mesh.TtRenderMesh>();
+        List<Graphics.Mesh.TtRenderMesh> mMeshMatrix = new List<Graphics.Mesh.TtRenderMesh>();
 
         protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent)
         {

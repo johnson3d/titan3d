@@ -25,7 +25,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             defines.AddDefine("ENV_ADD_COLOR", "1");
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtRenderMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtAdditiveNode;
             if (aaNode == null)
@@ -86,7 +86,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             base.InitNodePins();
         }
         public TtAdditiveShading mBasePassShading;
-        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtRenderMesh.TtAtom atom = null)
         {
             return mBasePassShading;
         }
@@ -163,7 +163,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             Name = "AdditiveLumNode";
         }
         public TtAdditiveLumShading mAdditiveLumShading;
-        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtRenderMesh.TtAtom atom = null)
         {
             return mAdditiveLumShading;
         }

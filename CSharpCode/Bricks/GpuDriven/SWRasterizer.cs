@@ -503,7 +503,7 @@ namespace EngineNS.Bricks.GpuDriven
         {
 
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtRenderMesh.TtAtom atom)
         {
             var node = drawcall.TagObject as TtQuarkResolveNode;
 
@@ -551,7 +551,7 @@ namespace EngineNS.Bricks.GpuDriven
             //base.InitNodePins();
         }
         public TtQuarkResolveShading mBasePassShading;
-        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom)
+        public override TtGraphicsShadingEnv GetPassShading(TtRenderMesh.TtAtom atom)
         {
             return mBasePassShading;
         }

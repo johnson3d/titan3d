@@ -121,7 +121,7 @@ namespace EngineNS.Bricks.Collision.DDA
                 return MipLayers[MipLayers.Length - 1];
             }
         }
-        public Graphics.Mesh.TtMesh VxDebugMesh;
+        public Graphics.Mesh.TtRenderMesh VxDebugMesh;
         public TtMeshNode HVXDebugNode;
         public TtMeshNode HVXDebugLineNode;
         public TtMeshNode HVXDebugHitNode;
@@ -138,7 +138,7 @@ namespace EngineNS.Bricks.Collision.DDA
         public async System.Threading.Tasks.Task CreateDebugMesh(GamePlay.TtWorld world)
         {
             var material = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
-            VxDebugMesh = new Graphics.Mesh.TtMesh();
+            VxDebugMesh = new Graphics.Mesh.TtRenderMesh();
             var rect = Graphics.Mesh.TtMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1, 0xffff00ff);
             var rectMesh = rect.ToMesh();
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
@@ -209,7 +209,7 @@ namespace EngineNS.Bricks.Collision.DDA
             {
                 lineTo = from;
 
-                var sphereDebugMesh = new Graphics.Mesh.TtMesh();
+                var sphereDebugMesh = new Graphics.Mesh.TtRenderMesh();
                 var sphere = Graphics.Mesh.TtMeshDataProvider.MakeSphere(0.3f, 8, 8, 0xFFFFFF00);
                 var sphereMesh = sphere.ToMesh();
                 sphereDebugMesh.Initialize(sphereMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
@@ -226,7 +226,7 @@ namespace EngineNS.Bricks.Collision.DDA
 
                 HVXDebugHitNode = meshNode1;
             }
-            var lineMesh = new Graphics.Mesh.TtMesh();
+            var lineMesh = new Graphics.Mesh.TtRenderMesh();
             var rect = Graphics.Mesh.TtMeshDataProvider.MakeLine(in lineFrom, in lineTo, 0xFF50ff80);
             var rectMesh = rect.ToMesh();
             lineMesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);

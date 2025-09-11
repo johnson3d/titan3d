@@ -48,7 +48,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
         {
 
         }
-        public unsafe void OnBuildDrawCall(Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnBuildDrawCall(Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Mesh.TtRenderMesh.TtAtom atom)
         {
             Meshlets = atom.MeshPrimitives.Meshlets;
 
@@ -74,7 +74,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
             //drawcall.DrawInstance = 37;
             //drawcall.BindIndirectDrawArgsBuffer()
         }
-        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtRenderMesh.TtAtom atom)
         {
             if (Meshlets == null)
                 return;

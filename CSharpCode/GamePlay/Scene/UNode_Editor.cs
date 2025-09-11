@@ -7,7 +7,7 @@ namespace EngineNS.GamePlay.Scene
 {
     public partial class TtNode : Graphics.Pipeline.IProxiable
     {
-        public virtual void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
+        public virtual void GetHitProxyDrawMesh(List<Graphics.Mesh.TtRenderMesh> meshes)
         {
             return;
         }

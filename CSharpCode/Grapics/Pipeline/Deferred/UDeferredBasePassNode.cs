@@ -196,7 +196,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             base.Dispose();
         }
-        public override Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
+        public override Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtRenderMesh.TtAtom atom)
         {
             if (EnableMeshlets && TtEngine.Instance.GfxDevice.RenderContext.DeviceCaps.IsSupportMeshShader && atom.MeshPrimitives.Meshlets != null)
             {

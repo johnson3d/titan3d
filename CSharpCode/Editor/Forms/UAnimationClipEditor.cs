@@ -183,7 +183,7 @@ namespace EngineNS.Editor.Forms
             policy.DefaultCamera.AutoZoom(in sphere);
 
             {
-                var PlaneMesh = new Graphics.Mesh.TtMesh();
+                var PlaneMesh = new Graphics.Mesh.TtRenderMesh();
                 var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
                 tMaterials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(TtEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName);
                 PlaneMesh.Initialize(Graphics.Mesh.TtMeshDataProvider.MakePlane(10, 10).ToMesh(), tMaterials,
@@ -231,8 +231,8 @@ namespace EngineNS.Editor.Forms
             var meshData = new EngineNS.GamePlay.Scene.TtMeshNode.TtMeshNodeData();
             meshData.MeshName = materialMesh.AssetName;
             meshData.MdfQueueType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtMdfSkinMesh));
-            meshData.AtomType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtMesh.TtAtom));
-            var mesh = new Graphics.Mesh.TtMesh();
+            meshData.AtomType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtRenderMesh.TtAtom));
+            var mesh = new Graphics.Mesh.TtRenderMesh();
             mesh.Initialize(materialMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfSkinMesh>.TypeDesc);
 
             var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(PreviewViewport.World, PreviewViewport.World.Root, meshData, typeof(GamePlay.TtPlacement), mesh,

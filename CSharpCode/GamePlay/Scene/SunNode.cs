@@ -68,7 +68,7 @@ namespace EngineNS.GamePlay.Scene
             if (DebugMesh != null)
                 rp.AddVisibleMesh(DebugMesh);
         }
-        public override void GetHitProxyDrawMesh(List<TtMesh> meshes)
+        public override void GetHitProxyDrawMesh(List<TtRenderMesh> meshes)
         {
             base.GetHitProxyDrawMesh(meshes);
             if (DebugMesh != null)
@@ -103,8 +103,8 @@ namespace EngineNS.GamePlay.Scene
                 mDebugMesh.IsDrawHitproxy = false;
             }
         }
-        Graphics.Mesh.TtMesh mDebugMesh;
-        public Graphics.Mesh.TtMesh DebugMesh
+        Graphics.Mesh.TtRenderMesh mDebugMesh;
+        public Graphics.Mesh.TtRenderMesh DebugMesh
         {
             get
             {
@@ -115,7 +115,7 @@ namespace EngineNS.GamePlay.Scene
                         return null;
                     var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
                     materials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("axis/axis_x_d.uminst", RName.ERNameType.Engine));
-                    var mesh2 = new Graphics.Mesh.TtMesh();
+                    var mesh2 = new Graphics.Mesh.TtRenderMesh();
                     var ok1 = mesh2.Initialize(cookedMesh, materials1,
                         Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
                     if (ok1)

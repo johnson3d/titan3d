@@ -242,29 +242,52 @@ namespace EngineNS.Support
                 mCoreObject.SetDatas((byte*)ptr.ToPointer(), count);
             }
         }
+        //public T this[int index]
+        //{
+        //    get
+        //    {
+        //        T result = default(T);
+        //        unsafe
+        //        {
+        //            var ptr = (IntPtr)mCoreObject.GetAddressAt((uint)index);
+        //            if (ptr == IntPtr.Zero)
+        //                return result;
+        //            CoreSDK.MemoryCopy(&result, ptr.ToPointer(), (UInt32)sizeof(T));
+        //        }
+        //        return result;
+        //    }
+        //    set
+        //    {
+        //        unsafe
+        //        {
+        //            var ptr = (IntPtr)mCoreObject.GetAddressAt((uint)index);
+        //            if (ptr == IntPtr.Zero)
+        //                return;
+        //            CoreSDK.MemoryCopy(ptr.ToPointer(), &value, (UInt32)sizeof(T));
+        //        }
+        //    }
+        //}
         public T this[int index]
         {
             get
             {
-                T result = default(T);
-                unsafe
-                {
-                    var ptr = (IntPtr)mCoreObject.GetAddressAt((uint)index);
-                    if (ptr == IntPtr.Zero)
-                        return result;
-                    CoreSDK.MemoryCopy(&result, ptr.ToPointer(), (UInt32)sizeof(T));
-                }
-                return result;
+                return GetRef(index);
             }
             set
             {
-                unsafe
-                {
-                    var ptr = (IntPtr)mCoreObject.GetAddressAt((uint)index);
-                    if (ptr == IntPtr.Zero)
-                        return;
-                    CoreSDK.MemoryCopy(ptr.ToPointer(), &value, (UInt32)sizeof(T));
-                }
+                ref var rd = ref GetRef(index);
+                rd = value;
+            }
+        }
+
+        public ref T GetRef(int index)
+        {
+            unsafe
+            {
+                var ptr = (T*)mCoreObject.GetAddressAt((uint)index);
+                if (((IntPtr)ptr) == IntPtr.Zero)
+                    throw new InvalidOperationException("GetRef failed!");
+                return ref *ptr;
             }
         }
         public bool Contains(T item) 

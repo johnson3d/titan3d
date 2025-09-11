@@ -118,7 +118,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
         public TtShadowShading mShadowShading;
 
-        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtRenderMesh.TtAtom atom = null)
         {
             return mShadowShading;
         }

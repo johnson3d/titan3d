@@ -35,7 +35,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             get;
             set;
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtRenderMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
@@ -78,7 +78,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             base.InitNodePins();
         }
         public TtFogShading mBasePassShading;
-        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom)
+        public override TtGraphicsShadingEnv GetPassShading(TtRenderMesh.TtAtom atom)
         {
             return mBasePassShading;
         }

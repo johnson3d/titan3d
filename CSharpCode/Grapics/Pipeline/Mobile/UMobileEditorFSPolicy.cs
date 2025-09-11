@@ -261,7 +261,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             base.Dispose();
         }
         //渲染DrawCall的时候调用，如果产生了对应的ShadingType的Drawcall，则会callback到这里设置一些这个shading的特殊参数
-        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Mesh.TtRenderMesh.TtAtom atom)
         {
             atom.MdfQueue.OnDrawCall(cmd, drawcall, this, atom);
             //drawcall.Effect.ShadingEnv

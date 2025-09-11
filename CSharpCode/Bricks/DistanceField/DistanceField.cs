@@ -230,11 +230,11 @@ namespace EngineNS.DistanceField
 
     public partial class TtSdfAssetManager
     {
-        public Dictionary<RName, TtSdfAsset> sdfAssets { get; } = new Dictionary<RName, TtSdfAsset>();
-        public async System.Threading.Tasks.Task<TtSdfAsset> GetSdfAsset(RName name)
+        public Dictionary<RName, TtSdfAsset> mSdfAssets { get; } = new Dictionary<RName, TtSdfAsset>();
+        public async Thread.Async.TtTask<TtSdfAsset> GetSdfAsset(RName name)
         {
             TtSdfAsset result;
-            if (sdfAssets.TryGetValue(name, out result))
+            if (mSdfAssets.TryGetValue(name, out result))
                 return result;
 
             result = await TtEngine.Instance.EventPoster.Post((state) =>
@@ -259,7 +259,7 @@ namespace EngineNS.DistanceField
 
             if (result != null)
             {
-                sdfAssets[name] = result;
+                mSdfAssets[name] = result;
                 return result;
             }
 

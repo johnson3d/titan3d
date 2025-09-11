@@ -57,9 +57,9 @@ namespace EngineNS.Editor.Forms
         }
 
         public EngineNS.GamePlay.Scene.TtMeshNode NormalNode;
-        public Graphics.Mesh.TtMesh NormalMesh;
+        public Graphics.Mesh.TtRenderMesh NormalMesh;
         public EngineNS.GamePlay.Scene.TtMeshNode TangentNode;
-        public Graphics.Mesh.TtMesh TangentMesh;
+        public Graphics.Mesh.TtRenderMesh TangentMesh;
 
         public async System.Threading.Tasks.Task Initialize(List<Graphics.Mesh.TtMeshPrimitives> MeshPrimitivesList, GamePlay.TtWorld world)
         {
@@ -106,7 +106,7 @@ namespace EngineNS.Editor.Forms
 
             if(NormalList.Count>0)
             {
-                NormalMesh = new Graphics.Mesh.TtMesh();
+                NormalMesh = new Graphics.Mesh.TtRenderMesh();
                 var normalProvider = Graphics.Mesh.TtMeshDataProvider.MakeLines(in NormalList, 0xFF00FF00);
                 NormalMesh.Initialize(normalProvider.ToMesh(), materials, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
                 NormalMesh.MdfQueue.MdfDatas = this;
@@ -122,7 +122,7 @@ namespace EngineNS.Editor.Forms
 
             if(TangentList.Count>0)
             {
-                TangentMesh = new Graphics.Mesh.TtMesh();
+                TangentMesh = new Graphics.Mesh.TtRenderMesh();
                 var tangentProvider = Graphics.Mesh.TtMeshDataProvider.MakeLines(in TangentList, 0xFF0000FF);
                 TangentMesh.Initialize(tangentProvider.ToMesh(), materials, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
                 TangentMesh.MdfQueue.MdfDatas = this;
@@ -242,7 +242,7 @@ namespace EngineNS.Editor.Forms
             {
                 materials[i] = mtl;
             }
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
             var meshNodeData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
             if (Mesh.PartialSkeleton != null)
             {
@@ -287,7 +287,7 @@ namespace EngineNS.Editor.Forms
                 //var box = Graphics.Mesh.UMeshDataProvider.MakeBox(boxStart.X, boxStart.Y, boxStart.Z, meshSize.X, meshSize.Y, meshSize.Z).ToMesh();
                 var box = Graphics.Mesh.TtMeshDataProvider.MakePlane(meshSize.X, meshSize.Z).ToMesh();
 
-                var PlaneMesh = new Graphics.Mesh.TtMesh();
+                var PlaneMesh = new Graphics.Mesh.TtRenderMesh();
                 var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
                 tMaterials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(TtEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName);
                 PlaneMesh.Initialize(box, tMaterials,
@@ -307,7 +307,7 @@ namespace EngineNS.Editor.Forms
             return true;
         }
 
-        public Graphics.Mesh.TtMesh SdfDebugMesh;
+        public Graphics.Mesh.TtRenderMesh SdfDebugMesh;
         EngineNS.GamePlay.Scene.TtMeshNode SdfMeshNode;
         public void CalcVoxelsInBrick(Vector3i BrickCoordinate, BoundingBox DistanceFieldVolumeBounds,
             DistanceField.TtSparseSdfMip SdfData, DistanceField.DistanceFieldConfig SdfConfig,
@@ -347,7 +347,7 @@ namespace EngineNS.Editor.Forms
             if (SdfMeshNode == null)
             {
                 var material = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/sdfcolor.uminst", RName.ERNameType.Engine));
-                SdfDebugMesh = new Graphics.Mesh.TtMesh();
+                SdfDebugMesh = new Graphics.Mesh.TtRenderMesh();
                 var rect = Graphics.Mesh.TtMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1, 0xffffffff);
                 var rectMesh = rect.ToMesh();
                 var materials = new Graphics.Pipeline.Shader.TtMaterial[1];

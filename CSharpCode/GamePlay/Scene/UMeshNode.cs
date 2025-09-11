@@ -39,7 +39,7 @@ namespace EngineNS.GamePlay.Scene
             public string MdfQueueType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMdfStaticMesh));
             [Rtti.Meta("")]
             [ReadOnly(true)]
-            public string AtomType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMesh.TtAtom));
+            public string AtomType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtRenderMesh.TtAtom));
 
             [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Pipeline.Shader.TtMdfQueueBase))]
             public Rtti.TtTypeDesc MdfQueue
@@ -53,7 +53,7 @@ namespace EngineNS.GamePlay.Scene
                     MdfQueueType = Rtti.TtTypeDesc.TypeStr(value);
                 }
             }
-            [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Mesh.TtMesh.TtAtom))]
+            [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Mesh.TtRenderMesh.TtAtom))]
             public Rtti.TtTypeDesc Atom
             {
                 get
@@ -79,7 +79,7 @@ namespace EngineNS.GamePlay.Scene
             var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
             if (materialMesh != null)
             {
-                var mesh = new Graphics.Mesh.TtMesh();
+                var mesh = new Graphics.Mesh.TtRenderMesh();
                 mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
                 this.Mesh = mesh;
                 //await materialMesh.Mesh.TryLoadClusteredMesh();
@@ -88,7 +88,7 @@ namespace EngineNS.GamePlay.Scene
             
             return true;
         }
-        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
+        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtRenderMesh> meshes)
         {
             if (mMesh == null)
                 return;
@@ -158,7 +158,7 @@ namespace EngineNS.GamePlay.Scene
                 mMesh.IsAcceptShadow = value;
             }
         }
-        public static async System.Threading.Tasks.Task<TtMeshNode> AddMeshNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, Graphics.Mesh.TtMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
+        public static async System.Threading.Tasks.Task<TtMeshNode> AddMeshNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, Graphics.Mesh.TtRenderMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
             var meshNode = await scene.SpawnSceneActor<TtMeshNode>(parent, async (nd)=>
@@ -181,7 +181,7 @@ namespace EngineNS.GamePlay.Scene
             var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
             if (materialMesh == null)
                 return null;
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
             
             var ok = mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
             if (ok == false)
@@ -206,9 +206,9 @@ namespace EngineNS.GamePlay.Scene
         {
             return BoundVolume as UBoxBV;
         }
-        Graphics.Mesh.TtMesh mMesh;
+        Graphics.Mesh.TtRenderMesh mMesh;
         [Rtti.Meta("")]
-        public Graphics.Mesh.TtMesh Mesh 
+        public Graphics.Mesh.TtRenderMesh Mesh 
         {
             get 
             {
@@ -273,7 +273,7 @@ namespace EngineNS.GamePlay.Scene
                     return;
                 System.Action action = async () =>
                 {
-                    var mesh = new Graphics.Mesh.TtMesh();
+                    var mesh = new Graphics.Mesh.TtRenderMesh();
 
                     var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(value);
                     var ok = mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
@@ -324,7 +324,7 @@ namespace EngineNS.GamePlay.Scene
         private async Thread.Async.TtTask SetMdfQueue(Rtti.TtTypeDesc value)
         {
             var meshNodeData = NodeData as TtMeshNodeData;
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
 
             var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(MeshName);
             var ok = mesh.Initialize(materialMesh, meshNodeData.MdfQueue, meshNodeData.Atom);
@@ -362,7 +362,7 @@ namespace EngineNS.GamePlay.Scene
                 //{
                 //    colorVar.SetValue(new Vector4(1, 0, 1, 1));
                 //}
-                var mesh = new Graphics.Mesh.TtMesh();
+                var mesh = new Graphics.Mesh.TtRenderMesh();
                 mesh.Initialize(cookedMesh, materials1, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
                 mesh.IsAcceptShadow = this.IsAcceptShadow;
                 Mesh = mesh;

@@ -29,7 +29,7 @@ namespace EngineNS.Bricks.GI.PRT
         public TtCpu2GpuBuffer<FProbeData> ProbeBuffer = new TtCpu2GpuBuffer<FProbeData>();
         public TtCpu2GpuBuffer<FTetrahedron> TetraBuffer = new TtCpu2GpuBuffer<FTetrahedron>();
         List<Graphics.Pipeline.GI.TtTetrahedronData> TetrahedronData = new List<Graphics.Pipeline.GI.TtTetrahedronData>();
-        public Graphics.Mesh.TtMesh mDebugMesh;
+        public Graphics.Mesh.TtRenderMesh mDebugMesh;
         public TtMeshAtomDesc mAtomDesc = new TtMeshAtomDesc();
         public Collision.Embree.TtEmbreeManager mEmbreeManager = null;
         public Collision.Embree.TtEmbreeScene mEmbreeScene = null;

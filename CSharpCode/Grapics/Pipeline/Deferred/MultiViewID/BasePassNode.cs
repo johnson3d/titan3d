@@ -202,7 +202,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
 
             base.Dispose();
         }
-        public override Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
+        public override Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtRenderMesh.TtAtom atom)
         {
             return mOpaqueShading;
         }

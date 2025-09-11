@@ -65,8 +65,8 @@ namespace EngineNS.Editor.Forms
         {
             public TtSkeletonAsset SkeletonAsset { get; set; } = null;
         }
-        Dictionary<int, TtMesh> BoneMeshes = new();
-        Dictionary<FBoneLine, TtMesh> BoneLineMeshes = new();
+        Dictionary<int, TtRenderMesh> BoneMeshes = new();
+        Dictionary<FBoneLine, TtRenderMesh> BoneLineMeshes = new();
         public TtSkeletonAsset SkeletonAsset { get; set; } = null;
         public TtLocalSpaceRuntimePose CurrentPose = null;
         protected override Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
@@ -309,7 +309,7 @@ namespace EngineNS.Editor.Forms
             }
 
             {
-                var PlaneMesh = new Graphics.Mesh.TtMesh();
+                var PlaneMesh = new Graphics.Mesh.TtRenderMesh();
                 var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
                 tMaterials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(TtEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName);
                 PlaneMesh.Initialize(Graphics.Mesh.TtMeshDataProvider.MakePlane(10, 10).ToMesh(), tMaterials,

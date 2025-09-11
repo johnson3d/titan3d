@@ -45,7 +45,7 @@ namespace EngineNS.Bricks.Procedure
             graph.GraphEditor.PreviewRoot.ClearChildren();
 
             var vms = Graphics.Mesh.TtMeshDataProvider.MakeRect2D(0, 0, 100, 100, 0).ToMesh();
-            var mesh = new Graphics.Mesh.TtMesh();
+            var mesh = new Graphics.Mesh.TtRenderMesh();
 
             var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
             materials1[0] = Graphics.Pipeline.Shader.TtMaterialInstance.CreateMaterialInstance(

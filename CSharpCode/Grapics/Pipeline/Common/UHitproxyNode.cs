@@ -142,7 +142,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public NxRHI.TtRenderPass GizmosRenderPass;
         [Rtti.Meta("")]
         public float ScaleFactor { get; set; } = 0.5f;
-        public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
+        public override TtGraphicsShadingEnv GetPassShading(TtRenderMesh.TtAtom atom = null)
         {
             return mHitproxyShading;
         }
