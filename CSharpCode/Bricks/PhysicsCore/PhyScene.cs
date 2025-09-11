@@ -167,7 +167,7 @@ namespace EngineNS.Bricks.PhysicsCore
         EngineNS.PhySceneDesc.FDelegate_FonContact mOnContackCallBack;
         EngineNS.PhySceneDesc.FDelegate_FonTrigger mOnTriggerCallBack;
         private TtPhySceneDesc mPxceneDesc = null;
-        public async System.Threading.Tasks.Task<bool> Initialize(object host)
+        public async Thread.Async.TtTask<bool> Initialize(object host)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 

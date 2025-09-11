@@ -273,7 +273,7 @@ namespace EngineNS.Bricks.Collision.Octree
         public NxRHI.TtTransientBuffer TransientIB = new();
         [Category("Option")]
         public bool IsDrawBounds { get; set; } = false;
-        public async System.Threading.Tasks.Task<bool> Initialize(object host)
+        public async Thread.Async.TtTask<bool> Initialize(object host)
         {
             var scene = host as GamePlay.Scene.TtScene;
             mOctree = new Bricks.Collision.Octree.TtBoundsOctree<GamePlay.Scene.TtNode>(0.5f, scene.Placement.AbsTransform.Position, 1, 1.25f);

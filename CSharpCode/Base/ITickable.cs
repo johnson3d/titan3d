@@ -21,7 +21,7 @@ namespace EngineNS
 
     public interface IMemberTickable
     {
-        System.Threading.Tasks.Task<bool> Initialize(object host);
+        Thread.Async.TtTask<bool> Initialize(object host);
         void Cleanup(object host);
         void TickLogic(object host, float ellapse);
         void OnHostNotify(object host, in FHostNotify notify);
@@ -42,7 +42,7 @@ namespace EngineNS
                 }
             }
         }
-        public async System.Threading.Tasks.Task InitializeMembers(object host)
+        public async Thread.Async.TtTask InitializeMembers(object host)
         {
             foreach (var i in Members)
             {
