@@ -127,7 +127,7 @@ namespace EngineNS.DistanceField
                             if (bUsePointQuery)
                             {
                                 float ClosestDistance = 0.0f;
-                                EmbreeManager.EmbreePointQuery(EmbreeScene, VoxelPosition, LocalSpaceTraceDistance, ref bTraceRays, ref ClosestDistance);
+                                EmbreeScene.EmbreePointQuery(VoxelPosition, LocalSpaceTraceDistance, ref bTraceRays, ref ClosestDistance);
                                 MinLocalSpaceDistance = MathHelper.Min(MinLocalSpaceDistance, ClosestDistance);
                             }
 
@@ -161,10 +161,13 @@ namespace EngineNS.DistanceField
                                         bool bHitTwoSide = false;
                                         Vector3 HitNormal = Vector3.Zero;
                                         float TFar = 1.0f;
-                                        EmbreeManager.EmbreeRayTrace(EmbreeScene, StartPosition, RayDirection, ref bHit, ref bHitTwoSide, ref HitNormal, ref TFar);
-
+                                        FHitResult hit = new FHitResult();
+                                        bHit = EmbreeScene.EmbreeRayTrace(StartPosition, RayDirection, 0, VolumeBounds.GetSize().Length(), ref hit);
+                                        
                                         if (bHit == true)
                                         {
+                                            HitNormal = hit.m_HitNormal;
+                                            TFar = hit.m_HitDistance;
                                             Hit++;
 
                                             if (Vector3.Dot(UnitRayDirection, HitNormal) > 0 && !bHitTwoSide)
@@ -292,10 +295,12 @@ namespace EngineNS.DistanceField
 
             var StartTime = Support.TtTime.GetTickCount();
 
-            var embreeScene = new Bricks.Collision.Embree.TtEmbreeScene();
             var embreeManager = new Bricks.Collision.Embree.TtEmbreeManager();
-            embreeManager.SetupEmbreeScene(MeshName, meshProvider, DistanceFieldResolutionScale, embreeScene);
-
+            embreeManager.Initialize();
+            var embreeScene = embreeManager.CreateScene();
+            var embreeGeom = embreeManager.CreateGeometry(MeshName, meshProvider);
+            embreeScene.AttachGeometry(embreeGeom);
+            
             // Whether to use an Embree Point Query to compute the closest unsigned distance.  Rays will only be traced to determine backfaces visible for sign.
             const bool bUsePointQuery = true;
 
@@ -467,10 +472,8 @@ namespace EngineNS.DistanceField
                 OutData.Mips.Add(OutMip);
             }
 
-            OutData.bMostlyTwoSided = embreeScene.bMostlyTwoSided;
+            OutData.bMostlyTwoSided = false;// embreeScene.bMostlyTwoSided;
             OutData.LocalSpaceMeshBounds = LocalSpaceMeshBounds;
-
-            embreeManager.DeleteEmbreeScene(embreeScene);
 
             float BuildTime = (float)(Support.TtTime.GetTickCount() - StartTime)/1000.0f;
 
@@ -481,7 +484,7 @@ namespace EngineNS.DistanceField
                    
                 Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, $"SDF Generate: Finished distance field build in {BuildTime:0.00} - " +
                     $"{Mip0IndirectionDimensions.X * sdfConfig.UniqueDataBrickSize}x{Mip0IndirectionDimensions.Y * sdfConfig.UniqueDataBrickSize}x{Mip0IndirectionDimensions.Z * sdfConfig.UniqueDataBrickSize} " +
-                    $"sparse distance field, {memoryKB:0.0}Kb total, {occupied}% occupied, {embreeScene.NumIndices/3} triangles, {MeshName}");
+                    $"sparse distance field, {memoryKB:0.0}Kb total, {occupied}% occupied, {meshProvider.mCoreObject.GetPrimitiveNumber()} triangles, {MeshName}");
             }
         }
     }

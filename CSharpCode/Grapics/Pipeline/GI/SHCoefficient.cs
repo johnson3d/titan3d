@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NPOI.SS.Formula.Functions;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -169,9 +170,17 @@ namespace EngineNS.Graphics.Pipeline.GI
 
             return basis;
         }
-        public static void SHEval3(float[] shBasis, Vector3 dir)
+        public static unsafe void SHEval3(float[] inBasis, in Vector3 dir)
         {
-            System.Diagnostics.Debug.Assert(shBasis.Length >= 9);
+            System.Diagnostics.Debug.Assert(inBasis.Length >= 9);
+
+            fixed(float* shBasis = &inBasis[0])
+            {
+                SHEval3(shBasis, in dir);
+            }
+        }
+        public static unsafe void SHEval3(float* shBasis, in Vector3 dir)
+        {
             // 归一化方向
             Vector3 d = dir;
             d.Normalize();
@@ -210,7 +219,7 @@ namespace EngineNS.Graphics.Pipeline.GI
                 float radiance = sampleEnvironment(dir);
 
                 // 计算球谐基函数值
-                SHEval3(basis, dir);
+                SHEval3(basis, in dir);
 
                 // 累加到系数
                 for (int j = 0; j < 9; j++)
@@ -227,12 +236,19 @@ namespace EngineNS.Graphics.Pipeline.GI
             }
             return coefficients;
         }
-        public static float EvaluateSH(float[] coefficients, Vector3 normal)
+        public static unsafe float EvaluateSH(float[] coefficients, in Vector3 normal)
         {
             if (coefficients.Length != 9)
                 throw new ArgumentException("Coefficients must have 9 elements for 3rd-order SH.");
 
-            float[] basis = new float[9];
+            fixed(float* p = &coefficients[0])
+            {
+                return EvaluateSH(p, in normal);
+            }
+        }
+        public static unsafe float EvaluateSH(float* coefficients, in Vector3 normal)
+        {
+            float* basis = stackalloc float[9];
             SHEval3(basis, normal);
             float result = 0.0f;
 

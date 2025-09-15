@@ -1,6 +1,6 @@
 #pragma once
-#include "embree3/rtcore.h"
-#include "embree3/rtcore_ray.h"
+#include "rtcore.h"
+#include "rtcore_ray.h"
 #include "../../Graphics/Mesh/MeshDataProvider.h"
 #include "../../Math/v3dxVector3.h"
 
@@ -13,10 +13,9 @@ class EmbreeManager;
 struct TR_CLASS()
 	FEmbreeGeometry : public VIUnknown
 {
-	std::vector<UINT> IndexArray;
-	std::vector<v3dxVector3> VertexArray;
 	AutoRef<NxRHI::FMeshDataProvider> MeshProvider;
 	RTCGeometry InternalGeometry = nullptr;
+	std::vector<UINT> IndexBuffer32;
 	unsigned int GeomID = 0;
 	~FEmbreeGeometry();
 
@@ -25,12 +24,6 @@ struct TR_CLASS()
 	FEmbreeScene* AsTemplateScene(EmbreeManager* device);
 	AutoRef<FEmbreeScene> TemplateScene;
 
-	virtual std::vector<v3dxVector3>& GetVertexArray() {
-		return VertexArray;
-	}
-	virtual std::vector<UINT> GetIndexArray() {
-		return IndexArray;
-	}
 	virtual NxRHI::FMeshDataProvider* GetMeshProvider() {
 		return MeshProvider;
 	}
@@ -42,12 +35,6 @@ struct TR_CLASS()
 	~FEmbreeGeometryInstance();
 	AutoRef<FEmbreeGeometry> TemplateGeometry;
 	
-	virtual std::vector<v3dxVector3>& GetVertexArray() override {
-		return TemplateGeometry->GetVertexArray();
-	}
-	virtual std::vector<UINT> GetIndexArray() override {
-		return TemplateGeometry->GetIndexArray();
-	}
 	virtual NxRHI::FMeshDataProvider* GetMeshProvider() override{
 		return TemplateGeometry->GetMeshProvider();
 	}
@@ -64,6 +51,7 @@ struct TR_CLASS(SV_LayoutStruct = 8)
 
 	UINT PrimID = -1; // primitive ID
 	FEmbreeGeometry* Geometry = nullptr; // geometry that was hit
+	FEmbreeGeometry* GetGeometry() const { return Geometry; }
 	void SetDefault()
 	{
 		HitDistance = 0;
@@ -81,30 +69,28 @@ class TR_CLASS()
 {
 public:
 	FEmbreeScene() :
-		NumIndices(0),
-		bMostlyTwoSided(false),
 		EmbreeDevice(nullptr),
 		EmbreeScene(nullptr)
 	{
 	}
 	~FEmbreeScene();
 
-	INT32 NumIndices = 0;
-	bool bMostlyTwoSided = false;
-
 	// Embree
 	RTCDevice EmbreeDevice = nullptr;
 	RTCScene EmbreeScene = nullptr;
+	std::map<UINT, AutoRef<FEmbreeGeometry>> Geometries;
+	std::map<UINT, AutoRef<FEmbreeGeometryInstance>> GeometryInstances;
 
-	TR_MEMBER(SV_NoBind)
-	FEmbreeGeometry Geometry;
+	void RemoveAllGeometries();
+	void RemoveAllGeometryInstances();
 	void AttachGeometry(FEmbreeGeometry* Geometry);
 	void DetachGeometry(unsigned int geomID);
 	void AttachGeometryInstance(FEmbreeGeometryInstance* Geometry);
+	void DetachGeometryInstance(unsigned int geomID);
 	void CommitScene();
 	FEmbreeGeometry* FindGeometry(unsigned int geomID);
 	void EmbreePointQuery(v3dxVector3 VoxelPosition, float LocalSpaceTraceDistance, bool& bOutNeedTracyRays, float& OutClosestDistance);
-	bool EmbreeRayTrace(v3dxVector3 StartPosition, v3dxVector3 RayDirection, FHitResult& OutHit);
+	bool EmbreeRayTrace(v3dxVector3 StartPosition, v3dxVector3 RayDirection, float minDist, float maxDist, FHitResult& OutHit);
 };
 
 class FEmbreeRay : public RTCRayHit
@@ -137,7 +123,7 @@ public:
 };
 
 
-struct FEmbreeIntersectionContext : public RTCIntersectContext
+struct FEmbreeIntersectionContext : public RTCRayQueryContext
 {
 	FEmbreeIntersectionContext() :
 		ElementIndex(-1)
@@ -169,13 +155,6 @@ public:
 	FEmbreeScene* CreateScene();
 	FEmbreeGeometry* CreateGeometry(VNameString meshName, NxRHI::FMeshDataProvider* meshProvider);
 	FEmbreeGeometryInstance* CreateGeometryInstance(FEmbreeGeometry* geometry);
-
-	void SetupEmbreeScene(VNameString meshName, NxRHI::FMeshDataProvider& meshProvider, float DistanceFieldResolutionScale, FEmbreeScene& embreeScene);
-
-	void DeleteEmbreeScene(FEmbreeScene& embreeScene);
-
-	void EmbreePointQuery(FEmbreeScene& embreeScene, v3dxVector3 VoxelPosition, float LocalSpaceTraceDistance, bool& bOutNeedTracyRays, float& OutClosestDistance);
-	void EmbreeRayTrace(FEmbreeScene& embreeScene, v3dxVector3 StartPosition, v3dxVector3 RayDirection, bool& bOutHit, bool& bOutHitTwoSided, v3dxVector3& OutHitNormal, float& OutTFar);
 };
 
 

@@ -63,6 +63,18 @@ namespace EngineNS.Bricks.Collision.Embree
         {
             mCoreObject.DetachGeometry(geomID);
         }
+        public void DetachGeometryInstance(uint geomID)
+        {
+            mCoreObject.DetachGeometryInstance(geomID);
+        }
+        public void RemoveAllGeometries()
+        {
+            mCoreObject.RemoveAllGeometries();
+        }
+        public void RemoveAllGeometryInstances()
+        {
+            mCoreObject.RemoveAllGeometryInstances();
+        }
         public void CommitScene()
         {
             mCoreObject.CommitScene();
@@ -75,15 +87,10 @@ namespace EngineNS.Bricks.Collision.Embree
         {
             mCoreObject.EmbreePointQuery(VoxelPosition, LocalSpaceTraceDistance, ref bOutNeedTracyRays, ref OutClosestDistance);
         }
-        public bool EmbreeRayTrace(Vector3 StartPosition, Vector3 RayDirection, ref EngineNS.FHitResult OutHit)
+        public bool EmbreeRayTrace(Vector3 StartPosition, Vector3 RayDirection, float minDist, float maxDist, ref EngineNS.FHitResult OutHit)
         {
-            return mCoreObject.EmbreeRayTrace(StartPosition, RayDirection, ref OutHit);
+            return mCoreObject.EmbreeRayTrace(StartPosition, RayDirection, minDist, maxDist, ref OutHit);
         }
-
-        #region Old API
-        public int NumIndices { get => mCoreObject.NumIndices; set => mCoreObject.NumIndices = value; }
-        public bool bMostlyTwoSided { get => mCoreObject.bMostlyTwoSided; set => mCoreObject.bMostlyTwoSided = value; }
-        #endregion
     }
 
     public class TtEmbreeManager : AuxPtrType<EngineNS.EmbreeManager>
@@ -110,23 +117,5 @@ namespace EngineNS.Bricks.Collision.Embree
             return new TtEmbreeGeometryInstance(ptr);
         }
 
-        #region Old API
-        public void SetupEmbreeScene(string name, TtMeshDataProvider meshProvider, float DistanceFieldResolutionScale, TtEmbreeScene embreeScene)
-        {
-            mCoreObject.SetupEmbreeScene(VNameString.FromString(name), meshProvider.mCoreObject, DistanceFieldResolutionScale, embreeScene.mCoreObject);
-        }
-        public void DeleteEmbreeScene(TtEmbreeScene embreeScene)
-        {
-            mCoreObject.DeleteEmbreeScene(embreeScene.mCoreObject);
-        }
-        public void EmbreePointQuery(TtEmbreeScene embreeScene, Vector3 VoxelPosition, float LocalSpaceTraceDistance, ref bool bOutNeedTracyRays, ref float OutClosestDistance)
-        {
-            mCoreObject.EmbreePointQuery(embreeScene.mCoreObject, VoxelPosition, LocalSpaceTraceDistance, ref bOutNeedTracyRays, ref OutClosestDistance);
-        }
-        public void EmbreeRayTrace(TtEmbreeScene embreeScene, Vector3 StartPosition, Vector3 RayDirection, ref bool bOutHit, ref bool bOutHitTwoSided, ref Vector3 OutHitNormal, ref float OutTFar)
-        {
-            mCoreObject.EmbreeRayTrace(embreeScene.mCoreObject, StartPosition, RayDirection, ref bOutHit, ref bOutHitTwoSided, ref OutHitNormal, ref OutTFar);
-        }
-        #endregion
     }
 }

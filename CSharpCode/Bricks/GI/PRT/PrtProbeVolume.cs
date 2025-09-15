@@ -46,6 +46,12 @@ namespace EngineNS.Bricks.GI.PRT
             BuildMesh();
             return result;
         }
+        public override void Dispose()
+        {
+            CoreSDK.DisposeObject(ref mEmbreeScene);
+            CoreSDK.DisposeObject(ref mEmbreeManager);
+            base.Dispose();
+        }
         [Category("Option")]
         [Rtti.Meta]
         public Vector3 Extend
@@ -177,10 +183,17 @@ namespace EngineNS.Bricks.GI.PRT
             set
             {
                 BuildProbe();
+                for (int i = 0; i < 3; i++)
+                {
+                    System.GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                }
             }
         }
         private unsafe void BuildProbe()
         {
+            mEmbreeScene.RemoveAllGeometries();
+            mEmbreeScene.RemoveAllGeometryInstances();
             var center = DVector3.Zero;// Placement.Position;
             Dictionary<IntPtr, TtGeometryUserData> meshUserBuffers = new Dictionary<IntPtr, TtGeometryUserData>();
             this.GetWorld().Root.IterateNodes((node, arg) =>
@@ -204,6 +217,7 @@ namespace EngineNS.Bricks.GI.PRT
                         geometryUserData.FaceBuffer = faceData;
                         geometryUserData.Geometry = mEmbreeManager.CreateGeometry(meshdata.AssetName.Name, meshdata.MeshDataProvider);
                         meshUserBuffers.Add(key, geometryUserData);
+                        //mEmbreeScene.AttachGeometry(geometryUserData.Geometry);
                     }
                     var geomInst = mEmbreeManager.CreateGeometryInstance(geometryUserData.Geometry);
                     geomInst.SetTransform(meshNode.Placement.AbsTransform.ToMatrixWithScale(center));
@@ -222,8 +236,12 @@ namespace EngineNS.Bricks.GI.PRT
                 var coeffs = Graphics.Pipeline.GI.TtSHCoefficient.PrecomputeSHCoefficients((dir)=>
                 {
                     FHitResult hit = new FHitResult();
-                    var bHit = mEmbreeScene.EmbreeRayTrace(ProbeBuffer.DataArray[i].Position, dir, ref hit);
-                    if (bHit && meshUserBuffers.TryGetValue(hit.m_Geometry->GetMeshProvider().NativePointer, out var geometryUserData))
+                    //dir.X = 0.1f;
+                    //dir.Y = -1;
+                    //dir.Z = 0.1f;
+                    //dir.Normalize();
+                    var bHit = mEmbreeScene.EmbreeRayTrace(ProbeBuffer.DataArray[i].Position, dir, 0, 100.0f, ref hit);
+                    if (bHit && meshUserBuffers.TryGetValue(hit.GetGeometry().GetMeshProvider().NativePointer, out var geometryUserData))
                     {
                         var ptr = (int*)geometryUserData.FaceBuffer.DataPointer;
                         var materialId = ptr[hit.m_PrimID];
@@ -241,7 +259,7 @@ namespace EngineNS.Bricks.GI.PRT
                         float ao = 0;
                         return ao;
                     }
-                }, 1000);
+                }, 10000);
                 FProbeData tmp = new FProbeData();
                 tmp.Position = ProbeBuffer.DataArray[i].Position;
                 for (int j = 0; j < 9; j++)
@@ -250,6 +268,13 @@ namespace EngineNS.Bricks.GI.PRT
                 }
                 ProbeBuffer.DataArray[i] = tmp;
             }
+
+            var dir = Vector3.UnitY;
+            //dir.Y = -1;
+            var probe = ProbeBuffer.DataArray[0];
+            float* pSH = probe.Coeffs.RCoeffs;
+            float ao1 = Graphics.Pipeline.GI.TtSHCoefficient.EvaluateSH(pSH, dir);
+            meshUserBuffers = null;
         }
     }
 }

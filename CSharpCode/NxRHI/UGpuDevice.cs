@@ -75,6 +75,11 @@ namespace EngineNS.NxRHI
         }
         public override void Dispose()
         {
+            if (GlobalEnvDefines!=null)
+            {
+                GlobalEnvDefines.Dispose();
+                GlobalEnvDefines = null;
+            }
             this.CmdListManager.Dispose();
             this.GpuQueue.Dispose();
             this.mDescriptorPoolManager?.Dispose();
@@ -108,7 +113,7 @@ namespace EngineNS.NxRHI
                 return mCaps.Value;
             }
         }
-        public TtShaderDefinitions GlobalEnvDefines { get; } = new TtShaderDefinitions();
+        public TtShaderDefinitions GlobalEnvDefines { get; private set; } = new TtShaderDefinitions();
         Hash160 mGlobalEnvHash;
         public Hash160 GlobalEnvHash
         {
