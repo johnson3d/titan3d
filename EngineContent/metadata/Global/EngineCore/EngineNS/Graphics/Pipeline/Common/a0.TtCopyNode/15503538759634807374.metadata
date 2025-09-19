@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_15503538759634807374 Type="EngineNS.Graphics.Pipeline.Common.TtCopyNode@EngineCore">
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <OutputLifeMode Type="EngineNS.Graphics.Pipeline.TtAttachBuffer.ELifeMode@EngineCore" Order="0" />
+</Hash_15503538759634807374>

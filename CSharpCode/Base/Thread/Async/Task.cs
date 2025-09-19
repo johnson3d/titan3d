@@ -349,6 +349,10 @@ namespace EngineNS.Thread.Async
         {
             mTaskData = TtTaskData<T>.CreateInstance();
         }
+        public void AddWaitTask(TtTaskCollector.FOnTaskFinished cb = null)
+        {
+            TtEngine.Instance.TaskCollector.AddWaitTask(this, cb);
+        }
         public T GetResultUntilCompleted()
         {
             WaitCompleted();

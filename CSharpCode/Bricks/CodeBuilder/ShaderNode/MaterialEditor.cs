@@ -370,6 +370,25 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 //Material.HLSLCode = code;// GenHLSLCode();
                 //Material.SerialId++;
             }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("Test", in btSize))
+            {
+                Graphics.Pipeline.Shader.TtMaterial.GetTextureSpaceResult(AssetName).AddWaitTask((task)=>
+                {
+                    var result = ((Thread.Async.TtTask<Graphics.Pipeline.Shader.TtMaterial.FTextureSpaceResult>)task).DirectResult;
+                    unsafe
+                    {
+                        var mapped = new NxRHI.FMappedSubResource();
+                        var buffer = result.Buffer.GpuResource as NxRHI.TtBuffer;
+                        buffer.Map(0, &mapped, true);
+                        var image = StbImageSharp.ImageResult.CreateImageRGBA((byte*)mapped.m_pData, in result.Footprint);
+                        buffer.Umap(0);
+                        image.SavePng(AssetName.Address + ".png");
+                    }
+                    result.Buffer.LifeMode = Graphics.Pipeline.TtAttachBuffer.ELifeMode.Transient;
+                    result.Buffer.FreeBuffer();
+                });
+            }
         }
         bool ShowNodeGraph = true;
         protected void DrawShaderGraph()

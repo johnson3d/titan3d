@@ -127,6 +127,7 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\screenspace\hdr.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\SSM.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\TemporalAA.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Utility\MaterialToTexture.cginc" />
     <None Include="$(MSBuildThisFileDirectory)slate\SlateGUI.cginc" />
     <None Include="$(MSBuildThisFileDirectory)slate\Slate_TextureCubeViewer.cginc" />
     <None Include="$(MSBuildThisFileDirectory)slate\Slate_TextureViewer.cginc" />

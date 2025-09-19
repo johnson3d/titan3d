@@ -5,6 +5,7 @@ using EngineNS.Bricks.Collision.Embree;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
+using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
 using EngineNS.Support;
 using EngineNS.Thread.Async;
@@ -203,6 +204,11 @@ namespace EngineNS.Bricks.GI.PRT
                 {
                     var mesh = meshNode.Mesh;
                     Graphics.Mesh.TtMaterialMesh.TtSubMaterialedMesh subMesh = mesh.MaterialMesh.SubMeshes[0];
+                    foreach(var i in subMesh.Materials)
+                    {
+                        //build material -> TextureSpaceResult mapping
+                        //TtMaterial.GetTextureSpaceResult(i.AssetName);
+                    }
                     var meshdata = subMesh.Mesh;
                     meshdata.LoadMeshDataProvider().WaitCompleted();
                     if (meshdata.MeshDataProvider==null)
@@ -233,7 +239,8 @@ namespace EngineNS.Bricks.GI.PRT
             ProbeBuffer.PushData(t);
             for (int i = 0; i<ProbeBuffer.DataArray.Count; i++)
             {
-                var coeffs = Graphics.Pipeline.GI.TtSHCoefficient.PrecomputeSHCoefficients((dir)=>
+                var coeffs = new float[9];
+                Graphics.Pipeline.GI.TtSHCoefficient.PrecomputeSHCoefficients(coeffs, (dir)=>
                 {
                     FHitResult hit = new FHitResult();
                     //dir.X = 0.1f;

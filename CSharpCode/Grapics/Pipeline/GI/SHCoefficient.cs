@@ -203,11 +203,23 @@ namespace EngineNS.Graphics.Pipeline.GI
 
             // 第3阶 (l=3) 可根据需要扩展
         }
-        public static float[] PrecomputeSHCoefficients(Func<Vector3, float> sampleEnvironment, uint sampleCount = 100000)
+        public static unsafe void PrecomputeSHCoefficients(float[] coefficients, Func<Vector3, float> sampleEnvironment, uint sampleCount = 100000)
         {
-            float[] coefficients = new float[9];
-
-            float[] basis = new float[9];
+            if (coefficients.Length != 9)
+                throw new ArgumentException("Coefficients must have 9 elements for 3rd-order SH.");
+            fixed (float* p = &coefficients[0])
+            {
+                PrecomputeSHCoefficients(p, sampleEnvironment, sampleCount);
+            }
+        }
+        public static unsafe void PrecomputeSHCoefficients(float* coefficients, Func<Vector3, float> sampleEnvironment, uint sampleCount = 100000)
+        {
+            //float[] coefficients = new float[9];
+            for (int j = 0; j < 9; j++)
+            {
+                coefficients[j] = 0;
+            }
+            float* basis = stackalloc float[9];
             for (uint i = 0; i < sampleCount; i++)
             {
                 // 生成均匀分布的随机方向（蒙特卡洛采样）
@@ -234,7 +246,6 @@ namespace EngineNS.Graphics.Pipeline.GI
             {
                 coefficients[j] *= weight;
             }
-            return coefficients;
         }
         public static unsafe float EvaluateSH(float[] coefficients, in Vector3 normal)
         {

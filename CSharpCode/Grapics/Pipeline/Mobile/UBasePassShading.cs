@@ -189,7 +189,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public NxRHI.TtRenderPass RenderPass;
         public NxRHI.TtRenderPass GizmosRenderPass;
 
-        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
@@ -377,7 +377,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public NxRHI.TtRenderPass RenderPass;
         public NxRHI.TtRenderPass GizmosRenderPass;
         public TtCpuCullingNode CpuCullNode = null;
-        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 

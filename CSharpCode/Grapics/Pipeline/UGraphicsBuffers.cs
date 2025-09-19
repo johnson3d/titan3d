@@ -11,13 +11,14 @@ namespace EngineNS.Graphics.Pipeline
     {
         public NxRHI.EBufferType BufferViewTypes;// = NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV
         public EPixelFormat Format;
+        public NxRHI.ECpuAccess CpuAccess;
         public NxRHI.EResourceMiscFlag Flags;
         public uint Width;
         public uint Height;
         public bool IsMatch(in FAttachBufferDesc desc)
         {
             return (Format == desc.Format) && (Width == desc.Width) && (Height == desc.Height) && 
-                ((BufferViewTypes & desc.BufferViewTypes) != NxRHI.EBufferType.BFT_NONE);
+                ((BufferViewTypes & desc.BufferViewTypes) == desc.BufferViewTypes) && (CpuAccess == desc.CpuAccess);
         }
         public bool IsMatchSize(in FAttachBufferDesc desc)
         {
@@ -25,7 +26,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public override string ToString()
         {
-            return $"{Format}({Width},{Height},{BufferViewTypes})";
+            return $"{Format}({Width},{Height},{BufferViewTypes},{CpuAccess})";
         }
         public override int GetHashCode()
         {
@@ -177,27 +178,37 @@ namespace EngineNS.Graphics.Pipeline
                 desc.m_Height = BufferDesc.Height;
                 desc.m_Format = BufferDesc.Format;
                 desc.MiscFlags = abfdesc.Flags;
-
-                if ((types & NxRHI.EBufferType.BFT_DSV) != 0)
+                desc.CpuAccess = BufferDesc.CpuAccess;
+                if (BufferDesc.CpuAccess != NxRHI.ECpuAccess.CAS_DEFAULT)
                 {
-                    desc.m_BindFlags |= NxRHI.EBufferType.BFT_DSV;
-                    //types |= NxRHI.EBufferType.BFT_DSV;
+                    desc.Usage = NxRHI.EGpuUsage.USAGE_STAGING;
+                    System.Diagnostics.Debug.Assert(false);
                 }
-                if ((types & NxRHI.EBufferType.BFT_RTV) != 0)
+                else
                 {
-                    desc.m_BindFlags |= NxRHI.EBufferType.BFT_RTV;
-                    //types |= NxRHI.EBufferType.BFT_RTV;
+                    desc.Usage = NxRHI.EGpuUsage.USAGE_DEFAULT;
+                    if ((types & NxRHI.EBufferType.BFT_DSV) != 0)
+                    {
+                        desc.m_BindFlags |= NxRHI.EBufferType.BFT_DSV;
+                        //types |= NxRHI.EBufferType.BFT_DSV;
+                    }
+                    if ((types & NxRHI.EBufferType.BFT_RTV) != 0)
+                    {
+                        desc.m_BindFlags |= NxRHI.EBufferType.BFT_RTV;
+                        //types |= NxRHI.EBufferType.BFT_RTV;
+                    }
+                    if ((types & NxRHI.EBufferType.BFT_SRV) != 0)
+                    {
+                        desc.m_BindFlags |= NxRHI.EBufferType.BFT_SRV;
+                        //types |= NxRHI.EBufferType.BFT_SRV;
+                    }
+                    if ((types & NxRHI.EBufferType.BFT_UAV) != 0)
+                    {
+                        desc.m_BindFlags |= NxRHI.EBufferType.BFT_UAV;
+                        //types |= NxRHI.EBufferType.BFT_UAV;
+                    }
                 }
-                if ((types & NxRHI.EBufferType.BFT_SRV) != 0)
-                {
-                    desc.m_BindFlags |= NxRHI.EBufferType.BFT_SRV;
-                    //types |= NxRHI.EBufferType.BFT_SRV;
-                }
-                if ((types & NxRHI.EBufferType.BFT_UAV) != 0)
-                {
-                    desc.m_BindFlags |= NxRHI.EBufferType.BFT_UAV;
-                    //types |= NxRHI.EBufferType.BFT_UAV;
-                }
+                
                 if (desc.Format == EPixelFormat.PXF_D24_UNORM_S8_UINT ||
                     desc.Format == EPixelFormat.PXF_D16_UNORM ||
                     desc.Format == EPixelFormat.PXF_D32_FLOAT ||
@@ -258,12 +269,17 @@ namespace EngineNS.Graphics.Pipeline
             {
                 var desc = new NxRHI.FBufferDesc();
                 desc.SetDefault(false, types);
+                desc.CpuAccess = BufferDesc.CpuAccess;
                 desc.MiscFlags = abfdesc.Flags;
                 desc.Size = BufferDesc.Width * BufferDesc.Height;
                 desc.StructureStride = BufferDesc.Width;
+                if (BufferDesc.CpuAccess!= NxRHI.ECpuAccess.CAS_DEFAULT)
+                {
+                    desc.Usage = NxRHI.EGpuUsage.USAGE_STAGING;
+                }
                 GpuResource = rc.CreateBuffer(in desc);
                 GpuResource.SetDebugName("TtAttachBuffer");
-                if ((types & NxRHI.EBufferType.BFT_SRV) != 0)
+                if (BufferDesc.CpuAccess == NxRHI.ECpuAccess.CAS_DEFAULT && (types & NxRHI.EBufferType.BFT_SRV) != 0)
                 {
                     var viewDesc = new NxRHI.FSrvDesc();
                     viewDesc.SetBuffer(false);
@@ -275,7 +291,7 @@ namespace EngineNS.Graphics.Pipeline
                     Srv = rc.CreateSRV(GpuResource as NxRHI.TtBuffer, in viewDesc);
                     System.Diagnostics.Debug.Assert(Srv != null);
                 }
-                if ((types & NxRHI.EBufferType.BFT_UAV) != 0)
+                if (BufferDesc.CpuAccess == NxRHI.ECpuAccess.CAS_DEFAULT && (types & NxRHI.EBufferType.BFT_UAV) != 0)
                 {
                     var viewDesc = new NxRHI.FUavDesc();
                     viewDesc.SetBuffer(false);

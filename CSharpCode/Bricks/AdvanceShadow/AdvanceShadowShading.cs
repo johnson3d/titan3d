@@ -144,7 +144,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                 return mShadowShading;
         }
         public TtQTree mShadowQTree = null;
-        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             mShadowShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAdvanceShadowShading>();
@@ -186,7 +186,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             dpRastDesc.m_Rasterizer.m_SlopeScaledDepthBias = 2.0f;
             DepthRaster = TtEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(rc, in dpRastDesc);
 
-            ESMScreenMesh = Graphics.Pipeline.Common.TtSceenSpaceNode.CreateScreenMesh();
+            ESMScreenMesh = Graphics.Pipeline.Common.TtSceenSpaceNode.CreateScreenMesh(null);
             ESMScreenMesh.Tag = mEsmShading;
             if (this.Enable)
                 this.Enable = true;

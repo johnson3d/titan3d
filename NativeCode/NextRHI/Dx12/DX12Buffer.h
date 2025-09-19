@@ -49,6 +49,7 @@ namespace NxRHI
 		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) override;
 		virtual void SetDebugName(const char* name) override;
 		virtual IGpuBufferData* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) override;
+		virtual bool GetFootprint(FSubResourceFootPrint* fp, UINT64* rowSize, UINT64* totalSize, UINT subRes, UINT64 offset) override;
 	public:
 		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		D3D12_RESOURCE_DESC mDX12ResourceDesc{};

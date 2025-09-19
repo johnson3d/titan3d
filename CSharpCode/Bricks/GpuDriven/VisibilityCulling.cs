@@ -124,7 +124,7 @@ namespace EngineNS.Bricks.GpuDriven
 
             base.InitNodePins();
         }
-        public override async Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
             var rc = TtEngine.Instance.GfxDevice.RenderContext;

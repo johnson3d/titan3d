@@ -1,5 +1,5 @@
 ﻿using EngineNS.Bricks.VXGI;
-using Org.BouncyCastle.Asn1.Mozilla;
+using EngineNS.Graphics.Pipeline.Shader;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -34,7 +34,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public NxRHI.TtRenderPass RenderPass;
         public string DebugName;
         //public override Graphics.Pipeline.Shader.UGraphicsShadingEnv GetPassShading(URenderPolicy.EShadingType type = URenderPolicy.EShadingType.Count, Graphics.Mesh.TtMesh.TtAtom atom = null) abstract;
-        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
@@ -42,7 +42,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             DebugName = debugName;
 
-            ScreenMesh = CreateScreenMesh();
+            ScreenMesh = CreateScreenMesh(null);
             //var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             //materials[0] = TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial;
             //if (materials[0] == null)
@@ -57,10 +57,17 @@ namespace EngineNS.Graphics.Pipeline.Common
             //    ScreenMesh = mesh;
             //}
         }
-        public static Graphics.Mesh.TtRenderMesh CreateScreenMesh()
+        public static Graphics.Mesh.TtRenderMesh CreateScreenMesh(TtMaterial material)
         {
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
-            materials[0] = TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial;
+            if (material==null)
+            {
+                materials[0] = TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial;
+            }
+            else
+            {
+                materials[0] = material;
+            }
             if (materials[0] == null)
                 return null;
 

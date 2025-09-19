@@ -84,6 +84,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)UHitproxyManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UPresentWindow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UStateManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utility\MaterialToTexture.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UViewportSlate.cs" />
   </ItemGroup>
   <ItemGroup>

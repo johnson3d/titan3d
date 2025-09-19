@@ -131,7 +131,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
             Rt1PinOut.Attachement.Height = (uint)y;
             Rt1PinOut.Attachement.Width = (uint)x;
         }
-        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 

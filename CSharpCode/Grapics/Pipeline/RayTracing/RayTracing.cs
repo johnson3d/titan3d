@@ -92,7 +92,7 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
         public NxRHI.TtSrView VBV_Normal;
         public NxRHI.TtSrView IBV;
         public NxRHI.TtBindless DiffuseTextures;
-        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
 

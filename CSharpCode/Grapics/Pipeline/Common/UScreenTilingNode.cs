@@ -154,7 +154,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         private PushLightToTileDataShading PushLightToTileData;
         private NxRHI.TtComputeDraw PushLightToTileDataDrawcall;
 
-        public async override System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        public async override Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
             var rc = TtEngine.Instance.GfxDevice.RenderContext;

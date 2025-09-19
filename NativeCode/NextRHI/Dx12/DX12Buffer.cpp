@@ -788,6 +788,24 @@ namespace NxRHI
 		return true;
 	}
 
+	bool DX12Texture::GetFootprint(FSubResourceFootPrint* fp, UINT64* rowSize, UINT64* totalSize, UINT subRes, UINT64 offset)
+	{
+		D3D12_PLACED_SUBRESOURCE_FOOTPRINT footPrint{};
+		mDeviceRef.GetPtr()->mDevice->GetCopyableFootprints(&mDX12ResourceDesc, subRes, 1, offset, &footPrint, nullptr, rowSize, totalSize);
+
+		fp->Format = DX12FormatToFormat(footPrint.Footprint.Format);
+		fp->X = 0;
+		fp->Y = 0;
+		fp->Z = 0;
+		fp->Width = footPrint.Footprint.Width;
+		fp->Height = footPrint.Footprint.Height;
+		fp->Depth = footPrint.Footprint.Depth;
+		fp->RowPitch = footPrint.Footprint.RowPitch;
+		fp->TotalSize = footPrint.Footprint.RowPitch * footPrint.Footprint.Height;
+
+		return true;
+	}
+
 	IGpuBufferData* DX12Texture::CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint)
 	{
 		FBufferDesc desc{};

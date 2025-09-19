@@ -493,6 +493,10 @@ namespace NxRHI
 			return false;
 		}
 		virtual IBuffer* CreateReadable(IGpuDevice* device, int subRes, ICopyDraw* cpDraw) override;
+		virtual bool GetFootprint(FSubResourceFootPrint* fp, UINT64* rowSize, UINT64* totalSize, UINT subRes, UINT64 offset) { 
+			ASSERT(false);
+			return false; 
+		}
 	public:
 		FTextureDesc		Desc{};
 		FResourceState		mResourceState{};

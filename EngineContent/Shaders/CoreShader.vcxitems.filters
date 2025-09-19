@@ -109,6 +109,9 @@
     <Filter Include="Bricks\AdvanceShadow">
       <UniqueIdentifier>{65a00b5e-8d3d-4887-817d-034b4d2d9a0a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ShadingEnv\Utility">
+      <UniqueIdentifier>{d21b4c92-0a53-470c-b56e-35a446ada6b1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -454,6 +457,9 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)Bricks\AdvanceShadow\ESM.cginc">
       <Filter>Bricks\AdvanceShadow</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Utility\MaterialToTexture.cginc">
+      <Filter>ShadingEnv\Utility</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

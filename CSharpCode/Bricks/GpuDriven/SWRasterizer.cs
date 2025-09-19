@@ -407,7 +407,7 @@ namespace EngineNS.Bricks.GpuDriven
             mShadingStruct.QuarkRTSizeFactor.X = x;
             mShadingStruct.QuarkRTSizeFactor.Y = y;
         }
-        public override async Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
@@ -555,7 +555,7 @@ namespace EngineNS.Bricks.GpuDriven
         {
             return mBasePassShading;
         }
-        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
 

@@ -124,7 +124,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public TtDeferredOpaqueMeshlets mMeshletsOpaqueShading;
         public NxRHI.TtRenderPass RenderPass;
 
-        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 

@@ -24,7 +24,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             CoreSDK.DisposeObject(ref mFinishFence);
             CoreSDK.DisposeObject(ref mCmdList);
         }
-        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
 

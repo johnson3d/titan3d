@@ -35,7 +35,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public TtGaussNode[] DownSampleNodes = null;
         public TtGaussAdditiveNode[] UpSampleNodes = null;
 
-        public override async Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
 

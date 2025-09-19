@@ -49,7 +49,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             return mBasePassShading;
         }
         public TtScreenSpaceUIShading mBasePassShading;
-        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 

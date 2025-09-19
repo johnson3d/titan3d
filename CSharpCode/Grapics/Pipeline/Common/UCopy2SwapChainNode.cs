@@ -54,7 +54,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             AddOutput(ColorPinOut);
         }
-        public override async Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             await base.Initialize(policy, debugName);

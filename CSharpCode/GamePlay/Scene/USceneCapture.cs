@@ -1,4 +1,5 @@
 using EngineNS.Graphics.Pipeline;
+using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,6 +11,41 @@ using static EngineNS.GamePlay.TtWorld;
 
 namespace EngineNS.GamePlay.Scene
 {
+    public class TtWorldRenderer
+    {
+        public GamePlay.TtWorld CaptureWorld { get; set; }
+        public Editor.Controller.EditorCameraController CameraController = new Editor.Controller.EditorCameraController();
+        public Graphics.Pipeline.TtRenderPolicy RenderPolicy { get; set; }
+        public virtual bool Initialize(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        {
+            CaptureWorld = world;
+
+            RenderPolicy = policy;
+            CameraController.ControlCamera(RenderPolicy.DefaultCamera);
+
+            return true;
+        }
+        public virtual void TickLogic(float ellapse)
+        {
+            RenderPolicy?.BeginTickLogic(CaptureWorld);
+            RenderPolicy?.TickLogic(CaptureWorld, null);
+            RenderPolicy?.EndTickLogic(CaptureWorld);
+        }
+    }
+    public class TtWorldImmRenderer : TtWorldRenderer
+    {
+        public override bool Initialize(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        {
+            base.Initialize(world, policy);
+            RenderPolicy.CmdQueue = new NxRHI.TtRCmdQueue();
+            return true;
+        }
+        public override void TickLogic(float ellapse)
+        {
+            base.TickLogic(ellapse);
+            RenderPolicy.CmdQueue.Execute(new NxRHI.ICommandList());
+        }
+    }
     [Bricks.CodeBuilder.ContextMenu("Capture", "SceneCapture", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtSceneCapture.TtSceneCaptureData), DefaultNamePrefix = "Capture")]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.USceneCapture@EngineCore", "EngineNS.GamePlay.Scene.USceneCapture" })]
@@ -70,9 +106,7 @@ namespace EngineNS.GamePlay.Scene
             OnlyShowNodes.Clear();
         }
         #endregion
-        public Graphics.Pipeline.TtRenderPolicy RenderPolicy { get; set; }
-        public Editor.Controller.EditorCameraController CameraController = new Editor.Controller.EditorCameraController();
-        public GamePlay.TtWorld CaptureWorld { get; set; }
+        public TtWorldRenderer WorldRenderer { get; } = new TtWorldRenderer();
         protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
@@ -91,11 +125,8 @@ namespace EngineNS.GamePlay.Scene
             await policy.Initialize(null);
             policy.OnResize(nd.TargetSize.X, nd.TargetSize.Y);
 
-            RenderPolicy = policy;
-            CameraController.ControlCamera(RenderPolicy.DefaultCamera);
-
-            CaptureWorld = world;
-
+            WorldRenderer.Initialize(world, policy);
+            
             this.OnlyShowNodes.Clear();
             if (nd.ShowActors != null && nd.ShowActors.Count > 0)
             {
@@ -113,24 +144,24 @@ namespace EngineNS.GamePlay.Scene
 
             TtEngine.Instance.TickableManager.AddTickable(this);
 
-            var cullNode = RenderPolicy.FindFirstNode<TtCpuCullingNode>();
+            var cullNode = WorldRenderer.RenderPolicy.FindFirstNode<TtCpuCullingNode>();
             GamePlay.TtWorld.TtVisParameter mVisParameter = cullNode.VisParameter;
             mVisParameter.IsGatherVisibleMeshes = this.OnVisitNode;
             cullNode.UserTickLogic = (GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear) =>
             {
-                mVisParameter.World = CaptureWorld;
-                mVisParameter.CullCamera = RenderPolicy.DefaultCamera;
+                mVisParameter.World = WorldRenderer.CaptureWorld;
+                mVisParameter.CullCamera = WorldRenderer.RenderPolicy.DefaultCamera;
                 if (CaptureMode == ECaptureMode.OnlyShowNodes)
                 {
                     mVisParameter.ClearVisibles();
                     foreach (var i in OnlyShowNodes)
                     {
-                        CaptureWorld.GatherVisibleMeshes(mVisParameter, i);
+                        WorldRenderer.CaptureWorld.GatherVisibleMeshes(mVisParameter, i);
                     }
                 }
                 else
                 {
-                    CaptureWorld.GatherVisibleMeshes(mVisParameter);
+                    WorldRenderer.CaptureWorld.GatherVisibleMeshes(mVisParameter);
                 }
             };
 
@@ -142,7 +173,7 @@ namespace EngineNS.GamePlay.Scene
             nd.ShowActors.Clear();
             foreach (var i in OnlyShowNodes)
             {
-                var node = CaptureWorld.Root.FindNode(i.NodeId, true);
+                var node = WorldRenderer.CaptureWorld.Root.FindNode(i.NodeId, true);
                 if (node != null)
                 {
                     nd.ShowActors.Add(i.NodeId);
@@ -197,19 +228,19 @@ namespace EngineNS.GamePlay.Scene
             set
             {
                 GetNodeData<TtSceneCaptureData>().TargetSize = value;
-                RenderPolicy.OnResize(value.X, value.Y);
+                WorldRenderer.RenderPolicy.OnResize(value.X, value.Y);
             }
         }
 
         void UpdateCamera()
         {
-            if (RenderPolicy == null)
+            if (WorldRenderer.RenderPolicy == null)
                 return;
             ref var eyePos = ref this.Placement.AbsTransform.mPosition;
             var dir = this.Placement.AbsTransform.TransformVector3NoScale(in Vector3.Forward);
             dir.Normalize();
             var lookAt = eyePos + dir * 100.0f;
-            RenderPolicy.DefaultCamera.mCoreObject.LookAtLH(in eyePos, in lookAt, in Vector3.Up);
+            WorldRenderer.RenderPolicy.DefaultCamera.mCoreObject.LookAtLH(in eyePos, in lookAt, in Vector3.Up);
         }
         protected override void OnAbsTransformChanged()
         {
@@ -219,7 +250,7 @@ namespace EngineNS.GamePlay.Scene
         public void TickLogic(float ellapse)
         {
             var absAABB = DBoundingBox.TransformNoScale(in RefAABB, in Placement.AbsTransform);
-            var type = CameraController.Camera.WhichContainTypeFast(CaptureWorld, in absAABB, false);
+            var type = WorldRenderer.CameraController.Camera.WhichContainTypeFast(WorldRenderer.CaptureWorld, in absAABB, false);
 
             if (type == CONTAIN_TYPE.CONTAIN_TEST_OUTER)
             {
@@ -228,9 +259,7 @@ namespace EngineNS.GamePlay.Scene
             }
             IsCaptureVisible = true;
 
-            RenderPolicy?.BeginTickLogic(CaptureWorld);
-            RenderPolicy?.TickLogic(CaptureWorld, null);
-            RenderPolicy?.EndTickLogic(CaptureWorld);
+            WorldRenderer.TickLogic(ellapse);
         }
         public void TickRender(float ellapse)
         {
@@ -243,7 +272,7 @@ namespace EngineNS.GamePlay.Scene
         public void TickSync(float ellapse)
         {
             if (IsCaptureVisible)
-                RenderPolicy?.TickSync();
+                WorldRenderer.RenderPolicy?.TickSync();
         }
 
         #region DebugUI
@@ -275,7 +304,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public unsafe void OnDraw()
         {
-            if (Visible == false || RenderPolicy == null)
+            if (Visible == false || WorldRenderer.RenderPolicy == null)
                 return;
 
             ImGuiAPI.SetNextWindowSize(GetNodeData<TtSceneCaptureData>().TargetSize, ImGuiCond_.ImGuiCond_FirstUseEver);
@@ -294,7 +323,7 @@ namespace EngineNS.GamePlay.Scene
                     min1 = min1 + pos;
                     max1 = max1 + pos;
                     ImTextureRef imTextureRef = new ImTextureRef();
-                    imTextureRef.m__TexID = (ulong)RenderPolicy.GetFinalShowRSV().GetTextureHandle();
+                    imTextureRef.m__TexID = (ulong)WorldRenderer.RenderPolicy.GetFinalShowRSV().GetTextureHandle();
                     drawlist.AddImage(imTextureRef, in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
                 }
                 ImGuiAPI.EndChild();

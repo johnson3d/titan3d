@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.Particle
             AddInputOutput(ColorPinInOut);
             AddInputOutput(DepthPinInOut);
         }
-        public async override System.Threading.Tasks.Task Initialize(Graphics.Pipeline.TtRenderPolicy policy,
+        public async override Thread.Async.TtTask Initialize(Graphics.Pipeline.TtRenderPolicy policy,
                     string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();

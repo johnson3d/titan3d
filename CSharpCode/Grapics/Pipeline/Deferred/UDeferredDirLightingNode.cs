@@ -410,7 +410,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             return mBasePassShading;
         }
         public Bricks.AdvanceShadow.TtAdvanceShadowMapNode AdvanceShadowMapNode;
-        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
             mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDeferredDirLightingShading>();

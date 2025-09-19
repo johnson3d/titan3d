@@ -260,7 +260,7 @@ namespace EngineNS.Bricks.VXGI
         private NxRHI.TtComputeDraw EraseVoxelGroupDrawcall;
         #endregion
 
-        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(Graphics.Pipeline.TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 

@@ -809,6 +809,8 @@ namespace NxRHI
 
 	void DX12CommandList::CopyBufferRegion(IBuffer* target, UINT64 DstOffset, IBuffer* src, UINT64 SrcOffset, UINT64 Size)
 	{	
+		if (target == nullptr || src == nullptr)
+			return;
 		GetCmdRecorder()->UseResource(target);
 		GetCmdRecorder()->UseResource(src);
 		if (Size == 0 && DstOffset == 0 && SrcOffset == 0 && target->GetRtti() == src->GetRtti())
@@ -826,6 +828,8 @@ namespace NxRHI
 	}
 	void DX12CommandList::CopyTextureRegion(ITexture* target, UINT tarSubRes, UINT DstX, UINT DstY, UINT DstZ, ITexture* source, UINT srcSubRes, const FSubresourceBox* box)
 	{
+		if (target == nullptr || source == nullptr)
+			return;
 		GetCmdRecorder()->UseResource(target);
 		GetCmdRecorder()->UseResource(source);
 
@@ -841,6 +845,8 @@ namespace NxRHI
 	}
 	void DX12CommandList::CopyBufferToTexture(ITexture* target, UINT subRes, IBuffer* source, const FSubResourceFootPrint* footprint)
 	{
+		if (target == nullptr || source == nullptr)
+			return;
 		GetCmdRecorder()->UseResource(target);
 		GetCmdRecorder()->UseResource(source);
 
@@ -872,6 +878,8 @@ namespace NxRHI
 	}
 	void DX12CommandList::CopyTextureToBuffer(IBuffer* target, const FSubResourceFootPrint* footprint, ITexture* source, UINT subRes)
 	{
+		if (target == nullptr || source == nullptr)
+			return;
 		GetCmdRecorder()->UseResource(target);
 		GetCmdRecorder()->UseResource(source);
 

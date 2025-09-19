@@ -112,7 +112,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public TtLayerDrawBuffers LayerBasePass = new TtLayerDrawBuffers();
         public NxRHI.TtRenderPass RenderPass;
         public TtCpuCullingNode CpuCullNode = null;
-        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 

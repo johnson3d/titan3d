@@ -77,7 +77,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         {
             return mBasePassShading;
         }
-        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
             mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtExponentialShadowShading>();

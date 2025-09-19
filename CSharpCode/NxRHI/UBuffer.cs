@@ -269,6 +269,10 @@ namespace EngineNS.NxRHI
         {
             get => mCoreObject.NativeSuper.GpuState;
         }
+        public bool GetFootprint(ref EngineNS.NxRHI.FSubResourceFootPrint fp, ref ulong rowSize, ref ulong totalSize, uint subRes = 0, ulong offset = 0)
+        {
+            return mCoreObject.GetFootprint(ref fp, ref rowSize, ref totalSize, subRes, offset);
+        }
     }
     public class TtCbView : AuxPtrType<NxRHI.ICbView>
     {

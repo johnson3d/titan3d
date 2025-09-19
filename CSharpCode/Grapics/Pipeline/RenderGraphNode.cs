@@ -259,7 +259,7 @@ namespace EngineNS.Graphics.Pipeline
             //return false;
         }
 
-        public virtual async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        public virtual async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
         }

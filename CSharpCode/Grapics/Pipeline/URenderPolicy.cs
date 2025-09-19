@@ -44,6 +44,17 @@ namespace EngineNS.Graphics.Pipeline
         {
             NodeList.Host = this;
         }
+        public static async Thread.Async.TtTask<TtRenderPolicy> CreatRenderPolicy(RName name)
+        {
+            Graphics.Pipeline.TtRenderPolicy policy = null;
+            var rpAsset = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(name);
+            if (rpAsset != null)
+            {
+                policy = rpAsset.CreateRenderPolicy(null);
+            }
+            await policy.Initialize(null);
+            return policy;
+        }
         public override void Dispose()
         {
             //foreach(var i in VisibleMeshes)

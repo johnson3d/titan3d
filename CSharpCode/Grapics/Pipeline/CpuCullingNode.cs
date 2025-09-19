@@ -47,7 +47,7 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
-        public async override System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        public async override Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 

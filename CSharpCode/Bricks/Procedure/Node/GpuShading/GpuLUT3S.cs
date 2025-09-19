@@ -84,7 +84,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
 
             base.InitNodePins();
         }
-        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
             ShadingEnv = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtWaterBasinShading>();

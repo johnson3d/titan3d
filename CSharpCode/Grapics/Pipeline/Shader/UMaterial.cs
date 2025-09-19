@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using EngineNS.Animation.Macross.BlendTree;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.NodeGraph;
+using EngineNS.GamePlay;
+using EngineNS.NxRHI;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
@@ -1206,6 +1209,40 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 mPipelineDesc.m_Blend = value;
                 UpdatePipeline();
             }
+        }
+        #endregion
+
+        #region Utility
+        public class FTextureSpaceResult
+        {
+            public TtAttachBuffer Buffer;
+            public FSubResourceFootPrint Footprint;
+            public void SavePng(string file)
+            {
+
+            }
+        }
+        public static async Thread.Async.TtTask<FTextureSpaceResult> GetTextureSpaceResult(RName materialName)
+        {
+            TtRenderPolicy policy = await TtRenderPolicy.CreatRenderPolicy(RName.GetRName("graphics/material_to_texture.rpolicy", RName.ERNameType.Engine));
+            var m2t = policy.FindFirstNode<Graphics.Pipeline.Utility.TtMaterialToTextureNode>();
+            if (m2t==null)
+                return null;
+            m2t.MaterialName = materialName;
+
+            policy.OnResize(512,512);
+
+            var renderer = new GamePlay.Scene.TtWorldImmRenderer();
+            TtWorld ttWorld = new TtWorld(null, false);
+            await ttWorld.InitWorld();
+            renderer.Initialize(ttWorld, policy);
+
+            renderer.TickLogic(0);
+            var node = renderer.RenderPolicy.FindFirstNode<Graphics.Pipeline.Common.TtCopy2ReadbackNode>();
+            var result = new FTextureSpaceResult();
+            result.Buffer = node.ResultBuffer;
+            result.Footprint = node.mCopyDrawcall.FootPrint;
+            return result;
         }
         #endregion
     }
