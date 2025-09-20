@@ -1,8 +1,10 @@
-﻿using System;
+﻿using EngineNS;
+using Hebron.Runtime;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
-using Hebron.Runtime;
+using System.Security.Cryptography;
 
 namespace StbImageSharp
 {
@@ -11,21 +13,22 @@ namespace StbImageSharp
 #else
 	internal
 #endif
-    partial class ImageResult
+    partial class TtMemImage
 	{
 		public int Width { get; set; }
 		public int Height { get; set; }
 		public ColorComponents SourceComp { get; set; }
 		public ColorComponents Comp { get; set; }
-		public byte[] Data { get; set; }
+        byte[] mData;
+        public byte[] Data { get => mData; set => mData = value; }
 
-		internal static unsafe ImageResult FromResult(byte* result, int width, int height, ColorComponents comp,
+        internal static unsafe TtMemImage FromResult(byte* result, int width, int height, ColorComponents comp,
 			ColorComponents req_comp)
 		{
 			if (result == null)
 				throw new InvalidOperationException(StbImage.stbi__g_failure_reason);
 
-			var image = new ImageResult
+			var image = new TtMemImage
 			{
 				Width = width,
 				Height = height,
@@ -40,7 +43,7 @@ namespace StbImageSharp
 			return image;
 		}
 
-		public static unsafe ImageResult FromStream(Stream stream,
+        public static unsafe TtMemImage FromStream(Stream stream,
 			ColorComponents requiredComponents = ColorComponents.Default)
 		{
 			byte* result = null;
@@ -62,7 +65,7 @@ namespace StbImageSharp
 			}
 		}
 
-		public static ImageResult FromMemory(byte[] data, ColorComponents requiredComponents = ColorComponents.Default)
+		public static TtMemImage FromMemory(byte[] data, ColorComponents requiredComponents = ColorComponents.Default)
 		{
 			using (var stream = new MemoryStream(data))
 			{
@@ -75,5 +78,5 @@ namespace StbImageSharp
 		{
 			return new AnimatedGifEnumerable(stream, requiredComponents);
 		}
-	}
+    }
 }

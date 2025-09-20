@@ -1336,7 +1336,7 @@ namespace EngineNS.Bricks.Procedure
         {
             using (var stream = System.IO.File.OpenRead(name.Address))
             {
-                var image = StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                var image = StbImageSharp.TtMemImage.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
                 CreateBuffer(image.Height, image.Width, 1);
                 for (int i = 0; i < Depth; i++)
                 {

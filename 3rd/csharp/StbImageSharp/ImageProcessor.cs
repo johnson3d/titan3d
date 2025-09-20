@@ -9,10 +9,10 @@ namespace StbImageSharp
 {
     public class ImageProcessor
     {
-        public static unsafe ImageResult GetCenterSquare(ImageResult src)
+        public static unsafe TtMemImage GetCenterSquare(TtMemImage src)
         {
             var size = Math.Min(src.Width, src.Height);
-            ImageResult result = new ImageResult();
+            TtMemImage result = new TtMemImage();
             var x = (src.Width - size) / 2;
             var y = (src.Height - size) / 2;
             result.Width = size;
@@ -63,10 +63,10 @@ namespace StbImageSharp
             
             return result;
         }
-        public static unsafe ImageResult GetCenterLeft(ImageResult src)
+        public static unsafe TtMemImage GetCenterLeft(TtMemImage src)
         {
             var size = Math.Min(src.Width, src.Height);
-            ImageResult result = new ImageResult();
+            TtMemImage result = new TtMemImage();
             var x = 0;
             var y = (src.Height - size) / 2;
             result.Width = size;
@@ -117,10 +117,10 @@ namespace StbImageSharp
 
             return result;
         }
-        public static unsafe ImageResult GetCenterRight(ImageResult src)
+        public static unsafe TtMemImage GetCenterRight(TtMemImage src)
         {
             var size = Math.Min(src.Width, src.Height);
-            ImageResult result = new ImageResult();
+            TtMemImage result = new TtMemImage();
             var x = src.Width - size;
             var y = (src.Height - size) / 2;
             result.Width = size;
@@ -171,7 +171,7 @@ namespace StbImageSharp
 
             return result;
         }
-        public static unsafe ImageResult GetBoxDownSampler(ImageResult src, int targetWidth, int targetHeight)
+        public static unsafe TtMemImage GetBoxDownSampler(TtMemImage src, int targetWidth, int targetHeight)
         {
             switch (src.Comp)
             {
@@ -184,10 +184,10 @@ namespace StbImageSharp
             }
             return null;
         }
-        public static unsafe ImageResult GetBoxDownSampler_rgba(ImageResult src, int targetWidth, int targetHeight)
+        public static unsafe TtMemImage GetBoxDownSampler_rgba(TtMemImage src, int targetWidth, int targetHeight)
         {
             System.Diagnostics.Debug.Assert(src.Comp == ColorComponents.RedGreenBlueAlpha);
-            ImageResult result = new ImageResult();
+            TtMemImage result = new TtMemImage();
             int hW = targetWidth;
             int hH = targetHeight;
             float scaleX = (float)src.Width / (float)hW;
@@ -215,10 +215,10 @@ namespace StbImageSharp
             }
             return result;
         }
-        public static unsafe ImageResult GetBoxDownSampler_rgb(ImageResult src, int targetWidth, int targetHeight)
+        public static unsafe TtMemImage GetBoxDownSampler_rgb(TtMemImage src, int targetWidth, int targetHeight)
         {
             System.Diagnostics.Debug.Assert(src.Comp == ColorComponents.RedGreenBlue);
-            ImageResult result = new ImageResult();
+            TtMemImage result = new TtMemImage();
             int hW = targetWidth;
             int hH = targetHeight;
             float scaleX = (float)src.Width / (float)hW;
@@ -279,10 +279,10 @@ namespace StbImageSharp
             return result;
         }
 
-        public static unsafe ImageResult StretchBlt(uint targetWidth, uint targetHeight, ImageResult src, uint SrcX, uint SrcY, uint SrcW, uint SrcH)
+        public static unsafe TtMemImage StretchBlt(uint targetWidth, uint targetHeight, TtMemImage src, uint SrcX, uint SrcY, uint SrcW, uint SrcH)
         {
             System.Diagnostics.Debug.Assert(src.Comp == ColorComponents.RedGreenBlueAlpha);
-            ImageResult result = new ImageResult();
+            TtMemImage result = new TtMemImage();
             uint hW = targetWidth;
             uint hH = targetHeight;
             if (SrcX >= src.Width)

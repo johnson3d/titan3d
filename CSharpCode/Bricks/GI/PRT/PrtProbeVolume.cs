@@ -197,6 +197,7 @@ namespace EngineNS.Bricks.GI.PRT
             mEmbreeScene.RemoveAllGeometryInstances();
             var center = DVector3.Zero;// Placement.Position;
             Dictionary<IntPtr, TtGeometryUserData> meshUserBuffers = new Dictionary<IntPtr, TtGeometryUserData>();
+            Dictionary<TtMaterial, StbImageSharp.TtMemImage> materialResults = new Dictionary<TtMaterial, StbImageSharp.TtMemImage>();
             this.GetWorld().Root.IterateNodes((node, arg) =>
             {
                 var meshNode = node as TtMeshNode;
@@ -206,8 +207,21 @@ namespace EngineNS.Bricks.GI.PRT
                     Graphics.Mesh.TtMaterialMesh.TtSubMaterialedMesh subMesh = mesh.MaterialMesh.SubMeshes[0];
                     foreach(var i in subMesh.Materials)
                     {
-                        //build material -> TextureSpaceResult mapping
-                        //TtMaterial.GetTextureSpaceResult(i.AssetName);
+                        if (!materialResults.ContainsKey(i))
+                        {
+                            var result = Graphics.Pipeline.Shader.TtMaterial.GetTextureSpaceResult(i.AssetName).GetResultUntilCompleted();
+
+                            var mapped = new NxRHI.FMappedSubResource();
+                            var buffer = result.Buffer.GpuResource as NxRHI.TtBuffer;
+                            buffer.Map(0, &mapped, true);
+                            var image = StbImageSharp.TtMemImage.CreateImageRGBA((byte*)mapped.m_pData, in result.Footprint);
+                            buffer.Umap(0);
+                            //image.SavePng(AssetName.Address + ".png");
+                            //image.GetPixel();
+                            result.Buffer.LifeMode = Graphics.Pipeline.TtAttachBuffer.ELifeMode.Transient;
+                            result.Buffer.FreeBuffer();
+                            materialResults.Add(i, image);
+                        }
                     }
                     var meshdata = subMesh.Mesh;
                     meshdata.LoadMeshDataProvider().WaitCompleted();
@@ -250,12 +264,17 @@ namespace EngineNS.Bricks.GI.PRT
                     var bHit = mEmbreeScene.EmbreeRayTrace(ProbeBuffer.DataArray[i].Position, dir, 0, 100.0f, ref hit);
                     if (bHit && meshUserBuffers.TryGetValue(hit.GetGeometry().GetMeshProvider().NativePointer, out var geometryUserData))
                     {
+                        float ao = 1;
                         var ptr = (int*)geometryUserData.FaceBuffer.DataPointer;
                         var materialId = ptr[hit.m_PrimID];
                         var mtl = geometryUserData.Mesh.Materials[materialId];
                         //take albedo from mtl;
-
-                        float ao = 1;
+                        if (materialResults.TryGetValue(mtl, out var image))
+                        {
+                            var pixel = image.GetPixel((int)(hit.U * image.Width), (int)(hit.V * image.Height));
+                            var color = pixel.ToColor4Float() * ao;
+                        }
+                        
                         return ao;//todo ao * albedo
                     }
                     else

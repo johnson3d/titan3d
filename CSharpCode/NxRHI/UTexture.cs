@@ -656,7 +656,7 @@ namespace EngineNS.NxRHI
             // Rejected to taken sample ratio threshold.
             const float RejectedToTakenRatioThreshold = 0.33f;
 
-            void EvaluateSubBlock(StbImageSharp.ImageResult image, int Left, int Top, int Width, int Height)
+            void EvaluateSubBlock(StbImageSharp.TtMemImage image, int Left, int Top, int Width, int Height)
             {
                 for (int Y = Top; Y != (Top + Height); Y++)
                 {
@@ -730,7 +730,7 @@ namespace EngineNS.NxRHI
              * value specifications. If the vector satisfies those tolerances then the texture is
              * considered to be a normal map.
              */
-            public bool DoesTextureLookLikelyToBeANormalMap(StbImageSharp.ImageResult image)
+            public bool DoesTextureLookLikelyToBeANormalMap(StbImageSharp.TtMemImage image)
             {
                 int TextureSizeX = image.Width;
                 int TextureSizeY = image.Height;
@@ -831,7 +831,7 @@ namespace EngineNS.NxRHI
             {
                 using (var stream = System.IO.File.OpenRead(mSourceFile))
                 {
-                    var image = StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.Default);
+                    var image = StbImageSharp.TtMemImage.FromStream(stream, StbImageSharp.ColorComponents.Default);
                     if (image != null)
                     {
                         mDesc.Width = image.Width;
@@ -979,8 +979,8 @@ namespace EngineNS.NxRHI
                     }
                     else
                     {
-                        ImageResult image = null;
-                        image = StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.Default);
+                        TtMemImage image = null;
+                        image = StbImageSharp.TtMemImage.FromStream(stream, StbImageSharp.ColorComponents.Default);
                         if (image == null)
                             return false;
 
@@ -1021,7 +1021,7 @@ namespace EngineNS.NxRHI
                 {
                     if (stream == null)
                         return false;
-                    var image = StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                    var image = StbImageSharp.TtMemImage.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
                     if (image == null)
                         return false;
 
@@ -1078,7 +1078,7 @@ namespace EngineNS.NxRHI
                 return true;
             }
 
-            public static bool SaveSrv(StbImageSharp.ImageResult image, RName rn, TtPicDesc desc)
+            public static bool SaveSrv(StbImageSharp.TtMemImage image, RName rn, TtPicDesc desc)
             {
                 desc.Width = image.Width;
                 desc.Height = image.Height;
@@ -1188,9 +1188,9 @@ namespace EngineNS.NxRHI
             var ameta = this.GetAMeta() as TtSrViewAMeta;
             if (mOriginImageObject != null)
             {
-                if (mOriginImageObject.GetType() == typeof(ImageResult))
+                if (mOriginImageObject.GetType() == typeof(TtMemImage))
                 {
-                    ImportAttribute.SaveSrv(mOriginImageObject as ImageResult, name, this.PicDesc);
+                    ImportAttribute.SaveSrv(mOriginImageObject as TtMemImage, name, this.PicDesc);
                 }
                 else if (mOriginImageObject.GetType() == typeof(ImageResultFloat))
                 {
@@ -1483,7 +1483,7 @@ namespace EngineNS.NxRHI
             return false;
         }
 
-        public static StbImageSharp.ImageResult LoadOriginPng(RName name)
+        public static StbImageSharp.TtMemImage LoadOriginPng(RName name)
         {
             //优先读真正的原始文件
             var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(name) as TtSrViewAMeta;
@@ -1495,7 +1495,7 @@ namespace EngineNS.NxRHI
                     {
                         if (stream == null)
                             return null;
-                        return StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                        return StbImageSharp.TtMemImage.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
                     }
                 }
             }
@@ -1520,7 +1520,7 @@ namespace EngineNS.NxRHI
 
                         using (var memStream = new System.IO.MemoryStream(pngData))
                         {
-                            var image = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.Default);
+                            var image = StbImageSharp.TtMemImage.FromStream(memStream, StbImageSharp.ColorComponents.Default);
                             return image;
                         }
                     }
@@ -1795,7 +1795,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        public static StbImageWriteSharp.ColorComponents GetImageWriteFormat(StbImageSharp.ImageResult image)
+        public static StbImageWriteSharp.ColorComponents GetImageWriteFormat(StbImageSharp.TtMemImage image)
         {
             switch(image.Comp)
             {
@@ -1810,7 +1810,7 @@ namespace EngineNS.NxRHI
             }
             return StbImageWriteSharp.ColorComponents.RedGreenBlue;
         }
-        public static unsafe void SaveTexture(RName assetName, XndNode node, StbImageSharp.ImageResult image, TtPicDesc desc)
+        public static unsafe void SaveTexture(RName assetName, XndNode node, StbImageSharp.TtMemImage image, TtPicDesc desc)
         {
             desc.Height = image.Height;
             desc.Width = image.Width;
@@ -2224,7 +2224,7 @@ namespace EngineNS.NxRHI
             return mipLevel;
         }
 
-        public static int SavePngMips(XndNode pngMipsNode, StbImageSharp.ImageResult curImage, TtPicDesc desc)
+        public static int SavePngMips(XndNode pngMipsNode, StbImageSharp.TtMemImage curImage, TtPicDesc desc)
         {
             int mipLevel = 0;
             int height = curImage.Height;
@@ -2264,7 +2264,7 @@ namespace EngineNS.NxRHI
 
             return mipLevel;
         }
-        public unsafe static int SaveDxtMips(XndNode mipsNode, StbImageSharp.ImageResult curImage, TtPicDesc desc)
+        public unsafe static int SaveDxtMips(XndNode mipsNode, StbImageSharp.TtMemImage curImage, TtPicDesc desc)
         {
             System.Diagnostics.Debug.Assert(desc.DontCompress == false);
 
@@ -2393,7 +2393,7 @@ namespace EngineNS.NxRHI
             return desc.MipLevel;
         }
 
-        public unsafe static int SaveDxtMips_BcEncoder(XndNode mipsNode, StbImageSharp.ImageResult curImage, TtPicDesc desc)
+        public unsafe static int SaveDxtMips_BcEncoder(XndNode mipsNode, StbImageSharp.TtMemImage curImage, TtPicDesc desc)
         {
             System.Diagnostics.Debug.Assert(desc.DontCompress == false);
 
@@ -2557,7 +2557,7 @@ namespace EngineNS.NxRHI
 
             return desc.MipLevel;
         }
-        public unsafe static int SaveAstcMips_ActcEncoder(XndNode mipsNode, StbImageSharp.ImageResult curImage, TtPicDesc desc)
+        public unsafe static int SaveAstcMips_ActcEncoder(XndNode mipsNode, StbImageSharp.TtMemImage curImage, TtPicDesc desc)
         {
             System.Diagnostics.Debug.Assert(desc.DontCompress == false);
             System.Diagnostics.Debug.Assert(false);
@@ -2646,7 +2646,7 @@ namespace EngineNS.NxRHI
                     {
                         mipLevel = pngNode.GetNumOfAttribute();
                     }
-                    var result = new StbImageSharp.ImageResult[mipLevel];
+                    var result = new StbImageSharp.TtMemImage[mipLevel];
                     var blobs = new Support.TtBlobObject[mipLevel];
                     for (uint i = 0; i < mipLevel; i++)
                     {
@@ -2662,7 +2662,7 @@ namespace EngineNS.NxRHI
 
                         using (var memStream = new System.IO.MemoryStream(data, false))
                         {
-                            result[i] = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                            result[i] = StbImageSharp.TtMemImage.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
                             blobs[i] = new Support.TtBlobObject();
                             fixed (byte* p = &result[i].Data[0])
                             {
@@ -3180,10 +3180,10 @@ namespace EngineNS.NxRHI
                         ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
                     }
 
-                    StbImageSharp.ImageResult image;
+                    StbImageSharp.TtMemImage image;
                     using (var memStream = new System.IO.MemoryStream(data, false))
                     {
-                        image = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                        image = StbImageSharp.TtMemImage.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
                     }
                     handles[i] = System.Runtime.InteropServices.GCHandle.Alloc(image.Data, System.Runtime.InteropServices.GCHandleType.Pinned);
                     //pInitData[i].SetDefault();
@@ -3643,11 +3643,11 @@ namespace EngineNS.NxRHI
         {
             if (EngineNS.IO.TtFileManager.FileExists(file) == false)
                 return null;
-            StbImageSharp.ImageResult image = await TtEngine.Instance.EventPoster.Post((state) =>
+            StbImageSharp.TtMemImage image = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var memStream = new System.IO.FileStream(file, System.IO.FileMode.Open))
                 {
-                    return StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                    return StbImageSharp.TtMemImage.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
                 }
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (image == null)
@@ -3657,7 +3657,7 @@ namespace EngineNS.NxRHI
 
             return CreateTexture(image, file);
         }
-        private unsafe TtSrView CreateTexture(StbImageSharp.ImageResult image, string file)
+        private unsafe TtSrView CreateTexture(StbImageSharp.TtMemImage image, string file)
         {
             var texDesc = new FTextureDesc();
             texDesc.SetDefault();

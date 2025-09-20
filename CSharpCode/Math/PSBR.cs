@@ -11,7 +11,7 @@ namespace EngineNS
 {
     public struct PSBR
     {
-        public static unsafe Vector3 GetMSERGB(StbImageSharp.ImageResult Img1, StbImageSharp.ImageResult Img2)
+        public static unsafe Vector3 GetMSERGB(StbImageSharp.TtMemImage Img1, StbImageSharp.TtMemImage Img2)
         {
             Debug.Assert(Img1.Width == Img2.Width && Img1.Height == Img2.Height && Img1.Comp == StbImageSharp.ColorComponents.RedGreenBlue);
 
@@ -109,7 +109,7 @@ namespace EngineNS
             return new Vector3(EX, EY, EZ);
         }
 
-        public static float GetImagePSNR(StbImageSharp.ImageResult Img1, StbImageSharp.ImageResult Img2)
+        public static float GetImagePSNR(StbImageSharp.TtMemImage Img1, StbImageSharp.TtMemImage Img2)
         {
             Vector3 MSERGB = GetMSERGB(Img1, Img2);
             float MSEValue = (MSERGB.X + MSERGB.Y + MSERGB.Z) / 3.0f;

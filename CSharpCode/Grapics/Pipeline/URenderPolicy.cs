@@ -63,6 +63,8 @@ namespace EngineNS.Graphics.Pipeline
             //}
             base.Dispose();
         }
+        [Category("Option")]
+        public bool IsSyncBuildDrawcall { get; set; } = false;
         public class TtNodeListDefine
         {
             internal TtRenderPolicy Host;

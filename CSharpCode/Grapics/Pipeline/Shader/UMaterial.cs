@@ -1230,6 +1230,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return null;
             m2t.MaterialName = materialName;
 
+            policy.IsSyncBuildDrawcall = true;
             policy.OnResize(512,512);
 
             var renderer = new GamePlay.Scene.TtWorldImmRenderer();
@@ -1237,7 +1238,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
             await ttWorld.InitWorld();
             renderer.Initialize(ttWorld, policy);
 
+            //TtEngine.Instance.GfxDevice.RenderSwapQueue.CaptureRenderDocFrame = true;
+            //TtEngine.Instance.GfxDevice.RenderSwapQueue.BeginFrameCapture();
             renderer.TickLogic(0);
+            TtEngine.Instance.GfxDevice.RenderSwapQueue.EndFrameCapture("Mat2Textur");
+
+            //TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush(EQueueType.QU_ALL);
             var node = renderer.RenderPolicy.FindFirstNode<Graphics.Pipeline.Common.TtCopy2ReadbackNode>();
             var result = new FTextureSpaceResult();
             result.Buffer = node.ResultBuffer;

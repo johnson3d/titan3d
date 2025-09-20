@@ -400,6 +400,8 @@ namespace EngineNS.Graphics.Mesh
                 if (Material == null)
                     return null;
 
+                bForce |= policy.IsSyncBuildDrawcall;
+
                 var meshMaterial = this.GetMeshMaterial();
                 if (Material != meshMaterial ||
                     (Material!=null && Material.SerialId != MaterialSerialId))

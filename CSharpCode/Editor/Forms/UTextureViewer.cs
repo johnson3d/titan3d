@@ -213,7 +213,7 @@ namespace EngineNS.Editor.Forms
                 {
                     case EngineNS.Bricks.ImageDecoder.UImageType.PNG:
                         {
-                            StbImageSharp.ImageResult image = NxRHI.TtSrView.LoadOriginPng(AssetName);
+                            StbImageSharp.TtMemImage image = NxRHI.TtSrView.LoadOriginPng(AssetName);
                             using (var xnd = new IO.TtXndHolder("USrView", 0, 0))
                             {
                                 NxRHI.TtSrView.SaveTexture(AssetName, xnd.RootNode.mCoreObject, image, this.TextureSRV.PicDesc);

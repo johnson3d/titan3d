@@ -5,7 +5,7 @@
 #else
 	internal
 #endif
-	class AnimatedFrameResult : ImageResult
+	class AnimatedFrameResult : TtMemImage
 	{
 		public int DelayInMs { get; set; }
 	}

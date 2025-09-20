@@ -146,7 +146,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     {
                         foreach (var j in i.Atoms)
                         {
-                            var drawcall = j.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
+                            var drawcall = j.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this, true);
                             if (drawcall == null)
                                 continue;
                             drawcall.TagObject = this;

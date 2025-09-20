@@ -84,7 +84,7 @@ namespace EngineNS.Bricks.Procedure.Node
             if (ImageName == null)
                 return false;
 
-            StbImageSharp.ImageResult image = null;
+            StbImageSharp.TtMemImage image = null;
 
             using (var xnd = IO.TtXndHolder.LoadXnd(ImageName.Address))
             {
@@ -103,7 +103,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
                 using (var memStream = new System.IO.MemoryStream(data, false))
                 {
-                    image = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                    image = StbImageSharp.TtMemImage.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
                     if (image == null)
                         return false;
                 }
