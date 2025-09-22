@@ -207,9 +207,11 @@ namespace EngineNS.Bricks.GI.PRT
                     Graphics.Mesh.TtMaterialMesh.TtSubMaterialedMesh subMesh = mesh.MaterialMesh.SubMeshes[0];
                     foreach(var i in subMesh.Materials)
                     {
+                        if (i==null)
+                            continue;
                         if (!materialResults.ContainsKey(i))
                         {
-                            var result = Graphics.Pipeline.Shader.TtMaterial.GetTextureSpaceResult(i.AssetName).GetResultUntilCompleted();
+                            var result = Graphics.Pipeline.Shader.TtMaterial.GetTextureSpaceResult(i).GetResultUntilCompleted();
 
                             var mapped = new NxRHI.FMappedSubResource();
                             var buffer = result.Buffer.GpuResource as NxRHI.TtBuffer;
@@ -253,14 +255,12 @@ namespace EngineNS.Bricks.GI.PRT
             ProbeBuffer.PushData(t);
             for (int i = 0; i<ProbeBuffer.DataArray.Count; i++)
             {
-                var coeffs = new float[9];
-                Graphics.Pipeline.GI.TtSHCoefficient.PrecomputeSHCoefficients(coeffs, (dir)=>
+                var coeffR = new float[9];
+                var coeffG = new float[9];
+                var coeffB = new float[9];
+                Graphics.Pipeline.GI.TtSHCoefficient.PrecomputeSHCoefficients(coeffR, coeffG, coeffB, (dir)=>
                 {
                     FHitResult hit = new FHitResult();
-                    //dir.X = 0.1f;
-                    //dir.Y = -1;
-                    //dir.Z = 0.1f;
-                    //dir.Normalize();
                     var bHit = mEmbreeScene.EmbreeRayTrace(ProbeBuffer.DataArray[i].Position, dir, 0, 100.0f, ref hit);
                     if (bHit && meshUserBuffers.TryGetValue(hit.GetGeometry().GetMeshProvider().NativePointer, out var geometryUserData))
                     {
@@ -269,28 +269,30 @@ namespace EngineNS.Bricks.GI.PRT
                         var materialId = ptr[hit.m_PrimID];
                         var mtl = geometryUserData.Mesh.Materials[materialId];
                         //take albedo from mtl;
+                        Vector3 abeldo = Vector3.Zero;
                         if (materialResults.TryGetValue(mtl, out var image))
                         {
                             var pixel = image.GetPixel((int)(hit.U * image.Width), (int)(hit.V * image.Height));
-                            var color = pixel.ToColor4Float() * ao;
+                            abeldo = pixel.ToColor4Float() * ao;
                         }
                         
-                        return ao;//todo ao * albedo
+                        return abeldo;
                     }
                     else
                     {
                         var sky = Graphics.Pipeline.GI.FCubemapResult.DirectionToCubemap(dir);
                         //take albedo from skybox
 
-                        float ao = 0;
-                        return ao;
+                        return Vector3.Zero;
                     }
                 }, 10000);
                 FProbeData tmp = new FProbeData();
                 tmp.Position = ProbeBuffer.DataArray[i].Position;
                 for (int j = 0; j < 9; j++)
                 {
-                    tmp.Coeffs.RCoeffs[j] = coeffs[j];
+                    tmp.Coeffs.RCoeffs[j] = coeffR[j];
+                    tmp.Coeffs.GCoeffs[j] = coeffG[j];
+                    tmp.Coeffs.BCoeffs[j] = coeffB[j];
                 }
                 ProbeBuffer.DataArray[i] = tmp;
             }
@@ -298,8 +300,18 @@ namespace EngineNS.Bricks.GI.PRT
             var dir = Vector3.UnitY;
             //dir.Y = -1;
             var probe = ProbeBuffer.DataArray[0];
-            float* pSH = probe.Coeffs.RCoeffs;
-            float ao1 = Graphics.Pipeline.GI.TtSHCoefficient.EvaluateSH(pSH, dir);
+            Vector3 color = Vector3.Zero;
+            float* basis = stackalloc float[9];
+            Graphics.Pipeline.GI.TtSHCoefficient.SHEval3(basis, in dir);
+            for (int i = 0; i < 9; i++)
+            {
+                color.X += probe.Coeffs.RCoeffs[i] * basis[i];
+                color.Y += probe.Coeffs.GCoeffs[i] * basis[i];
+                color.Z += probe.Coeffs.BCoeffs[i] * basis[i];
+            }
+            //color.X = Graphics.Pipeline.GI.TtSHCoefficient.EvaluateSH(probe.Coeffs.RCoeffs, dir);
+            //color.Y = Graphics.Pipeline.GI.TtSHCoefficient.EvaluateSH(probe.Coeffs.GCoeffs, dir);
+            //color.Z = Graphics.Pipeline.GI.TtSHCoefficient.EvaluateSH(probe.Coeffs.BCoeffs, dir);
             meshUserBuffers = null;
         }
     }

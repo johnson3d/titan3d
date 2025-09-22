@@ -1,5 +1,4 @@
-﻿using NPOI.SS.Formula.Functions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -214,7 +213,6 @@ namespace EngineNS.Graphics.Pipeline.GI
         }
         public static unsafe void PrecomputeSHCoefficients(float* coefficients, Func<Vector3, float> sampleEnvironment, uint sampleCount = 100000)
         {
-            //float[] coefficients = new float[9];
             for (int j = 0; j < 9; j++)
             {
                 coefficients[j] = 0;
@@ -245,6 +243,60 @@ namespace EngineNS.Graphics.Pipeline.GI
             for (int j = 0; j < 9; j++)
             {
                 coefficients[j] *= weight;
+            }
+        }
+        public static unsafe void PrecomputeSHCoefficients(float[] coeffR, float[] coeffG, float[] coeffB, Func<Vector3, Vector3> sampleEnvironment, uint sampleCount = 100000)
+        {
+            if (coeffR.Length != 9 || coeffG.Length != 9 || coeffB.Length != 9)
+                throw new ArgumentException("Coefficients must have 9 elements for 3rd-order SH.");
+            fixed (float* r = &coeffR[0])
+            fixed (float* g = &coeffG[0])
+            fixed (float* b = &coeffB[0])
+            {
+                PrecomputeSHCoefficients(r, g, b, sampleEnvironment, sampleCount);
+            }
+        }
+        public static unsafe void PrecomputeSHCoefficients(float* coeffR,
+            float* coeffG,
+            float* coeffB,
+            Func<Vector3, Vector3> sampleEnvironment, uint sampleCount = 100000)
+        {
+            for (int j = 0; j < 9; j++)
+            {
+                coeffR[j] = 0;
+                coeffG[j] = 0;
+                coeffB[j] = 0;
+            }
+            float* basis = stackalloc float[9];
+            for (uint i = 0; i < sampleCount; i++)
+            {
+                // 生成均匀分布的随机方向（蒙特卡洛采样）
+                Vector3 dir = UniformSampleSphere(Hammersley(i, sampleCount));//CosineSampleHemisphere
+                //System.Diagnostics.Debug.Assert(Vector3.GreatEqual(dir, Vector3.Zero).All());
+                //System.Diagnostics.Debug.Assert(dir.Z>0);
+
+                // 采样环境光照颜色（返回值为float，范围[0,1]）
+                Vector3 radiance = sampleEnvironment(dir);
+
+                // 计算球谐基函数值
+                SHEval3(basis, in dir);
+
+                // 累加到系数
+                for (int j = 0; j < 9; j++)
+                {
+                    coeffR[j] += radiance.r * basis[j];
+                    coeffG[j] += radiance.g * basis[j];
+                    coeffB[j] += radiance.b * basis[j];
+                }
+            }
+
+            // 应用蒙特卡洛积分权重（4π / sampleCount）
+            float weight = 4.0f * MathF.PI / sampleCount;
+            for (int j = 0; j < 9; j++)
+            {
+                coeffR[j] *= weight;
+                coeffG[j] *= weight;
+                coeffB[j] *= weight;
             }
         }
         public static unsafe float EvaluateSH(float[] coefficients, in Vector3 normal)

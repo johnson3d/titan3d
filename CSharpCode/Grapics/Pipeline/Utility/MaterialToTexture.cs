@@ -71,5 +71,9 @@ namespace EngineNS.Graphics.Pipeline.Utility
                 ScreenMesh = CreateScreenMesh(material);
             }
         }
+        public void SetMaterial(TtMaterial material)
+        {
+            ScreenMesh = CreateScreenMesh(material);
+        }
     }
 }

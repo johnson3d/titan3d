@@ -1222,16 +1222,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             }
         }
-        public static async Thread.Async.TtTask<FTextureSpaceResult> GetTextureSpaceResult(RName materialName)
+        public static async Thread.Async.TtTask<FTextureSpaceResult> GetTextureSpaceResult(TtMaterial material, int width = 512, int height = 512)
         {
             TtRenderPolicy policy = await TtRenderPolicy.CreatRenderPolicy(RName.GetRName("graphics/material_to_texture.rpolicy", RName.ERNameType.Engine));
             var m2t = policy.FindFirstNode<Graphics.Pipeline.Utility.TtMaterialToTextureNode>();
             if (m2t==null)
                 return null;
-            m2t.MaterialName = materialName;
+            //m2t.MaterialName = materialName;
+            m2t.SetMaterial(material);
 
             policy.IsSyncBuildDrawcall = true;
-            policy.OnResize(512,512);
+            policy.OnResize(width, height);
 
             var renderer = new GamePlay.Scene.TtWorldImmRenderer();
             TtWorld ttWorld = new TtWorld(null, false);

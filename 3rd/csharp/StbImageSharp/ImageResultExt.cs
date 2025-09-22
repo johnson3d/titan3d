@@ -267,6 +267,8 @@ namespace StbImageSharp
         }
         public EngineNS.Color4b GetPixel(int x, int y)
         {
+            if (x<0 || x>=Width || y<0 ||y>=Height)
+                return EngineNS.Color4b.Transparent;
             var color = new EngineNS.Color4b();
             switch (Comp)
             {
