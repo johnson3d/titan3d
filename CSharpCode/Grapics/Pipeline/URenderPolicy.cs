@@ -1,4 +1,5 @@
 ﻿using EngineNS.Graphics.Pipeline.Common;
+using EngineNS.NxRHI;
 using EngineNS.Thread;
 using System;
 using System.Collections.Generic;
@@ -61,6 +62,11 @@ namespace EngineNS.Graphics.Pipeline
             //{
             //    i.Dispose();
             //}
+            foreach (var i in Fences)
+            {
+                i.Value.Dispose();
+            }
+            Fences.Clear();
             base.Dispose();
         }
         [Category("Option")]
@@ -106,6 +112,24 @@ namespace EngineNS.Graphics.Pipeline
         public bool IsInitialized { get; set; } = false;
         public TtCamera DefaultCamera { get => mDefaultCamera; }
         public Dictionary<string, TtCamera> CameraAttachments { get; } = new Dictionary<string, TtCamera>();
+        public Dictionary<string, TtFence> Fences { get; } = new Dictionary<string, TtFence>();
+        public TtFence FindFence(string name)
+        {
+            TtFence result;
+            if (Fences.TryGetValue(name, out result))
+                return result;
+            return null;
+        }
+        public TtFence FindOrCreateFence(string name)
+        {
+            TtFence result;
+            if (Fences.TryGetValue(name, out result))
+                return result;
+            FFenceDesc desc = new FFenceDesc();
+            result = TtEngine.Instance.GfxDevice.RenderContext.CreateFence(in desc, name);
+            Fences.Add(name, result);
+            return result;
+        }
         public bool AddCamera(string name, TtCamera camera)
         {
             if (CameraAttachments.ContainsKey(name))

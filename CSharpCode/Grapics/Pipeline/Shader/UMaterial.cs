@@ -1242,7 +1242,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //TtEngine.Instance.GfxDevice.RenderSwapQueue.CaptureRenderDocFrame = true;
             //TtEngine.Instance.GfxDevice.RenderSwapQueue.BeginFrameCapture();
             renderer.TickLogic(0);
-            TtEngine.Instance.GfxDevice.RenderSwapQueue.EndFrameCapture("Mat2Textur");
+            //TtEngine.Instance.GfxDevice.RenderSwapQueue.EndFrameCapture("Mat2Textur");
+
+            var fence = renderer.RenderPolicy.FindFirstNode<Graphics.Pipeline.Common.TtFenceIncreaseNode>();
+            fence.WaitFence();
 
             //TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush(EQueueType.QU_ALL);
             var node = renderer.RenderPolicy.FindFirstNode<Graphics.Pipeline.Common.TtCopy2ReadbackNode>();

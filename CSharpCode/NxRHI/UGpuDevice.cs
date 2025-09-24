@@ -655,6 +655,10 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.EndEvent(info);
         }
+        public void WaitFence(TtFence fence, ulong value, EngineNS.NxRHI.EQueueType type)
+        {
+            mCoreObject.WaitFence(fence.mCoreObject, value, type);
+        }
     }
 
     public struct FTransientCmd : IDisposable

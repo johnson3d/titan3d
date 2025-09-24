@@ -126377,6 +126377,60 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
+	static class EngineNS_Graphics_Pipeline_Common_TtFenceIncreaseNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtFenceIncreaseNode;
+			ar.Write(srcObj.Enable);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Pipeline.Common.TtFenceIncreaseNode;
+			var srcObj = src as EngineNS.Graphics.Pipeline.Common.TtFenceIncreaseNode;
+			tarObj.Enable = srcObj.Enable;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1031439478003122711 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtFenceIncreaseNode;
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+		};
+	}
+	static class EngineNS_Graphics_Pipeline_Common_TtFenceWaitNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtFenceWaitNode;
+			ar.Write(srcObj.Enable);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Pipeline.Common.TtFenceWaitNode;
+			var srcObj = src as EngineNS.Graphics.Pipeline.Common.TtFenceWaitNode;
+			tarObj.Enable = srcObj.Enable;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1031439478003122711 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtFenceWaitNode;
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+		};
+	}
 	static class EngineNS_Graphics_Pipeline_Common_TtFindNode
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -162553,6 +162607,18 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(1031439478003122711, EngineNS_Graphics_Pipeline_Common_TtEndingNode.Read_1031439478003122711);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.TtFenceIncreaseNode@EngineCore");
+				kls.Writer = EngineNS_Graphics_Pipeline_Common_TtFenceIncreaseNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Pipeline_Common_TtFenceIncreaseNode.CopyCurrentVersion;
+				kls.RegVersion(1031439478003122711, EngineNS_Graphics_Pipeline_Common_TtFenceIncreaseNode.Read_1031439478003122711);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.TtFenceWaitNode@EngineCore");
+				kls.Writer = EngineNS_Graphics_Pipeline_Common_TtFenceWaitNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Pipeline_Common_TtFenceWaitNode.CopyCurrentVersion;
+				kls.RegVersion(1031439478003122711, EngineNS_Graphics_Pipeline_Common_TtFenceWaitNode.Read_1031439478003122711);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.TtFindNode@EngineCore");
 				kls.Writer = EngineNS_Graphics_Pipeline_Common_TtFindNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Common_TtFindNode.CopyCurrentVersion;
@@ -163508,7 +163574,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = Survivor_TtWeaponProxyNode.CopyCurrentVersion;
 				kls.RegVersion(10759720178659608122, Survivor_TtWeaponProxyNode.Read_10759720178659608122);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("11_29_44_B4_FD_52_47_73_02_A5_7F_59_BA_62_B0_21_26_5E_8B_46");
+			this.VersionHash = EngineNS.Hash160.Parse("E8_B7_64_4A_6F_FD_BB_7F_CB_77_CF_36_CC_D0_FC_43_01_0D_09_ED");
 		}
 	}
 }
