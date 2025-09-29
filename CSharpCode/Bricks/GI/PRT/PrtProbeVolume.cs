@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using EngineNS.Bricks.Collision.Embree;
+﻿using EngineNS.Bricks.Collision.Embree;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
@@ -9,6 +6,7 @@ using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
 using EngineNS.Support;
 using EngineNS.Thread.Async;
+using System.ComponentModel;
 
 namespace EngineNS.Bricks.GI.PRT
 {
@@ -313,6 +311,7 @@ namespace EngineNS.Bricks.GI.PRT
             //color.Y = Graphics.Pipeline.GI.TtSHCoefficient.EvaluateSH(probe.Coeffs.GCoeffs, dir);
             //color.Z = Graphics.Pipeline.GI.TtSHCoefficient.EvaluateSH(probe.Coeffs.BCoeffs, dir);
             meshUserBuffers = null;
+            materialResults = null;
         }
     }
 }

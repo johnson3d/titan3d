@@ -50,6 +50,8 @@
     <None Include="$(MSBuildThisFileDirectory)Compute\MacrossComputeShadingEnvImpl.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Font.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)FSBase.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)GI\SH\SHCoefficients.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)GI\TrayTracing\HSDF.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\Queue.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\RingBuffer.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\WaveTask.cginc" />

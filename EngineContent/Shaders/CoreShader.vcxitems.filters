@@ -112,6 +112,15 @@
     <Filter Include="ShadingEnv\Utility">
       <UniqueIdentifier>{d21b4c92-0a53-470c-b56e-35a446ada6b1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GI">
+      <UniqueIdentifier>{d9894cff-0dec-4aaf-8a95-cbb63f4d9c30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GI\RayTracing">
+      <UniqueIdentifier>{6b517f5e-29e0-4bf0-91f5-79e01faf479a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GI\SH">
+      <UniqueIdentifier>{59e917fa-99f5-4e20-a343-8c718d286b93}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -460,6 +469,12 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Utility\MaterialToTexture.cginc">
       <Filter>ShadingEnv\Utility</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)GI\SH\SHCoefficients.cginc">
+      <Filter>GI\SH</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)GI\TrayTracing\HSDF.cginc">
+      <Filter>GI\RayTracing</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

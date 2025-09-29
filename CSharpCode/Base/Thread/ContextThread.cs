@@ -360,41 +360,44 @@ namespace EngineNS.Thread
         }
         public void TickAwaitEvent()
         {
-            Async.TtAsyncTaskStateBase cur;
-            var start = Support.TtTime.HighPrecision_GetTickCount();
-            while (DoOnePriorityEvent(out cur))
+            lock (this)
             {
-                cur.Dispose();
-                if (TestTimeOut(start, LimitTime, cur))
+                Async.TtAsyncTaskStateBase cur;
+                var start = Support.TtTime.HighPrecision_GetTickCount();
+                while (DoOnePriorityEvent(out cur))
                 {
-                    TimeOut = true;
-                    mEnqueueTrigger.Set();
-                    return;
+                    cur.Dispose();
+                    if (TestTimeOut(start, LimitTime, cur))
+                    {
+                        TimeOut = true;
+                        mEnqueueTrigger.Set();
+                        return;
+                    }
                 }
-            }
-            
-            while (DoOneAsyncEvent(out cur))
-            {
-                if (TestTimeOut(start, LimitTime, cur))
-                {
-                    TimeOut = true;
-                    mEnqueueTrigger.Set();
-                    return;
-                }
-            }
-            while (DoOneContinueEvent(out cur))
-            {
 
+                while (DoOneAsyncEvent(out cur))
+                {
+                    if (TestTimeOut(start, LimitTime, cur))
+                    {
+                        TimeOut = true;
+                        mEnqueueTrigger.Set();
+                        return;
+                    }
+                }
+                while (DoOneContinueEvent(out cur))
+                {
+
+                }
+                //while ((t1 = Support.Time.HighPrecision_GetTickCount()) > 0 && DoOneContinueEvent(out cur))
+                //{
+                //    if (TestTimeOut(start, t1, LimitTime, cur))
+                //    {
+                //        TimeOut = true;
+                //        return;
+                //    }
+                //}
+                TimeOut = false;
             }
-            //while ((t1 = Support.Time.HighPrecision_GetTickCount()) > 0 && DoOneContinueEvent(out cur))
-            //{
-            //    if (TestTimeOut(start, t1, LimitTime, cur))
-            //    {
-            //        TimeOut = true;
-            //        return;
-            //    }
-            //}
-            TimeOut = false;
         }
         public bool DoOnePriorityEvent(out Async.TtAsyncTaskStateBase oe)
         {
