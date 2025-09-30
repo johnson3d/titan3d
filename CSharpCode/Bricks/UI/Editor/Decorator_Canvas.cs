@@ -744,9 +744,9 @@ namespace EngineNS.UI.Editor
                                                 {
                                                     if(mCurrentPointAtAnchor != null)
                                                     {
-                                                        mCurrentPointAtAnchor.Mesh.UpdateMesh(0, mCurrentPointAtAnchor.Mesh.MaterialMesh.SubMeshes[0].Mesh, mNormalAnchorMats);
+                                                        mCurrentPointAtAnchor.RenderMesh.UpdateMesh(0, mCurrentPointAtAnchor.RenderMesh.MaterialMesh.SubMeshes[0].Mesh, mNormalAnchorMats);
                                                     }
-                                                    var mesh = mAnchorNodes[i].Mesh;
+                                                    var mesh = mAnchorNodes[i].RenderMesh;
                                                     mesh.UpdateMesh(0, mesh.MaterialMesh.SubMeshes[0].Mesh, mHighLightAnchorMats);
                                                     mCurrentPointAtAnchor = mAnchorNodes[i];
                                                 }
@@ -758,7 +758,7 @@ namespace EngineNS.UI.Editor
                                         {
                                             if (mCurrentPointAtAnchor != null)
                                             {
-                                                mCurrentPointAtAnchor.Mesh.UpdateMesh(0, mCurrentPointAtAnchor.Mesh.MaterialMesh.SubMeshes[0].Mesh, mNormalAnchorMats);
+                                                mCurrentPointAtAnchor.RenderMesh.UpdateMesh(0, mCurrentPointAtAnchor.RenderMesh.MaterialMesh.SubMeshes[0].Mesh, mNormalAnchorMats);
                                             }
                                             mCurrentPointAtAnchor = null;
                                         }

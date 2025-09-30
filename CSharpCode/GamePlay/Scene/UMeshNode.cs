@@ -81,7 +81,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 var mesh = new Graphics.Mesh.TtRenderMesh();
                 mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
-                this.Mesh = mesh;
+                this.RenderMesh = mesh;
                 //await materialMesh.Mesh.TryLoadClusteredMesh();
             }
             this.SetStyle(ENodeStyles.ParallelTick);
@@ -169,7 +169,7 @@ namespace EngineNS.GamePlay.Scene
                 meshNode.NodeData.Name = mesh.MaterialMesh.AssetName.Name;
             else
                 meshNode.NodeData.Name = meshNode.SceneId.ToString();
-            meshNode.Mesh = mesh;
+            meshNode.RenderMesh = mesh;
             
             meshNode.Placement.SetTransform(in pos, in scale, in quat);
 
@@ -207,8 +207,8 @@ namespace EngineNS.GamePlay.Scene
             return BoundVolume as UBoxBV;
         }
         Graphics.Mesh.TtRenderMesh mMesh;
-        [Rtti.Meta("")]
-        public Graphics.Mesh.TtRenderMesh Mesh 
+        [Rtti.Meta("", NameAlias = new string[] { "Mesh" })]
+        public override Graphics.Mesh.TtRenderMesh RenderMesh 
         {
             get 
             {
@@ -279,7 +279,7 @@ namespace EngineNS.GamePlay.Scene
                     var ok = mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
                     if (ok == false)
                         return;
-                    Mesh = mesh;
+                    RenderMesh = mesh;
                     if (HasSkin && mesh.MdfQueue is TtMdfSkinMesh mdfSkin)
                     {
                         mdfSkin.PerSkinMeshCBuffer = PerSkinMeshCBuffer;
@@ -287,11 +287,11 @@ namespace EngineNS.GamePlay.Scene
                     var world = this.GetWorld();
                     if (world != null)
                     {
-                        Mesh.SetWorldTransform(in Placement.AbsTransform, world, false);
+                        RenderMesh.SetWorldTransform(in Placement.AbsTransform, world, false);
                     }
                     else
                     {
-                        Mesh.SetWorldTransform(in Placement.AbsTransform, null, false);
+                        RenderMesh.SetWorldTransform(in Placement.AbsTransform, null, false);
                     }
                     OnHitProxyChanged();
                 };
@@ -330,7 +330,7 @@ namespace EngineNS.GamePlay.Scene
             var ok = mesh.Initialize(materialMesh, meshNodeData.MdfQueue, meshNodeData.Atom);
             if (ok == false)
                 return;
-            Mesh = mesh;
+            RenderMesh = mesh;
             if (HasSkin && mesh.MdfQueue is TtMdfSkinMesh mdfSkin)
             {
                 mdfSkin.PerSkinMeshCBuffer = PerSkinMeshCBuffer;
@@ -338,11 +338,11 @@ namespace EngineNS.GamePlay.Scene
             var world = this.GetWorld();
             if (world != null)
             {
-                Mesh.SetWorldTransform(in Placement.AbsTransform, world, false);
+                RenderMesh.SetWorldTransform(in Placement.AbsTransform, world, false);
             }
             else
             {
-                Mesh.SetWorldTransform(in Placement.AbsTransform, null, false);
+                RenderMesh.SetWorldTransform(in Placement.AbsTransform, null, false);
             }
             OnHitProxyChanged();
         }
@@ -365,7 +365,7 @@ namespace EngineNS.GamePlay.Scene
                 var mesh = new Graphics.Mesh.TtRenderMesh();
                 mesh.Initialize(cookedMesh, materials1, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
                 mesh.IsAcceptShadow = this.IsAcceptShadow;
-                Mesh = mesh;
+                RenderMesh = mesh;
                 if (HasSkin && mesh.MdfQueue is TtMdfSkinMesh mdfSkin)
                 {
                     mdfSkin.PerSkinMeshCBuffer = PerSkinMeshCBuffer;
@@ -429,7 +429,7 @@ namespace EngineNS.GamePlay.Scene
         {
             get
             {
-                if (HasSkin && Mesh.MdfQueue is TtMdfSkinMesh mdfSkin)
+                if (HasSkin && RenderMesh.MdfQueue is TtMdfSkinMesh mdfSkin)
                 {
                     return HasStyle(ENodeStyles.NoTick);
                 }
@@ -442,7 +442,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public unsafe override bool OnTickLogic(TtNodeTickParameters args)
         {
-            if (HasSkin && Mesh.MdfQueue is TtMdfSkinMesh mdfSkin)
+            if (HasSkin && RenderMesh.MdfQueue is TtMdfSkinMesh mdfSkin)
             {
                 if(mdfSkin.PerSkinMeshCBuffer == null)
                 {

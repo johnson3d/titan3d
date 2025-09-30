@@ -40177,89 +40177,6 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_14192322476631630344 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.Bricks.GI.PRT.TtPrtProbeVolume.TtPrtProbeVolumeData;
-			EngineNS.RName t_BehaviorName;
-			ar.Read(out t_BehaviorName);
-			srcObj.BehaviorName = t_BehaviorName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			EngineNS.GamePlay.Scene.TtNode.ENodeStyles t_NodeStyles;
-			ar.Read(out t_NodeStyles);
-			srcObj.NodeStyles = t_NodeStyles;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NodeStyles", false);
-				}
-			}
-			EngineNS.Hash64 type_BoundVolume;
-			ar.Read(out type_BoundVolume);
-			var meta_BoundVolume = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BoundVolume);
-			if(meta_BoundVolume != null)
-			{
-				EngineNS.Hash64 ver_BoundVolume;
-				ar.Read(out ver_BoundVolume);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BoundVolume.ClassType.TypeString, ver_BoundVolume );
-				if (fn != null)
-				{
-					EngineNS.GamePlay.Scene.TtBoundVolume t_BoundVolume = null;
-					t_BoundVolume = srcObj.BoundVolume;
-					if (t_BoundVolume == null)
-					{
-						t_BoundVolume = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BoundVolume.ClassType) as EngineNS.GamePlay.Scene.TtBoundVolume;
-					}
-					fn(ar, t_BoundVolume);
-					srcObj.BoundVolume = t_BoundVolume;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BoundVolume", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_Placement;
-			ar.Read(out type_Placement);
-			var meta_Placement = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Placement);
-			if(meta_Placement != null)
-			{
-				EngineNS.Hash64 ver_Placement;
-				ar.Read(out ver_Placement);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Placement.ClassType.TypeString, ver_Placement );
-				if (fn != null)
-				{
-					EngineNS.GamePlay.TtPlacementBase t_Placement = null;
-					t_Placement = srcObj.Placement;
-					if (t_Placement == null)
-					{
-						t_Placement = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Placement.ClassType) as EngineNS.GamePlay.TtPlacementBase;
-					}
-					fn(ar, t_Placement);
-					srcObj.Placement = t_Placement;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Placement", false);
-						}
-					}
-				}
-			}
-		};
 	}
 	static class EngineNS_Bricks_GI_PRT_TtPrtProbeVolume
 	{
@@ -40358,92 +40275,6 @@ namespace EngineNS.Plugins.DataCopyer
 			else if (srcObj.Parent == null)
 			{
 				tarObj.Parent = null;
-			}
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8632070254408373664 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.Bricks.GI.PRT.TtPrtProbeVolume;
-			EngineNS.RName t_BehaviorName;
-			ar.Read(out t_BehaviorName);
-			srcObj.BehaviorName = t_BehaviorName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
-				}
-			}
-			System.Guid t_NodeId;
-			ar.Read(out t_NodeId);
-			srcObj.NodeId = t_NodeId;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NodeId", false);
-				}
-			}
-			EngineNS.Hash64 type_Parent;
-			ar.Read(out type_Parent);
-			var meta_Parent = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Parent);
-			if(meta_Parent != null)
-			{
-				EngineNS.Hash64 ver_Parent;
-				ar.Read(out ver_Parent);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Parent.ClassType.TypeString, ver_Parent );
-				if (fn != null)
-				{
-					EngineNS.GamePlay.Scene.TtNode t_Parent = null;
-					t_Parent = srcObj.Parent;
-					if (t_Parent == null)
-					{
-						t_Parent = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Parent.ClassType) as EngineNS.GamePlay.Scene.TtNode;
-					}
-					fn(ar, t_Parent);
-					srcObj.Parent = t_Parent;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Parent", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_ParentScene;
-			ar.Read(out type_ParentScene);
-			var meta_ParentScene = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_ParentScene);
-			if(meta_ParentScene != null)
-			{
-				EngineNS.Hash64 ver_ParentScene;
-				ar.Read(out ver_ParentScene);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_ParentScene.ClassType.TypeString, ver_ParentScene );
-				if (fn != null)
-				{
-					EngineNS.GamePlay.Scene.TtScene t_ParentScene = null;
-					t_ParentScene = srcObj.ParentScene;
-					if (t_ParentScene == null)
-					{
-						t_ParentScene = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_ParentScene.ClassType) as EngineNS.GamePlay.Scene.TtScene;
-					}
-					fn(ar, t_ParentScene);
-				}
-			}
-			EngineNS.Hash64 type_RootNode;
-			ar.Read(out type_RootNode);
-			var meta_RootNode = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_RootNode);
-			if(meta_RootNode != null)
-			{
-				EngineNS.Hash64 ver_RootNode;
-				ar.Read(out ver_RootNode);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_RootNode.ClassType.TypeString, ver_RootNode );
-				if (fn != null)
-				{
-					EngineNS.GamePlay.Scene.TtNode t_RootNode = null;
-					t_RootNode = srcObj.RootNode;
-					if (t_RootNode == null)
-					{
-						t_RootNode = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_RootNode.ClassType) as EngineNS.GamePlay.Scene.TtNode;
-					}
-					fn(ar, t_RootNode);
-				}
 			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_18001794322188677698 = (EngineNS.IO.IReader ar, object obj)=>
@@ -44518,27 +44349,6 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var srcObj = obj as EngineNS.Bricks.Particle.TtNebulaNode;
 			ar.Write(srcObj.BehaviorName);
-			if (srcObj.Mesh != null)
-			{
-				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.Mesh.GetType());
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
-				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
-				if (fn != null && meta != null)
-				{
-					ar.Write(false);
-					ar.Write(EngineNS.Hash64.FromString(typeStr));
-					ar.Write(meta.CurrentVersion.MetaHash);
-					fn(ar, srcObj.Mesh);
-				}
-				else
-				{
-					ar.Write(true);
-				}
-			}
-			else
-			{
-				ar.Write(true);
-			}
 			ar.Write(srcObj.NodeId);
 			if (srcObj.Parent != null)
 			{
@@ -44582,6 +44392,27 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				ar.Write(true);
 			}
+			if (srcObj.RenderMesh != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.RenderMesh.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.RenderMesh);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
 			if (srcObj.RootNode != null)
 			{
 				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.RootNode.GetType());
@@ -44609,25 +44440,6 @@ namespace EngineNS.Plugins.DataCopyer
 			var tarObj = tar as EngineNS.Bricks.Particle.TtNebulaNode;
 			var srcObj = src as EngineNS.Bricks.Particle.TtNebulaNode;
 			tarObj.BehaviorName = srcObj.BehaviorName;
-			if (srcObj.Mesh != null)
-			{
-				if (tarObj.Mesh == null || tarObj.Mesh.GetType() != srcObj.Mesh.GetType())
-				{
-					tarObj.Mesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.Mesh.GetType()) as EngineNS.Graphics.Mesh.TtRenderMesh;
-				}
-				if (tarObj.Mesh != null)
-				{
-					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.Graphics.Mesh.TtRenderMesh>.TypeDesc.TypeString);
-					if (fn != null)
-					{
-						fn(tarObj.Mesh, srcObj.Mesh);
-					}
-				}
-			}
-			else if (srcObj.Mesh == null)
-			{
-				tarObj.Mesh = null;
-			}
 			tarObj.NodeId = srcObj.NodeId;
 			if (srcObj.Parent != null)
 			{
@@ -44648,8 +44460,27 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				tarObj.Parent = null;
 			}
+			if (srcObj.RenderMesh != null)
+			{
+				if (tarObj.RenderMesh == null || tarObj.RenderMesh.GetType() != srcObj.RenderMesh.GetType())
+				{
+					tarObj.RenderMesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.RenderMesh.GetType()) as EngineNS.Graphics.Mesh.TtRenderMesh;
+				}
+				if (tarObj.RenderMesh != null)
+				{
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.Graphics.Mesh.TtRenderMesh>.TypeDesc.TypeString);
+					if (fn != null)
+					{
+						fn(tarObj.RenderMesh, srcObj.RenderMesh);
+					}
+				}
+			}
+			else if (srcObj.RenderMesh == null)
+			{
+				tarObj.RenderMesh = null;
+			}
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_14346545206288721961 = (EngineNS.IO.IReader ar, object obj)=>
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5056249184320773334 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Bricks.Particle.TtNebulaNode;
 			EngineNS.RName t_BehaviorName;
@@ -44659,32 +44490,6 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
-				}
-			}
-			EngineNS.Hash64 type_Mesh;
-			ar.Read(out type_Mesh);
-			var meta_Mesh = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Mesh);
-			if(meta_Mesh != null)
-			{
-				EngineNS.Hash64 ver_Mesh;
-				ar.Read(out ver_Mesh);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Mesh.ClassType.TypeString, ver_Mesh );
-				if (fn != null)
-				{
-					EngineNS.Graphics.Mesh.TtRenderMesh t_Mesh = null;
-					t_Mesh = srcObj.Mesh;
-					if (t_Mesh == null)
-					{
-						t_Mesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Mesh.ClassType) as EngineNS.Graphics.Mesh.TtRenderMesh;
-					}
-					fn(ar, t_Mesh);
-					srcObj.Mesh = t_Mesh;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Mesh", false);
-						}
-					}
 				}
 			}
 			System.Guid t_NodeId;
@@ -44741,116 +44546,30 @@ namespace EngineNS.Plugins.DataCopyer
 					fn(ar, t_ParentScene);
 				}
 			}
-			EngineNS.Hash64 type_RootNode;
-			ar.Read(out type_RootNode);
-			var meta_RootNode = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_RootNode);
-			if(meta_RootNode != null)
+			EngineNS.Hash64 type_RenderMesh;
+			ar.Read(out type_RenderMesh);
+			var meta_RenderMesh = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_RenderMesh);
+			if(meta_RenderMesh != null)
 			{
-				EngineNS.Hash64 ver_RootNode;
-				ar.Read(out ver_RootNode);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_RootNode.ClassType.TypeString, ver_RootNode );
+				EngineNS.Hash64 ver_RenderMesh;
+				ar.Read(out ver_RenderMesh);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_RenderMesh.ClassType.TypeString, ver_RenderMesh );
 				if (fn != null)
 				{
-					EngineNS.GamePlay.Scene.TtNode t_RootNode = null;
-					t_RootNode = srcObj.RootNode;
-					if (t_RootNode == null)
+					EngineNS.Graphics.Mesh.TtRenderMesh t_RenderMesh = null;
+					t_RenderMesh = srcObj.RenderMesh;
+					if (t_RenderMesh == null)
 					{
-						t_RootNode = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_RootNode.ClassType) as EngineNS.GamePlay.Scene.TtNode;
+						t_RenderMesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_RenderMesh.ClassType) as EngineNS.Graphics.Mesh.TtRenderMesh;
 					}
-					fn(ar, t_RootNode);
-				}
-			}
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_18138827459594745946 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.Bricks.Particle.TtNebulaNode;
-			EngineNS.RName t_BehaviorName;
-			ar.Read(out t_BehaviorName);
-			srcObj.BehaviorName = t_BehaviorName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
-				}
-			}
-			EngineNS.Hash64 type_Mesh;
-			ar.Read(out type_Mesh);
-			var meta_Mesh = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Mesh);
-			if(meta_Mesh != null)
-			{
-				EngineNS.Hash64 ver_Mesh;
-				ar.Read(out ver_Mesh);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Mesh.ClassType.TypeString, ver_Mesh );
-				if (fn != null)
-				{
-					EngineNS.Graphics.Mesh.TtRenderMesh t_Mesh = null;
-					t_Mesh = srcObj.Mesh;
-					if (t_Mesh == null)
-					{
-						t_Mesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Mesh.ClassType) as EngineNS.Graphics.Mesh.TtRenderMesh;
-					}
-					fn(ar, t_Mesh);
-					srcObj.Mesh = t_Mesh;
+					fn(ar, t_RenderMesh);
+					srcObj.RenderMesh = t_RenderMesh;
 					{
 						if (srcObj is IO.ISerializer sr)
 						{
-							sr.OnPropertyRead(ar.Tag, "Mesh", false);
+							sr.OnPropertyRead(ar.Tag, "RenderMesh", false);
 						}
 					}
-				}
-			}
-			System.Guid t_NodeId;
-			ar.Read(out t_NodeId);
-			srcObj.NodeId = t_NodeId;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NodeId", false);
-				}
-			}
-			EngineNS.Hash64 type_Parent;
-			ar.Read(out type_Parent);
-			var meta_Parent = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Parent);
-			if(meta_Parent != null)
-			{
-				EngineNS.Hash64 ver_Parent;
-				ar.Read(out ver_Parent);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Parent.ClassType.TypeString, ver_Parent );
-				if (fn != null)
-				{
-					EngineNS.GamePlay.Scene.TtNode t_Parent = null;
-					t_Parent = srcObj.Parent;
-					if (t_Parent == null)
-					{
-						t_Parent = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Parent.ClassType) as EngineNS.GamePlay.Scene.TtNode;
-					}
-					fn(ar, t_Parent);
-					srcObj.Parent = t_Parent;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Parent", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_ParentScene;
-			ar.Read(out type_ParentScene);
-			var meta_ParentScene = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_ParentScene);
-			if(meta_ParentScene != null)
-			{
-				EngineNS.Hash64 ver_ParentScene;
-				ar.Read(out ver_ParentScene);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_ParentScene.ClassType.TypeString, ver_ParentScene );
-				if (fn != null)
-				{
-					EngineNS.GamePlay.Scene.TtScene t_ParentScene = null;
-					t_ParentScene = srcObj.ParentScene;
-					if (t_ParentScene == null)
-					{
-						t_ParentScene = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_ParentScene.ClassType) as EngineNS.GamePlay.Scene.TtScene;
-					}
-					fn(ar, t_ParentScene);
 				}
 			}
 			EngineNS.Hash64 type_RootNode;
@@ -84106,330 +83825,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_897380426366747436 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.Bricks.UI.Controls.Containers.TtGrid;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			System.Collections.Generic.List<EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition> t_ColumnDefinitions = null;
-			t_ColumnDefinitions = srcObj.ColumnDefinitions;
-			if (t_ColumnDefinitions == null)
-			{
-				t_ColumnDefinitions = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition>)) as System.Collections.Generic.List<EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition>;
-			}
-			int count_ColumnDefinitions;
-			ar.Read(out count_ColumnDefinitions);
-			for(int i = 0; i<count_ColumnDefinitions; i++)
-			{
-				EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition t = null;
-				EngineNS.Hash64 typeHash;
-				ar.Read(out typeHash);
-				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
-				if (meta != null)
-				{
-					EngineNS.Hash64 verHash;
-					ar.Read(out verHash);
-					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
-					if (fn != null)
-					{
-						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition;
-						fn(ar, t);
-					}
-				}
-				t_ColumnDefinitions.Add(t);
-				srcObj.ColumnDefinitions = t_ColumnDefinitions;
-				{
-					if (srcObj is IO.ISerializer sr)
-					{
-						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition>), false);
-					}
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			System.Collections.Generic.List<EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition> t_RowDefinitions = null;
-			t_RowDefinitions = srcObj.RowDefinitions;
-			if (t_RowDefinitions == null)
-			{
-				t_RowDefinitions = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition>)) as System.Collections.Generic.List<EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition>;
-			}
-			int count_RowDefinitions;
-			ar.Read(out count_RowDefinitions);
-			for(int i = 0; i<count_RowDefinitions; i++)
-			{
-				EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition t = null;
-				EngineNS.Hash64 typeHash;
-				ar.Read(out typeHash);
-				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
-				if (meta != null)
-				{
-					EngineNS.Hash64 verHash;
-					ar.Read(out verHash);
-					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
-					if (fn != null)
-					{
-						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition;
-						fn(ar, t);
-					}
-				}
-				t_RowDefinitions.Add(t);
-				srcObj.RowDefinitions = t_RowDefinitions;
-				{
-					if (srcObj is IO.ISerializer sr)
-					{
-						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition>), false);
-					}
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
-		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5665266675681867522 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Bricks.UI.Controls.Containers.TtGrid;
@@ -118042,27 +117437,6 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var srcObj = obj as EngineNS.GamePlay.Scene.TtGridNode;
 			ar.Write(srcObj.BehaviorName);
-			if (srcObj.Mesh != null)
-			{
-				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.Mesh.GetType());
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
-				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
-				if (fn != null && meta != null)
-				{
-					ar.Write(false);
-					ar.Write(EngineNS.Hash64.FromString(typeStr));
-					ar.Write(meta.CurrentVersion.MetaHash);
-					fn(ar, srcObj.Mesh);
-				}
-				else
-				{
-					ar.Write(true);
-				}
-			}
-			else
-			{
-				ar.Write(true);
-			}
 			ar.Write(srcObj.NodeId);
 			if (srcObj.Parent != null)
 			{
@@ -118106,6 +117480,27 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				ar.Write(true);
 			}
+			if (srcObj.RenderMesh != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.RenderMesh.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.RenderMesh);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
 			if (srcObj.RootNode != null)
 			{
 				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.RootNode.GetType());
@@ -118133,25 +117528,6 @@ namespace EngineNS.Plugins.DataCopyer
 			var tarObj = tar as EngineNS.GamePlay.Scene.TtGridNode;
 			var srcObj = src as EngineNS.GamePlay.Scene.TtGridNode;
 			tarObj.BehaviorName = srcObj.BehaviorName;
-			if (srcObj.Mesh != null)
-			{
-				if (tarObj.Mesh == null || tarObj.Mesh.GetType() != srcObj.Mesh.GetType())
-				{
-					tarObj.Mesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.Mesh.GetType()) as EngineNS.Graphics.Mesh.TtRenderMesh;
-				}
-				if (tarObj.Mesh != null)
-				{
-					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.Graphics.Mesh.TtRenderMesh>.TypeDesc.TypeString);
-					if (fn != null)
-					{
-						fn(tarObj.Mesh, srcObj.Mesh);
-					}
-				}
-			}
-			else if (srcObj.Mesh == null)
-			{
-				tarObj.Mesh = null;
-			}
 			tarObj.NodeId = srcObj.NodeId;
 			if (srcObj.Parent != null)
 			{
@@ -118172,8 +117548,27 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				tarObj.Parent = null;
 			}
+			if (srcObj.RenderMesh != null)
+			{
+				if (tarObj.RenderMesh == null || tarObj.RenderMesh.GetType() != srcObj.RenderMesh.GetType())
+				{
+					tarObj.RenderMesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.RenderMesh.GetType()) as EngineNS.Graphics.Mesh.TtRenderMesh;
+				}
+				if (tarObj.RenderMesh != null)
+				{
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.Graphics.Mesh.TtRenderMesh>.TypeDesc.TypeString);
+					if (fn != null)
+					{
+						fn(tarObj.RenderMesh, srcObj.RenderMesh);
+					}
+				}
+			}
+			else if (srcObj.RenderMesh == null)
+			{
+				tarObj.RenderMesh = null;
+			}
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_14346545206288721961 = (EngineNS.IO.IReader ar, object obj)=>
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5056249184320773334 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.GamePlay.Scene.TtGridNode;
 			EngineNS.RName t_BehaviorName;
@@ -118183,32 +117578,6 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
-				}
-			}
-			EngineNS.Hash64 type_Mesh;
-			ar.Read(out type_Mesh);
-			var meta_Mesh = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Mesh);
-			if(meta_Mesh != null)
-			{
-				EngineNS.Hash64 ver_Mesh;
-				ar.Read(out ver_Mesh);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Mesh.ClassType.TypeString, ver_Mesh );
-				if (fn != null)
-				{
-					EngineNS.Graphics.Mesh.TtRenderMesh t_Mesh = null;
-					t_Mesh = srcObj.Mesh;
-					if (t_Mesh == null)
-					{
-						t_Mesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Mesh.ClassType) as EngineNS.Graphics.Mesh.TtRenderMesh;
-					}
-					fn(ar, t_Mesh);
-					srcObj.Mesh = t_Mesh;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Mesh", false);
-						}
-					}
 				}
 			}
 			System.Guid t_NodeId;
@@ -118265,116 +117634,30 @@ namespace EngineNS.Plugins.DataCopyer
 					fn(ar, t_ParentScene);
 				}
 			}
-			EngineNS.Hash64 type_RootNode;
-			ar.Read(out type_RootNode);
-			var meta_RootNode = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_RootNode);
-			if(meta_RootNode != null)
+			EngineNS.Hash64 type_RenderMesh;
+			ar.Read(out type_RenderMesh);
+			var meta_RenderMesh = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_RenderMesh);
+			if(meta_RenderMesh != null)
 			{
-				EngineNS.Hash64 ver_RootNode;
-				ar.Read(out ver_RootNode);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_RootNode.ClassType.TypeString, ver_RootNode );
+				EngineNS.Hash64 ver_RenderMesh;
+				ar.Read(out ver_RenderMesh);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_RenderMesh.ClassType.TypeString, ver_RenderMesh );
 				if (fn != null)
 				{
-					EngineNS.GamePlay.Scene.TtNode t_RootNode = null;
-					t_RootNode = srcObj.RootNode;
-					if (t_RootNode == null)
+					EngineNS.Graphics.Mesh.TtRenderMesh t_RenderMesh = null;
+					t_RenderMesh = srcObj.RenderMesh;
+					if (t_RenderMesh == null)
 					{
-						t_RootNode = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_RootNode.ClassType) as EngineNS.GamePlay.Scene.TtNode;
+						t_RenderMesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_RenderMesh.ClassType) as EngineNS.Graphics.Mesh.TtRenderMesh;
 					}
-					fn(ar, t_RootNode);
-				}
-			}
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_18138827459594745946 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.GamePlay.Scene.TtGridNode;
-			EngineNS.RName t_BehaviorName;
-			ar.Read(out t_BehaviorName);
-			srcObj.BehaviorName = t_BehaviorName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
-				}
-			}
-			EngineNS.Hash64 type_Mesh;
-			ar.Read(out type_Mesh);
-			var meta_Mesh = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Mesh);
-			if(meta_Mesh != null)
-			{
-				EngineNS.Hash64 ver_Mesh;
-				ar.Read(out ver_Mesh);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Mesh.ClassType.TypeString, ver_Mesh );
-				if (fn != null)
-				{
-					EngineNS.Graphics.Mesh.TtRenderMesh t_Mesh = null;
-					t_Mesh = srcObj.Mesh;
-					if (t_Mesh == null)
-					{
-						t_Mesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Mesh.ClassType) as EngineNS.Graphics.Mesh.TtRenderMesh;
-					}
-					fn(ar, t_Mesh);
-					srcObj.Mesh = t_Mesh;
+					fn(ar, t_RenderMesh);
+					srcObj.RenderMesh = t_RenderMesh;
 					{
 						if (srcObj is IO.ISerializer sr)
 						{
-							sr.OnPropertyRead(ar.Tag, "Mesh", false);
+							sr.OnPropertyRead(ar.Tag, "RenderMesh", false);
 						}
 					}
-				}
-			}
-			System.Guid t_NodeId;
-			ar.Read(out t_NodeId);
-			srcObj.NodeId = t_NodeId;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NodeId", false);
-				}
-			}
-			EngineNS.Hash64 type_Parent;
-			ar.Read(out type_Parent);
-			var meta_Parent = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Parent);
-			if(meta_Parent != null)
-			{
-				EngineNS.Hash64 ver_Parent;
-				ar.Read(out ver_Parent);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Parent.ClassType.TypeString, ver_Parent );
-				if (fn != null)
-				{
-					EngineNS.GamePlay.Scene.TtNode t_Parent = null;
-					t_Parent = srcObj.Parent;
-					if (t_Parent == null)
-					{
-						t_Parent = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Parent.ClassType) as EngineNS.GamePlay.Scene.TtNode;
-					}
-					fn(ar, t_Parent);
-					srcObj.Parent = t_Parent;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Parent", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_ParentScene;
-			ar.Read(out type_ParentScene);
-			var meta_ParentScene = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_ParentScene);
-			if(meta_ParentScene != null)
-			{
-				EngineNS.Hash64 ver_ParentScene;
-				ar.Read(out ver_ParentScene);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_ParentScene.ClassType.TypeString, ver_ParentScene );
-				if (fn != null)
-				{
-					EngineNS.GamePlay.Scene.TtScene t_ParentScene = null;
-					t_ParentScene = srcObj.ParentScene;
-					if (t_ParentScene == null)
-					{
-						t_ParentScene = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_ParentScene.ClassType) as EngineNS.GamePlay.Scene.TtScene;
-					}
-					fn(ar, t_ParentScene);
 				}
 			}
 			EngineNS.Hash64 type_RootNode;
@@ -118747,27 +118030,6 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var srcObj = obj as EngineNS.GamePlay.Scene.TtMeshNode;
 			ar.Write(srcObj.BehaviorName);
-			if (srcObj.Mesh != null)
-			{
-				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.Mesh.GetType());
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
-				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
-				if (fn != null && meta != null)
-				{
-					ar.Write(false);
-					ar.Write(EngineNS.Hash64.FromString(typeStr));
-					ar.Write(meta.CurrentVersion.MetaHash);
-					fn(ar, srcObj.Mesh);
-				}
-				else
-				{
-					ar.Write(true);
-				}
-			}
-			else
-			{
-				ar.Write(true);
-			}
 			ar.Write(srcObj.NodeId);
 			if (srcObj.Parent != null)
 			{
@@ -118811,6 +118073,27 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				ar.Write(true);
 			}
+			if (srcObj.RenderMesh != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.RenderMesh.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.RenderMesh);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
 			if (srcObj.RootNode != null)
 			{
 				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.RootNode.GetType());
@@ -118838,25 +118121,6 @@ namespace EngineNS.Plugins.DataCopyer
 			var tarObj = tar as EngineNS.GamePlay.Scene.TtMeshNode;
 			var srcObj = src as EngineNS.GamePlay.Scene.TtMeshNode;
 			tarObj.BehaviorName = srcObj.BehaviorName;
-			if (srcObj.Mesh != null)
-			{
-				if (tarObj.Mesh == null || tarObj.Mesh.GetType() != srcObj.Mesh.GetType())
-				{
-					tarObj.Mesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.Mesh.GetType()) as EngineNS.Graphics.Mesh.TtRenderMesh;
-				}
-				if (tarObj.Mesh != null)
-				{
-					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.Graphics.Mesh.TtRenderMesh>.TypeDesc.TypeString);
-					if (fn != null)
-					{
-						fn(tarObj.Mesh, srcObj.Mesh);
-					}
-				}
-			}
-			else if (srcObj.Mesh == null)
-			{
-				tarObj.Mesh = null;
-			}
 			tarObj.NodeId = srcObj.NodeId;
 			if (srcObj.Parent != null)
 			{
@@ -118877,8 +118141,27 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				tarObj.Parent = null;
 			}
+			if (srcObj.RenderMesh != null)
+			{
+				if (tarObj.RenderMesh == null || tarObj.RenderMesh.GetType() != srcObj.RenderMesh.GetType())
+				{
+					tarObj.RenderMesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.RenderMesh.GetType()) as EngineNS.Graphics.Mesh.TtRenderMesh;
+				}
+				if (tarObj.RenderMesh != null)
+				{
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.Graphics.Mesh.TtRenderMesh>.TypeDesc.TypeString);
+					if (fn != null)
+					{
+						fn(tarObj.RenderMesh, srcObj.RenderMesh);
+					}
+				}
+			}
+			else if (srcObj.RenderMesh == null)
+			{
+				tarObj.RenderMesh = null;
+			}
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_14346545206288721961 = (EngineNS.IO.IReader ar, object obj)=>
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5056249184320773334 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.GamePlay.Scene.TtMeshNode;
 			EngineNS.RName t_BehaviorName;
@@ -118888,32 +118171,6 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
-				}
-			}
-			EngineNS.Hash64 type_Mesh;
-			ar.Read(out type_Mesh);
-			var meta_Mesh = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Mesh);
-			if(meta_Mesh != null)
-			{
-				EngineNS.Hash64 ver_Mesh;
-				ar.Read(out ver_Mesh);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Mesh.ClassType.TypeString, ver_Mesh );
-				if (fn != null)
-				{
-					EngineNS.Graphics.Mesh.TtRenderMesh t_Mesh = null;
-					t_Mesh = srcObj.Mesh;
-					if (t_Mesh == null)
-					{
-						t_Mesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Mesh.ClassType) as EngineNS.Graphics.Mesh.TtRenderMesh;
-					}
-					fn(ar, t_Mesh);
-					srcObj.Mesh = t_Mesh;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Mesh", false);
-						}
-					}
 				}
 			}
 			System.Guid t_NodeId;
@@ -118970,116 +118227,30 @@ namespace EngineNS.Plugins.DataCopyer
 					fn(ar, t_ParentScene);
 				}
 			}
-			EngineNS.Hash64 type_RootNode;
-			ar.Read(out type_RootNode);
-			var meta_RootNode = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_RootNode);
-			if(meta_RootNode != null)
+			EngineNS.Hash64 type_RenderMesh;
+			ar.Read(out type_RenderMesh);
+			var meta_RenderMesh = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_RenderMesh);
+			if(meta_RenderMesh != null)
 			{
-				EngineNS.Hash64 ver_RootNode;
-				ar.Read(out ver_RootNode);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_RootNode.ClassType.TypeString, ver_RootNode );
+				EngineNS.Hash64 ver_RenderMesh;
+				ar.Read(out ver_RenderMesh);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_RenderMesh.ClassType.TypeString, ver_RenderMesh );
 				if (fn != null)
 				{
-					EngineNS.GamePlay.Scene.TtNode t_RootNode = null;
-					t_RootNode = srcObj.RootNode;
-					if (t_RootNode == null)
+					EngineNS.Graphics.Mesh.TtRenderMesh t_RenderMesh = null;
+					t_RenderMesh = srcObj.RenderMesh;
+					if (t_RenderMesh == null)
 					{
-						t_RootNode = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_RootNode.ClassType) as EngineNS.GamePlay.Scene.TtNode;
+						t_RenderMesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_RenderMesh.ClassType) as EngineNS.Graphics.Mesh.TtRenderMesh;
 					}
-					fn(ar, t_RootNode);
-				}
-			}
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_18138827459594745946 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.GamePlay.Scene.TtMeshNode;
-			EngineNS.RName t_BehaviorName;
-			ar.Read(out t_BehaviorName);
-			srcObj.BehaviorName = t_BehaviorName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
-				}
-			}
-			EngineNS.Hash64 type_Mesh;
-			ar.Read(out type_Mesh);
-			var meta_Mesh = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Mesh);
-			if(meta_Mesh != null)
-			{
-				EngineNS.Hash64 ver_Mesh;
-				ar.Read(out ver_Mesh);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Mesh.ClassType.TypeString, ver_Mesh );
-				if (fn != null)
-				{
-					EngineNS.Graphics.Mesh.TtRenderMesh t_Mesh = null;
-					t_Mesh = srcObj.Mesh;
-					if (t_Mesh == null)
-					{
-						t_Mesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Mesh.ClassType) as EngineNS.Graphics.Mesh.TtRenderMesh;
-					}
-					fn(ar, t_Mesh);
-					srcObj.Mesh = t_Mesh;
+					fn(ar, t_RenderMesh);
+					srcObj.RenderMesh = t_RenderMesh;
 					{
 						if (srcObj is IO.ISerializer sr)
 						{
-							sr.OnPropertyRead(ar.Tag, "Mesh", false);
+							sr.OnPropertyRead(ar.Tag, "RenderMesh", false);
 						}
 					}
-				}
-			}
-			System.Guid t_NodeId;
-			ar.Read(out t_NodeId);
-			srcObj.NodeId = t_NodeId;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NodeId", false);
-				}
-			}
-			EngineNS.Hash64 type_Parent;
-			ar.Read(out type_Parent);
-			var meta_Parent = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Parent);
-			if(meta_Parent != null)
-			{
-				EngineNS.Hash64 ver_Parent;
-				ar.Read(out ver_Parent);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Parent.ClassType.TypeString, ver_Parent );
-				if (fn != null)
-				{
-					EngineNS.GamePlay.Scene.TtNode t_Parent = null;
-					t_Parent = srcObj.Parent;
-					if (t_Parent == null)
-					{
-						t_Parent = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Parent.ClassType) as EngineNS.GamePlay.Scene.TtNode;
-					}
-					fn(ar, t_Parent);
-					srcObj.Parent = t_Parent;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Parent", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_ParentScene;
-			ar.Read(out type_ParentScene);
-			var meta_ParentScene = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_ParentScene);
-			if(meta_ParentScene != null)
-			{
-				EngineNS.Hash64 ver_ParentScene;
-				ar.Read(out ver_ParentScene);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_ParentScene.ClassType.TypeString, ver_ParentScene );
-				if (fn != null)
-				{
-					EngineNS.GamePlay.Scene.TtScene t_ParentScene = null;
-					t_ParentScene = srcObj.ParentScene;
-					if (t_ParentScene == null)
-					{
-						t_ParentScene = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_ParentScene.ClassType) as EngineNS.GamePlay.Scene.TtScene;
-					}
-					fn(ar, t_ParentScene);
 				}
 			}
 			EngineNS.Hash64 type_RootNode;
@@ -122900,27 +122071,6 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var srcObj = obj as EngineNS.GamePlay.Scene.TtSkyNode;
 			ar.Write(srcObj.BehaviorName);
-			if (srcObj.Mesh != null)
-			{
-				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.Mesh.GetType());
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
-				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
-				if (fn != null && meta != null)
-				{
-					ar.Write(false);
-					ar.Write(EngineNS.Hash64.FromString(typeStr));
-					ar.Write(meta.CurrentVersion.MetaHash);
-					fn(ar, srcObj.Mesh);
-				}
-				else
-				{
-					ar.Write(true);
-				}
-			}
-			else
-			{
-				ar.Write(true);
-			}
 			ar.Write(srcObj.NodeId);
 			if (srcObj.Parent != null)
 			{
@@ -122964,6 +122114,27 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				ar.Write(true);
 			}
+			if (srcObj.RenderMesh != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.RenderMesh.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.RenderMesh);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
 			if (srcObj.RootNode != null)
 			{
 				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.RootNode.GetType());
@@ -122993,25 +122164,6 @@ namespace EngineNS.Plugins.DataCopyer
 			var tarObj = tar as EngineNS.GamePlay.Scene.TtSkyNode;
 			var srcObj = src as EngineNS.GamePlay.Scene.TtSkyNode;
 			tarObj.BehaviorName = srcObj.BehaviorName;
-			if (srcObj.Mesh != null)
-			{
-				if (tarObj.Mesh == null || tarObj.Mesh.GetType() != srcObj.Mesh.GetType())
-				{
-					tarObj.Mesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.Mesh.GetType()) as EngineNS.Graphics.Mesh.TtRenderMesh;
-				}
-				if (tarObj.Mesh != null)
-				{
-					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.Graphics.Mesh.TtRenderMesh>.TypeDesc.TypeString);
-					if (fn != null)
-					{
-						fn(tarObj.Mesh, srcObj.Mesh);
-					}
-				}
-			}
-			else if (srcObj.Mesh == null)
-			{
-				tarObj.Mesh = null;
-			}
 			tarObj.NodeId = srcObj.NodeId;
 			if (srcObj.Parent != null)
 			{
@@ -123032,10 +122184,29 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				tarObj.Parent = null;
 			}
+			if (srcObj.RenderMesh != null)
+			{
+				if (tarObj.RenderMesh == null || tarObj.RenderMesh.GetType() != srcObj.RenderMesh.GetType())
+				{
+					tarObj.RenderMesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.RenderMesh.GetType()) as EngineNS.Graphics.Mesh.TtRenderMesh;
+				}
+				if (tarObj.RenderMesh != null)
+				{
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.Graphics.Mesh.TtRenderMesh>.TypeDesc.TypeString);
+					if (fn != null)
+					{
+						fn(tarObj.RenderMesh, srcObj.RenderMesh);
+					}
+				}
+			}
+			else if (srcObj.RenderMesh == null)
+			{
+				tarObj.RenderMesh = null;
+			}
 			tarObj.SunDirection = srcObj.SunDirection;
 			tarObj.SunMaterialName = srcObj.SunMaterialName;
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15758172778526191632 = (EngineNS.IO.IReader ar, object obj)=>
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_2306612516342565725 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.GamePlay.Scene.TtSkyNode;
 			EngineNS.RName t_BehaviorName;
@@ -123045,32 +122216,6 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
-				}
-			}
-			EngineNS.Hash64 type_Mesh;
-			ar.Read(out type_Mesh);
-			var meta_Mesh = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Mesh);
-			if(meta_Mesh != null)
-			{
-				EngineNS.Hash64 ver_Mesh;
-				ar.Read(out ver_Mesh);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Mesh.ClassType.TypeString, ver_Mesh );
-				if (fn != null)
-				{
-					EngineNS.Graphics.Mesh.TtRenderMesh t_Mesh = null;
-					t_Mesh = srcObj.Mesh;
-					if (t_Mesh == null)
-					{
-						t_Mesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Mesh.ClassType) as EngineNS.Graphics.Mesh.TtRenderMesh;
-					}
-					fn(ar, t_Mesh);
-					srcObj.Mesh = t_Mesh;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Mesh", false);
-						}
-					}
 				}
 			}
 			System.Guid t_NodeId;
@@ -123127,134 +122272,30 @@ namespace EngineNS.Plugins.DataCopyer
 					fn(ar, t_ParentScene);
 				}
 			}
-			EngineNS.Hash64 type_RootNode;
-			ar.Read(out type_RootNode);
-			var meta_RootNode = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_RootNode);
-			if(meta_RootNode != null)
+			EngineNS.Hash64 type_RenderMesh;
+			ar.Read(out type_RenderMesh);
+			var meta_RenderMesh = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_RenderMesh);
+			if(meta_RenderMesh != null)
 			{
-				EngineNS.Hash64 ver_RootNode;
-				ar.Read(out ver_RootNode);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_RootNode.ClassType.TypeString, ver_RootNode );
+				EngineNS.Hash64 ver_RenderMesh;
+				ar.Read(out ver_RenderMesh);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_RenderMesh.ClassType.TypeString, ver_RenderMesh );
 				if (fn != null)
 				{
-					EngineNS.GamePlay.Scene.TtNode t_RootNode = null;
-					t_RootNode = srcObj.RootNode;
-					if (t_RootNode == null)
+					EngineNS.Graphics.Mesh.TtRenderMesh t_RenderMesh = null;
+					t_RenderMesh = srcObj.RenderMesh;
+					if (t_RenderMesh == null)
 					{
-						t_RootNode = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_RootNode.ClassType) as EngineNS.GamePlay.Scene.TtNode;
+						t_RenderMesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_RenderMesh.ClassType) as EngineNS.Graphics.Mesh.TtRenderMesh;
 					}
-					fn(ar, t_RootNode);
-				}
-			}
-			EngineNS.Vector3 t_SunDirection;
-			ar.Read(out t_SunDirection);
-			srcObj.SunDirection = t_SunDirection;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SunDirection", false);
-				}
-			}
-			EngineNS.RName t_SunMaterialName;
-			ar.Read(out t_SunMaterialName);
-			srcObj.SunMaterialName = t_SunMaterialName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SunMaterialName", false);
-				}
-			}
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_17509269582929386779 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.GamePlay.Scene.TtSkyNode;
-			EngineNS.RName t_BehaviorName;
-			ar.Read(out t_BehaviorName);
-			srcObj.BehaviorName = t_BehaviorName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
-				}
-			}
-			EngineNS.Hash64 type_Mesh;
-			ar.Read(out type_Mesh);
-			var meta_Mesh = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Mesh);
-			if(meta_Mesh != null)
-			{
-				EngineNS.Hash64 ver_Mesh;
-				ar.Read(out ver_Mesh);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Mesh.ClassType.TypeString, ver_Mesh );
-				if (fn != null)
-				{
-					EngineNS.Graphics.Mesh.TtRenderMesh t_Mesh = null;
-					t_Mesh = srcObj.Mesh;
-					if (t_Mesh == null)
-					{
-						t_Mesh = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Mesh.ClassType) as EngineNS.Graphics.Mesh.TtRenderMesh;
-					}
-					fn(ar, t_Mesh);
-					srcObj.Mesh = t_Mesh;
+					fn(ar, t_RenderMesh);
+					srcObj.RenderMesh = t_RenderMesh;
 					{
 						if (srcObj is IO.ISerializer sr)
 						{
-							sr.OnPropertyRead(ar.Tag, "Mesh", false);
+							sr.OnPropertyRead(ar.Tag, "RenderMesh", false);
 						}
 					}
-				}
-			}
-			System.Guid t_NodeId;
-			ar.Read(out t_NodeId);
-			srcObj.NodeId = t_NodeId;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NodeId", false);
-				}
-			}
-			EngineNS.Hash64 type_Parent;
-			ar.Read(out type_Parent);
-			var meta_Parent = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Parent);
-			if(meta_Parent != null)
-			{
-				EngineNS.Hash64 ver_Parent;
-				ar.Read(out ver_Parent);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Parent.ClassType.TypeString, ver_Parent );
-				if (fn != null)
-				{
-					EngineNS.GamePlay.Scene.TtNode t_Parent = null;
-					t_Parent = srcObj.Parent;
-					if (t_Parent == null)
-					{
-						t_Parent = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Parent.ClassType) as EngineNS.GamePlay.Scene.TtNode;
-					}
-					fn(ar, t_Parent);
-					srcObj.Parent = t_Parent;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Parent", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_ParentScene;
-			ar.Read(out type_ParentScene);
-			var meta_ParentScene = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_ParentScene);
-			if(meta_ParentScene != null)
-			{
-				EngineNS.Hash64 ver_ParentScene;
-				ar.Read(out ver_ParentScene);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_ParentScene.ClassType.TypeString, ver_ParentScene );
-				if (fn != null)
-				{
-					EngineNS.GamePlay.Scene.TtScene t_ParentScene = null;
-					t_ParentScene = srcObj.ParentScene;
-					if (t_ParentScene == null)
-					{
-						t_ParentScene = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_ParentScene.ClassType) as EngineNS.GamePlay.Scene.TtScene;
-					}
-					fn(ar, t_ParentScene);
 				}
 			}
 			EngineNS.Hash64 type_RootNode;
@@ -125459,6 +124500,38 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
+	static class EngineNS_Graphics_Mesh_TtRenderMesh_TtAtom
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.TtRenderMesh.TtAtom;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Mesh.TtRenderMesh.TtAtom;
+			var srcObj = src as EngineNS.Graphics.Mesh.TtRenderMesh.TtAtom;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9524687136534877311 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.TtRenderMesh.TtAtom;
+		};
+	}
+	static class EngineNS_Graphics_Mesh_TtRenderMesh
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.TtRenderMesh;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Mesh.TtRenderMesh;
+			var srcObj = src as EngineNS.Graphics.Mesh.TtRenderMesh;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9524687136534877311 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.TtRenderMesh;
+		};
+	}
 	static class EngineNS_Graphics_Pipeline_Common_Post_TtAdditiveLumNode
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -126262,43 +125335,6 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = src as EngineNS.Graphics.Pipeline.Common.TtCopyNode;
 			tarObj.Enable = srcObj.Enable;
 			tarObj.OutputLifeMode = srcObj.OutputLifeMode;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_122668767203111020 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtCopyNode;
-			System.Boolean t_Enable;
-			ar.Read(out t_Enable);
-			srcObj.Enable = t_Enable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Enable", false);
-				}
-			}
-			EngineNS.NxRHI.ECpuAccess t_OutputCpuAccess;
-			ar.Read(out t_OutputCpuAccess);
-			EngineNS.Graphics.Pipeline.TtAttachBuffer.ELifeMode t_OutputLifeMode;
-			ar.Read(out t_OutputLifeMode);
-			srcObj.OutputLifeMode = t_OutputLifeMode;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "OutputLifeMode", false);
-				}
-			}
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1031439478003122711 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtCopyNode;
-			System.Boolean t_Enable;
-			ar.Read(out t_Enable);
-			srcObj.Enable = t_Enable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Enable", false);
-				}
-			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15503538759634807374 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -132852,271 +131888,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_140978241867274723 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.Containers.TtBorder;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.Vector4 t_CornerRadius;
-			ar.Read(out t_CornerRadius);
-			srcObj.CornerRadius = t_CornerRadius;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "CornerRadius", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
-		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_4472148183672140849 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.UI.Controls.Containers.TtBorder;
@@ -133580,262 +132351,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9711381192518498048 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.Containers.TtCanvasControl;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
-		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_12363456890481729257 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.UI.Controls.Containers.TtCanvasControl;
@@ -134289,262 +132804,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Visibility = srcObj.Visibility;
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9711381192518498048 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.Containers.TtContainer;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_12363456890481729257 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -135080,314 +133339,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_145613801277146996 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.Containers.TtHeaderedContentsControl;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.Hash64 type_Content;
-			ar.Read(out type_Content);
-			var meta_Content = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Content);
-			if(meta_Content != null)
-			{
-				EngineNS.Hash64 ver_Content;
-				ar.Read(out ver_Content);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Content.ClassType.TypeString, ver_Content );
-				if (fn != null)
-				{
-					EngineNS.UI.Controls.Containers.TtTemplateContainer t_Content = null;
-					t_Content = srcObj.Content;
-					if (t_Content == null)
-					{
-						t_Content = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Content.ClassType) as EngineNS.UI.Controls.Containers.TtTemplateContainer;
-					}
-					fn(ar, t_Content);
-					srcObj.Content = t_Content;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Content", false);
-						}
-					}
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			EngineNS.Hash64 type_Header;
-			ar.Read(out type_Header);
-			var meta_Header = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Header);
-			if(meta_Header != null)
-			{
-				EngineNS.Hash64 ver_Header;
-				ar.Read(out ver_Header);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Header.ClassType.TypeString, ver_Header );
-				if (fn != null)
-				{
-					EngineNS.UI.Controls.Containers.TtTemplateContainer t_Header = null;
-					t_Header = srcObj.Header;
-					if (t_Header == null)
-					{
-						t_Header = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Header.ClassType) as EngineNS.UI.Controls.Containers.TtTemplateContainer;
-					}
-					fn(ar, t_Header);
-					srcObj.Header = t_Header;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Header", false);
-						}
-					}
-				}
-			}
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
-		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5568203772892347877 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.UI.Controls.Containers.TtHeaderedContentsControl;
@@ -135893,262 +133844,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Visibility = srcObj.Visibility;
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9711381192518498048 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.Containers.TtPopup;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_12363456890481729257 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -136871,271 +134566,6 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9086920089694442662 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.Containers.TtStackPanel;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.ELayout_Orientation t_Orientation;
-			ar.Read(out t_Orientation);
-			srcObj.Orientation = t_Orientation;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Orientation", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
-		};
 	}
 	static class EngineNS_UI_Controls_Containers_TtTabControl
 	{
@@ -137601,271 +135031,6 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9086920089694442662 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.Containers.TtTabControl;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.ELayout_Orientation t_Orientation;
-			ar.Read(out t_Orientation);
-			srcObj.Orientation = t_Orientation;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Orientation", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
-		};
 	}
 	static class EngineNS_UI_Controls_Containers_TtTabItem
 	{
@@ -138063,262 +135228,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Visibility = srcObj.Visibility;
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9711381192518498048 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.Containers.TtTabItem;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_12363456890481729257 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -138773,262 +135682,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Visibility = srcObj.Visibility;
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9711381192518498048 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.Containers.TtTemplateContainer;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_12363456890481729257 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -139762,280 +136415,6 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_18352354974683059042 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.Containers.TtUniformGridPanel;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			System.UInt32 t_Columns;
-			ar.Read(out t_Columns);
-			srcObj.Columns = t_Columns;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Columns", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			System.UInt32 t_Rows;
-			ar.Read(out t_Rows);
-			srcObj.Rows = t_Rows;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Rows", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
-		};
 	}
 	static class EngineNS_UI_Controls_Containers_TtUserControl
 	{
@@ -140235,271 +136614,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Visibility = srcObj.Visibility;
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_182403351239558880 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.Containers.TtUserControl;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.RName t_ChildRName;
-			ar.Read(out t_ChildRName);
-			srcObj.ChildRName = t_ChildRName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "ChildRName", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_16538271179797198750 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -141231,271 +137345,6 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9086920089694442662 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.Containers.TtWrapPanel;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.ELayout_Orientation t_Orientation;
-			ar.Read(out t_Orientation);
-			srcObj.Orientation = t_Orientation;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Orientation", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
-		};
 	}
 	static class EngineNS_UI_Controls_TtButton
 	{
@@ -141695,271 +137544,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Visibility = srcObj.Visibility;
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7550015687701907973 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.TtButton;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.UI.Controls.TtButtonBase.EClickType t_ClickType;
-			ar.Read(out t_ClickType);
-			srcObj.ClickType = t_ClickType;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "ClickType", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_11862939318659861009 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -142426,271 +138010,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7550015687701907973 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.TtButtonBase;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.UI.Controls.TtButtonBase.EClickType t_ClickType;
-			ar.Read(out t_ClickType);
-			srcObj.ClickType = t_ClickType;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "ClickType", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
-		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_11862939318659861009 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.UI.Controls.TtButtonBase;
@@ -143155,271 +138474,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Visibility = srcObj.Visibility;
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7550015687701907973 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.TtCheckBox;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.UI.Controls.TtButtonBase.EClickType t_ClickType;
-			ar.Read(out t_ClickType);
-			srcObj.ClickType = t_ClickType;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "ClickType", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_11862939318659861009 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -143886,271 +138940,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_919702046424053966 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.TtContentsPresenter;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			System.String t_ContentSource;
-			ar.Read(out t_ContentSource);
-			srcObj.ContentSource = t_ContentSource;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "ContentSource", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
-		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15092936797287563383 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.UI.Controls.TtContentsPresenter;
@@ -144608,334 +139397,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Visibility = srcObj.Visibility;
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9820130812348811243 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.TtEditableText;
-			EngineNS.UI.Controls.ClipType t_ClipType;
-			ar.Read(out t_ClipType);
-			srcObj.ClipType = t_ClipType;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "ClipType", false);
-				}
-			}
-			EngineNS.Color4b t_Color;
-			ar.Read(out t_Color);
-			srcObj.Color = t_Color;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Color", false);
-				}
-			}
-			EngineNS.Hash64 type_CursorBrush;
-			ar.Read(out type_CursorBrush);
-			var meta_CursorBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_CursorBrush);
-			if(meta_CursorBrush != null)
-			{
-				EngineNS.Hash64 ver_CursorBrush;
-				ar.Read(out ver_CursorBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_CursorBrush.ClassType.TypeString, ver_CursorBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_CursorBrush = null;
-					t_CursorBrush = srcObj.CursorBrush;
-					if (t_CursorBrush == null)
-					{
-						t_CursorBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_CursorBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_CursorBrush);
-					srcObj.CursorBrush = t_CursorBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "CursorBrush", false);
-						}
-					}
-				}
-			}
-			System.Single t_CursorWidth;
-			ar.Read(out t_CursorWidth);
-			srcObj.CursorWidth = t_CursorWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "CursorWidth", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			EngineNS.UI.Controls.TtText.ETextDirection t_FlowDirection;
-			ar.Read(out t_FlowDirection);
-			srcObj.FlowDirection = t_FlowDirection;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "FlowDirection", false);
-				}
-			}
-			EngineNS.RName t_Font;
-			ar.Read(out t_Font);
-			srcObj.Font = t_Font;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Font", false);
-				}
-			}
-			System.Int32 t_FontSize;
-			ar.Read(out t_FontSize);
-			srcObj.FontSize = t_FontSize;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "FontSize", false);
-				}
-			}
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			System.Single t_LineSpacingScale;
-			ar.Read(out t_LineSpacingScale);
-			srcObj.LineSpacingScale = t_LineSpacingScale;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "LineSpacingScale", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			System.Boolean t_SelectAllWhenFocused;
-			ar.Read(out t_SelectAllWhenFocused);
-			srcObj.SelectAllWhenFocused = t_SelectAllWhenFocused;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SelectAllWhenFocused", false);
-				}
-			}
-			EngineNS.Hash64 type_SelectionBrush;
-			ar.Read(out type_SelectionBrush);
-			var meta_SelectionBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_SelectionBrush);
-			if(meta_SelectionBrush != null)
-			{
-				EngineNS.Hash64 ver_SelectionBrush;
-				ar.Read(out ver_SelectionBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_SelectionBrush.ClassType.TypeString, ver_SelectionBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_SelectionBrush = null;
-					t_SelectionBrush = srcObj.SelectionBrush;
-					if (t_SelectionBrush == null)
-					{
-						t_SelectionBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_SelectionBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_SelectionBrush);
-					srcObj.SelectionBrush = t_SelectionBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "SelectionBrush", false);
-						}
-					}
-				}
-			}
-			System.String t_Text;
-			ar.Read(out t_Text);
-			srcObj.Text = t_Text;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Text", false);
-				}
-			}
-			EngineNS.UI.Controls.TtText.ETextFlag t_TextFlag;
-			ar.Read(out t_TextFlag);
-			srcObj.TextFlag = t_TextFlag;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "TextFlag", false);
-				}
-			}
-			System.String t_TrimmingText;
-			ar.Read(out t_TrimmingText);
-			srcObj.TrimmingText = t_TrimmingText;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "TrimmingText", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_17203601270899242069 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -145873,332 +140334,6 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8410506798647563121 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.TtExpander;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.Hash64 type_Content;
-			ar.Read(out type_Content);
-			var meta_Content = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Content);
-			if(meta_Content != null)
-			{
-				EngineNS.Hash64 ver_Content;
-				ar.Read(out ver_Content);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Content.ClassType.TypeString, ver_Content );
-				if (fn != null)
-				{
-					EngineNS.UI.Controls.Containers.TtTemplateContainer t_Content = null;
-					t_Content = srcObj.Content;
-					if (t_Content == null)
-					{
-						t_Content = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Content.ClassType) as EngineNS.UI.Controls.Containers.TtTemplateContainer;
-					}
-					fn(ar, t_Content);
-					srcObj.Content = t_Content;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Content", false);
-						}
-					}
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			EngineNS.UI.Controls.EExpandDirection t_ExpandDirection;
-			ar.Read(out t_ExpandDirection);
-			srcObj.ExpandDirection = t_ExpandDirection;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "ExpandDirection", false);
-				}
-			}
-			EngineNS.Hash64 type_Header;
-			ar.Read(out type_Header);
-			var meta_Header = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Header);
-			if(meta_Header != null)
-			{
-				EngineNS.Hash64 ver_Header;
-				ar.Read(out ver_Header);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Header.ClassType.TypeString, ver_Header );
-				if (fn != null)
-				{
-					EngineNS.UI.Controls.Containers.TtTemplateContainer t_Header = null;
-					t_Header = srcObj.Header;
-					if (t_Header == null)
-					{
-						t_Header = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Header.ClassType) as EngineNS.UI.Controls.Containers.TtTemplateContainer;
-					}
-					fn(ar, t_Header);
-					srcObj.Header = t_Header;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Header", false);
-						}
-					}
-				}
-			}
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsExpanded;
-			ar.Read(out t_IsExpanded);
-			srcObj.IsExpanded = t_IsExpanded;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsExpanded", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
-		};
 	}
 	static class EngineNS_UI_Controls_TtImage
 	{
@@ -146533,209 +140668,6 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_16882915731225695087 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.TtImage;
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.Hash64 type_UIBrush;
-			ar.Read(out type_UIBrush);
-			var meta_UIBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_UIBrush);
-			if(meta_UIBrush != null)
-			{
-				EngineNS.Hash64 ver_UIBrush;
-				ar.Read(out ver_UIBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_UIBrush.ClassType.TypeString, ver_UIBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_UIBrush = null;
-					t_UIBrush = srcObj.UIBrush;
-					if (t_UIBrush == null)
-					{
-						t_UIBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_UIBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_UIBrush);
-					srcObj.UIBrush = t_UIBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "UIBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
-		};
 	}
 	static class EngineNS_UI_Controls_TtProgress
 	{
@@ -146912,262 +140844,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Visibility = srcObj.Visibility;
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15662458168482415927 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.TtProgress;
-			EngineNS.Hash64 type_BackgroundBrush;
-			ar.Read(out type_BackgroundBrush);
-			var meta_BackgroundBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BackgroundBrush);
-			if(meta_BackgroundBrush != null)
-			{
-				EngineNS.Hash64 ver_BackgroundBrush;
-				ar.Read(out ver_BackgroundBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BackgroundBrush.ClassType.TypeString, ver_BackgroundBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BackgroundBrush = null;
-					t_BackgroundBrush = srcObj.BackgroundBrush;
-					if (t_BackgroundBrush == null)
-					{
-						t_BackgroundBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BackgroundBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BackgroundBrush);
-					srcObj.BackgroundBrush = t_BackgroundBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BackgroundBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			EngineNS.UI.Controls.TtProgress.EFillType t_FillType;
-			ar.Read(out t_FillType);
-			srcObj.FillType = t_FillType;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "FillType", false);
-				}
-			}
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			System.Single t_Percent;
-			ar.Read(out t_Percent);
-			srcObj.Percent = t_Percent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Percent", false);
-				}
-			}
-			System.Single t_PieStartAngle;
-			ar.Read(out t_PieStartAngle);
-			srcObj.PieStartAngle = t_PieStartAngle;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "PieStartAngle", false);
-				}
-			}
-			EngineNS.Hash64 type_ProgressBrush;
-			ar.Read(out type_ProgressBrush);
-			var meta_ProgressBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_ProgressBrush);
-			if(meta_ProgressBrush != null)
-			{
-				EngineNS.Hash64 ver_ProgressBrush;
-				ar.Read(out ver_ProgressBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_ProgressBrush.ClassType.TypeString, ver_ProgressBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_ProgressBrush = null;
-					t_ProgressBrush = srcObj.ProgressBrush;
-					if (t_ProgressBrush == null)
-					{
-						t_ProgressBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_ProgressBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_ProgressBrush);
-					srcObj.ProgressBrush = t_ProgressBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "ProgressBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_16488422765454927708 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -147792,264 +141468,6 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15360117550467716972 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.TtText;
-			EngineNS.UI.Controls.ClipType t_ClipType;
-			ar.Read(out t_ClipType);
-			srcObj.ClipType = t_ClipType;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "ClipType", false);
-				}
-			}
-			EngineNS.Color4b t_Color;
-			ar.Read(out t_Color);
-			srcObj.Color = t_Color;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Color", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			EngineNS.UI.Controls.TtText.ETextDirection t_FlowDirection;
-			ar.Read(out t_FlowDirection);
-			srcObj.FlowDirection = t_FlowDirection;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "FlowDirection", false);
-				}
-			}
-			EngineNS.RName t_Font;
-			ar.Read(out t_Font);
-			srcObj.Font = t_Font;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Font", false);
-				}
-			}
-			System.Int32 t_FontSize;
-			ar.Read(out t_FontSize);
-			srcObj.FontSize = t_FontSize;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "FontSize", false);
-				}
-			}
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			System.Single t_LineSpacingScale;
-			ar.Read(out t_LineSpacingScale);
-			srcObj.LineSpacingScale = t_LineSpacingScale;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "LineSpacingScale", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			System.String t_Text;
-			ar.Read(out t_Text);
-			srcObj.Text = t_Text;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Text", false);
-				}
-			}
-			EngineNS.UI.Controls.TtText.ETextFlag t_TextFlag;
-			ar.Read(out t_TextFlag);
-			srcObj.TextFlag = t_TextFlag;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "TextFlag", false);
-				}
-			}
-			System.String t_TrimmingText;
-			ar.Read(out t_TrimmingText);
-			srcObj.TrimmingText = t_TrimmingText;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "TrimmingText", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
-		};
 	}
 	static class EngineNS_UI_Controls_TtToggleButton
 	{
@@ -148249,271 +141667,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Visibility = srcObj.Visibility;
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7550015687701907973 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.TtToggleButton;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.UI.Controls.TtButtonBase.EClickType t_ClickType;
-			ar.Read(out t_ClickType);
-			srcObj.ClickType = t_ClickType;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "ClickType", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_11862939318659861009 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -149561,183 +142714,6 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_10351394170618148876 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Controls.TtUIElement;
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
-		};
 	}
 	static class EngineNS_UI_Editor_EditorOnlyData
 	{
@@ -149951,262 +142927,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Visibility = srcObj.Visibility;
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9711381192518498048 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Editor.EditorUIHost;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_12363456890481729257 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -150661,262 +143381,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Visibility = srcObj.Visibility;
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9711381192518498048 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.Editor.SelectedDecorator;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_12363456890481729257 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -151669,262 +144133,6 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Visibility = srcObj.Visibility;
 			tarObj.Width = srcObj.Width;
 			tarObj.WidthAuto = srcObj.WidthAuto;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9711381192518498048 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.UI.TtUIHost;
-			EngineNS.Hash64 type_Background;
-			ar.Read(out type_Background);
-			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
-			if(meta_Background != null)
-			{
-				EngineNS.Hash64 ver_Background;
-				ar.Read(out ver_Background);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_Background = null;
-					t_Background = srcObj.Background;
-					if (t_Background == null)
-					{
-						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_Background);
-					srcObj.Background = t_Background;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "Background", false);
-						}
-					}
-				}
-			}
-			EngineNS.Hash64 type_BorderBrush;
-			ar.Read(out type_BorderBrush);
-			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
-			if(meta_BorderBrush != null)
-			{
-				EngineNS.Hash64 ver_BorderBrush;
-				ar.Read(out ver_BorderBrush);
-				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
-				if (fn != null)
-				{
-					EngineNS.UI.TtBrush t_BorderBrush = null;
-					t_BorderBrush = srcObj.BorderBrush;
-					if (t_BorderBrush == null)
-					{
-						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
-					}
-					fn(ar, t_BorderBrush);
-					srcObj.BorderBrush = t_BorderBrush;
-					{
-						if (srcObj is IO.ISerializer sr)
-						{
-							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
-						}
-					}
-				}
-			}
-			EngineNS.Thickness t_BorderThickness;
-			ar.Read(out t_BorderThickness);
-			srcObj.BorderThickness = t_BorderThickness;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
-				}
-			}
-			EngineNS.RectangleF t_DesignRect;
-			ar.Read(out t_DesignRect);
-			System.Single t_Height;
-			ar.Read(out t_Height);
-			srcObj.Height = t_Height;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Height", false);
-				}
-			}
-			System.Boolean t_HeightAuto;
-			ar.Read(out t_HeightAuto);
-			srcObj.HeightAuto = t_HeightAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
-				}
-			}
-			System.UInt64 t_Id;
-			ar.Read(out t_Id);
-			srcObj.Id = t_Id;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Id", false);
-				}
-			}
-			System.Boolean t_IsEnabled;
-			ar.Read(out t_IsEnabled);
-			srcObj.IsEnabled = t_IsEnabled;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
-				}
-			}
-			System.Boolean t_IsFocusable;
-			ar.Read(out t_IsFocusable);
-			srcObj.IsFocusable = t_IsFocusable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
-				}
-			}
-			System.Boolean t_IsVariable;
-			ar.Read(out t_IsVariable);
-			srcObj.IsVariable = t_IsVariable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
-				}
-			}
-			EngineNS.Thickness t_Margin;
-			ar.Read(out t_Margin);
-			srcObj.Margin = t_Margin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Margin", false);
-				}
-			}
-			System.Single t_MaxHeight;
-			ar.Read(out t_MaxHeight);
-			srcObj.MaxHeight = t_MaxHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
-				}
-			}
-			System.Single t_MaxWidth;
-			ar.Read(out t_MaxWidth);
-			srcObj.MaxWidth = t_MaxWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
-				}
-			}
-			System.Single t_MinHeight;
-			ar.Read(out t_MinHeight);
-			srcObj.MinHeight = t_MinHeight;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
-				}
-			}
-			System.Single t_MinWidth;
-			ar.Read(out t_MinWidth);
-			srcObj.MinWidth = t_MinWidth;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
-				}
-			}
-			System.String t_Name;
-			ar.Read(out t_Name);
-			srcObj.Name = t_Name;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Name", false);
-				}
-			}
-			System.Boolean t_NoHitTest;
-			ar.Read(out t_NoHitTest);
-			srcObj.NoHitTest = t_NoHitTest;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
-				}
-			}
-			EngineNS.Thickness t_Padding;
-			ar.Read(out t_Padding);
-			srcObj.Padding = t_Padding;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Padding", false);
-				}
-			}
-			EngineNS.FTransform t_RenderTransform;
-			ar.Read(out t_RenderTransform);
-			srcObj.RenderTransform = t_RenderTransform;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
-				}
-			}
-			EngineNS.Vector2 t_RenderTransformCenter;
-			ar.Read(out t_RenderTransformCenter);
-			srcObj.RenderTransformCenter = t_RenderTransformCenter;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
-				}
-			}
-			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
-			ar.Read(out t_SizeToContent);
-			srcObj.SizeToContent = t_SizeToContent;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
-				}
-			}
-			EngineNS.UI.Controls.Visibility t_Visibility;
-			ar.Read(out t_Visibility);
-			srcObj.Visibility = t_Visibility;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Visibility", false);
-				}
-			}
-			System.Single t_Width;
-			ar.Read(out t_Width);
-			srcObj.Width = t_Width;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Width", false);
-				}
-			}
-			System.Boolean t_WidthAuto;
-			ar.Read(out t_WidthAuto);
-			srcObj.WidthAuto = t_WidthAuto;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
-				}
-			}
-			EngineNS.RName t_AssetName;
-			ar.Read(out t_AssetName);
-			srcObj.AssetName = t_AssetName;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "AssetName", false);
-				}
-			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_12363456890481729257 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -160117,7 +152325,6 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.Bricks.GI.PRT.TtPrtProbeVolume.TtPrtProbeVolumeData@EngineCore");
 				kls.Writer = EngineNS_Bricks_GI_PRT_TtPrtProbeVolume_TtPrtProbeVolumeData.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_GI_PRT_TtPrtProbeVolume_TtPrtProbeVolumeData.CopyCurrentVersion;
-				kls.RegVersion(14192322476631630344, EngineNS_Bricks_GI_PRT_TtPrtProbeVolume_TtPrtProbeVolumeData.Read_14192322476631630344);
 				kls.RegVersion(1779055799457489036, EngineNS_Bricks_GI_PRT_TtPrtProbeVolume_TtPrtProbeVolumeData.Read_1779055799457489036);
 			}
 			{
@@ -160125,7 +152332,6 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Bricks_GI_PRT_TtPrtProbeVolume.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_GI_PRT_TtPrtProbeVolume.CopyCurrentVersion;
 				kls.RegVersion(18001794322188677698, EngineNS_Bricks_GI_PRT_TtPrtProbeVolume.Read_18001794322188677698);
-				kls.RegVersion(8632070254408373664, EngineNS_Bricks_GI_PRT_TtPrtProbeVolume.Read_8632070254408373664);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.GI.PRT.TtVertexPrtNode.TtPrtNodeData@EngineCore");
@@ -160329,8 +152535,7 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.Bricks.Particle.TtNebulaNode@EngineCore");
 				kls.Writer = EngineNS_Bricks_Particle_TtNebulaNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_Particle_TtNebulaNode.CopyCurrentVersion;
-				kls.RegVersion(14346545206288721961, EngineNS_Bricks_Particle_TtNebulaNode.Read_14346545206288721961);
-				kls.RegVersion(18138827459594745946, EngineNS_Bricks_Particle_TtNebulaNode.Read_18138827459594745946);
+				kls.RegVersion(5056249184320773334, EngineNS_Bricks_Particle_TtNebulaNode.Read_5056249184320773334);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.Particle.TtNebulaParticle@EngineCore");
@@ -161369,7 +153574,6 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Bricks_UI_Controls_Containers_TtGrid.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_UI_Controls_Containers_TtGrid.CopyCurrentVersion;
 				kls.RegVersion(5665266675681867522, EngineNS_Bricks_UI_Controls_Containers_TtGrid.Read_5665266675681867522);
-				kls.RegVersion(897380426366747436, EngineNS_Bricks_UI_Controls_Containers_TtGrid.Read_897380426366747436);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.VXGI.UVoxelsNode@EngineCore");
@@ -162203,8 +154407,7 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.GamePlay.Scene.TtGridNode@EngineCore");
 				kls.Writer = EngineNS_GamePlay_Scene_TtGridNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_GamePlay_Scene_TtGridNode.CopyCurrentVersion;
-				kls.RegVersion(14346545206288721961, EngineNS_GamePlay_Scene_TtGridNode.Read_14346545206288721961);
-				kls.RegVersion(18138827459594745946, EngineNS_GamePlay_Scene_TtGridNode.Read_18138827459594745946);
+				kls.RegVersion(5056249184320773334, EngineNS_GamePlay_Scene_TtGridNode.Read_5056249184320773334);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.GamePlay.Scene.TtLightWeightNodeBase@EngineCore");
@@ -162222,8 +154425,7 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.GamePlay.Scene.TtMeshNode@EngineCore");
 				kls.Writer = EngineNS_GamePlay_Scene_TtMeshNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_GamePlay_Scene_TtMeshNode.CopyCurrentVersion;
-				kls.RegVersion(14346545206288721961, EngineNS_GamePlay_Scene_TtMeshNode.Read_14346545206288721961);
-				kls.RegVersion(18138827459594745946, EngineNS_GamePlay_Scene_TtMeshNode.Read_18138827459594745946);
+				kls.RegVersion(5056249184320773334, EngineNS_GamePlay_Scene_TtMeshNode.Read_5056249184320773334);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.GamePlay.Scene.TtNode@EngineCore");
@@ -162343,8 +154545,7 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.GamePlay.Scene.TtSkyNode@EngineCore");
 				kls.Writer = EngineNS_GamePlay_Scene_TtSkyNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_GamePlay_Scene_TtSkyNode.CopyCurrentVersion;
-				kls.RegVersion(15758172778526191632, EngineNS_GamePlay_Scene_TtSkyNode.Read_15758172778526191632);
-				kls.RegVersion(17509269582929386779, EngineNS_GamePlay_Scene_TtSkyNode.Read_17509269582929386779);
+				kls.RegVersion(2306612516342565725, EngineNS_GamePlay_Scene_TtSkyNode.Read_2306612516342565725);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.GamePlay.Scene.TtSubTreeRootNode@EngineCore");
@@ -162485,6 +154686,18 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(16903451990896436939, EngineNS_Graphics_Mesh_TtMeshPrimitivesAMeta.Read_16903451990896436939);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Mesh.TtRenderMesh.TtAtom@EngineCore");
+				kls.Writer = EngineNS_Graphics_Mesh_TtRenderMesh_TtAtom.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Mesh_TtRenderMesh_TtAtom.CopyCurrentVersion;
+				kls.RegVersion(9524687136534877311, EngineNS_Graphics_Mesh_TtRenderMesh_TtAtom.Read_9524687136534877311);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Mesh.TtRenderMesh@EngineCore");
+				kls.Writer = EngineNS_Graphics_Mesh_TtRenderMesh.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Mesh_TtRenderMesh.CopyCurrentVersion;
+				kls.RegVersion(9524687136534877311, EngineNS_Graphics_Mesh_TtRenderMesh.Read_9524687136534877311);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.Post.TtAdditiveLumNode@EngineCore");
 				kls.Writer = EngineNS_Graphics_Pipeline_Common_Post_TtAdditiveLumNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Common_Post_TtAdditiveLumNode.CopyCurrentVersion;
@@ -162590,8 +154803,6 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.TtCopyNode@EngineCore");
 				kls.Writer = EngineNS_Graphics_Pipeline_Common_TtCopyNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Common_TtCopyNode.CopyCurrentVersion;
-				kls.RegVersion(1031439478003122711, EngineNS_Graphics_Pipeline_Common_TtCopyNode.Read_1031439478003122711);
-				kls.RegVersion(122668767203111020, EngineNS_Graphics_Pipeline_Common_TtCopyNode.Read_122668767203111020);
 				kls.RegVersion(15503538759634807374, EngineNS_Graphics_Pipeline_Common_TtCopyNode.Read_15503538759634807374);
 			}
 			{
@@ -163054,7 +155265,6 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.Containers.TtBorder@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_Containers_TtBorder.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtBorder.CopyCurrentVersion;
-				kls.RegVersion(140978241867274723, EngineNS_UI_Controls_Containers_TtBorder.Read_140978241867274723);
 				kls.RegVersion(4472148183672140849, EngineNS_UI_Controls_Containers_TtBorder.Read_4472148183672140849);
 			}
 			{
@@ -163062,20 +155272,17 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_UI_Controls_Containers_TtCanvasControl.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtCanvasControl.CopyCurrentVersion;
 				kls.RegVersion(12363456890481729257, EngineNS_UI_Controls_Containers_TtCanvasControl.Read_12363456890481729257);
-				kls.RegVersion(9711381192518498048, EngineNS_UI_Controls_Containers_TtCanvasControl.Read_9711381192518498048);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.Containers.TtContainer@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_Containers_TtContainer.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtContainer.CopyCurrentVersion;
 				kls.RegVersion(12363456890481729257, EngineNS_UI_Controls_Containers_TtContainer.Read_12363456890481729257);
-				kls.RegVersion(9711381192518498048, EngineNS_UI_Controls_Containers_TtContainer.Read_9711381192518498048);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.Containers.TtHeaderedContentsControl@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_Containers_TtHeaderedContentsControl.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtHeaderedContentsControl.CopyCurrentVersion;
-				kls.RegVersion(145613801277146996, EngineNS_UI_Controls_Containers_TtHeaderedContentsControl.Read_145613801277146996);
 				kls.RegVersion(5568203772892347877, EngineNS_UI_Controls_Containers_TtHeaderedContentsControl.Read_5568203772892347877);
 			}
 			{
@@ -163083,41 +155290,35 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_UI_Controls_Containers_TtPopup.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtPopup.CopyCurrentVersion;
 				kls.RegVersion(12363456890481729257, EngineNS_UI_Controls_Containers_TtPopup.Read_12363456890481729257);
-				kls.RegVersion(9711381192518498048, EngineNS_UI_Controls_Containers_TtPopup.Read_9711381192518498048);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.Containers.TtStackPanel@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_Containers_TtStackPanel.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtStackPanel.CopyCurrentVersion;
 				kls.RegVersion(6316211997314806055, EngineNS_UI_Controls_Containers_TtStackPanel.Read_6316211997314806055);
-				kls.RegVersion(9086920089694442662, EngineNS_UI_Controls_Containers_TtStackPanel.Read_9086920089694442662);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.Containers.TtTabControl@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_Containers_TtTabControl.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtTabControl.CopyCurrentVersion;
 				kls.RegVersion(6316211997314806055, EngineNS_UI_Controls_Containers_TtTabControl.Read_6316211997314806055);
-				kls.RegVersion(9086920089694442662, EngineNS_UI_Controls_Containers_TtTabControl.Read_9086920089694442662);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.Containers.TtTabItem@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_Containers_TtTabItem.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtTabItem.CopyCurrentVersion;
 				kls.RegVersion(12363456890481729257, EngineNS_UI_Controls_Containers_TtTabItem.Read_12363456890481729257);
-				kls.RegVersion(9711381192518498048, EngineNS_UI_Controls_Containers_TtTabItem.Read_9711381192518498048);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.Containers.TtTemplateContainer@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_Containers_TtTemplateContainer.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtTemplateContainer.CopyCurrentVersion;
 				kls.RegVersion(12363456890481729257, EngineNS_UI_Controls_Containers_TtTemplateContainer.Read_12363456890481729257);
-				kls.RegVersion(9711381192518498048, EngineNS_UI_Controls_Containers_TtTemplateContainer.Read_9711381192518498048);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.Containers.TtUniformGridPanel@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_Containers_TtUniformGridPanel.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtUniformGridPanel.CopyCurrentVersion;
-				kls.RegVersion(18352354974683059042, EngineNS_UI_Controls_Containers_TtUniformGridPanel.Read_18352354974683059042);
 				kls.RegVersion(9191450313829293980, EngineNS_UI_Controls_Containers_TtUniformGridPanel.Read_9191450313829293980);
 			}
 			{
@@ -163125,76 +155326,65 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_UI_Controls_Containers_TtUserControl.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtUserControl.CopyCurrentVersion;
 				kls.RegVersion(16538271179797198750, EngineNS_UI_Controls_Containers_TtUserControl.Read_16538271179797198750);
-				kls.RegVersion(182403351239558880, EngineNS_UI_Controls_Containers_TtUserControl.Read_182403351239558880);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.Containers.TtWrapPanel@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_Containers_TtWrapPanel.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtWrapPanel.CopyCurrentVersion;
 				kls.RegVersion(6316211997314806055, EngineNS_UI_Controls_Containers_TtWrapPanel.Read_6316211997314806055);
-				kls.RegVersion(9086920089694442662, EngineNS_UI_Controls_Containers_TtWrapPanel.Read_9086920089694442662);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.TtButton@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_TtButton.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtButton.CopyCurrentVersion;
 				kls.RegVersion(11862939318659861009, EngineNS_UI_Controls_TtButton.Read_11862939318659861009);
-				kls.RegVersion(7550015687701907973, EngineNS_UI_Controls_TtButton.Read_7550015687701907973);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.TtButtonBase@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_TtButtonBase.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtButtonBase.CopyCurrentVersion;
 				kls.RegVersion(11862939318659861009, EngineNS_UI_Controls_TtButtonBase.Read_11862939318659861009);
-				kls.RegVersion(7550015687701907973, EngineNS_UI_Controls_TtButtonBase.Read_7550015687701907973);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.TtCheckBox@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_TtCheckBox.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtCheckBox.CopyCurrentVersion;
 				kls.RegVersion(11862939318659861009, EngineNS_UI_Controls_TtCheckBox.Read_11862939318659861009);
-				kls.RegVersion(7550015687701907973, EngineNS_UI_Controls_TtCheckBox.Read_7550015687701907973);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.TtContentsPresenter@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_TtContentsPresenter.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtContentsPresenter.CopyCurrentVersion;
 				kls.RegVersion(15092936797287563383, EngineNS_UI_Controls_TtContentsPresenter.Read_15092936797287563383);
-				kls.RegVersion(919702046424053966, EngineNS_UI_Controls_TtContentsPresenter.Read_919702046424053966);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.TtEditableText@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_TtEditableText.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtEditableText.CopyCurrentVersion;
 				kls.RegVersion(17203601270899242069, EngineNS_UI_Controls_TtEditableText.Read_17203601270899242069);
-				kls.RegVersion(9820130812348811243, EngineNS_UI_Controls_TtEditableText.Read_9820130812348811243);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.TtExpander@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_TtExpander.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtExpander.CopyCurrentVersion;
 				kls.RegVersion(8256914992314205817, EngineNS_UI_Controls_TtExpander.Read_8256914992314205817);
-				kls.RegVersion(8410506798647563121, EngineNS_UI_Controls_TtExpander.Read_8410506798647563121);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.TtImage@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_TtImage.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtImage.CopyCurrentVersion;
-				kls.RegVersion(16882915731225695087, EngineNS_UI_Controls_TtImage.Read_16882915731225695087);
 				kls.RegVersion(7077125164768941970, EngineNS_UI_Controls_TtImage.Read_7077125164768941970);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.TtProgress@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_TtProgress.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtProgress.CopyCurrentVersion;
-				kls.RegVersion(15662458168482415927, EngineNS_UI_Controls_TtProgress.Read_15662458168482415927);
 				kls.RegVersion(16488422765454927708, EngineNS_UI_Controls_TtProgress.Read_16488422765454927708);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.TtText@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_TtText.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtText.CopyCurrentVersion;
-				kls.RegVersion(15360117550467716972, EngineNS_UI_Controls_TtText.Read_15360117550467716972);
 				kls.RegVersion(3792713837580019203, EngineNS_UI_Controls_TtText.Read_3792713837580019203);
 			}
 			{
@@ -163202,7 +155392,6 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_UI_Controls_TtToggleButton.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtToggleButton.CopyCurrentVersion;
 				kls.RegVersion(11862939318659861009, EngineNS_UI_Controls_TtToggleButton.Read_11862939318659861009);
-				kls.RegVersion(7550015687701907973, EngineNS_UI_Controls_TtToggleButton.Read_7550015687701907973);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.TtUIElement.BindingData_Method@EngineCore");
@@ -163256,7 +155445,6 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.TtUIElement@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_TtUIElement.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtUIElement.CopyCurrentVersion;
-				kls.RegVersion(10351394170618148876, EngineNS_UI_Controls_TtUIElement.Read_10351394170618148876);
 				kls.RegVersion(3830376096396895602, EngineNS_UI_Controls_TtUIElement.Read_3830376096396895602);
 			}
 			{
@@ -163270,14 +155458,12 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_UI_Editor_EditorUIHost.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Editor_EditorUIHost.CopyCurrentVersion;
 				kls.RegVersion(12363456890481729257, EngineNS_UI_Editor_EditorUIHost.Read_12363456890481729257);
-				kls.RegVersion(9711381192518498048, EngineNS_UI_Editor_EditorUIHost.Read_9711381192518498048);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Editor.SelectedDecorator@EngineCore");
 				kls.Writer = EngineNS_UI_Editor_SelectedDecorator.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Editor_SelectedDecorator.CopyCurrentVersion;
 				kls.RegVersion(12363456890481729257, EngineNS_UI_Editor_SelectedDecorator.Read_12363456890481729257);
-				kls.RegVersion(9711381192518498048, EngineNS_UI_Editor_SelectedDecorator.Read_9711381192518498048);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.TtBrush@EngineCore");
@@ -163308,7 +155494,6 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_UI_TtUIHost.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_TtUIHost.CopyCurrentVersion;
 				kls.RegVersion(12363456890481729257, EngineNS_UI_TtUIHost.Read_12363456890481729257);
-				kls.RegVersion(9711381192518498048, EngineNS_UI_TtUIHost.Read_9711381192518498048);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.TtUIMacrossBase@EngineCore");
@@ -163574,7 +155759,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = Survivor_TtWeaponProxyNode.CopyCurrentVersion;
 				kls.RegVersion(10759720178659608122, Survivor_TtWeaponProxyNode.Read_10759720178659608122);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("E8_B7_64_4A_6F_FD_BB_7F_CB_77_CF_36_CC_D0_FC_43_01_0D_09_ED");
+			this.VersionHash = EngineNS.Hash160.Parse("C8_EF_15_DF_E9_D1_6B_CD_25_27_46_8A_E3_F7_18_A7_3B_6E_01_E1");
 		}
 	}
 }

@@ -219,14 +219,14 @@ namespace EngineNS.GamePlay
                     {
                         for (int i = 0; i < FocusMaterials.Length; i++)
                         {
-                            MeshNode.Mesh.MaterialMesh.SubMeshes[0].Materials[i] = FocusMaterials[i];
+                            MeshNode.RenderMesh.MaterialMesh.SubMeshes[0].Materials[i] = FocusMaterials[i];
                         }
                     }
                     else
                     {
                         for (int i = 0; i < NormalMaterials.Length; i++)
                         {
-                            MeshNode.Mesh.MaterialMesh.SubMeshes[0].Materials[i] = NormalMaterials[i];
+                            MeshNode.RenderMesh.MaterialMesh.SubMeshes[0].Materials[i] = NormalMaterials[i];
                         }
                     }
                 }
@@ -678,7 +678,7 @@ namespace EngineNS.GamePlay
                 MeshNode.SetStyle(Scene.TtNode.ENodeStyles.HideBoundShape | Scene.TtNode.ENodeStyles.NoPickedDraw);
                 if(axisMesh != null)
                 {
-                    MeshNode.Mesh = axisMesh;
+                    MeshNode.RenderMesh = axisMesh;
                     MeshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                     MeshNode.IsCastShadow = false;
                 }
@@ -996,7 +996,7 @@ namespace EngineNS.GamePlay
                 meshNodeData.Name = "RotArrowAsset";
                 mRotArrowAssetNode = (Scene.TtMeshNode)await world.Root.SpawnSceneActor<Scene.TtMeshNode>(mHostWorld.Root, null, meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
                 mRotArrowAssetNode.SetStyle(Scene.TtNode.ENodeStyles.HideBoundShape | Scene.TtNode.ENodeStyles.NoPickedDraw);
-                mRotArrowAssetNode.Mesh = rotArrowAssetMesh;
+                mRotArrowAssetNode.RenderMesh = rotArrowAssetMesh;
                 mRotArrowAssetNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                 mRotArrowAssetNode.IsCastShadow = false;
             }

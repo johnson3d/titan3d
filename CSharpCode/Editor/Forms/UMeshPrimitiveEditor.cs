@@ -1,9 +1,5 @@
-﻿using EngineNS.DistanceField;
-using EngineNS.GamePlay.Camera;
+﻿using EngineNS.GamePlay.Camera;
 using EngineNS.Graphics.Mesh;
-using ICSharpCode.SharpZipLib.Tar;
-using NPOI.OpenXmlFormats.Dml;
-using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -339,7 +335,7 @@ namespace EngineNS.Editor.Forms
                 }
             }
         }
-        public async System.Threading.Tasks.Task CreateSdfDebugMesh(GamePlay.TtWorld world, DistanceField.TtSdfAsset sdfAsset)
+        public async Thread.Async.TtTask CreateSdfDebugMesh(GamePlay.TtWorld world, DistanceField.TtSdfAsset sdfAsset)
         {
             if (sdfAsset == null || sdfAsset.Mips.Count < 0)
                 return;
@@ -363,6 +359,7 @@ namespace EngineNS.Editor.Forms
                 meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
 
                 SdfMeshNode = meshNode;
+                //SdfMeshNode.Parent = viewport.World.Root;
             }
 
             var sdfData = sdfAsset.Mips[0];
@@ -639,27 +636,17 @@ namespace EngineNS.Editor.Forms
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "MeshDetails", ref ShowMeshPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                MeshPropGrid.OnDraw(true, false, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar, 
-                    ImGuiChildFlags_.ImGuiChildFlags_AlwaysAutoResize | ImGuiChildFlags_.ImGuiChildFlags_AutoResizeX | ImGuiChildFlags_.ImGuiChildFlags_AutoResizeY);
                 if (ImGuiAPI.Button("Build SDF"))
                 {
-
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-                    UMeshDataProvider meshProvider = new UMeshDataProvider();
-                    if (meshProvider.InitFrom(Mesh))
-在此之后:
-                    TtMeshDataProvider meshProvider = new UMeshDataProvider();
-                    if (meshProvider.InitFrom(Mesh))
-*/
-                    TtMeshDataProvider meshProvider = new TtMeshDataProvider();
+                    var meshProvider = new TtMeshDataProvider();
                     if (meshProvider.InitFrom(Mesh))
                     {
                         var sdfConfig = new DistanceField.DistanceFieldConfig();
                         var outSDF = MeshSdfAsset;
                         DistanceField.UMeshUtilities.GenerateSignedDistanceFieldVolumeData(Mesh.AssetName.ToString(), meshProvider, sdfConfig, 1.0f, false, ref outSDF);
 
-                        var noExtName = Mesh.AssetName.Name.Substring(0, Mesh.AssetName.Name.Length - Mesh.AssetName.ExtName.Length);
+                        //var noExtName = Mesh.AssetName.Name.Substring(0, Mesh.AssetName.Name.Length - Mesh.AssetName.ExtName.Length);
+                        var noExtName = Mesh.AssetName.NoExtName;
                         var rn = RName.GetRName(noExtName + DistanceField.TtSdfAsset.AssetExt, Mesh.AssetName.RNameType);
                         var ameta = new DistanceField.TtSdfAssetAMeta();
                         ameta.SetAssetName(rn);
@@ -671,7 +658,7 @@ namespace EngineNS.Editor.Forms
 
                         outSDF.SaveAssetTo(rn);
 
-                        _ = CreateSdfDebugMesh(PreviewViewport.World, outSDF);
+                        CreateSdfDebugMesh(PreviewViewport.World, outSDF).WaitCompletedAndDispose();
 
                         // test load sdf
                         Action action = async () =>
@@ -683,6 +670,8 @@ namespace EngineNS.Editor.Forms
 
                     }
                 }
+                MeshPropGrid.OnDraw(true, false, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar, 
+                    ImGuiChildFlags_.ImGuiChildFlags_AlwaysAutoResize | ImGuiChildFlags_.ImGuiChildFlags_AutoResizeX | ImGuiChildFlags_.ImGuiChildFlags_AutoResizeY);
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }

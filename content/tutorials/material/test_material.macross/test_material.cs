@@ -71,7 +71,7 @@
                     mFrame_Tick_63600741.SetWatchVariable("v_subMesh_GetMaterial_1597294926", 0);
                     mFrame_Tick_63600741.SetWatchVariable("v_atom_GetMaterial_1597294926", 0);
                     breaker_GetMaterial_1597294926.TryBreak();
-                    tmp_r_GetMaterial_1597294926 = Member_0.Mesh.GetMaterial(0,0);
+                    tmp_r_GetMaterial_1597294926 = Member_0.RenderMesh.GetMaterial(0,0);
                     mFrame_Tick_63600741.SetWatchVariable("tmp_r_GetMaterial_1597294926", tmp_r_GetMaterial_1597294926);
                     mFrame_Tick_63600741.SetWatchVariable("v_v_Sin_1732946206", EngineNS.TtEngine.Instance.TickCountSecond);
                     breaker_Sin_1732946206.TryBreak();

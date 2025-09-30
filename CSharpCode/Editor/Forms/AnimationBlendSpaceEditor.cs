@@ -337,8 +337,8 @@ namespace EngineNS.Editor.Forms
             {
                 System.Diagnostics.Debug.Assert(meshNode != null);
 
-                var pose = meshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as Animation.SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
-                var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.TtMdfSkinMesh;
+                var pose = meshNode?.RenderMesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as Animation.SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
+                var skinMDfQueue = meshNode.RenderMesh.MdfQueue as Graphics.Mesh.TtMdfSkinMesh;
 
                 meshNode.RuntimePose = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(pose);
                 Player.BindingPose(pose);

@@ -37,7 +37,7 @@
   "SimpleRPolicyName": null,
   "RpcRootType": "EngineNS.UTest.UTest_Rpc@EngineCore",
   "CookDXBC": false,
-  "CookDXIL": false,
+  "CookDXIL": true,
   "CookSPIRV": false,
   "CookGLSL": false,
   "CookMETAL": false,

@@ -1,2 +1,0 @@
-EngineCore
-EngineNS.Graphics.Pipeline.Utility.TtMaterialToTexture@EngineCore

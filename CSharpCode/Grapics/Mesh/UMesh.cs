@@ -23,6 +23,7 @@ namespace EngineNS.NxRHI
 
 namespace EngineNS.Graphics.Mesh
 {
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Mesh.TtMesh@EngineCore", "EngineNS.Graphics.Mesh.TtMesh" })]
     public partial class TtRenderMesh : IDisposable
     {
         public void Dispose()
@@ -147,6 +148,7 @@ namespace EngineNS.Graphics.Mesh
         public delegate void FOnBuildDrawcall(NxRHI.TtGraphicDraw drawcall);
         public FOnBuildDrawcall OnBuildDrawcall = null;
         public object Tag { get; set; }
+        [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Mesh.TtMesh.TtAtom@EngineCore", "EngineNS.Graphics.Mesh.TtMesh.TtAtom" })]
         public class TtAtom : IDisposable
         {
             public void Dispose()

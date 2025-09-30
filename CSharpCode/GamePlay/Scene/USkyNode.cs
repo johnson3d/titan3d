@@ -93,7 +93,7 @@ namespace EngineNS.GamePlay.Scene
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
             SunMesh.IsUnlit = true;
-            this.Mesh.IsUnlit = true;
+            this.RenderMesh.IsUnlit = true;
 
             var camPos = args.Policy.DefaultCamera.GetPosition();
             camPos = new DVector3(camPos.X, Placement.TransformRef.mPosition.Y, camPos.Z);

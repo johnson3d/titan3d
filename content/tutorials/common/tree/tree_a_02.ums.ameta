@@ -12,9 +12,9 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
-    <e_0 Value="Game,tutorials/common/tree/utest/mesh/tree/sm_tree_a_02.vms,e07273e0-b211-4906-a0ee-8c2f0da9daf9" />
-    <e_1 Value="Game,tutorials/common/tree/utest/material/tree/m_tree_leave.material,313d091a-60b7-4d05-9053-2b5382b5260e" />
-    <e_2 Value="Game,tutorials/common/tree/utest/material/tree/m_tree_branch2.material,f4efdc32-de06-405b-b309-28da9d421a4a" />
+    <e_0 Value="Game,tutorials/common/tree/utest/mesh/tree/sm_tree_a_02.vms,ac811352-24ce-47f2-9f62-49cc0d7a0d99" />
+    <e_1 Value="Game,tutorials/common/tree/utest/material/tree/m_tree_leave.material,47f835ff-fb34-4426-9bbf-db39c6f6ef1b" />
+    <e_2 Value="Game,tutorials/common/tree/utest/material/tree/m_tree_branch2.material,c5b0eb40-cb5a-4191-8f6a-29292c978f90" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
 </Root>

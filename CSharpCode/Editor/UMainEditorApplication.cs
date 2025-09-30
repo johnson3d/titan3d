@@ -813,7 +813,7 @@ namespace EngineNS.Editor
                     var meshData1 = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
                     var meshNode1 = await TtNode.SpawnNode<GamePlay.Scene.TtMeshNode>(meshNode, async (nd) =>
                     {
-                        nd.Mesh = mesh1;
+                        nd.RenderMesh = mesh1;
                         nd.NodeData.Name = "Robot1";
                         nd.Parent = meshNode;
                         nd.Placement.SetTransform(new DVector3(3, 3, 3), new Vector3(0.01f), Quaternion.RotationAxis(Vector3.UnitY, (float)Math.PI / 4));

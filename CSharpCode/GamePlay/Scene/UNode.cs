@@ -1740,6 +1740,13 @@ namespace EngineNS.GamePlay.Scene
     public partial class TtVisual : TtSceneActorNode
     {
         public override bool HashVisual => true;
+        public virtual Graphics.Mesh.TtRenderMesh RenderMesh
+        {
+            get { return null; }
+            set
+            { 
+            }
+        }
     }
     public partial class TtGpuSceneNode : TtVisual
     {

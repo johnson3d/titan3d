@@ -11,7 +11,7 @@ namespace EngineNS.Bricks.Collision.SDF
     public unsafe struct FBrick
     {
         public const int BrickSide = 4;
-        public const float VoxelSize = 0.25f;
+        public const float VoxelSize = TtSDF.VoxelSize / BrickSide;
         public fixed bool IsOccupied[BrickSide * BrickSide * BrickSide];
         public bool IsOccupy(int x, int y, int z)
         {
@@ -55,24 +55,59 @@ namespace EngineNS.Bricks.Collision.SDF
     public class TtSDF
     {
         public FSdfVoxel[,,] mHighSDF;
-        public FPayload[] mPayloads;
-        public FBrick[] mBricks;
+        public List<FPayload> mPayloads;
+        public List<FBrick> mBricks;
 
         public Vector3 HighSDFWorldSize; // 高分辨率 SDF 的覆盖范围（世界空间）
-        public Vector3 HighSDFVoxelSize;
 
         // Ray Marching 参数
         public float MaxDistance = 100f;    // 最大光线距离
         public float Epsilon = 0.01f;       // 命中阈值
         public float MinStepSize = 0.05f;   // 最小步长（避免无限小步长）
+        public const int XSide = 256;
+        public const int YSide = 256;
+        public const int ZSide = 32;
+        public const float VoxelSize = 1.0f;
+        public DBoundingBox AABB;
 
-        public void BuildSDF()
+        public void BuildSDF(GamePlay.TtWorld world, DVector3 center)
         {
-            mHighSDF = new FSdfVoxel[256, 256, 32];
+            mHighSDF = new FSdfVoxel[ZSide, YSide, XSide];
+            mPayloads = new List<FPayload>();
+            mBricks = new List<FBrick>();
+            DVector3 extend = new DVector3(VoxelSize * XSide, VoxelSize * YSide, VoxelSize * ZSide);
+            AABB.Minimum = center - extend;
+            AABB.Maximum = center + extend;
+            world.Root.IterateNodes((node, arg) =>
+            {
+                if (node is GamePlay.Scene.TtVisual == false)
+                    return true;
+                if ((node as GamePlay.Scene.TtVisual).HashVisual == false)
+                    return true;
+                if (IsDisjoint(in node.BoundVolume.AbsAABB))
+                    return true;
+
+                BuildNodeSDF(node as GamePlay.Scene.TtVisual);
+                return true;
+            }, null);
+        }
+
+        public void BuildNodeSDF(GamePlay.Scene.TtVisual node)
+        {
+            if (node.RenderMesh == null)
+                return;
+            foreach (var i in node.RenderMesh.MaterialMesh.SubMeshes)
+            {
+                //i.Mesh.
+            }
+        }
+        public bool IsDisjoint(in DBoundingBox box)
+        {
+            return DBoundingBox.Contains(in box, in AABB) == ContainmentType.Disjoint;
         }
 
         /// <summary>
-        /// 使用 Hierarchical SDF 进行光线步进
+        /// 使用 SDF 进行光线步进
         /// </summary>
         /// <param name="rayOrigin">光线起点（世界坐标）</param>
         /// <param name="rayDirection">光线方向（归一化）</param>
@@ -95,9 +130,9 @@ namespace EngineNS.Bricks.Collision.SDF
                 //    return t;
 
                 Vector3 brickStart;
-                brickStart.X = HighSDFVoxelSize.X * fineIndex.X;
-                brickStart.Y = HighSDFVoxelSize.Y * fineIndex.Y;
-                brickStart.Z = HighSDFVoxelSize.Z * fineIndex.Z;
+                brickStart.X = VoxelSize * fineIndex.X;
+                brickStart.Y = VoxelSize * fineIndex.Y;
+                brickStart.Z = VoxelSize * fineIndex.Z;
                 var t1 = mBricks[finePayload.BrickIndex].RayMarchSDF(this, currentPos - brickStart, rayDirection, ref OutVoxelIndex);
                 if (t1 > 0)
                 {
@@ -179,9 +214,9 @@ namespace EngineNS.Bricks.Collision.SDF
                     //    return t;
 
                     Vector3 brickStart;
-                    brickStart.X = HighSDFVoxelSize.X * fineIndex.X;
-                    brickStart.Y = HighSDFVoxelSize.Y * fineIndex.Y;
-                    brickStart.Z = HighSDFVoxelSize.Z * fineIndex.Z;
+                    brickStart.X = VoxelSize * fineIndex.X;
+                    brickStart.Y = VoxelSize * fineIndex.Y;
+                    brickStart.Z = VoxelSize * fineIndex.Z;
                     var t1 = mBricks[finePayload.BrickIndex].RayMarchSDF(this, currentPos - brickStart, rayDirection, ref OutVoxelIndex);
                     if (t1 > 0)
                     {

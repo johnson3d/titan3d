@@ -300,7 +300,8 @@ namespace EngineNS.DistanceField
             var embreeScene = embreeManager.CreateScene();
             var embreeGeom = embreeManager.CreateGeometry(MeshName, meshProvider);
             embreeScene.AttachGeometry(embreeGeom);
-            
+            embreeScene.CommitScene();
+
             // Whether to use an Embree Point Query to compute the closest unsigned distance.  Rays will only be traced to determine backfaces visible for sign.
             const bool bUsePointQuery = true;
 

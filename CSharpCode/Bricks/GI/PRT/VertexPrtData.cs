@@ -70,9 +70,9 @@ namespace EngineNS.Bricks.GI.PRT
         {
             var meshCoeffs = GetNodeData<TtPrtNodeData>().MeshCoeffs;
             meshCoeffs.Clear();
-            for (int i = 0; i<HostMeshNode.Mesh.MaterialMesh.SubMeshes.Count; i++)
+            for (int i = 0; i<HostMeshNode.RenderMesh.MaterialMesh.SubMeshes.Count; i++)
             {
-                var coeffs = new FSHCoefficients[HostMeshNode.Mesh.MaterialMesh.SubMeshes[i].Mesh.VertexNumber];
+                var coeffs = new FSHCoefficients[HostMeshNode.RenderMesh.MaterialMesh.SubMeshes[i].Mesh.VertexNumber];
                 meshCoeffs.Add(coeffs);
             }
         }
@@ -85,9 +85,9 @@ namespace EngineNS.Bricks.GI.PRT
         public void PrecomputePRT()
         {
             var meshCoeffs = GetNodeData<TtPrtNodeData>().MeshCoeffs;
-            for (int i = 0; i<HostMeshNode.Mesh.MaterialMesh.SubMeshes.Count; i++)
+            for (int i = 0; i<HostMeshNode.RenderMesh.MaterialMesh.SubMeshes.Count; i++)
             {
-                for (int j = 0; j<HostMeshNode.Mesh.MaterialMesh.SubMeshes[i].Mesh.VertexNumber; j++)
+                for (int j = 0; j<HostMeshNode.RenderMesh.MaterialMesh.SubMeshes[i].Mesh.VertexNumber; j++)
                 {
                     //Graphics.Pipeline.GI.TtSHCoefficient.PrecomputeSHCoefficients
                     //calc prt for meshCoeffs[i][j] = vis * brdf * abeldoRGB

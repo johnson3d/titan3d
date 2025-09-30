@@ -320,6 +320,7 @@ namespace EngineNS
         }
         [Rtti.Meta("")]
         public string PureName => IO.TtFileManager.GetPureName(mName);
+        public string NoExtName => IO.TtFileManager.RemoveExtName(mName);
         public static RName GetRNameFromAbsPath(string path)
         {
             path = IO.TtFileManager.GetValidFileName(path);

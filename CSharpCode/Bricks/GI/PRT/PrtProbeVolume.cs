@@ -199,9 +199,9 @@ namespace EngineNS.Bricks.GI.PRT
             this.GetWorld().Root.IterateNodes((node, arg) =>
             {
                 var meshNode = node as TtMeshNode;
-                if (meshNode != null && meshNode.Mesh != null)
+                if (meshNode != null && meshNode.RenderMesh != null)
                 {
-                    var mesh = meshNode.Mesh;
+                    var mesh = meshNode.RenderMesh;
                     Graphics.Mesh.TtMaterialMesh.TtSubMaterialedMesh subMesh = mesh.MaterialMesh.SubMeshes[0];
                     foreach(var i in subMesh.Materials)
                     {

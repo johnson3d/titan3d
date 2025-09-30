@@ -179,12 +179,12 @@ namespace EngineNS.IO
                 }
             }
         }
-        public void Write(byte[] v)
+        public unsafe void Write(byte[] v)
         {
-            unsafe
+            var len = (UInt16)v.Length;
+            WritePtr(&len, sizeof(UInt16));
+            if (len>0)
             {
-                var len = (UInt16)v.Length;
-                WritePtr(&len, sizeof(UInt16));
                 fixed (byte* p = &v[0])
                 {
                     WritePtr(p, len);

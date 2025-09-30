@@ -77,7 +77,7 @@ namespace EngineNS.Rtti
         {
             SourceFilePath = sourceFilePath;
             SourceLineNumber = sourceLineNumber;
-            if (SourceFilePath.StartsWith(TtEngine.EngineSourceFilePathAOT))
+            if (TtEngine.EngineSourceFilePathAOT!=null && SourceFilePath.StartsWith(TtEngine.EngineSourceFilePathAOT))
             {
                 SourceFilePath = "@Engine/" + SourceFilePath.Substring(TtEngine.EngineSourceFilePathAOT.Length);
             }

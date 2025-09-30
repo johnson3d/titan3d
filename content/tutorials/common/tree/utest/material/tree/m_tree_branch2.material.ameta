@@ -12,9 +12,9 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
-    <e_0 Value="Game,tutorials/common/tree/utest/texture/tree/t_bark_autumn_01_c.srv,1fe045b3-9a01-428e-961e-978e26c4e1ee" />
-    <e_1 Value="Game,tutorials/common/tree/utest/texture/tree/t_bark_autumn_01_n.srv,0c2ed445-cf62-4a37-a98d-fdff01bf0640" />
-    <e_2 Value="Game,tutorials/common/tree/utest/texture/tree/t_bark_autumn_01_orm.srv,8fa52ab3-676f-4946-8ff8-4a59f16abf34" />
+    <e_0 Value="Game,utest/texture/tree/t_bark_autumn_01_c.srv,1fe045b3-9a01-428e-961e-978e26c4e1ee" />
+    <e_1 Value="Game,utest/texture/tree/t_bark_autumn_01_n.srv,0c2ed445-cf62-4a37-a98d-fdff01bf0640" />
+    <e_2 Value="Game,utest/texture/tree/t_bark_autumn_01_orm.srv,8fa52ab3-676f-4946-8ff8-4a59f16abf34" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

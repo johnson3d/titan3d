@@ -226,7 +226,7 @@ namespace EngineNS.GamePlay.Scene
                 meshNode.NodeData.Name = mesh.MaterialMesh.AssetName.Name;
             else
                 meshNode.NodeData.Name = meshNode.SceneId.ToString();
-            meshNode.Mesh = mesh;
+            meshNode.RenderMesh = mesh;
             
             meshNode.Placement.SetTransform(in pos, in scale, in quat);
 
