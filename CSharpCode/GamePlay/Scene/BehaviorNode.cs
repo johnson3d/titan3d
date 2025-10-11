@@ -16,7 +16,7 @@ namespace EngineNS.GamePlay.Scene
         {
             return "Behavior";
         }
-        public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
         {
             //return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
             return null;

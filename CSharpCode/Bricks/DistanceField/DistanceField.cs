@@ -74,7 +74,7 @@ namespace EngineNS.DistanceField
         {
             get => TtSdfAsset.AssetExt;
         }
-        public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
         {
             return await TtEngine.Instance.SdfAssetManager.GetSdfAsset(GetAssetName());
         }
@@ -224,7 +224,15 @@ namespace EngineNS.DistanceField
         [Rtti.Meta("")]
         public List<TtSparseSdfMip> Mips { get; set; }
 
-
+        public int MipLevels
+        {
+            get { return Mips.Count; }
+        }
+        public float GetSdfValue(int mip, int x, int y, int z)
+        {
+            //todo: extract sdf(x,y,z)
+            return 0;
+        }
     };
 
 

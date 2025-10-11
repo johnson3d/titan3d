@@ -187,7 +187,7 @@ namespace EngineNS.Animation.Animatable
         //maybe can use hashcode to replace the AnimatablePropertyDesc as the key
         Dictionary<TtAnimatablePropertyDesc, Rtti.TtTypeDesc> ObjectPropertySetFuncDic { get; set; } = new Dictionary<TtAnimatablePropertyDesc, Rtti.TtTypeDesc>();
         bool bInitialized = false;
-        public override Task<bool> Initialize(TtEngine host)
+        public override Thread.Async.TtTask<bool> Initialize(TtEngine host)
         {
             foreach (var i in Rtti.TtTypeDescManager.Instance.Services)
             {

@@ -21,7 +21,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         {
             return TtEngine.Instance.EditorInstance.Config.RenderPolicyBoderColor;
         }
-        public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
         {
             return TtRenderPolicyAsset.LoadAsset(GetAssetName());
         }

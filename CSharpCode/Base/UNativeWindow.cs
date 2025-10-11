@@ -99,7 +99,7 @@ namespace EngineNS
             }
         }
 
-        public virtual async System.Threading.Tasks.Task<bool> Initialize(string title, int x, int y, int w, int h)
+        public virtual async Thread.Async.TtTask<bool> Initialize(string title, int x, int y, int w, int h)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 

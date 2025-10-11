@@ -12,7 +12,7 @@ namespace EngineNS.Graphics.Pipeline
             return 0;
         }
         public readonly NxRHI.TtRenderSwapQueue RenderSwapQueue = new NxRHI.TtRenderSwapQueue();
-        public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine engine)
+        public override async Thread.Async.TtTask<bool> Initialize(TtEngine engine)
         {
             if(engine.Config.RHIType == NxRHI.ERhiType.RHI_VirtualDevice)
             {

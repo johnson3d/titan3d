@@ -76,7 +76,7 @@ namespace EngineNS.Editor
             base.Cleanup(host);
         }
 
-        public override async Task<bool> Initialize(TtEngine host)
+        public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
         {
             var cfgFile = host.FileManager.GetRoot(IO.TtFileManager.ERootDir.Editor) + "EditorConfig.cfg";
             Config = IO.TtFileManager.LoadXmlToObject<TtEditorConfig>(cfgFile);

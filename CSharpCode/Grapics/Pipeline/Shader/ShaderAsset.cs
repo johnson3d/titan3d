@@ -16,7 +16,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return "Nebula";
         }
-        public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
         {
             return TtShaderAsset.LoadAsset(GetAssetName());
         }

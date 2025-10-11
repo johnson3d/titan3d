@@ -2,8 +2,7 @@
   "Enable": true,
   "LoadOnInit": true,
   "Platforms": [
-    "PLTF_Windows",
-	"PLTF_Android"
+    "PLTF_ALL"
   ],
   "Dependencies": [
     "GameItems"

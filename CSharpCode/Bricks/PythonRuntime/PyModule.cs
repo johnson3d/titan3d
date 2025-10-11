@@ -63,7 +63,7 @@ namespace EngineNS.Bricks.PythonRuntime
     {
         public TtPyModule RootModule { get; private set; }
         public bool StartPython { get; set; } = false;
-        public override async Task<bool> Initialize(TtEngine host)
+        public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
         {
             if (StartPython == false)
                 return true;

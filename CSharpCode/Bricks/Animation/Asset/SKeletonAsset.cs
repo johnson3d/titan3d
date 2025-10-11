@@ -13,7 +13,7 @@ namespace EngineNS.Animation.Asset
         {
             get => TtSkeletonAsset.AssetExt;
         }
-        public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
         {
             return await TtEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(GetAssetName());
         }

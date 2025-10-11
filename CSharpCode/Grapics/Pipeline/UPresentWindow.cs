@@ -24,7 +24,7 @@ namespace EngineNS.Graphics.Pipeline
         public void EndFrame()
         {
         }
-        public override async System.Threading.Tasks.Task<bool> Initialize(string title, int x, int y, int w, int h)
+        public override async Thread.Async.TtTask<bool> Initialize(string title, int x, int y, int w, int h)
         {
             if (false == await base.Initialize(title, x, y, w, h))
                 return false;

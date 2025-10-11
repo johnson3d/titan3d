@@ -22,7 +22,7 @@ namespace EngineNS.Bricks.DataSet
             //物理材质不会引用别的资产
             return false;
         }
-        public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
         {
             return null;
         }

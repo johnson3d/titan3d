@@ -190,7 +190,7 @@ namespace EngineNS.Bricks.PhysicsCore
             mPhyContext.PhyMaterialManager.Cleanup();
             mPhyContext = null;
         }
-        public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine host)
+        public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
             mPhyContext = new TtPhyContext();

@@ -281,7 +281,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
         }
 
-        public override async Task<bool> Initialize(TtEngine host)
+        public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
         {
             RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(bool)), new BoolEditor());
             RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(int)), new Int32Editor());

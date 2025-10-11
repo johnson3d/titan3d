@@ -13,7 +13,7 @@ namespace EngineNS.UI.Bind
 {
     public class TtBindManager : TtModule<TtEngine>
     {
-        public override async Task<bool> Initialize(TtEngine host)
+        public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
         {
             foreach(var service in TtTypeDescManager.Instance.Services.Values)
             {

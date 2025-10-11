@@ -23,7 +23,7 @@ namespace EngineNS.EGui
         {
             return "UVAnim";
         }
-        public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
             return null;

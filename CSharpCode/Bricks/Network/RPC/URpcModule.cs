@@ -279,7 +279,7 @@ namespace EngineNS.Bricks.Network.RPC
 
 			//awaiter.Dispose();
 		}
-		public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine host)
+		public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
 		{
 			await Thread.TtAsyncDummyClass.DummyFunc();
 			var type = Rtti.TtTypeDesc.TypeOf(host.Config.RpcRootType);

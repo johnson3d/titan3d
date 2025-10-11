@@ -159,7 +159,18 @@ namespace EngineNS.GamePlay
             return this;
         }
         public Thread.TtSemaphore GameSemaphore;
-        public virtual async System.Threading.Tasks.Task<bool> BeginPlay()
+        //public virtual async System.Threading.Tasks.Task<bool> BeginPlay()
+        //{
+        //    if (McObject == null)
+        //        return false;
+        //    if (McObject.Get() == null)
+        //        return false;
+        //    GameSemaphore = Thread.TtSemaphore.CreateSemaphore(1);
+        //    var ret = await McObject.Get().BeginPlay(this);
+        //    GameSemaphore.Release();
+        //    return ret;
+        //}
+        public virtual async Thread.Async.TtTask<bool> BeginPlay()
         {
             if (McObject == null)
                 return false;

@@ -22,7 +22,7 @@ namespace EngineNS.Graphics.Mesh
         {
             return "UMS";
         }
-        public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
         {
             return await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(GetAssetName());
         }

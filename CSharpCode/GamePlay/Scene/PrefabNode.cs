@@ -203,7 +203,7 @@ namespace EngineNS.GamePlay.Scene
         {
             return TtEngine.Instance.EditorInstance.Config.PrefabBoderColor;
         }
-        public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
         {
             //return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
             return null;
@@ -380,7 +380,7 @@ namespace EngineNS.GamePlay.Scene
             Prefabs.Clear();
             CoreSDK.DisposeObject(ref PrefabWorld);
         }
-        public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine host)
+        public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
         {
             PrefabWorld = new TtWorld(null, false);
             return await PrefabWorld.InitWorld();

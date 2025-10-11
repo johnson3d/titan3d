@@ -6,7 +6,7 @@ namespace EngineNS.Bricks.TcpServer
 {
     public class TtDedicatedServer : TtModule<TtEngine>
     {
-        public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine engine)
+        public override async Thread.Async.TtTask<bool> Initialize(TtEngine engine)
         {
             await base.Initialize(engine);
 

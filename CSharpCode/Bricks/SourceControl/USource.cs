@@ -79,7 +79,7 @@ namespace EngineNS.Bricks.SourceControl
         {
             return 2;
         }
-        public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine host)
+        public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 

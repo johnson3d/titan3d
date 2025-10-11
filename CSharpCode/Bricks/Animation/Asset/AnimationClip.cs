@@ -27,7 +27,7 @@ namespace EngineNS.Animation.Asset
         {
             return "AnimationClip";
         }
-        public override async Task<IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
         {
             return await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(GetAssetName());
         }

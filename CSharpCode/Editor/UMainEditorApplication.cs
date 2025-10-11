@@ -67,7 +67,7 @@ namespace EngineNS.Editor
             CoreSDK.DisposeObject(ref mClrProfiler);
             base.Cleanup();
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeApplication(NxRHI.TtGpuDevice rc, RName rpName)
+        public override async Thread.Async.TtTask<bool> InitializeApplication(NxRHI.TtGpuDevice rc, RName rpName)
         {
             await base.InitializeApplication(rc, rpName);
 

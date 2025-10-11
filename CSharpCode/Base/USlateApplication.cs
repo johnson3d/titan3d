@@ -145,7 +145,7 @@ namespace EngineNS
         public IntPtr mImGuiContext;
         public EGui.TtImDrawDataRHI mDrawData = new EGui.TtImDrawDataRHI();
         
-        public virtual async Task<bool> InitializeApplication(NxRHI.TtGpuDevice rc, RName rpName)
+        public virtual async Thread.Async.TtTask<bool> InitializeApplication(NxRHI.TtGpuDevice rc, RName rpName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
@@ -337,7 +337,7 @@ namespace EngineNS
             TtEngine.Instance.TickableManager.RemoveTickable(this);
             base.Cleanup();
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeApplication(NxRHI.TtGpuDevice rc, RName rpName)
+        public override async Thread.Async.TtTask<bool> InitializeApplication(NxRHI.TtGpuDevice rc, RName rpName)
         {
             await base.InitializeApplication(rc, rpName);
 

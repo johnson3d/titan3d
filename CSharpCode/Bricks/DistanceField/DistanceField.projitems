@@ -6,7 +6,7 @@
     <SharedGUID>8481f1e1-e0ea-4805-95bc-e74c65b16a00</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>DistanceField</Import_RootNamespace>
+    <Import_RootNamespace>EngineNS.DistanceField</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)DistanceField.cs" />

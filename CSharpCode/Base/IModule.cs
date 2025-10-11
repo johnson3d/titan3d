@@ -27,7 +27,7 @@ namespace EngineNS
             }
             mModules.Sort((x, y) => x.GetOrder().CompareTo(y.GetOrder()));
         }
-        protected async System.Threading.Tasks.Task InitializeModules()
+        protected async Thread.Async.TtTask InitializeModules()
         {
             var host = GetHost();
             foreach (var i in mModules)
@@ -138,7 +138,7 @@ namespace EngineNS
         {
             return 1;
         }
-        public virtual async System.Threading.Tasks.Task<bool> Initialize(THost host)
+        public virtual async Thread.Async.TtTask<bool> Initialize(THost host)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
             return true;

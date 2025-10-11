@@ -255,7 +255,7 @@ namespace EngineNS.IO
                 Task = null;
             }
         }
-        public virtual async System.Threading.Tasks.Task<IAsset> LoadAsset()
+        public virtual async Thread.Async.TtTask<IAsset> LoadAsset()
         {
             System.Diagnostics.Debug.Assert(false);
             await Thread.TtAsyncDummyClass.DummyFunc();

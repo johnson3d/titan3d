@@ -83,7 +83,7 @@ namespace EngineNS.Bricks.Particle
         {
             return ((float)mRandom.NextDouble() - 0.5f) * 2.0f;
         }
-        public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine host)
+        public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
             

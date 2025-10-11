@@ -23,7 +23,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
         public UMacrossConfig Config { get; set; }
 
-        public override async Task<bool> Initialize(TtEngine host)
+        public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
         {
             var cfgFile = host.FileManager.GetRoot(IO.TtFileManager.ERootDir.Editor) + "MacrossConfig.cfg";
             Config = IO.TtFileManager.LoadXmlToObject<UMacrossConfig>(cfgFile);
