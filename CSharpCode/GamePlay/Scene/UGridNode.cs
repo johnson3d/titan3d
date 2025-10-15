@@ -31,7 +31,7 @@ namespace EngineNS.GamePlay.Scene
         public static async Thread.Async.TtTask<TtGridNode> AddGridNode(GamePlay.TtWorld world, TtNode parent)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            var material = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/gridline.material", RName.ERNameType.Engine));
+            var material = await RName.GetRName("material/gridline.material", RName.ERNameType.Engine).GetAsset<Graphics.Pipeline.Shader.TtMaterial>(); // TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/gridline.material", RName.ERNameType.Engine));
             var materialInstance = Graphics.Pipeline.Shader.TtMaterialInstance.CreateMaterialInstance(material);
             materialInstance.RenderLayer = Graphics.Pipeline.ERenderLayer.RL_PostTranslucent;
             unsafe

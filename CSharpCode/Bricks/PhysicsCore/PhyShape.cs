@@ -37,7 +37,7 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 FullRedraw = false;
             }
-            protected override async System.Threading.Tasks.Task<bool> Initialize_Override()
+            protected override async Thread.Async.TtTask<bool> Initialize_Override()
             {
                 mRNameEditor = new RName.PGRNameAttribute();
                 await mRNameEditor.Initialize();

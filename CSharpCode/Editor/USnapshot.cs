@@ -1,4 +1,5 @@
 ﻿using EngineNS.NxRHI;
+using NPOI.HPSF;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -94,6 +95,7 @@ namespace EngineNS.Editor
                 writer.WritePng(image.Data, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
                 ameta.ResetSnapshot();
             }
+            ameta.AddAssetFile(file);
             TtEngine.Instance.SourceControlModule.AddFile(file);
             return true;
         }

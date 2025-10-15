@@ -282,6 +282,8 @@ namespace EngineNS.UI
                 }
                 var fileName = name.Address + "/" + name.PureName + name.ExtName;
                 xnd.SaveXnd(fileName);
+
+                name.AMeta.AddAssetFile(fileName);
                 TtEngine.Instance.SourceControlModule.AddFile(fileName);
             }
         }

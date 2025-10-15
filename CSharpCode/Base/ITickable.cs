@@ -76,7 +76,7 @@ namespace EngineNS
         }
     }
 
-    public partial class UTickableManager
+    public partial class TtTickableManager
     {
         public List<WeakReference<ITickable>> Tickables { get; } = new List<WeakReference<ITickable>>();
         private struct FTickSync
@@ -176,9 +176,9 @@ namespace EngineNS
 
 namespace EngineNS
 {
-	partial class UTickableManager
+	partial class TtTickableManager
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_AddTickable_2414318340 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UTickableManager->void AddTickable(ITickable tickable)");
+		private static EngineNS.Macross.TtMacrossBreak macross_break_AddTickable_2414318340 = new EngineNS.Macross.TtMacrossBreak("EngineNS.TtTickableManager->void AddTickable(ITickable tickable)");
 		public unsafe void macross_AddTickable (string nodeName, ITickable tickable) 
 		{
 			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
@@ -191,7 +191,7 @@ namespace EngineNS
 			AddTickable(tickable);
 			macross_break_AddTickable_2414318340.TryBreak();
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_RemoveTickable_2414318340 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UTickableManager->void RemoveTickable(ITickable tickable)");
+		private static EngineNS.Macross.TtMacrossBreak macross_break_RemoveTickable_2414318340 = new EngineNS.Macross.TtMacrossBreak("EngineNS.TtTickableManager->void RemoveTickable(ITickable tickable)");
 		public unsafe void macross_RemoveTickable (string nodeName, ITickable tickable) 
 		{
 			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)

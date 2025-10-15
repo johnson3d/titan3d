@@ -1,5 +1,6 @@
 ﻿using EngineNS.DesignMacross;
 using EngineNS.IO;
+using NPOI.HPSF;
 using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
@@ -151,6 +152,7 @@ namespace EngineNS.DistanceField
             }
 
             xnd.SaveXnd(name.Address);
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
 

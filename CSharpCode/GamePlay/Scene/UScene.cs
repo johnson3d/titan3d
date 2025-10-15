@@ -270,13 +270,8 @@ namespace EngineNS.GamePlay.Scene
         public const uint SceneDescAttributeFlags = 1;
         public void SaveAssetTo(RName name)
         {
-            var ameta = this.GetAMeta();
-            if (ameta != null)
-            {
-                UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta(this);
-            }
-
+            name.AMeta.ClearAssetFiles();
+            
             UpdateNumOfNodes();
             var typeStr = Rtti.TtTypeDesc.TypeStr(GetType());
             var xndHolder = new EngineNS.IO.TtXndHolder(typeStr, 1, 0);
@@ -302,6 +297,7 @@ namespace EngineNS.GamePlay.Scene
 
             var file = name.Address + "/" + name.PureName + AssetExt;
             xndHolder.SaveXnd(file);
+            name.AMeta.AddAssetFile(file);
             TtEngine.Instance.SourceControlModule.AddFile(file, true);
 
             // Macross
@@ -325,6 +321,13 @@ namespace EngineNS.GamePlay.Scene
                     mc.Root = this;
                     mc.InitializeMacrossNodePropertyValues();
                 }
+            }
+
+            var ameta = this.GetAMeta();
+            if (ameta != null)
+            {
+                UpdateAMetaReferences(ameta);
+                ameta.SaveAMeta(this);
             }
         }
         public int NumOfNodes 

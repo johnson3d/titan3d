@@ -86,6 +86,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public void SaveAssetTo(RName name)
         {
+            name.AMeta.ClearAssetFiles();
             var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
             var xnd = new IO.TtXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("Material", 0, 0))
@@ -98,6 +99,7 @@ namespace EngineNS.Bricks.PhysicsCore
             }
 
             xnd.SaveXnd(name.Address);
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         public static TtPhyMaterial LoadXnd(TtPhyMaterialManager manager, IO.TtXndNode node)

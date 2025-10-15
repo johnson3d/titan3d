@@ -116,6 +116,7 @@ namespace EngineNS.Bricks.Procedure
 
             AssetGraph.Version++;
             IO.TtFileManager.SaveObjectToXml(name.Address, AssetGraph);
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         [Rtti.Meta("")]

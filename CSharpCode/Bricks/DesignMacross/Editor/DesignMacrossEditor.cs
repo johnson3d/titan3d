@@ -144,6 +144,7 @@ namespace EngineNS.DesignMacross.Editor
             var xmlText = IO.TtFileManager.GetXmlText(xml);
             var file = $"{rn.Address}/GraphElementStyles.dat";
             IO.TtFileManager.WriteAllText(file, xmlText);
+            rn.AMeta.AddAssetFile(file);
             TtEngine.Instance.SourceControlModule.AddFile(file, true);
         }
 
@@ -179,6 +180,7 @@ namespace EngineNS.DesignMacross.Editor
                 {
                     sr.Write(code);
                 }
+                AssetName.AMeta.AddAssetFile(fileName);
                 TtEngine.Instance.SourceControlModule.AddFile(fileName, true);
                 EngineNS.TtEngine.Instance.MacrossManager.GenerateProjects();
                 return code;

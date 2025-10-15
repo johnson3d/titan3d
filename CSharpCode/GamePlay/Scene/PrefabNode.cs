@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.ComponentModel;
+﻿using EngineNS.Thread.Async;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using EngineNS.Thread.Async;
+using NPOI.HPSF;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
@@ -287,13 +288,8 @@ namespace EngineNS.GamePlay.Scene
 
         public void SaveAssetTo(RName name)
         {
-            var ameta = this.GetAMeta();
-            if (ameta != null)
-            {
-                UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta(this);
-            }
-
+            name.AMeta.ClearAssetFiles();
+            
             var typeStr = Rtti.TtTypeDesc.TypeStr(GetType());
             var xndHolder = new EngineNS.IO.TtXndHolder(typeStr, 1, 0);
             var xnd = xndHolder;
@@ -313,8 +309,16 @@ namespace EngineNS.GamePlay.Scene
             }
 
             xndHolder.SaveXnd(name.Address);
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
             TtEngine.Instance.PrefabManager.UnloadPrefab(name);
+
+            var ameta = this.GetAMeta();
+            if (ameta != null)
+            {
+                UpdateAMetaReferences(ameta);
+                ameta.SaveAMeta(this);
+            }
         }
         
         public IO.IAssetMeta CreateAMeta()

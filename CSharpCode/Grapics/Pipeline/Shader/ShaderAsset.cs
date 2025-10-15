@@ -80,8 +80,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     shader.ShaderCode = IO.TtFileManager.ReadAllText(TemplateName.Address);
                 }
                 mAsset.SaveAssetTo(mAsset.AssetName);
+                mAsset.AssetName.AMeta.AddAssetFile(mAsset.AssetName.Address);
                 TtEngine.Instance.SourceControlModule.AddFile(mAsset.AssetName.Address, true);
-                TtEngine.Instance.SourceControlModule.AddFile(mAsset.AssetName.Address + ".ameta", true);
+                TtEngine.Instance.SourceControlModule.AddFile(mAsset.AssetName.Address + IO.IAssetMeta.MetaExt, true);
 
                 return true;
             }
@@ -125,6 +126,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 IO.TtFileManager.WriteAllText(name.Address, ShaderCode);
             }
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
         }
         [Rtti.Meta("")]

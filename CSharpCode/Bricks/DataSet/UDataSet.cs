@@ -157,6 +157,7 @@ namespace EngineNS.Bricks.DataSet
                 var dataset = mAsset as TtDataSet;
                 var rn = GetAssetRName();
                 IO.TtFileManager.CopyFile(mSourceFile, rn.Address + ".xlsx", true);
+                rn.AMeta.AddAssetFile(rn.Address + ".xlsx");
                 TtEngine.Instance.SourceControlModule.AddFile(rn.Address + ".xlsx", true);
                 dataset.LoadDataSet(rn, dataset.DataType.SystemType);
                 dataset.SaveAssetTo(rn);
@@ -204,6 +205,7 @@ namespace EngineNS.Bricks.DataSet
             var savexnd = new IO.TtXndHolder(DataType.TypeString, 0, 0);
             SaveDataSetToXnd(savexnd.RootNode, XlsMd5);
             savexnd.SaveXnd(name.Address);
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
         }
         [Rtti.Meta("")]
@@ -305,6 +307,7 @@ namespace EngineNS.Bricks.DataSet
                         var savexnd = new IO.TtXndHolder(Rtti.TtTypeDesc.TypeOf(objType).TypeString, 0, 0);
                         SaveDataSetToXnd(savexnd.RootNode, XlsMd5);
                         savexnd.SaveXnd(name.Address);
+                        name.AMeta.AddAssetFile(name.Address);
                         TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
                     }
                     return true;

@@ -996,7 +996,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         class GraphNameAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
         {
-            protected override async Task<bool> Initialize_Override()
+            protected override async Thread.Async.TtTask<bool> Initialize_Override()
             {
                 return await base.Initialize_Override();
             }

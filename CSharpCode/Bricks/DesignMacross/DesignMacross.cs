@@ -305,6 +305,7 @@ namespace EngineNS.DesignMacross
             var xmlText = IO.TtFileManager.GetXmlText(xml);
             var file = $"{rn.Address}/DesignMacrossDescription.dat";
             IO.TtFileManager.WriteAllText(file, xmlText);
+            rn.AMeta.AddAssetFile(file);
             TtEngine.Instance.SourceControlModule.AddFile(file, true);
         }
         public void Load(RName rn) 

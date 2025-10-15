@@ -65,6 +65,7 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 mAsset = TtEngine.Instance.PhyModule.PhyContext.CookTriMesh(mMesh.MeshDataProvider, null, null, null);
                 mAsset.AssetName = GetAssetRName();
+                mAsset.AssetName.AMeta.AddAssetFile(mAsset.AssetName.Address);
                 TtEngine.Instance.SourceControlModule.AddFile(mAsset.AssetName.Address);
 
                 return base.DoImportAsset();
@@ -84,7 +85,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 {
                     Action action = async () =>
                     {
-                        mMesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value);
+                        mMesh = await value.GetAsset<Graphics.Mesh.TtMeshPrimitives>();
                         await mMesh.LoadMeshDataProvider();
                     };
                     action();
@@ -134,6 +135,8 @@ namespace EngineNS.Bricks.PhysicsCore
             }
 
             xnd.SaveXnd(name.Address);
+
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         public static TtPhyTriMesh LoadXnd(UPhyMeshManager manager, IO.TtXndNode node)

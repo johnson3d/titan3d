@@ -49,7 +49,7 @@ namespace EngineNS.GamePlay.Scene
                 GetNodeData<TtSunNodeData>().SunMaterialName = value;
                 var action = async () =>
                 {
-                    SunMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(value);
+                    SunMaterial = await value.GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
                 };
                 action();
             }

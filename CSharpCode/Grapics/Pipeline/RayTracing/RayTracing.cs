@@ -113,7 +113,7 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
             FTopAccelerationStructureDesc topAccelerationStructureDesc = new FTopAccelerationStructureDesc();
             topAccelerationStructureDesc.SetDefault();
             mTopAccelerationStructure = TtEngine.Instance.GfxDevice.RenderContext.CreateTopAccelerationStructure(in topAccelerationStructureDesc);
-            var mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(RName.GetRName("mesh/base/box.vms", RName.ERNameType.Engine));
+            var mesh = await RName.GetRName("mesh/base/box.vms", RName.ERNameType.Engine).GetAsset<Graphics.Mesh.TtMeshPrimitives>();
             mBlas0 = Graphics.Mesh.TtMeshPrimitives.CreateAStructure(mesh);
             var ib = mesh.GetIndexBuffer();
             var vb = mesh.GetVertexBuffer(EVertexStreamType.VST_Normal);

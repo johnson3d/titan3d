@@ -210,6 +210,7 @@ namespace EngineNS.Bricks.Font
                 UpdateAMetaReferences(ameta);
                 ameta.SaveAMeta(this);
             }
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         [Rtti.Meta("")]

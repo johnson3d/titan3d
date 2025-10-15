@@ -377,7 +377,7 @@ namespace EngineNS.Bricks.Particle
         public virtual async Thread.Async.TtTask<bool> InitEmitter(RName meshName, uint maxParticle)
         {
             NxRHI.TtGpuDevice rc = TtEngine.Instance.GfxDevice.RenderContext;
-            var umesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshName);
+            var umesh = await meshName.GetAsset<Graphics.Mesh.TtMaterialMesh>();
             if (umesh == null)
                 return false;
             var mesh = new Graphics.Mesh.TtRenderMesh();

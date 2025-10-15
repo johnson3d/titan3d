@@ -9,7 +9,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     {
         EngineNS.EGui.UIProxy.ImageButtonProxy mImageButton;
 
-        protected override async Task<bool> Initialize_Override()
+        protected override async Thread.Async.TtTask<bool> Initialize_Override()
         {
             mImageButton = new UIProxy.ImageButtonProxy()
             {
@@ -915,7 +915,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         }
         [System.ThreadStatic]
         static DrawData mDrawData = new DrawData();
-        protected override async Task<bool> Initialize_Override()
+        protected override async Thread.Async.TtTask<bool> Initialize_Override()
         {
             mComboBox = new UIProxy.ComboBox()
             {

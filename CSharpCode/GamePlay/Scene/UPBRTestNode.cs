@@ -235,7 +235,7 @@ namespace EngineNS.GamePlay.Scene
         public static async System.Threading.Tasks.Task<TtMeshNode> AddMeshNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var meshData = data as UMeshNodeData;
-            var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
+            var materialMesh = await meshData.MeshName.GetAsset<Graphics.Mesh.TtMaterialMesh>();
             if (materialMesh == null)
                 return null;
             var mesh = new Graphics.Mesh.TtRenderMesh();

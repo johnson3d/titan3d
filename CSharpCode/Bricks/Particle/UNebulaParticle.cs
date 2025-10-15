@@ -82,9 +82,10 @@ namespace EngineNS.Bricks.Particle
                 UpdateAMetaReferences(ameta);
                 ameta.SaveAMeta(this);
             }
-            TtEngine.Instance.SourceControlModule.AddFile(name.Address);
-
+            name.AMeta.AddAssetFile(name.Address);
+            
             IO.TtFileManager.SaveObjectToXml(name.Address, this);
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         public static async Thread.Async.TtTask<TtNebulaParticle> LoadAsset(RName name, bool bForEditor)

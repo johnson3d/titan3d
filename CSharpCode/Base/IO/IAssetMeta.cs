@@ -214,6 +214,7 @@ namespace EngineNS.IO
         protected RName mAssetName;
         public bool HasSnapshot { get; set; } = true;
         public bool IsSelected = false;
+        public bool IsAssetFilesValid { get; set; } = true;
         public IAssetMeta()
         {
             mDeleteMenuState.Reset();
@@ -261,6 +262,8 @@ namespace EngineNS.IO
             await Thread.TtAsyncDummyClass.DummyFunc();
             return null;
         }
+
+        #region Asset Op
         public virtual void OnBeforeRenamedAsset(IAsset asset, RName name)
         {
             
@@ -398,6 +401,8 @@ namespace EngineNS.IO
                 return;
             await MoveTo(name, type);
         }
+        #endregion
+
         public virtual void ResetSnapshot()
         {
             HasSnapshot = true;
@@ -549,6 +554,8 @@ namespace EngineNS.IO
         {
             return true;
         }
+
+        #region UI
         protected EGui.UIProxy.MenuItemProxy.MenuState mExplorerToMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         protected EGui.UIProxy.MenuItemProxy.MenuState mRefGraphMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         protected EGui.UIProxy.MenuItemProxy.MenuState mCopyRNameMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
@@ -661,12 +668,12 @@ namespace EngineNS.IO
             if (EGui.UIProxy.MenuItemProxy.MenuItem("RefGraph", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
             {
                 var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
-                var rn = RName.GetRName(mAssetName.Name + ".ameta", mAssetName.RNameType);
+                var rn = RName.GetRName(mAssetName.Name + IAssetMeta.MetaExt, mAssetName.RNameType);
                 var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, typeof(Editor.Forms.UAssetReferViewer), rn, this);
             }
             if (EGui.UIProxy.MenuItemProxy.MenuItem("CopyRName", null, false, null, in drawList, in menuData, ref mCopyRNameMenuState))
             {
-                ImGuiAPI.SetClipboardText(RName.GetRName(mAssetName.Name + ".ameta", mAssetName.RNameType).ToString());
+                ImGuiAPI.SetClipboardText(RName.GetRName(mAssetName.Name + IAssetMeta.MetaExt, mAssetName.RNameType).ToString());
             }
             ImGuiAPI.Separator();
             if (EGui.UIProxy.MenuItemProxy.MenuItem("Delete", null, false, null, in drawList, in menuData, ref mDeleteMenuState))
@@ -746,6 +753,8 @@ namespace EngineNS.IO
         {
             return true;
         }
+        #endregion
+
         [Rtti.Meta("")]
         public EGui.TtUVAnim Icon
         {
@@ -761,7 +770,25 @@ namespace EngineNS.IO
         [Rtti.Meta("")]
         public List<RName> RefAssetRNames { get; set; } = new List<RName>();
 
+        [Rtti.Meta("")]
+        public List<string> AssetFiles { get; set; } = new List<string>();
+
         public long ShowIconTime;
+
+        public void ClearAssetFiles()
+        {
+            AssetFiles.Clear();
+        }
+        public void AddAssetFile(string file)
+        {
+            if (file == null)
+                return;
+            file = TtFileManager.GetRegularPath(file);
+            file = TtFileManager.GetRelativePath(AssetName.ParentPath, file);
+            if (AssetFiles.Contains(file))
+                return;
+            AssetFiles.Add(file);
+        }
 
         public void AddReferenceAsset(RName rn)
         {
@@ -840,12 +867,15 @@ namespace EngineNS.IO
         }
         public IAssetMeta GetAssetMeta(RName name)
         {
-            if (name == null)
+            lock(this)
+            {
+                if (name == null)
+                    return null;
+                IAssetMeta result;
+                if (RNameAssets.TryGetValue(name, out result))
+                    return result;
                 return null;
-            IAssetMeta result;
-            if (RNameAssets.TryGetValue(name, out result))
-                return result;
-            return null;
+            }
         }
         public static string ItemShadowImgName = "uestyle/content/uniformshadow.srv";
         public void LoadMetas(string dir)
@@ -860,19 +890,28 @@ namespace EngineNS.IO
                 case TtFileManager.ERootDir.Engine:
                     rnType = RName.ERNameType.Engine;
                     break;
+                case TtFileManager.ERootDir.Cloud:
+                    rnType = RName.ERNameType.Cloud;
+                    break;
             }
             var root = TtEngine.Instance.FileManager.GetRoot(type);
             var metas = IO.TtFileManager.GetFiles(dir, "*" + IAssetMeta.MetaExt, true);
             foreach (var i in metas)
             {
-                var m = IO.TtFileManager.LoadXmlToObject(i) as IAssetMeta;
+                //var m = IO.TtFileManager.LoadXmlToObject(i) as IAssetMeta;
+                //if (m == null)
+                //{
+                //    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"{i} is not a IAssetMeta");
+                //    continue;
+                //}
+                //var rn = IO.TtFileManager.GetRelativePath(root, i);
+                //m.SetAssetName(RName.GetRName(rn.Substring(0, rn.Length - 6), rnType));
+                var m = LoadAMeta(root, rnType, i);
                 if (m == null)
                 {
                     Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"{i} is not a IAssetMeta");
                     continue;
                 }
-                var rn = IO.TtFileManager.GetRelativePath(root, i);
-                m.SetAssetName(RName.GetRName(rn.Substring(0, rn.Length - 6), rnType));
                 IAssetMeta om;
                 if (Assets.TryGetValue(m.AssetId, out om))
                 {
@@ -883,10 +922,21 @@ namespace EngineNS.IO
                 RNameAssets[m.GetAssetName()] = m;
             }
         }
+        public static IAssetMeta LoadAMeta(string root, RName.ERNameType rnType, string file)
+        {
+            var m = IO.TtFileManager.LoadXmlToObject(file) as IAssetMeta;
+            if (m == null)
+                return null;
+            var rn = IO.TtFileManager.GetRelativePath(root, file);
+            m.SetAssetName(RName.GetRName(rn.Substring(0, rn.Length - 6), rnType));
+            return m;
+        }
         public void LoadMetas()
         {
             LoadMetas(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine));
             LoadMetas(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game));
+            LoadMetas(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cloud));
+
             //var root = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine);
             //var metas = IO.TtFileManager.GetFiles(RName.GetRName("", RName.ERNameType.Engine).Address, "*" + IAssetMeta.MetaExt, true);
             //foreach(var i in metas)
@@ -1014,14 +1064,18 @@ namespace EngineNS.IO
         }
         public bool RegAsset(IAssetMeta ameta)
         {
-            if (Assets.ContainsKey(ameta.AssetId) ||
-                RNameAssets.ContainsKey(ameta.GetAssetName()) )
+            lock (this)
             {
-                Profiler.Log.WriteLine<Profiler.TtAssetGategory>(Profiler.ELogTag.Error, $"RegAsset {ameta.AssetName}/{ameta.AssetId} failed ");
-                return false;
+                if (Assets.ContainsKey(ameta.AssetId) ||
+                RNameAssets.ContainsKey(ameta.GetAssetName()))
+                {
+                    Profiler.Log.WriteLine<Profiler.TtAssetGategory>(Profiler.ELogTag.Error, $"RegAsset {ameta.AssetName}/{ameta.AssetId} failed ");
+                    return false;
+                }
+                Assets.Add(ameta.AssetId, ameta);
+                RNameAssets.Add(ameta.GetAssetName(), ameta);
             }
-            Assets.Add(ameta.AssetId, ameta);
-            RNameAssets.Add(ameta.GetAssetName(), ameta);
+
             return true;
         }
         public void GetAssetHolder(IAssetMeta ameta, List<IAssetMeta> holders)

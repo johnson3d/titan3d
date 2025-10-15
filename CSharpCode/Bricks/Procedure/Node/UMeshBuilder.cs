@@ -62,7 +62,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 mMeshName = value;
                 System.Action exec = async () =>
                 {
-                    Mesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(value);
+                    Mesh = await value.GetAsset<Graphics.Mesh.TtMaterialMesh>();
                     await Mesh.GetMeshPrimitives(0).LoadMeshDataProvider();
                 };
                 exec();

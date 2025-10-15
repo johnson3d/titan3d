@@ -620,6 +620,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 ameta.SaveAMeta(this);
             }
             IO.TtFileManager.SaveObjectToXml(name.Address, this);
+
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
         }
         public static TtMacrossShadingEnv LoadAsset(RName rn)

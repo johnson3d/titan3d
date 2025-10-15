@@ -62,11 +62,11 @@ namespace EngineNS.Graphics.Pipeline.Utility
                 TtMaterial material = null;
                 if (value.ExtName == TtMaterial.AssetExt)
                 {
-                    material =TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(value).GetResultUntilCompleted();
+                    material =value.GetAsset<Graphics.Pipeline.Shader.TtMaterial>().GetResultUntilCompleted();
                 }
                 else if (value.ExtName == TtMaterial.AssetExt)
                 {
-                    material =TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(value).GetResultUntilCompleted();
+                    material =value.GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>().GetResultUntilCompleted();
                 }
                 ScreenMesh = CreateScreenMesh(material);
             }

@@ -225,7 +225,7 @@ namespace EngineNS.EGui.Controls
                     bool hasTarget = false;
                     for (int i = 0; i < ExtNameArray.Length; i++)
                     {
-                        var files = IO.TtFileManager.GetFiles(path, "*" + ExtNameArray[i] + ".ameta");
+                        var files = IO.TtFileManager.GetFiles(path, "*" + ExtNameArray[i] + IO.IAssetMeta.MetaExt);
                         if (files.Length == 0)
                             continue;
                         if (MacrossBase != null && ExtNameArray[i] == Bricks.CodeBuilder.TtMacross.AssetExt)

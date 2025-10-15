@@ -185,7 +185,7 @@ namespace EngineNS.Editor.Forms
             {
                 var PlaneMesh = new Graphics.Mesh.TtRenderMesh();
                 var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
-                tMaterials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(TtEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName);
+                tMaterials[0] = await TtEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName.GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
                 PlaneMesh.Initialize(Graphics.Mesh.TtMeshDataProvider.MakePlane(10, 10).ToMesh(), tMaterials,
                     Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
                 PlaneMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), PlaneMesh, new DVector3(0, -0.0001f, 0), Vector3.One, Quaternion.Identity);
@@ -276,7 +276,7 @@ namespace EngineNS.Editor.Forms
                     AssetState = IO.EAssetState.Loading;
                     System.Action exec = async () =>
                     {
-                        var Mesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(value);
+                        var Mesh = await value.GetAsset<Graphics.Mesh.TtMaterialMesh>();
                         if (Mesh == null)
                         {
                             AssetState = IO.EAssetState.LoadFailed;

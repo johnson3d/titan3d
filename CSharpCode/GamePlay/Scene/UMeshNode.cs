@@ -76,14 +76,18 @@ namespace EngineNS.GamePlay.Scene
                 return false;
 
             var meshData = data as TtMeshNodeData;
-            var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
-            if (materialMesh != null)
+            if (meshData.MeshName!=null)
             {
-                var mesh = new Graphics.Mesh.TtRenderMesh();
-                mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
-                this.RenderMesh = mesh;
-                //await materialMesh.Mesh.TryLoadClusteredMesh();
+                var materialMesh = await meshData.MeshName.GetAsset<Graphics.Mesh.TtMaterialMesh>();
+                if (materialMesh != null)
+                {
+                    var mesh = new Graphics.Mesh.TtRenderMesh();
+                    mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
+                    this.RenderMesh = mesh;
+                    //await materialMesh.Mesh.TryLoadClusteredMesh();
+                }
             }
+            
             this.SetStyle(ENodeStyles.ParallelTick);
             
             return true;
@@ -178,7 +182,7 @@ namespace EngineNS.GamePlay.Scene
         public static async System.Threading.Tasks.Task<TtMeshNode> AddMeshNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var meshData = data as TtMeshNodeData;
-            var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
+            var materialMesh = await meshData.MeshName.GetAsset<Graphics.Mesh.TtMaterialMesh>();
             if (materialMesh == null)
                 return null;
             var mesh = new Graphics.Mesh.TtRenderMesh();
@@ -190,7 +194,7 @@ namespace EngineNS.GamePlay.Scene
             var meshNode = await AddMeshNode(world, parent, data, placementType, mesh, pos, scale, quat);
             if (meshData.CollideName != null)
             {
-                var collideMesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(meshData.CollideName);
+                var collideMesh = await meshData.CollideName.GetAsset<Graphics.Mesh.TtMeshPrimitives>();
                 if (collideMesh != null)
                 {
                     if (collideMesh.MeshDataProvider == null)
@@ -275,7 +279,7 @@ namespace EngineNS.GamePlay.Scene
                 {
                     var mesh = new Graphics.Mesh.TtRenderMesh();
 
-                    var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(value);
+                    var materialMesh = await value.GetAsset<Graphics.Mesh.TtMaterialMesh>();
                     var ok = mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
                     if (ok == false)
                         return;
@@ -326,7 +330,7 @@ namespace EngineNS.GamePlay.Scene
             var meshNodeData = NodeData as TtMeshNodeData;
             var mesh = new Graphics.Mesh.TtRenderMesh();
 
-            var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(MeshName);
+            var materialMesh = await MeshName.GetAsset<Graphics.Mesh.TtMaterialMesh>();
             var ok = mesh.Initialize(materialMesh, meshNodeData.MdfQueue, meshNodeData.Atom);
             if (ok == false)
                 return;

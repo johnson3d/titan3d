@@ -234,3 +234,17 @@ Plugins目录下CopyPlugins.bat在修改*.plugin后目前需要手工执行，刷新到插件目录
 - 通过Permuation对象的SetValue来设置当前Permutation
 - 记得重载GetNeedStreams来指定需要的VertexBuffer
 - 顺道关注一下RenderGraphNode，通常他负责最终使用这些ShadingEnv
+
+## 9.加载一个资产
+- 所有资产通过RName来唯一标识，而通过代码构造RName的唯一途径是RName.GetRName
+- 绝大多数RName是通过序列化产生的，在RName属性上添加[Rtti.Meta("")]就可保证序列化
+- 泛型RName的GetAsset<T>()负责从RName加载资产，T是资产类型
+- RName由路径和类型组成，常见的类型有
+  - Engine：引擎自带的资产，通常在EngineContent目录下
+  - Game：游戏项目的资产，通常在Game/Content目录下
+  - Cloud：云端资产，在本地会有缓存
+```C#
+var textureName = RName.GetRName("texture/checkboard.txpic", RName.ERNameType.Engine);
+var texture = await textureName.GetAsset<NxRHI.TtSrView>();//异步加载
+var texture1 = textureName.GetAsset<NxRHI.TtSrView>().GetResultUntilCompleted();//同步加载
+```

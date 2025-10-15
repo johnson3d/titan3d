@@ -410,7 +410,7 @@ namespace EngineNS.Graphics.Mesh
                         ums.SubMeshes[0].Mesh = mesh;
                         for(int i = 0; i < ums.SubMeshes[0].Materials.Count; i++)
                         {
-                            ums.SubMeshes[0].Materials[i] = await EngineNS.TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(EngineNS.TtEngine.Instance.Config.DefaultMaterial);
+                            ums.SubMeshes[0].Materials[i] = await EngineNS.TtEngine.Instance.Config.DefaultMaterial.GetAsset<Pipeline.Shader.TtMaterial>(); //EngineNS.TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(EngineNS.TtEngine.Instance.Config.DefaultMaterial);
                         }
                         var ameta = new TtMaterialMeshAMeta();
                         ameta.SetAssetName(umsRN);

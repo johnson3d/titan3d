@@ -192,6 +192,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 xnd.SaveXnd(name.Address);
             }
             this.SerialId++;
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         public static bool ReloadXnd(TtMaterial material, TtMaterialManager manager, IO.TtXndNode node)
@@ -802,12 +803,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return null;
             return UsedSrView[index]?.Name;
         }
-        public virtual async System.Threading.Tasks.Task<NxRHI.TtSrView> GetSRV(int index)
+        public virtual async Thread.Async.TtTask<NxRHI.TtSrView> GetSRV(int index)
         {
             var srv = UsedSrView[index].SrvObject as NxRHI.TtSrView;
             if (srv != null)
                 return srv;
-            UsedSrView[index].SrvObject = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(UsedSrView[index].Value);
+            if (UsedSrView[index].Value == null)
+                return null;
+            UsedSrView[index].SrvObject = await UsedSrView[index].Value.GetAsset<NxRHI.TtSrView>();
             return UsedSrView[index].SrvObject as NxRHI.TtSrView;
         }
         public NxRHI.TtSrView TryGetSRV(int index)

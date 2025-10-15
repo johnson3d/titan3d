@@ -1,6 +1,7 @@
 ﻿using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.Macross;
 using EngineNS.Rtti;
+using NPOI.Util;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace EngineNS
     }
 
     [RName.PGRName]
-    public class RName : IComparable<RName>, IComparable
+    public partial class RName : IComparable<RName>, IComparable
     {
         public class PGRNameAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
         {
@@ -37,7 +38,7 @@ namespace EngineNS
 
             public float MaxWidth = -1;
             public float MinWidth = -1;
-            protected override async Task<bool> Initialize_Override()
+            protected override async Thread.Async.TtTask<bool> Initialize_Override()
             {
                 ContentBrowser = Editor.TtEditor.NewPopupContentBrowser();
                 mComboBox = new EGui.UIProxy.ComboBox()
@@ -149,14 +150,18 @@ namespace EngineNS
                 return false;
             }
         }
-        private static object Locker = new object();
-        private static uint NameUniqueIdAllocator = 0;
+        public class TtRNameStats
+        {
+            public uint NameUniqueIdAllocator = 0;
+        }
+        private static TtRNameStats Stats = new TtRNameStats();
         private uint NameUniqueId;
         public enum ERNameType : ushort
         {
             Game = 0,
             Engine,
             Transient,
+            Cloud,
             Count,
             Unkown = ushort.MaxValue,
         }
@@ -172,11 +177,11 @@ namespace EngineNS
         public WeakReference mTagReference = null;
         internal RName(string name, ERNameType type)
         {
-            lock (Locker)
+            lock (Stats)
             {
-                System.Diagnostics.Debug.Assert(NameUniqueIdAllocator < uint.MaxValue - 1);
-                NameUniqueId = NameUniqueIdAllocator;
-                NameUniqueIdAllocator++;
+                System.Diagnostics.Debug.Assert(Stats.NameUniqueIdAllocator < uint.MaxValue - 1);
+                NameUniqueId = Stats.NameUniqueIdAllocator;
+                Stats.NameUniqueIdAllocator++;
             }
             VeryDangrouseUpdate(name, type);
         }
@@ -270,14 +275,29 @@ namespace EngineNS
                 return false;
             return IO.TtFileManager.FileExists(rName.Address) || IO.TtFileManager.DirectoryExists(rName.Address);
         }
+
+        #region AMeta
+        public IO.IAssetMeta AMeta
+        {
+            get
+            {
+                return TtEngine.Instance.AssetMetaManager.GetAssetMeta(this);
+            }
+        }
+        public async Thread.Async.TtTask<T> GetAsset<T>() where T : class, IO.IAsset
+        {
+            var ameta = AMeta;
+            if (ameta == null || ameta.IsAssetFilesValid==false)
+                return default(T);
+            return await ameta.LoadAsset() as T;
+        }
         [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public Guid AssetId
         {
             get
             {
-                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(this);
-                if (ameta != null)
-                    return ameta.AssetId;
+                if (AMeta != null)
+                    return AMeta.AssetId;
                 
                 return Guid.Empty;
             }
@@ -285,16 +305,17 @@ namespace EngineNS
             {
                 if (value == Guid.Empty)
                     return;
-                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(value);
-                if (ameta != null)
+                if (AMeta != null)
                 {
-                    if (ameta.GetAssetName().Name != Name || ameta.GetAssetName().mRNameType != mRNameType)
+                    if (AMeta.GetAssetName().Name != Name || AMeta.GetAssetName().mRNameType != mRNameType)
                     {
-
+                        System.Diagnostics.Debug.Assert(false);
                     }
                 }
             }
         }
+        #endregion
+
         [Rtti.Meta("")]
         public ERNameType RNameType
         {
@@ -321,6 +342,7 @@ namespace EngineNS
         [Rtti.Meta("")]
         public string PureName => IO.TtFileManager.GetPureName(mName);
         public string NoExtName => IO.TtFileManager.RemoveExtName(mName);
+        public string ParentPath => IO.TtFileManager.GetParentPathName(Address);
         public static RName GetRNameFromAbsPath(string path)
         {
             path = IO.TtFileManager.GetValidFileName(path);
@@ -368,7 +390,7 @@ namespace EngineNS
         {
             return $"{mName}:{mRNameType}";
         }
-        public static string GetAddress(ERNameType type, string name)
+        public static string GetAddress(ERNameType type, string name, RName rn = null)
         {
             switch (type)
             {
@@ -376,6 +398,12 @@ namespace EngineNS
                     return TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + name;
                 case ERNameType.Game:
                     return TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) + name;
+                case ERNameType.Cloud:
+                    if (rn==null)
+                        return null;
+                    if (SureCloudAMeta(rn)==false)
+                        return null;
+                    return TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cloud) + name;
                 default:
                     {
                         return null;
@@ -393,7 +421,7 @@ namespace EngineNS
         {
             mName = name;
             mRNameType = type;
-            mAddress = GetAddress(mRNameType, Name);
+            mAddress = GetAddress(mRNameType, Name, this);
         }
         public override int GetHashCode()
         {

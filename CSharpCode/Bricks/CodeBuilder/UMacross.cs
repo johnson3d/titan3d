@@ -334,6 +334,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public MacrossNode.TtMacrossEditor MacrossEditor = null;
         public void SaveAssetTo(RName name)
         {
+            name.AMeta.ClearAssetFiles();
             var ameta = GetAMeta() as TtMacrossAMeta;
             if (ameta != null)
             {

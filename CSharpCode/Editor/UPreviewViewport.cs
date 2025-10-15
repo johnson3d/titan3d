@@ -36,7 +36,7 @@ namespace EngineNS.Editor
             CameraController.ControlCamera(RenderPolicy.DefaultCamera);
 
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
-            materials[0] = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("utest/ttt.material"));
+            materials[0] = await RName.GetRName("utest/ttt.material").GetAsset<Graphics.Pipeline.Shader.TtMaterial>();// await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("utest/ttt.material"));
             if (materials[0] == null)
                 return false;
             var mesh = new Graphics.Mesh.TtRenderMesh();

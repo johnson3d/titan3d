@@ -234,6 +234,7 @@ namespace EngineNS.Graphics.Mesh
                 xnd.SaveXnd(name.Address);
                 this.SerialId++;
             }
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         [Rtti.Meta("")]
@@ -384,7 +385,7 @@ namespace EngineNS.Graphics.Mesh
                     AssetState = IO.EAssetState.Loading;
                     System.Action exec = async () =>
                     {
-                        Mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value);
+                        Mesh = await value.GetAsset<Graphics.Mesh.TtMeshPrimitives>();
                         if (Mesh.mCoreObject.IsValidPointer == false)
                         {
                             Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"GetMeshPrimitive({value}) failed");
@@ -404,7 +405,7 @@ namespace EngineNS.Graphics.Mesh
                 {
                     FullRedraw = false;
                 }
-                protected override async Task<bool> Initialize_Override()
+                protected override async Thread.Async.TtTask<bool> Initialize_Override()
                 {
                     mRNameEditor = new RName.PGRNameAttribute();
                     await mRNameEditor.Initialize();
@@ -501,11 +502,11 @@ namespace EngineNS.Graphics.Mesh
                                     {
                                         if (rn.ExtName == Pipeline.Shader.TtMaterialInstance.AssetExt)
                                         {
-                                            materials[IndexOfMaterial] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(rn);
+                                            materials[IndexOfMaterial] = await rn.GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
                                         }
                                         else if (rn.ExtName == Pipeline.Shader.TtMaterial.AssetExt)
                                         {
-                                            materials[IndexOfMaterial] = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
+                                            materials[IndexOfMaterial] = await rn.GetAsset<Graphics.Pipeline.Shader.TtMaterial>();// TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
                                         }
                                         umesh.AssetState = IO.EAssetState.LoadFinished;
                                         var mesh = (TtMaterialMesh)info.HostPropertyGrid.Target;
@@ -610,7 +611,7 @@ namespace EngineNS.Graphics.Mesh
                     {
                         if (value.MeshName == null)
                             value.MeshName = TtEngine.Instance.Config.DefaultVMS;
-                        Mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value.MeshName);
+                        Mesh = await value.MeshName.GetAsset<Graphics.Mesh.TtMeshPrimitives>();
                         if (Mesh == null)
                         {
                             Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"GetMeshPrimitive({value.MeshName}) failed");
@@ -624,11 +625,11 @@ namespace EngineNS.Graphics.Mesh
                             {
                                 if (value.Materials[i].ExtName == Graphics.Pipeline.Shader.TtMaterial.AssetExt)
                                 {
-                                    Materials[i] = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(value.Materials[i]);
+                                    Materials[i] = await value.Materials[i].GetAsset<Graphics.Pipeline.Shader.TtMaterial>();
                                 }
                                 else if (value.Materials[i].ExtName == Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt)
                                 {
-                                    Materials[i] = await mtlMgr.GetMaterialInstance(value.Materials[i]);
+                                    Materials[i] = await value.Materials[i].GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
                                 }
                             }
                         }

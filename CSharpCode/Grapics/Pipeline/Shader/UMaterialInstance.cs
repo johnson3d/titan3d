@@ -98,7 +98,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
                 xnd.SaveXnd(name.Address);
             }
-            
+
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         public static bool ReloadXnd(TtMaterialInstance material, TtMaterialInstanceManager manager, IO.TtXndNode node)
@@ -242,7 +243,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 AssetState = IO.EAssetState.Loading;
                 System.Action exec = async () =>
                 {
-                    ParentMaterial = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(value.MaterialName);
+                    ParentMaterial = await value.MaterialName.GetAsset<Graphics.Pipeline.Shader.TtMaterial>();// TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(value.MaterialName);
                     if (ParentMaterial == null)
                     {
                         ParentMaterial = TtEngine.Instance.GfxDevice.MaterialManager.PxDebugMaterial;
@@ -376,7 +377,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 if (AssetState == IO.EAssetState.Loading)
                     return;
                 AssetState = IO.EAssetState.Loading;
-                var task = TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(value);
+                var task = value.GetAsset<TtMaterial>();// TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(value);
                 TtEngine.Instance.TaskCollector.AddWaitTask(task, (tsk) =>
                 {
                     ParentMaterial = task.DirectResult;

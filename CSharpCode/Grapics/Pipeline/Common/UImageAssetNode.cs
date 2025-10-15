@@ -60,7 +60,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 System.Action action = async () =>
                 {
-                    ImageSrv = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
+                    ImageSrv = await value.GetAsset<NxRHI.TtSrView>();
                     if (ImageSrv != null)
                     {
                         ImagePinOut.Attachement.Format = ImageSrv.SrvFormat;

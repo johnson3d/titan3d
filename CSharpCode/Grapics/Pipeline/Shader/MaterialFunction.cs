@@ -132,6 +132,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 xnd.SaveXnd(name.Address);
             }
 
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address);
 
             TtEngine.Instance.GfxDevice.MaterialFunctionManager.RegMaterialFunctionName(AssetName);

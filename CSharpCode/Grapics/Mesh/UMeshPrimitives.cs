@@ -36,7 +36,10 @@ namespace EngineNS.Graphics.Mesh
             var targetSnapName = TtEngine.Instance.FileManager.GetRoot(type) + name;
             IO.TtFileManager.CopyFile(mAssetName.Address, targetSnapName);
             if (IO.TtFileManager.FileExists(targetSnapName))
+            {
+                mAssetName.AMeta.AddAssetFile(mAssetName.Address);
                 TtEngine.Instance.SourceControlModule.AddFile(targetSnapName, true);
+            }
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -198,6 +201,7 @@ namespace EngineNS.Graphics.Mesh
                 Meshlets.SaveXnd(meshlets);
             }
             xnd.SaveXnd(name.Address);
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
         }
         [Rtti.Meta("")]

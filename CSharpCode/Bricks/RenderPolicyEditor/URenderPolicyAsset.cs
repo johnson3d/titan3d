@@ -111,6 +111,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             }
 
             IO.TtFileManager.SaveObjectToXml(name.Address, PolicyGraph);
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         [Rtti.Meta("")]

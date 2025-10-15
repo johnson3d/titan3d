@@ -63,11 +63,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             set
             {
                 mRain = value;
-                var action = async () =>
-                {
-                    mRainTexture = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
-                };
-                action();
+                mRainTexture = value.GetAsset<NxRHI.TtSrView>().GetResultUntilCompleted();
             }
         }
         internal NxRHI.TtSrView mRainTexture;

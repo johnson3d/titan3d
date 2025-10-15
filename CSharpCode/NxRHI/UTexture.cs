@@ -1000,6 +1000,7 @@ namespace EngineNS.NxRHI
                     }
 
                     xnd.SaveXnd(rn.Address);
+                    rn.AMeta.AddAssetFile(rn.Address);
                     TtEngine.Instance.SourceControlModule.AddFile(rn.Address, true);
 
                     var ameta = new TtSrViewAMeta();
@@ -1052,6 +1053,7 @@ namespace EngineNS.NxRHI
                 ameta.SaveAMeta((IO.IAsset)null);
 
                 TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                rn.AMeta.AddAssetFile(rn.Address);
                 TtEngine.Instance.SourceControlModule.AddFile(rn.Address);
 
                 return true;
@@ -1074,6 +1076,7 @@ namespace EngineNS.NxRHI
                 ameta.SaveAMeta((IO.IAsset)null);
 
                 TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                rn.AMeta.AddAssetFile(rn.Address);
                 TtEngine.Instance.SourceControlModule.AddFile(rn.Address);
                 return true;
             }
@@ -1244,6 +1247,7 @@ namespace EngineNS.NxRHI
                             var rnType = (RName.ERNameType)Support.TConvert.ToEnumValue(typeof(RName.ERNameType), segs[1]);
                             var src = RName.GetAddress(rnType, segs[0]);
                             IO.TtFileManager.CopyFile(src, name.Address);
+                            name.AMeta.AddAssetFile(name.Address);
                             TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
                         }
                         else

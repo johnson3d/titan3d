@@ -96,7 +96,7 @@ namespace EngineNS.Editor.Forms
                 }
             }
 
-            var mtl = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/line_color.material", RName.ERNameType.Engine));
+            var mtl = await RName.GetRName("material/line_color.material", RName.ERNameType.Engine).GetAsset<Graphics.Pipeline.Shader.TtMaterial>();// TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/line_color.material", RName.ERNameType.Engine));
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = mtl;
 
@@ -232,7 +232,7 @@ namespace EngineNS.Editor.Forms
 
             (viewport as Editor.TtPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
-            var mtl = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(TtEngine.Instance.Config.MeshPrimitiveEditorConfig.MaterialName);
+            var mtl = await TtEngine.Instance.Config.MeshPrimitiveEditorConfig.MaterialName.GetAsset<Graphics.Pipeline.Shader.TtMaterial>();// TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(TtEngine.Instance.Config.MeshPrimitiveEditorConfig.MaterialName);
             var materials = new Graphics.Pipeline.Shader.TtMaterial[Mesh.mCoreObject.GetAtomNumber()];
             for (int i = 0; i < materials.Length; i++)
             {
@@ -285,7 +285,7 @@ namespace EngineNS.Editor.Forms
 
                 var PlaneMesh = new Graphics.Mesh.TtRenderMesh();
                 var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
-                tMaterials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(TtEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName);
+                tMaterials[0] = await TtEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName.GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
                 PlaneMesh.Initialize(box, tMaterials,
                     Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
                 PlaneMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), PlaneMesh, new DVector3(0, boxStart.Y, 0), Vector3.One, Quaternion.Identity);

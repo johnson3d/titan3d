@@ -27,6 +27,7 @@ namespace EngineNS.IO
             SetRoot(ERootDir.PluginContent, root + "plugincontent");
             SetRoot(ERootDir.Editor, root + "editorcontent");
             SetRoot(ERootDir.Cache, root + "cache");
+            SetRoot(ERootDir.Cloud, root + "cache/cloud");
             SetRoot(ERootDir.Plugin, root + $"binaries/Plugins/");
             SetRoot(ERootDir.EngineSource, root);
             SetRoot(ERootDir.PluginSource, root + "Plugins/");

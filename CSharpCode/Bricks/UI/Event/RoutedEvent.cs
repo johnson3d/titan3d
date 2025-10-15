@@ -30,7 +30,7 @@ namespace EngineNS.UI.Event
     public class PGRoutedEventHandlerEditorAttribute : PGCustomValueEditorAttribute
     {
         EngineNS.EGui.UIProxy.ImageButtonProxy mImageButton;
-        protected override async Task<bool> Initialize_Override()
+        protected override async Thread.Async.TtTask<bool> Initialize_Override()
         {
             mImageButton = new EGui.UIProxy.ImageButtonProxy()
             {

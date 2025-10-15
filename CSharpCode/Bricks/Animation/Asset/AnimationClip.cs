@@ -86,12 +86,7 @@ namespace EngineNS.Animation.Asset
 
         public void SaveAssetTo(RName name)
         {
-            var ameta = this.GetAMeta();
-            if (ameta != null)
-            {
-                UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta(this);
-            }
+            name.AMeta.ClearAssetFiles();
             var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
             var xnd = new IO.TtXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("AnimationClip", 0, 0))
@@ -112,6 +107,13 @@ namespace EngineNS.Animation.Asset
             }
 
             xnd.SaveXnd(name.Address);
+
+            var ameta = name.AMeta;
+            if (ameta != null)
+            {
+                UpdateAMetaReferences(ameta);
+                ameta.SaveAMeta(this);
+            }
         }
         public static TtAnimationClip LoadXnd(TtAnimationClipManager manager, IO.TtXndHolder holder)
         {

@@ -223,7 +223,7 @@ namespace EngineNS.UI
         {
             if (mDefaultTextureTask == null)
             {
-                mDefaultTextureTask = TtEngine.Instance.GfxDevice.TextureManager.GetTexture(TtEngine.Instance.Config.UIDefaultTexture);
+                mDefaultTextureTask = TtEngine.Instance.Config.UIDefaultTexture.GetAsset<NxRHI.TtSrView>();
                 return false;
             }
             else if (mDefaultTextureTask.Value.IsCompleted == false)

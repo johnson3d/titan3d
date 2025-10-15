@@ -4,8 +4,6 @@ using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 using EngineNS;
-using Org.BouncyCastle.Asn1.X509.Qualified;
-using SixLabors.Fonts;
 
 namespace EngineNS.EGui.Controls.PropertyGrid
 {
@@ -95,12 +93,12 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             newValue = default;
             return false;
         }
-        public async Task<bool> Initialize() 
+        public async Thread.Async.TtTask<bool> Initialize() 
         {
             RefCount++;
             return await Initialize_Override();
         }
-        protected virtual async Task<bool> Initialize_Override()
+        protected virtual async Thread.Async.TtTask<bool> Initialize_Override()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             Initialized = true;

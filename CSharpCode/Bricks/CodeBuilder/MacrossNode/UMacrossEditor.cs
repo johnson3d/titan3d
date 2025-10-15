@@ -4,6 +4,7 @@ using EngineNS.Macross;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
 using NPOI.SS.Formula.Functions;
+using NPOI.SS.UserModel;
 using NPOI.Util;
 using System;
 using System.Collections.Generic;
@@ -221,6 +222,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var xmlText = IO.TtFileManager.GetXmlText(xml);
             var graphDataFileName = $"{rn.Address + FolderExt}/class_graph.dat";
             IO.TtFileManager.WriteAllText(graphDataFileName, xmlText);
+            rn.AMeta.AddAssetFile(graphDataFileName);
             TtEngine.Instance.SourceControlModule.AddFile(graphDataFileName);
 
             for(int i=0; i<Methods.Count; i++)
@@ -232,6 +234,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var funcXmlText = IO.TtFileManager.GetXmlText(funcXml);
                 var methodFileName = GetMethodFileName(rn, Methods[i]);
                 IO.TtFileManager.WriteAllText(methodFileName, funcXmlText);
+                rn.AMeta.AddAssetFile(methodFileName);
                 TtEngine.Instance.SourceControlModule.AddFile(methodFileName);
             }
 

@@ -53,11 +53,7 @@ namespace EngineNS.Bricks.Procedure.Node
             set
             {
                 mImageName = value;
-                System.Action exec = async () =>
-                {
-                    TextureSRV = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
-                };
-                exec();
+                TextureSRV = value.GetAsset<NxRHI.TtSrView>().GetResultUntilCompleted();
             }
         }
         private NxRHI.TtSrView TextureSRV;

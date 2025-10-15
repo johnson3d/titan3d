@@ -239,7 +239,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 GrassDesc = desc;
                 WeightMap = weights;
                 WeightStride = weightStride;
-                MaterialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(desc.MeshName);
+                MaterialMesh = await desc.MeshName.GetAsset<Graphics.Mesh.TtMaterialMesh>();
                 if (MaterialMesh == null)
                 {
                     CreateFinished = true;

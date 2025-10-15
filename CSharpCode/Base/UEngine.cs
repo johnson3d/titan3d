@@ -257,10 +257,10 @@ namespace EngineNS
             get => mFileManager;
         }
         [Rtti.Meta("")]
-        public UTickableManager TickableManager
+        public TtTickableManager TickableManager
         {
             get;
-        } = new UTickableManager();
+        } = new TtTickableManager();
         public TtEventProcessorManager EventProcessorManager
         {
             get;

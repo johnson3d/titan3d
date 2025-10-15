@@ -65,6 +65,7 @@ namespace EngineNS.Animation.Asset
             }
 
             xnd.SaveXnd(name.Address);
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
 

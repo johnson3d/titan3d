@@ -38,6 +38,7 @@ namespace EngineNS.IO
             PluginContent,
             Editor,
             Cache,
+            Cloud,
             Plugin,
             Execute,
             EngineSource,

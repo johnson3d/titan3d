@@ -61,10 +61,8 @@ namespace EngineNS.Animation
     {
         public string mSelectedValueBind = "None";
         public Guid mSelectedValueBindId = Guid.Empty;
-        protected override async Task<bool> Initialize_Override()
+        protected override async Thread.Async.TtTask<bool> Initialize_Override()
         {
-
-
             return await base.Initialize_Override();
         }
         ~PGBlendSpaceValueBindSelectAttribute()
@@ -171,7 +169,7 @@ namespace EngineNS.Animation
     {
         public string mSelectedStateMachine = "None";
         public Guid mSelectedStateMachineId = Guid.Empty;
-        protected override async Task<bool> Initialize_Override()
+        protected override async Thread.Async.TtTask<bool> Initialize_Override()
         {
 
 

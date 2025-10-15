@@ -72,7 +72,7 @@ namespace EngineNS.Bricks.Procedure.Node
             {
                 foreach (var j in i.Plants)
                 {
-                    await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(j.MeshName);
+                    await j.MeshName.GetAsset<Graphics.Mesh.TtMaterialMesh>();
                 }
             }
         }

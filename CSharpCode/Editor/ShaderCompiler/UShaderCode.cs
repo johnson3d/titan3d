@@ -442,12 +442,13 @@ namespace EngineNS.Editor.ShaderCompiler
         {
             if (name.ExtName == Graphics.Pipeline.Shader.TtMaterial.AssetExt)
             {
-                var saveMode = Thread.Async.TtContextThreadManager.ImmidiateMode;
-                Thread.Async.TtContextThreadManager.ImmidiateMode = true;
-                var task = TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(name);
-                task.Wait();
-                Thread.Async.TtContextThreadManager.ImmidiateMode = saveMode;
-                var material = task.DirectResult;
+                //var saveMode = Thread.Async.TtContextThreadManager.ImmidiateMode;
+                //Thread.Async.TtContextThreadManager.ImmidiateMode = true;
+                //var task = name.GetAsset<Graphics.Pipeline.Shader.TtMaterial>();// TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(name);
+                //task.Wait();
+                //Thread.Async.TtContextThreadManager.ImmidiateMode = saveMode;
+                //var material = task.DirectResult;
+                var material = name.GetAsset<Graphics.Pipeline.Shader.TtMaterial>().GetResultUntilCompleted();
                 if (material != null)
                     return material;
                 return null;

@@ -45,7 +45,7 @@ namespace EngineNS.GamePlay.Scene
                 GetNodeData<TtSkyNodeData>().SunMaterialName = value;
                 var action = async () =>
                 {
-                    SunMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(value);
+                    SunMaterial = await value.GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
                 };
                 action();
             }
@@ -62,11 +62,11 @@ namespace EngineNS.GamePlay.Scene
                 meta.CopyObjectMetaField(skyData, data);
                 skyData.SunMaterialName = RName.GetRName("material/default_sun.uminst", RName.ERNameType.Engine);
                 data = skyData;
-                SunMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(skyData.SunMaterialName);
+                SunMaterial = await skyData.SunMaterialName.GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
             }
             else
             {
-                SunMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(skyData.SunMaterialName);
+                SunMaterial = await skyData.SunMaterialName.GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
             }
             await base.InitializeNode(world, data, bvType, placementType);
             var rect = Graphics.Mesh.TtMeshDataProvider.MakeRect2D(-0.5f, -0.5f, 1, 1, 0);

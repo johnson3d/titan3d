@@ -30,7 +30,7 @@ namespace EngineNS.EGui.UIProxy
             if (mTask == null)
             {
                 var rc = TtEngine.Instance.GfxDevice.RenderContext;
-                mTask = TtEngine.Instance.GfxDevice.TextureManager.GetTexture(ImageFile);
+                mTask = ImageFile.GetAsset<NxRHI.TtSrView>();
                 return IntPtr.Zero;
             }
             else if (mTask.Value.IsCompleted == false)

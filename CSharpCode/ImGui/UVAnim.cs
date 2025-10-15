@@ -52,7 +52,7 @@ namespace EngineNS.EGui
             if (SnapTask == null)
             {
                 var rc = TtEngine.Instance.GfxDevice.RenderContext;
-                SnapTask = TtEngine.Instance.GfxDevice.TextureManager.GetTexture(TextureName, 1);
+                SnapTask = TextureName.GetAsset<NxRHI.TtSrView>();
                 cmdlist.AddText(in start, 0xFFFFFFFF, "UVAnim", null);
                 return;
             }
@@ -166,6 +166,8 @@ namespace EngineNS.EGui
             }
 
             xnd.SaveXnd(name.Address);
+
+            name.AMeta.AddAssetFile(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
         }
         public static TtUVAnim LoadXnd(TtUvAnimManager manager, IO.TtXndNode node)
@@ -217,7 +219,7 @@ namespace EngineNS.EGui
                     mTextureTask = null;
                 else
                 {
-                    mTextureTask = TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
+                    mTextureTask = value.GetAsset<NxRHI.TtSrView>();
                 }
             }
         }

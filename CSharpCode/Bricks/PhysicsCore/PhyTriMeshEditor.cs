@@ -58,7 +58,7 @@ namespace EngineNS.Bricks.PhysicsCore
             var meshPrimitve = TriMesh.ToMeshProvider().ToMesh();
 
             var matrials = new Graphics.Pipeline.Shader.TtMaterial[1];
-            matrials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
+            matrials[0] = await RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine).GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
 
             var matrials1 = new Graphics.Pipeline.Shader.TtMaterial[1];
             matrials1[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));

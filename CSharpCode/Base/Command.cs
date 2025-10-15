@@ -317,7 +317,7 @@ namespace EngineNS
             var args = GetArguments(argsText);
             var arg = FindArgument(args, "Material");
             var mtlName = GetRNameByArg(arg, null);
-            var mtl = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(mtlName);
+            var mtl = await mtlName.GetAsset<TtMaterial>(); //TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(mtlName);
             if (mtl == null)
                 return;
             var files = IO.TtFileManager.GetFiles(TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.GraphicEffect), "*.effect", true);

@@ -40,8 +40,9 @@ namespace EngineNS.NxPhysics
         }
         public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
         {
-            DebugShapeMaterial = await host.GfxDevice.MaterialInstanceManager.GetMaterialInstance(
-                RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
+            DebugShapeMaterial = await RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine).GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
+                //host.GfxDevice.MaterialInstanceManager.GetMaterialInstance(
+                //RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
 
             //var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
             //var mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(RName.GetRName("mesh/sphere001.vms", RName.ERNameType.Engine));

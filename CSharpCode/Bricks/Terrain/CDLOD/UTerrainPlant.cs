@@ -98,7 +98,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 Terrain = trn;
                 PlantDesc = desc;
-                MaterialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(desc.MeshName);
+                MaterialMesh = await desc.MeshName.GetAsset<Graphics.Mesh.TtMaterialMesh>();
                 Mesh = new Graphics.Mesh.TtRenderMesh();
                 Mesh.Initialize(MaterialMesh, 
                     Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfInstanceStaticMesh>.TypeDesc);

@@ -775,8 +775,8 @@ namespace EngineNS.Editor
         public static async System.Threading.Tasks.Task TestCreateScene(Graphics.Pipeline.TtViewportSlate vpSlate,GamePlay.TtWorld world, GamePlay.Scene.TtNode root, bool hideTerrain = false)
         {
             var materials = new Graphics.Pipeline.Shader.TtMaterialInstance[2];
-            materials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ddd.uminst"));
-            materials[1] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ground.uminst"));
+            materials[0] = await RName.GetRName("utest/ddd.uminst").GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
+            materials[1] = await RName.GetRName("utest/ground.uminst").GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>(   );
             if (materials[0] == null)
                 return;
             {

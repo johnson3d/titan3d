@@ -55,7 +55,7 @@ namespace EngineNS.GamePlay
             mRoot = await TtNode.SpawnNode<Scene.TtScene>(null, null, data, Scene.EBoundVolumeType.Box, typeof(TtPlacement), this);
             mRoot.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleAlways);
 
-            mBoundingDebugMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
+            mBoundingDebugMaterial = await RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine).GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
 
             await mMemberTickables.InitializeMembers(this);
             return true;

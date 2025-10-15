@@ -49,7 +49,7 @@ namespace EngineNS.Bricks.Procedure
 
             var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
             materials1[0] = Graphics.Pipeline.Shader.TtMaterialInstance.CreateMaterialInstance(
-                await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/SysDft.material", RName.ERNameType.Engine))
+                await RName.GetRName("material/SysDft.material", RName.ERNameType.Engine).GetAsset<Graphics.Pipeline.Shader.TtMaterial>() //TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/SysDft.material", RName.ERNameType.Engine))
                 );
             var state = materials1[0].Rasterizer;
             state.CullMode = NxRHI.ECullMode.CMD_NONE;

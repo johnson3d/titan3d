@@ -599,7 +599,7 @@ namespace EngineNS.Graphics.Mesh
         }
         public async Thread.Async.TtTask<bool> Initialize(RName materialMesh, Rtti.TtTypeDesc mdfQueueType, Rtti.TtTypeDesc atomType = null)
         {
-            MaterialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(materialMesh);
+            MaterialMesh = await materialMesh.GetAsset<Graphics.Mesh.TtMaterialMesh>();
             if (MaterialMesh == null)
                 return false;
 
@@ -616,7 +616,7 @@ namespace EngineNS.Graphics.Mesh
             var mesh = new List<TtMeshPrimitives>();
             foreach(var i in meshSource)
             {
-                var tm = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(i);
+                var tm = await i.GetAsset<Graphics.Mesh.TtMeshPrimitives>();
                 mesh.Add(tm);
             }
             if (false == UpdateMesh(mesh, materials, atomType))
@@ -659,7 +659,7 @@ namespace EngineNS.Graphics.Mesh
         public async Thread.Async.TtTask<bool> Initialize(RName meshName, List<Pipeline.Shader.TtMaterial> materials,
             Rtti.TtTypeDesc mdfQueueType, Rtti.TtTypeDesc atomType = null)
         {
-            var mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(meshName);
+            var mesh = await meshName.GetAsset<Graphics.Mesh.TtMeshPrimitives>();
             return Initialize(new List<TtMeshPrimitives>() { mesh },
                 new List<List<Pipeline.Shader.TtMaterial>>() { materials },
                 mdfQueueType, atomType);
