@@ -97,7 +97,7 @@ namespace EngineNS.Bricks.PhysicsCore
         public async Thread.Async.TtTask<bool> OpenEditor(Editor.TtMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            TriMesh = await TtEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMesh(name);
+            TriMesh = await name.GetAsset<Bricks.PhysicsCore.TtPhyTriMesh>();
             if (TriMesh == null)
                 return false;
 

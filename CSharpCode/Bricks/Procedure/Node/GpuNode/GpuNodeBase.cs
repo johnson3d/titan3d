@@ -18,15 +18,11 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
             }
             set
             {
-                var action = async () =>
-                {
-                    var policy = TtRenderPolicyAsset.LoadAsset(value).CreateRenderPolicy(null, null);
-                    await policy.Initialize(null);
-                    Policy = policy;
-                    mPolicyName = value;
-                    GpuProcessor.Policy = policy;
-                };
-                action();
+                var policy = value.GetAsset<TtRenderPolicyAsset>().GetResultUntilCompleted().CreateRenderPolicy(null, null);
+                policy.Initialize(null).WaitCompletedAndDispose();
+                Policy = policy;
+                mPolicyName = value;
+                GpuProcessor.Policy = policy;
             }
         }
         public bool IsCapture { get; set; } = false;

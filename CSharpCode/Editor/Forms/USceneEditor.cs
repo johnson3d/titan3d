@@ -534,7 +534,7 @@ namespace EngineNS.Editor.Forms
         public async virtual Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            Scene = await TtEngine.Instance.SceneManager.CreateScene(PreviewViewport.World, name);
+            Scene = await name.GetAsset<TtScene>(PreviewViewport.World);// TtEngine.Instance.SceneManager.CreateScene(PreviewViewport.World, name);
             if (Scene == null)
                 return false;
             var rpolicy = Scene.RPolicyName;
@@ -692,7 +692,7 @@ namespace EngineNS.Editor.Forms
             System.Action action = async () =>
             {
                 var saved = Scene;
-                Scene = await TtEngine.Instance.SceneManager.CreateScene(PreviewViewport.World, AssetName);
+                Scene = await AssetName.GetAsset<TtScene>(PreviewViewport.World); // TtEngine.Instance.SceneManager.CreateScene(PreviewViewport.World, AssetName);
                 Scene.Parent = PreviewViewport.World.Root;
 
                 saved.Cleanup();
@@ -1137,7 +1137,7 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.CameralWheelMoveWithLookAt = false;
             await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.SimpleRPolicyName, 0, 1);
 
-            Prefab = await TtEngine.Instance.PrefabManager.CreatePrefab(PreviewViewport.World, name);
+            Prefab = await name.GetAsset<TtPrefab>(PreviewViewport.World);// TtEngine.Instance.PrefabManager.CreatePrefab(PreviewViewport.World, name);
             if (Prefab == null)
                 return false;
             var rpolicy = Prefab.RPolicyName;
@@ -1172,7 +1172,7 @@ namespace EngineNS.Editor.Forms
             System.Action action = async () =>
             {
                 var saved = Prefab;
-                Prefab = await TtEngine.Instance.PrefabManager.CreatePrefab(PreviewViewport.World,AssetName);
+                Prefab = await AssetName.GetAsset<TtPrefab>(PreviewViewport.World);// TtEngine.Instance.PrefabManager.CreatePrefab(PreviewViewport.World,AssetName);
                 Prefab.Root.Parent = PreviewViewport.World.Root;
             };
             action();

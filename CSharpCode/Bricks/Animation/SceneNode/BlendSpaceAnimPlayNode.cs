@@ -65,7 +65,7 @@ namespace EngineNS.Animation.SceneNode
                 }
                 for (int i = 0; i < animPlayNodeData.Points.Count; ++i)
                 {
-                    var animation = await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(animPlayNodeData.Points[i].Animation);
+                    var animation = await animPlayNodeData.Points[i].Animation.GetAsset<Animation.Asset.TtAnimationClip>();
                     bs2D.AddPoint(animation, animPlayNodeData.Points[i].Value);
                 }
                 Player = new Player.TtBlendSpace2DPlayer(bs2D);

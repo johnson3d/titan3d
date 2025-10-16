@@ -171,7 +171,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
         {
             //valid sample
             var animPoint = new TtBlendSpace_Point(animationAsset, value);
-            animPoint.Animation = await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(animationAsset);
+            animPoint.Animation = await animationAsset.GetAsset<Animation.Asset.TtAnimationClip>();
             AnimPoints.Add(animPoint);
             animPoint.OnAnimationChanged += AnimPoint_OnAnimationChanged;
             ReConstructTrangles();

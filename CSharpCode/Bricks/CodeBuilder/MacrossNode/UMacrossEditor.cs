@@ -170,6 +170,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             UpdateMacrossAssetMeta(AssetName);
 
+            AssetName?.AMeta?.ClearAssetFiles();
+
             SaveClassGraph(AssetName);
             GenerateCode();
             CompileCode();

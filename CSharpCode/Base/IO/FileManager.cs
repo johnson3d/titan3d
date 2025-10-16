@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -10,6 +11,59 @@ using System.Text.Json.Serialization.Metadata;
 
 namespace EngineNS.IO
 {
+    [Rtti.Meta("")]
+    public class TtFileInfo
+    {
+        [Rtti.Meta("")]
+        public string Path { get; set; }
+        [Rtti.Meta("")]
+        public string Hash { get; set; }
+        public bool UpdateHash(string root)
+        {
+            var file = TtFileManager.CombinePath(root, Path);
+            var bytes = TtFileManager.ReadAllBytes(file);
+            if (bytes==null)
+            {
+                Hash = null;
+                return false;
+            }
+            Hash = ComputeSHA256Hash(bytes);
+            return true;
+        }
+        public static string ComputeSHA256Hash(byte[] input)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] bytes = sha256.ComputeHash(input);
+                StringBuilder builder = new StringBuilder();
+                foreach (byte b in bytes)
+                {
+                    builder.Append(b.ToString("x2"));
+                }
+                return builder.ToString();
+            }
+        }
+        public static byte[] HexStringToByteArray(string hexString)
+        {
+            // 检查字符串长度是否为偶数（每个字节由2个十六进制字符表示）
+            if (hexString.Length % 2 != 0)
+            {
+                throw new ArgumentException("十六进制字符串长度必须为偶数");
+            }
+
+            // 创建字节数组
+            byte[] bytes = new byte[hexString.Length / 2];
+
+            // 每两个字符转换为一个字节
+            for (int i = 0; i < hexString.Length; i += 2)
+            {
+                string hexByte = hexString.Substring(i, 2);
+                bytes[i / 2] = Convert.ToByte(hexByte, 16);
+            }
+
+            return bytes;
+        }
+    }
     public partial class TtFileManager
     {
         internal TtFileManager(string[] args)
@@ -60,6 +114,7 @@ namespace EngineNS.IO
         public string BinariesDir { get; private set; }
         public string[] Roots = new string[(int)ERootDir.Count];
         public string[] SysDirs = new string[(int)ESystemDir.Count];
+        public string CloudUrlBase = "https://localhost/CloudAssets/";
         public void SetRoot(ERootDir type, string path)
         {
             Roots[(int)type] = GetValidDirectory(path);
@@ -81,6 +136,8 @@ namespace EngineNS.IO
                     return Roots[(int)ERootDir.Engine];
                 case RName.ERNameType.Game:
                     return Roots[(int)ERootDir.Game];
+                case RName.ERNameType.Cloud:
+                    return Roots[(int)ERootDir.Cloud];
             }
             return null;
         }
@@ -98,6 +155,8 @@ namespace EngineNS.IO
             }
             return ERootDir.Count;
         }
+        
+        #region Path Op
         public static string GetValidDirectory(string path)
         {
             path = path.Replace('\\', '/');
@@ -141,90 +200,6 @@ namespace EngineNS.IO
             }
             return null;
         }
-        public static string[] GetFiles(string path, string searchPattern, bool bAllDirectory = true)
-        {
-            System.IO.SearchOption option = bAllDirectory ? System.IO.SearchOption.AllDirectories : System.IO.SearchOption.TopDirectoryOnly;
-            return System.IO.Directory.GetFiles(path, searchPattern, option);
-        }
-        public static string[] GetDirectories(string path, string searchPattern, bool bAllDirectory = true)
-        {
-            System.IO.SearchOption option = bAllDirectory ? System.IO.SearchOption.AllDirectories : System.IO.SearchOption.TopDirectoryOnly;
-            return System.IO.Directory.GetDirectories(path, searchPattern, option);
-        }
-        public static bool DirectoryExists(string path)
-        {
-            return System.IO.Directory.Exists(path);
-        }
-        public static bool FileExists(string path)
-        {
-            return System.IO.File.Exists(path);
-        }
-        public static void SureDirectory(string path)
-        {
-            if (DirectoryExists(path) == false)
-            {
-                CreateDirectory(path);
-            }
-        }
-        public static System.Security.Cryptography.MD5 GetMD5HashFromFile(string fileName)
-        {
-            try
-            {
-                var file = new System.IO.FileStream(fileName, System.IO.FileMode.Open);
-                System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
-                byte[] retVal = md5.ComputeHash(file);
-                file.Close();
-                return md5;
-            }
-            catch (Exception ex)
-            {
-                Profiler.Log.WriteException(ex);
-                return null; 
-                //throw new Exception("GetMD5HashFromFile() fail,error:" + ex.Message);
-            }
-        }
-        public static System.IO.DirectoryInfo CreateDirectory(string path)
-        {
-            return System.IO.Directory.CreateDirectory(path);
-        }
-        public static void DeleteDirectory(string path, bool recursive = true)
-        {
-            try
-            {
-                if (System.IO.Directory.Exists(path))
-                    System.IO.Directory.Delete(path, recursive);
-            }
-            catch (Exception ex)
-            {
-                Profiler.Log.WriteException(ex);
-            }
-        }
-        public static void DeleteFile(string path)
-        {
-            try
-            {
-                if (System.IO.File.Exists(path))
-                    System.IO.File.Delete(path);
-            }
-            catch(Exception ex)
-            {
-                Profiler.Log.WriteException(ex);
-            }
-        }
-        public static void CopyFile(string src, string tar, bool bOverride = true)
-        {
-            if (System.IO.File.Exists(src))
-            {
-                System.IO.File.Copy(src, tar, bOverride);
-            }
-        }
-        public static void MoveFile(string src, string tar)
-        {
-            if (System.IO.File.Exists(src))
-            {
-                System.IO.File.Move(src, tar);
-            }   
-        }
         public static string GetRelativePath(string absoluteSourcePath, string absoluteTargetPath)
         {
             if (!System.IO.Path.IsPathRooted(absoluteSourcePath))
@@ -243,7 +218,7 @@ namespace EngineNS.IO
             int intIndex = -1;
             int intPos = strPathSrc.IndexOf('/');
 
-            while(intPos >= 0)
+            while (intPos >= 0)
             {
                 intPos++;
 
@@ -254,12 +229,12 @@ namespace EngineNS.IO
                 intPos = strPathSrc.IndexOf('/', intPos);
             }
 
-            if(intIndex >= 0)
+            if (intIndex >= 0)
             {
                 strPathTag = strPathTag.Substring(intIndex);
                 intPos = strPathSrc.IndexOf('/', intIndex);
 
-                while(intPos >= 0)
+                while (intPos >= 0)
                 {
                     strPathTag = "../" + strPathTag;
                     intPos = strPathSrc.IndexOf('/', intPos + 1);
@@ -362,7 +337,7 @@ namespace EngineNS.IO
             while (cur >= 0)
             {
                 cur--;
-                var start = path.LastIndexOf('/',  cur);
+                var start = path.LastIndexOf('/', cur);
                 if (start < 0)
                     return null;
                 path = path.Remove(start, cur + 1 - start + 3);
@@ -370,6 +345,96 @@ namespace EngineNS.IO
             }
             return path;
         }
+        #endregion
+
+        #region Directory & File Op
+        public static string[] GetFiles(string path, string searchPattern, bool bAllDirectory = true)
+        {
+            System.IO.SearchOption option = bAllDirectory ? System.IO.SearchOption.AllDirectories : System.IO.SearchOption.TopDirectoryOnly;
+            return System.IO.Directory.GetFiles(path, searchPattern, option);
+        }
+        public static string[] GetDirectories(string path, string searchPattern, bool bAllDirectory = true)
+        {
+            System.IO.SearchOption option = bAllDirectory ? System.IO.SearchOption.AllDirectories : System.IO.SearchOption.TopDirectoryOnly;
+            return System.IO.Directory.GetDirectories(path, searchPattern, option);
+        }
+        public static bool DirectoryExists(string path)
+        {
+            return System.IO.Directory.Exists(path);
+        }
+        public static bool FileExists(string path)
+        {
+            return System.IO.File.Exists(path);
+        }
+        public static void SureDirectory(string path)
+        {
+            if (DirectoryExists(path) == false)
+            {
+                CreateDirectory(path);
+            }
+        }
+        public static System.IO.DirectoryInfo CreateDirectory(string path)
+        {
+            return System.IO.Directory.CreateDirectory(path);
+        }
+        public static void DeleteDirectory(string path, bool recursive = true)
+        {
+            try
+            {
+                if (System.IO.Directory.Exists(path))
+                    System.IO.Directory.Delete(path, recursive);
+            }
+            catch (Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+            }
+        }
+        public static void DeleteFile(string path)
+        {
+            try
+            {
+                if (System.IO.File.Exists(path))
+                    System.IO.File.Delete(path);
+            }
+            catch (Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+            }
+        }
+        public static void CopyFile(string src, string tar, bool bOverride = true)
+        {
+            if (System.IO.File.Exists(src))
+            {
+                System.IO.File.Copy(src, tar, bOverride);
+            }
+        }
+        public static void MoveFile(string src, string tar)
+        {
+            if (System.IO.File.Exists(src))
+            {
+                System.IO.File.Move(src, tar);
+            }
+        }
+        #endregion
+        public static System.Security.Cryptography.MD5 GetMD5HashFromFile(string fileName)
+        {
+            try
+            {
+                var file = new System.IO.FileStream(fileName, System.IO.FileMode.Open);
+                System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
+                byte[] retVal = md5.ComputeHash(file);
+                file.Close();
+                return md5;
+            }
+            catch (Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+                return null; 
+                //throw new Exception("GetMD5HashFromFile() fail,error:" + ex.Message);
+            }
+        }
+
+        #region Stream
         public static string ReadAllText(string file, System.Text.Encoding encoding = null)
         {
             if (System.IO.File.Exists(file) == false)
@@ -382,6 +447,19 @@ namespace EngineNS.IO
         {
             System.IO.File.WriteAllText(file, text);
         }
+
+        public static byte[] ReadAllBytes(string file)
+        {
+            if (System.IO.File.Exists(file) == false)
+                return null;
+            return System.IO.File.ReadAllBytes(file);
+        }
+        public static void WriteBytes(string file, byte[] data)
+        {
+            System.IO.File.WriteAllBytes(file, data);
+        }
+        #endregion
+
         #region xml
         public static string GetXmlText(System.Xml.XmlDocument xml)
         {

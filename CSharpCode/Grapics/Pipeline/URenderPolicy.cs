@@ -48,7 +48,7 @@ namespace EngineNS.Graphics.Pipeline
         public static async Thread.Async.TtTask<TtRenderPolicy> CreatRenderPolicy(RName name)
         {
             Graphics.Pipeline.TtRenderPolicy policy = null;
-            var rpAsset = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(name);
+            var rpAsset = name.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted();
             if (rpAsset != null)
             {
                 policy = rpAsset.CreateRenderPolicy(null);
@@ -311,7 +311,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             atom.MdfQueue.OnDrawCall(cmd, drawcall, this, atom);
         }
-        public virtual async System.Threading.Tasks.Task Initialize(TtCamera camera)
+        public virtual async Thread.Async.TtTask Initialize(TtCamera camera)
         {
             IsInitialized = false;
             if (camera == null)

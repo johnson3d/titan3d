@@ -2,6 +2,7 @@
 using EngineNS;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.CodeBuilder.MacrossNode;
+using EngineNS.GamePlay.Scene;
 using EngineNS.Profiler;
 using EngineNS.UI.Editor;
 using System;
@@ -347,7 +348,7 @@ namespace ProjectCooker.Command
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
-                var asset = await EngineNS.TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(rn);
+                var asset = await rn.GetAsset<EngineNS.Animation.Asset.TtAnimationClip>();
                 if (asset != null)
                 {
                     asset.SaveAssetTo(rn);
@@ -367,7 +368,7 @@ namespace ProjectCooker.Command
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
-                var asset = await EngineNS.TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(rn);
+                var asset = await rn.GetAsset<EngineNS.Animation.Asset.TtAnimationClip>();
                 if (asset != null)
                 {
                     asset.SaveAssetTo(rn);
@@ -510,7 +511,7 @@ namespace ProjectCooker.Command
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var world = new EngineNS.GamePlay.TtWorld(null);
                 await world.InitWorld();
-                var asset = await EngineNS.TtEngine.Instance.SceneManager.GetScene(world, rn);
+                var asset = await rn.GetAsset<TtScene>(world);// EngineNS.TtEngine.Instance.SceneManager.GetScene(world, rn);
                 if (asset != null)
                 {
                     asset.SaveAssetTo(rn);
@@ -533,7 +534,7 @@ namespace ProjectCooker.Command
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var world = new EngineNS.GamePlay.TtWorld(null);
                 await world.InitWorld();
-                var asset = await EngineNS.TtEngine.Instance.SceneManager.GetScene(world, rn);
+                var asset = await rn.GetAsset<TtScene>(world);// EngineNS.TtEngine.Instance.SceneManager.GetScene(world, rn);
                 if (asset != null)
                 {
                     asset.SaveAssetTo(rn);

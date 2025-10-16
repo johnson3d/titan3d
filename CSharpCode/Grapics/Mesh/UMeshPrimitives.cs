@@ -16,7 +16,7 @@ namespace EngineNS.Graphics.Mesh
         {
             return "VMS";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
         {
             return await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(GetAssetName());
         }

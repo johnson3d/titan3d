@@ -1079,7 +1079,7 @@ namespace EngineNS.Rtti
         {
             return "Metadata";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
         {
             return null;
         }

@@ -20,7 +20,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return "Material";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
         {
             return await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(GetAssetName());
         }

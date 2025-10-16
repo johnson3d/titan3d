@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.Font
         {
             return "FONTSDF";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
         {
             //return await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(GetAssetName());
             return null;

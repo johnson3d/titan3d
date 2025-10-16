@@ -538,7 +538,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return "McShading";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
         {
             //return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
             return null;
@@ -665,7 +665,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             set
             {
                 base.CodeName = value;
-                ShaderAsset = TtShaderAsset.LoadAsset(value);
+                ShaderAsset = value.GetAsset<TtShaderAsset>().GetResultUntilCompleted();
             }
         }
         [Category("Option")]

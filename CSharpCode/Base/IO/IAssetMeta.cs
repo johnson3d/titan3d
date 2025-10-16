@@ -256,7 +256,7 @@ namespace EngineNS.IO
                 Task = null;
             }
         }
-        public virtual async Thread.Async.TtTask<IAsset> LoadAsset()
+        public virtual async Thread.Async.TtTask<IAsset> LoadAsset(params object[] args)
         {
             System.Diagnostics.Debug.Assert(false);
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -771,7 +771,7 @@ namespace EngineNS.IO
         public List<RName> RefAssetRNames { get; set; } = new List<RName>();
 
         [Rtti.Meta("")]
-        public List<string> AssetFiles { get; set; } = new List<string>();
+        public List<TtFileInfo> AssetFiles { get; set; } = new List<TtFileInfo>();
 
         public long ShowIconTime;
 
@@ -784,10 +784,25 @@ namespace EngineNS.IO
             if (file == null)
                 return;
             file = TtFileManager.GetRegularPath(file);
-            file = TtFileManager.GetRelativePath(AssetName.ParentPath, file);
-            if (AssetFiles.Contains(file))
-                return;
-            AssetFiles.Add(file);
+            file = TtFileManager.GetRelativePath(AssetName.AbsParentPath, file);
+            foreach (var i in AssetFiles)
+            {
+                if (i.Path == file)
+                {
+                    if (false==i.UpdateHash(AssetName.AbsParentPath))
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"AddAssetFile UpdateHash failed:{file}");
+                    }
+                    return;
+                }
+            }
+            var t = new TtFileInfo();
+            t.Path = file;
+            if (false==t.UpdateHash(AssetName.AbsParentPath))
+            {
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"AddAssetFile UpdateHash failed:{file}");
+            }
+            AssetFiles.Add(t);
         }
 
         public void AddReferenceAsset(RName rn)
@@ -929,6 +944,20 @@ namespace EngineNS.IO
                 return null;
             var rn = IO.TtFileManager.GetRelativePath(root, file);
             m.SetAssetName(RName.GetRName(rn.Substring(0, rn.Length - 6), rnType));
+            m.IsAssetFilesValid = true;
+            var absPath = m.AssetName.AbsParentPath;
+            foreach (var i in m.AssetFiles)
+            {
+                if(i.Path==null)
+                {
+                    continue;
+                }
+                if (TtFileManager.FileExists(TtFileManager.CombinePath(absPath, i.Path))==false)
+                {
+                    m.IsAssetFilesValid = false;
+                    break;
+                }
+            }
             return m;
         }
         public void LoadMetas()

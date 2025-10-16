@@ -284,12 +284,12 @@ namespace EngineNS
                 return TtEngine.Instance.AssetMetaManager.GetAssetMeta(this);
             }
         }
-        public async Thread.Async.TtTask<T> GetAsset<T>() where T : class, IO.IAsset
+        public async Thread.Async.TtTask<T> GetAsset<T>(params object[] args) where T : class, IO.IAsset
         {
             var ameta = AMeta;
             if (ameta == null || ameta.IsAssetFilesValid==false)
                 return default(T);
-            return await ameta.LoadAsset() as T;
+            return await ameta.LoadAsset(args) as T;
         }
         [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public Guid AssetId
@@ -342,7 +342,8 @@ namespace EngineNS
         [Rtti.Meta("")]
         public string PureName => IO.TtFileManager.GetPureName(mName);
         public string NoExtName => IO.TtFileManager.RemoveExtName(mName);
-        public string ParentPath => IO.TtFileManager.GetParentPathName(Address);
+        public string AbsParentPath => IO.TtFileManager.GetParentPathName(Address);
+        public string ParentPath => IO.TtFileManager.GetParentPathName(mName);
         public static RName GetRNameFromAbsPath(string path)
         {
             path = IO.TtFileManager.GetValidFileName(path);

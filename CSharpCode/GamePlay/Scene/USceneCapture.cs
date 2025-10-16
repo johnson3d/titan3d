@@ -117,7 +117,7 @@ namespace EngineNS.GamePlay.Scene
                 nd.RPolicyName = TtEngine.Instance.Config.SimpleRPolicyName;
             }
             Graphics.Pipeline.TtRenderPolicy policy = null;
-            var rpAsset = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(nd.RPolicyName);
+            var rpAsset = nd.RPolicyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted();
             if (rpAsset != null)
             {
                 policy = rpAsset.CreateRenderPolicy(null);

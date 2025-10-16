@@ -65,7 +65,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
 
             IsStarting = true;
 
-            PolicyGraph = TtRenderPolicyAsset.LoadAsset(name);
+            PolicyGraph = name.GetAsset<TtRenderPolicyAsset>().GetResultUntilCompleted();
             PolicyGraph.PolicyGraph.PolicyEditor = this;
 
             AssetName = name;

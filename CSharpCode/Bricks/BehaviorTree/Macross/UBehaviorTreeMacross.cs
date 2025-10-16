@@ -30,7 +30,7 @@ namespace EngineNS.BehaviorTree.Macross
         {
             return "BehaviorTreeMacross";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return null;

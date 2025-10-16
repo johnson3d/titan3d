@@ -664,7 +664,7 @@ namespace EngineNS.Editor.Forms
                         Action action = async () =>
                         {
                             //await CreateSdfDebugMesh(PreviewViewport.World, outSDF);
-                            var testSDF = await TtEngine.Instance.SdfAssetManager.GetSdfAsset(rn);
+                            var testSDF = await rn.GetAsset<DistanceField.TtSdfAsset>();
                         };
                         action();
 

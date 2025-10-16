@@ -221,7 +221,7 @@ namespace EngineNS.GamePlay
             var viewport = this.WorldViewportSlate;
             var world = viewport.World;
 
-            var scene = await GamePlay.Scene.TtScene.LoadScene(world, mapName);
+            var scene = await mapName.GetAsset<TtScene>(world);// GamePlay.Scene.TtScene.LoadScene(world, mapName);
             if (scene != null && bSetToWorld)
             {
                 world.Root.ClearChildren();
@@ -250,7 +250,7 @@ namespace EngineNS.GamePlay
             var viewport = this.WorldViewportSlate;
             var world = viewport.World;
 
-            var scene = await GamePlay.Scene.TtScene.LoadScene(world, mapName);
+            var scene = await mapName.GetAsset<TtScene>(world);
             if (scene == null)
             {
                 return null;

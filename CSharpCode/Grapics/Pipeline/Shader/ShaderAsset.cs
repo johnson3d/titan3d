@@ -16,7 +16,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return "Nebula";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
         {
             return TtShaderAsset.LoadAsset(GetAssetName());
         }
@@ -194,7 +194,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             await AssetPropGrid.Initialize();
 
-            ShaderAsset = TtShaderAsset.LoadAsset(name);
+            ShaderAsset = name.GetAsset<TtShaderAsset>().GetResultUntilCompleted();// TtShaderAsset.LoadAsset(name);
 
             mShaderEditor.mCoreObject.ApplyLangDefine();
             mShaderEditor.mCoreObject.ApplyErrorMarkers();

@@ -206,7 +206,7 @@ namespace EngineNS.Editor.Forms
         public async Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            AnimationClip = await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(name);
+            AnimationClip = await name.GetAsset<Animation.Asset.TtAnimationClip>();
             if (AnimationClip == null)
                 return false;
 

@@ -377,7 +377,7 @@ namespace EngineNS.Editor.Forms
                     AssetState = IO.EAssetState.Loading;
                     System.Action exec = async () =>
                     {
-                        var animation = await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(value);
+                        var animation = await value.GetAsset<Animation.Asset.TtAnimationClip>();
                         if (animation == null)
                         {
                             AssetState = IO.EAssetState.LoadFailed;

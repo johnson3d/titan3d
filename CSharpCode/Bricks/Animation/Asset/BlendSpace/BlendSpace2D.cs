@@ -268,7 +268,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
 
             foreach (var point in result.AnimPoints)
             {
-                point.Animation = await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(point.AnimationName);
+                point.Animation = await point.AnimationName.GetAsset<Animation.Asset.TtAnimationClip>();
             }
 
             if (result != null)

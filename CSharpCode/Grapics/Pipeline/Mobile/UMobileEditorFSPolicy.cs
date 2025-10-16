@@ -143,7 +143,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         //for test
         public Bricks.VXGI.UVoxelsNode VoxelsNode = new Bricks.VXGI.UVoxelsNode();
 
-        public override async System.Threading.Tasks.Task Initialize(TtCamera camera)
+        public override async Thread.Async.TtTask Initialize(TtCamera camera)
         {
             await base.Initialize(camera);
 

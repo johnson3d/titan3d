@@ -442,7 +442,7 @@ namespace EngineNS.Graphics.Pipeline
         [Rtti.Meta("")]
         public virtual async System.Threading.Tasks.Task<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
         {
-            var policy = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(policyName).CreateRenderPolicy(this);
+            var policy = policyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted().CreateRenderPolicy(this);
             if (OnInitialize != null)
             {
                 await OnInitialize(this, application, policy, zMin, zMax);
@@ -683,7 +683,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual async System.Threading.Tasks.Task Initialize(RName policyName)
         {
-            RenderPolicy = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(policyName).CreateRenderPolicy(null);
+            RenderPolicy = policyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted().CreateRenderPolicy(null);
             await RenderPolicy.Initialize(null);
 
             World = new GamePlay.TtWorld(null);

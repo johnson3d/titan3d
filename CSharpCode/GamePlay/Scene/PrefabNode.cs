@@ -204,10 +204,9 @@ namespace EngineNS.GamePlay.Scene
         {
             return TtEngine.Instance.EditorInstance.Config.PrefabBoderColor;
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
         {
-            //return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
-            return null;
+            return await TtEngine.Instance.PrefabManager.CreatePrefab(args[0] as TtWorld, GetAssetName());
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {

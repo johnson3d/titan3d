@@ -26,7 +26,7 @@ namespace EngineNS.Animation.SceneNode
             }
 
             var animPlayNodeData = NodeData as TtSkeletonAnimPlayNodeData;
-            var skeletonAnimClip = await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(animPlayNodeData.AnimatinName);
+            var skeletonAnimClip = await animPlayNodeData.AnimatinName.GetAsset<Animation.Asset.TtAnimationClip>();
             Player = new Player.TtSkeletonAnimationPlayer(skeletonAnimClip);
             return true;
         }

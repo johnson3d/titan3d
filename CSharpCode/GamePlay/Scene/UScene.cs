@@ -25,10 +25,9 @@ namespace EngineNS.GamePlay.Scene
         {
             return TtEngine.Instance.EditorInstance.Config.SceneBoderColor;
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
         {
-            //return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
-            return null;
+            return await TtEngine.Instance.SceneManager.CreateScene(args[0] as TtWorld, GetAssetName());
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -132,7 +131,7 @@ namespace EngineNS.GamePlay.Scene
         public async Thread.Async.TtTask<TtRenderPolicy> SetRenderPolicyToViewport(TtViewportSlate slate)
         {
             TtRenderPolicy policy = null;
-            var rpAsset = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(RPolicyName);
+            var rpAsset = RPolicyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted();
             if (rpAsset != null)
             {
                 policy = rpAsset.CreateRenderPolicy(slate);

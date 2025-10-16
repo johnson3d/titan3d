@@ -91,7 +91,7 @@ namespace EngineNS.Editor.Forms
                 return false;
             var noExtName = subMesh.AssetName.NoExtName;// subMesh.AssetName.Name.Substring(0, subMesh.AssetName.Name.Length - subMesh.AssetName.ExtName.Length);
             var rn = RName.GetRName(noExtName + DistanceField.TtSdfAsset.AssetExt, Mesh.AssetName.RNameType);
-            MeshSdfAsset = await TtEngine.Instance.SdfAssetManager.GetSdfAsset(rn);
+            MeshSdfAsset = await rn.GetAsset<DistanceField.TtSdfAsset>();
 
             if (MeshSdfAsset == null)
             {

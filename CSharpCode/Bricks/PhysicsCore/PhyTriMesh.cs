@@ -16,7 +16,7 @@ namespace EngineNS.Bricks.PhysicsCore
             //物理Mesh不会引用别的资产
             return false;
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset()
+        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
         {
             return await TtEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMesh(GetAssetName());
         }
@@ -249,7 +249,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 }
             }
         }
-        public async System.Threading.Tasks.Task<TtPhyTriMesh> GetMesh(RName rn)
+        public async Thread.Async.TtTask<TtPhyTriMesh> GetMesh(RName rn)
         {
             if (rn == null)
                 return null;

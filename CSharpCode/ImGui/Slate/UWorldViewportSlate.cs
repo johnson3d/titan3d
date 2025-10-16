@@ -46,7 +46,7 @@ namespace EngineNS.EGui.Slate
         public override async System.Threading.Tasks.Task<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
         {
             TtRenderPolicy policy = null;
-            var rpAsset = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(policyName);
+            var rpAsset = policyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted();
             if (rpAsset != null)
             {
                 policy = rpAsset.CreateRenderPolicy(this);
