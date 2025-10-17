@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="b91bb4f4-7d54-4ba5-8342-a0767ec2e0ac" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,mesh/base/box_1.ums,b91bb4f4-7d54-4ba5-8342-a0767ec2e0ac" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMaterialMesh&#xA;Hahah" />

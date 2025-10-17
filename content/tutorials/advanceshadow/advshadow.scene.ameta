@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="8104cd02d4db646c628b0f18aa618491f6514109da010491a0e2892276b32d96" />
+      <Path Type="System.String@Unknown" Value="advshadow.scene/advshadow.scene" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="bb77ca777bd97ccb1b129b068daccc4f56e8b83d84c50f18e81843e404c36dc3" />
+      <Path Type="System.String@Unknown" Value="advshadow.scene/class_graph.dat" />
+    </e_1>
+  </AssetFiles>
   <AssetId Type="System.Guid@Unknown" Value="9677d173-4288-41ad-9434-c7dfaa46ad97" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/advanceshadow/advshadow.scene,9677d173-4288-41ad-9434-c7dfaa46ad97" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtScene&#xA;" />

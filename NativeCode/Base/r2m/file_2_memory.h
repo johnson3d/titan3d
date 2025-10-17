@@ -22,7 +22,7 @@ class VFile2Memory : public VRes2Memory
 {
 	VCritical					mLocker;
 protected:
-	virtual  VResPtr	Ptr(UINT64 offset, UINT64 size = -1) override;
+	virtual  VResPtr	Ptr(UINT64 offset, UINT64 size = 0) override;
 	virtual  vBOOL		Free() override;
 public:
 	ENGINE_RTTI(VFile2Memory);

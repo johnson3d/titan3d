@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="e735a3eb2b7176e6868d05ba26a3571fffe5bae4dbcdb2ed9c9df7f9c46a1bdd" />
+      <Path Type="System.String@Unknown" Value="probe_gi.scene/probe_gi.scene" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="6115fffc6d3e5e65bfbba16b777c5a835f8ddd9e61fab915d9c5f32a946e5df2" />
+      <Path Type="System.String@Unknown" Value="probe_gi.scene/class_graph.dat" />
+    </e_1>
+  </AssetFiles>
   <AssetId Type="System.Guid@Unknown" Value="39b8e5f7-9abd-42fa-83b0-7b971da23c43" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/gi/probe_gi.scene,39b8e5f7-9abd-42fa-83b0-7b971da23c43" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtScene&#xA;" />

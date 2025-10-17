@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.TtMeshPrimitivesAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="587c3272-cd50-47b0-b3c3-2c4aacc54c3f" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/utest/mesh/box1.vms,587c3272-cd50-47b0-b3c3-2c4aacc54c3f" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMeshPrimitives&#xA;" />

@@ -241,7 +241,8 @@ public:
 		mRootNode.StrongRef(node);
 	}
 
-	bool LoadXnd(const char* file);
+	//bool LoadXnd(const char* file);
+	bool LoadXnd(VRes2Memory* res);
 	void SaveXnd(const char* file);
 
 	void TryReleaseHolder();

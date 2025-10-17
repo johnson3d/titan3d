@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.GamePlay.Scene.TtPrefabAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="1a7e1ccfc6f195505419a1a532b97e32a275fda57f6b87ef931f72c890f53b58" />
+      <Path Type="System.String@Unknown" Value="prefab01.prefab" />
+    </e_0>
+  </AssetFiles>
   <AssetId Type="System.Guid@Unknown" Value="f065ad84-fce9-4f1d-a9ab-bf49f9b97a87" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/prefab/prefab01.prefab,f065ad84-fce9-4f1d-a9ab-bf49f9b97a87" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtPrefab&#xA;Hahah" />

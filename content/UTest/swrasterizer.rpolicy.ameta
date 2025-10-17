@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.RenderPolicyEditor.TtRenderPolicyAssetAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="f2700a0b-95a0-42a5-ad4f-fc4bf74beb91" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/swrasterizer.rpolicy,f2700a0b-95a0-42a5-ad4f-fc4bf74beb91" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.RenderPolicyEditor.URenderPolicyAsset&#xA;Hahah" />

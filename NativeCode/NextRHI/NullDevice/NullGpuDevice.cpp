@@ -34,6 +34,7 @@ namespace NxRHI
 	}
 	bool NullGpuDevice::InitDevice(IGpuSystem* pGpuSystem, const FGpuDeviceDesc* desc)
 	{
+		Desc = *desc;
 		mCmdQueue = MakeWeakRef(new NullCmdQueue());
 		mCmdQueue->mDevice = this;
 		return true;

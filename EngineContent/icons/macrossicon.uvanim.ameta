@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.EGui.TtUVAnimAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="3aac2cb9-ac8f-4a20-a8c9-12f2722ba571" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,icons/macrossicon.uvanim,3aac2cb9-ac8f-4a20-a8c9-12f2722ba571" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.EGui.UUvAnim&#xA;Hahah" />

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="7e8c0d08-c43e-47db-9402-c56a1fcc7fa6" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,axis/axis_x_matins.uminst,7e8c0d08-c43e-47db-9402-c56a1fcc7fa6" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterialInstance&#xA;Hahah" />

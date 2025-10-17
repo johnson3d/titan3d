@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="ef79c14b-dc81-402f-93fc-6f48a98fc258" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/mesh/mesh_cluster.ums,ef79c14b-dc81-402f-93fc-6f48a98fc258" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.TtMaterialMesh&#xA;" />

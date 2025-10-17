@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="ba2ec049-ad7b-4d20-bd30-4e78dbe25859" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/pivotpainter/pivot_rotation.ums,ba2ec049-ad7b-4d20-bd30-4e78dbe25859" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMaterialMesh&#xA;Hahah" />

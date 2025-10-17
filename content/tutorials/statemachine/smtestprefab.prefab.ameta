@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.GamePlay.Scene.TtPrefabAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="e6550ed5a63793c2327fbe03493696556c22c2c487a026c9c0c13439d0dcab8f" />
+      <Path Type="System.String@Unknown" Value="smtestprefab.prefab" />
+    </e_0>
+  </AssetFiles>
   <AssetId Type="System.Guid@Unknown" Value="3b2b5233-3567-448f-aff5-e573348cb05e" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/statemachine/smtestprefab.prefab,3b2b5233-3567-448f-aff5-e573348cb05e" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtPrefab&#xA;" />

@@ -140,7 +140,6 @@ PTSTR GetErrorMessage(DWORD dwErrCode, DWORD dwLanguageId = MAKELANGID(LANG_NEUT
 #else
 #endif
 
-int GFileOpenNumber = 0;
 vBOOL  VFile::Open(LPCSTR lpszFileName, UINT nOpenFlags)
 {
 	Close();
@@ -182,17 +181,31 @@ vBOOL  VFile::Open(LPCSTR lpszFileName, UINT nOpenFlags)
 	m_hFile = fopen(m_strFileName.c_str(), arg.c_str());
 	if (m_hFile == NULL)
 	{
-#if defined WIN
-		auto dwError = ::GetLastError();
-		if(dwError != 2&& dwError != 3)
+		int error_code = errno;
+		if (error_code == EMFILE)
 		{
-			auto errorStr = ::GetErrorMessage(dwError);
-			VFX_LTRACE(ELTT_Resource, "VFile::Open file(%s) (%s) open error = %d,%s\n", m_strFileName.c_str(), arg.c_str(), dwError, errorStr);
-			::LocalFree(errorStr);
+			{// try to close some openned files, avoid to fopen failed
+				int t = EngineNS::F2MManager::Instance->FileOpenNumber;
+				VFX_LTRACE(ELTT_Resource, "Try Close Openning Files Begin(%d)\n", t);
+				EngineNS::F2MManager::Instance->TryReleaseFile();
+				t = EngineNS::F2MManager::Instance->FileOpenNumber;
+				VFX_LTRACE(ELTT_Resource, "Try Close Openning Files End(%d)\n", t);
+			}
+			m_hFile = fopen(m_strFileName.c_str(), arg.c_str());
+			if (m_hFile == NULL)
+			{
+				VFX_LTRACE(ELTT_Resource, "VFile::Open file(%s) (%s) open error = too many open files\n", m_strFileName.c_str(), arg.c_str());
+				GVFLostAssets[lpszFileName] = lpszFileName;
+				return FALSE;
+			}
 		}
-#endif
-		GVFLostAssets[lpszFileName] = lpszFileName;
-		return FALSE;
+		else
+		{
+			const char* error_str = strerror(error_code);
+			VFX_LTRACE(ELTT_Resource, "VFile::Open file(%s) (%s) open error = %d,%s\n", m_strFileName.c_str(), arg.c_str(), error_code, error_str);
+			GVFLostAssets[lpszFileName] = lpszFileName;
+			return FALSE;
+		}
 	}
 
 	auto saved = fseek(m_hFile, 0, current);
@@ -200,14 +213,8 @@ vBOOL  VFile::Open(LPCSTR lpszFileName, UINT nOpenFlags)
 	mFileLength = ftell(m_hFile);
 	fseek(m_hFile, saved, begin);
 
-	GFileOpenNumber++;
-	if (GFileOpenNumber > 100)
-	{
-		VFX_LTRACE(ELTT_Resource, "Try Close Openning Files Begin(%d)\n", GFileOpenNumber);
-		EngineNS::F2MManager::Instance->TryReleaseFile();
-		VFX_LTRACE(ELTT_Resource, "Try Close Openning Files End(%d)\n", GFileOpenNumber);
-	}
-
+	EngineNS::F2MManager::Instance->FileOpenNumber++;
+	
 	m_bCloseOnDelete = TRUE;
 
 	/*if (GVFReadAssets.find(lpszFileName) != GVFReadAssets.end())
@@ -284,7 +291,8 @@ void  VFile::Close()
 	VAutoVSLLock lk(mLocker);
 	if (m_hFile)
 	{
-		GFileOpenNumber--;
+		if (EngineNS::F2MManager::Instance)
+			EngineNS::F2MManager::Instance->FileOpenNumber--;
 		fclose(m_hFile);
 		m_hFile = NULL;
 	}

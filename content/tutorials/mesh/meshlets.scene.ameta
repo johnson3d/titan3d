@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="fc6f440f912ab26cb41f84800112a4fe2765345f1f02bb1f63cf2b3d18165aa7" />
+      <Path Type="System.String@Unknown" Value="meshlets.scene/meshlets.scene" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="0bb6575f23b953718c52ed6166d48bec0243df35004aa79d875c45a8282bb657" />
+      <Path Type="System.String@Unknown" Value="meshlets.scene/class_graph.dat" />
+    </e_1>
+  </AssetFiles>
   <AssetId Type="System.Guid@Unknown" Value="cd53c53a-f0bc-4f95-af4f-30c4bb20d0dc" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/mesh/meshlets.scene,cd53c53a-f0bc-4f95-af4f-30c4bb20d0dc" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtScene&#xA;" />

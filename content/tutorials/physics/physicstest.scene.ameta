@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="0c8ca594425fc3e8f07131e63b41d91bb6fb4c20eb40022e3cd19ce9ce2d7140" />
+      <Path Type="System.String@Unknown" Value="physicstest.scene/physicstest.scene" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="029cd08890faf055708acbca2719b87ed6d4c584b63679a225774b87b6066d70" />
+      <Path Type="System.String@Unknown" Value="physicstest.scene/class_graph.dat" />
+    </e_1>
+  </AssetFiles>
   <AssetId Type="System.Guid@Unknown" Value="6c2c165c-f595-45d6-b1d5-352a05135a57" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/physics/physicstest.scene,6c2c165c-f595-45d6-b1d5-352a05135a57" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtScene&#xA;" />

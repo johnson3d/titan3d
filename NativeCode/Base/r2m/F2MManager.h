@@ -13,6 +13,7 @@ class F2MManager
 	std::vector<VPakFile*>	mMountPaks;
 public:
 	static F2MManager* Instance;
+	std::atomic<int> FileOpenNumber = 0;
 	F2MManager();
 	~F2MManager();
 

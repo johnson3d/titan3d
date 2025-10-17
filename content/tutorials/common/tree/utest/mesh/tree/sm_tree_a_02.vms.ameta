@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.TtMeshPrimitivesAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="ac811352-24ce-47f2-9f62-49cc0d7a0d99" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/tree/utest/mesh/tree/sm_tree_a_02.vms,ac811352-24ce-47f2-9f62-49cc0d7a0d99" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMeshPrimitives&#xA;" />

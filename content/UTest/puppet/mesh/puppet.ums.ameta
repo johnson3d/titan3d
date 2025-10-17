@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="f96719f6-83b6-4bd6-87f2-547a6cf50c04" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/puppet/mesh/puppet.ums,f96719f6-83b6-4bd6-87f2-547a6cf50c04" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMaterialMesh&#xA;Hahah" />
@@ -15,10 +16,8 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
-    <e_0 Value="Game,utest/puppet/mesh/puppet.vms,00000000-0000-0000-0000-000000000000" />
-    <e_1 Value="Game,utest/puppet/texture/gra.uminst,6e6c974c-ca58-49b8-9bd7-77e6148722fc" />
-    <e_2 Value="Game,utest/ground.uminst,333fadf5-5a6d-48aa-86a8-e6ebff8b6d85" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 IsNull="True" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
 </Root>

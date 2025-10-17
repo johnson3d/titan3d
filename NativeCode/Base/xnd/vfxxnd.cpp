@@ -120,13 +120,18 @@ XndNode* XndHolder::NewNode(const char* name, UINT ver, UINT flags)
 	return result;
 }
 
-bool XndHolder::LoadXnd(const char* file)
+//bool XndHolder::LoadXnd(const char* file)
+//{
+//	auto res = MakeWeakRef(F2MManager::Instance->GetF2M(file));
+//	return LoadXnd(res.GetPtr());
+//}
+bool XndHolder::LoadXnd(VRes2Memory* res)
 {
 	mRootNode = nullptr;
 	mResource = nullptr;
 
 	{
-		mResource = MakeWeakRef(F2MManager::Instance->GetF2M(file));
+		mResource = res;
 		if (mResource == nullptr)
 			return false;
 		UINT64 length = (UINT64)mResource->Length();

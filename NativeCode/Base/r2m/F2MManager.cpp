@@ -6,6 +6,13 @@ NS_BEGIN
 
 F2MManager* F2MManager::Instance = nullptr;
 
+VRes2Memory* VRes2Memory::CreateFromFile(LPCSTR pszFile)
+{
+	auto result = F2MManager::Instance->GetF2M(pszFile);
+	//result->AddRef();
+	return result;
+}
+
 //////////////////////////////////////////////////////////////////////////
 extern "C"  void vfxMemory_SetDebugInfo(void* memory, LPCSTR info);
 VFile2Memory* F2MManager::_F2M(LPCSTR psz, vBOOL bShareWrite/* = FALSE*/)

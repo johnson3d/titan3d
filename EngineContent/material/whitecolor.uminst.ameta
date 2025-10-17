@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="e26232e31954bc22c79e83951af5506bc123a2d3813c91cba1b4f8ea963cd41a" />
+      <Path Type="System.String@Unknown" Value="whitecolor.uminst" />
+    </e_0>
+  </AssetFiles>
   <AssetId Type="System.Guid@Unknown" Value="1d61a75e-6ed0-4622-8619-7e6229f9453e" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,material/whitecolor.uminst,1d61a75e-6ed0-4622-8619-7e6229f9453e" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterialInstance&#xA;Hahah" />

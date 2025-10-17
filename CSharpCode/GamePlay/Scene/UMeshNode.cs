@@ -82,8 +82,14 @@ namespace EngineNS.GamePlay.Scene
                 if (materialMesh != null)
                 {
                     var mesh = new Graphics.Mesh.TtRenderMesh();
-                    mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
-                    this.RenderMesh = mesh;
+                    if (mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom))
+                    {
+                        this.RenderMesh = mesh;
+                    }
+                    else
+                    {
+                        meshData.Atom = Rtti.TtTypeDescGetter<Graphics.Mesh.TtRenderMesh.TtAtom>.TypeDesc;
+                    }
                     //await materialMesh.Mesh.TryLoadClusteredMesh();
                 }
             }

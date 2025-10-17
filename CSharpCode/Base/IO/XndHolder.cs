@@ -45,19 +45,22 @@ namespace EngineNS.IO
                 return new XndNode(p);
             }
         }
-        public static TtXndHolder LoadXnd(string file)
+        public static unsafe TtXndHolder LoadXnd(string file)
         {
             if (file == null)
                 return null;
             var result = new TtXndHolder();
-            if (result.mCoreObject.LoadXnd(file) == false)
-                return null;
-            unsafe
+            using (var f2m = TtRes2Memory.CreateFromFile(file))
             {
+                if (f2m == null)
+                    return null;
+
+                result.mCoreObject.LoadXnd(f2m.mCoreObject);
+
                 result.mRootNode = new TtXndNode(result, new XndNode(result.mCoreObject.GetRootNode()));
                 result.mRootNode.Core_AddRef();
                 return result;
-            }
+            }   
         }
         public TtXndHolder(string name, UInt32 ver, UInt32 flags)
         {

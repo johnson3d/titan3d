@@ -28,14 +28,17 @@ struct FResPointerGuard
 	~FResPointerGuard();
 };
 
-struct VRes2Memory : public EngineNS::IWeakRefObject
+struct TR_CLASS()
+	VRes2Memory : public EngineNS::IWeakRefObject
 {
 protected:
-	virtual VResPtr		Ptr(UINT64 offset=0, UINT64 size=0 ) = 0;
-	virtual vBOOL		Free() = 0;
 	friend struct FResPointerGuard;
 	friend class XndAttribute;
 public:
+	static VRes2Memory* CreateFromFile(LPCSTR pszFile);
+	virtual VResPtr		Ptr(UINT64 offset = 0, UINT64 size = 0) = 0;
+	virtual vBOOL		Free() = 0;
+
 	virtual UINT64		Length() const = 0;
 	virtual LPCSTR		Name() const = 0; 
 

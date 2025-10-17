@@ -1,7 +1,9 @@
-﻿using System;
+﻿using NPOI.SS.Formula.Functions;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -11,6 +13,45 @@ using System.Text.Json.Serialization.Metadata;
 
 namespace EngineNS.IO
 {
+    public struct FScopedResMemory : IDisposable
+    {
+        public IntPtr Pointer;
+        public ulong Size;
+        public TtRes2Memory Res2Mem;
+        public unsafe FScopedResMemory(TtRes2Memory r2m)
+        {
+            Res2Mem = r2m;
+            Size = r2m.mCoreObject.Length();
+            Pointer = (IntPtr)r2m.mCoreObject.Ptr(0, Size);
+        }
+        public void Dispose()
+        {
+            if (Res2Mem==null)
+                return;
+            Res2Mem.mCoreObject.Free();
+            Res2Mem = null;
+            Pointer = IntPtr.Zero; 
+            Size = 0;
+        }
+    }
+    public class TtRes2Memory : AuxPtrType<VRes2Memory>
+    {
+        public static TtRes2Memory CreateFromFile(string file)
+        {
+            var ptr = VRes2Memory.CreateFromFile(file);
+            if (ptr.IsValidPointer == false)
+                return null;
+            return new TtRes2Memory(ptr);
+        }
+        public TtRes2Memory(VRes2Memory self)
+        {
+            mCoreObject = self;
+        }
+        public FScopedResMemory GetMemory()
+        {
+            return new FScopedResMemory(this);
+        }
+    }
     [Rtti.Meta("")]
     public class TtFileInfo
     {
@@ -448,11 +489,25 @@ namespace EngineNS.IO
             System.IO.File.WriteAllText(file, text);
         }
 
-        public static byte[] ReadAllBytes(string file)
+        public static unsafe byte[] ReadAllBytes(string file)
         {
-            if (System.IO.File.Exists(file) == false)
+            if (FileExists(file) == false)
                 return null;
-            return System.IO.File.ReadAllBytes(file);
+            using (var r2m = TtRes2Memory.CreateFromFile(file))
+            {
+                if (r2m==null)
+                    return null;
+                using (var res = r2m.GetMemory())
+                {
+                    var result = new byte[res.Size];
+                    fixed (byte* p = &result[0])
+                    {
+                        CoreSDK.MemoryCopy(p, res.Pointer.ToPointer(), (uint)res.Size);
+                    }
+                    return result;
+                }
+            }
+            //return System.IO.File.ReadAllBytes(file);
         }
         public static void WriteBytes(string file, byte[] data)
         {
@@ -474,13 +529,22 @@ namespace EngineNS.IO
             streamXml.Close();
             return content;
         }
-        public static System.Xml.XmlDocument LoadXml(string file)
+        public static unsafe System.Xml.XmlDocument LoadXml(string file)
         {
             if (FileExists(file) == false)
                 return null;
-            var xml = new System.Xml.XmlDocument();
-            xml.Load(file);
-            return xml;
+            using (var res = TtRes2Memory.CreateFromFile(file))
+            {
+                if (res == null)
+                    return null;
+                using (var r2m = res.GetMemory())
+                using (var stream = new UnmanagedMemoryStream((byte*)r2m.Pointer.ToPointer(), (long)r2m.Size, (long)r2m.Size, FileAccess.Read))
+                {
+                    var xml = new System.Xml.XmlDocument();
+                    xml.Load(stream);
+                    return xml;
+                }
+            }
         }
         public static System.Xml.XmlDocument LoadXmlFromString(string xmlStr)
         {

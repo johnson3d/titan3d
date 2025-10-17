@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="fd1b1a80-4202-4fa2-9b42-7f5ab8f7df70" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/fx/skin3s/skin_material.material,fd1b1a80-4202-4fa2-9b42-7f5ab8f7df70" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.TtMaterial&#xA;" />

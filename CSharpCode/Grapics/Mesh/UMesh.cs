@@ -568,8 +568,8 @@ namespace EngineNS.Graphics.Mesh
         public bool Initialize(TtMaterialMesh materialMesh, Rtti.TtTypeDesc mdfQueueType, Rtti.TtTypeDesc atomType = null)
         {
             if (atomType == null)
-                atomType = Rtti.TtTypeDesc.TypeOf(typeof(TtAtom));
-            if (atomType != Rtti.TtTypeDesc.TypeOf(typeof(TtAtom)) && atomType.IsSubclassOf(typeof(TtAtom)) == false)
+                atomType = Rtti.TtTypeDescGetter<TtAtom>.TypeDesc;
+            if (atomType != Rtti.TtTypeDescGetter<TtAtom>.TypeDesc && atomType.IsSubclassOf(typeof(TtAtom)) == false)
                 return false;
             
             MdfQueue = Rtti.TtTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.TtMdfQueueBase;

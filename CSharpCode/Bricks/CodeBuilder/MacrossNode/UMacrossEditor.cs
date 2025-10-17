@@ -224,7 +224,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var xmlText = IO.TtFileManager.GetXmlText(xml);
             var graphDataFileName = $"{rn.Address + FolderExt}/class_graph.dat";
             IO.TtFileManager.WriteAllText(graphDataFileName, xmlText);
-            rn.AMeta.AddAssetFile(graphDataFileName);
+            rn.AMeta?.AddAssetFile(graphDataFileName);
             TtEngine.Instance.SourceControlModule.AddFile(graphDataFileName);
 
             for(int i=0; i<Methods.Count; i++)
