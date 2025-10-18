@@ -1,5 +1,4 @@
-﻿using NPOI.SS.Formula.Functions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -59,17 +58,18 @@ namespace EngineNS.IO
         public string Path { get; set; }
         [Rtti.Meta("")]
         public string Hash { get; set; }
-        public bool UpdateHash(string root)
+        public string CalcFileHash(string root)
         {
             var file = TtFileManager.CombinePath(root, Path);
             var bytes = TtFileManager.ReadAllBytes(file);
             if (bytes==null)
-            {
-                Hash = null;
-                return false;
-            }
-            Hash = ComputeSHA256Hash(bytes);
-            return true;
+                return null;
+            return ComputeSHA256Hash(bytes);
+        }
+        public bool UpdateHash(string root)
+        {
+            Hash = CalcFileHash(root);
+            return Hash!=null;
         }
         public static string ComputeSHA256Hash(byte[] input)
         {

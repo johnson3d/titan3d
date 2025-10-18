@@ -70,7 +70,7 @@ namespace EngineNS
                 if (await DownloadFromCloud(TtFileManager.CombinePath(path, i.Path), TtFileManager.CombinePath(absPath, i.Path))==false)
                     return false;
             }
-            ameta.IsAssetFilesValid = true;
+            ameta.AssetStatus = IAssetMeta.EAssetStatus.Valid;
             return true;
         }
         public static bool SureCloudAMeta(RName rn)
@@ -97,9 +97,72 @@ namespace EngineNS
                 ameta = TtAssetMetaManager.LoadAMeta(root, rn.RNameType, file);
                 TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
-                DownloadAssetFiles(ameta).AddWaitTask();
+                TtEngine.Instance.FileManager.CloudAssetManager.AddDownloadAsset(ameta);
             }
             return true;
         }
+        public static void CheckAssetState(IO.IAssetMeta meta)
+        {
+            if (meta.AssetName.RNameType!=ERNameType.Cloud)
+            {
+                return;
+            }
+            var absPath = meta.AssetName.AbsParentPath;
+            meta.AssetStatus = IAssetMeta.EAssetStatus.Valid;
+            foreach (var i in meta.AssetFiles)
+            {
+                if (i.Path==null)
+                {
+                    continue;
+                }
+                var hash = i.CalcFileHash(TtFileManager.CombinePath(absPath, i.Path));
+                if (hash == null || hash!=i.Hash)
+                {
+                    TtEngine.Instance.FileManager.CloudAssetManager.AddDownloadAsset(meta);
+                    break;
+                }
+            }
+        }
+    }
+    public class TtCloudAssetManager
+    {
+        private HashSet<IO.IAssetMeta> DownAssets { get; } = new HashSet<IO.IAssetMeta>();
+        public void AddDownloadAsset(IO.IAssetMeta rn)
+        {
+            lock (DownAssets)
+            {
+                if (rn.AssetStatus == IAssetMeta.EAssetStatus.PullingFiles)
+                    return;
+                if (DownAssets.Contains(rn))
+                    return;
+                rn.AssetStatus = IAssetMeta.EAssetStatus.PullingFiles;
+                DownAssets.Add(rn);
+            }
+        }
+        public void Download()
+        {
+            lock (DownAssets)
+            {
+                foreach (var i in DownAssets)
+                {
+                    RName.DownloadAssetFiles(i).AddWaitTask((task) =>
+                    {
+                        //lock (DownAssets)
+                        //{
+                        //    DownAssets.Remove(i);
+                        //}
+                    });
+                }
+                DownAssets.Clear();
+            }   
+        }
+    }
+}
+
+namespace EngineNS.IO
+{
+    partial class TtFileManager
+    {
+        public TtCloudAssetManager CloudAssetManager { get; } = new TtCloudAssetManager();
     }
 }

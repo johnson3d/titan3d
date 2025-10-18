@@ -214,7 +214,14 @@ namespace EngineNS.IO
         protected RName mAssetName;
         public bool HasSnapshot { get; set; } = true;
         public bool IsSelected = false;
-        public bool IsAssetFilesValid { get; set; } = true;
+
+        public enum EAssetStatus
+        {
+            PullingMeta,
+            PullingFiles,
+            Valid,
+        }
+        public EAssetStatus AssetStatus { get; set; } = EAssetStatus.Valid;
         public IAssetMeta()
         {
             mDeleteMenuState.Reset();
@@ -944,20 +951,21 @@ namespace EngineNS.IO
                 return null;
             var rn = IO.TtFileManager.GetRelativePath(root, file);
             m.SetAssetName(RName.GetRName(rn.Substring(0, rn.Length - 6), rnType));
-            m.IsAssetFilesValid = true;
-            var absPath = m.AssetName.AbsParentPath;
-            foreach (var i in m.AssetFiles)
-            {
-                if(i.Path==null)
-                {
-                    continue;
-                }
-                if (TtFileManager.FileExists(TtFileManager.CombinePath(absPath, i.Path))==false)
-                {
-                    m.IsAssetFilesValid = false;
-                    break;
-                }
-            }
+            m.AssetStatus = IAssetMeta.EAssetStatus.Valid;
+            RName.CheckAssetState(m);
+            //var absPath = m.AssetName.AbsParentPath;
+            //foreach (var i in m.AssetFiles)
+            //{
+            //    if(i.Path==null)
+            //    {
+            //        continue;
+            //    }
+            //    if (TtFileManager.FileExists(TtFileManager.CombinePath(absPath, i.Path))==false)
+            //    {
+            //        m.AssetStatus = IAssetMeta.EAssetStatus.PullingFiles;
+            //        break;
+            //    }
+            //}
             return m;
         }
         public void LoadMetas()

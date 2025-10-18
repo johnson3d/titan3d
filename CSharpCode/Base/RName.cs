@@ -287,7 +287,7 @@ namespace EngineNS
         public async Thread.Async.TtTask<T> GetAsset<T>(params object[] args) where T : class, IO.IAsset
         {
             var ameta = AMeta;
-            if (ameta == null || ameta.IsAssetFilesValid==false)
+            if (ameta == null || ameta.AssetStatus != IO.IAssetMeta.EAssetStatus.Valid)
                 return default(T);
             return await ameta.LoadAsset(args) as T;
         }
