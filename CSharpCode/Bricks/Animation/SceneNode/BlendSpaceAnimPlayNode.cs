@@ -72,7 +72,7 @@ namespace EngineNS.Animation.SceneNode
             }
             else
             {
-                bs2D = await TtEngine.Instance.AnimationModule.BlendSpaceClipManager.GetAnimation(animPlayNodeData.AnimatinName);
+                bs2D = await animPlayNodeData.AnimatinName.GetAsset<TtBlendSpace2D>();
                 Player = new Player.TtBlendSpace2DPlayer(bs2D);
             }
 

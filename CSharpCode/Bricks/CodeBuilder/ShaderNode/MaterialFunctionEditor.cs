@@ -119,7 +119,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             MaterialGraph.ShaderEditor = this;
             MaterialGraph.ResetGraph();
             IsStarting = true;
-            MaterialFunction = await TtEngine.Instance.GfxDevice.MaterialFunctionManager.CreateMaterialFunction(name);
+            MaterialFunction = await TtMaterialFunctionManager.CreateMaterialFunction(name);
             //MaterialFunction.IsEditingMaterial = true;
             if (MaterialFunction == null)
             {

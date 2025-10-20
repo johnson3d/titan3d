@@ -44,8 +44,7 @@ namespace EngineNS.Animation.StateMachine
         public override async TtTask<bool> Initialize(TtAnimStateMachineContext context)
         {
             var blendSpaceBlendTree = new TtBlendTree_BlendSpace2D<S>();
-            blendSpaceBlendTree.BlendSpace = await TtEngine.Instance.AnimationModule.BlendSpaceClipManager
-                .GetAnimation(AnimationName);
+            blendSpaceBlendTree.BlendSpace = await AnimationName.GetAsset<Animation.Asset.BlendSpace.TtBlendSpace2D>();
             BlendTree = blendSpaceBlendTree;
             await BlendTree.Initialize(context.BlendTreeContext);
             return await base.Initialize(context);

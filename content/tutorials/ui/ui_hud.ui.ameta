@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.UI.TtUIAssetAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="ba0c0a48bfd065fb887b7422d02acac8e85da6739d3ddf552249650a71028a44" />
+      <Path Type="System.String@Unknown" Value="ui_hud.ui/class_graph.dat" />
+    </e_0>
+  </AssetFiles>
   <AssetId Type="System.Guid@Unknown" Value="d6790a5e-1bf4-46bc-bbb9-479e4da6f19b" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/ui/ui_hud.ui,d6790a5e-1bf4-46bc-bbb9-479e4da6f19b" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.UI.TtUIAsset&#xA;" />
+  <DesignResolution Type="EngineNS.Vector2i@EngineCore" Value="0,0" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
@@ -11,6 +18,7 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
+  <IsDisable Type="System.Boolean@Unknown" Value="False" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.UI.TtUIAsset@EngineCore" />
 </Root>

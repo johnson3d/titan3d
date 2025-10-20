@@ -208,7 +208,7 @@ namespace EngineNS.Editor.Forms
         public async Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            BlendSpace = await TtEngine.Instance.AnimationModule.BlendSpaceClipManager.GetAnimation(name);
+            BlendSpace = await name.GetAsset<Animation.Asset.BlendSpace.TtBlendSpace2D>();// TtEngine.Instance.AnimationModule.BlendSpaceClipManager.GetAnimation(name);
             if (BlendSpace == null)
                 return false;
 
@@ -328,7 +328,7 @@ namespace EngineNS.Editor.Forms
                 }
 
                 var animPlayNodeData = data as TtBlendSpaceAnimPreviewNodeData;
-                var bs2D = await TtEngine.Instance.AnimationModule.BlendSpaceClipManager.GetAnimation(animPlayNodeData.AnimatinName);
+                var bs2D = await animPlayNodeData.AnimatinName.GetAsset<Animation.Asset.BlendSpace.TtBlendSpace2D>();
                 Player = new Animation.Player.TtBlendSpace2DPlayer(bs2D);
 
                 return true;

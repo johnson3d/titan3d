@@ -197,6 +197,12 @@ namespace EngineNS.IO
         }
         public void Write(RName v)
         {
+            Write(RName.CurrentVersion);
+            if (v== null)
+            {
+                Write(RName.ERNameType.Unkown);
+                return;
+            }
             Write(v.RNameType);
             Write(v.Name);
         }
@@ -230,7 +236,10 @@ namespace EngineNS.IO
         }
         public void Write(Rtti.TtTypeDesc v)
         {
-            this.Write(v.TypeString);
+            if(v == null)
+                this.Write("");
+            else
+                this.Write(v.TypeString);
         }
     }
 

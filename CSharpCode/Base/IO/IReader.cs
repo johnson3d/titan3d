@@ -204,10 +204,39 @@ namespace EngineNS.IO
         public void Read(out RName v)
         {
             RName.ERNameType type;
-            Read(out type);
-            string name;
-            Read(out name);
-            v = RName.GetRName(name, type);
+            ushort Version;
+            Read(out Version);
+            if (Version < RName.MinVersion || Version == (ushort)RName.ERNameType.Unkown)
+            {
+                type = (RName.ERNameType)Version;
+                if (type == RName.ERNameType.Unkown)
+                {
+                    v = null;
+                    return;
+                }
+                string name;
+                Read(out name);
+                v = RName.GetRName(name, type);
+            }
+            else
+            {
+                if (Version == RName.MinVersion + 0)
+                {
+                    Read(out type);
+                    if (type == RName.ERNameType.Unkown)
+                    {
+                        v = null;
+                        return;
+                    }
+                    string name;
+                    Read(out name);
+                    v = RName.GetRName(name, type);
+                }
+                else
+                {
+                    throw new Exception("RName Version not support:" + Version);
+                }
+            }
         }
         public void Read(ref Support.TtBitset v)
         {

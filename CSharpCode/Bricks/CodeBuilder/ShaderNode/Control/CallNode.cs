@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.Graphics.Pipeline.Shader;
-using MathNet.Numerics.LinearAlgebra.Factorization;
-using Org.BouncyCastle.Asn1.Mozilla;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 {
@@ -410,7 +408,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     return;
                 mFunctionName = value;
 
-                MaterialFunction = TtEngine.Instance.GfxDevice.MaterialFunctionManager.GetMaterialFunctionSync(value);
+                MaterialFunction = value.GetAsset<Graphics.Pipeline.Shader.TtMaterialFunction>().GetResultUntilCompleted();
                 this.Initialize(MaterialFunction.MethodMeta);
                 this.Name = MaterialFunction.CallNodeName;
             }

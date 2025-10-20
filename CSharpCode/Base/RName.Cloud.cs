@@ -73,6 +73,49 @@ namespace EngineNS
             ameta.AssetStatus = IAssetMeta.EAssetStatus.Valid;
             return true;
         }
+
+        public static async Thread.Async.TtTask<string> GetAssetHash(RName rn)
+        {
+            using var httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri("http://localhost:7000");
+
+            try
+            {
+                // 编码参数
+                string encodedName = Uri.EscapeDataString(rn.Name);
+                var queryParams = new System.Collections.Generic.Dictionary<string, string>
+                {
+                    ["name"] = rn.Name
+                };
+                var queryString = await new FormUrlEncodedContent(queryParams).ReadAsStringAsync();
+                string requestUri = $"/titan3d/cloudassets/GetAssetHash?{queryString}";
+
+                // 发送请求
+                HttpResponseMessage response = await httpClient.GetAsync(requestUri);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string hash = await response.Content.ReadAsStringAsync();
+                    return hash;
+                }
+                else
+                {
+                    Console.WriteLine($"请求失败: {response.StatusCode}");
+                    string errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"错误详情: {errorContent}");
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"网络请求错误: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"发生未预期错误: {ex.Message}");
+            }
+            return null;
+        }
+
         public static bool SureCloudAMeta(RName rn)
         {
             if (rn.RNameType != ERNameType.Cloud)
@@ -93,6 +136,11 @@ namespace EngineNS
                     {
                         return false;
                     }
+                }
+                else
+                {
+                    //test hash for ameta file
+                    var hash = GetAssetHash(rn).GetResultUntilCompleted();
                 }
                 ameta = TtAssetMetaManager.LoadAMeta(root, rn.RNameType, file);
                 TtEngine.Instance.AssetMetaManager.RegAsset(ameta);

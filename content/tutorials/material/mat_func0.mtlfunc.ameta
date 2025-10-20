@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialFunctionAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="8df77479-6f69-4965-8ef1-a406a7bafed2" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/material/mat_func0.mtlfunc,8df77479-6f69-4965-8ef1-a406a7bafed2" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.TtMaterialFunction&#xA;" />

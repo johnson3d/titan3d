@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.UI.TtUIAssetAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="7b704a827fcbfdf06b39cf96c7b7450ac0c5b71da8e59683ffbc3e98575419b3" />
+      <Path Type="System.String@Unknown" Value="hello.ui/class_graph.dat" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="1f36458732363005d10085eed68bb8aed9b3f94ad01087e45f5ce399e0db7b39" />
+      <Path Type="System.String@Unknown" Value="hello.ui/on_click_2240035251220394824_f6_2a_6e_26_e9_43_d4_9a_58_39_a4_b2_e2_77_1f_21_3c_5b_55_8f.fn" />
+    </e_1>
+  </AssetFiles>
   <AssetId Type="System.Guid@Unknown" Value="e1520501-a052-4abe-a7d6-e9cfdf41e8e0" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/helloword/hello.ui,e1520501-a052-4abe-a7d6-e9cfdf41e8e0" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.UI.TtUIAsset&#xA;Hahah" />
+  <DesignResolution Type="EngineNS.Vector2i@EngineCore" Value="0,0" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
@@ -10,6 +22,7 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
+  <IsDisable Type="System.Boolean@Unknown" Value="False" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.UI.TtUIAsset@EngineCore" />
 </Root>

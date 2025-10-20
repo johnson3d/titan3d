@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.NodeGraph;
-using Microsoft.Toolkit.HighPerformance.Helpers;
-using static Org.BouncyCastle.Math.Primes;
+using EngineNS.Thread.Async;
+using EngineNS.IO;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
@@ -44,6 +44,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //}, Thread.Async.EAsyncTarget.AsyncIO);
             //Resume Editor Operate
             TtEngine.Instance.ResumeOperation();
+        }
+        public override async TtTask<IAsset> LoadAsset(params object[] args)
+        {
+            return await TtEngine.Instance.GfxDevice.MaterialFunctionManager.GetMaterialFunction(this.AssetName);
         }
     }
     [TtMaterialFunction.MaterialFunctionImport]
@@ -368,7 +372,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 var f = i as Bricks.CodeBuilder.ShaderNode.Control.TtCallMaterialFunctionNode;
                 if (f == null)
                     continue;
-                var refFunc = TtEngine.Instance.GfxDevice.MaterialFunctionManager.GetMaterialFunctionSync(f.FunctionName);
+                var refFunc = f.FunctionName.GetAsset<Graphics.Pipeline.Shader.TtMaterialFunction>().GetResultUntilCompleted();
                 if (refFunc != null)
                 {
                     refFunc.WriteRefHLSLCode(ref code);
@@ -416,7 +420,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
 
         public Dictionary<RName, TtMaterialFunction> MaterialFunctions { get; } = new Dictionary<RName, TtMaterialFunction>();
-        public async Thread.Async.TtTask<TtMaterialFunction> CreateMaterialFunction(RName rn)
+        public static async Thread.Async.TtTask<TtMaterialFunction> CreateMaterialFunction(RName rn)
         {
             TtMaterialFunction result;
             result = await TtEngine.Instance.EventPoster.Post((state) =>
@@ -425,7 +429,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 {
                     if (xnd != null)
                     {
-                        var material = TtMaterialFunction.LoadXnd(this, xnd.RootNode);
+                        var material = TtMaterialFunction.LoadXnd(null, xnd.RootNode);
                         if (material == null)
                             return null;
 
@@ -469,31 +473,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     }
                 }
             }, Thread.Async.EAsyncTarget.AsyncIO);
-
-            if (result != null)
-            {
-                MaterialFunctions[rn] = result;
-                return result;
-            }
-
-            return null;
-        }
-        public TtMaterialFunction GetMaterialFunctionSync(RName rn)
-        {
-            if (rn == null)
-                return null;
-
-            TtMaterialFunction result;
-            if (MaterialFunctions.TryGetValue(rn, out result))
-                return result;
-
-            using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
-            {
-                if (xnd != null)
-                {
-                    result = TtMaterialFunction.LoadXnd(this, xnd.RootNode);
-                }
-            }
 
             if (result != null)
             {

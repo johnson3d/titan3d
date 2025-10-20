@@ -208,13 +208,9 @@ namespace EngineNS.Bricks.DataCopyer
             }
             else if (t == typeof(RName))
             {
-                RName.ERNameType rt;
-                ar.Read(out rt);
-                if (rt == RName.ERNameType.Unkown)
-                    return null;
-                string name;
-                ar.Read(out name);
-                return RName.GetRName(name, rt);
+                RName v;
+                ar.Read(out v);
+                return v;
             }
             else if (t == typeof(Rtti.TtTypeDesc))
             {
@@ -353,17 +349,7 @@ namespace EngineNS.Bricks.DataCopyer
             }
             else if (t == typeof(RName))
             {
-                if (obj == null)
-                {
-                    ar.Write(RName.ERNameType.Unkown);
-                }
-                else
-                {
-                    var rn = (RName)obj;
-                    ar.Write(rn.RNameType);
-                    ar.Write(rn.Name);
-                }
-                //ar.Write((RName)obj);
+                ar.Write((RName)obj);
             }
             else if (t == typeof(Rtti.TtTypeDesc))
             {

@@ -19,29 +19,32 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 public override unsafe void Save(IO.IWriter ar, object host, string propName)
                 {
-                    System.Diagnostics.Debug.Assert(propName == "PxShapes");
-                    var rbData = host as TtRigidBodyNodeData;
-                    ar.Write(rbData.PxShapes.Count);
-                    foreach (var i in rbData.PxShapes)
-                    {
-                        var sr = i.GetShapeSerializer();
-                        IO.SerializerHelper.WriteObject(ar, sr.GetType(), sr);
-                    }
+                    System.Diagnostics.Debug.Assert(false);
+                    //System.Diagnostics.Debug.Assert(propName == "PxShapes");
+                    //var rbData = host as TtRigidBodyNodeData;
+                    //ar.Write(rbData.PxShapes.Count);
+                    //foreach (var i in rbData.PxShapes)
+                    //{
+                    //    Bricks.DataCopyer.TtDataCopyer.WriteObject(ar, i.GetType(), i);
+                    //}
                 }
                 public override unsafe object Load(IO.IReader ar, object host, string propName)
                 {
-                    System.Diagnostics.Debug.Assert(propName == "PxShapes");
-                    var rbData = host as TtRigidBodyNodeData;
-                    rbData.PxShapes.Clear();
-                    int count = 0;
-                    ar.Read(out count);
-                    for (int i = 0; i < count; i++)
-                    {
-                        var sr = IO.SerializerHelper.ReadObject(ar, typeof(TtPhyShape.TtShapeSerializer), null) as TtPhyShape.TtShapeSerializer;
-                        var shape = TtPhyShape.CreateShape(sr);
-                        rbData.PxShapes.Add(shape);
-                    }
-                    return rbData.PxShapes;
+                    System.Diagnostics.Debug.Assert(false);
+                    return null;
+                    //System.Diagnostics.Debug.Assert(propName == "PxShapes");
+                    //var rbData = host as TtRigidBodyNodeData;
+                    //rbData.PxShapes.Clear();
+                    //int count = 0;
+                    //ar.Read(out count);
+                    //for (int i = 0; i < count; i++)
+                    //{
+                    //    var sr = Bricks.DataCopyer.TtDataCopyer.ReadObject(ar, i.GetType(), null, true) as TtPhyShape.TtShapeSerializer;
+                    //    //var sr = IO.SerializerHelper.ReadObject(ar, typeof(TtPhyShape.TtShapeSerializer), null) as TtPhyShape.TtShapeSerializer;
+                    //    var shape = TtPhyShape.CreateShape(sr);
+                    //    rbData.PxShapes.Add(shape);
+                    //}
+                    //return rbData.PxShapes;
                 }
             }
             [TtShapeSerializer]

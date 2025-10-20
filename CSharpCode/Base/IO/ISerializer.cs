@@ -177,6 +177,7 @@ namespace EngineNS.IO
             {
                 ar.Seek(pos);
             }
+            System.Diagnostics.Debug.Assert(false);
             foreach (var i in metaVersion.Propertys)
             {
                 if (i.CustumSerializer != null)
@@ -190,7 +191,7 @@ namespace EngineNS.IO
                     continue;
                 }
                 var value = ReadObject(ar, i.FieldType.SystemType, obj);
-                
+
                 if (value != null && i.PropInfo != null)
                 {
                     if (Rtti.TtTypeDesc.CanCast(value.GetType(), i.PropInfo.PropertyType) == false)
@@ -284,538 +285,27 @@ namespace EngineNS.IO
                 ar.Write(MemberMagic_2);
                 Bricks.DataCopyer.TtDataCopyer.WriteMember(ar, obj, metaVersion);
             }
-            else
-            {
-                foreach (var i in metaVersion.Propertys)
-                {
-                    if (i.PropInfo != null && i.PropInfo.CanRead)
-                    {
-                        if (i.CustumSerializer != null)
-                        {
-                            i.CustumSerializer.Save(ar, obj, i.PropertyName);
-                            continue;
-                        }
+            //else
+            //{
+            //    foreach (var i in metaVersion.Propertys)
+            //    {
+            //        if (i.PropInfo != null && i.PropInfo.CanRead)
+            //        {
+            //            if (i.CustumSerializer != null)
+            //            {
+            //                i.CustumSerializer.Save(ar, obj, i.PropertyName);
+            //                continue;
+            //            }
 
-                        var value = i.PropInfo.GetValue(obj, null);
-                        if (value != null)
-                            WriteObject(ar, value.GetType(), value);
-                        else
-                            WriteObject(ar, i.PropInfo.PropertyType, value);
-                    }
-                }
-            }
+            //            var value = i.PropInfo.GetValue(obj, null);
+            //            if (value != null)
+            //                WriteObject(ar, value.GetType(), value);
+            //            else
+            //                WriteObject(ar, i.PropInfo.PropertyType, value);
+            //        }
+            //    }
+            //}
         }
-        public static void WriteObject(IWriter ar, Type t, object obj)
-        {
-            bool isNull = false;
-            if (obj == null)
-            {
-                isNull = true;
-                ar.Write(isNull);
-                return;
-            }
-
-            if (t.IsEnum)
-            {
-                ar.Write(isNull);
-                var v = System.Convert.ToString(obj);
-                ar.Write(v);
-            }
-            else if (t.IsValueType)
-            {
-                ar.Write(isNull);
-                unsafe
-                {
-                    var size = System.Runtime.InteropServices.Marshal.SizeOf(t);
-                    var pBuffer = stackalloc byte[size];
-                    System.Runtime.InteropServices.Marshal.StructureToPtr(obj, (IntPtr)pBuffer, false);
-                    ar.WritePtr(pBuffer, size);
-                }
-            }
-            else if (t == typeof(string))
-            {
-                ar.Write(isNull);
-                var v = (string)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(RName))
-            {
-                ar.Write(isNull);
-                var v = (RName)obj;
-                if (v == null)
-                {
-                    ar.Write(true);
-                }
-                else
-                {
-                    ar.Write(false);
-                    ar.Write(v.AssetId);
-                    ar.Write(v.RNameType);
-                    ar.Write(v.Name);
-                }
-            }
-            else if(t == typeof(Rtti.TtTypeDesc))
-            {
-                ar.Write(isNull);
-                var v = (Rtti.TtTypeDesc)obj;
-                if(v == null)
-                {
-                    ar.Write(true);
-                }
-                else
-                {
-                    ar.Write(false);
-                    var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(v);
-                    ar.Write(typeStr);
-                }
-            }
-            else if (t.GetInterface(nameof(ISerializer)) != null)
-            {
-                ar.Write(isNull);
-                Write(ar, obj as ISerializer, null);
-            }            
-            else if(obj is System.Collections.IList)
-            {
-                ar.Write(isNull);
-                var lst = obj as System.Collections.IList;
-                var elemType = obj.GetType().GetGenericArguments()[0];
-                ar.Write(elemType.IsValueType);
-                ar.Write(lst.Count);
-                if (elemType.IsValueType)
-                {
-                    var elemTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemType);
-                    ar.Write(elemTypeStr);
-                    var offset = WriteSkippable(ar);
-                    for (int j = 0; j < lst.Count; j++)
-                    {
-                        var e = lst[j];
-                        WriteObject(ar, e.GetType(), e);
-                    }
-                    SureSkippable(ar, offset);
-                }
-                else
-                {
-                    for (int j = 0; j < lst.Count; j++)
-                    {
-                        var e = lst[j];
-                        var elemTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(e.GetType());
-                        ar.Write(elemTypeStr);
-                        var offset = WriteSkippable(ar);
-                        WriteObject(ar, e.GetType(), e);
-                        SureSkippable(ar, offset);
-                    }
-                }
-            }
-            else if (obj is System.Collections.IDictionary)
-            {
-                ar.Write(isNull);
-                var lst = obj as System.Collections.IDictionary;
-                var elemKeyType = obj.GetType().GetGenericArguments()[0];
-                var elemValueType = obj.GetType().GetGenericArguments()[1];
-                bool isKeyValueType = elemKeyType.IsValueType || elemKeyType == typeof(string);
-                bool isValueValueType = elemValueType.IsValueType || elemValueType == typeof(string);
-                ar.Write(isKeyValueType);
-                ar.Write(isValueValueType);
-                ar.Write(lst.Count);
-                if (isKeyValueType && isValueValueType)
-                {
-                    var elemKeyTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemKeyType);
-                    ar.Write(elemKeyTypeStr);
-                    var elemValueTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemValueType);
-                    ar.Write(elemValueTypeStr);
-                    var offset = WriteSkippable(ar);
-                    System.Collections.IDictionaryEnumerator j = lst.GetEnumerator();
-                    while (j.MoveNext())
-                    {
-                        WriteObject(ar, elemKeyType, j.Key);
-                        WriteObject(ar, elemValueType, j.Value);
-                    }
-                    SureSkippable(ar, offset);
-                }
-                else if (isKeyValueType && !isValueValueType)
-                {
-                    System.Collections.IDictionaryEnumerator j = lst.GetEnumerator();
-                    var elemKeyTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemKeyType);
-                    ar.Write(elemKeyTypeStr);
-                    var offset = WriteSkippable(ar);
-                    while (j.MoveNext())
-                    {
-                        var elemValueTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemValueType);
-                        ar.Write(elemValueTypeStr);
-                        var offset1 = WriteSkippable(ar);
-                        WriteObject(ar, elemKeyType, j.Key);
-                        WriteObject(ar, elemValueType, j.Value);
-                        SureSkippable(ar, offset1);
-                    }
-                    SureSkippable(ar, offset);
-                }
-                else if (!isKeyValueType && isValueValueType)
-                {
-                    System.Collections.IDictionaryEnumerator j = lst.GetEnumerator();
-                    var elemValueTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemValueType);
-                    ar.Write(elemValueTypeStr);
-                    var offset = WriteSkippable(ar);
-                    while (j.MoveNext())
-                    {
-                        var elemKeyTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemKeyType);
-                        ar.Write(elemKeyTypeStr);
-                        var offset1 = WriteSkippable(ar);
-                        WriteObject(ar, elemKeyType, j.Key);
-                        WriteObject(ar, elemValueType, j.Value);
-                        SureSkippable(ar, offset1);
-                    }
-                    SureSkippable(ar, offset);
-                }
-                else if (!isKeyValueType && !isValueValueType)
-                {
-                    System.Collections.IDictionaryEnumerator j = lst.GetEnumerator();
-                    while (j.MoveNext())
-                    {
-                        var elemValueTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemValueType);
-                        ar.Write(elemValueTypeStr);
-                        var elemKeyTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemKeyType);
-                        ar.Write(elemKeyTypeStr);
-                        var offset = WriteSkippable(ar);
-                        WriteObject(ar, elemKeyType, j.Key);
-                        WriteObject(ar, elemValueType, j.Value);
-                        SureSkippable(ar, offset);
-                    }
-                }
-            }
-            else
-            {
-                // 无法存盘默认null
-                ar.Write(true);
-
-                var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(t);
-                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
-            }
-        }
-        //public static bool DoIsNull = true;
-        public static object ReadObject(IReader ar, Type t, object hostObject)
-        {
-            //if (DoIsNull)
-            {
-                bool isNull = false;
-                ar.Read(out isNull);
-                if (isNull)
-                    return null;
-            }
-            if (t.IsEnum)
-            {
-                string v;
-                ar.Read(out v);
-                return Support.TConvert.ToEnumValue(t, v);
-            }
-            else if (t.IsValueType)
-            {
-                unsafe
-                {
-                    var size = System.Runtime.InteropServices.Marshal.SizeOf(t);
-                    var attrs = t.GetCustomAttributes(typeof(Rtti.TtStructAttrubte), false);
-                    if(attrs.Length>0)
-                    {
-                        size = (attrs[0] as Rtti.TtStructAttrubte).ReadSize;
-                    }                    
-                    var pBuffer = stackalloc byte[size];
-                    ar.ReadPtr(pBuffer, size);
-                    var v = System.Runtime.InteropServices.Marshal.PtrToStructure((IntPtr)pBuffer, t);
-                    return v;
-                }
-            }
-            else if (t == typeof(string))
-            {
-                string v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(RName))
-            {
-                bool isNull;
-                ar.Read(out isNull);
-                if (!isNull)
-                {
-                    Guid assetId;
-                    ar.Read(out assetId);
-                    RName.ERNameType rnType;
-                    ar.Read(out rnType);
-                    string name;
-                    ar.Read(out name);
-                    var v = RName.GetRName(name, rnType);
-                    v.AssetId = assetId;
-                    return v;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            else if(t == typeof(Rtti.TtTypeDesc))
-            {
-                bool isNull;
-                ar.Read(out isNull);
-                if(!isNull)
-                {
-                    string typeStr;
-                    ar.Read(out typeStr);
-                    return Rtti.TtTypeDesc.TypeOf(typeStr);
-                }
-                return null;
-            }
-            else if (t.GetInterface(nameof(ISerializer)) != null)
-            {
-                bool isNull = false;
-                ar.Read(out isNull);
-                if (isNull)
-                {
-                    return null;
-                }
-
-                Hash64 typeHash;
-                ar.Read(out typeHash);
-                
-                uint magic;
-                ar.Read(out magic);
-                UInt64 versionHash;
-                if (magic != SerializerHelper.HashMagic)
-                {
-                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"读取到老的资产格式请重新保存成最新版本");
-                    versionHash = magic;
-                }
-                else
-                {
-                    ar.Read(out versionHash);
-                }
-
-                var savePos = ar.GetPosition();
-                uint ObjDataSize = 0;
-                ar.Read(out ObjDataSize);
-                savePos += ObjDataSize;
-
-                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
-                Rtti.TtMetaVersion metaVersion;
-                if (meta != null && (metaVersion = meta.GetMetaVersion(versionHash)) != null)
-                {
-                    var obj = Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as ISerializer;
-                    obj.OnPreRead(ar.Tag, hostObject, false);
-                    Read(ar, obj, metaVersion);
-                    obj.OnPostRead(ar.Tag, hostObject, false);
-                    return obj;
-                }
-                else
-                {
-                    ar.Seek(savePos);
-                    return null;
-                }
-            }            
-            else if (t.GetInterface(nameof(System.Collections.IList)) != null)
-            {
-                var lst = Rtti.TtTypeDescManager.CreateInstance(t) as System.Collections.IList;
-                bool isValueType;
-                ar.Read(out isValueType);
-                int count = 0;
-                ar.Read(out count);
-                if (isValueType)
-                {
-                    string elemTypeStr;
-                    ar.Read(out elemTypeStr);
-                    var skipPoint = GetSkipOffset(ar);
-                    try
-                    {
-                        var elemType = Rtti.TtTypeDesc.TypeOf(elemTypeStr).SystemType;
-                        if (elemType == null)
-                        {
-                            throw new IOException($"Read List: {elemTypeStr} is missing");
-                        }
-                        for (int j = 0; j < count; j++)
-                        {
-                            var e = ReadObject(ar, elemType, hostObject);
-                            lst.Add(e);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Profiler.Log.WriteException(ex);
-                        ar.Seek(skipPoint);
-                    }
-                }
-                else
-                {
-                    for (int j = 0; j < count; j++)
-                    {
-                        string elemTypeStr;
-                        ar.Read(out elemTypeStr);
-                        var skipPoint = GetSkipOffset(ar);
-                        try
-                        {
-                            var elemType = Rtti.TtTypeDesc.TypeOf(elemTypeStr).SystemType;
-                            if (elemType == null)
-                            {
-                                throw new IOException($"Read List: {elemTypeStr} is missing");
-                            }
-                            var e = ReadObject(ar, elemType, hostObject);
-                            lst.Add(e);
-                        }
-                        catch (Exception ex)
-                        {
-                            Profiler.Log.WriteException(ex);
-                            ar.Seek(skipPoint);
-                        }
-                    }
-                }
-                return lst;
-            }
-            else if (t.GetInterface(nameof(System.Collections.IDictionary)) != null)
-            {
-                var lst = Rtti.TtTypeDescManager.CreateInstance(t) as System.Collections.IDictionary;
-                bool isKeyValueType;
-                bool isValueValueType;
-                ar.Read(out isKeyValueType);
-                ar.Read(out isValueValueType);
-                int count;
-                ar.Read(out count);
-                if (isKeyValueType && isValueValueType)
-                {
-                    string elemKeyTypeStr;
-                    ar.Read(out elemKeyTypeStr);
-                    string elemValueTypeStr;
-                    ar.Read(out elemValueTypeStr);
-
-                    var skipPoint = GetSkipOffset(ar);
-                    try
-                    {
-                        var elemKeyType = Rtti.TtTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
-                        if (elemKeyType == null)
-                            throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
-                        var elemValueType = Rtti.TtTypeDesc.TypeOf(elemValueTypeStr).SystemType;
-                        if (elemValueType == null)
-                            throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
-                        for (int i = 0; i < count; i++)
-                        {
-                            var key = ReadObject(ar, elemKeyType, hostObject);
-                            var value = ReadObject(ar, elemValueType, hostObject);
-                            lst[key] = value;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Profiler.Log.WriteException(ex);
-                        ar.Seek(skipPoint);
-                    }
-                }
-                else if (isKeyValueType && !isValueValueType)
-                {
-                    string elemKeyTypeStr;
-                    ar.Read(out elemKeyTypeStr);
-                    var skipPoint = GetSkipOffset(ar);
-                    try
-                    {
-                        var elemKeyType = Rtti.TtTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
-                        if (elemKeyType == null)
-                            throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
-                        for (int i = 0; i < count; i++)
-                        {
-                            string elemValueTypeStr;
-                            ar.Read(out elemValueTypeStr);
-                            var skipPoint1 = GetSkipOffset(ar);
-                            var elemValueType = Rtti.TtTypeDesc.TypeOf(elemValueTypeStr).SystemType;
-                            if (elemValueType == null)
-                                throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
-                            try
-                            {
-                                var key = ReadObject(ar, elemKeyType, hostObject);
-                                var value = ReadObject(ar, elemValueType, hostObject);
-                                lst[key] = value;
-                            }
-                            catch (Exception ex)
-                            {
-                                Profiler.Log.WriteException(ex);
-                                ar.Seek(skipPoint1);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Profiler.Log.WriteException(ex);
-                        ar.Seek(skipPoint);
-                    }
-                }
-                else if (!isKeyValueType && isValueValueType)
-                {
-                    string elemValueTypeStr;
-                    ar.Read(out elemValueTypeStr);
-                    var skipPoint = GetSkipOffset(ar);
-                    try
-                    {
-                        var elemValueType = Rtti.TtTypeDesc.TypeOf(elemValueTypeStr).SystemType;
-                        if (elemValueType == null)
-                            throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
-
-                        for (int i = 0; i < count; i++)
-                        {
-                            string elemKeyTypeStr;
-                            ar.Read(out elemKeyTypeStr);
-                            var skipPoint1 = GetSkipOffset(ar);
-                            try
-                            {
-                                var elemKeyType = Rtti.TtTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
-                                if (elemKeyType == null)
-                                    throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
-                                var key = ReadObject(ar, elemKeyType, hostObject);
-                                var value = ReadObject(ar, elemValueType, hostObject);
-                                lst[key] = value;
-                            }
-                            catch (Exception ex)
-                            {
-                                Profiler.Log.WriteException(ex);
-                                ar.Seek(skipPoint1);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Profiler.Log.WriteException(ex);
-                        ar.Seek(skipPoint);
-                    }
-                }
-                else if (!isKeyValueType && !isValueValueType)
-                {
-                    for (int i = 0; i < count; i++)
-                    {
-                        string elemKeyTypeStr;
-                        ar.Read(out elemKeyTypeStr);
-                        var skipPoint = GetSkipOffset(ar);
-                        try
-                        {
-                            var elemKeyType = Rtti.TtTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
-                            if (elemKeyType == null)
-                                throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
-                            string elemValueTypeStr;
-                            ar.Read(out elemValueTypeStr);
-                            var elemValueType = Rtti.TtTypeDesc.TypeOf(elemValueTypeStr).SystemType;
-                            if (elemValueType == null)
-                                throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
-                            var key = ReadObject(ar, elemKeyType, hostObject);
-                            var value = ReadObject(ar, elemValueType, hostObject);
-                            lst[key] = value;
-                        }
-                        catch (Exception ex)
-                        {
-                            Profiler.Log.WriteException(ex);
-                            ar.Seek(skipPoint);
-                        }
-                    }
-                }
-                return lst;
-            }
-            else
-            {
-                var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(t);
-                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
-            }
-            return null;
-        }
-
         public static bool WriteObjectMetaFields(System.Xml.XmlDocument xml, System.Xml.XmlElement node, object obj)
         {
             if (obj == null)
@@ -1198,6 +688,332 @@ namespace EngineNS.IO
         public static T LoadFromJson<T>(string txt)
         {
             return System.Text.Json.JsonSerializer.Deserialize<T>(txt);
+        }
+
+        public static object ReadObject(IReader ar, Type t, object hostObject)
+        {
+            //尽量兼容老数据用的，不要再调用了
+            System.Diagnostics.Debug.Assert(false);
+            //if (DoIsNull)
+            {
+                bool isNull = false;
+                ar.Read(out isNull);
+                if (isNull)
+                    return null;
+            }
+            if (t.IsEnum)
+            {
+                string v;
+                ar.Read(out v);
+                return Support.TConvert.ToEnumValue(t, v);
+            }
+            else if (t.IsValueType)
+            {
+                unsafe
+                {
+                    var size = System.Runtime.InteropServices.Marshal.SizeOf(t);
+                    var attrs = t.GetCustomAttributes(typeof(Rtti.TtStructAttrubte), false);
+                    if (attrs.Length>0)
+                    {
+                        size = (attrs[0] as Rtti.TtStructAttrubte).ReadSize;
+                    }
+                    var pBuffer = stackalloc byte[size];
+                    ar.ReadPtr(pBuffer, size);
+                    var v = System.Runtime.InteropServices.Marshal.PtrToStructure((IntPtr)pBuffer, t);
+                    return v;
+                }
+            }
+            else if (t == typeof(string))
+            {
+                string v;
+                ar.Read(out v);
+                return v;
+            }
+            else if (t == typeof(RName))
+            {
+                bool isNull;
+                ar.Read(out isNull);
+                if (!isNull)
+                {
+                    Guid assetId;
+                    ar.Read(out assetId);
+                    RName.ERNameType rnType;
+                    ar.Read(out rnType);
+                    string name;
+                    ar.Read(out name);
+                    var v = RName.GetRName(name, rnType);
+                    v.AssetId = assetId;
+                    return v;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else if (t == typeof(Rtti.TtTypeDesc))
+            {
+                bool isNull;
+                ar.Read(out isNull);
+                if (!isNull)
+                {
+                    string typeStr;
+                    ar.Read(out typeStr);
+                    return Rtti.TtTypeDesc.TypeOf(typeStr);
+                }
+                return null;
+            }
+            else if (t.GetInterface(nameof(ISerializer)) != null)
+            {
+                bool isNull = false;
+                ar.Read(out isNull);
+                if (isNull)
+                {
+                    return null;
+                }
+
+                Hash64 typeHash;
+                ar.Read(out typeHash);
+
+                uint magic;
+                ar.Read(out magic);
+                UInt64 versionHash;
+                if (magic != SerializerHelper.HashMagic)
+                {
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"读取到老的资产格式请重新保存成最新版本");
+                    versionHash = magic;
+                }
+                else
+                {
+                    ar.Read(out versionHash);
+                }
+
+                var savePos = ar.GetPosition();
+                uint ObjDataSize = 0;
+                ar.Read(out ObjDataSize);
+                savePos += ObjDataSize;
+
+                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+                Rtti.TtMetaVersion metaVersion;
+                if (meta != null && (metaVersion = meta.GetMetaVersion(versionHash)) != null)
+                {
+                    var obj = Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as ISerializer;
+                    obj.OnPreRead(ar.Tag, hostObject, false);
+                    Read(ar, obj, metaVersion);
+                    obj.OnPostRead(ar.Tag, hostObject, false);
+                    return obj;
+                }
+                else
+                {
+                    ar.Seek(savePos);
+                    return null;
+                }
+            }
+            else if (t.GetInterface(nameof(System.Collections.IList)) != null)
+            {
+                var lst = Rtti.TtTypeDescManager.CreateInstance(t) as System.Collections.IList;
+                bool isValueType;
+                ar.Read(out isValueType);
+                int count = 0;
+                ar.Read(out count);
+                if (isValueType)
+                {
+                    string elemTypeStr;
+                    ar.Read(out elemTypeStr);
+                    var skipPoint = GetSkipOffset(ar);
+                    try
+                    {
+                        var elemType = Rtti.TtTypeDesc.TypeOf(elemTypeStr).SystemType;
+                        if (elemType == null)
+                        {
+                            throw new IOException($"Read List: {elemTypeStr} is missing");
+                        }
+                        for (int j = 0; j < count; j++)
+                        {
+                            var e = ReadObject(ar, elemType, hostObject);
+                            lst.Add(e);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                        ar.Seek(skipPoint);
+                    }
+                }
+                else
+                {
+                    for (int j = 0; j < count; j++)
+                    {
+                        string elemTypeStr;
+                        ar.Read(out elemTypeStr);
+                        var skipPoint = GetSkipOffset(ar);
+                        try
+                        {
+                            var elemType = Rtti.TtTypeDesc.TypeOf(elemTypeStr).SystemType;
+                            if (elemType == null)
+                            {
+                                throw new IOException($"Read List: {elemTypeStr} is missing");
+                            }
+                            var e = ReadObject(ar, elemType, hostObject);
+                            lst.Add(e);
+                        }
+                        catch (Exception ex)
+                        {
+                            Profiler.Log.WriteException(ex);
+                            ar.Seek(skipPoint);
+                        }
+                    }
+                }
+                return lst;
+            }
+            else if (t.GetInterface(nameof(System.Collections.IDictionary)) != null)
+            {
+                var lst = Rtti.TtTypeDescManager.CreateInstance(t) as System.Collections.IDictionary;
+                bool isKeyValueType;
+                bool isValueValueType;
+                ar.Read(out isKeyValueType);
+                ar.Read(out isValueValueType);
+                int count;
+                ar.Read(out count);
+                if (isKeyValueType && isValueValueType)
+                {
+                    string elemKeyTypeStr;
+                    ar.Read(out elemKeyTypeStr);
+                    string elemValueTypeStr;
+                    ar.Read(out elemValueTypeStr);
+
+                    var skipPoint = GetSkipOffset(ar);
+                    try
+                    {
+                        var elemKeyType = Rtti.TtTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
+                        if (elemKeyType == null)
+                            throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
+                        var elemValueType = Rtti.TtTypeDesc.TypeOf(elemValueTypeStr).SystemType;
+                        if (elemValueType == null)
+                            throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
+                        for (int i = 0; i < count; i++)
+                        {
+                            var key = ReadObject(ar, elemKeyType, hostObject);
+                            var value = ReadObject(ar, elemValueType, hostObject);
+                            lst[key] = value;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                        ar.Seek(skipPoint);
+                    }
+                }
+                else if (isKeyValueType && !isValueValueType)
+                {
+                    string elemKeyTypeStr;
+                    ar.Read(out elemKeyTypeStr);
+                    var skipPoint = GetSkipOffset(ar);
+                    try
+                    {
+                        var elemKeyType = Rtti.TtTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
+                        if (elemKeyType == null)
+                            throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
+                        for (int i = 0; i < count; i++)
+                        {
+                            string elemValueTypeStr;
+                            ar.Read(out elemValueTypeStr);
+                            var skipPoint1 = GetSkipOffset(ar);
+                            var elemValueType = Rtti.TtTypeDesc.TypeOf(elemValueTypeStr).SystemType;
+                            if (elemValueType == null)
+                                throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
+                            try
+                            {
+                                var key = ReadObject(ar, elemKeyType, hostObject);
+                                var value = ReadObject(ar, elemValueType, hostObject);
+                                lst[key] = value;
+                            }
+                            catch (Exception ex)
+                            {
+                                Profiler.Log.WriteException(ex);
+                                ar.Seek(skipPoint1);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                        ar.Seek(skipPoint);
+                    }
+                }
+                else if (!isKeyValueType && isValueValueType)
+                {
+                    string elemValueTypeStr;
+                    ar.Read(out elemValueTypeStr);
+                    var skipPoint = GetSkipOffset(ar);
+                    try
+                    {
+                        var elemValueType = Rtti.TtTypeDesc.TypeOf(elemValueTypeStr).SystemType;
+                        if (elemValueType == null)
+                            throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
+
+                        for (int i = 0; i < count; i++)
+                        {
+                            string elemKeyTypeStr;
+                            ar.Read(out elemKeyTypeStr);
+                            var skipPoint1 = GetSkipOffset(ar);
+                            try
+                            {
+                                var elemKeyType = Rtti.TtTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
+                                if (elemKeyType == null)
+                                    throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
+                                var key = ReadObject(ar, elemKeyType, hostObject);
+                                var value = ReadObject(ar, elemValueType, hostObject);
+                                lst[key] = value;
+                            }
+                            catch (Exception ex)
+                            {
+                                Profiler.Log.WriteException(ex);
+                                ar.Seek(skipPoint1);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                        ar.Seek(skipPoint);
+                    }
+                }
+                else if (!isKeyValueType && !isValueValueType)
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        string elemKeyTypeStr;
+                        ar.Read(out elemKeyTypeStr);
+                        var skipPoint = GetSkipOffset(ar);
+                        try
+                        {
+                            var elemKeyType = Rtti.TtTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
+                            if (elemKeyType == null)
+                                throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
+                            string elemValueTypeStr;
+                            ar.Read(out elemValueTypeStr);
+                            var elemValueType = Rtti.TtTypeDesc.TypeOf(elemValueTypeStr).SystemType;
+                            if (elemValueType == null)
+                                throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
+                            var key = ReadObject(ar, elemKeyType, hostObject);
+                            var value = ReadObject(ar, elemValueType, hostObject);
+                            lst[key] = value;
+                        }
+                        catch (Exception ex)
+                        {
+                            Profiler.Log.WriteException(ex);
+                            ar.Seek(skipPoint);
+                        }
+                    }
+                }
+                return lst;
+            }
+            else
+            {
+                var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(t);
+                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+            }
+            return null;
         }
     }
 }

@@ -4,6 +4,7 @@ using EngineNS.IO;
 using EngineNS.Rtti;
 using EngineNS.UI.Bind;
 using EngineNS.UI.Controls.Containers;
+using NPOI.SS.Formula.Functions;
 using Org.BouncyCastle.Asn1.Mozilla;
 using System;
 using System.Collections.Generic;
@@ -686,7 +687,8 @@ namespace EngineNS.UI.Controls
                         ar.Write(Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(expr.Key.PropertyType.SystemType));
                         var offset = SerializerHelper.WriteSkippable(ar);
                         var value = expr.Value.GetValue<object>(expr.Key);
-                        SerializerHelper.WriteObject(ar, expr.Key.PropertyType.SystemType, value);
+                        Bricks.DataCopyer.TtDataCopyer.WriteObject(ar, expr.Key.PropertyType.SystemType, value);
+                        //SerializerHelper.WriteObject(ar, expr.Key.PropertyType.SystemType, value);
                         SerializerHelper.SureSkippable(ar, offset);
                     }
                 }
@@ -721,7 +723,8 @@ namespace EngineNS.UI.Controls
                         {
                             throw new EngineNS.IO.IOException($"Read attacked property: property type {proType} is missing");
                         }
-                        var valObj = EngineNS.IO.SerializerHelper.ReadObject(ar, type, host);
+                        var valObj = Bricks.DataCopyer.TtDataCopyer.ReadObject(ar, type, host, null, true); 
+                        //var valObj = EngineNS.IO.SerializerHelper.ReadObject(ar, type, host);
                         var pro = EngineNS.TtEngine.Instance.UIBindManager.FindBindableProperty(proName, hostType);
                         if (pro == null)
                             continue;

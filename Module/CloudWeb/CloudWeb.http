@@ -1,0 +1,6 @@
+@CloudWeb_HostAddress = http://localhost:5259
+
+GET {{CloudWeb_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

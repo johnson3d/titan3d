@@ -20,6 +20,9 @@ namespace EngineNS
     [RName.PGRName]
     public partial class RName : IComparable<RName>, IComparable
     {
+        public const ushort MinVersion = 100;//don't change this value any time
+        public const ushort CurrentVersion = MinVersion + 0;//increase this value when serialization changed
+
         public class PGRNameAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
         {
             public string FilterExts;   // "ext1" / "ext1,ext2"
