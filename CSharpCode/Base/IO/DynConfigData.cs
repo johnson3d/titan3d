@@ -109,6 +109,52 @@ namespace EngineNS.IO
             }
         }
     }
+
+    public class TtConfigAttribute : Attribute
+    {
+        public string Path;
+    }
+    public interface IConfig
+    {
+
+    }
+    public class TtConfigManager
+    {
+        Dictionary<Rtti.TtTypeDesc, IConfig> mConfigs = new Dictionary<Rtti.TtTypeDesc, IConfig>();
+        public void Initialize()
+        {
+            string dir = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Game, IO.TtFileManager.ESystemDir.Config);
+            Rtti.TtTypeDescManager.Instance.InterateTypes((type) =>
+            {
+                if (type.HasInterface("IConfig"))
+                {
+                    var attr = type.GetCustomAttribute<TtConfigAttribute>(false);
+                    if (attr==null)
+                        return;
+                    var file = TtFileManager.CombinePath(dir, attr.Path);
+                    var jsCode = IO.TtFileManager.ReadAllText(file);
+                    if (jsCode!=null)
+                    {
+                        var cfg = IO.TtFileManager.LoadObjectFromJson(type.SystemType, jsCode) as IConfig;
+                        mConfigs[type] = cfg;
+                    }
+                    else
+                    {
+                        mConfigs[type] = Rtti.TtTypeDescManager.CreateInstance(type) as IConfig;
+                    }
+                }
+            });
+        }
+        public T GetConfig<T>() where T : class, IConfig
+        {
+            var type = Rtti.TtTypeDescGetter<T>.TypeDesc;
+            if (mConfigs.TryGetValue(type, out IConfig cfg))
+            {
+                return cfg as T;
+            }
+            return null;
+        }
+    }
 }
 
 namespace EngineNS
@@ -116,5 +162,6 @@ namespace EngineNS
     partial class TtEngine
     {
         public IO.TtDynConfigData DynConfigData { get; } = new IO.TtDynConfigData();
+        public IO.TtConfigManager ConfigManager { get; } = new IO.TtConfigManager();
     }
 }

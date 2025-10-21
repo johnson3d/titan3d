@@ -485,6 +485,8 @@ namespace EngineNS
                 }
             }
             Config.ConfigName = $"Titan3D.{TtEngineConfig.MajorVersion}.{TtEngineConfig.MiniVersion} [{IO.TtFileManager.GetPureName(cfgFile)}]";
+
+            this.ConfigManager.Initialize();
             #endregion
 
             CoreSDK.SetOnGpuDeviceRemovedCallBack(OnGpuDeviceRemoved);

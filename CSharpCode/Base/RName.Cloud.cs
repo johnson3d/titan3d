@@ -6,6 +6,14 @@ using System.Text;
 
 namespace EngineNS
 {
+    [IO.TtConfig(Path = "cloud.jscfg")]
+    public class TtCloudConfig : IO.IConfig
+    {
+        [Rtti.Meta("")]
+        public string CloudAssetUrlBase { get; set; } = "http://localhost:7000";
+        [Rtti.Meta("")]
+        public string WebApiUrlBase { get; set; } = "http://localhost:7000";
+    }
     public partial class RName
     {
         public static async Thread.Async.TtTask<bool> UploadToCloud(string name, string destinationPath)
@@ -17,7 +25,7 @@ namespace EngineNS
             var httpClient = new System.Net.Http.HttpClient();
             try
             {
-                using var response = await httpClient.GetAsync(TtFileManager.CombinePath(TtEngine.Instance.FileManager.CloudUrlBase, name), HttpCompletionOption.ResponseHeadersRead);
+                using var response = await httpClient.GetAsync(TtFileManager.CombinePath(TtEngine.Instance.ConfigManager.GetConfig<TtCloudConfig>().CloudAssetUrlBase, name), HttpCompletionOption.ResponseHeadersRead);
                 response.EnsureSuccessStatusCode();
                 if (response.StatusCode != System.Net.HttpStatusCode.OK)
                 {
@@ -77,7 +85,7 @@ namespace EngineNS
         public static async Thread.Async.TtTask<string> GetAssetHash(RName rn)
         {
             using var httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri("http://localhost:7000");
+            httpClient.BaseAddress = new Uri(TtEngine.Instance.ConfigManager.GetConfig<TtCloudConfig>().WebApiUrlBase);
 
             try
             {
@@ -120,6 +128,8 @@ namespace EngineNS
         {
             if (rn.RNameType != ERNameType.Cloud)
                 return false;
+            if (rn.ExtName=="")
+                return false;//It's directory
 
             lock (rn)
             {

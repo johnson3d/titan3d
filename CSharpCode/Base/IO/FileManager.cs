@@ -122,6 +122,7 @@ namespace EngineNS.IO
         {
             InitDirectory(args);
             SetSysDir(ESystemDir.MetaData, "metadata");
+            SetSysDir(ESystemDir.Config, "config");
             SetSysDir(ESystemDir.GraphicEffect, "effect/graphic");
             SetSysDir(ESystemDir.ComputeEffect, "effect/compute");
             SetSysDir(ESystemDir.RayTracingEffect, "effect/raytracing");
@@ -129,6 +130,7 @@ namespace EngineNS.IO
             SetSysDir(ESystemDir.RenderDoc, "renderdoc");
             SetSysDir(ESystemDir.DebugUtility, "debugutility");
             SureDirectory(GetPath(ERootDir.Engine, ESystemDir.MetaData));
+            SureDirectory(GetPath(ERootDir.Game, ESystemDir.Config));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.GraphicEffect));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.ComputeEffect));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.PSO));
@@ -155,6 +157,7 @@ namespace EngineNS.IO
         public enum ESystemDir
         {
             MetaData,
+            Config,
             GraphicEffect,
             ComputeEffect,
             RayTracingEffect,
@@ -374,7 +377,7 @@ namespace EngineNS.IO
             }
             if (path2.StartsWith("\\") || path2.StartsWith("/"))
             {
-                path2 = path2.Substring(1, path1.Length - 1);
+                path2 = path2.Substring(1, path2.Length - 1);
             }
 
             var result = path1 + '/' + path2;
@@ -649,6 +652,10 @@ namespace EngineNS.IO
         public static T LoadObjectFromJson<T>(string jsonStr)
         {
             return JsonSerializer.Deserialize<T>(jsonStr, TtJsonOptions.Options);
+        }
+        public static object LoadObjectFromJson(System.Type type, string jsonStr)
+        {
+            return JsonSerializer.Deserialize(jsonStr, type, TtJsonOptions.Options);
         }
         #endregion
     }
