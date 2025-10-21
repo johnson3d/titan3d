@@ -29,6 +29,10 @@ namespace EngineNS.GamePlay.Scene
         {
             return await TtEngine.Instance.SceneManager.CreateScene(args[0] as TtWorld, GetAssetName());
         }
+        public override async Thread.Async.TtTask<IO.IAsset> CreateAsset(params object[] args)
+        {
+            return await TtEngine.Instance.SceneManager.CreateScene(args[0] as TtWorld, GetAssetName());
+        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //必须是TextureAsset

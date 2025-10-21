@@ -31,6 +31,10 @@ namespace EngineNS.Animation.Asset
         {
             return await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(GetAssetName());
         }
+        public override async TtTask<IAsset> CreateAsset(params object[] args)
+        {
+            return await TtEngine.Instance.AnimationModule.AnimationClipManager.CreateAnimationClip(GetAssetName());
+        }
     }
 
     [Rtti.Meta("")]
@@ -212,9 +216,20 @@ namespace EngineNS.Animation.Asset
             if (AnimationClips.TryGetValue(name, out result))
                 return result;
 
+            result = await CreateAnimationClip(name);
+
+            if (result != null)
+            {
+                AnimationClips[name] = result;
+                return result;
+            }
+            return null;
+        }
+        public async TtTask<TtAnimationClip> CreateAnimationClip(RName name)
+        {
             //this is a demo for suspend&cancel operation
             Thread.Async.TtAsyncTaskToken token = null;// new Thread.Async.TtAsyncTaskToken();
-            result = await TtEngine.Instance.EventPoster.Post((state) =>
+            var result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 if (state.TaskToken != null)
                 {
@@ -233,7 +248,7 @@ namespace EngineNS.Animation.Asset
                 {
                     if (xnd != null)
                     {
-                        var clip = TtAnimationClip.LoadXnd(this, xnd);                            
+                        var clip = TtAnimationClip.LoadXnd(this, xnd);
                         //clip.SaveAssetTo(name);
                         if (clip == null)
                             return null;
@@ -248,12 +263,7 @@ namespace EngineNS.Animation.Asset
                 }
             }, Thread.Async.EAsyncTarget.AsyncIO).WithToken(token);
 
-            if (result != null)
-            {
-                AnimationClips[name] = result;
-                return result;
-            }
-            return null;
+            return result;
         }
         public void Remove(RName name)
         {

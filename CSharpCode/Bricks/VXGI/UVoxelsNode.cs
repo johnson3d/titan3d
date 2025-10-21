@@ -290,7 +290,7 @@ namespace EngineNS.Bricks.VXGI
             
             if (true)
             {
-                var material = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
+                var material = await RName.GetRName("utest/box_wite.uminst").CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
                 material.RenderLayer = Graphics.Pipeline.ERenderLayer.RL_Translucent;
                 //var rast = material.Rasterizer;
                 //rast.FillMode = EFillMode.FMD_WIREFRAME;

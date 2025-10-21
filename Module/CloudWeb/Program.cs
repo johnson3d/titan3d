@@ -27,4 +27,6 @@ app.MapGet("/api/hello", () =>
     return Results.Ok(new { Message = "Hello, World!", Time = DateTime.Now });
 });
 
+//Init hash table for files
+
 app.Run();

@@ -1,6 +1,4 @@
-﻿using NPOI.SS.Formula.Functions;
-using NPOI.Util;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -220,7 +218,7 @@ namespace EngineNS.IO
             }
             else
             {
-                if (Version == RName.MinVersion + 0)
+                if (Version == RName.Version100)
                 {
                     Read(out type);
                     if (type == RName.ERNameType.Unkown)
@@ -231,6 +229,32 @@ namespace EngineNS.IO
                     string name;
                     Read(out name);
                     v = RName.GetRName(name, type);
+                }
+                else if (Version == RName.Version101)
+                {
+                    Read(out type);
+                    if (type == RName.ERNameType.Unkown)
+                    {
+                        v = null;
+                        return;
+                    }
+                    string name;
+                    Read(out name);
+                    Guid assetId;
+                    Read(out assetId);
+                    var meta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(assetId);
+                    if (meta!=null)
+                    {
+                        v = meta.AssetName;
+                        if (v.RNameType != type || v.Name != name)
+                        {
+                            Profiler.Log.WriteLine<Profiler.TtAssetGategory>(Profiler.ELogTag.Warning, $"RName info not match AssetMeta:{v},read type:{type},name:{name}");
+                        }
+                    }
+                    else
+                    {
+                        v = RName.GetRName(name, type);
+                    }
                 }
                 else
                 {

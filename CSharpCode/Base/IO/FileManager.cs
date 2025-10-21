@@ -60,7 +60,18 @@ namespace EngineNS.IO
         public string Hash { get; set; }
         public string CalcFileHash(string root)
         {
-            var file = TtFileManager.CombinePath(root, Path);
+            return StaticCalcFileHash(Path, root);
+        }
+        public static string StaticCalcFileHash(string path, string root)
+        {
+            var file = TtFileManager.CombinePath(root, path);
+            var bytes = TtFileManager.ReadAllBytes(file);
+            if (bytes==null)
+                return null;
+            return ComputeSHA256Hash(bytes);
+        }
+        public static string StaticCalcFileHash(string file)
+        {
             var bytes = TtFileManager.ReadAllBytes(file);
             if (bytes==null)
                 return null;

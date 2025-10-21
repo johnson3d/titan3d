@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
-  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="8c4fca623ad99d384b1785c6bd0bec85eac96407729d8987ba66c3d004da026d" />
+      <Path Type="System.String@Unknown" Value="pivot_hierarchy.material" />
+    </e_0>
+  </AssetFiles>
   <AssetId Type="System.Guid@Unknown" Value="3f1ec76a-5e2d-4c69-9291-1d3bb4121a19" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/pivotpainter/hilltree/pivot_hierarchy.material,3f1ec76a-5e2d-4c69-9291-1d3bb4121a19" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterial&#xA;Hahah" />

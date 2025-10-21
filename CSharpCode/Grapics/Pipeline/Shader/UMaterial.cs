@@ -24,6 +24,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(GetAssetName());
         }
+        public override async Thread.Async.TtTask<IO.IAsset> CreateAsset(params object[] args)
+        {
+            return await TtEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(GetAssetName());
+        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //必须是TextureAsset
@@ -1289,11 +1293,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             dsDesc.m_DepthWriteMask = 0;
             ScreenMaterial.DepthStencil = dsDesc;
 
-            PxDebugMaterial = await this.CreateMaterial(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
-            VtxColorMaterial = await this.CreateMaterial(RName.GetRName("material/vfx_color.material", RName.ERNameType.Engine));
-            NavMeshDebugMaterial = await this.CreateMaterial(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
+            PxDebugMaterial = await RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterial>();
+            VtxColorMaterial = await RName.GetRName("material/vfx_color.material", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterial>();
+            NavMeshDebugMaterial = await RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterial>();
             NavMeshDebugMaterial.SetColor4("clr4_0", new Color4f(Color4b.White));
-            NavMeshDebugWireMaterial = await this.CreateMaterial(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
+            NavMeshDebugWireMaterial = await RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterial>();
             NavMeshDebugWireMaterial.SetColor4("clr4_0", new Color4f(Color4b.PaleVioletRed));
             var rast = NavMeshDebugWireMaterial.Rasterizer;
             rast.FillMode = NxRHI.EFillMode.FMD_WIREFRAME;

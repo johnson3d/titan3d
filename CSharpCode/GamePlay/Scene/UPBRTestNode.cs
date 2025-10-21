@@ -98,8 +98,8 @@ namespace EngineNS.GamePlay.Scene
             {
                 for (int z = 0; z < meshCount; ++z)
                 {
-                    var meshPrimitive = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.CreateMeshPrimitive(RName.GetRName("mesh/base/sphere.vms", RName.ERNameType.Engine));
-                    var mtlInst = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/brdf_base.uminst", RName.ERNameType.Engine));
+                    var meshPrimitive = await RName.GetRName("mesh/base/sphere.vms", RName.ERNameType.Engine).CreateAsset<Graphics.Mesh.TtMeshPrimitives>();
+                    var mtlInst = await RName.GetRName("material/brdf_base.uminst", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
                     var mtlInstList = new List<Graphics.Pipeline.Shader.TtMaterial>();
                     mtlInstList.Add(mtlInst);
                     {

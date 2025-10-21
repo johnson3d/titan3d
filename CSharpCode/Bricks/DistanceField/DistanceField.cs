@@ -79,6 +79,10 @@ namespace EngineNS.DistanceField
         {
             return await TtEngine.Instance.SdfAssetManager.GetSdfAsset(GetAssetName());
         }
+        public override async Thread.Async.TtTask<IO.IAsset> CreateAsset(params object[] args)
+        {
+            return await TtEngine.Instance.SdfAssetManager.CreateSdfAsset(GetAssetName());
+        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             return true;
@@ -247,7 +251,19 @@ namespace EngineNS.DistanceField
             if (mSdfAssets.TryGetValue(name, out result))
                 return result;
 
-            result = await TtEngine.Instance.EventPoster.Post((state) =>
+            result = await CreateSdfAsset(name);
+
+            if (result != null)
+            {
+                mSdfAssets[name] = result;
+                return result;
+            }
+
+            return null;
+        }
+        public async Thread.Async.TtTask<TtSdfAsset> CreateSdfAsset(RName name)
+        {
+            var result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
                 {
@@ -267,13 +283,7 @@ namespace EngineNS.DistanceField
                 }
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
-            if (result != null)
-            {
-                mSdfAssets[name] = result;
-                return result;
-            }
-
-            return null;
+            return result;
         }
     }
 }

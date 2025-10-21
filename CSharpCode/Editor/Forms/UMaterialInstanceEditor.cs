@@ -70,7 +70,7 @@ namespace EngineNS.Editor.Forms
             var mesh = new Graphics.Mesh.TtRenderMesh();
             //var rect = Graphics.Mesh.TtMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
             //var rectMesh = rect.ToMesh();
-            var rectMesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.CreateMeshPrimitive(RName.GetRName("mesh/base/sphere.vms", RName.ERNameType.Engine));
+            var rectMesh = await RName.GetRName("mesh/base/sphere.vms", RName.ERNameType.Engine).CreateAsset<Graphics.Mesh.TtMeshPrimitives>();
             var ok = mesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
             if (ok)
             {
@@ -128,7 +128,7 @@ namespace EngineNS.Editor.Forms
             LoadingPercent = 0;
             ProgressText = "Load Material";
             AssetName = name;
-            Material = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(name);
+            Material = await name.CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
             if (Material == null)
                 return false;
             LoadingPercent = 0.1f;

@@ -20,6 +20,10 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             return await TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterial(GetAssetName());
         }
+        public override async Thread.Async.TtTask<IO.IAsset> CreateAsset(params object[] args)
+        {
+            return await TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.CreateMaterial(GetAssetName());
+        }
         public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
             TtEngine.Instance.EditorInstance.PhyMaterialIcon?.OnDraw(cmdlist, in start, in end, 0);
@@ -244,7 +248,7 @@ namespace EngineNS.Bricks.PhysicsCore
 
             return null;
         }
-        public async System.Threading.Tasks.Task<TtPhyMaterial> CreateMaterial(RName rn)
+        public async Thread.Async.TtTask<TtPhyMaterial> CreateMaterial(RName rn)
         {
             TtPhyMaterial result;
             result = await TtEngine.Instance.EventPoster.Post((state) =>

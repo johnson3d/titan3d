@@ -342,7 +342,7 @@ namespace EngineNS.Editor.Forms
 
             if (SdfMeshNode == null)
             {
-                var material = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/sdfcolor.uminst", RName.ERNameType.Engine));
+                var material = await RName.GetRName("material/sdfcolor.uminst", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
                 SdfDebugMesh = new Graphics.Mesh.TtRenderMesh();
                 var rect = Graphics.Mesh.TtMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1, 0xffffffff);
                 var rectMesh = rect.ToMesh();
@@ -433,7 +433,7 @@ namespace EngineNS.Editor.Forms
             Mesh = arg as Graphics.Mesh.TtMeshPrimitives;
             if (Mesh == null)
             {
-                Mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.CreateMeshPrimitive(name);
+                Mesh = await name.CreateAsset<Graphics.Mesh.TtMeshPrimitives>();
                 if (Mesh == null)
                     return false;
                 await Mesh.LoadMeshDataProvider();

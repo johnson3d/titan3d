@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using Assimp;
 using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
@@ -109,7 +110,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var mesh = new Graphics.Mesh.TtRenderMesh();
             //var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
             //var rectMesh = rect.ToMesh();
-            var rectMesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.CreateMeshPrimitive(RName.GetRName("mesh/base/sphere.vms", RName.ERNameType.Engine));
+            var rectMesh = await RName.GetRName("mesh/base/sphere.vms", RName.ERNameType.Engine).CreateAsset<Graphics.Mesh.TtMeshPrimitives>();
             var ok = mesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
             if (ok)
             {
@@ -149,7 +150,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             MaterialGraph.ShaderEditor = this;
             MaterialGraph.ResetGraph();
             IsStarting = true;
-            Material = await TtEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(name);
+            Material = await name.CreateAsset<Graphics.Pipeline.Shader.TtMaterial>();
             Material.AssetName = name;
             Material.IsEditingMaterial = true;
             //Material = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(name);

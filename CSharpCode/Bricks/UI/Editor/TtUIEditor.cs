@@ -1562,7 +1562,7 @@ namespace EngineNS.UI.Editor
                 {
                     if (mIsWireFrame)
                     {
-                        var mtl = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/wireframe_red.uminst", RName.ERNameType.Engine));
+                        var mtl = await RName.GetRName("material/wireframe_red.uminst", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
                         mUIHost.DrawMesh.UpdateMaterial(mtl);
                     }
                     else

@@ -26,6 +26,10 @@ namespace EngineNS.Graphics.Mesh
         {
             return await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(GetAssetName());
         }
+        public override async Thread.Async.TtTask<IO.IAsset> CreateAsset(params object[] args)
+        {
+            return await TtEngine.Instance.GfxDevice.MaterialMeshManager.CreateMaterialMesh(GetAssetName());
+        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //必须是TextureAsset
@@ -36,8 +40,8 @@ namespace EngineNS.Graphics.Mesh
             var renderer = new Graphics.Pipeline.TtOffscreenRenderer();
             await renderer.Initialize(RName.GetRName("graphics/deferred.rpolicy", RName.ERNameType.Engine));
             renderer.SetSize(256, 256);
-            
-            Graphics.Mesh.TtMaterialMesh Mesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.CreateMaterialMesh(GetAssetName());
+
+            Graphics.Mesh.TtMaterialMesh Mesh = await GetAssetName().CreateAsset<TtMaterialMesh>();
             var mesh = new Graphics.Mesh.TtRenderMesh();
             var ok = mesh.Initialize(Mesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
             if (ok)
@@ -247,7 +251,7 @@ namespace EngineNS.Graphics.Mesh
         #endregion
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
-            var manager = tagObject as UMaterialMeshManager;
+            var manager = tagObject as TtMaterialMeshManager;
             if (manager == null)
                 return;
         }
@@ -300,7 +304,7 @@ namespace EngineNS.Graphics.Mesh
             UpdateAABB();
             SerialId++;
         }
-        public unsafe static TtMaterialMesh LoadXnd(UMaterialMeshManager manager, IO.TtXndNode node)
+        public unsafe static TtMaterialMesh LoadXnd(TtMaterialMeshManager manager, IO.TtXndNode node)
         {
             try
             {
@@ -328,7 +332,7 @@ namespace EngineNS.Graphics.Mesh
                 return null;
             }
         }
-        public static bool ReloadXnd(TtMaterialMesh mesh, UMaterialMeshManager manager, IO.TtXndNode node)
+        public static bool ReloadXnd(TtMaterialMesh mesh, TtMaterialMeshManager manager, IO.TtXndNode node)
         {
             unsafe
             {
@@ -676,7 +680,7 @@ namespace EngineNS.Graphics.Mesh
         } = 0;
     }
 
-    public class UMaterialMeshManager
+    public class TtMaterialMeshManager
     {
         public Dictionary<RName, TtMaterialMesh> Meshes { get; } = new Dictionary<RName, TtMaterialMesh>();
         public async Thread.Async.TtTask<TtMaterialMesh> CreateMaterialMesh(RName name)
@@ -784,6 +788,6 @@ namespace EngineNS.Graphics.Pipeline
 {
     public partial class TtGfxDevice
     {
-        public Mesh.UMaterialMeshManager MaterialMeshManager { get; } = new Mesh.UMaterialMeshManager();
+        public Mesh.TtMaterialMeshManager MaterialMeshManager { get; } = new Mesh.TtMaterialMeshManager();
     }
 }

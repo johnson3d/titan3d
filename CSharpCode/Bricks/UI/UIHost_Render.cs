@@ -308,7 +308,7 @@ namespace EngineNS.UI
                 var brush = cmd.GetBrush();
                 if (brush.Name.StartWith("@Text:"))
                 {
-                    mtl = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/font_sdf_0.uminst", RName.ERNameType.Engine));
+                    mtl = await RName.GetRName("material/font_sdf_0.uminst", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
                     var clr = mtl.FindVar("FontColor");
                     if (clr != null)
                     {
@@ -322,17 +322,17 @@ namespace EngineNS.UI
                     var name = brush.Name.c_str().Replace("@MatInst:", "");
                     if (string.IsNullOrEmpty(name) || "DefaultBrush" == name)
                     {
-                        mtl = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
+                        mtl = await RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
                     }
                     else
                     {
-                        mtl = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.ParseFrom(name));
-                        if(mtl == null)
-                            mtl = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
+                        mtl = await RName.ParseFrom(name).CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
+                        if (mtl == null)
+                            mtl = await RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
                     }
                 }
                 else
-                    mtl = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
+                    mtl = await RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
 
                 materials[i] = mtl;
 

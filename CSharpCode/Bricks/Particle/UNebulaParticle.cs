@@ -23,6 +23,10 @@ namespace EngineNS.Bricks.Particle
         {
             return await TtEngine.Instance.NebulaTemplateManager.GetParticle(GetAssetName());
         }
+        public override async Thread.Async.TtTask<IO.IAsset> CreateAsset(params object[] args)
+        {
+            return await TtEngine.Instance.NebulaTemplateManager.CreateParticle(GetAssetName());
+        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             return false;

@@ -121,7 +121,7 @@ namespace EngineNS.Bricks.Particle
             }
             return true;
         }
-        public async System.Threading.Tasks.Task<TtNebulaParticle> GetParticle(RName name)
+        public async Thread.Async.TtTask<TtNebulaParticle> GetParticle(RName name)
         {
             if (name == null)
                 return null;
@@ -134,7 +134,7 @@ namespace EngineNS.Bricks.Particle
             Particles.Add(name, result);
             return await result.CloneNebula();
         }
-        public async System.Threading.Tasks.Task<TtNebulaParticle> CreateParticle(RName name)
+        public async Thread.Async.TtTask<TtNebulaParticle> CreateParticle(RName name)
         {
             if (name == null)
                 return null;

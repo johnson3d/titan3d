@@ -246,7 +246,7 @@ namespace EngineNS.Bricks.Particle.Editor
 
             var nebulaData = new Bricks.Particle.TtNebulaNode.TtNebulaNodeData();
             nebulaData.NebulaName = AssetName;
-            nebulaData.NebulaParticle = await TtEngine.Instance.NebulaTemplateManager.CreateParticle(AssetName);
+            nebulaData.NebulaParticle = await AssetName.CreateAsset<Bricks.Particle.TtNebulaParticle>();
             var meshNode = await GamePlay.Scene.TtNode.SpawnNode<Bricks.Particle.TtNebulaNode>(viewport.World.Root, async (nd) =>
             {
                 nd.Placement.Position = DVector3.Zero;

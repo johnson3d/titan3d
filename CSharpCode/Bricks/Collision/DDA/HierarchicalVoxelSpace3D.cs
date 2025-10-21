@@ -137,7 +137,7 @@ namespace EngineNS.Bricks.Collision.DDA
 
         public async System.Threading.Tasks.Task CreateDebugMesh(GamePlay.TtWorld world)
         {
-            var material = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
+            var material = await RName.GetRName("utest/box_wite.uminst").CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
             VxDebugMesh = new Graphics.Mesh.TtRenderMesh();
             var rect = Graphics.Mesh.TtMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1, 0xffff00ff);
             var rectMesh = rect.ToMesh();
@@ -196,7 +196,7 @@ namespace EngineNS.Bricks.Collision.DDA
                 HVXDebugHitNode = null;
             }
 
-            var material = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
+            var material = await RName.GetRName("utest/box_wite.uminst").CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = material;
 

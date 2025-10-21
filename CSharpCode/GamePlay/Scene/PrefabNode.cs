@@ -208,6 +208,10 @@ namespace EngineNS.GamePlay.Scene
         {
             return await TtEngine.Instance.PrefabManager.CreatePrefab(args[0] as TtWorld, GetAssetName());
         }
+        public override async Thread.Async.TtTask<IO.IAsset> CreateAsset(params object[] args)
+        {
+            return await TtEngine.Instance.PrefabManager.CreatePrefab(args[0] as TtWorld, GetAssetName());
+        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             return true;

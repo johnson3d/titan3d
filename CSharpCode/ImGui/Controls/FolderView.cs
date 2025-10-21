@@ -75,6 +75,7 @@ namespace EngineNS.EGui.Controls
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, UIProxy.StyleConfig.Instance.TVHeaderHovered);
                 DrawDirectories(RName.GetRName("", RName.ERNameType.Game));
                 DrawDirectories(RName.GetRName("", RName.ERNameType.Engine));
+                DrawDirectories(RName.GetRName("", RName.ERNameType.Cloud));
                 ImGuiAPI.PopStyleColor(3);
             }
             ImGuiAPI.EndChild();
@@ -90,6 +91,10 @@ namespace EngineNS.EGui.Controls
                 else if (TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) == mCreateFolderDir)
                 {
                     pathName = "Engine";
+                }
+                else if (TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cloud) == mCreateFolderDir)
+                {
+                    pathName = "Cloud";
                 }
                 else if (TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Editor) == mCreateFolderDir)
                 {

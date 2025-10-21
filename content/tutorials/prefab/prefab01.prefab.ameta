@@ -2,7 +2,7 @@
 <Root Type="EngineNS.GamePlay.Scene.TtPrefabAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="e659fbcdb95ae3495cf57f27cfa28dcbf6f7b6e7f2913b0e71d4bdb0b04cbac8" />
+      <Hash Type="System.String@Unknown" Value="2eb7fd9f4bf88e14443c2dfc46283a7261d209c1981a79982ace1f845e467a38" />
       <Path Type="System.String@Unknown" Value="prefab01.prefab" />
     </e_0>
   </AssetFiles>

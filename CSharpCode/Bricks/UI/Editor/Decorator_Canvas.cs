@@ -119,8 +119,8 @@ namespace EngineNS.UI.Editor
         {
             mEditor = editor;
 
-            mWhiteColorMat = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("ui/uidecorator_white.uminst", RName.ERNameType.Engine));
-            mGreenColorMat = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("ui/uidecorator_green.uminst", RName.ERNameType.Engine));
+            mWhiteColorMat = await RName.GetRName("ui/uidecorator_white.uminst", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
+            mGreenColorMat = await RName.GetRName("ui/uidecorator_green.uminst", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
             mNormalAnchorMats = new List<Graphics.Pipeline.Shader.TtMaterial>();
             mNormalAnchorMats.Add(mWhiteColorMat);
             mHighLightAnchorMats = new List<Graphics.Pipeline.Shader.TtMaterial>();

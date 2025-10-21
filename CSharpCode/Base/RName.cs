@@ -21,8 +21,35 @@ namespace EngineNS
     public partial class RName : IComparable<RName>, IComparable
     {
         public const ushort MinVersion = 100;//don't change this value any time
-        public const ushort CurrentVersion = MinVersion + 0;//increase this value when serialization changed
-
+        public const ushort Version100 = MinVersion + 0;
+        //public void Write(RName v)
+        //{
+        //    Write(RName.CurrentVersion);
+        //    if (v== null)
+        //    {
+        //        Write(RName.ERNameType.Unkown);
+        //        return;
+        //    }
+        //    Write(v.RNameType);
+        //    Write(v.Name);
+        //}
+        public const ushort Version101 = MinVersion + 1;//increase this value when serialization changed
+        //public void Write(RName v)
+        //{
+        //    Write(RName.CurrentVersion);
+        //    if (v== null)
+        //    {
+        //        Write(RName.ERNameType.Unkown);
+        //        return;
+        //    }
+        //    else
+        //    {
+        //        Write(v.RNameType);
+        //    }
+        //    Write(v.Name);
+        //    Write(v.AssetId);
+        //}
+        public const ushort CurrentVersion = Version101;
         public class PGRNameAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
         {
             public string FilterExts;   // "ext1" / "ext1,ext2"
@@ -294,6 +321,13 @@ namespace EngineNS
                 return default(T);
             return await ameta.LoadAsset(args) as T;
         }
+        public async Thread.Async.TtTask<T> CreateAsset<T>(params object[] args) where T : class, IO.IAsset
+        {
+            var ameta = AMeta;
+            if (ameta == null || ameta.AssetStatus != IO.IAssetMeta.EAssetStatus.Valid)
+                return default(T);
+            return await ameta.CreateAsset(args) as T;
+        }
         [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public Guid AssetId
         {
@@ -406,7 +440,9 @@ namespace EngineNS
                     if (rn==null)
                         return null;
                     if (SureCloudAMeta(rn)==false)
-                        return null;
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtAssetGategory>(Profiler.ELogTag.Warning, "RName", $"Cloud RName get address failed, AMeta not exist! RName:{rn} is a directory?");
+                    }
                     return TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cloud) + name;
                 default:
                     {

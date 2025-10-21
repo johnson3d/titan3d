@@ -1,6 +1,4 @@
 ﻿using EngineNS.IO;
-using NPOI.SS.Formula.Functions;
-using SixLabors.Fonts;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -460,6 +458,8 @@ namespace EngineNS.EGui.Controls
                         ameta.SetAssetName(RName.GetRName(rPath, RName.ERNameType.Game));
                     else if (rootType == IO.TtFileManager.ERootDir.Engine)
                         ameta.SetAssetName(RName.GetRName(rPath, RName.ERNameType.Engine));
+                    else if (rootType == IO.TtFileManager.ERootDir.Cloud)
+                        ameta.SetAssetName(RName.GetRName(rPath, RName.ERNameType.Cloud));
                     else
                         continue;
 
@@ -959,14 +959,11 @@ namespace EngineNS.EGui.Controls
         public bool DrawInWindow = true;
         RName mCurrentDir;
 
-        internal System.Threading.Tasks.Task AssetOpTask = null;
+        bool IsAssetOprating = false;
         public unsafe void OnDraw()
         {
             if (Visible == false)
                 return;
-
-            if (AssetOpTask != null && AssetOpTask.IsCompleted)
-                AssetOpTask = null;
 
             //            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             var name = Name;
@@ -1229,33 +1226,49 @@ namespace EngineNS.EGui.Controls
                     {
                         try
                         {
-                            if (AssetOpTask == null || AssetOpTask.IsCompleted)
+                            if (IsAssetOprating == false)
                             {
                                 switch(mOperationType)
                                 {
                                     case EAssetOperationType.MoveTo:
                                         {
                                             var name = mSelectFolderView.CurrentDir.Name + sourceName.PureName + sourceName.ExtName;
-                                            AssetOpTask = mOperationAsset.MoveTo(name, sourceName.RNameType);
+                                            IsAssetOprating = true;
+                                            mOperationAsset.MoveTo(name, sourceName.RNameType).AddWaitTask((task)=>
+                                            {
+                                                IsAssetOprating = false;
+                                            });
                                         }
                                         break;
                                     case EAssetOperationType.CopyTo:
                                         {
                                             var name = mSelectFolderView.CurrentDir.Name + sourceName.PureName + sourceName.ExtName;
-                                            AssetOpTask = mOperationAsset.CopyTo(name, sourceName.RNameType);
+                                            IsAssetOprating = true;
+                                            mOperationAsset.CopyTo(name, sourceName.RNameType).AddWaitTask((task) =>
+                                            {
+                                                IsAssetOprating = false;
+                                            });
                                         }
                                         break;
                                     case EAssetOperationType.PackTo:
                                         {
                                             var name = mSelectFolderView.CurrentDir.Name;// + sourceName.PureName + sourceName.ExtName;
-                                            AssetOpTask = mOperationAsset.PackRefAssetsTo(RName.GetRName(name, sourceName.RNameType));
+                                            IsAssetOprating = true;
+                                            mOperationAsset.PackRefAssetsTo(RName.GetRName(name, sourceName.RNameType)).AddWaitTask((task) =>
+                                            {
+                                                IsAssetOprating = false;
+                                            });
                                         }
                                         break;
                                     case EAssetOperationType.Rename:
                                         {
                                             var dir = sourceName.Name.Substring(0, sourceName.Name.Length - sourceName.PureName.Length - sourceName.ExtName.Length);
                                             var name = dir + NewName + sourceName.ExtName;
-                                            AssetOpTask = mOperationAsset.RenameTo(name, sourceName.RNameType);
+                                            IsAssetOprating = true;
+                                            mOperationAsset.RenameTo(name, sourceName.RNameType).AddWaitTask((task) =>
+                                            {
+                                                IsAssetOprating = false;
+                                            });
                                         }
                                         break;
                                 }

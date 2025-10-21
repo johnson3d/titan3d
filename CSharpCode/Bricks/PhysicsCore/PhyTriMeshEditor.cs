@@ -61,7 +61,7 @@ namespace EngineNS.Bricks.PhysicsCore
             matrials[0] = await RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine).GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
 
             var matrials1 = new Graphics.Pipeline.Shader.TtMaterial[1];
-            matrials1[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
+            matrials1[0] = await RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
             var rast = matrials1[0].Rasterizer;
             rast.FillMode = NxRHI.EFillMode.FMD_WIREFRAME;
             matrials1[0].Rasterizer = rast;

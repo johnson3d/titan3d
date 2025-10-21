@@ -31,7 +31,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             MipLevels = mipLevel;
             //Material = await TtEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("material/SysDft.material", RName.ERNameType.Engine));
-            Material = await TtEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("utest/material/terrainidmap.material"));
+            Material = await RName.GetRName("utest/material/terrainidmap.material").CreateAsset<Graphics.Pipeline.Shader.TtMaterial>();
             Material.IsEditingMaterial = false;
 
             if (TtEngine.Instance.Config.Feature_UseRVT)
@@ -44,10 +44,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 MaterialIdRVT.Initialize(EPixelFormat.PXF_R8G8B8A8_UNORM, 1024, 1, 32);
             }
 
-            WireFrameMaterial = await TtEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
+            WireFrameMaterial = await RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterial>();
             WireFrameMaterial.IsEditingMaterial = false;
 
-            WaterMaterial = await TtEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("utest/material/terrainwater.material"));
+            WaterMaterial = await RName.GetRName("utest/material/terrainwater.material").CreateAsset<Graphics.Pipeline.Shader.TtMaterial>();
             WaterMaterial.IsEditingMaterial = false;
 
             var rast = WireFrameMaterial.Rasterizer;

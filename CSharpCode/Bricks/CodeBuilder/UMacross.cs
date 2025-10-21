@@ -87,6 +87,11 @@ namespace EngineNS.Bricks.CodeBuilder
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return null;
         }
+        public override async Thread.Async.TtTask<IO.IAsset> CreateAsset(params object[] args)
+        {
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
+            return null;
+        }
         public override void DeleteAsset(string name, RName.ERNameType type)
         {
             var address = RName.GetAddress(type, name);

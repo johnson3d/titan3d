@@ -20,6 +20,10 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             return await TtEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMesh(GetAssetName());
         }
+        public override async Thread.Async.TtTask<IO.IAsset> CreateAsset(params object[] args)
+        {
+            return await TtEngine.Instance.PhyModule.PhyContext.PhyMeshManager.CreateMesh(GetAssetName());
+        }
         //public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         //{
         //    base.OnDrawSnapshot(in cmdlist, ref start, ref end);
@@ -258,7 +262,19 @@ namespace EngineNS.Bricks.PhysicsCore
             if (TriMeshes.TryGetValue(rn, out result))
                 return result;
 
-            result = await TtEngine.Instance.EventPoster.Post((state) =>
+            result = await CreateMesh(rn);
+
+            if (result != null)
+            {
+                TriMeshes[rn] = result;
+                return result;
+            }
+
+            return null;
+        }
+        public async Thread.Async.TtTask<TtPhyTriMesh> CreateMesh(RName rn)
+        {
+            var result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
@@ -278,13 +294,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 }
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
-            if (result != null)
-            {
-                TriMeshes[rn] = result;
-                return result;
-            }
-
-            return null;
+            return result;
         }
     }
 }

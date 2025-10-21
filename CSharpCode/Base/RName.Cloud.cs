@@ -141,6 +141,14 @@ namespace EngineNS
                 {
                     //test hash for ameta file
                     var hash = GetAssetHash(rn).GetResultUntilCompleted();
+                    if (hash!=null && hash != TtFileInfo.StaticCalcFileHash(rn.Address))
+                    {
+                        var ok = DownloadFromCloud(TtFileManager.CombinePath(rn.Name, IAssetMeta.MetaExt), file).GetResultUntilCompleted();
+                        if (ok == false)
+                        {
+                            return false;
+                        }
+                    }
                 }
                 ameta = TtAssetMetaManager.LoadAMeta(root, rn.RNameType, file);
                 TtEngine.Instance.AssetMetaManager.RegAsset(ameta);

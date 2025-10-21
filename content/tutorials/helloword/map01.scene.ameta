@@ -2,7 +2,7 @@
 <Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="a2748c809e0f9912d5895bf01ba520c49c490f9a22834981a273181cebd42f60" />
+      <Hash Type="System.String@Unknown" Value="1aa815416ad872c9175c2fee6a8e1f21247bc928c8b281006f55859fe6dabc88" />
       <Path Type="System.String@Unknown" Value="map01.scene/map01.scene" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">

@@ -203,8 +203,12 @@ namespace EngineNS.IO
                 Write(RName.ERNameType.Unkown);
                 return;
             }
-            Write(v.RNameType);
+            else
+            {
+                Write(v.RNameType);
+            }
             Write(v.Name);
+            Write(v.AssetId);
         }
         public void WriteNoSize(byte[] v, int len)
         {

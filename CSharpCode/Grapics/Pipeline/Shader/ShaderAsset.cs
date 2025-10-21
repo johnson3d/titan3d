@@ -20,6 +20,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return TtShaderAsset.LoadAsset(GetAssetName());
         }
+        public override async Thread.Async.TtTask<IO.IAsset> CreateAsset(params object[] args)
+        {
+            return TtShaderAsset.LoadAsset(GetAssetName());
+        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             return false;

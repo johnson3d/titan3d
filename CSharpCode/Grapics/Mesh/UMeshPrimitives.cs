@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using EngineNS.IO;
+using EngineNS.Thread.Async;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,7 +22,11 @@ namespace EngineNS.Graphics.Mesh
         {
             return await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(GetAssetName());
         }
-        public override async System.Threading.Tasks.Task CopyTo(string name, RName.ERNameType type)
+        public override async TtTask<IAsset> CreateAsset(params object[] args)
+        {
+            return await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.CreateMeshPrimitive(GetAssetName());
+        }
+        public override async Thread.Async.TtTask CopyTo(string name, RName.ERNameType type)
         {
             if (mAssetName.Name == name && mAssetName.RNameType == type)
                 return;

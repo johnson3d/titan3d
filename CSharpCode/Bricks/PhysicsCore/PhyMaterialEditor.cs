@@ -38,7 +38,7 @@ namespace EngineNS.Bricks.PhysicsCore
         public async Thread.Async.TtTask<bool> OpenEditor(Editor.TtMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            Material = await TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.CreateMaterial(name);
+            Material = await name.CreateAsset<Bricks.PhysicsCore.TtPhyMaterial>();
             if (Material == null)
                 return false;
 

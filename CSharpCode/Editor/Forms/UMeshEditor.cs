@@ -225,7 +225,7 @@ namespace EngineNS.Editor.Forms
             Mesh = arg as Graphics.Mesh.TtMaterialMesh;
             if (Mesh == null)
             {
-                Mesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.CreateMaterialMesh(name);
+                Mesh = await name.CreateAsset<Graphics.Mesh.TtMaterialMesh>();
                 Mesh.AssetName = AssetName;
                 if (Mesh == null)
                     return false;

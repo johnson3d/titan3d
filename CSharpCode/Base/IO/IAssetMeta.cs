@@ -325,7 +325,7 @@ namespace EngineNS.IO
             }
             IO.TtFileManager.DeleteDirectory(dir);
         }
-        public virtual async System.Threading.Tasks.Task MoveTo(string name, RName.ERNameType type)
+        public virtual async Thread.Async.TtTask MoveTo(string name, RName.ERNameType type)
         {
             if (mAssetName.Name == name && mAssetName.RNameType == type)
                 return;
@@ -383,7 +383,7 @@ namespace EngineNS.IO
 
             DeleteAsset(savedName, savedType);
         }
-        public virtual async System.Threading.Tasks.Task CopyTo(string name, RName.ERNameType type)
+        public virtual async Thread.Async.TtTask CopyTo(string name, RName.ERNameType type)
         {
             if (mAssetName.Name == name && mAssetName.RNameType == type)
                 return;
@@ -406,7 +406,7 @@ namespace EngineNS.IO
             IO.TtFileManager.CopyFile(mAssetName.Address + ".snap", tarName.Address + ".snap");
             TtEngine.Instance.SourceControlModule.AddFile(mAssetName.Address + ".snap", true);
         }
-        public virtual async System.Threading.Tasks.Task RenameTo(string name, RName.ERNameType type)
+        public virtual async Thread.Async.TtTask RenameTo(string name, RName.ERNameType type)
         {
             if (name == mAssetName.Name && type == mAssetName.RNameType)
                 return;
@@ -466,7 +466,7 @@ namespace EngineNS.IO
                 meta.GetAllRefAssets(names);
             }
         }
-        public async System.Threading.Tasks.Task PackRefAssetsTo(RName target)
+        public async Thread.Async.TtTask PackRefAssetsTo(RName target)
         {
             TtEngine.Instance.BlockOperation($"{this.AssetName}: PackRefAssetsTo {target}");
             var metas = new HashSet<IO.IAssetMeta>();
@@ -1138,62 +1138,6 @@ namespace EngineNS.IO
             }
         }
     }
-
-    public class TtAssetManager
-    {
-        public Dictionary<RName, WeakReference<IAsset>> Assets { get; } = new Dictionary<RName, WeakReference<IAsset>>();
-        public async Thread.Async.TtTask<IAsset> GetAsset(RName rn)
-        {
-            IAsset asset;
-            WeakReference<IAsset> result;
-            lock (Assets)
-            {
-                if (Assets.TryGetValue(rn, out result))
-                {
-                    if (result.TryGetTarget(out asset))
-                    {
-                        return asset;
-                    }
-                    else
-                    {
-                        Assets.Remove(rn);
-                    }
-                }
-            }
-            var meta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(rn);
-            if (meta == null)
-                return null;
-            asset = await meta.LoadAsset();
-            lock (Assets)
-            {
-                Assets[rn] = new WeakReference<IAsset>(asset);
-                return asset;
-            }
-        }
-        public async Thread.Async.TtTask<T> GetAsset<T>(RName rn) where T : class, IAsset
-        {
-            return GetAsset(rn) as T;
-        }
-        List<RName> mRmvAssets = new List<RName>();
-        public void TickSync()
-        {
-            mRmvAssets.Clear();
-            lock (Assets)
-            {   
-                foreach (var i in Assets)
-                {
-                    if (i.Value.TryGetTarget(out var asset) == false)
-                    {
-                        mRmvAssets.Add(i.Key);
-                    }
-                }
-                foreach (var i in mRmvAssets)
-                {
-                    Assets.Remove(i);
-                }
-            }
-        }
-    }
 }
 
 namespace EngineNS
@@ -1201,7 +1145,6 @@ namespace EngineNS
     partial class TtEngine
     {
         public IO.TtAssetMetaManager AssetMetaManager { get; } = new IO.TtAssetMetaManager();
-        public IO.TtAssetManager AssetManager { get; } = new IO.TtAssetManager();
     }
 }
 

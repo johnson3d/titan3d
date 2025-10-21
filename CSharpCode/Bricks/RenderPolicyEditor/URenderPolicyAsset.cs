@@ -25,6 +25,10 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         {
             return TtRenderPolicyAsset.LoadAsset(GetAssetName());
         }
+        public override async Thread.Async.TtTask<IO.IAsset> CreateAsset(params object[] args)
+        {
+            return TtRenderPolicyAsset.LoadAsset(GetAssetName());
+        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //纹理不会引用别的资产

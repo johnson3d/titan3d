@@ -17,6 +17,10 @@ namespace EngineNS.Animation.Asset
         {
             return await TtEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(GetAssetName());
         }
+        public override async Thread.Async.TtTask<IO.IAsset> CreateAsset(params object[] args)
+        {
+            return await TtEngine.Instance.AnimationModule.SkeletonAssetManager.CreateSkeletonAsset(GetAssetName());
+        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             return true;
@@ -103,13 +107,25 @@ namespace EngineNS.Animation.Asset
     public partial class TtSkeletonAssetManager
     {
         public Dictionary<RName, TtSkeletonAsset> SkeletonAssets { get; } = new Dictionary<RName, TtSkeletonAsset>();
-        public async System.Threading.Tasks.Task<TtSkeletonAsset> GetSkeletonAsset(RName name)
+        public async Thread.Async.TtTask<TtSkeletonAsset> GetSkeletonAsset(RName name)
         {
             TtSkeletonAsset result;
             if (SkeletonAssets.TryGetValue(name, out result))
                 return result;
 
-            result = await TtEngine.Instance.EventPoster.Post((state) =>
+            result = await CreateSkeletonAsset(name);
+
+            if (result != null)
+            {
+                SkeletonAssets[name] = result;
+                return result;
+            }
+
+            return null;
+        }
+        public async Thread.Async.TtTask<TtSkeletonAsset> CreateSkeletonAsset(RName name)
+        {
+            var result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
                 {
@@ -129,13 +145,7 @@ namespace EngineNS.Animation.Asset
                 }
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
-            if (result != null)
-            {
-                SkeletonAssets[name] = result;
-                return result;
-            }
-
-            return null;
+            return result;
         }
     }
 }
