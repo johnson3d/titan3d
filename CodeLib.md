@@ -248,3 +248,21 @@ var textureName = RName.GetRName("texture/checkboard.txpic", RName.ERNameType.En
 var texture = await textureName.GetAsset<NxRHI.TtSrView>();//异步加载
 var texture1 = textureName.GetAsset<NxRHI.TtSrView>().GetResultUntilCompleted();//同步加载
 ```
+
+## 10.增加一个Config配置文件
+- 定义一个IO.IConfig接口的类
+- 对该类添加[IO.TtConfig(Path="你的配置文件路径")]属性
+- 将需要配置的属性增加[Rtti.Meta("")]属性
+- 通过TtEngine.Instance.ConfigManager.GetConfig<TtCloudConfig>().CloudAssetUrlBase类似方法访问配置
+```C#
+    [IO.TtConfig(Path = "cloud.jscfg")]
+    public class TtCloudConfig : IO.IConfig
+    {
+        [Rtti.Meta("")]
+        public string CloudAssetUrlBase { get; set; } = "http://localhost:7000";
+        [Rtti.Meta("")]
+        public string WebApiUrlBase { get; set; } = "http://localhost:7000";
+    }
+    //调用
+    TtEngine.Instance.ConfigManager.GetConfig<TtCloudConfig>().CloudAssetUrlBase;
+```
