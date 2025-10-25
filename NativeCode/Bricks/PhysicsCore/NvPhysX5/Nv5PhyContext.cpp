@@ -1,11 +1,11 @@
-#include "NvPhyContext.h"
-#include "NvPhyScene.h"
-#include "NvPhyActor.h"
-#include "NvPhyMaterial.h"
-#include "NvPhyShape.h"
-#include "NvPhyMesh.h"
-#include "NvPhyHeightfield.h"
-#include "NvPhyController.h"
+#include "Nv5PhyContext.h"
+#include "Nv5PhyScene.h"
+#include "Nv5PhyActor.h"
+#include "Nv5PhyMaterial.h"
+#include "Nv5PhyShape.h"
+#include "Nv5PhyMesh.h"
+#include "Nv5PhyHeightfield.h"
+#include "Nv5PhyController.h"
 #include "../../../Graphics/Mesh/MeshDataProvider.h"
 
 #ifdef PLATFORM_IOS
@@ -16,8 +16,6 @@
 #endif
 
 #if defined(PLATFORM_WIN)
-	#pragma comment(lib,"LowLevel_static_64.lib")
-	#pragma comment(lib,"LowLevelAABB_static_64.lib")
 	#pragma comment(lib,"PhysX_64.lib")
 	#pragma comment(lib,"PhysXCharacterKinematic_static_64.lib")
 	#pragma comment(lib,"PhysXCommon_64.lib")
@@ -26,9 +24,7 @@
 	#pragma comment(lib,"PhysXFoundation_64.lib")
 	#pragma comment(lib,"PhysXPvdSDK_static_64.lib")
 	#pragma comment(lib,"PhysXTask_static_64.lib")
-	#pragma comment(lib,"PhysXVehicle_static_64.lib")
-	#pragma comment(lib,"SceneQuery_static_64.lib")
-	#pragma comment(lib,"SimulationController_static_64.lib")
+	#pragma comment(lib,"PhysXVehicle2_static_64.lib")
 #elif defined(PLATFORM_DROID)
 	/*PhysX3CharacterKinematic
 	PhysX3Extensions
@@ -54,7 +50,7 @@ NS_BEGIN
 
 using namespace NxRHI;
 
-ENGINE_RTTI_IMPL(EngineNS::NvPhyContext);
+ENGINE_RTTI_IMPL(EngineNS::Nv5PhyContext);
 
 class PxVictoryAllocator : public physx::PxAllocatorCallback
 {
@@ -130,16 +126,16 @@ public:
 static PxVictoryAllocator gDefaultAllocatorCallback;
 static PxVictoryErrorCallback gDefaultErrorCallback;
 
-NvPhyContext::NvPhyContext()
+Nv5PhyContext::Nv5PhyContext()
 {
 	mFoundation = nullptr;
 	mPvd = nullptr;
 	mContext = nullptr;
-	mCooking = nullptr;
+	//mCooking = nullptr;
 	EntityType = Phy_Context;
 }
 
-vBOOL NvPhyContext::Init(UINT featureFlags)
+vBOOL Nv5PhyContext::Init(UINT featureFlags)
 {
 	mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, gDefaultErrorCallback);
 	if (mFoundation == NULL)
@@ -149,7 +145,7 @@ vBOOL NvPhyContext::Init(UINT featureFlags)
 	}
 
 #if defined PLATFORM_WIN
-	physx::PxCudaContextManagerDesc cudaContextManagerDesc;
+	/*physx::PxCudaContextManagerDesc cudaContextManagerDesc;
 	auto m_cudaContextManager = PxCreateCudaContextManager(*mFoundation, cudaContextManagerDesc);
 	if (m_cudaContextManager)
 	{
@@ -164,7 +160,7 @@ vBOOL NvPhyContext::Init(UINT featureFlags)
 		VFX_LTRACE(ELTT_Physics, "Driver Version: %d\n", m_cudaContextManager->getDriverVersion());
 		VFX_LTRACE(ELTT_Physics, "Total Bytes: %d\n", (int)m_cudaContextManager->getDeviceTotalMemBytes());
 		VFX_LTRACE(ELTT_Physics, "core count: %d\n", m_cudaContextManager->getMultiprocessorCount());
-	}
+	}*/
 	//if (NULL == m_physics->getPvdConnectionManager())
 	//	return false;
 	// setup connection parameters
@@ -186,8 +182,7 @@ vBOOL NvPhyContext::Init(UINT featureFlags)
 	mPvd->connect(*transport, PxPvdInstrumentationFlag::eDEBUG);
 #endif
 
-	physx::PxTolerancesScale scale;
-	mContext = PxCreateBasePhysics(PX_PHYSICS_VERSION, *mFoundation, scale, false, mPvd);
+	mContext = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, mTolerancesScale, false, mPvd, nullptr);
 	if (!mContext)
 	{
 		VFX_LTRACE(ELTT_Physics, "PxCreatePhysics(Ver = %d) failed!\r\n", PX_PHYSICS_VERSION);
@@ -198,22 +193,22 @@ vBOOL NvPhyContext::Init(UINT featureFlags)
 		VFX_LTRACE(ELTT_Physics, "PxInitExtensions(Ver = %d) failed!\r\n", PX_PHYSICS_VERSION);
 		return FALSE;
 	}
-	PxCookingParams params(scale);
+	PxCookingParams params(mTolerancesScale);
 	params.meshWeldTolerance = 0.001f;
 	// version 3.3 params.meshPreprocessParams = PxMeshPreprocessingFlags(PxMeshPreprocessingFlag::eWELD_VERTICES | PxMeshPreprocessingFlag:: PxMeshPreprocessingFlag::eREMOVE_UNREFERENCED_VERTICES | PxMeshPreprocessingFlag::eREMOVE_DUPLICATED_TRIANGLES);
 	params.meshPreprocessParams = PxMeshPreprocessingFlags(PxMeshPreprocessingFlag::eWELD_VERTICES);
-	mCooking = PxCreateCooking(PX_PHYSICS_VERSION, *mFoundation, params);
+	/*mCooking = PxCreateCooking(PX_PHYSICS_VERSION, *mFoundation, params);
 	if (!mCooking)
 	{
 		VFX_LTRACE(ELTT_Physics, "PxCreateCooking(Ver = %d) failed!\r\n", PX_PHYSICS_VERSION);
 		return FALSE;
-	}
+	}*/
 
-	if (featureFlags & EPhyFeatureFlag::Articulations)
+	/*if (featureFlags & EPhyFeatureFlag::Articulations)
 		PxRegisterArticulations(*mContext);
 	if (featureFlags & EPhyFeatureFlag::HeightFields)
 		PxRegisterHeightFields(*mContext);
-	/*if (featureFlags & PhyFeatureFlag::Cloth)
+	if (featureFlags & PhyFeatureFlag::Cloth)
 		PxRegisterCloth(*mContext);
 	if (featureFlags & PhyFeatureFlag::Particles)
 		PxRegisterParticles(*mContext);*/
@@ -221,18 +216,18 @@ vBOOL NvPhyContext::Init(UINT featureFlags)
 	return TRUE;
 }
 
-PhySceneDesc* NvPhyContext::CreateSceneDesc()
+PhySceneDesc* Nv5PhyContext::CreateSceneDesc()
 {
-	auto ret = new NvPhySceneDesc();
+	auto ret = new Nv5PhySceneDesc();
 	ret->mDesc = new physx::PxSceneDesc(mContext->getTolerancesScale());
 	ret->Init();
 	return ret;
 }
 
-PhyScene* NvPhyContext::CreateScene(const PhySceneDesc* desc1)
+PhyScene* Nv5PhyContext::CreateScene(const PhySceneDesc* desc1)
 {
-	const NvPhySceneDesc* desc = (const NvPhySceneDesc*)desc1;
-	auto ret = new NvPhyScene();
+	const Nv5PhySceneDesc* desc = (const Nv5PhySceneDesc*)desc1;
+	auto ret = new Nv5PhyScene();
 	ret->mScene = mContext->createScene(*desc->mDesc);
 #if defined(_DEBUG) && defined(PLATFORM_WIN)
 	ret->mScene->getScenePvdClient()->setScenePvdFlags(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS | PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES | PxPvdSceneFlag::eTRANSMIT_CONTACTS);
@@ -246,7 +241,7 @@ PhyScene* NvPhyContext::CreateScene(const PhySceneDesc* desc1)
 	return ret;
 }
 
-PhyActor* NvPhyContext::CreateActor(EPhyActorType type, const v3dxVector3* p, const v3dxQuaternion* q)
+PhyActor* Nv5PhyContext::CreateActor(EPhyActorType type, const v3dxVector3* p, const v3dxQuaternion* q)
 {
 	physx::PxTransform trf;
 	trf.p.x = p->X;
@@ -261,9 +256,9 @@ PhyActor* NvPhyContext::CreateActor(EPhyActorType type, const v3dxVector3* p, co
 	return CreateActor(type, &trf);
 }
 
-PhyActor* NvPhyContext::CreateActor(EPhyActorType type, const physx::PxTransform* pose)
+PhyActor* Nv5PhyContext::CreateActor(EPhyActorType type, const physx::PxTransform* pose)
 {
-	auto ret = new NvPhyActor();
+	auto ret = new Nv5PhyActor();
 
 	ret->mActorType = type;
 	switch (type)
@@ -299,9 +294,9 @@ PhyActor* NvPhyContext::CreateActor(EPhyActorType type, const physx::PxTransform
 	return ret;
 }
 
-PhyMaterial* NvPhyContext::CreateMaterial(float staticFriction, float dynamicFriction, float restitution)
+PhyMaterial* Nv5PhyContext::CreateMaterial(float staticFriction, float dynamicFriction, float restitution)
 {
-	auto ret = new NvPhyMaterial();
+	auto ret = new Nv5PhyMaterial();
 
 	ret->mMaterial = mContext->createMaterial(staticFriction, dynamicFriction, restitution);
 
@@ -314,10 +309,10 @@ PhyMaterial* NvPhyContext::CreateMaterial(float staticFriction, float dynamicFri
 	return ret;
 }
 
-PhyShape* NvPhyContext::CreateShapePlane(PhyMaterial* material1)
+PhyShape* Nv5PhyContext::CreateShapePlane(PhyMaterial* material1)
 {
-	NvPhyMaterial* material = (NvPhyMaterial*)material1;
-	auto ret = new NvPhyShape();
+	Nv5PhyMaterial* material = (Nv5PhyMaterial*)material1;
+	auto ret = new Nv5PhyShape();
 	ret->mType = PST_Plane;
 	ret->mShape = mContext->createShape(physx::PxPlaneGeometry(), *material->mMaterial, true,
 		physx::PxShapeFlag::eVISUALIZATION | physx::PxShapeFlag::eSIMULATION_SHAPE | physx::PxShapeFlag::eSCENE_QUERY_SHAPE);
@@ -331,10 +326,10 @@ PhyShape* NvPhyContext::CreateShapePlane(PhyMaterial* material1)
 	return ret;
 }
 
-PhyShape* NvPhyContext::CreateShapeBox(PhyMaterial* material1, const v3dxVector3* halfExtent)
+PhyShape* Nv5PhyContext::CreateShapeBox(PhyMaterial* material1, const v3dxVector3* halfExtent)
 {
-	NvPhyMaterial* material = (NvPhyMaterial*)material1;
-	auto ret = new NvPhyShape();
+	Nv5PhyMaterial* material = (Nv5PhyMaterial*)material1;
+	auto ret = new Nv5PhyShape();
 	ret->mType = PST_Box;	
 	ret->mShape = mContext->createShape(physx::PxBoxGeometry(halfExtent->X, halfExtent->Y, halfExtent->Z), *material->mMaterial, true,
 		physx::PxShapeFlag::eVISUALIZATION | physx::PxShapeFlag::eSIMULATION_SHAPE | physx::PxShapeFlag::eSCENE_QUERY_SHAPE);
@@ -348,10 +343,10 @@ PhyShape* NvPhyContext::CreateShapeBox(PhyMaterial* material1, const v3dxVector3
 	return ret;
 }
 
-PhyShape* NvPhyContext::CreateShapeSphere(PhyMaterial* material1, float radius)
+PhyShape* Nv5PhyContext::CreateShapeSphere(PhyMaterial* material1, float radius)
 {
-	NvPhyMaterial* material = (NvPhyMaterial*)material1;
-	auto ret = new NvPhyShape();
+	Nv5PhyMaterial* material = (Nv5PhyMaterial*)material1;
+	auto ret = new Nv5PhyShape();
 	ret->mType = PST_Sphere;
 	ret->mShape = mContext->createShape(physx::PxSphereGeometry(radius), *material->mMaterial, true,
 		physx::PxShapeFlag::eVISUALIZATION | physx::PxShapeFlag::eSIMULATION_SHAPE | physx::PxShapeFlag::eSCENE_QUERY_SHAPE | physx::PxShapeFlag::eVISUALIZATION);
@@ -365,10 +360,10 @@ PhyShape* NvPhyContext::CreateShapeSphere(PhyMaterial* material1, float radius)
 	return ret;
 }
 
-PhyShape* NvPhyContext::CreateShapeCapsule(PhyMaterial* material1, float radius, float halfHeight)
+PhyShape* Nv5PhyContext::CreateShapeCapsule(PhyMaterial* material1, float radius, float halfHeight)
 {
-	NvPhyMaterial* material = (NvPhyMaterial*)material1;
-	auto ret = new NvPhyShape();
+	Nv5PhyMaterial* material = (Nv5PhyMaterial*)material1;
+	auto ret = new Nv5PhyShape();
 	ret->mType = PST_Capsule;
 	ret->mShape = mContext->createShape(physx::PxCapsuleGeometry(radius, halfHeight), *material->mMaterial, true,
 		physx::PxShapeFlag::eVISUALIZATION | physx::PxShapeFlag::eSIMULATION_SHAPE | physx::PxShapeFlag::eSCENE_QUERY_SHAPE);
@@ -382,14 +377,14 @@ PhyShape* NvPhyContext::CreateShapeCapsule(PhyMaterial* material1, float radius,
 	return ret;
 }
 
-PhyShape* NvPhyContext::CreateShapeConvex(PhyMaterial* material1, PhyConvexMesh* mesh1, const v3dxVector3* scale, const v3dxQuaternion* scaleRot)
+PhyShape* Nv5PhyContext::CreateShapeConvex(PhyMaterial* material1, PhyConvexMesh* mesh1, const v3dxVector3* scale, const v3dxQuaternion* scaleRot)
 {
-	NvPhyMaterial* material = (NvPhyMaterial*)material1;
-	NvPhyConvexMesh* mesh = (NvPhyConvexMesh*)mesh1;
+	Nv5PhyMaterial* material = (Nv5PhyMaterial*)material1;
+	Nv5PhyConvexMesh* mesh = (Nv5PhyConvexMesh*)mesh1;
 	auto convexMesh = mesh->mMesh;
 
 	physx::PxMeshScale scaling(*(const physx::PxVec3*)scale, *(const physx::PxQuat*)scaleRot);
-	auto ret = new NvPhyShape();
+	auto ret = new Nv5PhyShape();
 	ret->mType = PST_Convex;
 	ret->mShape = mContext->createShape(physx::PxConvexMeshGeometry(convexMesh, scaling), *material->mMaterial, true,
 		physx::PxShapeFlag::eVISUALIZATION | physx::PxShapeFlag::eSIMULATION_SHAPE | physx::PxShapeFlag::eSCENE_QUERY_SHAPE);
@@ -404,12 +399,12 @@ PhyShape* NvPhyContext::CreateShapeConvex(PhyMaterial* material1, PhyConvexMesh*
 	return ret;
 }
 
-PhyShape* NvPhyContext::CreateShapeTriMesh(PhyMaterial** material, int NumOfMtl, PhyTriMesh* mesh1, const v3dxVector3* scale, const v3dxQuaternion* scaleRot)
+PhyShape* Nv5PhyContext::CreateShapeTriMesh(PhyMaterial** material, int NumOfMtl, PhyTriMesh* mesh1, const v3dxVector3* scale, const v3dxQuaternion* scaleRot)
 {
 	physx::PxMeshScale scaling(*(const physx::PxVec3*)scale, *(const physx::PxQuat*)scaleRot);
 	
-	NvPhyTriMesh* mesh = (NvPhyTriMesh*)mesh1;
-	auto ret = new NvPhyShape();
+	Nv5PhyTriMesh* mesh = (Nv5PhyTriMesh*)mesh1;
+	auto ret = new Nv5PhyShape();
 	ret->mTrianglesRemapNumber = mesh->mMesh->getNbTriangles();
 	ret->mTrianglesRemap = new uint32_t[ret->mTrianglesRemapNumber];
 	memcpy(ret->mTrianglesRemap , mesh->mMesh->getTrianglesRemap(), sizeof(uint32_t) * ret->mTrianglesRemapNumber);
@@ -419,7 +414,7 @@ PhyShape* NvPhyContext::CreateShapeTriMesh(PhyMaterial** material, int NumOfMtl,
 	std::vector<PxMaterial*> pxMtls;
 	for (int i = 0; i < NumOfMtl; i++)
 	{
-		pxMtls.push_back(((NvPhyMaterial*)material[i])->mMaterial);
+		pxMtls.push_back(((Nv5PhyMaterial*)material[i])->mMaterial);
 	}
 	ret->mShape = mContext->createShape(physx::PxTriangleMeshGeometry(mesh->mMesh, scaling), &pxMtls[0], NumOfMtl, true,
 		physx::PxShapeFlag::eVISUALIZATION | physx::PxShapeFlag::eSIMULATION_SHAPE | physx::PxShapeFlag::eSCENE_QUERY_SHAPE);
@@ -437,10 +432,10 @@ PhyShape* NvPhyContext::CreateShapeTriMesh(PhyMaterial** material, int NumOfMtl,
 	return ret;
 }
 
-PhyShape* NvPhyContext::CreateShapeHeightfield(PhyMaterial** material, int NumOfMtl, PhyHeightfield* heightfield1, float heightScale, const v3dxVector3* scale)
+PhyShape* Nv5PhyContext::CreateShapeHeightfield(PhyMaterial** material, int NumOfMtl, PhyHeightfield* heightfield1, float heightScale, const v3dxVector3* scale)
 {
-	NvPhyHeightfield* heightfield = (NvPhyHeightfield*)heightfield1;
-	auto ret = new NvPhyShape();
+	Nv5PhyHeightfield* heightfield = (Nv5PhyHeightfield*)heightfield1;
+	auto ret = new Nv5PhyShape();
 	PxHeightFieldGeometry hfGeom;//(heightfield->mHeightField, PxMeshGeometryFlags(), scale->x, scale->y, scale->z);
 	hfGeom.heightFieldFlags = PxMeshGeometryFlag::eDOUBLE_SIDED;
 	hfGeom.heightField = heightfield->mHeightField;
@@ -450,7 +445,7 @@ PhyShape* NvPhyContext::CreateShapeHeightfield(PhyMaterial** material, int NumOf
 	std::vector<PxMaterial*> pxMtls;
 	for (int i = 0; i < NumOfMtl; i++)
 	{
-		pxMtls.push_back(((NvPhyMaterial*)material[i])->mMaterial);
+		pxMtls.push_back(((Nv5PhyMaterial*)material[i])->mMaterial);
 	}
 	ret->mShape = mContext->createShape(hfGeom, &pxMtls[0], NumOfMtl, true, 
 		physx::PxShapeFlag::eVISUALIZATION | physx::PxShapeFlag::eSIMULATION_SHAPE | physx::PxShapeFlag::eSCENE_QUERY_SHAPE);
@@ -465,7 +460,7 @@ PhyShape* NvPhyContext::CreateShapeHeightfield(PhyMaterial** material, int NumOf
 	return ret;
 }
 
-PhyConvexMesh* NvPhyContext::CookConvexMesh(FMeshDataProvider* mesh)
+PhyConvexMesh* Nv5PhyContext::CookConvexMesh(FMeshDataProvider* mesh)
 {
 	auto blobVB = mesh->GetStream(VST_Position);
 	
@@ -474,23 +469,21 @@ PhyConvexMesh* NvPhyContext::CookConvexMesh(FMeshDataProvider* mesh)
 	convexDesc.points.stride = sizeof(v3dxVector3);
 	convexDesc.points.data = blobVB->GetData();
 	convexDesc.flags |= physx::PxConvexFlag::eCOMPUTE_CONVEX;
-	//convexDesc.flags |= physx::PxConvexFlag::eINFLATE_CONVEX; //physx 3.4 flags
-	physx::PxDefaultMemoryOutputStream m_memoryStream;
-	physx::PxConvexMeshCookingResult::Enum cookOk;
-	if (mCooking->cookConvexMesh(convexDesc, m_memoryStream, &cookOk) == 0)
-		return nullptr;
 
-	physx::PxDefaultMemoryInputData readBuffer(m_memoryStream.getData(), m_memoryStream.getSize());
-	auto convexMesh = mContext->createConvexMesh(readBuffer);
+	PxCookingParams params(mTolerancesScale);
+	params.meshWeldTolerance = 0.001f;
+	params.meshPreprocessParams = PxMeshPreprocessingFlags(PxMeshPreprocessingFlag::eWELD_VERTICES);
+
+	auto convexMesh = PxCreateConvexMesh(params, convexDesc);
 	if (convexMesh == nullptr)
 		return nullptr;
-	auto result = new NvPhyConvexMesh();
+	auto result = new Nv5PhyConvexMesh();
 	result->mMesh = convexMesh;
 
 	return result;
 }
 
-PhyTriMesh* NvPhyContext::CookTriMesh(FMeshDataProvider* mesh, IBlobObject* uvblob, IBlobObject* faceblob, IBlobObject* posblob)
+PhyTriMesh* Nv5PhyContext::CookTriMesh(FMeshDataProvider* mesh, IBlobObject* uvblob, IBlobObject* faceblob, IBlobObject* posblob)
 {
 	auto blobVB = mesh->GetStream(VST_Position);
 
@@ -530,8 +523,12 @@ PhyTriMesh* NvPhyContext::CookTriMesh(FMeshDataProvider* mesh, IBlobObject* uvbl
 	}
 	meshDesc.triangles.data = blobIB->GetData();
 
+	PxCookingParams params(mTolerancesScale);
+	params.meshWeldTolerance = 0.001f;
+	params.meshPreprocessParams = PxMeshPreprocessingFlags(PxMeshPreprocessingFlag::eWELD_VERTICES);
+
 	physx::PxDefaultMemoryOutputStream m_memoryStream;
-	bool status = mCooking->cookTriangleMesh(meshDesc, m_memoryStream);
+	bool status = PxCookTriangleMesh(params, meshDesc, m_memoryStream);
 	if (!status)
 		return nullptr;
 
@@ -540,7 +537,7 @@ PhyTriMesh* NvPhyContext::CookTriMesh(FMeshDataProvider* mesh, IBlobObject* uvbl
 	if (triMesh == nullptr)
 		return nullptr;
 
-	auto result = new NvPhyTriMesh();
+	auto result = new Nv5PhyTriMesh();
 	result->mMesh = triMesh;
 	result->mCookedData.ReSize(0);
 	result->mCookedData.PushData(m_memoryStream.getData(), m_memoryStream.getSize());
@@ -567,7 +564,7 @@ PhyTriMesh* NvPhyContext::CookTriMesh(FMeshDataProvider* mesh, IBlobObject* uvbl
 	return result;
 }
 
-PhyHeightfield* NvPhyContext::CookHeightfield(int nbColumns, int nbRows, PhyHeightFieldSample* pData, float convexEdgeThreshold, bool bNoBoundaryEdge)
+PhyHeightfield* Nv5PhyContext::CookHeightfield(int nbColumns, int nbRows, PhyHeightFieldSample* pData, float convexEdgeThreshold, bool bNoBoundaryEdge)
 {
 	physx::PxHeightFieldDesc desc;
 	desc.format = PxHeightFieldFormat::eS16_TM;
@@ -578,38 +575,39 @@ PhyHeightfield* NvPhyContext::CookHeightfield(int nbColumns, int nbRows, PhyHeig
 	desc.samples.stride = sizeof(PhyHeightFieldSample);// dataStride;
 	if (bNoBoundaryEdge)
 	{
-		desc.flags.set(physx::PxHeightFieldFlag::Enum::eNO_BOUNDARY_EDGES);
+		desc.flags = physx::PxHeightFieldFlag::Enum::eNO_BOUNDARY_EDGES;
 	}
 	physx::PxDefaultMemoryOutputStream m_memoryStream;
-	mCooking->cookHeightField(desc, m_memoryStream);
+	if (false == PxCookHeightField(desc, m_memoryStream))
+		return nullptr;
 	physx::PxDefaultMemoryInputData readBuffer(m_memoryStream.getData(), m_memoryStream.getSize());
 	auto hflds = mContext->createHeightField(readBuffer);
 	if (hflds == nullptr)
 		return nullptr;
 
-	auto result = new NvPhyHeightfield();
+	auto result = new Nv5PhyHeightfield();
 	result->mHeightField = hflds;
 	return result;
 }
 
-PhyBoxControllerDesc* NvPhyContext::CreateBoxControllerDesc()
+PhyBoxControllerDesc* Nv5PhyContext::CreateBoxControllerDesc()
 {
-	return new NvPhyBoxControllerDesc();
+	return new Nv5PhyBoxControllerDesc();
 }
 
-PhyCapsuleControllerDesc* NvPhyContext::CreateCapsuleControllerDesc()
+PhyCapsuleControllerDesc* Nv5PhyContext::CreateCapsuleControllerDesc()
 {
-	return new NvPhyCapsuleControllerDesc();
+	return new Nv5PhyCapsuleControllerDesc();
 }
 
-PhyTriMesh* NvPhyContext::CreateTriMesh()
+PhyTriMesh* Nv5PhyContext::CreateTriMesh()
 {
-	return new NvPhyTriMesh();
+	return new Nv5PhyTriMesh();
 }
 
-PhyConvexMesh* NvPhyContext::CreateConvexMesh()
+PhyConvexMesh* Nv5PhyContext::CreateConvexMesh()
 {
-	return new NvPhyConvexMesh();
+	return new Nv5PhyConvexMesh();
 }
 
 NS_END

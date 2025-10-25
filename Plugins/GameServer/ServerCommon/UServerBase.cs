@@ -37,7 +37,7 @@ namespace EngineNS.Plugins.ServerCommon
         {
             return null;
         }
-        public override Bricks.Network.INetConnect GetRunTargetConnect(in Bricks.Network.RPC.URouter target, Bricks.Network.INetConnect connect)
+        public override Bricks.Network.INetConnect GetRunTargetConnect(in Bricks.Network.RPC.FRouter target, Bricks.Network.INetConnect connect)
         {
             return GetRunTargetConnect(target.RunTarget, target.Index, connect);
         }

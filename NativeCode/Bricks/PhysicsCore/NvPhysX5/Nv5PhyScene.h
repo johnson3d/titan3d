@@ -1,19 +1,19 @@
 #pragma once
-#include "NvCommon.h"
+#include "Nv5Common.h"
 #include "../PhyScene.h"
 #include "../../../Math/v3dxRayCast.h"
 using namespace physx;
 
 NS_BEGIN
 
-class NvPhyContext;
-class NvPhyController;
-class NvPhyMaterial;
-class NvPhyBoxControllerDesc;
-class NvPhyCapsuleControllerDesc;
-class NvPhyShape;
-class NvPhyActor;
-class NvPhyObstacleContext;
+class Nv5PhyContext;
+class Nv5PhyController;
+class Nv5PhyMaterial;
+class Nv5PhyBoxControllerDesc;
+class Nv5PhyCapsuleControllerDesc;
+class Nv5PhyShape;
+class Nv5PhyActor;
+class Nv5PhyObstacleContext;
 
 //TODO: Need to impl
 typedef void(*FonConstraintBreak)(void* selft, physx::PxConstraintInfo*, UINT);
@@ -114,29 +114,28 @@ struct PhySimulationFilterShader
 		PxFilterObjectAttributes attributes1, PxFilterData filterData1,
 		PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize)
 	{
-		if (_CustomSimulationFilterShader != nullptr)
+		if (_CustomSimulationFilterShader5 != nullptr)
 		{
 			if ((&pairFlags) == nullptr)
 			{
 				VFX_LTRACE(ELTT_Physics, "CorePxSimulationFilterShader pairFlags == null\r\n");
 			}
-			return (physx::PxFilterFlags)_CustomSimulationFilterShader(attributes0, (FPhyFilterData*)&filterData0, attributes1, (FPhyFilterData*)&filterData1, &pairFlags, constantBlock, constantBlockSize);
+			return (physx::PxFilterFlags)_CustomSimulationFilterShader5(attributes0, (FPhyFilterData*)&filterData0, attributes1, (FPhyFilterData*)&filterData1, &pairFlags, constantBlock, constantBlockSize);
 		}
 		pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT| physx::PxPairFlag::eTRIGGER_DEFAULT;
 		return physx::PxFilterFlags();
 	}
 
-	static FSimulationFilterShader _CustomSimulationFilterShader;
+	static FSimulationFilterShader _CustomSimulationFilterShader5;
 };
 
-class NvPhySceneDesc : public PhySceneDesc
+class Nv5PhySceneDesc : public PhySceneDesc
 {
-	friend NvPhyContext;
+	friend Nv5PhyContext;
 public:
-
-	ENGINE_RTTI(NvPhySceneDesc);
-	NvPhySceneDesc();
-	~NvPhySceneDesc();
+	ENGINE_RTTI(Nv5PhySceneDesc);
+	Nv5PhySceneDesc();
+	~Nv5PhySceneDesc();
 	virtual void Init() override;
 	physx::PxSceneDesc* GetDesc() {
 		return mDesc;
@@ -184,13 +183,13 @@ protected:
 };
 
 
-class NvPhyScene : public PhyScene
+class Nv5PhyScene : public PhyScene
 {
 public:
-	ENGINE_RTTI(NvPhyScene);
+	ENGINE_RTTI(Nv5PhyScene);
 
-	NvPhyScene();
-	~NvPhyScene();
+	Nv5PhyScene();
+	~Nv5PhyScene();
 	virtual void Cleanup() override;
 	virtual void BindPhysX() override;
 

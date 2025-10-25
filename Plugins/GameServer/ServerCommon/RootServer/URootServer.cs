@@ -4,14 +4,14 @@ using EngineNS.Bricks.Network.RPC;
 
 namespace EngineNS.Plugins.RootServer
 {
-    [URpcClass(RunTarget = ERunTarget.Root, Executer = EExecuter.Root)]
+    [TtRpcClass(RunTarget = ERunTarget.Root, Executer = EExecuter.Root)]
     public partial class URootServer : ServerCommon.UServerBase
     {
         public URootServer()
         {
             CurrentTarget = ERunTarget.Root;
         }
-        public override object GetExecuter(in URouter router)
+        public override object GetExecuter(in FRouter router)
         {
             switch (router.Executer)
             {
@@ -58,7 +58,7 @@ namespace EngineNS.Plugins.RootServer
             return null;
         }
         #region RPC
-        [URpcMethod(Index = 100 + 0)]
+        [TtRpcMethod(Index = 100 + 0)]
         public bool RegLogin(string psw, Guid serverId, string ip, UInt16 port, TtCallContext context)
         {
             if (psw != "TitanServer")
@@ -74,7 +74,7 @@ namespace EngineNS.Plugins.RootServer
 			LoginServer.ListenPoint.Port = port;
             return true;
         }
-        [URpcMethod(Index = 100 + 1)]
+        [TtRpcMethod(Index = 100 + 1)]
         public UInt16 RegGate(string psw, Guid serverId, string ip, UInt16 port, TtCallContext context)
         {
             for (int i = 0; i < UInt16.MaxValue; i++)
@@ -102,7 +102,7 @@ namespace EngineNS.Plugins.RootServer
             
             return UInt16.MaxValue;
         }
-        [URpcMethod(Index = 100 + 2)]
+        [TtRpcMethod(Index = 100 + 2)]
         public UInt16 RegLevel(string psw, Guid serverId, string ip, UInt16 port, TtCallContext context)
         {
             for (int i = 0; i < UInt16.MaxValue; i++)
@@ -130,7 +130,7 @@ namespace EngineNS.Plugins.RootServer
 
             return UInt16.MaxValue;
         }
-        [URpcMethod(Index = 100 + 3)]
+        [TtRpcMethod(Index = 100 + 3)]
 		public async System.Threading.Tasks.Task<Bricks.Network.FNetworkPoint> SelectGateway(string user, Guid sessionId, TtCallContext context)
 		{
 			ServerCommon.UServerBase slt = null;
@@ -162,7 +162,7 @@ namespace EngineNS.Plugins.RootServer
                 return null;
             return slt.ListenPoint;
 		}
-        [URpcMethod(Index = 100 + 4)]
+        [TtRpcMethod(Index = 100 + 4)]
 		public bool UpdatePayload(ERunTarget target, UInt16 index, long value, TtCallContext context)
 		{
             switch (target)
@@ -176,7 +176,7 @@ namespace EngineNS.Plugins.RootServer
             }
 			return true;
         }
-        [URpcMethod(Index = 100 + 5)]
+        [TtRpcMethod(Index = 100 + 5)]
         public bool RegClient(Guid gateId, Guid sessionId, string user, TtCallContext context)
 		{
 			var server = FindGate(gateId);

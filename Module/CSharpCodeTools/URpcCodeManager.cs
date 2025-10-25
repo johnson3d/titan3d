@@ -12,11 +12,13 @@ namespace CSharpCodeTools
 {
     class URpcCodeManager : UCodeManagerBase
     {
+        const string RpcAttributeName = "TtRpcMethod";
+        const string RpcClassAttributeName = "TtRpcClass";
         public static URpcCodeManager Instance = new URpcCodeManager();
 
         protected override bool CheckSourceCode(string code)
         {
-            if (code.Contains("URpcMethod"))
+            if (code.Contains(RpcAttributeName))
                 return true;
             return false;
         }
@@ -136,7 +138,7 @@ namespace CSharpCodeTools
                                     foreach (var k in j.Attributes)
                                     {
                                         var attributeName = k.Name.NormalizeWhitespace().ToFullString();
-                                        if (attributeName.EndsWith("URpcMethodAttribute") || attributeName.EndsWith("URpcMethod"))
+                                        if (attributeName.EndsWith(RpcAttributeName+"Attribute") || attributeName.EndsWith(RpcAttributeName))
                                         {
                                             var klsDeffine = FindOrCreate(fullname) as URpcClassDefine;
                                             URpcMethod rpcMethod = new URpcMethod();
@@ -180,7 +182,7 @@ namespace CSharpCodeTools
 
                                             rpcMethod.ArgTypes.Clear();
                                             var lstParam = method.ParameterList.Parameters.Last();
-                                            if (lstParam.Type.ToString().Contains("UCallContext") == false)
+                                            if (lstParam.Type.ToString().Contains("TtCallContext") == false)
                                             {
                                                 Console.WriteLine($"RPC {klsDeffine.Name}.{rpcMethod.Name} parameter error");
                                             }
@@ -245,7 +247,7 @@ namespace CSharpCodeTools
                 foreach (var j in i.Attributes)
                 {
                     var attributeName = j.Name.NormalizeWhitespace().ToFullString();
-                    if (attributeName.EndsWith("URpcClassAttribute") || attributeName.EndsWith("URpcClass"))
+                    if (attributeName.EndsWith(RpcClassAttributeName+"Attribute") || attributeName.EndsWith(RpcClassAttributeName))
                     {
                         target = "EngineNS.Bricks.Network.RPC.ERunTarget.None";
                         executer = "EngineNS.Bricks.Network.RPC.EExecuter.Root";

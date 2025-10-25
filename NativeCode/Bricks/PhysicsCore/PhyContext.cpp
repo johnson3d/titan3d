@@ -7,7 +7,8 @@
 #include "PhyHeightfield.h"
 #include "../../Graphics/Mesh/MeshDataProvider.h"
 
-#include "NvPhysX/NvPhyContext.h"
+//#include "NvPhysX/NvPhyContext.h"
+#include "NvPhysX5/Nv5PhyContext.h"
 
 #define new VNEW
 
@@ -18,7 +19,8 @@ PhyContext* PhyContext::CreateContext(EPhysicsContextType type)
 	switch (type)
 	{
 	case EPhysicsContextType::NvPhysX:
-		return new NvPhyContext();
+		//return new NvPhyContext();
+		return new Nv5PhyContext();
 	default:
 		return nullptr;
 	}

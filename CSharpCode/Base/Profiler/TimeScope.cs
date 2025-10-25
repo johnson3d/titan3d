@@ -282,7 +282,7 @@ namespace EngineNS.Profiler
         }
     }
 
-    [URpcClassAttribute(RunTarget = ERunTarget.None, Executer = EExecuter.Profiler, CallerInClass = true)]
+    [TtRpcClassAttribute(RunTarget = ERunTarget.None, Executer = EExecuter.Profiler, CallerInClass = true)]
     public partial class TtRpcProfiler : IRpcHost
     {
         static URpcClass smRpcClass = null;
@@ -350,7 +350,7 @@ namespace EngineNS.Profiler
             }
         }
         RpcProfilerThreads mRpcProfilerThreads = new RpcProfilerThreads();
-        [URpcMethod(Index = 0)]
+        [TtRpcMethod(Index = 0)]
         public EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads GetProfilerThreads(sbyte arg, TtCallContext context)
         {
             //mRpcProfilerThreads.ThreadNames.Clear();
@@ -473,7 +473,7 @@ namespace EngineNS.Profiler
             }
         }        
         RpcProfilerData mRpcProfilerData = new RpcProfilerData();
-        [URpcMethod(Index = 1)]
+        [TtRpcMethod(Index = 1)]
         public EngineNS.Profiler.TtRpcProfiler.RpcProfilerData GetProfilerData(string name, TtCallContext context)
         {
             foreach (var i in Profiler.TimeScopeManager.AllThreadInstance)
@@ -494,7 +494,7 @@ namespace EngineNS.Profiler
             [Rtti.Meta("")]
             public string ScopeName { get; set; }
         }
-        [URpcMethod(Index = 2)]
+        [TtRpcMethod(Index = 2)]
         public void ResetMaxTime(EngineNS.Profiler.TtRpcProfiler.ResetMaxTimeArg arg, TtCallContext context)
         {
             foreach (var i in Profiler.TimeScopeManager.AllThreadInstance)
@@ -566,7 +566,7 @@ namespace EngineNS.Profiler
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				URouter router = new URouter();
+				FRouter router = new FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Profiler;
 				router.Index = ExeIndex;
@@ -603,7 +603,7 @@ namespace EngineNS.Profiler
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				URouter router = new URouter();
+				FRouter router = new FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Profiler;
 				router.Index = ExeIndex;
@@ -635,7 +635,7 @@ namespace EngineNS.Profiler
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				URouter router = new URouter();
+				FRouter router = new FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Profiler;
 				router.Index = ExeIndex;

@@ -35,11 +35,11 @@ namespace EngineNS.Bricks.Network
                 }
                 else
                 {
-                    URouter router1 = new URouter();
+                    FRouter router1 = new FRouter();
                     pkg.Read(out router1);
                     if (router1.RunTarget != ERunTarget.None && router1.RunTarget != TtEngine.Instance.RpcModule.RpcManager.CurrentTarget)
                     {
-                        var pRouterAddr = (URouter*)((byte*)ptr + sizeof(RPC.FPkgHeader));
+                        var pRouterAddr = (FRouter*)((byte*)ptr + sizeof(RPC.FPkgHeader));
                         if (TtEngine.Instance.RpcModule.RpcManager.OnRelay(pRouterAddr, connect))
                         {
                             var conn = TtEngine.Instance.RpcModule.RpcManager.GetRunTargetConnect(in *pRouterAddr, connect);
@@ -94,7 +94,7 @@ namespace EngineNS.Bricks.Network
                     }
                     else
                     {
-                        URouter router1 = new URouter();
+                        FRouter router1 = new FRouter();
                         pkg.Read(out router1);
                         if (router1.RunTarget != ERunTarget.None && router1.RunTarget != TtEngine.Instance.RpcModule.RpcManager.CurrentTarget)
                         {

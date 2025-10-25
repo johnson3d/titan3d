@@ -1,6 +1,8 @@
 #include <WinSock2.h>
 #include <mswsock.h>
 #include <windows.h>
+#include <cor.h>
+#include <corprof.h>
 
 #include "ClrLogger.h"
 #include "ClrProfiler.h"

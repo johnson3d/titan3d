@@ -212,7 +212,7 @@ namespace CSharpCodeTools
                             PushBrackets();
                             {
                                 AddLine($"var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);");
-                                AddLine($"URouter router = new URouter();");
+                                AddLine($"FRouter router = new FRouter();");
                                 AddLine($"router.RunTarget = {this.RunTarget};");
                                 AddLine($"router.Executer = {this.Executer};");
                                 AddLine($"router.Index = ExeIndex;");

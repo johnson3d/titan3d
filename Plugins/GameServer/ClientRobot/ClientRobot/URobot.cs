@@ -7,7 +7,7 @@ using EngineNS.Plugins.ClientCommon;
 
 namespace RobotClient
 {
-    [URpcClass(RunTarget = ERunTarget.Client, Executer = EExecuter.Root)]
+    [TtRpcClass(RunTarget = ERunTarget.Client, Executer = EExecuter.Root)]
     partial class URobot : EngineNS.Bricks.Network.RPC.TtRpcManager, EngineNS.ITickable
     {
         public int GetTickOrder()
@@ -144,12 +144,12 @@ namespace RobotClient
         }
 
         #region RPC
-        [URpcMethod(Index = 100 + 0)]
+        [TtRpcMethod(Index = 100 + 0)]
         public void UpdatePosition(Vector3 pos, TtCallContext context)
         {
 
         }
-        [URpcMethod(Index = 100 + 1)]
+        [TtRpcMethod(Index = 100 + 1)]
         public void GhostsAutoSync(EngineNS.IO.TtMemWriter data, TtCallContext context)
         {
             using (var reader = EngineNS.IO.TtMemReader.CreateInstance(in data))
@@ -180,7 +180,7 @@ namespace RobotClient
                 }
             }
         }
-        [URpcMethod(Index = 100 + 2)]
+        [TtRpcMethod(Index = 100 + 2)]
         public void GhostsUpdatePlacement(EngineNS.IO.TtMemWriter data, TtCallContext context)
         {
             using (var reader = EngineNS.IO.TtMemReader.CreateInstance(in data))

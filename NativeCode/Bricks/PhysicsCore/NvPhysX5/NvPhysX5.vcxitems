@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{66934216-5767-41b6-b4f8-7c355d4f0184}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Nv5Common.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Nv5PhyActor.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Nv5PhyContext.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Nv5PhyController.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Nv5PhyHeightfield.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Nv5PhyMaterial.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Nv5PhyMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Nv5PhyObstacle.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Nv5PhyScene.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Nv5PhyShape.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Nv5PhyActor.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Nv5PhyContext.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Nv5PhyController.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Nv5PhyHeightfield.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Nv5PhyMaterial.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Nv5PhyMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Nv5PhyObstacle.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Nv5PhyScene.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Nv5PhyShape.cpp" />
+  </ItemGroup>
+</Project>

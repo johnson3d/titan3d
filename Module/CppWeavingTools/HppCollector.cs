@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -99,6 +101,26 @@ namespace CppWeaving
                             {
                                 if (i.StartsWith("%(AdditionalIncludeDirectories)"))
                                     continue;
+                                if (i=="$(WindowsSDK_IncludePath)")
+                                {
+                                    var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows Kits\Installed Roots");
+                                    var kitsRoot10 = key?.GetValue("KitsRoot10") as string;
+
+                                    if (!string.IsNullOrEmpty(kitsRoot10))
+                                    {
+                                        var latestVersion = Directory.GetDirectories(Path.Combine(kitsRoot10, "Include"))
+                                                                     .OrderByDescending(v => v)  // 选最新版本
+                                                                     .First();
+
+                                        var ucrt = Path.Combine(latestVersion, "ucrt");
+                                        var shared = Path.Combine(latestVersion, "shared");
+                                        var um = Path.Combine(latestVersion, "um");
+
+                                        IncludePath.Add(ucrt);
+                                        IncludePath.Add(shared);
+                                        IncludePath.Add(um);
+                                    }
+                                }
                                 if (System.IO.Path.IsPathRooted(i))
                                     IncludePath.Add(i);
                                 else

@@ -1,15 +1,15 @@
-#include "NvPhyController.h"
-#include "NvPhyScene.h"
-#include "NvPhyActor.h"
-#include "NvPhyMaterial.h"
+#include "Nv5PhyController.h"
+#include "Nv5PhyScene.h"
+#include "Nv5PhyActor.h"
+#include "Nv5PhyMaterial.h"
 
 #define new VNEW
 
 NS_BEGIN
 
-ENGINE_RTTI_IMPL(EngineNS::NvPhyBoxControllerDesc);
-ENGINE_RTTI_IMPL(EngineNS::NvPhyCapsuleControllerDesc);
-ENGINE_RTTI_IMPL(EngineNS::NvPhyController);
+ENGINE_RTTI_IMPL(EngineNS::Nv5PhyBoxControllerDesc);
+ENGINE_RTTI_IMPL(EngineNS::Nv5PhyCapsuleControllerDesc);
+ENGINE_RTTI_IMPL(EngineNS::Nv5PhyController);
 
 struct vPhysXCharacterControllerCallBack_ControllerFilter : public physx::PxControllerFilterCallback
 {
@@ -33,7 +33,7 @@ struct vPhysXCharacterControllerCallBack_ControllerFilter : public physx::PxCont
 
 struct vPhysXCharacterControllerCallBack_QueryFilter : public physx::PxQueryFilterCallback
 {
-	virtual physx::PxQueryHitType::Enum preFilter(const physx::PxFilterData& filterData, const physx::PxShape* shape, const physx::PxRigidActor* actor, physx::PxSceneQueryFlags& queryFlags)
+	virtual PxQueryHitType::Enum preFilter(const PxFilterData& filterData, const PxShape* shape, const PxRigidActor* actor, PxHitFlags& queryFlags) override
 	{
 		return physx::PxQueryHitType::eBLOCK;
 		if (shape->getFlags()&physx::PxShapeFlag::eTRIGGER_SHAPE)
@@ -44,7 +44,7 @@ struct vPhysXCharacterControllerCallBack_QueryFilter : public physx::PxQueryFilt
 		else
 			return  physx::PxQueryHitType::eNONE;
 	}
-	virtual	physx::PxQueryHitType::Enum postFilter(const physx::PxFilterData& filterData, const physx::PxSceneQueryHit& hit)
+	virtual PxQueryHitType::Enum postFilter(const PxFilterData& filterData, const PxQueryHit& hit, const PxShape* shape, const PxRigidActor* actor) override
 	{
 		return physx::PxQueryHitType::eBLOCK;
 	}
@@ -83,54 +83,54 @@ struct vPhysXCharacterControllerCallBack_Behavior : public physx::PxControllerBe
 	{
 		return physx::PxControllerBehaviorFlags(0);
 	}
-} static Behavior;
+}static Behavior;
 
-void NvPhyBoxControllerDesc::SetMaterial(PhyMaterial* mtl)
+void Nv5PhyBoxControllerDesc::SetMaterial(PhyMaterial* mtl)
 {
 	if (mtl == nullptr)
 		mBoxDesc.material = nullptr;
 	else
-		mBoxDesc.material = static_cast<NvPhyMaterial*>(mtl)->mMaterial;
+		mBoxDesc.material = static_cast<Nv5PhyMaterial*>(mtl)->mMaterial;
 }
 
-void NvPhyCapsuleControllerDesc::SetMaterial(PhyMaterial* mtl)
+void Nv5PhyCapsuleControllerDesc::SetMaterial(PhyMaterial* mtl)
 {
 	if (mtl == nullptr)
 		mCapsuleDesc.material = nullptr;
 	else
-		mCapsuleDesc.material = static_cast<NvPhyMaterial*>(mtl)->mMaterial;
+		mCapsuleDesc.material = static_cast<Nv5PhyMaterial*>(mtl)->mMaterial;
 }
 
-NvPhyCapsuleControllerDesc::NvPhyCapsuleControllerDesc()
+Nv5PhyCapsuleControllerDesc::Nv5PhyCapsuleControllerDesc()
 {
 	mCapsuleDesc.behaviorCallback = &Behavior;
 	mCapsuleDesc.reportCallback = &HitReport;
 }
 
-NvPhyController::NvPhyController(PhyScene* scene, physx::PxController* ctr)
+Nv5PhyController::Nv5PhyController(PhyScene* scene, physx::PxController* ctr)
 {
 	mController = ctr;
 	ASSERT(mController);
 	mScene.FromObject(scene);
 	EntityType = Phy_Controller;
 
-	mActor = new NvPhyActor();
+	mActor = new Nv5PhyActor();
 	mActor->mActor = ctr->getActor();
 }
 
-NvPhyController::~NvPhyController()
+Nv5PhyController::~Nv5PhyController()
 {
 	Cleanup();
 }
 
-PhyActor* NvPhyController::GetReadOnlyActor() 
+PhyActor* Nv5PhyController::GetReadOnlyActor() 
 {
 	if (mActor == nullptr || mActor->mActor == nullptr)
 		return nullptr;
 	return mActor;
 }
 
-void NvPhyController::Cleanup()
+void Nv5PhyController::Cleanup()
 {
 	if (mController != nullptr)
 	{
@@ -138,7 +138,7 @@ void NvPhyController::Cleanup()
 		mActor->mActor = nullptr;
 		Safe_Release(mActor);
 		//destroy pxActor
-		auto pScene = mScene.GetCastPtr<NvPhyScene>();
+		auto pScene = mScene.GetCastPtr<Nv5PhyScene>();
 		if (pScene != nullptr)
 		{
 			physx::PxSceneWriteLock Lock(*pScene->mScene);
@@ -149,17 +149,17 @@ void NvPhyController::Cleanup()
 	}
 }
 
-void NvPhyController::BindPhysX()
+void Nv5PhyController::BindPhysX()
 {
 	ASSERT(mController);
 	mController->setUserData(this);
 	mController->getActor()->userData = this;
 }
 
-EPhyControllerCollisionFlag NvPhyController::Move(const v3dxVector3* disp, float minDist, float elapsedTime,
+EPhyControllerCollisionFlag Nv5PhyController::Move(const v3dxVector3* disp, float minDist, float elapsedTime,
 	const FPhyFilterData* filterData, EPhyQueryFlag filterFlags)
 {
-	auto pScene = mScene.GetCastPtr<NvPhyScene>();
+	auto pScene = mScene.GetCastPtr<Nv5PhyScene>();
 
 	if (pScene == nullptr)
 		return (EPhyControllerCollisionFlag)physx::PxControllerCollisionFlag::Enum::eCOLLISION_SIDES;
@@ -175,19 +175,19 @@ EPhyControllerCollisionFlag NvPhyController::Move(const v3dxVector3* disp, float
 	return (EPhyControllerCollisionFlag)(ret);
 }
 
-void NvPhyController::SetPosition(const v3dxVector3* position)
+void Nv5PhyController::SetPosition(const v3dxVector3* position)
 {
 	physx::PxExtendedVec3 vec;
 	vec.x = position->X;
 	vec.y = position->Y;
 	vec.z = position->Z;
 
-	auto pScene = mScene.GetCastPtr<NvPhyScene>();
+	auto pScene = mScene.GetCastPtr<Nv5PhyScene>();
 	physx::PxSceneWriteLock Lock(*pScene->mScene);
 	mController->setPosition(vec);
 }
 
-v3dxVector3 NvPhyController::GetPosition()
+v3dxVector3 Nv5PhyController::GetPosition()
 {
 	v3dxVector3 result;
 	const physx::PxExtendedVec3& vec = mController->getPosition();
@@ -196,19 +196,19 @@ v3dxVector3 NvPhyController::GetPosition()
 	result.Z = (float)vec.z;
 	return result;
 }
-void NvPhyController::SetFootPosition(const v3dxVector3* position)
+void Nv5PhyController::SetFootPosition(const v3dxVector3* position)
 {
 	physx::PxExtendedVec3 vec;
 	vec.x = position->X;
 	vec.y = position->Y;
 	vec.z = position->Z;
 
-	auto pScene = mScene.GetCastPtr<NvPhyScene>();
+	auto pScene = mScene.GetCastPtr<Nv5PhyScene>();
 	physx::PxSceneWriteLock Lock(*pScene->mScene);
 	mController->setFootPosition(vec);
 }
 
-v3dxVector3 NvPhyController::GetFootPosition()
+v3dxVector3 Nv5PhyController::GetFootPosition()
 {
 	v3dxVector3 result;
 	const physx::PxExtendedVec3& vec = mController->getFootPosition();
@@ -217,32 +217,32 @@ v3dxVector3 NvPhyController::GetFootPosition()
 	result.Z = (float)vec.z;
 	return result;
 }
-float NvPhyController::GetContactOffset()
+float Nv5PhyController::GetContactOffset()
 {
 	return mController->getContactOffset();
 }
 
-void NvPhyController::SetContactOffset(float offset)
+void Nv5PhyController::SetContactOffset(float offset)
 {
-	auto pScene = mScene.GetCastPtr<NvPhyScene>();
+	auto pScene = mScene.GetCastPtr<Nv5PhyScene>();
 	physx::PxSceneWriteLock Lock(*pScene->mScene);
 	mController->setContactOffset(offset);
 }
 
-float NvPhyController::GetSlopeLimit()
+float Nv5PhyController::GetSlopeLimit()
 {
 	return mController->getSlopeLimit();
 }
 
-void NvPhyController::SetSlopeLimit(float slopeLimit)
+void Nv5PhyController::SetSlopeLimit(float slopeLimit)
 {
-	auto pScene = mScene.GetCastPtr<NvPhyScene>();
+	auto pScene = mScene.GetCastPtr<Nv5PhyScene>();
 	physx::PxSceneWriteLock Lock(*pScene->mScene);
 	mController->setSlopeLimit(slopeLimit);
 }
-void NvPhyController::SetQueryFilterData(const FPhyFilterData* filterData)
+void Nv5PhyController::SetQueryFilterData(const FPhyFilterData* filterData)
 {
-	auto pScene = mScene.GetCastPtr<NvPhyScene>();
+	auto pScene = mScene.GetCastPtr<Nv5PhyScene>();
 	physx::PxSceneWriteLock Lock(*pScene->mScene);
 	auto shapeCount = mController->getActor()->getNbShapes();
 	physx::PxShape* shapeList_array[32];
@@ -265,9 +265,9 @@ void NvPhyController::SetQueryFilterData(const FPhyFilterData* filterData)
 		delete[] shapeList;
 	}
 }
-void NvPhyController::SetSimulationFilterData(const FPhyFilterData* filterData)
+void Nv5PhyController::SetSimulationFilterData(const FPhyFilterData* filterData)
 {
-	auto pScene = mScene.GetCastPtr<NvPhyScene>();
+	auto pScene = mScene.GetCastPtr<Nv5PhyScene>();
 	physx::PxSceneWriteLock Lock(*pScene->mScene);
 	auto shapeCount = mController->getActor()->getNbShapes();
 	physx::PxShape* shapeList_array[32];

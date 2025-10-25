@@ -42,10 +42,17 @@ namespace CppWeaving
 
             var args = new List<string>();
             args.Add("-std=c++17");
-            args.Add("-stdlib=libc++");
+            //args.Add("-stdlib=libc++");
             args.Add("-xc++");
             args.Add("-Wno-pragma-once-outside-header");
             args.Add("-Wno-address-of-temporary");
+            args.Add("-m64");
+            args.Add("-target");
+            args.Add("x86_64-pc-windows-msvc");
+            args.Add("-fms-extensions");
+            args.Add("-fms-compatibility");
+            args.Add("-D_M_X64=1");
+            args.Add("-D__EMSCRIPTEN__");
             foreach (var i in includePath)
             {
                 args.Add($"-I{i}");
@@ -54,6 +61,7 @@ namespace CppWeaving
             {
                 args.Add($"-D{i}");
             }
+            
             string[] DefaultClangCommandLineArgs = args.ToArray();
             var translationUnit = ClangSharp.Interop.CXTranslationUnit.Parse(index, file.File, DefaultClangCommandLineArgs, Array.Empty<ClangSharp.Interop.CXUnsavedFile>(), DefaultTranslationUnitFlags);
 

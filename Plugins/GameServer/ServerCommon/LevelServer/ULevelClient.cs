@@ -12,7 +12,7 @@ using NPOI.SS.Formula.PTG;
 
 namespace EngineNS.Plugins.LevelServer
 {
-    [URpcClass(RunTarget = ERunTarget.Level, Executer = EExecuter.Client)]
+    [TtRpcClass(RunTarget = ERunTarget.Level, Executer = EExecuter.Client)]
     public partial class ULevelClient : ServerCommon.UClient, IRpcHost, CSCommon.ISyncActor
     {
         #region IRpcHost
@@ -40,12 +40,12 @@ namespace EngineNS.Plugins.LevelServer
 		}
 
         #region RPC
-        [URpcMethod(Index = 100 + 0)]
+        [TtRpcMethod(Index = 100 + 0)]
         public int GetHP(TtCallContext context)
         {
             return 5;
         }
-        [URpcMethod(Index = 100 + 1)]
+        [TtRpcMethod(Index = 100 + 1)]
         public void UpdateAutoSyncData(IO.TtMemWriter data, TtCallContext context)
         {
             using (var reader = IO.TtMemReader.CreateInstance(in data))
@@ -86,7 +86,7 @@ namespace EngineNS.Plugins.LevelServer
                 var client = enumerator.Current as ULevelClient;
                 if (client != null)
                 {
-                    var pRouter = (URouter*)((byte*)pkg.Ptr + sizeof(FPkgHeader));
+                    var pRouter = (FRouter*)((byte*)pkg.Ptr + sizeof(FPkgHeader));
                     BeforeSend(pRouter, client);
                     client.ClientConnect.Send(in pkg);
                 }
@@ -100,7 +100,7 @@ namespace EngineNS.Plugins.LevelServer
         {
             return null;
         }
-        public unsafe virtual void BeforeSend(URouter* pRouter, ULevelClient client)
+        public unsafe virtual void BeforeSend(FRouter* pRouter, ULevelClient client)
         {
             pRouter->Index = client.ClientIndex;
         }

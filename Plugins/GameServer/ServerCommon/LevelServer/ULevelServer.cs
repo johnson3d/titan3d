@@ -5,7 +5,7 @@ using EngineNS.Plugins.GateServer;
 
 namespace EngineNS.Plugins.LevelServer
 {
-    [URpcClass(RunTarget = ERunTarget.Level, Executer = EExecuter.Root)]
+    [TtRpcClass(RunTarget = ERunTarget.Level, Executer = EExecuter.Root)]
     public partial class ULevelServer : ServerCommon.UServerBase
     {
         static ULevelServer mInstance = null;
@@ -19,7 +19,7 @@ namespace EngineNS.Plugins.LevelServer
             ClientAllConnects = new UClientAllConnects();
             ClientAllConnects.ClientManager = ClientManager;
         }
-        public override object GetExecuter(in URouter router)
+        public override object GetExecuter(in FRouter router)
         {
             switch (router.Executer)
             {
@@ -105,7 +105,7 @@ namespace EngineNS.Plugins.LevelServer
         #endregion
 
         #region RPC
-        [URpcMethod(Index = 100 + 0, Authority = EAuthority.Gateway)]
+        [TtRpcMethod(Index = 100 + 0, Authority = EAuthority.Gateway)]
         public UInt16 RegClient(Guid sessionId, string user, UInt16 indexInGate, TtCallContext context)
         {
             var client = ClientManager.RegClient<ULevelClient>(in sessionId) as ULevelClient;
@@ -116,14 +116,14 @@ namespace EngineNS.Plugins.LevelServer
             client.AutoSyncData.IsGhostSyncObject = true;
             return client.ClientIndex;
         }
-        [URpcMethod(Index = 100 + 1, Authority = EAuthority.Server)]
+        [TtRpcMethod(Index = 100 + 1, Authority = EAuthority.Server)]
         public bool RegLevel(Guid id, RName name, TtCallContext context)
         {
             var level = new ULevel();
             level.AssetName = name;
             return LevelManager.RegLevel(in id, level);
         }
-        [URpcMethod(Index = 100 + 2, Authority = EAuthority.Server)]
+        [TtRpcMethod(Index = 100 + 2, Authority = EAuthority.Server)]
         public uint TryClientEnterLevel(UInt16 clientIndex, Guid levelId, TtCallContext context)
         {
             var clt = ClientManager.GetClient<ULevelClient>(clientIndex);
@@ -134,7 +134,7 @@ namespace EngineNS.Plugins.LevelServer
                 return uint.MaxValue;
             return level.EnterActor(clt, CSCommon.ESyncIdType.Dynamic);
         }
-        [URpcMethod(Index = 100 + 3, Authority = EAuthority.Server)]
+        [TtRpcMethod(Index = 100 + 3, Authority = EAuthority.Server)]
         public bool TryClientLeaveLevel(UInt16 clientIndex, Guid levelId, TtCallContext context)
         {
             var clt = ClientManager.GetClient<ULevelClient>(clientIndex);

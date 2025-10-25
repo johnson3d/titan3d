@@ -5,14 +5,14 @@ using EngineNS.Plugins.ServerCommon;
 
 namespace EngineNS.Plugins.GateServer
 {
-    [URpcClass(RunTarget = ERunTarget.Gate, Executer = EExecuter.Root)]
+    [TtRpcClass(RunTarget = ERunTarget.Gate, Executer = EExecuter.Root)]
     public partial class UGateServer : ServerCommon.UServerBase
     {
         public UGateServer()
         {
             CurrentTarget = ERunTarget.Gate;
         }
-        public override object GetExecuter(in URouter router)
+        public override object GetExecuter(in FRouter router)
         {
             switch (router.Executer)
             {
@@ -45,7 +45,7 @@ namespace EngineNS.Plugins.GateServer
 
             return null;
         }
-        public unsafe override bool OnRelay(Bricks.Network.RPC.URouter* pRouter, Bricks.Network.INetConnect connect)
+        public unsafe override bool OnRelay(Bricks.Network.RPC.FRouter* pRouter, Bricks.Network.INetConnect connect)
         {
             var client = connect.Tag as UGateClient;
             if (client != null)
@@ -124,7 +124,7 @@ namespace EngineNS.Plugins.GateServer
         #endregion
 
         #region RPC
-        [URpcMethod(Index = 100 + 0)]
+        [TtRpcMethod(Index = 100 + 0)]
         public bool WaitSession(Guid sessionId, string user, TtCallContext context)
         {
 			var client = ClientManager.FindClient(sessionId);
@@ -135,7 +135,7 @@ namespace EngineNS.Plugins.GateServer
             return true;
         }
         Dictionary<string, KeyValuePair<Guid,System.DateTime>> WaitSessions = new Dictionary<string, KeyValuePair<Guid, System.DateTime>>();
-        [URpcMethod(Index = 100 + 1)]
+        [TtRpcMethod(Index = 100 + 1)]
         public UInt16 RegClient(Guid sessionId, string user, TtCallContext context)
         {
             KeyValuePair<Guid, System.DateTime> id;
@@ -157,7 +157,7 @@ namespace EngineNS.Plugins.GateServer
 			//todo: ULevelServer.RegClient
 			return client.ClientIndex;// "OK";
         }
-        [URpcMethod(Index = 100 + 2, Authority = EAuthority.Server)]
+        [TtRpcMethod(Index = 100 + 2, Authority = EAuthority.Server)]
         public UInt16 ClientEnterLevel(Guid sessionId, string user, UInt16 indexInLevel, TtCallContext context)
 		{
             var client = ClientManager.FindClient(in sessionId) as UGateClient;

@@ -532,6 +532,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataCopyer.All", "Plugins\D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudWeb", "Module\CloudWeb\CloudWeb.csproj", "{27777FC3-83F1-4A42-940E-8E9BA5FEE2AE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NvPhysX5", "NativeCode\Bricks\PhysicsCore\NvPhysX5\NvPhysX5.vcxitems", "{66934216-5767-41B6-B4F8-7C355D4F0184}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1264,6 +1266,7 @@ Global
 		{9EA70F22-8048-AB42-80A5-5DED58820890} = {DAC5BA3C-A175-4E94-B438-F2B7246812F6}
 		{00A1A3B9-646E-AA8D-E763-B2604D487775} = {7D33F58F-FF5C-4BAD-885E-398DCD456824}
 		{27777FC3-83F1-4A42-940E-8E9BA5FEE2AE} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
+		{66934216-5767-41B6-B4F8-7C355D4F0184} = {A2A724BD-935F-4689-9329-2FB28BA900C2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
@@ -1457,6 +1460,7 @@ Global
 		NativeCode\Bricks\TcpServer\TcpServer.vcxitems*{5b10575b-b34e-4644-8a58-e6ca5b3dbe3f}*SharedItemsImports = 9
 		CSharpCode\Bricks\FX\Skin\Skin.projitems*{5cac7d56-5eb9-4eea-b197-b5f7563101ac}*SharedItemsImports = 13
 		CSharpCode\Bricks\DataCopyer\DataCopyer.projitems*{65846da5-e717-450f-be1a-9f23a017f144}*SharedItemsImports = 13
+		NativeCode\Bricks\PhysicsCore\NvPhysX5\NvPhysX5.vcxitems*{66934216-5767-41b6-b4f8-7c355d4f0184}*SharedItemsImports = 9
 		NativeCode\Bricks\DestinyPX\NxMath\NxMath.vcxitems*{66d1bb78-d377-4b8b-964a-b12f946205e6}*SharedItemsImports = 9
 		CSharpCode\Platform\Android\Android.projitems*{696256cb-8710-4790-805b-1f2424bf19cd}*SharedItemsImports = 13
 		CSharpCode\Bricks\Collision\Collision.projitems*{6d4b708f-a316-44e4-8a92-e4fae48c9a70}*SharedItemsImports = 13
@@ -1576,7 +1580,7 @@ Global
 		NativeCode\Bricks\MathLib\MathLib.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\MeshSimplify\MeshSimplify.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\Particle\Particle.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
-		NativeCode\Bricks\PhysicsCore\NvPhysX\NvPhysX.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
+		NativeCode\Bricks\PhysicsCore\NvPhysX5\NvPhysX5.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\PhysicsCore\PhysicsCore.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\PythonRuntime\PythonRuntime.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\Quark\Quark.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4

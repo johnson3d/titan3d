@@ -1,5 +1,5 @@
 #pragma once
-#include "NvCommon.h"
+#include "Nv5Common.h"
 #include "../PhyMesh.h"
 
 NS_BEGIN
@@ -7,17 +7,17 @@ NS_BEGIN
 class XndAttribute;
 class NvPhyContext;
 
-class NvPhyTriMesh : public PhyTriMesh
+class Nv5PhyTriMesh : public PhyTriMesh
 {
 public:
 	physx::PxTriangleMesh*		mMesh;
 	TR_MEMBER(SV_NoBind)
 	IBlobObject					mCookedData;
-	NvPhyTriMesh()
+	Nv5PhyTriMesh()
 	{
 		mMesh = nullptr;
 	}
-	~NvPhyTriMesh();
+	~Nv5PhyTriMesh();
 	void Cleanup();
 	bool CreateFromCookedData(PhyContext* ctx, void* cookedData, UINT size);
 	IBlobObject* GetCookedData() {
@@ -26,17 +26,17 @@ public:
 	NxRHI::FMeshDataProvider* CreateMeshProvider();
 };
 
-class NvPhyConvexMesh : public PhyConvexMesh
+class Nv5PhyConvexMesh : public PhyConvexMesh
 {
 public:
 	physx::PxConvexMesh*		mMesh;
 	IBlobObject* mCookedData;
-	NvPhyConvexMesh()
+	Nv5PhyConvexMesh()
 	{
 		mMesh = nullptr;
 		mCookedData = nullptr;
 	}
-	~NvPhyConvexMesh();
+	~Nv5PhyConvexMesh();
 };
 
 NS_END

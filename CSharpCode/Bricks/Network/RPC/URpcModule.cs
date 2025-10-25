@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using EngineNS.Bricks.Network.RPC;
 using EngineNS.Rtti;
-using NPOI.SS.Formula.Functions;
 
 namespace EngineNS.Bricks.Network.RPC
 {
@@ -34,7 +33,7 @@ namespace EngineNS.Bricks.Network.RPC
         Client,
         Profiler,
     }
-    public class URpcClassAttribute : Attribute
+    public class TtRpcClassAttribute : Attribute
     {
         public ERunTarget RunTarget;
         public EExecuter Executer;
@@ -47,14 +46,14 @@ namespace EngineNS.Bricks.Network.RPC
 		Server,
 		God = byte.MaxValue,
     }
-    public class URpcMethodAttribute : Attribute
+    public class TtRpcMethodAttribute : Attribute
 	{	
 		public UInt16 Index;
         public EPkgTypes PkgFlags;
         public EAuthority Authority = EAuthority.Client;
     }
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)]
-    public struct URouter
+    public struct FRouter
     {
         public ERunTarget RunTarget;
         public EExecuter Executer;
@@ -201,7 +200,7 @@ namespace EngineNS.Bricks.Network.RPC
     {
         URpcClass GetRpcClass();
     }
-    [URpcClassAttribute(RunTarget = ERunTarget.None, Executer = EExecuter.Root, CallerInClass = true)]
+    [TtRpcClassAttribute(RunTarget = ERunTarget.None, Executer = EExecuter.Root, CallerInClass = true)]
     public partial class TtRpcManager : IRpcHost
     {
         public ERunTarget CurrentTarget { get; set; } = ERunTarget.Client;
@@ -212,7 +211,7 @@ namespace EngineNS.Bricks.Network.RPC
                 smRpcClass = new URpcClass(this.GetType());
             return smRpcClass;
         }
-        public virtual object GetExecuter(in URouter router)
+        public virtual object GetExecuter(in FRouter router)
         {
             switch (router.Executer)
             {
@@ -224,7 +223,7 @@ namespace EngineNS.Bricks.Network.RPC
 
             return null;
         }
-        public virtual INetConnect GetRunTargetConnect(in URouter target, INetConnect connect)
+        public virtual INetConnect GetRunTargetConnect(in FRouter target, INetConnect connect)
 		{
 			return null;
 		}
@@ -232,12 +231,12 @@ namespace EngineNS.Bricks.Network.RPC
 		{
             return null;
         }
-		public unsafe virtual bool OnRelay(URouter* pRouter, INetConnect connect)
+		public unsafe virtual bool OnRelay(FRouter* pRouter, INetConnect connect)
 		{
 			return true;
 		}
         Profiler.TtRpcProfiler RpcProfiler = new Profiler.TtRpcProfiler();
-        [URpcMethod(Index = 0)]
+        [TtRpcMethod(Index = 0)]
         public int TestBaseRpc1(float arg, TtCallContext context)
         {
             //AutoGenProp0 = 1;
@@ -331,7 +330,7 @@ namespace EngineNS.UnitTest
 	//using Microsoft.CodeAnalysis.CSharp.Syntax;
 	using System.Reflection;
     [UnitTest.TtTest]
-    [URpcClassAttribute(RunTarget = ERunTarget.None, Executer = EExecuter.Root, CallerInClass = true)]
+    [TtRpcClassAttribute(RunTarget = ERunTarget.None, Executer = EExecuter.Root, CallerInClass = true)]
     public partial class UTest_Rpc : Bricks.Network.RPC.TtRpcManager
     {
 		int mAutoSyncProp1;
@@ -376,29 +375,29 @@ namespace EngineNS.UnitTest
         //    }
         //}
 
-        [URpcMethod(Index = 100 + 0, PkgFlags = EPkgTypes.WeakPkg)]
+        [TtRpcMethod(Index = 100 + 0, PkgFlags = EPkgTypes.WeakPkg)]
         public int TestRpc1(float arg, TtCallContext context)
         {
             //AutoGenProp1 = 1;
             //AutoGenProp1 = 2;
             return (int)arg + 2;
         }
-        [URpcMethod(Index = 100 + 1)]
+        [TtRpcMethod(Index = 100 + 1)]
         public void TestRpc2(string arg, TtCallContext context)
         {
             Console.WriteLine(arg);
         }
-        [URpcMethod(Index = 100 + 2)]
+        [TtRpcMethod(Index = 100 + 2)]
         public IO.ISerializer TestRpc3(int arg, TtCallContext context)
         {
             return null;
         }
-        [URpcMethod(Index = 100 + 3)]
+        [TtRpcMethod(Index = 100 + 3)]
         public string TestRpc4(string arg, TtCallContext context)
         {
             return arg.ToString();
         }
-        [URpcMethod(Index = 100 + 4)]
+        [TtRpcMethod(Index = 100 + 4)]
         public async Task<Vector3> TestRpc5(Vector3 arg, TtCallContext context)
         {
             var ret3 = await UTest_Rpc_RpcCaller.TestRpc4("10.1", new FRpcCallArg());
@@ -419,7 +418,7 @@ namespace EngineNS.UnitTest
                 AA = ar.Read<int>();
             }
         }
-        [URpcMethod(Index = 100 + 5)]
+        [TtRpcMethod(Index = 100 + 5)]
         public EngineNS.UnitTest.UTest_Rpc.TestRPCArgument TestRpc6(EngineNS.UnitTest.UTest_Rpc.TestRPCArgument arg, TtCallContext context)
         {
             arg.AA += 5;
@@ -430,7 +429,7 @@ namespace EngineNS.UnitTest
             public int A;
             public Vector3 B;
         }
-        [URpcMethod(Index = 100 + 6)]
+        [TtRpcMethod(Index = 100 + 6)]
         public int TestRpc7(EngineNS.UnitTest.UTest_Rpc.TestUnmanagedStruct arg, TtCallContext context)
         {
             arg.A += 15;
@@ -511,7 +510,7 @@ namespace EngineNS.Bricks.Network.RPC
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				URouter router = new URouter();
+				FRouter router = new FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
 				router.Index = ExeIndex;
@@ -584,7 +583,7 @@ namespace EngineNS.UnitTest
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				URouter router = new URouter();
+				FRouter router = new FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
 				router.Index = ExeIndex;
@@ -617,7 +616,7 @@ namespace EngineNS.UnitTest
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				URouter router = new URouter();
+				FRouter router = new FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
 				router.Index = ExeIndex;
@@ -652,7 +651,7 @@ namespace EngineNS.UnitTest
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				URouter router = new URouter();
+				FRouter router = new FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
 				router.Index = ExeIndex;
@@ -689,7 +688,7 @@ namespace EngineNS.UnitTest
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				URouter router = new URouter();
+				FRouter router = new FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
 				router.Index = ExeIndex;
@@ -726,7 +725,7 @@ namespace EngineNS.UnitTest
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				URouter router = new URouter();
+				FRouter router = new FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
 				router.Index = ExeIndex;
@@ -763,7 +762,7 @@ namespace EngineNS.UnitTest
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				URouter router = new URouter();
+				FRouter router = new FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
 				router.Index = ExeIndex;
@@ -800,7 +799,7 @@ namespace EngineNS.UnitTest
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				URouter router = new URouter();
+				FRouter router = new FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
 				router.Index = ExeIndex;

@@ -31,6 +31,13 @@ namespace CppWeaving
                 }
             }
 
+            //// 加载工程文件
+            //var project = new Project(vcxproj);
+
+            //// 获取属性值
+            //var sdkIncludePath = project.GetPropertyValue("WindowsSDK_IncludePath");
+            //var sdkLibPath = project.GetPropertyValue("WindowsSDK_LibraryPath");
+
             HppCollector.Instance.Reset();
             HppCollector.Instance.Collect(vcxproj, @"'$(Configuration)|$(Platform)'=='Debug|x64'");
 

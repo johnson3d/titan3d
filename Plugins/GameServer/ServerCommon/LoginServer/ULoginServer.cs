@@ -5,7 +5,7 @@ using static EngineNS.Plugins.RootServer.URootServer;
 
 namespace EngineNS.Plugins.LoginServer
 {
-    [URpcClass(RunTarget = ERunTarget.Login, Executer = EExecuter.Root)]
+    [TtRpcClass(RunTarget = ERunTarget.Login, Executer = EExecuter.Root)]
     public partial class ULoginServer : ServerCommon.UServerBase
     {
         protected Bricks.Network.UNetPackageManager RootConnectPackages = new Bricks.Network.UNetPackageManager();
@@ -14,7 +14,7 @@ namespace EngineNS.Plugins.LoginServer
         {
             CurrentTarget = ERunTarget.Login;
         }
-        public override object GetExecuter(in URouter router)
+        public override object GetExecuter(in FRouter router)
         {
             switch (router.Executer)
             {
@@ -71,7 +71,7 @@ namespace EngineNS.Plugins.LoginServer
         }
         public UAccountManager AccountManager { get; } = new UAccountManager();
         #region RPC
-        [URpcMethod(Index = 100 + 0)]
+        [TtRpcMethod(Index = 100 + 0)]
         public async System.Threading.Tasks.Task<Bricks.Network.FLoginResultArgument> LoginAccount(string user, string psw, TtCallContext context)
         {
             var info = AccountManager.LoginAccount(user, psw);

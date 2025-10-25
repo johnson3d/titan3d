@@ -12,24 +12,24 @@ namespace EngineNS.Bricks.Network.RPC
         {
             public string Name;
             public FCallMethod Method;
-            public URpcMethodAttribute Attribute;
+            public TtRpcMethodAttribute Attribute;
         }
 
         FRpcInfo[] Methods = new FRpcInfo[UInt16.MaxValue];
         public URpcClass(Type type)
         {
-            var attrs = type.GetCustomAttributes(typeof(URpcClassAttribute), true);
+            var attrs = type.GetCustomAttributes(typeof(TtRpcClassAttribute), true);
             if (attrs.Length == 0)
                 throw new TtException("");
 
-            var kls = attrs[0] as URpcClassAttribute;
+            var kls = attrs[0] as TtRpcClassAttribute;
             RunTarget = kls.RunTarget;
             Executer = kls.Executer;
 
             var methods = type.GetMethods();
             foreach (var i in methods)
             {
-                attrs = i.GetCustomAttributes(typeof(URpcMethodAttribute), true);
+                attrs = i.GetCustomAttributes(typeof(TtRpcMethodAttribute), true);
                 if (attrs.Length == 0)
                     continue;
 
@@ -46,7 +46,7 @@ namespace EngineNS.Bricks.Network.RPC
                 if (fun == null)
                     throw new TtException("");
 
-                var mtd = attrs[0] as URpcMethodAttribute;
+                var mtd = attrs[0] as TtRpcMethodAttribute;
                 if (Methods[mtd.Index].Method != null)
                     throw new TtException("");
                 Methods[mtd.Index].Name = i.Name;

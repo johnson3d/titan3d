@@ -2,9 +2,11 @@
 #include "../../base/IUnknown.h"
 #include "../../base/string/vfxstring.h"
 #include "../../base/thread/vfxcritical.h"
-#include <cor.h>
-#include <corprof.h>
+
 #include <string>
+
+typedef UINT64 ClassID;
+typedef UINT64 ObjectID;
 
 class CoreProfiler;
 enum TR_ENUM(SV_EnumNoFlags=true)
