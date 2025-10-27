@@ -21,25 +21,6 @@ namespace EngineNS.IO
         void Seek(ulong pos);
         unsafe void ReadPtr(void* p, int length);
     }
-    public interface IReader : ICoreReader
-    {
-        object Tag { get; }
-        void OnReadError();
-
-        void Read(out ISerializer v, object hostObject);
-        void Read(out string v);
-        void Read(out byte[] v);
-        void Read(out RName v);
-        void Read(out VNameString v);
-        void Read(out Rtti.TtTypeDesc v); 
-        void Read(ref Support.TtBitset v);
-        void Read(out TtMemWriter v);
-        void Read<T>(out T v) where T : unmanaged;
-        T Read<T>() where T : unmanaged;
-
-        public object ReadWithType(Type type);
-    }
-
     public struct TtMemReader : IO.ICoreReader, IDisposable
     {
         private unsafe static CoreSDK.FDelegate_FGetMemStream NativeGetMemStream = NativeGetMemStreamCB;
@@ -107,11 +88,29 @@ namespace EngineNS.IO
         }
         public unsafe void Read<T>(out T v) where T : unmanaged
         {
-            fixed(T* p = &v)
+            fixed (T* p = &v)
             {
                 ReadPtr(p, sizeof(T));
             }
         }
+    }
+    public interface IReader : ICoreReader
+    {
+        object Tag { get; }
+        void OnReadError();
+
+        void Read(out ISerializer v, object hostObject);
+        void Read(out string v);
+        void Read(out byte[] v);
+        void Read(out RName v);
+        void Read(out VNameString v);
+        void Read(out Rtti.TtTypeDesc v); 
+        void Read(ref Support.TtBitset v);
+        void Read(out TtMemWriter v);
+        void Read<T>(out T v) where T : unmanaged;
+        T Read<T>() where T : unmanaged;
+
+        public object ReadWithType(Type type);
     }
 
     public struct AuxReader<TR> : IReader, IDisposable where TR : ICoreReader

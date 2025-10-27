@@ -289,6 +289,7 @@ namespace EngineNS.Profiler
         {
 
         }
+        #region Interface
         static TtRpcClass smRpcClass = null;
         public TtRpcClass GetRpcClass()
         {
@@ -301,6 +302,12 @@ namespace EngineNS.Profiler
         {
             return TtEngine.Instance.RpcModule.DefaultNetConnect;
         }
+        public void OnRpcPropertyChanged(string propName, object v)
+        {
+
+        }
+        #endregion
+
         #region RPC
         [RpcProfilerThreads.TtCreator]
         public class RpcProfilerThreads : IO.BaseSerializer, IPooledObject

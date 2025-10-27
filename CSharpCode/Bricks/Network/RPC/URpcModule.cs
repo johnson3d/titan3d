@@ -165,6 +165,7 @@ namespace EngineNS.Bricks.Network.RPC
     public partial class TtRpcManager : IRpcHost
     {
         public ERunTarget CurrentTarget { get; set; } = ERunTarget.Client;
+        #region Interface
         static TtRpcClass smRpcClass = null;
         public TtRpcClass GetRpcClass()
         {
@@ -172,7 +173,17 @@ namespace EngineNS.Bricks.Network.RPC
                 smRpcClass = new TtRpcClass(this.GetType());
             return smRpcClass;
         }
-		public Func<FRouter, IRpcHost> GetExecuterFunc = null;
+        public virtual ushort RpcExecuteIndex { get; set; } = 0;
+        public virtual INetConnect GetRpcConnect()
+        {
+            return TtEngine.Instance.RpcModule.DefaultNetConnect;
+        }
+        public void OnRpcPropertyChanged(string propName, object v)
+        {
+
+        }
+        #endregion
+        public Func<FRouter, IRpcHost> GetExecuterFunc = null;
         public virtual IRpcHost GetExecuter(in FRouter router)
         {
             if (GetExecuterFunc!=null)
@@ -185,15 +196,13 @@ namespace EngineNS.Bricks.Network.RPC
                     return RpcProfiler;
                 case EExecuter.Root:
                     return this;
+                case EExecuter.PropertyData:
+                    return RpcPropertyDataManager;
             }
 
             return null;
         }
-		public virtual ushort RpcExecuteIndex { get; set; } = 0;
-        public virtual INetConnect GetRpcConnect()
-		{
-			return TtEngine.Instance.RpcModule.DefaultNetConnect;
-		}
+		
         public virtual INetConnect GetRunTargetConnect(in FRouter target, INetConnect connect)
 		{
 			return null;
@@ -207,6 +216,7 @@ namespace EngineNS.Bricks.Network.RPC
 			return true;
 		}
         public Profiler.TtRpcProfiler RpcProfiler { get; } = new Profiler.TtRpcProfiler();
+		public TtRpcPropertyDataManager RpcPropertyDataManager { get; } = new TtRpcPropertyDataManager();
         [TtRpcMethod(Index = 0)]
         public int TestBaseRpc1(float arg, TtCallContext context)
         {
@@ -262,6 +272,7 @@ namespace EngineNS.Bricks.Network.RPC
 		}
         public unsafe override void TickModule(TtEngine host)
         {
+			RpcManager?.RpcPropertyDataManager.Tick();
             NetPackageManager.Tick();
 			var now = Support.TtTime.GetTickCount();
 			var nullPkg = new IO.AuxReader<EngineNS.IO.TtMemReader>();

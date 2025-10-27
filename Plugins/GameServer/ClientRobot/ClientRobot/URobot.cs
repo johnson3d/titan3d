@@ -236,6 +236,7 @@ namespace RobotClient
 			EngineNS.IO.TtMemWriter data;
 			reader.Read(out data);
 			((RobotClient.URobot)host).GhostsAutoSync(data, context);
+			data.Dispose();
 		};
 		public void RPC_GhostsAutoSync(EngineNS.IO.TtMemWriter data, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
 		{
@@ -249,6 +250,7 @@ namespace RobotClient
 			EngineNS.IO.TtMemWriter data;
 			reader.Read(out data);
 			((RobotClient.URobot)host).GhostsUpdatePlacement(data, context);
+			data.Dispose();
 		};
 		public void RPC_GhostsUpdatePlacement(EngineNS.IO.TtMemWriter data, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
 		{

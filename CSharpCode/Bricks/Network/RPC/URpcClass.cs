@@ -1,4 +1,4 @@
-﻿using EngineNS.Support;
+using EngineNS.Support;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -18,11 +18,12 @@ namespace EngineNS.Bricks.Network.RPC
         Gate,
         Level,
     }
-    public enum EExecuter : sbyte
+    public enum EExecuter : byte
     {
         Root,
         Client,
         Profiler,
+        PropertyData,
     }
     public class TtRpcClassAttribute : Attribute
     {
@@ -191,6 +192,7 @@ namespace EngineNS.Bricks.Network.RPC
         TtRpcClass GetRpcClass();
         ushort RpcExecuteIndex { get; set; }
         INetConnect GetRpcConnect();
+        void OnRpcPropertyChanged(string propName, object v);
     }
     public class TtRpcPropertyData
     {
@@ -234,8 +236,34 @@ namespace EngineNS.Bricks.Network.RPC
             return v1.Equals(v2);
         }
     }
-    public class TtRpcPropertyDataManager
+    [TtRpcClassAttribute(RunTarget = ERunTarget.None, Executer = EExecuter.PropertyData, CallerInClass = true)]
+    public partial class TtRpcPropertyDataManager : IRpcHost
     {
+        #region Interface
+        static TtRpcClass smRpcClass = null;
+        public TtRpcClass GetRpcClass()
+        {
+            if (smRpcClass == null)
+                smRpcClass = new TtRpcClass(this.GetType());
+            return smRpcClass;
+        }
+        public virtual ushort RpcExecuteIndex { get; set; } = 0;
+        public virtual INetConnect GetRpcConnect()
+        {
+            return TtEngine.Instance.RpcModule.DefaultNetConnect;
+        }
+        public void OnRpcPropertyChanged(string propName, object v)
+        {
+
+        }
+        #endregion
+
+        [TtRpcProperty]
+        public int TestSync1 { get; set; } = 1;
+        public TtRpcPropertyDataManager()
+        {
+            RegisterHost(this);
+        }
         public ConditionalWeakTable<IRpcHost, TtRpcPropertyData> PropertyDatas = new();
         public void RegisterHost(IRpcHost host)
         {
@@ -247,7 +275,7 @@ namespace EngineNS.Bricks.Network.RPC
         {
             PropertyDatas.Remove(host);
         }
-        public void CollectProperties(IO.IWriter writer)
+        private void CollectProperties(IO.IWriter writer)
         {
             List<object> propValues = new();
             TtBitset modifyProps = new();
@@ -281,15 +309,26 @@ namespace EngineNS.Bricks.Network.RPC
                     }
                 }
             }
-            writer.Write(sbyte.MaxValue); //结束标志
+            writer.Write(byte.MaxValue); //结束标志
         }
-        public void UpdateProperties(IO.IReader reader)
+        public void Tick()
+        {
+            using (var writer = IO.TtMemWriter.CreateInstance())
+            {
+                using (var ar = new IO.AuxWriter<IO.TtMemWriter>(writer))
+                {
+                    CollectProperties(ar);
+                    RPC_SyncAllProperties(writer);
+                }
+            }
+        }
+        private void UpdateProperties(IO.IReader reader)
         {
             while (true)
             {
-                sbyte executer = 0;
+                byte executer = 0;
                 reader.Read(out executer);
-                if (executer == sbyte.MaxValue)
+                if (executer == byte.MaxValue)
                     break;
                 UInt16 rpcIndex = 0;
                 reader.Read(out rpcIndex);
@@ -319,10 +358,89 @@ namespace EngineNS.Bricks.Network.RPC
                         //read val
                         v = reader.ReadWithType(prop.PropertyType);
                         if (bSet)
+                        {
                             prop.SetValue(host, v);
+                            host.OnRpcPropertyChanged(propInfo.Name, v);
+                        }
                     }
+                }
+            }
+        }
+        [TtRpcMethod(Index = 0)]
+        public void SyncAllProperties(EngineNS.IO.TtMemWriter data, TtCallContext context)
+        {
+            using (var reader = IO.TtMemReader.CreateInstance(in data))
+            {
+                using (var ar = new IO.AuxReader<IO.TtMemReader>(reader, this))
+                {
+                    UpdateProperties(ar);
                 }
             }
         }
     }
 }
+#if TitanEngine_AutoGen_RPC
+#region TitanEngine_AutoGen_RPC
+#pragma warning disable 105
+
+
+namespace EngineNS.Bricks.Network.RPC
+{
+	public partial class TtRpcPropertyDataManager_RpcCaller
+	{
+		public static void SyncAllProperties(EngineNS.IO.TtMemWriter data, in EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
+		{
+			var ExeIndex = rpcArg.ExeIndex;
+			var NetConnect = rpcArg.NetConnect;
+			if (ExeIndex == UInt16.MaxValue)
+			{
+				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
+			}
+			if (NetConnect == null)
+			{
+				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
+			}
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
+			{
+				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
+				FRouter router = new FRouter();
+				router.RunTarget = ERunTarget.None;
+				router.Executer = EExecuter.PropertyData;
+				router.Index = ExeIndex;
+				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
+				var pkgHeader = new FPkgHeader();
+				pkg.Write(pkgHeader);
+				pkg.Write(router);
+				UInt16 methodIndex = 0;
+				pkg.Write(methodIndex);
+				pkg.Write(data);
+				pkg.CoreWriter.SurePkgHeader();
+				NetConnect?.Send(in pkg);
+			}
+		}
+	}
+}
+
+
+namespace EngineNS.Bricks.Network.RPC
+{
+	partial class TtRpcPropertyDataManager
+	{
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_SyncAllProperties = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
+		{
+			EngineNS.IO.TtMemWriter data;
+			reader.Read(out data);
+			((EngineNS.Bricks.Network.RPC.TtRpcPropertyDataManager)host).SyncAllProperties(data, context);
+			data.Dispose();
+		};
+		public void RPC_SyncAllProperties(EngineNS.IO.TtMemWriter data, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			TtRpcPropertyDataManager_RpcCaller.SyncAllProperties(data, rpcArg);
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_RPC
+#endif//TitanEngine_AutoGen_RPC

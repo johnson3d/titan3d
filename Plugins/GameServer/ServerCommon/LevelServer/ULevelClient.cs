@@ -28,6 +28,10 @@ namespace EngineNS.Plugins.LevelServer
         {
             return ClientConnect;
         }
+        public void OnRpcPropertyChanged(string propName, object v)
+        {
+
+        }
         #endregion
 
         #region ISyncActor
@@ -192,6 +196,7 @@ namespace EngineNS.Plugins.LevelServer
 			IO.TtMemWriter data;
 			reader.Read(out data);
 			((EngineNS.Plugins.LevelServer.ULevelClient)host).UpdateAutoSyncData(data, context);
+			data.Dispose();
 		};
 		public void RPC_UpdateAutoSyncData(IO.TtMemWriter data, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
 		{

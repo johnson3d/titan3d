@@ -12,22 +12,6 @@ namespace EngineNS.IO
         unsafe void WritePtr(void* p, int length);
         unsafe void* Ptr { get; }
     }
-
-    public interface IWriter : ICoreWriter
-    {
-        void Write(ISerializer v);
-        void Write(string v);
-        void Write(byte[] v);
-        void Write(VNameString v);
-        void Write(RName v);
-        void Write(Support.TtBitset v);
-        void Write(Rtti.TtTypeDesc v); 
-        void Write<T>(T v) where T : unmanaged;
-        void Write<T>(T v, bool dummy = true) where T : struct;
-
-        void WriteWithType(Type type, object value);
-    }
-
     public partial struct TtMemWriter : IO.ICoreWriter, IDisposable
     {
         private unsafe static CoreSDK.FDelegate_FSaveMemStream NativeSaveMemStream = NativeSaveMemStreamCB;
@@ -47,7 +31,7 @@ namespace EngineNS.IO
                         ar.WritePtr(arg0.GetPointer(), (int)arg0.GetLength());
                     }
                     xnd.SaveXnd(path + name + ".pso");
-                }   
+                }
             }
         }
         public static void InitNativeCallback()
@@ -94,6 +78,20 @@ namespace EngineNS.IO
         {
             Writer.Dispose();
         }
+    }
+    public interface IWriter : ICoreWriter
+    {
+        void Write(ISerializer v);
+        void Write(string v);
+        void Write(byte[] v);
+        void Write(VNameString v);
+        void Write(RName v);
+        void Write(Support.TtBitset v);
+        void Write(Rtti.TtTypeDesc v); 
+        void Write<T>(T v) where T : unmanaged;
+        void Write<T>(T v, bool dummy = true) where T : struct;
+
+        void WriteWithType(Type type, object value);
     }
 
     public struct AuxWriter<TR> : IWriter, IDisposable where TR : ICoreWriter

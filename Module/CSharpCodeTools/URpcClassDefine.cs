@@ -144,6 +144,14 @@ namespace CSharpCodeTools
                 {
                     AddLine($"(({this.FullName})host).{i.Name}({argCallStr}context);");
                 }
+
+                foreach (var j in i.ArgTypes)
+                {
+                    if (j.Key == "EngineNS.IO.TtMemWriter" || j.Key == "IO.TtMemWriter" || j.Key == "TtMemWriter")
+                    {
+                        AddLine($"{j.Value}.Dispose();");
+                    }
+                }
             }
             PopBrackets(true);
         }
