@@ -285,14 +285,22 @@ namespace EngineNS.Profiler
     [TtRpcClassAttribute(RunTarget = ERunTarget.None, Executer = EExecuter.Profiler, CallerInClass = true)]
     public partial class TtRpcProfiler : IRpcHost
     {
-        static URpcClass smRpcClass = null;
-        public URpcClass GetRpcClass()
+        public TtRpcProfiler()
+        {
+
+        }
+        static TtRpcClass smRpcClass = null;
+        public TtRpcClass GetRpcClass()
         {
             if (smRpcClass == null)
-                smRpcClass = new URpcClass(this.GetType());
+                smRpcClass = new TtRpcClass(this.GetType());
             return smRpcClass;
         }
-
+        public virtual ushort RpcExecuteIndex { get; set; } = 0;
+        public virtual Bricks.Network.INetConnect GetRpcConnect()
+        {
+            return TtEngine.Instance.RpcModule.DefaultNetConnect;
+        }
         #region RPC
         [RpcProfilerThreads.TtCreator]
         public class RpcProfilerThreads : IO.BaseSerializer, IPooledObject
@@ -677,6 +685,13 @@ namespace EngineNS.Profiler
 				context.NetConnect?.Send(in pkg);
 			}
 		};
+		public async Thread.Async.TtTask<EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads> RPC_GetProfilerThreads(sbyte arg, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			return await TtRpcProfiler_RpcCaller.GetProfilerThreads(arg, rpcArg);
+		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GetProfilerData = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			string name;
@@ -696,12 +711,26 @@ namespace EngineNS.Profiler
 				context.NetConnect?.Send(in pkg);
 			}
 		};
+		public async Thread.Async.TtTask<EngineNS.Profiler.TtRpcProfiler.RpcProfilerData> RPC_GetProfilerData(string name, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			return await TtRpcProfiler_RpcCaller.GetProfilerData(name, rpcArg);
+		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_ResetMaxTime = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			EngineNS.Profiler.TtRpcProfiler.ResetMaxTimeArg arg;
 			reader.Read(out arg);
 			((EngineNS.Profiler.TtRpcProfiler)host).ResetMaxTime(arg, context);
 		};
+		public void RPC_ResetMaxTime(EngineNS.Profiler.TtRpcProfiler.ResetMaxTimeArg arg, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			TtRpcProfiler_RpcCaller.ResetMaxTime(arg, rpcArg);
+		}
 	}
 }
 #endregion//TitanEngine_AutoGen_RPC

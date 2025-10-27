@@ -24,6 +24,8 @@ namespace EngineNS.IO
         void Write(Rtti.TtTypeDesc v); 
         void Write<T>(T v) where T : unmanaged;
         void Write<T>(T v, bool dummy = true) where T : struct;
+
+        void WriteWithType(Type type, object value);
     }
 
     public partial struct TtMemWriter : IO.ICoreWriter, IDisposable
@@ -245,6 +247,77 @@ namespace EngineNS.IO
             else
                 this.Write(v.TypeString);
         }
-    }
 
+        public void WriteWithType(Type type, object value)
+        {
+            if(type == typeof(byte))
+            {
+                Write((byte)value);
+            }
+            else if(type == typeof(short))
+            {
+                Write((short)value);
+            }
+            else if(type == typeof(ushort))
+            {
+                Write((ushort)value);
+            }
+            else if(type == typeof(int))
+            {
+                Write((int)value);
+            }
+            else if(type == typeof(uint))
+            {
+                Write((uint)value);
+            }
+            else if(type == typeof(long))
+            {
+                Write((long)value);
+            }
+            else if(type == typeof(ulong))
+            {
+                Write((ulong)value);
+            }
+            else if(type == typeof(float))
+            {
+                Write((float)value);
+            }
+            else if(type == typeof(double))
+            {
+                Write((double)value);
+            }
+            else if(type == typeof(bool))
+            {
+                Write((bool)value);
+            }
+            else if(type == typeof(string))
+            {
+                Write((string)value);
+            }
+            else if (type == typeof(VNameString))
+            {
+                Write((RName)value);
+            }
+            else if (type == typeof(Support.TtBitset))
+            {
+                Write((Support.TtBitset)value);
+            }
+            else if (type == typeof(byte[]))
+            {
+                Write((byte[])value);
+            }
+            else if (type == typeof(RName))
+            {
+                Write((RName)value);
+            }
+            else if(typeof(ISerializer).IsAssignableFrom(type))
+            {
+                Write((ISerializer)value);
+            }
+            else
+            {
+                throw new InvalidOperationException($"Unsupport type serialize {type.FullName}");
+            }
+        }
+    }
 }

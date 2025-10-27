@@ -224,18 +224,39 @@ namespace RobotClient
 			reader.Read(out pos);
 			((RobotClient.URobot)host).UpdatePosition(pos, context);
 		};
+		public void RPC_UpdatePosition(Vector3 pos, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			URobot_RpcCaller.UpdatePosition(pos, rpcArg);
+		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GhostsAutoSync = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			EngineNS.IO.TtMemWriter data;
 			reader.Read(out data);
 			((RobotClient.URobot)host).GhostsAutoSync(data, context);
 		};
+		public void RPC_GhostsAutoSync(EngineNS.IO.TtMemWriter data, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			URobot_RpcCaller.GhostsAutoSync(data, rpcArg);
+		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GhostsUpdatePlacement = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			EngineNS.IO.TtMemWriter data;
 			reader.Read(out data);
 			((RobotClient.URobot)host).GhostsUpdatePlacement(data, context);
 		};
+		public void RPC_GhostsUpdatePlacement(EngineNS.IO.TtMemWriter data, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			URobot_RpcCaller.GhostsUpdatePlacement(data, rpcArg);
+		}
 	}
 }
 #endregion//TitanEngine_AutoGen_RPC

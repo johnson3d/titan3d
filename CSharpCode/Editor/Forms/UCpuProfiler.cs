@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Editor.Forms
 {
-    public class TtCpuProfiler : IRootForm
+    public class TtCpuProfilerForm : IRootForm
     {
-        public TtCpuProfiler()
+        public TtCpuProfilerForm()
         {
             TtEngine.RootFormManager.RegRootForm(this);
             ExcludeThreads.Add("TPool");
@@ -141,7 +141,7 @@ namespace EngineNS.Editor.Forms
             get
             {
                 if (mScopeOnDraw == null)
-                    mScopeOnDraw = new Profiler.TimeScope(typeof(TtCpuProfiler), nameof(OnDraw));
+                    mScopeOnDraw = new Profiler.TimeScope(typeof(TtCpuProfilerForm), nameof(OnDraw));
                 return mScopeOnDraw;
             }
         }
@@ -169,7 +169,8 @@ namespace EngineNS.Editor.Forms
                         //回收mRpcProfilerThreads.DirectResult，也就是Profiler.TtRpcProfiler.RpcProfilerThreads
                         t.RecycleThis();
                     }
-                    mRpcProfilerThreads = Profiler.TtRpcProfiler_RpcCaller.GetProfilerThreads(0, new Bricks.Network.RPC.FRpcCallArg());
+                    //mRpcProfilerThreads = Profiler.TtRpcProfiler_RpcCaller.GetProfilerThreads(0, new Bricks.Network.RPC.FRpcCallArg());
+                    mRpcProfilerThreads = TtEngine.Instance.RpcModule.RpcManager.RpcProfiler.RPC_GetProfilerThreads(0);
                 }
             }
                 
@@ -216,7 +217,8 @@ namespace EngineNS.Editor.Forms
                                     mRpcProfilerData.GetResultAndRelease();
                                     t.RecycleThis();
                                 }
-                                mRpcProfilerData = Profiler.TtRpcProfiler_RpcCaller.GetProfilerData(i, new());
+                                //mRpcProfilerData = Profiler.TtRpcProfiler_RpcCaller.GetProfilerData(i, new());
+                                mRpcProfilerData = TtEngine.Instance.RpcModule.RpcManager.RpcProfiler.RPC_GetProfilerData(i);
                             }
                             if (ImGuiAPI.BeginChild("TimeScope", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                             {
@@ -450,7 +452,7 @@ namespace EngineNS.Editor.Forms
             }
             internal TtTimeScopeNode TimeScopeRootNode = new TtTimeScopeNode();
             internal Dictionary<string, TtTimeScopeNode> TreeNodes = new Dictionary<string, TtTimeScopeNode>();
-            internal TtCpuProfiler Host;
+            internal TtCpuProfilerForm Host;
             internal string Thread;
             internal TtTimeScopeTree()
             {
@@ -461,7 +463,7 @@ namespace EngineNS.Editor.Forms
                 TimeScopeRootNode.Children.Clear();
                 TreeNodes.Clear();
             }
-            internal unsafe void OnDraw(TtCpuProfiler host, string thread)
+            internal unsafe void OnDraw(TtCpuProfilerForm host, string thread)
             {
                 Host = host;
                 Thread = thread;
@@ -602,7 +604,8 @@ namespace EngineNS.Editor.Forms
                                     var arg = new Profiler.TtRpcProfiler.ResetMaxTimeArg();
                                     arg.ThreadName = watchingThread;
                                     arg.ScopeName = scope.ShowName;
-                                    Profiler.TtRpcProfiler_RpcCaller.ResetMaxTime(arg, new());
+                                    //Profiler.TtRpcProfiler_RpcCaller.ResetMaxTime(arg, new());
+                                    TtEngine.Instance.RpcModule.RpcManager.RpcProfiler.RPC_ResetMaxTime(arg);
                                     OnDrawMenu = null;
                                 }
                                 ImGuiAPI.EndPopup();

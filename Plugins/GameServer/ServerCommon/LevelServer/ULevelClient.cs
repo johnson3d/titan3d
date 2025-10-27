@@ -16,12 +16,17 @@ namespace EngineNS.Plugins.LevelServer
     public partial class ULevelClient : ServerCommon.UClient, IRpcHost, CSCommon.ISyncActor
     {
         #region IRpcHost
-        static URpcClass smRpcClass = null;
-        public URpcClass GetRpcClass()
+        static TtRpcClass smRpcClass = null;
+        public TtRpcClass GetRpcClass()
         {
             if (smRpcClass == null)
-                smRpcClass = new URpcClass(this.GetType());
+                smRpcClass = new TtRpcClass(this.GetType());
             return smRpcClass;
+        }
+        public virtual ushort RpcExecuteIndex { get; set; } = 0;
+        public virtual Bricks.Network.INetConnect GetRpcConnect()
+        {
+            return ClientConnect;
         }
         #endregion
 
@@ -175,12 +180,26 @@ namespace EngineNS.Plugins.LevelServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
+		public async Thread.Async.TtTask<int> RPC_GetHP(EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			return await ULevelClient_RpcCaller.GetHP(rpcArg);
+		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_UpdateAutoSyncData = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			IO.TtMemWriter data;
 			reader.Read(out data);
 			((EngineNS.Plugins.LevelServer.ULevelClient)host).UpdateAutoSyncData(data, context);
 		};
+		public void RPC_UpdateAutoSyncData(IO.TtMemWriter data, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			ULevelClient_RpcCaller.UpdateAutoSyncData(data, rpcArg);
+		}
 	}
 }
 #endregion//TitanEngine_AutoGen_RPC

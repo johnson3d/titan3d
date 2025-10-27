@@ -11,7 +11,7 @@ namespace EngineNS.Plugins.RootServer
         {
             CurrentTarget = ERunTarget.Root;
         }
-        public override object GetExecuter(in FRouter router)
+        public override IRpcHost GetExecuter(in FRouter router)
         {
             switch (router.Executer)
             {
@@ -379,6 +379,13 @@ namespace EngineNS.Plugins.RootServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
+		public async Thread.Async.TtTask<bool> RPC_RegLogin(string psw, Guid serverId, string ip, UInt16 port, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			return await URootServer_RpcCaller.RegLogin(psw, serverId, ip, port, rpcArg);
+		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegGate = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			string psw;
@@ -404,6 +411,13 @@ namespace EngineNS.Plugins.RootServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
+		public async Thread.Async.TtTask<UInt16> RPC_RegGate(string psw, Guid serverId, string ip, UInt16 port, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			return await URootServer_RpcCaller.RegGate(psw, serverId, ip, port, rpcArg);
+		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegLevel = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			string psw;
@@ -429,6 +443,13 @@ namespace EngineNS.Plugins.RootServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
+		public async Thread.Async.TtTask<UInt16> RPC_RegLevel(string psw, Guid serverId, string ip, UInt16 port, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			return await URootServer_RpcCaller.RegLevel(psw, serverId, ip, port, rpcArg);
+		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_SelectGateway = async (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host,  EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			string user;
@@ -450,6 +471,13 @@ namespace EngineNS.Plugins.RootServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
+		public async Thread.Async.TtTask<Bricks.Network.FNetworkPoint> RPC_SelectGateway(string user, Guid sessionId, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			return await URootServer_RpcCaller.SelectGateway(user, sessionId, rpcArg);
+		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_UpdatePayload = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			ERunTarget target;
@@ -473,6 +501,13 @@ namespace EngineNS.Plugins.RootServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
+		public async Thread.Async.TtTask<bool> RPC_UpdatePayload(ERunTarget target, UInt16 index, long value, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			return await URootServer_RpcCaller.UpdatePayload(target, index, value, rpcArg);
+		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegClient = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			Guid gateId;
@@ -496,6 +531,13 @@ namespace EngineNS.Plugins.RootServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
+		public async Thread.Async.TtTask<bool> RPC_RegClient(Guid gateId, Guid sessionId, string user, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			return await URootServer_RpcCaller.RegClient(gateId, sessionId, user, rpcArg);
+		}
 	}
 }
 #endregion//TitanEngine_AutoGen_RPC

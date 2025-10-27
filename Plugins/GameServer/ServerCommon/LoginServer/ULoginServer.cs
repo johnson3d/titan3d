@@ -14,7 +14,7 @@ namespace EngineNS.Plugins.LoginServer
         {
             CurrentTarget = ERunTarget.Login;
         }
-        public override object GetExecuter(in FRouter router)
+        public override IRpcHost GetExecuter(in FRouter router)
         {
             switch (router.Executer)
             {
@@ -154,6 +154,13 @@ namespace EngineNS.Plugins.LoginServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
+		public async Thread.Async.TtTask<Bricks.Network.FLoginResultArgument> RPC_LoginAccount(string user, string psw, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			return await ULoginServer_RpcCaller.LoginAccount(user, psw, rpcArg);
+		}
 	}
 }
 #endregion//TitanEngine_AutoGen_RPC

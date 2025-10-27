@@ -12,7 +12,7 @@ namespace EngineNS.Plugins.GateServer
         {
             CurrentTarget = ERunTarget.Gate;
         }
-        public override object GetExecuter(in FRouter router)
+        public override IRpcHost GetExecuter(in FRouter router)
         {
             switch (router.Executer)
             {
@@ -278,6 +278,13 @@ namespace EngineNS.Plugins.GateServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
+		public async Thread.Async.TtTask<bool> RPC_WaitSession(Guid sessionId, string user, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			return await UGateServer_RpcCaller.WaitSession(sessionId, user, rpcArg);
+		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegClient = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			Guid sessionId;
@@ -299,6 +306,13 @@ namespace EngineNS.Plugins.GateServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
+		public async Thread.Async.TtTask<UInt16> RPC_RegClient(Guid sessionId, string user, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			return await UGateServer_RpcCaller.RegClient(sessionId, user, rpcArg);
+		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_ClientEnterLevel = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			Guid sessionId;
@@ -322,6 +336,13 @@ namespace EngineNS.Plugins.GateServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
+		public async Thread.Async.TtTask<UInt16> RPC_ClientEnterLevel(Guid sessionId, string user, UInt16 indexInLevel, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect();
+			return await UGateServer_RpcCaller.ClientEnterLevel(sessionId, user, indexInLevel, rpcArg);
+		}
 	}
 }
 #endregion//TitanEngine_AutoGen_RPC

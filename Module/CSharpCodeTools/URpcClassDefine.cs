@@ -78,67 +78,111 @@ namespace CSharpCodeTools
                 {
                     foreach (var i in Methods)
                     {
-                        if (i.IsAsync)
-                        {
-                            AddLine($"public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_{i.Name} = async (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host,  EngineNS.Bricks.Network.RPC.TtCallContext context) =>");
-                        }
-                        else
-                        {
-                            AddLine($"public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_{i.Name} = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>");
-                        }
-                        PushBrackets();
-                        {
-                            string argCallStr = "";
-                            {
-                                foreach (var j in i.ArgTypes)
-                                {
-                                    AddLine($"{j.Key} {j.Value};");
-                                    AddLine($"reader.Read(out {j.Value});");
-
-                                    if (argCallStr != "")
-                                        argCallStr += ", ";
-                                    argCallStr += j.Value;
-                                }
-                                if (argCallStr != "")
-                                    argCallStr += ", ";
-                            }
-                            if (i.ReturnType != null)
-                            {
-                                AddLine($"FReturnContext retContext;");
-                                AddLine($"reader.Read(out retContext);");
-
-                                if (i.IsAsync)
-                                {
-                                    AddLine($"var ret = await (({this.FullName})host).{i.Name}({argCallStr}context);");
-                                }
-                                else
-                                {
-                                    AddLine($"var ret = (({this.FullName})host).{i.Name}({argCallStr}context);");
-                                }
-
-                                AddLine($"using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())");
-                                PushBrackets();
-                                {
-                                    AddLine($"var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);");
-                                    AddLine($"var pkgHeader = new FPkgHeader();");
-                                    AddLine($"pkgHeader.SetHasReturn(true);");
-                                    AddLine($"pkg.Write(pkgHeader);");
-                                    AddLine($"pkg.Write(retContext);");
-                                    AddLine($"pkg.Write(ret);");
-                                    AddLine($"pkg.CoreWriter.SurePkgHeader();");
-                                    AddLine($"context.NetConnect?.Send(in pkg);");
-                                }
-                                PopBrackets();
-                            }
-                            else
-                            {
-                                AddLine($"(({this.FullName})host).{i.Name}({argCallStr}context);");
-                            }
-                        }
-                        PopBrackets(true);
+                        BuildCallee(i);
+                        BuildCaller(i);
                     }
                 }
                 PopBrackets();
+            }
+            PopBrackets();
+        }
+        private void BuildCallee(URpcMethod i)
+        {
+            if (i.IsAsync)
+            {
+                AddLine($"public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_{i.Name} = async (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host,  EngineNS.Bricks.Network.RPC.TtCallContext context) =>");
+            }
+            else
+            {
+                AddLine($"public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_{i.Name} = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>");
+            }
+            PushBrackets();
+            {
+                string argCallStr = "";
+                {
+                    foreach (var j in i.ArgTypes)
+                    {
+                        AddLine($"{j.Key} {j.Value};");
+                        AddLine($"reader.Read(out {j.Value});");
+
+                        if (argCallStr != "")
+                            argCallStr += ", ";
+                        argCallStr += j.Value;
+                    }
+                    if (argCallStr != "")
+                        argCallStr += ", ";
+                }
+                if (i.ReturnType != null)
+                {
+                    AddLine($"FReturnContext retContext;");
+                    AddLine($"reader.Read(out retContext);");
+
+                    if (i.IsAsync)
+                    {
+                        AddLine($"var ret = await (({this.FullName})host).{i.Name}({argCallStr}context);");
+                    }
+                    else
+                    {
+                        AddLine($"var ret = (({this.FullName})host).{i.Name}({argCallStr}context);");
+                    }
+
+                    AddLine($"using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())");
+                    PushBrackets();
+                    {
+                        AddLine($"var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);");
+                        AddLine($"var pkgHeader = new FPkgHeader();");
+                        AddLine($"pkgHeader.SetHasReturn(true);");
+                        AddLine($"pkg.Write(pkgHeader);");
+                        AddLine($"pkg.Write(retContext);");
+                        AddLine($"pkg.Write(ret);");
+                        AddLine($"pkg.CoreWriter.SurePkgHeader();");
+                        AddLine($"context.NetConnect?.Send(in pkg);");
+                    }
+                    PopBrackets();
+                }
+                else
+                {
+                    AddLine($"(({this.FullName})host).{i.Name}({argCallStr}context);");
+                }
+            }
+            PopBrackets(true);
+        }
+        private void BuildCaller(URpcMethod i)
+        {
+            string argDeclStr = "";
+            string argCallStr = "";
+            foreach (var j in i.ArgTypes)
+            {
+                if (argDeclStr != "")
+                    argDeclStr += ", ";
+                argDeclStr += j.Key + " " + j.Value;
+
+                if (argCallStr != "")
+                    argCallStr += ", ";
+                argCallStr += j.Value;
+            }
+            if (argDeclStr != "")
+                argDeclStr += ", ";
+            if (argCallStr != "")
+                argCallStr += ", ";
+            if (i.RetType != URpcMethod.EDataType.Void)
+                AddLine($"public async Thread.Async.TtTask<{i.GetNakedReturnType()}> RPC_{i.Name}({argDeclStr}EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)");
+            else
+                AddLine($"public void RPC_{i.Name}({argDeclStr}EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)");
+            PushBrackets();
+            {
+                AddLine($"var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);");
+                AddLine($"rpcArg.ExeIndex = RpcExecuteIndex;");
+                AddLine($"rpcArg.NetConnect = GetRpcConnect();");
+
+                if (i.RetType != URpcMethod.EDataType.Void)
+                {
+                    AddLine($"return await {this.Name}_RpcCaller.{i.Name}({argCallStr}rpcArg);");
+                }
+                else
+                {
+                    AddLine($"{this.Name}_RpcCaller.{i.Name}({argCallStr}rpcArg);");
+                }
             }
             PopBrackets();
         }

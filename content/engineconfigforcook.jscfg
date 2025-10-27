@@ -35,7 +35,7 @@
   "MainWindowType": "EngineNS.Editor.UMainEditorApplication@EngineCore",
   "MainRPolicyName": "utest/deferred.rpolicy:Game",
   "SimpleRPolicyName": null,
-  "RpcRootType": "EngineNS.UTest.UTest_Rpc@EngineCore",
+  "RpcRootType": "EngineNS.UnitTest.UTest_Rpc@EngineCore",
   "CookDXBC": false,
   "CookDXIL": true,
   "CookSPIRV": false,

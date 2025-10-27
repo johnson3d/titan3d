@@ -36,6 +36,8 @@ namespace EngineNS.IO
         void Read(out TtMemWriter v);
         void Read<T>(out T v) where T : unmanaged;
         T Read<T>() where T : unmanaged;
+
+        public object ReadWithType(Type type);
     }
 
     public struct TtMemReader : IO.ICoreReader, IDisposable
@@ -472,6 +474,110 @@ namespace EngineNS.IO
             //SerializerHelper.Read(this, out v, hostObject);
             v.OnPostRead(this.Tag, hostObject, false);
             return true;
+        }
+
+        public object ReadWithType(Type type)
+        {
+            if (type == typeof(byte))
+            {
+                byte value;
+                Read(out value);
+                return value;
+            }
+            else if (type == typeof(short))
+            {
+                short value;
+                Read(out value);
+                return value;
+            }
+            else if (type == typeof(ushort))
+            {
+                ushort value;
+                Read(out value);
+                return value;
+            }
+            else if (type == typeof(int))
+            {
+                int value;
+                Read(out value);
+                return value;
+            }
+            else if (type == typeof(uint))
+            {
+                uint value;
+                Read(out value);
+                return value;
+            }
+            else if (type == typeof(long))
+            {
+                long value;
+                Read(out value);
+                return value;
+            }
+            else if (type == typeof(ulong))
+            {
+                ulong value;
+                Read(out value);
+                return value;
+            }
+            else if (type == typeof(float))
+            {
+                float value;
+                Read(out value);
+                return value;
+            }
+            else if (type == typeof(double))
+            {
+                double value;
+                Read(out value);
+                return value;
+            }
+            else if (type == typeof(bool))
+            {
+                bool value;
+                Read(out value);
+                return value;
+            }
+            else if (type == typeof(string))
+            {
+                string value;
+                Read(out value);
+                return value;
+            }
+            else if (type == typeof(VNameString))
+            {
+                VNameString value;
+                Read(out value);
+                return value;
+            }
+            else if (type == typeof(Support.TtBitset))
+            {
+                Support.TtBitset value = new Support.TtBitset();
+                Read(ref value);
+                return value;
+            }
+            else if (type == typeof(byte[]))
+            {
+                byte[] value;
+                Read(out value);
+                return value;
+            }
+            else if (type == typeof(RName))
+            {
+                RName value;
+                Read(out value);
+                return value;
+            }
+            else if (typeof(ISerializer).IsAssignableFrom(type))
+            {
+                ISerializer value;
+                Read(out value);
+                return value;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Unsupport type serialize {type.FullName}");
+            }
         }
     }
 }

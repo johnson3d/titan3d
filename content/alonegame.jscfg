@@ -35,7 +35,7 @@
   "MainWindowType": "EngineNS.GamePlay.TtGameApplication@EngineCore",
   "MainRPolicyName": null,
   "SimpleRPolicyName": null,
-  "RpcRootType": "EngineNS.UTest.UTest_Rpc@EngineCore",
+  "RpcRootType": "EngineNS.UnitTest.UTest_Rpc@EngineCore",
   "CookDXBC": true,
   "CookDXIL": false,
   "CookSPIRV": false,
