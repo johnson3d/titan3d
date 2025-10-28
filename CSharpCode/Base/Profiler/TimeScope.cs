@@ -283,29 +283,10 @@ namespace EngineNS.Profiler
     }
 
     [TtRpcClassAttribute(RunTarget = ERunTarget.None, Executer = EExecuter.Profiler, CallerInClass = true)]
-    public partial class TtRpcProfiler : IRpcHost
+    public partial class TtRpcProfiler : AuxRpcHost<TtRpcProfiler>
     {
-        public TtRpcProfiler()
-        {
-
-        }
         #region Interface
-        static TtRpcClass smRpcClass = null;
-        public TtRpcClass GetRpcClass()
-        {
-            if (smRpcClass == null)
-                smRpcClass = new TtRpcClass(this.GetType());
-            return smRpcClass;
-        }
-        public virtual ushort RpcExecuteIndex { get; set; } = 0;
-        public virtual Bricks.Network.INetConnect GetRpcConnect()
-        {
-            return TtEngine.Instance.RpcModule.DefaultNetConnect;
-        }
-        public void OnRpcPropertyChanged(string propName, object v)
-        {
-
-        }
+        
         #endregion
 
         #region RPC
@@ -696,7 +677,7 @@ namespace EngineNS.Profiler
 		{
 			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
 			rpcArg.ExeIndex = RpcExecuteIndex;
-			rpcArg.NetConnect = GetRpcConnect();
+			rpcArg.NetConnect = GetRpcConnect(0);
 			return await TtRpcProfiler_RpcCaller.GetProfilerThreads(arg, rpcArg);
 		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GetProfilerData = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
@@ -722,7 +703,7 @@ namespace EngineNS.Profiler
 		{
 			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
 			rpcArg.ExeIndex = RpcExecuteIndex;
-			rpcArg.NetConnect = GetRpcConnect();
+			rpcArg.NetConnect = GetRpcConnect(1);
 			return await TtRpcProfiler_RpcCaller.GetProfilerData(name, rpcArg);
 		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_ResetMaxTime = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
@@ -735,7 +716,7 @@ namespace EngineNS.Profiler
 		{
 			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
 			rpcArg.ExeIndex = RpcExecuteIndex;
-			rpcArg.NetConnect = GetRpcConnect();
+			rpcArg.NetConnect = GetRpcConnect(2);
 			TtRpcProfiler_RpcCaller.ResetMaxTime(arg, rpcArg);
 		}
 	}

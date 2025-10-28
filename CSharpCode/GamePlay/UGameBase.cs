@@ -401,6 +401,7 @@ namespace EngineNS
             get;
             set;
         }
+        public GamePlay.TtGameInstance[] MultiGameInstances = new GamePlay.TtGameInstance[4];
     }
 }
 

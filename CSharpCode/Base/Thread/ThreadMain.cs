@@ -6,6 +6,19 @@ namespace EngineNS.Thread
 {
     public class TtThreadMain : TtContextThread
     {
+        public override bool IsThisThread()
+        {
+            if (this.ThreadId == System.Threading.Thread.CurrentThread.ManagedThreadId)
+                return true;
+            if (WaitingThread!=null)
+            {
+                if (WaitingThread.ThreadId == TtEngine.Instance.ThreadLogic.ThreadId)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         public override Async.EAsyncTarget GetThreadType()
         {
             return Async.EAsyncTarget.Main;

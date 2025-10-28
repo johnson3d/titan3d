@@ -23,6 +23,19 @@ namespace EngineNS.Thread
             }
             return count;
         }
+        public static int GetTotalEventNumber()
+        {
+            int count = 0;
+            foreach (var i in AllContexts)
+            {
+                TtContextThread context;
+                if (i.TryGetTarget(out context))
+                {
+                    count += context.TotalEvents;
+                }
+            }
+            return count;
+        }
         [ThreadStatic]
         public static TtContextThread CurrentContext;
         //这个Flag是解决主线程同时是:RHIContext，MainContext
@@ -41,7 +54,7 @@ namespace EngineNS.Thread
         {
             
         }
-        public bool IsWaitingTask = false;
+        public static TtContextThread WaitingThread = null;
         protected bool mIsRun = false;
         private bool mIsFinished = false;
         public int Interval
@@ -99,26 +112,51 @@ namespace EngineNS.Thread
             }
             mThread = null;
         }
-        public static void FlushAllThreadEvents(TtContextThread thread)
+        public void FlushAllThreadEvents()
         {
-            var t1 = Support.TtTime.HighPrecision_GetTickCount();
-            while (TtContextThread.GetTotalContinueEventNumber(thread) + thread.ContinueNum > 0)
+            WaitingThread = this;
+            var IsMainThread = TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadMain.ThreadId;
+            var IsLogicThread = TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadLogic.ThreadId;
+            while (true)
             {
                 FContextTickableManager.GetInstance().ThreadTick();
-                thread.TickAwaitEvent();
+                TickAwaitEvent();
+                if (IsMainThread)
+                {
+                    TtEngine.Instance.ThreadLogic.TickAwaitEvent();
+                }
+                else if (IsLogicThread)
+                {
+                    TtEngine.Instance.ThreadMain.TickAwaitEvent();
+                }
                 TtEngine.Instance.TaskCollector.Tick();
+                if (TtContextThread.GetTotalEventNumber() == 0)
+                {
+                    WaitingThread = null;
+                    return;
+                }
             }
-            var t2 = Support.TtTime.HighPrecision_GetTickCount();
-            if (t2 - t1 > 20000)
-            {
-                Profiler.Log.WriteLine<Profiler.TtThreadGategory>(Profiler.ELogTag.Warning, $"FlushAllThreadEvents({thread.Name}) Time = {(t2 - t1)/1000} ms");
-            }
+
+            //var t1 = Support.TtTime.HighPrecision_GetTickCount();
+            //while (TtContextThread.GetTotalContinueEventNumber(thread) + thread.ContinueNum > 0)
+            //{
+            //    FContextTickableManager.GetInstance().ThreadTick();
+            //    thread.TickAwaitEvent();
+            //    TtEngine.Instance.TaskCollector.Tick();
+            //}
+            //var t2 = Support.TtTime.HighPrecision_GetTickCount();
+            //if (t2 - t1 > 20000)
+            //{
+            //    Profiler.Log.WriteLine<Profiler.TtThreadGategory>(Profiler.ELogTag.Warning, $"FlushAllThreadEvents({thread.Name}) Time = {(t2 - t1)/1000} ms");
+            //}
         }
         public void FlushToSemephore(TtSemaphore smp)
         {
-            IsWaitingTask = true;
+            System.Diagnostics.Debug.Assert(WaitingThread == null);
+            WaitingThread = this;
             //System.Diagnostics.Debug.Assert(TtContextThread.CurrentContext.ThreadId != TtEngine.Instance.ThreadMain.ThreadId);
             var IsMainThread = TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadMain.ThreadId;
+            var IsLogicThread = TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadLogic.ThreadId;
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
             while (true)
             {
@@ -127,6 +165,10 @@ namespace EngineNS.Thread
                 if (IsMainThread)
                 {
                     TtEngine.Instance.ThreadLogic.TickAwaitEvent();
+                }
+                else if (IsLogicThread)
+                {
+                    TtEngine.Instance.ThreadMain.TickAwaitEvent();
                 }
                 TtEngine.Instance.TaskCollector.Tick();
                 if (smp.GetCount() == 0)
@@ -136,15 +178,17 @@ namespace EngineNS.Thread
                     {
                         Profiler.Log.WriteLine<Profiler.TtThreadGategory>(Profiler.ELogTag.Warning, $"FlushToSemephore Time = {(t2 - t1) / 1000} ms");
                     }
-                    IsWaitingTask = false;
+                    WaitingThread = null;
                     return;
                 }
             }
         }
         public void WaitTask(Thread.Async.ITask task)
         {
-            IsWaitingTask = true;
+            System.Diagnostics.Debug.Assert(WaitingThread == null || WaitingThread.ThreadId == TtContextThread.CurrentContext.ThreadId);
+            WaitingThread = this;
             var IsMainThread = TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadMain.ThreadId;
+            var IsLogicThread = TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadLogic.ThreadId;
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
             while (true)
             {
@@ -154,6 +198,10 @@ namespace EngineNS.Thread
                 {
                     TtEngine.Instance.ThreadLogic.TickAwaitEvent();
                 }
+                else if (IsLogicThread)
+                {
+                    TtEngine.Instance.ThreadMain.TickAwaitEvent();
+                }
                 TtEngine.Instance.TaskCollector.Tick();
                 if (task.IsCompleted)
                 {
@@ -162,7 +210,7 @@ namespace EngineNS.Thread
                     {
                         Profiler.Log.WriteLine<Profiler.TtThreadGategory>(Profiler.ELogTag.Warning, $"WaitTask Time = {(t2 - t1) / 1000} ms");
                     }
-                    IsWaitingTask = false;
+                    WaitingThread = null;
                     return;
                 }
             }
@@ -502,17 +550,18 @@ namespace EngineNS.Thread
             return true;
         }
 
-        public bool IsThisThread()
+        public virtual bool IsThisThread()
         {
-            if (IsWaitingTask)
-            {
-                if (TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadMain.ThreadId)
-                {
-                    if (this.ThreadId == TtEngine.Instance.ThreadLogic.ThreadId)
-                        return true;
-                }
-            }
-            return (this.ThreadId == System.Threading.Thread.CurrentThread.ManagedThreadId);
+            if (this.ThreadId == System.Threading.Thread.CurrentThread.ManagedThreadId)
+                return true;
+            //if (WaitingThread!=null)
+            //{
+            //    if (TtContextThread.CurrentContext.ThreadId == WaitingThread.ThreadId)
+            //    {
+            //        return true;
+            //    }
+            //}
+            return false;
         }
 
         #region Payload

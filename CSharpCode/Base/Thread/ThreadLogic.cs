@@ -83,5 +83,18 @@ namespace EngineNS.Thread
                 TtEngine.Instance.StartFrame();
             });
         }
+        public override bool IsThisThread()
+        {
+            if (this.ThreadId == System.Threading.Thread.CurrentThread.ManagedThreadId)
+                return true;
+            if (WaitingThread!=null)
+            {
+                if (WaitingThread.ThreadId == TtEngine.Instance.ThreadMain.ThreadId)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

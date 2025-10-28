@@ -228,7 +228,7 @@ namespace RobotClient
 		{
 			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
 			rpcArg.ExeIndex = RpcExecuteIndex;
-			rpcArg.NetConnect = GetRpcConnect();
+			rpcArg.NetConnect = GetRpcConnect(100 + 0);
 			URobot_RpcCaller.UpdatePosition(pos, rpcArg);
 		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GhostsAutoSync = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
@@ -242,7 +242,7 @@ namespace RobotClient
 		{
 			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
 			rpcArg.ExeIndex = RpcExecuteIndex;
-			rpcArg.NetConnect = GetRpcConnect();
+			rpcArg.NetConnect = GetRpcConnect(100 + 1);
 			URobot_RpcCaller.GhostsAutoSync(data, rpcArg);
 		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GhostsUpdatePlacement = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
@@ -256,7 +256,7 @@ namespace RobotClient
 		{
 			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
 			rpcArg.ExeIndex = RpcExecuteIndex;
-			rpcArg.NetConnect = GetRpcConnect();
+			rpcArg.NetConnect = GetRpcConnect(100 + 2);
 			URobot_RpcCaller.GhostsUpdatePlacement(data, rpcArg);
 		}
 	}

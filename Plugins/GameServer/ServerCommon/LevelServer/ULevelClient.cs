@@ -24,13 +24,17 @@ namespace EngineNS.Plugins.LevelServer
             return smRpcClass;
         }
         public virtual ushort RpcExecuteIndex { get; set; } = 0;
-        public virtual Bricks.Network.INetConnect GetRpcConnect()
+        public virtual Bricks.Network.INetConnect GetRpcConnect(UInt16 methodIndex)
         {
             return ClientConnect;
         }
-        public void OnRpcPropertyChanged(string propName, object v)
+        public void OnRpcPropertyChanged(string propName, object v, object old)
         {
 
+        }
+        public bool IgnoreUpdateProperties(ushort RpcExecuteIndex)
+        {
+            return false;
         }
         #endregion
 
@@ -188,7 +192,7 @@ namespace EngineNS.Plugins.LevelServer
 		{
 			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
 			rpcArg.ExeIndex = RpcExecuteIndex;
-			rpcArg.NetConnect = GetRpcConnect();
+			rpcArg.NetConnect = GetRpcConnect(100 + 0);
 			return await ULevelClient_RpcCaller.GetHP(rpcArg);
 		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_UpdateAutoSyncData = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
@@ -202,7 +206,7 @@ namespace EngineNS.Plugins.LevelServer
 		{
 			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
 			rpcArg.ExeIndex = RpcExecuteIndex;
-			rpcArg.NetConnect = GetRpcConnect();
+			rpcArg.NetConnect = GetRpcConnect(100 + 1);
 			ULevelClient_RpcCaller.UpdateAutoSyncData(data, rpcArg);
 		}
 	}

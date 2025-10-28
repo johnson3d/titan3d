@@ -181,7 +181,7 @@ namespace CSharpCodeTools
             {
                 AddLine($"var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);");
                 AddLine($"rpcArg.ExeIndex = RpcExecuteIndex;");
-                AddLine($"rpcArg.NetConnect = GetRpcConnect();");
+                AddLine($"rpcArg.NetConnect = GetRpcConnect({i.Index});");
 
                 if (i.RetType != URpcMethod.EDataType.Void)
                 {

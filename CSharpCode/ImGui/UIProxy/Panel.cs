@@ -14,11 +14,12 @@ namespace EngineNS.EGui.UIProxy
         };
 
         // 只能dock到Main window中
-        public static bool BeginMainForm(string name, IRootForm form, ImGuiWindowFlags_ flags)
+        public static bool BeginMainForm(string name, IRootForm form, ImGuiWindowFlags_ flags, uint dockId = 0)
         {
             ImGuiAPI.SetNextWindowClass(MainFormDockClass);
-            ImGuiAPI.SetNextWindowDockID(MainFormDockClass.m_ClassId, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if(ImGuiAPI.IsLastFrame(name))
+            //ImGuiAPI.SetNextWindowDockID(MainFormDockClass.m_ClassId, ImGuiCond_.ImGuiCond_FirstUseEver);
+            ImGuiAPI.SetNextWindowDockID(dockId, ImGuiCond_.ImGuiCond_FirstUseEver);
+            if (ImGuiAPI.IsLastFrame(name))
             {
                 ImGuiAPI.SetNextWindowFocus();
             }

@@ -23,10 +23,14 @@ namespace EngineNS.GamePlay
                 mNstrTitle.SetText(value);
             } 
         }
+        public int MultiGameIndex = -1;
         protected override void OnViewportClosed()
         {
             mPresentWindow?.UnregEventProcessor(this);
-            TtEngine.Instance.EndPlayInEditor();
+            if (MultiGameIndex==-1)
+                TtEngine.Instance.EndPlayInEditor();
+            else
+                TtEngine.Instance.EndMultiPlayInEditor(MultiGameIndex);
         }
         public override async System.Threading.Tasks.Task<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
         {

@@ -169,6 +169,7 @@ namespace EngineNS.Bricks.Network.RPC
             {
                 if (parms[i].ParameterType != typeof(string) &&
                     parms[i].ParameterType != typeof(RName) &&
+                    parms[i].ParameterType != typeof(Rtti.TtTypeDesc) &&
                     parms[i].ParameterType.IsValueType == false &&
                     parms[i].ParameterType.Name != "ISerializer" &&
                     parms[i].ParameterType.GetInterface("ISerializer") == null)
@@ -191,8 +192,29 @@ namespace EngineNS.Bricks.Network.RPC
     {
         TtRpcClass GetRpcClass();
         ushort RpcExecuteIndex { get; set; }
-        INetConnect GetRpcConnect();
-        void OnRpcPropertyChanged(string propName, object v);
+        bool IgnoreUpdateProperties(ushort RpcExecuteIndex);//exclude some special case
+        INetConnect GetRpcConnect(UInt16 methodIndex);
+        void OnRpcPropertyChanged(string propName, object v, object old);
+    }
+    public class AuxRpcHost<T> : IRpcHost
+    {
+        static TtRpcClass smRpcClass = new TtRpcClass(typeof(T));
+        public virtual TtRpcClass GetRpcClass()
+        {
+            return smRpcClass;
+        }
+        public virtual ushort RpcExecuteIndex { get; set; } = 0;
+        public virtual INetConnect GetRpcConnect(UInt16 methodIndex)
+        {
+            return TtEngine.Instance.RpcModule.DefaultNetConnect;
+        }
+        public virtual bool IgnoreUpdateProperties(ushort RpcExecuteIndex)
+        {
+            return false;
+        }
+        public virtual void OnRpcPropertyChanged(string propName, object v, object old)
+        {
+        }
     }
     public class TtRpcPropertyData
     {
@@ -237,25 +259,10 @@ namespace EngineNS.Bricks.Network.RPC
         }
     }
     [TtRpcClassAttribute(RunTarget = ERunTarget.None, Executer = EExecuter.PropertyData, CallerInClass = true)]
-    public partial class TtRpcPropertyDataManager : IRpcHost
+    public partial class TtRpcPropertyDataManager : AuxRpcHost<TtRpcPropertyDataManager>
     {
         #region Interface
-        static TtRpcClass smRpcClass = null;
-        public TtRpcClass GetRpcClass()
-        {
-            if (smRpcClass == null)
-                smRpcClass = new TtRpcClass(this.GetType());
-            return smRpcClass;
-        }
-        public virtual ushort RpcExecuteIndex { get; set; } = 0;
-        public virtual INetConnect GetRpcConnect()
-        {
-            return TtEngine.Instance.RpcModule.DefaultNetConnect;
-        }
-        public void OnRpcPropertyChanged(string propName, object v)
-        {
-
-        }
+        
         #endregion
 
         [TtRpcProperty]
@@ -264,29 +271,84 @@ namespace EngineNS.Bricks.Network.RPC
         {
             RegisterHost(this);
         }
-        public ConditionalWeakTable<IRpcHost, TtRpcPropertyData> PropertyDatas = new();
+        public struct TtPropKey
+        {
+            public TtPropKey(IRpcHost host)
+            {
+                ExecuterType = host.GetRpcClass().Executer;
+                ExecuteIndex = host.RpcExecuteIndex;
+            }
+            public TtPropKey(EExecuter type, ushort index)
+            {
+                ExecuterType = type;
+                ExecuteIndex = index;
+            }
+            public EExecuter ExecuterType;
+            public ushort ExecuteIndex;
+            public override int GetHashCode()
+            {
+                return (int)(ExecuteIndex + (byte)ExecuterType);
+            }
+        }
+        public class TtPropValue
+        {
+            public TtRpcPropertyData PropertyData;
+            public WeakReference<IRpcHost> Host;
+        }
+        class TtPropKeyComparer : IEqualityComparer<TtPropKey>
+        {
+            public bool Equals(TtPropKey x, TtPropKey y)
+            {
+                return x.ExecuterType == y.ExecuterType && x.ExecuteIndex == y.ExecuteIndex;
+            }
+
+            public int GetHashCode(TtPropKey obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
+        public Dictionary<TtPropKey, TtPropValue> PropertyDatas = new(new TtPropKeyComparer());
         public void RegisterHost(IRpcHost host)
         {
             var kls = host.GetRpcClass();
             var propData = new TtRpcPropertyData(kls);
-            PropertyDatas.Add(host, propData);
+            var v = new TtPropValue();
+            v.PropertyData = propData;
+            v.Host = new WeakReference<IRpcHost>(host);
+            PropertyDatas.Add(new TtPropKey(host), v);
         }
         public void UnregisterHost(IRpcHost host)
         {
-            PropertyDatas.Remove(host);
+            PropertyDatas.Remove(new TtPropKey(host));
+        }
+        public IRpcHost UnregisterHost(EExecuter executerType, ushort executeIndex)
+        {
+            if (PropertyDatas.TryGetValue(new TtPropKey(executerType, executeIndex), out var result))
+            {
+                if (result.Host.TryGetTarget(out var t))
+                {
+                    return t;
+                }
+                PropertyDatas.Remove(new TtPropKey(executerType, executeIndex));
+            }
+            return null;
         }
         private void CollectProperties(IO.IWriter writer)
         {
             List<object> propValues = new();
             TtBitset modifyProps = new();
+            List<TtPropKey> rmvKeys = new();
             foreach (var i in PropertyDatas)
             {
-                var host = i.Key;
-                if (host == null)
+                IRpcHost host;
+                if (false == i.Value.Host.TryGetTarget(out host))
+                {
+                    rmvKeys.Add(i.Key);
                     continue;
+                }
 
                 propValues.Clear();
-                i.Value.CollectProperties(host, modifyProps, propValues, true);
+                i.Value.PropertyData.CollectProperties(host, modifyProps, propValues, true);
                 if (modifyProps.IsAnySet()==false)
                     continue;
 
@@ -310,6 +372,11 @@ namespace EngineNS.Bricks.Network.RPC
                 }
             }
             writer.Write(byte.MaxValue); //结束标志
+
+            foreach(var i in rmvKeys)
+            {
+                PropertyDatas.Remove(i);
+            }
         }
         public void Tick()
         {
@@ -341,10 +408,10 @@ namespace EngineNS.Bricks.Network.RPC
                     Index = rpcIndex,
                 };
                 var host = TtEngine.Instance.RpcModule.RpcManager.GetExecuter(in router);
-                if (host == null || host.RpcExecuteIndex != rpcIndex)
+                if (host == null || host.RpcExecuteIndex != rpcIndex || host.IgnoreUpdateProperties(rpcIndex))
+                {
                     bSet = false;
-                if (PropertyDatas.TryGetValue(host, out var propData) == false)
-                    continue;
+                }
                 var type = host.GetType();
                 for (uint i = 0; i < modifyProps.BitCount; i++)
                 {
@@ -359,8 +426,11 @@ namespace EngineNS.Bricks.Network.RPC
                         v = reader.ReadWithType(prop.PropertyType);
                         if (bSet)
                         {
+                            var old = prop.GetValue(host);
+                            if (TtRpcPropertyData.IsSameValue(old, v))
+                                continue;
                             prop.SetValue(host, v);
-                            host.OnRpcPropertyChanged(propInfo.Name, v);
+                            host.OnRpcPropertyChanged(propInfo.Name, v, old);
                         }
                     }
                 }
@@ -375,6 +445,32 @@ namespace EngineNS.Bricks.Network.RPC
                 {
                     UpdateProperties(ar);
                 }
+            }
+        }
+        // Callback when response RPC_CreateRpcHost
+        public delegate void FOnCreateRpcHost(IRpcHost host, string info);
+        public FOnCreateRpcHost OnCreateRpcHost;
+        [TtRpcMethod(Index = 1)]
+        public void CreateRpcHost(Rtti.TtTypeDesc type, ushort executeIndex, string info, TtCallContext context)
+        {
+            var result = Rtti.TtTypeDescManager.CreateInstance(type) as IRpcHost;
+            if (result==null)
+                return;
+            result.RpcExecuteIndex = executeIndex;
+            if (OnCreateRpcHost!=null)
+            {
+                OnCreateRpcHost(result, info);
+            }
+        }
+        public delegate void FOnRemoveRpcHost(IRpcHost host, string info);
+        public FOnRemoveRpcHost OnRemoveRpcHost;
+        [TtRpcMethod(Index = 2)]
+        public void RemoveRpcHost(EExecuter executerType, ushort executeIndex, string info, TtCallContext context)
+        {
+            var host = UnregisterHost(executerType, executeIndex);
+            if (OnCreateRpcHost!=null)
+            {
+                OnRemoveRpcHost(host, info);
             }
         }
     }
@@ -418,6 +514,70 @@ namespace EngineNS.Bricks.Network.RPC
 				NetConnect?.Send(in pkg);
 			}
 		}
+		public static void CreateRpcHost(Rtti.TtTypeDesc type, ushort executeIndex, string info, in EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
+		{
+			var ExeIndex = rpcArg.ExeIndex;
+			var NetConnect = rpcArg.NetConnect;
+			if (ExeIndex == UInt16.MaxValue)
+			{
+				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
+			}
+			if (NetConnect == null)
+			{
+				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
+			}
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
+			{
+				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
+				FRouter router = new FRouter();
+				router.RunTarget = ERunTarget.None;
+				router.Executer = EExecuter.PropertyData;
+				router.Index = ExeIndex;
+				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
+				var pkgHeader = new FPkgHeader();
+				pkg.Write(pkgHeader);
+				pkg.Write(router);
+				UInt16 methodIndex = 1;
+				pkg.Write(methodIndex);
+				pkg.Write(type);
+				pkg.Write(executeIndex);
+				pkg.Write(info);
+				pkg.CoreWriter.SurePkgHeader();
+				NetConnect?.Send(in pkg);
+			}
+		}
+		public static void RemoveRpcHost(EExecuter executerType, ushort executeIndex, string info, in EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
+		{
+			var ExeIndex = rpcArg.ExeIndex;
+			var NetConnect = rpcArg.NetConnect;
+			if (ExeIndex == UInt16.MaxValue)
+			{
+				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
+			}
+			if (NetConnect == null)
+			{
+				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
+			}
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
+			{
+				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
+				FRouter router = new FRouter();
+				router.RunTarget = ERunTarget.None;
+				router.Executer = EExecuter.PropertyData;
+				router.Index = ExeIndex;
+				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
+				var pkgHeader = new FPkgHeader();
+				pkg.Write(pkgHeader);
+				pkg.Write(router);
+				UInt16 methodIndex = 2;
+				pkg.Write(methodIndex);
+				pkg.Write(executerType);
+				pkg.Write(executeIndex);
+				pkg.Write(info);
+				pkg.CoreWriter.SurePkgHeader();
+				NetConnect?.Send(in pkg);
+			}
+		}
 	}
 }
 
@@ -437,8 +597,42 @@ namespace EngineNS.Bricks.Network.RPC
 		{
 			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
 			rpcArg.ExeIndex = RpcExecuteIndex;
-			rpcArg.NetConnect = GetRpcConnect();
+			rpcArg.NetConnect = GetRpcConnect(0);
 			TtRpcPropertyDataManager_RpcCaller.SyncAllProperties(data, rpcArg);
+		}
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_CreateRpcHost = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
+		{
+			Rtti.TtTypeDesc type;
+			reader.Read(out type);
+			ushort executeIndex;
+			reader.Read(out executeIndex);
+			string info;
+			reader.Read(out info);
+			((EngineNS.Bricks.Network.RPC.TtRpcPropertyDataManager)host).CreateRpcHost(type, executeIndex, info, context);
+		};
+		public void RPC_CreateRpcHost(Rtti.TtTypeDesc type, ushort executeIndex, string info, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect(1);
+			TtRpcPropertyDataManager_RpcCaller.CreateRpcHost(type, executeIndex, info, rpcArg);
+		}
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RemoveRpcHost = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
+		{
+			EExecuter executerType;
+			reader.Read(out executerType);
+			ushort executeIndex;
+			reader.Read(out executeIndex);
+			string info;
+			reader.Read(out info);
+			((EngineNS.Bricks.Network.RPC.TtRpcPropertyDataManager)host).RemoveRpcHost(executerType, executeIndex, info, context);
+		};
+		public void RPC_RemoveRpcHost(EExecuter executerType, ushort executeIndex, string info, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect(2);
+			TtRpcPropertyDataManager_RpcCaller.RemoveRpcHost(executerType, executeIndex, info, rpcArg);
 		}
 	}
 }

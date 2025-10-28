@@ -1,6 +1,5 @@
 ﻿using EngineNS.Bricks.Input.Control;
 using EngineNS.Bricks.Input.Device.Keyboard;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -109,6 +108,29 @@ namespace EngineNS.Editor
                 {
 
                 }
+                if (TtEngine.Instance.GameInstance!=null)
+                {
+                    for (int i = 0; i<TtEngine.Instance.MultiGameInstances.Length; i++)
+                    {
+                        if (TtEngine.Instance.MultiGameInstances[i]==null)
+                        {
+                            if (ImGuiAPI.Button("Run Multi Game", sz))
+                            {
+                                TtEngine.Instance.EventPoster.RunOn(async (state) =>
+                                {
+                                    TtEngine.Instance.PlayMode = EPlayMode.PlayerInEditor;
+                                    var ret = await TtEngine.Instance.StartMultiPlayInEditor(TtEngine.Instance.GfxDevice.SlateApplication, mCurrentName, i);
+                                    if (ret == false)
+                                    {
+                                        Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Error, $"StartMultiPlayInEditor {mCurrentName}_{i} failed!");
+                                    }
+                                    return ret;
+                                }, Thread.Async.EAsyncTarget.Logic);
+                            }
+                            break;
+                        }
+                    }
+                }
 
                 //EGui.UIProxy.Toolbar.EndToolbar();
             }
@@ -157,7 +179,7 @@ namespace EngineNS
         public Editor.TtPIEModule PIEModule { get; } = new Editor.TtPIEModule();
         public readonly static System.Version Version = System.Environment.Version;
         public static string DotNetVersion { get; private set; } = "?";
-        public virtual async System.Threading.Tasks.Task<bool> StartPlayInEditor(TtSlateApplication application, RName main)
+        public virtual async Thread.Async.TtTask<bool> StartPlayInEditor(TtSlateApplication application, RName main)
         {
             if (this.GameInstance != null)
                 return false;
@@ -167,6 +189,7 @@ namespace EngineNS
 
             var gameInstance = new GamePlay.TtGameInstance();
             gameInstance.WorldViewportSlate.Title = $"Game:{main.Name}";
+            gameInstance.WorldViewportSlate.MultiGameIndex = -1;
 
             gameInstance.McObject.Name = main;
             var ret = await gameInstance.BeginPlay();
@@ -199,24 +222,36 @@ namespace EngineNS
             if (this.GameInstance == null)
                 return;
 
-            Thread.TtContextThread.FlushAllThreadEvents(TtEngine.Instance.ThreadLogic);
-            Thread.TtContextThread.FlushAllThreadEvents(TtEngine.Instance.ThreadMain);
-            Thread.TtContextThread.FlushAllThreadEvents(TtEngine.Instance.ThreadRHI);
-            TtEngine.Instance.TaskCollector.AddWaitTask(AwaitEndPlayInEditor(),(task)=>
+            for (int i = 0; i<MultiGameInstances.Length; i++)
             {
-                TtEngine.Instance.EventPoster.RunOn(static (state) =>
-                {
-                    for (int i = 0; i < 5; i++)
-                    {
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                    }
-                    return true;
-                }, Thread.Async.EAsyncTarget.Main);
-            });
+                if (MultiGameInstances[i] == null)
+                    continue;
+                EndMultiPlayInEditor(i);
+            }
+
+            Thread.TtContextThread.CurrentContext.FlushAllThreadEvents();
+            AwaitEndPlayInEditor().WaitCompletedAndDispose();
+            for (int i = 0; i < 5; i++)
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+            //AwaitEndPlayInEditor().AddWaitTask((task)=>
+            //{
+            //    TtEngine.Instance.EventPoster.RunOn(static (state) =>
+            //    {
+            //        for (int i = 0; i < 5; i++)
+            //        {
+            //            GC.Collect();
+            //            GC.WaitForPendingFinalizers();
+            //        }
+            //        return true;
+            //    }, Thread.Async.EAsyncTarget.Main);
+            //});
         }
-        public async Thread.Async.TtTask AwaitEndPlayInEditor()
+        private async Thread.Async.TtTask AwaitEndPlayInEditor()
         {
+            //等待 GameSemaphore, 确保BeginPlay已经结束
             await TtEngine.Instance.EventPoster.AwaitSemaphore(this.GameInstance.GameSemaphore);
 
             EndPlayInEditorImpl();
@@ -240,5 +275,69 @@ namespace EngineNS
                 TtEngine.Instance.PlayMode = EPlayMode.Editor;
             }
         }
+        #region Multi Game Instance
+        public virtual async Thread.Async.TtTask<bool> StartMultiPlayInEditor(TtSlateApplication application, RName main, int index)
+        {
+            if (this.GameInstance == null || index<0 ||index >=MultiGameInstances.Length)
+                return false;
+
+            if (MultiGameInstances[index] != null)
+                return false;
+
+            var gameInstance = new GamePlay.TtGameInstance();
+            gameInstance.WorldViewportSlate.Title = $"Game:{main.Name}[{index}]";
+            gameInstance.WorldViewportSlate.MultiGameIndex = index;
+
+            gameInstance.McObject.Name = main;
+            var ret = await gameInstance.BeginPlay();
+            if (ret == false)
+            {
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Error, $"{main}[{index}] BeginPlay failed!");
+                return false;
+            }
+
+            TtEngine.Instance.InputSystem.Mouse.ShowCursor = true;
+            var esc = IControl.Create<UKey>(new UKey.UKeyData() { Keycode = Bricks.Input.Keycode.KEY_ESCAPE });
+            esc.TriggerPress += (ITriggerControl sender) =>
+            {
+                TtEngine.Instance.InputSystem.Mouse.ShowCursor = true;
+                EndMultiPlayInEditor(index);
+            };
+
+            var outOfMouse = IControl.Create<UKey>(new UKey.UKeyData() { Keycode = Bricks.Input.Keycode.KEY_F1 });
+            outOfMouse.TriggerPress += (ITriggerControl sender) =>
+            {
+                TtEngine.Instance.InputSystem.Mouse.ShowCursor = !TtEngine.Instance.InputSystem.Mouse.ShowCursor;
+            };
+
+            TtEngine.Instance.TickableManager.AddTickable(gameInstance);
+            MultiGameInstances[index] = gameInstance;
+            return true;
+        }
+        public void EndMultiPlayInEditor(int index)
+        {
+            if (this.GameInstance == null)
+                return;
+
+            if (index < 0 || index >= MultiGameInstances.Length)
+                return;
+
+            if (MultiGameInstances[index]== null)
+                return;
+
+            try
+            {
+                TtEngine.Instance?.TickableManager.RemoveTickable(MultiGameInstances[index]);
+                MultiGameInstances[index].BeginDestroy();
+                MultiGameInstances[index].Dispose();
+                if (MultiGameInstances[index].WorldViewportSlate!=null)
+                    MultiGameInstances[index].WorldViewportSlate.MultiGameIndex = -1;
+            }
+            finally
+            {
+                MultiGameInstances[index] = null;
+            }
+        }
+        #endregion
     }
 }

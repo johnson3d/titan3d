@@ -158,7 +158,7 @@ namespace EngineNS.Plugins.LoginServer
 		{
 			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
 			rpcArg.ExeIndex = RpcExecuteIndex;
-			rpcArg.NetConnect = GetRpcConnect();
+			rpcArg.NetConnect = GetRpcConnect(100 + 0);
 			return await ULoginServer_RpcCaller.LoginAccount(user, psw, rpcArg);
 		}
 	}

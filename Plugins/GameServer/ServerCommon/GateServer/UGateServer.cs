@@ -282,7 +282,7 @@ namespace EngineNS.Plugins.GateServer
 		{
 			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
 			rpcArg.ExeIndex = RpcExecuteIndex;
-			rpcArg.NetConnect = GetRpcConnect();
+			rpcArg.NetConnect = GetRpcConnect(100 + 0);
 			return await UGateServer_RpcCaller.WaitSession(sessionId, user, rpcArg);
 		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegClient = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
@@ -310,7 +310,7 @@ namespace EngineNS.Plugins.GateServer
 		{
 			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
 			rpcArg.ExeIndex = RpcExecuteIndex;
-			rpcArg.NetConnect = GetRpcConnect();
+			rpcArg.NetConnect = GetRpcConnect(100 + 1);
 			return await UGateServer_RpcCaller.RegClient(sessionId, user, rpcArg);
 		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_ClientEnterLevel = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
@@ -340,7 +340,7 @@ namespace EngineNS.Plugins.GateServer
 		{
 			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
 			rpcArg.ExeIndex = RpcExecuteIndex;
-			rpcArg.NetConnect = GetRpcConnect();
+			rpcArg.NetConnect = GetRpcConnect(100 + 2);
 			return await UGateServer_RpcCaller.ClientEnterLevel(sessionId, user, indexInLevel, rpcArg);
 		}
 	}
