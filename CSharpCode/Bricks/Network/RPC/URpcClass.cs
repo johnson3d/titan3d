@@ -317,9 +317,29 @@ namespace EngineNS.Bricks.Network.RPC
             v.Host = new WeakReference<IRpcHost>(host);
             PropertyDatas.Add(new TtPropKey(host), v);
         }
-        public void UnregisterHost(IRpcHost host)
+        public IRpcHost FindHost(EExecuter executerType, ushort executeIndex)
         {
-            PropertyDatas.Remove(new TtPropKey(host));
+            if (PropertyDatas.TryGetValue(new TtPropKey(executerType, executeIndex), out var result))
+            {
+                if (result.Host.TryGetTarget(out var t))
+                {
+                    return t;
+                }
+                PropertyDatas.Remove(new TtPropKey(executerType, executeIndex));
+            }
+            return null;
+        }
+        public IRpcHost UnregisterHost(IRpcHost host)
+        {
+            if (PropertyDatas.TryGetValue(new TtPropKey(host), out var result))
+            {
+                if (result.Host.TryGetTarget(out var t))
+                {
+                    return t;
+                }
+                PropertyDatas.Remove(new TtPropKey(host));
+            }
+            return null;
         }
         public IRpcHost UnregisterHost(EExecuter executerType, ushort executeIndex)
         {
@@ -453,7 +473,19 @@ namespace EngineNS.Bricks.Network.RPC
         [TtRpcMethod(Index = 1)]
         public void CreateRpcHost(Rtti.TtTypeDesc type, ushort executeIndex, string info, TtCallContext context)
         {
-            var result = Rtti.TtTypeDescManager.CreateInstance(type) as IRpcHost;
+            var rpcClass = type.GetCustomAttribute(typeof(TtRpcClassAttribute), false) as TtRpcClassAttribute;
+            if (rpcClass!=null)
+                return;
+            
+            var result = FindHost(rpcClass.Executer, executeIndex);
+            if (result!=null)
+            {
+                if (result.GetType()==type.SystemType)
+                    return;
+                else
+                    UnregisterHost(rpcClass.Executer, executeIndex);
+            }
+            result = Rtti.TtTypeDescManager.CreateInstance(type) as IRpcHost;
             if (result==null)
                 return;
             result.RpcExecuteIndex = executeIndex;
