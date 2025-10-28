@@ -505,6 +505,65 @@ namespace EngineNS.Bricks.Network.RPC
                 OnRemoveRpcHost(host, info);
             }
         }
+        [TtRpcMethod(Index = 3)]
+        public EngineNS.IO.TtMemWriter QueryProperties(EExecuter executerType, ushort executeIndex, TtCallContext context)
+        {
+            var host = FindHost(executerType, executeIndex);
+            var result = IO.TtMemWriter.CreateInstance();
+            using (var ar = new IO.AuxWriter<IO.TtMemWriter>(result))
+            {
+                if (host==null)
+                {
+                    ar.Write((short)0);
+                    return result;
+                }
+                else
+                {
+                    var HostClass = host.GetRpcClass();
+                    ar.Write((short)HostClass.Properties.Length);
+                    var type = host.GetType();
+                    for (int i = 0; i < HostClass.Properties.Length; i++)
+                    {
+                        if (HostClass.Properties[i].Attribute == null)
+                            continue;
+                        var prop = type.GetProperty(HostClass.Properties[i].Name);
+                        if (prop == null)
+                            throw new TtException("");
+                        var val = prop.GetValue(host);
+                        ar.WriteWithType(type, val);
+                    }
+                    return result;
+                }
+            }
+        }
+        public async Thread.Async.TtTask InitProperties(EExecuter executerType, ushort executeIndex)
+        {
+            var host = FindHost(executerType, executeIndex);
+            if (host == null)
+                return;
+            using (var writer = await this.RPC_QueryProperties(executerType, executeIndex))
+            {
+                using(var ar = new IO.AuxReader<IO.TtMemReader>(IO.TtMemReader.CreateInstance(writer), this))
+                {
+                    short propCount = 0;
+                    ar.Read(out propCount);
+                    
+                    var type = host.GetType();
+                    var props = host.GetRpcClass().Properties;
+                    for (int i = 0; i < propCount; i++)
+                    {
+                        var propInfo = props[i];
+                        var prop = type.GetProperty(propInfo.Name);
+                        if (prop == null)
+                            throw new TtException("");
+                        object v = null;
+                        //read val
+                        v = ar.ReadWithType(prop.PropertyType);
+                        prop.SetValue(host, v);
+                    }
+                }
+            }
+        }
     }
 }
 #if TitanEngine_AutoGen_RPC
@@ -610,6 +669,44 @@ namespace EngineNS.Bricks.Network.RPC
 				NetConnect?.Send(in pkg);
 			}
 		}
+		public static async Thread.Async.TtTask<EngineNS.IO.TtMemWriter> QueryProperties(EExecuter executerType, ushort executeIndex, EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
+		{
+			var ExeIndex = rpcArg.ExeIndex;
+			var NetConnect = rpcArg.NetConnect;
+			if (ExeIndex == UInt16.MaxValue)
+			{
+				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
+			}
+			if (NetConnect == null)
+			{
+				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
+			}
+			var retContext = TtReturnAwaiter<EngineNS.IO.TtMemWriter>.CreateInstance(rpcArg.Timeout, rpcArg.ReturnContext);
+			if (NetConnect != null)
+			{
+				retContext.Context.Index = ExeIndex;
+			}
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
+			{
+				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
+				FRouter router = new FRouter();
+				router.RunTarget = ERunTarget.None;
+				router.Executer = EExecuter.PropertyData;
+				router.Index = ExeIndex;
+				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
+				var pkgHeader = new FPkgHeader();
+				pkg.Write(pkgHeader);
+				pkg.Write(router);
+				UInt16 methodIndex = 3;
+				pkg.Write(methodIndex);
+				pkg.Write(executerType);
+				pkg.Write(executeIndex);
+				pkg.Write(retContext.Context);
+				pkg.CoreWriter.SurePkgHeader();
+				NetConnect?.Send(in pkg);
+			}
+			return await TtRpcAwaiter.AwaitReturn_MemWriter(retContext);
+		}
 	}
 }
 
@@ -665,6 +762,35 @@ namespace EngineNS.Bricks.Network.RPC
 			rpcArg.ExeIndex = RpcExecuteIndex;
 			rpcArg.NetConnect = GetRpcConnect(2);
 			TtRpcPropertyDataManager_RpcCaller.RemoveRpcHost(executerType, executeIndex, info, rpcArg);
+		}
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_QueryProperties = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
+		{
+			EExecuter executerType;
+			reader.Read(out executerType);
+			ushort executeIndex;
+			reader.Read(out executeIndex);
+			FReturnContext retContext;
+			reader.Read(out retContext);
+			var ret = ((EngineNS.Bricks.Network.RPC.TtRpcPropertyDataManager)host).QueryProperties(executerType, executeIndex, context);
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
+			{
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
+				var pkgHeader = new FPkgHeader();
+				pkgHeader.SetHasReturn(true);
+				pkg.Write(pkgHeader);
+				pkg.Write(retContext);
+				pkg.Write(ret);
+				pkg.CoreWriter.SurePkgHeader();
+				context.NetConnect?.Send(in pkg);
+			}
+			ret.Dispose();
+		};
+		public async Thread.Async.TtTask<EngineNS.IO.TtMemWriter> RPC_QueryProperties(EExecuter executerType, ushort executeIndex, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect(3);
+			return await TtRpcPropertyDataManager_RpcCaller.QueryProperties(executerType, executeIndex, rpcArg);
 		}
 	}
 }

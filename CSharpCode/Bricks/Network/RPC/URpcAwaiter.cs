@@ -29,14 +29,14 @@ namespace EngineNS.Bricks.Network.RPC
             T rt = await TaskExtension.RPCWaitReturn_ISerializer<T>(waiter);
             return rt;
         }
-        public static async TtTask<T> AwaitReturn_ISerializer<T>(TtReturnAwaiter<T> waiter) where T : IO.ISerializer
-        {
-            T rt = await TaskExtension.RPCWaitReturn_ISerializer<T>(waiter);
-            return rt;
-        }
         public static async TtTask<string> AwaitReturn_String(TtReturnAwaiter<string> waiter)
         {
             var rt = await TaskExtension.RPCWaitReturn_String(waiter);
+            return rt;
+        }
+        public static async TtTask<IO.TtMemWriter> AwaitReturn_MemWriter(TtReturnAwaiter<IO.TtMemWriter> waiter)
+        {
+            var rt = await TaskExtension.RPCWaitReturn_MemWriter(waiter);
             return rt;
         }
     }
@@ -214,6 +214,59 @@ namespace EngineNS.Bricks.Network.RPC
             return ret;
         }
     }
+    public struct FRpcTaskAwaiter_MemWriter : INotifyCompletion
+    {
+        //Task task;
+        public TtReturnAwaiter<IO.TtMemWriter> Waiter;
+        public FRpcTaskAwaiter_MemWriter(TtReturnAwaiter<IO.TtMemWriter> waiter)
+        {
+            Waiter = waiter;
+            //this.task = task;
+        }
+        public FRpcTaskAwaiter_MemWriter GetAwaiter()
+        {
+            return this;
+        }
+        public void OnCompleted(Action continuation)
+        {
+            Waiter.ContinuationAction = continuation;
+            Waiter.RetCallBack = static (ref IO.AuxReader<EngineNS.IO.TtMemReader> pkg, bool isTimeOut, TtReturnAwaiterBase awaiter) =>
+            {
+                var typedAwaiter = (TtReturnAwaiter<string>)awaiter;
+                if (isTimeOut)
+                {
+                    ((TtReturnAwaiter<string>)awaiter).Result = "@RPC_TimeOut@";
+                    Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"{typedAwaiter.ContinuationAction.ToString()} timeout");
+                }
+                else
+                {
+                    pkg.Read(out ((TtReturnAwaiter<IO.TtMemWriter>)awaiter).Result);
+                }
+                try
+                {
+                    typedAwaiter.ContinuationAction();
+                }
+                catch (Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                }
+            };
+        }
+        public bool IsCompleted
+        {
+            get
+            {
+                //return task.IsCompleted;
+                return Waiter.IsCompleted;
+            }
+        }
+        public IO.TtMemWriter GetResult()
+        {
+            var ret = Waiter.Result;
+            Waiter.Dispose();
+            return ret;
+        }
+    }
     public static class TaskExtension
     {
         public static FRpcTaskAwaiter<T> RPCWaitReturn<T>(TtReturnAwaiter<T> waiter) where T : unmanaged
@@ -227,6 +280,10 @@ namespace EngineNS.Bricks.Network.RPC
         public static FRpcTaskAwaiter_String RPCWaitReturn_String(TtReturnAwaiter<string> waiter)
         {
             return new FRpcTaskAwaiter_String(waiter);
+        }
+        public static FRpcTaskAwaiter_MemWriter RPCWaitReturn_MemWriter(TtReturnAwaiter<IO.TtMemWriter> waiter)
+        {
+            return new FRpcTaskAwaiter_MemWriter(waiter);
         }
     }
 }

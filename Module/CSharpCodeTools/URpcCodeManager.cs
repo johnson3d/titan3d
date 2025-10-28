@@ -203,6 +203,11 @@ namespace CSharpCodeTools
                                                 rpcMethod.ReturnType = "string";
                                                 rpcMethod.RetType = URpcMethod.EDataType.String;
                                             }
+                                            else if (method.ReturnType.ToString() == "EngineNS.IO.TtMemWriter" || method.ReturnType.ToString() == "IO.TtMemWriter"|| method.ReturnType.ToString() == "TtMemWriter")
+                                            {
+                                                rpcMethod.ReturnType = "EngineNS.IO.TtMemWriter";
+                                                rpcMethod.RetType = URpcMethod.EDataType.MemWriter;
+                                            }
                                             else if (bReturnISerializer)
                                             {
                                                 rpcMethod.RetType = URpcMethod.EDataType.ISerializer;

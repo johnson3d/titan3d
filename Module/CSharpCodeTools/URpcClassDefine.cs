@@ -20,6 +20,7 @@ namespace CSharpCodeTools
             Unmanaged,
             String,
             ISerializer,
+            MemWriter,
         }
         public EDataType RetType;
         public EDataType ArgDataType;
@@ -151,6 +152,10 @@ namespace CSharpCodeTools
                     {
                         AddLine($"{j.Value}.Dispose();");
                     }
+                }
+                if (i.ReturnType == "EngineNS.IO.TtMemWriter" || i.ReturnType == "IO.TtMemWriter" || i.ReturnType == "TtMemWriter")
+                {
+                    AddLine($"ret.Dispose();");
                 }
             }
             PopBrackets(true);
@@ -304,6 +309,9 @@ namespace CSharpCodeTools
                                         break;
                                     case URpcMethod.EDataType.String:
                                         AddLine($"return await TtRpcAwaiter.AwaitReturn_String(retContext);");
+                                        break;
+                                    case URpcMethod.EDataType.MemWriter:
+                                        AddLine($"return await TtRpcAwaiter.AwaitReturn_MemWriter(retContext);");
                                         break;
                                 }
                             }
