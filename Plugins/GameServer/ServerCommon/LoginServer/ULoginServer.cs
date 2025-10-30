@@ -8,8 +8,8 @@ namespace EngineNS.Plugins.LoginServer
     [TtRpcClass(RunTarget = ERunTarget.Login, Executer = EExecuter.Root)]
     public partial class ULoginServer : ServerCommon.UServerBase
     {
-        protected Bricks.Network.UNetPackageManager RootConnectPackages = new Bricks.Network.UNetPackageManager();
-        public Bricks.Network.UTcpClient RootConnect { get; } = new Bricks.Network.UTcpClient();
+        protected Bricks.Network.TtNetPackageManager RootConnectPackages = new Bricks.Network.TtNetPackageManager();
+        public Bricks.Network.TtTcpClient RootConnect { get; } = new Bricks.Network.TtTcpClient();
         public ULoginServer()
         {
             CurrentTarget = ERunTarget.Login;

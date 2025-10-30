@@ -119,8 +119,8 @@ namespace EngineNS.Plugins.GateServer
         }
 		#region Connect
 		public UInt16 IndexInRoot { get; private set; } = UInt16.MaxValue;
-        protected Bricks.Network.UNetPackageManager RootConnectPackages = new Bricks.Network.UNetPackageManager();
-        public Bricks.Network.UTcpClient RootConnect { get; } = new Bricks.Network.UTcpClient();
+        protected Bricks.Network.TtNetPackageManager RootConnectPackages = new Bricks.Network.TtNetPackageManager();
+        public Bricks.Network.TtTcpClient RootConnect { get; } = new Bricks.Network.TtTcpClient();
         #endregion
 
         #region RPC

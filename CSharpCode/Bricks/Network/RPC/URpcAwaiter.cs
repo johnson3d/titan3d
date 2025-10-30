@@ -232,10 +232,10 @@ namespace EngineNS.Bricks.Network.RPC
             Waiter.ContinuationAction = continuation;
             Waiter.RetCallBack = static (ref IO.AuxReader<EngineNS.IO.TtMemReader> pkg, bool isTimeOut, TtReturnAwaiterBase awaiter) =>
             {
-                var typedAwaiter = (TtReturnAwaiter<string>)awaiter;
+                var typedAwaiter = (TtReturnAwaiter<IO.TtMemWriter>)awaiter;
                 if (isTimeOut)
                 {
-                    ((TtReturnAwaiter<string>)awaiter).Result = "@RPC_TimeOut@";
+                    ((TtReturnAwaiter<IO.TtMemWriter>)awaiter).Result = IO.TtMemWriter.CreateInstance();
                     Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"{typedAwaiter.ContinuationAction.ToString()} timeout");
                 }
                 else

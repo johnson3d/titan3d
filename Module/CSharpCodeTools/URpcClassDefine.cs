@@ -13,6 +13,7 @@ namespace CSharpCodeTools
         public List<KeyValuePair<string, string>> ArgTypes = new List<KeyValuePair<string, string>>();
         public string ReturnType;
         public string Flags;
+        public bool IsBroadCaster = false;
         public bool IsAsync;
         public enum EDataType
         {
@@ -157,8 +158,58 @@ namespace CSharpCodeTools
                 {
                     AddLine($"ret.Dispose();");
                 }
+                BuildBroadCaster(i);
             }
             PopBrackets(true);
+        }
+        private void BuildBroadCaster(URpcMethod i)
+        {
+            if (i.RetType != URpcMethod.EDataType.Void)
+                return;
+            if (i.IsBroadCaster)
+            {
+                AddLine($"if (context.NoBroadCast)");
+                PushBrackets();
+                {
+                    AddLine($"return;");
+                }
+                PopBrackets();
+                AddLine($"var broadCaster = (host as IRpcHost)?.GetRpcBroadCaster();");
+                AddLine($"if (broadCaster != null)");
+                PushBrackets();
+                {
+                    AddLine($"var t_iter = broadCaster.GetEnumerator(host as IRpcHost, typeof({this.FullName}));");
+                    AddLine($"if (t_iter!=null)");
+                    PushBrackets();
+                    {
+                        AddLine($"while (t_iter.MoveNext())");
+                        PushBrackets();
+                        {
+                            AddLine($"var t_sendTarget = t_iter.Current as {this.FullName};");
+                            AddLine($"if (t_sendTarget!=null)");
+                            PushBrackets();
+                            {
+                                string argCallStr = "";
+                                {
+                                    foreach (var j in i.ArgTypes)
+                                    {
+                                        if (argCallStr != "")
+                                            argCallStr += ", ";
+                                        argCallStr += j.Value;
+                                    }
+                                    if (argCallStr != "")
+                                        argCallStr += ", ";
+                                }
+                                AddLine($"t_sendTarget.RPC_{i.Name}({argCallStr}null);");
+                            }
+                            PopBrackets();
+                        }
+                        PopBrackets();
+                    }
+                    PopBrackets();
+                }
+                PopBrackets();
+            }
         }
         private void BuildCaller(URpcMethod i)
         {

@@ -4,6 +4,7 @@ using EngineNS.Rtti;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -286,7 +287,10 @@ namespace EngineNS.Profiler
     public partial class TtRpcProfiler : AuxRpcHost<TtRpcProfiler>
     {
         #region Interface
-        
+        public override Bricks.Network.INetConnect GetRpcConnect(UInt16 methodIndex)
+        {
+            return TtEngine.Instance.RpcModule.FaceConnect;
+        }
         #endregion
 
         #region RPC

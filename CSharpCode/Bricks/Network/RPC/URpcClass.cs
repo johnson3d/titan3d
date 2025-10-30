@@ -1,5 +1,6 @@
 using EngineNS.Support;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -38,11 +39,23 @@ namespace EngineNS.Bricks.Network.RPC
         Server,
         God = byte.MaxValue,
     }
+    public class TtRpcBroadCaster
+    {
+        public virtual IEnumerator GetEnumerator(IRpcHost sender, System.Type type)
+        {
+            FRouter router = new FRouter();
+            router.Executer = sender.GetRpcClass().Executer;
+            TtEngine.Instance.RpcModule.RpcManager.GetExecuter(in router);
+            return null;
+        }
+        public static TtRpcBroadCaster Instance { get; } = new TtRpcBroadCaster();
+    }
     public class TtRpcMethodAttribute : Attribute
     {
         public UInt16 Index;
         public EPkgTypes PkgFlags;
         public EAuthority Authority = EAuthority.Client;
+        public bool IsBroadCaster = false;
     }
     public class TtRpcPropertyAttribute : Attribute
     {
@@ -57,6 +70,7 @@ namespace EngineNS.Bricks.Network.RPC
             public string Name;
             public FCallMethod Method;
             public TtRpcMethodAttribute Attribute;
+            public bool IsBroadCaster;
         }
         public FRpcMethodInfo[] Methods = new FRpcMethodInfo[UInt16.MaxValue];
 
@@ -103,6 +117,7 @@ namespace EngineNS.Bricks.Network.RPC
                 Methods[mtd.Index].Name = i.Name;
                 Methods[mtd.Index].Method = fun;
                 Methods[mtd.Index].Attribute = mtd;
+                Methods[mtd.Index].IsBroadCaster = mtd.IsBroadCaster;
             }
 
             var props = type.GetProperties();
@@ -194,6 +209,7 @@ namespace EngineNS.Bricks.Network.RPC
         ushort RpcExecuteIndex { get; set; }
         bool IgnoreUpdateProperties(ushort RpcExecuteIndex);//exclude some special case
         INetConnect GetRpcConnect(UInt16 methodIndex);
+        TtRpcBroadCaster GetRpcBroadCaster();
         void OnRpcPropertyChanged(string propName, object v, object old);
     }
     public class AuxRpcHost<T> : IRpcHost
@@ -214,6 +230,10 @@ namespace EngineNS.Bricks.Network.RPC
         }
         public virtual void OnRpcPropertyChanged(string propName, object v, object old)
         {
+        }
+        public virtual TtRpcBroadCaster GetRpcBroadCaster()
+        {
+            return TtRpcBroadCaster.Instance;
         }
     }
     public class TtRpcPropertyData
@@ -262,7 +282,10 @@ namespace EngineNS.Bricks.Network.RPC
     public partial class TtRpcPropertyDataManager : AuxRpcHost<TtRpcPropertyDataManager>
     {
         #region Interface
-        
+        public override INetConnect GetRpcConnect(UInt16 methodIndex)
+        {
+            return TtEngine.Instance.RpcModule.DefaultNetConnect;
+        }
         #endregion
 
         [TtRpcProperty]
@@ -408,6 +431,7 @@ namespace EngineNS.Bricks.Network.RPC
                     RPC_SyncAllProperties(writer);
                 }
             }
+            //InitProperties(EExecuter.PropertyData, 0).AddWaitTask();
         }
         private void UpdateProperties(IO.IReader reader)
         {
@@ -470,7 +494,7 @@ namespace EngineNS.Bricks.Network.RPC
         // Callback when response RPC_CreateRpcHost
         public delegate void FOnCreateRpcHost(IRpcHost host, string info);
         public FOnCreateRpcHost OnCreateRpcHost;
-        [TtRpcMethod(Index = 1)]
+        [TtRpcMethod(Index = 1, IsBroadCaster = true)]
         public void CreateRpcHost(Rtti.TtTypeDesc type, ushort executeIndex, string info, TtCallContext context)
         {
             var rpcClass = type.GetCustomAttribute(typeof(TtRpcClassAttribute), false) as TtRpcClassAttribute;
@@ -493,6 +517,7 @@ namespace EngineNS.Bricks.Network.RPC
             {
                 OnCreateRpcHost(result, info);
             }
+            context.NoBroadCast = false;
         }
         public delegate void FOnRemoveRpcHost(IRpcHost host, string info);
         public FOnRemoveRpcHost OnRemoveRpcHost;
@@ -530,7 +555,7 @@ namespace EngineNS.Bricks.Network.RPC
                         if (prop == null)
                             throw new TtException("");
                         var val = prop.GetValue(host);
-                        ar.WriteWithType(type, val);
+                        ar.WriteWithType(prop.PropertyType, val);
                     }
                     return result;
                 }
@@ -543,25 +568,28 @@ namespace EngineNS.Bricks.Network.RPC
                 return;
             using (var writer = await this.RPC_QueryProperties(executerType, executeIndex))
             {
-                using(var ar = new IO.AuxReader<IO.TtMemReader>(IO.TtMemReader.CreateInstance(writer), this))
+                using (var reader = IO.TtMemReader.CreateInstance(in writer))
                 {
-                    short propCount = 0;
-                    ar.Read(out propCount);
-                    
-                    var type = host.GetType();
-                    var props = host.GetRpcClass().Properties;
-                    for (int i = 0; i < propCount; i++)
+                    using (var ar = new IO.AuxReader<IO.TtMemReader>(reader, this))
                     {
-                        var propInfo = props[i];
-                        var prop = type.GetProperty(propInfo.Name);
-                        if (prop == null)
-                            throw new TtException("");
-                        object v = null;
-                        //read val
-                        v = ar.ReadWithType(prop.PropertyType);
-                        prop.SetValue(host, v);
+                        short propCount = 0;
+                        ar.Read(out propCount);
+
+                        var type = host.GetType();
+                        var props = host.GetRpcClass().Properties;
+                        for (int i = 0; i < propCount; i++)
+                        {
+                            var propInfo = props[i];
+                            var prop = type.GetProperty(propInfo.Name);
+                            if (prop == null)
+                                throw new TtException("");
+                            object v = null;
+                            //read val
+                            v = ar.ReadWithType(prop.PropertyType);
+                            prop.SetValue(host, v);
+                        }
                     }
-                }
+                }   
             }
         }
     }
@@ -738,6 +766,26 @@ namespace EngineNS.Bricks.Network.RPC
 			string info;
 			reader.Read(out info);
 			((EngineNS.Bricks.Network.RPC.TtRpcPropertyDataManager)host).CreateRpcHost(type, executeIndex, info, context);
+			if (context.NoBroadCast)
+			{
+				return;
+			}
+			var broadCaster = (host as IRpcHost)?.GetRpcBroadCaster();
+			if (broadCaster != null)
+			{
+				var t_iter = broadCaster.GetEnumerator(host as IRpcHost, typeof(EngineNS.Bricks.Network.RPC.TtRpcPropertyDataManager));
+				if (t_iter!=null)
+				{
+					while (t_iter.MoveNext())
+					{
+						var t_sendTarget = t_iter.Current as EngineNS.Bricks.Network.RPC.TtRpcPropertyDataManager;
+						if (t_sendTarget!=null)
+						{
+							t_sendTarget.RPC_CreateRpcHost(type, executeIndex, info, null);
+						}
+					}
+				}
+			}
 		};
 		public void RPC_CreateRpcHost(Rtti.TtTypeDesc type, ushort executeIndex, string info, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
 		{

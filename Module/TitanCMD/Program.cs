@@ -1,4 +1,5 @@
 ﻿using EngineNS;
+using EngineNS.EGui.UIProxy;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -56,6 +57,10 @@ namespace ProjectCooker
             ShowWindow(handle, 1);
 
             Console.WriteLine("Hello Titan");
+            foreach(var arg in args)
+            {
+                Console.WriteLine(arg);
+            }
             var extCmd = TtCookCommand.FindArgument(args, "ExtraCmd=");
             if (extCmd != null)
             {

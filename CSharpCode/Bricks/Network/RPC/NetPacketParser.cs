@@ -6,7 +6,7 @@ namespace EngineNS.Bricks.Network.RPC
 {
     public class PacketBuilder : IDisposable
     {
-        public UNetPackageManager NetPackageManager;
+        public TtNetPackageManager NetPackageManager;
         MemStreamWriter Writer;
         uint PacketSize = 0;
         public PacketBuilder()

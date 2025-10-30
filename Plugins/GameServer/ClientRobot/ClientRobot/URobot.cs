@@ -44,8 +44,8 @@ namespace RobotClient
         public UInt16 IndexInGate { get; set; } = UInt16.MaxValue;
         public UInt16 IndexInLevel { get; set; } = UInt16.MaxValue;
         public uint SyncIdInLevel { get; set; } = uint.MaxValue;
-        protected EngineNS.Bricks.Network.UNetPackageManager RootConnectPackages = new EngineNS.Bricks.Network.UNetPackageManager();
-        public EngineNS.Bricks.Network.UTcpClient RootConnect { get; } = new EngineNS.Bricks.Network.UTcpClient();
+        protected EngineNS.Bricks.Network.TtNetPackageManager RootConnectPackages = new EngineNS.Bricks.Network.TtNetPackageManager();
+        public EngineNS.Bricks.Network.TtTcpClient RootConnect { get; } = new EngineNS.Bricks.Network.TtTcpClient();
         #endregion
         public bool Initialized = false;
         public virtual async System.Threading.Tasks.Task<bool> Initialize()

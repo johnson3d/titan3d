@@ -141,6 +141,8 @@ namespace EngineNS.IO
                     else
                     {
                         mConfigs[type] = Rtti.TtTypeDescManager.CreateInstance(type) as IConfig;
+                        var text = IO.TtFileManager.SaveObjectToJson(mConfigs[type]);
+                        IO.TtFileManager.WriteAllText(file, text);
                     }
                 }
             });
@@ -153,6 +155,20 @@ namespace EngineNS.IO
                 return cfg as T;
             }
             return null;
+        }
+        public void SaveConfig<T>() where T : class, IConfig
+        {
+            var type = Rtti.TtTypeDescGetter<T>.TypeDesc;
+            if (mConfigs.TryGetValue(type, out IConfig cfg))
+            {
+                string dir = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Game, IO.TtFileManager.ESystemDir.Config);
+                var attr = type.GetCustomAttribute<TtConfigAttribute>(false);
+                if (attr==null)
+                    return;
+                var file = TtFileManager.CombinePath(dir, attr.Path);
+                var text = IO.TtFileManager.SaveObjectToJson(cfg);
+                IO.TtFileManager.WriteAllText(file, text);
+            }
         }
     }
 }

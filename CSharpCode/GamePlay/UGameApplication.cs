@@ -24,7 +24,7 @@ namespace EngineNS.GamePlay
         {
             await base.InitializeApplication(rc, rpName);
             TtEngine.Instance.PlayMode = EPlayMode.Game;
-            await TtEngine.Instance.StartPlayInEditor(this, rpName);
+            await TtEngine.Instance.PIEModule.StartPlayInEditor(this, rpName, false);
             
             TtEngine.Instance.TickableManager.AddTickable(this);
             return true;

@@ -28,9 +28,9 @@ namespace EngineNS.GamePlay
         {
             mPresentWindow?.UnregEventProcessor(this);
             if (MultiGameIndex==-1)
-                TtEngine.Instance.EndPlayInEditor();
+                TtEngine.Instance.PIEModule.EndPlayInEditor();
             else
-                TtEngine.Instance.EndMultiPlayInEditor(MultiGameIndex);
+                TtEngine.Instance.PIEModule.EndMultiPlayInEditor(MultiGameIndex);
         }
         public override async System.Threading.Tasks.Task<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
         {

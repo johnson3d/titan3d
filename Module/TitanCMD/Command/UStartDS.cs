@@ -12,7 +12,9 @@ namespace ProjectCooker.Command
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             var port = FindArgument(args, DS_Port);
+            Console.WriteLine($"Starting Dedicated Server on port {port}...");
             EngineNS.TtEngine.Instance.DedicatedServer.StartServer("0.0.0.0", System.Convert.ToUInt16(port));
+            Console.WriteLine($"Dedicated Server start success.");
         }
     }
 }

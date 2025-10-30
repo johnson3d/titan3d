@@ -28,11 +28,13 @@ namespace EngineNS.Bricks.Network.RPC
             return $"Target = {RunTarget}, Executer = {Executer}, Index = {Index}, Authority = {Authority}";
         }
     }
-    public struct TtCallContext
+    public class TtCallContext : IPooledObject
     {
+        public bool IsAlloc { get; set; }
         public INetConnect NetConnect;
         public ERunTarget Caller;
         public ERunTarget Callee;
+		public bool NoBroadCast;
     }
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)]
     public struct FReturnContext
@@ -166,6 +168,10 @@ namespace EngineNS.Bricks.Network.RPC
     {
         public ERunTarget CurrentTarget { get; set; } = ERunTarget.Client;
         #region Interface
+        public override INetConnect GetRpcConnect(UInt16 methodIndex)
+        {
+            return TtEngine.Instance.RpcModule.DefaultNetConnect;
+        }
         #endregion
         public Func<FRouter, IRpcHost> GetExecuterFunc = null;
         public virtual IRpcHost GetExecuter(in FRouter router)
@@ -201,23 +207,23 @@ namespace EngineNS.Bricks.Network.RPC
 		}
         public Profiler.TtRpcProfiler RpcProfiler { get; } = new Profiler.TtRpcProfiler();
 		public TtRpcPropertyDataManager RpcPropertyDataManager { get; } = new TtRpcPropertyDataManager();
-        [TtRpcMethod(Index = 0)]
-        public int TestBaseRpc1(float arg, TtCallContext context)
-        {
-            //AutoGenProp0 = 1;
-            //AutoGenProp0 = 2;
-            return (int)arg + 2;
-        }
     }
 
 	public class TtRpcModule : TtModule<TtEngine>
 	{
-		public INetConnect DefaultNetConnect = new UFakeNetConnect();
+        public override void Cleanup(TtEngine host)
+        {
+            CoreSDK.DisposeObject(ref NetPackageManager);
+            base.Cleanup(host);
+        }
+		public TtFakeNetConnect FaceConnect { get; set; } = new TtFakeNetConnect();
+        public TtTcpClient TcpClient { get; set; } = new TtTcpClient();
+        public INetConnect DefaultNetConnect { get; set; }
         public UInt16 DefaultExeIndex = UInt16.MaxValue;
         //public UNetConnetProvider ConnectProvider { get; set; } = null;
         public TtRpcManager RpcManager;
 		public Dictionary<UInt32, TtReturnAwaiterBase> ReturnAwaiters = new Dictionary<uint, TtReturnAwaiterBase>();
-		public UNetPackageManager NetPackageManager = new UNetPackageManager();
+		public TtNetPackageManager NetPackageManager = new TtNetPackageManager();
 		public void PushReturnAwaiter(TtReturnAwaiterBase awaiter)
 		{
 			lock (ReturnAwaiters)
@@ -246,7 +252,8 @@ namespace EngineNS.Bricks.Network.RPC
 		public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
 		{
 			await Thread.TtAsyncDummyClass.DummyFunc();
-			var type = Rtti.TtTypeDesc.TypeOf(host.Config.RpcRootType);
+			DefaultNetConnect = FaceConnect;
+            var type = Rtti.TtTypeDesc.TypeOf(host.Config.RpcRootType);
 			RpcManager = Rtti.TtTypeDescManager.CreateInstance(type) as TtRpcManager;
 			if (RpcManager == null)
 			{
@@ -439,7 +446,7 @@ namespace EngineNS.UnitTest
                 var ret6 = await this.RPC_TestRpc6(new TestRPCArgument() { AA = 8 }, retContext);
                 var ret7 = await this.RPC_TestRpc7(new TestUnmanagedStruct() { A = 8 }, retContext);
 
-                var base_ret7 = await this.RPC_TestBaseRpc1(5.0f, retContext);
+                //var base_ret7 = await this.RPC_TestBaseRpc1(5.0f, retContext);
 
 				//tcpClient?.Disconnect();
             };
@@ -450,86 +457,6 @@ namespace EngineNS.UnitTest
 
 #if TitanEngine_AutoGen_RPC
 #region TitanEngine_AutoGen_RPC
-#pragma warning disable 105
-
-
-namespace EngineNS.Bricks.Network.RPC
-{
-	public partial class TtRpcManager_RpcCaller
-	{
-		public static async Thread.Async.TtTask<int> TestBaseRpc1(float arg, EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
-		{
-			var ExeIndex = rpcArg.ExeIndex;
-			var NetConnect = rpcArg.NetConnect;
-			if (ExeIndex == UInt16.MaxValue)
-			{
-				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
-			}
-			if (NetConnect == null)
-			{
-				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
-			}
-			var retContext = TtReturnAwaiter<int>.CreateInstance(rpcArg.Timeout, rpcArg.ReturnContext);
-			if (NetConnect != null)
-			{
-				retContext.Context.Index = ExeIndex;
-			}
-			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
-			{
-				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				FRouter router = new FRouter();
-				router.RunTarget = ERunTarget.None;
-				router.Executer = EExecuter.Root;
-				router.Index = ExeIndex;
-				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
-				var pkgHeader = new FPkgHeader();
-				pkg.Write(pkgHeader);
-				pkg.Write(router);
-				UInt16 methodIndex = 0;
-				pkg.Write(methodIndex);
-				pkg.Write(arg);
-				pkg.Write(retContext.Context);
-				pkg.CoreWriter.SurePkgHeader();
-				NetConnect?.Send(in pkg);
-			}
-			return await TtRpcAwaiter.AwaitReturn<int>(retContext);
-		}
-	}
-}
-
-
-namespace EngineNS.Bricks.Network.RPC
-{
-	partial class TtRpcManager
-	{
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestBaseRpc1 = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
-		{
-			float arg;
-			reader.Read(out arg);
-			FReturnContext retContext;
-			reader.Read(out retContext);
-			var ret = ((EngineNS.Bricks.Network.RPC.TtRpcManager)host).TestBaseRpc1(arg, context);
-			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
-			{
-				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
-				pkgHeader.SetHasReturn(true);
-				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
-				pkg.Write(ret);
-				pkg.CoreWriter.SurePkgHeader();
-				context.NetConnect?.Send(in pkg);
-			}
-		};
-		public async Thread.Async.TtTask<int> RPC_TestBaseRpc1(float arg, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
-		{
-			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
-			rpcArg.ExeIndex = RpcExecuteIndex;
-			rpcArg.NetConnect = GetRpcConnect(0);
-			return await TtRpcManager_RpcCaller.TestBaseRpc1(arg, rpcArg);
-		}
-	}
-}
 #pragma warning disable 105
 
 

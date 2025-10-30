@@ -4,14 +4,14 @@ using System.Text;
 
 namespace EngineNS.Bricks.Network
 {
-    public class UTcpClient : AuxPtrType<EngineNS.TcpClient>, INetConnect
+    public class TtTcpClient : AuxPtrType<EngineNS.TcpClient>, INetConnect
     {
-        public UTcpClient()
+        public TtTcpClient()
         {
             mCoreObject = EngineNS.TcpClient.CreateInstance();
             mRcvBuffer = Support.TtNativeArray<byte>.CreateInstance();
         }
-        ~UTcpClient()
+        ~TtTcpClient()
         {
             mRcvBuffer.Dispose();
         }
@@ -47,7 +47,7 @@ namespace EngineNS.Bricks.Network
         }
         private System.Threading.Thread mRcvThread;
         public Support.TtNativeArray<byte> mRcvBuffer;
-        public async System.Threading.Tasks.Task<bool> Connect(string ip, UInt16 port, UNetPackageManager pkgManager = null, UInt16 connId = UInt16.MinValue, int timeOut = 2000)
+        public async System.Threading.Tasks.Task<bool> Connect(string ip, UInt16 port, TtNetPackageManager pkgManager = null, UInt16 connId = UInt16.MinValue, int timeOut = 2000)
         {
             if (pkgManager != null)
                 mPkgBuilder.NetPackageManager = pkgManager;
@@ -57,7 +57,7 @@ namespace EngineNS.Bricks.Network
             var ok = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 return mCoreObject.Connect(ip, port, timeOut);
-            }, Thread.Async.EAsyncTarget.TPools);
+            }, Thread.Async.EAsyncTarget.AsyncIO);
 
             Connected = ok != 0;
 

@@ -33,7 +33,7 @@ namespace EngineNS.Bricks.TcpServer
             }
             base.Dispose();
         }
-        public Bricks.Network.UNetPackageManager NetPackageManager = new Network.UNetPackageManager();
+        public Bricks.Network.TtNetPackageManager NetPackageManager = new Network.TtNetPackageManager();
         Bricks.Network.RPC.PacketBuilder mPkgBuilder = new Bricks.Network.RPC.PacketBuilder();
         protected unsafe virtual void OnRcvData(byte* ptr, int size)
         {

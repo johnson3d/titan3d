@@ -608,6 +608,8 @@ namespace EngineNS.Rtti
         }
         public static object CreateInstance(System.Type t, object[] args = null)
         {
+            if (t==null)
+                return null;
             if (t == typeof(string))
                 return "";
 

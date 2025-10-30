@@ -49,7 +49,7 @@ namespace EngineNS.Bricks.Network
         void Send(void* ptr, uint size);
         void Send(in IO.AuxWriter<IO.TtMemWriter> pkg);
     }
-    public class UFakeNetConnect : INetConnect
+    public class TtFakeNetConnect : INetConnect
     {
         public RPC.EAuthority Authority { get; set; } = EAuthority.Client;
         public bool Connected 

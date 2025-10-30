@@ -4,10 +4,32 @@ using EngineNS.Bricks.Network.RPC;
 
 namespace EngineNS.Bricks.Network
 {
-    public class UNetPackageManager
+    public class TtNetPackageManager : IDisposable
     {
+        ~TtNetPackageManager()
+        {
+            Dispose();
+        }
+        public void Dispose()
+        {
+            foreach (var i in PushList)
+            {
+                i.Dispose();
+            }
+            PushList.Clear();
+            foreach (var i in RcvPacakages)
+            {
+                i.Dispose();
+            }
+            RcvPacakages.Clear();
+        }
         public List<IO.TtMemWriter> RcvPacakages = new List<IO.TtMemWriter>();
         public List<IO.TtMemWriter> PushList = new List<IO.TtMemWriter>();
+        class TtCallContextPool : TtObjectPool<TtCallContext>
+        {
+
+        }
+        TtCallContextPool CallContextPool = new TtCallContextPool();
         public unsafe void PushPackage(void* ptr, uint size, INetConnect connect)
         {
             using (var reader = IO.TtMemReader.CreateInstance((byte*)ptr, size))
@@ -111,10 +133,12 @@ namespace EngineNS.Bricks.Network
                             var conn = i.Tag as INetConnect;
                             if (fun.Method != null && fun.Attribute.Authority <= conn.Authority && fun.Attribute.Authority <= router1.Authority)
                             {
-                                TtCallContext context = new TtCallContext();
+                                TtCallContext context = CallContextPool.QueryObjectSync();
                                 context.NetConnect = conn;
                                 context.Callee = TtEngine.Instance.RpcModule.RpcManager.CurrentTarget;
+                                context.NoBroadCast = false;
                                 fun.Method(pkg, exe, context);
+                                CallContextPool.ReleaseObject(context);
                             }
                             else
                             {

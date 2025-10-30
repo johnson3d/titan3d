@@ -177,6 +177,11 @@ namespace CSharpCodeTools
                                                         var value = m.Expression.NormalizeWhitespace().ToFullString();
                                                         rpcMethod.Flags = value;
                                                     }
+                                                    else if (name == "IsBroadCaster")
+                                                    {
+                                                        var value = m.Expression.NormalizeWhitespace().ToFullString();
+                                                        rpcMethod.IsBroadCaster = value=="true" ? true : false;
+                                                    }
                                                 }
                                             }
 

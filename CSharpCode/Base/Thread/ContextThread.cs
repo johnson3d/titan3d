@@ -55,6 +55,23 @@ namespace EngineNS.Thread
             
         }
         public static TtContextThread WaitingThread = null;
+        private static int WaitingCount = 0;
+        private static void EnterWaitingThread(TtContextThread thread)
+        {
+            if (WaitingThread!=null)
+            {
+                System.Diagnostics.Debug.Assert(WaitingThread.ThreadId == thread.ThreadId);
+            }
+            WaitingThread = thread;
+            WaitingCount++;
+        }
+        private static void LeaveWaitingThread(TtContextThread thread)
+        {
+            System.Diagnostics.Debug.Assert(WaitingThread.ThreadId == thread.ThreadId);
+            WaitingCount--;
+            if (WaitingCount == 0)
+                WaitingThread = null;
+        }
         protected bool mIsRun = false;
         private bool mIsFinished = false;
         public int Interval
@@ -114,7 +131,8 @@ namespace EngineNS.Thread
         }
         public void FlushAllThreadEvents()
         {
-            WaitingThread = this;
+            EnterWaitingThread(this);
+
             var IsMainThread = TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadMain.ThreadId;
             var IsLogicThread = TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadLogic.ThreadId;
             while (true)
@@ -132,7 +150,7 @@ namespace EngineNS.Thread
                 TtEngine.Instance.TaskCollector.Tick();
                 if (TtContextThread.GetTotalEventNumber() == 0)
                 {
-                    WaitingThread = null;
+                    LeaveWaitingThread(this);
                     return;
                 }
             }
@@ -152,8 +170,7 @@ namespace EngineNS.Thread
         }
         public void FlushToSemephore(TtSemaphore smp)
         {
-            System.Diagnostics.Debug.Assert(WaitingThread == null);
-            WaitingThread = this;
+            EnterWaitingThread(this);
             //System.Diagnostics.Debug.Assert(TtContextThread.CurrentContext.ThreadId != TtEngine.Instance.ThreadMain.ThreadId);
             var IsMainThread = TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadMain.ThreadId;
             var IsLogicThread = TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadLogic.ThreadId;
@@ -178,15 +195,14 @@ namespace EngineNS.Thread
                     {
                         Profiler.Log.WriteLine<Profiler.TtThreadGategory>(Profiler.ELogTag.Warning, $"FlushToSemephore Time = {(t2 - t1) / 1000} ms");
                     }
-                    WaitingThread = null;
+                    LeaveWaitingThread(this);
                     return;
                 }
             }
         }
         public void WaitTask(Thread.Async.ITask task)
         {
-            System.Diagnostics.Debug.Assert(WaitingThread == null || WaitingThread.ThreadId == TtContextThread.CurrentContext.ThreadId);
-            WaitingThread = this;
+            EnterWaitingThread(this);
             var IsMainThread = TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadMain.ThreadId;
             var IsLogicThread = TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadLogic.ThreadId;
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
@@ -210,7 +226,7 @@ namespace EngineNS.Thread
                     {
                         Profiler.Log.WriteLine<Profiler.TtThreadGategory>(Profiler.ELogTag.Warning, $"WaitTask Time = {(t2 - t1) / 1000} ms");
                     }
-                    WaitingThread = null;
+                    LeaveWaitingThread(this);
                     return;
                 }
             }
