@@ -209,7 +209,7 @@ namespace EngineNS.Bricks.Network.RPC
         ushort RpcExecuteIndex { get; set; }
         bool IgnoreUpdateProperties(ushort RpcExecuteIndex);//exclude some special case
         INetConnect GetRpcConnect(UInt16 methodIndex);
-        TtRpcBroadCaster GetRpcBroadCaster();
+        TtRpcBroadCaster GetRpcBroadCaster(UInt16 methodIndex);
         void OnRpcPropertyChanged(string propName, object v, object old);
     }
     public class AuxRpcHost<T> : IRpcHost
@@ -231,7 +231,7 @@ namespace EngineNS.Bricks.Network.RPC
         public virtual void OnRpcPropertyChanged(string propName, object v, object old)
         {
         }
-        public virtual TtRpcBroadCaster GetRpcBroadCaster()
+        public virtual TtRpcBroadCaster GetRpcBroadCaster(UInt16 methodIndex)
         {
             return TtRpcBroadCaster.Instance;
         }
@@ -770,7 +770,7 @@ namespace EngineNS.Bricks.Network.RPC
 			{
 				return;
 			}
-			var broadCaster = (host as IRpcHost)?.GetRpcBroadCaster();
+			var broadCaster = (host as IRpcHost)?.GetRpcBroadCaster(1);
 			if (broadCaster != null)
 			{
 				var t_iter = broadCaster.GetEnumerator(host as IRpcHost, typeof(EngineNS.Bricks.Network.RPC.TtRpcPropertyDataManager));

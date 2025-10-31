@@ -174,7 +174,7 @@ namespace CSharpCodeTools
                     AddLine($"return;");
                 }
                 PopBrackets();
-                AddLine($"var broadCaster = (host as IRpcHost)?.GetRpcBroadCaster();");
+                AddLine($"var broadCaster = (host as IRpcHost)?.GetRpcBroadCaster({i.Index});");
                 AddLine($"if (broadCaster != null)");
                 PushBrackets();
                 {
