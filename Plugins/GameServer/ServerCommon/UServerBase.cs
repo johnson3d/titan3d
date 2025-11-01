@@ -33,7 +33,7 @@ namespace EngineNS.Plugins.ServerCommon
         {
             TcpServer?.Tick();
         }
-        public virtual Bricks.Network.INetConnect GetRunTargetConnect(Bricks.Network.RPC.ERunTarget target, UInt16 index, Bricks.Network.INetConnect connect)
+        public virtual Bricks.Network.INetConnect GetRunTargetConnect(Bricks.Network.RPC.ERunTarget target, uint index, Bricks.Network.INetConnect connect)
         {
             return null;
         }

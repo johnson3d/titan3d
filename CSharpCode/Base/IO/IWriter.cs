@@ -11,6 +11,10 @@ namespace EngineNS.IO
         void Seek(ulong pos);
         unsafe void WritePtr(void* p, int length);
         unsafe void* Ptr { get; }
+        public static unsafe void Write<T>(ICoreWriter writer, T v) where T : unmanaged
+        {
+            writer.WritePtr(&v, sizeof(T));
+        }
     }
     public partial struct TtMemWriter : IO.ICoreWriter, IDisposable
     {
@@ -79,6 +83,11 @@ namespace EngineNS.IO
             Writer.Dispose();
         }
     }
+    public interface IArchive
+    {
+        void Write(ICoreWriter writer);
+        void Read(ICoreReader writer);
+    }
     public interface IWriter : ICoreWriter
     {
         void Write(ISerializer v);
@@ -89,7 +98,8 @@ namespace EngineNS.IO
         void Write(Support.TtBitset v);
         void Write(Rtti.TtTypeDesc v); 
         void Write<T>(T v) where T : unmanaged;
-        void Write<T>(T v, bool dummy = true) where T : struct;
+        void Write<T>(T v, int dummy = 0) where T : struct;
+        void Write<T>(T v, bool dummy = false) where T : IArchive;
 
         void WriteWithType(Type type, object value);
     }
@@ -130,21 +140,21 @@ namespace EngineNS.IO
         {
             CoreWriter.WritePtr(p, length);
         }
-        public void Write<T>(T v) where T : unmanaged
+        public unsafe void Write<T>(T v) where T : unmanaged
         {
-            unsafe
-            {
-                WritePtr(&v, sizeof(T));
-            }
+            System.Diagnostics.Debug.Assert(typeof(T) is IArchive == false);
+
+            WritePtr(&v, sizeof(T));
         }
         public unsafe void Write<T>(in T v) where T : unmanaged
         {
+            System.Diagnostics.Debug.Assert(typeof(T) is IArchive == false);
             fixed(T* p = &v)
             {
                 WritePtr(p, sizeof(T));
             }
         }
-        public void Write<T>(T v, bool dummy = true) where T : struct
+        public void Write<T>(T v, int dummy = 0) where T : struct
         {
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDescGetter<T>.TypeDesc.TypeString);
             if (meta != null)
@@ -155,6 +165,10 @@ namespace EngineNS.IO
             {
                 Write(Hash64.Empty);
             }
+        }
+        public void Write<T>(T v, bool dummy = false) where T : IArchive
+        {
+            v.Write(this);
         }
         public void Write(string v)
         {

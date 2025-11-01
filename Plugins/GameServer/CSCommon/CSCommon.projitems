@@ -11,6 +11,5 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)FSyncUniqueId.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)USyncActorManager.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UClientAutoSyncData.cs" />
   </ItemGroup>
 </Project>

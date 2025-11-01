@@ -49,10 +49,6 @@ namespace EngineNS.Plugins.LevelServer
                 {//placement changed
                     mGhostPlacementChangedActors.Add(clt);
 
-                    if (clt.AutoSyncData.IsDirty)
-                    {
-                        mGhostAutoSyncDataChangedActors.Add(clt);
-                    }
                 }
                 i.Value.Tick();
             }
@@ -82,7 +78,6 @@ namespace EngineNS.Plugins.LevelServer
                     {
                         ar.Write(mGhostAutoSyncDataChangedActors[i].SyncId);
                         var clt = mGhostAutoSyncDataChangedActors[i] as ULevelClient;
-                        EngineNS.Bricks.Network.AutoSync.FSyncHelper.BuildModify(clt.AutoSyncData, ar);
                     }
                     var rpcArg = new Bricks.Network.RPC.FRpcCallArg();
                     rpcArg.NetConnect = ULevelServer.Instance.ClientAllConnects;

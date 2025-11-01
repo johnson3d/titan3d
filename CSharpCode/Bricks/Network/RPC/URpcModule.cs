@@ -1,11 +1,12 @@
+using EngineNS.Bricks.Network.RPC;
+using EngineNS.Rtti;
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using EngineNS.Bricks.Network.RPC;
-using EngineNS.Rtti;
 
 namespace EngineNS.Bricks.Network.RPC
 {
@@ -17,12 +18,27 @@ namespace EngineNS.Bricks.Network.RPC
     }
     
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)]
-    public struct FRouter
+    public struct FRouter : IO.IArchive
     {
         public ERunTarget RunTarget;
+        public EAuthority Authority;
         public EExecuter Executer;
-        public UInt16 Index;
-		public EAuthority Authority;
+        public UInt32 Index;
+		
+        public void Write(IO.ICoreWriter writer)
+		{
+			IO.ICoreWriter.Write(writer, RunTarget);
+            IO.ICoreWriter.Write(writer, Authority);
+            IO.ICoreWriter.Write(writer, Executer);
+            IO.ICoreWriter.Write(writer, Index);
+        }
+        public void Read(IO.ICoreReader reader)
+		{
+            IO.ICoreReader.Read(reader, ref RunTarget);
+            IO.ICoreReader.Read(reader, ref Authority);
+            IO.ICoreReader.Read(reader, ref Executer);
+            IO.ICoreReader.Read(reader, ref Index);
+        }
         public override string ToString()
         {
             return $"Target = {RunTarget}, Executer = {Executer}, Index = {Index}, Authority = {Authority}";
@@ -37,13 +53,25 @@ namespace EngineNS.Bricks.Network.RPC
 		public bool NoBroadCast;
     }
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)]
-    public struct FReturnContext
+    public struct FReturnContext : IO.IArchive
     {
         public UInt32 Handle;
+        public uint Index;
         public ERunTarget RunTarget;
-        public byte Unused;
-        public UInt16 Index;
-	}
+        
+        public void Write(IO.ICoreWriter writer)
+        {
+            IO.ICoreWriter.Write(writer, RunTarget);
+            IO.ICoreWriter.Write(writer, Index);
+            IO.ICoreWriter.Write(writer, Handle);
+        }
+        public void Read(IO.ICoreReader reader)
+        {
+            IO.ICoreReader.Read(reader, ref RunTarget);
+            IO.ICoreReader.Read(reader, ref Index);
+            IO.ICoreReader.Read(reader, ref Handle);
+        }
+    }
 	public abstract class TtReturnAwaiterBase : IPooledObject, IDisposable
 	{
         public bool IsAlloc { get; set; } = false;
@@ -86,26 +114,26 @@ namespace EngineNS.Bricks.Network.RPC
         public FRpcCallArg(INetConnect Connect)
 		{
             Timeout = uint.MaxValue;
-            ExeIndex = UInt16.MaxValue;
+            ExeIndex = uint.MaxValue;
             NetConnect = Connect;
             ReturnContext = null;
         }
         public FRpcCallArg(TtReturnContext retContext)
         {
 			Timeout = uint.MaxValue;
-            ExeIndex = UInt16.MaxValue;
+            ExeIndex = uint.MaxValue;
             NetConnect = null;
             ReturnContext = retContext;
         }
         public void SetDefault()
 		{
             Timeout = uint.MaxValue;
-			ExeIndex = UInt16.MaxValue;
+			ExeIndex = uint.MaxValue;
 			NetConnect = null;
             ReturnContext = null;
         }
 		public uint Timeout;
-		public UInt16 ExeIndex;
+		public uint ExeIndex;
 		public INetConnect NetConnect;
 		public TtReturnContext ReturnContext;
     }
@@ -216,7 +244,7 @@ namespace EngineNS.Bricks.Network.RPC
             CoreSDK.DisposeObject(ref NetPackageManager);
             base.Cleanup(host);
         }
-		public TtFakeNetConnect FaceConnect { get; set; } = new TtFakeNetConnect();
+		public TtFakeNetConnect FakeConnect { get; set; } = new TtFakeNetConnect();
         public TtTcpClient TcpClient { get; set; } = new TtTcpClient();
         public INetConnect DefaultNetConnect { get; set; }
         public UInt16 DefaultExeIndex = UInt16.MaxValue;
@@ -252,7 +280,7 @@ namespace EngineNS.Bricks.Network.RPC
 		public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
 		{
 			await Thread.TtAsyncDummyClass.DummyFunc();
-			DefaultNetConnect = FaceConnect;
+			DefaultNetConnect = FakeConnect;
             var type = Rtti.TtTypeDesc.TypeOf(host.Config.RpcRootType);
 			RpcManager = Rtti.TtTypeDescManager.CreateInstance(type) as TtRpcManager;
 			if (RpcManager == null)
@@ -306,11 +334,20 @@ namespace EngineNS.UnitTest
     [TtRpcClassAttribute(RunTarget = ERunTarget.None, Executer = EExecuter.Root, CallerInClass = true)]
     public partial class UTest_Rpc : Bricks.Network.RPC.TtRpcManager
     {
-		INetConnect Connect;
+        #region Interface
+        INetConnect Connect;
         public override INetConnect GetRpcConnect(UInt16 methodIndex)
         {
             return Connect;
         }
+        static TtRpcClass smRpcClass = null;
+        public override TtRpcClass GetRpcClass()
+        {
+			if(smRpcClass==null)
+                smRpcClass = new TtRpcClass(typeof(UTest_Rpc));
+            return smRpcClass;
+        }
+        #endregion
         int mAutoSyncProp1;
 
         public int AutoSyncProp1
@@ -393,7 +430,9 @@ namespace EngineNS.UnitTest
             }
             public override void OnReadMember(IO.IReader ar, IO.ISerializer obj, Rtti.TtMetaVersion metaVersion)
             {
-                AA = ar.Read<int>();
+                int t = 0;
+                ar.Read<int>(out t);
+				AA = t;
             }
         }
         [TtRpcMethod(Index = 100 + 5)]
@@ -417,7 +456,7 @@ namespace EngineNS.UnitTest
         {
             Action action = async () =>
             {
-                Connect = TtEngine.Instance.RpcModule.DefaultNetConnect;
+                Connect = TtEngine.Instance.RpcModule.FakeConnect;
                 //UTcpClient tcpClient = new UTcpClient();
                 //var ok = await tcpClient.Connect("127.0.0.1", 5555);
                 //if (ok)
@@ -433,6 +472,7 @@ namespace EngineNS.UnitTest
 				}
                 if (ret != 4)
                 {
+					System.Diagnostics.Debug.Assert(false);
                     return;
                 }
                 this.RPC_TestRpc2("");
@@ -492,11 +532,11 @@ namespace EngineNS.UnitTest
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.PKGFlags = (byte)EPkgTypes.WeakPkg;
 				pkg.Write(pkgHeader);
-				pkg.Write(router);
+				pkg.Write(router, false);
 				UInt16 methodIndex = 100 + 0;
 				pkg.Write(methodIndex);
 				pkg.Write(arg);
-				pkg.Write(retContext.Context);
+				pkg.Write(retContext.Context, false);
 				pkg.CoreWriter.SurePkgHeader();
 				NetConnect?.Send(in pkg);
 			}
@@ -524,7 +564,7 @@ namespace EngineNS.UnitTest
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
 				var pkgHeader = new FPkgHeader();
 				pkg.Write(pkgHeader);
-				pkg.Write(router);
+				pkg.Write(router, false);
 				UInt16 methodIndex = 100 + 1;
 				pkg.Write(methodIndex);
 				pkg.Write(arg);
@@ -559,11 +599,11 @@ namespace EngineNS.UnitTest
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
 				var pkgHeader = new FPkgHeader();
 				pkg.Write(pkgHeader);
-				pkg.Write(router);
+				pkg.Write(router, false);
 				UInt16 methodIndex = 100 + 2;
 				pkg.Write(methodIndex);
 				pkg.Write(arg);
-				pkg.Write(retContext.Context);
+				pkg.Write(retContext.Context, false);
 				pkg.CoreWriter.SurePkgHeader();
 				NetConnect?.Send(in pkg);
 			}
@@ -596,11 +636,11 @@ namespace EngineNS.UnitTest
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
 				var pkgHeader = new FPkgHeader();
 				pkg.Write(pkgHeader);
-				pkg.Write(router);
+				pkg.Write(router, false);
 				UInt16 methodIndex = 100 + 3;
 				pkg.Write(methodIndex);
 				pkg.Write(arg);
-				pkg.Write(retContext.Context);
+				pkg.Write(retContext.Context, false);
 				pkg.CoreWriter.SurePkgHeader();
 				NetConnect?.Send(in pkg);
 			}
@@ -633,11 +673,11 @@ namespace EngineNS.UnitTest
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
 				var pkgHeader = new FPkgHeader();
 				pkg.Write(pkgHeader);
-				pkg.Write(router);
+				pkg.Write(router, false);
 				UInt16 methodIndex = 100 + 4;
 				pkg.Write(methodIndex);
 				pkg.Write(arg);
-				pkg.Write(retContext.Context);
+				pkg.Write(retContext.Context, false);
 				pkg.CoreWriter.SurePkgHeader();
 				NetConnect?.Send(in pkg);
 			}
@@ -670,11 +710,11 @@ namespace EngineNS.UnitTest
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
 				var pkgHeader = new FPkgHeader();
 				pkg.Write(pkgHeader);
-				pkg.Write(router);
+				pkg.Write(router, false);
 				UInt16 methodIndex = 100 + 5;
 				pkg.Write(methodIndex);
 				pkg.Write(arg);
-				pkg.Write(retContext.Context);
+				pkg.Write(retContext.Context, false);
 				pkg.CoreWriter.SurePkgHeader();
 				NetConnect?.Send(in pkg);
 			}
@@ -707,11 +747,11 @@ namespace EngineNS.UnitTest
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
 				var pkgHeader = new FPkgHeader();
 				pkg.Write(pkgHeader);
-				pkg.Write(router);
+				pkg.Write(router, false);
 				UInt16 methodIndex = 100 + 6;
 				pkg.Write(methodIndex);
 				pkg.Write(arg);
-				pkg.Write(retContext.Context);
+				pkg.Write(retContext.Context, false);
 				pkg.CoreWriter.SurePkgHeader();
 				NetConnect?.Send(in pkg);
 			}
@@ -730,7 +770,7 @@ namespace EngineNS.UnitTest
 			float arg;
 			reader.Read(out arg);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = ((EngineNS.UnitTest.UTest_Rpc)host).TestRpc1(arg, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -738,7 +778,7 @@ namespace EngineNS.UnitTest
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);
@@ -769,7 +809,7 @@ namespace EngineNS.UnitTest
 			int arg;
 			reader.Read(out arg);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = ((EngineNS.UnitTest.UTest_Rpc)host).TestRpc3(arg, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -777,7 +817,7 @@ namespace EngineNS.UnitTest
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);
@@ -795,7 +835,7 @@ namespace EngineNS.UnitTest
 			string arg;
 			reader.Read(out arg);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = ((EngineNS.UnitTest.UTest_Rpc)host).TestRpc4(arg, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -803,7 +843,7 @@ namespace EngineNS.UnitTest
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);
@@ -821,7 +861,7 @@ namespace EngineNS.UnitTest
 			Vector3 arg;
 			reader.Read(out arg);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = await ((EngineNS.UnitTest.UTest_Rpc)host).TestRpc5(arg, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -829,7 +869,7 @@ namespace EngineNS.UnitTest
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);
@@ -847,7 +887,7 @@ namespace EngineNS.UnitTest
 			EngineNS.UnitTest.UTest_Rpc.TestRPCArgument arg;
 			reader.Read(out arg);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = ((EngineNS.UnitTest.UTest_Rpc)host).TestRpc6(arg, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -855,7 +895,7 @@ namespace EngineNS.UnitTest
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);
@@ -873,7 +913,7 @@ namespace EngineNS.UnitTest
 			EngineNS.UnitTest.UTest_Rpc.TestUnmanagedStruct arg;
 			reader.Read(out arg);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = ((EngineNS.UnitTest.UTest_Rpc)host).TestRpc7(arg, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -881,7 +921,7 @@ namespace EngineNS.UnitTest
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);

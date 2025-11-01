@@ -23,7 +23,7 @@ namespace EngineNS.Plugins.LevelServer
                 smRpcClass = new TtRpcClass(this.GetType());
             return smRpcClass;
         }
-        public virtual ushort RpcExecuteIndex { get; set; } = 0;
+        public virtual uint RpcExecuteIndex { get; set; } = 0;
         public virtual Bricks.Network.INetConnect GetRpcConnect(UInt16 methodIndex)
         {
             return ClientConnect;
@@ -32,9 +32,13 @@ namespace EngineNS.Plugins.LevelServer
         {
 
         }
-        public bool IgnoreUpdateProperties(ushort RpcExecuteIndex)
+        public bool IgnoreUpdateProperties(uint RpcExecuteIndex)
         {
             return false;
+        }
+        public virtual TtRpcBroadCaster GetRpcBroadCaster(UInt16 methodIndex)
+        {
+            return TtRpcBroadCaster.Instance;
         }
         #endregion
 
@@ -44,7 +48,6 @@ namespace EngineNS.Plugins.LevelServer
 
         public Bricks.Network.INetConnect ClientConnect { get; set; }
 		public UInt16 IndexInGame { get; set; } = UInt16.MaxValue;//IndexInGate
-		public CSCommon.UClientAutoSyncData AutoSyncData { get; } = new CSCommon.UClientAutoSyncData();
         public TtPlacementBase Placement { get; } = new TtPlacement();
 
         public override void Tick()
@@ -61,11 +64,7 @@ namespace EngineNS.Plugins.LevelServer
         [TtRpcMethod(Index = 100 + 1)]
         public void UpdateAutoSyncData(IO.TtMemWriter data, TtCallContext context)
         {
-            using (var reader = IO.TtMemReader.CreateInstance(in data))
-            {
-                var ar = new IO.AuxReader<IO.TtMemReader>(reader, null);
-                Bricks.Network.AutoSync.FSyncHelper.SyncValues(AutoSyncData, ar);
-            }
+            
         }
         #endregion
     }
@@ -174,7 +173,7 @@ namespace EngineNS.Plugins.LevelServer
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GetHP = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.LevelServer.ULevelClient)host).GetHP(context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -182,7 +181,7 @@ namespace EngineNS.Plugins.LevelServer
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);

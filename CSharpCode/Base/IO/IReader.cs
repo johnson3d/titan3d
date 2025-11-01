@@ -20,6 +20,13 @@ namespace EngineNS.IO
         ulong GetPosition();
         void Seek(ulong pos);
         unsafe void ReadPtr(void* p, int length);
+        public static unsafe void Read<T>(ICoreReader reader, ref T v) where T : unmanaged
+        {
+            fixed (T* p = &v)
+            {
+                reader.ReadPtr(p, sizeof(T));
+            }
+        }
     }
     public struct TtMemReader : IO.ICoreReader, IDisposable
     {
@@ -108,7 +115,8 @@ namespace EngineNS.IO
         void Read(ref Support.TtBitset v);
         void Read(out TtMemWriter v);
         void Read<T>(out T v) where T : unmanaged;
-        T Read<T>() where T : unmanaged;
+        void Read<T>(out T v, bool dummy = false) where T : IArchive;
+        void Read<T>(out T v, int dummy = 0) where T : class, IO.ISerializer;
 
         public object ReadWithType(Type type);
     }
@@ -338,17 +346,21 @@ namespace EngineNS.IO
                 }
             }
         }
-        public void Read<T>(out T v) where T : unmanaged
+        public unsafe void Read<T>(out T v) where T : unmanaged
         {
-            unsafe
+            System.Diagnostics.Debug.Assert(typeof(T) is IArchive == false);
+
+            fixed (T* p = &v)
             {
-                fixed (T* p = &v)
-                {
-                    ReadPtr(p, sizeof(T));
-                }
+                ReadPtr(p, sizeof(T));
             }
         }
-        public void Read<T>(out T v, bool noused = false) where T : class, IO.ISerializer
+        public void Read<T>(out T v, bool dummy = false) where T : IArchive
+        {
+            v = default(T);
+            v.Read(this);
+        }
+        public void Read<T>(out T v, int dummy = 0) where T : class, IO.ISerializer
         {
             ReadObject<T>(out v);
         }
@@ -358,15 +370,7 @@ namespace EngineNS.IO
             Read(out tmp);
             v = tmp as T;
         }
-        public T Read<T>() where T : unmanaged
-        {
-            unsafe
-            {
-                T v;
-                ReadPtr(&v, sizeof(T));
-                return v;
-            }
-        }
+
         public void Read(out ISerializer v, object hostObject = null)
         {
             bool isNull;

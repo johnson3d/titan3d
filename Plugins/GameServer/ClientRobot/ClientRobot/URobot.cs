@@ -117,31 +117,14 @@ namespace RobotClient
             if (hp != 5)
                 return false;
 
-            AutoSyncData.A = 8;
-
             Initialized = true;
             return true;
         }
         public void Tick()
         {
-            UpdateAutoSyncData2Server();
+            
         }
         public EngineNS.Plugins.CSCommon.USyncActorManager<UGhostActor> GhostActorManager { get; } = new EngineNS.Plugins.CSCommon.USyncActorManager<UGhostActor>();
-        public EngineNS.Plugins.CSCommon.UClientAutoSyncData AutoSyncData { get; } = new EngineNS.Plugins.CSCommon.UClientAutoSyncData();
-
-        private void UpdateAutoSyncData2Server()
-        {//call by tick per second
-            if (AutoSyncData.IsDirty == false)
-                return;
-            using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
-            {
-                var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-                EngineNS.Bricks.Network.AutoSync.FSyncHelper.BuildModify(AutoSyncData, ar);
-
-                var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg();
-                EngineNS.Plugins.LevelServer.ULevelClient_RpcCaller.UpdateAutoSyncData(writer, in rpcArg);
-            }
-        }
 
         #region RPC
         [TtRpcMethod(Index = 100 + 0)]
@@ -171,11 +154,11 @@ namespace RobotClient
 
                     if (syncId != SyncIdInLevel)
                     {
-                        EngineNS.Bricks.Network.AutoSync.FSyncHelper.SyncValues(actor.AutoSyncData, ar, true);
+                        
                     }
                     else
                     {
-                        EngineNS.Bricks.Network.AutoSync.FSyncHelper.SyncValues(AutoSyncData, ar, false);
+                        
                     }
                 }
             }

@@ -289,7 +289,7 @@ namespace EngineNS.Profiler
         #region Interface
         public override Bricks.Network.INetConnect GetRpcConnect(UInt16 methodIndex)
         {
-            return TtEngine.Instance.RpcModule.FaceConnect;
+            return TtEngine.Instance.RpcModule.FakeConnect;
         }
         #endregion
 
@@ -573,11 +573,11 @@ namespace EngineNS.Profiler
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
 				var pkgHeader = new FPkgHeader();
 				pkg.Write(pkgHeader);
-				pkg.Write(router);
+				pkg.Write(router, false);
 				UInt16 methodIndex = 0;
 				pkg.Write(methodIndex);
 				pkg.Write(arg);
-				pkg.Write(retContext.Context);
+				pkg.Write(retContext.Context, false);
 				pkg.CoreWriter.SurePkgHeader();
 				NetConnect?.Send(in pkg);
 			}
@@ -610,11 +610,11 @@ namespace EngineNS.Profiler
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
 				var pkgHeader = new FPkgHeader();
 				pkg.Write(pkgHeader);
-				pkg.Write(router);
+				pkg.Write(router, false);
 				UInt16 methodIndex = 1;
 				pkg.Write(methodIndex);
 				pkg.Write(name);
-				pkg.Write(retContext.Context);
+				pkg.Write(retContext.Context, false);
 				pkg.CoreWriter.SurePkgHeader();
 				NetConnect?.Send(in pkg);
 			}
@@ -642,7 +642,7 @@ namespace EngineNS.Profiler
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
 				var pkgHeader = new FPkgHeader();
 				pkg.Write(pkgHeader);
-				pkg.Write(router);
+				pkg.Write(router, false);
 				UInt16 methodIndex = 2;
 				pkg.Write(methodIndex);
 				pkg.Write(arg);
@@ -663,7 +663,7 @@ namespace EngineNS.Profiler
 			sbyte arg;
 			reader.Read(out arg);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Profiler.TtRpcProfiler)host).GetProfilerThreads(arg, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -671,7 +671,7 @@ namespace EngineNS.Profiler
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);
@@ -689,7 +689,7 @@ namespace EngineNS.Profiler
 			string name;
 			reader.Read(out name);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Profiler.TtRpcProfiler)host).GetProfilerData(name, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -697,7 +697,7 @@ namespace EngineNS.Profiler
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);

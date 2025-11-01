@@ -20,7 +20,7 @@ namespace EngineNS.Plugins.RootServer
             }
             return null;
         }
-        public override Bricks.Network.INetConnect GetRunTargetConnect(ERunTarget target, UInt16 index, Bricks.Network.INetConnect connect)
+        public override Bricks.Network.INetConnect GetRunTargetConnect(ERunTarget target, uint index, Bricks.Network.INetConnect connect)
         {
             switch (target)
             {
@@ -365,7 +365,7 @@ namespace EngineNS.Plugins.RootServer
 			UInt16 port;
 			reader.Read(out port);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.RootServer.URootServer)host).RegLogin(psw, serverId, ip, port, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -373,7 +373,7 @@ namespace EngineNS.Plugins.RootServer
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);
@@ -397,7 +397,7 @@ namespace EngineNS.Plugins.RootServer
 			UInt16 port;
 			reader.Read(out port);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.RootServer.URootServer)host).RegGate(psw, serverId, ip, port, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -405,7 +405,7 @@ namespace EngineNS.Plugins.RootServer
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);
@@ -429,7 +429,7 @@ namespace EngineNS.Plugins.RootServer
 			UInt16 port;
 			reader.Read(out port);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.RootServer.URootServer)host).RegLevel(psw, serverId, ip, port, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -437,7 +437,7 @@ namespace EngineNS.Plugins.RootServer
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);
@@ -457,7 +457,7 @@ namespace EngineNS.Plugins.RootServer
 			Guid sessionId;
 			reader.Read(out sessionId);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = await ((EngineNS.Plugins.RootServer.URootServer)host).SelectGateway(user, sessionId, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -465,7 +465,7 @@ namespace EngineNS.Plugins.RootServer
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);
@@ -487,7 +487,7 @@ namespace EngineNS.Plugins.RootServer
 			long value;
 			reader.Read(out value);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.RootServer.URootServer)host).UpdatePayload(target, index, value, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -495,7 +495,7 @@ namespace EngineNS.Plugins.RootServer
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);
@@ -517,7 +517,7 @@ namespace EngineNS.Plugins.RootServer
 			string user;
 			reader.Read(out user);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.RootServer.URootServer)host).RegClient(gateId, sessionId, user, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -525,7 +525,7 @@ namespace EngineNS.Plugins.RootServer
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);

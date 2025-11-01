@@ -13,6 +13,5 @@ namespace EngineNS.Plugins.ClientCommon
         {
 
         }
-        public CSCommon.UClientAutoSyncData AutoSyncData { get; } = new CSCommon.UClientAutoSyncData();
     }
 }

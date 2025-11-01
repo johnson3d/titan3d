@@ -23,7 +23,7 @@ namespace EngineNS.Plugins.LoginServer
             }
             return null;
         }
-        public override Bricks.Network.INetConnect GetRunTargetConnect(ERunTarget target, UInt16 index, Bricks.Network.INetConnect connect)
+        public override Bricks.Network.INetConnect GetRunTargetConnect(ERunTarget target, uint index, Bricks.Network.INetConnect connect)
         {
             switch (target)
             {
@@ -140,7 +140,7 @@ namespace EngineNS.Plugins.LoginServer
 			string psw;
 			reader.Read(out psw);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = await ((EngineNS.Plugins.LoginServer.ULoginServer)host).LoginAccount(user, psw, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -148,7 +148,7 @@ namespace EngineNS.Plugins.LoginServer
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);

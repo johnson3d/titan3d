@@ -40,7 +40,7 @@ namespace EngineNS.Bricks.Network
                 if (pkgHeader.IsHasReturn())
                 {
                     FReturnContext retContext;
-                    pkg.Read(out retContext);
+                    pkg.Read(out retContext, false);
                     if (retContext.RunTarget != TtEngine.Instance.RpcModule.RpcManager.CurrentTarget)
                     {
                         var conn = TtEngine.Instance.RpcModule.RpcManager.GetRunTargetConnect(in retContext, connect);
@@ -58,7 +58,7 @@ namespace EngineNS.Bricks.Network
                 else
                 {
                     FRouter router1 = new FRouter();
-                    pkg.Read(out router1);
+                    pkg.Read(out router1, false);
                     if (router1.RunTarget != ERunTarget.None && router1.RunTarget != TtEngine.Instance.RpcModule.RpcManager.CurrentTarget)
                     {
                         var pRouterAddr = (FRouter*)((byte*)ptr + sizeof(RPC.FPkgHeader));
@@ -111,13 +111,13 @@ namespace EngineNS.Bricks.Network
                     if (pkgHeader.IsHasReturn())
                     {
                         FReturnContext retContext;
-                        pkg.Read(out retContext);
+                        pkg.Read(out retContext, false);
                         TtEngine.Instance.RpcModule.RemoteReturn(retContext.Handle, ref pkg);
                     }
                     else
                     {
                         FRouter router1 = new FRouter();
-                        pkg.Read(out router1);
+                        pkg.Read(out router1, false);
                         if (router1.RunTarget != ERunTarget.None && router1.RunTarget != TtEngine.Instance.RpcModule.RpcManager.CurrentTarget)
                         {
                             Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"{router1.RunTarget} != ERunTarget.None");

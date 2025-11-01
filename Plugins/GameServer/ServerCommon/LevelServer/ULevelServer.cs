@@ -32,7 +32,7 @@ namespace EngineNS.Plugins.LevelServer
             }
             return null;
         }
-        public override Bricks.Network.INetConnect GetRunTargetConnect(ERunTarget target, UInt16 index, Bricks.Network.INetConnect connect)
+        public override Bricks.Network.INetConnect GetRunTargetConnect(ERunTarget target, uint index, Bricks.Network.INetConnect connect)
         {
             switch (target)
             {
@@ -113,7 +113,6 @@ namespace EngineNS.Plugins.LevelServer
             client.UserName = user;
             client.ClientConnect = context.NetConnect;
             client.IndexInGame = indexInGate;
-            client.AutoSyncData.IsGhostSyncObject = true;
             return client.ClientIndex;
         }
         [TtRpcMethod(Index = 100 + 1, Authority = EAuthority.Server)]
@@ -263,7 +262,7 @@ namespace EngineNS.Plugins.LevelServer
 			UInt16 indexInGate;
 			reader.Read(out indexInGate);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).RegClient(sessionId, user, indexInGate, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -271,7 +270,7 @@ namespace EngineNS.Plugins.LevelServer
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);
@@ -291,7 +290,7 @@ namespace EngineNS.Plugins.LevelServer
 			RName name;
 			reader.Read(out name);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).RegLevel(id, name, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -299,7 +298,7 @@ namespace EngineNS.Plugins.LevelServer
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);
@@ -319,7 +318,7 @@ namespace EngineNS.Plugins.LevelServer
 			Guid levelId;
 			reader.Read(out levelId);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).TryClientEnterLevel(clientIndex, levelId, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -327,7 +326,7 @@ namespace EngineNS.Plugins.LevelServer
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);
@@ -347,7 +346,7 @@ namespace EngineNS.Plugins.LevelServer
 			Guid levelId;
 			reader.Read(out levelId);
 			FReturnContext retContext;
-			reader.Read(out retContext);
+			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).TryClientLeaveLevel(clientIndex, levelId, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
@@ -355,7 +354,7 @@ namespace EngineNS.Plugins.LevelServer
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
-				pkg.Write(retContext);
+				pkg.Write(retContext, false);
 				pkg.Write(ret);
 				pkg.CoreWriter.SurePkgHeader();
 				context.NetConnect?.Send(in pkg);

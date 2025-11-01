@@ -53,14 +53,12 @@ namespace CSharpCodeTools
             var segs = cfg.Split(DefNewLine);
 
             bool workRpc = true;
-            bool workAutoSync = true;
             bool workCs2Cpp = true;
             bool workMacross = true;
             var modes = GetArguments(args, "mode=");
             if (modes != null)
             {
                 workRpc = false;
-                workAutoSync = false;
                 workCs2Cpp = false;
                 workMacross = false;
                 foreach(var i in modes)
@@ -69,9 +67,6 @@ namespace CSharpCodeTools
                     {
                         case "Rpc":
                             workRpc = true;
-                            break;
-                        case "AutoSync":
-                            workAutoSync = true;
                             break;
                         case "Cs2Cpp":
                             workCs2Cpp = true;
@@ -134,22 +129,6 @@ namespace CSharpCodeTools
             if (text==null)
             {
                 return;
-            }
-            if (workAutoSync)
-            {
-                Console.WriteLine("CSharp build event: AutoSync");
-                string property_target = dir + "/" + text;
-
-                PropertyGen.UPropertyCodeManager.Instance.GatherCodeFiles(includes, excludes);
-                PropertyGen.UPropertyCodeManager.Instance.GatherAutoSyncClass(property_target);
-
-                //PropertyGen.UPropertyCodeManager.Instance.GatherCodeFiles(includes, excludes);
-                //Console.WriteLine("Property:GatherClass");
-                //PropertyGen.UPropertyCodeManager.Instance.GatherClass();
-                //Console.WriteLine("Property:WriteCode");
-                //PropertyGen.UPropertyCodeManager.Instance.WriteCode(property_target);
-                //PropertyGen.UPropertyCodeManager.Instance.MakeSharedProjectCSharp(property_target + "/", "EngineProperty.projitems");
-                //Console.WriteLine("Property:Finished");
             }
 
             if (workCs2Cpp)

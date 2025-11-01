@@ -117,7 +117,7 @@ namespace CSharpCodeTools
                 if (i.ReturnType != null)
                 {
                     AddLine($"FReturnContext retContext;");
-                    AddLine($"reader.Read(out retContext);");
+                    AddLine($"reader.Read(out retContext, false);");
 
                     if (i.IsAsync)
                     {
@@ -135,7 +135,7 @@ namespace CSharpCodeTools
                         AddLine($"var pkgHeader = new FPkgHeader();");
                         AddLine($"pkgHeader.SetHasReturn(true);");
                         AddLine($"pkg.Write(pkgHeader);");
-                        AddLine($"pkg.Write(retContext);");
+                        AddLine($"pkg.Write(retContext, false);");
                         AddLine($"pkg.Write(ret);");
                         AddLine($"pkg.CoreWriter.SurePkgHeader();");
                         AddLine($"context.NetConnect?.Send(in pkg);");
@@ -331,7 +331,7 @@ namespace CSharpCodeTools
                                     AddLine($"pkgHeader.PKGFlags = (byte){i.Flags};");
                                 }
                                 AddLine($"pkg.Write(pkgHeader);");
-                                AddLine($"pkg.Write(router);");
+                                AddLine($"pkg.Write(router, false);");
                                 AddLine($"UInt16 methodIndex = {i.Index};");
                                 AddLine($"pkg.Write(methodIndex);");
                                 foreach (var j in i.ArgTypes)
@@ -341,7 +341,7 @@ namespace CSharpCodeTools
 
                                 if (i.RetType != URpcMethod.EDataType.Void)
                                 {
-                                    AddLine($"pkg.Write(retContext.Context);");
+                                    AddLine($"pkg.Write(retContext.Context, false);");
                                 }
 
                                 AddLine($"pkg.CoreWriter.SurePkgHeader();");
