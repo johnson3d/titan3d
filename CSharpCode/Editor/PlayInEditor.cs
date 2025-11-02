@@ -28,6 +28,11 @@ namespace EngineNS.Editor
             if (engine.GameInstance == null)
                 return;
             engine.GameInstance.Tick(engine.ElapseTickCountMS);
+            foreach(var i in MultiGameInstances)
+            {
+                if (i != null)
+                    i.Tick(engine.ElapseTickCountMS);
+            }
         }
         public override void Cleanup(TtEngine engine)
         {

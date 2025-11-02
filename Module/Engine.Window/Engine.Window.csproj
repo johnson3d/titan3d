@@ -182,6 +182,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.13.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.13.0" />
     <PackageReference Include="Mono.Cecil" Version="0.11.6" />
+    <PackageReference Include="NLua" Version="1.7.6" />
     <PackageReference Include="NPOI" Version="2.7.2" />
     <PackageReference Include="ppy.SDL3-CS" Version="2025.703.0" />
     <PackageReference Include="RIPEMD160" Version="1.0.1" />
