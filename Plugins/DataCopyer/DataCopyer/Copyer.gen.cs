@@ -126880,12 +126880,18 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtAvgBrightnessNode;
 			ar.Write(srcObj.Enable);
+			ar.Write(srcObj.LuminancePower);
+			ar.Write(srcObj.MaxValidLuminance);
+			ar.Write(srcObj.MinValidLuminance);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
 			var tarObj = tar as EngineNS.Graphics.Pipeline.Common.TtAvgBrightnessNode;
 			var srcObj = src as EngineNS.Graphics.Pipeline.Common.TtAvgBrightnessNode;
 			tarObj.Enable = srcObj.Enable;
+			tarObj.LuminancePower = srcObj.LuminancePower;
+			tarObj.MaxValidLuminance = srcObj.MaxValidLuminance;
+			tarObj.MinValidLuminance = srcObj.MinValidLuminance;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1031439478003122711 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -126897,6 +126903,46 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_13296439962218970436 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtAvgBrightnessNode;
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+			System.Single t_LuminancePower;
+			ar.Read(out t_LuminancePower);
+			srcObj.LuminancePower = t_LuminancePower;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "LuminancePower", false);
+				}
+			}
+			System.Single t_MaxValidLuminance;
+			ar.Read(out t_MaxValidLuminance);
+			srcObj.MaxValidLuminance = t_MaxValidLuminance;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxValidLuminance", false);
+				}
+			}
+			System.Single t_MinValidLuminance;
+			ar.Read(out t_MinValidLuminance);
+			srcObj.MinValidLuminance = t_MinValidLuminance;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinValidLuminance", false);
 				}
 			}
 		};
@@ -157713,6 +157759,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Graphics_Pipeline_Common_TtAvgBrightnessNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Common_TtAvgBrightnessNode.CopyCurrentVersion;
 				kls.RegVersion(1031439478003122711, EngineNS_Graphics_Pipeline_Common_TtAvgBrightnessNode.Read_1031439478003122711);
+				kls.RegVersion(13296439962218970436, EngineNS_Graphics_Pipeline_Common_TtAvgBrightnessNode.Read_13296439962218970436);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.TtBasePassNode@EngineCore");
@@ -158711,7 +158758,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = Survivor_TtWeaponProxyNode.CopyCurrentVersion;
 				kls.RegVersion(10759720178659608122, Survivor_TtWeaponProxyNode.Read_10759720178659608122);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("83_9A_C2_72_CF_B6_FB_53_ED_4F_C9_A9_43_19_25_30_D5_E9_BF_C4");
+			this.VersionHash = EngineNS.Hash160.Parse("0D_CA_1D_43_1A_95_00_9D_31_A2_6D_78_91_C4_DA_C0_6A_64_93_6B");
 		}
 	}
 }

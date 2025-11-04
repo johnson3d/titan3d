@@ -8,7 +8,7 @@ Texture2D<float4> TargetBuffer;
 #define GroupSize DispatchX * DispatchY
 #define GroupDivider 255 * GroupSize
 groupshared float CachedGroupColors[GroupSize];
-groupshared uint NumOfValidPixel = 0;
+groupshared uint NumOfInValidPixel = 0;
 
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_SetupAvgBrightness(uint3 id : SV_DispatchThreadID,
@@ -38,6 +38,13 @@ void CS_SetupAvgBrightness(uint3 id : SV_DispatchThreadID,
 	GpuSceneDesc[0].AverageColorDivider = 0;
 }
 
+cbuffer ParameterBuffer
+{
+    float MinValidLuminance = 0.01; // 最小有效亮度，避免纯黑区域影响
+    float MaxValidLuminance = 3.5; // 最大有效亮度，避免过曝区域影响
+    float LuminancePower = 0.8; // 亮度幂次调整，用于压缩动态范围
+};
+
 /**Meta Begin:(CS_CountAvgBrightness)
 HLSL=none
 Meta End:(CS_CountAvgBrightness)**/
@@ -49,8 +56,8 @@ void CS_CountAvgBrightness(uint3 id : SV_DispatchThreadID,
 {
 	if (all(GroupThreadId.xy == 0))
 	{
-		NumOfValidPixel = 0;
-	}
+        NumOfInValidPixel = 0;
+    }
 	GroupMemoryBarrierWithGroupSync();
 
 	uint2 texSize;
@@ -60,13 +67,35 @@ void CS_CountAvgBrightness(uint3 id : SV_DispatchThreadID,
 	if (all(id.xy < texSize))
 	{	
 		//CachedGroupColors[groupIndex] = CalcLuminanceYCbCr(sRGB2Linear((half3)TargetBuffer[id.xy].rgb));
-		CachedGroupColors[groupIndex] = CalcLuminance(sRGB2Linear((half3)TargetBuffer[id.xy].rgb));
-		uint oldValue;
-		InterlockedAdd(NumOfValidPixel, 1, oldValue);
+        float3 linearColor = sRGB2Linear((half3) TargetBuffer[id.xy].rgb);
+        float luminance = CalcLuminance(linearColor);
+		
+        luminance = clamp(luminance, MinValidLuminance, MaxValidLuminance);
+        float adjustedLuminance = pow(luminance, LuminancePower);
+        CachedGroupColors[groupIndex] = adjustedLuminance;
+		
+        //if (luminance >= MinValidLuminance && luminance <= MaxValidLuminance)
+        //{
+        //    // 应用幂次曲线压缩极端值的影响
+        //    float adjustedLuminance = pow(luminance, LuminancePower);
+        //    CachedGroupColors[groupIndex] = adjustedLuminance;
+        //}
+        //else
+        //{
+        //    CachedGroupColors[groupIndex] = 0;
+        //    uint oldValue;
+        //    InterlockedAdd(NumOfInValidPixel, 1, oldValue);
+        //}
+		
+		//CachedGroupColors[groupIndex] = CalcLuminance(sRGB2Linear((half3)TargetBuffer[id.xy].rgb));
+		//uint oldValue;
+		//InterlockedAdd(NumOfValidPixel, 1, oldValue);
 	}
 	else
 	{
-		CachedGroupColors[groupIndex] = (float)0;
+        CachedGroupColors[groupIndex] = (float) 0;
+        uint oldValue;
+        InterlockedAdd(NumOfInValidPixel, 1, oldValue);
 	}
 	GroupMemoryBarrierWithGroupSync();
 
@@ -81,7 +110,7 @@ void CS_CountAvgBrightness(uint3 id : SV_DispatchThreadID,
 	
 	if (GroupIndex == 0)
 	{
-		uint iRgb = (uint)(CachedGroupColors[0] * (float)GroupDivider / (float)NumOfValidPixel);
+        uint iRgb = (uint) (CachedGroupColors[0] * (float) GroupDivider / (float) (GroupSize - NumOfInValidPixel));
 
 		uint oldValue;
 		InterlockedAdd(GpuSceneDesc[0].ScreenAverageColorI, iRgb, oldValue);

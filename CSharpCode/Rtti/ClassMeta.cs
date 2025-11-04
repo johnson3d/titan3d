@@ -1284,12 +1284,12 @@ namespace EngineNS.Rtti
 
         public TtTypeTreeManager TreeManager = new TtTypeTreeManager();
         public string MetaRoot;
-        public void LoadMetas(string moduleName = null)
+        public void LoadMetas(TtEngine engine, string moduleName = null)
         {
             var rootTypes = new IO.TtFileManager.ERootDir[2] { IO.TtFileManager.ERootDir.Engine, IO.TtFileManager.ERootDir.Game };
             foreach (var r in rootTypes)
             {
-                var metaRoot = TtEngine.Instance.FileManager.GetPath(r, IO.TtFileManager.ESystemDir.MetaData);
+                var metaRoot = engine.FileManager.GetPath(r, IO.TtFileManager.ESystemDir.MetaData);
                 if (EngineNS.IO.TtFileManager.DirectoryExists(metaRoot) == false)
                 {
                     continue;
@@ -1301,6 +1301,37 @@ namespace EngineNS.Rtti
                     foreach (var j in assemblies)
                     {
                         var kls = EngineNS.IO.TtFileManager.GetDirectories(j, "*.*", true);
+                        //engine.EventPoster.ParallelFor(kls.Length, (index, state) =>
+                        //{
+                        //    var k = kls[index];
+                        //    var tmpPath = EngineNS.IO.TtFileManager.CombinePath(k, $"typedesc.txt");
+                        //    var text = EngineNS.IO.TtFileManager.ReadAllText(tmpPath);
+                        //    if (text == null)
+                        //        return;
+                        //    string readModule, strName;
+                        //    TtClassMeta.TypeDescText(text, out readModule, out strName);
+                        //    if (moduleName == null || (moduleName != null && readModule == moduleName))
+                        //    {
+                        //        bool isAlias;
+                        //        var type = TtTypeDesc.TypeOf(strName, out isAlias);// EngineNS.Rtti.UTypeDescManager.Instance.GetTypeDescFromString(strName);
+                        //        if (type != null)
+                        //        {
+                        //            //if (isAlias)
+                        //            //    continue;
+                        //            TtClassMeta meta = null;
+                        //            var key = TtTypeDesc.TypeStr(type);
+                        //            lock (mMetas)
+                        //            {
+                        //                if (mMetas.TryGetValue(key, out meta) == false)
+                        //                {
+                        //                    meta = new TtClassMeta(type);
+                        //                    mMetas[key] = meta;
+                        //                }
+                        //                meta.LoadClass(k);
+                        //            }
+                        //        }
+                        //    }
+                        //});
                         foreach (var k in kls)
                         {
                             var tmpPath = EngineNS.IO.TtFileManager.CombinePath(k, $"typedesc.txt");
@@ -1318,7 +1349,8 @@ namespace EngineNS.Rtti
                                     //if (isAlias)
                                     //    continue;
                                     TtClassMeta meta = null;
-                                    var key = TtTypeDesc.TypeStr(type);
+                                    //var key = TtTypeDesc.TypeStr(type);
+                                    var key = strName;
                                     if (mMetas.TryGetValue(key, out meta) == false)
                                     {
                                         meta = new TtClassMeta(type);

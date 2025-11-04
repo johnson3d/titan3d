@@ -3,9 +3,15 @@
 	<PropertyGroup Label="UserMacros">
 		<TtPluginName>$(MSBuildProjectName.Split('.')[0])</TtPluginName>
 		<TtPluginSourceRoot>$(ProjectDir)..\</TtPluginSourceRoot>
-		<TtOutputBasePath>$(SolutionDir)binaries\Plugins\</TtOutputBasePath>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
 	</PropertyGroup>
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-		<Exec Command="copy $(TtPluginSourceRoot)\$(TtPluginName).plugin $(TtOutputBasePath)\$(TtPluginName).plugin" />
+		<Exec Command="del $(TtOutputBasePath) /q" />
+		<Exec Command="copy $(TtPluginSourceRoot)$(TtPluginName).plugin $(TtOutputBasePath)..\$(TtPluginName).plugin" />
+	</Target>
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="rename $(TtOutputBasePath)*.pdb *.tpdb" />
+		<Exec Command="del $(TtIntermediateBasePath)$(MSBuildProjectName)\*.pdb /s /q" />
 	</Target>
 </Project>

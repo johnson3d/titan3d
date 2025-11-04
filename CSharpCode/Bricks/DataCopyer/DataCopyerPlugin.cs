@@ -1,6 +1,5 @@
 ﻿using EngineNS.Bricks.DataCopyer;
 using EngineNS.IO;
-using MathNet.Numerics.Distributions;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -505,7 +504,7 @@ namespace EngineNS.Bricks.DataCopyer
             }
         }
         public abstract Hash160 GetVersionHash();
-        public Hash160 CalcVersionHash()
+        public static Hash160 CalcVersionHash()
         {
             var metas = Rtti.TtClassMetaManager.Instance.Metas.Values.ToList();
             for (int i = metas.Count - 1; i >= 0; i--)
@@ -1125,7 +1124,7 @@ namespace EngineNS
                     if (serverPlugin != null)
                     {
                         mDataCopyer = serverPlugin.GetPluginObject<TtDataCopyer>();
-                        var hash = mDataCopyer.CalcVersionHash();
+                        var hash = Bricks.DataCopyer.TtDataCopyer.CalcVersionHash();
                         if (hash != mDataCopyer.GetVersionHash())
                         {
                             var code = mDataCopyer.GenCode(hash);
@@ -1134,8 +1133,19 @@ namespace EngineNS
 
                             Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Plugin DataCopyer need build");
 #if PWindow
-                            TtNativeWindow.MessageBoxA(IntPtr.Zero, "Plugin DataCopyer need build", "DataCopyer", 0);
-                            TtEngine.Instance.PostQuitMessage();
+                            mDataCopyer = null;
+                            var path = TtEngine.Instance.FileManager.GetRoot(TtFileManager.ERootDir.PluginSource);
+                            var proj = TtFileManager.CombinePath(path, "DataCopyer/DataCopyer.All/DataCopyer.All.csproj");
+                            if (Bricks.AssemblyLoader.TtPluginModule.BuildProject(proj))
+                            {
+                                serverPlugin.ForceReload();
+                                mDataCopyer = serverPlugin.GetPluginObject<TtDataCopyer>();
+                            }
+                            else
+                            {
+                                TtNativeWindow.MessageBoxA(IntPtr.Zero, "Plugin DataCopyer need build", "DataCopyer", 0);
+                                TtEngine.Instance.PostQuitMessage();
+                            }
 #endif
                             //rebuild plugin
                         }

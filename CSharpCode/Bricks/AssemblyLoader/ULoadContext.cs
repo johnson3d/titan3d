@@ -1,11 +1,14 @@
-﻿using System;
-using System.IO;
+﻿using EngineNS.IO;
+using EngineNS.Macross;
+using EngineNS.Rtti;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
-using EngineNS.Macross;
-using EngineNS.Rtti;
+using System.Text;
 
 namespace EngineNS.Bricks.AssemblyLoader
 {
@@ -70,7 +73,8 @@ namespace EngineNS.Bricks.AssemblyLoader
         }
         public Assembly LoadOnMemory(string assemblyPath)
         {
-            string pdbPath = assemblyPath.Replace(".dll", ".tpdb");
+            string pdbPath = assemblyPath.Replace(".dll", ".pdb");
+            string tdbPath = assemblyPath.Replace(".dll", ".tpdb");
             using (FileStream sr = new FileStream(assemblyPath, FileMode.OpenOrCreate, FileAccess.Read))
             {
                 byte[] buffer = new byte[sr.Length];
@@ -78,9 +82,20 @@ namespace EngineNS.Bricks.AssemblyLoader
                 var mrs = new System.IO.MemoryStream(buffer);
                 try
                 {
-                    if (pdbPath != null && IO.TtFileManager.FileExists(pdbPath))
+                    if (IO.TtFileManager.FileExists(tdbPath))
                     {
-                        using (FileStream pdbStream = new FileStream(pdbPath, FileMode.Open, FileAccess.Read))
+                        using (FileStream pdbStream = new FileStream(tdbPath, FileMode.Open, FileAccess.Read))
+                        {
+                            var pdbBuffer = new byte[pdbStream.Length];
+                            pdbStream.Read(pdbBuffer, 0, pdbBuffer.Length);
+                            var pdbmrs = new System.IO.MemoryStream(pdbBuffer);
+                            return this.LoadFromStream(mrs, pdbmrs);
+                        }
+                    }
+                    else if (!IO.TtFileManager.FileExists(tdbPath) || IO.TtFileManager.FileExists(pdbPath))
+                    {
+                        TtFileManager.MoveFile(pdbPath, tdbPath);
+                        using (FileStream pdbStream = new FileStream(tdbPath, FileMode.Open, FileAccess.Read))
                         {
                             var pdbBuffer = new byte[pdbStream.Length];
                             pdbStream.Read(pdbBuffer, 0, pdbBuffer.Length);
@@ -236,29 +251,68 @@ namespace EngineNS.Bricks.AssemblyLoader
                     }
                 case EPluginModuleState.ReloadReady:
                     {
-                        Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): will be reloaded");
-                        if (UnloadPlugin(false) == false)
-                        {
-                            ModuleSate = EPluginModuleState.Loaded;
-                            return true;
-                        }
-
-                        try
-                        {
-                            if (LoadPlugin() == false)
-                                return false;
-                            ModuleSate = EPluginModuleState.Loaded;
-                            return true;
-                        }
-                        catch (Exception ex)
-                        {
-                            Profiler.Log.WriteException(ex);
-                            ModuleSate = EPluginModuleState.Unloaded;
-                            return false;
-                        }
+                        return ForceReload();
                     }
                 default:
                     return false;
+            }
+        }
+        public static bool BuildProject(string projectPath)
+        {
+            var slnPath = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
+            slnPath = IO.TtFileManager.SureAsDirectory(slnPath);
+            slnPath = slnPath.Replace('/', '\\');
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = "dotnet",
+                //Arguments = $"build \"{projectPath}\" /p:TitanRoot={slnPath} --no-dependencies",
+                Arguments = $"build \"{projectPath}\" /p:TitanRoot={slnPath} /p:HotReloadEnabled=false",// /p:GenerateAssemblyInfo=false /p:GenerateTargetFrameworkAttribute=false /p:GenerateAssemblyAttributes=false
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                StandardOutputEncoding = Encoding.UTF8,  // 关键设置
+                StandardErrorEncoding = Encoding.UTF8   // 关键设置
+            };
+
+            using var process = new Process { StartInfo = processStartInfo };
+            process.Start();
+
+            // 输出构建信息
+            string output = process.StandardOutput.ReadToEnd();
+            string errors = process.StandardError.ReadToEnd();
+
+            process.WaitForExit();
+
+            Console.WriteLine(output);
+            if (!string.IsNullOrEmpty(errors))
+            {
+                Console.Error.WriteLine(errors);
+            }
+
+            return process.ExitCode == 0;
+        }
+        public bool ForceReload()
+        {
+            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): will be reloaded");
+            if (UnloadPlugin(false) == false)
+            {
+                ModuleSate = EPluginModuleState.Loaded;
+                return true;
+            }
+
+            try
+            {
+                if (LoadPlugin() == false)
+                    return false;
+                ModuleSate = EPluginModuleState.Loaded;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+                ModuleSate = EPluginModuleState.Unloaded;
+                return false;
             }
         }
         private bool LoadPlugin()

@@ -39,7 +39,7 @@ namespace EngineNS.Graphics.Mesh
             }
             ameta.SaveAMeta((IO.IAsset)null);
 
-            var targetSnapName = TtEngine.Instance.FileManager.GetRoot(type) + name;
+            var targetSnapName = TtEngine.Instance.FileManager.GetRoot2(type) + name;
             IO.TtFileManager.CopyFile(mAssetName.Address, targetSnapName);
             if (IO.TtFileManager.FileExists(targetSnapName))
             {

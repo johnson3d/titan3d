@@ -183,7 +183,7 @@ namespace EngineNS.IO
         {
             return Roots[(int)type];
         }
-        public string GetRoot(RName.ERNameType type)
+        public string GetRoot2(RName.ERNameType type)
         {
             switch (type)
             {

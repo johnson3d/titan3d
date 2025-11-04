@@ -61,7 +61,7 @@ namespace EngineNS.Rtti
             Rtti.TtAssemblyDesc desc;
             if (Rtti.TtTypeDescManager.Instance.RegAssembly(newAssembly, out manager, out desc))
             {
-                manager.RegAssemblyTypes(desc);
+                manager.RegAssemblyTypes(TtEngine.Instance, desc);
                 List<Type> removed = new List<Type>();
                 List<Type> changed = new List<Type>();
                 List<Type> added = new List<Type>();
@@ -82,12 +82,12 @@ namespace EngineNS.Rtti
             }
             else
             {
-                manager.RegAssemblyTypes(desc);
+                manager.RegAssemblyTypes(TtEngine.Instance, desc);
             }
 
             Rtti.TtTypeDescManager.Instance.OnTypeChangedInvoke();
 
-            EngineNS.Rtti.TtClassMetaManager.Instance.LoadMetas(moduleName);
+            EngineNS.Rtti.TtClassMetaManager.Instance.LoadMetas(TtEngine.Instance, moduleName);
 
             return desc;
         }
@@ -669,21 +669,36 @@ namespace EngineNS.Rtti
             }
             return finded;
         }
-        public void InitAssembly(string name)
+        public void InitAssembly(TtEngine engine, string name)
         {
             var assm = FindAssemblyInCurrentDomain(name);
             if (assm != null)
             {
-                InitAssembly(assm);
+                InitAssembly(engine, assm);
             }
         }
-        public void InitAssembly(Assembly assembly)
+        public void InitAssembly(TtEngine engine, Assembly assembly)
         {
             TtAssemblyDesc desc;
             ServiceManager manager;
             if (RegAssembly(assembly, out manager, out desc) == false)
             {
-                manager.RegAssemblyTypes(desc);
+                manager.RegAssemblyTypes(engine, desc);
+                //var types = manager.Types.Values.ToArray<TtTypeDesc>();
+                //engine.EventPoster.ParallelFor(manager.Types.Count, (index, state) =>
+                //{
+                //    var t = types[index];
+                //    var attr = t.SystemType.GetCustomAttribute(typeof(Rtti.MetaAttribute), false) as Rtti.MetaAttribute;
+                //    if (attr == null || attr.NameAlias == null)
+                //        return;
+                //    foreach (var k in attr.NameAlias)
+                //    {
+                //        lock (NameAliasTypes)
+                //        {
+                //            NameAliasTypes[k] = t;
+                //        }
+                //    }
+                //});
                 foreach (var j in manager.Types)
                 {
                     var attr = j.Value.SystemType.GetCustomAttribute(typeof(Rtti.MetaAttribute), false) as Rtti.MetaAttribute;
@@ -706,7 +721,7 @@ namespace EngineNS.Rtti
             }
             return null;
         }
-        public void InitTypes()
+        public void InitTypes(TtEngine engine)
         {
             var ass = AppDomain.CurrentDomain.GetAssemblies();
             string[] TypeAssembies = {
@@ -736,7 +751,7 @@ namespace EngineNS.Rtti
             {
                 foreach (var j in i.Value.Assemblies)
                 {
-                    i.Value.RegAssemblyTypes(j.Value);
+                    i.Value.RegAssemblyTypes(engine, j.Value);
                 }
             }
 
@@ -768,9 +783,42 @@ namespace EngineNS.Rtti
         {
             public Dictionary<string, TtTypeDesc> Types = new Dictionary<string, TtTypeDesc>();
             public Dictionary<string, TtAssemblyDesc> Assemblies { get; } = new Dictionary<string, TtAssemblyDesc>();
-            public void RegAssemblyTypes(TtAssemblyDesc desc)
+            public void RegAssemblyTypes(TtEngine engine, TtAssemblyDesc desc)
             {
                 var tps = desc.UnsafeGetAssembly().GetTypes();
+                //engine.EventPoster.ParallelFor(tps.Length, (index, state) =>
+                //{
+                //    var i= tps[index];
+                //    if (i.IsGenericType)
+                //        return;
+                //    RegType(i, desc);
+                //    foreach (var j in i.GetProperties())
+                //    {
+                //        if (j.PropertyType.IsGenericType == false)
+                //        {
+                //            continue;
+                //        }
+
+                //        var propAssmDesc = FindAssemblyDesc(j.PropertyType.Assembly);
+                //        if (propAssmDesc != null)
+                //        {
+                //            RegType(j.PropertyType, propAssmDesc);
+                //        }
+                //    }
+                //    foreach (var j in i.GetFields())
+                //    {
+                //        if (j.FieldType.IsGenericType == false)
+                //        {
+                //            continue;
+                //        }
+
+                //        var propAssmDesc = FindAssemblyDesc(j.FieldType.Assembly);
+                //        if (propAssmDesc != null)
+                //        {
+                //            RegType(j.FieldType, propAssmDesc);
+                //        }
+                //    }
+                //});
                 foreach (var i in tps)
                 {
                     if (i.IsGenericType)
@@ -782,7 +830,7 @@ namespace EngineNS.Rtti
                         {
                             continue;
                         }
-            
+
                         var propAssmDesc = FindAssemblyDesc(j.PropertyType.Assembly);
                         if (propAssmDesc != null)
                         {
@@ -819,17 +867,20 @@ namespace EngineNS.Rtti
                 if (str == null)
                     return;
                 TtTypeDesc tdesc;
-                if (Types.TryGetValue(str, out tdesc) == false)
+                lock (Types)
                 {
-                    tdesc = new TtTypeDesc();
-                    tdesc.Assembly = desc;
-                    tdesc.SystemType = t;
-                    Types.Add(str, tdesc);
-                }
-                else
-                {
-                    tdesc.Assembly = desc;
-                    tdesc.SystemType = t;
+                    if (Types.TryGetValue(str, out tdesc) == false)
+                    {
+                        tdesc = new TtTypeDesc();
+                        tdesc.Assembly = desc;
+                        tdesc.SystemType = t;
+                        Types.Add(str, tdesc);
+                    }
+                    else
+                    {
+                        tdesc.Assembly = desc;
+                        tdesc.SystemType = t;
+                    }
                 }
             }
         }
@@ -848,10 +899,6 @@ namespace EngineNS.Rtti
             return null;
         }
         public Dictionary<string, string> StringMap = new Dictionary<string, string>();
-        public string GetTypeStringFromType(TtTypeDesc type, bool tryAdd2Manager = true)
-        {
-            return GetTypeStringFromType(type.SystemType, tryAdd2Manager);
-        }
         public string GetTypeStringFromType(Type type, bool tryAdd2Manager = true)
         {
             var originName = type.ToString();// type.FullName;
@@ -868,45 +915,54 @@ namespace EngineNS.Rtti
                 return null;
             }
             string result;
-            if (StringMap.TryGetValue(originName, out result))
-                return result;
-            
-            TtAssemblyDesc assm = FindAssemblyDesc(type.Assembly);
-            if (assm == null)
+            lock (StringMap)
             {
-                return null;
-            }
-            var fullName = originName.Replace('+', '.');
-            var templatePos = fullName.IndexOf('`');
-            if (templatePos >=0 )
-            {
-                fullName = fullName.Substring(0, templatePos);
-            }
-            var agTypeStr = "";            
-            if (type.IsGenericType)
-            {
-                agTypeStr += "<";
-                var agTypes = type.GetGenericArguments();           
-                for (int i = 0; i < agTypes.Length; i++)
+                if (StringMap.TryGetValue(originName, out result))
+                    return result;
+                TtAssemblyDesc assm = FindAssemblyDesc(type.Assembly);
+                if (assm == null)
                 {
-                    agTypeStr += GetTypeStringFromType(agTypes[i], tryAdd2Manager) + ",";
+                    return null;
                 }
-                agTypeStr += ">";
-            }
+                var fullName = originName.Replace('+', '.');
+                var templatePos = fullName.IndexOf('`');
+                if (templatePos >=0)
+                {
+                    fullName = fullName.Substring(0, templatePos);
+                }
+                var agTypeStr = "";
+                if (type.IsGenericType)
+                {
+                    agTypeStr += "<";
+                    var agTypes = type.GetGenericArguments();
+                    for (int i = 0; i < agTypes.Length; i++)
+                    {
+                        agTypeStr += GetTypeStringFromType(agTypes[i], tryAdd2Manager) + ",";
+                    }
+                    agTypeStr += ">";
+                }
 
-            result = $"{fullName}{agTypeStr}@{assm.Name}";
-            StringMap[originName] = result;
-            if (tryAdd2Manager)
-            {
-                if (GetTypeDescFromString(result, out var isAlias) == null)
+                result = $"{fullName}{agTypeStr}@{assm.Name}";
+                StringMap[originName] = result;
+
+                if (tryAdd2Manager)
                 {
-                    var typeDesc = new TtTypeDesc();
-                    typeDesc.Assembly = assm;
-                    typeDesc.SystemType = type;
-                    assm.Manager.Types[result] = typeDesc;
+                    if (GetTypeDescFromString(result, out var isAlias) == null)
+                    {
+                        var typeDesc = new TtTypeDesc();
+                        typeDesc.Assembly = assm;
+                        typeDesc.SystemType = type;
+                        lock (assm.Manager)
+                        {
+                            if (assm.Manager.Types.ContainsKey(result) == false)
+                            {
+                                assm.Manager.Types[result] = typeDesc;
+                            }
+                        }
+                    }
                 }
+                return result;
             }
-            return result;
         }
         public TtTypeDesc GetTypeDescFromString(string typeStr, out bool isAlias)
         {

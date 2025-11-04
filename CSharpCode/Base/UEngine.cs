@@ -382,15 +382,15 @@ namespace EngineNS
             }
 
             //EngineNS.Rtti.TtTypeDescManager.Instance.InitTypes();
-            EngineNS.Rtti.TtTypeDescManager.Instance.InitAssembly("System.Private.CoreLib");
-            EngineNS.Rtti.TtTypeDescManager.Instance.InitAssembly("Engine.Window");
-            EngineNS.Rtti.TtTypeDescManager.Instance.InitAssembly("Engine.Console");
+            EngineNS.Rtti.TtTypeDescManager.Instance.InitAssembly(this, "System.Private.CoreLib");
+            EngineNS.Rtti.TtTypeDescManager.Instance.InitAssembly(this, "Engine.Window");
+            //EngineNS.Rtti.TtTypeDescManager.Instance.InitAssembly("Engine.Console");
 
             var t2 = Support.TtTime.HighPrecision_GetTickCount();
 
             this.PluginModuleManager.InitPlugins(this, bLoadPluginModuel);
 
-            EngineNS.Rtti.TtClassMetaManager.Instance.LoadMetas("EngineCore");
+            EngineNS.Rtti.TtClassMetaManager.Instance.LoadMetas(this, "EngineCore");
             
             var t3 = Support.TtTime.HighPrecision_GetTickCount();
 
@@ -414,12 +414,12 @@ namespace EngineNS
         
         public async System.Threading.Tasks.Task<bool> PreInitEngine(string cfgFile, bool bNatvieMemory)
         {
+            StartSystemThreads();
+
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
             InitTypes(cfgFile, bNatvieMemory, true);
 
             EngineNS.UCs2CppBase.InitializeNativeCoreProvider();
-
-            StartSystemThreads();
 
             if (Config == null)
             {

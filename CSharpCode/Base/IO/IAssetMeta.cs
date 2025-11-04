@@ -344,7 +344,7 @@ namespace EngineNS.IO
 
             var savedName = mAssetName.Name;
             var savedType = mAssetName.RNameType;
-            var targetSnapName = TtEngine.Instance.FileManager.GetRoot(type) + name + ".snap";
+            var targetSnapName = TtEngine.Instance.FileManager.GetRoot2(type) + name + ".snap";
             IO.TtFileManager.MoveFile(mAssetName.Address + ".snap", targetSnapName);
             if (IO.TtFileManager.FileExists(targetSnapName))
                 TtEngine.Instance.SourceControlModule.AddFile(targetSnapName, true);

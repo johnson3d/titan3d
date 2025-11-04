@@ -190,8 +190,13 @@
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
 
+    <PropertyGroup Label="UserMacros">
+	    <TtTitanRoot Condition="'$(TitanRoot)' == ''">$(SolutionDir)</TtTitanRoot>
+	    <TtTitanRoot Condition="'$(TitanRoot)' != ''">$(TitanRoot)</TtTitanRoot>
+    </PropertyGroup>
+	
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="$(SolutionDir)CS_Engine.bat" />
+    <Exec Command="$(TtTitanRoot)CS_Engine.bat" />
   </Target>
   
   <ItemGroup>

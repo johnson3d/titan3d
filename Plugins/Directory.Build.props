@@ -5,14 +5,16 @@
 
   <!-- Define macros for easy and consistent access to various parts of the tree -->
   <PropertyGroup Label="UserMacros">
-    <TtOsDir Condition="$([MSBuild]::IsOSPlatform('Linux'))">Linux</TtOsDir>
+	<TtTitanRoot Condition="'$(TitanRoot)' == ''">$(SolutionDir)</TtTitanRoot>
+	<TtTitanRoot Condition="'$(TitanRoot)' != ''">$(TitanRoot)</TtTitanRoot>
+	<TtOsDir Condition="$([MSBuild]::IsOSPlatform('Linux'))">Linux</TtOsDir>
 	<TtOsDir Condition="$([MSBuild]::IsOSPlatform('Windows'))">Win64</TtOsDir>
 	<TtOsDir Condition="$([MSBuild]::IsOSPlatform('OSX'))">MacOS</TtOsDir>
 	<TtPluginName>$(MSBuildProjectName.Split('.')[0])</TtPluginName>
 	<TtPluginSourceRoot>$(ProjectDir)..\</TtPluginSourceRoot>
-    <TtIntermediateBasePath>$(SolutionDir)intermediate\csharp\plugins\</TtIntermediateBasePath>
-    <!--<TtOutputBasePath>$(SolutionDir)binaries\Plugins\$(Configuration)\$(TargetFramework)\</TtOutputBasePath>-->
-	<TtOutputBasePath>$(SolutionDir)binaries\Plugins\$(TtPluginName)\</TtOutputBasePath>
+    <TtIntermediateBasePath>$(TtTitanRoot)intermediate\csharp\plugins\</TtIntermediateBasePath>
+    <!--<TtOutputBasePath>$(TitanRoot)binaries\Plugins\$(Configuration)\$(TargetFramework)\</TtOutputBasePath>-->
+	<TtOutputBasePath>$(TtTitanRoot)binaries\Plugins\$(TtPluginName)\</TtOutputBasePath>
   </PropertyGroup>
   <ItemDefinitionGroup />
 

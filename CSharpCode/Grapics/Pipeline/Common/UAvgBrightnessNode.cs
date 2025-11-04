@@ -1,4 +1,6 @@
-﻿using EngineNS.Bricks.VXGI;
+﻿using Assimp;
+using EngineNS.Bricks.VXGI;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Net.Mail;
@@ -104,10 +106,56 @@ namespace EngineNS.Graphics.Pipeline.Common
                     attachment = node.GetAttachBuffer(node.GpuScenePinInOut);
                     drawcall.BindUav(srvIdx, attachment.Uav);
                 }
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "ParameterBuffer");
+                if (srvIdx.IsValidPointer)
+                {
+                    if (node.ParameterCBuffer == null)
+                    {
+                        node.ParameterCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(srvIdx);
+                        node.MinValidLuminance = node.MinValidLuminance;
+                        node.MaxValidLuminance = node.MaxValidLuminance;
+                        node.LuminancePower = node.LuminancePower;
+                    }
+                    drawcall.BindCBV(srvIdx, node.ParameterCBuffer);
+                }
             }
         }
         private CountAvgBrightnessShading CountAvgBrightness;
         private NxRHI.TtComputeDraw CountAvgBrightnessDrawcall;
+        private NxRHI.TtCbView ParameterCBuffer;
+        float mMinValidLuminance = 0.01f;
+        [Rtti.Meta("")]
+        public float MinValidLuminance
+        {
+            get => mMinValidLuminance;
+            set 
+            { 
+                mMinValidLuminance = value;
+                ParameterCBuffer.SetValue("MinValidLuminance", value);
+            }
+        }
+        float mMaxValidLuminance = 3.5f;
+        [Rtti.Meta("")]
+        public float MaxValidLuminance
+        {
+            get => mMaxValidLuminance;
+            set
+            {
+                mMaxValidLuminance = value;
+                ParameterCBuffer.SetValue("MaxValidLuminance", value);
+            }
+        }
+        float mLuminancePower = 0.8f;
+        [Rtti.Meta("")]
+        public float LuminancePower
+        {
+            get => mLuminancePower;
+            set
+            {
+                mLuminancePower = value;
+                ParameterCBuffer.SetValue("LuminancePower", value);
+            }
+        }
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();

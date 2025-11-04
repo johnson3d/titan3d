@@ -66,9 +66,5 @@
     "Survivor",
     "TencentAIGC",
     "VisualStudioPlugin"
-  ],
-  "MeshPrimitiveEditorConfig": {
-    "MaterialName": "material/sysdft.material:Engine",
-    "PlaneMaterialName": "material/whitecolor.uminst:Engine"
-  }
+  ]
 }

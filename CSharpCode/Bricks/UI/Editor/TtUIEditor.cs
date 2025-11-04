@@ -536,7 +536,7 @@ namespace EngineNS.UI.Editor
                 {
                     var data = new ControlCreateDragData()
                     {
-                        TypeName = TtTypeDescManager.Instance.GetTypeStringFromType(ctrlItemData.UIControlType),
+                        TypeName = ctrlItemData.UIControlType.TypeString,
                     };
                     var handle = GCHandle.Alloc(data);
                     ImGuiAPI.SetDragDropPayload("UIControlCreateDragDrop", GCHandle.ToIntPtr(handle).ToPointer(), (uint)Marshal.SizeOf<ControlCreateDragData>(), ImGuiCond_.ImGuiCond_None);

@@ -62,9 +62,5 @@
     "SourceGit",
     "DataCopyer",
     "Survivor"
-  ],
-  "MeshPrimitiveEditorConfig": {
-    "MaterialName": "material/sysdft.material:Engine",
-    "PlaneMaterialName": "material/whitecolor.uminst:Engine"
-  }
+  ]
 }

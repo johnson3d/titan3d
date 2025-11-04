@@ -93,7 +93,7 @@ namespace EngineNS.NxRHI
             }
             ameta.SaveAMeta((IAsset)null);
 
-            var targetSnapName = TtEngine.Instance.FileManager.GetRoot(type) + name;
+            var targetSnapName = TtEngine.Instance.FileManager.GetRoot2(type) + name;
             IO.TtFileManager.CopyFile(mAssetName.Address, targetSnapName);
             if (IO.TtFileManager.FileExists(targetSnapName))
                 TtEngine.Instance.SourceControlModule.AddFile(targetSnapName, true);
@@ -120,7 +120,7 @@ namespace EngineNS.NxRHI
 
             var savedName = mAssetName.Name;
             var savedType = mAssetName.RNameType;
-            var targetSnapName = TtEngine.Instance.FileManager.GetRoot(type) + name;
+            var targetSnapName = TtEngine.Instance.FileManager.GetRoot2(type) + name;
             IO.TtFileManager.CopyFile(mAssetName.Address, targetSnapName);
             if (IO.TtFileManager.FileExists(targetSnapName))
                 TtEngine.Instance.SourceControlModule.AddFile(targetSnapName, true);

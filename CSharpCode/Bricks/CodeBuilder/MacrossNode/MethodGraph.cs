@@ -1081,7 +1081,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         string[] GetContextPath(Rtti.TtTypeDesc type, string name)
         {
-            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(type, false);
+            var typeStr = type.TypeString;
             typeStr = typeStr.Replace("EngineNS.", "").Replace("Bricks.", "");
             var idx = typeStr.LastIndexOf('@');
             if(idx >= 0)

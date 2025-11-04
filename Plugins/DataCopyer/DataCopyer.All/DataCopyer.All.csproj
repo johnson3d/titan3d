@@ -4,14 +4,28 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <BaseOutputPath>$(SolutionDir)\binaries\Plugins</BaseOutputPath>
+    <BaseOutputPath>$(TtTitanRoot)\binaries\Plugins</BaseOutputPath>
+	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	<GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
   </PropertyGroup>
 
   <Import Project="..\DataCopyer\DataCopyer.projitems" Label="Shared" />
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Module\Engine.Window\Engine.Window.csproj" />
-    <ProjectReference Include="..\..\Game\Survivor\Survivor.All\Survivor.All.csproj" />
+	  <Reference Include="Engine.Window">
+		  <HintPath>$(TtTitanRoot)binaries\net8.0\Engine.Window.dll</HintPath>
+		  <Private>false</Private>
+	  </Reference>
+	  <Reference Include="Survivor.All">
+		  <HintPath>$(TtTitanRoot)binaries\Plugins\Survivor\Survivor.All.dll</HintPath>
+		  <Private>false</Private>
+	  </Reference>
+    <!--<ProjectReference Include="..\..\..\Module\Engine.Window\Engine.Window.csproj">
+		<Private>False</Private>
+	</ProjectReference>-->
+    <!--<ProjectReference Include="..\..\Game\Survivor\Survivor.All\Survivor.All.csproj">
+		<Private>False</Private>
+	</ProjectReference>-->
   </ItemGroup>
 
 </Project>
