@@ -16,6 +16,12 @@ namespace EngineNS.Graphics.Mesh
         [Category("FileInfo"), ReadOnly(true)]
         public string FileName { get; set; } = "";
         [Category("FileInfo"), ReadOnly(true)]
+        public string FileFormat { get; set; } = "";
+        [Category("FileInfo"), ReadOnly(true)]
+        public string FileFormatVersion { get; set; } = "";
+        [Category("FileInfo"), ReadOnly(true)]
+        public string Generator { get; set; } = "";
+        [Category("FileInfo"), ReadOnly(true)]
         public int MeshesCount { get; set; } = 0;
         [Category("FileInfo"), ReadOnly(true)]
         public bool MeshesHaveScale { get; set; } = false;
@@ -25,8 +31,6 @@ namespace EngineNS.Graphics.Mesh
         public string UpAxis { get; set; } = "";
         [Category("FileInfo"), ReadOnly(true)]
         public float UnitScaleFactor { get; set; } = 1;
-        [Category("FileInfo"), ReadOnly(true)]
-        public string Generator { get; set; } = "";
         [Category("ImportSetting"), ReadOnly(true)]
         public string DefaultImportRule { get; } = "Import mesh in Local Space";
         [Category("ImportSetting")]
@@ -101,7 +105,7 @@ namespace EngineNS.Graphics.Mesh
                             {
                                 //PGAsset.Target = null;
                                 var sz = new Vector2(-1, 0);
-                                if (ImGuiAPI.Button("Select FBX", in sz))
+                                if (ImGuiAPI.Button("Select File", in sz))
                                 {
                                     mFileDialog.OpenModalWithMutiSelect("ChooseFileDlgKey", "Choose File", ".*", ".", int.MaxValue - 1);
                                 }
@@ -431,7 +435,6 @@ namespace EngineNS.Graphics.Mesh
                 {
                     Animation.Asset.TtSkeletonAsset newAsset = new Animation.Asset.TtSkeletonAsset();
                     newAsset.Skeleton = skeleton;
-                    newAsset.SaveAssetTo(skeletonAsset);
 
                     var sktameta = new Animation.Asset.TtSkeletonAssetAMeta();
                     sktameta.SetAssetName(skeletonAsset);
@@ -440,6 +443,8 @@ namespace EngineNS.Graphics.Mesh
                     sktameta.Description = $"This is a {typeof(Animation.Asset.TtSkeletonAsset).FullName}\n";
                     sktameta.SaveAMeta(newAsset);
                     TtEngine.Instance.AssetMetaManager.RegAsset(sktameta);
+
+                    newAsset.SaveAssetTo(skeletonAsset);
 
                     if (EngineNS.TtEngine.Instance.AnimationModule.SkeletonAssetManager.SkeletonAssets.ContainsKey(skeletonAsset))
                     {

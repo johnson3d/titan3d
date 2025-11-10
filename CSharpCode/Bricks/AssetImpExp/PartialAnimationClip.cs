@@ -12,6 +12,10 @@ namespace EngineNS.Animation.Asset
         [Category("FileInfo"), ReadOnly(true)]
         public string FileName { get; set; } = "";
         [Category("FileInfo"), ReadOnly(true)]
+        public string FileFormat { get; set; } = "";
+        [Category("FileInfo"), ReadOnly(true)]
+        public string FileFormatVersion { get; set; } = "";
+        [Category("FileInfo"), ReadOnly(true)]
         public int AnimationsCount { get; set; } = 0;
         [Category("FileInfo"), ReadOnly(true)]
         public string UpAxis { get; set; } = "";

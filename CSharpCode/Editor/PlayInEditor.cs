@@ -4,6 +4,8 @@ using EngineNS.Bricks.Network;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,6 +16,8 @@ namespace EngineNS.Editor
     {
         [Rtti.Meta("")]
         public string DSIp { get; set; } = "127.0.0.1";
+        [Rtti.Meta("")]
+        public string DSUrl { get; set; } = "http://localhost";
         [Rtti.Meta("")]
         public ushort DSPort { get; set; } = 1234;
     }
@@ -110,7 +114,18 @@ namespace EngineNS.Editor
                     System.Threading.Thread.Sleep(100);
                 }
                 Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Info, $"Dedicated Server started.");
-                if (await TtEngine.Instance.RpcModule.TcpClient.Connect(TtEngine.Instance.ConfigManager.GetConfig<TtPIEConfig>().DSIp, dsPort, null, 0, 2000))
+                var cfg = TtEngine.Instance.ConfigManager.GetConfig<TtPIEConfig>();
+                var ip = cfg.DSIp;
+                //if (!string.IsNullOrEmpty(cfg.DSUrl))
+                //{
+                //    var hostName = new Uri(cfg.DSUrl).Host;
+                //    var addresses = await Dns.GetHostAddressesAsync(hostName);
+                //    foreach (var address in addresses)
+                //    {
+                //        ip = address.ToString();
+                //    }
+                //}
+                if (await TtEngine.Instance.RpcModule.TcpClient.Connect(ip, dsPort, null, 0, 2000))
                 {
                     Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Info, $"Connect Dedicated Server successed.");
                     SaveConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;

@@ -398,8 +398,6 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "NxPhysics", "CSharpCode\Bri
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AssetImpExp", "CSharpCode\Bricks\AssetImpExp\AssetImpExp.shproj", "{98988E6F-4A71-4B73-8BAF-D5BBDB679ADF}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AssimpNet", "3rd\csharp\AssimpNet\AssimpNet.shproj", "{0971E63F-1C76-4E26-953D-63991FA73C97}"
-EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CompilingGenerator", "CSharpCode\CompilingGenerator\CompilingGenerator.shproj", "{C01CE747-DDE3-424B-89B3-95E9716C6130}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Localization", "CSharpCode\Bricks\Localization\Localization.shproj", "{2E83D749-257F-4CEA-9370-CB44422524B9}"
@@ -1224,7 +1222,6 @@ Global
 		{55E6CAE1-0F10-4840-BA9F-81FFA2008361} = {BD7ED910-C8AD-4273-A759-9465CF41F3D1}
 		{8D584D87-62A1-41DE-AF08-4E4527FE106E} = {BD7ED910-C8AD-4273-A759-9465CF41F3D1}
 		{98988E6F-4A71-4B73-8BAF-D5BBDB679ADF} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
-		{0971E63F-1C76-4E26-953D-63991FA73C97} = {1BEAD919-8866-4753-B5EE-64ACC9CC2E5B}
 		{C01CE747-DDE3-424B-89B3-95E9716C6130} = {424B9266-46E0-4F38-BFE3-9F1338152F96}
 		{2E83D749-257F-4CEA-9370-CB44422524B9} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{410D0BD4-4FE7-4D97-AFE3-1AE527D8B56E} = {041F2057-6090-446E-8CEF-D524C973477F}
@@ -1281,7 +1278,6 @@ Global
 		3rd\csharp\xxHash\xxHash.projitems*{06df8867-c29e-4424-95a8-3592453e3fee}*SharedItemsImports = 13
 		NativeCode\NextRHI\NextRHI.vcxitems*{06f46e42-7261-47cb-8830-50228f2bd899}*SharedItemsImports = 9
 		3rd\native\Recast\DebugUtils\DebugUtils.vcxitems*{07f7e779-db97-4a5f-86e2-747bbf05a434}*SharedItemsImports = 9
-		3rd\csharp\AssimpNet\AssimpNet.projitems*{0971e63f-1c76-4e26-953d-63991fa73c97}*SharedItemsImports = 13
 		NativeCode\Bricks\Terrain\Terrain.vcxitems*{098851d6-103a-4726-9dd9-9b30c1470b8e}*SharedItemsImports = 9
 		CSharpCode\Grapics\Pipeline\Pipeline.projitems*{09a701b1-eb1f-41c3-bd63-1b3823894da2}*SharedItemsImports = 13
 		CSharpCode\Bricks\SourceControl\SourceControl.projitems*{0a8d5418-f687-45ba-b720-ef5f18ef7a7f}*SharedItemsImports = 13
@@ -1289,7 +1285,6 @@ Global
 		CSharpCode\Editor\Editor.projitems*{0b1a3442-4420-414f-aa79-15575e9f8885}*SharedItemsImports = 13
 		CSharpCode\Bricks\CodeBuilder\CodeBuilder.projitems*{0b90fed7-a3e5-4169-9532-6aa4e9f89001}*SharedItemsImports = 13
 		CSharpCode\Bricks\GpuDriven\GpuDriven.projitems*{0bf2a284-4a10-49b3-a4b0-048df20c0a4d}*SharedItemsImports = 13
-		3rd\csharp\AssimpNet\AssimpNet.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		3rd\csharp\AstcDecoder\AstcDecoder.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		3rd\csharp\JitherOpenEXR\JitherOpenEXR.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		3rd\csharp\NvTriStrip\NvTriStrip.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
