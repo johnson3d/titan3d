@@ -350,6 +350,14 @@ namespace EngineNS.Bricks.AssetImpExp
             FindAllNodesContainsMeshRecursively(scene, scene.RootNode, ref meshNodes);
             return meshNodes;
         }
+        public static void IterateNode(Assimp.Scene scene, Assimp.Node node, Action<Assimp.Node> action)
+        {
+            action(node);
+            foreach (var child in node.Children)
+            {
+                IterateNode(scene, child, action);
+            }
+        }
         private static void FindAllNodesContainsMeshRecursively(Assimp.Scene scene, Assimp.Node node, ref List<Assimp.Node> outNodes)
         {
             if (node.MeshCount != 0)
@@ -846,6 +854,10 @@ namespace EngineNS.Bricks.AssetImpExp
         {
             var meshNodes = AssimpSceneUtil.FindMeshNodes(scene);
             return Generate(meshNodes, meshSkeletons, scene, importOption);
+        }
+        public static List<NxRHI.TtSrView> GenerateTextures(List<TtSkinSkeleton> meshSkeletons, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
+        {
+            return null;
         }
         private static List<TtMeshPrimitives> Generate(List<Assimp.Node> meshNodes, List<TtSkinSkeleton> meshSkeletons, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {

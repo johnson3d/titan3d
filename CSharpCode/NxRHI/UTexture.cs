@@ -814,9 +814,9 @@ namespace EngineNS.NxRHI
         {
             bool bPopOpen = false;
             bool bFileExisting = false;
-            RName mDir;
-            string mName;
-            string mSourceFile;
+            public RName mDir;
+            public string mName;
+            public string mSourceFile;
             public TtPicDesc mDesc = new TtPicDesc();
             ImGui.ImGuiFileDialog mFileDialog = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
             EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
@@ -942,67 +942,73 @@ namespace EngineNS.NxRHI
                 }, Thread.Async.EAsyncTarget.AsyncIO);
                 return true;
             }
-            private unsafe bool ImportImageImpl()
+            public bool ImportImageImpl()
             {
                 using (var stream = System.IO.File.OpenRead(mSourceFile))
                 {
-                    if (stream == null)
+                    return ImportImageImpl(stream);
+                }
+            }
+            public unsafe bool ImportImageImpl(System.IO.Stream stream)
+            {
+                if (stream == null)
+                    return false;
+
+                var extName = IO.TtFileManager.GetExtName(mSourceFile);
+                var rn = RName.GetRName(mDir.Name + mName + TtSrView.AssetExt, mDir.RNameType);
+                var xnd = new IO.TtXndHolder("TtSrView", 0, 0);
+
+                if (extName.ToLower() == ".hdr")
+                {
+                    var imageFloat = StbImageSharp.ImageResultFloat.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                    if (imageFloat == null)
                         return false;
 
-                    var extName = IO.TtFileManager.GetExtName(mSourceFile);
-                    var rn = RName.GetRName(mDir.Name + mName + TtSrView.AssetExt, mDir.RNameType);
-                    var xnd = new IO.TtXndHolder("USrView", 0, 0);
-
-                    if (extName.ToLower() == ".hdr")
+                    StbImageSharp.ImageResultFloat processedImage = null;
+                    if (mDesc.CubeFaces == 6)
                     {
-                        var imageFloat = StbImageSharp.ImageResultFloat.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
-                        if (imageFloat == null)
-                            return false;
-
-                        StbImageSharp.ImageResultFloat processedImage = null;
-                        if (mDesc.CubeFaces == 6)
-                        {
-                            TtSrView.GenerateBaseCubeMipFromLongitudeLatitude2D(ref processedImage, imageFloat, 512);
-                        }
-                        else
-                            processedImage = imageFloat;
-
-                        TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, processedImage, mDesc);
-                    }
-                    else if (extName.ToLower() == ".exr")
-                    {
-                        var file = new Jither.OpenEXR.EXRFile(stream);
-                        if (file.Parts.Count == 0)
-                            return false;
-
-                        TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, file, mDesc);
+                        TtSrView.GenerateBaseCubeMipFromLongitudeLatitude2D(ref processedImage, imageFloat, 512);
                     }
                     else
+                        processedImage = imageFloat;
+
+                    TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, processedImage, mDesc);
+                }
+                else if (extName.ToLower() == ".exr")
+                {
+                    var file = new Jither.OpenEXR.EXRFile(stream);
+                    if (file.Parts.Count == 0)
+                        return false;
+
+                    TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, file, mDesc);
+                }
+                else
+                {
+                    TtMemImage image = null;
+                    image = StbImageSharp.TtMemImage.FromStream(stream, StbImageSharp.ColorComponents.Default);
+                    if (image == null)
+                        return false;
+
+                    if (mDesc.AutoCheckNormal == true)
                     {
-                        TtMemImage image = null;
-                        image = StbImageSharp.TtMemImage.FromStream(stream, StbImageSharp.ColorComponents.Default);
-                        if (image == null)
-                            return false;
-
-                        if(mDesc.AutoCheckNormal == true)
-                        {
-                            NormalmapChecker normalChecker = new NormalmapChecker();
-                            mDesc.IsNormal = normalChecker.DoesTextureLookLikelyToBeANormalMap(image);
-                        }
-
-                        if(mDesc.MipLevel==0)
-                        {
-                            if (mDesc.Height < 64 && mDesc.Width < 64)
-                                mDesc.MipLevel = 1;
-                        }
-
-                        TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, image, mDesc);
+                        NormalmapChecker normalChecker = new NormalmapChecker();
+                        mDesc.IsNormal = normalChecker.DoesTextureLookLikelyToBeANormalMap(image);
                     }
 
-                    xnd.SaveXnd(rn.Address);
-                    rn.AMeta.AddAssetFile(rn.Address);
-                    TtEngine.Instance.SourceControlModule.AddFile(rn.Address, true);
+                    if (mDesc.MipLevel==0)
+                    {
+                        if (mDesc.Height < 64 && mDesc.Width < 64)
+                            mDesc.MipLevel = 1;
+                    }
 
+                    TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, image, mDesc);
+                }
+
+                xnd.SaveXnd(rn.Address);
+                TtEngine.Instance.SourceControlModule.AddFile(rn.Address, true);
+
+                if (rn.AMeta==null)
+                {
                     var ameta = new TtSrViewAMeta();
                     ameta.SetAssetName(rn);
                     ameta.AssetId = Guid.NewGuid();
@@ -1013,6 +1019,8 @@ namespace EngineNS.NxRHI
 
                     TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
                 }
+
+                rn.AMeta.AddAssetFile(rn.Address);
                 return true;
             }
 

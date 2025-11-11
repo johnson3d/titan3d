@@ -2,6 +2,8 @@
 using EngineNS.Animation.Asset;
 using EngineNS.Animation.SkeletonAnimation.Skeleton;
 using EngineNS.Bricks.AssetImpExp;
+using Org.BouncyCastle.Asn1.Cms;
+using Org.BouncyCastle.Crypto.IO;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -396,6 +398,51 @@ namespace EngineNS.Graphics.Mesh
                     //    var rn = RName.GetRName(mDir.Name + meshPrimitives.mCoreObject.GetName() + Animation.Asset.USkeletonAsset.AssetExt, mDir.RNameType);
                     //    await SaveSkeleton(rn, meshPrimitives.PartialSkeleton);
                     //}
+                }
+
+                var scene = improtSetting.AssetImporter.AiScene;
+                if (scene.HasMaterials)
+                {
+                    foreach (var m in scene.Materials)
+                    {
+                        if (m.TextureAmbient.TextureIndex>=0&&m.TextureAmbient.TextureIndex<scene.Textures.Count)
+                        {
+                            var texture = scene.Textures[m.TextureAmbient.TextureIndex];
+                            if (texture.HasCompressedData)
+                            {
+                                if (texture.CompressedFormatHint=="png" || texture.CompressedFormatHint=="jpg")
+                                {
+                                    try
+                                    {
+                                        using (var stream = new MemoryStream(texture.CompressedData))
+                                        {
+                                            StbImageSharp.TtMemImage image = StbImageSharp.TtMemImage.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+
+                                            var importer = new NxRHI.TtSrView.ImportAttribute();
+                                            importer.mSourceFile = texture.Filename + ".png";
+                                            importer.mDir = mDir;
+                                            importer.mName = texture.Filename;
+                                            importer.mDesc.Width = image.Width;
+                                            importer.mDesc.Height = image.Height;
+                                            stream.Seek(0, SeekOrigin.Begin);
+                                            importer.ImportImageImpl(stream);
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Console.WriteLine($"加载图像失败: {ex.Message}");
+                                    }
+                                    
+                                }
+                            }
+                            else if (texture.HasNonCompressedData)
+                            {
+
+                            }
+                        }
+                        //TextureSlot slot;
+                        //m.GetMaterialTexture(m.TextureAmbient, 0, out slot);
+                    }
                 }
 
                 var meshPrimitives = MeshGenerater.Generate(skeletons, improtSetting.AssetImporter.AiScene, AssetImportOption);
