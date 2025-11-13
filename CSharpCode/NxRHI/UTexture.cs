@@ -942,17 +942,17 @@ namespace EngineNS.NxRHI
                 }, Thread.Async.EAsyncTarget.AsyncIO);
                 return true;
             }
-            public bool ImportImageImpl()
+            public RName ImportImageImpl()
             {
                 using (var stream = System.IO.File.OpenRead(mSourceFile))
                 {
                     return ImportImageImpl(stream);
                 }
             }
-            public unsafe bool ImportImageImpl(System.IO.Stream stream)
+            public unsafe RName ImportImageImpl(System.IO.Stream stream)
             {
                 if (stream == null)
-                    return false;
+                    return null;
 
                 var extName = IO.TtFileManager.GetExtName(mSourceFile);
                 var rn = RName.GetRName(mDir.Name + mName + TtSrView.AssetExt, mDir.RNameType);
@@ -962,7 +962,7 @@ namespace EngineNS.NxRHI
                 {
                     var imageFloat = StbImageSharp.ImageResultFloat.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
                     if (imageFloat == null)
-                        return false;
+                        return null;
 
                     StbImageSharp.ImageResultFloat processedImage = null;
                     if (mDesc.CubeFaces == 6)
@@ -978,7 +978,7 @@ namespace EngineNS.NxRHI
                 {
                     var file = new Jither.OpenEXR.EXRFile(stream);
                     if (file.Parts.Count == 0)
-                        return false;
+                        return null;
 
                     TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, file, mDesc);
                 }
@@ -987,7 +987,7 @@ namespace EngineNS.NxRHI
                     TtMemImage image = null;
                     image = StbImageSharp.TtMemImage.FromStream(stream, StbImageSharp.ColorComponents.Default);
                     if (image == null)
-                        return false;
+                        return null;
 
                     if (mDesc.AutoCheckNormal == true)
                     {
@@ -1021,7 +1021,9 @@ namespace EngineNS.NxRHI
                 }
 
                 rn.AMeta.AddAssetFile(rn.Address);
-                return true;
+                TtEngine.Instance.SourceControlModule.AddFile(rn.Address + IAssetMeta.MetaExt, true);
+
+                return rn;
             }
 
             public static bool ImportImage(string sourceFile, RName dir, TtPicDesc desc)

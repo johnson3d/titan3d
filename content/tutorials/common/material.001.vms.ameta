@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Graphics.Mesh.TtMeshPrimitivesAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="bdc0d615a6ebb5ac158d608a0727c77608f5b70df56549bea156d8d56145d60d" />
+      <Hash Type="System.String@Unknown" Value="98d3d75f703de616bdb6c63e647dd2befa591128e0cf68c3c711d9bbc3038bce" />
       <Path Type="System.String@Unknown" Value="material.001.vms" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">

@@ -31,6 +31,7 @@ namespace EngineNS.Bricks.AssetImpExp
     public class TtAssetImportOption_Mesh
     {
         public bool GenerateUMS { get; set; } = false;
+        public bool GenerateTexture { get; set; } = true;
         public bool ApplyTransformToVertex { get; set; } = false;
         public bool AsStaticMesh { get; set; } = false;
         public float UnitScale { get; set; } = 1f;
@@ -844,13 +845,18 @@ namespace EngineNS.Bricks.AssetImpExp
     }
     public class MeshGenerater
     {
-        public static List<TtMeshPrimitives> Generate(Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
+        public struct TtExpMeshData
+        {
+            public TtMeshPrimitives Mesh;
+            public List<Mesh> Materials;
+        }
+        public static List<TtExpMeshData> Generate(Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
             var meshNodes = AssimpSceneUtil.FindMeshNodes(scene);
             var skeletons = SkeletonGenerater.Generate(scene, importOption);
             return Generate(meshNodes, skeletons, scene, importOption);
         }
-        public static List<TtMeshPrimitives> Generate(List<TtSkinSkeleton> meshSkeletons, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
+        public static List<TtExpMeshData> Generate(List<TtSkinSkeleton> meshSkeletons, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
             var meshNodes = AssimpSceneUtil.FindMeshNodes(scene);
             return Generate(meshNodes, meshSkeletons, scene, importOption);
@@ -859,15 +865,16 @@ namespace EngineNS.Bricks.AssetImpExp
         {
             return null;
         }
-        private static List<TtMeshPrimitives> Generate(List<Assimp.Node> meshNodes, List<TtSkinSkeleton> meshSkeletons, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
+        private static List<TtExpMeshData> Generate(List<Assimp.Node> meshNodes, List<TtSkinSkeleton> meshSkeletons, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
-            List<TtMeshPrimitives> meshPrimitives = new List<TtMeshPrimitives>();
+            List<TtExpMeshData> meshPrimitives = new List<TtExpMeshData>();
             foreach (var meshNode in meshNodes)
             {
                 var skeleton = AssimpSceneUtil.FindMeshSkeleton(meshNode, meshSkeletons, scene);
-                var meshPrimitive = CreateMeshPrimitives(meshNode, skeleton, scene, importOption);
+                List<Mesh> meshes;
+                var meshPrimitive = CreateMeshPrimitives(meshNode, skeleton, scene, importOption, out meshes);
                 meshPrimitive.PartialSkeleton = skeleton;
-                meshPrimitives.Add(meshPrimitive);
+                meshPrimitives.Add(new TtExpMeshData() { Mesh = meshPrimitive, Materials = meshes });
             }
             return meshPrimitives;
         }
@@ -884,7 +891,7 @@ namespace EngineNS.Bricks.AssetImpExp
             }
             return validMeshes;
         }
-        private static TtMeshPrimitives CreateMeshPrimitives(Assimp.Node meshNode, TtSkinSkeleton skeleton, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
+        private static TtMeshPrimitives CreateMeshPrimitives(Assimp.Node meshNode, TtSkinSkeleton skeleton, Assimp.Scene scene, TtAssetImportOption_Mesh importOption, out List<Mesh> meshes)
         {
             var preAssimpTransform = Matrix4x4.Identity;
             if (AssimpSceneUtil.IsZUpLeftHandCoordinate(scene))
@@ -916,7 +923,7 @@ namespace EngineNS.Bricks.AssetImpExp
                 transformTuple.Scale * importOption.UnitScale, transformTuple.Quat);
             }
 
-            var meshes = GetValidMesh(meshNode, scene);
+            meshes = GetValidMesh(meshNode, scene);
 
             TtMeshPrimitives meshPrimitives = new TtMeshPrimitives(meshNode.Name, (uint)meshes.Count);
             int vertextCount = 0;

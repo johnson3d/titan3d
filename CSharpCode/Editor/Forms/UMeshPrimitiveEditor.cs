@@ -129,9 +129,11 @@ namespace EngineNS.Editor.Forms
         {
             MaterialName = RName.GetRName("material/sysdft.material", RName.ERNameType.Engine);
             PlaneMaterialName = RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine);
+            ImportBaseMaterial = RName.GetRName("material/pbr.material", RName.ERNameType.Engine);
         }
         public RName MaterialName { get; set; }
         public RName PlaneMaterialName { get; set; }
+        public RName ImportBaseMaterial { get; set; }
     }
     public class TtMeshPrimitiveEditor : TtLightEnvironemnt, Editor.IAssetEditor, IRootForm
     {

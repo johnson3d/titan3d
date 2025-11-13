@@ -2,6 +2,7 @@
 using EngineNS.Animation.Asset;
 using EngineNS.Animation.SkeletonAnimation.Skeleton;
 using EngineNS.Bricks.AssetImpExp;
+using NPOI.SS.Formula.Functions;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Crypto.IO;
 using System;
@@ -359,7 +360,7 @@ namespace EngineNS.Graphics.Mesh
                 return retValue;
             }
 
-            private async System.Threading.Tasks.Task<bool> DoImport()
+            private async Thread.Async.TtTask<bool> DoImport()
             {
                 foreach(var importSetting in MeshImportSettings)
                 {
@@ -372,7 +373,7 @@ namespace EngineNS.Graphics.Mesh
                 }
                 return true;
             }
-            public static async System.Threading.Tasks.Task<bool> ImportAndSaveMesh(RName mDir, TtMeshImportSetting improtSetting)
+            public static async Thread.Async.TtTask<bool> ImportAndSaveMesh(RName mDir, TtMeshImportSetting improtSetting)
             {
                 var AssetImportOption = new TtAssetImportOption_Mesh();
                 AssetImportOption.UnitScale = improtSetting.UnitScale;
@@ -401,67 +402,121 @@ namespace EngineNS.Graphics.Mesh
                 }
 
                 var scene = improtSetting.AssetImporter.AiScene;
-                if (scene.HasMaterials)
+                Pipeline.Shader.TtMaterialInstance[] materials = new Pipeline.Shader.TtMaterialInstance[scene.Materials.Count];
+                
+                if (AssetImportOption.GenerateTexture && scene.HasMaterials)
                 {
-                    foreach (var m in scene.Materials)
+                    var baseMtl = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(TtEngine.Instance.ConfigManager.GetConfig<Editor.Forms.TtMeshPrimitiveEditorConfig>().ImportBaseMaterial);
+                    
+                    for (int i = 0; i<scene.Materials.Count; i++)
                     {
-                        if (m.TextureAmbient.TextureIndex>=0&&m.TextureAmbient.TextureIndex<scene.Textures.Count)
-                        {
-                            var texture = scene.Textures[m.TextureAmbient.TextureIndex];
-                            if (texture.HasCompressedData)
-                            {
-                                if (texture.CompressedFormatHint=="png" || texture.CompressedFormatHint=="jpg")
-                                {
-                                    try
-                                    {
-                                        using (var stream = new MemoryStream(texture.CompressedData))
-                                        {
-                                            StbImageSharp.TtMemImage image = StbImageSharp.TtMemImage.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                        var m = scene.Materials[i];
+                        if (m.IsPBRMaterial == false)
+                            continue;
+                        var mtl = Graphics.Pipeline.Shader.TtMaterialInstance.CreateMaterialInstance(baseMtl);
+                        mtl.AssetName = RName.GetRName($"{mDir.Name}{m.Name}_{i}{Pipeline.Shader.TtMaterialInstance.AssetExt}", mDir.RNameType);
 
-                                            var importer = new NxRHI.TtSrView.ImportAttribute();
-                                            importer.mSourceFile = texture.Filename + ".png";
-                                            importer.mDir = mDir;
-                                            importer.mName = texture.Filename;
-                                            importer.mDesc.Width = image.Width;
-                                            importer.mDesc.Height = image.Height;
-                                            stream.Seek(0, SeekOrigin.Begin);
-                                            importer.ImportImageImpl(stream);
+                        Action<TextureSlot, string> setSrv = (TextureSlot slot, string shaderName) =>
+                        {
+                            if (slot.FilePath==null)
+                                return;
+                            int textureIndex = -1;
+                            if (slot.FilePath.StartsWith("*"))
+                            {
+                                textureIndex = int.Parse(slot.FilePath.Substring(1));
+                            }
+                            if (textureIndex>=0&&textureIndex<scene.Textures.Count)
+                            {
+                                var texture = scene.Textures[textureIndex];
+                                if (texture.HasCompressedData)
+                                {
+                                    if (texture.CompressedFormatHint=="png" || texture.CompressedFormatHint=="jpg")
+                                    {
+                                        try
+                                        {
+                                            var imageData = texture.CompressedData;
+                                            if (shaderName=="TexNormal")
+                                            {
+                                                //using (var stream = new MemoryStream(imageData))
+                                                //{
+                                                //    StbImageSharp.TtMemImage image = StbImageSharp.TtMemImage.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+
+                                                //    image = StbImageSharp.ImageProcessor.GetBoxDownSampler(image, image.Width/2, image.Height/2);
+                                                //    imageData = image.SaveToMem().GetBuffer();
+                                                //}
+                                            }
+
+                                            using (var stream = new MemoryStream(imageData))
+                                            {
+                                                //StbImageSharp.TtMemImage image = StbImageSharp.TtMemImage.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                                                var importer = new NxRHI.TtSrView.ImportAttribute();
+                                                importer.mSourceFile = texture.Filename + $"_{shaderName}.png";
+                                                importer.mDir = mDir;
+                                                importer.mName = texture.Filename + $"_{shaderName}";
+                                                //importer.mDesc.Width = image.Width;
+                                                //importer.mDesc.Height = image.Height;
+                                                stream.Seek(0, SeekOrigin.Begin);
+                                                var rn = importer.ImportImageImpl(stream);
+                                                mtl.SetSrv(shaderName, rn);
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Console.WriteLine($"加载图像失败: {ex.Message}");
                                         }
                                     }
-                                    catch (Exception ex)
-                                    {
-                                        Console.WriteLine($"加载图像失败: {ex.Message}");
-                                    }
-                                    
+                                }
+                                else if (texture.HasNonCompressedData)
+                                {
+
                                 }
                             }
-                            else if (texture.HasNonCompressedData)
-                            {
+                        };
+                        setSrv(m.PBR.TextureBaseColor, "TexDiffuse");
+                        setSrv(m.TextureNormal, "TexNormal");
+                        setSrv(m.PBR.TextureMetalness, "TexMRA");
 
-                            }
-                        }
+                        //setSrv(m.Matal, "TexMRA");
                         //TextureSlot slot;
                         //m.GetMaterialTexture(m.TextureAmbient, 0, out slot);
+
+                        if (mtl.AssetName.AMeta==null)
+                        {
+                            var ameta = mtl.CreateAMeta();
+                            ameta.AssetId = Guid.NewGuid();
+                            ameta.SetAssetName(mtl.AssetName);
+                            ameta.SaveAMeta(mtl);
+                            TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                        }   
+                        
+                        mtl.SaveAssetTo(mtl.AssetName);
+                        materials[i] = mtl;
                     }
                 }
 
                 var meshPrimitives = MeshGenerater.Generate(skeletons, improtSetting.AssetImporter.AiScene, AssetImportOption);
                 foreach (var mesh in meshPrimitives)
                 {
-                    var rn = RName.GetRName(mDir.Name + mesh.mCoreObject.GetName() + TtMeshPrimitives.AssetExt, mDir.RNameType);
-                    await SaveMesh(rn, mesh);
+                    var rn = RName.GetRName(mDir.Name + mesh.Mesh.mCoreObject.GetName() + TtMeshPrimitives.AssetExt, mDir.RNameType);
+                    await SaveMesh(rn, mesh.Mesh);
                     if (AssetImportOption.GenerateUMS)
                     {
-
-                        var umsRN = RName.GetRName(mDir.Name + mesh.mCoreObject.GetName() + TtMaterialMesh.AssetExt, mDir.RNameType);
+                        var umsRN = RName.GetRName(mDir.Name + mesh.Mesh.mCoreObject.GetName() + TtMaterialMesh.AssetExt, mDir.RNameType);
                         var ums = new TtMaterialMesh
                         {
                             AssetName = umsRN,
                         };
-                        ums.SubMeshes[0].Mesh = mesh;
+                        ums.SubMeshes[0].Mesh = mesh.Mesh;
                         for(int i = 0; i < ums.SubMeshes[0].Materials.Count; i++)
                         {
-                            ums.SubMeshes[0].Materials[i] = await EngineNS.TtEngine.Instance.Config.DefaultMaterial.GetAsset<Pipeline.Shader.TtMaterial>(); //EngineNS.TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(EngineNS.TtEngine.Instance.Config.DefaultMaterial);
+                            if (i < mesh.Materials.Count && mesh.Materials[i].MaterialIndex < materials.Length && materials[mesh.Materials[i].MaterialIndex]!=null)
+                            {
+                                ums.SubMeshes[0].Materials[i] = materials[mesh.Materials[i].MaterialIndex];
+                            }
+                            else
+                            {
+                                ums.SubMeshes[0].Materials[i] = await EngineNS.TtEngine.Instance.Config.DefaultMaterial.GetAsset<Pipeline.Shader.TtMaterial>(); //EngineNS.TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(EngineNS.TtEngine.Instance.Config.DefaultMaterial);
+                            }
                         }
                         var ameta = new TtMaterialMeshAMeta();
                         ameta.SetAssetName(umsRN);
@@ -476,7 +531,7 @@ namespace EngineNS.Graphics.Mesh
                 return true;
             }
 
-            public static async System.Threading.Tasks.Task SaveSkeleton(RName skeletonAsset, TtSkinSkeleton skeleton, bool bIsNeedMerge = false)
+            public static async Thread.Async.TtTask SaveSkeleton(RName skeletonAsset, TtSkinSkeleton skeleton, bool bIsNeedMerge = false)
             {
                 if(!bIsNeedMerge || !EngineNS.TtEngine.Instance.AnimationModule.SkeletonAssetManager.SkeletonAssets.ContainsKey(skeletonAsset))
                 {
@@ -508,7 +563,7 @@ namespace EngineNS.Graphics.Mesh
 
                 }
             }
-            public static async System.Threading.Tasks.Task SaveMesh(RName name, TtMeshPrimitives meshPrimitives)
+            public static async Thread.Async.TtTask SaveMesh(RName name, TtMeshPrimitives meshPrimitives)
             {
                 var ameta = new TtMeshPrimitivesAMeta();
                 ameta.SetAssetName(name);

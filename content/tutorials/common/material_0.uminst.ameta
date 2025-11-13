@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="6679be2a2ab11f76f4b3af24930d29395afb6ec30a839e6dc9798d8aef8c40fe" />
+      <Path Type="System.String@Unknown" Value="material_0.uminst" />
+    </e_0>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="cf8f0b85-8d8f-43c4-8787-42e124526699" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/material_0.uminst,cf8f0b85-8d8f-43c4-8787-42e124526699" />
+  <Description Type="System.String@Unknown" Value="This is a Asset" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="4">
+    <e_0 Value="Engine,material/pbr.material,95d0c6ba-5ec5-497b-8738-03c2d2965cba" />
+    <e_1 Value="Game,tutorials/common/texture_pbr_20250901_texdiffuse.srv,60dfc063-9513-46c2-bf2e-832245066925" />
+    <e_2 Value="Game,tutorials/common/texture_pbr_20250901_normal_texnormal.srv,6ea6e136-6749-421c-97f3-3601e42e75b4" />
+    <e_3 Value="Game,tutorials/common/texture_pbr_20250901_metallic-texture_pbr_20250901_roughness_texmra.srv,3667e865-f76e-4210-bc88-84dfe312b506" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
+</Root>

@@ -350,6 +350,8 @@ namespace EngineNS.IO
                 TtEngine.Instance.SourceControlModule.AddFile(targetSnapName, true);
 
             TtEngine.Instance.AssetMetaManager.RemoveAMeta(this);
+            IO.TtFileManager.DeleteFile(mAssetName.Address + IAssetMeta.MetaExt);
+
             try
             {
                 OnBeforeRenamedAsset(asset, mAssetName);
@@ -363,10 +365,12 @@ namespace EngineNS.IO
             mAssetName.VeryDangrouseUpdate(name, type);
             RNameManager.Instance.VeryDangrouseAdd(mAssetName);
             this.SaveAMeta(asset);
-            
-            asset.SaveAssetTo(mAssetName);
-
+            //var tmp = TtAssetMetaManager.LoadAMeta(TtEngine.Instance.FileManager.GetRoot2(type), type, mAssetName.Address + IAssetMeta.MetaExt);
+            //TtEngine.Instance.AssetMetaManager.RegAsset(tmp);
             TtEngine.Instance.AssetMetaManager.RegAsset(this);
+
+            asset.SaveAssetTo(mAssetName);
+            
             try
             {
                 OnAfterRenamedAsset(asset, mAssetName);

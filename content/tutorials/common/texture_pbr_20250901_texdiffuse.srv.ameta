@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
-  <AssetId Type="System.Guid@Unknown" Value="0b6169a3-e5e0-4a19-85e3-25d29e5d4fe6" />
-  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/texture_pbr_20250901.srv,00000000-0000-0000-0000-000000000000" />
+  <AssetId Type="System.Guid@Unknown" Value="60dfc063-9513-46c2-bf2e-832245066925" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/texture_pbr_20250901_texdiffuse.srv,00000000-0000-0000-0000-000000000000" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.TtSrView&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
@@ -12,7 +12,7 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <OriginImageAddress Type="System.String@Unknown" Value="texture_pbr_20250901.png" />
+  <OriginImageAddress Type="System.String@Unknown" Value="texture_pbr_20250901_TexDiffuse.png" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.TtSrView@EngineCore" />
 </Root>

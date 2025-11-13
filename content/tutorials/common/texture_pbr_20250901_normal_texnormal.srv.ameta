@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Animation.Asset.TtSkeletonAssetAMeta@EngineCore">
+<Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
-  <AssetId Type="System.Guid@Unknown" Value="9d15b4ec-f237-4726-8698-a30e12b18a07" />
-  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/optimus.skt,0de762f4-eed0-4660-a6e4-dd5ffcffdc66" />
-  <Description Type="System.String@Unknown" Value="This is a EngineNS.Animation.Asset.TtSkeletonAsset&#xA;" />
+  <AssetId Type="System.Guid@Unknown" Value="6ea6e136-6749-421c-97f3-3601e42e75b4" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/texture_pbr_20250901_normal_texnormal.srv,00000000-0000-0000-0000-000000000000" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.TtSrView&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
@@ -12,6 +12,7 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
+  <OriginImageAddress Type="System.String@Unknown" Value="texture_pbr_20250901_normal_TexNormal.png" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Animation.Asset.TtSkeletonAsset@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.TtSrView@EngineCore" />
 </Root>

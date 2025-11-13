@@ -1234,7 +1234,7 @@ namespace EngineNS.EGui.Controls
                                         {
                                             var name = mSelectFolderView.CurrentDir.Name + sourceName.PureName + sourceName.ExtName;
                                             IsAssetOprating = true;
-                                            mOperationAsset.MoveTo(name, sourceName.RNameType).AddWaitTask((task)=>
+                                            mOperationAsset.MoveTo(name, mSelectFolderView.CurrentDir.RNameType).AddWaitTask((task)=>
                                             {
                                                 IsAssetOprating = false;
                                             });
@@ -1244,7 +1244,7 @@ namespace EngineNS.EGui.Controls
                                         {
                                             var name = mSelectFolderView.CurrentDir.Name + sourceName.PureName + sourceName.ExtName;
                                             IsAssetOprating = true;
-                                            mOperationAsset.CopyTo(name, sourceName.RNameType).AddWaitTask((task) =>
+                                            mOperationAsset.CopyTo(name, mSelectFolderView.CurrentDir.RNameType).AddWaitTask((task) =>
                                             {
                                                 IsAssetOprating = false;
                                             });
@@ -1254,7 +1254,7 @@ namespace EngineNS.EGui.Controls
                                         {
                                             var name = mSelectFolderView.CurrentDir.Name;// + sourceName.PureName + sourceName.ExtName;
                                             IsAssetOprating = true;
-                                            mOperationAsset.PackRefAssetsTo(RName.GetRName(name, sourceName.RNameType)).AddWaitTask((task) =>
+                                            mOperationAsset.PackRefAssetsTo(RName.GetRName(name, mSelectFolderView.CurrentDir.RNameType)).AddWaitTask((task) =>
                                             {
                                                 IsAssetOprating = false;
                                             });
@@ -1265,7 +1265,7 @@ namespace EngineNS.EGui.Controls
                                             var dir = sourceName.Name.Substring(0, sourceName.Name.Length - sourceName.PureName.Length - sourceName.ExtName.Length);
                                             var name = dir + NewName + sourceName.ExtName;
                                             IsAssetOprating = true;
-                                            mOperationAsset.RenameTo(name, sourceName.RNameType).AddWaitTask((task) =>
+                                            mOperationAsset.RenameTo(name, mSelectFolderView.CurrentDir.RNameType).AddWaitTask((task) =>
                                             {
                                                 IsAssetOprating = false;
                                             });
