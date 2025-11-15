@@ -74,22 +74,23 @@ namespace EngineNS.Bricks.Recast
         {
             get => mNavMesh;
         }
-        Guid mNodeId = Guid.NewGuid();
         [Category("Option")]
         public override Guid NodeId
         {
             get
             {
-                if (GetNodeData<TtRecastSceneNodeData>() == null)
-                    return Guid.Empty;
-                return GetNodeData<TtRecastSceneNodeData>().NodeId;
+                return base.NodeId;
+                //if (GetNodeData<TtRecastSceneNodeData>() == null)
+                //    return Guid.Empty;
+                //return GetNodeData<TtRecastSceneNodeData>().NodeId;
             }
             set
             {
-                if (GetNodeData<TtRecastSceneNodeData>() == null)
-                    return;
-
-                mNodeId = value; 
+                if (GetNodeData<TtRecastSceneNodeData>() != null)
+                {
+                    GetNodeData<TtRecastSceneNodeData>().NodeId = value;
+                    base.NodeId = value;
+                }
             }
         }
         public bool BuildNavMesh()

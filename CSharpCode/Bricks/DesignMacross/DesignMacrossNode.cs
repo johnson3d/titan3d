@@ -69,9 +69,9 @@ namespace EngineNS.DesignMacross
             base.OnParentChanged(prev, cur);
             //DesignMacross = DesignMacross;
         }
-        protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent)
+        protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent, object extArg)
         {
-            await base.OnPostInitNode(parent);
+            await base.OnPostInitNode(parent, extArg);
             DesignMacross = DesignMacross;
         }
         //[RName.PGRName(FilterExts = UDesignMacross.AssetExt)]

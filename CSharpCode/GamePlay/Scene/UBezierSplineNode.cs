@@ -227,9 +227,9 @@ namespace EngineNS.GamePlay.Scene
             UpdateAABB();
             Parent?.UpdateAABB();
         }
-        protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent)
+        protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent, object extArg)
         {
-            await base.OnPostInitNode(parent);
+            await base.OnPostInitNode(parent, extArg);
             UpdateAbsTransform();
         }
         public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtRenderMesh> meshes)

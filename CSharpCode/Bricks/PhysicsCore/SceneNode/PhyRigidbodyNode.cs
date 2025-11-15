@@ -159,11 +159,6 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             PhyActor.mCoreObject.SetMinCCDAdvanceCoefficient(0);       
         }
 
-        protected override TtTask OnPostInitNode(TtNode parent)
-        {
-            return base.OnPostInitNode(parent);
-        }
-
         protected override void OnParentChanged(TtNode prev, TtNode cur)
         {
             base.OnParentChanged(prev, cur);

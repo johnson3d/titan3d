@@ -151,7 +151,7 @@ namespace Survivor
     }
     [EngineNS.Bricks.CodeBuilder.ContextMenu("MonsterSpawner", "Game\\Survivor\\MonsterSpawner", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtMonsterSpawnerNode.TtMonsterSpawnerNodeData), DefaultNamePrefix = "MonsterSpawner")]
-    public class TtMonsterSpawnerNode : EngineNS.GamePlay.Scene.TtLightWeightNodeBase
+    public class TtMonsterSpawnerNode : EngineNS.GamePlay.Scene.TtSceneActorNode
     {
         public class TtMonsterSpawnerNodeData : EngineNS.GamePlay.Scene.TtNodeData
         {

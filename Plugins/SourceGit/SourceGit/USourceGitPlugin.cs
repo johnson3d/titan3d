@@ -67,36 +67,55 @@ namespace EngineNS.Plugins.SourceGit
                 System.Diagnostics.Process result = new System.Diagnostics.Process();
                 result.StartInfo = processStartInfo;
                 result.Start();
-                Action action = async () =>
+                var timeoutSignal = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                result.WaitForExit();
+                //result.WaitForExitAsync(timeoutSignal.Token).Wait();
+                var q = new System.Text.StringBuilder();
+                while (!result.HasExited)
                 {
-                    try
-                    {
-                        var timeoutSignal = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                        await result.WaitForExitAsync(timeoutSignal.Token);
+                    q.Append(result.StandardOutput.ReadToEnd());
+                }
+                string r = q.ToString();
 
-                        var q = new System.Text.StringBuilder();
-                        while (!result.HasExited)
-                        {
-                            q.Append(result.StandardOutput.ReadToEnd());
-                        }
-                        string r = q.ToString();
+                if (r == "")
+                {
 
-                        if (r == "")
-                        {
+                }
+                else
+                {
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(ELogTag.Warning, $"git add {file} returned:{r}");
+                }
 
-                        }
-                        else
-                        {
+                //Action action = async () =>
+                //{
+                //    try
+                //    {
+                //        var timeoutSignal = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                //        await result.WaitForExitAsync(timeoutSignal.Token);
 
-                        }
-                    }
-                    catch (Exception actionEx) 
-                    {
-                        Profiler.Log.WriteException(actionEx);
-                        Profiler.Log.WriteLine<Profiler.TtIOCategory>(ELogTag.Warning, $"git add {file} failed:{actionEx.Message}");
-                    }
-                };
-                action();
+                //        var q = new System.Text.StringBuilder();
+                //        while (!result.HasExited)
+                //        {
+                //            q.Append(result.StandardOutput.ReadToEnd());
+                //        }
+                //        string r = q.ToString();
+
+                //        if (r == "")
+                //        {
+
+                //        }
+                //        else
+                //        {
+
+                //        }
+                //    }
+                //    catch (Exception actionEx) 
+                //    {
+                //        Profiler.Log.WriteException(actionEx);
+                //        Profiler.Log.WriteLine<Profiler.TtIOCategory>(ELogTag.Warning, $"git add {file} failed:{actionEx.Message}");
+                //    }
+                //};
+                //action();
 
                 return new Bricks.SourceControl.TtSourceOpResult(0);
             }

@@ -185,10 +185,10 @@ namespace EngineNS.GamePlay
                 SetStyle(ENodeStyles.Transient);
                 return result;
             }
-            protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent)
+            protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent, object extArg)
             {
                 SetStyle(ENodeStyles.Transient);
-                await base.OnPostInitNode(parent);
+                await base.OnPostInitNode(parent, extArg);
             }
             public override bool DrawNode(EngineNS.Editor.INodeUIProvider parent, EngineNS.Editor.TtTreeNodeDrawer tree, int index, int NumOfChild)
             {

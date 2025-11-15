@@ -107,9 +107,9 @@ namespace EngineNS.UI
                 // todo: load ui
             }
         }
-        protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent)
+        protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent, object extArg)
         {
-            await base.OnPostInitNode(parent);
+            await base.OnPostInitNode(parent, extArg);
 
             UpdateAbsTransform();
             var uiData = NodeData as TtUINodeData;

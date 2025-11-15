@@ -542,10 +542,6 @@ namespace EngineNS.Bricks.AdvanceShadow
 
             return ret;
         }
-        protected override TtTask OnPostInitNode(TtNode parent)
-        {
-            return base.OnPostInitNode(parent);
-        }
         public override void Dispose()
         {
             ShowDebugger = false;

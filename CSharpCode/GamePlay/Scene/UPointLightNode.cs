@@ -114,9 +114,9 @@ namespace EngineNS.GamePlay.Scene
                 return mDebugMesh;
             }
         }
-        protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent)
+        protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent, object extArg)
         {
-            await base.OnPostInitNode(parent);
+            await base.OnPostInitNode(parent, extArg);
             this.BoundVolume.LocalAABB = new BoundingBox(Vector3.Zero, 1.0f);
             UpdateAbsTransform();
         }

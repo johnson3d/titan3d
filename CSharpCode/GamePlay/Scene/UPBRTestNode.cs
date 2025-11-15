@@ -266,9 +266,9 @@ namespace EngineNS.GamePlay.Scene
         List<Graphics.Mesh.TtRenderMesh> mCurrMeshMatrix = new List<Graphics.Mesh.TtRenderMesh>();
         List<Graphics.Mesh.TtRenderMesh> mMeshMatrix = new List<Graphics.Mesh.TtRenderMesh>();
 
-        protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent)
+        protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent, object extArg)
         {
-            await base.OnPostInitNode(parent);
+            await base.OnPostInitNode(parent, extArg);
 
             UpdateAbsTransform();
             var meshData = NodeData as UMeshNodeData;

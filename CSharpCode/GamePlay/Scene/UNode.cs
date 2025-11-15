@@ -186,7 +186,7 @@ namespace EngineNS.GamePlay.Scene
             //this.UpdateAABB();
             this.Dispose();
         }
-        public static async Thread.Async.TtTask<TtNode> ConcreateNode(TtWorld world, TtNode tarNode, TtNode node)
+        public static async Thread.Async.TtTask<TtNode> ConcreateNode(TtWorld world, TtNode tarNode, TtNode node, object extArg)
         {
             TtNode result = tarNode;
             bool isNewObj = false;
@@ -210,12 +210,12 @@ namespace EngineNS.GamePlay.Scene
             foreach (var i in node.Children)
             {
                 var cnodeTar = result.FindFirstChild(i.NodeName, i.GetType());
-                var cnode = await ConcreateNode(world, cnodeTar, i);
+                var cnode = await ConcreateNode(world, cnodeTar, i, extArg);
                 cnode.Parent = result;
             }
 
             if (isNewObj)
-                await result.OnPostInitNode(result.Parent);
+                await result.OnPostInitNode(result.Parent, extArg);
 
             return result;
         }
@@ -282,7 +282,7 @@ namespace EngineNS.GamePlay.Scene
             return true;
         }
         //Callback: Children ready!
-        protected virtual async Thread.Async.TtTask OnPostInitNode(TtNode parent)
+        protected virtual async Thread.Async.TtTask OnPostInitNode(TtNode parent, object extArg)
         {
             Behavior?.BeginPlay(this);
         }
@@ -314,7 +314,7 @@ namespace EngineNS.GamePlay.Scene
             return Rtti.TtTypeDescManager.CreateInstance(attr.NodeDataType) as TtNodeData;
         }
         public delegate TtTask FPostSpawnNode<T>(T node);
-        public static async Thread.Async.TtTask<T> SpawnNode<T>(TtNode parent, FPostSpawnNode<T> postAction, TtNodeData data = null, EBoundVolumeType bvType = EBoundVolumeType.Box, Type placementType = null, TtWorld world = null)
+        public static async Thread.Async.TtTask<T> SpawnNode<T>(TtNode parent, FPostSpawnNode<T> postAction, TtNodeData data = null, EBoundVolumeType bvType = EBoundVolumeType.Box, Type placementType = null, TtWorld world = null, object extArg = null)
             where T : TtNode, new()
         {
             var result = new T();
@@ -340,12 +340,12 @@ namespace EngineNS.GamePlay.Scene
             result.Parent = parent;
             if (postAction != null)
                 await postAction(result);
-            await result.OnPostInitNode(parent);
+            await result.OnPostInitNode(parent, extArg);
             return result;
         }
         public delegate TtTask FPostSpawnNode(TtNode node);
         [Rtti.Meta("")]
-        public static async Thread.Async.TtTask<TtNode> SpawnNode(TtNode parent, System.Type nodeType, FPostSpawnNode postAction, TtNodeData data = null, EBoundVolumeType bvType = EBoundVolumeType.Box, Type placementType = null, TtWorld world = null)
+        public static async Thread.Async.TtTask<TtNode> SpawnNode(TtNode parent, System.Type nodeType, FPostSpawnNode postAction, TtNodeData data = null, EBoundVolumeType bvType = EBoundVolumeType.Box, Type placementType = null, TtWorld world = null, object extArg = null)
         {
             if (nodeType.IsSubclassOf(typeof(TtNode)) == false)
             {
@@ -374,7 +374,7 @@ namespace EngineNS.GamePlay.Scene
             result.Parent = parent;
             if (postAction != null)
                 await postAction(result);
-            await result.OnPostInitNode(parent);
+            await result.OnPostInitNode(parent, extArg);
             return result;
         }
         #endregion
@@ -1169,165 +1169,324 @@ namespace EngineNS.GamePlay.Scene
         {
 
         }
-        public unsafe void SaveChildNode(TtNode scene, EngineNS.XndHolder xnd, EngineNS.XndNode node)
+        //public unsafe void SaveChildNode(TtNode scene, EngineNS.XndHolder xnd, EngineNS.XndNode node)
+        //{
+        //    foreach(var i in Children)
+        //    {
+        //        if (i.HasStyle(ENodeStyles.Transient))
+        //            continue;
+
+        //        var typeStr = Rtti.TtTypeDesc.TypeStr(i.GetType());
+        //        using (var nd = xnd.NewNode(typeStr, 1, 0))
+        //        {
+        //            node.AddNode(nd);
+
+        //            if (i.NodeData != null)
+        //            {
+        //                uint nodeFlags = (uint)ENodeFlags.IsNodeDesc;
+        //                if (this.IsPrefab)
+        //                {
+        //                    nodeFlags |= (uint)ENodeFlags.IgnoreNodeDesc;
+        //                }
+        //                var dataAttr = nd.GetOrAddAttribute(Rtti.TtTypeDesc.TypeStr(i.NodeData.GetType()), 1, nodeFlags, true);
+
+        //                //using (var dataAttr = xnd.NewAttribute(Rtti.TtTypeDesc.TypeStr(i.NodeData.GetType()), 1, nodeFlags))
+        //                using (var ar = dataAttr.GetWriter((ulong)NodeData.GetStructSize() * 2))
+        //                {
+        //                    i.OnBeforeSaveNodeData();
+        //                    ar.Write(i.NodeData);
+        //                }
+
+        //                if (i.Behavior != null)
+        //                {
+        //                    dataAttr = nd.GetOrAddAttribute(Rtti.TtTypeDesc.TypeStr(i.Behavior.GetType()), 1, (uint)ENodeFlags.IsBehaviorData, true);
+        //                    using (var ar = dataAttr.GetWriter((ulong)NodeData.GetStructSize() * 2))
+        //                    {
+        //                        ar.Write(i.Behavior);
+        //                    }
+        //                }
+        //            }
+        //            i.SaveChildNode(scene, xnd, nd);
+        //        }   
+        //    }
+        //}
+
+        //public async Thread.Async.TtTask<bool> LoadChildNode(GamePlay.TtWorld world, TtNode scene, EngineNS.XndNode node, bool bTryFindNode)
+        //{
+        //    var isNoAABB = this.HasStyle(ENodeStyles.DiscardAABB);
+        //    this.SetStyle(ENodeStyles.DiscardAABB);
+        //    for (uint i = 0; i < node.GetNumOfNode(); i++)
+        //    {
+        //        var cld = node.GetNode(i);
+        //        var cldTypeStr = cld.NativeSuper.Name;
+                
+        //        var attr = cld.FindFirstAttributeByFlags((uint)ENodeFlags.IsNodeDesc);
+        //        if (attr.NativePointer == IntPtr.Zero)
+        //        {
+        //            continue;
+        //        }
+        //        if ((attr.Flags & (uint)ENodeFlags.IgnoreNodeDesc) != 0)
+        //        {
+        //            this.IsPrefab = true;
+        //        }
+        //        var nodeTypeDesc = Rtti.TtTypeDesc.TypeOf(attr.Name);
+        //        TtNodeData nodeData = Rtti.TtTypeDescManager.CreateInstance(nodeTypeDesc) as TtNodeData;
+        //        var nd = Rtti.TtTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(cldTypeStr)) as TtNode;
+        //        if (nd == null || nodeData == null)
+        //        {
+        //            Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"SceneNode Load failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
+        //            continue;
+        //        }
+                
+        //        using (var ar = attr.GetReader(nd))
+        //        {
+        //            IO.ISerializer data = nodeData;
+        //            try
+        //            {
+        //                //ar.Tag = nd;
+        //                System.Type placementType = typeof(TtPlacement);
+        //                if (this.IsPrefab == false)
+        //                {
+        //                    if (false == ar.ReadTo(data, this))
+        //                    {
+        //                        continue;
+        //                    }
+
+        //                    if (bTryFindNode)
+        //                    {
+        //                        var old = FindFirstChild(nodeData.Name, nd.GetType());
+        //                        if (old != null)
+        //                        {
+        //                            var typeDesc = Rtti.TtTypeDesc.TypeOf(nodeData.GetType());
+        //                            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
+        //                            meta.CopyObjectMetaField(old.NodeData, nodeData);
+        //                            nodeData = old.NodeData;
+        //                            nd.IsDirty = true;
+        //                        }
+        //                    }
+        //                }
+
+        //                var ok = await nd.InitializeNode(world, nodeData, EBoundVolumeType.Box, placementType);
+        //                if (ok == false)
+        //                {
+        //                    Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"SceneNode Load Initialize failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
+        //                    continue;
+        //                }
+        //                var sn = scene as TtScene;
+        //                if (sn != null)
+        //                {
+        //                    sn.NumOfLoadedNode++;
+        //                }
+        //                //nd.NodeData = data as UNodeData;
+        //                //nd.OnNodeLoaded(this);
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                Profiler.Log.WriteException(ex);
+        //                Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"Scene({scene}): Node({nd.NodeData?.Name}) load failed");
+        //            }
+        //        }
+
+        //        if (nd.Behavior != null)
+        //        {
+        //            attr = cld.FindFirstAttributeByFlags((uint)ENodeFlags.IsBehaviorData);
+        //            if (attr.NativePointer != IntPtr.Zero)
+        //            {
+        //                var bhvType = Rtti.TtTypeDesc.TypeOf(attr.Name);
+        //                var bhv = Rtti.TtTypeDescManager.CreateInstance(bhvType) as TtBehavior;
+        //                try
+        //                {
+        //                    using (var ar = attr.GetReader(nd))
+        //                    {
+        //                        IO.ISerializer ro = bhv;
+        //                        ar.ReadTo(ro);
+        //                    }
+
+        //                    var typeStr = Rtti.TtTypeDesc.TypeStr(nd.Behavior.GetType());
+        //                    var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+        //                    if (meta != null)
+        //                    {
+        //                        meta.CopyObjectMetaField(nd.Behavior, bhv);
+        //                    }
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    Profiler.Log.WriteException(ex);
+        //                }
+        //            }
+        //        }
+                    
+        //        if (nd.Placement != null)
+        //        {
+        //            nd.Parent = this;
+        //            await nd.LoadChildNode(world, scene, cld, bTryFindNode);
+        //        }
+        //        await nd.OnPostInitNode(this, null);
+        //    }
+        //    if (isNoAABB == false)
+        //    {
+        //        this.UnsetStyle(ENodeStyles.DiscardAABB);
+        //        this.UpdateAABB();
+        //    }
+        //    return true;
+        //}
+        public unsafe void SaveNodeTree(TtNode scene, EngineNS.XndHolder xnd, EngineNS.XndNode node, bool bSaveChildren)
         {
-            foreach(var i in Children)
+            //System.Diagnostics.Debug.Assert(node.NativeSuper.Name==Rtti.TtTypeDesc.TypeOf(this.GetType()).TypeString);
+            node.NativeSuper.SetName(Rtti.TtTypeDesc.TypeOf(this.GetType()).TypeString);
+            if (this.NodeData != null)
             {
-                if (i.HasStyle(ENodeStyles.Transient))
-                    continue;
-
-                var typeStr = Rtti.TtTypeDesc.TypeStr(i.GetType());
-                using (var nd = xnd.NewNode(typeStr, 1, 0))
+                uint nodeFlags = (uint)ENodeFlags.IsNodeDesc;
+                if (this.IsPrefab)
                 {
-                    node.AddNode(nd);
+                    nodeFlags |= (uint)ENodeFlags.IgnoreNodeDesc;
+                }
+                var dataAttr = node.GetOrAddAttribute(Rtti.TtTypeDesc.TypeStr(this.NodeData.GetType()), 1, nodeFlags, true);
 
-                    if (i.NodeData != null)
+                //using (var dataAttr = xnd.NewAttribute(Rtti.TtTypeDesc.TypeStr(i.NodeData.GetType()), 1, nodeFlags))
+                using (var ar = dataAttr.GetWriter((ulong)NodeData.GetStructSize() * 2))
+                {
+                    this.OnBeforeSaveNodeData();
+                    ar.Write(this.NodeData);
+                }
+
+                if (this.Behavior != null)
+                {
+                    dataAttr = node.GetOrAddAttribute(Rtti.TtTypeDesc.TypeStr(this.Behavior.GetType()), 1, (uint)ENodeFlags.IsBehaviorData, true);
+                    using (var ar = dataAttr.GetWriter((ulong)NodeData.GetStructSize() * 2))
                     {
-                        uint nodeFlags = (uint)ENodeFlags.IsNodeDesc;
-                        if (this.IsPrefab)
-                        {
-                            nodeFlags |= (uint)ENodeFlags.IgnoreNodeDesc;
-                        }
-                        var dataAttr = nd.GetOrAddAttribute(Rtti.TtTypeDesc.TypeStr(i.NodeData.GetType()), 1, nodeFlags, true);
+                        ar.Write(this.Behavior);
+                    }
+                }
+            }
+            if (bSaveChildren)
+            {
+                foreach (var i in Children)
+                {
+                    //var typeStr = Rtti.TtTypeDesc.TypeStr(i.GetType());
+                    using (var cld = xnd.NewNode("", 1, 0))
+                    {
+                        node.AddNode(cld);
+                        i.SaveNodeTree(scene, xnd, cld, bSaveChildren);
+                    }
+                }
+            }
+        }
+        public static async Thread.Async.TtTask<TtNode> LoadNodeTree(TtWorld world, TtScene scene, TtNode parent, EngineNS.XndNode node, bool bTryFindNode, object extArg, bool bLoadChildren = true)
+        {
+            var attr = node.FindFirstAttributeByFlags((uint)ENodeFlags.IsNodeDesc);
+            if (attr.NativePointer == IntPtr.Zero)
+            {
+                return null;
+            }
+            var nodeTypeStr = node.NativeSuper.Name;
+            var nodeTypeDesc = Rtti.TtTypeDesc.TypeOf(attr.Name);
+            TtNodeData nodeData = Rtti.TtTypeDescManager.CreateInstance(nodeTypeDesc) as TtNodeData;
+            var result = Rtti.TtTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(nodeTypeStr)) as TtNode;
+            if (result == null || nodeData == null)
+            {
+                Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"SceneNode Load failed: NodeDataType={attr.Name}, NodeData={nodeTypeStr}");
+                return null;
+            }
+            if ((attr.Flags & (uint)ENodeFlags.IgnoreNodeDesc) != 0)
+            {
+                result.IsPrefab = true;
+            }
 
-                        //using (var dataAttr = xnd.NewAttribute(Rtti.TtTypeDesc.TypeStr(i.NodeData.GetType()), 1, nodeFlags))
-                        using (var ar = dataAttr.GetWriter((ulong)NodeData.GetStructSize() * 2))
+            if (scene==null && result is TtScene)
+            {
+                scene = result as TtScene;
+            }
+            
+            using (var ar = attr.GetReader(result))
+            {
+                IO.ISerializer data = nodeData;
+                try
+                {
+                    //ar.Tag = nd;
+                    System.Type placementType = typeof(TtPlacement);
+                    if (result.IsPrefab == false)
+                    {
+                        if (false == ar.ReadTo(data, parent))
                         {
-                            i.OnBeforeSaveNodeData();
-                            ar.Write(i.NodeData);
+                            return null;
                         }
 
-                        if (i.Behavior != null)
+                        if (bTryFindNode)
                         {
-                            dataAttr = nd.GetOrAddAttribute(Rtti.TtTypeDesc.TypeStr(i.Behavior.GetType()), 1, (uint)ENodeFlags.IsBehaviorData, true);
-                            using (var ar = dataAttr.GetWriter((ulong)NodeData.GetStructSize() * 2))
+                            var old = parent.FindFirstChild(nodeData.Name, result.GetType());
+                            if (old != null)
                             {
-                                ar.Write(i.Behavior);
+                                var typeDesc = Rtti.TtTypeDesc.TypeOf(nodeData.GetType());
+                                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
+                                meta.CopyObjectMetaField(old.NodeData, nodeData);
+                                nodeData = old.NodeData;
+                                result.IsDirty = true;
                             }
                         }
                     }
-                    i.SaveChildNode(scene, xnd, nd);
-                }   
+
+                    var ok = await result.InitializeNode(world, nodeData, EBoundVolumeType.Box, placementType);
+                    if (ok == false)
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"SceneNode Load Initialize failed: NodeDataType={attr.Name}, NodeData={nodeTypeStr}");
+                        return null;
+                    }
+                    var sn = scene as TtScene;
+                    if (sn != null)
+                    {
+                        sn.NumOfLoadedNode++;
+                    }
+                    //nd.NodeData = data as UNodeData;
+                    //nd.OnNodeLoaded(this);
+                }
+                catch (Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                    Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"Scene({scene}): Node({result.NodeData?.Name}) load failed");
+                }
             }
-        }
-        public async Thread.Async.TtTask<bool> LoadChildNode(GamePlay.TtWorld world, TtNode scene, EngineNS.XndNode node, bool bTryFindNode)
-        {
-            var isNoAABB = this.HasStyle(ENodeStyles.DiscardAABB);
-            this.SetStyle(ENodeStyles.DiscardAABB);
-            for (uint i = 0; i < node.GetNumOfNode(); i++)
+
+            if (result.Behavior != null)
             {
-                var cld = node.GetNode(i);
-                var cldTypeStr = cld.NativeSuper.Name;
-                
-                var attr = cld.FindFirstAttributeByFlags((uint)ENodeFlags.IsNodeDesc);
-                if (attr.NativePointer == IntPtr.Zero)
+                attr = node.FindFirstAttributeByFlags((uint)ENodeFlags.IsBehaviorData);
+                if (attr.NativePointer != IntPtr.Zero)
                 {
-                    continue;
-                }
-                if ((attr.Flags & (uint)ENodeFlags.IgnoreNodeDesc) != 0)
-                {
-                    this.IsPrefab = true;
-                }
-                var nodeTypeDesc = Rtti.TtTypeDesc.TypeOf(attr.Name);
-                TtNodeData nodeData = Rtti.TtTypeDescManager.CreateInstance(nodeTypeDesc) as TtNodeData;
-                var nd = Rtti.TtTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(cldTypeStr)) as TtNode;
-                if (nd == null || nodeData == null)
-                {
-                    Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"SceneNode Load failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
-                    continue;
-                }
-                
-                using (var ar = attr.GetReader(nd))
-                {
-                    IO.ISerializer data = nodeData;
+                    var bhvType = Rtti.TtTypeDesc.TypeOf(attr.Name);
+                    var bhv = Rtti.TtTypeDescManager.CreateInstance(bhvType) as TtBehavior;
                     try
                     {
-                        //ar.Tag = nd;
-                        System.Type placementType = typeof(TtPlacement);
-                        if (this.IsPrefab == false)
+                        using (var ar = attr.GetReader(result))
                         {
-                            if (false == ar.ReadTo(data, this))
-                            {
-                                continue;
-                            }
-
-                            if (bTryFindNode)
-                            {
-                                var old = FindFirstChild(nodeData.Name, nd.GetType());
-                                if (old != null)
-                                {
-                                    var typeDesc = Rtti.TtTypeDesc.TypeOf(nodeData.GetType());
-                                    var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
-                                    meta.CopyObjectMetaField(old.NodeData, nodeData);
-                                    nodeData = old.NodeData;
-                                    nd.IsDirty = true;
-                                }
-                            }
+                            IO.ISerializer ro = bhv;
+                            ar.ReadTo(ro);
                         }
 
-                        var ok = await nd.InitializeNode(world, nodeData, EBoundVolumeType.Box, placementType);
-                        if (ok == false)
+                        var typeStr = Rtti.TtTypeDesc.TypeStr(result.Behavior.GetType());
+                        var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+                        if (meta != null)
                         {
-                            Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"SceneNode Load Initialize failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
-                            continue;
+                            meta.CopyObjectMetaField(result.Behavior, bhv);
                         }
-                        var sn = scene as TtScene;
-                        if (sn != null)
-                        {
-                            sn.NumOfLoadedNode++;
-                        }
-                        //nd.NodeData = data as UNodeData;
-                        //nd.OnNodeLoaded(this);
                     }
                     catch (Exception ex)
                     {
                         Profiler.Log.WriteException(ex);
-                        Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"Scene({scene}): Node({nd.NodeData?.Name}) load failed");
                     }
                 }
-
-                if (nd.Behavior != null)
-                {
-                    attr = cld.FindFirstAttributeByFlags((uint)ENodeFlags.IsBehaviorData);
-                    if (attr.NativePointer != IntPtr.Zero)
-                    {
-                        var bhvType = Rtti.TtTypeDesc.TypeOf(attr.Name);
-                        var bhv = Rtti.TtTypeDescManager.CreateInstance(bhvType) as TtBehavior;
-                        try
-                        {
-                            using (var ar = attr.GetReader(nd))
-                            {
-                                IO.ISerializer ro = bhv;
-                                ar.ReadTo(ro);
-                            }
-
-                            var typeStr = Rtti.TtTypeDesc.TypeStr(nd.Behavior.GetType());
-                            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
-                            if (meta != null)
-                            {
-                                meta.CopyObjectMetaField(nd.Behavior, bhv);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Profiler.Log.WriteException(ex);
-                        }
-                    }
-                }
-                    
-                if (nd.Placement != null)
-                {
-                    nd.Parent = this;
-                    await nd.LoadChildNode(world, scene, cld, bTryFindNode);
-                }
-                await nd.OnPostInitNode(this);
             }
-            if (isNoAABB == false)
+            result.Parent = parent;
+
+            if (bLoadChildren)
             {
-                this.UnsetStyle(ENodeStyles.DiscardAABB);
-                this.UpdateAABB();
+                for (uint i = 0; i < node.GetNumOfNode(); i++)
+                {
+                    await LoadNodeTree(world, scene, result, node.GetNode(i), bTryFindNode, extArg);
+                }
             }
-            return true;
+
+            await result.OnPostInitNode(parent, extArg);
+            return result;
         }
         public virtual void OnSceneLoaded()
         {
@@ -1686,7 +1845,7 @@ namespace EngineNS.GamePlay.Scene
         }
         #endregion
 
-        public async Thread.Async.TtTask<TtNode> CloneNode(TtWorld world)
+        public async Thread.Async.TtTask<TtNode> CloneNode(TtWorld world, object extArg)
         {
             var data = Rtti.TtTypeDescManager.CreateInstance(this.NodeData.GetType()) as TtNodeData;
             //var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDesc.TypeOf(this.NodeData.GetType()));
@@ -1703,9 +1862,9 @@ namespace EngineNS.GamePlay.Scene
 
             foreach (var i in Children)
             {
-                var cn = await i.CloneNode(world);
+                var cn = await i.CloneNode(world, extArg);
                 cn.Parent = node;
-                await cn.OnPostInitNode(node);
+                await cn.OnPostInitNode(node, extArg);
             }
 
             return node;
@@ -1713,6 +1872,16 @@ namespace EngineNS.GamePlay.Scene
     }
     public partial class TtSceneActorNode : TtNode
     {
+        protected Guid mNodeId = Guid.NewGuid();
+        public override Guid NodeId
+        {
+            get => mNodeId;
+            set
+            {
+                mNodeId = value;
+            }
+        }
+
         UInt32 mSceneId = UInt32.MaxValue;
         public override UInt32 SceneId
         {
@@ -1820,8 +1989,8 @@ namespace EngineNS.GamePlay.Scene
 			DisposeWithChildren();
 			macross_break_DisposeWithChildren_2609910045.TryBreak();
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SpawnNode_4190300340 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtNode->static Thread.Async.TtTask<TtNode> SpawnNode(TtNode parent, System.Type nodeType, FPostSpawnNode postAction, TtNodeData data, EBoundVolumeType bvType, Type placementType, TtWorld world)");
-		public static async Thread.Async.TtTask<TtNode> macross_SpawnNode (string nodeName, TtNode parent, System.Type nodeType, FPostSpawnNode postAction, TtNodeData data, EBoundVolumeType bvType, Type placementType, TtWorld world) 
+		private static EngineNS.Macross.TtMacrossBreak macross_break_SpawnNode_2578765284 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtNode->static Thread.Async.TtTask<TtNode> SpawnNode(TtNode parent, System.Type nodeType, FPostSpawnNode postAction, TtNodeData data, EBoundVolumeType bvType, Type placementType, TtWorld world, object extArg)");
+		public static async Thread.Async.TtTask<TtNode> macross_SpawnNode (string nodeName, TtNode parent, System.Type nodeType, FPostSpawnNode postAction, TtNodeData data, EBoundVolumeType bvType, Type placementType, TtWorld world, object extArg) 
 		{
 			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
@@ -1834,10 +2003,11 @@ namespace EngineNS.GamePlay.Scene
 					stackframe.SetWatchVariable(nodeName + ":bvType", bvType);
 					stackframe.SetWatchVariable(nodeName + ":placementType", placementType);
 					stackframe.SetWatchVariable(nodeName + ":world", world);
+					stackframe.SetWatchVariable(nodeName + ":extArg", extArg);
 				}
 			}
-			var _return_value = await SpawnNode(parent, nodeType, postAction, data, bvType, placementType, world);
-			macross_break_SpawnNode_4190300340.TryBreak();
+			var _return_value = await SpawnNode(parent, nodeType, postAction, data, bvType, placementType, world, extArg);
+			macross_break_SpawnNode_2578765284.TryBreak();
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_FindFirstChild_26975848 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtNode->TtNode FindFirstChild(string name, System.Type type, bool bRecursive)");

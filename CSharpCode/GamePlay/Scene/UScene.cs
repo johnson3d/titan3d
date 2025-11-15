@@ -1,8 +1,10 @@
 using Assimp;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Graphics.Pipeline;
+using EngineNS.IO;
 using EngineNS.Macross;
 using NPOI.SS.Formula.Functions;
+using Org.BouncyCastle.Asn1.Mozilla;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -270,7 +272,6 @@ namespace EngineNS.GamePlay.Scene
 
         #region IAsset
         public RName AssetName { get; set; }
-        public const uint SceneDescAttributeFlags = 1;
         public void SaveAssetTo(RName name)
         {
             name.AMeta.ClearAssetFiles();
@@ -280,22 +281,26 @@ namespace EngineNS.GamePlay.Scene
             var xndHolder = new EngineNS.IO.TtXndHolder(typeStr, 1, 0);
             var xnd = xndHolder;
             var node = xndHolder.RootNode;
-            if (SceneData != null)
-            {
-                using (var dataAttr = xnd.NewAttribute(Rtti.TtTypeDesc.TypeStr(SceneData.GetType()), 1, SceneDescAttributeFlags))
-                {
-                    node.AddAttribute(dataAttr);
-                    using (var ar = dataAttr.GetWriter((ulong)SceneData.GetStructSize() * 2))
-                    {
-                        this.OnBeforeSaveNodeData();
-                        ar.Write(SceneData);
-                    }
-                }
-            }
+            //if (SceneData != null)
+            //{
+            //    using (var dataAttr = xnd.NewAttribute(Rtti.TtTypeDesc.TypeStr(SceneData.GetType()), 1, (uint)ENodeFlags.IsNodeDesc))
+            //    {
+            //        node.AddAttribute(dataAttr);
+            //        using (var ar = dataAttr.GetWriter((ulong)SceneData.GetStructSize() * 2))
+            //        {
+            //            this.OnBeforeSaveNodeData();
+            //            ar.Write(SceneData);
+            //        }
+            //    }
+            //}
 
-            SaveChildNode(this, xnd.mCoreObject, node.mCoreObject);
+            //SaveChildNode(this, xnd.mCoreObject, node.mCoreObject);
+            node.Name = Rtti.TtTypeDesc.TypeStr(this.GetType());
+            node.Version = 1;
+            SaveNodeTree(this, xnd.mCoreObject, node.mCoreObject, false);
+            SaveRootNodes();
 
-            if(IO.TtFileManager.FileExists(name.Address))
+            if (IO.TtFileManager.FileExists(name.Address))
                 IO.TtFileManager.DeleteFile(name.Address);
 
             var file = name.Address + "/" + name.PureName + AssetExt;
@@ -333,6 +338,52 @@ namespace EngineNS.GamePlay.Scene
                 ameta.SaveAMeta(this);
             }
         }
+        public void SaveRootNodes()
+        {
+            var dir = TtFileManager.CombinePath(this.AssetName.Address, "nodes");
+            TtFileManager.SureDirectory(dir);
+            foreach (var child in Children)
+            {
+                if (child.HasStyle(ENodeStyles.Transient))
+                    continue;
+                if (child is TtSceneActorNode== false)
+                {
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Scene({this.AssetName}): SaveRootNodes skipped node which is not TtSceneActorNode. NodeName={child.NodeName}, NodeId={child.NodeId}");
+                    continue;
+                }
+
+                var file = TtFileManager.CombinePath(dir, child.NodeId.ToString() + TtNode.NodeExt);
+                using (var xnd = new IO.TtXndHolder(Rtti.TtTypeDesc.TypeOf(child.GetType()).TypeString, 0, 0))
+                {
+                    child.SaveNodeTree(this, xnd.mCoreObject, xnd.RootNode.mCoreObject, true);
+                    xnd.SaveXnd(file);
+                }
+                TtEngine.Instance.SourceControlModule.AddFile(file, true);
+            }
+        }
+        public async Thread.Async.TtTask<bool> LoadRootNodes(TtWorld world)
+        {
+            var dir = TtFileManager.CombinePath(this.AssetName.Address, "nodes");
+            if (TtFileManager.DirectoryExists(dir) == false)
+                return false;
+            var files = TtFileManager.GetFiles(dir, "*" + TtNode.NodeExt, false);
+            foreach (var file in files)
+            {
+                var name = IO.TtFileManager.GetPureName(file);
+                var nodeId = Guid.Parse(name);
+                using (var xnd = IO.TtXndHolder.LoadXnd(file))
+                {
+                    var node = await TtNode.LoadNodeTree(world, this, this, xnd.RootNode.mCoreObject, false, null);
+                    if (node == null)
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Scene({this.AssetName}): LoadRootNodes failed. NodeFile={file}");
+                        continue;
+                    }
+                    node.NodeId = nodeId;
+                }
+            }
+            return true;
+        }
         public int NumOfNodes 
         { 
             get
@@ -363,45 +414,75 @@ namespace EngineNS.GamePlay.Scene
                 file = name.Address;
             using (var xnd = IO.TtXndHolder.LoadXnd(file))
             {
-                var descAttr = xnd.RootNode.mCoreObject.FindFirstAttributeByFlags(SceneDescAttributeFlags);
-                if (descAttr.NativePointer == IntPtr.Zero)
+                var dir = TtFileManager.CombinePath(name.Address, "nodes");
+                TtScene scene = null;
+                if (TtFileManager.DirectoryExists(dir))
                 {
-                    return null;
+                    scene = (await TtNode.LoadNodeTree(world, null, null, xnd.RootNode.mCoreObject, false, null, false)) as TtScene;
+                    if (scene == null)
+                        return null;
+                    scene.AssetName = name;
+                    if (false == await scene.LoadRootNodes(world))
+                        return null;
                 }
-
-                TtSceneData nodeData = Rtti.TtTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(descAttr.Name)) as TtSceneData;
-
-                //UScene don't have construct with params
-                //UScene scene = Rtti.UTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(xnd.RootNode.Name), nodeData) as UScene;
-                TtScene scene = Rtti.TtTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(xnd.RootNode.Name)) as TtScene;
-                if (scene == null)
-                    return null;
-
-                scene.NumOfLoadedNode = 0;
-
-                using (var ar = descAttr.GetReader(scene))
+                else
                 {
-                    IO.ISerializer desc = nodeData;
-                    try
-                    {
-                        ar.ReadTo(desc, scene);
-                        if (await scene.InitializeNode(world, nodeData, EBoundVolumeType.None, null) == false)
-                        {
-                            Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");
-                            return null;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Profiler.Log.WriteException(ex);
-                        Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"SceneData({scene.AssetName}): load failed");
-                    }
+                    scene = (await TtNode.LoadNodeTree(world, null, null, xnd.RootNode.mCoreObject, false, null)) as TtScene;
+                    if (scene == null)
+                        return null;
+                    scene.AssetName = name;
                 }
-                scene.NumOfLoadedNode++;
+                
 
-                scene.AssetName = name;
-                if (await scene.LoadChildNode(world, scene, xnd.RootNode.mCoreObject, false) == false)
-                    return null;
+                //var descAttr = xnd.RootNode.mCoreObject.FindFirstAttributeByFlags((uint)ENodeFlags.IsNodeDesc);
+                //if (descAttr.NativePointer == IntPtr.Zero)
+                //{
+                //    return null;
+                //}
+
+                //TtSceneData nodeData = Rtti.TtTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(descAttr.Name)) as TtSceneData;
+
+                ////UScene don't have construct with params
+                ////UScene scene = Rtti.UTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(xnd.RootNode.Name), nodeData) as UScene;
+                //TtScene scene = Rtti.TtTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(xnd.RootNode.Name)) as TtScene;
+                //if (scene == null)
+                //    return null;
+
+                //scene.NumOfLoadedNode = 0;
+
+                //using (var ar = descAttr.GetReader(scene))
+                //{
+                //    IO.ISerializer desc = nodeData;
+                //    try
+                //    {
+                //        ar.ReadTo(desc, scene);
+                //        if (await scene.InitializeNode(world, nodeData, EBoundVolumeType.None, null) == false)
+                //        {
+                //            Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");
+                //            return null;
+                //        }
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        Profiler.Log.WriteException(ex);
+                //        Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"SceneData({scene.AssetName}): load failed");
+                //    }
+                //}
+                //scene.NumOfLoadedNode++;
+
+                //scene.AssetName = name;
+
+                //var dir = TtFileManager.CombinePath(name.Address, "nodes");
+                //if (TtFileManager.DirectoryExists(dir))
+                //{
+                //    if (false == await scene.LoadRootNodes(world))
+                //        return null;
+                //}
+                //else
+                //{
+                //    if (await scene.LoadChildNode(world, scene, xnd.RootNode.mCoreObject, false) == false)
+                //        return null;
+                //}
 
                 scene.DFS_VisitNodeTree((TtNode inNode, object inArg) =>
                 {

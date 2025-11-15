@@ -356,9 +356,9 @@ namespace EngineNS.GamePlay.Scene
             }
             OnHitProxyChanged();
         }
-        protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent)
+        protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent, object extArg)
         {
-            await base.OnPostInitNode(parent);
+            await base.OnPostInitNode(parent, extArg);
 
             UpdateAbsTransform();
             var meshData = NodeData as TtMeshNodeData;

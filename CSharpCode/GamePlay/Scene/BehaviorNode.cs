@@ -254,6 +254,7 @@ namespace EngineNS.GamePlay.Scene
     }
     partial class TtNode
     {
+        public const string NodeExt = ".node";
         public class TtBehaviorGetter
         {
             public uint Version = 0;

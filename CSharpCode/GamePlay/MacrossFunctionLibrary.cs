@@ -93,7 +93,7 @@ namespace EngineNS.GamePlay
                     System.Diagnostics.Debug.Assert(false);
                 }
             }
-            var ret = await mOriginPrefab.CloneNode(PoolManager.World) as TtPrefabNode;
+            var ret = await mOriginPrefab.CloneNode(PoolManager.World, null) as TtPrefabNode;
             return ret;
         }
         public TtPrefabPool(RName prefabName)

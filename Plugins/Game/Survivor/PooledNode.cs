@@ -48,9 +48,9 @@ namespace Survivor
             
             return true;
         }
-        protected override async TtTask OnPostInitNode(TtNode parent)
+        protected override async TtTask OnPostInitNode(TtNode parent, object extArg)
         {
-            await base.OnPostInitNode(parent);
+            await base.OnPostInitNode(parent, extArg);
             var creatorData = GetNodeData<TtSceneMeshCreatorData>();
             await ResetMeshCount(creatorData.Count);
         }

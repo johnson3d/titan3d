@@ -429,14 +429,18 @@ namespace EngineNS.Bricks.CodeBuilder
         { 
             get
             {
-                if (NodeData is TtMacrossSceneNodeData data)
-                    return data.NodeId;
-                return Guid.Empty;
+                return base.NodeId;
+                //if (NodeData is TtMacrossSceneNodeData data)
+                //    return data.NodeId;
+                //return Guid.Empty;
             }
             set
             {
                 if (NodeData is TtMacrossSceneNodeData data)
+                {
                     data.NodeId = value;
+                    base.NodeId = value;
+                }
             }
         }
 
@@ -468,9 +472,9 @@ namespace EngineNS.Bricks.CodeBuilder
             var ret = await base.InitializeNode(world, data, bvType, placementType);
             return ret;
         }
-        protected override async TtTask OnPostInitNode(TtNode parent)
+        protected override async TtTask OnPostInitNode(TtNode parent, object extArg)
         {
-            await base.OnPostInitNode(parent);
+            await base.OnPostInitNode(parent, extArg);
             if (MacrossGetter != null)
             {
                 var mc = MacrossGetter.Get();
