@@ -1,8 +1,6 @@
 ﻿using EngineNS.Bricks.Collision.DDA;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
-using MathNet.Numerics.LinearAlgebra.Factorization;
-using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Bricks.Collision.DDA
 {
-    [Bricks.CodeBuilder.ContextMenu("HVX", "HVX", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("HVX", "Graphics\\HVX", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtNodeData), DefaultNamePrefix = "HVX")]
     public class TtHierarchicalVoxelSpace3D : GamePlay.Scene.TtSceneActorNode
     {

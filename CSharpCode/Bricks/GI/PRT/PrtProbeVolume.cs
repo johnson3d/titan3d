@@ -15,7 +15,7 @@ namespace EngineNS.Bricks.GI.PRT
         public Vector3 Position;
         public FSHCoefficients Coeffs;
     }
-    [Bricks.CodeBuilder.ContextMenu("PrtProbe", "GI\\PrtProbe", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("PrtProbe", "Graphics\\GI\\PrtProbe", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtPrtProbeVolume.TtPrtProbeVolumeData), DefaultNamePrefix = "PPV")]
     public class TtPrtProbeVolume : TtVisual
     {

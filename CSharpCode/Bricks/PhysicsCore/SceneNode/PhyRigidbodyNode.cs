@@ -8,7 +8,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
 {
 
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    [Bricks.CodeBuilder.ContextMenu("Rigidbody", "Collision\\Rigidbody", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Rigidbody", "Physics\\Collision\\Rigidbody", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtPhyRigidbodyNode.TtPhyRigidbodyNodeData), DefaultNamePrefix = "Rigidbody")]
     //only contians one shape
     public class TtPhyRigidbodyNode : GamePlay.Scene.TtLightWeightNodeBase

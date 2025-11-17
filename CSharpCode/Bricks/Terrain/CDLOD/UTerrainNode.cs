@@ -7,7 +7,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.Terrain.CDLOD
 {
-    [Bricks.CodeBuilder.ContextMenu("TerrainNode", "TerrainNode", GamePlay.Scene.TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("TerrainNode", "Graphics\\TerrainNode", GamePlay.Scene.TtNode.EditorKeyword)]
     [GamePlay.Scene.TtNode(NodeDataType = typeof(TtTerrainData), DefaultNamePrefix = "Terrain")]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.Terrain.CDLOD.UTerrainNode@EngineCore" })]
     public class TtTerrainNode : GamePlay.Scene.TtVisual

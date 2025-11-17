@@ -128,7 +128,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("SphereCollision", "Collision\\SphereCollision", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("SphereCollision", "Physics\\Collision\\SphereCollision", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtPhySphereCollisionNode.TtPhySphereCollisionNodeData), DefaultNamePrefix = "SphereCollision")]
     public class TtPhySphereCollisionNode : TtPhyCollisionNode
     {
@@ -163,7 +163,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             return shape;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("BoxCollision", "Collision\\BoxCollision", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("BoxCollision", "Physics\\Collision\\BoxCollision", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtPhyBoxCollisionNode.TtPhyBoxCollisionNodeData), DefaultNamePrefix = "BoxCollision")]
     public class TtPhyBoxCollisionNode : TtPhyCollisionNode
     {
@@ -197,7 +197,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             return shape;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("PlaneCollision", "Collision\\PlaneCollision", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("PlaneCollision", "Physics\\Collision\\PlaneCollision", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtPhyPlaneCollisionNode.TtPhyPlaneCollisionNodeData), DefaultNamePrefix = "PlaneCollision")]
     public class TtPhyPlaneCollisionNode : TtPhyCollisionNode
     {
@@ -219,7 +219,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             return shape;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("CapsuleCollision", "Collision\\CapsuleCollision", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("CapsuleCollision", "Physics\\Collision\\CapsuleCollision", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtPhyCapsuleCollisionNode.TtPhyCapsuleCollisionNodeData), DefaultNamePrefix = "CapsuleCollision")]
     public class TtPhyCapsuleCollisionNode : TtPhyCollisionNode
     {
@@ -267,7 +267,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             return shape;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("ConvexCollision", "Collision\\ConvexCollision", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("ConvexCollision", "Physics\\Collision\\ConvexCollision", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtPhyConvexCollisionNode.TtPhyConvexCollisionNodeData), DefaultNamePrefix = "ConvexCollision")]
     public class TtPhyConvexCollisionNode : TtPhyCollisionNode
     {
@@ -303,7 +303,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             return shape;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("TriMeshCollision", "Collision\\TriMeshCollision", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("TriMeshCollision", "Physics\\Collision\\TriMeshCollision", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtPhyTriMeshCollisionNode.TtPhyTriMeshCollisionNodeData), DefaultNamePrefix = "TriMeshCollision")]
     public class TtPhyTriMeshCollisionNode : TtPhyCollisionNode
     {

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Bricks.Particle
 {
-    [Bricks.CodeBuilder.ContextMenu("NebulaNode ", "NebulaNode ", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("NebulaNode ", "Graphics\\NebulaNode ", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtNebulaNode.TtNebulaNodeData), DefaultNamePrefix = "Nebula")]
     public class TtNebulaNode : GamePlay.Scene.TtMeshNode 
     {

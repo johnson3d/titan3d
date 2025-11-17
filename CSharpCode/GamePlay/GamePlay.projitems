@@ -21,6 +21,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Movemnet\SimpleMovement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\PlayerStart.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\BehaviorNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\HubNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\PrefabNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\SunNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UPBRTestNode.cs" />

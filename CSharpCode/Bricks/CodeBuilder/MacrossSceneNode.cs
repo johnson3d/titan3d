@@ -341,7 +341,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("MacrossNode", "MacrossNode", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("MacrossNode", "Script\\MacrossNode", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtMacrossSceneNode.TtMacrossSceneNodeData), DefaultNamePrefix = "Macross")]
     public class TtMacrossSceneNode : TtSceneActorNode, ISceneNodeMacrossInterface
     {

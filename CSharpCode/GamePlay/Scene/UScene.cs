@@ -341,48 +341,134 @@ namespace EngineNS.GamePlay.Scene
         public void SaveRootNodes()
         {
             var dir = TtFileManager.CombinePath(this.AssetName.Address, "nodes");
+            SaveNodeList(dir, this, this);
+            
+            //TtFileManager.SureDirectory(dir);
+            //string rootNodes = "";
+            //foreach (var child in Children)
+            //{
+            //    if (child.HasStyle(ENodeStyles.Transient))
+            //        continue;
+            //    if (child is TtHubNode)
+            //    {
+
+            //    }
+            //    if (child is TtSceneActorNode== false)
+            //    {
+            //        Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Scene({this.AssetName}): SaveRootNodes skipped node which is not TtSceneActorNode. NodeName={child.NodeName}, NodeId={child.NodeId}");
+            //        continue;
+            //    }
+
+            //    var file = TtFileManager.CombinePath(dir, child.NodeId.ToString() + TtNode.NodeExt);
+            //    using (var xnd = new IO.TtXndHolder(Rtti.TtTypeDesc.TypeOf(child.GetType()).TypeString, 0, 0))
+            //    {
+            //        child.SaveNodeTree(this, xnd.mCoreObject, xnd.RootNode.mCoreObject, true);
+            //        xnd.SaveXnd(file);
+            //    }
+            //    TtEngine.Instance.SourceControlModule.AddFile(file, true);
+            //    rootNodes += child.NodeId.ToString()+'\n';
+            //}
+            //IO.TtFileManager.WriteAllText(TtFileManager.CombinePath(dir, "nodelist.txt"), rootNodes);
+            //TtEngine.Instance.SourceControlModule.AddFile(TtFileManager.CombinePath(dir, "nodelist.txt"), true);
+        }
+        internal static void SaveNodeList(string dir, TtScene scene, TtNode node)
+        {
             TtFileManager.SureDirectory(dir);
-            foreach (var child in Children)
+            string rootNodes = "";
+            foreach (var child in node.Children)
             {
                 if (child.HasStyle(ENodeStyles.Transient))
                     continue;
+                if (child is TtHubNode)
+                {
+                    SaveNodeList(dir + child.NodeName, scene, child);
+                    rootNodes += "hub:" + child.NodeName + '\n';
+                    continue;
+                }
                 if (child is TtSceneActorNode== false)
                 {
-                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Scene({this.AssetName}): SaveRootNodes skipped node which is not TtSceneActorNode. NodeName={child.NodeName}, NodeId={child.NodeId}");
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Scene({scene.AssetName}): SaveRootNodes skipped node which is not TtSceneActorNode. NodeName={child.NodeName}, NodeId={child.NodeId}");
                     continue;
                 }
 
                 var file = TtFileManager.CombinePath(dir, child.NodeId.ToString() + TtNode.NodeExt);
                 using (var xnd = new IO.TtXndHolder(Rtti.TtTypeDesc.TypeOf(child.GetType()).TypeString, 0, 0))
                 {
-                    child.SaveNodeTree(this, xnd.mCoreObject, xnd.RootNode.mCoreObject, true);
+                    child.SaveNodeTree(scene, xnd.mCoreObject, xnd.RootNode.mCoreObject, true);
                     xnd.SaveXnd(file);
                 }
                 TtEngine.Instance.SourceControlModule.AddFile(file, true);
+                rootNodes += child.NodeId.ToString()+'\n';
             }
+            IO.TtFileManager.WriteAllText(TtFileManager.CombinePath(dir, "nodelist.txt"), rootNodes);
+            TtEngine.Instance.SourceControlModule.AddFile(TtFileManager.CombinePath(dir, "nodelist.txt"), true);
         }
         public async Thread.Async.TtTask<bool> LoadRootNodes(TtWorld world)
         {
             var dir = TtFileManager.CombinePath(this.AssetName.Address, "nodes");
             if (TtFileManager.DirectoryExists(dir) == false)
                 return false;
-            var files = TtFileManager.GetFiles(dir, "*" + TtNode.NodeExt, false);
-            foreach (var file in files)
+            await LoadNodeList(world, dir, this, this);
+            return true;
+        }
+        internal static async Thread.Async.TtTask LoadNodeList(TtWorld world, string dir, TtScene scene, TtNode parent)
+        {
+            var rootStr = IO.TtFileManager.ReadAllText(TtFileManager.CombinePath(dir, "nodelist.txt"));
+            if (rootStr!=null)
             {
-                var name = IO.TtFileManager.GetPureName(file);
-                var nodeId = Guid.Parse(name);
-                using (var xnd = IO.TtXndHolder.LoadXnd(file))
+                var files = rootStr.Split('\n');
+                foreach (var f in files)
                 {
-                    var node = await TtNode.LoadNodeTree(world, this, this, xnd.RootNode.mCoreObject, false, null);
-                    if (node == null)
+                    if (f.StartsWith("hub:"))
                     {
-                        Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Scene({this.AssetName}): LoadRootNodes failed. NodeFile={file}");
-                        continue;
+                        var name = f.Substring("hub:".Length);
+                        var subDir = TtFileManager.CombinePath(dir, name);
+                        if (TtFileManager.DirectoryExists(subDir))
+                        {
+                            var hubNode = await TtNode.SpawnNode<TtHubNode>(parent, null);
+                            hubNode.Parent = parent;
+                            await LoadNodeList(world, subDir, scene, hubNode);
+                        }
                     }
-                    node.NodeId = nodeId;
+                    else
+                    {
+                        Guid nodeId;
+                        if (Guid.TryParse(f, out nodeId))
+                        {
+                            var file = TtFileManager.CombinePath(dir, f + TtNode.NodeExt);
+                            using (var xnd = IO.TtXndHolder.LoadXnd(file))
+                            {
+                                var node = await TtNode.LoadNodeTree(world, scene, parent, xnd.RootNode.mCoreObject, false, null);
+                                if (node == null)
+                                {
+                                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Scene({scene.AssetName}): LoadRootNodes failed. NodeFile={file}");
+                                    continue;
+                                }
+                                node.NodeId = nodeId;
+                            }
+                        }
+                    }
                 }
             }
-            return true;
+            //else
+            //{//deprecated: old assets
+            //    var files = TtFileManager.GetFiles(dir, "*" + TtNode.NodeExt, false);
+            //    foreach (var file in files)
+            //    {
+            //        var name = IO.TtFileManager.GetPureName(file);
+            //        var nodeId = Guid.Parse(name);
+            //        using (var xnd = IO.TtXndHolder.LoadXnd(file))
+            //        {
+            //            var node = await TtNode.LoadNodeTree(world, this, this, xnd.RootNode.mCoreObject, false, null);
+            //            if (node == null)
+            //            {
+            //                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Scene({this.AssetName}): LoadRootNodes failed. NodeFile={file}");
+            //                continue;
+            //            }
+            //            node.NodeId = nodeId;
+            //        }
+            //    }
+            //}
         }
         public int NumOfNodes 
         { 

@@ -124,6 +124,7 @@ namespace EngineNS.IO
         public void Initialize()
         {
             string dir = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Game, IO.TtFileManager.ESystemDir.Config);
+            var patch_dir = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Config);
             Rtti.TtTypeDescManager.Instance.InterateTypes((type) =>
             {
                 if (type.HasInterface("IConfig"))
@@ -136,6 +137,12 @@ namespace EngineNS.IO
                     if (jsCode!=null)
                     {
                         var cfg = IO.TtFileManager.LoadObjectFromJson(type.SystemType, jsCode) as IConfig;
+                        file = TtFileManager.CombinePath(patch_dir, attr.Path);
+                        jsCode = IO.TtFileManager.ReadAllText(file);
+                        if (jsCode != null)
+                        {
+                            TtAdvancedJsonPartialUpdater.PartialUpdate(jsCode, cfg, TtJsonOptions.Options);
+                        }
                         mConfigs[type] = cfg;
                     }
                     else

@@ -331,7 +331,7 @@ namespace Survivor
 
     }
 
-    [EngineNS.Bricks.CodeBuilder.ContextMenu("WeaponProxyNode", "WeaponProxyNode", TtNode.EditorKeyword)]
+    [EngineNS.Bricks.CodeBuilder.ContextMenu("WeaponProxyNode", "Game\\Survivor\\WeaponProxyNode", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtNodeData), DefaultNamePrefix = "WeaponProxyNode")]
     [EngineNS.EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtWeaponProxyNode : TtLightWeightNodeBase

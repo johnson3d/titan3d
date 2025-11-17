@@ -43,7 +43,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             PhyController.mCoreObject.SetPosition(footPosition);
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("PhyCapsuleController", "PhyCapsuleController", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("PhyCapsuleController", "Physics\\PhyCapsuleController", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtCapsulePhyControllerNode.TtCapsulePhyControllerNodeData), DefaultNamePrefix = "PhyCapsuleController")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtCapsulePhyControllerNode : TtPhyControllerNodeBase
@@ -135,7 +135,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             }
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("PhyBoxController", "PhyBoxController", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("PhyBoxController", "Physics\\PhyBoxController", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtBoxPhyControllerNode.TtBoxPhyControllerNodeData), DefaultNamePrefix = "PhyBoxController")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtBoxPhyControllerNode : TtPhyControllerNodeBase

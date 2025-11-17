@@ -9,7 +9,7 @@ using System.Text;
 
 namespace EngineNS.DesignMacross
 {
-    [Bricks.CodeBuilder.ContextMenu("DesignMacrossNode", "DesignMacrossNode", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("DesignMacrossNode", "Script\\DesignMacrossNode", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtDesignMacrossNodeData), DefaultNamePrefix = "DM")]
     public class TtDesignMacrossNode : TtSceneActorNode
     {

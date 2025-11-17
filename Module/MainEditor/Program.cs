@@ -1,14 +1,15 @@
-﻿using Assimp.Unmanaged;
-using Assimp;
+﻿using Assimp;
+using Assimp.Unmanaged;
 using EngineNS;
+using EngineNS.EGui.UIProxy;
+using EngineNS.Graphics.Pipeline;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
-using EngineNS.EGui.UIProxy;
-using EngineNS.Graphics.Pipeline;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace MainEditor
 {
@@ -56,12 +57,22 @@ namespace MainEditor
             //}
 
             var mBin = System.IO.Directory.GetCurrentDirectory();
-            var dynCfgData = new EngineNS.IO.TtDynConfigData();
-            dynCfgData.LoadConfigData(mBin + "/../cache/DynConfigData.dcd", true);
-            if (dynCfgData.TryGetConfig<string>("NativeDLL", out var NativeDLL))
+            
+            var jsCode = EngineNS.IO.TtFileManager.ReadAllText(mBin + "/../cache/config/engine.jscfg");
+            EngineNS.TtEngineConfig Config = null;
+            if (jsCode != null)
             {
-                Console.WriteLine($"NativeDLL={NativeDLL}");
-                EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/{NativeDLL}");
+                Config = EngineNS.IO.TtFileManager.LoadObjectFromJson<TtEngineConfig>(jsCode);
+            }
+            else
+            {
+                EngineNS.IO.TtFileManager.WriteAllText(mBin + "/../cache/config/engine.jscfg", "{}");
+            }
+
+            if (Config!=null)
+            {
+                Console.WriteLine($"NativeDLL={Config.NativeDll}");
+                EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/{Config.NativeDll}");
             }
             else
             {

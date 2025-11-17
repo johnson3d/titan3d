@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.GamePlay.Scene
 {
-    [Bricks.CodeBuilder.ContextMenu("Sun", "Sun", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Sun", "Graphics\\Sun", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtSunNode.TtSunNodeData), DefaultNamePrefix = "Sun")]
     public class TtSunNode : TtVisual
     {

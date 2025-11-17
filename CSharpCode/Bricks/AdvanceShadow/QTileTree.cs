@@ -502,7 +502,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             this.Root.RemoveShadowNode(node);
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("AdvanceShadow", "AdvanceShadow", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("AdvanceShadow", "Graphics\\AdvanceShadow", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtAdvanceShadowNode.TtAdvanceShadowData), DefaultNamePrefix = "AdvanceShadow")]
     public class TtAdvanceShadowNode : TtSceneActorNode
     {

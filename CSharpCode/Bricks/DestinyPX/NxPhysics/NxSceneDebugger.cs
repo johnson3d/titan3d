@@ -9,7 +9,7 @@ using System.Text;
 
 namespace EngineNS.NxPhysics
 {
-    [Bricks.CodeBuilder.ContextMenu("NxSceneDbg", "NxSceneDbg", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("NxSceneDbg", "Physics\\NxSceneDbg", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(GamePlay.Scene.TtNodeData), DefaultNamePrefix = "NxSceneDbg")]
     public class NxSceneDebugger : GamePlay.Scene.TtVisual
     {

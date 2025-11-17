@@ -1,0 +1,5 @@
+{
+  "MaterialName": "material/sysdft.material:Engine",
+  "PlaneMaterialName": "material/whitecolor.uminst:Engine",
+  "ImportBaseMaterial": "material/pbr.material:Engine"
+}

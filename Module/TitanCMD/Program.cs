@@ -20,12 +20,30 @@ namespace ProjectCooker
         {
             var mBin = System.IO.Directory.GetCurrentDirectory();
 
-            var dynCfgData = new EngineNS.IO.TtDynConfigData();
-            dynCfgData.LoadConfigData(mBin + "/../cache/DynConfigData.dcd", true);
-            if (dynCfgData.TryGetConfig<string>("NativeDLL", out var NativeDLL))
+            var jsCode = EngineNS.IO.TtFileManager.ReadAllText(mBin + "/../cache/config/engine.jscfg");
+            EngineNS.TtEngineConfig Config = null;
+            if (jsCode != null)
             {
-                Console.WriteLine($"NativeDLL={NativeDLL}");
-                EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/{NativeDLL}");
+                Config = EngineNS.IO.TtFileManager.LoadObjectFromJson<TtEngineConfig>(jsCode);
+            }
+            else
+            {
+                EngineNS.IO.TtFileManager.WriteAllText(mBin + "/../cache/config/engine.jscfg", "{}");
+            }
+
+            if (Config!=null)
+            {
+                Console.WriteLine($"NativeDLL={Config.NativeDll}");
+                EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/{Config.NativeDll}");
+
+                for (int i = 0; i < args.Length; i++)
+                {
+                    if (args[i].StartsWith("AssetType="))
+                    {
+                        args[i] = "AssetType=" + Config.CookAssetType;
+                        break;
+                    }
+                }
             }
             else
             {
@@ -39,17 +57,6 @@ namespace ProjectCooker
                 {
                     Console.WriteLine($"NativeDLL=release");
                     EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
-                }
-            }
-            if (dynCfgData.TryGetConfig<string>("AssetType", out var AssetType))
-            {
-                for (int i = 0; i < args.Length; i++)
-                {
-                    if (args[i].StartsWith("AssetType="))
-                    {
-                        args[i] = "AssetType=" + AssetType;
-                        break;
-                    }
                 }
             }
 

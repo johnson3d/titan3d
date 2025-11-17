@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
-    [Bricks.CodeBuilder.ContextMenu("Bezier", "BezierSpline", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Bezier", "Graphics\\BezierSpline", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtBezierSplineNode.TtBezierSplineNodeData), DefaultNamePrefix = "BzSpline")]
     public class TtBezierSplineNode : TtVisual
     {

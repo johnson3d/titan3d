@@ -8,7 +8,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.Recast
 {
-    [Bricks.CodeBuilder.ContextMenu("Recast", "Recast", GamePlay.Scene.TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Recast", "AI\\Recast", GamePlay.Scene.TtNode.EditorKeyword)]
     [GamePlay.Scene.TtNode(NodeDataType = typeof(TtRecastSceneNode.TtRecastSceneNodeData), DefaultNamePrefix = "Recast")]
     public class TtRecastSceneNode : GamePlay.Scene.TtVisual
     {

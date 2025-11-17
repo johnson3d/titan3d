@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace EngineNS.GamePlay.Scene
 {
     //https://zhuanlan.zhihu.com/p/621412675
-    [Bricks.CodeBuilder.ContextMenu("Sky", "Sky", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Sky", "Graphics\\Sky", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtSkyNode.TtSkyNodeData), DefaultNamePrefix = "Sky")]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.USkyNode@EngineCore" })]
     public class TtSkyNode : TtMeshNode

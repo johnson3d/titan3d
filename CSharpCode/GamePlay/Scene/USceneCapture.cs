@@ -46,7 +46,7 @@ namespace EngineNS.GamePlay.Scene
             RenderPolicy.CmdQueue.Execute(new NxRHI.ICommandList());
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Capture", "SceneCapture", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Capture", "Graphics\\SceneCapture", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtSceneCapture.TtSceneCaptureData), DefaultNamePrefix = "Capture")]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.USceneCapture@EngineCore", "EngineNS.GamePlay.Scene.USceneCapture" })]
     public partial class TtSceneCapture : TtSceneActorNode, ITickable, IRootForm

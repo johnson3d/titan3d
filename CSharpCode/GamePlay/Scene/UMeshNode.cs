@@ -11,7 +11,7 @@ using System.Formats.Asn1;
 
 namespace EngineNS.GamePlay.Scene
 {
-    [Bricks.CodeBuilder.ContextMenu("MeshNode", "MeshNode", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("MeshNode", "Graphics\\MeshNode", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtMeshNode.TtMeshNodeData), DefaultNamePrefix = "Mesh")]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.UMeshNode@EngineCore", "EngineNS.GamePlay.Scene.UMeshNode" })]
     public partial class TtMeshNode : TtGpuSceneNode

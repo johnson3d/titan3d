@@ -116,4 +116,49 @@ namespace EngineNS.IO
             },
         };
     }
+
+    public static class TtAdvancedJsonPartialUpdater
+    {
+        public static void PartialUpdate<T>(string json, T target, JsonSerializerOptions options = null)
+        {
+            options ??= new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            var sourceProperties = JsonSerializer.Deserialize<JsonElement>(json);
+            UpdateProperties(sourceProperties, target, target.GetType(), options);
+        }
+
+        private static void UpdateProperties<T>(JsonElement source, T target, Type targetType, JsonSerializerOptions options)
+        {
+            foreach (var property in source.EnumerateObject())
+            {
+                var targetProperty = targetType.GetProperty(property.Name,
+                    System.Reflection.BindingFlags.IgnoreCase |
+                    System.Reflection.BindingFlags.Public |
+                    System.Reflection.BindingFlags.Instance);
+
+                if (targetProperty != null && targetProperty.CanWrite)
+                {
+                    if (property.Value.ValueKind == JsonValueKind.Object)
+                    {
+                        // 嵌套对象递归处理
+                        var nestedTarget = targetProperty.GetValue(target);
+                        if (nestedTarget != null)
+                        {
+                            UpdateProperties(property.Value, nestedTarget, targetProperty.PropertyType, options);
+                        }
+                    }
+                    else
+                    {
+                        // 简单属性直接更新
+                        var value = JsonSerializer.Deserialize(property.Value.GetRawText(), targetProperty.PropertyType, options);
+                        targetProperty.SetValue(target, value);
+                    }
+                }
+            }
+        }
+    }
 }

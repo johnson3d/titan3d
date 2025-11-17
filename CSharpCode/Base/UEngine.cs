@@ -60,6 +60,12 @@ namespace EngineNS
         }
         [Rtti.Meta("")]
         [Category("Option")]
+        public string NativeDll { get; set; } = "release";
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public string CookAssetType { get; set; } = "Scene+Mesh+Material+MaterialInst+AnimClip+MeshPrimitive+UI+Prefab+Macross+UVAnim+RPolicy+AnimationClip+BlendSpace+MaterialFunction";
+        [Rtti.Meta("")]
+        [Category("Option")]
         public bool IsReverseZ { get; set; } = true;
         [Rtti.Meta("")]
         [Category("Option")]
@@ -143,7 +149,7 @@ namespace EngineNS
         public RName SimpleRPolicyName { get; set; }
         [Rtti.Meta("")]
         [Category("Option")]
-        public string RpcRootType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.UnitTest.UTest_Rpc));
+        public string RpcRootType { get; set; }// = Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.UnitTest.UTest_Rpc));
         [Rtti.Meta("")]
         [Category("Option")]
         public bool CookDXBC { get; set; } = true;
@@ -170,7 +176,7 @@ namespace EngineNS
         public bool CompressAstc { get; set; } = false;
         [Rtti.Meta("")]
         [Category("Option")]
-        public RName DefaultVMS { get; set; } = RName.GetRName("mesh/base/box.vms", RName.ERNameType.Engine);
+        public RName DefaultVMS { get; set; } //= RName.GetRName("mesh/base/box.vms", RName.ERNameType.Engine);
         [Rtti.Meta("")]
         [Category("Option")]
         public RName DefaultMaterial { get; set; }// = RName.GetRName("UTest/ttt.material");
@@ -218,8 +224,13 @@ namespace EngineNS
         public TtEngineConfig()
         {
             //EditorFont = RName.GetRName("fonts/Roboto-Regular.ttf", RName.ERNameType.Engine);
-            EditorFont = RName.GetRName("fonts/NotoSansSC-Regular.otf", RName.ERNameType.Engine);
-            UIDefaultTexture = RName.GetRName("texture/white.srv", RName.ERNameType.Engine);
+            if (TtEngine.Instance!=null)
+            {
+                EditorFont = RName.GetRName("fonts/NotoSansSC-Regular.otf", RName.ERNameType.Engine);
+                UIDefaultTexture = RName.GetRName("texture/white.srv", RName.ERNameType.Engine);
+                DefaultVMS = RName.GetRName("mesh/base/box.vms", RName.ERNameType.Engine);
+                RpcRootType = Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.UnitTest.UTest_Rpc));
+            }
         }
     }
     [Rtti.Meta("")]
@@ -347,6 +358,12 @@ namespace EngineNS
             {
                 var jsCode = IO.TtFileManager.ReadAllText(cfgFile);
                 Config = IO.TtFileManager.LoadObjectFromJson<TtEngineConfig>(jsCode);
+
+                var patch_dir = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Config);
+                var patch_file = IO.TtFileManager.CombinePath(patch_dir, "engine.jscfg");
+                jsCode = IO.TtFileManager.ReadAllText(patch_file);
+                if (jsCode!=null)
+                    IO.TtAdvancedJsonPartialUpdater.PartialUpdate(jsCode, Config, IO.TtJsonOptions.Options);
             }
             else
             {
@@ -449,27 +466,6 @@ namespace EngineNS
 
             #region DynConfigData
             this.DynConfigData.LoadConfigData(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "DynConfigData.dcd");
-
-            if (this.DynConfigData.TryGetConfig<bool>("UseRenderDoc", out var Config_UseRenderDoc))
-            {
-                Config.UseRenderDoc = Config_UseRenderDoc;
-            }
-            if (this.DynConfigData.TryGetConfig<bool>("HasDebugLayer", out var Config_HasDebugLayer))
-            {
-                Config.HasDebugLayer = (bool)Config_HasDebugLayer;
-            }
-            if (this.DynConfigData.TryGetConfig<bool>("IsGpuBaseValidation", out var Config_HasGpuBaseValidation))
-            {
-                Config.IsGpuBaseValidation = (bool)Config_HasGpuBaseValidation;
-            }
-            if (this.DynConfigData.TryGetConfig<bool>("IsGpuDred", out var Config_IsGpuDred))
-            {
-                Config.IsGpuDred = (bool)Config_IsGpuDred;
-            }
-            if (this.DynConfigData.TryGetConfig<bool>("IsAftermath", out var Config_IsAftermath))
-            {
-                Config.IsAftermath = (bool)Config_IsAftermath;
-            }
 
             if (Config.IsAftermath)
             {

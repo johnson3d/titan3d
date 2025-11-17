@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Camera
 {
-    [Bricks.CodeBuilder.ContextMenu("Camera", "Camera", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Camera", "Gameplay\\Camera", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtGamePlayCamera.TtGamePlayCameraData), DefaultNamePrefix = "Camera")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtGamePlayCamera : GamePlay.Scene.TtLightWeightNodeBase

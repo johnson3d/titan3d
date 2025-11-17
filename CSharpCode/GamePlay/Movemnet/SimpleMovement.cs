@@ -9,7 +9,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Movemnet
 {
-    [Bricks.CodeBuilder.ContextMenu("SimpleMovement", "SimpleMovement", TtNode.EditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("SimpleMovement", "Gameplay\\SimpleMovement", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtSimpleMovement.TtSimpleMovementData), DefaultNamePrefix = "SimpleMovement")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtSimpleMovement : Scene.TtLightWeightNodeBase
