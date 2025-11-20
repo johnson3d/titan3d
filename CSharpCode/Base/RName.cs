@@ -430,6 +430,8 @@ namespace EngineNS
         }
         public static string GetAddress(ERNameType type, string name, RName rn = null)
         {
+            if (TtEngine.Instance==null)
+                return null;
             switch (type)
             {
                 case ERNameType.Engine:

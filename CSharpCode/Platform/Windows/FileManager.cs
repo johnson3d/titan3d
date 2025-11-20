@@ -8,7 +8,11 @@ namespace EngineNS.IO
         partial void InitDirectory(string[] args)
         {
             var mBin = System.IO.Directory.GetCurrentDirectory();//AppDomain.CurrentDomain.BaseDirectory;
-            var root = GetBaseDirectory(mBin, 1);
+            var root = TtEngine.FindArgument(args, "EngineRoot=");
+            if (root==null)
+            {
+                root = GetBaseDirectory(mBin, 1);
+            }
             BinariesDir = mBin;
 
             //SetRoot(ERootDir.Root, root);

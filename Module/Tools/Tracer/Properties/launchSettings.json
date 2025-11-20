@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Tracer": {
+      "commandName": "Project",
+      "commandLineArgs": "EngineRoot=$(SolutionDir) config=$(SolutionDir)content\\apptracer.jscfg NativeDLL=debug"
+    }
+  }
+}

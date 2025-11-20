@@ -16,6 +16,7 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)cache\DynConfigData.dcd" />
     <None Include="$(MSBuildThisFileDirectory)content\alonegame.jscfg" />
+    <None Include="$(MSBuildThisFileDirectory)content\apptracer.jscfg" />
     <None Include="$(MSBuildThisFileDirectory)content\engineconfigdx11.jscfg" />
     <None Include="$(MSBuildThisFileDirectory)content\engineconfigdx12.jscfg" />
     <None Include="$(MSBuildThisFileDirectory)content\engineconfigforcook.jscfg" />

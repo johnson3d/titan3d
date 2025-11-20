@@ -83,6 +83,38 @@ namespace EngineNS.IO
             Writer.Dispose();
         }
     }
+    public class TtFileWriter : ICoreWriter, IDisposable
+    {
+        System.IO.FileStream FileStream;
+        public TtFileWriter(string filename)
+        {
+            FileStream = new System.IO.FileStream(filename, System.IO.FileMode.Create, System.IO.FileAccess.Write);
+        }
+        public unsafe void* Ptr
+        {
+            get
+            {
+                return IntPtr.Zero.ToPointer();
+            }
+        }
+        public IO.EIOType IOType { get => IO.EIOType.File; }
+        public ulong GetPosition()
+        {
+            return (ulong)FileStream.Position;
+        }
+        public void Seek(ulong pos)
+        {
+            FileStream.Seek((long)pos, System.IO.SeekOrigin.Begin);
+        }
+        public unsafe void WritePtr(void* p, int length)
+        {
+            FileStream.Write(new System.ReadOnlySpan<byte>(p, length));
+        }
+        public void Dispose()
+        {
+            FileStream.Dispose();
+        }
+    }
     public interface IArchive
     {
         void Write(ICoreWriter writer);

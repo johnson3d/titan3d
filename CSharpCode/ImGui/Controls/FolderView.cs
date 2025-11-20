@@ -1,6 +1,4 @@
 ﻿using EngineNS.Thread;
-using MathNet.Numerics.Random;
-using NPOI.OpenXmlFormats.Dml;
 using System;
 using System.Collections.Generic;
 using System.Text;

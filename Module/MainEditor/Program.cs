@@ -58,15 +58,34 @@ namespace MainEditor
 
             var mBin = System.IO.Directory.GetCurrentDirectory();
             
-            var jsCode = EngineNS.IO.TtFileManager.ReadAllText(mBin + "/../cache/config/engine.jscfg");
             EngineNS.TtEngineConfig Config = null;
+            
+            var jsCode = EngineNS.IO.TtFileManager.ReadAllText(mBin + "/../cache/config/engine.jscfg");
             if (jsCode != null)
             {
-                Config = EngineNS.IO.TtFileManager.LoadObjectFromJson<TtEngineConfig>(jsCode);
+                if (Config==null)
+                {
+                    Config = EngineNS.IO.TtFileManager.LoadObjectFromJson<TtEngineConfig>(jsCode);
+                }
+                else
+                {
+                    EngineNS.IO.TtAdvancedJsonPartialUpdater.PartialUpdate(jsCode, Config, EngineNS.IO.TtJsonOptions.Options);
+                }
             }
             else
             {
-                EngineNS.IO.TtFileManager.WriteAllText(mBin + "/../cache/config/engine.jscfg", "{}");
+                EngineNS.IO.TtFileManager.WriteAllText(mBin + "/../cache/config/engine.jscfg", "{\"NativeDll\": \"release\"}");
+                
+                var cfg = FindArgument(args, "config=");
+                if (cfg == null)
+                {
+                    TtNativeWindow.MessageBoxA(0, "config is null", "Titan3D", 0);
+                }
+                jsCode = EngineNS.IO.TtFileManager.ReadAllText(cfg);
+                if (jsCode!=null)
+                {
+                    Config = EngineNS.IO.TtFileManager.LoadObjectFromJson<TtEngineConfig>(jsCode);
+                }
             }
 
             if (Config!=null)

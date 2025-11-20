@@ -28,7 +28,7 @@ namespace ProjectCooker
             }
             else
             {
-                EngineNS.IO.TtFileManager.WriteAllText(mBin + "/../cache/config/engine.jscfg", "{}");
+                EngineNS.IO.TtFileManager.WriteAllText(mBin + "/../cache/config/engine.jscfg", "{\"NativeDll\": \"release\"}");
             }
 
             if (Config!=null)

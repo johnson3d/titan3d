@@ -1,4 +1,3 @@
-using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -221,6 +220,9 @@ namespace EngineNS
         [Rtti.Meta("")]
         [Category("Option")]
         public List<string> Plugins { get; set; } = new List<string>() { "SourceGit", "Survivor" };
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public List<string> TypeAssemblies { get; set; } = new List<string>();
         public TtEngineConfig()
         {
             //EditorFont = RName.GetRName("fonts/Roboto-Regular.ttf", RName.ERNameType.Engine);
@@ -401,6 +403,12 @@ namespace EngineNS
             //EngineNS.Rtti.TtTypeDescManager.Instance.InitTypes();
             EngineNS.Rtti.TtTypeDescManager.Instance.InitAssembly(this, "System.Private.CoreLib");
             EngineNS.Rtti.TtTypeDescManager.Instance.InitAssembly(this, "Engine.Window");
+
+            foreach(var assembly in Config.TypeAssemblies)
+            {
+                EngineNS.Rtti.TtTypeDescManager.Instance.InitAssembly(this, assembly);
+            }
+
             //EngineNS.Rtti.TtTypeDescManager.Instance.InitAssembly("Engine.Console");
 
             var t2 = Support.TtTime.HighPrecision_GetTickCount();
@@ -573,91 +581,99 @@ namespace EngineNS
         int QuitFrame = -1;
         public bool Tick()
         {
-            using(new Profiler.TimeScopeHelper(Scope_Tick))
+            var frame = this.Tracer.BeginFrame();
+            try
+            {   
+                using (new Profiler.TimeScopeHelper(Scope_Tick))
+                {
+                    var t1 = Support.TtTime.HighPrecision_GetTickCount();
+                    var newTickCount = t1 - EngineStartTickCountUS;
+                    ElapseTickCountMS = (newTickCount - CurrentTickCountUS) * 0.001f;
+                    CurrentTickCountUS = newTickCount;
+                    CurrentTickFrame++;
+                    FPSCounter--;
+                    if (FPSCounter == 0)
+                    {
+                        FPS = (float)((double)(10) / ((double)(newTickCount - FPSBeginTime) / 1000000.0));
+                        FPSBeginTime = newTickCount;
+                        FPSCounter = 10;
+                    }
+
+                    using (new Profiler.TimeScopeHelper(ScopeInputSystem))
+                    {
+                        CoreSDK.UpdateEngineFrame(CurrentTickFrame);
+                        InputSystem.BeforeTick();
+                        if (-1 == InputSystem.Tick(this))
+                        {
+                            QuitFrame = 2;
+                        }
+                    }
+
+                    var bCapturing = GfxDevice.RenderSwapQueue.BeginFrameCapture();
+
+                    //Do engine frame tick
+                    {
+                        TickBeginFrame();
+
+                        using (new Profiler.TimeScopeHelper(ScopeTickModules))
+                        {
+                            base.TickModules();
+                        }
+
+                        this.ThreadMain.Tick();
+
+                        TickSync();
+
+                        using (new Profiler.TimeScopeHelper(ScopeTickModules))
+                        {
+                            FContextTickableManager.GetInstance().ThreadTick();
+                            base.EndFrameModules();
+                        }
+                    }
+
+                    if (bCapturing)
+                        GfxDevice.RenderSwapQueue.EndFrameCapture();
+
+                    using (new Profiler.TimeScopeHelper(ScopeInputSystem))
+                    {
+                        InputSystem.AfterTick();
+
+                        Profiler.TimeScopeManager.UpdateAllInstance();
+                    }
+
+                    var t2 = Support.TtTime.HighPrecision_GetTickCount();
+                    var delta = (int)((t2 - t1) / 1000);
+                    var idleTime = Config.Interval - delta;
+                    if (idleTime > 0)
+                    {
+                        using (new Profiler.TimeScopeHelper(ScopeSleep))
+                        {
+                            System.Threading.Thread.Sleep(idleTime);
+                        }
+                    }
+
+                    TickCountSecond = ((float)CurrentTickCountUS) * 0.001f;
+                    ElapsedSecond = ((float)ElapseTickCountMS) * 0.001f;
+
+                    FrameCount++;
+                    if (QuitFrame < 0)
+                    {
+                        return true;
+                    }
+                    else if (QuitFrame == 0)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        QuitFrame--;
+                        return true;
+                    }
+                }
+            }
+            finally
             {
-                var t1 = Support.TtTime.HighPrecision_GetTickCount();
-                var newTickCount = t1 - EngineStartTickCountUS;
-                ElapseTickCountMS = (newTickCount - CurrentTickCountUS) * 0.001f;
-                CurrentTickCountUS = newTickCount;
-                CurrentTickFrame++;
-                FPSCounter--;
-                if (FPSCounter == 0)
-                {
-                    FPS = (float)((double)(10) / ((double)(newTickCount - FPSBeginTime) / 1000000.0));
-                    FPSBeginTime = newTickCount;
-                    FPSCounter = 10;
-                }
-
-                using (new Profiler.TimeScopeHelper(ScopeInputSystem))
-                {
-                    CoreSDK.UpdateEngineFrame(CurrentTickFrame);
-                    InputSystem.BeforeTick();
-                    if (-1 == InputSystem.Tick(this))
-                    {
-                        QuitFrame = 2;
-                    }
-                }
-                
-                var bCapturing = GfxDevice.RenderSwapQueue.BeginFrameCapture();
-
-                //Do engine frame tick
-                {
-                    TickBeginFrame();
-
-                    using (new Profiler.TimeScopeHelper(ScopeTickModules))
-                    {
-                        base.TickModules();
-                    }
-                    
-                    this.ThreadMain.Tick();
-
-                    TickSync();
-                    
-                    using (new Profiler.TimeScopeHelper(ScopeTickModules))
-                    {
-                        FContextTickableManager.GetInstance().ThreadTick();
-                        base.EndFrameModules();
-                    }   
-                }
-
-                if (bCapturing)
-                    GfxDevice.RenderSwapQueue.EndFrameCapture();
-
-                using (new Profiler.TimeScopeHelper(ScopeInputSystem))
-                {
-                    InputSystem.AfterTick();
-
-                    Profiler.TimeScopeManager.UpdateAllInstance();
-                }
-
-                var t2 = Support.TtTime.HighPrecision_GetTickCount();
-                var delta = (int)((t2 - t1) / 1000);
-                var idleTime = Config.Interval - delta;
-                if (idleTime > 0)
-                {
-                    using (new Profiler.TimeScopeHelper(ScopeSleep))
-                    {
-                        System.Threading.Thread.Sleep(idleTime);
-                    }   
-                }
-
-                TickCountSecond = ((float)CurrentTickCountUS) * 0.001f;
-                ElapsedSecond = ((float)ElapseTickCountMS) * 0.001f;
-
-                FrameCount++;
-                if (QuitFrame < 0)
-                {
-                    return true;
-                }
-                else if (QuitFrame == 0)
-                {
-                    return false;
-                }
-                else
-                {
-                    QuitFrame--;
-                    return true;
-                }
+                this.Tracer.EndFrame(frame);
             }
         }
         public void PostQuitMessage()
