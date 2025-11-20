@@ -139,13 +139,13 @@ namespace EngineNS.Plugins.LoginServer
 			reader.Read(out user);
 			string psw;
 			reader.Read(out psw);
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = await ((EngineNS.Plugins.LoginServer.ULoginServer)host).LoginAccount(user, psw, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);

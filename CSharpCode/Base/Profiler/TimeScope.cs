@@ -566,12 +566,12 @@ namespace EngineNS.Profiler
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				FRouter router = new FRouter();
+				var router = new EngineNS.Bricks.Network.RPC.FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Profiler;
 				router.Index = ExeIndex;
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkg.Write(pkgHeader);
 				pkg.Write(router, false);
 				UInt16 methodIndex = 0;
@@ -603,12 +603,12 @@ namespace EngineNS.Profiler
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				FRouter router = new FRouter();
+				var router = new EngineNS.Bricks.Network.RPC.FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Profiler;
 				router.Index = ExeIndex;
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkg.Write(pkgHeader);
 				pkg.Write(router, false);
 				UInt16 methodIndex = 1;
@@ -635,12 +635,12 @@ namespace EngineNS.Profiler
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				FRouter router = new FRouter();
+				var router = new EngineNS.Bricks.Network.RPC.FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Profiler;
 				router.Index = ExeIndex;
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkg.Write(pkgHeader);
 				pkg.Write(router, false);
 				UInt16 methodIndex = 2;
@@ -662,13 +662,13 @@ namespace EngineNS.Profiler
 		{
 			sbyte arg;
 			reader.Read(out arg);
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Profiler.TtRpcProfiler)host).GetProfilerThreads(arg, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);
@@ -688,13 +688,13 @@ namespace EngineNS.Profiler
 		{
 			string name;
 			reader.Read(out name);
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Profiler.TtRpcProfiler)host).GetProfilerData(name, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);

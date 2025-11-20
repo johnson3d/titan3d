@@ -172,13 +172,13 @@ namespace EngineNS.Plugins.LevelServer
 	{
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GetHP = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.LevelServer.ULevelClient)host).GetHP(context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);

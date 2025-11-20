@@ -263,13 +263,13 @@ namespace EngineNS.Plugins.GateServer
 			reader.Read(out sessionId);
 			string user;
 			reader.Read(out user);
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.GateServer.UGateServer)host).WaitSession(sessionId, user, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);
@@ -291,13 +291,13 @@ namespace EngineNS.Plugins.GateServer
 			reader.Read(out sessionId);
 			string user;
 			reader.Read(out user);
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.GateServer.UGateServer)host).RegClient(sessionId, user, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);
@@ -321,13 +321,13 @@ namespace EngineNS.Plugins.GateServer
 			reader.Read(out user);
 			UInt16 indexInLevel;
 			reader.Read(out indexInLevel);
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.GateServer.UGateServer)host).ClientEnterLevel(sessionId, user, indexInLevel, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);

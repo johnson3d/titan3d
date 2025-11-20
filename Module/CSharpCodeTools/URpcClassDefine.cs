@@ -116,7 +116,7 @@ namespace CSharpCodeTools
                 }
                 if (i.ReturnType != null)
                 {
-                    AddLine($"FReturnContext retContext;");
+                    AddLine($"EngineNS.Bricks.Network.RPC.FReturnContext retContext;");
                     AddLine($"reader.Read(out retContext, false);");
 
                     if (i.IsAsync)
@@ -132,7 +132,7 @@ namespace CSharpCodeTools
                     PushBrackets();
                     {
                         AddLine($"var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);");
-                        AddLine($"var pkgHeader = new FPkgHeader();");
+                        AddLine($"var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();");
                         AddLine($"pkgHeader.SetHasReturn(true);");
                         AddLine($"pkg.Write(pkgHeader);");
                         AddLine($"pkg.Write(retContext, false);");
@@ -320,12 +320,12 @@ namespace CSharpCodeTools
                             PushBrackets();
                             {
                                 AddLine($"var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);");
-                                AddLine($"FRouter router = new FRouter();");
+                                AddLine($"var router = new EngineNS.Bricks.Network.RPC.FRouter();");
                                 AddLine($"router.RunTarget = {this.RunTarget};");
                                 AddLine($"router.Executer = {this.Executer};");
                                 AddLine($"router.Index = ExeIndex;");
                                 AddLine($"router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;");
-                                AddLine($"var pkgHeader = new FPkgHeader();");
+                                AddLine($"var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();");
                                 if (i.Flags != null)
                                 {
                                     AddLine($"pkgHeader.PKGFlags = (byte){i.Flags};");

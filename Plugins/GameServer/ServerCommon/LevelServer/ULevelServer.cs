@@ -261,13 +261,13 @@ namespace EngineNS.Plugins.LevelServer
 			reader.Read(out user);
 			UInt16 indexInGate;
 			reader.Read(out indexInGate);
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).RegClient(sessionId, user, indexInGate, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);
@@ -289,13 +289,13 @@ namespace EngineNS.Plugins.LevelServer
 			reader.Read(out id);
 			RName name;
 			reader.Read(out name);
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).RegLevel(id, name, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);
@@ -317,13 +317,13 @@ namespace EngineNS.Plugins.LevelServer
 			reader.Read(out clientIndex);
 			Guid levelId;
 			reader.Read(out levelId);
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).TryClientEnterLevel(clientIndex, levelId, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);
@@ -345,13 +345,13 @@ namespace EngineNS.Plugins.LevelServer
 			reader.Read(out clientIndex);
 			Guid levelId;
 			reader.Read(out levelId);
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).TryClientLeaveLevel(clientIndex, levelId, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);

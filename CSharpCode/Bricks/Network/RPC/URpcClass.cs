@@ -25,6 +25,7 @@ namespace EngineNS.Bricks.Network.RPC
         Root,
         Client,
         Profiler,
+        Tracer,
         PropertyData,
     }
     public class TtRpcClassAttribute : Attribute
@@ -645,12 +646,12 @@ namespace EngineNS.Bricks.Network.RPC
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				FRouter router = new FRouter();
+				var router = new EngineNS.Bricks.Network.RPC.FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.PropertyData;
 				router.Index = ExeIndex;
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkg.Write(pkgHeader);
 				pkg.Write(router, false);
 				UInt16 methodIndex = 0;
@@ -675,12 +676,12 @@ namespace EngineNS.Bricks.Network.RPC
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				FRouter router = new FRouter();
+				var router = new EngineNS.Bricks.Network.RPC.FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.PropertyData;
 				router.Index = ExeIndex;
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkg.Write(pkgHeader);
 				pkg.Write(router, false);
 				UInt16 methodIndex = 1;
@@ -707,12 +708,12 @@ namespace EngineNS.Bricks.Network.RPC
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				FRouter router = new FRouter();
+				var router = new EngineNS.Bricks.Network.RPC.FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.PropertyData;
 				router.Index = ExeIndex;
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkg.Write(pkgHeader);
 				pkg.Write(router, false);
 				UInt16 methodIndex = 2;
@@ -744,12 +745,12 @@ namespace EngineNS.Bricks.Network.RPC
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				FRouter router = new FRouter();
+				var router = new EngineNS.Bricks.Network.RPC.FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.PropertyData;
 				router.Index = ExeIndex;
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkg.Write(pkgHeader);
 				pkg.Write(router, false);
 				UInt16 methodIndex = 3;
@@ -844,13 +845,13 @@ namespace EngineNS.Bricks.Network.RPC
 			reader.Read(out executerType);
 			ushort executeIndex;
 			reader.Read(out executeIndex);
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = ((EngineNS.Bricks.Network.RPC.TtRpcPropertyDataManager)host).QueryProperties(executerType, executeIndex, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);

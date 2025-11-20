@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
+using EngineNS.Bricks.CodeBuilder.MacrossNode;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,11 +9,13 @@ namespace EngineNS.Profiler.Trace
     public enum ETraceChannel : uint
     {
         None = 0,
-        CPU = 1,
-        GPU = (1<<1),
-        RDG = (1<<2),
+        Cpu = 1,
+        Gpu = (1<<1),
+        Rdg = (1<<2),
+        Log = (1<<3),
     }
-    public class TtTracer
+    [Bricks.Network.RPC.TtRpcClass(RunTarget = Bricks.Network.RPC.ERunTarget.None, Executer = Bricks.Network.RPC.EExecuter.Tracer, CallerInClass = true)]
+    public partial class TtTracer : Bricks.Network.RPC.AuxRpcHost<TtTracer>
     {
         public static void PushAction(TtAction action)
         {
@@ -22,7 +24,7 @@ namespace EngineNS.Profiler.Trace
             TtEngine.Instance.Tracer.Current?.PushAction(action);
         }
         public bool Enabled { get; set; } = false;
-        public ETraceChannel Channels { get; set; } = ETraceChannel.CPU;
+        public ETraceChannel Channels { get; set; } = ETraceChannel.Cpu;
         public List<TtFrame> Frames = new List<TtFrame>();
         public TtFrame Current;
         public TtFrame BeginFrame()
@@ -57,7 +59,18 @@ namespace EngineNS.Profiler.Trace
             }
             Current = null;
         }
-        public Bricks.Network.TtTcpClient NetConnect = null;
+        public void PushFrame(TtFrame frame)
+        {
+            if (Enabled == false)
+            {
+                return;
+            }
+            lock (this)
+            {
+                Frames.Add(frame);
+            }
+        }
+        public Bricks.Network.INetConnect NetConnect = null;
         public IO.TtFileWriter FileWriter = null;
         public void WriteFrames()
         {
@@ -95,6 +108,21 @@ namespace EngineNS.Profiler.Trace
                 //}
             }
         }
+        #region RPC
+        [Bricks.Network.RPC.TtRpcMethod(Index = 0)]
+        public void ReciveFrame(EngineNS.IO.TtMemWriter frameData, Bricks.Network.RPC.TtCallContext context)
+        {
+            using (var reader = IO.TtMemReader.CreateInstance(in frameData))
+            {
+                using (var ar = new IO.AuxReader<IO.TtMemReader>(reader, this))
+                {
+                    var frame = new TtFrame();
+                    //frame.Read
+                    TtEngine.Instance.Tracer.PushFrame(frame);
+                }
+            }
+        }
+        #endregion
     }
     public class TtFrame
     {
@@ -144,3 +172,69 @@ namespace EngineNS
         public Profiler.Trace.TtTracer Tracer { get; } = new Profiler.Trace.TtTracer();
     }
 }
+
+#if TitanEngine_AutoGen_RPC
+#region TitanEngine_AutoGen_RPC
+#pragma warning disable 105
+
+
+namespace EngineNS.Profiler.Trace
+{
+	public partial class TtTracer_RpcCaller
+	{
+		public static void ReciveFrame(EngineNS.IO.TtMemWriter frameData, in EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
+		{
+			var ExeIndex = rpcArg.ExeIndex;
+			var NetConnect = rpcArg.NetConnect;
+			if (ExeIndex == UInt16.MaxValue)
+			{
+				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
+			}
+			if (NetConnect == null)
+			{
+				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
+			}
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
+			{
+				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
+				var router = new EngineNS.Bricks.Network.RPC.FRouter();
+				router.RunTarget = Bricks.Network.RPC.ERunTarget.None;
+				router.Executer = Bricks.Network.RPC.EExecuter.Tracer;
+				router.Index = ExeIndex;
+				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
+				pkg.Write(pkgHeader);
+				pkg.Write(router, false);
+				UInt16 methodIndex = 0;
+				pkg.Write(methodIndex);
+				pkg.Write(frameData);
+				pkg.CoreWriter.SurePkgHeader();
+				NetConnect?.Send(in pkg);
+			}
+		}
+	}
+}
+
+
+namespace EngineNS.Profiler.Trace
+{
+	partial class TtTracer
+	{
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_ReciveFrame = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
+		{
+			EngineNS.IO.TtMemWriter frameData;
+			reader.Read(out frameData);
+			((EngineNS.Profiler.Trace.TtTracer)host).ReciveFrame(frameData, context);
+			frameData.Dispose();
+		};
+		public void RPC_ReciveFrame(EngineNS.IO.TtMemWriter frameData, EngineNS.Bricks.Network.RPC.TtReturnContext retContext = null)
+		{
+			var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg(retContext);
+			rpcArg.ExeIndex = RpcExecuteIndex;
+			rpcArg.NetConnect = GetRpcConnect(0);
+			TtTracer_RpcCaller.ReciveFrame(frameData, rpcArg);
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_RPC
+#endif//TitanEngine_AutoGen_RPC

@@ -524,12 +524,12 @@ namespace EngineNS.UnitTest
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				FRouter router = new FRouter();
+				var router = new EngineNS.Bricks.Network.RPC.FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
 				router.Index = ExeIndex;
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.PKGFlags = (byte)EPkgTypes.WeakPkg;
 				pkg.Write(pkgHeader);
 				pkg.Write(router, false);
@@ -557,12 +557,12 @@ namespace EngineNS.UnitTest
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				FRouter router = new FRouter();
+				var router = new EngineNS.Bricks.Network.RPC.FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
 				router.Index = ExeIndex;
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkg.Write(pkgHeader);
 				pkg.Write(router, false);
 				UInt16 methodIndex = 100 + 1;
@@ -592,12 +592,12 @@ namespace EngineNS.UnitTest
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				FRouter router = new FRouter();
+				var router = new EngineNS.Bricks.Network.RPC.FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
 				router.Index = ExeIndex;
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkg.Write(pkgHeader);
 				pkg.Write(router, false);
 				UInt16 methodIndex = 100 + 2;
@@ -629,12 +629,12 @@ namespace EngineNS.UnitTest
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				FRouter router = new FRouter();
+				var router = new EngineNS.Bricks.Network.RPC.FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
 				router.Index = ExeIndex;
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkg.Write(pkgHeader);
 				pkg.Write(router, false);
 				UInt16 methodIndex = 100 + 3;
@@ -666,12 +666,12 @@ namespace EngineNS.UnitTest
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				FRouter router = new FRouter();
+				var router = new EngineNS.Bricks.Network.RPC.FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
 				router.Index = ExeIndex;
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkg.Write(pkgHeader);
 				pkg.Write(router, false);
 				UInt16 methodIndex = 100 + 4;
@@ -703,12 +703,12 @@ namespace EngineNS.UnitTest
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				FRouter router = new FRouter();
+				var router = new EngineNS.Bricks.Network.RPC.FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
 				router.Index = ExeIndex;
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkg.Write(pkgHeader);
 				pkg.Write(router, false);
 				UInt16 methodIndex = 100 + 5;
@@ -740,12 +740,12 @@ namespace EngineNS.UnitTest
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				FRouter router = new FRouter();
+				var router = new EngineNS.Bricks.Network.RPC.FRouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
 				router.Index = ExeIndex;
 				router.Authority = EngineNS.Bricks.Network.RPC.EAuthority.God;
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkg.Write(pkgHeader);
 				pkg.Write(router, false);
 				UInt16 methodIndex = 100 + 6;
@@ -769,13 +769,13 @@ namespace EngineNS.UnitTest
 		{
 			float arg;
 			reader.Read(out arg);
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = ((EngineNS.UnitTest.UTest_Rpc)host).TestRpc1(arg, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);
@@ -808,13 +808,13 @@ namespace EngineNS.UnitTest
 		{
 			int arg;
 			reader.Read(out arg);
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = ((EngineNS.UnitTest.UTest_Rpc)host).TestRpc3(arg, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);
@@ -834,13 +834,13 @@ namespace EngineNS.UnitTest
 		{
 			string arg;
 			reader.Read(out arg);
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = ((EngineNS.UnitTest.UTest_Rpc)host).TestRpc4(arg, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);
@@ -860,13 +860,13 @@ namespace EngineNS.UnitTest
 		{
 			Vector3 arg;
 			reader.Read(out arg);
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = await ((EngineNS.UnitTest.UTest_Rpc)host).TestRpc5(arg, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);
@@ -886,13 +886,13 @@ namespace EngineNS.UnitTest
 		{
 			EngineNS.UnitTest.UTest_Rpc.TestRPCArgument arg;
 			reader.Read(out arg);
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = ((EngineNS.UnitTest.UTest_Rpc)host).TestRpc6(arg, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);
@@ -912,13 +912,13 @@ namespace EngineNS.UnitTest
 		{
 			EngineNS.UnitTest.UTest_Rpc.TestUnmanagedStruct arg;
 			reader.Read(out arg);
-			FReturnContext retContext;
+			EngineNS.Bricks.Network.RPC.FReturnContext retContext;
 			reader.Read(out retContext, false);
 			var ret = ((EngineNS.UnitTest.UTest_Rpc)host).TestRpc7(arg, context);
 			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
-				var pkgHeader = new FPkgHeader();
+				var pkgHeader = new EngineNS.Bricks.Network.RPC.FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
 				pkg.Write(retContext, false);
