@@ -12,6 +12,7 @@ namespace EngineNS.Bricks.Network.RPC
     {
         Return = -1,
         None = 0,
+        Tracer,
         Client,
         Root,
         Login,
@@ -220,6 +221,8 @@ namespace EngineNS.Bricks.Network.RPC
         }
         public FRpcMethodInfo GetCallee(UInt16 index)
         {
+            if (index>=Methods.Length)
+                return new FRpcMethodInfo();
             return Methods[index];
         }
     }
@@ -446,6 +449,8 @@ namespace EngineNS.Bricks.Network.RPC
         }
         public void Tick()
         {
+            if (TtEngine.Instance.Config.AutoSyncPropertyData==false)
+                return;
             using (var writer = IO.TtMemWriter.CreateInstance())
             {
                 using (var ar = new IO.AuxWriter<IO.TtMemWriter>(writer))

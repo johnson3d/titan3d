@@ -118,6 +118,9 @@ namespace EngineNS
         public bool DoUnitTest { get; set; } = true;
         [Rtti.Meta("")]
         [Category("Option")]
+        public bool AutoSyncPropertyData { get; set; } = true;
+        [Rtti.Meta("")]
+        [Category("Option")]
         public NxRHI.ERhiType RHIType { get; set; } = NxRHI.ERhiType.RHI_D3D11;
         [Rtti.Meta("")]
         [Category("Option")]
@@ -682,6 +685,8 @@ namespace EngineNS
         }
         public void FinalCleanup()
         {
+            Tracer.Dispose();
+
             TaskCollector.Dispose();
 
             GfxDevice.RenderSwapQueue.Reset();

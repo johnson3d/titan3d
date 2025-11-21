@@ -28,6 +28,13 @@ public:
 	vBOOL Connect(const char* address, int port, int timeout);
 	void Disconnect();
 
+	int GetPort() const { 
+		return mPort; 
+	}
+	const char* GetAddress() const { 
+		return mAddress.c_str(); 
+	}
+
 	int Send(TR_META(SV_NoStringConverter=true) char* p, UINT size);
 
 	vBOOL WaitData(int* errCode);

@@ -18,6 +18,7 @@ namespace EngineNS.IO
     }
     public partial struct TtMemWriter : IO.ICoreWriter, IDisposable
     {
+        internal const int MemWriterCompressThreshold = 64;
         private unsafe static CoreSDK.FDelegate_FSaveMemStream NativeSaveMemStream = NativeSaveMemStreamCB;
         private unsafe static void NativeSaveMemStreamCB(EngineNS.MemStreamWriter arg0, sbyte* arg1, sbyte* arg2)
         {
@@ -281,8 +282,22 @@ namespace EngineNS.IO
         }
         public unsafe void Write(TtMemWriter v)
         {
-            Write((uint)v.GetPosition());
-            WritePtr(v.Ptr, (int)v.GetPosition());
+            var size = (uint)v.GetPosition();
+            Write((uint)size);
+            if (size > TtMemWriter.MemWriterCompressThreshold)
+            {
+                var len = CoreSDK.CompressBound_ZSTD(size) + 5;
+                using (var d = BigStackBuffer.CreateInstance((int)len))
+                {
+                    var wSize = (uint)CoreSDK.Compress_ZSTD(d.GetBuffer(), len, v.Ptr, size, 2);
+                    Write((uint)wSize);
+                    WritePtr(d.GetBuffer(), (int)wSize);
+                }
+            }
+            else
+            {
+                WritePtr(v.Ptr, (int)size);
+            }   
         }
         public void Write(Rtti.TtTypeDesc v)
         {

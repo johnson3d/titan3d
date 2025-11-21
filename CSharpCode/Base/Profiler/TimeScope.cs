@@ -407,7 +407,7 @@ namespace EngineNS.Profiler
                     ar.Write(i.Value.mCoreObject.mMaxTimeInLife);
                     ar.Write(i.Value.mCoreObject.GetDebugSourceLine());
                     ar.Write(i.Value.mCoreObject.GetDebugSourceFile());
-                    var num = i.Value.mCoreObject.GetNunOfCaller();
+                    var num = i.Value.mCoreObject.GetNumOfCaller();
                     if(i.Value.mCoreObject.mParent.IsValidPointer == false)
                     {
                         ar.Write((int)0);

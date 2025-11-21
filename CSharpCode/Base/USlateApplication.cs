@@ -315,14 +315,15 @@ namespace EngineNS
         }
         protected unsafe virtual void OnDrawUI()
         {
-            var visible = true;
-            Vector2 sz = new Vector2(300, 600);
-            ImGuiAPI.SetNextWindowSize(in sz, ImGuiCond_.ImGuiCond_None);
-            if (ImGuiAPI.Begin("Slate", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            {
+            //var visible = true;
+            //Vector2 sz = new Vector2(300, 600);
+            //ImGuiAPI.SetNextWindowSize(in sz, ImGuiCond_.ImGuiCond_None);
+            //if (ImGuiAPI.Begin("Slate", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            //{
 
-            }
-            ImGuiAPI.End();
+            //}
+            //ImGuiAPI.End();
+            TtEngine.RootFormManager.DrawRootForms();
         }
     }
 
@@ -356,13 +357,13 @@ namespace EngineNS
                 }
                 return;
             }
-            Vector2 sz = new Vector2(300, 600);
-            ImGuiAPI.SetNextWindowSize(in sz, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (ImGuiAPI.Begin("Slate", ref Visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            {
+            //Vector2 sz = new Vector2(300, 600);
+            //ImGuiAPI.SetNextWindowSize(in sz, ImGuiCond_.ImGuiCond_FirstUseEver);
+            //if (ImGuiAPI.Begin("Slate", ref Visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            //{
 
-            }
-            ImGuiAPI.End();
+            //}
+            //ImGuiAPI.End();
 
             TtEngine.RootFormManager.DrawRootForms();
         }

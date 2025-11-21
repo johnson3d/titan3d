@@ -96,7 +96,7 @@ struct TR_CLASS()
 		}
 	}
 
-	int GetNunOfCaller()
+	int GetNumOfCaller()
 	{
 		return (int)m_Parents.size();
 	}

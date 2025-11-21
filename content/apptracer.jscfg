@@ -1,4 +1,5 @@
 {
+  "AutoSyncPropertyData": false,
   "IsReverseZ": true,
   "MultiRenderMode": 2,
   "UsePhysxMT": true,
@@ -25,7 +26,7 @@
     "A": 720
   },
   "SupportMultWindows": true,
-  "DoUnitTest": true,
+  "DoUnitTest": false,
   "RHIType": "RHI_D3D12",
   "HasDebugLayer": false,
   "IsGpuBaseValidation": false,
@@ -36,7 +37,7 @@
   "MainWindowType": "Tracer.TtTraceApplication@Unknown",
   "MainRPolicyName": "utest/deferred.rpolicy:Game",
   "SimpleRPolicyName": "graphics/deferred_simple.rpolicy:Engine",
-  "RpcRootType": "EngineNS.UnitTest.UTest_Rpc@EngineCore",
+  "RpcRootType": "Tracer.TtTraceRpcManager@Unknown",
   "CookDXBC": true,
   "CookDXIL": true,
   "CookSPIRV": true,

@@ -15,6 +15,20 @@ namespace EngineNS.Bricks.Network
         {
             mRcvBuffer.Dispose();
         }
+        public ushort Port
+        {
+            get
+            {
+                return (ushort)mCoreObject.GetPort();
+            }
+        }
+        public string IP
+        {
+            get
+            {
+                return mCoreObject.GetAddress();
+            }
+        }
         public RPC.EAuthority Authority { get; set; } = RPC.EAuthority.Client;
         public bool Connected { get; set; }
         public object Tag { get; set; } = null;

@@ -226,6 +226,15 @@ namespace EngineNS.Editor
 #endif
                             },
                         },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "OpenTracer",
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                //test and start tracer process...
+                                TtEngine.Instance.Tracer.ConnectTo().AddWaitTask();
+                            },
+                        },
                     },
                 },
                 new EGui.UIProxy.MenuItemProxy()

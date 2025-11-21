@@ -292,10 +292,27 @@ namespace EngineNS.IO
         {
             uint len = 0;
             Read(out len);
-            v = TtMemWriter.CreateInstance();
-            v.ResetSize(len + 1);
-            v.Seek(len);
-            ReadPtr(v.Ptr, (int)len);
+            if (len > TtMemWriter.MemWriterCompressThreshold)
+            {
+                uint size = 0;
+                Read(out size);
+                using (var d = BigStackBuffer.CreateInstance((int)size + 1))
+                {
+                    ReadPtr(d.GetBuffer(), (int)size);
+                    v = TtMemWriter.CreateInstance();
+                    v.ResetSize(len);
+                    v.Seek(len);
+                    var t = CoreSDK.Decompress_ZSTD(v.Ptr, len, d.GetBuffer(), size);
+                    System.Diagnostics.Debug.Assert(t == len);
+                }
+            }
+            else
+            {
+                v = TtMemWriter.CreateInstance();
+                v.ResetSize(len + 1);
+                v.Seek(len);
+                ReadPtr(v.Ptr, (int)len);
+            }
         }
         public void Read(out Rtti.TtTypeDesc v)
         {
