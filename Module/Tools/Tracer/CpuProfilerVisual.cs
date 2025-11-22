@@ -38,7 +38,7 @@ namespace Tracer
         {
             var size = new Vector2(800, 600);
             ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
-            var result = EngineNS.EGui.UIProxy.DockProxy.BeginMainForm("CpuProfiler", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            var result = EngineNS.EGui.UIProxy.DockProxy.BeginMainForm("CpuVisual", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (result)
             {
                 var cmdlst = ImGuiAPI.GetWindowDrawList();

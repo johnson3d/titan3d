@@ -10,6 +10,7 @@ using EngineNS.UI.Editor;
 using EngineNS.Macross;
 using System.Runtime.InteropServices;
 using EngineNS.GamePlay.Scene;
+using System.Diagnostics;
 //using SDL2;
 
 namespace EngineNS.Editor
@@ -232,7 +233,51 @@ namespace EngineNS.Editor
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 //test and start tracer process...
-                                TtEngine.Instance.Tracer.ConnectTo().AddWaitTask();
+                                Action action = async ()=>
+                                {
+                                    if(false == await TtEngine.Instance.Tracer.ConnectTo())
+                                    {
+                                        var apps = Process.GetProcessesByName("Tracer");
+                                        if(apps.Length == 0)
+                                        {
+                                            bool bDSStarted = false;
+                                            var startInfo = new ProcessStartInfo();
+                                            var dir = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
+                                            startInfo.FileName = IO.TtFileManager.CombinePath(dir, $"Binaries/Tracer/debug/{TtEngine.DotNetVersion}/Tracer.exe");
+                                            startInfo.Arguments = $"EngineRoot={dir} config={dir}content\\apptracer.jscfg NativeDLL={TtEngine.Instance.Config.NativeDll}";
+                                            startInfo.UseShellExecute = false;
+                                            startInfo.RedirectStandardOutput = true;
+                                            var ProcessTracer = new Process();
+                                            ProcessTracer.StartInfo = startInfo;
+                                            ProcessTracer.EnableRaisingEvents = true;
+                                            ProcessTracer.OutputDataReceived += (sender, e) =>
+                                            {
+                                                if (e.Data == "Tracer Server start success.")
+                                                {
+                                                    bDSStarted = true;
+                                                }
+                                            };
+                                            ProcessTracer.Start();
+                                            ProcessTracer.BeginOutputReadLine();
+                                            while (bDSStarted==false)
+                                            {
+                                                System.Threading.Thread.Sleep(100);
+                                            }
+                                            ProcessTracer.CancelOutputRead();
+    
+                                            //ProcessTracer.StandardOutput?.Close();
+                                            if(await TtEngine.Instance.Tracer.ConnectTo()==false)
+                                            {
+                                                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Tracer server start failed!");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Tracer server down!");
+                                        }
+                                    }
+                                };
+                                action();
                             },
                         },
                     },

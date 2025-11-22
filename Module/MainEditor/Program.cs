@@ -142,10 +142,17 @@ namespace MainEditor
             WeakReference wr = Main_Impl(args, out renderSys, out gpuDevice);
             
             //wait gc
+            int iCollect = 0;
             while (wr.IsAlive)
             {
                 System.GC.Collect();
                 System.GC.WaitForPendingFinalizers();
+                iCollect++;
+                if (iCollect>=50)
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCoreGategory>(EngineNS.Profiler.ELogTag.Warning, $"Main wait GC failed");
+                    break;
+                }
             }
             
             TtGfxDevice.DestroyRenderSystem(renderSys, gpuDevice);

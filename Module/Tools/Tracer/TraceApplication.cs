@@ -107,6 +107,7 @@ namespace Tracer
             await CpuProfilerVisual.Initialize();
             CpuProfilerVisual.Visible = true;
             TtEngine.Instance.TickableManager.AddTickable(this);
+            Console.WriteLine("Tracer Server start success.");
             return true;
         }
         public override void Cleanup()
