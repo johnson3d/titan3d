@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 namespace EngineNS.Profiler
 {
     [Flags]
-    public enum ELogTag
+    public enum ELogTag : byte
     {
         [Description("消息")]
         Info = 1,
@@ -144,6 +144,15 @@ namespace EngineNS.Profiler
                 System.Diagnostics.Trace.WriteLine(info);
             if (IsWriteConsole)
                 System.Console.WriteLine(info);
+        }
+        public static void OnReportLog_Tracer(ELogTag tag, string category, string memberName, string sourceFilePath, int sourceLineNumber, string info)
+        {
+            if (IsWriteVSOutput || IsWriteVSOutput)
+                info = $"{sourceFilePath}({sourceLineNumber},0):{info}";
+            if (IsWriteVSOutput)
+                System.Diagnostics.Trace.WriteLine(info);
+
+            Trace.TtTracer.PushAction(new Trace.TtLogAction(tag, category, memberName, sourceFilePath, sourceLineNumber, info));
         }
         private static CoreSDK.FDelegate_FWriteLogString NativeLogger = NativeWriteLogString;
 #if PMacIOS

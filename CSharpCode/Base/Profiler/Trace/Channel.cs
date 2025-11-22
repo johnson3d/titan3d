@@ -138,4 +138,48 @@ namespace EngineNS.Profiler.Trace
         }
         public List<TtThreadScopeInfo> Threads = new List<TtThreadScopeInfo>();
     }
+    public class TtLogAction : TtAction
+    {
+        public ELogTag Tag;
+        public string Category;
+        public string MemberName;
+        public string SourceFilePath;
+        public int SourceLineNumber;
+        public string Info;
+        public TtLogAction()
+        {
+
+        }
+        public TtLogAction(ELogTag tag, string category, string memberName, string sourceFilePath, int sourceLineNumber, string info)
+        {
+            Tag =tag;
+            Category = category;
+            MemberName = memberName;
+            SourceFilePath = sourceFilePath;
+            SourceLineNumber = sourceLineNumber;
+            Info = info;
+        }
+        public override ETraceChannel GetChannel()
+        {
+            return ETraceChannel.Log;
+        }
+        public override void Write(IO.IWriter writer)
+        {
+            writer.Write(Tag);
+            writer.Write(Category);
+            writer.Write(MemberName);
+            writer.Write(SourceFilePath);
+            writer.Write(SourceLineNumber);
+            writer.Write(Info);
+        }
+        public override void Read(IO.IReader reader)
+        {
+            reader.Read(out Tag);
+            reader.Read(out Category);
+            reader.Read(out MemberName);
+            reader.Read(out SourceFilePath);
+            reader.Read(out SourceLineNumber);
+            reader.Read(out Info);
+        }
+    }
 }

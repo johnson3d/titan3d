@@ -13,6 +13,7 @@ namespace Tracer
         public TtCpuProfilerVisual()
         {
             TtEngine.RootFormManager.RegRootForm(this);
+            ExcludeThreads.Add("TPool");
         }
 
         public async EngineNS.Thread.Async.TtTask<bool> Initialize()
@@ -21,7 +22,10 @@ namespace Tracer
             return true;
         }
 
-        public void Dispose() { }
+        public void Dispose()
+        {
+            TtEngine.RootFormManager.UnregRootForm(this);
+        }
         bool mVisible = true;
         public bool Visible
         {
@@ -34,6 +38,16 @@ namespace Tracer
         #endregion
 
         public EngineNS.Profiler.Trace.TtCpuFrameProfilerAction FrameProfiler;
+        public List<string> ExcludeThreads { get; set; } = new List<string>();
+        private bool IsExcludeThread(string name)
+        {
+            foreach (var i in ExcludeThreads)
+            {
+                if (name.StartsWith(i))
+                    return true;
+            }
+            return false;
+        }
         public unsafe void OnDraw()
         {
             var size = new Vector2(800, 600);
@@ -48,6 +62,8 @@ namespace Tracer
                     {
                         foreach (var i in FrameProfiler.Threads)
                         {
+                            if (IsExcludeThread(i.ThreadName))
+                                continue;
                             if (ImGuiAPI.BeginTabItem(i.ThreadName, null, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
                             {
                                 if (ImGuiAPI.BeginChild("TimeScope", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_None))

@@ -35,19 +35,10 @@ namespace EngineNS.Profiler.Trace
         }
         public void Dispose()
         {
-            if (NetConnect!=null)
-            {
-                NetConnect.Disconnect();
-                NetConnect = null;
-            }
-            if (FileWriter!=null)
-            {
-                //FileWriter.Close();
-                FileWriter = null;
-            }
+            CloseTrace();
         }
 
-        public async EngineNS.Thread.Async.TtTask<bool> ConnectTo(string ip=null, ushort port = ushort.MaxValue)
+        public async EngineNS.Thread.Async.TtTask<bool> OpenTrace(string ip=null, ushort port = ushort.MaxValue)
         {
             if (NetConnect!=null)
                 NetConnect.Disconnect();
@@ -63,8 +54,30 @@ namespace EngineNS.Profiler.Trace
             }
             var ret = await NetConnect.Connect(ip, port, null);
             if (ret)
+            {
                 Enabled = true;
+                Profiler.Log.OnReportLog += Profiler.Log.OnReportLog_Tracer;
+            }
+            else 
+            {
+                Profiler.Log.OnReportLog -= Profiler.Log.OnReportLog_Tracer;
+            }
             return ret;
+        }
+        public void CloseTrace()
+        {
+            Enabled = false;
+            Profiler.Log.OnReportLog -= Profiler.Log.OnReportLog_Tracer;
+            if (NetConnect!=null)
+            {
+                NetConnect.Disconnect();
+                NetConnect = null;
+            }
+            if (FileWriter!=null)
+            {
+                //FileWriter.Close();
+                FileWriter = null;
+            }
         }
 
         public static void PushAction(TtAction action)
@@ -78,7 +91,7 @@ namespace EngineNS.Profiler.Trace
             TtEngine.Instance.Tracer.Current.PushAction(TtEngine.Instance.Tracer, action);
         }
         public bool Enabled { get; set; } = false;
-        public ETraceChannel Channels { get; set; } = ETraceChannel.Cpu;
+        public ETraceChannel Channels { get; set; } = ETraceChannel.Cpu | ETraceChannel.Log;
         public List<TtFrame> Frames = new List<TtFrame>();
         public TtFrame Current;
         public TtFrame BeginFrame()

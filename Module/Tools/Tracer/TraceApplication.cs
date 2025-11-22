@@ -35,6 +35,20 @@ namespace Tracer
                             }
                         }
                     }
+                    var log = frame.GetChannel(EngineNS.Profiler.Trace.ETraceChannel.Log);
+                    if (log!=null)
+                    {
+                        var app = TtEngine.Instance.GfxDevice.SlateApplication as TtTraceApplication;
+                        foreach (var a in log.Actions)
+                        {
+                            if (a.GetType() == typeof(EngineNS.Profiler.Trace.TtLogAction))
+                            {
+                                var act = a as EngineNS.Profiler.Trace.TtLogAction;
+                                app.LogVisual.OnReportLog(act.Tag, act.Category, act.MemberName, act.SourceFilePath, act.SourceLineNumber, act.Info);
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -98,6 +112,7 @@ namespace Tracer
 
         public EngineNS.Bricks.TcpServer.TtTcpServer TcpServer { get; private set; } = new EngineNS.Bricks.TcpServer.TtTcpServer();
         public TtCpuProfilerVisual CpuProfilerVisual = null;
+        public TtLogVisual LogVisual = null;
         public override async EngineNS.Thread.Async.TtTask<bool> InitializeApplication(EngineNS.NxRHI.TtGpuDevice rc, RName rpName)
         {
             await base.InitializeApplication(rc, rpName);
@@ -106,6 +121,11 @@ namespace Tracer
             CpuProfilerVisual = new TtCpuProfilerVisual();
             await CpuProfilerVisual.Initialize();
             CpuProfilerVisual.Visible = true;
+
+            LogVisual = new TtLogVisual();
+            await LogVisual.Initialize();
+            LogVisual.Visible = true;
+
             TtEngine.Instance.TickableManager.AddTickable(this);
             Console.WriteLine("Tracer Server start success.");
             return true;
@@ -115,7 +135,8 @@ namespace Tracer
             TcpServer.StopServer();
             TtEngine.Instance.TickableManager.RemoveTickable(this);
             EngineNS.CoreSDK.DisposeObject(ref CpuProfilerVisual);
-            
+            EngineNS.CoreSDK.DisposeObject(ref LogVisual);
+
             base.Cleanup();
         }
     }

@@ -1,30 +1,35 @@
-﻿using EngineNS.DesignMacross;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using EngineNS;
+using EngineNS.EGui;
+using EngineNS.EGui.Controls;
 
-namespace EngineNS.EGui.Controls
+namespace Tracer
 {
-    public class TtLogWatcher : IRootForm
+    public class TtLogVisual : IRootForm
     {
-        public TtLogWatcher()
+        public TtLogVisual()
         {
             TtEngine.RootFormManager.RegRootForm(this);
-            Profiler.Log.OnReportLog += OnReportLog;
-
+            
             UpdateCategoryFilters();
             Visible = true;
         }
-        ~TtLogWatcher()
+        ~TtLogVisual()
         {
-            Profiler.Log.OnReportLog -= OnReportLog;
         }
-        public async Thread.Async.TtTask<bool> Initialize()
+        public async EngineNS.Thread.Async.TtTask<bool> Initialize()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
-        public void Dispose() { }
+        public void Dispose()
+        {
+            TtEngine.RootFormManager.UnregRootForm(this);
+        }
         public bool Visible { get; set; }
         public uint DockId { get; set; }
         public ImGuiWindowClass DockKeyClass { get; }
@@ -37,7 +42,7 @@ namespace EngineNS.EGui.Controls
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             var size = new Vector2(800, 600);
             ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm("LogWatcher", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            var result = EngineNS.EGui.UIProxy.DockProxy.BeginMainForm("LogVisual", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (result)
             {
                 DockId = ImGuiAPI.GetWindowDockID();
@@ -50,49 +55,49 @@ namespace EngineNS.EGui.Controls
                     mLogInfos.Clear();
                     mNewLogs.Clear();
                 }
-                bool check = (TagFilters & Profiler.ELogTag.Info) != 0;
+                bool check = (TagFilters & EngineNS.Profiler.ELogTag.Info) != 0;
                 ImGuiAPI.SameLine(0, -1);
                 EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox("Info", ref check);
                 if (check)
                 {
-                    TagFilters |= Profiler.ELogTag.Info;
+                    TagFilters |= EngineNS.Profiler.ELogTag.Info;
                 }
                 else
                 {
-                    TagFilters &= (~Profiler.ELogTag.Info);
+                    TagFilters &= (~EngineNS.Profiler.ELogTag.Info);
                 }
-                check = (TagFilters & Profiler.ELogTag.Warning) != 0;
+                check = (TagFilters & EngineNS.Profiler.ELogTag.Warning) != 0;
                 ImGuiAPI.SameLine(0, -1);
                 EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox("Warning", ref check);
                 if (check)
                 {
-                    TagFilters |= Profiler.ELogTag.Warning;
+                    TagFilters |= EngineNS.Profiler.ELogTag.Warning;
                 }
                 else
                 {
-                    TagFilters &= (~Profiler.ELogTag.Warning);
+                    TagFilters &= (~EngineNS.Profiler.ELogTag.Warning);
                 }
-                check = (TagFilters & Profiler.ELogTag.Error) != 0;
+                check = (TagFilters & EngineNS.Profiler.ELogTag.Error) != 0;
                 ImGuiAPI.SameLine(0, -1);
                 EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox("Error", ref check);
                 if (check)
                 {
-                    TagFilters |= Profiler.ELogTag.Error;
+                    TagFilters |= EngineNS.Profiler.ELogTag.Error;
                 }
                 else
                 {
-                    TagFilters &= (~Profiler.ELogTag.Error);
+                    TagFilters &= (~EngineNS.Profiler.ELogTag.Error);
                 }
-                check = (TagFilters & Profiler.ELogTag.Fatal) != 0;
+                check = (TagFilters & EngineNS.Profiler.ELogTag.Fatal) != 0;
                 ImGuiAPI.SameLine(0, -1);
                 EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox("Fatal", ref check);
                 if (check)
                 {
-                    TagFilters |= Profiler.ELogTag.Fatal;
+                    TagFilters |= EngineNS.Profiler.ELogTag.Fatal;
                 }
                 else
                 {
-                    TagFilters &= (~Profiler.ELogTag.Fatal);
+                    TagFilters &= (~EngineNS.Profiler.ELogTag.Fatal);
                 }
                 ImGuiAPI.SameLine(0, 25);
                 ImGuiAPI.Text("Category:");
@@ -108,11 +113,11 @@ namespace EngineNS.EGui.Controls
                 ImGuiAPI.SameLine(0, -1);
                 if (ImGuiAPI.InputText("##Command", ref CommandText))
                 {
-                    
+
                 }
                 if (ImGuiAPI.IsItemActive())
                 {
-                    if(ImGuiAPI.IsKeyDown(ImGuiKey.ImGuiKey_UpArrow))
+                    if (ImGuiAPI.IsKeyDown(ImGuiKey.ImGuiKey_UpArrow))
                     {
                         if (CommandHistory.Count > 0)
                         {
@@ -161,7 +166,7 @@ namespace EngineNS.EGui.Controls
                     }
                     else
                     {
-                        Profiler.Log.WriteLine<Profiler.TtDebugLogCategory>(Profiler.ELogTag.Info, "Commands", $"Command {cmdName} is not found");
+                        EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtDebugLogCategory>(EngineNS.Profiler.ELogTag.Info, "Commands", $"Command {cmdName} is not found");
                     }
                     CommandHistory.Remove(CommandText);
                     CommandHistory.Add(CommandText);
@@ -176,7 +181,7 @@ namespace EngineNS.EGui.Controls
                 if (ImGuiAPI.BeginChild("LogContent", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     UpdateNewLogs();
-                    
+
                     if (ImGuiAPI.BeginTable("Logs", 5, ImGuiTableFlags_.ImGuiTableFlags_Resizable, in Vector2.Zero, 0.0f))
                     {
                         ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_Headers, 0);
@@ -201,16 +206,16 @@ namespace EngineNS.EGui.Controls
                             var clr = Vector4.One;
                             switch (i.Tag)
                             {
-                                case Profiler.ELogTag.Info:
+                                case EngineNS.Profiler.ELogTag.Info:
                                     clr = UCoreStyles.Instance.LogInfoColor.ToColor4Float();
                                     break;
-                                case Profiler.ELogTag.Warning:
+                                case EngineNS.Profiler.ELogTag.Warning:
                                     clr = UCoreStyles.Instance.LogWarningColor.ToColor4Float();
                                     break;
-                                case Profiler.ELogTag.Error:
+                                case EngineNS.Profiler.ELogTag.Error:
                                     clr = UCoreStyles.Instance.LogErrorColor.ToColor4Float();
                                     break;
-                                case Profiler.ELogTag.Fatal:
+                                case EngineNS.Profiler.ELogTag.Fatal:
                                     clr = UCoreStyles.Instance.LogFatalColor.ToColor4Float();
                                     break;
                             }
@@ -232,11 +237,11 @@ namespace EngineNS.EGui.Controls
                 }
                 ImGuiAPI.EndChild();
             }
-            EGui.UIProxy.DockProxy.EndMainForm(result);
+            EngineNS.EGui.UIProxy.DockProxy.EndMainForm(result);
         }
         private struct FLogInfo
         {
-            public Profiler.ELogTag Tag;
+            public EngineNS.Profiler.ELogTag Tag;
             public string Category;
             public string MemberName;
             public string SourceFile;
@@ -246,7 +251,7 @@ namespace EngineNS.EGui.Controls
         Queue<FLogInfo> mLogInfos = new Queue<FLogInfo>();
         List<FLogInfo> mNewLogs = new List<FLogInfo>();
         public int MaxLogs { get; set; } = 1024;
-        public Profiler.ELogTag TagFilters { get; set; } = Profiler.ELogTag.All;
+        public EngineNS.Profiler.ELogTag TagFilters { get; set; } = EngineNS.Profiler.ELogTag.All;
         private string[] CategoryFilters;
         public string CategoryFilterText;
         public string CommandText;
@@ -294,7 +299,7 @@ namespace EngineNS.EGui.Controls
                 }
             }
         }
-        public void OnReportLog(Profiler.ELogTag tag, string category, string memberName, string sourceFilePath, int sourceLineNumber, string info)
+        public void OnReportLog(EngineNS.Profiler.ELogTag tag, string category, string memberName, string sourceFilePath, int sourceLineNumber, string info)
         {
             if (mIsReportLog == false)
                 return;

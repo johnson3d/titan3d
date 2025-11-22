@@ -25,7 +25,7 @@ namespace EngineNS.Editor
         
         public TtMainEditorApplication()
         {
-            mLogWatcher = new EGui.Controls.ULogWatcher();
+            mLogWatcher = new EGui.Controls.TtLogWatcher();
             mCpuProfiler = new Editor.Forms.TtCpuProfilerForm();
             mGpuProfiler = new Editor.Forms.TtGpuProfiler();
             mMemProfiler = new Forms.TtMemoryProfiler();
@@ -40,7 +40,7 @@ namespace EngineNS.Editor
         }
         private bool IsVisible = true;
         //public Editor.Forms.UWorldOutliner mWorldOutliner;
-        public EGui.Controls.ULogWatcher mLogWatcher;
+        public EGui.Controls.TtLogWatcher mLogWatcher;
         public Editor.Forms.TtCpuProfilerForm mCpuProfiler;
         public Editor.Forms.TtGpuProfiler mGpuProfiler;
         public Editor.Forms.TtMemoryProfiler mMemProfiler;
@@ -235,7 +235,7 @@ namespace EngineNS.Editor
                                 //test and start tracer process...
                                 Action action = async ()=>
                                 {
-                                    if(false == await TtEngine.Instance.Tracer.ConnectTo())
+                                    if(false == await TtEngine.Instance.Tracer.OpenTrace())
                                     {
                                         var apps = Process.GetProcessesByName("Tracer");
                                         if(apps.Length == 0)
@@ -266,7 +266,7 @@ namespace EngineNS.Editor
                                             ProcessTracer.CancelOutputRead();
     
                                             //ProcessTracer.StandardOutput?.Close();
-                                            if(await TtEngine.Instance.Tracer.ConnectTo()==false)
+                                            if(await TtEngine.Instance.Tracer.OpenTrace()==false)
                                             {
                                                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Tracer server start failed!");
                                             }
@@ -278,6 +278,14 @@ namespace EngineNS.Editor
                                     }
                                 };
                                 action();
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "CloseTracer",
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                TtEngine.Instance.Tracer.CloseTrace();
                             },
                         },
                     },
