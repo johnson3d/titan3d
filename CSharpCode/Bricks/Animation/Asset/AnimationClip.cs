@@ -52,6 +52,13 @@ namespace EngineNS.Animation.Asset
             set;
         }
         [Rtti.Meta("")]
+        [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
+        public RName PreviewMeshName
+        {
+            get;
+            set;
+        }
+        [Rtti.Meta("")]
         public float SampleRate { get; set; } = 1.0f;
         [Rtti.Meta("")]
         public float Duration { get; set; } = 0.0f;

@@ -298,7 +298,7 @@ namespace EngineNS.Bricks.Procedure.Node
             //    cmdlist.AddImage(PreviewSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
             //}
         }
-        public async System.Threading.Tasks.Task DoPreview()
+        public async Thread.Async.TtTask DoPreview()
         {
             //var mainEditor = TtEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
             //if (mainEditor != null)
@@ -317,7 +317,7 @@ namespace EngineNS.Bricks.Procedure.Node
             var viewport = graph.GraphEditor.PreviewViewport;
 
             var mesh = new Graphics.Mesh.TtRenderMesh();
-            var ok = mesh.Initialize(PreviewMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
+            var ok = mesh.Initialize(PreviewMesh);
             if (ok)
             {
                 var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, graph.GraphEditor.PreviewRoot, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);

@@ -565,13 +565,36 @@ namespace EngineNS.Graphics.Mesh
             }
             return true;
         }
-        public bool Initialize(TtMaterialMesh materialMesh, Rtti.TtTypeDesc mdfQueueType, Rtti.TtTypeDesc atomType = null)
+        public bool Initialize(TtMaterialMesh materialMesh, Rtti.TtTypeDesc mdfQueueType = null, Rtti.TtTypeDesc atomType = null)
         {
             if (atomType == null)
                 atomType = Rtti.TtTypeDescGetter<TtAtom>.TypeDesc;
             if (atomType != Rtti.TtTypeDescGetter<TtAtom>.TypeDesc && atomType.IsSubclassOf(typeof(TtAtom)) == false)
                 return false;
-            
+
+            if (mdfQueueType == null)
+            {
+                if (materialMesh.MdfQueueType!=null)
+                    mdfQueueType = materialMesh.MdfQueueType;
+                else
+                {
+                    foreach (var j in materialMesh.SubMeshes)
+                    {
+                        if (j.Mesh == null)
+                            continue;
+                        if (j.Mesh.PartialSkeleton!=null)
+                        {
+                            mdfQueueType = Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfSkinMesh>.TypeDesc;
+                            break;
+                        }
+                    }
+                    if (mdfQueueType == null)
+                    {
+                        mdfQueueType = Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc;
+                    }
+                }
+            }
+
             MdfQueue = Rtti.TtTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.TtMdfQueueBase;
             if (MdfQueue == null)
                 return false;

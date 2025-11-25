@@ -33,7 +33,8 @@ namespace EngineNS.Animation.SceneNode
         public void BindingTo(TtMeshNode meshNode)
         {
             System.Diagnostics.Debug.Assert(meshNode != null);
-            var animatablePose = meshNode?.RenderMesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
+            //var animatablePose = meshNode?.RenderMesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
+            var animatablePose = meshNode?.RenderMesh?.MaterialMesh?.GetSkeletonAsset().GetResultUntilCompleted().Skeleton.CreatePose() as SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
             var skinMDfQueue = meshNode.RenderMesh.MdfQueue as Graphics.Mesh.TtMdfSkinMesh;
             mAnimatedPose = SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animatablePose);
             meshNode.RuntimePose = mAnimatedPose;

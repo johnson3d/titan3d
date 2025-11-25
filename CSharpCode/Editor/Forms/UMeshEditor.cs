@@ -1,7 +1,7 @@
-﻿using System;
+﻿using EngineNS.Graphics.Pipeline;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using EngineNS.Graphics.Pipeline;
 
 namespace EngineNS.Editor.Forms
 {
@@ -82,7 +82,7 @@ namespace EngineNS.Editor.Forms
         #region Color Sdf Preview
         DistanceField.TtSdfAsset MeshSdfAsset = new DistanceField.TtSdfAsset();
         public EngineNS.Editor.USdfPreviewViewport sdfViewport = new EngineNS.Editor.USdfPreviewViewport();
-        protected async System.Threading.Tasks.Task<bool> Initialize_SdfViewport(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async Thread.Async.TtTask<bool> Initialize_SdfViewport(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -147,7 +147,8 @@ namespace EngineNS.Editor.Forms
         EngineNS.GamePlay.Scene.TtMeshNode mCurrentMeshNode;
         //EngineNS.GamePlay.Scene.TtMeshNode mArrowMeshNode;
         EngineNS.GamePlay.Scene.TtGridNode GridNode;
-        protected async System.Threading.Tasks.Task<bool> Initialize_PreviewMesh(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        public Graphics.Mesh.Modifier.TtSkinModifier SkinModifier;
+        protected async Thread.Async.TtTask<bool> Initialize_PreviewMesh(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -156,6 +157,7 @@ namespace EngineNS.Editor.Forms
 
             (viewport as Editor.TtPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
+            var mesh = new Graphics.Mesh.TtRenderMesh();
             List<Graphics.Mesh.TtMeshPrimitives> MeshPrimitivesList = new List<Graphics.Mesh.TtMeshPrimitives>();
             foreach (var j in Mesh.SubMeshes)
             {
@@ -163,12 +165,8 @@ namespace EngineNS.Editor.Forms
                     continue;
                 MeshPrimitivesList.Add(j.Mesh);
             }
-            DebugShowTool = new TtDebugShowTool();
-            await DebugShowTool.Initialize(MeshPrimitivesList, PreviewViewport.World);
 
-            var mesh = new Graphics.Mesh.TtRenderMesh();
-
-            var ok = mesh.Initialize(Mesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
+            var ok = mesh.Initialize(Mesh);
             if (ok)
             {
                 var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
@@ -177,7 +175,17 @@ namespace EngineNS.Editor.Forms
                 meshNode.IsAcceptShadow = true;
                 meshNode.IsCastShadow = true;
                 mCurrentMeshNode = meshNode;
+
+                SkinModifier = mesh.MdfQueue.FindModifier<Graphics.Mesh.Modifier.TtSkinModifier>();
+                if (SkinModifier!=null && Mesh.Skeleton!=null)
+                {
+                    SkinModifier.Skeleton = (await Mesh.Skeleton.GetAsset<Animation.Asset.TtSkeletonAsset>()).Skeleton;
+                    BoneTree.mRoot = new TtLimbTree.TtLimbNode(SkinModifier.Skeleton);
+                }
             }
+
+            DebugShowTool = new TtDebugShowTool();
+            await DebugShowTool.Initialize(MeshPrimitivesList, PreviewViewport.World);
 
             var aabb = mesh.MaterialMesh.AABB;
             float radius = aabb.GetMaxSide();
@@ -245,7 +253,7 @@ namespace EngineNS.Editor.Forms
             sdfViewport.OnInitialize = Initialize_SdfViewport;
             await sdfViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, sdfRPolicyName, 0, 1);
             var mesh = new Graphics.Mesh.TtRenderMesh();
-            var ok = mesh.Initialize(Mesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
+            var ok = mesh.Initialize(Mesh);
             if (ok)
             {
                 var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(sdfViewport.World, sdfViewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
@@ -300,6 +308,7 @@ namespace EngineNS.Editor.Forms
             DrawPreview();
             DrawEditorDetails();
             DrawMeshDetails();
+            DrawSkeleton();
         }
         bool mDockInitialized = false;
         protected void ResetDockspace(bool force = false)
@@ -330,6 +339,7 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), middleId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("sdfPreview", mDockKeyClass), middleId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MeshDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Skeleton", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightDownId);
 
             ImGuiAPI.DockBuilderFinish(id);
@@ -397,6 +407,116 @@ namespace EngineNS.Editor.Forms
             {
                 MeshPropGrid.OnDraw(true, false, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar, 
                     ImGuiChildFlags_.ImGuiChildFlags_AlwaysAutoResize | ImGuiChildFlags_.ImGuiChildFlags_AutoResizeX | ImGuiChildFlags_.ImGuiChildFlags_AutoResizeY);
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        internal class TtLimbTree : EngineNS.Editor.TtTreeNodeDrawer
+        {
+            internal class TtLimbNode : EngineNS.Editor.INodeUIProvider
+            {
+                public TtLimbNode(Animation.SkeletonAnimation.Skeleton.Limb.ILimb lb)
+                {
+                    Limb = lb;
+                }
+                internal Animation.SkeletonAnimation.Skeleton.Limb.ILimb Limb;
+                List<TtLimbNode> mChildren = null;
+                internal List<TtLimbNode> Children
+                {
+                    get
+                    {
+                        if (mChildren == null)
+                        {
+                            mChildren = new List<TtLimbNode>();
+                            foreach (var i in Limb.Children)
+                            {
+                                var childNode = new TtLimbNode(i);
+                                mChildren.Add(childNode);
+                            }
+                        }
+                        return mChildren;
+                    }
+                }
+                public int NumOfChildUI()
+                {
+                    return Children.Count;
+                }
+                public EngineNS.Editor.INodeUIProvider GetChildUI(int index)
+                {
+                    if (index>=Children.Count)
+                        return null;
+                    return Children[index];
+                }
+                public string NodeName
+                {
+                    get
+                    {
+                        if (Limb.Desc==null)
+                            return "Skeleton";
+                        return Limb.Desc.Name;
+                    }
+                }
+                public bool Selected { get; set; }
+                public bool DrawNode(EngineNS.Editor.INodeUIProvider parent, EngineNS.Editor.TtTreeNodeDrawer tree, int index, int NumOfChild)
+                {
+                    ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
+                    if (this.Selected)
+                        flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
+                    bool ret = false;
+                    var name = (string.IsNullOrEmpty(NodeName) ? "EmptyName" : NodeName) + "##" + index;
+                    if (NumOfChild == 0)
+                    {
+                        flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
+                    }
+                    ret = ImGuiAPI.TreeNodeEx(name, flags);
+                    if (ImGuiAPI.IsItemActivated())
+                    {
+                        tree.OnNodeUI_Activated(this);
+                    }
+                    if (ImGuiAPI.IsItemDeactivated())
+                    {
+                    }
+                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                    {
+                        tree.OnNodeUI_LClick(this);
+                    }
+                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                    {
+                        tree.OnNodeUI_RClick(this);
+                    }
+                    
+                    return ret;
+                }
+                public EngineNS.GamePlay.TtWorld GetWorld()
+                {
+                    return null;
+                }
+            }
+            internal TtLimbTree()
+            {
+                
+            }
+            internal TtLimbNode mRoot;
+            internal unsafe void OnDraw(TtMeshEditor host)
+            {
+                //host.SkinModifier.mCoreObject
+                DrawTree(null, mRoot, 0);
+            }
+            public override void OnNodeUI_RClick(EngineNS.Editor.INodeUIProvider provider)
+            {
+                //Host.PopItemMenu(Thread, (provider as TtTimeScopeNode).TimeInfo, "GotoSource");
+            }
+        }
+
+        internal TtLimbTree BoneTree = new TtLimbTree();
+        protected void DrawSkeleton()
+        {
+            if (SkinModifier == null || SkinModifier.Skeleton == null)
+                return;
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Skeleton", ref ShowMeshPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                BoneTree.OnDraw(this);
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }

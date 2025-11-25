@@ -199,7 +199,7 @@ namespace EngineNS.Bricks.PhysicsCore
                         ShowMesh.Initialize(new List<Graphics.Mesh.TtMeshPrimitives>() { meshPrimitive },
                                 new List<Graphics.Pipeline.Shader.TtMaterial[]>() { matrials });
                         mDebugMesh = new Graphics.Mesh.TtRenderMesh();
-                        mDebugMesh.Initialize(ShowMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
+                        mDebugMesh.Initialize(ShowMesh);
                     }
                 }
                 return mDebugMesh;

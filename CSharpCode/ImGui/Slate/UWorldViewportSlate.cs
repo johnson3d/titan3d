@@ -36,14 +36,14 @@ namespace EngineNS.EGui.Slate
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
-        public async System.Threading.Tasks.Task<bool> Initialize_Default(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        public async Thread.Async.TtTask<bool> Initialize_Default(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             RenderPolicy = policy;
 
             CameraController.ControlCamera(RenderPolicy.DefaultCamera);
             return true;
         }
-        public override async System.Threading.Tasks.Task<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
+        public override async Thread.Async.TtTask<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
         {
             TtRenderPolicy policy = null;
             var rpAsset = policyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted();

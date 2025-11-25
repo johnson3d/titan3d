@@ -72,8 +72,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 if (DebugHitproxyMesh == null)
                 {
                     DebugHitproxyMesh = new Graphics.Mesh.TtRenderMesh();
-                    DebugHitproxyMesh.Initialize(PlantType.MaterialMesh,
-                        Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
+                    DebugHitproxyMesh.Initialize(PlantType.MaterialMesh);
                     DebugHitproxyMesh.SetWorldTransform(Placement.TransformData, PlantType.Terrain.GetWorld(), false);
                     DebugHitproxyMesh.IsAcceptShadow = false;
                 }

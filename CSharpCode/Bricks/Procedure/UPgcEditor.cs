@@ -87,7 +87,7 @@ namespace EngineNS.Bricks.Procedure
 
             return true;
         }
-        protected async System.Threading.Tasks.Task<bool> Initialize_PreviewMaterial(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async Thread.Async.TtTask<bool> Initialize_PreviewMaterial(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 

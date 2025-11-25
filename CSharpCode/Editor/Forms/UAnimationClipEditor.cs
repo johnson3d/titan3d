@@ -1,4 +1,5 @@
-﻿using EngineNS.Animation.Asset;
+﻿using Assimp;
+using EngineNS.Animation.Asset;
 using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.Thread.Async;
@@ -115,7 +116,7 @@ namespace EngineNS.Editor.Forms
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 AnimationClip.SaveAssetTo(AnimationClip.AssetName);
-                var unused = TtEngine.Instance.GfxDevice.MaterialMeshManager.ReloadMaterialMesh(AnimationClip.AssetName);
+                TtEngine.Instance.GfxDevice.MaterialMeshManager.ReloadMaterialMesh(AnimationClip.AssetName).AddWaitTask();
 
                 //USnapshot.Save(AnimationClip.AssetName, AnimationClip.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
@@ -166,7 +167,7 @@ namespace EngineNS.Editor.Forms
         EngineNS.GamePlay.Scene.TtMeshNode mCurrentMeshNode;
         public float PlaneScale = 5.0f;
         EngineNS.GamePlay.Scene.TtMeshNode PlaneMeshNode;
-        protected async System.Threading.Tasks.Task<bool> Initialize_PreviewScene(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async Thread.Async.TtTask<bool> Initialize_PreviewScene(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -218,6 +219,8 @@ namespace EngineNS.Editor.Forms
             AnimationClipPreview.AnimationClip = AnimationClip;
             AnimationClipPropGrid.Target = AnimationClipPreview;
             TtEngine.Instance.TickableManager.AddTickable(this);
+
+            AnimationClipPreview.PreivewMesh = AnimationClip.PreviewMeshName;
             return true;
         }
         public async TtTask OnPreviewMeshChange(TtMaterialMesh materialMesh)
@@ -272,6 +275,8 @@ namespace EngineNS.Editor.Forms
                     if (AssetState == IO.EAssetState.Loading)
                         return;
                     mPreivewMeshName = value;
+                    if (value==null)
+                        return;
                     AssetState = IO.EAssetState.Loading;
                     System.Action exec = async () =>
                     {
@@ -283,6 +288,7 @@ namespace EngineNS.Editor.Forms
                         }
                         AssetState = IO.EAssetState.LoadFinished;
                         await AnimationClipEditor.OnPreviewMeshChange(Mesh);
+                        AnimationClipEditor.AnimationClip.PreviewMeshName = value;
                     };
                     exec();
                 }

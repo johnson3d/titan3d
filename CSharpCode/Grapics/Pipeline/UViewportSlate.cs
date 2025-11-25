@@ -437,10 +437,10 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
-        public delegate System.Threading.Tasks.Task<bool> FOnInitialize(TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax);
+        public delegate Thread.Async.TtTask<bool> FOnInitialize(TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax);
         public FOnInitialize OnInitialize = null;
         [Rtti.Meta("")]
-        public virtual async System.Threading.Tasks.Task<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
+        public virtual async Thread.Async.TtTask<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
         {
             var policy = policyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted().CreateRenderPolicy(this);
             if (OnInitialize != null)
@@ -736,8 +736,8 @@ namespace EngineNS.Graphics.Pipeline
 {
 	partial class TtViewportSlate
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_Initialize_3328281008 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->System.Threading.Tasks.Task<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)");
-		public async System.Threading.Tasks.Task<bool> macross_Initialize (string nodeName, TtSlateApplication application, RName policyName, float zMin, float zMax) 
+		private static EngineNS.Macross.TtMacrossBreak macross_break_Initialize_3328281008 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->Thread.Async.TtTask<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)");
+		public async Thread.Async.TtTask<bool> macross_Initialize (string nodeName, TtSlateApplication application, RName policyName, float zMin, float zMax) 
 		{
 			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{

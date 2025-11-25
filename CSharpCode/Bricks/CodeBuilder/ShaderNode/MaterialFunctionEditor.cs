@@ -72,7 +72,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
         bool IsStarting = false;
-        protected async System.Threading.Tasks.Task<bool> Initialize_PreviewMaterial(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async Thread.Async.TtTask<bool> Initialize_PreviewMaterial(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 

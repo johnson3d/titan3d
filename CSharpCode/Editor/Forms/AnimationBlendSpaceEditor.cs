@@ -168,7 +168,7 @@ namespace EngineNS.Editor.Forms
         EngineNS.GamePlay.Scene.TtMeshNode mCurrentMeshNode;
         public float PlaneScale = 5.0f;
         EngineNS.GamePlay.Scene.TtMeshNode PlaneMeshNode;
-        protected async System.Threading.Tasks.Task<bool> Initialize_PreviewScene(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async Thread.Async.TtTask<bool> Initialize_PreviewScene(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 

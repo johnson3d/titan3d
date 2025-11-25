@@ -55,7 +55,7 @@ namespace EngineNS.Editor.Forms
             return this;
         }
 
-        protected async System.Threading.Tasks.Task<bool> Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async Thread.Async.TtTask<bool> Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 

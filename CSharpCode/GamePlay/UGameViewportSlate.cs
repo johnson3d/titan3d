@@ -32,7 +32,7 @@ namespace EngineNS.GamePlay
             else
                 TtEngine.Instance.PIEModule.EndMultiPlayInEditor(MultiGameIndex);
         }
-        public override async System.Threading.Tasks.Task<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
+        public override async Thread.Async.TtTask<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
         {
             var ret = await base.Initialize(application, policyName, zMin, zMax);
             this.World.IsGameWorld = true;

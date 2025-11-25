@@ -46,12 +46,13 @@ namespace EngineNS.Editor.Forms
             return !(left == right);
         }
     }
-    public class USkeletonShowNode : TtVisual
+    //[Rtti.Meta("", NameAlias = new string[] { "EngineNS.Editor.Forms.USkeletonShowNode@EngineCore", "EngineNS.Editor.Forms.USkeletonShowNode" })]
+    public class TtSkeletonShowNode : TtVisual
     {
-        public static async System.Threading.Tasks.Task<USkeletonShowNode> AddNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
+        public static async Thread.Async.TtTask<TtSkeletonShowNode> AddNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
-            var node = await scene.SpawnSceneActor<USkeletonShowNode>(parent, null, data, EBoundVolumeType.Box, placementType);
+            var node = await scene.SpawnSceneActor<TtSkeletonShowNode>(parent, null, data, EBoundVolumeType.Box, placementType);
             node.NodeData.Name = node.SceneId.ToString();
 
             node.Placement.SetTransform(in pos, in scale, in quat);
@@ -59,7 +60,7 @@ namespace EngineNS.Editor.Forms
             return node;
         }
 
-        public class USkeletonShowNodeData : TtNodeData
+        public class TtSkeletonShowNodeData : TtNodeData
         {
             public TtSkeletonAsset SkeletonAsset { get; set; } = null;
         }
@@ -69,7 +70,7 @@ namespace EngineNS.Editor.Forms
         public TtLocalSpaceRuntimePose CurrentPose = null;
         protected override Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
-            var nodeData = data as USkeletonShowNodeData;
+            var nodeData = data as TtSkeletonShowNodeData;
             SkeletonAsset = nodeData.SkeletonAsset;
             var animPose = SkeletonAsset.Skeleton.CreatePose() as Animation.SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
             CurrentPose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animPose);
@@ -132,7 +133,7 @@ namespace EngineNS.Editor.Forms
             base.OnGatherVisibleMeshes(rp);
         }
     }
-    public class USkeletonEditor : Editor.IAssetEditor, ITickable, IRootForm
+    public class TtSkeletonEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
         public int GetTickOrder()
         {
@@ -141,7 +142,7 @@ namespace EngineNS.Editor.Forms
         public Animation.Asset.TtSkeletonAsset SkeletonAsset;
         public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
         public EGui.Controls.PropertyGrid.PropertyGrid AnimationClipPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        ~USkeletonEditor()
+        ~TtSkeletonEditor()
         {
             Dispose();
         }
@@ -286,8 +287,8 @@ namespace EngineNS.Editor.Forms
 
         }
         EngineNS.GamePlay.Scene.TtMeshNode PlaneMeshNode;
-        USkeletonShowNode SkeletonShowNode = null;
-        protected async System.Threading.Tasks.Task<bool> Initialize_PreviewScene(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        TtSkeletonShowNode SkeletonShowNode = null;
+        protected async Thread.Async.TtTask<bool> Initialize_PreviewScene(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -301,9 +302,9 @@ namespace EngineNS.Editor.Forms
             policy.DefaultCamera.AutoZoom(in sphere);
 
             {
-                var nodeDta = new USkeletonShowNode.USkeletonShowNodeData();
+                var nodeDta = new TtSkeletonShowNode.TtSkeletonShowNodeData();
                 nodeDta.SkeletonAsset = SkeletonAsset;
-                SkeletonShowNode = await USkeletonShowNode.AddNode(viewport.World, viewport.World.Root, nodeDta, typeof(GamePlay.TtPlacement), DVector3.Zero, Vector3.One, Quaternion.Identity);
+                SkeletonShowNode = await TtSkeletonShowNode.AddNode(viewport.World, viewport.World.Root, nodeDta, typeof(GamePlay.TtPlacement), DVector3.Zero, Vector3.One, Quaternion.Identity);
             }
 
             {
@@ -356,7 +357,7 @@ namespace EngineNS.Editor.Forms
         class TtAnimationClipPreview
         {
             [Browsable(false)]
-            public USkeletonEditor SkeletonEditor = null;
+            public TtSkeletonEditor SkeletonEditor = null;
             [Browsable(false)]
             public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
             private RName mPreivewAnimation;
@@ -426,7 +427,7 @@ namespace EngineNS.Editor.Forms
 }
 namespace EngineNS.Animation.Asset
 {
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.USkeletonEditor))]
+    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.TtSkeletonEditor))]
     public partial class TtSkeletonAsset
     {
 

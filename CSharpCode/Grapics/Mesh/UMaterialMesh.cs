@@ -43,7 +43,7 @@ namespace EngineNS.Graphics.Mesh
 
             Graphics.Mesh.TtMaterialMesh Mesh = await GetAssetName().CreateAsset<TtMaterialMesh>();
             var mesh = new Graphics.Mesh.TtRenderMesh();
-            var ok = mesh.Initialize(Mesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
+            var ok = mesh.Initialize(Mesh);
             if (ok)
             {
                 var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(renderer.World, renderer.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
@@ -648,6 +648,26 @@ namespace EngineNS.Graphics.Mesh
         }
         [Rtti.Meta("")]
         public List<TtSubMaterialedMesh> SubMeshes { get; set; } = new List<TtSubMaterialedMesh>() { new TtSubMaterialedMesh() };
+        Rtti.TtTypeDesc mMdfQueueType = null;
+        [Rtti.Meta("")]
+        public Rtti.TtTypeDesc MdfQueueType 
+        {
+            get => mMdfQueueType;
+            set
+            {
+                mMdfQueueType = value;
+            }
+        }
+        [Rtti.Meta("")]
+        [RName.PGRName(FilterExts = Animation.Asset.TtSkeletonAsset.AssetExt)]
+        public RName Skeleton { get; set; }
+        public async Thread.Async.TtTask<Animation.Asset.TtSkeletonAsset> GetSkeletonAsset()
+        {
+            if (Skeleton == null)
+                return null;
+            var skel = await Skeleton.GetAsset<Animation.Asset.TtSkeletonAsset>();
+            return skel;
+        }
         public int GetMeshNum()
         {
             return SubMeshes.Count;

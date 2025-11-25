@@ -27,7 +27,7 @@ namespace EngineNS.Editor.Forms
             EnvDirLight = viewport.World.DirectionLight;
             var arrowMaterialMesh = await RName.GetRName("mesh/base/arrow.ums", RName.ERNameType.Engine).GetAsset<Graphics.Mesh.TtMaterialMesh>();
             var arrowMesh = new Graphics.Mesh.TtRenderMesh();
-            var ok = arrowMesh.Initialize(arrowMaterialMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
+            var ok = arrowMesh.Initialize(arrowMaterialMesh);
             if (ok)
             {
                 mArrowMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), arrowMesh, DVector3.UnitX * 3, Vector3.One, Quaternion.Identity);

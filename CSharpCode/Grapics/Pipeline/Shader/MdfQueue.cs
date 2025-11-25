@@ -155,6 +155,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
     public abstract class TtMdfQueueBase : AuxPtrType<IMdfQueue>, IShaderCodeProvider
     {
         public List<IMeshModifier> Modifiers { get; } = new List<IMeshModifier>();
+        public T FindModifier<T>() where T : IMeshModifier
+        {
+            foreach(var i in Modifiers)
+            {
+                if(i is T t)
+                {
+                    return t;
+                }
+            }
+            return default(T);
+        }
         public RName CodeName { get; set; }
         public NxRHI.TtShaderCode DefineCode { get; protected set; }
         public NxRHI.TtShaderCode SourceCode { get; protected set; }

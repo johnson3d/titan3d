@@ -238,7 +238,7 @@ namespace EngineNS.Bricks.Particle.Editor
         public TtGraphRenderer GraphRenderer { get; } = new TtGraphRenderer();
         //public CodeBuilder.UClassLayoutBuilder ParticleStructBuilder { get; } = new CodeBuilder.UClassLayoutBuilder();
         bool IsStarting = false;
-        protected async System.Threading.Tasks.Task<bool> Initialize_PreviewParticle(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async Thread.Async.TtTask<bool> Initialize_PreviewParticle(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 

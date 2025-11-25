@@ -43,7 +43,7 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             return this;
         }
-        protected async System.Threading.Tasks.Task<bool> Initialize_PreviewMesh(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async Thread.Async.TtTask<bool> Initialize_PreviewMesh(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -70,7 +70,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 new List<Graphics.Pipeline.Shader.TtMaterial[]>() { matrials, matrials1 });
             
             var mesh = new Graphics.Mesh.TtRenderMesh();
-            var ok = mesh.Initialize(ShowMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
+            var ok = mesh.Initialize(ShowMesh);
             if (ok)
             {
                 var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);

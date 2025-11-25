@@ -11,7 +11,10 @@ namespace EngineNS.Graphics.Mesh.Modifier
         {
             mCoreObject = ISkinModifier.CreateInstance();
         }
-
+        public Animation.SkeletonAnimation.Skeleton.TtSkinSkeleton Skeleton
+        {
+            get; set;
+        }
         public string ModifierNameVS { get => "DoSkinModifierVS"; }
         public string ModifierNamePS { get => null; }
         public RName SourceName
