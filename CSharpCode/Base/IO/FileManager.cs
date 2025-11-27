@@ -96,6 +96,21 @@ namespace EngineNS.IO
                 return builder.ToString();
             }
         }
+        public static unsafe string ComputeSHA256Hash(void* ptr, ulong size)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] input = new byte[size];
+                Marshal.Copy((IntPtr)ptr, input, 0, (int)size);
+                byte[] bytes = sha256.ComputeHash(input);
+                StringBuilder builder = new StringBuilder();
+                foreach (byte b in bytes)
+                {
+                    builder.Append(b.ToString("x2"));
+                }
+                return builder.ToString();
+            }
+        }
         public static byte[] HexStringToByteArray(string hexString)
         {
             // 检查字符串长度是否为偶数（每个字节由2个十六进制字符表示）

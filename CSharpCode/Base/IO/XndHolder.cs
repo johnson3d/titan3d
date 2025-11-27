@@ -81,6 +81,10 @@ namespace EngineNS.IO
             IO.TtFileManager.SureDirectory(path);
             mCoreObject.SaveXnd(file);
         }
+        public void SaveXndWithoutHead(TtMemWriter writer)
+        {
+            mCoreObject.SaveXndWithoutHead(writer.Writer.NativeSuper);
+        }
         TtXndNode mRootNode;
         public TtXndNode RootNode
         {

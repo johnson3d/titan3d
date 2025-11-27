@@ -293,6 +293,17 @@ namespace EngineNS.Thread.Async
         public delegate void Delegate_ParrallelForAction(int index, TtAsyncTaskStateBase state);
         internal TtPooledSemaphoreAllocator ParallelForSmpAllocator = new TtPooledSemaphoreAllocator();
         [ThreadStatic]
+        private static Profiler.TimeScope mScopeParrallelForPush;
+        private static Profiler.TimeScope ScopeParrallelForPush
+        {
+            get
+            {
+                if (mScopeParrallelForPush == null)
+                    mScopeParrallelForPush = new Profiler.TimeScope(typeof(TtContextThreadManager), nameof(ParallelFor) + ".Push");
+                return mScopeParrallelForPush;
+            }
+        }
+        [ThreadStatic]
         private static Profiler.TimeScope mScopeParrallelForWait;
         private static Profiler.TimeScope ScopeParrallelForWait
         {
@@ -303,6 +314,14 @@ namespace EngineNS.Thread.Async
                 return mScopeParrallelForWait;
             }
         }
+        public bool IsInParallelFor
+        {
+            get
+            {
+                return ParallelForNum > 0;
+            }
+        }
+        int ParallelForNum = 0;
         public void ParallelFor(int numTask, Delegate_ParrallelForAction action, int numMicroThread = -1, object userData1 = null, object userData2 = null, int maxNumPerMicroThread = -1)
         {
             System.Diagnostics.Debug.Assert(Thread.TtContextThread.CurrentContext.GetThreadType() != EAsyncTarget.TPools);
@@ -362,27 +381,32 @@ namespace EngineNS.Thread.Async
             {
                 userArgs.Value0.Z += 1;
             }
-            for (int i = 0; i < numMicroThread; i++)
+            System.Threading.Interlocked.Increment(ref ParallelForNum);
+            using (new Profiler.TimeScopeHelper(ScopeParrallelForPush))
             {
-                userArgs.Value0.X = (uint)i;
-                this.RunParallel(static (state) =>
+                for (int i = 0; i < numMicroThread; i++)
                 {
-                    var action = (Delegate_ParrallelForAction)state.UserArguments.Obj0;
-                    var stride = state.UserArguments.StrideOfParallelFor;
-                    var start = (int)(state.UserArguments.TaskIndexOfParallelFor * stride);
-                    int count = 0;
-                    for (int j = 0; j < stride; j++)
+                    userArgs.Value0.X = (uint)i;
+                    this.RunParallel(static (state) =>
                     {
-                        var index = start + j;
-                        if (index >= state.UserArguments.NumOfParallelFor)
-                            break;
-                        action(index, state);
-                        count++;
-                    }
-                    ((TtPooledSemaphore)state.UserArguments.Obj1).Semaphore.AddNum(-count);
-                    return true;
-                }, in userArgs/*, smp.WaitEvent*/);
-            }
+                        var action = (Delegate_ParrallelForAction)state.UserArguments.Obj0;
+                        var stride = state.UserArguments.StrideOfParallelFor;
+                        var start = (int)(state.UserArguments.TaskIndexOfParallelFor * stride);
+                        int count = 0;
+                        for (int j = 0; j < stride; j++)
+                        {
+                            var index = start + j;
+                            if (index >= state.UserArguments.NumOfParallelFor)
+                                break;
+                            action(index, state);
+                            count++;
+                        }
+                        ((TtPooledSemaphore)state.UserArguments.Obj1).Semaphore.AddNum(-count);
+                        return true;
+                    }, in userArgs/*, smp.WaitEvent*/);
+                }
+            }   
+            System.Threading.Interlocked.Decrement(ref ParallelForNum);
             using (new Profiler.TimeScopeHelper(ScopeParrallelForWait))
             {
                 smp.Wait(true);

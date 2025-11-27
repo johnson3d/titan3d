@@ -57,6 +57,8 @@ namespace EngineNS.Thread
         {
             get
             {
+                if (TtEngine.Instance.EventPoster.IsInParallelFor)
+                    return true;
                 if (PrivateTasks.Count > 0 || TtEngine.Instance.EventPoster.GlobalTasks.Count > 0)
                     return true;
                 return System.Threading.Interlocked.CompareExchange(ref mHasWork, 1, 1) == 1;

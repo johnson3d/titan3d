@@ -191,17 +191,19 @@ bool XndHolder::LoadXnd(VRes2Memory* res)
 	return false;*/
 }
 
+const char g_szName[] = { 'x' ,'n','d', '0' };
+
+const void* XndHolder::GetXndHead()
+{
+	return g_szName;
+}
+
 void XndHolder::SaveXnd(const char* file)
 {
 	VFile io;
 	if (io.Open(file, VFile::modeCreate | VFile::modeWrite))
 	{
-		CHAR szName[4];
-		szName[0] = 'x';
-		szName[1] = 'n';
-		szName[2] = 'd';
-		szName[3] = '0';
-		io.Write(szName, 4);
+		io.Write(g_szName, 4);
 
 		FileStreamWriter ar(io);
 		SaveXnd(ar, mRootNode);
@@ -212,6 +214,15 @@ void XndHolder::SaveXnd(const char* file)
 
 		io.Close();
 	}
+}
+
+void XndHolder::SaveXndWithoutHead(IStreamWriter* ar)
+{
+	SaveXnd(*ar, mRootNode);
+	
+	auto offsetTrees = (UINT64)ar->Tell();
+	WriteNodeTree(*ar, mRootNode);
+	ar->Write(offsetTrees);
 }
 
 void XndHolder::SaveXnd(IStreamWriter& ar, XndNode* node)

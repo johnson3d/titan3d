@@ -761,6 +761,7 @@ namespace EngineNS.GamePlay.Scene
             get => Guid.Empty;
             set { }
         }
+        public string SaveHash { get; set; } = null;
 
         public TtNode FindNode(in Guid nodeId, bool bRecursive)
         {

@@ -16,7 +16,8 @@
 
 NS_BEGIN
 
-class IStreamWriter : public IWeakRefObject
+class TR_CLASS()
+	IStreamWriter : public IWeakRefObject
 {
 public:
 	virtual UINT64 Tell() const = 0;
@@ -36,7 +37,8 @@ public:
 	}
 };
 
-class IStreamReader : public IWeakRefObject
+class TR_CLASS()
+	IStreamReader : public IWeakRefObject
 {
 public:
 	virtual UINT64 GetLength() const = 0;

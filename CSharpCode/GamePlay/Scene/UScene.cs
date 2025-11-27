@@ -371,12 +371,14 @@ namespace EngineNS.GamePlay.Scene
             //IO.TtFileManager.WriteAllText(TtFileManager.CombinePath(dir, "nodelist.txt"), rootNodes);
             //TtEngine.Instance.SourceControlModule.AddFile(TtFileManager.CombinePath(dir, "nodelist.txt"), true);
         }
-        internal static void SaveNodeList(string dir, TtScene scene, TtNode node)
+        internal unsafe static void SaveNodeList(string dir, TtScene scene, TtNode node)
         {
             TtFileManager.SureDirectory(dir);
             string rootNodes = "";
-            foreach (var child in node.Children)
+            //foreach (var child in node.Children)
+            for (int i = 0; i<node.Children.Count; i++)
             {
+                var child = node.Children[i];
                 if (child.HasStyle(ENodeStyles.Transient))
                     continue;
                 if (child is TtHubNode)
@@ -391,14 +393,30 @@ namespace EngineNS.GamePlay.Scene
                     continue;
                 }
 
+                //todo: gather as list,and parallel save
                 var file = TtFileManager.CombinePath(dir, child.NodeId.ToString() + TtNode.NodeExt);
+                string hash = "";
                 using (var xnd = new IO.TtXndHolder(Rtti.TtTypeDesc.TypeOf(child.GetType()).TypeString, 0, 0))
                 {
                     child.SaveNodeTree(scene, xnd.mCoreObject, xnd.RootNode.mCoreObject, true);
-                    xnd.SaveXnd(file);
+                    //xnd.SaveXnd(file);
+                    using (var mem = TtMemWriter.CreateInstance(1024))
+                    {
+                        var header = XndHolder.GetXndHead();
+                        mem.WritePtr(header, 4);
+                        xnd.SaveXndWithoutHead(mem);
+                        hash = IO.TtFileInfo.ComputeSHA256Hash(mem.Ptr, mem.GetPosition());
+                        if (hash != child.SaveHash || !IO.TtFileManager.FileExists(file))
+                        {
+                            using (var fileWriter = new IO.TtFileWriter(file))
+                            {
+                                mem.WriteToFile(fileWriter);
+                            }
+                        }
+                    }
                 }
                 TtEngine.Instance.SourceControlModule.AddFile(file, true);
-                rootNodes += child.NodeId.ToString()+'\n';
+                rootNodes += child.NodeId.ToString() + '#' + hash + '\n';
             }
             IO.TtFileManager.WriteAllText(TtFileManager.CombinePath(dir, "nodelist.txt"), rootNodes);
             TtEngine.Instance.SourceControlModule.AddFile(TtFileManager.CombinePath(dir, "nodelist.txt"), true);
@@ -414,11 +432,15 @@ namespace EngineNS.GamePlay.Scene
         internal static async Thread.Async.TtTask LoadNodeList(TtWorld world, string dir, TtScene scene, TtNode parent)
         {
             var rootStr = IO.TtFileManager.ReadAllText(TtFileManager.CombinePath(dir, "nodelist.txt"));
-            if (rootStr!=null)
+            if (string.IsNullOrEmpty(rootStr)==false)
             {
                 var files = rootStr.Split('\n');
-                foreach (var f in files)
+                //foreach (var f in files)
+                for (int i = 0; i<files.Length; i++)
                 {
+                    var f = files[i];
+                    if (string.IsNullOrEmpty(f))
+                        continue;
                     if (f.StartsWith("hub:"))
                     {
                         var name = f.Substring("hub:".Length);
@@ -432,10 +454,16 @@ namespace EngineNS.GamePlay.Scene
                     }
                     else
                     {
-                        Guid nodeId;
-                        if (Guid.TryParse(f, out nodeId))
+                        var f1 = f;
+                        if (f.EndsWith('\n'))
                         {
-                            var file = TtFileManager.CombinePath(dir, f + TtNode.NodeExt);
+                            f1 = f.Substring(0, f.Length - 1);
+                        }
+                        var segs = f1.Split('#');
+                        Guid nodeId;
+                        if (Guid.TryParse(segs[0], out nodeId))
+                        {
+                            var file = TtFileManager.CombinePath(dir, segs[0] + TtNode.NodeExt);
                             using (var xnd = IO.TtXndHolder.LoadXnd(file))
                             {
                                 var node = await TtNode.LoadNodeTree(world, scene, parent, xnd.RootNode.mCoreObject, false, null);
@@ -445,6 +473,14 @@ namespace EngineNS.GamePlay.Scene
                                     continue;
                                 }
                                 node.NodeId = nodeId;
+                                if (segs.Length>1)
+                                {
+                                    node.SaveHash = segs[1];
+                                }
+                                else 
+                                {
+                                    node.SaveHash = null;
+                                }
                             }
                         }
                     }

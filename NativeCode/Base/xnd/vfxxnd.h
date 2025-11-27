@@ -225,6 +225,10 @@ class TR_CLASS(SV_Dispose = self->Release())
 	AutoRef<XndNode>			mRootNode;
 	AutoRef<VRes2Memory>		mResource;
 public:
+	static const void* GetXndHead();
+	static int GetXndHeadSize(){
+		return 4;
+	}
 	XndHolder() 
 	{
 	}
@@ -244,6 +248,7 @@ public:
 	//bool LoadXnd(const char* file);
 	bool LoadXnd(VRes2Memory* res);
 	void SaveXnd(const char* file);
+	void SaveXndWithoutHead(IStreamWriter* ar);
 
 	void TryReleaseHolder();
 protected:

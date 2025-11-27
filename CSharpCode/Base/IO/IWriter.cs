@@ -53,6 +53,12 @@ namespace EngineNS.IO
             result.Writer = MemStreamWriter.CreateInstance();
             return result;
         }
+        public static TtMemWriter CreateInstance(uint size)
+        {
+            TtMemWriter result = new TtMemWriter();
+            result.Writer = MemStreamWriter.CreateInstance(size);
+            return result;
+        }
         public object Tag;
         public MemStreamWriter Writer;
         public unsafe void* Ptr
@@ -82,6 +88,12 @@ namespace EngineNS.IO
         public void Dispose()
         {
             Writer.Dispose();
+        }
+        public unsafe void WriteToFile(TtFileWriter fileWriter)
+        {
+            var size = Writer.Tell();
+            var buffer = Writer.GetPointer();
+            fileWriter.WritePtr(buffer, (int)size);
         }
     }
     public class TtFileWriter : ICoreWriter, IDisposable
