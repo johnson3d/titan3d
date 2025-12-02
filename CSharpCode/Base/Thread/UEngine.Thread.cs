@@ -53,7 +53,6 @@ namespace EngineNS
             Thread.TtContextThread ctx = null;
             switch (target)
             {
-                case Thread.Async.EAsyncTarget.AsyncIOAfterEmpty:
                 case Thread.Async.EAsyncTarget.AsyncIO:
                     ctx = this.ThreadAsync;
                     break;

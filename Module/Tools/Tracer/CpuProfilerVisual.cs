@@ -187,7 +187,6 @@ namespace Tracer
 
         }
         string mFilter;
-        string CurrentThreadName = null;
         string CurrentName = null;
         internal bool mMenuShow = false;
         private unsafe void PopItemMenu(string watchingThread, EngineNS.Profiler.TtRpcProfiler.RpcProfilerData.ScopeInfo scope, string column)

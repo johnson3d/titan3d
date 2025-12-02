@@ -433,7 +433,7 @@ namespace EngineNS.GamePlay.Scene
                 return null;
 
             Prefabs.Add(name, result);
-            mCreatingSession.FinishSession(name, session, result);
+            session.FinishSession(name, result);
 
             return result;
         }

@@ -10,6 +10,7 @@
   "Interval": 15,
   "TargetFps": 66,
   "DefaultTexture": "texture/checkboard.srv:Engine",
+  "ImGuiIniPath": "imgui_tracer.ini",
   "AdaperId": -1,
   "MainWindow": {
     "Left": 100,
@@ -66,7 +67,8 @@
     "DataCopyer",
     "Survivor",
     "TencentAIGC",
-    "VisualStudioPlugin"
+    "VisualStudioPlugin",
+    "Inventory"
   ],
   "TypeAssemblies": [
     "Tracer"

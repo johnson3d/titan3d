@@ -38,6 +38,7 @@ namespace EngineNS.Editor.Forms
                     {
                         if (ImGuiAPI.CollapsingHeader("Object", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                         {
+                            ImGuiAPI.Text($"ActiveThread = {Thread.Async.TtContextThreadManager.AliveThread};");
                             ImGuiAPI.Text($"TtGameInstance Count = {GamePlay.TtGameInstance.NodeAliveNumber};");
                             ImGuiAPI.Text($"TtMacrossGetter Count = {TtEngine.Instance.MacrossModule.mGetters.Count};");
                             ImGuiAPI.Text($"TtWorld Count = {GamePlay.TtWorld.NodeAliveNumber};");

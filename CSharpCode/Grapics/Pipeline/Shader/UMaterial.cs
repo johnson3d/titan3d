@@ -1447,7 +1447,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Material({rn}): AssetName({result.AssetName})");
                 }
                 Materials.Add(rn, result);
-                mCreatingSession.FinishSession(rn, session, result);
+                session.FinishSession(rn, result);
                 return result;
             }
 

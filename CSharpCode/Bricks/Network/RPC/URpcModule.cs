@@ -400,6 +400,8 @@ namespace EngineNS.UnitTest
         [TtRpcMethod(Index = 100 + 1)]
         public void TestRpc2(string arg, TtCallContext context)
         {
+            if (context==null)
+                return;
             Console.WriteLine(arg);
         }
         [TtRpcMethod(Index = 100 + 2)]
@@ -803,6 +805,7 @@ namespace EngineNS.UnitTest
 			rpcArg.ExeIndex = RpcExecuteIndex;
 			rpcArg.NetConnect = GetRpcConnect(100 + 1);
 			UTest_Rpc_RpcCaller.TestRpc2(arg, rpcArg);
+			TestRpc2(arg, null);
 		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestRpc3 = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{

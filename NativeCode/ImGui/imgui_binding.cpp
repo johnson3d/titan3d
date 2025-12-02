@@ -7,6 +7,7 @@
 NS_BEGIN
 
 static const float          DRAG_MOUSE_THRESHOLD_FACTOR = 0.50f;    // Multiplier for the default value of io.MouseDragThreshold to make DragFloat/DragInt react faster to mouse drags.
+std::string ImGuiAPI::mIniFilename;
 
 //void	ImGuiAPI::ImGui_NativeWindow_EnableDpiAwareness()
 //{

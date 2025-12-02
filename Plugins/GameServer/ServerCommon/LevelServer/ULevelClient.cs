@@ -64,7 +64,8 @@ namespace EngineNS.Plugins.LevelServer
         [TtRpcMethod(Index = 100 + 1)]
         public void UpdateAutoSyncData(IO.TtMemWriter data, TtCallContext context)
         {
-            
+            if (context==null)
+                return;
         }
         #endregion
     }
@@ -207,6 +208,7 @@ namespace EngineNS.Plugins.LevelServer
 			rpcArg.ExeIndex = RpcExecuteIndex;
 			rpcArg.NetConnect = GetRpcConnect(100 + 1);
 			ULevelClient_RpcCaller.UpdateAutoSyncData(data, rpcArg);
+			UpdateAutoSyncData(data, null);
 		}
 	}
 }

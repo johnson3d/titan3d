@@ -8,6 +8,7 @@
   "Interval": 15,
   "TargetFps": 66,
   "DefaultTexture": "texture/checkboard.srv:Engine",
+  "ImGuiIniPath": "imgui.ini",
   "AdaperId": -1,
   "MainWindow": {
     "Left": 100,

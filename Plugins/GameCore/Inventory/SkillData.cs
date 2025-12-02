@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using EngineNS.GamePlay.Scene;
 
-namespace Survivor
+namespace Inventory
 {
     [EngineNS.Bricks.DataSet.TtDataTable(SheetName = "TtSkillData", KeyName = "SkillId", HeadRow = 0, DataStartRow = 3)]
     public class TtSkillData : EngineNS.Bricks.DataSet.TtDataProvider
@@ -21,10 +21,6 @@ namespace Survivor
         [EngineNS.Rtti.Meta]
         [EngineNS.Bricks.DataSet.TtDataColumn(HeadName = "SkillType")]
         public string SkillType { get; set; }
-    }
-    public class TtSkillDataManager : EngineNS.Bricks.DataSet.TtDataManager<TtSkillData>
-    {
-
     }
     public class TtSkill
     {

@@ -4,7 +4,5 @@
   "Platforms": [
     "PLTF_ALL"
   ],
-  "Dependencies": [
-    "Inventory"
-  ]
+  "Dependencies": []
 }

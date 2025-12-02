@@ -1,6 +1,8 @@
 ﻿//#define HAS_DebugInfo
 //#define STATE_TIME
+#define Use_ConcurrentQueue
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -11,7 +13,6 @@ namespace EngineNS.Thread.Async
     public enum EAsyncTarget
     {
         AsyncIO,
-        AsyncIOAfterEmpty,//特殊的，当ThreadAsync的所有任务清空后执行
         Physics,
         Logic,
         Render,
@@ -25,7 +26,6 @@ namespace EngineNS.Thread.Async
     {
         Normal,
         Semaphore,
-        AsyncIOAfterEmpty,//特殊的，当ThreadAsync的所有任务清空后执行
         ParallelTasks,
     }
     public enum EAsyncTaskState
@@ -283,7 +283,6 @@ namespace EngineNS.Thread.Async
         }
         internal Support.TtBitset IdleThreads;
         internal TtThreadPool[] ContextPools;
-        internal List<TtAsyncTaskStateBase> AsyncIOEmptys = new List<TtAsyncTaskStateBase>();
         public int PooledThreadNum
         {
             get { return ContextPools.Length; }
@@ -471,16 +470,36 @@ namespace EngineNS.Thread.Async
         }
         #region WaitTaskFast
         internal static int mAliveThread = 0;
+        public static int AliveThread { get => mAliveThread; }
+#if Use_ConcurrentQueue
+        //多线程高并发场景下，ConcurrentQueue性能优于Queue+lock
+        internal ConcurrentQueue<Async.TtAsyncTaskStateBase> GlobalTasks = new ConcurrentQueue<Async.TtAsyncTaskStateBase>();
+#else
         internal Queue<Async.TtAsyncTaskStateBase> GlobalTasks = new Queue<Async.TtAsyncTaskStateBase>();
+#endif
         internal void PushGlobalTask(Async.TtAsyncTaskStateBase t)
         {
+#if Use_ConcurrentQueue
+            GlobalTasks.Enqueue(t);
+#else
             lock (GlobalTasks)
             {
                 GlobalTasks.Enqueue(t);
             }
+#endif
         }
         internal Async.TtAsyncTaskStateBase PopGlobalTask()
         {
+#if Use_ConcurrentQueue
+            if (GlobalTasks.TryDequeue(out Async.TtAsyncTaskStateBase item))
+            {
+                return item;
+            }
+            else
+            {
+                return null;
+            }
+#else
             lock (GlobalTasks)
             {
                 if (GlobalTasks.Count == 0)
@@ -489,6 +508,7 @@ namespace EngineNS.Thread.Async
                 TaskLatency(e);
                 return e;
             }
+#endif
         }
         internal static void TaskLatency(Async.TtAsyncTaskStateBase e)
         {
@@ -513,7 +533,7 @@ namespace EngineNS.Thread.Async
         }
         public void PushTask(Async.TtAsyncTaskStateBase e)
         {
-            //using (new Profiler.TimeScopeHelper(ScopePushTask))
+            using (new Profiler.TimeScopeHelper(ScopePushTask))
             {
                 TtThreadPool thread = null;
                 thread = SelectBestThread();
@@ -532,23 +552,37 @@ namespace EngineNS.Thread.Async
                 }
             }  
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeSelectBestThread;
+        private static Profiler.TimeScope ScopeSelectBestThread
+        {
+            get
+            {
+                if (mScopeSelectBestThread == null)
+                    mScopeSelectBestThread = new Profiler.TimeScope(typeof(TtContextThreadManager), nameof(SelectBestThread));
+                return mScopeSelectBestThread;
+            }
+        }
         private TtThreadPool SelectBestThread()
         {
-            TtThreadPool result = null;
-            int LoadBalance = int.MaxValue;
-            foreach (var t in ContextPools)
+            using (new Profiler.TimeScopeHelper(ScopeSelectBestThread))
             {
-                if (t.LoadBalance < LoadBalance)
+                TtThreadPool result = null;
+                int LoadBalance = int.MaxValue;
+                foreach (var t in ContextPools)
                 {
-                    LoadBalance = t.LoadBalance;
-                    result = t;
-                    if (LoadBalance == 0)
-                        return t;
+                    if (t.LoadBalance < LoadBalance)
+                    {
+                        LoadBalance = t.LoadBalance;
+                        result = t;
+                        if (LoadBalance == 0)
+                            return t;
+                    }
                 }
-            }
-            return result;
+                return result;
+            }   
         }
-        #endregion
+#endregion
         public TtContextThread GetContext(EAsyncTarget target)
         {
             switch (target)
@@ -686,10 +720,6 @@ namespace EngineNS.Thread.Async
                 }
             }
             eh.PostAction = evt;
-            if (target == EAsyncTarget.AsyncIOAfterEmpty)
-            {
-                eh.AsyncType = EAsyncType.AsyncIOAfterEmpty;
-            }
             return new FTaskAwaiter<T>(eh);
             //return await TaskExtensionForPost.AwaitPost(eh);
         }
@@ -813,15 +843,6 @@ namespace EngineNS.Thread.Async
                 case EAsyncType.Normal:
                     {
                         PEvent.AsyncTarget.EnqueueAsync(PEvent);
-                    }
-                    break;
-                case EAsyncType.AsyncIOAfterEmpty:
-                    {
-                        lock (TtEngine.Instance.ContextThreadManager.AsyncIOEmptys)
-                        {
-                            TtEngine.Instance.ContextThreadManager.AsyncIOEmptys.Add(PEvent);
-                        }
-                        TtEngine.Instance.ThreadAsync.mEnqueueTrigger.Set();
                     }
                     break;
                 case EAsyncType.Semaphore:

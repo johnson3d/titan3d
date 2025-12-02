@@ -71,8 +71,9 @@ struct TR_CLASS(SV_LayoutStruct = 8)
 };
 
 class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = ImGui, SV_LayoutStruct=8)
-ImGuiAPI
+	ImGuiAPI
 {
+	static std::string mIniFilename;
 public:
 	static void* CreateContext(ImFontAtlas* shared_font_atlas = NULL)
 	{
@@ -89,6 +90,11 @@ public:
 	static void SetCurrentContext(void* ctx)
 	{
 		return ImGui::SetCurrentContext((ImGuiContext*)ctx);
+	}
+	static void SetIniFilename(const char* ini_filename)
+	{
+		mIniFilename = ini_filename ? ini_filename : "";
+		ImGui::GetIO().IniFilename = mIniFilename.empty() ? NULL : mIniFilename.c_str();
 	}
 	static ImGuiIO* GetIO()
 	{

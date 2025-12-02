@@ -60,6 +60,7 @@
   "Plugins": [
     "SourceGit",
     "DataCopyer",
-    "Survivor"
+    "Survivor",
+    "Inventory"
   ]
 }

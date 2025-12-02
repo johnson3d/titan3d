@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Survivor
+namespace Inventory
 {
     [EngineNS.Bricks.DataSet.TtDataTable(SheetName = "TtItemData", KeyName= "ItemId", HeadRow = 0, DataStartRow = 3)]
     public class TtItemData : EngineNS.Bricks.DataSet.TtDataProvider
@@ -30,9 +30,9 @@ namespace Survivor
         [EngineNS.Bricks.DataSet.TtDataColumn(HeadName = "Duration")]
         public int Duration { get; set; } = -1;
     }
-    public class TtItemDataManager : EngineNS.Bricks.DataSet.TtDataManager<TtItemData>
+    public interface IDataFactory
     {
-
+        public V GetData<K, V>(K key) where V : class;
     }
     public class TtItem : EngineNS.IO.BaseSerializer
     {
@@ -43,7 +43,7 @@ namespace Survivor
         //Save to Database
         public Guid UniqueId = Guid.Empty;
 
-        public static TtItem CreateItem(TtItemData data)
+        public static TtItem CreateItem(IDataFactory factory, TtItemData data)
         {
             var type = EngineNS.Rtti.TtTypeDesc.TypeOf($"Survivor.{data.ItemType}@Survivor");
             if (type == null)
@@ -55,7 +55,7 @@ namespace Survivor
             result.UniqueId = Guid.NewGuid();
             if (data.SkillId >= 0)
             {
-                var skillData = TtDatabase.Instance.GetSkillData(data.SkillId);
+                var skillData = factory.GetData<int, TtSkillData>(data.SkillId);
                 if (skillData == null)
                     return null;
                 type = EngineNS.Rtti.TtTypeDesc.TypeOf($"Survivor.{skillData.SkillType}@Survivor");

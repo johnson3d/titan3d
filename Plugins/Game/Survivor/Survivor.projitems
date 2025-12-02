@@ -15,14 +15,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Data\DropGroup.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GameMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\HeroData.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Data\ItemData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossSurvivorGame.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Data\MissionData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\MonsterData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MonsterController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MonsterSpawner.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PooledNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Data\SkillData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data\WeaponData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MonsterNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WeaponNode.cs" />

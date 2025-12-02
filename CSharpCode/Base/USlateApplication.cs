@@ -159,6 +159,9 @@ namespace EngineNS
                 TtEngine.Instance.GfxDevice.SlateRenderer.RecreateFontDeviceTexture();
 
                 var io = ImGuiAPI.GetIO();
+                var cachePath = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache);
+                var imgui = TtEngine.Instance.Config.ImGuiIniPath;
+                ImGuiAPI.SetIniFilename(IO.TtFileManager.CombinePath(cachePath, imgui));
 
                 ImGuiConfigFlags_ configFlags = ImGuiConfigFlags_.ImGuiConfigFlags_None;
                 //configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_DpiEnableScaleViewports;

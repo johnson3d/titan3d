@@ -80,6 +80,10 @@ namespace EngineNS.Profiler.Trace
             }
         }
 
+        public static long GetCurrentMicroSecond()
+        {
+            return Support.TtTime.HighPrecision_GetTickCount();
+        }
         public static void PushAction(TtAction action)
         {
             if (TtEngine.Instance==null)
@@ -104,6 +108,7 @@ namespace EngineNS.Profiler.Trace
             lock (this)
             {
                 Current = new TtFrame();
+                Current.StartTimeMicroSecond = GetCurrentMicroSecond();
                 Current.InitChannels(Channels);
                 Frames.Add(Current);
                 return Current;
@@ -116,6 +121,7 @@ namespace EngineNS.Profiler.Trace
                 return;
             }
             TtTracer.PushAction(new TtCpuFrameProfilerAction());
+            Current.EndTimeMicroSecond = GetCurrentMicroSecond();
             //send to server or write to file
             if (NetConnect!=null)
             {
@@ -199,6 +205,22 @@ namespace EngineNS.Profiler.Trace
     }
     public class TtFrame
     {
+        public long StartTimeMicroSecond;
+        public long EndTimeMicroSecond;
+        public int DurationMicroSecond
+        {
+            get
+            {
+                return (int)(EndTimeMicroSecond - StartTimeMicroSecond);
+            }
+        }
+        public int DurationMillisecond
+        {
+            get
+            {
+                return (int)((EndTimeMicroSecond - StartTimeMicroSecond)/1000);
+            }
+        }
         public List<TtChannel> Channels = new List<TtChannel>();
         public void InitChannels(ETraceChannel channel)
         {
@@ -224,15 +246,18 @@ namespace EngineNS.Profiler.Trace
         }
         public void Write(IO.IWriter writer)
         {
+            writer.Write(StartTimeMicroSecond);
             writer.Write(Channels.Count);
             foreach (var channel in Channels)
             {
                 writer.Write(channel.Channel);
                 channel.Write(writer);
             }
+            writer.Write(EndTimeMicroSecond);
         }
         public void Read(IO.IReader reader)
         {
+            reader.Read(out StartTimeMicroSecond);
             int count;
             reader.Read(out count);
             for (int i = 0; i<count; i++)
@@ -245,6 +270,7 @@ namespace EngineNS.Profiler.Trace
                 ttChannel.Read(reader);
                 Channels.Add(ttChannel);
             }
+            reader.Read(out EndTimeMicroSecond);
         }
 
         public bool PushAction(TtTracer tracer, TtAction action)
@@ -334,6 +360,7 @@ namespace EngineNS.Profiler.Trace
 			rpcArg.ExeIndex = RpcExecuteIndex;
 			rpcArg.NetConnect = GetRpcConnect(0);
 			TtTracer_RpcCaller.ReciveFrame(frameData, rpcArg);
+			ReciveFrame(frameData, null);
 		}
 	}
 }

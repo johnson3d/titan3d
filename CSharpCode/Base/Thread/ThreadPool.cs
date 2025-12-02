@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using static EngineNS.Thread.TtThreadPool;
 
 namespace EngineNS.Thread
@@ -27,15 +30,44 @@ namespace EngineNS.Thread
                 return PrivateTasks.Count + ((mPoolThreadState == EPoolThreadState.Wait) ? 0 : 1);
             }
         }
+        //private System.Threading.SpinLock PrivateTasksLock = new();
         public void PushTask(Async.TtAsyncTaskStateBase e)
         {
+#if Use_ConcurrentQueue
+            PrivateTasks.Enqueue(e);
+#else
             lock (PrivateTasks)
             {
                 PrivateTasks.Enqueue(e);
             }
+#endif
+            //bool lockTaken = false;
+            //try
+            //{
+            //    PrivateTasksLock.Enter(ref lockTaken);
+            //    PrivateTasks.Enqueue(e);
+            //}
+            //finally
+            //{
+            //    if (lockTaken)
+            //        PrivateTasksLock.Exit();
+            //}
         }
         public Async.TtAsyncTaskStateBase PopTask()
         {
+            //while (TtEngine.Instance.ContextThreadManager.IsInParallelFor)
+            //{
+            //}
+#if Use_ConcurrentQueue
+            if (PrivateTasks.TryDequeue(out Async.TtAsyncTaskStateBase item))
+            {
+                return item;
+            }
+            else
+            {
+                return null;
+            }
+#else
             lock (PrivateTasks)
             {
                 if (PrivateTasks.Count == 0)
@@ -44,8 +76,28 @@ namespace EngineNS.Thread
                 Async.TtContextThreadManager.TaskLatency(e);
                 return e;
             }
+            //bool lockTaken = false;
+            //try
+            //{
+            //    PrivateTasksLock.Enter(ref lockTaken);
+            //    if (PrivateTasks.Count == 0)
+            //        return null;
+            //    var e = PrivateTasks.Dequeue();
+            //    Async.TtContextThreadManager.TaskLatency(e);
+            //    return e;
+            //}
+            //finally
+            //{
+            //    if (lockTaken)
+            //        PrivateTasksLock.Exit();
+            //}
+#endif
         }
-        internal Queue<Async.TtAsyncTaskStateBase> PrivateTasks = new Queue<Async.TtAsyncTaskStateBase>();
+#if Use_ConcurrentQueue
+        internal ConcurrentQueue<Async.TtAsyncTaskStateBase> PrivateTasks = new ConcurrentQueue<Async.TtAsyncTaskStateBase>();
+#else
+        internal Queue<Async.TtAsyncTaskStateBase> PrivateTasks = new Queue<Async.TtAsyncTaskStateBase>(512);
+#endif
         internal System.Threading.ManualResetEventSlim Trigger = new System.Threading.ManualResetEventSlim(false);
         
         int mHasWork;
@@ -193,7 +245,7 @@ namespace EngineNS.Thread
                 }
             }
         }
-        #endregion
+#endregion
         protected override void OnThreadStart()
         {
             this.LimitTime = long.MaxValue;

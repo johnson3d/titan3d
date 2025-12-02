@@ -3,6 +3,7 @@ using EngineNS;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Thread.Async;
+using Inventory;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -35,7 +36,7 @@ namespace Survivor
         }
         
     }
-    public partial class TtCharacterStateNode : TtStateNode
+    public partial class TtCharacterStateNode : TtStateNode, Inventory.IHostActor
     {
         public class TtCharacterStateNodeData : TtStateNodeData
         {
@@ -61,16 +62,22 @@ namespace Survivor
             }
         }
         public TtCharacterStateNodeData StateData { get => NodeData as TtCharacterStateNodeData; }
+        #region IHostActor
+        public IDataFactory GetDataFactory()
+        {
+            return TtDatabase.Instance;
+        }
         //物品背包
-        public TtGoodsInventory GoodsInventory = new TtGoodsInventory();
+        public Inventory.TtGoodsInventory GoodsInventory { get; } = new();
         //只读物品背包
-        public TtGoodsUnlimitInventory ReadOnlyInventory = new TtGoodsUnlimitInventory();
+        public Inventory.TtGoodsUnlimitInventory ReadOnlyInventory { get; } = new();
         //技能背包
-        public TtSkillInventory SkillInventory = new TtSkillInventory();
+        public Inventory.TtSkillInventory SkillInventory { get; } = new();
         //技能物品快捷图标背包
-        public TtProxyInventory ProxyInventory = new TtProxyInventory();
+        public Inventory.TtProxyInventory ProxyInventory { get; } = new();
         //任务背包
-        public TtMissionInventory MissionInventory = new TtMissionInventory();
+        public Inventory.TtMissionInventory MissionInventory { get; } = new();
+        #endregion
         protected override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             return await base.InitializeNode(world, data, bvType, placementType);
@@ -89,6 +96,11 @@ namespace Survivor
 
             this.CurrentHP = MathF.Max(hp, 0);
             return;
+        }
+        public override bool OnTickLogic(TtNodeTickParameters args)
+        {
+            this.MissionInventory.Tick(this);
+            return base.OnTickLogic(args);
         }
     }
 

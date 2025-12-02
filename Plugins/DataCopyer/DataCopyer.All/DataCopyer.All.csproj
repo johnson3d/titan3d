@@ -20,6 +20,10 @@
 		  <HintPath>$(TtTitanRoot)binaries\Plugins\Survivor\Survivor.All.dll</HintPath>
 		  <Private>false</Private>
 	  </Reference>
+	  <Reference Include="Inventory.All">
+		  <HintPath>$(TtTitanRoot)binaries\Plugins\Inventory\Inventory.All.dll</HintPath>
+		  <Private>false</Private>
+	  </Reference>
     <!--<ProjectReference Include="..\..\..\Module\Engine.Window\Engine.Window.csproj">
 		<Private>False</Private>
 	</ProjectReference>-->

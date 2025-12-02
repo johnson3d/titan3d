@@ -213,21 +213,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core.iOS", "Core.iOS\Core.i
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{E5CE3791-9C8E-4476-8528-B81DFB5FDDF5}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GameItems", "GameItems", "{00CB857E-7FD0-41FC-9D34-8112B643CF2D}"
-	ProjectSection(SolutionItems) = preProject
-		Plugins\GameItems\GameItems.plugin = Plugins\GameItems\GameItems.plugin
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Android", "Module\Engine.Android\Engine.Android.csproj", "{2B57F697-2492-4D3B-859C-7D47E12E6819}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WindowSDL", "CSharpCode\Bricks\WindowSDL\WindowSDL.shproj", "{3DA775BF-8DF6-4000-9458-5975DC3377A2}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GameTasks", "GameTasks", "{DAC5BA3C-A175-4E94-B438-F2B7246812F6}"
-	ProjectSection(SolutionItems) = preProject
-		Plugins\GameTasks\GameTasks.plugin = Plugins\GameTasks\GameTasks.plugin
-	EndProjectSection
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "GameTasks", "Plugins\GameTasks\GameTasks\GameTasks.shproj", "{8DF1C9D5-2788-409A-A741-D61451B85549}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{9DD1EA3E-A1BD-43B5-9F2A-B1AA3DD5F01A}"
 	ProjectSection(SolutionItems) = preProject
@@ -238,8 +226,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{
 		Readme.md = Readme.md
 		Documents\Roadmap.md = Documents\Roadmap.md
 	EndProjectSection
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "GameItems", "Plugins\GameItems\GameItems\GameItems.shproj", "{06A7E536-E6DE-4033-AFCA-27030A7FF2A3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Recast", "Recast", "{2D753BA1-FE34-4E01-A68D-61DB69050471}"
 	ProjectSection(SolutionItems) = preProject
@@ -520,10 +506,6 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Meshly", "CSharpCode\Bricks
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Collision", "NativeCode\Bricks\Collision\Collision.vcxitems", "{579066EA-1563-47F7-B50E-ACAEA875DDF6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameItems.All", "Plugins\GameItems\GameItems.All\GameItems.All.csproj", "{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameTasks.All", "Plugins\GameTasks\GameTasks.All\GameTasks.All.csproj", "{9EA70F22-8048-AB42-80A5-5DED58820890}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataCopyer.All", "Plugins\DataCopyer\DataCopyer.All\DataCopyer.All.csproj", "{00A1A3B9-646E-AA8D-E763-B2604D487775}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudWeb", "Module\CloudWeb\CloudWeb.csproj", "{27777FC3-83F1-4A42-940E-8E9BA5FEE2AE}"
@@ -535,6 +517,17 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer", "Module\Tools\Tracer\Tracer.csproj", "{ACDA645D-5D66-4AC9-91EB-1C92983C46ED}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{6B4A4482-77DE-480A-896A-5DAD2AB44780}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GameCore", "GameCore", "{7A30DEE2-7292-43B8-9D3E-3DEBC9D163C7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Inventory", "Inventory", "{0C64E9A2-B99F-42B0-8012-C2C62F9656B3}"
+	ProjectSection(SolutionItems) = preProject
+		Plugins\GameCore\Inventory\Inventory.plugin = Plugins\GameCore\Inventory\Inventory.plugin
+	EndProjectSection
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Inventory", "Plugins\GameCore\Inventory\Inventory.shproj", "{C5A6CD32-252A-4F89-B45A-39FE2AE04CE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inventory.All", "Plugins\GameCore\Inventory\Inventory.All\Inventory.All.csproj", "{D8CA055A-683B-1525-C7F5-A4F27660E550}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -974,42 +967,6 @@ Global
 		{978B42A8-A64A-AB99-2368-70B21CA18E1F}.Release|x64.Build.0 = Release|Any CPU
 		{978B42A8-A64A-AB99-2368-70B21CA18E1F}.Release|x86.ActiveCfg = Release|Any CPU
 		{978B42A8-A64A-AB99-2368-70B21CA18E1F}.Release|x86.Build.0 = Release|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.Debug|x64.Build.0 = Debug|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.Debug|x86.Build.0 = Debug|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.DebugOnlyCS|Any CPU.ActiveCfg = Debug|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.DebugOnlyCS|Any CPU.Build.0 = Debug|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.DebugOnlyCS|x64.ActiveCfg = Debug|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.DebugOnlyCS|x64.Build.0 = Debug|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.DebugOnlyCS|x86.ActiveCfg = Debug|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.DebugOnlyCS|x86.Build.0 = Debug|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.Release|x64.ActiveCfg = Release|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.Release|x64.Build.0 = Release|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.Release|x86.ActiveCfg = Release|Any CPU
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D}.Release|x86.Build.0 = Release|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.Debug|x64.Build.0 = Debug|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.Debug|x86.Build.0 = Debug|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.DebugOnlyCS|Any CPU.ActiveCfg = Debug|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.DebugOnlyCS|Any CPU.Build.0 = Debug|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.DebugOnlyCS|x64.ActiveCfg = Debug|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.DebugOnlyCS|x64.Build.0 = Debug|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.DebugOnlyCS|x86.ActiveCfg = Debug|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.DebugOnlyCS|x86.Build.0 = Debug|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.Release|x64.ActiveCfg = Release|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.Release|x64.Build.0 = Release|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.Release|x86.ActiveCfg = Release|Any CPU
-		{9EA70F22-8048-AB42-80A5-5DED58820890}.Release|x86.Build.0 = Release|Any CPU
 		{00A1A3B9-646E-AA8D-E763-B2604D487775}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{00A1A3B9-646E-AA8D-E763-B2604D487775}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00A1A3B9-646E-AA8D-E763-B2604D487775}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -1082,6 +1039,24 @@ Global
 		{ACDA645D-5D66-4AC9-91EB-1C92983C46ED}.Release|x64.Build.0 = Release|Any CPU
 		{ACDA645D-5D66-4AC9-91EB-1C92983C46ED}.Release|x86.ActiveCfg = Release|Any CPU
 		{ACDA645D-5D66-4AC9-91EB-1C92983C46ED}.Release|x86.Build.0 = Release|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.Debug|x64.Build.0 = Debug|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.Debug|x86.Build.0 = Debug|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.DebugOnlyCS|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.DebugOnlyCS|Any CPU.Build.0 = Debug|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.DebugOnlyCS|x64.ActiveCfg = Debug|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.DebugOnlyCS|x64.Build.0 = Debug|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.DebugOnlyCS|x86.ActiveCfg = Debug|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.DebugOnlyCS|x86.Build.0 = Debug|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.Release|x64.ActiveCfg = Release|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.Release|x64.Build.0 = Release|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.Release|x86.ActiveCfg = Release|Any CPU
+		{D8CA055A-683B-1525-C7F5-A4F27660E550}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1174,12 +1149,8 @@ Global
 		{F8B576D2-A578-4F55-B513-95BB92ABE489} = {041F2057-6090-446E-8CEF-D524C973477F}
 		{EF01B997-E212-488D-83C0-9F250EB73429} = {4A69F69C-6D09-4798-838A-BCE0C8C785F9}
 		{926CC83F-7D65-49F1-B7A0-95AD346E863A} = {892AFF4D-69EA-4061-8F59-320A21A0814A}
-		{00CB857E-7FD0-41FC-9D34-8112B643CF2D} = {E5CE3791-9C8E-4476-8528-B81DFB5FDDF5}
 		{2B57F697-2492-4D3B-859C-7D47E12E6819} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
 		{3DA775BF-8DF6-4000-9458-5975DC3377A2} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
-		{DAC5BA3C-A175-4E94-B438-F2B7246812F6} = {E5CE3791-9C8E-4476-8528-B81DFB5FDDF5}
-		{8DF1C9D5-2788-409A-A741-D61451B85549} = {DAC5BA3C-A175-4E94-B438-F2B7246812F6}
-		{06A7E536-E6DE-4033-AFCA-27030A7FF2A3} = {00CB857E-7FD0-41FC-9D34-8112B643CF2D}
 		{2D753BA1-FE34-4E01-A68D-61DB69050471} = {4A69F69C-6D09-4798-838A-BCE0C8C785F9}
 		{07F7E779-DB97-4A5F-86E2-747BBF05A434} = {2D753BA1-FE34-4E01-A68D-61DB69050471}
 		{E7663984-A991-4722-87CE-D7D56FFC2DD0} = {2D753BA1-FE34-4E01-A68D-61DB69050471}
@@ -1280,14 +1251,16 @@ Global
 		{176139B1-26BB-4CDD-897B-B934BEE034E2} = {4A69F69C-6D09-4798-838A-BCE0C8C785F9}
 		{BAFED495-15B8-4113-BC81-AC9DF10D3619} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{579066EA-1563-47F7-B50E-ACAEA875DDF6} = {041F2057-6090-446E-8CEF-D524C973477F}
-		{E1FF209F-7B40-A5D1-4E75-F9A45E86E45D} = {00CB857E-7FD0-41FC-9D34-8112B643CF2D}
-		{9EA70F22-8048-AB42-80A5-5DED58820890} = {DAC5BA3C-A175-4E94-B438-F2B7246812F6}
 		{00A1A3B9-646E-AA8D-E763-B2604D487775} = {7D33F58F-FF5C-4BAD-885E-398DCD456824}
 		{27777FC3-83F1-4A42-940E-8E9BA5FEE2AE} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
 		{66934216-5767-41B6-B4F8-7C355D4F0184} = {A2A724BD-935F-4689-9329-2FB28BA900C2}
 		{F7886CBC-0AE4-E713-4C9B-417B1238407B} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
 		{ACDA645D-5D66-4AC9-91EB-1C92983C46ED} = {6B4A4482-77DE-480A-896A-5DAD2AB44780}
 		{6B4A4482-77DE-480A-896A-5DAD2AB44780} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
+		{7A30DEE2-7292-43B8-9D3E-3DEBC9D163C7} = {E5CE3791-9C8E-4476-8528-B81DFB5FDDF5}
+		{0C64E9A2-B99F-42B0-8012-C2C62F9656B3} = {7A30DEE2-7292-43B8-9D3E-3DEBC9D163C7}
+		{C5A6CD32-252A-4F89-B45A-39FE2AE04CE2} = {0C64E9A2-B99F-42B0-8012-C2C62F9656B3}
+		{D8CA055A-683B-1525-C7F5-A4F27660E550} = {0C64E9A2-B99F-42B0-8012-C2C62F9656B3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
@@ -1298,7 +1271,6 @@ Global
 		CSharpCode\CompilingGenerator\CompilingGenerator.projitems*{015286df-5ed8-4fa9-9b45-0e73ed25d3a7}*SharedItemsImports = 5
 		Plugins\VisualStudioPlugin\VisualStudioPlugin\VisualStudioPlugin.projitems*{01e40434-fbf1-40d3-bb0e-adc9828ea3ed}*SharedItemsImports = 13
 		3rd\native\xatlas\xatlas.vcxitems*{04682cf8-0eb3-4b02-a1bc-8c769fca3a91}*SharedItemsImports = 9
-		Plugins\GameItems\GameItems\GameItem.projitems*{06a7e536-e6de-4033-afca-27030a7ff2a3}*SharedItemsImports = 13
 		3rd\csharp\xxHash\xxHash.projitems*{06df8867-c29e-4424-95a8-3592453e3fee}*SharedItemsImports = 13
 		NativeCode\NextRHI\NextRHI.vcxitems*{06f46e42-7261-47cb-8830-50228f2bd899}*SharedItemsImports = 9
 		3rd\native\Recast\DebugUtils\DebugUtils.vcxitems*{07f7e779-db97-4a5f-86e2-747bbf05a434}*SharedItemsImports = 9
@@ -1535,7 +1507,6 @@ Global
 		NativeCode\NextRHI\NextRHI.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\NextRHI\Vulkan\Vulkan.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Platform\Android\Android.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
-		Plugins\GameTasks\GameTasks\GameTasks.projitems*{8df1c9d5-2788-409a-a741-d61451b85549}*SharedItemsImports = 13
 		CSharpCode\Bricks\VirtualShadowMaps\VirtualShadowMaps.projitems*{91c46b9c-a9c1-4ab1-9c41-e493041e9244}*SharedItemsImports = 13
 		3rd\native\FreeType\FreeType.vcxitems*{926cc83f-7d65-49f1-b7a0-95ad346e863a}*SharedItemsImports = 4
 		3rd\native\Image.Shared\Image.Shared.vcxitems*{926cc83f-7d65-49f1-b7a0-95ad346e863a}*SharedItemsImports = 4
@@ -1559,7 +1530,6 @@ Global
 		CSharpCode\Bricks\AssetImpExp\AssetImpExp.projitems*{98988e6f-4a71-4b73-8baf-d5bbdb679adf}*SharedItemsImports = 13
 		NativeCode\Base\Base.vcxitems*{99a85112-a63d-4b30-a610-b17025e3bb64}*SharedItemsImports = 9
 		CSharpCode\Bricks\CodeCompiler\CodeCompiler.projitems*{9a454650-729c-496e-bae4-71b863ea036e}*SharedItemsImports = 13
-		Plugins\GameTasks\GameTasks\GameTasks.projitems*{9ea70f22-8048-ab42-80a5-5ded58820890}*SharedItemsImports = 5
 		NativeCode\Bricks\TcpClient\TcpClient.vcxitems*{9f919c6f-01e0-4560-9706-7f9cdea2c1c9}*SharedItemsImports = 9
 		3rd\csharp\NvTriStrip\NvTriStrip.projitems*{a2ec9f38-402e-4af3-b718-dbbbbae41e33}*SharedItemsImports = 13
 		CSharpCode\Bricks\ImageDecoder\ImageDecoder.projitems*{a3697ce8-7369-4d92-84e6-6f5667d03c79}*SharedItemsImports = 13
@@ -1645,6 +1615,7 @@ Global
 		CSharpCode\Base\Base.projitems*{c0f05488-22ec-4212-8fc4-4873d8360c52}*SharedItemsImports = 13
 		Plugins\GameServer\Login\LoginServer\LoginServer.projitems*{c24b3899-e5a9-44ba-89ac-d1b7940b390e}*SharedItemsImports = 13
 		Plugins\AIGC\TencentAIGC\TencentAIGC\TencentAIGC.projitems*{c29ec9f5-ffc9-4086-b1c7-58fac9534ba6}*SharedItemsImports = 13
+		Plugins\GameCore\Inventory\Inventory.projitems*{c5a6cd32-252a-4f89-b45a-39fe2ae04ce2}*SharedItemsImports = 13
 		Plugins\GameServer\CSCommon\CSCommon.projitems*{cb0d3b5c-182b-4fab-8ddb-6c9e201e55fd}*SharedItemsImports = 5
 		Plugins\GameServer\ServerCommon\ServerCommon.projitems*{cb0d3b5c-182b-4fab-8ddb-6c9e201e55fd}*SharedItemsImports = 5
 		CSharpCode\Bricks\AIGC\AIGC.projitems*{cc2b85ff-9c07-4808-8fbb-5b14f47b30f6}*SharedItemsImports = 13
@@ -1652,13 +1623,13 @@ Global
 		CSharpCode\Bricks\Particle\Particle.projitems*{d15c508d-f0bb-4843-8b50-38728b79bba9}*SharedItemsImports = 13
 		NativeCode\Bricks\Quark\Quark.vcxitems*{d21c4a2f-7c4b-4a5c-bd49-d538d741821d}*SharedItemsImports = 9
 		CSharpCode\Bricks\DataSet\DataSet.projitems*{d52d7fe3-c34d-4337-9b82-e917f8d29b4c}*SharedItemsImports = 13
+		Plugins\GameCore\Inventory\Inventory.projitems*{d8ca055a-683b-1525-c7f5-a4f27660e550}*SharedItemsImports = 5
 		CSharpCode\NxRHI\NxRHI.projitems*{d97f536c-7fe8-49bb-b9cb-4ba6ea85488c}*SharedItemsImports = 13
 		NativeCode\Graphics\Mesh\Mesh.vcxitems*{da3d7904-6611-4c03-ac80-f251d8a68ecd}*SharedItemsImports = 9
 		3rd\native\SpirvCross\SpirvCross.vcxitems*{dbb39279-6fde-4555-8e65-5c24b4130cdf}*SharedItemsImports = 9
 		CSharpCode\GamePlay\GamePlay.projitems*{df4345b3-0c74-43e1-890c-190395767fce}*SharedItemsImports = 13
 		3rd\csharp\StbImageSharp\StbImageSharp.projitems*{e0ad6c9d-2af8-43e8-bbb5-8bd96fe1dee2}*SharedItemsImports = 13
 		NativeCode\Bricks\PythonRuntime\PythonRuntime.vcxitems*{e0f6a79a-007a-4f5d-8c93-07c753a1ca67}*SharedItemsImports = 9
-		Plugins\GameItems\GameItems\GameItem.projitems*{e1ff209f-7b40-a5d1-4e75-f9a45e86e45d}*SharedItemsImports = 5
 		codegen\Rpc\Engine\EngineRPC.projitems*{e25af610-5ad0-4646-b7ee-0fbbab8dfd5d}*SharedItemsImports = 13
 		NativeCode\Bricks\RenderDoc\RenderDoc.vcxitems*{e35e90df-5548-4c48-87fd-d9efec2d50eb}*SharedItemsImports = 9
 		Plugins\GameServer\Gate\GateServer\GateServer.projitems*{e51c14de-46de-43a5-8ccf-c274f65acd90}*SharedItemsImports = 13

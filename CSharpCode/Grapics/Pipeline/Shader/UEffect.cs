@@ -811,7 +811,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             finally
             {
-                mCreatingSession.FinishSession(hash, session, result);
+                session.FinishSession(hash, result);
             }
         }
         //需要逐渐被Tt ComputeShadingEnv替换

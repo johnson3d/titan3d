@@ -62,6 +62,9 @@ namespace EngineNS
         public string NativeDll { get; set; } = "release";
         [Rtti.Meta("")]
         [Category("Option")]
+        public string ImGuiIniPath { get; set; } = "imgui.ini";
+        [Rtti.Meta("")]
+        [Category("Option")]
         public string CookAssetType { get; set; } = "Scene+Mesh+Material+MaterialInst+AnimClip+MeshPrimitive+UI+Prefab+Macross+UVAnim+RPolicy+AnimationClip+BlendSpace+MaterialFunction";
         [Rtti.Meta("")]
         [Category("Option")]

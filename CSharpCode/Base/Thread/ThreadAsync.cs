@@ -35,19 +35,6 @@ namespace EngineNS.Thread
                 this.TickAwaitEvent();
             }
 
-            if (AsyncEvents.Count + ContinueEvents.Count == 0)
-            {
-                lock (TtEngine.Instance.ContextThreadManager.AsyncIOEmptys)
-                {
-                    foreach (var i in TtEngine.Instance.ContextThreadManager.AsyncIOEmptys)
-                    {
-                        i.ExecutePostEvent();
-                        //i.ExecuteContinue();
-                        i.ContinueThread.EnqueueContinue(i);
-                    }
-                }
-            }
-
             base.Tick();
         }
         protected override void OnThreadStart()

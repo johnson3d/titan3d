@@ -54,8 +54,8 @@ namespace Survivor
             }
         }
         //需要存盘，避免物品丢失
-        public TtItem SwapItem = null;
-        public void ClickItem(TtInventory targetInventory, short index)
+        public Inventory.TtItem SwapItem = null;
+        public void ClickItem(Inventory.TtInventory targetInventory, short index)
         {
             SwapItem = targetInventory.SwapItem(SwapItem, index);
         }

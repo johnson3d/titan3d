@@ -179,6 +179,7 @@ namespace EngineNS.Bricks.AssemblyLoader
     [Rtti.Meta("")]
     public class TtPluginDescriptor
     {
+        public string Name { get; set; }
         public string FilePath { get; set; }
         [Rtti.Meta("")]
         public bool Enable { get; set; } = true;
@@ -504,6 +505,7 @@ namespace EngineNS.Bricks.AssemblyLoader
                     break;
             }
 
+            List<TtPluginDescriptor> descriptors = new List<TtPluginDescriptor>();
             foreach (var i in files)
             {
                 var jsCode = IO.TtFileManager.ReadAllText(i);
@@ -511,7 +513,20 @@ namespace EngineNS.Bricks.AssemblyLoader
                 if (descriptor == null)
                     continue;
                 descriptor.FilePath = i;
+                descriptor.Name = IO.TtFileManager.GetPureName(descriptor.FilePath);
+                descriptors.Add(descriptor);
+            }
+            
+            List<TtPluginDescriptor> validDescriptors = new();
+            
+            foreach (var i in TtEngine.Instance.Config.Plugins)
+            {
+                var p = FindDescriptor(descriptors, i);
+                AddTree(p, descriptors, validDescriptors);
+            }
 
+            foreach (var descriptor in validDescriptors)
+            {
                 bool bUsePlatformSuffix = true;
                 if (!descriptor.Platforms.Contains(EPlatformType.PLTF_ALL))
                 {
@@ -523,15 +538,13 @@ namespace EngineNS.Bricks.AssemblyLoader
                     bUsePlatformSuffix = false;
                 }
 
-                var name = IO.TtFileManager.GetPureName(i);
-                if (TtEngine.Instance.Config.Plugins.Contains(name) == false)
-                    continue;
+                var name = descriptor.Name;
 
                 var module = new TtPluginModule();
                 module.PluginDescriptor = descriptor;
                 module.Manager = this;
                 module.Name = name;
-                var dir = IO.TtFileManager.GetBaseDirectory(i);
+                var dir = IO.TtFileManager.GetBaseDirectory(descriptor.FilePath);
                 module.AssemblyPath = dir + name + "/" + name + (bUsePlatformSuffix ? PlatformSuffix : ".All.dll");
                 PluginModules.Add(name, module);
             }
@@ -552,6 +565,30 @@ namespace EngineNS.Bricks.AssemblyLoader
             //    //test code
             //    //taskModule.UnloadPlugin(true);
             //}
+        }
+        private static TtPluginDescriptor FindDescriptor(List<TtPluginDescriptor> descriptors, string n)
+        {
+            foreach (var i in descriptors)
+            {
+                if (i.Name == n)
+                    return i;
+            }
+            return null;
+        }
+        private static void AddTree(TtPluginDescriptor p, List<TtPluginDescriptor> descriptors, List<TtPluginDescriptor> validDescriptors)
+        {
+            if (validDescriptors.Contains(p)==false)
+            {
+                validDescriptors.Add(p);
+            }
+            foreach (var d in p.Dependencies)
+            {
+                var dp = FindDescriptor(descriptors, d);
+                if (dp != null)
+                {
+                    AddTree(dp, descriptors, validDescriptors);
+                }
+            }
         }
     }
 }

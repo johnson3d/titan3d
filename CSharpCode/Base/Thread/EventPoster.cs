@@ -168,6 +168,7 @@ namespace EngineNS.Thread
     {
         public class TtAwaitSession
         {
+            internal TtAwaitSessionManager<K, T> Manager;
             private List<Thread.TtSemaphore> Smph = new List<Thread.TtSemaphore>();
             public T Result;
             public Thread.TtSemaphore AddSemaphore()
@@ -179,7 +180,7 @@ namespace EngineNS.Thread
                     return tmp;
                 }
             }
-            public void FinishSession(T rst)
+            internal void FinishSessionInner(T rst)
             {
                 Result = rst;
                 lock (Smph)
@@ -190,6 +191,10 @@ namespace EngineNS.Thread
                     }
                     Smph.Clear();
                 }
+            }
+            public void FinishSession(K key, T value)
+            {
+                Manager.FinishSession(key, this, value);
             }
 
             public async Thread.Async.TtTask<T> Await()
@@ -209,6 +214,7 @@ namespace EngineNS.Thread
                 {
                     isNewSession = true;
                     result = new TtAwaitSession();
+                    result.Manager = this;
                     mSessions.Add(key, result);
                 }
                 else
@@ -224,7 +230,7 @@ namespace EngineNS.Thread
             {
                 mSessions.Remove(key);
             }
-            session.FinishSession(result);
+            session.FinishSessionInner(result);
         }
         //public async System.Threading.Tasks.Task<T> Await(K key)
         //{

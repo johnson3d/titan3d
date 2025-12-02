@@ -110,13 +110,26 @@ namespace Tracer
         #endregion
         #endregion
 
+        public static TtTraceApplication Instance
+        {
+            get
+            {
+                return TtEngine.Instance.GfxDevice.SlateApplication as TtTraceApplication;
+            }
+        }
+
         public EngineNS.Bricks.TcpServer.TtTcpServer TcpServer { get; private set; } = new EngineNS.Bricks.TcpServer.TtTcpServer();
+        public TtTracerEditor TracerEditor = null;
         public TtCpuProfilerVisual CpuProfilerVisual = null;
         public TtLogVisual LogVisual = null;
         public override async EngineNS.Thread.Async.TtTask<bool> InitializeApplication(EngineNS.NxRHI.TtGpuDevice rc, RName rpName)
         {
             await base.InitializeApplication(rc, rpName);
             TcpServer.StartServer("0.0.0.0", TtEngine.Instance.ConfigManager.GetConfig<EngineNS.Profiler.Trace.TtTraceConfig>().Port);
+
+            TracerEditor = new TtTracerEditor();
+            await TracerEditor.Initialize();
+            TracerEditor.Visible = true;
 
             CpuProfilerVisual = new TtCpuProfilerVisual();
             await CpuProfilerVisual.Initialize();
@@ -136,6 +149,7 @@ namespace Tracer
             TtEngine.Instance.TickableManager.RemoveTickable(this);
             EngineNS.CoreSDK.DisposeObject(ref CpuProfilerVisual);
             EngineNS.CoreSDK.DisposeObject(ref LogVisual);
+            EngineNS.CoreSDK.DisposeObject(ref TracerEditor);
 
             base.Cleanup();
         }

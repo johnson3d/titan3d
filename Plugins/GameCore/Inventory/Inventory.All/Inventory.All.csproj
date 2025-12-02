@@ -16,15 +16,14 @@
     <DefineConstants>$(DefineConstants);TitanEngine_AutoGen_Macross;TitanEngine_AutoGen_RPC</DefineConstants>
   </PropertyGroup>
 
-  <Import Project="..\Survivor.projitems" Label="Shared" />
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Module\Engine.Window\Engine.Window.csproj" />
-    <ProjectReference Include="..\..\..\GameCore\Inventory\Inventory.All\Inventory.All.csproj" />
-  </ItemGroup>
+  <Import Project="..\Inventory.projitems" Label="Shared" />
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="$(SolutionDir)CS_Engine.bat" />
   </Target>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Module\Engine.Window\Engine.Window.csproj" />
+  </ItemGroup>
 
 </Project>

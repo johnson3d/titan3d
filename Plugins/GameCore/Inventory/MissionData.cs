@@ -1,15 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using EngineNS;
 using EngineNS.GamePlay.Scene;
 
-namespace Survivor
+namespace Inventory
 {
+    public interface IHostActor
+    {
+        public IDataFactory GetDataFactory();
+        //物品背包
+        public Inventory.TtGoodsInventory GoodsInventory { get; }
+        //只读物品背包
+        public Inventory.TtGoodsUnlimitInventory ReadOnlyInventory { get; }
+        //技能背包
+        public Inventory.TtSkillInventory SkillInventory { get; }
+        //技能物品快捷图标背包
+        public Inventory.TtProxyInventory ProxyInventory { get; }
+        //任务背包
+        public TtMissionInventory MissionInventory { get; }
+    }
     [EngineNS.Bricks.DataSet.TtDataTable(SheetName = "TtMissionData", KeyName = "MissionId", HeadRow = 0, DataStartRow = 3)]
     public class TtMissionData : EngineNS.Bricks.DataSet.TtDataProvider
     {
         public TtMissionData()
         {
-            MissionType = nameof(TtMission);
+            MissionType = EngineNS.Rtti.TtTypeDescGetter<TtMission>.TypeDesc;
         }
         [EngineNS.Rtti.Meta]
         [EngineNS.Bricks.DataSet.TtDataColumn(HeadName = "MissionId")]
@@ -19,7 +34,7 @@ namespace Survivor
         public string MissionName { get; set; }
         [EngineNS.Rtti.Meta]
         [EngineNS.Bricks.DataSet.TtDataColumn(HeadName = "MissionType")]
-        public string MissionType { get; set; }
+        public EngineNS.Rtti.TtTypeDesc MissionType { get; set; }
         [EngineNS.Rtti.Meta]
         [EngineNS.Bricks.DataSet.TtDataColumn(HeadName = "MissionConditions")]
         public List<int> MissionConditions { get; set; } = new List<int>();
@@ -44,14 +59,10 @@ namespace Survivor
         [EngineNS.Bricks.DataSet.TtDataColumn(HeadName = "AwardGoods")]
         public List<TtGoodsCondition> AwardGoods { get; set; } = new List<TtGoodsCondition>();
     }
-    public class TtMissionDataManager : EngineNS.Bricks.DataSet.TtDataManager<TtMissionData>
-    {
-
-    }
     public class TtMission
     {
         public TtMissionData Data;
-        public virtual bool CanAccept(TtMissionData data, TtCharacterStateNode character)
+        public virtual bool CanAccept(TtMissionData data, IHostActor character)
         {
             foreach (var i in data.MissionConditions)
             {
@@ -78,20 +89,7 @@ namespace Survivor
             }
             return true;
         }
-        public static bool AcceptMission(TtMissionData data, TtCharacterStateNode character)
-        {
-            var type = EngineNS.Rtti.TtTypeDesc.TypeOf($"Survivor.{data.MissionName}@Survivor");
-            if (type == null)
-            {
-                return false;
-            }
-            var mission = EngineNS.Rtti.TtTypeDescManager.CreateInstance(type) as TtMission;
-            mission.Data = data;
-            if (mission.CanAccept(data, character) == false)
-                return false;
-            return character.MissionInventory.PushMission(mission);
-        }
-        public virtual bool IsFinished(TtCharacterStateNode character)
+        public virtual bool IsFinished(IHostActor character)
         {
             foreach (var i in Data.GoodsFinishConditions)
             {
@@ -113,7 +111,7 @@ namespace Survivor
             }
             return true;
         }
-        public bool FinishMission(TtCharacterStateNode character)
+        public bool FinishMission(IHostActor character)
         {
             if (IsFinished(character) == false)
                 return false;
@@ -124,14 +122,14 @@ namespace Survivor
             Award(character);
             return true;
         }
-        public virtual void Award(TtCharacterStateNode character)
+        public virtual void Award(IHostActor character)
         {
             foreach (var i in Data.AwardGoods)
             {
                 for (int j = 0; j < i.Count; j++)
                 {
-                    var data = TtDatabase.Instance.GetItemData(i.ItemId);
-                    var goods = TtItem.CreateItem(data);
+                    var data = character.GetDataFactory().GetData<int, TtItemData>(i.ItemId);
+                    var goods = Inventory.TtItem.CreateItem(character.GetDataFactory(), data);
                     if (character.GoodsInventory.AutoPutIn(goods) == false)
                     {
                         //可以放到一个无限存储空间，只能取，不能做其他操作，避免因为背包满了丢奖励
@@ -140,7 +138,7 @@ namespace Survivor
                 }
             }
         }
-        public virtual void TickMission(TtCharacterStateNode character)
+        public virtual void TickMission(IHostActor character)
         {
 
         }
@@ -168,7 +166,24 @@ namespace Survivor
             }
             return false;
         }
-        public bool PushMission(TtMission mission)
+        public virtual bool AcceptMission(int missionId, IHostActor character)
+        {
+            var data = character.GetDataFactory().GetData<int, TtMissionData>(missionId);
+            if (data == null)
+                return false;
+            
+            var type = data.MissionType;
+            if (type == null)
+            {
+                return false;
+            }
+            var mission = EngineNS.Rtti.TtTypeDescManager.CreateInstance(type) as TtMission;
+            mission.Data = data;
+            if (mission.CanAccept(data, character) == false)
+                return false;
+            return character.MissionInventory.PushMission(mission);
+        }
+        private bool PushMission(TtMission mission)
         {
             foreach(var item in Missions)
             {
@@ -178,7 +193,7 @@ namespace Survivor
             Missions.Add(mission);
             return true;
         }
-        public void Tick(TtCharacterStateNode character)
+        public void Tick(IHostActor character)
         {
             foreach (var i in Missions)
             {

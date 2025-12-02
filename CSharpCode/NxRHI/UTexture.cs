@@ -3767,7 +3767,7 @@ namespace EngineNS.NxRHI
             }
             finally
             {
-                mCreatingSession.FinishSession(rn, session, srv);
+                session.FinishSession(rn, srv);
             }
         }
         public TtSrView TryGetTexture(RName rn)

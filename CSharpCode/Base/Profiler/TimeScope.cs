@@ -497,6 +497,8 @@ namespace EngineNS.Profiler
         [TtRpcMethod(Index = 2)]
         public void ResetMaxTime(EngineNS.Profiler.TtRpcProfiler.ResetMaxTimeArg arg, TtCallContext context)
         {
+            if (context==null)
+                return;
             foreach (var i in Profiler.TimeScopeManager.AllThreadInstance)
             {
                 if (i.ThreadName == arg.ThreadName)
@@ -722,6 +724,7 @@ namespace EngineNS.Profiler
 			rpcArg.ExeIndex = RpcExecuteIndex;
 			rpcArg.NetConnect = GetRpcConnect(2);
 			TtRpcProfiler_RpcCaller.ResetMaxTime(arg, rpcArg);
+			ResetMaxTime(arg, null);
 		}
 	}
 }

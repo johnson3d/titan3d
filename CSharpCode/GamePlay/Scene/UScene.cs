@@ -834,7 +834,7 @@ namespace EngineNS.GamePlay.Scene
                 return null;
 
             Scenes.Add(name, new WeakReference<TtScene>(scene));
-            mCreatingSession.FinishSession(name, session, scene);
+            session.FinishSession(name, scene);
             return scene;
         }
         public async Thread.Async.TtTask<TtScene> CreateScene(GamePlay.TtWorld world, RName name)
