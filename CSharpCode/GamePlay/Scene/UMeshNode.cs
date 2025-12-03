@@ -168,7 +168,7 @@ namespace EngineNS.GamePlay.Scene
                 mMesh.IsAcceptShadow = value;
             }
         }
-        public static async System.Threading.Tasks.Task<TtMeshNode> AddMeshNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, Graphics.Mesh.TtRenderMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
+        public static async Thread.Async.TtTask<TtMeshNode> AddMeshNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, Graphics.Mesh.TtRenderMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
             var meshNode = await scene.SpawnSceneActor<TtMeshNode>(parent, async (nd)=>
@@ -185,7 +185,7 @@ namespace EngineNS.GamePlay.Scene
 
             return meshNode;
         }
-        public static async System.Threading.Tasks.Task<TtMeshNode> AddMeshNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
+        public static async Thread.Async.TtTask<TtMeshNode> AddMeshNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var meshData = data as TtMeshNodeData;
             var materialMesh = await meshData.MeshName.GetAsset<Graphics.Mesh.TtMaterialMesh>();

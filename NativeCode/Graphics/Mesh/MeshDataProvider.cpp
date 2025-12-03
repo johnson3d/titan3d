@@ -920,6 +920,32 @@ namespace NxRHI
 
 		return VertexNumber++;
 	}
+	bool FMeshDataProvider::SetVertex(int index, const v3dxVector3* pos, const v3dxVector3* nor, const v3dxVector2* uv, DWORD color)
+	{
+		if (index >= (int)VertexNumber)
+			return false;
+		auto cur = mVertexBuffers[VST_Position];
+		if (cur != nullptr && pos != nullptr)
+		{
+			cur->GetDataPtr<v3dxVector3>()[index] = *pos;
+		}
+		cur = mVertexBuffers[VST_Normal];
+		if (cur != nullptr && nor != nullptr)
+		{
+			cur->GetDataPtr<v3dxVector3>()[index] = *nor;
+		}
+		cur = mVertexBuffers[VST_Color];
+		if (cur != nullptr)
+		{
+			cur->GetDataPtr<DWORD>()[index] = color;
+		}
+		cur = mVertexBuffers[VST_UV];
+		if (cur != nullptr && uv != nullptr)
+		{
+			cur->GetDataPtr<v3dxVector2>()[index] = *uv;
+		}
+		return true;
+	}
 
 	UINT FMeshDataProvider::AddVertex(const v3dxVector3* pos, const v3dxVector3* nor, const v3dxVector3* tangent, const v3dxVector2* uv, DWORD color)
 	{

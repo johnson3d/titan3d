@@ -109,6 +109,7 @@ namespace NxRHI
 		UINT AddVertex(const v3dxVector3* pos, const v3dxVector3* nor, const v3dxVector2* uv, const v3dxQuaternion* lighmapUV, DWORD color);
 		UINT AddVertex(const FMeshVertex& vertex);
 		void AddVertex(const FMeshVertex* pVertex, UINT num);
+		bool SetVertex(int index, const v3dxVector3* pos, const v3dxVector3* nor, const v3dxVector2* uv, DWORD color);
 
 		bool AddVertex_Pos_UV_Color_Index(const void* pVertex, UINT num, bool bInvertY = false, float CanvasHeight = 0);
 

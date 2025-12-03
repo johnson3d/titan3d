@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Mesh
 {
-    public class TtMeshDataProvider : AuxPtrType<NxRHI.FMeshDataProvider>
+    public partial class TtMeshDataProvider : AuxPtrType<NxRHI.FMeshDataProvider>
     {
         public TtMeshDataProvider()
         {
@@ -1451,15 +1451,6 @@ namespace EngineNS.Graphics.Mesh
         }
         public static TtMeshDataProvider MakeGridPlane(NxRHI.TtGpuDevice rc, Vector2 uvMin, Vector2 uvMax, UInt32 tileCount = 10)
         {//reference:DrawGridline
-
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-            UMeshDataProvider meshBuilder = new Graphics.Mesh.UMeshDataProvider();
-            meshBuilder.AssetName = RName.GetRName("@MakeGridPlane", RName.ERNameType.Transient);
-在此之后:
-            TtMeshDataProvider meshBuilder = new Graphics.Mesh.UMeshDataProvider();
-            meshBuilder.AssetName = RName.GetRName("@MakeGridPlane", RName.ERNameType.Transient);
-*/
             TtMeshDataProvider meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             meshBuilder.AssetName = RName.GetRName("@MakeGridPlane", RName.ERNameType.Transient);
             var builder = meshBuilder.mCoreObject;
