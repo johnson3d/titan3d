@@ -96,7 +96,8 @@ namespace NxRHI
 		if (desc.InitData != nullptr)
 		{
 			D3D11_SUBRESOURCE_DATA data;
-			data.pSysMem = desc.InitData;
+			ASSERT(desc.InitData->RowPitch >= desc.Size);
+			data.pSysMem = desc.InitData->pData;
 			data.SysMemPitch = desc.Size;
 			data.SysMemSlicePitch = 0;
 			hr = device->mDevice->CreateBuffer(&BufferDesc, &data, &mBuffer);

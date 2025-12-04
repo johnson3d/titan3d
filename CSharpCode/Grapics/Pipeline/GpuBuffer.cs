@@ -118,7 +118,12 @@ namespace EngineNS.Graphics.Pipeline
                 bfDesc.RowPitch = bfDesc.Size;
                 bfDesc.DepthPitch = bfDesc.Size;
                 bfDesc.StructureStride = (uint)sizeof(T);
-                bfDesc.InitData = DataArray.UnsafeGetElementAddress(0);
+
+                var initData = new NxRHI.FMappedSubResource();
+                initData.pData = DataArray.UnsafeGetElementAddress(0);
+                initData.RowPitch = (uint)(DataArray.Count * sizeof(T));
+
+                bfDesc.InitData = &initData;
                 bfDesc.Type = BufferTypes;
                 if ((BufferTypes & NxRHI.EBufferType.BFT_UAV) != 0)
                 {
@@ -217,7 +222,14 @@ namespace EngineNS.Graphics.Pipeline
                 bfDesc.SetDefault(isRaw, bufferType);
                 bfDesc.Size = (uint)sizeof(T) * Count;
                 bfDesc.StructureStride = (uint)sizeof(T);
-                bfDesc.InitData = pInitData;
+
+                var initData = new NxRHI.FMappedSubResource();
+                initData.pData = pInitData;
+                initData.RowPitch = Count * (uint)sizeof(T);
+                if (pInitData!=IntPtr.Zero.ToPointer())
+                {
+                    bfDesc.InitData = &initData;
+                }
                 bfDesc.Type = bufferType;
 
                 GpuResource = TtEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);

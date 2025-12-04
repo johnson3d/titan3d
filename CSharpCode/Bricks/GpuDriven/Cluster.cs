@@ -320,7 +320,11 @@ namespace EngineNS.Bricks.GpuDriven
             {
                 pIBData[i] = (ushort)i;
             }
-            ivd.InitData = pIBData;
+            var initData = new NxRHI.FMappedSubResource();
+            initData.m_pData = pIBData;
+            initData.m_RowPitch = ivd.Size;
+
+            ivd.InitData = &initData;
             var ib = rc.CreateIBV(null, in ivd);
             CoreSDK.Free(pIBData);
             GeomMesh.BindIndexBuffer(ib);

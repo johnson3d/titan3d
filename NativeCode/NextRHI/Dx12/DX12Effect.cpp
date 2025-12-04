@@ -711,7 +711,10 @@ namespace NxRHI
 			rayGenDesc.Size = shaderIdentifierSize;
 			rayGenDesc.RowPitch = rayGenDesc.Size;
 			rayGenDesc.DepthPitch = rayGenDesc.Size;
-			rayGenDesc.InitData = rayGenShaderIdentifier;
+			FMappedSubResource initData{};
+			initData.pData = rayGenShaderIdentifier;
+			initData.RowPitch = shaderIdentifierSize;
+			rayGenDesc.InitData = &initData;
 			mRayGenShaderTable = MakeWeakRef(new FUploadBuffer(MakeWeakRef(device->CreateBuffer(&rayGenDesc))));
 		}
 		{
@@ -723,7 +726,10 @@ namespace NxRHI
 			missDesc.Size = shaderIdentifierSize;
 			missDesc.RowPitch = missDesc.Size;
 			missDesc.DepthPitch = missDesc.Size;
-			missDesc.InitData = missShaderIdentifier;
+			FMappedSubResource initData{};
+			initData.pData = missShaderIdentifier;
+			initData.RowPitch = shaderIdentifierSize;
+			missDesc.InitData = &initData;
 			mMissShaderTable = MakeWeakRef(new FUploadBuffer(MakeWeakRef(device->CreateBuffer(&missDesc))));
 		}
 

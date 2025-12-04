@@ -52,7 +52,7 @@ namespace NxRHI
 		mGpuMemory = nullptr;
 	}
 
-	AutoRef<DX12Buffer> CreateUploadBuffer(DX12GpuDevice* device, void* pData, UINT64 totalSize, UINT size, const char* name)
+	AutoRef<DX12Buffer> CreateUploadBuffer(DX12GpuDevice* device, FMappedSubResource* pData, UINT64 totalSize, UINT size, const char* name)
 	{
 		D3D12_HEAP_PROPERTIES properties{};
 		properties.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -89,8 +89,9 @@ namespace NxRHI
 		if (uploadBuffer->Map(0, &mapped, false))
 		{
 			BYTE* pCopyTar = (BYTE*)mapped.pData;
-			BYTE* pCopySrc = (BYTE*)pData;
-			memcpy(pCopyTar, pCopySrc, size);
+			BYTE* pCopySrc = (BYTE*)pData->pData;
+			auto size1 =  std::min(pData->RowPitch, size);
+			memcpy(pCopyTar, pCopySrc, size1);
 			uploadBuffer->Unmap(0);
 		}
 
@@ -249,8 +250,9 @@ namespace NxRHI
 				if (this->Map(0, &mapped, false))
 				{
 					BYTE* pCopyTar = (BYTE*)mapped.pData;
-					BYTE* pCopySrc = (BYTE*)desc.InitData;
-					memcpy(pCopyTar, pCopySrc, resDesc.Width);
+					BYTE* pCopySrc = (BYTE*)desc.InitData->pData;
+					auto size = std::min(desc.InitData->RowPitch, (UINT)resDesc.Width);
+					memcpy(pCopyTar, pCopySrc, size);
 					this->Unmap(0);
 				}
 				//cmd->EndCommand();
@@ -332,7 +334,10 @@ namespace NxRHI
 			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
 			copyDesc.Type = EBufferType::BFT_NONE;
 			copyDesc.Size = pFootPrint->TotalSize;
-			copyDesc.InitData = pData;
+			FMappedSubResource initData{};
+			initData.pData = pData;
+			initData.RowPitch = copyDesc.Size;
+			copyDesc.InitData = &initData;
 			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
 			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
@@ -419,7 +424,10 @@ namespace NxRHI
 			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
 			copyDesc.Type = EBufferType::BFT_NONE;
 			copyDesc.Size = pFootPrint->TotalSize;
-			copyDesc.InitData = pData;
+			FMappedSubResource initData{};
+			initData.pData = pData;
+			initData.RowPitch = copyDesc.Size;
+			copyDesc.InitData = &initData;
 			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
 			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
@@ -1000,7 +1008,10 @@ namespace NxRHI
 			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
 			copyDesc.Type = EBufferType::BFT_NONE;
 			copyDesc.Size = pFootPrint->TotalSize;
-			copyDesc.InitData = pData;
+			FMappedSubResource initData{};
+			initData.pData = pData;
+			initData.RowPitch = copyDesc.Size;
+			copyDesc.InitData = &initData;
 			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
 			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
@@ -1862,7 +1873,10 @@ namespace NxRHI
 			bfDesc.Size = (UINT)(sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * mBottomASInstances.size());
 			bfDesc.RowPitch = bfDesc.Size;
 			bfDesc.DepthPitch = bfDesc.Size;
-			bfDesc.InitData = mInstDescs.data();
+			FMappedSubResource initData{};
+			initData.pData = mInstDescs.data();
+			initData.RowPitch = bfDesc.Size;
+			bfDesc.InitData = &initData;
 			auto buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
 			mInstanceGpuBuffer = MakeWeakRef(new FUploadBuffer(buffer));
 			return true;

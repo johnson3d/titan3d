@@ -488,7 +488,7 @@ namespace EngineNS.Bricks.DataSet
         public async Thread.Async.TtTask<bool> OpenEditor(Editor.TtMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(name) as TtDataSetAMeta;
+            var ameta = name.AMeta as TtDataSetAMeta;
             if (ameta == null)
                 return false;
             DataSet = new TtDataSet();
@@ -511,7 +511,7 @@ namespace EngineNS.Bricks.DataSet
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (IsDrawing)
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
@@ -585,6 +585,8 @@ namespace EngineNS.Bricks.DataSet
                 int n = 0;
                 foreach (var i in DataSet.MainTable.DataProviders)
                 {
+                    if (i==null)
+                        continue;
                     if (prop != null)
                         ImGuiAPI.Text($"{prop.GetValue(i)}");
                     else

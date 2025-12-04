@@ -85,6 +85,18 @@ namespace NxRHI
 			BFT_RTAS = (1 << 9),
 	};
 	struct TR_CLASS(SV_LayoutStruct = 8)
+		FMappedSubResource
+	{
+		void SetDefault() {
+			pData = nullptr;
+			RowPitch = 0;
+			DepthPitch = 0;
+		}
+		void* pData = nullptr;
+		UINT RowPitch = 0;
+		UINT DepthPitch = 0;
+	};
+	struct TR_CLASS(SV_LayoutStruct = 8)
 		FBufferDesc
 	{
 		void SetDefault(bool isRaw = false, EBufferType types = BFT_CBuffer)
@@ -116,7 +128,7 @@ namespace NxRHI
 		UINT		Size = 0;
 		UINT		RowPitch = 0;
 		UINT		DepthPitch = 0;
-		void*		InitData = nullptr;
+		FMappedSubResource*		InitData = nullptr;
 	};
 
 	enum TR_ENUM()
@@ -139,18 +151,6 @@ namespace NxRHI
 			//GRS_RTAS,
 	};
 
-	struct TR_CLASS(SV_LayoutStruct = 8)
-		FMappedSubResource
-	{
-		void SetDefault() {
-			pData = nullptr;
-			RowPitch = 0;
-			DepthPitch = 0;
-		}
-		void* pData = nullptr;
-		UINT RowPitch = 0;
-		UINT DepthPitch = 0;
-	};
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FSubResourceFootPrint
 	{
@@ -626,7 +626,7 @@ namespace NxRHI
 		UINT		Size = 0;
 		EGpuUsage	Usage = EGpuUsage::USAGE_DEFAULT;
 		ECpuAccess	CpuAccess = (ECpuAccess)0;
-		void*		InitData = nullptr;
+		FMappedSubResource*		InitData = nullptr;
 		void SetDefault()
 		{
 			Offset = 0;
@@ -662,7 +662,7 @@ namespace NxRHI
 		UINT		Size = 0;
 		EGpuUsage	Usage = EGpuUsage::USAGE_DEFAULT;
 		ECpuAccess	CpuAccess = (ECpuAccess)0;
-		void*		InitData = nullptr;
+		FMappedSubResource*		InitData = nullptr;
 
 		void SetDefault()
 		{

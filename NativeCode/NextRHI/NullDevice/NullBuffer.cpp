@@ -22,7 +22,10 @@ namespace NxRHI
 	
 		mBuffer.resize(desc->Size);
 		if (desc->InitData != nullptr)
-			memcpy(&mBuffer[0], desc->InitData, desc->Size);
+		{
+			auto size = std::min(desc->InitData->RowPitch, desc->Size);
+			memcpy(&mBuffer[0], desc->InitData->pData, size);
+		}
 		return true;
 	}
 

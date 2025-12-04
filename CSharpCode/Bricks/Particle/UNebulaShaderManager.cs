@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace EngineNS.Bricks.Particle
@@ -86,40 +87,45 @@ namespace EngineNS.Bricks.Particle
         public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
-            
-            var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            unsafe
-            {
-                var bfDesc = new NxRHI.FBufferDesc();
 
-                bfDesc.SetDefault(false, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
-                bfDesc.Type = NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV;
-                //bfDesc.MiscFlags = (UInt32)(EResourceMiscFlag.BUFFER_ALLOW_RAW_VIEWS);
-                bfDesc.Size = (uint)sizeof(Vector4) * ShaderRandomPoolSize;
-                bfDesc.StructureStride = (uint)sizeof(Vector4);
-                var initData = new Vector4[ShaderRandomPoolSize];
-                for (int i = 0; i < ShaderRandomPoolSize; i++)
-                {
-                    initData[i] = new Vector4(RandomSignedUnit(), RandomSignedUnit(), RandomSignedUnit(), RandomSignedUnit());
-                }
-                fixed (Vector4* pAddr = &initData[0])
-                {
-                    bfDesc.InitData = pAddr;
-                    RandomPoolBuffer = rc.CreateBuffer(in bfDesc);
-                }
+            CreateWhenInit();
 
-                var srvDesc = new NxRHI.FSrvDesc();
-                srvDesc.SetBuffer(false);
-                srvDesc.Buffer.FirstElement = 0;
-                srvDesc.Buffer.NumElements = ShaderRandomPoolSize;// (uint)sizeof(Vector4);
-                srvDesc.Buffer.StructureByteStride = (uint)sizeof(Vector4);
-                //srvDesc.Type = NxRHI.ESrvType.ST_BufferEx;
-                //srvDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
-                //srvDesc.BufferEx.Flags = 1;
-                //srvDesc.BufferEx.NumElements = ShaderRandomPoolSize;
-                RandomPoolSrv = rc.CreateSRV(RandomPoolBuffer, in srvDesc);
-            }
             return true;
+        }
+        private unsafe void CreateWhenInit()
+        {
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            var bfDesc = new NxRHI.FBufferDesc();
+
+            bfDesc.SetDefault(false, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+            bfDesc.Type = NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV;
+            //bfDesc.MiscFlags = (UInt32)(EResourceMiscFlag.BUFFER_ALLOW_RAW_VIEWS);
+            bfDesc.Size = (uint)sizeof(Vector4) * ShaderRandomPoolSize;
+            bfDesc.StructureStride = (uint)sizeof(Vector4);
+            var initData = new Vector4[ShaderRandomPoolSize];
+            for (int i = 0; i < ShaderRandomPoolSize; i++)
+            {
+                initData[i] = new Vector4(RandomSignedUnit(), RandomSignedUnit(), RandomSignedUnit(), RandomSignedUnit());
+            }
+            fixed (Vector4* pAddr = &initData[0])
+            {
+                var initData1 = new NxRHI.FMappedSubResource();
+                initData1.m_pData = pAddr;
+                initData1.m_RowPitch = bfDesc.Size;
+                bfDesc.InitData = &initData1;
+                RandomPoolBuffer = rc.CreateBuffer(in bfDesc);
+            }
+
+            var srvDesc = new NxRHI.FSrvDesc();
+            srvDesc.SetBuffer(false);
+            srvDesc.Buffer.FirstElement = 0;
+            srvDesc.Buffer.NumElements = ShaderRandomPoolSize;// (uint)sizeof(Vector4);
+            srvDesc.Buffer.StructureByteStride = (uint)sizeof(Vector4);
+            //srvDesc.Type = NxRHI.ESrvType.ST_BufferEx;
+            //srvDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
+            //srvDesc.BufferEx.Flags = 1;
+            //srvDesc.BufferEx.NumElements = ShaderRandomPoolSize;
+            RandomPoolSrv = rc.CreateSRV(RandomPoolBuffer, in srvDesc);
         }
         public async Thread.Async.TtTask<TtNebulaParticle> GetParticle(RName name)
         {

@@ -682,7 +682,10 @@ namespace NxRHI
 			ptr[i] = BufferWriters[i].Value;
 		}
 
-		bfDesc.InitData = ptr;
+		FMappedSubResource initData{};
+		initData.pData = ptr;
+		initData.RowPitch = bfDesc.Size;
+		bfDesc.InitData = &initData;
 		auto copyBuffer = MakeWeakRef(GetDX11Device()->CreateBuffer(&bfDesc));
 		/*FMappedSubResource mapped{};
 		if (copyBuffer->Map(0, &mapped, false))

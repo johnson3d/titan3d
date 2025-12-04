@@ -529,6 +529,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Inventory", "Plugins\GameCo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inventory.All", "Plugins\GameCore\Inventory\Inventory.All\Inventory.All.csproj", "{D8CA055A-683B-1525-C7F5-A4F27660E550}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Water", "CSharpCode\Bricks\FX\Water\Water.shproj", "{D1A38C88-04AB-4B5F-963E-0306B901CC2B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1261,6 +1263,7 @@ Global
 		{0C64E9A2-B99F-42B0-8012-C2C62F9656B3} = {7A30DEE2-7292-43B8-9D3E-3DEBC9D163C7}
 		{C5A6CD32-252A-4F89-B45A-39FE2AE04CE2} = {0C64E9A2-B99F-42B0-8012-C2C62F9656B3}
 		{D8CA055A-683B-1525-C7F5-A4F27660E550} = {0C64E9A2-B99F-42B0-8012-C2C62F9656B3}
+		{D1A38C88-04AB-4B5F-963E-0306B901CC2B} = {1C7247C9-8835-4D68-B2F4-3180297E2836}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
@@ -1314,6 +1317,7 @@ Global
 		CSharpCode\Bricks\Font\Font.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\FX\Hair\Hair.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\FX\Skin\Skin.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		CSharpCode\Bricks\FX\Water\Water.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\GI\PRT\PRT.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\GpuDriven\GpuDriven.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\ImageDecoder\ImageDecoder.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -1621,6 +1625,7 @@ Global
 		CSharpCode\Bricks\AIGC\AIGC.projitems*{cc2b85ff-9c07-4808-8fbb-5b14f47b30f6}*SharedItemsImports = 13
 		CSharpCode\Bricks\DevIDE\DevIDE.projitems*{d0c12daf-ba2a-46e8-b93a-831d4efdd59d}*SharedItemsImports = 13
 		CSharpCode\Bricks\Particle\Particle.projitems*{d15c508d-f0bb-4843-8b50-38728b79bba9}*SharedItemsImports = 13
+		CSharpCode\Bricks\FX\Water\Water.projitems*{d1a38c88-04ab-4b5f-963e-0306b901cc2b}*SharedItemsImports = 13
 		NativeCode\Bricks\Quark\Quark.vcxitems*{d21c4a2f-7c4b-4a5c-bd49-d538d741821d}*SharedItemsImports = 9
 		CSharpCode\Bricks\DataSet\DataSet.projitems*{d52d7fe3-c34d-4337-9b82-e917f8d29b4c}*SharedItemsImports = 13
 		Plugins\GameCore\Inventory\Inventory.projitems*{d8ca055a-683b-1525-c7f5-a4f27660e550}*SharedItemsImports = 5

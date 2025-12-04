@@ -25,9 +25,37 @@ namespace Inventory
     public class TtSkill
     {
         public TtSkillData Data;
-        public virtual void Spell(TtItem item, TtNode user)
+        public class TtSkillEffect
         {
-
+            public bool Tick(IHostActor actor, TtSkill skill)
+            {
+                return true;
+            }
+        }
+        public List<TtSkillEffect> SkillEffects = new List<TtSkillEffect>();
+        public void Spell(TtItem item, TtNode user)
+        {
+            var se = OnSpell(item, user);
+            if (se != null)
+            {
+                SkillEffects.Add(se);
+            }
+        }
+        public void Tick(IHostActor actor)
+        {
+            for (int i = 0; i<SkillEffects.Count; i++)
+            {
+                var s = SkillEffects[i];
+                if (s.Tick(actor, this) == false)
+                {
+                    SkillEffects.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+        public virtual TtSkillEffect OnSpell(TtItem item, TtNode user)
+        {
+            return null;
         }
     }
 
@@ -39,13 +67,25 @@ namespace Inventory
                 return false;
             return true;
         }
+        public void Tick(IHostActor actor)
+        {
+            if (Items==null)
+                return;
+            foreach(var i in Items)
+            {
+                if (i==null || i.Skill==null)
+                    continue;
+                i.Skill.Tick(actor);
+            }
+        }
     }
 
     public class TtTeleportSkill : TtSkill
     {
-        public override void Spell(TtItem item, TtNode user)
+        public override TtSkillEffect OnSpell(TtItem item, TtNode user)
         {
             //user.Placement.Position = xxxx
+            return null;
         }
     }
 }

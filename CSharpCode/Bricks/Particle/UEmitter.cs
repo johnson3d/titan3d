@@ -219,11 +219,16 @@ namespace EngineNS.Bricks.Particle
                 pInitData.X = 1;
                 pInitData.Y = 1;
                 pInitData.Z = 1;
-                bfDesc.InitData = &pInitData;
+
+                var initData = new NxRHI.FMappedSubResource();
+                initData.pData = &pInitData;
+                initData.RowPitch = (uint)sizeof(NxRHI.FIndirectDispatchArgument);
+
+                bfDesc.InitData = &initData;
                 DispatchArgBuffer = rc.CreateBuffer(in bfDesc);
                 
                 bfDesc.Size = (uint)sizeof(NxRHI.FIndirectDrawIndexArgument) * NumOfArgument;
-                bfDesc.InitData = IntPtr.Zero.ToPointer();
+                bfDesc.InitData = (NxRHI.FMappedSubResource*)IntPtr.Zero.ToPointer();
                 DrawArgBuffer = rc.CreateBuffer(in bfDesc);
 
                 NxRHI.FUavDesc uavDesc = new NxRHI.FUavDesc();

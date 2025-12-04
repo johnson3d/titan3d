@@ -80,7 +80,12 @@ namespace Survivor
         #endregion
         protected override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
-            return await base.InitializeNode(world, data, bvType, placementType);
+            if (await base.InitializeNode(world, data, bvType, placementType)==false)
+                return false;
+
+            GoodsInventory.Initialize(100);
+            SkillInventory.Initialize(32);
+            return true;
         }
         public override void BeAttacked(TtWeaponNode weaponNode)
         {
@@ -100,6 +105,7 @@ namespace Survivor
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
             this.MissionInventory.Tick(this);
+            this.SkillInventory.Tick(this);
             return base.OnTickLogic(args);
         }
     }

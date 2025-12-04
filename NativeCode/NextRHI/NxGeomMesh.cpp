@@ -770,7 +770,10 @@ namespace NxRHI
             FVbvDesc vbvDesc{};
             vbvDesc.Stride = sizeof(v3dxVector3);
             vbvDesc.Size = vbvDesc.Stride * vbCount;
-			vbvDesc.InitData = (BYTE*)&mClustersVB[0];
+			FMappedSubResource initData{};
+			initData.pData = (BYTE*)&mClustersVB[0];
+			initData.RowPitch = vbvDesc.Size;
+			vbvDesc.InitData = &initData;
 			auto vb = MakeWeakRef(device->CreateVBV(nullptr, &vbvDesc));
 			mClustersVertexArray->BindVB(EVertexStreamType::VST_Position, vb);
 
@@ -778,8 +781,10 @@ namespace NxRHI
             FIbvDesc ibvDesc{};
             ibvDesc.Stride = sizeof(UINT);
             ibvDesc.Size = ibCount * ibvDesc.Stride;
-
-            ibvDesc.InitData = (BYTE*)&mClustersIB[0];
+			FMappedSubResource initData1{};
+			initData1.pData = (BYTE*)&mClustersIB[0];
+			initData1.RowPitch = ibvDesc.Size;
+			ibvDesc.InitData = &initData1;
 			mClustersIndexView = MakeWeakRef(device->CreateIBV(nullptr, &ibvDesc));
 		}
 		
@@ -895,7 +900,10 @@ namespace NxRHI
 				}
 			}
 		}
-		vbvDesc.InitData = data;
+		FMappedSubResource initData{};
+		initData.pData = data;
+		initData.RowPitch = vbvDesc.Size;
+		vbvDesc.InitData = &initData;
 		pAttr->EndRead();
 
 		if (stream == VST_Position && mAABB.IsEmpty())
@@ -1030,7 +1038,10 @@ namespace NxRHI
 			pAttr->Read(data, ibvDesc.Size);
 			pAttr->EndRead();
 
-			ibvDesc.InitData = data;
+			FMappedSubResource initData{};
+			initData.pData = data;
+			initData.RowPitch = ibvDesc.Size;
+			ibvDesc.InitData = &initData;
 			auto ib = MakeWeakRef(device->CreateIBV(nullptr, &ibvDesc));
 			mGeometryMesh->BindIndexBuffer(ib);
 			mGeometryMesh->IsIndex32 = bFormatIndex32;
@@ -1093,7 +1104,12 @@ namespace NxRHI
 			FVbvDesc vbvDesc{};
 			vbvDesc.Stride = stride;
 			vbvDesc.Size = size;
-			vbvDesc.InitData = data;
+
+			FMappedSubResource initData{};
+			initData.pData = data;
+			initData.RowPitch = size;
+
+			vbvDesc.InitData = &initData;
 			auto vb = MakeWeakRef(cmd->mDevice.GetPtr()->CreateVBV(nullptr, &vbvDesc));
 			if (vb == nullptr)
 				return false;
@@ -1128,7 +1144,12 @@ namespace NxRHI
 			FIbvDesc ibvDesc{};
 			ibvDesc.Stride = isBit32 ? sizeof(UINT) : sizeof(USHORT);
 			ibvDesc.Size = size;
-			ibvDesc.InitData = data;
+
+			FMappedSubResource initData{};
+			initData.pData = data;
+			initData.RowPitch = size;
+
+			ibvDesc.InitData = &initData;
 			auto ib = MakeWeakRef(cmd->mDevice.GetPtr()->CreateIBV(nullptr, &ibvDesc));
 			if (ib == nullptr)
 				return false;

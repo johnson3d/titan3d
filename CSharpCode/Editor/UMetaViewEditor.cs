@@ -78,7 +78,7 @@ namespace EngineNS.Editor
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm("MetaViewer", this, ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm("MetaViewer", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (IsDrawing)
             {
                 WindowPos = ImGuiAPI.GetWindowPos();

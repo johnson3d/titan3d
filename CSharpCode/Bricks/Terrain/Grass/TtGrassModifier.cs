@@ -211,7 +211,10 @@ namespace EngineNS.Bricks.Terrain.Grass
                     fixed(FVSGrassData* pTar = &InstData[0])
                     {
                         CoreSDK.MemoryCopy(pTar, pSrc, mdf.mCurNumber * (uint)sizeof(FVSGrassData));
-                        bfDesc.InitData = pTar;
+                        var initData = new NxRHI.FMappedSubResource();
+                        initData.m_pData = pTar;
+                        initData.m_RowPitch = mdf.mCurNumber * (uint)sizeof(FVSGrassData);
+                        bfDesc.InitData = &initData;
                         InstantBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
                     }
                 }

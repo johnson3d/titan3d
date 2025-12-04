@@ -223,7 +223,8 @@ namespace NxRHI
 				FMappedSubResource subRes{};
 				if (this->Map(0, &subRes, false))
 				{
-					memcpy(subRes.pData, desc.InitData, desc.Size);
+					auto size = std::min(desc.InitData->RowPitch, desc.Size);
+					memcpy(subRes.pData, desc.InitData->pData, size);
 					this->Unmap(0);
 				}
 			}
@@ -264,7 +265,10 @@ namespace NxRHI
 			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
 			copyDesc.Type = EBufferType::BFT_NONE;
 			copyDesc.Size = footPrint->TotalSize;
-			copyDesc.InitData = pData;
+			FMappedSubResource initData{};
+			initData.pData = pData;
+			initData.RowPitch = footPrint->TotalSize;
+			copyDesc.InitData = &initData;
 			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
 			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
@@ -307,7 +311,10 @@ namespace NxRHI
 		copyDesc.Usage = EGpuUsage::USAGE_STAGING;
 		copyDesc.Type = EBufferType::BFT_NONE;
 		copyDesc.Size = footPrint->TotalSize;
-		copyDesc.InitData = pData;
+		FMappedSubResource initData{};
+		initData.pData = pData;
+		initData.RowPitch = footPrint->TotalSize;
+		copyDesc.InitData = &initData;
 		copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
 		auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
@@ -588,7 +595,7 @@ namespace NxRHI
 					copyDesc.Usage = EGpuUsage::USAGE_STAGING;
 					copyDesc.Type = EBufferType::BFT_NONE;
 					copyDesc.Size = desc.InitData[j].DepthPitch;
-					copyDesc.InitData = desc.InitData[j].pData;
+					copyDesc.InitData = &desc.InitData[j];
 					copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
 					auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
@@ -760,7 +767,10 @@ namespace NxRHI
 		copyDesc.Usage = EGpuUsage::USAGE_STAGING;
 		copyDesc.Type = EBufferType::BFT_NONE;
 		copyDesc.Size = footPrint->TotalSize;
-		copyDesc.InitData = pData;
+		FMappedSubResource initData{};
+		initData.pData = pData;
+		initData.RowPitch = footPrint->TotalSize;
+		copyDesc.InitData = &initData;
 		copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
 		auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
@@ -793,7 +803,10 @@ namespace NxRHI
 			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
 			copyDesc.Type = EBufferType::BFT_NONE;
 			copyDesc.Size = footPrint->TotalSize;
-			copyDesc.InitData = pData;
+			FMappedSubResource initData{};
+			initData.pData = pData;
+			initData.RowPitch = footPrint->TotalSize;
+			copyDesc.InitData = &initData;
 			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
 			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
