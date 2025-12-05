@@ -116,12 +116,12 @@ namespace EngineNS.GamePlay.Scene
     {
         public GamePlay.TtWorld World;
         public GamePlay.TtWorld.TtVisParameter VisParameter;
-        public bool IsParalle { get; set; } = true;
+        public bool IsParallel { get; set; } = true;
         public void Process(ECS.TtEntityManager manager, float deltaTime)
         {
             var values = (manager as TtEntityManager).BoundingValues;
 
-            if (IsParalle == false)
+            if (IsParallel == false)
             {
                 var t1 = Support.TtTime.HighPrecision_GetTickCount();
                 VisParameter.ClearVisibles();
@@ -133,6 +133,8 @@ namespace EngineNS.GamePlay.Scene
                         if (node == null)
                             continue;
                         if (node.HashVisual==false)
+                            continue;
+                        if (VisParameter.CullType == TtWorld.TtVisParameter.EVisCull.Shadow && node.IsCastShadow == false)
                             continue;
                         Count++;
 
@@ -194,6 +196,8 @@ namespace EngineNS.GamePlay.Scene
                     if (node == null)
                         return;
                     if (node.HashVisual==false)
+                        return;
+                    if (VisParameter.CullType == TtWorld.TtVisParameter.EVisCull.Shadow && node.IsCastShadow == false)
                         return;
 
                     var bv = node.BoundVolume;

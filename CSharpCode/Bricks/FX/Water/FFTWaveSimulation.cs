@@ -14,6 +14,7 @@ namespace EngineNS.Bricks.FX.Water
         private int N;                      // 网格分辨率 (N x N)
         private int Rows, Cols;             // 行数和列数
         private float L;                    // 物理域大小 (米)
+        private float A = 1.0001f;          // 全局振幅系数
         private float Dt;                   // 时间步长 (秒)
         private float G = 9.81f;            // 重力加速度 (m/s²)
 
@@ -29,17 +30,18 @@ namespace EngineNS.Bricks.FX.Water
         private float[,] Omega; // 角频率
 
         // 随机数生成
-        private Random mRandom = new Random();
+        internal Random mRandom = new Random();
 
         /// <summary>
         /// 初始化海浪模拟
         /// </summary>
-        public TtFftWaveSimulation(int resolution, float domainSize, float timeStep)
+        public TtFftWaveSimulation(int resolution, float domainSize, float timeStep, float a)
         {
             N = resolution;
             Rows = N;
             Cols = N;
             L = domainSize;
+            A = a;
             Dt = timeStep;
 
             // 分配内存
@@ -92,7 +94,6 @@ namespace EngineNS.Bricks.FX.Water
         /// </summary>
         private void InitializeWaveSpectrum()
         {
-            float A = 0.0001f; // 全局振幅系数
             float windSpeed = 10.0f;
             float windSpeedSq = windSpeed * windSpeed;
             Vector2 windDir = new Vector2(1.0f, 0.0f);
@@ -190,8 +191,10 @@ namespace EngineNS.Bricks.FX.Water
             UpdateSpatialHeightField();
         }
 
-        public static void FourierInverse2D(System.Numerics.Complex[,] data, int rows, int cols)
+        public static void FourierInverse2D(System.Numerics.Complex[,] data)
         {
+            int rows = data.GetLength(0);
+            int cols = data.GetLength(1);
             // 1. 每一行做 1D Inverse FFT
             System.Numerics.Complex[] row = new System.Numerics.Complex[cols];
             for (int r = 0; r < rows; r++)
@@ -218,6 +221,34 @@ namespace EngineNS.Bricks.FX.Water
                     data[r, c] = col[r];
             }
         }
+        public static void FourierInverse2D(System.Numerics.Complex[] data, int rows, int cols)
+        {
+            // 1. 每一行做 1D Inverse FFT
+            System.Numerics.Complex[] row = new System.Numerics.Complex[cols];
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                    row[c] = data[r * cols + c];
+
+                Fourier.Inverse(row, FourierOptions.Matlab);
+
+                for (int c = 0; c < cols; c++)
+                    data[r * cols + c] = row[c];
+            }
+
+            System.Numerics.Complex[] col = new System.Numerics.Complex[rows];
+            // 2. 每一列做 1D Inverse FFT
+            for (int c = 0; c < cols; c++)
+            {
+                for (int r = 0; r < rows; r++)
+                    col[r] = data[r * cols + c];
+
+                Fourier.Inverse(col, FourierOptions.Matlab);
+
+                for (int r = 0; r < rows; r++)
+                    data[r * cols + c] = col[r];
+            }
+        }
 
         /// <summary>
         /// 通过逆FFT更新空间域高度场
@@ -228,7 +259,8 @@ namespace EngineNS.Bricks.FX.Water
             Array.Copy(HeightFieldFrequency, TempComplexArray, HeightFieldFrequency.Length);
 
             // 执行二维逆FFT（使用一维数组和行列参数）
-            Fourier.Inverse2D(TempComplexArray, Rows, Cols);
+            //Fourier.Inverse2D(TempComplexArray, Rows, Cols);
+            FourierInverse2D(TempComplexArray, Rows, Cols);
 
             // 提取实部作为高度场
             for (int i = 0; i < Rows; i++)
@@ -397,7 +429,7 @@ namespace EngineNS.Bricks.FX.Water
 
             // 执行正向FFT
             Fourier.Forward2D(TempComplexArray, Rows, Cols);
-
+            
             // 复制回频率域数组
             Array.Copy(TempComplexArray, HeightFieldFrequency, TempComplexArray.Length);
 
@@ -512,8 +544,18 @@ namespace EngineNS.Bricks.FX.Water
             if (await base.InitializeNode(world, data, bvType, placementType) == false)
                 return false;
 
-            mWaveSim = new TtFftWaveSimulation(128, 100.0f, 0.016f);
+            mWaveSim = new TtFftWaveSimulation(128, 100.0f, 0.016f, 10000.0f);
+            this.IsAcceptShadow = false;
+            this.IsCastShadow = false;
             return true;
+        }
+        public override Graphics.Mesh.TtRenderMesh RenderMesh
+        {
+            get { return mMesh; }
+            set
+            {
+                mMesh = value;
+            }
         }
         TtFftWaveSimulation mWaveSim = null;
         Graphics.Mesh.TtRenderMesh mMesh = null;
@@ -536,55 +578,36 @@ namespace EngineNS.Bricks.FX.Water
                 return true;
 
             mWaveSim.TimeStep();
+            // 可选：添加随机扰动
+            if (false)
+            {
+                Random rand = mWaveSim.mRandom;
+                float x = (float)(rand.NextDouble() * 100 - 50);
+                float z = (float)(rand.NextDouble() * 100 - 50);
+                mWaveSim.AddDisturbance(x, z, 5.0f, 0.5f);
+            }
             mWaveSim.GetWaveMeshData(ref mMeshData);
 
             mMeshData.MakeMesh(ref mMeshBuilder);
             if (mMesh==null)
             {
                 mMesh = mMeshBuilder.ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialManager.NavMeshDebugWireMaterial);
+                mMesh.DebugName = "FftWater";
             }
             else
             {
                 mMeshBuilder.ToMesh(mMesh.MaterialMesh.SubMeshes[0].Mesh);
             }
-            return true;
-        }
-    }
-
-    class Program
-    {
-        internal static void Test(string[] args)
-        {
-            // 初始化模拟
-            int resolution = 128;  // 128x128网格
-            float domainSize = 100.0f;  // 100米 x 100米
-            float timeStep = 0.016f;  // 约60FPS的时间步长
-
-            TtFftWaveSimulation waveSim = new TtFftWaveSimulation(resolution, domainSize, timeStep);
-
-            WaveMeshData meshData = null;
-            // 模拟循环
-            for (int frame = 0; frame < 1000; frame++)
+            var world = this.GetWorld();
+            if (world != null)
             {
-                // 时间演化
-                waveSim.TimeStep();
-
-                // 获取顶点数据用于渲染
-                waveSim.GetWaveMeshData(ref meshData);
-                // 这里可以将vertexData传递给渲染系统
-
-                // 可选：添加随机扰动
-                if (frame % 100 == 0)
-                {
-                    Random rand = new Random();
-                    float x = (float)(rand.NextDouble() * 100 - 50);
-                    float z = (float)(rand.NextDouble() * 100 - 50);
-                    waveSim.AddDisturbance(x, z, 5.0f, 0.5f);
-                }
-
-                // 控制帧率
-                System.Threading.Thread.Sleep(16);
+                RenderMesh.SetWorldTransform(in Placement.AbsTransform, world, false);
             }
+            else
+            {
+                RenderMesh.SetWorldTransform(in Placement.AbsTransform, null, false);
+            }
+            return true;
         }
     }
 }

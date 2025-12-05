@@ -8,7 +8,8 @@
 #include "DX12FrameBuffers.h"
 #include "DX12Effect.h"
 #include "../NxDrawcall.h"
-
+//#include "../../Bricks/RenderDoc/IRenderDocTool.h"
+//#include "../../../3rd/native/renderdoc/renderdoc_app.h"
 #include <pix3.h>
 
 #define new VNEW
@@ -324,7 +325,13 @@ namespace NxRHI
 
 	void DX12CommandList::BeginEvent(std::wstring& info)
 	{
-		PIXBeginEvent(mContext.GetPtr(), 0, info.c_str());
+		//PIXBeginEvent(mContext.GetPtr(), 0, info.c_str());
+		mContext->BeginEvent(0, info.c_str(), (UINT)info.length() * sizeof(WCHAR));
+		/*auto rdoc = IRenderDocTool::GetInstance();
+		if (rdoc != nullptr)
+		{
+			rdoc->GetAPI()->Start
+		}*/
 		GetCmdRecorder()->mDirectDrawNum++;
 	}
 	void DX12CommandList::BeginEvent(const char* info)
@@ -332,15 +339,17 @@ namespace NxRHI
 		//ASSERT(mIsRecording);
 		//mContext->BeginEvent(1, info, strlen(info));
 		auto n = StringHelper::strtowstr(info);
-		PIXBeginEvent(mContext.GetPtr(), 0, n.c_str());
-		mContext->SetName(n.c_str());
+		//PIXBeginEvent(mContext.GetPtr(), 0, n.c_str());
+		mContext->BeginEvent(0, n.c_str(), (UINT)n.length() * sizeof(WCHAR));
+		//mContext->BeginEvent(0, info, (UINT)strlen(info));
+		//mContext->SetName(n.c_str());
 		GetCmdRecorder()->mDirectDrawNum++;
 	}
 	void DX12CommandList::EndEvent()
 	{
 		//ASSERT(mIsRecording);
-		//mContext->EndEvent();
-		PIXEndEvent(mContext.GetPtr());
+		mContext->EndEvent();
+		//PIXEndEvent(mContext.GetPtr());
 	}
 
 	void DX12CommandList::SetViewport(UINT Num, const FViewPort* pViewports)

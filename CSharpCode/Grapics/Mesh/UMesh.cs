@@ -26,6 +26,7 @@ namespace EngineNS.Graphics.Mesh
     [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Mesh.TtMesh@EngineCore", "EngineNS.Graphics.Mesh.TtMesh" })]
     public partial class TtRenderMesh : IDisposable
     {
+        public string DebugName { get; set; } = null;
         public void Dispose()
         {
             foreach (var i in SubMeshes)
@@ -258,7 +259,9 @@ namespace EngineNS.Graphics.Mesh
                         drawcall.BindPipeline(Material.Pipeline);
                         drawcall.BindGBuffer(policy.DefaultCamera, targetView);
                         drawcall.PermutationId = shading.mCurrentPermutationId;
-                        
+                        if (SubMesh.Mesh.DebugName!=null)
+                            drawcall.SetDebugName(SubMesh.Mesh.DebugName);
+
                         #region Textures
                         for (int j = 0; j < Material.NumOfSRV; j++)
                         {

@@ -67,5 +67,8 @@
     "Survivor",
     "TencentAIGC",
     "VisualStudioPlugin"
+  ],
+  "TypeAssemblies": [
+    
   ]
 }

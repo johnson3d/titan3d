@@ -21,6 +21,10 @@ class TR_CLASS()
 	void*								mActiveWndHandle = nullptr;
 public:
 	static IRenderDocTool* GetInstance();
+	inline RENDERDOC_API_1_6_0* GetAPI()
+	{
+		return mApi;
+	}
 	IRenderDocTool();
 	void InitRenderDoc(const char* path);
 	void SetGpuDevice(NxRHI::IGpuDevice* rc);
