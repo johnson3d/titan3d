@@ -81,6 +81,15 @@ void PS_INPUT::Set_vSpecialDataW(uint v)
 #endif
 }
 
+float3 PS_INPUT::Get_ScreenViewVector()
+{
+#if USE_PS_Custom0 == 1
+    return psCustomUV0.xyz;
+#else
+    return float3(0,0,0);
+#endif
+}
+
 // Works around bug in the spirv for the missing implementation of the and() and or() intrinsics.
 bool  and_internal(bool  a, bool  b) { return bool(a && b); }
 bool2 and_internal(bool2 a, bool2 b) { return bool2(a.x && b.x, a.y && b.y); }

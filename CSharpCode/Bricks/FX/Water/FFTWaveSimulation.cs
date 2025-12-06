@@ -13,10 +13,12 @@ namespace EngineNS.Bricks.FX.Water
         // 模拟参数
         private int N;                      // 网格分辨率 (N x N)
         private int Rows, Cols;             // 行数和列数
-        private float L;                    // 物理域大小 (米)
-        private float A = 1.0001f;          // 全局振幅系数
         private float Dt;                   // 时间步长 (秒)
-        private float G = 9.81f;            // 重力加速度 (m/s²)
+
+        public float L;                    // 物理域大小 (米)
+        public float A = 1.0001f;          // 全局振幅系数
+        public float G = 9.81f;            // 重力加速度 (m/s²)
+        public float WindSpeed = 10.0f;
 
         // 数据存储（使用一维数组）
         private System.Numerics.Complex[] HeightFieldFrequency;  // 频率域高度场（一维）
@@ -53,18 +55,12 @@ namespace EngineNS.Bricks.FX.Water
             Kz = new float[Rows, Cols];
             K = new float[Rows, Cols];
             Omega = new float[Rows, Cols];
-
-            // 初始化波数网格
-            InitializeWaveNumbers();
-
-            // 初始化海浪频谱
-            InitializeWaveSpectrum();
         }
 
         /// <summary>
         /// 初始化波数网格
         /// </summary>
-        private void InitializeWaveNumbers()
+        public void InitializeWaveNumbers()
         {
             float dk = 2.0f * MathF.PI / L;
 
@@ -92,10 +88,9 @@ namespace EngineNS.Bricks.FX.Water
         /// <summary>
         /// 使用Phillips频谱初始化频率域数据
         /// </summary>
-        private void InitializeWaveSpectrum()
+        public void InitializeWaveSpectrum()
         {
-            float windSpeed = 10.0f;
-            float windSpeedSq = windSpeed * windSpeed;
+            float windSpeedSq = WindSpeed * WindSpeed;
             Vector2 windDir = new Vector2(1.0f, 0.0f);
 
             for (int i = 0; i < Rows; i++)
@@ -545,6 +540,13 @@ namespace EngineNS.Bricks.FX.Water
                 return false;
 
             mWaveSim = new TtFftWaveSimulation(128, 100.0f, 0.016f, 10000.0f);
+            mWaveSim.WindSpeed = 100.0f;
+
+            // 初始化波数网格
+            mWaveSim.InitializeWaveNumbers();
+
+            // 初始化海浪频谱
+            mWaveSim.InitializeWaveSpectrum();
             this.IsAcceptShadow = false;
             this.IsCastShadow = false;
             return true;

@@ -310,6 +310,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
             vSpecialData.W = v;
         }
 
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "Get_ScreenViewVector")]
+        public Vector3 Get_ScreenViewVector()
+        {
+            return psCustomUV0;
+        }
+
         public static void VSModifier_2_PSInput(Bricks.CodeBuilder.UHLSLCodeGenerator codeBuilder, ref string sourceCode)
         {
             codeBuilder.AddLine($"void Default_VSInput2PSInput(inout PS_INPUT output, VS_MODIFIER input)", ref sourceCode);

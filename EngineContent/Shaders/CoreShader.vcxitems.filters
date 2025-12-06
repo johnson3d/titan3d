@@ -476,6 +476,9 @@
     <None Include="$(MSBuildThisFileDirectory)GI\TrayTracing\HSDF.cginc">
       <Filter>GI\RayTracing</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\FX\VolumeCloud.cginc">
+      <Filter>Bricks\FX</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

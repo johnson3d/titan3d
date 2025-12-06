@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NPOI.SS.Formula.Functions;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -104,6 +105,11 @@ namespace EngineNS
             return f1 + (f2 - f1) * lp;
             //return f1 * lp + (1.0 - lp) * f2;
         }
+        public static float Repeat(float value, float length)
+        {
+            return value % length;
+        }
+
         public static int Clamp(int a, int min, int max)
         {
             if (a > max)

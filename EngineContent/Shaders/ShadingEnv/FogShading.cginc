@@ -54,7 +54,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     output.RT0 = color;
 #elif ENV_FOGFACTOR_TYPE == TypeFog_ExpHeight
     float depth = DepthBuffer.Sample(Samp_DepthBuffer, uv).r;
-    output.RT0.rgb = FogStruct.GetExpHeightFogColor(GetWorldPositionFromDepthValue(uv, depth, false), color.rgb, LinearFromDepth(depth), input.psCustomUV0.xyz, uv);
+    output.RT0.rgb = FogStruct.GetExpHeightFogColor(GetWorldPositionFromDepthValue(uv, depth, false), color.rgb, LinearFromDepth(depth), input.Get_ScreenViewVector(), uv);
     output.RT0.a = color.a;
 #endif
     

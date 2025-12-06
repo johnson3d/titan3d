@@ -18,6 +18,7 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\AdvanceShadow\AdvanceShadow.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\AdvanceShadow\ESM.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\FX\Hair.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\FX\VolumeCloud.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\ClusterCulling.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\FRaster.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\GpuCulling.cginc" />

@@ -29,7 +29,7 @@ namespace EngineNS.EGui.Controls
                     }
                 }
                 mMinX = value;
-                DefaultControlPointExtersion = (mMaxX - mMinX) * 0.1f;
+                DefaultControlPointExtension = (mMaxX - mMinX) * 0.1f;
             }
         }
         float mMinY = 0.0f;
@@ -76,7 +76,7 @@ namespace EngineNS.EGui.Controls
                     }
                 }
                 mMaxX = value;
-                DefaultControlPointExtersion = (mMaxX - mMinX) * 0.1f;
+                DefaultControlPointExtension = (mMaxX - mMinX) * 0.1f;
             }
         }
         float mMaxY = 1.0f;
@@ -157,7 +157,7 @@ namespace EngineNS.EGui.Controls
         [Rtti.Meta("")]
         public float BezierThickness { get; set; } = 2.0f;
 
-        public float DefaultControlPointExtersion { get; set; } = 0.1f;
+        public float DefaultControlPointExtension { get; set; } = 0.1f;
         public bool IsScaleValue { get; set; } = false;
         public bool ScalePointRadiusWithSize = true;
         public float DesireWidth = 300;
@@ -169,8 +169,8 @@ namespace EngineNS.EGui.Controls
             MaxX = maxX;
             MaxY = maxY;
             var sizeY = maxY - minY;
-            BezierPoints.Add(new BezierPointBase(new Vector2(minX, 0.5f * sizeY + minY), new Vector2(minX + DefaultControlPointExtersion * sizeY, 0.5f * sizeY + minY)));
-            BezierPoints.Add(new BezierPointBase(new Vector2(maxX, 0.5f * sizeY + minY), new Vector2(maxX - DefaultControlPointExtersion * sizeY, 0.5f * sizeY + minY)));
+            BezierPoints.Add(new BezierPointBase(new Vector2(minX, 0.5f * sizeY + minY), new Vector2(minX + DefaultControlPointExtension * sizeY, 0.5f * sizeY + minY)));
+            BezierPoints.Add(new BezierPointBase(new Vector2(maxX, 0.5f * sizeY + minY), new Vector2(maxX - DefaultControlPointExtension * sizeY, 0.5f * sizeY + minY)));
         }
 
         float GetPositionXInCanvas(float bezierPointX, float canvasSizeX, float canvasMinX)
@@ -437,8 +437,8 @@ namespace EngineNS.EGui.Controls
                     {
                         if(BezierPoints[i].Position.X > mousePosInBezier.X)
                         {
-                            BezierPoints.Insert(i, new BezierPointBase(new Vector2(mousePosInBezier.X, mousePosInBezier.Y), new Vector2(mousePosInBezier.X + DefaultControlPointExtersion, mousePosInBezier.Y)));
-                            BezierPoints.Insert(i, new BezierPointBase(new Vector2(mousePosInBezier.X, mousePosInBezier.Y), new Vector2(mousePosInBezier.X - DefaultControlPointExtersion, mousePosInBezier.Y)));
+                            BezierPoints.Insert(i, new BezierPointBase(new Vector2(mousePosInBezier.X, mousePosInBezier.Y), new Vector2(mousePosInBezier.X + DefaultControlPointExtension, mousePosInBezier.Y)));
+                            BezierPoints.Insert(i, new BezierPointBase(new Vector2(mousePosInBezier.X, mousePosInBezier.Y), new Vector2(mousePosInBezier.X - DefaultControlPointExtension, mousePosInBezier.Y)));
                             break;
                         }
                     }

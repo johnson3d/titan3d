@@ -28,6 +28,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)RName.Cloud.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Statistic.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\CBlobObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Support\RemapCurve.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\UNativeArray.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\CPerlin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\UBitset.cs" />
