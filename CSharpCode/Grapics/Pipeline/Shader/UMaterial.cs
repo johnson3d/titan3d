@@ -1301,6 +1301,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             NavMeshDebugWireMaterial.SetColor4("clr4_0", new Color4f(Color4b.PaleVioletRed));
             var rast = NavMeshDebugWireMaterial.Rasterizer;
             rast.FillMode = NxRHI.EFillMode.FMD_WIREFRAME;
+            rast.CullMode = ECullMode.CMD_NONE;
             NavMeshDebugWireMaterial.Rasterizer = rast;
         }
         public TtMaterial ScreenMaterial;
