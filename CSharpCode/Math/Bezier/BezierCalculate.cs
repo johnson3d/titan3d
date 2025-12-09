@@ -6,11 +6,8 @@ using System.Text;
 namespace EngineNS
 {
     [Rtti.Meta("")]
-    public partial class BezierPointBase : EngineNS.IO.ISerializer
+    public partial class BezierPointBase : EngineNS.IO.BaseSerializer
     {
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
-        public void OnPropertyRead(object root, string prop, bool fromXml) { }
-        public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         protected EngineNS.Vector2 mPosition = EngineNS.Vector2.Zero;
         [Rtti.Meta("")]
         public EngineNS.Vector2 Position
@@ -98,7 +95,7 @@ namespace EngineNS
                 i++;
             }
 
-            EngineNS.Vector2 retPt;
+            //EngineNS.Vector2 retPt;
 
             if (i == 0 || i >= bezierPtList.Count)
             {
@@ -115,19 +112,38 @@ namespace EngineNS
 
             var pt0 = bezierPtList[i - 1];
             var pt1 = bezierPtList[i];
-            var t = (xValue - pt0.Position.X) / (pt1.Position.X - pt0.Position.X);
+            var t = ((float)xValue - pt0.Position.X) / (pt1.Position.X - pt0.Position.X);
+            return ValueOnBezierSegment(pt0, pt1, t);
+            //var t = (xValue - pt0.Position.X) / (pt1.Position.X - pt0.Position.X);
 
-            //var cx = 3 * (pt0.ControlPoint.X - pt0.Position.X);
-            //var bx = 3 * (pt1.ControlPoint.X - pt0.ControlPoint.X) - cx;
-            //var ax = pt1.Position.X - pt0.Position.X - cx - bx;
-            //var cy = 3 * (pt0.ControlPoint.Y - pt0.Position.Y);
-            //var by = 3 * (pt1.ControlPoint.Y - pt0.ControlPoint.Y) - cy;
-            //var ay = pt1.Position.Y - pt0.Position.Y - cy - by;
-            //var tSquared = t * t;
-            //var tCubed = tSquared * t;
+            ////var cx = 3 * (pt0.ControlPoint.X - pt0.Position.X);
+            ////var bx = 3 * (pt1.ControlPoint.X - pt0.ControlPoint.X) - cx;
+            ////var ax = pt1.Position.X - pt0.Position.X - cx - bx;
+            ////var cy = 3 * (pt0.ControlPoint.Y - pt0.Position.Y);
+            ////var by = 3 * (pt1.ControlPoint.Y - pt0.ControlPoint.Y) - cy;
+            ////var ay = pt1.Position.Y - pt0.Position.Y - cy - by;
+            ////var tSquared = t * t;
+            ////var tCubed = tSquared * t;
 
-            //var resultX = (ax * tCubed) + (bx * tSquared) + (cx * t) + pt0.Position.X;
-            //var resultY = (ay * tCubed) + (by * tSquared) + (cy * t) + pt0.Position.Y;
+            ////var resultX = (ax * tCubed) + (bx * tSquared) + (cx * t) + pt0.Position.X;
+            ////var resultY = (ay * tCubed) + (by * tSquared) + (cy * t) + pt0.Position.Y;
+
+            //var yt = 1 - t;
+            //retPt.X = (float)(pt0.Position.X * yt * yt * yt +
+            //          3 * pt0.ControlPoint.X * yt * yt * t +
+            //          3 * pt1.ControlPoint.X * yt * t * t +
+            //          pt1.Position.X * t * t * t);
+            //retPt.Y = (float)(pt0.Position.Y * yt * yt * yt +
+            //              3 * pt0.ControlPoint.Y * yt * yt * t +
+            //              3 * pt1.ControlPoint.Y * yt * t * t +
+            //              pt1.Position.Y * t * t * t);
+
+            //return retPt;
+        }
+
+        public static Vector2 ValueOnBezierSegment(BezierPointBase pt0, BezierPointBase pt1, float t)
+        {
+            EngineNS.Vector2 retPt;
 
             var yt = 1 - t;
             retPt.X = (float)(pt0.Position.X * yt * yt * yt +

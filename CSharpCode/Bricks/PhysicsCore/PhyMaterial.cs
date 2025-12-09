@@ -72,6 +72,10 @@ namespace EngineNS.Bricks.PhysicsCore
         public void OnPostRead(object tagObject, object hostObject, bool fromXml)
         {
         }
+        public void OnPropertyWrite(string prop, bool fromXml)
+        {
+
+        }
         #endregion
 
         #region IAsset

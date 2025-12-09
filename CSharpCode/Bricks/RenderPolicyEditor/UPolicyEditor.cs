@@ -4,7 +4,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.RenderPolicyEditor
 {
-    public class TtPolicyEditor : Editor.IAssetEditor, IO.ISerializer, IRootForm
+    public class TtPolicyEditor : IO.BaseSerializer, Editor.IAssetEditor, IRootForm
     {
         public RName AssetName { get; set; }
         protected bool mVisible = true;
@@ -42,17 +42,6 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             return true;
         }
         #region ISerializer
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-
-        }
-        public void OnPropertyRead(object tagObject, string prop, bool fromXml)
-        {
-
-        }
-        public void OnPostRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
         #endregion
         #region IAssetEditor
         bool IsStarting = false;

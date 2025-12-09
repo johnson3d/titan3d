@@ -40,6 +40,10 @@ namespace EngineNS.Graphics.Pipeline
 
         }
         public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
+        public void OnPropertyWrite(string prop, bool fromXml)
+        {
+
+        }
         #endregion
         public TtRenderPolicy()
         {

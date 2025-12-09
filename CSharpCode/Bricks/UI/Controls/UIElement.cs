@@ -41,7 +41,7 @@ namespace EngineNS.UI.Controls
         ClipToBound = 1,
     }
     [Bind.BindableObject]
-    public partial class TtUIElement : IO.ISerializer
+    public partial class TtUIElement : IO.BaseSerializer
     {
         static partial void TtUIELement_Template();
         static TtUIElement()
@@ -314,11 +314,7 @@ namespace EngineNS.UI.Controls
         {
 
         }
-
-        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
-
-        public virtual void OnPropertyRead(object tagObject, string prop, bool fromXml) { }
-        public virtual void OnPostRead(object tagObj, object hostObj, bool fromXml)
+        public override void OnPostRead(object tagObj, object hostObj, bool fromXml)
         {
             if (mAssetName != null)
             {

@@ -806,6 +806,15 @@ namespace NxRHI
 			Texture2D.ResourceMinLODClamp = 0;
 			Texture2D.PlaneSlice = 0;
 		}
+		void SetTexture3D()
+		{
+			memset(this, 0, sizeof(FSrvDesc));
+			Type = ST_Texture3D;
+			Format = PXF_R8G8B8A8_UNORM;
+			Texture2D.MipLevels = 0;
+			Texture2D.ResourceMinLODClamp = 0;
+			Texture2D.PlaneSlice = 0;
+		}
 		void SetTexture2DArray()
 		{
 			memset(this, 0, sizeof(FSrvDesc));

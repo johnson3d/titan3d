@@ -216,7 +216,7 @@ namespace EngineNS.Bricks.NodeGraph
     }
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore", "EngineNS.Bricks.NodeGraph.UNodeBase" })]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public class TtNodeBase : IO.ISerializer
+    public class TtNodeBase : IO.BaseSerializer
     {
         public bool LayoutDirty = true;
 
@@ -229,15 +229,13 @@ namespace EngineNS.Bricks.NodeGraph
         }
 
         public Action<TtNodeBase, object, object, bool> OnPreReadAction;
-        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
             var graph = hostObject as TtNodeGraph;
             if (graph != null)
                 ParentGraph = graph;
             OnPreReadAction?.Invoke(this, tagObject, hostObject, fromXml);
         }
-        public virtual void OnPropertyRead(object root, string prop, bool fromXml) { }
-        public virtual void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         string mName = "NoName";
         [Rtti.Meta("")]
         [Category("Option")]

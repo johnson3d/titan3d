@@ -1,29 +1,39 @@
-﻿using System;
+﻿using Assimp;
+using EngineNS.Bricks.AssetImpExp;
+using EngineNS.GamePlay;
+using EngineNS.GamePlay.Scene;
+using EngineNS.Support;
+using EngineNS.Thread.Async;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
+using static EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator;
 
 namespace EngineNS.Bricks.FX.Weather
 {
-    public class CloudNoiseGenerator
+    public class TtCloudNoiseGenerator
     {
-        public int resolution = 64;
-        public Vector3 scale = Vector3.One;
+        public int Resolution = 64;
+        public Vector3 Scale = Vector3.One;
 
-        public int octaves = 4;
-        public float frequency = 1.0f;
-        public float lacunarity = 2.0f;
-        public float gain = 0.5f;
+        public int Octaves { get; set; } = 4;
+        public float Frequency { get; set; } = 1.0f;
+        public float Lacunarity { get; set; } = 2.0f;
+        public float Gain { get; set; } = 0.5f;
 
-        
-        public float perlinWeight = 0.7f;
-        public float worleyWeight = 0.3f;
-        public float billowPower = 1.0f;
+        public TtPerlin2 Perlin3D = new TtPerlin2((int)Support.TtTime.GetTickCount());
+        public TtWorly3D Worly3D = new TtWorly3D();
 
-        public Support.IRemapCurve remapCurve = null;
+        public float PerlinWeight = 0.7f;
+        public float WorleyWeight = 0.3f;
+        public float BillowPower = 1.0f;
 
-        public NxRHI.TtTexture GenerateTexture()
+        public Support.IRemapCurve RemapCurve = null;
+
+        public unsafe NxRHI.TtTexture GenerateNoise3D()
         {
-            int size = resolution;
+            int size = Resolution;
             Color4f[] colors = new Color4f[size * size * size];
 
             float maxValue = float.MinValue;
@@ -46,14 +56,14 @@ namespace EngineNS.Bricks.FX.Weather
                         float worley = worleyNoise[index];
 
                         // 混合Perlin和Worley噪声
-                        float value = perlin * perlinWeight + worley * worleyWeight;
+                        float value = perlin * PerlinWeight + worley * WorleyWeight;
 
                         // 应用Billow效果
-                        value = MathF.Pow(value, billowPower);
+                        value = MathF.Pow(value, BillowPower);
 
                         // 应用重映射曲线
-                        if (remapCurve!=null)
-                            value = remapCurve.Evaluate(value);
+                        if (RemapCurve!=null)
+                            value = RemapCurve.Evaluate(value);
 
                         colors[index] = new Color4f(value, value, value, 1.0f);
 
@@ -73,9 +83,160 @@ namespace EngineNS.Bricks.FX.Weather
                 }
             }
 
-            return null;
-        }
+            var sourceLayer = new NxRHI.TtTextureUtility.TtTex3dLayer();
+            sourceLayer.Pixels = colors;
+            sourceLayer.Width = size;
+            sourceLayer.Height = size;
+            sourceLayer.Depth = size;
+            List<NxRHI.TtTextureUtility.TtTex3dLayer> mipDatas = new List<NxRHI.TtTextureUtility.TtTex3dLayer>();
+            mipDatas.Add(sourceLayer);
+            int s = size/2;
+            while (s>=1)
+            {
+                var next = NxRHI.TtTextureUtility.GenerateMipLayer3D(sourceLayer, s, s, s);
+                mipDatas.Add(next);
+                s = s/2;
+            }
 
+            NxRHI.FMappedSubResource* initData = stackalloc NxRHI.FMappedSubResource[mipDatas.Count];
+            try
+            {
+                for (int i = 0; i<mipDatas.Count; i++)
+                {
+                    initData[i].RowPitch = (uint)(mipDatas[i].Width * sizeof(Half));
+                    initData[i].DepthPitch = (uint)(initData[i].RowPitch * mipDatas[i].Height);
+                    initData[i].pData = mipDatas[i].CreateRHalf();
+                }
+
+                var texDesc = new NxRHI.FTextureDesc();
+                texDesc.SetDefault();
+                texDesc.Width = (uint)size;
+                texDesc.Height = (uint)size;
+                texDesc.Depth = (uint)size;
+                texDesc.Format = EPixelFormat.PXF_R16_FLOAT;
+                texDesc.MipLevels = (uint)mipDatas.Count;
+                texDesc.InitData = initData;
+                return TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in texDesc);
+            }
+            finally
+            {
+                for (int i = 0; i<mipDatas.Count; i++)
+                {
+                    mipDatas[i].DesctroyPixels(initData[i].pData);
+                }
+            }
+        }
+        public class WeatherMapSettings
+        {
+            public int width = 256;
+            public int height = 256;
+
+            public float coverageFrequency = 0.002f;
+            public float coverageAmount = 0.7f;
+
+            public float densityFrequency = 0.005f;
+            public float densityAmount = 0.5f;
+
+            public bool addCirrus = true;
+            public float cirrusFrequency = 0.001f;
+            public float cirrusStrength = 0.3f;
+        }
+        public unsafe NxRHI.TtTexture GenerateWeatherMap(WeatherMapSettings weatherMapSettings)
+        {
+            int width = weatherMapSettings.width;
+            int height = weatherMapSettings.height;
+
+            Color4f[] colors = new Color4f[width * height];
+
+            var perlin = new Support.TtPerlin2((int)TtEngine.Instance.CurrentTickFrame);
+            // 生成天气图
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    // 计算UV
+                    float u = (float)x / width;
+                    float v = (float)y / height;
+
+                    // 1. 覆盖率（R通道）
+                    float coverage = (float)perlin.Noise(
+                        u * weatherMapSettings.coverageFrequency,
+                        v * weatherMapSettings.coverageFrequency);
+
+                    coverage = MathHelper.Clamp(coverage * weatherMapSettings.coverageAmount, 0, 1);
+
+                    // 2. 密度（G通道）
+                    float density = (float)perlin.Noise(
+                        u * weatherMapSettings.densityFrequency + 100,
+                        v * weatherMapSettings.densityFrequency + 100);
+
+                    density = MathHelper.Clamp(density * weatherMapSettings.densityAmount, 0, 1);
+
+                    // 3. 卷云效果（B通道）
+                    float cirrus = 0;
+                    if (weatherMapSettings.addCirrus)
+                    {
+                        cirrus = (float)perlin.Noise(
+                            u * weatherMapSettings.cirrusFrequency + 200,
+                            v * weatherMapSettings.cirrusFrequency + 200);
+
+                        cirrus = MathHelper.Clamp(cirrus * weatherMapSettings.cirrusStrength, 0, 1);
+                    }
+
+                    // 4. 海拔变化（A通道）- 可选
+                    float elevation = (float)perlin.Noise(
+                        u * 0.001f + 300,
+                        v * 0.001f + 300);
+
+                    // 组合到颜色
+                    colors[x + y * width] = new Color4f(coverage, density, cirrus, elevation);
+                }
+            }
+
+            var sourceLayer = new NxRHI.TtTextureUtility.TtTex2dLayer();
+            sourceLayer.Pixels = colors;
+            sourceLayer.Width = width;
+            sourceLayer.Height = height;
+            List<NxRHI.TtTextureUtility.TtTex2dLayer> mipDatas = new List<NxRHI.TtTextureUtility.TtTex2dLayer>();
+            mipDatas.Add(sourceLayer);
+            int w = width/2;
+            int h = height/2;
+            while (w>=1 && h>=1)
+            {
+                var next = NxRHI.TtTextureUtility.GenerateMipLayer2D(sourceLayer, w, h);
+                mipDatas.Add(next);
+                w = w/2;
+                h = h/2;
+            }
+
+            NxRHI.FMappedSubResource* initData = stackalloc NxRHI.FMappedSubResource[mipDatas.Count];
+            try
+            {
+                for (int i = 0; i<mipDatas.Count; i++)
+                {
+                    initData[i].RowPitch = (uint)(mipDatas[i].Width * sizeof(Half));
+                    initData[i].DepthPitch = (uint)(initData[i].RowPitch * mipDatas[i].Height);
+                    initData[i].pData = mipDatas[i].CreateRHalf();
+                }
+
+                var texDesc = new NxRHI.FTextureDesc();
+                texDesc.SetDefault();
+                texDesc.Width = (uint)width;
+                texDesc.Height = (uint)height;
+                texDesc.Depth = (uint)0;
+                texDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+                texDesc.MipLevels = (uint)mipDatas.Count;
+                texDesc.InitData = initData;
+                return TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in texDesc);
+            }
+            finally
+            {
+                for (int i = 0; i<mipDatas.Count; i++)
+                {
+                    mipDatas[i].DesctroyPixels(initData[i].pData);
+                }
+            }
+        }
         private float[] GenerateFractalPerlinNoise(int size)
         {
             float[] noise = new float[size * size * size];
@@ -86,11 +247,11 @@ namespace EngineNS.Bricks.FX.Weather
                 {
                     for (int x = 0; x < size; x++)
                     {
-                        float nx = (float)x / size * scale.x;
-                        float ny = (float)y / size * scale.y;
-                        float nz = (float)z / size * scale.z;
+                        float nx = (float)x / size * Scale.x;
+                        float ny = (float)y / size * Scale.y;
+                        float nz = (float)z / size * Scale.z;
 
-                        float value = FractalPerlin(nx, ny, nz);
+                        float value = (float)Perlin3D.GetPerlinValue(TtPerlin2.EFbmMode.Classic, new DVector3(nx, ny, nz), Octaves, Frequency, 1, Lacunarity, Gain);
                         noise[x + y * size + z * size * size] = value;
                     }
                 }
@@ -98,81 +259,6 @@ namespace EngineNS.Bricks.FX.Weather
 
             return noise;
         }
-
-        private float FractalPerlin(float x, float y, float z)
-        {
-            float value = 0;
-            float amplitude = 1;
-            float currentFrequency = frequency;
-
-            for (int i = 0; i < octaves; i++)
-            {
-                float noiseValue = ImprovedPerlinNoise3D(
-                    x * currentFrequency,
-                    y * currentFrequency,
-                    z * currentFrequency);
-
-                value += noiseValue * amplitude;
-                amplitude *= gain;
-                currentFrequency *= lacunarity;
-            }
-
-            return MathHelper.Clamp(value * 0.5f + 0.5f, 0, 1);
-        }
-
-        private float ImprovedPerlinNoise3D(float x, float y, float z)
-        {
-            // 更高质量的3D Perlin噪声实现
-            int X = MathHelper.FloorToInt(x) & 255;
-            int Y = MathHelper.FloorToInt(y) & 255;
-            int Z = MathHelper.FloorToInt(z) & 255;
-
-            x -= MathHelper.Floor(x);
-            y -= MathHelper.Floor(y);
-            z -= MathHelper.Floor(z);
-
-            float u = Fade(x);
-            float v = Fade(y);
-            float w = Fade(z);
-
-            int A = p[X] + Y, AA = p[A] + Z, AB = p[A + 1] + Z;
-            int B = p[X + 1] + Y, BA = p[B] + Z, BB = p[B + 1] + Z;
-
-            return Lerp(w, Lerp(v, Lerp(u, Grad(p[AA], x, y, z),
-                                           Grad(p[BA], x - 1, y, z)),
-                                   Lerp(u, Grad(p[AB], x, y - 1, z),
-                                           Grad(p[BB], x - 1, y - 1, z))),
-                           Lerp(v, Lerp(u, Grad(p[AA + 1], x, y, z - 1),
-                                           Grad(p[BA + 1], x - 1, y, z - 1)),
-                                   Lerp(u, Grad(p[AB + 1], x, y - 1, z - 1),
-                                           Grad(p[BB + 1], x - 1, y - 1, z - 1))));
-        }
-
-        private float Fade(float t) => t * t * t * (t * (t * 6 - 15) + 10);
-        private float Lerp(float t, float a, float b) => a + t * (b - a);
-        private float Grad(int hash, float x, float y, float z)
-        {
-            int h = hash & 15;
-            float u = h < 8 ? x : y;
-            float v = h < 4 ? y : (h == 12 || h == 14 ? x : z);
-            return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
-        }
-
-        private static int[] p = {
-        151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,
-        8,99,37,240,21,10,23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,
-        35,11,32,57,177,33,88,237,149,56,87,174,20,125,136,171,168,68,175,74,165,71,
-        134,139,48,27,166,77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,
-        55,46,245,40,244,102,143,54,65,25,63,161,1,216,80,73,209,76,132,187,208,89,
-        18,169,200,196,135,130,116,188,159,86,164,100,109,198,173,186,3,64,52,217,226,
-        250,124,123,5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,
-        189,28,42,223,183,170,213,119,248,152,2,44,154,163,70,221,153,101,155,167,43,
-        172,9,129,22,39,253,19,98,108,110,79,113,224,232,178,185,112,104,218,246,97,
-        228,251,34,242,193,238,210,144,12,191,179,162,241,81,51,145,235,249,14,239,
-        107,49,192,214,31,181,199,106,157,184,84,204,176,115,121,50,45,127,4,150,254,
-        138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180
-    };
-
         private float[] GenerateFractalWorleyNoise(int size)
         {
             float[] noise = new float[size * size * size];
@@ -183,11 +269,11 @@ namespace EngineNS.Bricks.FX.Weather
                 {
                     for (int x = 0; x < size; x++)
                     {
-                        float nx = (float)x / size * scale.x;
-                        float ny = (float)y / size * scale.y;
-                        float nz = (float)z / size * scale.z;
+                        float nx = (float)x / size * Scale.x;
+                        float ny = (float)y / size * Scale.y;
+                        float nz = (float)z / size * Scale.z;
 
-                        float value = FractalWorley(nx, ny, nz);
+                        float value = Worly3D.GetWorleyValue(nx, ny, nz);
                         noise[x + y * size + z * size * size] = value;
                     }
                 }
@@ -195,74 +281,118 @@ namespace EngineNS.Bricks.FX.Weather
 
             return noise;
         }
+    }
 
-        private float FractalWorley(float x, float y, float z)
+    public class TtVolumeCloudShading : Graphics.Pipeline.Shader.TtGraphicsShadingEnv
+    {
+        public TtVolumeCloudShading()
         {
-            float value = 0;
-            float amplitude = 1;
-            float currentFrequency = frequency;
+            CodeName = RName.GetRName("shaders/bricks/fx/volumecloud.cginc", RName.ERNameType.Engine);
 
-            for (int i = 0; i < octaves; i++)
-            {
-                float noiseValue = WorleyNoise3D(
-                    x * currentFrequency,
-                    y * currentFrequency,
-                    z * currentFrequency);
-
-                value += noiseValue * amplitude;
-                amplitude *= gain;
-                currentFrequency *= lacunarity;
-            }
-
-            return MathHelper.Clamp(value, 0, 1);
+            this.UpdatePermutation();
         }
-
-        private float WorleyNoise3D(float x, float y, float z)
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
-            // 简化的Worley噪声实现
-            int cellX = MathHelper.FloorToInt(x * 3);
-            int cellY = MathHelper.FloorToInt(y * 3);
-            int cellZ = MathHelper.FloorToInt(z * 3);
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_UV,};
+        }
+        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
+        {
+            
+        }
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtRenderMesh.TtAtom atom)
+        {
+            var aaNode = drawcall.TagObject as TtVolumeCloudNode;
 
-            float minDistance = float.MaxValue;
-
-            for (int dx = -1; dx <= 1; dx++)
+            var index = drawcall.FindBinder("ColorBuffer");
+            if (index.IsValidPointer)
             {
-                for (int dy = -1; dy <= 1; dy++)
+                var attachBuffer = aaNode.GetAttachBuffer(aaNode.ColorPinIn);
+                drawcall.BindSRV(index, attachBuffer.Srv);
+            }
+            index = drawcall.FindBinder("WeatherTex");
+            if (index.IsValidPointer)
+            {
+                drawcall.BindSRV(index, aaNode.WeatherSrv);
+            }
+            index = drawcall.FindBinder("CloudNoiseTex");
+            if (index.IsValidPointer)
+            {
+                drawcall.BindSRV(index, aaNode.CloudNoiseSrv);
+            }
+            index = drawcall.FindBinder("cbShadingEnv");
+            if (index.IsValidPointer)
+            {
+                if (aaNode.ShadingCbv == null)
                 {
-                    for (int dz = -1; dz <= 1; dz++)
-                    {
-                        Vector3 featurePoint = GetFeaturePoint(cellX + dx, cellY + dy, cellZ + dz);
-                        Vector3 cellPos = new Vector3(cellX + dx, cellY + dy, cellZ + dz);
-                        Vector3 pointPos = cellPos + featurePoint;
-
-                        Vector3 samplePos = new Vector3(x * 3, y * 3, z * 3);
-                        float distance = Vector3.Distance(samplePos, pointPos);
-
-                        minDistance = MathF.Min(minDistance, distance);
-                    }
+                    aaNode.ShadingCbv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
+                drawcall.BindCBV(index, aaNode.ShadingCbv);
             }
-
-            return 1.0f - MathHelper.Clamp(minDistance, 0, 1);
-        }
-
-        private Vector3 GetFeaturePoint(int cx, int cy, int cz)
-        {
-            // 使用哈希函数获取确定性的随机点
-            float random(float seed)
-            {
-                return MathHelper.Repeat(MathF.Sin(seed * 12.9898f) * 43758.5453f, 1f);
-            }
-
-            float x = random(cx * 1.0f);
-            float y = random(cy * 1.3f + 100);
-            float z = random(cz * 1.7f + 200);
-
-            return new Vector3(x, y, z);
+            base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
-    public class TtVolumeCloud
+
+    [Bricks.CodeBuilder.ContextMenu("VolumeCloud", "Post\\VolumeCloud", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    public class TtVolumeCloudNode : Graphics.Pipeline.Common.TAuxSceenSpaceNode<TtVolumeCloudNode>
     {
+        public Graphics.Pipeline.TtRenderGraphPin ColorPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_SRV);
+        public TtVolumeCloudNode()
+        {
+            Name = "VolumeCloud";
+        }
+        public override void Dispose()
+        {
+            CoreSDK.DisposeObject(ref WeatherSrv);
+            CoreSDK.DisposeObject(ref CloudNoiseSrv);
+            base.Dispose();
+        }
+        public override void InitNodePins()
+        {
+            AddInputOutput(ColorPinIn);
+            base.InitNodePins();
+        }
+        public TtVolumeCloudShading mBasePassShading;
+        public override Graphics.Pipeline.Shader.TtGraphicsShadingEnv GetPassShading(Graphics.Mesh.TtRenderMesh.TtAtom atom = null)
+        {
+            return mBasePassShading;
+        }
+        public override async Thread.Async.TtTask Initialize(Graphics.Pipeline.TtRenderPolicy policy, string debugName)
+        {
+            await base.Initialize(policy, debugName);
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtVolumeCloudShading>();
+
+            var gen = new TtCloudNoiseGenerator();
+            
+            {
+                var weatherSettings = new TtCloudNoiseGenerator.WeatherMapSettings();
+                var weatherTex = gen.GenerateWeatherMap(weatherSettings);
+                
+                NxRHI.FSrvDesc srvDesc = new NxRHI.FSrvDesc();
+                srvDesc.SetTexture2D();
+                var texDesc = weatherTex.mCoreObject.Desc;
+                srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
+                WeatherSrv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(weatherTex, in srvDesc);
+            }
+
+            {
+                var cloudNoiseTex = gen.GenerateNoise3D();
+                NxRHI.FSrvDesc srvDesc = new NxRHI.FSrvDesc();
+                srvDesc.SetTexture3D();
+                var texDesc = cloudNoiseTex.mCoreObject.Desc;
+                srvDesc.Format = texDesc.Format;
+                srvDesc.Texture3D.MipLevels = texDesc.MipLevels;
+                CloudNoiseSrv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(cloudNoiseTex, in srvDesc);
+            }
+        }
+        public override void TickLogic(TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        {
+            base.TickLogic(world, policy, frameCmdList, bClear);
+        }
+        #region Rhi Resouces
+        public NxRHI.TtCbView ShadingCbv;
+        public NxRHI.TtSrView WeatherSrv;
+        public NxRHI.TtSrView CloudNoiseSrv;
+        #endregion
     }
 }

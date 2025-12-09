@@ -651,7 +651,8 @@ namespace NxRHI
 			break;
 			case 3:
 			{
-				resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+				ASSERT(desc.ArraySize == 1);
+				resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE3D;
 				resDesc.Width = desc.Width;
 				resDesc.Height = desc.Height;
 				resDesc.DepthOrArraySize = desc.Depth;
@@ -1304,7 +1305,7 @@ namespace NxRHI
 			case ST_Texture2DMS:
 			{
 				tar->ViewDimension = D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURE2DMS;
-				ASSERT(false);
+				//ASSERT(false);
 			}
 			break;
 			case ST_Texture2DMSArray:
@@ -1312,7 +1313,7 @@ namespace NxRHI
 				tar->ViewDimension = D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURE2DMSARRAY;
 				tar->Texture2DMSArray.ArraySize = src->Texture2DMSArray.ArraySize;
 				tar->Texture2DMSArray.FirstArraySlice = src->Texture2DMSArray.FirstArraySlice;
-				ASSERT(false);
+				//ASSERT(false);
 			}
 			break;
 			case ST_Texture3D:
@@ -1320,7 +1321,7 @@ namespace NxRHI
 				tar->ViewDimension = D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURE3D;
 				tar->Texture3D.MipLevels = src->Texture3D.MipLevels;
 				tar->Texture3D.MostDetailedMip = src->Texture3D.MostDetailedMip;
-				ASSERT(false);
+				//ASSERT(false);
 			}
 			break;
 			case ST_TextureCube:
@@ -1337,7 +1338,7 @@ namespace NxRHI
 				tar->TextureCubeArray.MipLevels = src->TextureCubeArray.MipLevels;
 				tar->TextureCubeArray.MostDetailedMip = src->TextureCubeArray.MostDetailedMip;
 				tar->TextureCubeArray.NumCubes = src->TextureCubeArray.NumCubes;
-				ASSERT(false);
+				//ASSERT(false);
 			}
 			break;
 			case ST_RTAS:

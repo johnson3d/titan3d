@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="f1eb4271e7dec1f8866c97cb55ab0990dd277bad92c8547d7a00d594c81f86b8" />
+      <Path Type="System.String@Unknown" Value="vcloud_scene.scene/vcloud_scene.scene" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="d33a2b2c2d20924c4e69223c708de4b62acf550f63ec91b1ad1460b6b1529c0a" />
+      <Path Type="System.String@Unknown" Value="vcloud_scene.scene/class_graph.dat" />
+    </e_1>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="e42e82d7-a4a4-47ea-bbb5-2e5ddeee355b" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/volumecloud/vcloud_scene.scene,e42e82d7-a4a4-47ea-bbb5-2e5ddeee355b" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtScene&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Value="Engine,material/gridline.material,fe431749-ed31-45b1-93d8-34462bd00922" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
+</Root>

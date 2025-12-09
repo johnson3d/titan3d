@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CmdQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RayTracing.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TextureUtility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UCommandList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UDrawcall.cs" />

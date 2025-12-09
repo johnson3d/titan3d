@@ -531,6 +531,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inventory.All", "Plugins\Ga
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Water", "CSharpCode\Bricks\FX\Water\Water.shproj", "{D1A38C88-04AB-4B5F-963E-0306B901CC2B}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Weather", "CSharpCode\Bricks\FX\Weather\Weather.shproj", "{2BBB3D77-91AB-4DC4-A761-FFD9E8ED0328}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1264,6 +1266,7 @@ Global
 		{C5A6CD32-252A-4F89-B45A-39FE2AE04CE2} = {0C64E9A2-B99F-42B0-8012-C2C62F9656B3}
 		{D8CA055A-683B-1525-C7F5-A4F27660E550} = {0C64E9A2-B99F-42B0-8012-C2C62F9656B3}
 		{D1A38C88-04AB-4B5F-963E-0306B901CC2B} = {1C7247C9-8835-4D68-B2F4-3180297E2836}
+		{2BBB3D77-91AB-4DC4-A761-FFD9E8ED0328} = {1C7247C9-8835-4D68-B2F4-3180297E2836}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
@@ -1318,6 +1321,7 @@ Global
 		CSharpCode\Bricks\FX\Hair\Hair.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\FX\Skin\Skin.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\FX\Water\Water.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		CSharpCode\Bricks\FX\Weather\Weather.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\GI\PRT\PRT.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\GpuDriven\GpuDriven.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\ImageDecoder\ImageDecoder.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -1419,6 +1423,7 @@ Global
 		CSharpCode\NxRHI\NxRHI.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Platform\Android\Android.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Rtti\Rtti.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\FX\Weather\Weather.projitems*{2bbb3d77-91ab-4dc4-a761-ffd9e8ed0328}*SharedItemsImports = 13
 		CSharpCode\Bricks\TcpServer\TcpServer.projitems*{2d94aeaf-8c89-4373-9987-79259902bdba}*SharedItemsImports = 13
 		CSharpCode\Bricks\Localization\Localization.projitems*{2e83d749-257f-4cea-9370-cb44422524b9}*SharedItemsImports = 13
 		CSharpCode\ImGui\ImGui.projitems*{30bc6f10-34dc-43fc-aa1e-ea73602b074f}*SharedItemsImports = 13

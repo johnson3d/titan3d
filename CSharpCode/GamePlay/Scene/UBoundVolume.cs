@@ -13,7 +13,7 @@ namespace EngineNS.GamePlay.Scene
         Sphere,
     }
 
-    public class TtBoundVolume : IO.ISerializer, IDisposable
+    public class TtBoundVolume : IO.BaseSerializer, IDisposable
     {
         public TtBoundVolume()
         {
@@ -27,12 +27,10 @@ namespace EngineNS.GamePlay.Scene
         {
             get => EBoundVolumeType.None;
         }
-        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
             HostNode = tagObject as TtNode;
         }
-        public virtual void OnPropertyRead(object root, string prop, bool fromXml) { }
-        public virtual void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         public TtNode HostNode { get; set; } = null;
         public BoundingBox mLocalAABB;
         public BoundingBox LocalAABB

@@ -50,18 +50,8 @@ namespace EngineNS.Bricks.CodeBuilder
     }
 
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCodeObject@EngineCore", "EngineNS.Bricks.CodeBuilder.UCodeObject" })]
-    public class TtCodeObject : IO.ISerializer
+    public class TtCodeObject : IO.BaseSerializer
     {
-        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public virtual void OnPropertyRead(object tagObject, string prop, bool fromXml)
-        {
-        }
-        public virtual void OnPostRead(object tagObj, object hostObj, bool fromXml)
-        {
-        }
 
         public virtual void GetReferenceMacrossRNames(HashSet<RName> rNames)
         {
@@ -89,7 +79,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public TtStatementBase Next;
     }
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore", "EngineNS.Bricks.CodeBuilder.UTypeReference" })]
-    public class TtTypeReference : IO.ISerializer
+    public class TtTypeReference : IO.BaseSerializer
     {
         string mTypeFullName;
         [Rtti.Meta("",Order = 1)]
@@ -234,17 +224,6 @@ namespace EngineNS.Bricks.CodeBuilder
                 return mTypeDesc == type;
             return TypeFullName == type.FullName;
         }
-        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public virtual void OnPropertyRead(object tagObject, string prop, bool fromXml)
-        {
-        }
-        public void OnPostRead(object tagObj, object hostObj, bool fromXml)
-        {
-        }
-
         public virtual void GetReferenceMacrossRName(HashSet<RName> rNames)
         {
             if (mTypeDesc != null)

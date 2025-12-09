@@ -508,6 +508,7 @@ namespace NxRHI
 			break;
 			case 3:
 			{
+				ASSERT(desc.ArraySize == 1);
 				D3D11_TEXTURE3D_DESC td;
 				td.Width = desc.Width;
 				td.Height = desc.Height;

@@ -223,22 +223,8 @@ namespace EngineNS.Bricks.PhysicsCore
             mCoreObject.RemoveFromActor();
         }
 
-        public class TtShapeSerializer : IO.ISerializer
+        public class TtShapeSerializer : IO.BaseSerializer
         {
-            #region IO
-            public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
-            {
-
-            }
-            public virtual void OnPropertyRead(object tagObject, string prop, bool fromXml)
-            {
-
-            }
-            public virtual void OnPostRead(object tagObject, object hostObject, bool fromXml)
-            {
-            }
-            #endregion
-
             [Rtti.Meta("")]
             [RName.PGRName(FilterExts = TtPhyMaterial.AssetExt)]
             public RName PxMaterialName { get; set; }

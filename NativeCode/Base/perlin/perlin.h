@@ -58,6 +58,14 @@ public:
 		vec[1] = y;
 		return perlin_noise_2D(vec);
 	};
+	double Get(double x, double y, double z)
+	{
+		double vec[3];
+		vec[0] = x;
+		vec[1] = y;
+		vec[2] = z;
+		return perlin_noise_3D(vec);
+	};
 
 	double GetAmplitude()
 	{
@@ -66,6 +74,7 @@ public:
 private:
 	//void init_perlin(int n,float p);
 	double perlin_noise_2D(double vec[2]);
+	double perlin_noise_3D(double vec[3]);
 
 	double noise1(double arg);
 	double noise2(double vec[2]);

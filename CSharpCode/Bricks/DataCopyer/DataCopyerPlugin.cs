@@ -106,7 +106,8 @@ namespace EngineNS.Bricks.DataCopyer
                         value = Rtti.TtTypeDescManager.CreateInstance(i.PropInfo.PropertyType);
                     }
                 }
-                
+
+                (obj as ISerializerNotifyEx)?.OnPropertyWrite(i.PropInfo.Name, false);
                 WriteObject(ar, i.PropInfo.PropertyType, value);
             }
         }

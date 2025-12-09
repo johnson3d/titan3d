@@ -86,22 +86,12 @@ namespace EngineNS.EGui
     [TtUVAnim.Import]
     [Editor.UAssetEditor(EditorType = typeof(UUvAnimEditor))]
     [IO.AssetCreateMenu(MenuName = "UI/UVAnim")]
-    public partial class TtUVAnim : IO.IAsset, IO.ISerializer
+    public partial class TtUVAnim : IO.BaseSerializer, IO.IAsset
     {
         public const string AssetExt = ".uvanim";
         public string TypeExt { get => AssetExt; }
         #region ISerializer
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-
-        }
-        public void OnPropertyRead(object tagObject, string prop, bool fromXml)
-        {
-
-        }
-        public void OnPostRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
+        
         #endregion
         public class ImportAttribute : IO.CommonCreateAttribute
         {

@@ -120,8 +120,8 @@ namespace EngineNS
         /// 带参构造函数
         /// </summary>
         /// <param name="color">颜色值，使用Vector3表示</param>
-	    public Color4f( Vector3 color )
-	    {
+	    public Color4f(Vector3 color)
+        {
 		    Alpha = 1.0f;
 		    Red = color.X;
 		    Green = color.Y;
@@ -155,19 +155,19 @@ namespace EngineNS
 		    return Red*Red < MathHelper.Epsilon && Green*Green < MathHelper.Epsilon && Red*Red < MathHelper.Epsilon;
 	    }
 
-    /// <summary>
-    /// 颜色转换
-    /// </summary>
-    /// <returns>返回转换后的颜色</returns>
-    public Color4b ToColor()
-	    {
-		    return Color4b.FromArgb( (int)(Alpha * 255), (int)(Red * 255), (int)(Green * 255), (int)(Blue * 255) );
-	    }
+        /// <summary>
+        /// 颜色转换
+        /// </summary>
+        /// <returns>返回转换后的颜色</returns>
+        public Color4b ToColor4b()
+        {
+            return Color4b.FromArgb((int)(Alpha * 255), (int)(Red * 255), (int)(Green * 255), (int)(Blue * 255));
+        }
         /// <summary>
         /// 转换成不带Alpha通道值的颜色值
         /// </summary>
         /// <returns>返回转换后的颜色值</returns>
-	    public Color3f ToColor3()
+	    public Color3f ToColor3f()
 	    {
             Color3f result;
             result.Red = Red;
@@ -181,35 +181,37 @@ namespace EngineNS
         /// <returns>返回转换后的颜色值</returns>
 	    public UInt32 ToArgb()
 	    {
-		    UInt32 a, r, g, b;
+		    //UInt32 a, r, g, b;
 
-		    a = (UInt32)(Alpha * 255.0f);
-		    r = (UInt32)(Red * 255.0f);
-		    g = (UInt32)(Green * 255.0f);
-		    b = (UInt32)(Blue * 255.0f);
+		    //a = (UInt32)(Alpha * 255.0f);
+		    //r = (UInt32)(Red * 255.0f);
+		    //g = (UInt32)(Green * 255.0f);
+		    //b = (UInt32)(Blue * 255.0f);
 
-		    UInt32 value = b;
-		    value += g << 8;
-		    value += r << 16;
-		    value += a << 24;
+		    //UInt32 value = b;
+		    //value += g << 8;
+		    //value += r << 16;
+		    //value += a << 24;
 
-		    return value;
+		    //return value;
+            return ToColor4b().ToArgb();
 	    }
         public UInt32 ToAbgr()
         {
-		    UInt32 a, r, g, b;
+            //UInt32 a, r, g, b;
 
-		    a = (UInt32)(Alpha * 255.0f);
-		    r = (UInt32)(Red * 255.0f);
-		    g = (UInt32)(Green * 255.0f);
-		    b = (UInt32)(Blue * 255.0f);
+            //a = (UInt32)(Alpha * 255.0f);
+            //r = (UInt32)(Red * 255.0f);
+            //g = (UInt32)(Green * 255.0f);
+            //b = (UInt32)(Blue * 255.0f);
 
-		    UInt32 value = r;
-		    value += g << 8;
-		    value += b << 16;
-		    value += a << 24;
+            //UInt32 value = r;
+            //value += g << 8;
+            //value += b << 16;
+            //value += a << 24;
 
-		    return value;
+            //return value;
+            return ToColor4b().ToAbgr();
         }
         public static Color4f FromColor4b(Color4b color)
         {
@@ -635,7 +637,7 @@ namespace EngineNS
         /// <param name="value">颜色对象</param>
 	    public static implicit operator Color3f( Color4f value )
 	    {
-		    return value.ToColor3();
+		    return value.ToColor3f();
 	    }
         /// <summary>
         /// 自定义CSUtility.Support.Color类型转换方式
@@ -643,7 +645,7 @@ namespace EngineNS
         /// <param name="value">颜色对象</param>
 	    public static implicit operator Color4b( Color4f value )
 	    {
-		    return value.ToColor();
+		    return value.ToColor4b();
 	    }
         /// <summary>
         /// 自定义Vector3类型转换方式

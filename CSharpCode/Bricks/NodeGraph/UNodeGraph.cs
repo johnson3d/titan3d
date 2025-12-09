@@ -36,17 +36,32 @@ namespace EngineNS.Bricks.NodeGraph
 
     }
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.NodeGraph.UNodeGraph@EngineCore", "EngineNS.Bricks.NodeGraph.UNodeGraph" })]
-    public partial class TtNodeGraph : IO.ISerializer
+    public partial class TtNodeGraph : IO.BaseSerializer, IO.ISerializerNotifyEx
     {
-        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
-        public virtual void OnPropertyRead(object root, string prop, bool fromXml) { }
-        public virtual void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         public virtual unsafe void Initialize()
         {
             //UpdateCanvasMenus();
             //UpdateNodeMenus();
             //UpdatePinMenus();
             SetScaleVP(1.0f / ImGuiAPI.GetWindowDpiScale());
+        }
+        public void OnPropertyWrite(string prop, bool fromXml)
+        {
+            if (prop == "Linkers")
+            {
+                return;
+            }
+        }
+        public override void OnPropertyRead(object tagObject, string prop, bool fromXml)
+        {
+            if (prop == "Linkers@")
+            {
+                return;
+            }
+            else if (prop == "Linkers")
+            {
+                return;
+            }
         }
         public virtual void SetDefaultActionForNode(TtNodeBase node) { }
         public virtual TtGraphRenderer GetGraphRenderer() 

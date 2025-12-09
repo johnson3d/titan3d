@@ -43,6 +43,11 @@ namespace EngineNS.IO
                 return null;
             return new TtRes2Memory(ptr);
         }
+        public override void Dispose()
+        {
+            mCoreObject.TryReleaseHolder();
+            base.Dispose();
+        }
         public TtRes2Memory(VRes2Memory self)
         {
             mCoreObject = self;

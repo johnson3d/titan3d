@@ -27,7 +27,7 @@ namespace EngineNS.Bricks.Procedure
             return result;
         }
     }
-    public class UPgcEditor : Editor.IAssetEditor, IO.ISerializer, IRootForm, ITickable
+    public class UPgcEditor : IO.BaseSerializer, Editor.IAssetEditor, IRootForm, ITickable
     {
         public int GetTickOrder()
         {
@@ -106,17 +106,6 @@ namespace EngineNS.Bricks.Procedure
         }
         public GamePlay.Scene.TtSceneActorNode PreviewRoot { get; private set; }
         #region ISerializer
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-
-        }
-        public void OnPropertyRead(object tagObject, string prop, bool fromXml)
-        {
-
-        }
-        public void OnPostRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
         #endregion
         #region Tickable
         public void TickLogic(float ellapse)

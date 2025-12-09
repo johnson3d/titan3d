@@ -47,7 +47,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     [TtMaterial.MaterialImport]
     [IO.AssetCreateMenu(MenuName = "Graphics/Material")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public partial class TtMaterial : IO.ISerializer, IO.IAsset, IShaderCodeProvider
+    public partial class TtMaterial : IO.BaseSerializer, IO.IAsset, IShaderCodeProvider
     {
         public const string AssetExt = ".material";
         public string TypeExt { get => AssetExt; }
@@ -236,15 +236,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
             get { return this; }
             protected set { }
         }
-        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-
-        }
-        public virtual void OnPropertyRead(object tagObject, string prop, bool fromXml)
-        {
-
-        }
-        public virtual void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         public virtual void GetDefines(List<KeyValuePair<string, string>> vars)
         {
         }

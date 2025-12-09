@@ -784,7 +784,18 @@ namespace EngineNS.Rtti
             public Dictionary<string, TtAssemblyDesc> Assemblies { get; } = new Dictionary<string, TtAssemblyDesc>();
             public void RegAssemblyTypes(TtEngine engine, TtAssemblyDesc desc)
             {
-                var tps = desc.UnsafeGetAssembly().GetTypes();
+                Type[] tps = null;
+                try
+                {
+                    tps = desc.UnsafeGetAssembly().GetTypes();
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    foreach (var loaderEx in ex.LoaderExceptions)
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Fatal,$"Loader Exception: {loaderEx.Message}");
+                    }
+                }
                 //engine.EventPoster.ParallelFor(tps.Length, (index, state) =>
                 //{
                 //    var i= tps[index];

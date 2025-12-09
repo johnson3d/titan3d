@@ -7,7 +7,7 @@ using EngineNS.DesignMacross.Design;
 
 namespace EngineNS.DesignMacross.Editor
 {
-    public class TtDesignMacrossEditor : IO.ISerializer, EngineNS.Editor.IAssetEditor, IRootForm
+    public class TtDesignMacrossEditor : IO.BaseSerializer, EngineNS.Editor.IAssetEditor, IRootForm
     {
         private UDesignMacross mDesignMacross = null;
         public UDesignMacross DesignMacross { get => mDesignMacross; }
@@ -218,9 +218,6 @@ namespace EngineNS.DesignMacross.Editor
         #endregion CodeGen
 
         #region IO.ISerializer
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
-        public void OnPropertyRead(object root, string prop, bool fromXml) { }
-        public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         #endregion IO.ISerializer
 
         #region DrawToolbar

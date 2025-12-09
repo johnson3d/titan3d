@@ -291,7 +291,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return MethodGraph;
         }
     }
-    public class MethodData : IO.ISerializer
+    public class MethodData : IO.BaseSerializer
     {
         public UMethodStartNode StartNode;
         [Rtti.Meta("")]
@@ -371,17 +371,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 return (MethodDec.IsOverride ? "[O]" : "") + MethodDec.DisplayName;
             }
-        }
-
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, string prop, bool fromXml)
-        {
-        }
-        public void OnPostRead(object tagObject, object hostObject, bool fromXml)
-        {
         }
     }
     public partial class UMacrossMethodGraph : TtNodeGraph, IPropertyCustomization

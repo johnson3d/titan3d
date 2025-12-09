@@ -25,18 +25,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             mBindIndexer = null;
             ShaderEffect = null;
         }
-        public class TtEffectDesc : IO.ISerializer
+        public class TtEffectDesc : IO.BaseSerializer
         {
-            public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-            {
-
-            }
-
-            public void OnPropertyRead(object tagObject, string prop, bool fromXml)
-            {
-
-            }
-            public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
             public const uint CurrentEffectVersion = 6;
             [Rtti.Meta("")]
             public uint EffectVersion { get; set; } = CurrentEffectVersion;

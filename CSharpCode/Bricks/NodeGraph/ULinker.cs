@@ -4,21 +4,14 @@ using System.Text;
 
 namespace EngineNS.Bricks.NodeGraph
 {
-    public class UPinLinker : IO.ISerializer
+    public class UPinLinker : IO.BaseSerializer
     {
-        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
             var graph = hostObject as TtNodeGraph;
             if (graph == null)
                 return;
             mGraph = graph;
-        }
-        public virtual void OnPropertyRead(object tagObject, string prop, bool fromXml)
-        {
-
-        }
-        public virtual void OnPostRead(object tagObject, object hostObject, bool fromXml)
-        {
         }
         TtNodeGraph mGraph;
         public PinIn InPin { get; set; }

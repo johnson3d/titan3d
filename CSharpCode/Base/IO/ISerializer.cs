@@ -23,8 +23,17 @@ namespace EngineNS.IO
         void OnPropertyRead(object tagObject, string prop, bool fromXml);
         void OnPostRead(object tagObj, object hostObj, bool fromXml);
     }
-    public partial class BaseSerializer : ISerializer
+    public interface ISerializerNotifyEx
     {
+        void OnPropertyWrite(string prop, bool fromXml);
+    }
+    public partial class BaseSerializer : ISerializer/*, ISerializerNotifyEx*/
+    {
+        #region ISerializer
+        //public virtual void OnPropertyWrite(string prop, bool fromXml)
+        //{
+
+        //}
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
 
@@ -36,6 +45,7 @@ namespace EngineNS.IO
         public virtual void OnPostRead(object tagObj, object hostObj, bool fromXml)
         {
         }
+        #endregion
         public virtual void OnWriteMember(IWriter ar, ISerializer obj, Rtti.TtMetaVersion metaVersion)
         {
             SerializerHelper.WriteMember(ar, obj, metaVersion);
@@ -350,6 +360,7 @@ namespace EngineNS.IO
                 var fv = i.PropInfo.GetValue(obj, null);
                 if (fv == null)
                     continue;
+                (obj as ISerializerNotifyEx)?.OnPropertyWrite(i.PropInfo.Name, true);
 
                 var prop = xml.CreateElement($"{i.PropertyName}", xml.NamespaceURI);
                 var attr = xml.CreateAttribute($"Type");
@@ -456,6 +467,8 @@ namespace EngineNS.IO
                 var prop = obj.GetType().GetProperty(i.Name);
                 if (prop == null)
                     continue;
+
+                (obj as ISerializer)?.OnPropertyRead(paramObject, prop.Name + "@", true);
 
                 object readOnlyObject = null;
                 if (prop.PropertyType == typeof(object))
@@ -1022,18 +1035,28 @@ namespace EngineNS.UnitTest
 {
     [Rtti.Meta("")]
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public partial class UTest_MetaObject : EngineNS.IO.ISerializer
+    public partial class UTest_MetaObject : EngineNS.IO.ISerializer, EngineNS.IO.ISerializerNotifyEx
     {
-        [Rtti.Meta("")]
-        public class TestSubClass : EngineNS.IO.ISerializer
+        #region ISerializer
+        public virtual void OnPropertyWrite(string prop, bool fromXml)
         {
-            public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
-            public void OnPropertyRead(object root, string prop, bool fromXml) { }
 
-            public void OnPostRead(object tagObj, object hostObj, bool fromXml)
-            {
-            }
+        }
+        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
 
+        }
+        public virtual void OnPropertyRead(object tagObject, string prop, bool fromXml)
+        {
+
+        }
+        public virtual void OnPostRead(object tagObj, object hostObj, bool fromXml)
+        {
+        }
+        #endregion
+        [Rtti.Meta("")]
+        public class TestSubClass : EngineNS.IO.BaseSerializer
+        {
             [Rtti.Meta("")]
             public int A { get; set; }
             [Rtti.Meta("")]
@@ -1093,20 +1116,6 @@ namespace EngineNS.UnitTest
         public bool ReadSignal
         {
             get => true;
-        }
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-        public void OnPropertyRead(object root, string prop, bool fromXml)
-        {
-            if(prop == nameof(ReadSignal))
-            {
-                return;
-            }
-        }
-
-        public void OnPostRead(object tagObj, object hostObj, bool fromXml)
-        {
         }
     }
 

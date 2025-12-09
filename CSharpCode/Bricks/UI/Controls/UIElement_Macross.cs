@@ -28,7 +28,7 @@ namespace EngineNS.UI.Controls
 
         #region Property bind
 
-        public class UIBindingData_Element : IO.ISerializer
+        public class UIBindingData_Element : IO.BaseSerializer
         {
             [Rtti.Meta("")]
             public string PropertyName { get; set; }
@@ -91,15 +91,6 @@ namespace EngineNS.UI.Controls
                 ImGuiAPI.SameLine(0, -1);
                 ImGuiAPI.Text(PropertyName);
             }
-
-            public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-            {
-            }
-
-            public void OnPropertyRead(object tagObject, string prop, bool fromXml)
-            {
-            }
-            public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         }
         public abstract class BindingDataBase : IO.BaseSerializer
         {

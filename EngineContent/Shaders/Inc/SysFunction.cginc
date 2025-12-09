@@ -2,6 +2,9 @@
 #define _COMMON_FUNCTION_
 #include "Math.cginc"
 #include "../CBuffer/VarBase_PerMesh.cginc"
+#include "../CBuffer/VarBase_PerViewport.cginc"
+#include "../CBuffer/VarBase_PerCamera.cginc"
+#include "../CBuffer/VarBase_PerFrame.cginc"
 
 Texture2D DefaultTexture DX_AUTOBIND;
 SamplerState DefaultSampLinear DX_AUTOBIND;

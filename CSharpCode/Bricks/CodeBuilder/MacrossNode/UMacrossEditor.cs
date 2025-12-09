@@ -22,7 +22,7 @@ using System.Xml.Linq;
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor@EngineCore", "EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor" })]
-    public partial class TtMacrossEditor : IO.ISerializer, Editor.IAssetEditor, IRootForm, NodeGraph.IGraphEditor, IMacrossMethodHolder
+    public partial class TtMacrossEditor : IO.BaseSerializer, Editor.IAssetEditor, IRootForm, NodeGraph.IGraphEditor, IMacrossMethodHolder
     {
         public TtMacrossEditor()
         {
@@ -113,9 +113,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             return this;
         }
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
-        public void OnPropertyRead(object root, string prop, bool fromXml) { }
-        public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         [Rtti.Meta("",Order = 0)]
         public TtClassDeclaration DefClass { get; } = new TtClassDeclaration();
         //public DefineClass DefClass { get; } = new DefineClass();

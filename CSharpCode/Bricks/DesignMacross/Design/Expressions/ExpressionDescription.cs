@@ -283,5 +283,9 @@ namespace EngineNS.DesignMacross.Design.Expressions
             
         }
         public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
+        public void OnPropertyWrite(string prop, bool fromXml)
+        {
+
+        }
     }
 }

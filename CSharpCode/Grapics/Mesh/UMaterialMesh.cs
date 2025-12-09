@@ -174,7 +174,7 @@ namespace EngineNS.Graphics.Mesh
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMaterialMesh@EngineCore" })]
     [TtMaterialMesh.Import]
     [IO.AssetCreateMenu(MenuName = "Mesh/MaterialMesh")]
-    public partial class TtMaterialMesh : IO.ISerializer, IO.IAsset
+    public partial class TtMaterialMesh : IO.BaseSerializer, IO.IAsset
     {
         public const string AssetExt = ".ums";
         public string TypeExt { get => AssetExt; }
@@ -249,17 +249,12 @@ namespace EngineNS.Graphics.Mesh
             set;
         }
         #endregion
-        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
             var manager = tagObject as TtMaterialMeshManager;
             if (manager == null)
                 return;
         }
-        public virtual void OnPropertyRead(object tagObject, string prop, bool fromXml)
-        {
-
-        }
-        public virtual void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         public bool Initialize(List<TtMeshPrimitives> mesh, List<Pipeline.Shader.TtMaterial[]> materials)
         {
             if (mesh.Count != materials.Count)

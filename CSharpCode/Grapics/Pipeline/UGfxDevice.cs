@@ -251,6 +251,7 @@ namespace EngineNS.Graphics.Pipeline
                 RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.DRAW_EMPTY_SCISSOR_RECTANGLE, false);
                 RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.GPU_BASED_VALIDATION_INCOMPATIBLE_RESOURCE_STATE, false);
                 RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CLEARDEPTHSTENCILVIEW_MISMATCHINGCLEARVALUE, false);
+                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CORRUPTED_PARAMETER2, false);
                 //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_COMMANDLIST12, false);
                 //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.DESTROY_COMMANDLIST12, false);
                 //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_RESOURCE, false);

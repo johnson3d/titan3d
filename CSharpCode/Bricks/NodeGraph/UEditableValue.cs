@@ -1,5 +1,4 @@
-﻿using Assimp;
-using EngineNS.EGui.Controls.PropertyGrid;
+﻿using EngineNS.EGui.Controls.PropertyGrid;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,6 +18,10 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public virtual void OnPostRead(object tagObject, object hostObject, bool fromXml)
         {
+        }
+        public virtual void OnPropertyWrite(string prop, bool fromXml)
+        {
+
         }
         public virtual void OnWriteMember(IO.IWriter ar, IO.ISerializer obj, Rtti.TtMetaVersion metaVersion)
         {

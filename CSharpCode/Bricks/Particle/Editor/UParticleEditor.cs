@@ -203,6 +203,10 @@ namespace EngineNS.Bricks.Particle.Editor
         public void OnPostRead(object tagObject, object hostObject, bool fromXml)
         {
         }
+        public void OnPropertyWrite(string prop, bool fromXml)
+        {
+
+        }
         #endregion
         #region Tickable
         public override void TickLogic(float ellapse)

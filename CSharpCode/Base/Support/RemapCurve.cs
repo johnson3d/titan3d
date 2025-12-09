@@ -105,7 +105,7 @@ namespace EngineNS.Support
         }
         public float Evaluate(float value)
         {
-            return value;
+            return BezierCalculate.ValueOnBezier(BezierPoints, value).Y;
         }
     }
 }

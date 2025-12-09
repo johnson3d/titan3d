@@ -157,7 +157,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return null;
         }
-        public class DelegateArgumentSaveData : IO.ISerializer
+        public class DelegateArgumentSaveData : IO.BaseSerializer
         {
             [Rtti.Meta("")]
             public string ArgumentName { get; set; }
@@ -165,24 +165,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             [Rtti.Meta("")]
             public UMacrossMethodGraph DelegateGraph { get; set; } = null;
 
-            public class ExtPinData : IO.ISerializer
+            public class ExtPinData : IO.BaseSerializer
             {
                 [Rtti.Meta("")]
                 public string PinName { get; set; }
                 [Rtti.Meta("")]
                 public Rtti.TtTypeDesc Type { get; set; }
-
-                public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
-                public void OnPropertyRead(object tagObject, string prop, bool fromXml) { }
-                public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
             }
             [Rtti.Meta("")]
             public List<ExtPinData> ExtPinDatas { get; set; } = new List<ExtPinData>();
-
-            public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
-
-            public void OnPropertyRead(object tagObject, string prop, bool fromXml) { }
-            public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
         }
 
         [Rtti.Meta("")]

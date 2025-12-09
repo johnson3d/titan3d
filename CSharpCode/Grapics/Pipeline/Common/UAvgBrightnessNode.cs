@@ -131,7 +131,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             set 
             { 
                 mMinValidLuminance = value;
-                ParameterCBuffer.SetValue("MinValidLuminance", value);
+                if (ParameterCBuffer!=null)
+                    ParameterCBuffer.SetValue("MinValidLuminance", value);
             }
         }
         float mMaxValidLuminance = 3.5f;
@@ -142,7 +143,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             set
             {
                 mMaxValidLuminance = value;
-                ParameterCBuffer.SetValue("MaxValidLuminance", value);
+                if (ParameterCBuffer!=null)
+                    ParameterCBuffer.SetValue("MaxValidLuminance", value);
             }
         }
         float mLuminancePower = 0.8f;
@@ -153,7 +155,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             set
             {
                 mLuminancePower = value;
-                ParameterCBuffer.SetValue("LuminancePower", value);
+                if (ParameterCBuffer!=null)
+                    ParameterCBuffer.SetValue("LuminancePower", value);
             }
         }
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)

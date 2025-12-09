@@ -41066,6 +41066,44 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
+	static class EngineNS_Bricks_FX_Weather_TtVolumeCloudNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Weather.TtVolumeCloudNode;
+			ar.Write(srcObj.Enable);
+			ar.Write(srcObj.OutputScaleFactor);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.FX.Weather.TtVolumeCloudNode;
+			var srcObj = src as EngineNS.Bricks.FX.Weather.TtVolumeCloudNode;
+			tarObj.Enable = srcObj.Enable;
+			tarObj.OutputScaleFactor = srcObj.OutputScaleFactor;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_10213394745706711997 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Weather.TtVolumeCloudNode;
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+			System.Single t_OutputScaleFactor;
+			ar.Read(out t_OutputScaleFactor);
+			srcObj.OutputScaleFactor = t_OutputScaleFactor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "OutputScaleFactor", false);
+				}
+			}
+		};
+	}
 	static class EngineNS_Bricks_GI_PRT_TtPrtProbeVolume_TtPrtProbeVolumeData
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -161164,6 +161202,12 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(17543872329442000835, EngineNS_Bricks_FX_Water_TtFftWaterNode.Read_17543872329442000835);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.FX.Weather.TtVolumeCloudNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_FX_Weather_TtVolumeCloudNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_FX_Weather_TtVolumeCloudNode.CopyCurrentVersion;
+				kls.RegVersion(10213394745706711997, EngineNS_Bricks_FX_Weather_TtVolumeCloudNode.Read_10213394745706711997);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.GI.PRT.TtPrtProbeVolume.TtPrtProbeVolumeData@EngineCore");
 				kls.Writer = EngineNS_Bricks_GI_PRT_TtPrtProbeVolume_TtPrtProbeVolumeData.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_GI_PRT_TtPrtProbeVolume_TtPrtProbeVolumeData.CopyCurrentVersion;
@@ -164648,7 +164692,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = Survivor_TtWeaponProxyNode.CopyCurrentVersion;
 				kls.RegVersion(10759720178659608122, Survivor_TtWeaponProxyNode.Read_10759720178659608122);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("B1_7B_5D_E0_41_0B_3A_6E_DD_DC_CD_B2_FE_87_D8_64_B5_21_15_05");
+			this.VersionHash = EngineNS.Hash160.Parse("8E_34_B7_89_FA_61_B2_0B_DD_C4_A9_A3_BA_41_3E_E2_71_65_A7_7A");
 		}
 	}
 }

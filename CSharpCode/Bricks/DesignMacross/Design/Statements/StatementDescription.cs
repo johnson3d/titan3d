@@ -335,5 +335,9 @@ namespace EngineNS.DesignMacross.Design.Statement
             
         }
         public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
+        public void OnPropertyWrite(string prop, bool fromXml)
+        {
+
+        }
     }
 }

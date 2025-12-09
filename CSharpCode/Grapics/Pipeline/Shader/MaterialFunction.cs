@@ -53,7 +53,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     [TtMaterialFunction.MaterialFunctionImport]
     [IO.AssetCreateMenu(MenuName = "Graphics/MaterialFunction")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public partial class TtMaterialFunction : IO.ISerializer, IO.IAsset, IShaderCodeProvider
+    public partial class TtMaterialFunction : IO.BaseSerializer, IO.IAsset, IShaderCodeProvider
     {
         public const string AssetExt = ".mtlfunc";
         public string TypeExt { get => AssetExt; }
@@ -69,15 +69,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         #endregion
         #region ISerializer
-        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-
-        }
-        public virtual void OnPropertyRead(object tagObject, string prop, bool fromXml)
-        {
-
-        }
-        public virtual void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
+        
         #endregion
         #region IAsset
         public virtual IO.IAssetMeta CreateAMeta()
