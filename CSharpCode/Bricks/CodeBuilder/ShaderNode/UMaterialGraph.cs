@@ -321,7 +321,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public Rtti.TtTypeDesc InputType { get => VarType; }
         public TtMaterialFunctionInputTexture2D()
         {
-            TitleColor = Color4b.AliceBlue.ToArgb();
+            TitleColor = Color4b.AliceBlue.ToB8G8R8A8();
             Inputs.Clear();
         }
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
@@ -340,7 +340,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public Rtti.TtTypeDesc InputType { get => VarType; }
         public TtMaterialFunctionInputF1() 
         {
-            TitleColor = Color4b.AliceBlue.ToArgb();
+            TitleColor = Color4b.AliceBlue.ToB8G8R8A8();
             Inputs.Clear();
         }
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
@@ -359,7 +359,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public Rtti.TtTypeDesc InputType { get => VarType; }
         public TtMaterialFunctionInputF2()
         {
-            TitleColor = Color4b.AliceBlue.ToArgb();
+            TitleColor = Color4b.AliceBlue.ToB8G8R8A8();
             Inputs.Clear();
         }
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
@@ -378,7 +378,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public Rtti.TtTypeDesc InputType { get => VarType; }
         public TtMaterialFunctionInputF3()
         {
-            TitleColor = Color4b.AliceBlue.ToArgb();
+            TitleColor = Color4b.AliceBlue.ToB8G8R8A8();
             Inputs.Clear();
         }
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
@@ -397,7 +397,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public Rtti.TtTypeDesc InputType { get => VarType; }
         public TtMaterialFunctionInputF4()
         {
-            TitleColor = Color4b.AliceBlue.ToArgb();
+            TitleColor = Color4b.AliceBlue.ToB8G8R8A8();
             Inputs.Clear();
         }
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
@@ -417,7 +417,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public List<PinIn> OutPins { get => this.Inputs; }
         public TtMaterialFunctionOutputF1()
         {
-            TitleColor = Color4b.IndianRed.ToArgb();
+            TitleColor = Color4b.IndianRed.ToB8G8R8A8();
             this.RemovePinOut(OutX);
         }
         public string GetSetter(TtNodeBase node, PinIn pin)
@@ -437,7 +437,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public List<PinIn> OutPins { get => this.Inputs; }
         public TtMaterialFunctionOutputF2()
         {
-            TitleColor = Color4b.IndianRed.ToArgb();
+            TitleColor = Color4b.IndianRed.ToB8G8R8A8();
             Outputs.Clear();
         }
         public string GetSetter(TtNodeBase node, PinIn pin)
@@ -464,7 +464,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public List<PinIn> OutPins { get => this.Inputs; }
         public TtMaterialFunctionOutputF3()
         {
-            TitleColor = Color4b.IndianRed.ToArgb();
+            TitleColor = Color4b.IndianRed.ToB8G8R8A8();
             Outputs.Clear();
         }
         public string GetSetter(TtNodeBase node, PinIn pin)
@@ -493,7 +493,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public List<PinIn> OutPins { get => this.Inputs; }
         public TtMaterialFunctionOutputF4()
         {
-            TitleColor = Color4b.IndianRed.ToArgb();
+            TitleColor = Color4b.IndianRed.ToB8G8R8A8();
             Outputs.Clear();
         }
         public string GetSetter(TtNodeBase node, PinIn pin)

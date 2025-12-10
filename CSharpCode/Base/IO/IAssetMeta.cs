@@ -638,7 +638,7 @@ namespace EngineNS.IO
             //if (titleImg != null)
             //    titleImg.OnDraw(cmdlist, in start, in end);
 
-            cmdlist.AddRect(in snapStart, in snapEnd, (uint)GetBorderColor().ToAbgr(), 
+            cmdlist.AddRect(in snapStart, in snapEnd, (uint)GetBorderColor().ToR8G8B8A8(), 
                 0.0f, ImDrawFlags_.ImDrawFlags_None, EGui.UCoreStyles.Instance.SnapThinkness);
 
             var name = IO.TtFileManager.GetPureName(GetAssetName().Name, 11);

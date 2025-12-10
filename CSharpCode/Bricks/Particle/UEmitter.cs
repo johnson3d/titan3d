@@ -52,7 +52,7 @@ namespace EngineNS.Bricks.Particle
         {
             get
             {
-                return Color4f.FromColor4b(EngineNS.Color4b.FromArgb((int)Color));
+                return Color4f.FromColor4b(EngineNS.Color4b.FromB8G8R8A8((int)Color));
             }
             set
             {
@@ -571,7 +571,7 @@ namespace EngineNS.Bricks.Particle
         [Rtti.Meta("",ShaderName = "Uint2Color4f")]
         public Color4f Uint2Color4f(uint value)
         {
-            return Color4f.FromColor4b(Color4b.FromArgb((int)value));
+            return Color4f.FromColor4b(Color4b.FromB8G8R8A8((int)value));
         }
         [Rtti.Meta("",ShaderName = "HasFlags")]
         public EParticleFlags HasFlags(in FParticle particle, EParticleFlags flags)

@@ -541,7 +541,7 @@ namespace NxRHI
 		}
 		return flags;
 	}
-	AutoRef<DX12Buffer> CreateUploadResource(DX12GpuDevice* device, UINT rowPitch, UINT64 uploadSize, UINT64 rowSize, UINT numOfRows, EPixelFormat format, FMappedSubResource* mappedResource, const char* name)
+	AutoRef<DX12Buffer> CreateUploadResource(DX12GpuDevice* device, UINT rowPitch, UINT64 uploadSize, UINT64 rowSize, UINT numOfRows, UINT numOfSlice, EPixelFormat format, FMappedSubResource* mappedResource, const char* name)
 	{
 		D3D12_HEAP_PROPERTIES properties{};
 		properties.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -571,6 +571,7 @@ namespace NxRHI
 		uploadBuffer->Desc.Usage = USAGE_STAGING;
 		uploadBuffer->Desc.CpuAccess = (ECpuAccess)(CAS_READ | CAS_WRITE);
 		uploadBuffer->Desc.RowPitch = (UINT)rowPitch;
+		uploadBuffer->Desc.DepthPitch = (UINT)rowPitch * numOfRows;
 		uploadBuffer->Desc.Size = (UINT)uploadSize;
 		uploadBuffer->mGpuMemory = MakeWeakRef(device->GetUploadBufferMemAllocator()->AllocGpuMem(device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, name));
 		uploadBuffer->GpuState = GRS_CopySrc;
@@ -580,13 +581,20 @@ namespace NxRHI
 			FMappedSubResource mapped{};
 			if (uploadBuffer->Map(0, &mapped, false))
 			{
-				BYTE* pCopyTar = (BYTE*)mapped.pData;
-				BYTE* pCopySrc = (BYTE*)mappedResource->pData;
-				for (UINT y = 0; y < numOfRows; y++)
+				//BYTE* pCopyTar = (BYTE*)mapped.pData;
+				//BYTE* pCopySrc = (BYTE*)mappedResource->pData;
+				if (numOfSlice == 0)
+					numOfSlice = 1;
+				for (UINT z = 0; z < numOfSlice; z++)
 				{
-					memcpy(pCopyTar, pCopySrc, rowSize);
-					pCopyTar += rowPitch;
-					pCopySrc += mappedResource->RowPitch;
+					BYTE* pTarSliceStart = (BYTE*)mapped.pData + z * mapped.DepthPitch;
+					BYTE* pSrcSliceStart = (BYTE*)mappedResource->pData + z * mappedResource->DepthPitch;
+					for (UINT y = 0; y < numOfRows; y++)
+					{
+						memcpy(pTarSliceStart, pSrcSliceStart, rowSize);
+						pTarSliceStart += rowPitch;
+						pSrcSliceStart += mappedResource->RowPitch;
+					}
 				}
 				uploadBuffer->Unmap(0);
 			}
@@ -746,6 +754,9 @@ namespace NxRHI
 			{
 				UINT w = Desc.Width;
 				UINT h = Desc.Height;
+				UINT d = 1;
+				if (Desc.Depth > 0)
+					d = Desc.Depth;
 				for (UINT k = 0; k < desc.MipLevels; k++)
 				{
 					UINT j = i * Desc.MipLevels + k;
@@ -754,7 +765,7 @@ namespace NxRHI
 					UINT64 rowSize, totalSize;
 					device->mDevice->GetCopyableFootprints(&resDesc, j, 1, 0, &footPrint, &numX, &rowSize, &totalSize);
 
-					auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, Desc.Format, &desc.InitData[j], "Upload Texture");
+					auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, d, Desc.Format, &desc.InitData[j], "Upload Texture");
 					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
 					cpDraw->BindTextureDest(this); 
 					cpDraw->BindBufferSrc(bf);
@@ -773,11 +784,14 @@ namespace NxRHI
 					cmd->PushGpuDraw(cpDraw.GetPtr());
 
 					w = w / 2;
-					h = h / 2;
 					if (w == 0)
 						w = 1;
+					h = h / 2;
 					if (h == 0)
 						h = 1;
+					d = d / 2;
+					if (d == 0)
+						d = 1;
 				}
 			}
 		}
@@ -911,7 +925,7 @@ namespace NxRHI
 			initData.pData = pData;
 			initData.RowPitch = pFootPrint->RowPitch;
 			initData.DepthPitch = pFootPrint->TotalSize;
-			auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, Desc.Format, &initData, "Upload Texture");
+			auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, Desc.Depth, Desc.Format, &initData, "Upload Texture");
 			
 			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
 			cpDraw->BindTextureDest(this);

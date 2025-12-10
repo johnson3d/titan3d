@@ -66,7 +66,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         public void InitNode(Graphics.Pipeline.TtRenderGraphNode node)
         {
             mGraphNode = node;
-            TitleColor = node.GetTileColor().ToArgb();
+            TitleColor = node.GetTileColor().ToB8G8R8A8();
 
             Inputs.Clear();
             for (int i = 0; i < GraphNode.NumOfInput; i++)

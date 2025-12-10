@@ -307,15 +307,15 @@ namespace EngineNS.Graphics.Pipeline
             v2Z.Y *= -1;
 
             var v2Center = new Vector2(WorldAxis.X, this.ClientSize.Y - WorldAxis.Y) + DrawOffset;
-            cmdlst.AddLine(in v2Center, v2Center + v2X, (uint)Color4b.Red.ToAbgr(), 1);
-            cmdlst.AddLine(in v2Center, v2Center + v2Y, (uint)Color4b.Green.ToAbgr(), 1);
-            cmdlst.AddLine(in v2Center, v2Center + v2Z, (uint)Color4b.Blue.ToAbgr(), 1);
+            cmdlst.AddLine(in v2Center, v2Center + v2X, (uint)Color4b.Red.ToR8G8B8A8(), 1);
+            cmdlst.AddLine(in v2Center, v2Center + v2Y, (uint)Color4b.Green.ToR8G8B8A8(), 1);
+            cmdlst.AddLine(in v2Center, v2Center + v2Z, (uint)Color4b.Blue.ToR8G8B8A8(), 1);
 
-            cmdlst.AddText(v2Center + v2X, (uint)Color4b.Red.ToAbgr(), "x", null);
-            cmdlst.AddText(v2Center + v2Y, (uint)Color4b.Green.ToAbgr(), "y", null);
-            cmdlst.AddText(v2Center + v2Z, (uint)Color4b.Blue.ToAbgr(), "z", null);
+            cmdlst.AddText(v2Center + v2X, (uint)Color4b.Red.ToR8G8B8A8(), "x", null);
+            cmdlst.AddText(v2Center + v2Y, (uint)Color4b.Green.ToR8G8B8A8(), "y", null);
+            cmdlst.AddText(v2Center + v2Z, (uint)Color4b.Blue.ToR8G8B8A8(), "z", null);
 
-            cmdlst.AddText(v2Center, Color4b.LightPink.ToAbgr(), string.Format("fps={0:F2}", TtEngine.Instance.FPS), null);
+            cmdlst.AddText(v2Center, Color4b.LightPink.ToR8G8B8A8(), string.Format("fps={0:F2}", TtEngine.Instance.FPS), null);
         }
         protected virtual void OnViewportClosed()
         {

@@ -84,7 +84,7 @@ namespace EngineNS.Bricks.Procedure
         public UPgcNodeBase()
         {
             CompileButton.HostNode = this;
-            this.TitleColor = Color4b.FromRgb(255, 0, 255).ToArgb();
+            this.TitleColor = Color4b.FromRgb(255, 0, 255).ToB8G8R8A8();
         }
         ~UPgcNodeBase()
         {

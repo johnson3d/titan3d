@@ -41066,20 +41066,425 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
+	static class EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator_TtWeatherMapSettings
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings;
+			ar.Write(srcObj.AddCirrus);
+			ar.Write(srcObj.CirrusFrequency);
+			ar.Write(srcObj.CirrusStrength);
+			ar.Write(srcObj.CoverageAmount);
+			ar.Write(srcObj.CoverageFrequency);
+			ar.Write(srcObj.DensityAmount);
+			ar.Write(srcObj.DensityFrequency);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.Width);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings;
+			var srcObj = src as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings;
+			tarObj.AddCirrus = srcObj.AddCirrus;
+			tarObj.CirrusFrequency = srcObj.CirrusFrequency;
+			tarObj.CirrusStrength = srcObj.CirrusStrength;
+			tarObj.CoverageAmount = srcObj.CoverageAmount;
+			tarObj.CoverageFrequency = srcObj.CoverageFrequency;
+			tarObj.DensityAmount = srcObj.DensityAmount;
+			tarObj.DensityFrequency = srcObj.DensityFrequency;
+			tarObj.Height = srcObj.Height;
+			tarObj.Width = srcObj.Width;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_10206416952505092579 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings;
+			System.Boolean t_AddCirrus;
+			ar.Read(out t_AddCirrus);
+			srcObj.AddCirrus = t_AddCirrus;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AddCirrus", false);
+				}
+			}
+			System.Single t_CirrusFrequency;
+			ar.Read(out t_CirrusFrequency);
+			srcObj.CirrusFrequency = t_CirrusFrequency;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CirrusFrequency", false);
+				}
+			}
+			System.Single t_CirrusStrength;
+			ar.Read(out t_CirrusStrength);
+			srcObj.CirrusStrength = t_CirrusStrength;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CirrusStrength", false);
+				}
+			}
+			System.Single t_CoverageAmount;
+			ar.Read(out t_CoverageAmount);
+			srcObj.CoverageAmount = t_CoverageAmount;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CoverageAmount", false);
+				}
+			}
+			System.Single t_CoverageFrequency;
+			ar.Read(out t_CoverageFrequency);
+			srcObj.CoverageFrequency = t_CoverageFrequency;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CoverageFrequency", false);
+				}
+			}
+			System.Single t_DensityAmount;
+			ar.Read(out t_DensityAmount);
+			srcObj.DensityAmount = t_DensityAmount;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DensityAmount", false);
+				}
+			}
+			System.Single t_DensityFrequency;
+			ar.Read(out t_DensityFrequency);
+			srcObj.DensityFrequency = t_DensityFrequency;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DensityFrequency", false);
+				}
+			}
+			System.Int32 t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Int32 t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+		};
+	}
 	static class EngineNS_Bricks_FX_Weather_TtVolumeCloudNode
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Bricks.FX.Weather.TtVolumeCloudNode;
+			ar.Write(srcObj.CloudCoverage);
+			ar.Write(srcObj.CloudDensity);
+			ar.Write(srcObj.CloudHeightMax);
+			ar.Write(srcObj.CloudHeightMin);
+			ar.Write(srcObj.CloudScale);
+			ar.Write(srcObj.DarknessThreshold);
 			ar.Write(srcObj.Enable);
+			ar.Write(srcObj.LightAbsorption);
+			ar.Write(srcObj.LightDir);
+			ar.Write(srcObj.MaxSteps);
 			ar.Write(srcObj.OutputScaleFactor);
+			if (srcObj.WeatherSettings != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.WeatherSettings.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.WeatherSettings);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
 			var tarObj = tar as EngineNS.Bricks.FX.Weather.TtVolumeCloudNode;
 			var srcObj = src as EngineNS.Bricks.FX.Weather.TtVolumeCloudNode;
+			tarObj.CloudCoverage = srcObj.CloudCoverage;
+			tarObj.CloudDensity = srcObj.CloudDensity;
+			tarObj.CloudHeightMax = srcObj.CloudHeightMax;
+			tarObj.CloudHeightMin = srcObj.CloudHeightMin;
+			tarObj.CloudScale = srcObj.CloudScale;
+			tarObj.DarknessThreshold = srcObj.DarknessThreshold;
 			tarObj.Enable = srcObj.Enable;
+			tarObj.LightAbsorption = srcObj.LightAbsorption;
+			tarObj.LightDir = srcObj.LightDir;
+			tarObj.MaxSteps = srcObj.MaxSteps;
 			tarObj.OutputScaleFactor = srcObj.OutputScaleFactor;
+			if (srcObj.WeatherSettings != null)
+			{
+				if (tarObj.WeatherSettings == null || tarObj.WeatherSettings.GetType() != srcObj.WeatherSettings.GetType())
+				{
+					tarObj.WeatherSettings = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.WeatherSettings.GetType()) as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings;
+				}
+				if (tarObj.WeatherSettings != null)
+				{
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings>.TypeDesc.TypeString);
+					if (fn != null)
+					{
+						fn(tarObj.WeatherSettings, srcObj.WeatherSettings);
+					}
+				}
+			}
+			else if (srcObj.WeatherSettings == null)
+			{
+				tarObj.WeatherSettings = null;
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7144489265181067940 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Weather.TtVolumeCloudNode;
+			System.Single t_CloudCoverage;
+			ar.Read(out t_CloudCoverage);
+			srcObj.CloudCoverage = t_CloudCoverage;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CloudCoverage", false);
+				}
+			}
+			System.Single t_CloudDensity;
+			ar.Read(out t_CloudDensity);
+			srcObj.CloudDensity = t_CloudDensity;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CloudDensity", false);
+				}
+			}
+			System.Single t_CloudHeightMax;
+			ar.Read(out t_CloudHeightMax);
+			srcObj.CloudHeightMax = t_CloudHeightMax;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CloudHeightMax", false);
+				}
+			}
+			System.Single t_CloudHeightMin;
+			ar.Read(out t_CloudHeightMin);
+			srcObj.CloudHeightMin = t_CloudHeightMin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CloudHeightMin", false);
+				}
+			}
+			EngineNS.Vector2 t_CloudScale;
+			ar.Read(out t_CloudScale);
+			srcObj.CloudScale = t_CloudScale;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CloudScale", false);
+				}
+			}
+			System.Single t_DarknessThreshold;
+			ar.Read(out t_DarknessThreshold);
+			srcObj.DarknessThreshold = t_DarknessThreshold;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DarknessThreshold", false);
+				}
+			}
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+			System.Single t_LightAbsorption;
+			ar.Read(out t_LightAbsorption);
+			srcObj.LightAbsorption = t_LightAbsorption;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "LightAbsorption", false);
+				}
+			}
+			EngineNS.Vector3 t_LightDir;
+			ar.Read(out t_LightDir);
+			srcObj.LightDir = t_LightDir;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "LightDir", false);
+				}
+			}
+			System.Int32 t_MaxSteps;
+			ar.Read(out t_MaxSteps);
+			srcObj.MaxSteps = t_MaxSteps;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxSteps", false);
+				}
+			}
+			System.Single t_OutputScaleFactor;
+			ar.Read(out t_OutputScaleFactor);
+			srcObj.OutputScaleFactor = t_OutputScaleFactor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "OutputScaleFactor", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7821179058082626963 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Weather.TtVolumeCloudNode;
+			System.Single t_CloudCoverage;
+			ar.Read(out t_CloudCoverage);
+			srcObj.CloudCoverage = t_CloudCoverage;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CloudCoverage", false);
+				}
+			}
+			System.Single t_CloudDensity;
+			ar.Read(out t_CloudDensity);
+			srcObj.CloudDensity = t_CloudDensity;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CloudDensity", false);
+				}
+			}
+			System.Single t_CloudHeightMax;
+			ar.Read(out t_CloudHeightMax);
+			srcObj.CloudHeightMax = t_CloudHeightMax;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CloudHeightMax", false);
+				}
+			}
+			System.Single t_CloudHeightMin;
+			ar.Read(out t_CloudHeightMin);
+			srcObj.CloudHeightMin = t_CloudHeightMin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CloudHeightMin", false);
+				}
+			}
+			EngineNS.Vector2 t_CloudScale;
+			ar.Read(out t_CloudScale);
+			srcObj.CloudScale = t_CloudScale;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CloudScale", false);
+				}
+			}
+			System.Single t_DarknessThreshold;
+			ar.Read(out t_DarknessThreshold);
+			srcObj.DarknessThreshold = t_DarknessThreshold;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DarknessThreshold", false);
+				}
+			}
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+			System.Single t_LightAbsorption;
+			ar.Read(out t_LightAbsorption);
+			srcObj.LightAbsorption = t_LightAbsorption;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "LightAbsorption", false);
+				}
+			}
+			EngineNS.Vector3 t_LightDir;
+			ar.Read(out t_LightDir);
+			srcObj.LightDir = t_LightDir;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "LightDir", false);
+				}
+			}
+			System.Int32 t_MaxSteps;
+			ar.Read(out t_MaxSteps);
+			srcObj.MaxSteps = t_MaxSteps;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxSteps", false);
+				}
+			}
+			System.Single t_OutputScaleFactor;
+			ar.Read(out t_OutputScaleFactor);
+			srcObj.OutputScaleFactor = t_OutputScaleFactor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "OutputScaleFactor", false);
+				}
+			}
+			EngineNS.Hash64 type_WeatherSettings;
+			ar.Read(out type_WeatherSettings);
+			var meta_WeatherSettings = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_WeatherSettings);
+			if(meta_WeatherSettings != null)
+			{
+				EngineNS.Hash64 ver_WeatherSettings;
+				ar.Read(out ver_WeatherSettings);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_WeatherSettings.ClassType.TypeString, ver_WeatherSettings );
+				if (fn != null)
+				{
+					EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings t_WeatherSettings = null;
+					t_WeatherSettings = srcObj.WeatherSettings;
+					if (t_WeatherSettings == null)
+					{
+						t_WeatherSettings = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_WeatherSettings.ClassType) as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings;
+					}
+					fn(ar, t_WeatherSettings);
+					srcObj.WeatherSettings = t_WeatherSettings;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "WeatherSettings", false);
+						}
+					}
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_10213394745706711997 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -161202,10 +161607,18 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(17543872329442000835, EngineNS_Bricks_FX_Water_TtFftWaterNode.Read_17543872329442000835);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings@EngineCore");
+				kls.Writer = EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator_TtWeatherMapSettings.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator_TtWeatherMapSettings.CopyCurrentVersion;
+				kls.RegVersion(10206416952505092579, EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator_TtWeatherMapSettings.Read_10206416952505092579);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.FX.Weather.TtVolumeCloudNode@EngineCore");
 				kls.Writer = EngineNS_Bricks_FX_Weather_TtVolumeCloudNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_FX_Weather_TtVolumeCloudNode.CopyCurrentVersion;
 				kls.RegVersion(10213394745706711997, EngineNS_Bricks_FX_Weather_TtVolumeCloudNode.Read_10213394745706711997);
+				kls.RegVersion(7144489265181067940, EngineNS_Bricks_FX_Weather_TtVolumeCloudNode.Read_7144489265181067940);
+				kls.RegVersion(7821179058082626963, EngineNS_Bricks_FX_Weather_TtVolumeCloudNode.Read_7821179058082626963);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.GI.PRT.TtPrtProbeVolume.TtPrtProbeVolumeData@EngineCore");
@@ -164692,7 +165105,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = Survivor_TtWeaponProxyNode.CopyCurrentVersion;
 				kls.RegVersion(10759720178659608122, Survivor_TtWeaponProxyNode.Read_10759720178659608122);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("8E_34_B7_89_FA_61_B2_0B_DD_C4_A9_A3_BA_41_3E_E2_71_65_A7_7A");
+			this.VersionHash = EngineNS.Hash160.Parse("8F_C1_36_0E_E3_C1_4E_D2_8F_88_E2_9A_4B_98_49_41_4B_7F_27_6E");
 		}
 	}
 }

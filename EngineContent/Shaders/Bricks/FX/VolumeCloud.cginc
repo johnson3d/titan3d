@@ -15,7 +15,6 @@ SamplerState Samp_CloudNoiseTex;
 Texture2D WeatherTex;
 SamplerState Samp_WeatherTex;
 // ÆÁÄ»ÎÆÀí
-
 Texture2D ColorBuffer;
 SamplerState Samp_ColorBuffer;
 
@@ -36,8 +35,6 @@ cbuffer cbShadingEnv DX_AUTOBIND
     
     float3 LightDir;
     int MaxSteps;
-    //float RayOffsetStrength;
-    
 };
 
 PS_INPUT VS_Main(VS_INPUT input1)

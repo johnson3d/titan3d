@@ -353,7 +353,7 @@ namespace EngineNS.EGui.Controls
                             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.TVHeader);
                             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.TVHeaderActive);
                             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.TVHeaderHovered);
-                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, ameta.GetBorderColor().ToAbgr());
+                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, ameta.GetBorderColor().ToR8G8B8A8());
                             var selectItemResult = ImGuiAPI.Selectable(mViewAssetsDatas[i].Type, ameta.IsSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_SpanAllColumns, Vector2.Zero);
                             ImGuiAPI.PopStyleColor(4);
                             AssetItemOperation(ameta, i);

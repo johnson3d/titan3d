@@ -594,7 +594,7 @@ namespace EngineNS.Bricks.FX.Water
             if (mMesh==null)
             {
                 mMesh = mMeshBuilder.ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialManager.NavMeshDebugWireMaterial);
-                mMesh.DebugName = "FftWater";
+                //mMesh.DebugName = "FftWater";
             }
             else
             {

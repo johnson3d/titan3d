@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public uint FlowControlTitleColor = 0xFF299325;
         public uint SelfLinkColor = 0xAABB008C;
-        public uint HostClassLinkColor = Color4b.FromArgb(100, 0, 100, 0).ToAbgr();
+        public uint HostClassLinkColor = Color4b.FromArgb(100, 0, 100, 0).ToR8G8B8A8();
         public uint DefaultPinColor = 0xFF00FF00;
         public uint DebugLineColor = 0xFF0000FF;
 

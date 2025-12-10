@@ -4,9 +4,12 @@ using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Support;
 using EngineNS.Thread.Async;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using static EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator;
 
@@ -126,29 +129,44 @@ namespace EngineNS.Bricks.FX.Weather
                 }
             }
         }
-        public class WeatherMapSettings
+        public class TtWeatherMapSettings : IO.BaseSerializer
         {
-            public int width = 256;
-            public int height = 256;
-
-            public float coverageFrequency = 0.002f;
-            public float coverageAmount = 0.7f;
-
-            public float densityFrequency = 0.005f;
-            public float densityAmount = 0.5f;
-
-            public bool addCirrus = true;
-            public float cirrusFrequency = 0.001f;
-            public float cirrusStrength = 0.3f;
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public int Width { get; set; } = 256;
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public int Height { get; set; } = 256;
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public float CoverageFrequency { get; set; } = 8.0f;
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public float CoverageAmount { get; set; } = 0.7f;
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public float DensityFrequency { get; set; } = 0.005f;
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public float DensityAmount { get; set; } = 0.5f;
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public bool AddCirrus { get; set; } = true;
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public float CirrusFrequency { get; set; } = 0.001f;
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public float CirrusStrength { get; set; } = 0.3f;
         }
-        public unsafe NxRHI.TtTexture GenerateWeatherMap(WeatherMapSettings weatherMapSettings)
+        public unsafe NxRHI.TtTexture GenerateWeatherMap(TtWeatherMapSettings weatherMapSettings)
         {
-            int width = weatherMapSettings.width;
-            int height = weatherMapSettings.height;
+            int width = weatherMapSettings.Width;
+            int height = weatherMapSettings.Height;
 
             Color4f[] colors = new Color4f[width * height];
 
-            var perlin = new Support.TtPerlin2((int)TtEngine.Instance.CurrentTickFrame);
+            var perlin = new Support.TtPerlin2((int)TtEngine.Instance.CurrentTickFrame, 1024);
             // 生成天气图
             for (int y = 0; y < height; y++)
             {
@@ -160,27 +178,30 @@ namespace EngineNS.Bricks.FX.Weather
 
                     // 1. 覆盖率（R通道）
                     float coverage = (float)perlin.Noise(
-                        u * weatherMapSettings.coverageFrequency,
-                        v * weatherMapSettings.coverageFrequency);
+                        u * weatherMapSettings.CoverageFrequency,
+                        v * weatherMapSettings.CoverageFrequency);
 
-                    coverage = MathHelper.Clamp(coverage * weatherMapSettings.coverageAmount, 0, 1);
+                    coverage = (coverage + 1.0f)/2.0f;
+                    coverage = MathHelper.Clamp(coverage * weatherMapSettings.CoverageAmount, 0, 1);
 
                     // 2. 密度（G通道）
                     float density = (float)perlin.Noise(
-                        u * weatherMapSettings.densityFrequency + 100,
-                        v * weatherMapSettings.densityFrequency + 100);
+                        u * weatherMapSettings.DensityFrequency + 100,
+                        v * weatherMapSettings.DensityFrequency + 100);
 
-                    density = MathHelper.Clamp(density * weatherMapSettings.densityAmount, 0, 1);
+                    density = (density + 1.0f)/2.0f;
+                    density = MathHelper.Clamp(density * weatherMapSettings.DensityAmount, 0, 1);
 
                     // 3. 卷云效果（B通道）
                     float cirrus = 0;
-                    if (weatherMapSettings.addCirrus)
+                    if (weatherMapSettings.AddCirrus)
                     {
                         cirrus = (float)perlin.Noise(
-                            u * weatherMapSettings.cirrusFrequency + 200,
-                            v * weatherMapSettings.cirrusFrequency + 200);
+                            u * weatherMapSettings.CirrusFrequency + 200,
+                            v * weatherMapSettings.CirrusFrequency + 200);
 
-                        cirrus = MathHelper.Clamp(cirrus * weatherMapSettings.cirrusStrength, 0, 1);
+                        cirrus = (cirrus + 1.0f)/2.0f;
+                        cirrus = MathHelper.Clamp(cirrus * weatherMapSettings.CirrusStrength, 0, 1);
                     }
 
                     // 4. 海拔变化（A通道）- 可选
@@ -189,8 +210,23 @@ namespace EngineNS.Bricks.FX.Weather
                         v * 0.001f + 300);
 
                     // 组合到颜色
-                    colors[x + y * width] = new Color4f(coverage, density, cirrus, elevation);
+                    colors[x + y * width] = new Color4f(elevation, coverage, density, cirrus);
                 }
+            }
+
+            float cmin = float.MaxValue;
+            float cmax = float.MinValue;
+            foreach (var color in colors)
+            {
+                if (color.r<cmin)
+                    cmin = color.r;
+                if (color.r>cmax)
+                    cmax = color.r;
+            }
+            float delta = cmax -cmin;
+            for (int i = 0; i<colors.Length; i++)
+            {
+                colors[i].Red = (colors[i].Red - cmin)/delta;
             }
 
             var sourceLayer = new NxRHI.TtTextureUtility.TtTex2dLayer();
@@ -214,9 +250,9 @@ namespace EngineNS.Bricks.FX.Weather
             {
                 for (int i = 0; i<mipDatas.Count; i++)
                 {
-                    initData[i].RowPitch = (uint)(mipDatas[i].Width * sizeof(Half));
+                    initData[i].RowPitch = (uint)(mipDatas[i].Width * sizeof(Color4b));
                     initData[i].DepthPitch = (uint)(initData[i].RowPitch * mipDatas[i].Height);
-                    initData[i].pData = mipDatas[i].CreateRHalf();
+                    initData[i].pData = mipDatas[i].CreateColorR8G8B8A8();
                 }
 
                 var texDesc = new NxRHI.FTextureDesc();
@@ -340,6 +376,7 @@ namespace EngineNS.Bricks.FX.Weather
         public TtVolumeCloudNode()
         {
             Name = "VolumeCloud";
+            mShadingStruct.SetDefault();
         }
         public override void Dispose()
         {
@@ -365,8 +402,7 @@ namespace EngineNS.Bricks.FX.Weather
             var gen = new TtCloudNoiseGenerator();
             
             {
-                var weatherSettings = new TtCloudNoiseGenerator.WeatherMapSettings();
-                var weatherTex = gen.GenerateWeatherMap(weatherSettings);
+                var weatherTex = gen.GenerateWeatherMap(mWeatherSettings);
                 
                 NxRHI.FSrvDesc srvDesc = new NxRHI.FSrvDesc();
                 srvDesc.SetTexture2D();
@@ -385,8 +421,143 @@ namespace EngineNS.Bricks.FX.Weather
                 CloudNoiseSrv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(cloudNoiseTex, in srvDesc);
             }
         }
+        TtWeatherMapSettings mWeatherSettings = new TtWeatherMapSettings();
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public TtWeatherMapSettings WeatherSettings
+        {
+            get 
+            { 
+                return mWeatherSettings; 
+            }
+            set
+            {
+                mWeatherSettings = value;
+            }
+        }
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
+        public struct FShadingStruct
+        {
+            public void SetDefault()
+            {
+                CloudColor = Color4b.WhiteSmoke.ToVector4();
+                ShadowColor = Color4b.DarkGray.ToVector4();
+                LightColor = Color4b.LightGoldenrodYellow.ToVector4();
+
+                CloudDensity = 1;
+                CloudCoverage = 1;
+                CloudHeightMin = 100;
+                CloudHeightMax = 200;
+
+                CloudScale = new Vector2(1,1);
+                LightAbsorption = 0.5f;
+                DarknessThreshold = 0.01f;
+
+                LightDir = Vector3.Down;
+                MaxSteps = 32;
+            }
+            public Vector4 CloudColor;
+            public Vector4 ShadowColor;
+            public Vector4 LightColor;
+            
+            public float CloudDensity;
+            public float CloudCoverage;
+            public float CloudHeightMin;
+            public float CloudHeightMax;
+            
+            public Vector2 CloudScale;
+            public float LightAbsorption;
+            public float DarknessThreshold;
+            
+            public Vector3 LightDir;
+            public int MaxSteps;
+        }
+        protected FShadingStruct mShadingStruct = new FShadingStruct();
+        public Vector4 CloudColor
+        {
+            get => mShadingStruct.CloudColor;
+            set => mShadingStruct.CloudColor = value;
+        }
+        public Vector4 ShadowColor
+        {
+            get => mShadingStruct.ShadowColor;
+            set => mShadingStruct.ShadowColor = value;
+        }
+        public Vector4 LightColor
+        {
+            get => mShadingStruct.LightColor;
+            set => mShadingStruct.LightColor = value;
+        }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public float CloudDensity
+        {
+            get => mShadingStruct.CloudDensity;
+            set => mShadingStruct.CloudDensity = value;
+        }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public float CloudCoverage
+        {
+            get => mShadingStruct.CloudCoverage;
+            set => mShadingStruct.CloudCoverage = value;
+        }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public float CloudHeightMin
+        {
+            get => mShadingStruct.CloudHeightMin;
+            set => mShadingStruct.CloudHeightMin = value;
+        }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public float CloudHeightMax
+        {
+            get => mShadingStruct.CloudHeightMax;
+            set => mShadingStruct.CloudHeightMax = value;
+        }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public Vector2 CloudScale
+        {
+            get => mShadingStruct.CloudScale;
+            set => mShadingStruct.CloudScale = value;
+        }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public float LightAbsorption
+        {
+            get => mShadingStruct.LightAbsorption;
+            set => mShadingStruct.LightAbsorption = value;
+        }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public float DarknessThreshold
+        {
+            get => mShadingStruct.DarknessThreshold;
+            set => mShadingStruct.DarknessThreshold = value;
+        }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public Vector3 LightDir
+        {
+            get => mShadingStruct.LightDir;
+            set => mShadingStruct.LightDir = value;
+        }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public int MaxSteps
+        {
+            get => mShadingStruct.MaxSteps;
+            set => mShadingStruct.MaxSteps = value;
+        }
         public override void TickLogic(TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
+            if (ShadingCbv!=null)
+            {
+                ShadingCbv.SetValue("cbShadingEnv", in mShadingStruct);
+            }
             base.TickLogic(world, policy, frameCmdList, bClear);
         }
         #region Rhi Resouces

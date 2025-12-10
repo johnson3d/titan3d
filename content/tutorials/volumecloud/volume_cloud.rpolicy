@@ -421,8 +421,28 @@
       <NodeId Type="System.Guid@Unknown" Value="0e6ffdfd-ce6e-45a6-801d-49c39af4f79d" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="1475.9996,-28.999878" />
       <GraphNode Type="EngineNS.Bricks.FX.Weather.TtVolumeCloudNode@EngineCore">
+        <CloudCoverage Type="System.Single@Unknown" Value="1" />
+        <CloudDensity Type="System.Single@Unknown" Value="1" />
+        <CloudHeightMax Type="System.Single@Unknown" Value="200" />
+        <CloudHeightMin Type="System.Single@Unknown" Value="100" />
+        <CloudScale Type="EngineNS.Vector2@EngineCore" Value="1,1" />
+        <DarknessThreshold Type="System.Single@Unknown" Value="0.01" />
         <Enable Type="System.Boolean@Unknown" Value="True" />
+        <LightAbsorption Type="System.Single@Unknown" Value="0.5" />
+        <LightDir Type="EngineNS.Vector3@EngineCore" Value="0,-1,0" />
+        <MaxSteps Type="System.Int32@Unknown" Value="32" />
         <OutputScaleFactor Type="System.Single@Unknown" Value="1" />
+        <WeatherSettings Type="EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings@EngineCore">
+          <AddCirrus Type="System.Boolean@Unknown" Value="True" />
+          <CirrusFrequency Type="System.Single@Unknown" Value="0.001" />
+          <CirrusStrength Type="System.Single@Unknown" Value="0.3" />
+          <CoverageAmount Type="System.Single@Unknown" Value="0.7" />
+          <CoverageFrequency Type="System.Single@Unknown" Value="8" />
+          <DensityAmount Type="System.Single@Unknown" Value="0.5" />
+          <DensityFrequency Type="System.Single@Unknown" Value="0.005" />
+          <Height Type="System.Int32@Unknown" Value="256" />
+          <Width Type="System.Int32@Unknown" Value="256" />
+        </WeatherSettings>
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_34>

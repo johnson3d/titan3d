@@ -31,7 +31,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             {
                 var level = (byte)(node.DeepLevel * 255 / MaxDeepLevel);
                 var color = new Color4b(level, level, level, 255);
-                cmdlist.AddRect(in min, in max, color.ToAbgr(), 0.0f, ImDrawFlags_.ImDrawFlags_None, 1.0f);
+                cmdlist.AddRect(in min, in max, color.ToR8G8B8A8(), 0.0f, ImDrawFlags_.ImDrawFlags_None, 1.0f);
                 stats.Node++;
 
                 DrawQTree(graphNode, node.Child00, cmdlist, in drawSize, in DrawOffset, ref stats);
@@ -54,7 +54,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                 }
                 var level = (byte)(node.DeepLevel * 255 / MaxDeepLevel);
                 var color = new Color4b(level, level, level, 255);
-                cmdlist.AddRect(in min, in max, color.ToAbgr(), 0.0f, ImDrawFlags_.ImDrawFlags_None, 1.0f);
+                cmdlist.AddRect(in min, in max, color.ToR8G8B8A8(), 0.0f, ImDrawFlags_.ImDrawFlags_None, 1.0f);
                 //cmdlist.AddText(in min, Color4b.White.ToAbgr(), node.PageIndex.ToString(), null);
                 stats.Node++;
                 stats.Tile += 1;
@@ -130,7 +130,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                         pos.X = (float)(pos.X * side / t.X);
                         pos.Y = (float)(pos.Y * side / t.Y);
                         pos += DrawOffset;
-                        cmdlist.AddCircle(in pos, 5, Color4b.Red.ToAbgr(), 10, 1);
+                        cmdlist.AddCircle(in pos, 5, Color4b.Red.ToR8G8B8A8(), 10, 1);
                     }
                 }
             }

@@ -194,7 +194,7 @@ namespace EngineNS
 		    //value += a << 24;
 
 		    //return value;
-            return ToColor4b().ToArgb();
+            return ToColor4b().ToB8G8R8A8();
 	    }
         public UInt32 ToAbgr()
         {
@@ -211,7 +211,7 @@ namespace EngineNS
             //value += a << 24;
 
             //return value;
-            return ToColor4b().ToAbgr();
+            return ToColor4b().ToR8G8B8A8();
         }
         public static Color4f FromColor4b(Color4b color)
         {

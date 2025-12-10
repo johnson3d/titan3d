@@ -734,7 +734,7 @@ namespace EngineNS
         {
             get
             {
-                return ToArgb().ToString("X");
+                return ToB8G8R8A8().ToString("X");
             }
         }
 
@@ -766,7 +766,7 @@ namespace EngineNS
             return ret;
         }
 
-        public static Color4b FromArgb( int alpha, Color4b baseColor )
+        public static Color4b FromArgb(int alpha, Color4b baseColor )
         {
             var ret = new Color4b();
             ret.A = (byte)alpha;
@@ -777,7 +777,7 @@ namespace EngineNS
 
         }
 
-        public static Color4b FromArgb(int value)
+        public static Color4b FromB8G8R8A8(int value)
         {
             var ret = new Color4b();
             ret.A = (byte)(value >> 24);
@@ -786,7 +786,7 @@ namespace EngineNS
             ret.B = (byte)(value);
             return ret;
         }
-        public static Color4b FromAbgr(int value)
+        public static Color4b FromR8G8B8A8(int value)
         {
             var ret = new Color4b();
             ret.A = (byte)(value >> 24);
@@ -795,11 +795,11 @@ namespace EngineNS
             ret.R = (byte)(value);
             return ret;
         }
-        public uint ToArgb()
+        public uint ToB8G8R8A8()
         {
             return (((uint)(B)) | ((uint)(G) << 8) | ((uint)(R << 16)) | ((uint)(A << 24)));
         }
-        public uint ToAbgr()
+        public uint ToR8G8B8A8()
         {
             return (((uint)(R)) | ((uint)(G) << 8) | ((uint)(B << 16)) | ((uint)(A << 24)));
         }
@@ -811,6 +811,15 @@ namespace EngineNS
             result.Red = (float)R / 255.0f;
             result.Green = (float)G / 255.0f;
             result.Blue = (float)B / 255.0f;
+            return result;
+        }
+        public Vector4 ToVector4()
+        {
+            Vector4 result;
+            result.W = (float)A / 255.0f;
+            result.X = (float)R / 255.0f;
+            result.Y = (float)G / 255.0f;
+            result.Z = (float)B / 255.0f;
             return result;
         }
         /// <summary>
@@ -912,563 +921,563 @@ namespace EngineNS
 
         public static Color4b AliceBlue
         {
-            get { return FromArgb(unchecked((int)(0xFFF0F8FF))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFF0F8FF))); }
         }
         public static Color4b AntiqueWhite
         {
-            get { return FromArgb(unchecked((int)(0xFFFAEBD7))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFAEBD7))); }
         }
         public static Color4b Aqua
         {
-            get { return FromArgb(unchecked((int)(0xFF00FFFF))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF00FFFF))); }
         }
         public static Color4b Aquamarine
         {
-            get { return FromArgb(unchecked((int)(0xFF7FFFD4))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF7FFFD4))); }
         }
         public static Color4b Azure
         {
-            get { return FromArgb(unchecked((int)(0xFFF0FFFF))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFF0FFFF))); }
         }
         public static Color4b Bisque
         {
-            get { return FromArgb(unchecked((int)(0xFFFFE4C4))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFE4C4))); }
         }
         public static Color4b Black
         {
-            get { return FromArgb(unchecked((int)(0xFF000000))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF000000))); }
         }
         public static Color4b BlanchedAlmond
         {
-            get { return FromArgb(unchecked((int)(0xFFFFEBCD))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFEBCD))); }
         }
         public static Color4b Blue
         {
-            get { return FromArgb(unchecked((int)(0xFF0000FF))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF0000FF))); }
         }
         public static Color4b BlueViolet
         {
-            get { return FromArgb(unchecked((int)(0xFF8A2BE2))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF8A2BE2))); }
         }
         public static Color4b Brown
         {
-            get { return FromArgb(unchecked((int)(0xFFA52A2A))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFA52A2A))); }
         }
         public static Color4b BurlyWood
         {
-            get { return FromArgb(unchecked((int)(0xFFDEB887))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFDEB887))); }
         }
         public static Color4b CadetBlue
         {
-            get { return FromArgb(unchecked((int)(0xFF5F9EA0))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF5F9EA0))); }
         }
         public static Color4b Chartreuse
         {
-            get { return FromArgb(unchecked((int)(0xFF7FFF00))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF7FFF00))); }
         }
         public static Color4b Chocolate
         {
-            get { return FromArgb(unchecked((int)(0xFFD2691E))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFD2691E))); }
         }
         public static Color4b Coral
         {
-            get { return FromArgb(unchecked((int)(0xFFFF7F50))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFF7F50))); }
         }
         public static Color4b CornflowerBlue
         {
-            get { return FromArgb(unchecked((int)(0xFF6495ED))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF6495ED))); }
         }
         public static Color4b Cornsilk
         {
-            get { return FromArgb(unchecked((int)(0xFFFFF8DC))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFF8DC))); }
         }
         public static Color4b Crimson
         {
-            get { return FromArgb(unchecked((int)(0xFFDC143C))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFDC143C))); }
         }
         public static Color4b Cyan
         {
-            get { return FromArgb(unchecked((int)(0xFF00FFFF))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF00FFFF))); }
         }
         public static Color4b DarkBlue
         {
-            get { return FromArgb(unchecked((int)(0xFF00008B))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF00008B))); }
         }
         public static Color4b DarkCyan
         {
-            get { return FromArgb(unchecked((int)(0xFF008B8B))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF008B8B))); }
         }
         public static Color4b DarkGoldenrod
         {
-            get { return FromArgb(unchecked((int)(0xFFB8860B))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFB8860B))); }
         }
         public static Color4b DarkGray
         {
-            get { return FromArgb(unchecked((int)(0xFFA9A9A9))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFA9A9A9))); }
         }
         public static Color4b DarkGreen
         {
-            get { return FromArgb(unchecked((int)(0xFF006400))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF006400))); }
         }
         public static Color4b DarkKhaki
         {
-            get { return FromArgb(unchecked((int)(0xFFBDB76B))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFBDB76B))); }
         }
         public static Color4b DarkMagenta
         {
-            get { return FromArgb(unchecked((int)(0xFF8B008B))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF8B008B))); }
         }
         public static Color4b DarkOliveGreen
         {
-            get { return FromArgb(unchecked((int)(0xFF556B2F))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF556B2F))); }
         }
         public static Color4b DarkOrange
         {
-            get { return FromArgb(unchecked((int)(0xFFFF8C00))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFF8C00))); }
         }
         public static Color4b DarkOrchid
         {
-            get { return FromArgb(unchecked((int)(0xFF9932CC))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF9932CC))); }
         }
         public static Color4b DarkRed
         {
-            get { return FromArgb(unchecked((int)(0xFF8B0000))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF8B0000))); }
         }
         public static Color4b DarkSalmon
         {
-            get { return FromArgb(unchecked((int)(0xFFE9967A))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFE9967A))); }
         }
         public static Color4b DarkSeaGreen
         {
-            get { return FromArgb(unchecked((int)(0xFF8FBC8F))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF8FBC8F))); }
         }
         public static Color4b DarkSlateBlue
         {
-            get { return FromArgb(unchecked((int)(0xFF483D8B))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF483D8B))); }
         }
         public static Color4b DarkSlateGray
         {
-            get { return FromArgb(unchecked((int)(0xFF2F4F4F))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF2F4F4F))); }
         }
         public static Color4b DarkTurquoise
         {
-            get { return FromArgb(unchecked((int)(0xFF00CED1))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF00CED1))); }
         }
         public static Color4b DarkViolet
         {
-            get { return FromArgb(unchecked((int)(0xFF9400D3))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF9400D3))); }
         }
         public static Color4b DeepPink
         {
-            get { return FromArgb(unchecked((int)(0xFFFF1493))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFF1493))); }
         }
         public static Color4b DeepSkyBlue
         {
-            get { return FromArgb(unchecked((int)(0xFF00BFFF))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF00BFFF))); }
         }
         public static Color4b DimGray
         {
-            get { return FromArgb(unchecked((int)(0xFF696969))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF696969))); }
         }
         public static Color4b DodgerBlue
         {
-            get { return FromArgb(unchecked((int)(0xFF1E90FF))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF1E90FF))); }
         }
         public static Color4b Firebrick
         {
-            get { return FromArgb(unchecked((int)(0xFFB22222))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFB22222))); }
         }
         public static Color4b FloralWhite
         {
-            get { return FromArgb(unchecked((int)(0xFFFFFAF0))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFFAF0))); }
         }
         public static Color4b ForestGreen
         {
-            get { return FromArgb(unchecked((int)(0xFF228B22))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF228B22))); }
         }
         public static Color4b Fuchsia
         {
-            get { return FromArgb(unchecked((int)(0xFFFF00FF))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFF00FF))); }
         }
         public static Color4b Gainsboro
         {
-            get { return FromArgb(unchecked((int)(0xFFDCDCDC))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFDCDCDC))); }
         }
         public static Color4b GhostWhite
         {
-            get { return FromArgb(unchecked((int)(0xFFF8F8FF))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFF8F8FF))); }
         }
         public static Color4b Gold
         {
-            get { return FromArgb(unchecked((int)(0xFFFFD700))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFD700))); }
         }
         public static Color4b Goldenrod
         {
-            get { return FromArgb(unchecked((int)(0xFFDAA520))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFDAA520))); }
         }
         public static Color4b Gray
         {
-            get { return FromArgb(unchecked((int)(0xFF808080))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF808080))); }
         }
         public static Color4b Green
         {
-            get { return FromArgb(unchecked((int)(0xFF008000))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF008000))); }
         }
         public static Color4b GreenYellow
         {
-            get { return FromArgb(unchecked((int)(0xFFADFF2F))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFADFF2F))); }
         }
         public static Color4b Honeydew
         {
-            get { return FromArgb(unchecked((int)(0xFFF0FFF0))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFF0FFF0))); }
         }
         public static Color4b HotPink
         {
-            get { return FromArgb(unchecked((int)(0xFFFF69B4))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFF69B4))); }
         }
         public static Color4b IndianRed
         {
-            get { return FromArgb(unchecked((int)(0xFFCD5C5C))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFCD5C5C))); }
         }
         public static Color4b Indigo
         {
-            get { return FromArgb(unchecked((int)(0xFF4B0082))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF4B0082))); }
         }
         public static Color4b Ivory
         {
-            get { return FromArgb(unchecked((int)(0xFFFFFFF0))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFFFF0))); }
         }
         public static Color4b Khaki
         {
-            get { return FromArgb(unchecked((int)(0xFFF0E68C))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFF0E68C))); }
         }
         public static Color4b Lavender
         {
-            get { return FromArgb(unchecked((int)(0xFFE6E6FA))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFE6E6FA))); }
         }
         public static Color4b LavenderBlush
         {
-            get { return FromArgb(unchecked((int)(0xFFFFF0F5))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFF0F5))); }
         }
         public static Color4b LawnGreen
         {
-            get { return FromArgb(unchecked((int)(0xFF7CFC00))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF7CFC00))); }
         }
         public static Color4b LemonChiffon
         {
-            get { return FromArgb(unchecked((int)(0xFFFFFACD))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFFACD))); }
         }
         public static Color4b LightBlue
         {
-            get { return FromArgb(unchecked((int)(0xFFADD8E6))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFADD8E6))); }
         }
         public static Color4b LightCoral
         {
-            get { return FromArgb(unchecked((int)(0xFFF08080))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFF08080))); }
         }
         public static Color4b LightCyan
         {
-            get { return FromArgb(unchecked((int)(0xFFE0FFFF))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFE0FFFF))); }
         }
         public static Color4b LightGoldenrodYellow
         {
-            get { return FromArgb(unchecked((int)(0xFFFAFAD2))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFAFAD2))); }
         }
         public static Color4b LightGray
         {
-            get { return FromArgb(unchecked((int)(0xFFD3D3D3))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFD3D3D3))); }
         }
         public static Color4b LightGreen
         {
-            get { return FromArgb(unchecked((int)(0xFF90EE90))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF90EE90))); }
         }
         public static Color4b LightPink
         {
-            get { return FromArgb(unchecked((int)(0xFFFFB6C1))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFB6C1))); }
         }
         public static Color4b LightSalmon
         {
-            get { return FromArgb(unchecked((int)(0xFFFFA07A))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFA07A))); }
         }
         public static Color4b LightSeaGreen
         {
-            get { return FromArgb(unchecked((int)(0xFF20B2AA))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF20B2AA))); }
         }
         public static Color4b LightSkyBlue
         {
-            get { return FromArgb(unchecked((int)(0xFF87CEFA))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF87CEFA))); }
         }
         public static Color4b LightSlateGray
         {
-            get { return FromArgb(unchecked((int)(0xFF778899))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF778899))); }
         }
         public static Color4b LightSteelBlue
         {
-            get { return FromArgb(unchecked((int)(0xFFB0C4DE))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFB0C4DE))); }
         }
         public static Color4b LightYellow
         {
-            get { return FromArgb(unchecked((int)(0xFFFFFFE0))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFFFE0))); }
         }
         public static Color4b Lime
         {
-            get { return FromArgb(unchecked((int)(0xFF00FF00))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF00FF00))); }
         }
         public static Color4b LimeGreen
         {
-            get { return FromArgb(unchecked((int)(0xFF32CD32))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF32CD32))); }
         }
         public static Color4b Linen
         {
-            get { return FromArgb(unchecked((int)(0xFFFAF0E6))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFAF0E6))); }
         }
         public static Color4b Magenta
         {
-            get { return FromArgb(unchecked((int)(0xFFFF00FF))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFF00FF))); }
         }
         public static Color4b Maroon
         {
-            get { return FromArgb(unchecked((int)(0xFF800000))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF800000))); }
         }
         public static Color4b MediumAquamarine
         {
-            get { return FromArgb(unchecked((int)(0xFF66CDAA))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF66CDAA))); }
         }
         public static Color4b MediumBlue
         {
-            get { return FromArgb(unchecked((int)(0xFF0000CD))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF0000CD))); }
         }
         public static Color4b MediumOrchid
         {
-            get { return FromArgb(unchecked((int)(0xFFBA55D3))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFBA55D3))); }
         }
         public static Color4b MediumPurple
         {
-            get { return FromArgb(unchecked((int)(0xFF9370DB))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF9370DB))); }
         }
         public static Color4b MediumSeaGreen
         {
-            get { return FromArgb(unchecked((int)(0xFF3CB371))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF3CB371))); }
         }
         public static Color4b MediumSlateBlue
         {
-            get { return FromArgb(unchecked((int)(0xFF7B68EE))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF7B68EE))); }
         }
         public static Color4b MediumSpringGreen
         {
-            get { return FromArgb(unchecked((int)(0xFF00FA9A))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF00FA9A))); }
         }
         public static Color4b MediumTurquoise
         {
-            get { return FromArgb(unchecked((int)(0xFF48D1CC))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF48D1CC))); }
         }
         public static Color4b MediumVioletRed
         {
-            get { return FromArgb(unchecked((int)(0xFFC71585))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFC71585))); }
         }
         public static Color4b MidnightBlue
         {
-            get { return FromArgb(unchecked((int)(0xFF191970))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF191970))); }
         }
         public static Color4b MintCream
         {
-            get { return FromArgb(unchecked((int)(0xFFF5FFFA))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFF5FFFA))); }
         }
         public static Color4b MistyRose
         {
-            get { return FromArgb(unchecked((int)(0xFFFFE4E1))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFE4E1))); }
         }
         public static Color4b Moccasin
         {
-            get { return FromArgb(unchecked((int)(0xFFFFE4B5))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFE4B5))); }
         }
         public static Color4b NavajoWhite
         {
-            get { return FromArgb(unchecked((int)(0xFFFFDEAD))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFDEAD))); }
         }
         public static Color4b Navy
         {
-            get { return FromArgb(unchecked((int)(0xFF000080))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF000080))); }
         }
         public static Color4b OldLace
         {
-            get { return FromArgb(unchecked((int)(0xFFFDF5E6))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFDF5E6))); }
         }
         public static Color4b Olive
         {
-            get { return FromArgb(unchecked((int)(0xFF808000))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF808000))); }
         }
         public static Color4b OliveDrab
         {
-            get { return FromArgb(unchecked((int)(0xFF6B8E23))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF6B8E23))); }
         }
         public static Color4b Orange
         {
-            get { return FromArgb(unchecked((int)(0xFFFFA500))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFA500))); }
         }
         public static Color4b OrangeRed
         {
-            get { return FromArgb(unchecked((int)(0xFFFF4500))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFF4500))); }
         }
         public static Color4b Orchid
         {
-            get { return FromArgb(unchecked((int)(0xFFDA70D6))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFDA70D6))); }
         }
         public static Color4b PaleGoldenrod
         {
-            get { return FromArgb(unchecked((int)(0xFFEEE8AA))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFEEE8AA))); }
         }
         public static Color4b PaleGreen
         {
-            get { return FromArgb(unchecked((int)(0xFF98FB98))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF98FB98))); }
         }
         public static Color4b PaleTurquoise
         {
-            get { return FromArgb(unchecked((int)(0xFFAFEEEE))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFAFEEEE))); }
         }
         public static Color4b PaleVioletRed
         {
-            get { return FromArgb(unchecked((int)(0xFFDB7093))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFDB7093))); }
         }
         public static Color4b PapayaWhip
         {
-            get { return FromArgb(unchecked((int)(0xFFFFEFD5))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFEFD5))); }
         }
         public static Color4b PeachPuff
         {
-            get { return FromArgb(unchecked((int)(0xFFFFDAB9))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFDAB9))); }
         }
         public static Color4b Peru
         {
-            get { return FromArgb(unchecked((int)(0xFFCD853F))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFCD853F))); }
         }
         public static Color4b Pink
         {
-            get { return FromArgb(unchecked((int)(0xFFFFC0CB))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFC0CB))); }
         }
         public static Color4b Plum
         {
-            get { return FromArgb(unchecked((int)(0xFFDDA0DD))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFDDA0DD))); }
         }
         public static Color4b PowderBlue
         {
-            get { return FromArgb(unchecked((int)(0xFFB0E0E6))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFB0E0E6))); }
         }
         public static Color4b Purple
         {
-            get { return FromArgb(unchecked((int)(0xFF800080))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF800080))); }
         }
         public static Color4b Red
         {
-            get { return FromArgb(unchecked((int)(0xFFFF0000))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFF0000))); }
         }
         public static Color4b RosyBrown
         {
-            get { return FromArgb(unchecked((int)(0xFFBC8F8F))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFBC8F8F))); }
         }
         public static Color4b RoyalBlue
         {
-            get { return FromArgb(unchecked((int)(0xFF4169E1))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF4169E1))); }
         }
         public static Color4b SaddleBrown
         {
-            get { return FromArgb(unchecked((int)(0xFF8B4513))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF8B4513))); }
         }
         public static Color4b Salmon
         {
-            get { return FromArgb(unchecked((int)(0xFFFA8072))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFA8072))); }
         }
         public static Color4b SandyBrown
         {
-            get { return FromArgb(unchecked((int)(0xFFF4A460))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFF4A460))); }
         }
         public static Color4b SeaGreen
         {
-            get { return FromArgb(unchecked((int)(0xFF2E8B57))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF2E8B57))); }
         }
         public static Color4b SeaShell
         {
-            get { return FromArgb(unchecked((int)(0xFFFFF5EE))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFF5EE))); }
         }
         public static Color4b Sienna
         {
-            get { return FromArgb(unchecked((int)(0xFFA0522D))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFA0522D))); }
         }
         public static Color4b Silver
         {
-            get { return FromArgb(unchecked((int)(0xFFC0C0C0))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFC0C0C0))); }
         }
         public static Color4b SkyBlue
         {
-            get { return FromArgb(unchecked((int)(0xFF87CEEB))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF87CEEB))); }
         }
         public static Color4b SlateBlue
         {
-            get { return FromArgb(unchecked((int)(0xFF6A5ACD))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF6A5ACD))); }
         }
         public static Color4b SlateGray
         {
-            get { return FromArgb(unchecked((int)(0xFF708090))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF708090))); }
         }
         public static Color4b Snow
         {
-            get { return FromArgb(unchecked((int)(0xFFFFFAFA))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFFAFA))); }
         }
         public static Color4b SpringGreen
         {
-            get { return FromArgb(unchecked((int)(0xFF00FF7F))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF00FF7F))); }
         }
         public static Color4b SteelBlue
         {
-            get { return FromArgb(unchecked((int)(0xFF4682B4))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF4682B4))); }
         }
         public static Color4b Tan
         {
-            get { return FromArgb(unchecked((int)(0xFFD2B48C))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFD2B48C))); }
         }
         public static Color4b Teal
         {
-            get { return FromArgb(unchecked((int)(0xFF008080))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF008080))); }
         }
         public static Color4b Thistle
         {
-            get { return FromArgb(unchecked((int)(0xFFD8BFD8))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFD8BFD8))); }
         }
         public static Color4b Tomato
         {
-            get { return FromArgb(unchecked((int)(0xFFFF6347))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFF6347))); }
         }
         public static Color4b Turquoise
         {
-            get { return FromArgb(unchecked((int)(0xFF40E0D0))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF40E0D0))); }
         }
         public static Color4b Violet
         {
-            get { return FromArgb(unchecked((int)(0xFFEE82EE))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFEE82EE))); }
         }
         public static Color4b Wheat
         {
-            get { return FromArgb(unchecked((int)(0xFFF5DEB3))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFF5DEB3))); }
         }
         public static Color4b White
         {
-            get { return FromArgb(unchecked((int)(0xFFFFFFFF))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFFFFF))); }
         }
         public static Color4b WhiteSmoke
         {
-            get { return FromArgb(unchecked((int)(0xFFF5F5F5))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFF5F5F5))); }
         }
         public static Color4b Yellow
         {
-            get { return FromArgb(unchecked((int)(0xFFFFFF00))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFFFFFF00))); }
         }
         public static Color4b YellowGreen
         {
-            get { return FromArgb(unchecked((int)(0xFF9ACD32))); }
+            get { return FromB8G8R8A8(unchecked((int)(0xFF9ACD32))); }
         }
         public static Color4b Transparent
         {
-            get { return FromArgb(unchecked((int)(0x00000000))); }
+            get { return FromB8G8R8A8(unchecked((int)(0x00000000))); }
         }
 
         #endregion

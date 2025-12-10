@@ -114,6 +114,15 @@ namespace EngineNS.NxRHI
                 }
                 return result;
             }
+            public unsafe uint* CreateColorR8G8B8A8()
+            {
+                uint* result = (uint*)CoreSDK.Alloc((uint)(sizeof(uint) * Pixels.Length), null, 0);
+                for (int i = 0; i<Pixels.Length; i++)
+                {
+                    result[i] = Pixels[i].ToColor4b().ToR8G8B8A8();
+                }
+                return result;
+            }
             public unsafe Half* CreateRHalf()
             {
                 Half* result = (Half*)CoreSDK.Alloc((uint)(sizeof(Half) * Pixels.Length), null, 0);
