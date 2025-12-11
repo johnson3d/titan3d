@@ -382,6 +382,7 @@ namespace EngineNS.Bricks.FX.Weather
         {
             CoreSDK.DisposeObject(ref WeatherSrv);
             CoreSDK.DisposeObject(ref CloudNoiseSrv);
+            CoreSDK.DisposeObject(ref ShadingCbv);
             base.Dispose();
         }
         public override void InitNodePins()
@@ -447,7 +448,7 @@ namespace EngineNS.Bricks.FX.Weather
 
                 CloudDensity = 1;
                 CloudCoverage = 1;
-                CloudHeightMin = 100;
+                CloudHeightMin = -100;
                 CloudHeightMax = 200;
 
                 CloudScale = new Vector2(1,1);
@@ -556,7 +557,7 @@ namespace EngineNS.Bricks.FX.Weather
         {
             if (ShadingCbv!=null)
             {
-                ShadingCbv.SetValue("cbShadingEnv", in mShadingStruct);
+                ShadingCbv.SetValue("ShadingStruct", in mShadingStruct);
             }
             base.TickLogic(world, policy, frameCmdList, bClear);
         }

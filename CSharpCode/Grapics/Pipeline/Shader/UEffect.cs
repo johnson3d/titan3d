@@ -729,11 +729,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return result;
             }
 
-            bool isNewSession;
-            var session = mCreatingSession.GetOrNewSession(hash, out isNewSession);
-            if (isNewSession == false)
+            Thread.TtSemaphore smp;
+            var session = mCreatingSession.GetOrNewSession(hash, out smp);
+            if (smp != null)
             {
-                return await session.Await();
+                await smp.Await();
+                return session.Result;
             }
 
             try

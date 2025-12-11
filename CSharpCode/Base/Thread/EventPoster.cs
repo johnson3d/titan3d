@@ -196,30 +196,23 @@ namespace EngineNS.Thread
             {
                 Manager.FinishSession(key, this, value);
             }
-
-            public async Thread.Async.TtTask<T> Await()
-            {
-                var tmp = this.AddSemaphore();
-                await tmp.Await();
-                return this.Result;
-            }
         }
         public Dictionary<K, TtAwaitSession> mSessions = new Dictionary<K, TtAwaitSession>();
-        public TtAwaitSession GetOrNewSession(K key, out bool isNewSession)
+        public TtAwaitSession GetOrNewSession(K key, out TtSemaphore smp)
         {
             lock (mSessions)
             {
                 TtAwaitSession result;
                 if (mSessions.TryGetValue(key, out result) == false)
                 {
-                    isNewSession = true;
+                    smp = null;
                     result = new TtAwaitSession();
                     result.Manager = this;
                     mSessions.Add(key, result);
                 }
                 else
                 {
-                    isNewSession = false;
+                    smp = result.AddSemaphore();
                 }
                 return result;
             }

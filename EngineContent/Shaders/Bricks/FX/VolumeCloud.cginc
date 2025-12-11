@@ -18,7 +18,7 @@ SamplerState Samp_WeatherTex;
 Texture2D ColorBuffer;
 SamplerState Samp_ColorBuffer;
 
-cbuffer cbShadingEnv DX_AUTOBIND
+struct FShadingStruct
 {
     float4 CloudColor;
     float4 ShadowColor;
@@ -35,6 +35,11 @@ cbuffer cbShadingEnv DX_AUTOBIND
     
     float3 LightDir;
     int MaxSteps;
+};
+
+cbuffer cbShadingEnv DX_AUTOBIND
+{
+    FShadingStruct ShadingStruct;
 };
 
 PS_INPUT VS_Main(VS_INPUT input1)
@@ -72,16 +77,16 @@ bool RayBoxIntersection(float3 rayOrigin, float3 rayDir,
 float GetCloudDensity(float3 worldPos)
 {
     // 计算UV
-    float2 uv = worldPos.xz * CloudScale * 0.001;
+    float2 uv = worldPos.xz * ShadingStruct.CloudScale * 0.001;
     float height = worldPos.y;
                 
     // 高度因子
-    float heightFactor = saturate((height - CloudHeightMin) / (CloudHeightMax - CloudHeightMin));
+    float heightFactor = saturate((height - ShadingStruct.CloudHeightMin) / (ShadingStruct.CloudHeightMax - ShadingStruct.CloudHeightMin));
     float heightGradient = 4.0 * heightFactor * (1.0 - heightFactor);
                 
     // 采样天气图
     float4 weatherData = WeatherTex.SampleLevel(Samp_WeatherTex, uv, 0);
-    float coverage = weatherData.r * CloudCoverage;
+    float coverage = weatherData.r * ShadingStruct.CloudCoverage;
                 
     // 基础密度
     float baseDensity = CloudNoiseTex.Sample(Samp_CloudNoiseTex, float3(uv * 0.5, height * 0.0005)).r;
@@ -95,7 +100,7 @@ float GetCloudDensity(float3 worldPos)
     float density = saturate(baseDensity - (1.0 - coverage)) * heightGradient;
                 
     // 重映射
-    density = saturate(density * CloudDensity * 4.0);
+    density = saturate(density * ShadingStruct.CloudDensity * 4.0);
                 
     return density;
 }
@@ -103,7 +108,7 @@ float GetCloudDensity(float3 worldPos)
 // 光线步进中的光照计算
 float LightMarch(float3 pos)
 {
-    float3 lightStep = LightDir * 50.0; // 光照步长
+    float3 lightStep = ShadingStruct.LightDir * 50.0; // 光照步长
     float totalDensity = 0.0;
     float transmittance = 1.0;
                 
@@ -116,10 +121,10 @@ float LightMarch(float3 pos)
         totalDensity += density;
                     
         // 计算透射率
-        transmittance *= exp(-density * LightAbsorption);
+        transmittance *= exp(-density * ShadingStruct.LightAbsorption);
                     
         // 提前退出
-        if (transmittance < DarknessThreshold)
+        if (transmittance < ShadingStruct.DarknessThreshold)
             break;
     }
                 
@@ -130,8 +135,8 @@ float LightMarch(float3 pos)
 float4 RayMarchClouds(float3 rayOrigin, float3 rayDir, float maxDistance)
 {
     // 定义云层边界框
-    float3 boxMin = float3(-10000, CloudHeightMin, -10000);
-    float3 boxMax = float3(10000, CloudHeightMax, 10000);
+    float3 boxMin = float3(-10000, ShadingStruct.CloudHeightMin, -10000);
+    float3 boxMax = float3(10000, ShadingStruct.CloudHeightMax, 10000);
                 
                 // 计算与云层相交
     float tMin, tMax;
@@ -144,7 +149,7 @@ float4 RayMarchClouds(float3 rayOrigin, float3 rayDir, float maxDistance)
                 
     // 计算步长
     float rayLength = tMax - tMin;
-    float stepSize = rayLength / MaxSteps;
+    float stepSize = rayLength / ShadingStruct.MaxSteps;
                 
     // 随机起始偏移（减少条带伪影）
     float offset = frac(sin(dot(rayDir, float3(12.9898, 78.233, 45.5432))) * 43758.5453);
@@ -155,7 +160,7 @@ float4 RayMarchClouds(float3 rayOrigin, float3 rayDir, float maxDistance)
     float transmittance = 1.0;
                 
     [loop]
-    for (int i = 0; i < MaxSteps; i++)
+    for (int i = 0; i < ShadingStruct.MaxSteps; i++)
     {
         // 采样密度
         float density = GetCloudDensity(currentPos);
@@ -166,11 +171,11 @@ float4 RayMarchClouds(float3 rayOrigin, float3 rayDir, float maxDistance)
             float lightTransmittance = LightMarch(currentPos);
                         
             // 基础颜色
-            float3 cloudColor = lerp(ShadowColor.rgb, CloudColor.rgb,
+            float3 cloudColor = lerp(ShadingStruct.ShadowColor.rgb, ShadingStruct.CloudColor.rgb,
                                                 saturate(lightTransmittance * 2.0));
                         
             // 乘以光照颜色
-            cloudColor *= LightColor.rgb;
+            cloudColor *= ShadingStruct.LightColor.rgb;
                         
             // 计算衰减
             float alpha = 1.0 - exp(-density * stepSize * 0.1);
@@ -210,6 +215,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     // 计算世界空间射线
     float3 rayOrigin = CameraPosition;
     float3 rayDir = input.Get_ScreenViewVector();
+    rayDir = normalize(rayDir);
                 
     // 执行光线步进
     float4 cloudColor = RayMarchClouds(rayOrigin, rayDir, gZFar);

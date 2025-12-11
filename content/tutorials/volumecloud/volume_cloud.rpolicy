@@ -424,7 +424,7 @@
         <CloudCoverage Type="System.Single@Unknown" Value="1" />
         <CloudDensity Type="System.Single@Unknown" Value="1" />
         <CloudHeightMax Type="System.Single@Unknown" Value="200" />
-        <CloudHeightMin Type="System.Single@Unknown" Value="100" />
+        <CloudHeightMin Type="System.Single@Unknown" Value="-100" />
         <CloudScale Type="EngineNS.Vector2@EngineCore" Value="1,1" />
         <DarknessThreshold Type="System.Single@Unknown" Value="0.01" />
         <Enable Type="System.Boolean@Unknown" Value="True" />

@@ -216,6 +216,7 @@ namespace EngineNS.Thread
                 }
                 else if (IsLogicThread)
                 {
+                    TtEngine.Instance.ThreadRHI.TickAwaitEvent();
                     TtEngine.Instance.ThreadMain.TickAwaitEvent();
                 }
                 TtEngine.Instance.TaskCollector.Tick();

@@ -666,11 +666,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (Materials.TryGetValue(rn, out result))
                 return result;
 
-            bool isNewSession;
-            var session = mCreatingSession.GetOrNewSession(rn, out isNewSession);
-            if (isNewSession == false)
+            Thread.TtSemaphore smp;
+            var session = mCreatingSession.GetOrNewSession(rn, out smp);
+            if (smp != null)
             {
-                return await session.Await();
+                await smp.Await();
+                return session.Result;
             }
 
             result = await TtEngine.Instance.EventPoster.Post((state) =>

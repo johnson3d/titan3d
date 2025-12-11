@@ -1791,8 +1791,8 @@ namespace EngineNS.UI.Editor
             {
                 UpdateDecorator().WaitCompletedAndDispose();
                 BuildMesh().WaitCompletedAndDispose();
-                //TtEngine.Instance.TaskCollector.AddWaitTask(UpdateDecorator());
-                //TtEngine.Instance.TaskCollector.AddWaitTask(BuildMesh());
+                //UpdateDecorator().AddWaitTask();
+                //BuildMesh().AddWaitTask();
             }
         }
         public void TickRender(float ellapse)

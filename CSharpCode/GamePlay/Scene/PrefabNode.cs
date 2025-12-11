@@ -421,11 +421,12 @@ namespace EngineNS.GamePlay.Scene
                 return result;
             }
 
-            bool isNewSession;
-            var session = mCreatingSession.GetOrNewSession(name, out isNewSession);
-            if (isNewSession == false)
+            Thread.TtSemaphore smp;
+            var session = mCreatingSession.GetOrNewSession(name, out smp);
+            if (smp != null)
             {
-                return await session.Await();
+                await smp.Await();
+                return session.Result;
             }
 
             result = await TtPrefabNode.LoadPrefab(PrefabWorld, name);

@@ -3739,11 +3739,12 @@ namespace EngineNS.NxRHI
                 }
             }
 
-            bool isNewSession;
-            var session = mCreatingSession.GetOrNewSession(rn, out isNewSession);
-            if (isNewSession == false)
+            Thread.TtSemaphore smp;
+            var session = mCreatingSession.GetOrNewSession(rn, out smp);
+            if (smp != null)
             {
-                return await session.Await();
+                await smp.Await();
+                return session.Result;
             }
 
             try
