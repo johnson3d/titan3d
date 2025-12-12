@@ -1,10 +1,7 @@
-using Assimp;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.IO;
 using EngineNS.Macross;
-using NPOI.SS.Formula.Functions;
-using Org.BouncyCastle.Asn1.Mozilla;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

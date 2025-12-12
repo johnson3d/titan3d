@@ -1,10 +1,8 @@
-﻿using Assimp;
-using EngineNS.Bricks.AssetImpExp;
+﻿using EngineNS.Bricks.AssetImpExp;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Support;
 using EngineNS.Thread.Async;
-using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,8 +13,57 @@ using static EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator;
 
 namespace EngineNS.Bricks.FX.Weather
 {
-    public class TtCloudNoiseGenerator
+    public class TtCloudNoiseGenerator : IDisposable
     {
+        public void Dispose() 
+        {
+            CoreSDK.DisposeObject(ref WeatherSrv);
+            CoreSDK.DisposeObject(ref CloudNoiseSrv);
+        }
+        public NxRHI.TtSrView WeatherSrv;
+        public NxRHI.TtSrView CloudNoiseSrv;
+        
+        TtWeatherMapSettings mWeatherSettings = null;
+        public TtWeatherMapSettings WeatherSettings
+        {
+            get
+            {
+                return mWeatherSettings;
+            }
+            set
+            {
+                mWeatherSettings = value;
+            }
+        }
+        public async Thread.Async.TtTask ReGenRenderResources()
+        {
+            CoreSDK.DisposeObject(ref WeatherSrv);
+            CoreSDK.DisposeObject(ref CloudNoiseSrv);
+            await TtEngine.Instance.EventPoster.Post((state) =>
+            {
+                {
+                    var weatherTex = GenerateWeatherMap(mWeatherSettings);
+
+                    NxRHI.FSrvDesc srvDesc = new NxRHI.FSrvDesc();
+                    srvDesc.SetTexture2D();
+                    var texDesc = weatherTex.mCoreObject.Desc;
+                    srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
+                    WeatherSrv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(weatherTex, in srvDesc);
+                }
+
+                {
+                    var cloudNoiseTex = GenerateNoise3D();
+                    NxRHI.FSrvDesc srvDesc = new NxRHI.FSrvDesc();
+                    srvDesc.SetTexture3D();
+                    var texDesc = cloudNoiseTex.mCoreObject.Desc;
+                    srvDesc.Format = texDesc.Format;
+                    srvDesc.Texture3D.MipLevels = texDesc.MipLevels;
+                    CloudNoiseSrv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(cloudNoiseTex, in srvDesc);
+                }
+                return true;
+            }, EAsyncTarget.AsyncIO);
+        }
+
         public int Resolution = 64;
         public Vector3 Scale = Vector3.One;
 
@@ -93,9 +140,12 @@ namespace EngineNS.Bricks.FX.Weather
             sourceLayer.Depth = size;
             List<NxRHI.TtTextureUtility.TtTex3dLayer> mipDatas = new List<NxRHI.TtTextureUtility.TtTex3dLayer>();
             mipDatas.Add(sourceLayer);
+            int MaxLayer = 1;
             int s = size/2;
             while (s>=1)
             {
+                if (mipDatas.Count>=MaxLayer)
+                    break;
                 var next = NxRHI.TtTextureUtility.GenerateMipLayer3D(sourceLayer, s, s, s);
                 mipDatas.Add(next);
                 s = s/2;
@@ -235,10 +285,13 @@ namespace EngineNS.Bricks.FX.Weather
             sourceLayer.Height = height;
             List<NxRHI.TtTextureUtility.TtTex2dLayer> mipDatas = new List<NxRHI.TtTextureUtility.TtTex2dLayer>();
             mipDatas.Add(sourceLayer);
+            int MaxLayer = 1;
             int w = width/2;
             int h = height/2;
             while (w>=1 && h>=1)
             {
+                if (mipDatas.Count>=MaxLayer)
+                    break;
                 var next = NxRHI.TtTextureUtility.GenerateMipLayer2D(sourceLayer, w, h);
                 mipDatas.Add(next);
                 w = w/2;
@@ -349,12 +402,12 @@ namespace EngineNS.Bricks.FX.Weather
             index = drawcall.FindBinder("WeatherTex");
             if (index.IsValidPointer)
             {
-                drawcall.BindSRV(index, aaNode.WeatherSrv);
+                drawcall.BindSRV(index, aaNode.SceneNode.NoiseGen.WeatherSrv);
             }
             index = drawcall.FindBinder("CloudNoiseTex");
             if (index.IsValidPointer)
             {
-                drawcall.BindSRV(index, aaNode.CloudNoiseSrv);
+                drawcall.BindSRV(index, aaNode.SceneNode.NoiseGen.CloudNoiseSrv);
             }
             index = drawcall.FindBinder("cbShadingEnv");
             if (index.IsValidPointer)
@@ -380,8 +433,7 @@ namespace EngineNS.Bricks.FX.Weather
         }
         public override void Dispose()
         {
-            CoreSDK.DisposeObject(ref WeatherSrv);
-            CoreSDK.DisposeObject(ref CloudNoiseSrv);
+            SceneNode = null;
             CoreSDK.DisposeObject(ref ShadingCbv);
             base.Dispose();
         }
@@ -400,27 +452,6 @@ namespace EngineNS.Bricks.FX.Weather
             await base.Initialize(policy, debugName);
             mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtVolumeCloudShading>();
 
-            var gen = new TtCloudNoiseGenerator();
-            
-            {
-                var weatherTex = gen.GenerateWeatherMap(mWeatherSettings);
-                
-                NxRHI.FSrvDesc srvDesc = new NxRHI.FSrvDesc();
-                srvDesc.SetTexture2D();
-                var texDesc = weatherTex.mCoreObject.Desc;
-                srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
-                WeatherSrv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(weatherTex, in srvDesc);
-            }
-
-            {
-                var cloudNoiseTex = gen.GenerateNoise3D();
-                NxRHI.FSrvDesc srvDesc = new NxRHI.FSrvDesc();
-                srvDesc.SetTexture3D();
-                var texDesc = cloudNoiseTex.mCoreObject.Desc;
-                srvDesc.Format = texDesc.Format;
-                srvDesc.Texture3D.MipLevels = texDesc.MipLevels;
-                CloudNoiseSrv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(cloudNoiseTex, in srvDesc);
-            }
         }
         TtWeatherMapSettings mWeatherSettings = new TtWeatherMapSettings();
         [Rtti.Meta("")]
@@ -436,7 +467,6 @@ namespace EngineNS.Bricks.FX.Weather
                 mWeatherSettings = value;
             }
         }
-
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         public struct FShadingStruct
         {
@@ -555,6 +585,11 @@ namespace EngineNS.Bricks.FX.Weather
         }
         public override void TickLogic(TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
+            if (SceneNode==null)
+            {
+                MoveAttachment(ColorPinIn, ResultPinOut);
+                return;
+            }
             if (ShadingCbv!=null)
             {
                 ShadingCbv.SetValue("ShadingStruct", in mShadingStruct);
@@ -563,8 +598,102 @@ namespace EngineNS.Bricks.FX.Weather
         }
         #region Rhi Resouces
         public NxRHI.TtCbView ShadingCbv;
-        public NxRHI.TtSrView WeatherSrv;
-        public NxRHI.TtSrView CloudNoiseSrv;
+        
+        public TtVolumeCloudSceneNode SceneNode;
         #endregion
+    }
+
+    [Bricks.CodeBuilder.ContextMenu("VolumeCloud", "Graphics\\VolumeCloud", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtVolumeCloudSceneNode.TtThisNodeData), DefaultNamePrefix = "VolumeCloud")]
+    public class TtVolumeCloudSceneNode : GamePlay.Scene.TtVisual
+    {
+        public class TtThisNodeData : TtNodeData
+        {
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public TtWeatherMapSettings WeatherSettings { get; set; } = new TtWeatherMapSettings();
+        }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public TtCloudNoiseGenerator NoiseGen { get; set; } = new TtCloudNoiseGenerator();
+        public class TtReGenTexture : EGui.Controls.PropertyGrid.TtButtonAttribute
+        {
+            bool IsGenarating = false;
+            protected override void OnButtonClick(in EditorInfo info)
+            {
+                if (IsGenarating)
+                    return;
+                if (info.ObjectInstance.GetType().GetInterface("IList")!=null)
+                {
+                    IsGenarating = true;
+                    var lst = info.ObjectInstance as System.Collections.IList;
+                    foreach (var i in lst)
+                    {
+                        var node = i as TtVolumeCloudSceneNode;
+                        if (node!=null)
+                        {
+                            node.NoiseGen.ReGenRenderResources().AddWaitTask((task)=>
+                            {
+                                IsGenarating = false;
+                            });
+                        }
+                    }
+                }
+                else
+                {
+                    IsGenarating = true;
+                    var node = info.ObjectInstance as TtVolumeCloudSceneNode;
+                    if (node!=null)
+                    {
+                        node.NoiseGen.ReGenRenderResources().AddWaitTask((task) =>
+                        {
+                            IsGenarating = false;
+                        });
+                    }
+                }   
+            }
+        }
+        [TtReGenTexture(ButtonText = "ReGenTexture")]
+        [Category("Option")]
+        public bool ReGenTexture
+        {
+            get
+            {
+                return false;
+            }
+            set
+            {
+
+            }
+        }
+        public TtVolumeCloudNode RenderNode = null;
+        public override void Dispose()
+        {
+            if (RenderNode!=null)
+            {
+                RenderNode.SceneNode = null;
+            }
+            if (NoiseGen!=null)
+            {
+                NoiseGen.Dispose();
+                NoiseGen = null;
+            }
+            base.Dispose();
+        }
+        protected override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        {
+            var ret = await base.InitializeNode(world, data, bvType, placementType);
+
+            NoiseGen.WeatherSettings = GetNodeData<TtThisNodeData>().WeatherSettings;
+            await NoiseGen.ReGenRenderResources();
+
+            RenderNode = world.ViewportSlate.RenderPolicy.FindFirstNode<TtVolumeCloudNode>();
+            if (RenderNode!=null)
+            {
+                RenderNode.SceneNode = this;
+            }
+
+            return ret;
+        }
     }
 }

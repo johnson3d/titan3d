@@ -25,9 +25,11 @@ namespace EngineNS.GamePlay
 
             mMemberTickables.CleanupMembers(this);
             EntityManager?.Dispose();
+            ViewportSlate = null;
         }
         public TtWorld(Graphics.Pipeline.TtViewportSlate viewport, bool hasEntityManager = true)
         {
+            ViewportSlate = viewport;
             mMemberTickables.CollectMembers(this);
 
             mOnVisitNode_GatherBoundShapes = this.OnVisitNode_GatherBoundShapes;
@@ -47,6 +49,7 @@ namespace EngineNS.GamePlay
             System.Threading.Interlocked.Decrement(ref mNodeAliveNumber);
         }
         public bool IsGameWorld { get; set; } = false;
+        public Graphics.Pipeline.TtViewportSlate ViewportSlate { get; private set; } = null;
         TtMemberTickables mMemberTickables = new TtMemberTickables();
         Graphics.Pipeline.Shader.TtMaterialInstance mBoundingDebugMaterial;
         public async Thread.Async.TtTask<bool> InitWorld()

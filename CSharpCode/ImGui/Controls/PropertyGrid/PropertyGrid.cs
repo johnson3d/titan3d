@@ -176,6 +176,31 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return false;
         }
     }
+
+    public class TtButtonAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+    {
+        public TtButtonAttribute()
+        {
+            //FullRedraw = true;
+        }
+        public string ButtonText;
+        Vector3 HalfExtent = new Vector3(1);
+        public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
+        {
+            newValue = info.Value;
+            var sz = new Vector2(0);
+            if (ImGuiAPI.Button(ButtonText, in sz))
+            {
+                OnButtonClick(in info);
+            }
+            return false;
+        }
+        protected virtual void OnButtonClick(in EditorInfo info)
+        {
+
+        }
+    }
+
     public interface IPropertySetPreChecker
     {
         bool CanSetPropertyValue(string propertyName, object? value);
