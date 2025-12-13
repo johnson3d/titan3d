@@ -1,10 +1,13 @@
 #include "../Inc/GlobalDefine.cginc"
 
-cbuffer ProjectionMatrixBuffer DX_BIND_B(0)
+cbuffer cbShadingEnv DX_BIND_B(0)
 {
     float4x4 ProjectionMatrix;
     int4 ColorMask;
     int IsNormalMap;
+    int MipLevel;
+    int Slice;
+    int TextureDepth;
 };
 
 struct VS_INPUT_SLATE
@@ -21,7 +24,13 @@ struct PS_INPUT_SLATE
     VK_LOCATION(3) float2 uv  : TEXCOORD0;
 };
 
+
+#if ENV_IS_TEX3D == 1
+Texture3D FontTexture DX_AUTOBIND;
+#else
 Texture2D FontTexture DX_AUTOBIND;
+#endif
+
 sampler Samp_FontTexture DX_AUTOBIND;
 /**Meta Begin:(VS_Main)
 HLSL=none
@@ -41,7 +50,12 @@ HLSL=none
 Meta End:(PS_Main)**/
 float4 PS_Main(PS_INPUT_SLATE input) : SV_Target
 {
-    float4 finalColor = FontTexture.Sample(Samp_FontTexture, input.uv);
+#if ENV_IS_TEX3D == 1
+    float z = (float(Slice) + 0.5) / float(TextureDepth);
+    float4 finalColor = FontTexture.SampleLevel(Samp_FontTexture, float3(input.uv, z), MipLevel);
+ #else
+    float4 finalColor = FontTexture.SampleLevel(Samp_FontTexture, input.uv, MipLevel);
+ #endif
     if (IsNormalMap == 1)
     {
         float3 N;

@@ -1,18 +1,34 @@
-﻿using EngineNS.NxRHI;
-using NPOI.SS.Formula.Functions;
+﻿using EngineNS.Graphics.Pipeline.Shader;
+using EngineNS.NxRHI;
+using NPOI.SS.UserModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using EngineNS.Graphics.Pipeline.Shader;
 
 namespace EngineNS.Editor.Forms
 {
-    public class USlateTextureViewerShading : Graphics.Pipeline.Shader.TtGraphicsShadingEnv
+    public class TtSlateTextureViewerShading : Graphics.Pipeline.Shader.TtGraphicsShadingEnv
     {
-        public USlateTextureViewerShading()
+        public UPermutationItem IsTex3D
+        {
+            get;
+            set;
+        }
+        public void SetIsTex3D(bool value)
+        {
+            IsTex3D.SetValue(value);
+            UpdatePermutation();
+        }
+        public TtSlateTextureViewerShading()
         {
             CodeName = RName.GetRName("shaders/slate/Slate_TextureViewer.cginc", RName.ERNameType.Engine);
+
+            this.BeginPermutaion();
+            IsTex3D = this.PushPermutation<Graphics.Pipeline.Shader.EPermutation_Bool>("ENV_IS_TEX3D", (int)EPermutation_Bool.BitWidth);
+
+            IsTex3D.SetValue((int)EPermutation_Bool.FalseValue);
+            this.UpdatePermutation();
         }
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
@@ -29,9 +45,9 @@ namespace EngineNS.Editor.Forms
         }
     }
 
-    public class USlateTextureCubeViewerShading : Graphics.Pipeline.Shader.TtGraphicsShadingEnv
+    public class TtSlateTextureCubeViewerShading : Graphics.Pipeline.Shader.TtGraphicsShadingEnv
     {
-        public USlateTextureCubeViewerShading()
+        public TtSlateTextureCubeViewerShading()
         {
             CodeName = RName.GetRName("shaders/slate/Slate_TextureCubeViewer.cginc", RName.ERNameType.Engine);
         }
@@ -51,7 +67,7 @@ namespace EngineNS.Editor.Forms
     }
 
 
-    public class UTextureViewer : Editor.IAssetEditor, IRootForm
+    public class TtTextureViewer : Editor.IAssetEditor, IRootForm
     {
         public RName AssetName { get; set; }
         protected bool mVisible = true;
@@ -64,9 +80,9 @@ namespace EngineNS.Editor.Forms
         TtTextureViewerCmdParams CmdParameters;
         public Graphics.Pipeline.Shader.TtEffect SlateEffect;
         public NxRHI.TtSrView TextureSRV;
-        public NxRHI.TtSrView ShowTextureSRV;
+        //public NxRHI.TtSrView ShowTextureSRV;
         public EGui.Controls.PropertyGrid.PropertyGrid TexturePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        ~UTextureViewer()
+        ~TtTextureViewer()
         {
             Dispose();
         }
@@ -88,6 +104,7 @@ namespace EngineNS.Editor.Forms
         {
             return this;
         }
+        public TtGraphicsShadingEnv ShadingEnv;
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
         public async Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg)
@@ -112,14 +129,16 @@ namespace EngineNS.Editor.Forms
             {
                 ImageSize.X = ImageSize.X*4;
                 ImageSize.Y = ImageSize.Y*3;
+                ShadingEnv = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSlateTextureCubeViewerShading>();
                 SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
-                     await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<USlateTextureCubeViewerShading>(),
+                     ShadingEnv,
                      TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
             }
             else
             {
+                ShadingEnv = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSlateTextureViewerShading>();
                 SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
-                    await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<USlateTextureViewerShading>(),
+                    ShadingEnv,
                     TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
             }
             var iptDesc = new NxRHI.TtInputLayoutDesc();
@@ -132,11 +151,10 @@ namespace EngineNS.Editor.Forms
             }
             iptDesc.mCoreObject.SetShaderDesc(SlateEffect.DescVS.mCoreObject);
             var InputLayout = rc.CreateInputLayout(iptDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
-            SlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
+            SlateEffect.ShaderEffect.BindInputLayout(InputLayout);
 
-            
             var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<TtTextureViewerCmdParams>();
-            var cbBinder = SlateEffect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");
+            var cbBinder = SlateEffect.ShaderEffect.FindBinder("cbShadingEnv");
             cmdParams.CBuffer = rc.CreateCBV(cbBinder);
             cmdParams.Drawcall.BindShaderEffect(SlateEffect);
             cmdParams.Drawcall.BindCBV(cbBinder.mCoreObject, cmdParams.CBuffer);
@@ -147,9 +165,27 @@ namespace EngineNS.Editor.Forms
             if (TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
                 cmdParams.IsNormalMap = 1;
 
+            cmdParams.TextureDepth = (int)TextureSRV.GetTexture().Desc.Depth;
             CmdParameters = cmdParams;
 
-            return true;
+            if (CmdParameters.TextureDepth != 0)
+            {
+                var texShading = ShadingEnv as TtSlateTextureViewerShading;
+                if (texShading != null)
+                {
+                    texShading.SetIsTex3D(true);
+                }
+            }
+            else
+            {
+                var texShading = ShadingEnv as TtSlateTextureViewerShading;
+                if (texShading != null)
+                {
+                    texShading.SetIsTex3D(false);
+                }
+            }
+
+                return true;
         }
         public void OnCloseEditor()
         {
@@ -189,8 +225,7 @@ namespace EngineNS.Editor.Forms
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
-                ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (result)
             {
                 DrawToolBar();
@@ -270,6 +305,44 @@ namespace EngineNS.Editor.Forms
             {
                 CmdParameters.ColorMask.W = mShowA ? 1 : 0;
             }
+            if (CmdParameters != null)
+            {
+                ImGuiAPI.SameLine(0, -1);
+                ImGuiAPI.Text("ShowMipLevel");
+                ImGuiAPI.SameLine(0, -1);
+                if (EGui.UIProxy.ComboBox.BeginCombo("##SelectMip", $"{CmdParameters.MipLevel}", 100))
+                {
+                    var desc = TextureSRV.GetTexture().Desc;
+                    bool bSelected = true;
+                    for (int i = 0; i< desc.MipLevels; i++)
+                    {
+                        if (ImGuiAPI.Selectable($"{i}", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        {
+                            CmdParameters.MipLevel = i;
+                        }
+                    }
+                    EGui.UIProxy.ComboBox.EndCombo();
+                }
+            }
+            if (CmdParameters.TextureDepth != 0)
+            {
+                ImGuiAPI.SameLine(0, -1);
+                ImGuiAPI.Text("ShowSlice3D");
+                ImGuiAPI.SameLine(0, -1);
+                if (EGui.UIProxy.ComboBox.BeginCombo("##SelectSlice", $"{CmdParameters.Slice}", 100))
+                {
+                    var desc = TextureSRV.GetTexture().Desc;
+                    bool bSelected = true;
+                    for (int i = 0; i< desc.Depth; i++)
+                    {
+                        if (ImGuiAPI.Selectable($"{i}", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        {
+                            CmdParameters.Slice = i;
+                        }
+                    }
+                    EGui.UIProxy.ComboBox.EndCombo();
+                }
+            }
         }
         bool mShowR = true;
         bool mShowG = true;
@@ -340,19 +413,25 @@ namespace EngineNS.Editor.Forms
     {
         public NxRHI.TtCbView CBuffer;
         public Vector4i ColorMask = new Vector4i(1,1,1,0);
-        public int IsNormalMap = 0; 
+        public int IsNormalMap = 0;
+        public int MipLevel = 0;
+        public int Slice = 0;
+        public int TextureDepth = 1;
         public override void OnDraw(in Matrix mvp)
         {
             CBuffer.SetValue("ProjectionMatrix", in mvp);
             CBuffer.SetValue("ColorMask", in ColorMask);
             CBuffer.SetValue("IsNormalMap", in IsNormalMap);
+            CBuffer.SetValue("MipLevel", MipLevel);
+            CBuffer.SetValue("Slice", Slice);
+            CBuffer.SetValue("TextureDepth", TextureDepth);
         }
     }
 }
 
 namespace EngineNS.NxRHI
 {
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.UTextureViewer))]
+    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.TtTextureViewer))]
     public partial class TtSrView
     {
     }

@@ -45,7 +45,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     TextureSRV = await value.GetAsset<NxRHI.TtSrView>();
 
                     mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
-                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
+                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>(),
                         TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
                 };
                 exec();
@@ -169,7 +169,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     TextureSRV = await value.GetAsset<NxRHI.TtSrView>();
 
                     mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
-                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
+                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>(),
                         TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
 
                 };
@@ -304,7 +304,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     TextureSRV = await value.GetAsset<NxRHI.TtSrView>();
 
                     mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
-                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
+                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>(),
                         TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
 
                 };
@@ -430,7 +430,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     TextureSRV = await value.GetAsset<NxRHI.TtSrView>();
 
                     mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
-                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
+                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>(),
                         TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
                 };
                 exec();
@@ -550,7 +550,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 {
                     TextureSRV = await value.GetAsset<NxRHI.TtSrView>();
                     mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
-                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
+                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>(),
                         TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
                 };
                 exec();

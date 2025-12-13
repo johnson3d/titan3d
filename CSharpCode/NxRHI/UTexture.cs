@@ -184,9 +184,9 @@ namespace EngineNS.NxRHI
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             TtShadingEnv shading = null;
             if(isCubemap)
-                shading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureCubeViewerShading>();
+                shading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.TtSlateTextureCubeViewerShading>();
             else
-                shading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>();
+                shading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>();
             var effect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(shading,
                 TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial,
                 new Graphics.Mesh.TtMdfStaticMesh());
@@ -205,7 +205,8 @@ namespace EngineNS.NxRHI
 
             var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<EngineNS.Editor.Forms.TtTextureViewerCmdParams>();
             cmdParams.ColorMask = new Vector4i(1, 1, 1, 1);
-            var cbBinder = effect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");
+            cmdParams.MipLevel = 0;
+            var cbBinder = effect.ShaderEffect.FindBinder("cbShadingEnv");
             cmdParams.CBuffer = rc.CreateCBV(cbBinder);
             cmdParams.Drawcall.BindShaderEffect(effect);
             cmdParams.Drawcall.BindCBV(cbBinder.mCoreObject, cmdParams.CBuffer);

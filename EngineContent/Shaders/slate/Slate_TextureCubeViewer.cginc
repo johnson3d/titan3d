@@ -1,10 +1,11 @@
 #include "../Inc/GlobalDefine.cginc"
 
-cbuffer ProjectionMatrixBuffer DX_BIND_B(0)
+cbuffer cbShadingEnv DX_BIND_B(0)
 {
     float4x4 ProjectionMatrix;
     int4 ColorMask;
     int IsNormalMap;
+    int MipLevel;
 };
 
 struct VS_INPUT_SLATE
@@ -48,7 +49,7 @@ bool FillColor(TextureCube tex, sampler samp, float2 inputUV, out float4 finalCo
     if(inputUV.x > faceUV0Start.x && inputUV.x < faceUV0End.x && inputUV.y > faceUV0Start.y && inputUV.y < faceUV0End.y)
     {
         float2 uv = (inputUV - faceUV0Start) / faceSize;
-        finalColor = tex.Sample(samp, float3(1, 1-uv.y*2, 1-uv.x*2));
+        finalColor = tex.SampleLevel(samp, float3(1, 1 - uv.y * 2, 1 - uv.x * 2), MipLevel);
         return true;
     }
     // face1
@@ -57,7 +58,7 @@ bool FillColor(TextureCube tex, sampler samp, float2 inputUV, out float4 finalCo
     if(inputUV.x > faceUV1Start.x && inputUV.x < faceUV1End.x && inputUV.y > faceUV1Start.y && inputUV.y < faceUV1End.y)
     {
         float2 uv = (inputUV - faceUV1Start) / faceSize;
-        finalColor = tex.Sample(samp, float3(-1, 1-uv.y*2, uv.x*2-1));
+        finalColor = tex.SampleLevel(samp, float3(-1, 1 - uv.y * 2, uv.x * 2 - 1), MipLevel);
         return true;
     }
     // face4
@@ -66,7 +67,7 @@ bool FillColor(TextureCube tex, sampler samp, float2 inputUV, out float4 finalCo
     if(inputUV.x > faceUV4Start.x && inputUV.x < faceUV4End.x && inputUV.y > faceUV4Start.y && inputUV.y < faceUV4End.y)
     {
         float2 uv = (inputUV - faceUV4Start) / faceSize;
-        finalColor = tex.Sample(samp, float3(uv.x*2-1, 1-uv.y*2, 1));
+        finalColor = tex.SampleLevel(samp, float3(uv.x * 2 - 1, 1 - uv.y * 2, 1), MipLevel);
         return true;
     }
     // face5
@@ -75,7 +76,7 @@ bool FillColor(TextureCube tex, sampler samp, float2 inputUV, out float4 finalCo
     if(inputUV.x > faceUV5Start.x && inputUV.x < faceUV5End.x && inputUV.y > faceUV5Start.y && inputUV.y < faceUV5End.y)
     {
         float2 uv = (inputUV - faceUV5Start) / faceSize;
-        finalColor = tex.Sample(samp, float3(1-uv.x*2, 1-uv.y*2, -1));
+        finalColor = tex.SampleLevel(samp, float3(1 - uv.x * 2, 1 - uv.y * 2, -1), MipLevel);
         return true;
     }
     // face2
@@ -84,7 +85,7 @@ bool FillColor(TextureCube tex, sampler samp, float2 inputUV, out float4 finalCo
     if(inputUV.x > faceUV2Start.x && inputUV.x < faceUV2End.x && inputUV.y > faceUV2Start.y && inputUV.y < faceUV2End.y)
     {
         float2 uv = (inputUV - faceUV2Start) / faceSize;
-        finalColor = tex.Sample(samp, float3(uv.x*2-1, 1, uv.y*2-1));
+        finalColor = tex.SampleLevel(samp, float3(uv.x * 2 - 1, 1, uv.y * 2 - 1), MipLevel);
         return true;
     }
     // face3
@@ -93,7 +94,7 @@ bool FillColor(TextureCube tex, sampler samp, float2 inputUV, out float4 finalCo
     if(inputUV.x > faceUV3Start.x && inputUV.x < faceUV3End.x && inputUV.y > faceUV3Start.y && inputUV.y < faceUV3End.y)
     {
         float2 uv = (inputUV - faceUV3Start) / faceSize;
-        finalColor = tex.Sample(samp, float3(uv.x*2-1, -1, 1-uv.y*2));
+        finalColor = tex.SampleLevel(samp, float3(uv.x * 2 - 1, -1, 1 - uv.y * 2), MipLevel);
         return true;
     }
          

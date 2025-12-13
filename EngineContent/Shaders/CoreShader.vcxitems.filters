@@ -442,7 +442,6 @@
     <None Include="$(MSBuildThisFileDirectory)..\..\cache\debugutility\engine_preprocessors.cginc">
       <Filter>Inc</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)slate\Slate_TextureCubeViewer.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\MultiViewID\BasePass.cginc">
       <Filter>ShadingEnv\Deferred\MultiViewID</Filter>
     </None>
@@ -478,6 +477,9 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)Bricks\FX\VolumeCloud.cginc">
       <Filter>Bricks\FX</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)slate\Slate_TextureCubeViewer.cginc">
+      <Filter>Slate</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
