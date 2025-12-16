@@ -13,10 +13,10 @@ namespace EngineNS.Bricks.Network.RPC
             PackageSize = 0;
             PKGFlags = 0;
         }
-
+        public const int MaxPackageSize = ushort.MaxValue;
         public ushort PackageSize;
         public byte PKGFlags;
-        
+        //private uint mSizeAndFlags;
 
         public static int SizeOf()
         {

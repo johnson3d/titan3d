@@ -8,7 +8,7 @@ namespace EngineNS.IO
     {
         public void SurePkgHeader()
         {
-            System.Diagnostics.Debug.Assert(Writer.Tell() < ushort.MaxValue);
+            System.Diagnostics.Debug.Assert(Writer.Tell() < Bricks.Network.RPC.FPkgHeader.MaxPackageSize);
             unsafe
             {
                 ((Bricks.Network.RPC.FPkgHeader*)Writer.GetPointer())->PackageSize = (ushort)Writer.Tell();

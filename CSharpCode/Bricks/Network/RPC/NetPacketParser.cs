@@ -9,9 +9,9 @@ namespace EngineNS.Bricks.Network.RPC
         public TtNetPackageManager NetPackageManager;
         MemStreamWriter Writer;
         uint PacketSize = 0;
-        public PacketBuilder()
+        public PacketBuilder(uint size = 1024 * 2)
         {
-            Writer = MemStreamWriter.CreateInstance(1024 * 2);
+            Writer = MemStreamWriter.CreateInstance(size);
         }
         ~PacketBuilder()
         {
@@ -73,7 +73,7 @@ namespace EngineNS.Bricks.Network.RPC
                             }
                         }
 
-                        if (PacketSize == 0 || PacketSize >= UInt16.MaxValue)
+                        if (PacketSize == 0 || PacketSize >= FPkgHeader.MaxPackageSize)
                         {//被修改或者错误的包
                             return false;
                         }
