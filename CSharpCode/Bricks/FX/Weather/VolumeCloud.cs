@@ -76,7 +76,6 @@ namespace EngineNS.Bricks.FX.Weather
         public TtWorly3D Worly3D = new TtWorly3D();
 
         public float PerlinWeight = 0.7f;
-        public float WorleyWeight = 0.3f;
         public float BillowPower = 1.0f;
 
         public Support.IRemapCurve RemapCurve = null;
@@ -93,6 +92,7 @@ namespace EngineNS.Bricks.FX.Weather
             float[] perlinNoise = GenerateFractalPerlinNoise(size);
             float[] worleyNoise = GenerateFractalWorleyNoise(size);
 
+            float WorleyWeight = 1 - PerlinWeight;
             // 混合噪声
             for (int z = 0; z < size; z++)
             {
@@ -687,13 +687,21 @@ namespace EngineNS.Bricks.FX.Weather
             NoiseGen.WeatherSettings = GetNodeData<TtThisNodeData>().WeatherSettings;
             await NoiseGen.ReGenRenderResources();
 
-            RenderNode = world.ViewportSlate.RenderPolicy.FindFirstNode<TtVolumeCloudNode>();
-            if (RenderNode!=null)
-            {
-                RenderNode.SceneNode = this;
-            }
-
+            this.IsNoTick = false;
+            this.IsParallelTick = false;
             return ret;
+        }
+        public override bool OnTickLogic(TtNodeTickParameters args)
+        {
+            if (RenderNode==null)
+            {
+                RenderNode = this.GetWorld().ViewportSlate.RenderPolicy?.FindFirstNode<TtVolumeCloudNode>();
+                if (RenderNode!=null)
+                {
+                    RenderNode.SceneNode = this;
+                }
+            }
+            return base.OnTickLogic(args);
         }
     }
 }

@@ -563,6 +563,25 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         [Category("Option")]
+        public virtual bool IsParallelTick
+        {
+            get
+            {
+                return HasStyle(ENodeStyles.ParallelTick);
+            }
+            set
+            {
+                if (value)
+                {
+                    SetStyle(ENodeStyles.ParallelTick);
+                }
+                else
+                {
+                    UnsetStyle(ENodeStyles.ParallelTick);
+                }
+            }
+        }
+        [Category("Option")]
         public virtual bool IsVisibleAlways
         {
             get
