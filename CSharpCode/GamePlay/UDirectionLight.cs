@@ -19,7 +19,7 @@ namespace EngineNS.GamePlay
             set => mDirLight.Direction = value;
         }
 
-        [EGui.Controls.PropertyGrid.Color3PickerEditor]
+        [EGui.Controls.PropertyGrid.TtColor3PickerEditor]
         [Rtti.Meta("")]
         [Category("Option")]
         public Vector3 SunLightColor
@@ -30,7 +30,7 @@ namespace EngineNS.GamePlay
                 mDirLight.SunLightColor = value;
             }
         }
-        [EGui.Controls.PropertyGrid.Color3PickerEditor]
+        [EGui.Controls.PropertyGrid.TtColor3PickerEditor]
         [Rtti.Meta("")]
         [Category("Option")]
         public Vector3 SkyLightColor
@@ -41,7 +41,7 @@ namespace EngineNS.GamePlay
                 mDirLight.SkyLightColor = value;
             }
         }
-        [EGui.Controls.PropertyGrid.Color3PickerEditor]
+        [EGui.Controls.PropertyGrid.TtColor3PickerEditor]
         [Rtti.Meta("")]
         [Category("Option")]
         public Vector3 GroundLightColor

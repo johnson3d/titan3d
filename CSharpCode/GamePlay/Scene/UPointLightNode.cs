@@ -22,7 +22,7 @@ namespace EngineNS.GamePlay.Scene
             Vector3 mColor;
             [Rtti.Meta("")]
             [Category("Option")]
-            [EGui.Controls.PropertyGrid.Color3PickerEditor()]
+            [EGui.Controls.PropertyGrid.TtColor3PickerEditor()]
             public Vector3 Color 
             { 
                 get=> mColor;

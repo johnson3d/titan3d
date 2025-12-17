@@ -10,7 +10,7 @@ namespace EngineNS
     //[System.ComponentModel.TypeConverter( typeof(EngineNS.Design.QuaternionConverter) )]
     public struct Quaternion : System.IEquatable<Quaternion>
     {
-        public class QuaternionEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        public class QuaternionEditorAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
         {
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {

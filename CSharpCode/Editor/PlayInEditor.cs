@@ -358,7 +358,7 @@ namespace EngineNS.Editor
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
 
-                var info = new EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute.EditorInfo()
+                var info = new EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute.EditorInfo()
                 {
                     Name = mCurrentName?.Name,
                     Value = mCurrentName,

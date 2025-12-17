@@ -58,7 +58,7 @@ namespace EngineNS.UI.Bind
         public TtBindableProperty Register<TProperty, TClass>(
             string name, TProperty defaultValue, 
             Action<IBindableObject, TtBindableProperty, TProperty> valueChangedCallback = null, 
-            EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute valueEditor = null,
+            EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute valueEditor = null,
             BindPropertyDisplayNameAttribute displayNameAtt = null)
             where TClass : class, IBindableObject
         {
@@ -69,7 +69,7 @@ namespace EngineNS.UI.Bind
             string category, 
             TProperty defaultValue, 
             Action<IBindableObject, TtBindableProperty, TProperty> valueChangedCallback = null, 
-            EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute valueEditor = null,
+            EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute valueEditor = null,
             BindPropertyDisplayNameAttribute displayNameAtt = null)
             where TClass : class, IBindableObject
         {
@@ -128,7 +128,7 @@ namespace EngineNS.UI.Bind
             string name, 
             TProperty defaultValue, 
             Action<IBindableObject, TtBindableProperty, TProperty> valueChangedCallback = null, 
-            EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute valueEditor = null,
+            EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute valueEditor = null,
             BindPropertyDisplayNameAttribute displayNameAtt = null)
             where TClass : class, IBindableObject
         {
@@ -139,7 +139,7 @@ namespace EngineNS.UI.Bind
             string category, 
             TProperty defaultValue, 
             Action<IBindableObject, TtBindableProperty, TProperty> valueChangedCallback = null, 
-            EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute valueEditor = null,
+            EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute valueEditor = null,
             BindPropertyDisplayNameAttribute displayNameAtt = null)
             where TClass : class, IBindableObject
         {

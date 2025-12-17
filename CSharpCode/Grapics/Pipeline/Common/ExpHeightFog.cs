@@ -104,7 +104,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
         FFogStruct mFogStruct;
         [Category("Exponent")]
-        [EGui.Controls.PropertyGrid.Color3PickerEditor()]
+        [EGui.Controls.PropertyGrid.TtColor3PickerEditor()]
         public Color3f FogColor
         {
             get => mFogStruct.FogColor;
@@ -141,7 +141,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public Vector3 LightPosition { get => mFogStruct.LightPosition; set => mFogStruct.LightPosition = value; }
 
         [Category("Exponent")]
-        [EGui.Controls.PropertyGrid.Color3PickerEditor()]
+        [EGui.Controls.PropertyGrid.TtColor3PickerEditor()]
         public Color3f InscatterColor
         {
             get => mFogStruct.InscatterColor;

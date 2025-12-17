@@ -235,7 +235,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             OutXYZ.MultiLinks = true;
             this.AddPinOut(OutXYZ);
         }
-        [EGui.Controls.PropertyGrid.Color4PickerEditor()]
+        [EGui.Controls.PropertyGrid.TtColor4PickerEditor()]
         [Category("Option")]
         public Vector4 Color { get => mValue; set => mValue = value; }
         public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)

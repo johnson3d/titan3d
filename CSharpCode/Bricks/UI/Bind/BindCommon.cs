@@ -815,7 +815,7 @@ namespace EngineNS.UI.Bind
         public string Category;
         public TtTypeDesc PropertyType;
         public TtTypeDesc HostType;
-        public PGCustomValueEditorAttribute CustomValueEditor;
+        public TtPGCustomValueEditorAttribute CustomValueEditor;
         public BindPropertyDisplayNameAttribute DisplayNameAtt;
 
         [Flags]

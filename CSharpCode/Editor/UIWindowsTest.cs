@@ -63,11 +63,11 @@ namespace EngineNS.Editor
         public Vector2 Vector2Value { get; set; } = new Vector2();
         public Vector3 Vector3Value { get; set; } = new Vector3();
         public Vector4 Vector4Value { get; set; } = new Vector4();
-        [EngineNS.EGui.Controls.PropertyGrid.Color4PickerEditorAttribute()]
+        [EngineNS.EGui.Controls.PropertyGrid.TtColor4PickerEditorAttribute()]
         public Vector4 Color4Value { get; set; } = new Vector4(1, 1, 1, 1);
-        [EngineNS.EGui.Controls.PropertyGrid.Color3PickerEditorAttribute()]
+        [EngineNS.EGui.Controls.PropertyGrid.TtColor3PickerEditorAttribute()]
         public Vector3 Color3Value { get; set; } = new Vector3(1, 1, 1);
-        [EGui.Controls.PropertyGrid.UByte4ToColor4PickerEditor]
+        [EGui.Controls.PropertyGrid.TtByte4ToColor4PickerEditor]
         public UInt32 Color { get; set; } = 0xFFFFFFFF;
         public RName RNameValue { get; set; }
 

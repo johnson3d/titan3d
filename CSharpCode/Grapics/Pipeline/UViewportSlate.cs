@@ -72,7 +72,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         protected Graphics.Pipeline.TtRenderPolicy mRenderPolicy;
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true, UserDraw = false)]
+        [EGui.Controls.PropertyGrid.TtPGCustomValueEditor(ReadOnly = true, UserDraw = false)]
         [Rtti.Meta("")]
         public Graphics.Pipeline.TtRenderPolicy RenderPolicy 
         { 

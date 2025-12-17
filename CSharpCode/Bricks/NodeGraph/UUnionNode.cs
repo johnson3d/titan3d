@@ -24,9 +24,9 @@ namespace EngineNS.Bricks.NodeGraph
                 OnNameChanged?.Invoke(oldName, value);
             }
         }
-        public delegate string Delegate_GetErrorString(in EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute.EditorInfo info, UNodePinDefineBase def, object newValue);
+        public delegate string Delegate_GetErrorString(in EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute.EditorInfo info, UNodePinDefineBase def, object newValue);
         public Delegate_GetErrorString GetErrorStringAction;
-        class NameCheckAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        class NameCheckAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
         {
             public NameCheckAttribute()
             {
@@ -392,7 +392,7 @@ namespace EngineNS.Bricks.NodeGraph
                         if (payLoad != null)
                         {
                             var handle = GCHandle.FromIntPtr((IntPtr)(payLoad->Data));
-                            var info = (EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute.EditorInfo)handle.Target;
+                            var info = (EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute.EditorInfo)handle.Target;
                             if(info.ObjectInstance != null) 
                             {
                                 var enumrableInterface = info.ObjectInstance.GetType().GetInterface(typeof(IEnumerable).FullName);

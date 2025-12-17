@@ -11,7 +11,7 @@ namespace EngineNS
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 4)]
     public struct Thickness : IEquatable<Thickness>
     {
-        public class ThicknessEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        public class ThicknessEditorAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
         {
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {

@@ -1,5 +1,4 @@
-﻿#define COMPACT_OLD
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -14,13 +13,36 @@ namespace EngineNS.Bricks.Network.RPC
             PKGFlags = 0;
         }
         public const int MaxPackageSize = ushort.MaxValue;
-        public ushort PackageSize;
-        public byte PKGFlags;
-        //private uint mSizeAndFlags;
-
-        public static int SizeOf()
+        public uint PackageSize
         {
-            unsafe
+            get
+            {
+                return (uint)(mSizeAndFlags & 0x00FFFFFF);
+            }
+            set
+            {
+                System.Diagnostics.Debug.Assert(value < MaxPackageSize);
+                mSizeAndFlags &= 0xFF000000;
+                mSizeAndFlags |= value;
+            }
+        }
+        public byte PKGFlags
+        {
+            get
+            {
+                return (byte)((mSizeAndFlags) >> 24);
+            }
+            set
+            {
+                mSizeAndFlags &= 0x00FFFFFF;
+                mSizeAndFlags |= (uint)(value << 24);
+            }
+        }
+        private uint mSizeAndFlags;
+
+        public static unsafe int SizeOf
+        {
+            get
             {
                 return sizeof(FPkgHeader);
             }

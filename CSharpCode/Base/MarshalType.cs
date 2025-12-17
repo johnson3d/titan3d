@@ -37,7 +37,7 @@ public struct wchar_t
 [CppBool.PropEditor()]
 public struct CppBool
 {
-    public class PropEditor : EngineNS.EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+    public class PropEditor : EngineNS.EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
     {
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
@@ -116,7 +116,7 @@ public struct CppBool
 [vBOOL.PropEditor()]
 public struct vBOOL
 {
-    public class PropEditor : EngineNS.EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+    public class PropEditor : EngineNS.EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
     {
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {

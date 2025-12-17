@@ -78,7 +78,7 @@ namespace EngineNS.Graphics.Pipeline
         public class TtNodeListDefine
         {
             internal TtRenderPolicy Host;
-            public class TtValueEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+            public class TtValueEditorAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
             {
                 public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
                 {

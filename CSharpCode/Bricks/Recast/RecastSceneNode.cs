@@ -29,7 +29,7 @@ namespace EngineNS.Bricks.Recast
             CoreSDK.DisposeObject(ref mNavMesh); 
             base.Dispose();
         }
-        class NavMeshAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        class NavMeshAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
         {
             public NavMeshAttribute()
             {

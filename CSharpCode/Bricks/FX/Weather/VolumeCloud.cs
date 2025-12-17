@@ -13,7 +13,7 @@ using static EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator;
 
 namespace EngineNS.Bricks.FX.Weather
 {
-    public class TtCloudNoiseGenerator : IDisposable
+    public class TtCloudNoiseGenerator : IO.BaseSerializer, IDisposable
     {
         public void Dispose() 
         {
@@ -22,8 +22,39 @@ namespace EngineNS.Bricks.FX.Weather
         }
         public NxRHI.TtSrView WeatherSrv;
         public NxRHI.TtSrView CloudNoiseSrv;
-        
-        TtWeatherMapSettings mWeatherSettings = null;
+        public class TtWeatherMapSettings : IO.BaseSerializer
+        {
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public int Width { get; set; } = 256;
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public int Height { get; set; } = 256;
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public float CoverageFrequency { get; set; } = 8.0f;
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public float CoverageAmount { get; set; } = 0.7f;
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public float DensityFrequency { get; set; } = 0.005f;
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public float DensityAmount { get; set; } = 0.5f;
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public bool AddCirrus { get; set; } = true;
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public float CirrusFrequency { get; set; } = 0.001f;
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public float CirrusStrength { get; set; } = 0.3f;
+        }
+        TtWeatherMapSettings mWeatherSettings = new TtWeatherMapSettings();
+        [Rtti.Meta("")]
+        [Category("Option")]
         public TtWeatherMapSettings WeatherSettings
         {
             get
@@ -67,9 +98,17 @@ namespace EngineNS.Bricks.FX.Weather
         public int Resolution = 64;
         public Vector3 Scale = Vector3.One;
 
+        [Rtti.Meta("")]
+        [Category("Option")]
         public int Octaves { get; set; } = 4;
+        [Rtti.Meta("")]
+        [Category("Option")]
         public float Frequency { get; set; } = 1.0f;
+        [Rtti.Meta("")]
+        [Category("Option")]
         public float Lacunarity { get; set; } = 2.0f;
+        [Rtti.Meta("")]
+        [Category("Option")]
         public float Gain { get; set; } = 0.5f;
 
         public TtPerlin2 Perlin3D = new TtPerlin2((int)Support.TtTime.GetTickCount());
@@ -178,36 +217,6 @@ namespace EngineNS.Bricks.FX.Weather
                     mipDatas[i].DesctroyPixels(initData[i].pData);
                 }
             }
-        }
-        public class TtWeatherMapSettings : IO.BaseSerializer
-        {
-            [Rtti.Meta("")]
-            [Category("Option")]
-            public int Width { get; set; } = 256;
-            [Rtti.Meta("")]
-            [Category("Option")]
-            public int Height { get; set; } = 256;
-            [Rtti.Meta("")]
-            [Category("Option")]
-            public float CoverageFrequency { get; set; } = 8.0f;
-            [Rtti.Meta("")]
-            [Category("Option")]
-            public float CoverageAmount { get; set; } = 0.7f;
-            [Rtti.Meta("")]
-            [Category("Option")]
-            public float DensityFrequency { get; set; } = 0.005f;
-            [Rtti.Meta("")]
-            [Category("Option")]
-            public float DensityAmount { get; set; } = 0.5f;
-            [Rtti.Meta("")]
-            [Category("Option")]
-            public bool AddCirrus { get; set; } = true;
-            [Rtti.Meta("")]
-            [Category("Option")]
-            public float CirrusFrequency { get; set; } = 0.001f;
-            [Rtti.Meta("")]
-            [Category("Option")]
-            public float CirrusStrength { get; set; } = 0.3f;
         }
         public unsafe NxRHI.TtTexture GenerateWeatherMap(TtWeatherMapSettings weatherMapSettings)
         {
@@ -429,7 +438,6 @@ namespace EngineNS.Bricks.FX.Weather
         public TtVolumeCloudNode()
         {
             Name = "VolumeCloud";
-            mShadingStruct.SetDefault();
         }
         public override void Dispose()
         {
@@ -451,137 +459,6 @@ namespace EngineNS.Bricks.FX.Weather
         {
             await base.Initialize(policy, debugName);
             mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtVolumeCloudShading>();
-
-        }
-        TtWeatherMapSettings mWeatherSettings = new TtWeatherMapSettings();
-        [Rtti.Meta("")]
-        [Category("Option")]
-        public TtWeatherMapSettings WeatherSettings
-        {
-            get 
-            { 
-                return mWeatherSettings; 
-            }
-            set
-            {
-                mWeatherSettings = value;
-            }
-        }
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
-        public struct FShadingStruct
-        {
-            public void SetDefault()
-            {
-                CloudColor = Color4b.WhiteSmoke.ToVector4();
-                ShadowColor = Color4b.DarkGray.ToVector4();
-                LightColor = Color4b.LightGoldenrodYellow.ToVector4();
-
-                CloudDensity = 1;
-                CloudCoverage = 1;
-                CloudHeightMin = -100;
-                CloudHeightMax = 200;
-
-                CloudScale = new Vector2(1,1);
-                LightAbsorption = 0.5f;
-                DarknessThreshold = 0.01f;
-
-                LightDir = Vector3.Down;
-                MaxSteps = 32;
-            }
-            public Vector4 CloudColor;
-            public Vector4 ShadowColor;
-            public Vector4 LightColor;
-            
-            public float CloudDensity;
-            public float CloudCoverage;
-            public float CloudHeightMin;
-            public float CloudHeightMax;
-            
-            public Vector2 CloudScale;
-            public float LightAbsorption;
-            public float DarknessThreshold;
-            
-            public Vector3 LightDir;
-            public int MaxSteps;
-        }
-        protected FShadingStruct mShadingStruct = new FShadingStruct();
-        public Vector4 CloudColor
-        {
-            get => mShadingStruct.CloudColor;
-            set => mShadingStruct.CloudColor = value;
-        }
-        public Vector4 ShadowColor
-        {
-            get => mShadingStruct.ShadowColor;
-            set => mShadingStruct.ShadowColor = value;
-        }
-        public Vector4 LightColor
-        {
-            get => mShadingStruct.LightColor;
-            set => mShadingStruct.LightColor = value;
-        }
-        [Rtti.Meta("")]
-        [Category("Option")]
-        public float CloudDensity
-        {
-            get => mShadingStruct.CloudDensity;
-            set => mShadingStruct.CloudDensity = value;
-        }
-        [Rtti.Meta("")]
-        [Category("Option")]
-        public float CloudCoverage
-        {
-            get => mShadingStruct.CloudCoverage;
-            set => mShadingStruct.CloudCoverage = value;
-        }
-        [Rtti.Meta("")]
-        [Category("Option")]
-        public float CloudHeightMin
-        {
-            get => mShadingStruct.CloudHeightMin;
-            set => mShadingStruct.CloudHeightMin = value;
-        }
-        [Rtti.Meta("")]
-        [Category("Option")]
-        public float CloudHeightMax
-        {
-            get => mShadingStruct.CloudHeightMax;
-            set => mShadingStruct.CloudHeightMax = value;
-        }
-        [Rtti.Meta("")]
-        [Category("Option")]
-        public Vector2 CloudScale
-        {
-            get => mShadingStruct.CloudScale;
-            set => mShadingStruct.CloudScale = value;
-        }
-        [Rtti.Meta("")]
-        [Category("Option")]
-        public float LightAbsorption
-        {
-            get => mShadingStruct.LightAbsorption;
-            set => mShadingStruct.LightAbsorption = value;
-        }
-        [Rtti.Meta("")]
-        [Category("Option")]
-        public float DarknessThreshold
-        {
-            get => mShadingStruct.DarknessThreshold;
-            set => mShadingStruct.DarknessThreshold = value;
-        }
-        [Rtti.Meta("")]
-        [Category("Option")]
-        public Vector3 LightDir
-        {
-            get => mShadingStruct.LightDir;
-            set => mShadingStruct.LightDir = value;
-        }
-        [Rtti.Meta("")]
-        [Category("Option")]
-        public int MaxSteps
-        {
-            get => mShadingStruct.MaxSteps;
-            set => mShadingStruct.MaxSteps = value;
         }
         public override void TickLogic(TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
@@ -590,9 +467,9 @@ namespace EngineNS.Bricks.FX.Weather
                 MoveAttachment(ColorPinIn, ResultPinOut);
                 return;
             }
-            if (ShadingCbv!=null)
+            if (ShadingCbv!=null && SceneNode!=null)
             {
-                ShadingCbv.SetValue("ShadingStruct", in mShadingStruct);
+                ShadingCbv.SetValue("ShadingStruct", in SceneNode.ShadingStruct);
             }
             base.TickLogic(world, policy, frameCmdList, bClear);
         }
@@ -609,13 +486,28 @@ namespace EngineNS.Bricks.FX.Weather
     {
         public class TtThisNodeData : TtNodeData
         {
+            public TtThisNodeData()
+            {
+                mShadingStruct.SetDefault();
+            }
             [Rtti.Meta("")]
             [Category("Option")]
-            public TtWeatherMapSettings WeatherSettings { get; set; } = new TtWeatherMapSettings();
+            public TtCloudNoiseGenerator NoiseGen { get; set; } = new TtCloudNoiseGenerator();
+
+            internal FShadingStruct mShadingStruct = new FShadingStruct();
+            [Rtti.Meta("")]
+            public FShadingStruct ShadingStruct
+            {
+                get => mShadingStruct;
+                set => mShadingStruct =value;
+            }
         }
         [Rtti.Meta("")]
         [Category("Option")]
-        public TtCloudNoiseGenerator NoiseGen { get; set; } = new TtCloudNoiseGenerator();
+        public TtCloudNoiseGenerator NoiseGen 
+        { 
+            get =>GetNodeData<TtThisNodeData>()?.NoiseGen; 
+        } 
         public class TtReGenTexture : EGui.Controls.PropertyGrid.TtButtonAttribute
         {
             bool IsGenarating = false;
@@ -666,6 +558,120 @@ namespace EngineNS.Bricks.FX.Weather
 
             }
         }
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
+        public struct FShadingStruct
+        {
+            public void SetDefault()
+            {
+                CloudColor = Color4b.WhiteSmoke.ToVector4();
+                ShadowColor = Color4b.DarkGray.ToVector4();
+                LightColor = Color4b.LightGoldenrodYellow.ToVector4();
+
+                CloudDensity = 1;
+                CloudCoverage = 1;
+                CloudHeightMin = -100;
+                CloudHeightMax = 200;
+
+                CloudScale = new Vector2(1, 1);
+                LightAbsorption = 0.5f;
+                DarknessThreshold = 0.01f;
+
+                LightDir = Vector3.Down;
+                MaxSteps = 32;
+            }
+            public Vector4 CloudColor;
+            public Vector4 ShadowColor;
+            public Vector4 LightColor;
+
+            public float CloudDensity;
+            public float CloudCoverage;
+            public float CloudHeightMin;
+            public float CloudHeightMax;
+
+            public Vector2 CloudScale;
+            public float LightAbsorption;
+            public float DarknessThreshold;
+
+            public Vector3 LightDir;
+            public int MaxSteps;
+        }
+        public ref FShadingStruct ShadingStruct => ref GetNodeData<TtThisNodeData>().mShadingStruct;
+
+        [EGui.Controls.PropertyGrid.TtColor4PickerEditor]
+        [Category("Option")]
+        public Vector4 CloudColor
+        {
+            get => GetNodeData<TtThisNodeData>().mShadingStruct.CloudColor;
+            set => GetNodeData<TtThisNodeData>().mShadingStruct.CloudColor = value;
+        }
+        [EGui.Controls.PropertyGrid.TtColor4PickerEditor]
+        [Category("Option")]
+        public Vector4 ShadowColor
+        {
+            get => GetNodeData<TtThisNodeData>().mShadingStruct.ShadowColor;
+            set => GetNodeData<TtThisNodeData>().mShadingStruct.ShadowColor = value;
+        }
+        [EGui.Controls.PropertyGrid.TtColor4PickerEditor]
+        [Category("Option")]
+        public Vector4 LightColor
+        {
+            get => GetNodeData<TtThisNodeData>().mShadingStruct.LightColor;
+            set => GetNodeData<TtThisNodeData>().mShadingStruct.LightColor = value;
+        }
+        [Category("Option")]
+        public float CloudDensity
+        {
+            get => GetNodeData<TtThisNodeData>().mShadingStruct.CloudDensity;
+            set => GetNodeData<TtThisNodeData>().mShadingStruct.CloudDensity = value;
+        }
+        [Category("Option")]
+        public float CloudCoverage
+        {
+            get => GetNodeData<TtThisNodeData>().mShadingStruct.CloudCoverage;
+            set => GetNodeData<TtThisNodeData>().mShadingStruct.CloudCoverage = value;
+        }
+        [Category("Option")]
+        public float CloudHeightMin
+        {
+            get => GetNodeData<TtThisNodeData>().mShadingStruct.CloudHeightMin;
+            set => GetNodeData<TtThisNodeData>().mShadingStruct.CloudHeightMin = value;
+        }
+        [Category("Option")]
+        public float CloudHeightMax
+        {
+            get => GetNodeData<TtThisNodeData>().mShadingStruct.CloudHeightMax;
+            set => GetNodeData<TtThisNodeData>().mShadingStruct.CloudHeightMax = value;
+        }
+        [Category("Option")]
+        public Vector2 CloudScale
+        {
+            get => GetNodeData<TtThisNodeData>().mShadingStruct.CloudScale;
+            set => GetNodeData<TtThisNodeData>().mShadingStruct.CloudScale = value;
+        }
+        [Category("Option")]
+        public float LightAbsorption
+        {
+            get => GetNodeData<TtThisNodeData>().mShadingStruct.LightAbsorption;
+            set => GetNodeData<TtThisNodeData>().mShadingStruct.LightAbsorption = value;
+        }
+        [Category("Option")]
+        public float DarknessThreshold
+        {
+            get => GetNodeData<TtThisNodeData>().mShadingStruct.DarknessThreshold;
+            set => GetNodeData<TtThisNodeData>().mShadingStruct.DarknessThreshold = value;
+        }
+        [Category("Option")]
+        public Vector3 LightDir
+        {
+            get => GetNodeData<TtThisNodeData>().mShadingStruct.LightDir;
+            set => GetNodeData<TtThisNodeData>().mShadingStruct.LightDir = value;
+        }
+        [Category("Option")]
+        public int MaxSteps
+        {
+            get => GetNodeData<TtThisNodeData>().mShadingStruct.MaxSteps;
+            set => GetNodeData<TtThisNodeData>().mShadingStruct.MaxSteps = value;
+        }
         public TtVolumeCloudNode RenderNode = null;
         public override void Dispose()
         {
@@ -676,7 +682,6 @@ namespace EngineNS.Bricks.FX.Weather
             if (NoiseGen!=null)
             {
                 NoiseGen.Dispose();
-                NoiseGen = null;
             }
             base.Dispose();
         }
@@ -684,7 +689,6 @@ namespace EngineNS.Bricks.FX.Weather
         {
             var ret = await base.InitializeNode(world, data, bvType, placementType);
 
-            NoiseGen.WeatherSettings = GetNodeData<TtThisNodeData>().WeatherSettings;
             await NoiseGen.ReGenRenderResources();
 
             this.IsNoTick = false;
@@ -699,6 +703,13 @@ namespace EngineNS.Bricks.FX.Weather
                 if (RenderNode!=null)
                 {
                     RenderNode.SceneNode = this;
+                }
+            }
+            else
+            {
+                if (GetWorld().GetSun()!=null)
+                {
+                    this.LightDir = GetWorld().GetSun().DirectionLight.Direction;
                 }
             }
             return base.OnTickLogic(args);

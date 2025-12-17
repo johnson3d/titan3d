@@ -50,7 +50,7 @@ namespace EngineNS
         //    Write(v.AssetId);
         //}
         public const ushort CurrentVersion = Version101;
-        public class PGRNameAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        public class PGRNameAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
         {
             public string FilterExts;   // "ext1" / "ext1,ext2"
             public System.Type MacrossType;

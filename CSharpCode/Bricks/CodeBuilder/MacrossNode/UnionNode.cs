@@ -14,7 +14,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public class UnionPinDefine : UNodePinDefineBase
     {
         [Rtti.Meta("")]
-        [EGui.Controls.PropertyGrid.PGTypeEditor()]
+        [EGui.Controls.PropertyGrid.TtPGTypeEditor()]
         public TtTypeDesc Type { get; set; } = TtTypeDesc.TypeOf(typeof(int));
         [Rtti.Meta("")]
         [Browsable(false)]
@@ -320,7 +320,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 render.SetGraph(ContentGraph);
             }
         }
-        string GetInputNameErrorString(in EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute.EditorInfo info, UNodePinDefineBase dec, object newValue)
+        string GetInputNameErrorString(in EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute.EditorInfo info, UNodePinDefineBase dec, object newValue)
         {
             var newName = (string)newValue;
             for (int i = 0; i < mUserInputs.Count; i++)
@@ -330,7 +330,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return null;
         }
-        string GetOutputNameErrorString(in EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute.EditorInfo info, UNodePinDefineBase dec, object newValue)
+        string GetOutputNameErrorString(in EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute.EditorInfo info, UNodePinDefineBase dec, object newValue)
         {
             var newName = (string)newValue;
             for (int i = 0; i < mUserOutputs.Count; i++)

@@ -13,7 +13,7 @@ namespace EngineNS.EGui.UIEditor.Elements
             Read,
             Write,
         }
-        public class PropNameEditor : Controls.PropertyGrid.PGCustomValueEditorAttribute
+        public class PropNameEditor : Controls.PropertyGrid.TtPGCustomValueEditorAttribute
         {
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {

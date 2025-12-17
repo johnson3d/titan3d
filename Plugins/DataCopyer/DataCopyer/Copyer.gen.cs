@@ -41181,21 +41181,138 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
+	static class EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator;
+			ar.Write(srcObj.Frequency);
+			ar.Write(srcObj.Gain);
+			ar.Write(srcObj.Lacunarity);
+			ar.Write(srcObj.Octaves);
+			if (srcObj.WeatherSettings != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.WeatherSettings.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.WeatherSettings);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator;
+			var srcObj = src as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator;
+			tarObj.Frequency = srcObj.Frequency;
+			tarObj.Gain = srcObj.Gain;
+			tarObj.Lacunarity = srcObj.Lacunarity;
+			tarObj.Octaves = srcObj.Octaves;
+			if (srcObj.WeatherSettings != null)
+			{
+				if (tarObj.WeatherSettings == null || tarObj.WeatherSettings.GetType() != srcObj.WeatherSettings.GetType())
+				{
+					tarObj.WeatherSettings = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.WeatherSettings.GetType()) as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings;
+				}
+				if (tarObj.WeatherSettings != null)
+				{
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings>.TypeDesc.TypeString);
+					if (fn != null)
+					{
+						fn(tarObj.WeatherSettings, srcObj.WeatherSettings);
+					}
+				}
+			}
+			else if (srcObj.WeatherSettings == null)
+			{
+				tarObj.WeatherSettings = null;
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15977829590903546287 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator;
+			System.Single t_Frequency;
+			ar.Read(out t_Frequency);
+			srcObj.Frequency = t_Frequency;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Frequency", false);
+				}
+			}
+			System.Single t_Gain;
+			ar.Read(out t_Gain);
+			srcObj.Gain = t_Gain;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Gain", false);
+				}
+			}
+			System.Single t_Lacunarity;
+			ar.Read(out t_Lacunarity);
+			srcObj.Lacunarity = t_Lacunarity;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Lacunarity", false);
+				}
+			}
+			System.Int32 t_Octaves;
+			ar.Read(out t_Octaves);
+			srcObj.Octaves = t_Octaves;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Octaves", false);
+				}
+			}
+			EngineNS.Hash64 type_WeatherSettings;
+			ar.Read(out type_WeatherSettings);
+			var meta_WeatherSettings = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_WeatherSettings);
+			if(meta_WeatherSettings != null)
+			{
+				EngineNS.Hash64 ver_WeatherSettings;
+				ar.Read(out ver_WeatherSettings);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_WeatherSettings.ClassType.TypeString, ver_WeatherSettings );
+				if (fn != null)
+				{
+					EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings t_WeatherSettings = null;
+					t_WeatherSettings = srcObj.WeatherSettings;
+					if (t_WeatherSettings == null)
+					{
+						t_WeatherSettings = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_WeatherSettings.ClassType) as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings;
+					}
+					fn(ar, t_WeatherSettings);
+					srcObj.WeatherSettings = t_WeatherSettings;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "WeatherSettings", false);
+						}
+					}
+				}
+			}
+		};
+	}
 	static class EngineNS_Bricks_FX_Weather_TtVolumeCloudNode
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Bricks.FX.Weather.TtVolumeCloudNode;
-			ar.Write(srcObj.CloudCoverage);
-			ar.Write(srcObj.CloudDensity);
-			ar.Write(srcObj.CloudHeightMax);
-			ar.Write(srcObj.CloudHeightMin);
-			ar.Write(srcObj.CloudScale);
-			ar.Write(srcObj.DarknessThreshold);
 			ar.Write(srcObj.Enable);
-			ar.Write(srcObj.LightAbsorption);
-			ar.Write(srcObj.LightDir);
-			ar.Write(srcObj.MaxSteps);
 			ar.Write(srcObj.OutputScaleFactor);
 			if (srcObj.WeatherSettings != null)
 			{
@@ -41223,16 +41340,7 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var tarObj = tar as EngineNS.Bricks.FX.Weather.TtVolumeCloudNode;
 			var srcObj = src as EngineNS.Bricks.FX.Weather.TtVolumeCloudNode;
-			tarObj.CloudCoverage = srcObj.CloudCoverage;
-			tarObj.CloudDensity = srcObj.CloudDensity;
-			tarObj.CloudHeightMax = srcObj.CloudHeightMax;
-			tarObj.CloudHeightMin = srcObj.CloudHeightMin;
-			tarObj.CloudScale = srcObj.CloudScale;
-			tarObj.DarknessThreshold = srcObj.DarknessThreshold;
 			tarObj.Enable = srcObj.Enable;
-			tarObj.LightAbsorption = srcObj.LightAbsorption;
-			tarObj.LightDir = srcObj.LightDir;
-			tarObj.MaxSteps = srcObj.MaxSteps;
 			tarObj.OutputScaleFactor = srcObj.OutputScaleFactor;
 			if (srcObj.WeatherSettings != null)
 			{
@@ -41254,63 +41362,69 @@ namespace EngineNS.Plugins.DataCopyer
 				tarObj.WeatherSettings = null;
 			}
 		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1752002600542425574 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Weather.TtVolumeCloudNode;
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+			System.Single t_OutputScaleFactor;
+			ar.Read(out t_OutputScaleFactor);
+			srcObj.OutputScaleFactor = t_OutputScaleFactor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "OutputScaleFactor", false);
+				}
+			}
+			EngineNS.Hash64 type_WeatherSettings;
+			ar.Read(out type_WeatherSettings);
+			var meta_WeatherSettings = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_WeatherSettings);
+			if(meta_WeatherSettings != null)
+			{
+				EngineNS.Hash64 ver_WeatherSettings;
+				ar.Read(out ver_WeatherSettings);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_WeatherSettings.ClassType.TypeString, ver_WeatherSettings );
+				if (fn != null)
+				{
+					EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings t_WeatherSettings = null;
+					t_WeatherSettings = srcObj.WeatherSettings;
+					if (t_WeatherSettings == null)
+					{
+						t_WeatherSettings = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_WeatherSettings.ClassType) as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings;
+					}
+					fn(ar, t_WeatherSettings);
+					srcObj.WeatherSettings = t_WeatherSettings;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "WeatherSettings", false);
+						}
+					}
+				}
+			}
+		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7144489265181067940 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Bricks.FX.Weather.TtVolumeCloudNode;
 			System.Single t_CloudCoverage;
 			ar.Read(out t_CloudCoverage);
-			srcObj.CloudCoverage = t_CloudCoverage;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "CloudCoverage", false);
-				}
-			}
 			System.Single t_CloudDensity;
 			ar.Read(out t_CloudDensity);
-			srcObj.CloudDensity = t_CloudDensity;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "CloudDensity", false);
-				}
-			}
 			System.Single t_CloudHeightMax;
 			ar.Read(out t_CloudHeightMax);
-			srcObj.CloudHeightMax = t_CloudHeightMax;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "CloudHeightMax", false);
-				}
-			}
 			System.Single t_CloudHeightMin;
 			ar.Read(out t_CloudHeightMin);
-			srcObj.CloudHeightMin = t_CloudHeightMin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "CloudHeightMin", false);
-				}
-			}
 			EngineNS.Vector2 t_CloudScale;
 			ar.Read(out t_CloudScale);
-			srcObj.CloudScale = t_CloudScale;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "CloudScale", false);
-				}
-			}
 			System.Single t_DarknessThreshold;
 			ar.Read(out t_DarknessThreshold);
-			srcObj.DarknessThreshold = t_DarknessThreshold;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DarknessThreshold", false);
-				}
-			}
 			System.Boolean t_Enable;
 			ar.Read(out t_Enable);
 			srcObj.Enable = t_Enable;
@@ -41322,31 +41436,10 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			System.Single t_LightAbsorption;
 			ar.Read(out t_LightAbsorption);
-			srcObj.LightAbsorption = t_LightAbsorption;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "LightAbsorption", false);
-				}
-			}
 			EngineNS.Vector3 t_LightDir;
 			ar.Read(out t_LightDir);
-			srcObj.LightDir = t_LightDir;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "LightDir", false);
-				}
-			}
 			System.Int32 t_MaxSteps;
 			ar.Read(out t_MaxSteps);
-			srcObj.MaxSteps = t_MaxSteps;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxSteps", false);
-				}
-			}
 			System.Single t_OutputScaleFactor;
 			ar.Read(out t_OutputScaleFactor);
 			srcObj.OutputScaleFactor = t_OutputScaleFactor;
@@ -41362,58 +41455,16 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Bricks.FX.Weather.TtVolumeCloudNode;
 			System.Single t_CloudCoverage;
 			ar.Read(out t_CloudCoverage);
-			srcObj.CloudCoverage = t_CloudCoverage;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "CloudCoverage", false);
-				}
-			}
 			System.Single t_CloudDensity;
 			ar.Read(out t_CloudDensity);
-			srcObj.CloudDensity = t_CloudDensity;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "CloudDensity", false);
-				}
-			}
 			System.Single t_CloudHeightMax;
 			ar.Read(out t_CloudHeightMax);
-			srcObj.CloudHeightMax = t_CloudHeightMax;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "CloudHeightMax", false);
-				}
-			}
 			System.Single t_CloudHeightMin;
 			ar.Read(out t_CloudHeightMin);
-			srcObj.CloudHeightMin = t_CloudHeightMin;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "CloudHeightMin", false);
-				}
-			}
 			EngineNS.Vector2 t_CloudScale;
 			ar.Read(out t_CloudScale);
-			srcObj.CloudScale = t_CloudScale;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "CloudScale", false);
-				}
-			}
 			System.Single t_DarknessThreshold;
 			ar.Read(out t_DarknessThreshold);
-			srcObj.DarknessThreshold = t_DarknessThreshold;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DarknessThreshold", false);
-				}
-			}
 			System.Boolean t_Enable;
 			ar.Read(out t_Enable);
 			srcObj.Enable = t_Enable;
@@ -41425,31 +41476,10 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			System.Single t_LightAbsorption;
 			ar.Read(out t_LightAbsorption);
-			srcObj.LightAbsorption = t_LightAbsorption;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "LightAbsorption", false);
-				}
-			}
 			EngineNS.Vector3 t_LightDir;
 			ar.Read(out t_LightDir);
-			srcObj.LightDir = t_LightDir;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "LightDir", false);
-				}
-			}
 			System.Int32 t_MaxSteps;
 			ar.Read(out t_MaxSteps);
-			srcObj.MaxSteps = t_MaxSteps;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxSteps", false);
-				}
-			}
 			System.Single t_OutputScaleFactor;
 			ar.Read(out t_OutputScaleFactor);
 			srcObj.OutputScaleFactor = t_OutputScaleFactor;
@@ -41517,9 +41547,9 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.BehaviorName);
 			ar.Write(srcObj.Name);
 			ar.Write(srcObj.NodeStyles);
-			if (srcObj.WeatherSettings != null)
+			if (srcObj.NoiseGen != null)
 			{
-				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.WeatherSettings.GetType());
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.NoiseGen.GetType());
 				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
 				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
 				if (fn != null && meta != null)
@@ -41527,7 +41557,7 @@ namespace EngineNS.Plugins.DataCopyer
 					ar.Write(false);
 					ar.Write(EngineNS.Hash64.FromString(typeStr));
 					ar.Write(meta.CurrentVersion.MetaHash);
-					fn(ar, srcObj.WeatherSettings);
+					fn(ar, srcObj.NoiseGen);
 				}
 				else
 				{
@@ -41538,6 +41568,7 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				ar.Write(true);
 			}
+			ar.Write(srcObj.ShadingStruct);
 			if (srcObj.BoundVolume != null)
 			{
 				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.BoundVolume.GetType());
@@ -41588,25 +41619,26 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.BehaviorName = srcObj.BehaviorName;
 			tarObj.Name = srcObj.Name;
 			tarObj.NodeStyles = srcObj.NodeStyles;
-			if (srcObj.WeatherSettings != null)
+			if (srcObj.NoiseGen != null)
 			{
-				if (tarObj.WeatherSettings == null || tarObj.WeatherSettings.GetType() != srcObj.WeatherSettings.GetType())
+				if (tarObj.NoiseGen == null || tarObj.NoiseGen.GetType() != srcObj.NoiseGen.GetType())
 				{
-					tarObj.WeatherSettings = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.WeatherSettings.GetType()) as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings;
+					tarObj.NoiseGen = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.NoiseGen.GetType()) as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator;
 				}
-				if (tarObj.WeatherSettings != null)
+				if (tarObj.NoiseGen != null)
 				{
-					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings>.TypeDesc.TypeString);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator>.TypeDesc.TypeString);
 					if (fn != null)
 					{
-						fn(tarObj.WeatherSettings, srcObj.WeatherSettings);
+						fn(tarObj.NoiseGen, srcObj.NoiseGen);
 					}
 				}
 			}
-			else if (srcObj.WeatherSettings == null)
+			else if (srcObj.NoiseGen == null)
 			{
-				tarObj.WeatherSettings = null;
+				tarObj.NoiseGen = null;
 			}
+			tarObj.ShadingStruct = srcObj.ShadingStruct;
 			if (srcObj.BoundVolume != null)
 			{
 				if (tarObj.BoundVolume == null || tarObj.BoundVolume.GetType() != srcObj.BoundVolume.GetType())
@@ -41644,6 +41676,124 @@ namespace EngineNS.Plugins.DataCopyer
 			else if (srcObj.Placement == null)
 			{
 				tarObj.Placement = null;
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_197597712990160198 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Weather.TtVolumeCloudSceneNode.TtThisNodeData;
+			EngineNS.RName t_BehaviorName;
+			ar.Read(out t_BehaviorName);
+			srcObj.BehaviorName = t_BehaviorName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			EngineNS.GamePlay.Scene.TtNode.ENodeStyles t_NodeStyles;
+			ar.Read(out t_NodeStyles);
+			srcObj.NodeStyles = t_NodeStyles;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeStyles", false);
+				}
+			}
+			EngineNS.Hash64 type_NoiseGen;
+			ar.Read(out type_NoiseGen);
+			var meta_NoiseGen = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_NoiseGen);
+			if(meta_NoiseGen != null)
+			{
+				EngineNS.Hash64 ver_NoiseGen;
+				ar.Read(out ver_NoiseGen);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_NoiseGen.ClassType.TypeString, ver_NoiseGen );
+				if (fn != null)
+				{
+					EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator t_NoiseGen = null;
+					t_NoiseGen = srcObj.NoiseGen;
+					if (t_NoiseGen == null)
+					{
+						t_NoiseGen = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_NoiseGen.ClassType) as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator;
+					}
+					fn(ar, t_NoiseGen);
+					srcObj.NoiseGen = t_NoiseGen;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "NoiseGen", false);
+						}
+					}
+				}
+			}
+			EngineNS.Bricks.FX.Weather.TtVolumeCloudSceneNode.FShadingStruct t_ShadingStruct;
+			ar.Read(out t_ShadingStruct);
+			srcObj.ShadingStruct = t_ShadingStruct;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadingStruct", false);
+				}
+			}
+			EngineNS.Hash64 type_BoundVolume;
+			ar.Read(out type_BoundVolume);
+			var meta_BoundVolume = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BoundVolume);
+			if(meta_BoundVolume != null)
+			{
+				EngineNS.Hash64 ver_BoundVolume;
+				ar.Read(out ver_BoundVolume);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BoundVolume.ClassType.TypeString, ver_BoundVolume );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtBoundVolume t_BoundVolume = null;
+					t_BoundVolume = srcObj.BoundVolume;
+					if (t_BoundVolume == null)
+					{
+						t_BoundVolume = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BoundVolume.ClassType) as EngineNS.GamePlay.Scene.TtBoundVolume;
+					}
+					fn(ar, t_BoundVolume);
+					srcObj.BoundVolume = t_BoundVolume;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BoundVolume", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_Placement;
+			ar.Read(out type_Placement);
+			var meta_Placement = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Placement);
+			if(meta_Placement != null)
+			{
+				EngineNS.Hash64 ver_Placement;
+				ar.Read(out ver_Placement);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Placement.ClassType.TypeString, ver_Placement );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.TtPlacementBase t_Placement = null;
+					t_Placement = srcObj.Placement;
+					if (t_Placement == null)
+					{
+						t_Placement = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Placement.ClassType) as EngineNS.GamePlay.TtPlacementBase;
+					}
+					fn(ar, t_Placement);
+					srcObj.Placement = t_Placement;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Placement", false);
+						}
+					}
+				}
 			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_2857695752239016352 = (EngineNS.IO.IReader ar, object obj)=>
@@ -41687,19 +41837,121 @@ namespace EngineNS.Plugins.DataCopyer
 				if (fn != null)
 				{
 					EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings t_WeatherSettings = null;
-					t_WeatherSettings = srcObj.WeatherSettings;
 					if (t_WeatherSettings == null)
 					{
 						t_WeatherSettings = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_WeatherSettings.ClassType) as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings;
 					}
 					fn(ar, t_WeatherSettings);
-					srcObj.WeatherSettings = t_WeatherSettings;
+				}
+			}
+			EngineNS.Hash64 type_BoundVolume;
+			ar.Read(out type_BoundVolume);
+			var meta_BoundVolume = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BoundVolume);
+			if(meta_BoundVolume != null)
+			{
+				EngineNS.Hash64 ver_BoundVolume;
+				ar.Read(out ver_BoundVolume);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BoundVolume.ClassType.TypeString, ver_BoundVolume );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtBoundVolume t_BoundVolume = null;
+					t_BoundVolume = srcObj.BoundVolume;
+					if (t_BoundVolume == null)
+					{
+						t_BoundVolume = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BoundVolume.ClassType) as EngineNS.GamePlay.Scene.TtBoundVolume;
+					}
+					fn(ar, t_BoundVolume);
+					srcObj.BoundVolume = t_BoundVolume;
 					{
 						if (srcObj is IO.ISerializer sr)
 						{
-							sr.OnPropertyRead(ar.Tag, "WeatherSettings", false);
+							sr.OnPropertyRead(ar.Tag, "BoundVolume", false);
 						}
 					}
+				}
+			}
+			EngineNS.Hash64 type_Placement;
+			ar.Read(out type_Placement);
+			var meta_Placement = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Placement);
+			if(meta_Placement != null)
+			{
+				EngineNS.Hash64 ver_Placement;
+				ar.Read(out ver_Placement);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Placement.ClassType.TypeString, ver_Placement );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.TtPlacementBase t_Placement = null;
+					t_Placement = srcObj.Placement;
+					if (t_Placement == null)
+					{
+						t_Placement = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Placement.ClassType) as EngineNS.GamePlay.TtPlacementBase;
+					}
+					fn(ar, t_Placement);
+					srcObj.Placement = t_Placement;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Placement", false);
+						}
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_10344191290629591080 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Weather.TtVolumeCloudSceneNode.TtThisNodeData;
+			EngineNS.RName t_BehaviorName;
+			ar.Read(out t_BehaviorName);
+			srcObj.BehaviorName = t_BehaviorName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			EngineNS.GamePlay.Scene.TtNode.ENodeStyles t_NodeStyles;
+			ar.Read(out t_NodeStyles);
+			srcObj.NodeStyles = t_NodeStyles;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeStyles", false);
+				}
+			}
+			EngineNS.Bricks.FX.Weather.TtVolumeCloudSceneNode.FShadingStruct t_ShadingStruct;
+			ar.Read(out t_ShadingStruct);
+			srcObj.ShadingStruct = t_ShadingStruct;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadingStruct", false);
+				}
+			}
+			EngineNS.Hash64 type_WeatherSettings;
+			ar.Read(out type_WeatherSettings);
+			var meta_WeatherSettings = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_WeatherSettings);
+			if(meta_WeatherSettings != null)
+			{
+				EngineNS.Hash64 ver_WeatherSettings;
+				ar.Read(out ver_WeatherSettings);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_WeatherSettings.ClassType.TypeString, ver_WeatherSettings );
+				if (fn != null)
+				{
+					EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings t_WeatherSettings = null;
+					if (t_WeatherSettings == null)
+					{
+						t_WeatherSettings = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_WeatherSettings.ClassType) as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings;
+					}
+					fn(ar, t_WeatherSettings);
 				}
 			}
 			EngineNS.Hash64 type_BoundVolume;
@@ -41852,25 +42104,6 @@ namespace EngineNS.Plugins.DataCopyer
 			var tarObj = tar as EngineNS.Bricks.FX.Weather.TtVolumeCloudSceneNode;
 			var srcObj = src as EngineNS.Bricks.FX.Weather.TtVolumeCloudSceneNode;
 			tarObj.BehaviorName = srcObj.BehaviorName;
-			if (srcObj.NoiseGen != null)
-			{
-				if (tarObj.NoiseGen == null || tarObj.NoiseGen.GetType() != srcObj.NoiseGen.GetType())
-				{
-					tarObj.NoiseGen = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.NoiseGen.GetType()) as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator;
-				}
-				if (tarObj.NoiseGen != null)
-				{
-					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator>.TypeDesc.TypeString);
-					if (fn != null)
-					{
-						fn(tarObj.NoiseGen, srcObj.NoiseGen);
-					}
-				}
-			}
-			else if (srcObj.NoiseGen == null)
-			{
-				tarObj.NoiseGen = null;
-			}
 			if (srcObj.Parent != null)
 			{
 				if (tarObj.Parent == null || tarObj.Parent.GetType() != srcObj.Parent.GetType())
@@ -41920,13 +42153,183 @@ namespace EngineNS.Plugins.DataCopyer
 						t_NoiseGen = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_NoiseGen.ClassType) as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator;
 					}
 					fn(ar, t_NoiseGen);
-					srcObj.NoiseGen = t_NoiseGen;
+				}
+			}
+			EngineNS.Hash64 type_Parent;
+			ar.Read(out type_Parent);
+			var meta_Parent = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Parent);
+			if(meta_Parent != null)
+			{
+				EngineNS.Hash64 ver_Parent;
+				ar.Read(out ver_Parent);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Parent.ClassType.TypeString, ver_Parent );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtNode t_Parent = null;
+					t_Parent = srcObj.Parent;
+					if (t_Parent == null)
+					{
+						t_Parent = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Parent.ClassType) as EngineNS.GamePlay.Scene.TtNode;
+					}
+					fn(ar, t_Parent);
+					srcObj.Parent = t_Parent;
 					{
 						if (srcObj is IO.ISerializer sr)
 						{
-							sr.OnPropertyRead(ar.Tag, "NoiseGen", false);
+							sr.OnPropertyRead(ar.Tag, "Parent", false);
 						}
 					}
+				}
+			}
+			EngineNS.Hash64 type_ParentScene;
+			ar.Read(out type_ParentScene);
+			var meta_ParentScene = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_ParentScene);
+			if(meta_ParentScene != null)
+			{
+				EngineNS.Hash64 ver_ParentScene;
+				ar.Read(out ver_ParentScene);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_ParentScene.ClassType.TypeString, ver_ParentScene );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtScene t_ParentScene = null;
+					t_ParentScene = srcObj.ParentScene;
+					if (t_ParentScene == null)
+					{
+						t_ParentScene = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_ParentScene.ClassType) as EngineNS.GamePlay.Scene.TtScene;
+					}
+					fn(ar, t_ParentScene);
+				}
+			}
+			EngineNS.Hash64 type_RootNode;
+			ar.Read(out type_RootNode);
+			var meta_RootNode = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_RootNode);
+			if(meta_RootNode != null)
+			{
+				EngineNS.Hash64 ver_RootNode;
+				ar.Read(out ver_RootNode);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_RootNode.ClassType.TypeString, ver_RootNode );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtNode t_RootNode = null;
+					t_RootNode = srcObj.RootNode;
+					if (t_RootNode == null)
+					{
+						t_RootNode = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_RootNode.ClassType) as EngineNS.GamePlay.Scene.TtNode;
+					}
+					fn(ar, t_RootNode);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_6581777712080210606 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Weather.TtVolumeCloudSceneNode;
+			EngineNS.RName t_BehaviorName;
+			ar.Read(out t_BehaviorName);
+			srcObj.BehaviorName = t_BehaviorName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
+				}
+			}
+			System.Single t_CloudCoverage;
+			ar.Read(out t_CloudCoverage);
+			srcObj.CloudCoverage = t_CloudCoverage;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CloudCoverage", false);
+				}
+			}
+			System.Single t_CloudDensity;
+			ar.Read(out t_CloudDensity);
+			srcObj.CloudDensity = t_CloudDensity;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CloudDensity", false);
+				}
+			}
+			System.Single t_CloudHeightMax;
+			ar.Read(out t_CloudHeightMax);
+			srcObj.CloudHeightMax = t_CloudHeightMax;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CloudHeightMax", false);
+				}
+			}
+			System.Single t_CloudHeightMin;
+			ar.Read(out t_CloudHeightMin);
+			srcObj.CloudHeightMin = t_CloudHeightMin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CloudHeightMin", false);
+				}
+			}
+			EngineNS.Vector2 t_CloudScale;
+			ar.Read(out t_CloudScale);
+			srcObj.CloudScale = t_CloudScale;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CloudScale", false);
+				}
+			}
+			System.Single t_DarknessThreshold;
+			ar.Read(out t_DarknessThreshold);
+			srcObj.DarknessThreshold = t_DarknessThreshold;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DarknessThreshold", false);
+				}
+			}
+			System.Single t_LightAbsorption;
+			ar.Read(out t_LightAbsorption);
+			srcObj.LightAbsorption = t_LightAbsorption;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "LightAbsorption", false);
+				}
+			}
+			EngineNS.Vector3 t_LightDir;
+			ar.Read(out t_LightDir);
+			srcObj.LightDir = t_LightDir;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "LightDir", false);
+				}
+			}
+			System.Int32 t_MaxSteps;
+			ar.Read(out t_MaxSteps);
+			srcObj.MaxSteps = t_MaxSteps;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxSteps", false);
+				}
+			}
+			EngineNS.Hash64 type_NoiseGen;
+			ar.Read(out type_NoiseGen);
+			var meta_NoiseGen = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_NoiseGen);
+			if(meta_NoiseGen != null)
+			{
+				EngineNS.Hash64 ver_NoiseGen;
+				ar.Read(out ver_NoiseGen);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_NoiseGen.ClassType.TypeString, ver_NoiseGen );
+				if (fn != null)
+				{
+					EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator t_NoiseGen = null;
+					t_NoiseGen = srcObj.NoiseGen;
+					if (t_NoiseGen == null)
+					{
+						t_NoiseGen = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_NoiseGen.ClassType) as EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator;
+					}
+					fn(ar, t_NoiseGen);
 				}
 			}
 			EngineNS.Hash64 type_Parent;
@@ -162099,10 +162502,17 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(10206416952505092579, EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator_TtWeatherMapSettings.Read_10206416952505092579);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator@EngineCore");
+				kls.Writer = EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator.CopyCurrentVersion;
+				kls.RegVersion(15977829590903546287, EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator.Read_15977829590903546287);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.FX.Weather.TtVolumeCloudNode@EngineCore");
 				kls.Writer = EngineNS_Bricks_FX_Weather_TtVolumeCloudNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_FX_Weather_TtVolumeCloudNode.CopyCurrentVersion;
 				kls.RegVersion(10213394745706711997, EngineNS_Bricks_FX_Weather_TtVolumeCloudNode.Read_10213394745706711997);
+				kls.RegVersion(1752002600542425574, EngineNS_Bricks_FX_Weather_TtVolumeCloudNode.Read_1752002600542425574);
 				kls.RegVersion(7144489265181067940, EngineNS_Bricks_FX_Weather_TtVolumeCloudNode.Read_7144489265181067940);
 				kls.RegVersion(7821179058082626963, EngineNS_Bricks_FX_Weather_TtVolumeCloudNode.Read_7821179058082626963);
 			}
@@ -162110,13 +162520,16 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.Bricks.FX.Weather.TtVolumeCloudSceneNode.TtThisNodeData@EngineCore");
 				kls.Writer = EngineNS_Bricks_FX_Weather_TtVolumeCloudSceneNode_TtThisNodeData.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_FX_Weather_TtVolumeCloudSceneNode_TtThisNodeData.CopyCurrentVersion;
+				kls.RegVersion(10344191290629591080, EngineNS_Bricks_FX_Weather_TtVolumeCloudSceneNode_TtThisNodeData.Read_10344191290629591080);
 				kls.RegVersion(2857695752239016352, EngineNS_Bricks_FX_Weather_TtVolumeCloudSceneNode_TtThisNodeData.Read_2857695752239016352);
+				kls.RegVersion(197597712990160198, EngineNS_Bricks_FX_Weather_TtVolumeCloudSceneNode_TtThisNodeData.Read_197597712990160198);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.FX.Weather.TtVolumeCloudSceneNode@EngineCore");
 				kls.Writer = EngineNS_Bricks_FX_Weather_TtVolumeCloudSceneNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_FX_Weather_TtVolumeCloudSceneNode.CopyCurrentVersion;
 				kls.RegVersion(3264307474243145742, EngineNS_Bricks_FX_Weather_TtVolumeCloudSceneNode.Read_3264307474243145742);
+				kls.RegVersion(6581777712080210606, EngineNS_Bricks_FX_Weather_TtVolumeCloudSceneNode.Read_6581777712080210606);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.GI.PRT.TtPrtProbeVolume.TtPrtProbeVolumeData@EngineCore");
@@ -165603,7 +166016,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = Survivor_TtWeaponProxyNode.CopyCurrentVersion;
 				kls.RegVersion(10759720178659608122, Survivor_TtWeaponProxyNode.Read_10759720178659608122);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("50_18_6D_6A_F8_82_7E_5E_E6_57_F5_2D_09_06_83_84_9A_0E_75_EE");
+			this.VersionHash = EngineNS.Hash160.Parse("65_4B_06_6E_9F_9B_14_AB_00_65_D6_6E_04_7B_D6_A6_01_D3_84_A2");
 		}
 	}
 }

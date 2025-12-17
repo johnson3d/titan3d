@@ -323,7 +323,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return true;
         }
 
-        private unsafe bool DrawNameLabel(string displayName, ImGuiTreeNodeFlags_ flags, ref PGCustomValueEditorAttribute.EditorInfo itemEditorInfo)
+        private unsafe bool DrawNameLabel(string displayName, ImGuiTreeNodeFlags_ flags, ref TtPGCustomValueEditorAttribute.EditorInfo itemEditorInfo)
         {
             ImGuiAPI.TableSetColumnIndex(0);
             var frameHeight = ImGuiAPI.GetFrameHeight();
@@ -335,7 +335,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             if(ImGuiAPI.BeginDragDropSource(ImGuiDragDropFlags_.ImGuiDragDropFlags_None))
             {
                 var handle = GCHandle.Alloc(itemEditorInfo);
-                ImGuiAPI.SetDragDropPayload("PropertyDragDrop", GCHandle.ToIntPtr(handle).ToPointer(), (uint)Marshal.SizeOf<PGCustomValueEditorAttribute.EditorInfo>(), ImGuiCond_.ImGuiCond_None);
+                ImGuiAPI.SetDragDropPayload("PropertyDragDrop", GCHandle.ToIntPtr(handle).ToPointer(), (uint)Marshal.SizeOf<TtPGCustomValueEditorAttribute.EditorInfo>(), ImGuiCond_.ImGuiCond_None);
                 ImGuiAPI.Text(itemEditorInfo.Name);
                 ImGuiAPI.EndDragDropSource();
             }
@@ -583,7 +583,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             if (IsLeafTreeNode(propDesc, propertyValue, showTypeDesc))
                                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
 
-                            var itemEditorInfo = new PGCustomValueEditorAttribute.EditorInfo()
+                            var itemEditorInfo = new TtPGCustomValueEditorAttribute.EditorInfo()
                             {
                                 Name = displayName,
                                 Type = showTypeDesc,
@@ -836,10 +836,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             if (typeDesc.SystemType.IsEnum)
                 return true;
 
-            var attrs = typeDesc.SystemType.GetCustomAttributes(typeof(PGCustomValueEditorAttribute), false);
+            var attrs = typeDesc.SystemType.GetCustomAttributes(typeof(TtPGCustomValueEditorAttribute), false);
             if (attrs != null && attrs.Length > 0)
             {
-                var editorOnDraw = attrs[0] as PGCustomValueEditorAttribute;
+                var editorOnDraw = attrs[0] as TtPGCustomValueEditorAttribute;
                 return !editorOnDraw.Expandable;
             }
             if (value != null)
@@ -847,16 +847,16 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
             return true;
         }
-        public static unsafe bool DrawPropertyGridObjectItem(ref PGCustomValueEditorAttribute.EditorInfo info, out object newValue)
+        public static unsafe bool DrawPropertyGridObjectItem(ref TtPGCustomValueEditorAttribute.EditorInfo info, out object newValue)
         {
             bool valueChanged = false;
             newValue = info.Value;
 
-            PGCustomValueEditorAttribute editorOnDraw = null;
-            var attrs = info.Type.SystemType.GetCustomAttributes(typeof(PGCustomValueEditorAttribute), false);
+            TtPGCustomValueEditorAttribute editorOnDraw = null;
+            var attrs = info.Type.SystemType.GetCustomAttributes(typeof(TtPGCustomValueEditorAttribute), false);
             if (attrs != null && attrs.Length > 0)
             {
-                editorOnDraw = attrs[0] as PGCustomValueEditorAttribute;
+                editorOnDraw = attrs[0] as TtPGCustomValueEditorAttribute;
             }
             if (editorOnDraw != null)
             {
@@ -909,7 +909,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
             return valueChanged;
         }
-        public static unsafe bool DrawPropertyGridItem(ref PGCustomValueEditorAttribute.EditorInfo info, out object newValue)
+        public static unsafe bool DrawPropertyGridItem(ref TtPGCustomValueEditorAttribute.EditorInfo info, out object newValue)
         {
             PushPGEditorStyleValues();
             newValue = info.Value;
@@ -1993,11 +1993,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             if (pg.IsReadOnly)
                 return;
 
-            PGCustomValueEditorAttribute editorOnDraw = null;
-            var attrs = prop.GetCustomAttributes(typeof(PGCustomValueEditorAttribute), true);
+            TtPGCustomValueEditorAttribute editorOnDraw = null;
+            var attrs = prop.GetCustomAttributes(typeof(TtPGCustomValueEditorAttribute), true);
             if (attrs != null && attrs.Length > 0)
             {
-                editorOnDraw = attrs[0] as PGCustomValueEditorAttribute;
+                editorOnDraw = attrs[0] as TtPGCustomValueEditorAttribute;
                 if (editorOnDraw.HideInPG)
                     return;
             }

@@ -60,7 +60,7 @@ namespace EngineNS.DesignMacross.Design
                                     types.Add(type);
                                 }
                             }
-                            proDesc.CustomValueEditor = new EGui.Controls.PropertyGrid.PGTypeEditorAttribute(types.ToArray());
+                            proDesc.CustomValueEditor = new EGui.Controls.PropertyGrid.TtPGTypeEditorAttribute(types.ToArray());
                         }
                         break;
                     case "InitValue":

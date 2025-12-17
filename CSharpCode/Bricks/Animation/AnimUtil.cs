@@ -57,7 +57,7 @@ namespace EngineNS.Animation
             return null;
         }
     }
-    public class PGBlendSpaceValueBindSelectAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+    public class PGBlendSpaceValueBindSelectAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
     {
         public string mSelectedValueBind = "None";
         public Guid mSelectedValueBindId = Guid.Empty;
@@ -165,7 +165,7 @@ namespace EngineNS.Animation
         }
     }
 
-    public class PGStateMachineSelectAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+    public class PGStateMachineSelectAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
     {
         public string mSelectedStateMachine = "None";
         public Guid mSelectedStateMachineId = Guid.Empty;

@@ -61,7 +61,7 @@ namespace EngineNS.Bricks.Procedure.Node
         public class UProgramNodeDefine
         {
             internal UProgramNode HostNode;
-            public class UValueEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+            public class UValueEditorAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
             {
                 public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
                 {

@@ -246,7 +246,7 @@ namespace EngineNS.EGui
             max.X = FrameUVs[frame].X + FrameUVs[frame].Z;
             max.Y = FrameUVs[frame].Y + FrameUVs[frame].W;
         }
-        [EGui.Controls.PropertyGrid.UByte4ToColor4PickerEditor]
+        [EGui.Controls.PropertyGrid.TtByte4ToColor4PickerEditor]
         [Rtti.Meta("")]
         public UInt32 Color { get; set; } = 0xFFFFFFFF;
         [Rtti.Meta("")]

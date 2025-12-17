@@ -62,7 +62,7 @@ namespace EngineNS.Bricks.Procedure
             return System.Runtime.InteropServices.Marshal.SizeOf(ElementType);
         }
         Rtti.TtTypeDesc mElementType;
-        [EGui.Controls.PropertyGrid.PGTypeEditor(FilterMode = 0)]
+        [EGui.Controls.PropertyGrid.TtPGTypeEditor(FilterMode = 0)]
         public Rtti.TtTypeDesc ElementType
         {
             get
@@ -85,7 +85,7 @@ namespace EngineNS.Bricks.Procedure
         Rtti.TtTypeDesc mBufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
         [Rtti.Meta("")]
         //[IO.UTypeDescSerializer()]
-        [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(UBufferComponent), FilterMode = EGui.Controls.UTypeSelector.EFilterMode.IncludeObjectType)]
+        [EGui.Controls.PropertyGrid.TtPGTypeEditor(typeof(UBufferComponent), FilterMode = EGui.Controls.UTypeSelector.EFilterMode.IncludeObjectType)]
         public Rtti.TtTypeDesc BufferType
         {
             get => mBufferType;

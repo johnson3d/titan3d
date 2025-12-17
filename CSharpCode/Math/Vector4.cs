@@ -38,7 +38,7 @@ namespace EngineNS
                 return true;
             }
         }
-        public class Vector4EditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        public class Vector4EditorAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
         {
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {

@@ -156,7 +156,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
 
         #region Editor Only
-        public class PGAddBoxShapeAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        public class PGAddBoxShapeAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
         {
             public PGAddBoxShapeAttribute()
             {
@@ -199,7 +199,7 @@ namespace EngineNS.Bricks.PhysicsCore
             }
         }
 
-        public class PGAddTriMeshShapeAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        public class PGAddTriMeshShapeAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
         {
             RName.PGRNameAttribute mMeshRNameEditor;
             RName.PGRNameAttribute mMtlRNameEditor;

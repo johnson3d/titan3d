@@ -396,7 +396,7 @@ namespace EngineNS.Graphics.Mesh
                     exec();
                 }
             }
-            public class PGMaterialsAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+            public class PGMaterialsAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
             {
                 RName.PGRNameAttribute mRNameEditor;
 

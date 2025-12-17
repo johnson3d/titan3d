@@ -430,7 +430,7 @@ namespace EngineNS.Bricks.CodeBuilder
                                     types.Add(type);
                                 }
                             }
-                            proDesc.CustomValueEditor = new EGui.Controls.PropertyGrid.PGTypeEditorAttribute(types.ToArray());
+                            proDesc.CustomValueEditor = new EGui.Controls.PropertyGrid.TtPGTypeEditorAttribute(types.ToArray());
                         }
                         break;
                     case "InitValue":
@@ -642,9 +642,9 @@ namespace EngineNS.Bricks.CodeBuilder
                 OnVariableNameChanged?.Invoke(oldName, value);
             }
         }
-        public delegate string Delegate_GetErrorString(in PGCustomValueEditorAttribute.EditorInfo info, TtMethodArgumentDeclaration dec, object newValue);
+        public delegate string Delegate_GetErrorString(in TtPGCustomValueEditorAttribute.EditorInfo info, TtMethodArgumentDeclaration dec, object newValue);
         public Delegate_GetErrorString GetErrorStringAction;
-        class VariableNameAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        class VariableNameAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
         {
             public VariableNameAttribute()
             {
@@ -781,7 +781,7 @@ namespace EngineNS.Bricks.CodeBuilder
                                     types.Add(type);
                                 }
                             }
-                            proDesc.CustomValueEditor = new EGui.Controls.PropertyGrid.PGTypeEditorAttribute(types.ToArray());
+                            proDesc.CustomValueEditor = new EGui.Controls.PropertyGrid.TtPGTypeEditorAttribute(types.ToArray());
                             collection.Add(proDesc);
                         }
                         break;

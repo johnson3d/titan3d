@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.EGui.Controls.PropertyGrid
 {
-    public class ObjectWithCreateEditor : PGCustomValueEditorAttribute
+    public class ObjectWithCreateEditor : TtPGCustomValueEditorAttribute
     {
         EngineNS.EGui.UIProxy.ImageButtonProxy mImageButton;
 
@@ -52,7 +52,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         }
     }
 
-    public class BoolEditor : PGCustomValueEditorAttribute
+    public class BoolEditor : TtPGCustomValueEditorAttribute
     {
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
@@ -115,7 +115,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         }
 
     }
-    public class SByteEditor : PGCustomValueEditorAttribute
+    public class SByteEditor : TtPGCustomValueEditorAttribute
     {
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
@@ -186,7 +186,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return retValue;
         }
     }
-    public class Int16Editor : PGCustomValueEditorAttribute
+    public class Int16Editor : TtPGCustomValueEditorAttribute
     {
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
@@ -255,7 +255,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return retValue;
         }
     }
-    public class Int32Editor : PGCustomValueEditorAttribute
+    public class Int32Editor : TtPGCustomValueEditorAttribute
     {
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
@@ -324,7 +324,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return retValue;
         }
     }
-    public class Int64Editor : PGCustomValueEditorAttribute
+    public class Int64Editor : TtPGCustomValueEditorAttribute
     {
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
@@ -395,7 +395,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return retValue;
         }
     }
-    public class ByteEditor : PGCustomValueEditorAttribute
+    public class ByteEditor : TtPGCustomValueEditorAttribute
     {
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
@@ -466,7 +466,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return retValue;
         }
     }
-    public class UInt16Editor : PGCustomValueEditorAttribute
+    public class UInt16Editor : TtPGCustomValueEditorAttribute
     {
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
@@ -537,7 +537,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return retValue;
         }
     }
-    public class UInt32Editor : PGCustomValueEditorAttribute
+    public class UInt32Editor : TtPGCustomValueEditorAttribute
     {
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
@@ -609,7 +609,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return retValue;
         }
     }
-    public class UInt64Editor : PGCustomValueEditorAttribute
+    public class UInt64Editor : TtPGCustomValueEditorAttribute
     {
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
@@ -680,7 +680,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return retValue;
         }
     }
-    public class FloatEditor : PGCustomValueEditorAttribute
+    public class FloatEditor : TtPGCustomValueEditorAttribute
     {
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
@@ -757,7 +757,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return retValue;
         }
     }
-    public class DoubleEditor : PGCustomValueEditorAttribute
+    public class DoubleEditor : TtPGCustomValueEditorAttribute
     {
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
@@ -830,13 +830,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return retValue;
         }
     }
-    public class StringEditor : PGCustomValueEditorAttribute
+    public class StringEditor : TtPGCustomValueEditorAttribute
     {
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
             return OnDraw(info.HostProperty.CustomValueEditor, in info, out newValue);
         }
-        public static unsafe bool OnDraw(PGCustomValueEditorAttribute attr, in EditorInfo info, out object newValue, 
+        public static unsafe bool OnDraw(TtPGCustomValueEditorAttribute attr, in EditorInfo info, out object newValue, 
             ImGuiInputTextFlags_ flags = ImGuiInputTextFlags_.ImGuiInputTextFlags_None, ImGuiAPI.FDelegate_ImGuiInputTextCallback callback = null)
         {
             bool valueChanged = false;
@@ -901,7 +901,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return valueChanged;
         }
     }
-    public class EnumEditor : PGCustomValueEditorAttribute
+    public class EnumEditor : TtPGCustomValueEditorAttribute
     {
         //EGui.UIProxy.ImageProxy mImage;
         EGui.UIProxy.ComboBox mComboBox;
@@ -1044,7 +1044,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         }
     }
 
-    public class ArrayEditor : PGCustomValueEditorAttribute
+    public class ArrayEditor : TtPGCustomValueEditorAttribute
     {
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
@@ -1112,7 +1112,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 else
                 {
                     var vtype = Rtti.TtTypeDesc.TypeOf(obj.GetType());
-                    var elementEditorInfo = new PGCustomValueEditorAttribute.EditorInfo()
+                    var elementEditorInfo = new TtPGCustomValueEditorAttribute.EditorInfo()
                     {
                         Name = info.Name + i,
                         Type = vtype,
@@ -1140,7 +1140,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         }
     }
 
-    public class ListEditor : PGCustomValueEditorAttribute
+    public class ListEditor : TtPGCustomValueEditorAttribute
     {
         EGui.Controls.UTypeSelector mTypeSelector;
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
@@ -1327,7 +1327,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
     }
 
-    public class DictionaryEditor : PGCustomValueEditorAttribute
+    public class DictionaryEditor : TtPGCustomValueEditorAttribute
     {
         KeyValueCreator mKVCreator = null;
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)

@@ -45,7 +45,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     {
 
     }
-    public class PGCustomValueEditorAttribute : Attribute
+    public class TtPGCustomValueEditorAttribute : Attribute
     {
         public PGProvider Provider = null;
         public bool HideInPG = false;
@@ -116,22 +116,22 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         }
         public virtual string GetErrorString<T>(in EditorInfo info, T newValue) { return null; }
     }
-    public class PGTypeEditorAttribute : PGCustomValueEditorAttribute
+    public class TtPGTypeEditorAttribute : TtPGCustomValueEditorAttribute
     {
         
         public string AssemblyFilter = null;
         public UTypeSelector.EFilterMode FilterMode = UTypeSelector.EFilterMode.IncludeObjectType | UTypeSelector.EFilterMode.IncludeValueType;
 
         public Rtti.TtTypeDesc BaseType;
-        public PGTypeEditorAttribute()
+        public TtPGTypeEditorAttribute()
         {
             BaseType = null;
         }
-        public PGTypeEditorAttribute(System.Type baseType)
+        public TtPGTypeEditorAttribute(System.Type baseType)
         {
             BaseType = Rtti.TtTypeDesc.TypeOf(baseType);
         }
-        public PGTypeEditorAttribute(Rtti.TtTypeDesc[] types)
+        public TtPGTypeEditorAttribute(Rtti.TtTypeDesc[] types)
         {
             TypeSlt.TypeList = types;
         }
@@ -177,7 +177,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         }
     }
 
-    public class TtButtonAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+    public class TtButtonAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
     {
         public TtButtonAttribute()
         {
@@ -321,10 +321,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var rNameEditor = new RName.PGRNameAttribute();
             await rNameEditor.Initialize();
             RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(RName)), rNameEditor);
-            var color4fEditor = new Color4PickerEditorAttribute();
+            var color4fEditor = new TtColor4PickerEditorAttribute();
             await color4fEditor.Initialize();
             RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(Color4f)), color4fEditor);
-            var color3fEditor = new Color3PickerEditorAttribute();
+            var color3fEditor = new TtColor3PickerEditorAttribute();
             await color3fEditor.Initialize();
             RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(Color3f)), color3fEditor);
 
@@ -347,24 +347,24 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public ListEditor ListEditor;
         public DictionaryEditor DictionaryEditor;
 
-        Dictionary<Rtti.TtTypeDesc, PGCustomValueEditorAttribute> mTypeEditors = new Dictionary<Rtti.TtTypeDesc, PGCustomValueEditorAttribute>();
-        public PGCustomValueEditorAttribute GetEditorType(Rtti.TtTypeDesc type)
+        Dictionary<Rtti.TtTypeDesc, TtPGCustomValueEditorAttribute> mTypeEditors = new Dictionary<Rtti.TtTypeDesc, TtPGCustomValueEditorAttribute>();
+        public TtPGCustomValueEditorAttribute GetEditorType(Rtti.TtTypeDesc type)
         {
-            PGCustomValueEditorAttribute result;
+            TtPGCustomValueEditorAttribute result;
             if (mTypeEditors.TryGetValue(type, out result))
                 return result;
             return null;
         }
-        public void RegTypeEditor(Rtti.TtTypeDesc type, PGCustomValueEditorAttribute editorType)
+        public void RegTypeEditor(Rtti.TtTypeDesc type, TtPGCustomValueEditorAttribute editorType)
         {
             mTypeEditors[type] = editorType;
         }
 
-        public bool DrawTypeEditor(in PGCustomValueEditorAttribute.EditorInfo info, out object newValue, out bool valueChanged)
+        public bool DrawTypeEditor(in TtPGCustomValueEditorAttribute.EditorInfo info, out object newValue, out bool valueChanged)
         {
             valueChanged = false;
             newValue = info.Value;
-            PGCustomValueEditorAttribute editor;
+            TtPGCustomValueEditorAttribute editor;
             if(mTypeEditors.TryGetValue(info.Type, out editor))
             {
                 valueChanged = editor.OnDraw(in info, out newValue);
@@ -374,7 +374,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return false;
         }
     }
-    public class ColorEditorBaseAttribute : PGCustomValueEditorAttribute
+    public class TtColorEditorBaseAttribute : TtPGCustomValueEditorAttribute
     {
         public bool mHDR = false;
         public bool mDragAndDrop = true;
@@ -382,7 +382,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public bool mAlphaHalfPreview = true;
         public bool mAlphaPreview = true;
     }
-    public class Color3PickerEditorAttribute : ColorEditorBaseAttribute
+    public class TtColor3PickerEditorAttribute : TtColorEditorBaseAttribute
     {
         bool mPopupOn = false;
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
@@ -451,10 +451,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return valueChanged;
         }
     }
-    public class Color4PickerEditorAttribute : ColorEditorBaseAttribute
+    public class TtColor4PickerEditorAttribute : TtColorEditorBaseAttribute
     {
         bool mPopupOn = false;
-        static Color4PickerEditorAttribute GlobalPicker = new Color4PickerEditorAttribute();
+        static TtColor4PickerEditorAttribute GlobalPicker = new TtColor4PickerEditorAttribute();
         public static unsafe bool OnDrawStatic(in EditorInfo info, out object newValue)
         {
             return GlobalPicker.OnDraw(in info, out newValue);
@@ -528,7 +528,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return valueChanged;
         }
     }
-    public class UByte4ToColor4PickerEditorAttribute : ColorEditorBaseAttribute
+    public class TtByte4ToColor4PickerEditorAttribute : TtColorEditorBaseAttribute
     {
         public bool IsABGR = false;
         bool mPopupOn = false;

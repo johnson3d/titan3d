@@ -29,7 +29,7 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             return BoundingBox.EmptyBox();
         }
-        public class PGPxMaterialsAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        public class PGPxMaterialsAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
         {
             RName.PGRNameAttribute mRNameEditor;
 

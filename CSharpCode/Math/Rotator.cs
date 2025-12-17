@@ -50,7 +50,7 @@ namespace EngineNS
         }
 
         #region editor attributes
-        public class FRotatorEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        public class FRotatorEditorAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
         {
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {

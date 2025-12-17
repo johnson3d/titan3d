@@ -190,7 +190,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         }
         Rtti.TtTypeDesc mPolicyType;
         [Rtti.Meta("")]
-        [PGTypeEditor(typeof(Graphics.Pipeline.TtRenderPolicy))]
+        [TtPGTypeEditor(typeof(Graphics.Pipeline.TtRenderPolicy))]
         public Rtti.TtTypeDesc PolicyType
         {
             get => mPolicyType;

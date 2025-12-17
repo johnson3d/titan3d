@@ -17,7 +17,7 @@ namespace EngineNS.Editor
                 return true;
             }
         }
-        public class FloatRangeEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        public class FloatRangeEditorAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
         {
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {

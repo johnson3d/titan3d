@@ -27,7 +27,7 @@ namespace EngineNS.UI.Event
     //public delegate void TtTouchEventHandler(object sender, TtTouchEventArgs args);
     //public delegate void TtDeviceEventHandler(object sender, TtDeviceEventArgs args);
 
-    public class PGRoutedEventHandlerEditorAttribute : PGCustomValueEditorAttribute
+    public class PGRoutedEventHandlerEditorAttribute : TtPGCustomValueEditorAttribute
     {
         EngineNS.EGui.UIProxy.ImageButtonProxy mImageButton;
         protected override async Thread.Async.TtTask<bool> Initialize_Override()

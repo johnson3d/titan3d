@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.NodeGraph
 {
-    public class UEditableValue : PGCustomValueEditorAttribute, IO.ISerializer, EGui.Controls.PropertyGrid.IPropertyCustomization
+    public class UEditableValue : TtPGCustomValueEditorAttribute, IO.ISerializer, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
@@ -420,7 +420,7 @@ namespace EngineNS.Bricks.NodeGraph
                 info.Name = node.NodeId.ToString() + (string.IsNullOrEmpty(pin.Name) ? "" : pin.Name);
                 info.Value = Value;
                 info.Type = ValueType;
-                if(Color4PickerEditorAttribute.OnDrawStatic(in info, out v))
+                if(TtColor4PickerEditorAttribute.OnDrawStatic(in info, out v))
                 {
                     Value = v;
                     mNotify?.OnValueChanged(this);

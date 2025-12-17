@@ -41,7 +41,7 @@ namespace EngineNS.GamePlay.Scene
             [ReadOnly(true)]
             public string AtomType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtRenderMesh.TtAtom));
 
-            [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Pipeline.Shader.TtMdfQueueBase))]
+            [EGui.Controls.PropertyGrid.TtPGTypeEditor(typeof(Graphics.Pipeline.Shader.TtMdfQueueBase))]
             public Rtti.TtTypeDesc MdfQueue
             {
                 get
@@ -53,7 +53,7 @@ namespace EngineNS.GamePlay.Scene
                     MdfQueueType = Rtti.TtTypeDesc.TypeStr(value);
                 }
             }
-            [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Mesh.TtRenderMesh.TtAtom))]
+            [EGui.Controls.PropertyGrid.TtPGTypeEditor(typeof(Graphics.Mesh.TtRenderMesh.TtAtom))]
             public Rtti.TtTypeDesc Atom
             {
                 get
@@ -310,7 +310,7 @@ namespace EngineNS.GamePlay.Scene
         }
 
         [Category("Option")]
-        [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Pipeline.Shader.TtMdfQueueBase))]
+        [EGui.Controls.PropertyGrid.TtPGTypeEditor(typeof(Graphics.Pipeline.Shader.TtMdfQueueBase))]
         public Rtti.TtTypeDesc MdfQueue
         {
             get

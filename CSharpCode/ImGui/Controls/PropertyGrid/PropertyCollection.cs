@@ -139,7 +139,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             set;
         }
 
-        public PGCustomValueEditorAttribute CustomValueEditor
+        public TtPGCustomValueEditorAttribute CustomValueEditor
         {
             get;
             set;
@@ -173,9 +173,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             IsBrowsable = property.IsBrowsable;
             foreach(var att in property.Attributes)
             {
-                if(att is PGCustomValueEditorAttribute)
+                if(att is TtPGCustomValueEditorAttribute)
                 {
-                    var tAtt = att as PGCustomValueEditorAttribute;
+                    var tAtt = att as TtPGCustomValueEditorAttribute;
                     if (!tAtt.Initialized)
                     {
                         _ = tAtt.Initialize();
@@ -222,9 +222,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 tAtts[i] = atts[i] as Attribute;
 
-                if(atts[i] is PGCustomValueEditorAttribute)
+                if(atts[i] is TtPGCustomValueEditorAttribute)
                 {
-                    var tAtt = atts[i] as PGCustomValueEditorAttribute;
+                    var tAtt = atts[i] as TtPGCustomValueEditorAttribute;
                     IsBrowsable = !tAtt.HideInPG;
                     mIsReadonly = tAtt.ReadOnly;
                     CustomValueEditor = tAtt;
@@ -668,7 +668,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             return retValue;
         }
-        public unsafe bool DrawDVector<T>(in PGCustomValueEditorAttribute.EditorInfo info) where T : unmanaged
+        public unsafe bool DrawDVector<T>(in TtPGCustomValueEditorAttribute.EditorInfo info) where T : unmanaged
         {
             bool retValue = false;
             var minValue = double.MinValue;
@@ -784,7 +784,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         }
 
         public delegate void FGetSetVectorValueFunction<T>(ref T target, int index, ref float v, bool bSet);
-        public unsafe bool DrawVector<T>(in PGCustomValueEditorAttribute.EditorInfo info, 
+        public unsafe bool DrawVector<T>(in TtPGCustomValueEditorAttribute.EditorInfo info, 
             string dimName0 = "X", 
             string dimName1 = "Y", 
             string dimName2 = "Z",
@@ -995,7 +995,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             return retValue;
         }
-        public unsafe bool DrawThickness(in PGCustomValueEditorAttribute.EditorInfo info, float width)
+        public unsafe bool DrawThickness(in TtPGCustomValueEditorAttribute.EditorInfo info, float width)
         {
             var titleWidth = 10;
             width = width * 0.5f - titleWidth;

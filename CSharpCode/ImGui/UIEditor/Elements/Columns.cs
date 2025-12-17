@@ -28,9 +28,9 @@ namespace EngineNS.EGui.UIEditor.Elements
         {
             get;
         } = new Dictionary<int, int>();
-        [Controls.PropertyGrid.Color4PickerEditorAttribute()]
+        [Controls.PropertyGrid.TtColor4PickerEditorAttribute()]
         public Vector4 TestColor1 { get; set; } = new Vector4(1, 1, 1, 1);
-        [Controls.PropertyGrid.Color3PickerEditorAttribute()]
+        [Controls.PropertyGrid.TtColor3PickerEditorAttribute()]
         public Vector3 TestColor2 { get; set; } = new Vector3(1, 1, 1);
         #endregion
 

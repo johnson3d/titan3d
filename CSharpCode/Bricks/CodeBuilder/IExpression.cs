@@ -170,7 +170,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public EVisitMode VisitMode { get; set; } = EVisitMode.Public;
         [Rtti.Meta("")]
         public bool IsLocalVar { get; set; } = true;
-        public class PropDefTypeEditor : EGui.Controls.PropertyGrid.PGTypeEditorAttribute
+        public class PropDefTypeEditor : EGui.Controls.PropertyGrid.TtPGTypeEditorAttribute
         {
             public PropDefTypeEditor(System.Type baseType, bool allowVoid)
                 : base(baseType)

@@ -2,6 +2,8 @@
 - - ![MainUI](picture/EngineConfig.png)
 - - 点击Save后把配置存储到指定文件
 - - 引擎通过启动参数config= 来指定配置文件
+- - cache/config/engine.jscfg也是一个引擎配置文件，他会覆盖默认配置文件
+- - content/config目录下有所有子系统的可以配置文件供项目配置，这些配置在cache/config下会有对应的为个人调试环境提供的同名覆盖配置文件,具体参考[增加一个Config配置文件](../../CodeLib.md)
 - 数据结构
 ```C#
     public partial class TtEngineConfig

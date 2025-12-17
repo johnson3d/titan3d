@@ -158,7 +158,7 @@ namespace EngineNS.Graphics.Mesh
         {
             public Vector3 Position { get; set; }
             public Vector3 Extent { get; set; } = Vector3.One;
-            [EGui.Controls.PropertyGrid.Color4PickerEditor()]
+            [EGui.Controls.PropertyGrid.TtColor4PickerEditor()]
             public Vector4 Color { get; set; }
             public EBoxFace FaceFlags { get; set; } = EBoxFace.All;
         }
@@ -504,7 +504,7 @@ namespace EngineNS.Graphics.Mesh
             public float Radius { get; set; } = 1.0f;
             public uint Slices { get; set; } = 30;
             public uint Stacks { get; set; } = 30;
-            [EGui.Controls.PropertyGrid.Color4PickerEditor()]
+            [EGui.Controls.PropertyGrid.TtColor4PickerEditor()]
             public Vector4 Color { get; set; } = Vector4.One;
         }
         public static unsafe TtMeshDataProvider MakeSphere(float radius, uint slices, uint stacks, uint color)
@@ -683,7 +683,7 @@ namespace EngineNS.Graphics.Mesh
             public float Length { get; set; } = 1.0f;
             public uint Slices { get; set; } = 30;
             public uint Stacks { get; set; } = 30;
-            [EGui.Controls.PropertyGrid.Color4PickerEditor()]
+            [EGui.Controls.PropertyGrid.TtColor4PickerEditor()]
             public Vector4 Color { get; set; } = Vector4.One;
         }
         public static unsafe TtMeshDataProvider MakeCylinder(float radius1, float radius2, float length, uint slices, uint stacks, uint color)
@@ -895,7 +895,7 @@ namespace EngineNS.Graphics.Mesh
             public float OutRadius2 { get; set; } = 1.0f;
             public uint Slices { get; set; } = 30;
             public uint Rings { get; set; } = 30;
-            [EGui.Controls.PropertyGrid.Color4PickerEditor()]
+            [EGui.Controls.PropertyGrid.TtColor4PickerEditor()]
             public Vector4 Color { get; set; } = Vector4.One;
         }
         public static unsafe TtMeshDataProvider MakeTorus(float innerradius, float outerradius, uint sides, uint rings, uint color = 0xffffffff)
@@ -1015,7 +1015,7 @@ namespace EngineNS.Graphics.Mesh
             public uint Slices { get; set; } = 30;
             public Graphics.Mesh.TtMeshDataProvider.ECapsuleUvProfile UvProfile { get; set; } = ECapsuleUvProfile.Aspect;
 
-            [EGui.Controls.PropertyGrid.Color4PickerEditor()]
+            [EGui.Controls.PropertyGrid.TtColor4PickerEditor()]
             public Vector4 Color { get; set; } = Vector4.One;
         }
         public static unsafe TtMeshDataProvider MakeCapsule(float radius, float depth, int latitudes, int longitudes, int rings, ECapsuleUvProfile profile, uint color = 0xffffffff)

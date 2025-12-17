@@ -8,7 +8,7 @@ using System.Text;
 
 namespace EngineNS.UI.Controls
 {
-    public class MarginEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+    public class MarginEditorAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
     {
         public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
         {
@@ -67,7 +67,7 @@ namespace EngineNS.UI.Controls
             return retValue;
         }
     }
-    public class CornerRadiusEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+    public class CornerRadiusEditorAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
     {
         public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
         {

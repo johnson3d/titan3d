@@ -806,7 +806,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        string GetVariableErrorString(in PGCustomValueEditorAttribute.EditorInfo info, TtMethodArgumentDeclaration dec, object newValue)
+        string GetVariableErrorString(in TtPGCustomValueEditorAttribute.EditorInfo info, TtMethodArgumentDeclaration dec, object newValue)
         {
             var newName = (string)newValue;
             for(int i=0; i<Inputs.Count; i++)
@@ -983,7 +983,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        class GraphNameAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        class GraphNameAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
         {
             protected override async Thread.Async.TtTask<bool> Initialize_Override()
             {
