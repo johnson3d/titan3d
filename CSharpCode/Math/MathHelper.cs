@@ -728,6 +728,19 @@ namespace EngineNS
             return (float)System.Math.Pow(x, y);
         }
 
+        #region Perlin
+        private static Support.TtPerlin2 sPerlin = new Support.TtPerlin2((int)Support.TtTime.GetTickCount(), 1024);
+		public static float PerlinNoise(float x, float y)
+		{
+			return (float)sPerlin.Noise((float)x, (float)y);
+        }
+        public static double PerlinNoise(double x, double y)
+        {
+            return sPerlin.Noise(x, y);
+        }
+        #endregion
+
+        #region Random
         private static System.Random sRandom = new Random((int)Support.TtTime.GetTickCount());
         [Rtti.Meta("")]
         public static int Random()
@@ -759,6 +772,7 @@ namespace EngineNS
                 result.Normalize();
             return result;
         }
+        #endregion
         [Rtti.Meta("")]
         public static float FClamp(float value, float min, float max)
         {

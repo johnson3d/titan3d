@@ -12,21 +12,69 @@ namespace EngineNS.NxRHI
             public int Width;
             public int Height;
             public int Depth;
-            public Color4b[] ToColor4b()
+            public unsafe NxRHI.TtTexture CreateTexture3D(EPixelFormat format = EPixelFormat.PXF_R8G8B8A8_UNORM, int MaxLayer = 1)
             {
-                Color4b[] result = new Color4b[Pixels.Length];
-                for (int i = 0; i<Pixels.Length; i++)
+                var sourceLayer = this;
+                List<NxRHI.TtTextureUtility.TtTex3dLayer> mipDatas = new List<NxRHI.TtTextureUtility.TtTex3dLayer>();
+                mipDatas.Add(sourceLayer);
+                int w = Width/2;
+                int h = Height/2;
+                int d = Depth/2;
+                while (w>=1 && h>=1 && d>=1)
                 {
-                    result[i] = Pixels[i].ToColor4b();
+                    if (mipDatas.Count>=MaxLayer)
+                        break;
+                    var next = NxRHI.TtTextureUtility.GenerateMipLayer3D(sourceLayer, w, h, d);
+                    mipDatas.Add(next);
+                    sourceLayer = next;
+                    w = w/2;
+                    h = h/2;
+                    d = d/2;
                 }
-                return result;
+
+                NxRHI.FMappedSubResource* initData = stackalloc NxRHI.FMappedSubResource[mipDatas.Count];
+                try
+                {
+                    for (int i = 0; i<mipDatas.Count; i++)
+                    {
+                        switch (format)
+                        {
+                            case EPixelFormat.PXF_R8G8B8A8_UNORM:
+                                initData[i].RowPitch = (uint)(mipDatas[i].Width * sizeof(uint));
+                                initData[i].pData = mipDatas[i].CreateColorR8G8B8A8();
+                                break;
+                            case EPixelFormat.PXF_R16_FLOAT:
+                                initData[i].RowPitch = (uint)(mipDatas[i].Width * sizeof(Half));
+                                initData[i].pData = mipDatas[i].CreateRHalf();
+                                break;
+                        }
+                        initData[i].DepthPitch = (uint)(initData[i].RowPitch * mipDatas[i].Height);
+                    }
+
+                    var texDesc = new NxRHI.FTextureDesc();
+                    texDesc.SetDefault();
+                    texDesc.Width = (uint)Width;
+                    texDesc.Height = (uint)Height;
+                    texDesc.Depth = (uint)Depth;
+                    texDesc.Format = format;
+                    texDesc.MipLevels = (uint)mipDatas.Count;
+                    texDesc.InitData = initData;
+                    return TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in texDesc);
+                }
+                finally
+                {
+                    for (int i = 0; i<mipDatas.Count; i++)
+                    {
+                        mipDatas[i].DesctroyPixels(initData[i].pData);
+                    }
+                }
             }
-            public unsafe Color4b* CreateColor4b()
+            public unsafe uint* CreateColorR8G8B8A8()
             {
-                Color4b* result = (Color4b*)CoreSDK.Alloc((uint)(sizeof(Color4b) * Pixels.Length), null, 0);
+                uint* result = (uint*)CoreSDK.Alloc((uint)(sizeof(uint) * Pixels.Length), null, 0);
                 for (int i = 0; i<Pixels.Length; i++)
                 {
-                    result[i] = Pixels[i].ToColor4b();
+                    result[i] = Pixels[i].ToColor4b().ToR8G8B8A8();
                 }
                 return result;
             }
@@ -96,23 +144,101 @@ namespace EngineNS.NxRHI
             public Color4f[] Pixels;
             public int Width;
             public int Height;
-            public Color4b[] ToColor4b()
+            public void NormalizeLayer()
             {
-                Color4b[] result = new Color4b[Pixels.Length];
+                Color4f cmin = new Color4f(float.MaxValue, float.MaxValue, float.MaxValue, float.MaxValue);
+                Color4f cmax = new Color4f(float.MinValue, float.MinValue, float.MinValue, float.MinValue);
+                foreach (var color in Pixels)
+                {
+                    if (color.Red<cmin.Red)
+                        cmin.Red = color.Red;
+                    if (color.Red>cmax.Red)
+                        cmax.Red = color.Red;
+
+                    if (color.Green<cmin.Green)
+                        cmin.Green = color.Green;
+                    if (color.Green>cmax.Green)
+                        cmax.Green = color.Green;
+
+                    if (color.Blue<cmin.Blue)
+                        cmin.Blue = color.Blue;
+                    if (color.Blue>cmax.Blue)
+                        cmax.Blue = color.Blue;
+
+                    if (color.Alpha<cmin.Alpha)
+                        cmin.Alpha = color.Alpha;
+                    if (color.Alpha>cmax.Alpha)
+                        cmax.Alpha = color.Alpha;
+                }
+                Color4f delta = cmax - cmin;
                 for (int i = 0; i<Pixels.Length; i++)
                 {
-                    result[i] = Pixels[i].ToColor4b();
+                    Pixels[i].Red = (Pixels[i].Red - cmin.Red)/delta.Red;
+                    Pixels[i].Green = (Pixels[i].Green - cmin.Green)/delta.Green;
+                    Pixels[i].Blue = (Pixels[i].Blue - cmin.Blue)/delta.Blue;
+                    Pixels[i].Alpha = (Pixels[i].Alpha - cmin.Alpha)/delta.Alpha;
                 }
-                return result;
             }
-            public unsafe Color4b* CreateColor4b()
+            public unsafe NxRHI.TtTexture CreateTexture2D(EPixelFormat format = EPixelFormat.PXF_R8G8B8A8_UNORM, int MaxLayer = 1)
             {
-                Color4b* result = (Color4b*)CoreSDK.Alloc((uint)(sizeof(Color4b) * Pixels.Length), null, 0);
-                for (int i = 0; i<Pixels.Length; i++)
+                var sourceLayer = this;
+                List<NxRHI.TtTextureUtility.TtTex2dLayer> mipDatas = new List<NxRHI.TtTextureUtility.TtTex2dLayer>();
+                mipDatas.Add(sourceLayer);
+                int w = Width/2;
+                int h = Height/2;
+                while (w>=1 && h>=1)
                 {
-                    result[i] = Pixels[i].ToColor4b();
+                    if (mipDatas.Count>=MaxLayer)
+                        break;
+                    var next = NxRHI.TtTextureUtility.GenerateMipLayer2D(sourceLayer, w, h);
+                    mipDatas.Add(next);
+                    sourceLayer = next;
+                    w = w/2;
+                    h = h/2;
                 }
-                return result;
+
+                NxRHI.FMappedSubResource* initData = stackalloc NxRHI.FMappedSubResource[mipDatas.Count];
+                try
+                {
+                    for (int i = 0; i<mipDatas.Count; i++)
+                    {
+                        switch(format)
+                        {
+                            case EPixelFormat.PXF_R8G8B8A8_UNORM:
+                                initData[i].RowPitch = (uint)(mipDatas[i].Width * sizeof(uint));
+                                initData[i].pData = mipDatas[i].CreateColorR8G8B8A8();
+                                break;
+                            case EPixelFormat.PXF_R16_FLOAT:
+                                initData[i].RowPitch = (uint)(mipDatas[i].Width * sizeof(Half));
+                                initData[i].pData = mipDatas[i].CreateRHalf();
+                                break;
+                        }
+                        initData[i].DepthPitch = (uint)(initData[i].RowPitch * mipDatas[i].Height);
+                    }
+
+                    var texDesc = new NxRHI.FTextureDesc();
+                    texDesc.SetDefault();
+                    texDesc.Width = (uint)Width;
+                    texDesc.Height = (uint)Height;
+                    texDesc.Depth = (uint)0;
+                    texDesc.Format = format;
+                    texDesc.MipLevels = (uint)mipDatas.Count;
+                    texDesc.InitData = initData;
+                    return TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in texDesc);
+                }
+                finally
+                {
+                    for (int i = 0; i<mipDatas.Count; i++)
+                    {
+                        mipDatas[i].DesctroyPixels(initData[i].pData);
+                    }
+                }
+            }
+            public Color4f GetPixel(int x, int y)
+            {
+                if (x>Width||y>Height)
+                    throw new ArgumentOutOfRangeException();
+                return Pixels[y*Width + x];
             }
             public unsafe uint* CreateColorR8G8B8A8()
             {

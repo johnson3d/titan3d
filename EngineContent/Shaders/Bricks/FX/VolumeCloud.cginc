@@ -77,7 +77,7 @@ bool RayBoxIntersection(float3 rayOrigin, float3 rayDir,
 float GetCloudDensity(float3 worldPos)
 {
     // 计算UV
-    float2 uv = worldPos.xz * ShadingStruct.CloudScale * 0.001;
+    float2 uv = worldPos.xz * ShadingStruct.CloudScale;
     float height = worldPos.y;
                 
     // 高度因子
@@ -86,7 +86,7 @@ float GetCloudDensity(float3 worldPos)
                 
     // 采样天气图
     float4 weatherData = WeatherTex.SampleLevel(Samp_WeatherTex, uv, 0);
-    float coverage = weatherData.r * ShadingStruct.CloudCoverage;
+    float coverage = weatherData.a * ShadingStruct.CloudCoverage;
                 
     // 基础密度
     float baseDensity = CloudNoiseTex.Sample(Samp_CloudNoiseTex, float3(uv * 0.5, height * 0.0005)).r;
@@ -96,7 +96,7 @@ float GetCloudDensity(float3 worldPos)
     // 侵蚀效果
     baseDensity = saturate(baseDensity - detailNoise * 0.2);
                 
-    // 应用覆盖率和高度
+    // 应用覆盖率和高度，这个公式需要想办法处理边缘的柔和过渡，否则可能出现一条直线
     float density = saturate(baseDensity - (1.0 - coverage)) * heightGradient;
                 
     // 重映射
