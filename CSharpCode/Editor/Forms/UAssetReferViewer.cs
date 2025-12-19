@@ -144,7 +144,7 @@ namespace EngineNS.Editor.Forms
     {
     }
 
-    class UAssetReferViewer : Editor.IAssetEditor, IRootForm
+    class TtAssetReferViewer : Editor.IAssetEditor, IRootForm
     {
         public RName AssetName { get; set; }
         protected bool mVisible = true;

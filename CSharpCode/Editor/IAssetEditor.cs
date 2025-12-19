@@ -25,16 +25,27 @@ namespace EngineNS.Editor
         Thread.Async.TtTask<bool> Initialize();
         string GetWindowsName();
     }
-    public class UAssetEditorManager
+    public class TtAssetEditorManager
     {
-        public async System.Threading.Tasks.Task<bool> Initialize()
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             return true;
         }
         public List<IAssetEditor> OpenedEditors { get; } = new List<IAssetEditor>();
         public IAssetEditor CurrentActiveEditor = null;
 
-        public async System.Threading.Tasks.Task OpenEditor(TtMainEditorApplication mainEditor, Type editorType, RName name, object arg)
+        public static async Thread.Async.TtTask<bool> TryOpenEditor(Type editorType, RName name, object arg)
+        {
+            var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
+            if (mainEditor == null)
+            {
+                return false;
+            }
+            await mainEditor.AssetEditorManager.OpenEditor(mainEditor, editorType, name, arg);
+            return true;
+        }
+
+        protected async Thread.Async.TtTask OpenEditor(TtMainEditorApplication mainEditor, Type editorType, RName name, object arg)
         {
             IAssetEditor editor = null;
             foreach(var i in OpenedEditors)
@@ -51,7 +62,17 @@ namespace EngineNS.Editor
             }
             await OpenEditor(mainEditor, editor, name, arg);
         }
-        public async System.Threading.Tasks.Task OpenEditor(TtMainEditorApplication mainEditor, IAssetEditor editor, RName name, object arg)
+        public static async Thread.Async.TtTask<bool> TryOpenEditor(IAssetEditor editor, RName name, object arg)
+        {
+            var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
+            if (mainEditor == null)
+            {
+                return false;
+            }
+            await mainEditor.AssetEditorManager.OpenEditor(mainEditor, editor, name, arg);
+            return true;
+        }
+        protected async Thread.Async.TtTask OpenEditor(TtMainEditorApplication mainEditor, IAssetEditor editor, RName name, object arg)
         {
             editor.AssetName = name;
             editor.Visible = true;

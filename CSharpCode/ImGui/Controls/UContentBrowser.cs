@@ -564,18 +564,14 @@ namespace EngineNS.EGui.Controls
                     //}
                     if (ImGuiAPI.IsMouseDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                     {
-                        var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
-                        if (mainEditor != null)
+                        var type = Rtti.TtTypeDesc.TypeOf(ameta.TypeStr).SystemType;
+                        if (type != null)
                         {
-                            var type = Rtti.TtTypeDesc.TypeOf(ameta.TypeStr).SystemType;
-                            if (type != null)
+                            var attrs = type.GetCustomAttributes(typeof(Editor.UAssetEditorAttribute), false);
+                            if (attrs.Length > 0)
                             {
-                                var attrs = type.GetCustomAttributes(typeof(Editor.UAssetEditorAttribute), false);
-                                if (attrs.Length > 0)
-                                {
-                                    var editorAttr = attrs[0] as Editor.UAssetEditorAttribute;
-                                    var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, editorAttr.EditorType, ameta.GetAssetName(), null);
-                                }
+                                var editorAttr = attrs[0] as Editor.UAssetEditorAttribute;
+                                Editor.TtAssetEditorManager.TryOpenEditor(editorAttr.EditorType, ameta.GetAssetName(), null).AddWaitTask();
                             }
                         }
 

@@ -200,13 +200,9 @@ namespace EngineNS.Bricks.Procedure.Node
             ImGuiAPI.PushID($"{this.NodeId.ToString()}");
             if (ImGuiAPI.Button("OpenMacross"))
             {
-                var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
-                if (mainEditor != null)
+                if (ProgramName != null)
                 {
-                    if (ProgramName != null)
-                    {
-                        var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, typeof(CodeBuilder.MacrossNode.TtMacrossEditor), ProgramName, null);
-                    }
+                    Editor.TtAssetEditorManager.TryOpenEditor(typeof(CodeBuilder.MacrossNode.TtMacrossEditor), ProgramName, null).AddWaitTask();
                 }
             }
             if (ProgramName != null)

@@ -21,7 +21,7 @@ namespace EngineNS.Editor
         {
             return 0;
         }
-        public UAssetEditorManager AssetEditorManager { get; } = new UAssetEditorManager();
+        public TtAssetEditorManager AssetEditorManager { get; } = new TtAssetEditorManager();
         
         public TtMainEditorApplication()
         {

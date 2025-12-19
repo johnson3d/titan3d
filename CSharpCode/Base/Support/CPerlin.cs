@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Support
@@ -401,11 +402,19 @@ namespace EngineNS.Support
         #endregion
     }
 
-    public class TtWorly3D
+    public class TtWorly3D : IO.BaseSerializer
     {
-        public int Octaves { get; set; } = 4;
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public int Octaves { get; set; } = 1;
+        [Rtti.Meta("")]
+        [Category("Option")]
         public float Frequency { get; set; } = 1.0f;
+        [Rtti.Meta("")]
+        [Category("Option")]
         public float Lacunarity { get; set; } = 2.0f;
+        [Rtti.Meta("")]
+        [Category("Option")]
         public float Gain { get; set; } = 0.5f;
         public float GetWorleyValue(float x, float y, float z)
         {
@@ -425,7 +434,8 @@ namespace EngineNS.Support
                 currentFrequency *= Lacunarity;
             }
 
-            return MathHelper.Clamp(value, 0, 1);
+            return value;
+            //return MathHelper.Clamp(value, 0, 1);
         }
 
         private float WorleyNoise3D(float x, float y, float z)
@@ -437,6 +447,7 @@ namespace EngineNS.Support
 
             float minDistance = float.MaxValue;
 
+            Vector3 samplePos = new Vector3(x * 3, y * 3, z * 3);
             for (int dx = -1; dx <= 1; dx++)
             {
                 for (int dy = -1; dy <= 1; dy++)
@@ -447,7 +458,6 @@ namespace EngineNS.Support
                         Vector3 cellPos = new Vector3(cellX + dx, cellY + dy, cellZ + dz);
                         Vector3 pointPos = cellPos + featurePoint;
 
-                        Vector3 samplePos = new Vector3(x * 3, y * 3, z * 3);
                         float distance = Vector3.Distance(samplePos, pointPos);
 
                         minDistance = MathF.Min(minDistance, distance);
@@ -455,9 +465,11 @@ namespace EngineNS.Support
                 }
             }
 
-            return 1.0f - MathHelper.Clamp(minDistance, 0, 1);
+            //minDistance = minDistance / MathF.Sqrt(3*3 + 3*3 + 3*3); // 归一化距离
+            return minDistance;
+            //return 1.0f - MathHelper.Clamp(minDistance, 0, 1);
         }
-        private Vector3 GetFeaturePoint(int cx, int cy, int cz)
+        private Vector3 GetFeaturePoint(float cx, float cy, float cz)
         {
             // 使用哈希函数获取确定性的随机点
             float random(float seed)
@@ -470,6 +482,10 @@ namespace EngineNS.Support
             float z = random(cz * 1.7f + 200);
 
             return new Vector3(x, y, z);
+            //float x = cx + MathHelper.RandomFloat();
+            //float y = cy + MathHelper.RandomFloat();
+            //float z = cz + MathHelper.RandomFloat();
+            //return new Vector3(x, y, z);
         }
     }
 }

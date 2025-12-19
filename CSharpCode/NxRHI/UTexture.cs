@@ -374,6 +374,45 @@ namespace EngineNS.NxRHI
         }
         public TtPicDesc PicDesc { get; set; }
         public TtTexture StreamingTexture { get; private set; } = null;
+        public EPixelFormat Format
+        {
+            get
+            {
+                if (PicDesc!=null)
+                    return PicDesc.Desc.Format;
+                return mCoreObject.GetBufferAsTexture().Desc.Format;
+            }
+        }
+        public int Width
+        {
+            get
+            {
+                if (PicDesc!=null)
+                    return PicDesc.Desc.Width;
+                return (int)mCoreObject.GetBufferAsTexture().Desc.Width;
+            }
+        }
+        public int Height
+        {
+            get
+            {
+                if (PicDesc!=null)
+                    return PicDesc.Desc.Height;
+                return (int)mCoreObject.GetBufferAsTexture().Desc.Height;
+            }
+        }
+        public uint CubeFaces
+        {
+            get
+            {
+                if (PicDesc!=null)
+                    return PicDesc.Desc.CubeFaces;
+                if (mCoreObject.Desc.Type == ESrvType.ST_TextureCube)
+                    return 6;
+                return 1;//mCoreObject.GetBufferAsTexture().Desc.CubeFaces;
+            }
+        }
+
         public object TagObject;
         public static int NumOfInstance = 0;
         public static int NumOfGCHandle = 0;
@@ -1333,7 +1372,12 @@ namespace EngineNS.NxRHI
         {
             get
             {
-                return PicDesc.MipLevel;
+                if (PicDesc!=null)
+                    return PicDesc.MipLevel;
+                var tex = mCoreObject.GetBufferAsTexture();
+                if (tex.IsValidPointer == false)
+                    return 0;
+                return (int)tex.Desc.MipLevels;
             }
         }
         [Browsable(false)]

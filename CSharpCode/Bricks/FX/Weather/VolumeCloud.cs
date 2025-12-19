@@ -15,222 +15,19 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace EngineNS.Bricks.FX.Weather
 {
-    public class TtAdvancedWeatherMapGenerator
-    {
-        public NoiseSettings CoverageNoise = new NoiseSettings
-        {
-            Frequency = 8,//0.0005f,
-            Octaves = 3,
-            Persistence = 0.5f,
-            Lacunarity = 2.0f,
-            Amplitude = 1.0f
-        };
-
-        public NoiseSettings DensityNoise = new NoiseSettings
-        {
-            Frequency = 0.001f,
-            Octaves = 2,
-            Persistence = 0.7f,
-            Lacunarity = 2.5f,
-            Amplitude = 0.8f
-        };
-
-        public NoiseSettings WindNoise = new NoiseSettings
-        {
-            Frequency = 0.002f,
-            Octaves = 1,
-            Persistence = 0.5f,
-            Lacunarity = 2.0f,
-            Amplitude = 0.5f
-        };
-
-        public NoiseSettings HeightNoise = new NoiseSettings
-        {
-            Frequency = 0.0002f,
-            Octaves = 4,
-            Persistence = 0.6f,
-            Lacunarity = 2.0f,
-            Amplitude = 1.0f
-        };
-
-        public class NoiseSettings
-        {
-            public float Frequency = 0.001f;
-            public int Octaves = 2;
-            public float Persistence = 0.5f;
-            public float Lacunarity = 2.0f;
-            public float Amplitude = 1.0f;
-            public Vector2 Offset = Vector2.Zero;
-        }
-
-        public NxRHI.TtTextureUtility.TtTex2dLayer CreateSeamlessWeatherTexture(int size = 512, int TileSize = 128)
-        {
-            Color4f[] colors = new Color4f[size * size];
-
-            // 预计算随机偏移
-            Vector2[] offsets = new Vector2[4];
-            for (int i = 0; i < 4; i++)
-            {
-                offsets[i] = new Vector2(MathHelper.RandomFloat() * 1000, MathHelper.RandomFloat() * 1000);
-            }
-
-            for (int y = 0; y < size; y++)
-            {
-                for (int x = 0; x < size; x++)
-                {
-                    Vector2 uv = new Vector2((float)x / size, (float)y / size);
-
-                    // 生成各个通道
-                    float coverage = GenerateTileableFractalNoise(
-                        uv, CoverageNoise, TileSize, offsets[0]);
-
-                    float density = GenerateTileableFractalNoise(
-                        uv, DensityNoise, TileSize, offsets[1]);
-
-                    float wind = GenerateTileableFractalNoise(
-                        uv, WindNoise, TileSize, offsets[2]);
-
-                    float height = GenerateTileableFractalNoise(
-                        uv, HeightNoise, TileSize, offsets[3]);
-
-                    // 确保在[0,1]范围内
-                    coverage = MathHelper.Clamp(coverage, 0 , 1);
-                    density = MathHelper.Clamp(density, 0, 1);
-                    wind = MathHelper.Clamp(wind, 0, 1);
-                    height = MathHelper.Clamp(height, 0, 1);
-
-                    colors[x + y * size] = new Color4f(coverage, density, wind, height);
-                }
-            }
-
-            var result = new NxRHI.TtTextureUtility.TtTex2dLayer();
-            result.Width = size;
-            result.Height = size;
-            result.Pixels = colors;
-            TestSeamlessness(result);
-            result.NormalizeLayer();
-
-            return result;
-        }
-
-        private float GenerateTileableFractalNoise(Vector2 uv, NoiseSettings settings,
-            float tileSize, Vector2 offset)
-        {
-            float value = 0;
-            float amplitude = settings.Amplitude;
-            float frequency = settings.Frequency;
-            float maxValue = 0;
-
-            for (int i = 0; i < settings.Octaves; i++)
-            {
-                // 计算平铺后的坐标
-                Vector2 sampleUV = uv * frequency + offset;
-
-                // 生成可平铺的噪声
-                float noise = TileablePerlinNoise(
-                    sampleUV.X, sampleUV.Y,
-                    tileSize * frequency);
-
-                value += noise * amplitude;
-                maxValue += amplitude;
-
-                amplitude *= settings.Persistence;
-                frequency *= settings.Lacunarity;
-            }
-
-            // 归一化
-            if (maxValue > 0)
-            {
-                value /= maxValue;
-            }
-
-            return value;
-        }
-
-        private float TileablePerlinNoise(float x, float y, float tileSize)
-        {
-            // 方法：使用4x4网格混合
-            float total = 0;
-            float totalWeight = 0;
-
-            // 采样周围4x4个平铺副本
-            for (int dy = -2; dy <= 2; dy++)
-            {
-                for (int dx = -2; dx <= 2; dx++)
-                {
-                    float sampleX = x + dx * tileSize;
-                    float sampleY = y + dy * tileSize;
-
-                    // 计算权重（距离衰减）
-                    float distX = MathF.Abs(dx);
-                    float distY = MathF.Abs(dy);
-                    float weight = GaussianWeight(distX) * GaussianWeight(distY);
-
-                    total += MathHelper.PerlinNoise(sampleX, sampleY) * weight;
-                    totalWeight += weight;
-                }
-            }
-
-            return total / totalWeight;
-        }
-
-        private float GaussianWeight(float distance)
-        {
-            // 高斯权重函数
-            float sigma = 1.0f; // 标准差
-            return MathF.Exp(-distance * distance / (2 * sigma * sigma));
-        }
-
-        // 测试函数：验证无缝性
-        public static void TestSeamlessness(NxRHI.TtTextureUtility.TtTex2dLayer weatherTexture)
-        {
-            int size = weatherTexture.Width;
-            float maxSeamError = 0;
-
-            // 测试水平边界
-            for (int y = 0; y < size; y++)
-            {
-                var left = weatherTexture.GetPixel(0, y);
-                var right = weatherTexture.GetPixel(size - 1, y);
-
-                float error = MathF.Abs(left.r - right.r) +
-                             MathF.Abs(left.g - right.g) +
-                             MathF.Abs(left.b - right.b);
-
-                maxSeamError = MathF.Max(maxSeamError, error);
-            }
-
-            // 测试垂直边界
-            for (int x = 0; x < size; x++)
-            {
-                var bottom = weatherTexture.GetPixel(x, 0);
-                var top = weatherTexture.GetPixel(x, size - 1);
-
-                float error = MathF.Abs(bottom.r - top.r) +
-                             MathF.Abs(bottom.g - top.g) +
-                             MathF.Abs(bottom.b - top.b);
-
-                maxSeamError = MathF.Max(maxSeamError, error);
-            }
-
-            if (maxSeamError < 0.01f)
-            {
-                Profiler.Log.WriteLine<Profiler.TtDebugLogCategory>(Profiler.ELogTag.Info, "✅ 天气图是无缝的！");
-            }
-            else
-            {
-                Profiler.Log.WriteLine<Profiler.TtDebugLogCategory>(Profiler.ELogTag.Info, "⚠️ 天气图可能存在接缝");
-            }
-        }
-    }
     public class TtCloudNoiseGenerator : IO.BaseSerializer, IDisposable
     {
         public void Dispose() 
         {
-            CoreSDK.DisposeObject(ref WeatherSrv);
+            if (WeatherSrv!=null)
+            {
+                WeatherSrv.Dispose();
+                WeatherSrv = null;
+            }
             CoreSDK.DisposeObject(ref CloudNoiseSrv);
         }
-        public NxRHI.TtSrView WeatherSrv;
+        [Category("Option")]
+        public NxRHI.TtSrView WeatherSrv { get; set; }
         public NxRHI.TtSrView CloudNoiseSrv;
         public class TtWeatherMapSettings : IO.BaseSerializer
         {
@@ -278,7 +75,11 @@ namespace EngineNS.Bricks.FX.Weather
         }
         public async Thread.Async.TtTask ReGenRenderResources()
         {
-            CoreSDK.DisposeObject(ref WeatherSrv);
+            if (WeatherSrv!=null)
+            {
+                WeatherSrv.Dispose();
+                WeatherSrv = null;
+            }
             CoreSDK.DisposeObject(ref CloudNoiseSrv);
             await TtEngine.Instance.EventPoster.Post((state) =>
             {
@@ -308,7 +109,12 @@ namespace EngineNS.Bricks.FX.Weather
         }
 
         public int Resolution = 64;
-        public Vector3 Scale = Vector3.One;
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public Vector3 Scale { get; set; } = new Vector3(0.05f, 0.05f, 0.05f);
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public Vector3 WorleyScale { get; set; } = new Vector3(0.01f, 0.01f, 0.01f);
 
         [Rtti.Meta("")]
         [Category("Option")]
@@ -331,7 +137,9 @@ namespace EngineNS.Bricks.FX.Weather
         public float BillowPower { get; set; } = 1.0f;
 
         public TtPerlin2 Perlin3D = new TtPerlin2((int)Support.TtTime.GetTickCount());
-        public TtWorly3D Worly3D = new TtWorly3D();
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public TtWorly3D Worley3D { get; set; } = new TtWorly3D();
         public Support.IRemapCurve RemapCurve = null;
 
         #region WeatherMap
@@ -443,7 +251,8 @@ namespace EngineNS.Bricks.FX.Weather
 
             // 预计算一些值以提高性能
             float[] perlinNoise = GenerateFractalPerlinNoise(size, Perlin3D);
-            float[] worleyNoise = GenerateFractalWorleyNoise(size, Worly3D);
+            float[] worleyNoise = GenerateFractalWorleyNoise(size, Worley3D);
+            //float[] worleyNoise = GenerateFractalWorleyNoise(size, new TtWorleyNoise3D());
 
             float WorleyWeight = 1 - PerlinWeight;
             // 混合噪声
@@ -526,9 +335,9 @@ namespace EngineNS.Bricks.FX.Weather
                 {
                     for (int x = 0; x < size; x++)
                     {
-                        float nx = (float)x / size * Scale.x;
-                        float ny = (float)y / size * Scale.y;
-                        float nz = (float)z / size * Scale.z;
+                        float nx = (float)x / size * WorleyScale.x;
+                        float ny = (float)y / size * WorleyScale.y;
+                        float nz = (float)z / size * WorleyScale.z;
 
                         float value = Worly3D.GetWorleyValue(nx, ny, nz);
                         noise[x + y * size + z * size * size] = value;

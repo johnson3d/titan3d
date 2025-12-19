@@ -1,8 +1,12 @@
-﻿using EngineNS.Graphics.Pipeline.Shader;
+﻿using Assimp;
+using EngineNS.Bricks.FX.Weather;
+using EngineNS.Editor.Forms;
+using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
 using NPOI.SS.UserModel;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 
@@ -69,7 +73,19 @@ namespace EngineNS.Editor.Forms
 
     public class TtTextureViewer : Editor.IAssetEditor, IRootForm
     {
-        public RName AssetName { get; set; }
+        public RName AssetName 
+        { 
+            get
+            {
+                if (TextureSRV!=null && TextureSRV.AssetName!=null)
+                    return TextureSRV.AssetName;
+                return RName.GetRName("NoName", RName.ERNameType.Transient);
+            }
+            set
+            {
+                
+            }
+        }
         protected bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }
         public uint DockId { get; set; }
@@ -110,13 +126,17 @@ namespace EngineNS.Editor.Forms
         public async Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            TextureSRV = await TtEngine.Instance.GfxDevice.TextureManager.GetOrNewTexture(name);
+            TextureSRV = arg as TtSrView;
             if (TextureSRV == null)
-                return false;
+            {
+                TextureSRV = await TtEngine.Instance.GfxDevice.TextureManager.GetOrNewTexture(name);
+                if (TextureSRV == null)
+                    return false;
+            }
 
             TexturePropGrid.Target = TextureSRV;
-            ImageSize.X = TextureSRV.PicDesc.Width;
-            ImageSize.Y = TextureSRV.PicDesc.Height;
+            ImageSize.X = TextureSRV.Width;
+            ImageSize.Y = TextureSRV.Height;
             if(Math.Min(ImageSize.X, ImageSize.Y) < 256)
             {
                 ScaleFactor = (float)256 / Math.Min(ImageSize.X, ImageSize.Y);
@@ -125,7 +145,7 @@ namespace EngineNS.Editor.Forms
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-            if(TextureSRV.PicDesc.CubeFaces == 6)
+            if(TextureSRV.CubeFaces == 6)
             {
                 ImageSize.X = ImageSize.X*4;
                 ImageSize.Y = ImageSize.Y*3;
@@ -162,7 +182,7 @@ namespace EngineNS.Editor.Forms
             cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
             cmdParams.IsNormalMap = 0;
-            if (TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
+            if (TextureSRV.Format == EPixelFormat.PXF_BC5_UNORM || TextureSRV.Format == EPixelFormat.PXF_BC5_TYPELESS || TextureSRV.Format == EPixelFormat.PXF_BC5_SNORM)
                 cmdParams.IsNormalMap = 1;
 
             cmdParams.TextureDepth = (int)TextureSRV.GetTexture().Desc.Depth;
@@ -405,7 +425,9 @@ namespace EngineNS.Editor.Forms
 
         public string GetWindowsName()
         {
-            return TextureSRV.AssetName.Name;
+            if (TextureSRV.AssetName!=null)
+                return TextureSRV.AssetName.Name;
+            return "NoName";
         }
     }
 
@@ -434,5 +456,44 @@ namespace EngineNS.NxRHI
     [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.TtTextureViewer))]
     public partial class TtSrView
     {
+        public class TtViewTexture : EGui.Controls.PropertyGrid.TtButtonAttribute
+        {
+            protected override void OnButtonClick(in EditorInfo info)
+            {
+                if (info.ObjectInstance.GetType().GetInterface("IList")!=null)
+                {
+                    var lst = info.ObjectInstance as System.Collections.IList;
+                    foreach (var i in lst)
+                    {
+                        var node = i as TtSrView;
+                        if (node!=null)
+                        {
+                            Editor.TtAssetEditorManager.TryOpenEditor(typeof(TtTextureViewer), node.AssetName, node).AddWaitTask();
+                        }
+                    }
+                }
+                else
+                {
+                    var node = info.ObjectInstance as TtSrView;
+                    if (node!=null)
+                    {
+                        Editor.TtAssetEditorManager.TryOpenEditor(typeof(TtTextureViewer), node.AssetName, node).AddWaitTask();
+                    }
+                }
+            }
+        }
+        [TtViewTexture(ButtonText = "ViewTexture")]
+        [Category("Editor")]
+        public bool ViewTexture
+        {
+            get
+            {
+                return false;
+            }
+            set
+            {
+
+            }
+        }
     }
 }

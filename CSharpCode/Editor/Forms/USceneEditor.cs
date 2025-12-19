@@ -713,8 +713,7 @@ namespace EngineNS.Editor.Forms
                 EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGHoverColor
                 ))
             {
-                var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
-                _ = mainEditor.AssetEditorManager.OpenEditor(mainEditor, Scene.MacrossEditor, AssetName, null);
+                Editor.TtAssetEditorManager.TryOpenEditor(Scene.MacrossEditor, AssetName, null).AddWaitTask();
             }
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
