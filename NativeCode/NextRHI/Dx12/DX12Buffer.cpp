@@ -744,7 +744,7 @@ namespace NxRHI
 				return false;
 			}
 		}
-		SetDebugName("Texture");
+		//SetDebugName("Texture");
 
 		if (desc.InitData != nullptr)
 		{

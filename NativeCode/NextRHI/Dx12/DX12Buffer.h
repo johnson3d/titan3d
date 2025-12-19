@@ -105,9 +105,18 @@ namespace NxRHI
 		virtual void SetFingerPrint(UINT fp) {
 			mFingerPrint = fp;
 		}
+		virtual void SetDebugName(const char* name) {
+			mDebugName = name;
+			auto mDebugNameW = StringHelper::strtowstr(mDebugName);
+			mView->Heap->RealObject->SetName(mDebugNameW.c_str());
+		}
+		const char* GetDebugName() const {
+			return mDebugName.c_str();
+		}
 	public:
 		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		
+		std::string 				mDebugName;
 		AutoRef<DX12HeapHolder>		mView;
 		UINT						mFingerPrint = 0;
 		

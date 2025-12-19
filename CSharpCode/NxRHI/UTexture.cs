@@ -1324,11 +1324,21 @@ namespace EngineNS.NxRHI
                 }
             }
         }
+        RName mAssetName;
         [Rtti.Meta("")]
         public RName AssetName
         {
-            get;
-            set;
+            get => mAssetName;
+            set
+            {
+                mAssetName = value;
+                mCoreObject.NativeSuper.SetDebugName(value.ToString());
+                var tex = mCoreObject.GetBufferAsTexture();
+                if (tex.IsValidPointer)
+                {
+                    tex.SetDebugName("Texture:" + value.ToString());
+                }
+            }
         }
         #endregion
 
@@ -1402,7 +1412,6 @@ namespace EngineNS.NxRHI
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             LevelOfDetail = level;
-            unsafe
             {
                 if (StreamingTexture == null)
                 {
@@ -1411,6 +1420,11 @@ namespace EngineNS.NxRHI
                 }
                 else
                 {
+                    if (AssetName != null)
+                    {
+                        StreamingTexture.SetDebugName("Texture:" + AssetName.ToString());
+                    }
+
                     //var desc = this.mCoreObject.Desc;
                     //desc.Texture2D.MipLevels = tex2d.mCoreObject.Desc.MipLevels;
                     //var srv = rc.mCoreObject.CreateSRV(tex2d.mCoreObject.NativeSuper, in desc);
@@ -3580,7 +3594,7 @@ namespace EngineNS.NxRHI
                 return null;
             }
 
-            tex2d.SetDebugName(rn.Name);
+            tex2d.SetDebugName("Texture:" + rn.ToString());
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var srvDesc = new FSrvDesc();
@@ -3604,7 +3618,7 @@ namespace EngineNS.NxRHI
             result.TargetLOD = mipLevel;
             result.AssetName = rn;
 
-            result.SetDebugName(rn.Name);
+            result.SetDebugName(rn.ToString());
             return result;
         }
         public static async System.Threading.Tasks.Task<TtSrView> LoadSrvMipmap(RName rn, int mipLevel, int channelR, int channelG, int channelB, int channelA)

@@ -93,6 +93,7 @@ namespace EngineNS.Bricks.FX.Weather
                     var texDesc = weatherTex.mCoreObject.Desc;
                     srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
                     WeatherSrv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(weatherTex, in srvDesc);
+                    WeatherSrv.AssetName = RName.GetRName("VolumeCloudWeather.srv", RName.ERNameType.Transient);
                 }
 
                 {
