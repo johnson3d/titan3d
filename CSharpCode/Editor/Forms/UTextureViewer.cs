@@ -1,9 +1,6 @@
-﻿using Assimp;
-using EngineNS.Bricks.FX.Weather;
-using EngineNS.Editor.Forms;
+﻿using EngineNS.Editor.Forms;
 using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
-using NPOI.SS.UserModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -145,22 +142,37 @@ namespace EngineNS.Editor.Forms
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-            if(TextureSRV.CubeFaces == 6)
+            if (TextureSRV.CubeFaces == 6)
             {
                 ImageSize.X = ImageSize.X*4;
                 ImageSize.Y = ImageSize.Y*3;
                 ShadingEnv = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSlateTextureCubeViewerShading>();
-                SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
-                     ShadingEnv,
-                     TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
             }
             else
             {
                 ShadingEnv = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSlateTextureViewerShading>();
-                SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
-                    ShadingEnv,
-                    TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
+                
             }
+            if (TextureSRV.GetTexture().Desc.Depth != 0)
+            {
+                var texShading = ShadingEnv as TtSlateTextureViewerShading;
+                if (texShading != null)
+                {
+                    texShading.SetIsTex3D(true);
+                }
+            }
+            else
+            {
+                var texShading = ShadingEnv as TtSlateTextureViewerShading;
+                if (texShading != null)
+                {
+                    texShading.SetIsTex3D(false);
+                }
+            }
+            SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
+                     ShadingEnv,
+                     TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
+
             var iptDesc = new NxRHI.TtInputLayoutDesc();
             unsafe
             {
@@ -188,24 +200,8 @@ namespace EngineNS.Editor.Forms
             cmdParams.TextureDepth = (int)TextureSRV.GetTexture().Desc.Depth;
             CmdParameters = cmdParams;
 
-            if (CmdParameters.TextureDepth != 0)
-            {
-                var texShading = ShadingEnv as TtSlateTextureViewerShading;
-                if (texShading != null)
-                {
-                    texShading.SetIsTex3D(true);
-                }
-            }
-            else
-            {
-                var texShading = ShadingEnv as TtSlateTextureViewerShading;
-                if (texShading != null)
-                {
-                    texShading.SetIsTex3D(false);
-                }
-            }
-
-                return true;
+            
+            return true;
         }
         public void OnCloseEditor()
         {

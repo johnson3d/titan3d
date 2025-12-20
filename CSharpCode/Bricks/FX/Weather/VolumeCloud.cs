@@ -24,11 +24,16 @@ namespace EngineNS.Bricks.FX.Weather
                 WeatherSrv.Dispose();
                 WeatherSrv = null;
             }
-            CoreSDK.DisposeObject(ref CloudNoiseSrv);
+            if (CloudNoiseSrv!=null)
+            {
+                CloudNoiseSrv.Dispose();
+                CloudNoiseSrv = null;
+            }
         }
         [Category("Option")]
         public NxRHI.TtSrView WeatherSrv { get; set; }
-        public NxRHI.TtSrView CloudNoiseSrv;
+        [Category("Option")]
+        public NxRHI.TtSrView CloudNoiseSrv { get; set; }
         public class TtWeatherMapSettings : IO.BaseSerializer
         {
             [Rtti.Meta("")]
@@ -80,14 +85,15 @@ namespace EngineNS.Bricks.FX.Weather
                 WeatherSrv.Dispose();
                 WeatherSrv = null;
             }
-            CoreSDK.DisposeObject(ref CloudNoiseSrv);
+            if (CloudNoiseSrv!=null)
+            {
+                CloudNoiseSrv.Dispose();
+                CloudNoiseSrv = null;
+            }
             await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 {
                     var weatherTex = GenerateWeatherMap(mWeatherSettings);
-                    //TtAdvancedWeatherMapGenerator gen = new TtAdvancedWeatherMapGenerator();
-                    //var weatherTex = gen.CreateSeamlessWeatherTexture(512, 128).CreateTexture2D(EPixelFormat.PXF_R8G8B8A8_UNORM, 1);
-
                     NxRHI.FSrvDesc srvDesc = new NxRHI.FSrvDesc();
                     srvDesc.SetTexture2D();
                     var texDesc = weatherTex.mCoreObject.Desc;
@@ -104,6 +110,7 @@ namespace EngineNS.Bricks.FX.Weather
                     srvDesc.Format = texDesc.Format;
                     srvDesc.Texture3D.MipLevels = texDesc.MipLevels;
                     CloudNoiseSrv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(cloudNoiseTex, in srvDesc);
+                    CloudNoiseSrv.AssetName = RName.GetRName("VolumeCloudNoise3D.srv", RName.ERNameType.Transient);
                 }
                 return true;
             }, EAsyncTarget.AsyncIO);
@@ -144,40 +151,6 @@ namespace EngineNS.Bricks.FX.Weather
         public Support.IRemapCurve RemapCurve = null;
 
         #region WeatherMap
-        private static float TileablePerlinNoise(float x, float y, float tileSize, Support.TtPerlin2 perlin)
-        {
-            //return (float)perlin.Noise(x, y);
-            // 方法：使用4x4网格混合
-            float total = 0;
-            float totalWeight = 0;
-
-            // 采样周围4x4个平铺副本
-            for (int dy = -2; dy <= 2; dy++)
-            {
-                for (int dx = -2; dx <= 2; dx++)
-                {
-                    float sampleX = x + dx * tileSize;
-                    float sampleY = y + dy * tileSize;
-
-                    // 计算权重（距离衰减）
-                    float distX = MathF.Abs(dx);
-                    float distY = MathF.Abs(dy);
-                    float weight = GaussianWeight(distX) * GaussianWeight(distY);
-
-                    total += (float)perlin.Noise(sampleX, sampleY) * weight;
-                    totalWeight += weight;
-                }
-            }
-
-            return total / totalWeight;
-        }
-
-        private static float GaussianWeight(float distance)
-        {
-            // 高斯权重函数
-            float sigma = 1.0f; // 标准差
-            return MathF.Exp(-distance * distance / (2 * sigma * sigma));
-        }
         public static unsafe NxRHI.TtTexture GenerateWeatherMap(TtWeatherMapSettings weatherMapSettings)
         {
             int width = weatherMapSettings.Width;
@@ -239,6 +212,39 @@ namespace EngineNS.Bricks.FX.Weather
             sourceLayer.Height = height;
             sourceLayer.NormalizeLayer();
             return sourceLayer.CreateTexture2D(EPixelFormat.PXF_R8G8B8A8_UNORM, 1);
+        }
+        private static float TileablePerlinNoise(float x, float y, float tileSize, Support.TtPerlin2 perlin)
+        {
+            //return (float)perlin.Noise(x, y);
+            // 方法：使用4x4网格混合
+            float total = 0;
+            float totalWeight = 0;
+
+            // 采样周围4x4个平铺副本
+            for (int dy = -2; dy <= 2; dy++)
+            {
+                for (int dx = -2; dx <= 2; dx++)
+                {
+                    float sampleX = x + dx * tileSize;
+                    float sampleY = y + dy * tileSize;
+
+                    // 计算权重（距离衰减）
+                    float distX = MathF.Abs(dx);
+                    float distY = MathF.Abs(dy);
+                    float weight = GaussianWeight(distX) * GaussianWeight(distY);
+
+                    total += (float)perlin.Noise(sampleX, sampleY) * weight;
+                    totalWeight += weight;
+                }
+            }
+
+            return total / totalWeight;
+        }
+        private static float GaussianWeight(float distance)
+        {
+            // 高斯权重函数
+            float sigma = 1.0f; // 标准差
+            return MathF.Exp(-distance * distance / (2 * sigma * sigma));
         }
         #endregion
 
@@ -332,14 +338,13 @@ namespace EngineNS.Bricks.FX.Weather
 
             for (int z = 0; z < size; z++)
             {
+                float nz = (float)z * WorleyScale.z;
                 for (int y = 0; y < size; y++)
                 {
+                    float ny = (float)y * WorleyScale.y;
                     for (int x = 0; x < size; x++)
                     {
-                        float nx = (float)x / size * WorleyScale.x;
-                        float ny = (float)y / size * WorleyScale.y;
-                        float nz = (float)z / size * WorleyScale.z;
-
+                        float nx = (float)x * WorleyScale.x;
                         float value = Worly3D.GetWorleyValue(nx, ny, nz);
                         noise[x + y * size + z * size * size] = value;
                     }

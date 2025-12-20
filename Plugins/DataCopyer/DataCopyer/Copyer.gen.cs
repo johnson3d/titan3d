@@ -137573,6 +137573,7 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.Frequency);
 			ar.Write(srcObj.Gain);
 			ar.Write(srcObj.Lacunarity);
+			ar.Write(srcObj.NeighborRange);
 			ar.Write(srcObj.Octaves);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
@@ -137582,6 +137583,7 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Frequency = srcObj.Frequency;
 			tarObj.Gain = srcObj.Gain;
 			tarObj.Lacunarity = srcObj.Lacunarity;
+			tarObj.NeighborRange = srcObj.NeighborRange;
 			tarObj.Octaves = srcObj.Octaves;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5346549656292904274 = (EngineNS.IO.IReader ar, object obj)=>
@@ -137612,6 +137614,55 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "Lacunarity", false);
+				}
+			}
+			System.Int32 t_Octaves;
+			ar.Read(out t_Octaves);
+			srcObj.Octaves = t_Octaves;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Octaves", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7913503131789620061 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Support.TtWorly3D;
+			System.Single t_Frequency;
+			ar.Read(out t_Frequency);
+			srcObj.Frequency = t_Frequency;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Frequency", false);
+				}
+			}
+			System.Single t_Gain;
+			ar.Read(out t_Gain);
+			srcObj.Gain = t_Gain;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Gain", false);
+				}
+			}
+			System.Single t_Lacunarity;
+			ar.Read(out t_Lacunarity);
+			srcObj.Lacunarity = t_Lacunarity;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Lacunarity", false);
+				}
+			}
+			System.UInt32 t_NeighborRange;
+			ar.Read(out t_NeighborRange);
+			srcObj.NeighborRange = t_NeighborRange;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NeighborRange", false);
 				}
 			}
 			System.Int32 t_Octaves;
@@ -163102,12 +163153,12 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator@EngineCore");
 				kls.Writer = EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator.CopyCurrentVersion;
+				kls.RegVersion(11880934441627704112, EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator.Read_11880934441627704112);
 				kls.RegVersion(1263796601866776165, EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator.Read_1263796601866776165);
 				kls.RegVersion(14279475623112570862, EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator.Read_14279475623112570862);
 				kls.RegVersion(1472717119982727948, EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator.Read_1472717119982727948);
 				kls.RegVersion(15977829590903546287, EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator.Read_15977829590903546287);
 				kls.RegVersion(7575181581243942291, EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator.Read_7575181581243942291);
-				kls.RegVersion(11880934441627704112, EngineNS_Bricks_FX_Weather_TtCloudNoiseGenerator.Read_11880934441627704112);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.FX.Weather.TtVolumeCloudNode@EngineCore");
@@ -166074,6 +166125,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Support_TtWorly3D.WriteCurrentVersion;
 				kls.Copy = EngineNS_Support_TtWorly3D.CopyCurrentVersion;
 				kls.RegVersion(5346549656292904274, EngineNS_Support_TtWorly3D.Read_5346549656292904274);
+				kls.RegVersion(7913503131789620061, EngineNS_Support_TtWorly3D.Read_7913503131789620061);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.TtBezier3DSpline@EngineCore");
@@ -166624,7 +166676,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = Survivor_TtWeaponProxyNode.CopyCurrentVersion;
 				kls.RegVersion(10759720178659608122, Survivor_TtWeaponProxyNode.Read_10759720178659608122);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("45_E8_4E_D7_2C_9F_0D_02_C6_6B_AC_F7_B0_8F_A1_A5_B8_3A_4F_27");
+			this.VersionHash = EngineNS.Hash160.Parse("EB_9C_54_A9_1B_2D_25_52_AF_BF_A2_8D_E3_09_35_10_B6_FC_5A_05");
 		}
 	}
 }

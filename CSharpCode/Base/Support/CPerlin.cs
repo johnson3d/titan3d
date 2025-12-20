@@ -1,4 +1,7 @@
-﻿using System;
+﻿using MathNet.Numerics;
+using NPOI.Util.Collections;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -213,7 +216,7 @@ namespace EngineNS.Support
                 n = MathHelper.Abs(n) * amp;
                 n = n * n;
                 result += n;
-                
+
                 coord *= 2.0f;
                 amp *= 0.5f;
             }
@@ -382,7 +385,7 @@ namespace EngineNS.Support
             return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
         }
 
-        int[] mPerm = 
+        int[] mPerm =
         {
         151,160,137,91,90,15,
         131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
@@ -416,6 +419,10 @@ namespace EngineNS.Support
         [Rtti.Meta("")]
         [Category("Option")]
         public float Gain { get; set; } = 0.5f;
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public uint NeighborRange { get; set; } = 1;
+
         public float GetWorleyValue(float x, float y, float z)
         {
             float value = 0;
@@ -441,18 +448,19 @@ namespace EngineNS.Support
         private float WorleyNoise3D(float x, float y, float z)
         {
             // 简化的Worley噪声实现
-            int cellX = MathHelper.FloorToInt(x * 3);
-            int cellY = MathHelper.FloorToInt(y * 3);
-            int cellZ = MathHelper.FloorToInt(z * 3);
+            int NumOfCells = 2 * (int)NeighborRange + 1;
+            int cellX = MathHelper.FloorToInt(x);
+            int cellY = MathHelper.FloorToInt(y);
+            int cellZ = MathHelper.FloorToInt(z);
 
             float minDistance = float.MaxValue;
 
-            Vector3 samplePos = new Vector3(x * 3, y * 3, z * 3);
-            for (int dx = -1; dx <= 1; dx++)
+            Vector3 samplePos = new Vector3(x, y, z);
+            for (int dx = -(int)NeighborRange; dx <= NeighborRange; dx++)
             {
-                for (int dy = -1; dy <= 1; dy++)
+                for (int dy = -(int)NeighborRange; dy <= NeighborRange; dy++)
                 {
-                    for (int dz = -1; dz <= 1; dz++)
+                    for (int dz = -(int)NeighborRange; dz <= NeighborRange; dz++)
                     {
                         Vector3 featurePoint = GetFeaturePoint(cellX + dx, cellY + dy, cellZ + dz);
                         Vector3 cellPos = new Vector3(cellX + dx, cellY + dy, cellZ + dz);
@@ -465,23 +473,48 @@ namespace EngineNS.Support
                 }
             }
 
-            //minDistance = minDistance / MathF.Sqrt(3*3 + 3*3 + 3*3); // 归一化距离
-            return minDistance;
-            //return 1.0f - MathHelper.Clamp(minDistance, 0, 1);
+            minDistance = minDistance / MathF.Sqrt(NumOfCells*NumOfCells + NumOfCells*NumOfCells + NumOfCells*NumOfCells); // 归一化距离
+            return 1.0f - MathHelper.Clamp(minDistance, 0, 1);
         }
-        private Vector3 GetFeaturePoint(float cx, float cy, float cz)
+        Vector3[,,] SeedSequencer = null;
+        private void InitSeedSequencer(int size)
         {
-            // 使用哈希函数获取确定性的随机点
-            float random(float seed)
+            SeedSequencer = new Vector3[size, size, size];
+            for (int z = 0; z < size; z++)
             {
-                return MathHelper.Repeat(MathF.Sin(seed * 12.9898f) * 43758.5453f, 1f);
+                for (int y = 0; y < size; y++)
+                {
+                    for (int x = 0; x < size; x++)
+                    {
+                        SeedSequencer[z, y, x].X = MathHelper.RandomFloat();
+                        SeedSequencer[z, y, x].Y = MathHelper.RandomFloat();
+                        SeedSequencer[z, y, x].Z = MathHelper.RandomFloat();
+                    }
+                }
             }
+        }
+        private Vector3 GetFeaturePoint(int cx, int cy, int cz)
+        {
+            // 这里的本质，是希望固定cx,cy,cz时，返回一个确定性的随机点
+            if (SeedSequencer==null)
+            {
+                InitSeedSequencer(64 + (int)NeighborRange * 2);
+            }
+            return SeedSequencer[(cz + (int)NeighborRange)%SeedSequencer.GetLength(0),
+                (cy + (int)NeighborRange)%SeedSequencer.GetLength(1),
+                (cx + (int)NeighborRange)%SeedSequencer.GetLength(2)];
 
-            float x = random(cx * 1.0f);
-            float y = random(cy * 1.3f + 100);
-            float z = random(cz * 1.7f + 200);
+            //// 使用哈希函数获取确定性的随机点
+            //float random(float seed)
+            //{
+            //    return MathF.Abs(MathHelper.Repeat(MathF.Sin(seed * 12.9898f) * 43758.5453f, 1f));
+            //}
 
-            return new Vector3(x, y, z);
+            //float x = random(cx * 1.0f);
+            //float y = random(cy * 1.3f + 100);
+            //float z = random(cz * 1.7f + 200);
+
+            //return new Vector3(x, y, z);
             //float x = cx + MathHelper.RandomFloat();
             //float y = cy + MathHelper.RandomFloat();
             //float z = cz + MathHelper.RandomFloat();
