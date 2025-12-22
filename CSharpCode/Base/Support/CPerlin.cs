@@ -1,6 +1,4 @@
-﻿using MathNet.Numerics;
-using NPOI.Util.Collections;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -423,12 +421,12 @@ namespace EngineNS.Support
         [Category("Option")]
         public uint NeighborRange { get; set; } = 1;
 
-        public float GetWorleyValue(float x, float y, float z)
+        public float GetWorleyValue(float x, float y, float z, float amplitude)
         {
+            float oriAmp = amplitude;
             float value = 0;
-            float amplitude = 1;
             float currentFrequency = Frequency;
-
+            
             for (int i = 0; i < Octaves; i++)
             {
                 float noiseValue = WorleyNoise3D(
@@ -436,13 +434,16 @@ namespace EngineNS.Support
                     y * currentFrequency,
                     z * currentFrequency);
 
+                //[0,1]->[-0.5,0.5]
+                noiseValue -= 0.5f;
+
                 value += noiseValue * amplitude;
                 amplitude *= Gain;
                 currentFrequency *= Lacunarity;
             }
 
-            return value;
-            //return MathHelper.Clamp(value, 0, 1);
+            //return value;
+            return MathHelper.Clamp(value, -oriAmp *  0.5f, oriAmp *  0.5f);
         }
 
         private float WorleyNoise3D(float x, float y, float z)
@@ -473,7 +474,7 @@ namespace EngineNS.Support
                 }
             }
 
-            minDistance = minDistance / MathF.Sqrt(NumOfCells*NumOfCells + NumOfCells*NumOfCells + NumOfCells*NumOfCells); // 归一化距离
+            minDistance = minDistance / 1.732f;//MathF.Sqrt(3); // 归一化距离
             return 1.0f - MathHelper.Clamp(minDistance, 0, 1);
         }
         Vector3[,,] SeedSequencer = null;
@@ -504,7 +505,7 @@ namespace EngineNS.Support
                 (cy + (int)NeighborRange)%SeedSequencer.GetLength(1),
                 (cx + (int)NeighborRange)%SeedSequencer.GetLength(2)];
 
-            //// 使用哈希函数获取确定性的随机点
+            // 使用哈希函数获取确定性的随机点
             //float random(float seed)
             //{
             //    return MathF.Abs(MathHelper.Repeat(MathF.Sin(seed * 12.9898f) * 43758.5453f, 1f));

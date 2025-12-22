@@ -345,7 +345,8 @@ namespace EngineNS.Bricks.FX.Weather
                     for (int x = 0; x < size; x++)
                     {
                         float nx = (float)x * WorleyScale.x;
-                        float value = Worly3D.GetWorleyValue(nx, ny, nz);
+                        float value = Worly3D.GetWorleyValue(nx, ny, nz, 1.0f);
+                        value += 0.5f;
                         noise[x + y * size + z * size * size] = value;
                     }
                 }
