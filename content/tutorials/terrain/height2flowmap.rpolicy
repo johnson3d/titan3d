@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyGraph@EngineCore">
+<Root Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyGraph@EngineCore">
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/terrain/height2flowmap.rpolicy,961076e2-5dce-427f-a9f0-ff47c91d13e3" />
   <GraphName Type="System.String@Unknown" Value="NodeGraph" />
   <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="2">
-    <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
+    <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.GpuShading.TtGpuFetchNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="GpuFetch" />
       <Name Type="System.String@Unknown" Value="GpuFetch" />
@@ -14,7 +14,7 @@
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
-    <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
+    <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.GpuShading.TtHeigh2FlowMapNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="Heigh2FlowMap" />
       <Name Type="System.String@Unknown" Value="Heigh2FlowMap" />

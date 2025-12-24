@@ -29,7 +29,7 @@ namespace EngineNS.Graphics.Pipeline.Utility
 
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Mat2Texture", "Utility\\Mat2Texture", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Mat2Texture", "Utility\\Mat2Texture", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtMaterialToTextureNode : Common.TAuxSceenSpaceNode<TtMaterialToTextureNode>
     {
         public TtMaterialToTextureNode()

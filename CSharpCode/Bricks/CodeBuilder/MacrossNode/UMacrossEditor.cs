@@ -129,7 +129,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public uint DockId { get; set; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
-        public EGui.Controls.PropertyGrid.PropertyGrid PGMember { get; set; } = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid PGMember { get; set; } = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public List<UMacrossMethodGraph> OpenFunctions = new List<UMacrossMethodGraph>();
         public MemberVar DraggingMember { get; set; }
         public bool IsDraggingMember { get; set; } = false;

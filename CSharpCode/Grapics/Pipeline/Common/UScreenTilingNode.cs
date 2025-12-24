@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    [Bricks.CodeBuilder.ContextMenu("ScreenTiling", "ScreenTiling", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("ScreenTiling", "ScreenTiling", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UScreenTilingNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UScreenTilingNode" })]
     public class TtScreenTilingNode : TAuxRenderGraphNode<TtScreenTilingNode>
     {

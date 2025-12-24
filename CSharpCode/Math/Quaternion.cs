@@ -57,13 +57,13 @@ namespace EngineNS
                     float speed = 0.1f;
                     if (info.HostProperty != null)
                     {
-                        var vR = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueRange>();
+                        var vR = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.TtValueRange>();
                         if (vR != null)
                         {
                             minValue = (float)vR.Min;
                             maxValue = (float)vR.Max;
                         }
-                        var vStep = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueChangeStep>();
+                        var vStep = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.TtValueChangeStep>();
                         if (vStep != null)
                         {
                             speed = vStep.Step;

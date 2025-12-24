@@ -23,7 +23,7 @@ namespace EngineNS.Editor.Forms
 
         }
     }
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtSceneEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
         public int GetTickOrder()
@@ -226,9 +226,9 @@ namespace EngineNS.Editor.Forms
         public TtWorldOutliner mWorldOutliner;
         EGui.Controls.TtContentBrowser mContentBrowser = new EGui.Controls.TtContentBrowser();
 
-        public EGui.Controls.PropertyGrid.PropertyGrid NodeInspector = new EGui.Controls.PropertyGrid.PropertyGrid();
-        public EGui.Controls.PropertyGrid.PropertyGrid ScenePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        public EGui.Controls.PropertyGrid.PropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid NodeInspector = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid ScenePropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         [Category("Option")]
         public Graphics.Pipeline.TtRenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
 

@@ -6,7 +6,7 @@ using System.Text;
 namespace EngineNS.GamePlay
 {
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.UDirectionLight@EngineCore" })]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtDirectionLight
         : IO.BaseSerializer
     {

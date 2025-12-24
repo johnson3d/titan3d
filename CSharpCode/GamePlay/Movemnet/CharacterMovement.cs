@@ -9,7 +9,7 @@ namespace EngineNS.GamePlay.Movemnet
 {
     [Bricks.CodeBuilder.ContextMenu("CharacterMovement", "Gameplay\\CharacterMovement", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtCharacterMovement.TtCharacterMovementData), DefaultNamePrefix = "CharacterMovement")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtCharacterMovement : TtMovement
     {
         [Rtti.Meta("")]

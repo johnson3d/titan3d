@@ -88,7 +88,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             };
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Forword", "Deferred\\Forword", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Forword", "Deferred\\Forword", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.UForwordNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.UForwordNode" })]
     public class TtForwordNode : Common.TtBasePassNode
     {
@@ -281,7 +281,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("Gizmos", "Deferred\\Gizmos", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Gizmos", "Deferred\\Gizmos", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtGizmosNode : Common.TtBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);

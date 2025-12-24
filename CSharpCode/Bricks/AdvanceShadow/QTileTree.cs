@@ -11,7 +11,7 @@ using EngineNS.Profiler;
 
 namespace EngineNS.Bricks.AdvanceShadow
 {
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtQTree
     {
         public Dictionary<TtNode, TtShadowObject> ShadowObjectDictionary = new Dictionary<TtNode, TtShadowObject>();

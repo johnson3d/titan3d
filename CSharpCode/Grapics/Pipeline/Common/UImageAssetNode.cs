@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    [Bricks.CodeBuilder.ContextMenu("Image", "Image", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Image", "Image", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UImageAssetNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UImageAssetNode" })]
     public class TtImageAssetNode : TAuxRenderGraphNode<TtImageAssetNode>
     {

@@ -6,41 +6,41 @@ using System.Text;
 namespace EngineNS.EGui.Controls.PropertyGrid
 {
     public class PGHideBaseClassPropertiesAttribute : Attribute { }
-    public class PGShowInPropertyGridAttribute : Attribute { }
-    public class PGCategoryFilters : Attribute 
+    public class TtShowInPropertyGridAttribute : Attribute { }
+    public class TtCategoryFilters : Attribute 
     {
         public string[] ExcludeFilters = null;
     }
-    public class PGValueRange : Attribute
+    public class TtValueRange : Attribute
     {
         public double Max;
         public double Min;
-        public PGValueRange(double min, double max)
+        public TtValueRange(double min, double max)
         {
             Max = max;
             Min = min;
         }
     }
-    public class PGValueChangeStep : Attribute
+    public class TtValueChangeStep : Attribute
     {
         public float Step = 1.0f;
-        public PGValueChangeStep(float step)
+        public TtValueChangeStep(float step)
         {
             Step = step;
         }
     }
-    public class PGValueFormat : Attribute
+    public class TtValueFormat : Attribute
     {
         public string Format = null;
-        public PGValueFormat(string format)
+        public TtValueFormat(string format)
         {
             Format = format;
         }
     }
-    public class PGBaseType : Attribute
+    public class TtBaseType : Attribute
     {
         public Type BaseType;
-        public PGBaseType(Type baseType)
+        public TtBaseType(Type baseType)
         {
             BaseType = baseType;
         }

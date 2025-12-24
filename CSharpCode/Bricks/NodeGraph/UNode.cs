@@ -215,7 +215,7 @@ namespace EngineNS.Bricks.NodeGraph
         public TtMenuItem ContextMenu { get; set; }
     }
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore", "EngineNS.Bricks.NodeGraph.UNodeBase" })]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtNodeBase : IO.BaseSerializer
     {
         public bool LayoutDirty = true;

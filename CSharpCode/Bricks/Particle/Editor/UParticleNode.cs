@@ -8,7 +8,7 @@ using EngineNS.Rtti;
 
 namespace EngineNS.Bricks.Particle.Editor
 {
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtParticleNode : NodeGraph.TtNodeBase
     {
         internal TtParticleEditor NebulaEditor;

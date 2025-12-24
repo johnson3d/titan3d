@@ -79,7 +79,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("BassPass", "Deferred\\MultiViewID\\BassPass", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("BassPass", "Deferred\\MultiViewID\\BassPass", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtBasePassNode : Common.TtBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);

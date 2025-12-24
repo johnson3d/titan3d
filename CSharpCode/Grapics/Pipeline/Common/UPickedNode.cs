@@ -19,7 +19,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 NxRHI.EVertexStreamType.VST_Tangent,};
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Picked", "Pick\\Picked", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Picked", "Pick\\Picked", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class UPickedNode : TAuxRenderGraphNode<UPickedNode>
     {
         public TtRenderGraphPin PickedPinOut = TtRenderGraphPin.CreateOutput("Picked", false, EPixelFormat.PXF_R16G16_FLOAT, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_RTV);

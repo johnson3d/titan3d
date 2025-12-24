@@ -449,7 +449,8 @@ namespace EngineNS.Rtti
                     continue;
                 var meta = attrs[0] as MetaAttribute;
                 var fd = new TtPropertyMeta();
-                fd.Build(result, TtTypeDesc.TypeOf(i.PropertyType), i.Name, true);
+                var propType = TtTypeDesc.TypeOf(i.PropertyType);
+                fd.Build(result, propType, i.Name, true, propType?.TypeString);
                 Properties.Add(fd);
                 if (!meta.IsNoSerializable)
                     result.Propertys.Add(fd);
@@ -983,7 +984,7 @@ namespace EngineNS.Rtti
                 }
             }
             
-            public void Build(TtMetaVersion metaVersion, TtTypeDesc propType, string name, bool bUpdateOrder)
+            public void Build(TtMetaVersion metaVersion, TtTypeDesc propType, string name, bool bUpdateOrder, string fieldTypeStr)
             {
                 mHostType = metaVersion.HostClass.ClassType;
                 mPropertyName = name;
@@ -992,6 +993,7 @@ namespace EngineNS.Rtti
                 {
                     mFieldType = propType;
                     CustumSerializer = null;
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"Property lost: Name = {mHostType}.{name}; Type = {fieldTypeStr}");
                     return;
                 }
                 if (propType == null || propType.SystemType != info.PropertyType)
@@ -1147,14 +1149,14 @@ namespace EngineNS.Rtti
             {
                 foreach (var i in Propertys)
                 {
-                    i.Build(this, i.FieldType, null, false);
+                    i.Build(this, i.FieldType, null, false, i.FieldType?.TypeString);
                 }
                 return;
             }
             foreach (var i in Propertys)
             {
                 //i.PropInfo = FindPropertyByName(i.PropInfo.PropertyType, i.PropertyName);
-                i.Build(this, i.FieldType, i.PropertyName, false);
+                i.Build(this, i.FieldType, i.PropertyName, false, i.FieldType?.TypeString);
             }
         }
         public System.Reflection.PropertyInfo FindPropertyByName(Type type, string name)
@@ -1207,10 +1209,10 @@ namespace EngineNS.Rtti
                     }
                 }
                 var fieldType = Rtti.TtTypeDesc.TypeOf(fieldTypeStr);
-                fd.Build(this, fieldType, i.Name, false);
+                fd.Build(this, fieldType, i.Name, false, fieldTypeStr);
                 if (fd.FieldType == null)
                 {
-                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Property lost: Name = {i.Name}; Type = {fieldTypeStr}");
+                    //Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Property lost: Name = {i.Name}; Type = {fieldTypeStr}");
                 }
                 Propertys.Add(fd);
             }

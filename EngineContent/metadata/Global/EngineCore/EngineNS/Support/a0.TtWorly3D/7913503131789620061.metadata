@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_7913503131789620061 Type="EngineNS.Support.TtWorly3D@EngineCore">
+  <Frequency Type="System.Single@Unknown" Order="0" />
+  <Gain Type="System.Single@Unknown" Order="0" />
+  <Lacunarity Type="System.Single@Unknown" Order="0" />
+  <NeighborRange Type="System.UInt32@Unknown" Order="0" />
+  <Octaves Type="System.Int32@Unknown" Order="0" />
+</Hash_7913503131789620061>

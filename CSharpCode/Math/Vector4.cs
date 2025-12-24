@@ -70,18 +70,18 @@ namespace EngineNS
                     var format = "%.6f";
                     if (info.HostProperty != null)
                     {
-                        var vR = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueRange>();
+                        var vR = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.TtValueRange>();
                         if (vR != null)
                         {
                             minValue = (float)vR.Min;
                             maxValue = (float)vR.Max;
                         }
-                        var vStep = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueChangeStep>();
+                        var vStep = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.TtValueChangeStep>();
                         if (vStep != null)
                         {
                             speed = vStep.Step;
                         }
-                        var vFormat = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueFormat>();
+                        var vFormat = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.TtValueFormat>();
                         if (vFormat != null)
                             format = vFormat.Format;
                     }

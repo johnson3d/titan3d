@@ -14,7 +14,7 @@ namespace EngineNS.EGui
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
         public TtUVAnim UvAnim;
-        public EGui.Controls.PropertyGrid.PropertyGrid UvAnimPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid UvAnimPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         ~UUvAnimEditor()
         {
             Dispose();

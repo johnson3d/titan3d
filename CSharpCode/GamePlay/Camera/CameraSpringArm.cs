@@ -12,7 +12,7 @@ namespace EngineNS.GamePlay.Camera
 {
     [Bricks.CodeBuilder.ContextMenu("CameraSpringArm", "Gameplay\\CameraSpringArm", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtCameraSpringArm.TtCameraSpringArmData), DefaultNamePrefix = "CameraSpringArm")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtCameraSpringArm : TtLightWeightNodeBase, ICameraControlNode
     {
         public class TtCameraSpringArmData : TtNodeData

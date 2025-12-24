@@ -57,7 +57,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("LuminanceThreshole", "Post\\LuminanceThreshole", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("LuminanceThreshole", "Post\\LuminanceThreshole", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtLuminanceThresholeNode : TAuxSceenSpaceNode<TtLuminanceThresholeNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
@@ -138,7 +138,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             defines.AddDefine("ENV_OUT_LUMINANCE", "1");
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("LuminanceThresholeOutLum", "Post\\LuminanceThresholeOutLum", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("LuminanceThresholeOutLum", "Post\\LuminanceThresholeOutLum", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtLuminanceThresholeOutLumNode : TtLuminanceThresholeNode
     {
         public TtLuminanceThresholeOutLumNode()

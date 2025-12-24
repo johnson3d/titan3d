@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyGraph@EngineCore">
+<Root Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyGraph@EngineCore">
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/swrasterizer.rpolicy,f2700a0b-95a0-42a5-ad4f-fc4bf74beb91" />
   <GraphName Type="System.String@Unknown" Value="NodeGraph" />
   <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="2">
-    <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
+    <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.TtCopy2SwapChainNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="Copy2SwapChainNode" />
       <Name Type="System.String@Unknown" Value="Copy2SwapChainNode" />
@@ -14,7 +14,7 @@
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
-    <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
+    <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="" />
       <Label Type="System.String@Unknown" Value="SWRasterizerNode" />
       <Name Type="System.String@Unknown" Value="SWRasterizerNode" />

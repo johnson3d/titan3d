@@ -70,11 +70,11 @@ namespace EngineNS.Thread
         {
 
         }
-        public override bool StartThread(string name, FOnThreadTick action)
+        public override bool StartThread(string name, FOnThreadTick action, int stackSize = -1)
         {
             LogicBegin.Reset();
             LogicEnd.Reset();
-            return base.StartThread(name, action);
+            return base.StartThread(name, action, stackSize);
         }
         public override void StopThread(Action waitAction)
         {

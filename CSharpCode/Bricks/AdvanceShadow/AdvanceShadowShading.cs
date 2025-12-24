@@ -72,7 +72,7 @@ namespace EngineNS.Bricks.AdvanceShadow
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("AdvanceShadow", "Shadow\\AdvanceShadow", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("AdvanceShadow", "Shadow\\AdvanceShadow", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtAdvanceShadowMapNode : TAuxRenderGraphNode<TtAdvanceShadowMapNode>
     {
         public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_R16_FLOAT, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//or D32

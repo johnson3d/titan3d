@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    [Bricks.CodeBuilder.ContextMenu("Find", "Find", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Find", "Find", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UFindNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UFindNode" })]
     public class TtFindNode : TAuxRenderGraphNode<TtFindNode>
     {

@@ -9,7 +9,7 @@ using NPOI.HSSF.Record.AutoFilter;
 
 namespace EngineNS.EGui.Controls.PropertyGrid
 {
-    partial class PropertyGrid : IPanel
+    partial class TtPropertyGrid : IPanel
     {
         public bool IsReadOnly = false;
         private bool mVisible = true;
@@ -272,7 +272,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor);
                 ImGuiAPI.Separator();
 
-                TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_13px);
+                TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.TtBaseRenderer.enFont.Font_13px);
 
                 Vector2 size = Vector2.MinusOne;
                 //Vector2 size = Vector2.Zero;
@@ -414,10 +414,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             string[] CategoryExcludeFilters = null;
             if (target != null)
             {
-                var categoryAtts = target.GetType().GetCustomAttributes(typeof(PGCategoryFilters), true);
+                var categoryAtts = target.GetType().GetCustomAttributes(typeof(TtCategoryFilters), true);
                 if (categoryAtts.Length > 0)
                 {
-                    var ctAttr = categoryAtts[0] as PGCategoryFilters;
+                    var ctAttr = categoryAtts[0] as TtCategoryFilters;
                     CategoryExcludeFilters = ctAttr.ExcludeFilters;
                 }
                 else if (target.GetType().GetInterface("IList") != null)
@@ -425,10 +425,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     var lst = target as IList;
                     if (lst.Count == 1 && lst[0] != null)
                     {
-                        categoryAtts = lst[0].GetType().GetCustomAttributes(typeof(PGCategoryFilters), true);
+                        categoryAtts = lst[0].GetType().GetCustomAttributes(typeof(TtCategoryFilters), true);
                         if (categoryAtts.Length > 0)
                         {
-                            var ctAttr = categoryAtts[0] as PGCategoryFilters;
+                            var ctAttr = categoryAtts[0] as TtCategoryFilters;
                             CategoryExcludeFilters = ctAttr.ExcludeFilters;
                         }
                     }
@@ -483,7 +483,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     //ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.PGHeadColor);
                     ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FrameRounding, 0);
                     ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in EGui.UIProxy.StyleConfig.Instance.PGCategoryPadding);
-                    TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_Bold_13px);
+                    TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.TtBaseRenderer.enFont.Font_Bold_13px);
 
                     if(isSubPropertyGrid)
                     {
@@ -1988,7 +1988,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
         //    }
         //}
-        public static void SetValue(PropertyGrid pg, object root, List<KeyValuePair<object, System.Reflection.PropertyInfo>> callstack, System.Reflection.PropertyInfo prop, object owner, object value)
+        public static void SetValue(TtPropertyGrid pg, object root, List<KeyValuePair<object, System.Reflection.PropertyInfo>> callstack, System.Reflection.PropertyInfo prop, object owner, object value)
         {
             if (pg.IsReadOnly)
                 return;

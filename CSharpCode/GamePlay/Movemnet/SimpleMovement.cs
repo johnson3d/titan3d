@@ -11,7 +11,7 @@ namespace EngineNS.GamePlay.Movemnet
 {
     [Bricks.CodeBuilder.ContextMenu("SimpleMovement", "Gameplay\\SimpleMovement", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtSimpleMovement.TtSimpleMovementData), DefaultNamePrefix = "SimpleMovement")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtSimpleMovement : Scene.TtLightWeightNodeBase
     {
         [Rtti.Meta("")]

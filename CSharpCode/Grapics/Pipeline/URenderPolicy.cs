@@ -27,7 +27,7 @@ namespace EngineNS.Graphics.Pipeline
         Advance,
         Num,
     }
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtRenderPolicy : TtRenderGraph, IO.ISerializer
     {
         #region ISerializer

@@ -458,7 +458,7 @@ namespace EngineNS.Bricks.DataSet
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
-        public EGui.Controls.PropertyGrid.PropertyGrid DataPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();        
+        public EGui.Controls.PropertyGrid.TtPropertyGrid DataPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();        
         
 
         ~TtDataSetEditor()

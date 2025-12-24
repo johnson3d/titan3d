@@ -58,7 +58,7 @@ namespace EngineNS.Graphics.Pipeline
                 return false;
             }
 
-            SlateRenderer = new EGui.Slate.UBaseRenderer();
+            SlateRenderer = new EGui.Slate.TtBaseRenderer();
             await SlateRenderer.Initialize();
 
             //engine.Config.MainRPolicyName = RName.GetRName("UTest/testrendergraph.rpolicy");
@@ -315,7 +315,7 @@ namespace EngineNS.Graphics.Pipeline
         public Shader.TtMaterialInstanceManager MaterialInstanceManager { get; private set; } = new Shader.TtMaterialInstanceManager();
         [Rtti.Meta("")]
         public Shader.TtMaterialFunctionManager MaterialFunctionManager { get; private set; } = new Shader.TtMaterialFunctionManager();
-        public EGui.Slate.UBaseRenderer SlateRenderer { get; private set; }
+        public EGui.Slate.TtBaseRenderer SlateRenderer { get; private set; }
         public Graphics.Pipeline.Shader.TtEffectManager EffectManager
         {
             get;

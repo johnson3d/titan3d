@@ -45,7 +45,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     }
     [Bricks.CodeBuilder.ContextMenu("PhyCapsuleController", "Physics\\PhyCapsuleController", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtCapsulePhyControllerNode.TtCapsulePhyControllerNodeData), DefaultNamePrefix = "PhyCapsuleController")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtCapsulePhyControllerNode : TtPhyControllerNodeBase
     {
         public class TtCapsulePhyControllerNodeData : TtPhyControllerNodeDataBase
@@ -137,10 +137,10 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     }
     [Bricks.CodeBuilder.ContextMenu("PhyBoxController", "Physics\\PhyBoxController", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtBoxPhyControllerNode.TtBoxPhyControllerNodeData), DefaultNamePrefix = "PhyBoxController")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtBoxPhyControllerNode : TtPhyControllerNodeBase
     {
-        [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+        [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
         public class TtBoxPhyControllerNodeData : TtPhyControllerNodeDataBase
         {
             [Rtti.Meta, Category("Option")]

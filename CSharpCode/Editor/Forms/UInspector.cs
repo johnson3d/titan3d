@@ -15,8 +15,8 @@ namespace EngineNS.Editor.Forms
         public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get => mPropertyGrid.DockCond; set => mPropertyGrid.DockCond = value; }
         public bool ShowReadOnly { get; set; } = true;
-        protected EGui.Controls.PropertyGrid.PropertyGrid mPropertyGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        public EGui.Controls.PropertyGrid.PropertyGrid PropertyGrid { get => mPropertyGrid; }
+        protected EGui.Controls.PropertyGrid.TtPropertyGrid mPropertyGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid PropertyGrid { get => mPropertyGrid; }
         
         public void Dispose()
         {

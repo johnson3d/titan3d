@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyGraph@EngineCore">
+<Root Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyGraph@EngineCore">
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/renderpolicy/simple_ds.rpolicy,821a48b8-ab07-4859-aaa1-d188a7d033b9" />
   <GraphName Type="System.String@Unknown" Value="NodeGraph" />
   <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="4">
-    <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
+    <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.TtCopy2SwapChainNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="Copy2SwapChainNode" />
       <Name Type="System.String@Unknown" Value="Copy2SwapChainNode" />
@@ -14,7 +14,7 @@
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
-    <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
+    <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.TtCpuCullingNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="CpuCulling" />
       <Name Type="System.String@Unknown" Value="CpuCulling" />
@@ -25,7 +25,7 @@
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_1>
-    <e_2 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
+    <e_2 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.TtClearMRTNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="ClearMRTNode" />
       <Name Type="System.String@Unknown" Value="ClearMRTNode" />
@@ -38,7 +38,7 @@
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_2>
-    <e_3 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
+    <e_3 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Deferred.TtForwordNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="UForwordNode" />
       <Name Type="System.String@Unknown" Value="UForwordNode" />

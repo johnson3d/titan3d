@@ -130,7 +130,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Fsr", "Post\\Fsr", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Fsr", "Post\\Fsr", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtFsrNode : TAuxRenderGraphNode<TtFsrNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_SRV);

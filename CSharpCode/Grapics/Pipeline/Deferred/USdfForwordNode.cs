@@ -87,7 +87,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             };
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("SdfForword", "Deferred\\SdfForword", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("SdfForword", "Deferred\\SdfForword", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.USdfForwordNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.USdfForwordNode" })]
     public class TtSdfForwordNode : Common.TtBasePassNode
     {

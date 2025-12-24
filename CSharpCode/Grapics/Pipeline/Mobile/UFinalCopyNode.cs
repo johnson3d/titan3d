@@ -124,7 +124,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("FinalCopy", "Mobile\\FinalCopy", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("FinalCopy", "Mobile\\FinalCopy", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtFinalCopyNode : Common.TAuxSceenSpaceNode<TtFinalCopyNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);

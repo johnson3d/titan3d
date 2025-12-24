@@ -168,7 +168,7 @@ namespace EngineNS.UI.Editor
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
         public Vector2 WindowContentRegionMin, WindowContentRegionMax;
-        public EGui.Controls.PropertyGrid.PropertyGrid DetailsGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid DetailsGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public enum enDrawType : byte
         {
             Designer,

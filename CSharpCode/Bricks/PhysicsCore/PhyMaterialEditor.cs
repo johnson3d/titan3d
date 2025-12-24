@@ -14,7 +14,7 @@ namespace EngineNS.Bricks.PhysicsCore
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
         public TtPhyMaterial Material;
-        public EGui.Controls.PropertyGrid.PropertyGrid MaterialPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid MaterialPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         ~TtPhyMaterialEditor()
         {
             Dispose();

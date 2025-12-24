@@ -338,7 +338,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             UpdatePermutation();
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("DirLighting", "Deferred\\DirLighting", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("DirLighting", "Deferred\\DirLighting", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.UDeferredDirLightingNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.UDeferredDirLightingNode" })]
     public partial class TtDeferredDirLightingNode : TAuxSceenSpaceNode<TtDeferredDirLightingNode>
     {

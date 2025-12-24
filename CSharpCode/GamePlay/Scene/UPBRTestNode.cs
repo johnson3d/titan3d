@@ -9,7 +9,7 @@ namespace EngineNS.GamePlay.Scene
 {
     [Bricks.CodeBuilder.ContextMenu("PBRTestNode", "Graphics\\PBRTestNode", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtMeshNode.TtMeshNodeData), DefaultNamePrefix = "PBRTest")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtPBRTestNode : TtGpuSceneNode
     {
         public override void Dispose()

@@ -1,6 +1,7 @@
 ﻿using EngineNS.Support;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace EngineNS.IO
@@ -129,30 +130,43 @@ namespace EngineNS.IO
             {
                 if (type.HasInterface("IConfig"))
                 {
-                    var attr = type.GetCustomAttribute<TtConfigAttribute>(false);
-                    if (attr==null)
-                        return;
-                    var file = TtFileManager.CombinePath(dir, attr.Path);
-                    var jsCode = IO.TtFileManager.ReadAllText(file);
-                    if (jsCode!=null)
-                    {
-                        var cfg = IO.TtFileManager.LoadObjectFromJson(type.SystemType, jsCode) as IConfig;
-                        file = TtFileManager.CombinePath(patch_dir, attr.Path);
-                        jsCode = IO.TtFileManager.ReadAllText(file);
-                        if (jsCode != null)
-                        {
-                            TtAdvancedJsonPartialUpdater.PartialUpdate(jsCode, cfg, TtJsonOptions.Options);
-                        }
-                        mConfigs[type] = cfg;
-                    }
-                    else
-                    {
-                        mConfigs[type] = Rtti.TtTypeDescManager.CreateInstance(type) as IConfig;
-                        var text = IO.TtFileManager.SaveObjectToJson(mConfigs[type]);
-                        IO.TtFileManager.WriteAllText(file, text);
-                    }
+                    mConfigs[type] = TryLoad(type.SystemType, dir, patch_dir);
                 }
             });
+        }
+        public static IConfig TryLoad(System.Type type, string dir, string patch_dir)
+        {
+            if (dir == null)
+            {
+                dir = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Game, IO.TtFileManager.ESystemDir.Config);
+            }
+            if (patch_dir == null)
+            {
+                patch_dir = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Config);
+            }
+            var attr = type.GetCustomAttribute<TtConfigAttribute>(false);
+            if (attr==null)
+                return null;
+            var file = TtFileManager.CombinePath(dir, attr.Path);
+            var jsCode = IO.TtFileManager.ReadAllText(file);
+            if (jsCode!=null)
+            {
+                var cfg = IO.TtFileManager.LoadObjectFromJson(type, jsCode) as IConfig;
+                file = TtFileManager.CombinePath(patch_dir, attr.Path);
+                jsCode = IO.TtFileManager.ReadAllText(file);
+                if (jsCode != null)
+                {
+                    TtAdvancedJsonPartialUpdater.PartialUpdate(jsCode, cfg, TtJsonOptions.Options);
+                }
+                return cfg;
+            }
+            else
+            {
+                var cfg = Rtti.TtTypeDescManager.CreateInstance(type) as IConfig;
+                var text = IO.TtFileManager.SaveObjectToJson(cfg);
+                IO.TtFileManager.WriteAllText(file, text);
+                return cfg;
+            }
         }
         public T GetConfig<T>() where T : class, IConfig
         {

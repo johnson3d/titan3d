@@ -180,7 +180,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     {
         #region IAssetEditor
         public RName AssetName { get; set; }
-        public EGui.Controls.PropertyGrid.PropertyGrid AssetPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid AssetPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public float LeftWidth = 0;
         public TtShaderAsset ShaderAsset;
         bool IsStarting = false;

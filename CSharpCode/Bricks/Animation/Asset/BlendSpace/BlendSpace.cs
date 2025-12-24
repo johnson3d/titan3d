@@ -13,7 +13,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
 {
     public delegate void AxisNameChange(string newName);
     [Rtti.Meta("")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtBlendSpace_Axis : IO.BaseSerializer
     {
         public event AxisNameChange OnAxisNameChange;
@@ -68,7 +68,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
     }
     //BlendSpace中 动作和所在的位置
     [Rtti.Meta("")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtBlendSpace_Point : IO.BaseSerializer
     {
         public event EventHandler OnAnimationChanged;
@@ -125,7 +125,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
 
     //need to seperate editor and runtime
     [Rtti.Meta("")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public abstract class TtBlendSpace : IO.BaseSerializer, IAnimationCompositeAsset
     {
         public virtual string TypeExt

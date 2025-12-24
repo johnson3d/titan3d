@@ -44,7 +44,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 drawcall.BindCBV(index, policy.GetGpuSceneNode().PerGpuSceneCbv);
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Hdr", "Post\\Hdr", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Hdr", "Post\\Hdr", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UHdrNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UHdrNode" })]
     public class TtHdrNode : TAuxSceenSpaceNode<TtHdrNode>
     {

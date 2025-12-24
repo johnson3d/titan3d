@@ -34,7 +34,7 @@ namespace EngineNS.EGui.UIEditor
                 mVisible = value;
             }
         }
-        public Controls.PropertyGrid.PropertyGrid PGrid = new Controls.PropertyGrid.PropertyGrid();
+        public Controls.PropertyGrid.TtPropertyGrid PGrid = new Controls.PropertyGrid.TtPropertyGrid();
         public unsafe void OnDraw()
         {
             fixed (bool* pVisible = &mVisible)

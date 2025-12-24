@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1393286606268094719 Type="Inventory.TtItemData@Inventory">
+  <Duration Type="System.Int32@Unknown" Order="0" />
+  <ItemId Type="System.Int32@Unknown" Order="0" />
+  <ItemName Type="System.String@Unknown" Order="0" />
+  <ItemType Type="System.String@Unknown" Order="0" />
+  <RowInSheet Type="System.Int32@Unknown" Order="0" />
+  <SkillId Type="System.Int32@Unknown" Order="0" />
+</Hash_1393286606268094719>

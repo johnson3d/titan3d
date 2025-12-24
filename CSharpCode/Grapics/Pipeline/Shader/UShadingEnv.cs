@@ -36,7 +36,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         TrueValue = 1,
         BitWidth = 1,
     }
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtShadingEnv
     {
         public static int GetBitWidth(int num)
@@ -727,7 +727,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     {
         #region IAssetEditor
         public RName AssetName { get; set; }
-        public EGui.Controls.PropertyGrid.PropertyGrid AssetPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid AssetPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public float LeftWidth = 0;
         public TtMacrossShadingEnv ShaderAsset;
         bool IsStarting = false;

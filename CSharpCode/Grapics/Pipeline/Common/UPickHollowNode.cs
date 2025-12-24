@@ -48,7 +48,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("PickHollow", "Pick\\PickHollow", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("PickHollow", "Pick\\PickHollow", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class UPickHollowNode : TAuxSceenSpaceNode<UPickHollowNode>
     {
         public TtRenderGraphPin PickedPinIn = TtRenderGraphPin.CreateInput("Picked", NxRHI.EBufferType.BFT_SRV);
@@ -158,7 +158,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("PickHollowBlend", "Pick\\PickHollowBlend", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("PickHollowBlend", "Pick\\PickHollowBlend", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtPickHollowBlendNode : TAuxSceenSpaceNode<TtPickHollowBlendNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    [Bricks.CodeBuilder.ContextMenu("Copy", "Copy\\Copy", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Copy", "Copy\\Copy", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UCopyNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UCopyNode" })]
     public class TtCopyNode : TAuxRenderGraphNode<TtCopyNode>
     {
@@ -124,7 +124,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("Copy", "Copy\\Copy2Readback", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Copy", "Copy\\Copy2Readback", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtCopy2ReadbackNode : TAuxRenderGraphNode<TtCopy2ReadbackNode>
     {
         public TtRenderGraphPin SrcPinIn = TtRenderGraphPin.CreateInput("Src", NxRHI.EBufferType.BFT_SRV);
@@ -233,7 +233,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("Copy", "Copy\\Copy2NextFrame", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Copy", "Copy\\Copy2NextFrame", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode" })]
     public class TtCopy2NextFrameNode : TAuxRenderGraphNode<TtCopy2NextFrameNode>
     {
@@ -350,7 +350,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("Debugger", "Debugger", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Debugger", "Debugger", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtDebuggerNode : TAuxRenderGraphNode<TtDebuggerNode>
     {
         public class TtRDGDebugger : IRootForm

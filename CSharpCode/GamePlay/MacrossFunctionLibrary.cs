@@ -126,7 +126,7 @@ namespace EngineNS.GamePlay
             return true;
         }
     }
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     [Rtti.Meta("")]
     public partial class TtMacrossFunctionLibrary
     {

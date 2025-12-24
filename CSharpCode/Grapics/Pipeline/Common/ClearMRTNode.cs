@@ -7,7 +7,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    [Bricks.CodeBuilder.ContextMenu("ClearMRT", "ClearMRT", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("ClearMRT", "ClearMRT", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtClearMRTNode : TAuxRenderGraphNode<TtClearMRTNode>
     {
         public TtRenderGraphPin[] RtPinOut;

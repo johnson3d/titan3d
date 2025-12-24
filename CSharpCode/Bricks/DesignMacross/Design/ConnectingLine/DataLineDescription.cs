@@ -13,7 +13,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         public string FilterExts;
         public Rtti.TtTypeDesc ShowType;
     }
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     [GraphElementStyle(typeof(TtDataPinDescriptionElementStyle))]
     public class TtDataPinDescription : IDescription
     {
@@ -64,7 +64,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         
     }
     [GraphElement(typeof(TtGraphElement_DataLine))]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtDataLineDescription : IDescription
     {
         public IDescription Parent { get; set; }

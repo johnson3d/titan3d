@@ -52,7 +52,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     }
     [TtMaterialFunction.MaterialFunctionImport]
     [IO.AssetCreateMenu(MenuName = "Graphics/MaterialFunction")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtMaterialFunction : IO.BaseSerializer, IO.IAsset, IShaderCodeProvider
     {
         public const string AssetExt = ".mtlfunc";

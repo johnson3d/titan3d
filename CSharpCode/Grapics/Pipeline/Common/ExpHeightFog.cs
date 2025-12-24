@@ -61,7 +61,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Fog", "Post\\Fog", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Fog", "Post\\Fog", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public partial class TtFogNode
     {
         private void TtFogNode_InitExpHeight()
@@ -121,8 +121,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
 
         [Category("Exponent")]
-        [EGui.Controls.PropertyGrid.PGValueRange(0, 1000.0)]
-        [EGui.Controls.PropertyGrid.PGValueChangeStep(0.0001f)]
+        [EGui.Controls.PropertyGrid.TtValueRange(0, 1000.0)]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.0001f)]
         public float FogDensity { get => mFogStruct.FogDensity; set => mFogStruct.FogDensity = value; }
 
         [Category("Exponent")]
@@ -132,8 +132,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         public float StartDistance { get => mFogStruct.StartDistance; set => mFogStruct.StartDistance = value; }
         
         [Category("Exponent")]
-        [EGui.Controls.PropertyGrid.PGValueRange(0, 1000.0)]
-        [EGui.Controls.PropertyGrid.PGValueChangeStep(0.0001f)]
+        [EGui.Controls.PropertyGrid.TtValueRange(0, 1000.0)]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.0001f)]
         public float FogHeightFalloff { get => mFogStruct.FogHeightFalloff; set => mFogStruct.FogHeightFalloff = value; }
 
         #region inscatter

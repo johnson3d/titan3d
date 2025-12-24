@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_8389473096070989191 Type="Inventory.TtMissionData@Inventory">
+  <AwardGoods Type="System.Collections.Generic.List&lt;Inventory.TtMissionData.TtGoodsCondition@Inventory,&gt;@Unknown" Order="0" />
+  <GoodsAcceptConditions Type="System.Collections.Generic.List&lt;Inventory.TtMissionData.TtGoodsCondition@Inventory,&gt;@Unknown" Order="0" />
+  <GoodsFinishConditions Type="System.Collections.Generic.List&lt;Inventory.TtMissionData.TtGoodsCondition@Inventory,&gt;@Unknown" Order="0" />
+  <MissionConditions Type="System.Collections.Generic.List&lt;System.Int32@Unknown,&gt;@Unknown" Order="0" />
+  <MissionId Type="System.Int32@Unknown" Order="0" />
+  <MissionName Type="System.String@Unknown" Order="0" />
+  <MissionType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Order="0" />
+  <RowInSheet Type="System.Int32@Unknown" Order="0" />
+</Hash_8389473096070989191>

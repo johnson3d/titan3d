@@ -71,7 +71,7 @@ namespace EngineNS.Bricks.Font
             string mSourceFile;
             public TtFontDesc mDesc = new TtFontDesc();
             ImGui.ImGuiFileDialog mFileDialog = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
-            EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
+            EGui.Controls.PropertyGrid.TtPropertyGrid PGAsset = new EGui.Controls.PropertyGrid.TtPropertyGrid();
             public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
             {
                 mDir = dir;

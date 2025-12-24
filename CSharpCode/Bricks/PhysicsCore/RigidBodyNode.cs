@@ -8,7 +8,7 @@ using System.ComponentModel;
 namespace EngineNS.Bricks.PhysicsCore
 {
     [GamePlay.Scene.TtNode(NodeDataType = typeof(TtRigidBodyNode.TtRigidBodyNodeData), DefaultNamePrefix = "Physics\\PxMesh")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtRigidBodyNode : GamePlay.Scene.TtVisual
     {
         public class TtRigidBodyNodeData : GamePlay.Scene.TtNodeData

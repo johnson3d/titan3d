@@ -70,7 +70,7 @@ namespace EngineNS.Bricks.AdvanceShadow
         }
     }
 
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtQTreeVisualDebugger : IRootForm
     {
         public bool Visible { get; set; } = true;

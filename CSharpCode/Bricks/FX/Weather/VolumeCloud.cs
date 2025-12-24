@@ -119,9 +119,11 @@ namespace EngineNS.Bricks.FX.Weather
         public int Resolution = 64;
         [Rtti.Meta("")]
         [Category("Option")]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.001f)]
         public Vector3 Scale { get; set; } = new Vector3(0.05f, 0.05f, 0.05f);
         [Rtti.Meta("")]
         [Category("Option")]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.001f)]
         public Vector3 WorleyScale { get; set; } = new Vector3(0.01f, 0.01f, 0.01f);
 
         [Rtti.Meta("")]
@@ -135,10 +137,12 @@ namespace EngineNS.Bricks.FX.Weather
         public float Lacunarity { get; set; } = 2.0f;
         [Rtti.Meta("")]
         [Category("Option")]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.01f)]
         public float Gain { get; set; } = 0.5f;
 
         [Rtti.Meta("")]
         [Category("Option")]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.01f)]
         public float PerlinWeight { get; set; } = 0.3f;
         [Rtti.Meta("")]
         [Category("Option")]
@@ -416,7 +420,7 @@ namespace EngineNS.Bricks.FX.Weather
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("VolumeCloud", "Post\\VolumeCloud", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("VolumeCloud", "Post\\VolumeCloud", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtVolumeCloudNode : Graphics.Pipeline.Common.TAuxSceenSpaceNode<TtVolumeCloudNode>
     {
         public Graphics.Pipeline.TtRenderGraphPin ColorPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_SRV);
@@ -604,12 +608,14 @@ namespace EngineNS.Bricks.FX.Weather
             set => GetNodeData<TtThisNodeData>().mShadingStruct.LightColor = value;
         }
         [Category("Option")]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.001f)]
         public float CloudDensity
         {
             get => GetNodeData<TtThisNodeData>().mShadingStruct.CloudDensity;
             set => GetNodeData<TtThisNodeData>().mShadingStruct.CloudDensity = value;
         }
         [Category("Option")]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.001f)]
         public float CloudCoverage
         {
             get => GetNodeData<TtThisNodeData>().mShadingStruct.CloudCoverage;
@@ -628,18 +634,21 @@ namespace EngineNS.Bricks.FX.Weather
             set => GetNodeData<TtThisNodeData>().mShadingStruct.CloudHeightMax = value;
         }
         [Category("Option")]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.0001f)]
         public Vector2 CloudScale
         {
             get => GetNodeData<TtThisNodeData>().mShadingStruct.CloudScale;
             set => GetNodeData<TtThisNodeData>().mShadingStruct.CloudScale = value;
         }
         [Category("Option")]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.001f)]
         public float LightAbsorption
         {
             get => GetNodeData<TtThisNodeData>().mShadingStruct.LightAbsorption;
             set => GetNodeData<TtThisNodeData>().mShadingStruct.LightAbsorption = value;
         }
         [Category("Option")]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.001f)]
         public float DarknessThreshold
         {
             get => GetNodeData<TtThisNodeData>().mShadingStruct.DarknessThreshold;

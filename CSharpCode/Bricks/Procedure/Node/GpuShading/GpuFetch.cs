@@ -5,7 +5,7 @@ using EngineNS.Graphics.Pipeline;
 
 namespace EngineNS.Bricks.Procedure.Node.GpuShading
 {
-    [Bricks.CodeBuilder.ContextMenu("GpuFetch", "PGC\\GpuFetch", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("GpuFetch", "PGC\\GpuFetch", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtGpuFetchNode : Graphics.Pipeline.Common.TtEndingNode
     {
         public Graphics.Pipeline.TtRenderGraphPin SrcPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInput("Src", NxRHI.EBufferType.BFT_SRV);

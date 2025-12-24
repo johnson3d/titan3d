@@ -40,8 +40,8 @@ namespace EngineNS.UI.Controls
 
         float mPercent = 0.0f;
         [BindProperty, Rtti.Meta, Category("Progress")]
-        [EGui.Controls.PropertyGrid.PGValueRange(0, 1)]
-        [EGui.Controls.PropertyGrid.PGValueChangeStep(0.01f)]
+        [EGui.Controls.PropertyGrid.TtValueRange(0, 1)]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.01f)]
         public float Percent
         {
             get => mPercent;

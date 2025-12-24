@@ -36,7 +36,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             drawcall.mCoreObject.BindPipeline(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, shadowMapNode.DepthRaster.mCoreObject);
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("CSM", "Shadow\\CSM", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("CSM", "Shadow\\CSM", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shadow.UShadowMapNode@EngineCore", "EngineNS.Graphics.Pipeline.Shadow.UShadowMapNode" })]
     public class TtShadowMapNode : TAuxRenderGraphNode<TtShadowMapNode>
     {

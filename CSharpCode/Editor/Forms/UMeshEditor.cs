@@ -23,8 +23,8 @@ namespace EngineNS.Editor.Forms
         public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
         [Category("Option")]
         public TtRenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
-        public EGui.Controls.PropertyGrid.PropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        public EGui.Controls.PropertyGrid.PropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
 
         public bool IsCastShadow
         {

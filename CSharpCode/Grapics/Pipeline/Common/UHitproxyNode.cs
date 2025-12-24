@@ -17,7 +17,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position};
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Hitproxy", "Hitproxy", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Hitproxy", "Hitproxy", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UHitproxyNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UHitproxyNode" })]
     public class TtHitproxyNode : TAuxRenderGraphNode<TtHitproxyNode>
     {

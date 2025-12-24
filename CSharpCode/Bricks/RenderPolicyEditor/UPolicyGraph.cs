@@ -8,9 +8,10 @@ using EngineNS.EGui.Controls.PropertyGrid;
 
 namespace EngineNS.Bricks.RenderPolicyEditor
 {
-    public partial class UPolicyNode : TtNodeBase//, EGui.Controls.PropertyGrid.IPropertyCustomization
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore", "EngineNS.Bricks.RenderPolicyEditor.UPolicyNode" })]
+    public partial class TtPolicyNode : TtNodeBase//, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
-        public UPolicyNode()
+        public TtPolicyNode()
         {
             this.Icon.Size = new Vector2(20, 20);
             TitleColor = 0xffff00ff;
@@ -103,7 +104,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         }
         public override void OnLButtonClicked(NodePin clickedPin)
         {
-            var graph = this.ParentGraph as UPolicyGraph;
+            var graph = this.ParentGraph as TtPolicyGraph;
 
             if (graph != null && graph.PolicyEditor != null)
             {
@@ -168,10 +169,12 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         //}
         //#endregion
     }
-    public class UPolicyGraph : TtNodeGraph
+
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.RenderPolicyEditor.UPolicyGraph@EngineCore", "EngineNS.Bricks.RenderPolicyEditor.UPolicyGraph" })]
+    public class TtPolicyGraph : TtNodeGraph
     {
         public const string RGDEditorKeyword = "RDG";
-        public UPolicyGraph()
+        public TtPolicyGraph()
         {
             PolicyType = Rtti.TtTypeDesc.TypeOf(typeof(Graphics.Pipeline.TtDeferredPolicyBase));
             UpdateCanvasMenus();
@@ -260,17 +263,17 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                         else
                         {
                             parentMenu.AddMenuItem(menuName, att.FilterStrings, null,
-                                (TtMenuItem item, object sender) =>
+                                (TtMenuItem.FMenuAction)((TtMenuItem item, object sender) =>
                                 {
-                                    var node = new UPolicyNode();
+                                    var node = new TtPolicyNode();
                                     var rgNode = Rtti.TtTypeDescManager.CreateInstance(i) as Graphics.Pipeline.TtRenderGraphNode;
                                     //rgNode.RenderGraph = this;
                                     rgNode.InitNodePins();
                                     node.InitNode(rgNode);
                                     node.Name = rgNode.Name;
                                     node.Position = PopMenuPosition;
-                                    this.AddNode(node);
-                                });
+                                    this.AddNode((TtNodeBase)node);
+                                }));
                         }
                     }
                 }

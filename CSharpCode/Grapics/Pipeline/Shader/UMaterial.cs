@@ -46,7 +46,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial@EngineCore" })]
     [TtMaterial.MaterialImport]
     [IO.AssetCreateMenu(MenuName = "Graphics/Material")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtMaterial : IO.BaseSerializer, IO.IAsset, IShaderCodeProvider
     {
         public const string AssetExt = ".material";
@@ -734,7 +734,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #endregion
         #region Texture
         [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial.NameRNamePair@EngineCore" })]
-        [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+        [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
         public class NameRNamePair : IO.BaseSerializer
         {
             public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
@@ -819,7 +819,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #endregion
         #region Sampler
         [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair@EngineCore" })]
-        [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+        [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
         public class NameSamplerStateDescPair : IO.BaseSerializer
         {
             public NameSamplerStateDescPair()
@@ -904,7 +904,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #endregion
         #region UniformVar
         [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial.NameValuePair@EngineCore" })]
-        [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+        [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
         public class NameValuePair : IO.BaseSerializer
         {
             public override void OnPreRead(object tagObject, object hostObject, bool fromXml)

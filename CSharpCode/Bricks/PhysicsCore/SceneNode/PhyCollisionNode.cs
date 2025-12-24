@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace EngineNS.Bricks.PhysicsCore.SceneNode
 {
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
 
     //only contians one shape
     public class TtPhyCollisionNode : GamePlay.Scene.TtLightWeightNodeBase

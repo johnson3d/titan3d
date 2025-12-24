@@ -83,7 +83,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("SunShaftDepthThreshole", "Post\\SunShaftDepthThreshole", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("SunShaftDepthThreshole", "Post\\SunShaftDepthThreshole", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtSunShaftDepthThresholeNode : TAuxSceenSpaceNode<TtSunShaftDepthThresholeNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
@@ -116,8 +116,8 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         FSunShaftStruct mSunShaftStruct = new FSunShaftStruct();
         [Category("Option")]
         [Rtti.Meta("")]
-        [EGui.Controls.PropertyGrid.PGValueRange(0, 1)]
-        [EGui.Controls.PropertyGrid.PGValueChangeStep(0.001f)]
+        [EGui.Controls.PropertyGrid.TtValueRange(0, 1)]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.001f)]
         public float DepthThreshole
         {
             get => mSunShaftStruct.DepthThreshole;
@@ -125,8 +125,8 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
         [Category("Option")]
         [Rtti.Meta("")]
-        [EGui.Controls.PropertyGrid.PGValueRange(0, 32)]
-        [EGui.Controls.PropertyGrid.PGValueChangeStep(0.1f)]
+        [EGui.Controls.PropertyGrid.TtValueRange(0, 32)]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.1f)]
         public float LumThreshold
         {
             get => mSunShaftStruct.LumThreshold;
@@ -222,7 +222,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("SunShaftRadialBlur", "Post\\SunShaftRadialBlur", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("SunShaftRadialBlur", "Post\\SunShaftRadialBlur", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtSunShaftRadialBlurNode : TAuxSceenSpaceNode<TtSunShaftRadialBlurNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
@@ -255,8 +255,8 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         
         [Category("Option")]
         [Rtti.Meta("")]
-        [EGui.Controls.PropertyGrid.PGValueRange(0, 1)]
-        [EGui.Controls.PropertyGrid.PGValueChangeStep(0.001f)]
+        [EGui.Controls.PropertyGrid.TtValueRange(0, 1)]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.001f)]
         public float BlurDecay
         {
             get => mSunShaftStruct.BlurDecay;
@@ -267,8 +267,8 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
         [Category("Option")]
         [Rtti.Meta("")]
-        [EGui.Controls.PropertyGrid.PGValueRange(0, 32)]
-        [EGui.Controls.PropertyGrid.PGValueChangeStep(0.1f)]
+        [EGui.Controls.PropertyGrid.TtValueRange(0, 32)]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.1f)]
         public Vector2 BlurRadius
         {
             get => new Vector2(mSunShaftStruct.BlurRadius4.X, mSunShaftStruct.BlurRadius4.Y);

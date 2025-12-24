@@ -106,7 +106,7 @@ namespace EngineNS.Graphics.Pipeline
             return Hash64.FromData((byte*)data, sizeof(int) * size);
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("GpuCulling", "Culling\\GpuCulling", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("GpuCulling", "Culling\\GpuCulling", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtGpuCullingNode : TAuxRenderGraphNode<TtGpuCullingNode>
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);

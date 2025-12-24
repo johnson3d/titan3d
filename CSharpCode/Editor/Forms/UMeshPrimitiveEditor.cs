@@ -153,8 +153,8 @@ namespace EngineNS.Editor.Forms
 
         public Graphics.Mesh.TtMeshPrimitives Mesh;
         public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
-        public EGui.Controls.PropertyGrid.PropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        public EGui.Controls.PropertyGrid.PropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         EngineNS.GamePlay.Scene.TtMeshNode mCurrentMeshNode;
         //EngineNS.GamePlay.Scene.TtMeshNode mArrowMeshNode;
         float mCurrentMeshRadius = 1.0f;

@@ -7,7 +7,7 @@ using System.ComponentModel;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtViewportSlate : IEventProcessor, IDisposable
     {
         public TtViewportSlate()

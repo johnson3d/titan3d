@@ -8,7 +8,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    [Bricks.CodeBuilder.ContextMenu("AvgBrightness", "AvgBrightness", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("AvgBrightness", "AvgBrightness", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UAvgBrightnessNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UAvgBrightnessNode" })]
     public class TtAvgBrightnessNode : TAuxRenderGraphNode<TtAvgBrightnessNode>
     {

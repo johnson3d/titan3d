@@ -2,7 +2,7 @@
 {
     public class TtDetialsEditPanel
     {
-        public EGui.Controls.PropertyGrid.PropertyGrid PGMember = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid PGMember = new EGui.Controls.PropertyGrid.TtPropertyGrid();
 
     }
 }

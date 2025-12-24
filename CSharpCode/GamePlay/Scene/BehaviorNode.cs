@@ -28,7 +28,7 @@ namespace EngineNS.GamePlay.Scene
     }
     [TtBehavior.Import]
     [IO.AssetCreateMenu(MenuName = "Script/Behavior")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtBehavior : IO.BaseSerializer, IO.IAsset
     {
         public const string AssetExt = ".cs";

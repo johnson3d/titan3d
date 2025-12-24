@@ -22,8 +22,8 @@ namespace EngineNS.Editor.Forms
 
         public Graphics.Pipeline.Shader.TtMaterialInstance Material;
         public Editor.TtPreviewViewport PreviewViewport { get; set; } = new Editor.TtPreviewViewport();
-        public EGui.Controls.PropertyGrid.PropertyGrid MaterialPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        public EGui.Controls.PropertyGrid.PropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid MaterialPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public UMaterialInstanceEditorRecorder ActionRecorder = new UMaterialInstanceEditorRecorder();
         public TtRenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
         GamePlay.Scene.TtMeshNode PreviewNode;

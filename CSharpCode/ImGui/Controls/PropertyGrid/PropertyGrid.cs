@@ -7,7 +7,7 @@ using EngineNS;
 
 namespace EngineNS.EGui.Controls.PropertyGrid
 {
-    public partial class PropertyGrid
+    public partial class TtPropertyGrid
     {
         //List<object> mTargetObjects;
         //public List<object> TargetObjects
@@ -67,7 +67,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             public object Value;
             public object ObjectInstance;
             public float RowHeight;
-            public Controls.PropertyGrid.PropertyGrid HostPropertyGrid;
+            public Controls.PropertyGrid.TtPropertyGrid HostPropertyGrid;
             public bool Readonly;
             public bool Expand;
             public ImGuiTreeNodeFlags_ Flags;
@@ -280,9 +280,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public virtual object GetValue(object arg) { return null; }
     }
 
-    public class PGTypeEditorManager : TtModule<TtEngine>
+    public class TtPGTypeEditorManager : TtModule<TtEngine>
     {
-        public PGTypeEditorManager()
+        public TtPGTypeEditorManager()
         {
         }
 
@@ -610,6 +610,6 @@ namespace EngineNS
 {
     public partial class TtEngine
     {
-        public EngineNS.EGui.Controls.PropertyGrid.PGTypeEditorManager PGTypeEditorManagerInstance { get; } = new EGui.Controls.PropertyGrid.PGTypeEditorManager();
+        public EngineNS.EGui.Controls.PropertyGrid.TtPGTypeEditorManager PGTypeEditorManagerInstance { get; } = new EGui.Controls.PropertyGrid.TtPGTypeEditorManager();
     }
 }

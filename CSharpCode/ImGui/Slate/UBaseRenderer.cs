@@ -1,12 +1,11 @@
 ﻿using EngineNS.Support;
-using NPOI.SS.Util;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EngineNS.EGui.Slate
 {
-    public class UBaseRenderer
+    public class TtBaseRenderer
     {
         public Graphics.Pipeline.Shader.TtEffect SlateEffect;
 
@@ -14,7 +13,7 @@ namespace EngineNS.EGui.Slate
         public NxRHI.TtSampler SamplerState;
         public NxRHI.TtTexture FontTexture;
         public NxRHI.TtSrView FontSRV;
-        public async System.Threading.Tasks.Task Initialize()
+        public async Thread.Async.TtTask Initialize()
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
@@ -30,10 +29,10 @@ namespace EngineNS.EGui.Slate
                 iptDesc.mCoreObject.AddElement("COLOR", 0, EPixelFormat.PXF_R8G8B8A8_UNORM, 0, (uint)sizeof(Vector2) * 2, 0, 0);
                 //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
             }
-            iptDesc.mCoreObject.SetShaderDesc(SlateEffect.DescVS.mCoreObject);
+            iptDesc.SetShaderDesc(SlateEffect.DescVS);
             InputLayout = TtEngine.Instance.GfxDevice.RenderContext.CreateInputLayout(iptDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
 
-            SlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
+            SlateEffect.ShaderEffect.BindInputLayout(InputLayout);
 
             var splDesc = new NxRHI.FSamplerDesc();
             splDesc.SetDefault();

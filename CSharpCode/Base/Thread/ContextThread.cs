@@ -95,14 +95,21 @@ namespace EngineNS.Thread
         }
         public delegate void FOnThreadTick(TtContextThread ctx);
         public FOnThreadTick TickAction = null;
-        public virtual bool StartThread(string name, FOnThreadTick action)
+        public virtual bool StartThread(string name, FOnThreadTick action, int stackSize = -1)
         {
             if (mIsRun)
                 return false;
             Name = name;
             mIsRun = true;
             mIsFinished = false;
-            mThread = new System.Threading.Thread(ThreadMain);
+            if (stackSize<0)
+            {
+                mThread = new System.Threading.Thread(ThreadMain);
+            }
+            else
+            {
+                mThread = new System.Threading.Thread(ThreadMain, stackSize);
+            }
             mThread.Name = name;
             TickAction = action;
             mThread.Start();

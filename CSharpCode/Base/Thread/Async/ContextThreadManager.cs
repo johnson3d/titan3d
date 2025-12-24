@@ -10,6 +10,22 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Thread.Async
 {
+    [IO.TtConfig(Path = "thead.jscfg")]
+    public class TtThreadConfig : IO.IConfig
+    {
+        [Rtti.Meta("")]
+        public int PoolStackSize { get; set; } = -1;
+        [Rtti.Meta("")]
+        public int LogicStackSize { get; set; } = -1;
+        [Rtti.Meta("")]
+        public int RenderStackSize { get; set; } = -1;
+        [Rtti.Meta("")]
+        public int AsyncIOStackSize { get; set; } = -1;
+        [Rtti.Meta("")]
+        public int PhysicsStackSize { get; set; } = -1;
+        [Rtti.Meta("")]
+        public int AsyncEditorStackSize { get; set; } = -1;
+    }
     public enum EAsyncTarget
     {
         AsyncIO,
@@ -439,7 +455,7 @@ namespace EngineNS.Thread.Async
                 return ContextPools.Length;
             }
         }
-        public void StartPools(int count)
+        public void StartPools(int count, Thread.Async.TtThreadConfig cfg)
         {
             if (count == -1)
             {
@@ -455,7 +471,7 @@ namespace EngineNS.Thread.Async
             for (int i = 0; i < count; i++)
             {
                 ContextPools[i] = new TtThreadPool(i);
-                ContextPools[i].StartThread($"TPool{i}", null);
+                ContextPools[i].StartThread($"TPool{i}", null, cfg.PoolStackSize);
             }
         }
         public void StopPools()

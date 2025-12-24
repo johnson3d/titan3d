@@ -94,7 +94,7 @@ namespace EngineNS.Editor.Forms
         public Graphics.Pipeline.Shader.TtEffect SlateEffect;
         public NxRHI.TtSrView TextureSRV;
         //public NxRHI.TtSrView ShowTextureSRV;
-        public EGui.Controls.PropertyGrid.PropertyGrid TexturePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid TexturePropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         ~TtTextureViewer()
         {
             Dispose();

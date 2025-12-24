@@ -9,8 +9,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public string CtrlName;
         public object KeyData;
         public object ValueData;
-        public PropertyGrid PGKeyData = new PropertyGrid();
-        public PropertyGrid PGValueData = new PropertyGrid();
+        public TtPropertyGrid PGKeyData = new TtPropertyGrid();
+        public TtPropertyGrid PGValueData = new TtPropertyGrid();
         public EGui.Controls.UTypeSelector KeyTypeSlt = new EGui.Controls.UTypeSelector();
         public EGui.Controls.UTypeSelector ValueTypeSlt = new EGui.Controls.UTypeSelector();
         public bool CreateFinished = false;

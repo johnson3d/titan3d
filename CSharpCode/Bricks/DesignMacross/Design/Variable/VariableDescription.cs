@@ -11,7 +11,7 @@ using System.Reflection;
 namespace EngineNS.DesignMacross.Design
 {
     [OutlineElement_Leaf(typeof(TtOutlineElement_Variable))]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtVariableDescription : IVariableDescription, EGui.Controls.PropertyGrid.IPropertyCustomization, Bricks.NodeGraph.UEditableValue.IValueEditNotify
     {
         public IDescription Parent { get; set; }

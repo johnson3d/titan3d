@@ -24,7 +24,7 @@ namespace EngineNS.DesignMacross.Editor
         {
 
         }
-        public EGui.Controls.PropertyGrid.PropertyGrid PGMember = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid PGMember = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public async Thread.Async.TtTask<bool> Initialize()
         {
             DeclarationEditPanel.Initialize();

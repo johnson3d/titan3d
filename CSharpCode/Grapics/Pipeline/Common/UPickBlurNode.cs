@@ -51,7 +51,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("PickBlur", "Pick\\PickBlur", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("PickBlur", "Pick\\PickBlur", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class UPickBlurNode : TAuxSceenSpaceNode<UPickBlurNode>
     {
         public TtRenderGraphPin PickedPinIn = TtRenderGraphPin.CreateInput("Picked", NxRHI.EBufferType.BFT_SRV);

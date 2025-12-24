@@ -24,7 +24,7 @@ namespace EngineNS.Animation.Macross.BlendTree
         
     }
     [GraphElement(typeof(TtGraphElement_PoseLine))]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtPoseLineDescription : IDescription
     {
         public IDescription Parent { get; set; }

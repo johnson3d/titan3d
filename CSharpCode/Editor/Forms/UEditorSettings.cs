@@ -40,7 +40,7 @@ namespace EngineNS.Editor.Forms
         public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
-        public EGui.Controls.PropertyGrid.PropertyGrid SettingsPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid SettingsPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public unsafe void OnDraw()
         {
             if (Visible == false)

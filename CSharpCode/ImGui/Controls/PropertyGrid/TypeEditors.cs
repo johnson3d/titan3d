@@ -145,13 +145,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 float speed = 1.0f;
                 if(info.HostProperty != null)
                 {
-                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    var vR = info.HostProperty.GetAttribute<TtValueRange>();
                     if(vR != null)
                     {
                         minValue = (sbyte)vR.Min;
                         maxValue = (sbyte)vR.Max;
                     }
-                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    var vStep = info.HostProperty.GetAttribute<TtValueChangeStep>();
                     if(vStep != null)
                     {
                         speed = vStep.Step;
@@ -214,13 +214,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 float speed = 1.0f;
                 if (info.HostProperty != null)
                 {
-                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    var vR = info.HostProperty.GetAttribute<TtValueRange>();
                     if (vR != null)
                     {
                         minValue = (Int16)vR.Min;
                         maxValue = (Int16)vR.Max;
                     }
-                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    var vStep = info.HostProperty.GetAttribute<TtValueChangeStep>();
                     if (vStep != null)
                     {
                         speed = vStep.Step;
@@ -283,13 +283,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 float speed = 1.0f;
                 if (info.HostProperty != null)
                 {
-                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    var vR = info.HostProperty.GetAttribute<TtValueRange>();
                     if (vR != null)
                     {
                         minValue = (Int32)vR.Min;
                         maxValue = (Int32)vR.Max;
                     }
-                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    var vStep = info.HostProperty.GetAttribute<TtValueChangeStep>();
                     if (vStep != null)
                     {
                         speed = vStep.Step;
@@ -354,13 +354,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 float speed = 1.0f;
                 if (info.HostProperty != null)
                 {
-                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    var vR = info.HostProperty.GetAttribute<TtValueRange>();
                     if (vR != null)
                     {
                         minValue = (Int64)vR.Min;
                         maxValue = (Int64)vR.Max;
                     }
-                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    var vStep = info.HostProperty.GetAttribute<TtValueChangeStep>();
                     if (vStep != null)
                     {
                         speed = vStep.Step;
@@ -425,13 +425,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 float speed = 1.0f;
                 if (info.HostProperty != null)
                 {
-                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    var vR = info.HostProperty.GetAttribute<TtValueRange>();
                     if (vR != null)
                     {
                         minValue = (byte)vR.Min;
                         maxValue = (byte)vR.Max;
                     }
-                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    var vStep = info.HostProperty.GetAttribute<TtValueChangeStep>();
                     if (vStep != null)
                     {
                         speed = vStep.Step;
@@ -496,13 +496,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 float speed = 1.0f;
                 if (info.HostProperty != null)
                 {
-                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    var vR = info.HostProperty.GetAttribute<TtValueRange>();
                     if (vR != null)
                     {
                         minValue = (UInt16)vR.Min;
                         maxValue = (UInt16)vR.Max;
                     }
-                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    var vStep = info.HostProperty.GetAttribute<TtValueChangeStep>();
                     if (vStep != null)
                     {
                         speed = vStep.Step;
@@ -568,13 +568,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 float speed = 1.0f;
                 if (info.HostProperty != null)
                 {
-                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    var vR = info.HostProperty.GetAttribute<TtValueRange>();
                     if (vR != null)
                     {
                         minValue = (UInt32)vR.Min;
                         maxValue = (UInt32)vR.Max;
                     }
-                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    var vStep = info.HostProperty.GetAttribute<TtValueChangeStep>();
                     if (vStep != null)
                     {
                         speed = vStep.Step;
@@ -639,13 +639,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 float speed = 1.0f;
                 if (info.HostProperty != null)
                 {
-                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    var vR = info.HostProperty.GetAttribute<TtValueRange>();
                     if (vR != null)
                     {
                         minValue = (UInt64)vR.Min;
                         maxValue = (UInt64)vR.Max;
                     }
-                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    var vStep = info.HostProperty.GetAttribute<TtValueChangeStep>();
                     if (vStep != null)
                     {
                         speed = vStep.Step;
@@ -711,18 +711,18 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 string format = "%.6f";
                 if (info.HostProperty != null)
                 {
-                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    var vR = info.HostProperty.GetAttribute<TtValueRange>();
                     if (vR != null)
                     {
                         minValue = (float)vR.Min;
                         maxValue = (float)vR.Max;
                     }
-                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    var vStep = info.HostProperty.GetAttribute<TtValueChangeStep>();
                     if (vStep != null)
                     {
                         speed = vStep.Step;
                     }
-                    var vFormat = info.HostProperty.GetAttribute<PGValueFormat>();
+                    var vFormat = info.HostProperty.GetAttribute<TtValueFormat>();
                     if(vFormat != null)
                     {
                         format = vFormat.Format;
@@ -788,16 +788,16 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 string format = "%.6f";
                 if (info.HostProperty != null)
                 {
-                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    var vR = info.HostProperty.GetAttribute<TtValueRange>();
                     if (vR != null)
                     {
                         minValue = (double)vR.Min;
                         maxValue = (double)vR.Max;
                     }
-                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    var vStep = info.HostProperty.GetAttribute<TtValueChangeStep>();
                     if (vStep != null)
                         speed = vStep.Step;
-                    var vFormat = info.HostProperty.GetAttribute<PGValueFormat>();
+                    var vFormat = info.HostProperty.GetAttribute<TtValueFormat>();
                     if (vFormat != null)
                         format = vFormat.Format;
                 }
@@ -1099,7 +1099,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ImGuiAPI.PushID(info.Name);
                 ImGuiAPI.AlignTextToFramePadding();
                 var flags = info.Flags;
-                if (PropertyGrid.IsLeafTreeNode(obj, null))
+                if (TtPropertyGrid.IsLeafTreeNode(obj, null))
                     flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
                 var treeNodeRet = ImGuiAPI.TreeNodeEx(name, flags, name);
                 ImGuiAPI.TableNextColumn();
@@ -1124,7 +1124,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         HostProperty = info.HostProperty,
                     };
                     object newValue;
-                    var changed = PropertyGrid.DrawPropertyGridItem(ref elementEditorInfo, out newValue);
+                    var changed = TtPropertyGrid.DrawPropertyGridItem(ref elementEditorInfo, out newValue);
                     if (changed && !info.Readonly)
                     {
                         lst.SetValue(newValue, i);
@@ -1155,7 +1155,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 var listOpAtt = info.HostProperty.GetAttribute<PGListOperationCallbackAttribute>();
-                var baseTypeAtt = info.HostProperty.GetAttribute<PGBaseType>();
+                var baseTypeAtt = info.HostProperty.GetAttribute<TtBaseType>();
                 //if (info.Readonly == false)
                 {
                     //ImGuiAPI.SameLine(0, -1);
@@ -1285,7 +1285,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     ImGuiAPI.SameLine(0, -1);
                 }
                 var flags = info.Flags;
-                if (PropertyGrid.IsLeafTreeNode(obj, null))
+                if (TtPropertyGrid.IsLeafTreeNode(obj, null))
                     flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
                 var treeNodeRet = ImGuiAPI.TreeNodeEx(name, flags, name);
                 ImGuiAPI.TableSetColumnIndex(1);
@@ -1310,7 +1310,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     };
                     object newValue;
                     listOpAtt?.OnPreValueChanged(i, obj, info.ObjectInstance);
-                    var changed = PropertyGrid.DrawPropertyGridItem(ref elementEditorInfo, out newValue);
+                    var changed = TtPropertyGrid.DrawPropertyGridItem(ref elementEditorInfo, out newValue);
                     if (changed && !info.Readonly)
                     {
                         lst[i] = newValue;
@@ -1446,7 +1446,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     ImGuiAPI.SameLine(0, -1);
                 }
                 var flags = info.Flags;
-                if (PropertyGrid.IsLeafTreeNode(iter.Value, null))
+                if (TtPropertyGrid.IsLeafTreeNode(iter.Value, null))
                     flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
                 ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in tempPadding);
                 var treeNodeRet = ImGuiAPI.TreeNodeEx(name, flags, name);
@@ -1464,7 +1464,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     HostProperty = info.HostProperty,
                 };
                 object newKeyValue;
-                if(PropertyGrid.DrawPropertyGridItem(ref keyEditorInfo, out newKeyValue))
+                if(TtPropertyGrid.DrawPropertyGridItem(ref keyEditorInfo, out newKeyValue))
                 {
                     dict[newKeyValue] = iter.Value;
                     dict.Remove(iter.Key);
@@ -1492,7 +1492,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     HostProperty = info.HostProperty,
                 };
                 object newValue;
-                if(PropertyGrid.DrawPropertyGridItem(ref valueEditorInfo, out newValue) && !info.Readonly)
+                if(TtPropertyGrid.DrawPropertyGridItem(ref valueEditorInfo, out newValue) && !info.Readonly)
                 {
                     dict[iter.Key] = newValue;
                     itemValueChanged = true;

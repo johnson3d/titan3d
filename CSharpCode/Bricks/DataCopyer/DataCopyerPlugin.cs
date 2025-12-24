@@ -951,6 +951,8 @@ namespace EngineNS.Bricks.DataCopyer
                 creator.AddLine($"var srcObj = obj as {meta.ClassType.FullName.Replace('+', '.')};", ref code);
                 foreach (var j in i.Propertys)
                 {
+                    if (j.FieldType==null)
+                        continue;
                     if (j.PropInfo != null)
                     {
                         var attr = j.PropInfo.GetCustomAttribute<Rtti.MetaAttribute>();

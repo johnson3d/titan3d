@@ -189,9 +189,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
         #region DrawUI
         //public UMaterialOutput MaterialOutput = null;
-        public EGui.Controls.PropertyGrid.PropertyGrid NodePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        public EGui.Controls.PropertyGrid.PropertyGrid MaterialPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        public EGui.Controls.PropertyGrid.PropertyGrid PreviewPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid NodePropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid MaterialPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid PreviewPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public Editor.TtPreviewViewport PreviewViewport;
         public Bricks.NodeGraph.TtGraphRenderer GraphRenderer = new Bricks.NodeGraph.TtGraphRenderer();
         public TtMaterialFunctionGraph MaterialGraph { get; } = new TtMaterialFunctionGraph();

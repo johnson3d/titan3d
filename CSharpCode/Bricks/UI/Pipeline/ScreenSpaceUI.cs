@@ -26,8 +26,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             };
         }
     }
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    [Bricks.CodeBuilder.ContextMenu("ScreenUI", "ScreenUI", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [Bricks.CodeBuilder.ContextMenu("ScreenUI", "ScreenUI", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public partial class TtScreenSpaceUINode : TAuxSceenSpaceNode<TtScreenSpaceUINode>
     {
         public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);

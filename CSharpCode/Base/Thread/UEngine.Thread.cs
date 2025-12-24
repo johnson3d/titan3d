@@ -101,17 +101,22 @@ namespace EngineNS
             ThreadRHI.FromCurrent("RHI");
             ThreadMain.FromCurrent("Main");
 
-            ThreadLogic.StartThread("Logic", null);
-            ThreadRender.StartThread("Render", null);
-            ThreadAsync.StartThread("AsyncIO", null);
-            ThreadPhysics.StartThread("Physics", null);
+            var cfg = IO.TtConfigManager.TryLoad(typeof(Thread.Async.TtThreadConfig), null, null) as Thread.Async.TtThreadConfig;
+            if (cfg == null)
+            {
+                cfg = new Thread.Async.TtThreadConfig();
+            }
+            ThreadLogic.StartThread("Logic", null, cfg.LogicStackSize);
+            ThreadRender.StartThread("Render", null, cfg.RenderStackSize);
+            ThreadAsync.StartThread("AsyncIO", null, cfg.AsyncIOStackSize);
+            ThreadPhysics.StartThread("Physics", null, cfg.PhysicsStackSize);
 
             if (PlayMode != EPlayMode.Game)
             {
-                ThreadAsyncEditor.StartThread("AsyncEditor", null);
+                ThreadAsyncEditor.StartThread("AsyncEditor", null, cfg.AsyncEditorStackSize);
             }
 
-            EventPoster.StartPools(Config.NumOfThreadPool);
+            EventPoster.StartPools(Config.NumOfThreadPool, cfg);
         }
         private void StopSystemThreads()
         {
@@ -146,7 +151,7 @@ namespace EngineNS
             if (PlayMode != EPlayMode.Game)
                 ThreadAsyncEditor.StartThread("AsyncEditor", null);
 
-            EventPoster.StartPools(Config.NumOfThreadPool);
+            EventPoster.StartPools(Config.NumOfThreadPool, TtEngine.Instance.ConfigManager.GetConfig<Thread.Async.TtThreadConfig>());
         }
         public void StartFrame()
         {

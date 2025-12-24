@@ -22,7 +22,7 @@ namespace EngineNS.Editor
         ImGuiWindowClass mDockKeyClass;
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
-        public EGui.Controls.PropertyGrid.PropertyGrid VersionPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid VersionPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public Rtti.TtMetaVersion CurrentMetaVersion;
         public void Dispose()
         {

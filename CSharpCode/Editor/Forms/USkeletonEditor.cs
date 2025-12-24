@@ -141,7 +141,7 @@ namespace EngineNS.Editor.Forms
         }
         public Animation.Asset.TtSkeletonAsset SkeletonAsset;
         public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
-        public EGui.Controls.PropertyGrid.PropertyGrid AnimationClipPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid AnimationClipPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         ~TtSkeletonEditor()
         {
             Dispose();

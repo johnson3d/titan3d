@@ -20,7 +20,7 @@ namespace EngineNS.Editor.Forms
         }
         public TtBlendSpace2D BlendSpace;
         public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
-        public EGui.Controls.PropertyGrid.PropertyGrid AnimationPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid AnimationPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         ~TtAnimationBlendSpaceEditor()
         {
             Dispose();
@@ -255,7 +255,7 @@ namespace EngineNS.Editor.Forms
             await TtBlendSpaceAnimPreviewNode.AddBlendSpace2DAnimPreviewNode(PreviewViewport.World, mCurrentMeshNode, sapnd,
                             EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtIdentityPlacement));
         }
-        [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+        [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
         public class TtAnimationBlendSpacePreview
         {
             [Browsable(false)]

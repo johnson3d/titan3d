@@ -34,7 +34,12 @@ namespace ProjectCooker.Command
             System.Console.WriteLine("End AssetType");
 
             var assetTypes = GetArguments(args, Param_Types);
-            
+
+            if (TtEngine.Instance.DynConfigData.TryGetConfig<string>("AssetType", out var cfgName))
+            {
+                assetTypes = cfgName.Split('+');
+            }
+
             if (assetTypes == null)
             {
                 //throw new Exception("AssetType error");

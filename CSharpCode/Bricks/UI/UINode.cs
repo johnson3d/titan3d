@@ -13,7 +13,7 @@ namespace EngineNS.UI
 {
     [Bricks.CodeBuilder.ContextMenu("UINode,UI", "Graphics\\UINode", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtUINode.TtUINodeData), DefaultNamePrefix = "UI")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtUINode : TtGpuSceneNode
     {
         public override void Dispose()

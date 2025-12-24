@@ -331,7 +331,7 @@ namespace EngineNS.Bricks.NodeGraph
     {
         int mSelectedIndex = -1;
         List<UnionNodePropertyData> mEditingDatas = new List<UnionNodePropertyData>();
-        EGui.Controls.PropertyGrid.PropertyGrid mPGMember = new EGui.Controls.PropertyGrid.PropertyGrid();
+        EGui.Controls.PropertyGrid.TtPropertyGrid mPGMember = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         IUnionNode mUnionNode;
 
         public async Task<bool> Initialize()

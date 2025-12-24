@@ -11,12 +11,12 @@ namespace EngineNS.Editor.Forms
         EngineNS.GamePlay.Scene.TtMeshNode mArrowMeshNode;
         public float mArrowRadius = 1.0f;
         [System.ComponentModel.Category("Light")]
-        [EGui.Controls.PropertyGrid.PGValueRange(-3.1416f, 3.1416f)]
-        [EGui.Controls.PropertyGrid.PGValueChangeStep(3.1416f / 100.0f)]
+        [EGui.Controls.PropertyGrid.TtValueRange(-3.1416f, 3.1416f)]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(3.1416f / 100.0f)]
         public float Yaw { get; set; } = 0;
         [System.ComponentModel.Category("Light")]
-        [EGui.Controls.PropertyGrid.PGValueRange(-3.1416f, 3.1416f)]
-        [EGui.Controls.PropertyGrid.PGValueChangeStep(3.1416f / 100.0f)]
+        [EGui.Controls.PropertyGrid.TtValueRange(-3.1416f, 3.1416f)]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(3.1416f / 100.0f)]
         public float Roll { get; set; } = /*-1.178f*/-0.698f;
 
         private GamePlay.TtDirectionLight EnvDirLight = null; 

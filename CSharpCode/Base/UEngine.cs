@@ -39,7 +39,7 @@ namespace EngineNS
         QueueNextFrame,
     }
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.UEngineConfig@EngineCore" })]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtEngineConfig
     {
         public const int MajorVersion = 1;
@@ -200,9 +200,6 @@ namespace EngineNS
         public Bricks.Network.RPC.EAuthority DefaultAuthority { get; set; } = Bricks.Network.RPC.EAuthority.Server;
         [Rtti.Meta("")]
         [Category("Option")]
-        public List<TtGlobalConfig> GlobalConfigs { get; set; } = new List<TtGlobalConfig>();
-        [Rtti.Meta("")]
-        [Category("Option")]
         public RName EditorFont { get; set; }
         [Rtti.Meta("")]
         [Category("Option")]
@@ -315,6 +312,7 @@ namespace EngineNS
         {
             mInstance = engine;
             engine.Config = new TtEngineConfig();
+            engine.InitConfigs(cfgFile);
             engine.InitTypes(cfgFile, bNatvieMemory, false);
         }
         internal static string EngineSourceFilePathAOT = null;
@@ -351,7 +349,7 @@ namespace EngineNS
         #endregion
 
         public bool IsCLRProfiling = false;
-        public void InitTypes(string cfgFile, bool bNatvieMemory, bool bLoadPluginModuel)
+        public void InitConfigs(string cfgFile)
         {
             if (cfgFile == null)
                 cfgFile = FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) + "EngineConfigDX11.jscfg";
@@ -378,6 +376,22 @@ namespace EngineNS
                 System.Diagnostics.Debug.Assert(false);
             }
 
+            if (Config == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Load failed: {cfgFile}");
+                Config = new TtEngineConfig();
+                Config.DefaultTexture = RName.GetRName("texture/checkboard.txpic", RName.ERNameType.Engine);
+                Config.DefaultMaterial = RName.GetRName("material/SysDft.material", RName.ERNameType.Engine);
+                Config.DefaultMaterialInstance = RName.GetRName("material/box_wite.uminst", RName.ERNameType.Game);
+                Config.MainWindowType = Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Editor.TtMainEditorApplication));
+                Config.MainRPolicyName = RName.GetRName("utest/deferred.rpolicy", RName.ERNameType.Game);
+                Config.SimpleRPolicyName = RName.GetRName("graphics/deferred_simple.rpolicy", RName.ERNameType.Engine);
+                Config.SaveConfig(cfgFile);
+            }
+        }
+        public void InitTypes(string cfgFile, bool bNatvieMemory, bool bLoadPluginModuel)
+        {
             var clrMgr = CoreCLRManager.GetInstance();
             clrMgr.PauseLog = true;
             clrMgr.Flags = 0xffffffff;//(uint)((1 << (int)EClrLogStringType.ObjectAlloc) | (1 << (int)EClrLogStringType.ObjectsAllocdByClass));
@@ -445,38 +459,14 @@ namespace EngineNS
         
         public async System.Threading.Tasks.Task<bool> PreInitEngine(string cfgFile, bool bNatvieMemory)
         {
+            InitConfigs(cfgFile);
             StartSystemThreads();
 
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
             InitTypes(cfgFile, bNatvieMemory, true);
+            this.ConfigManager.Initialize();
 
             EngineNS.UCs2CppBase.InitializeNativeCoreProvider();
-
-            if (Config == null)
-            {
-                System.Diagnostics.Debug.Assert(false);
-                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Load failed: {cfgFile}");
-                Config = new TtEngineConfig();
-                Config.DefaultTexture = RName.GetRName("texture/checkboard.txpic", RName.ERNameType.Engine);
-                Config.DefaultMaterial = RName.GetRName("material/SysDft.material", RName.ERNameType.Engine);
-                Config.DefaultMaterialInstance = RName.GetRName("material/box_wite.uminst", RName.ERNameType.Game);
-                Config.MainWindowType = Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Editor.TtMainEditorApplication));
-                Config.MainRPolicyName = RName.GetRName("utest/deferred.rpolicy", RName.ERNameType.Game);
-                Config.SimpleRPolicyName = RName.GetRName("graphics/deferred_simple.rpolicy", RName.ERNameType.Engine);                
-                Config.GlobalConfigs.Add(new TtGlobalConfig()
-                {
-                    Name = "RenderDocCallStacks",
-                    Value = 1.ToString(),
-                    ValueType = NxRHI.EShaderVarType.SVT_Int
-                });
-                Config.GlobalConfigs.Add(new TtGlobalConfig()
-                {
-                    Name = "RenderDocSaveAllInitials",
-                    Value = 1.ToString(),
-                    ValueType = NxRHI.EShaderVarType.SVT_Int
-                });
-                Config.SaveConfig(cfgFile);
-            }
 
             #region DynConfigData
             this.DynConfigData.LoadConfigData(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "DynConfigData.dcd");
@@ -496,17 +486,10 @@ namespace EngineNS
             }
             Config.ConfigName = $"Titan3D.{TtEngineConfig.MajorVersion}.{TtEngineConfig.MiniVersion} [{IO.TtFileManager.GetPureName(cfgFile)}]";
 
-            this.ConfigManager.Initialize();
             #endregion
 
             CoreSDK.SetOnGpuDeviceRemovedCallBack(OnGpuDeviceRemoved);
             
-            //Config.UseRenderDoc = useRenderDoc;
-            foreach(var i in Config.GlobalConfigs)
-            {
-                i.SetToGlobalConfig();
-            }
-
             this.DataCopyer.FindCopyer(Rtti.TtTypeDesc.TypeStr(typeof(TtEngineConfig)));
 
             var ModuleStart = Support.TtTime.HighPrecision_GetTickCount();

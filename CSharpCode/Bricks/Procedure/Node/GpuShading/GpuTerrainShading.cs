@@ -45,7 +45,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             }
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("IncWater", "PGC\\Erosion\\IncWater", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("IncWater", "PGC\\Erosion\\IncWater", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtErosionIncWaterNode : TAuxRenderGraphNode<TtErosionIncWaterNode>
     {
         public Graphics.Pipeline.TtRenderGraphPin WaterPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Water", false, EPixelFormat.PXF_R32_FLOAT, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
@@ -166,7 +166,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             }
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Height2Flow", "PGC\\Height2Flow", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Height2Flow", "PGC\\Height2Flow", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtHeigh2FlowMapNode : TAuxRenderGraphNode<TtHeigh2FlowMapNode>
     {
         public Graphics.Pipeline.TtRenderGraphPin HeightPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Height", NxRHI.EBufferType.BFT_SRV);
@@ -265,7 +265,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("WaterBasin", "PGC\\WaterBasin", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("WaterBasin", "PGC\\WaterBasin", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtWaterBasinNode : TAuxRenderGraphNode<TtWaterBasinNode>
     {
         public Graphics.Pipeline.TtRenderGraphPin HeightPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInput("Height", NxRHI.EBufferType.BFT_SRV);

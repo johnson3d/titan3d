@@ -555,7 +555,7 @@ namespace EngineNS.Editor
                 );
             }
                 //var viewPort = ImGuiAPI.GetMainViewport();
-                var inspector = new EGui.Controls.PropertyGrid.PropertyGrid();
+                var inspector = new EGui.Controls.PropertyGrid.TtPropertyGrid();
                 inspector.PGName = "MeshEditor_PG";
                 await inspector.Initialize();
                 inspector.SearchInfo = "Search Details";

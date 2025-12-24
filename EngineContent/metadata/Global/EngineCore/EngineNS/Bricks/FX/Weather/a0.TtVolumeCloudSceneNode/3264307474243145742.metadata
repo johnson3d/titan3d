@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3264307474243145742 Type="EngineNS.Bricks.FX.Weather.TtVolumeCloudSceneNode@EngineCore">
+  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <NoiseGen Type="EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator@EngineCore" Order="0" />
+  <Parent Type="EngineNS.GamePlay.Scene.TtNode@EngineCore" Order="0" />
+  <ParentScene Type="EngineNS.GamePlay.Scene.TtScene@EngineCore" Order="0" />
+  <RootNode Type="EngineNS.GamePlay.Scene.TtNode@EngineCore" Order="0" />
+</Hash_3264307474243145742>

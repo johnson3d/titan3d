@@ -16,7 +16,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public TtRenderPolicyAsset PolicyGraph { get; private set; }
         public TtGraphRenderer GraphRenderer { get; } = new TtGraphRenderer();
-        public EGui.Controls.PropertyGrid.PropertyGrid NodePropGrid { get; } = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid NodePropGrid { get; } = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public float LeftWidth = 0;
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
@@ -212,7 +212,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         private async System.Threading.Tasks.Task Compile()
         {
             var policy = new Graphics.Pipeline.TtRenderPolicy();
-            foreach (UPolicyNode i in PolicyGraph.PolicyGraph.Nodes)
+            foreach (TtPolicyNode i in PolicyGraph.PolicyGraph.Nodes)
             {
                 if (false == policy.RegRenderNode(i.NodeId, i.GraphNode))
                 {

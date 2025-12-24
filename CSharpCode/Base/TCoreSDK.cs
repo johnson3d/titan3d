@@ -273,33 +273,6 @@ namespace EngineNS
             return result;
         }
     }
-
-    public class TtGlobalConfig : IO.BaseSerializer
-    {
-        public TtGlobalConfig()
-        {
-            ConfigType = Rtti.TtTypeDesc.TypeOf(typeof(TtGlobalConfigVar));
-        }
-        [Rtti.Meta("")]
-        public string Name { get; set; }
-        [Rtti.Meta("")]
-        public string Value { get; set; }
-        [Rtti.Meta("")]
-        public NxRHI.EShaderVarType ValueType { get; set; } = NxRHI.EShaderVarType.SVT_Int;
-        [Rtti.Meta("")]
-        public Rtti.TtTypeDesc ConfigType { get; set; }
-        public TtGlobalConfigVar SetToGlobalConfig()
-        {
-            switch (ValueType)
-            {
-                case NxRHI.EShaderVarType.SVT_Int:
-                    return TtGlobalConfigVar.CreateConfigVar(ConfigType, Name, System.Convert.ToInt32(Value));
-                case NxRHI.EShaderVarType.SVT_Float:
-                    return TtGlobalConfigVar.CreateConfigVar(ConfigType, Name, System.Convert.ToSingle(Value));
-            }
-            return null;
-        }
-    }
 }
 
 public unsafe partial struct VNameString

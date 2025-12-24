@@ -23,7 +23,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public UHLSLCodeGenerator HlslCodeGen { get; }
         public TtCodeGeneratorBase CodeGen { get; }
         public List<UMacrossMethodGraph> Methods { get; }
-        public EGui.Controls.PropertyGrid.PropertyGrid PGMember { get; set; }
+        public EGui.Controls.PropertyGrid.TtPropertyGrid PGMember { get; set; }
         public void RemoveMethod(UMacrossMethodGraph method, bool realDelete);
         public void SetConfigUnionNode(NodeGraph.IUnionNode node);
     }

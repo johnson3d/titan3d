@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.UI.Controls.Containers
 {
-    [PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtUserControl : TtContainer, IPropertyCustomization
     {
         TtUIElement mChildElement = null;

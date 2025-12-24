@@ -9,7 +9,7 @@ namespace EngineNS.GamePlay.Scene
 {
     [Bricks.CodeBuilder.ContextMenu("Prefab", "Prefab", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtPrefabNode.TtPrefabNodeData), DefaultNamePrefix = "Prefab")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtPrefabNode : GamePlay.Scene.TtSceneActorNode, IPooledObject
     {
         public class TtPrefabNodeData : TtNodeData

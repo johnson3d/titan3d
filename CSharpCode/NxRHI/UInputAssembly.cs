@@ -14,6 +14,10 @@ namespace EngineNS.NxRHI
         {
             mCoreObject = FInputLayoutDesc.CreateInstance();
         }
+        public void SetShaderDesc(TtShaderDesc desc)
+        {
+            mCoreObject.SetShaderDesc(desc.mCoreObject);
+        }
         public void AddElement(string SemanticName,
             uint SemanticIndex,
 			EPixelFormat Format,

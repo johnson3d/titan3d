@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyGraph@EngineCore">
+<Root Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyGraph@EngineCore">
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/terrain/pgcerosion.rpolicy,f14a4349-6779-4c09-9dbb-cf23ed5f8cdf" />
   <GraphName Type="System.String@Unknown" Value="NodeGraph" />
   <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="2">
-    <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
+    <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.GpuShading.TtErosionIncWaterNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="ErosionIncWater" />
       <Name Type="System.String@Unknown" Value="ErosionIncWater" />
@@ -16,7 +16,7 @@
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
-    <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
+    <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.GpuShading.TtGpuFetchNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="GpuFetch" />
       <Name Type="System.String@Unknown" Value="GpuFetch" />

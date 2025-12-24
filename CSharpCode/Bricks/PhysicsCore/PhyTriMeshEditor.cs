@@ -22,7 +22,7 @@ namespace EngineNS.Bricks.PhysicsCore
         public TtPhyTriMesh TriMesh;
         public Graphics.Mesh.TtMaterialMesh ShowMesh;
         public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
-        public EGui.Controls.PropertyGrid.PropertyGrid TriMeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid TriMeshPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         ~UPhyTriMeshEditor()
         {
             Dispose();

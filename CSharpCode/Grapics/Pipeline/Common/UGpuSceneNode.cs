@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    [Bricks.CodeBuilder.ContextMenu("GpuScene", "GpuScene", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("GpuScene", "GpuScene", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UGpuSceneNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UGpuSceneNode" })]
     public partial class TtGpuSceneNode : TAuxRenderGraphNode<TtGpuSceneNode>
     {

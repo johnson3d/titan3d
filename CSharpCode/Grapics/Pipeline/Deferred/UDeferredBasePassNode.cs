@@ -56,7 +56,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             };
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("BassPass", "Deferred\\BassPass", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("BassPass", "Deferred\\BassPass", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.UDeferredBasePassNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.UDeferredBasePassNode" })]
     public class TtDeferredBasePassNode : Common.TtBasePassNode
     {

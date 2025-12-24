@@ -31,7 +31,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
 
     [TtBlendSpace2D.BlendSpaceCreate]
     [IO.AssetCreateMenu(MenuName = "Anim/BlendSpace")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtBlendSpace2D : TtBlendSpace
     {
         public TtBlendSpace2D() 

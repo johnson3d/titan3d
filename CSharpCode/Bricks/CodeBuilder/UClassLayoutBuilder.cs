@@ -84,7 +84,7 @@ namespace EngineNS.Bricks.CodeBuilder
             Size = packOffset + offsetTmp;
         }
 
-        public EGui.Controls.PropertyGrid.PropertyGrid LayoutPG = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid LayoutPG = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public UClassLayoutBuilder()
         {
             LayoutPG.Target = this;

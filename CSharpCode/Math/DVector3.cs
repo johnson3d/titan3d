@@ -49,18 +49,18 @@ namespace EngineNS
                     var format = "%.9lf";
                     if (info.HostProperty != null)
                     {
-                        var vR = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueRange>();
+                        var vR = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.TtValueRange>();
                         if (vR != null)
                         {
                             minValue = (double)vR.Min;
                             maxValue = (double)vR.Max;
                         }
-                        var vStep = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueChangeStep>();
+                        var vStep = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.TtValueChangeStep>();
                         if (vStep != null)
                         {
                             speed = vStep.Step;
                         }
-                        var vFormat = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueFormat>();
+                        var vFormat = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.TtValueFormat>();
                         if (vFormat != null)
                             format = vFormat.Format;
                     }

@@ -43,8 +43,8 @@ namespace EngineNS.Bricks.Procedure
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public UPgcAsset EditAsset { get; private set; }
         public TtGraphRenderer GraphRenderer { get; } = new TtGraphRenderer();
-        public EGui.Controls.PropertyGrid.PropertyGrid NodePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        public EGui.Controls.PropertyGrid.PropertyGrid GraphPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid NodePropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid GraphPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public float LeftWidth = 0;
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);

@@ -2,7 +2,7 @@
 <Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="eb95b7155dbce1b19bf43c214c22ec32e271841d00dffb9bdba38e8b05b2d089" />
+      <Hash Type="System.String@Unknown" Value="e6e4d87f953a342c1a88b47031f86fd6b3183e43998158bababaa84463e4517d" />
       <Path Type="System.String@Unknown" Value="test01.scene/test01.scene" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
@@ -21,8 +21,9 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Value="Game,tutorials/material/mesh2.ums,40cb953f-3c08-48ca-b2c2-dd84b533a087" />
+    <e_1 Value="Engine,material/gridline.material,fe431749-ed31-45b1-93d8-34462bd00922" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
 </Root>

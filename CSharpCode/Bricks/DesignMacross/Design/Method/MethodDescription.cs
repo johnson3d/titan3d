@@ -15,7 +15,7 @@ using System.ComponentModel;
 
 namespace EngineNS.DesignMacross.Design
 {
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtMethodArgumentDescription : IDescription
     {
         [Rtti.Meta, Category("Option")]
@@ -113,7 +113,7 @@ namespace EngineNS.DesignMacross.Design
 
     [Graph(typeof(TtGraph_Method))]
     [OutlineElement_Leaf(typeof(TtOutlineElement_Method))]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtMethodDescription : IMethodDescription, Bricks.NodeGraph.UEditableValue.IValueEditNotify
     {
         public IDescription Parent { get; set; }

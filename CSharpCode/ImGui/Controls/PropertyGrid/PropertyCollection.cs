@@ -1120,7 +1120,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var count = 0;
             for(int i=0; i<fields.Length; i++)
             {
-                var atts = fields[i].GetCustomAttributes(typeof(PGShowInPropertyGridAttribute), true);
+                var atts = fields[i].GetCustomAttributes(typeof(TtShowInPropertyGridAttribute), true);
                 if (atts == null || atts.Length == 0)
                     continue;
 

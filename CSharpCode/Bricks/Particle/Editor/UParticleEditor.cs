@@ -234,8 +234,8 @@ namespace EngineNS.Bricks.Particle.Editor
         #region IAssetEditor
         public RName AssetName { get; set; }
         public EngineNS.Editor.TtPreviewViewport PreviewViewport;
-        public EGui.Controls.PropertyGrid.PropertyGrid NebulaPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        public EGui.Controls.PropertyGrid.PropertyGrid NodePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid NebulaPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid NodePropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public float LeftWidth = 0;
 
         public TtParticleGraph ParticleGraph { get => NebulaParticle.ParticleGraph; }

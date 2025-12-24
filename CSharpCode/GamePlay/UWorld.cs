@@ -9,7 +9,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtWorld : IDisposable
     {
         static int mNodeAliveNumber = 0;

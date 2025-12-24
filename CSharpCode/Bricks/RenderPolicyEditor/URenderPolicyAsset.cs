@@ -144,7 +144,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             set;
         }
         [Rtti.Meta("")]
-        public UPolicyGraph PolicyGraph { get; } = new UPolicyGraph();
+        public TtPolicyGraph PolicyGraph { get; } = new TtPolicyGraph();
         public Graphics.Pipeline.TtRenderPolicy CreateRenderPolicy(TtViewportSlate viewport, string endingName = "Copy2SwapChainNode")
         {
             var typeDesc = PolicyGraph.PolicyType;
@@ -152,7 +152,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
             meta.CopyObjectMetaField(policy, this.PolicyGraph.RenderPolicy);
             policy.ViewportSlate = viewport;
-            foreach (UPolicyNode i in PolicyGraph.Nodes)
+            foreach (TtPolicyNode i in PolicyGraph.Nodes)
             {
                 if (false == policy.RegRenderNode(i.NodeId, i.GraphNode))
                 {

@@ -54,7 +54,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             //base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Gauss", "Post\\Gauss", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Gauss", "Post\\Gauss", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtGaussNode : TAuxSceenSpaceNode<TtGaussNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
@@ -233,7 +233,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("GaussAdditive", "Post\\GaussAdditive", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("GaussAdditive", "Post\\GaussAdditive", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtGaussAdditiveNode : TAuxSceenSpaceNode<TtGaussAdditiveNode>
     {
         public TtRenderGraphPin Color1PinIn = TtRenderGraphPin.CreateInput("Color1", NxRHI.EBufferType.BFT_SRV);

@@ -14,7 +14,7 @@ using static EngineNS.RName;
 namespace EngineNS.IO
 {
     //资源导入引擎的接口
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class IAssetCreateAttribute : Attribute
     {
         public virtual async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
@@ -49,7 +49,7 @@ namespace EngineNS.IO
         protected RName mDir;
         protected IAsset mAsset;
         protected string mName;
-        protected EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
+        protected EGui.Controls.PropertyGrid.TtPropertyGrid PGAsset = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         protected EGui.Controls.UTypeSelector TypeSlt = new EGui.Controls.UTypeSelector();
         protected Thread.Async.TtTask<bool> PGAssetInitTask;
         public RName GetAssetRName()
@@ -621,7 +621,7 @@ namespace EngineNS.IO
             Vector2 tpos;
             tpos.X = start.X + delta;
             tpos.Y = start.Y + delta;
-            TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.UBaseRenderer.enFont.Font_13px);
+            TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.TtBaseRenderer.enFont.Font_13px);
             cmdlist.AddText(in tpos, typeFontColor, typeName, null);
             TtEngine.Instance.GfxDevice.SlateRenderer.PopFont();
 
@@ -645,7 +645,7 @@ namespace EngineNS.IO
             var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
             tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
             tpos.Y = snapEnd.Y + 8 * scale;
-            TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.UBaseRenderer.enFont.Font_15px);
+            TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.TtBaseRenderer.enFont.Font_15px);
             cmdlist.AddText(in tpos, nameColor, name, null);
             TtEngine.Instance.GfxDevice.SlateRenderer.PopFont();
             //ImGuiAPI.PopClipRect();

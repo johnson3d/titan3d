@@ -127,7 +127,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             }
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("BassPass", "Mobile\\BasePass", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("BassPass", "Mobile\\BasePass", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtBasePassOpaque : TtBasePassShading
     {
         public TtBasePassOpaque()
@@ -142,7 +142,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             CodeName = RName.GetRName("shaders/ShadingEnv/Mobile/MobileTranslucent.cginc", RName.ERNameType.Engine);
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Forword", "Mobile\\Forword", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Forword", "Mobile\\Forword", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtMobileForwordNodeBase : Common.TtBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
@@ -164,7 +164,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("Opaque", "Mobile\\Opaque", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Opaque", "Mobile\\Opaque", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtMobileOpaqueNode : TtMobileForwordNodeBase
     {
         public TtRenderGraphPin ColorPinOut = TtRenderGraphPin.CreateOutput("Color", true, EPixelFormat.PXF_R16G16B16A16_FLOAT, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_RTV);
@@ -345,7 +345,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("Translucent", "Mobile\\Translucent", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Translucent", "Mobile\\Translucent", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     public class TtMobileTranslucentNode : Common.TtBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);

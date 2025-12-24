@@ -404,7 +404,7 @@ namespace EngineNS.EGui.UIProxy
         public static bool OnDraw(string name, in ImDrawList drawList, float thickness)
         {
             ImGuiAPI.BeginGroup();
-            TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_Bold_13px);
+            TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.TtBaseRenderer.enFont.Font_Bold_13px);
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.NamedMenuSeparatorColor);
             ImGuiAPI.Text(name);
             ImGuiAPI.PopStyleColor(1);

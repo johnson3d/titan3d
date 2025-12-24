@@ -264,7 +264,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public Guid OutputNodeId { get; set; }
         List<UNodePinDefineBase> mUserInputs = new List<UNodePinDefineBase>();
         [Rtti.Meta("")]
-        [EGui.Controls.PropertyGrid.PGBaseType(typeof(UnionPinDefine))]
+        [EGui.Controls.PropertyGrid.TtBaseType(typeof(UnionPinDefine))]
         public List<UNodePinDefineBase> UserInputs
         {
             get => mUserInputs;
@@ -276,7 +276,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         List<UNodePinDefineBase> mUserOutputs = new List<UNodePinDefineBase>();
         [Rtti.Meta("")]
-        [EGui.Controls.PropertyGrid.PGBaseType(typeof(UnionPinDefine))]
+        [EGui.Controls.PropertyGrid.TtBaseType(typeof(UnionPinDefine))]
         public List<UNodePinDefineBase> UserOutputs
         {
             get => mUserOutputs;

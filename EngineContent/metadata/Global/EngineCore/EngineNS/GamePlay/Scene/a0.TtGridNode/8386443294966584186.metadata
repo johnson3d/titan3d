@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_8386443294966584186 Type="EngineNS.GamePlay.Scene.TtGridNode@EngineCore">
+  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Parent Type="EngineNS.GamePlay.Scene.TtNode@EngineCore" Order="0" />
+  <ParentScene Type="EngineNS.GamePlay.Scene.TtScene@EngineCore" Order="0" />
+  <RenderMesh Type="EngineNS.Graphics.Mesh.TtRenderMesh@EngineCore" Order="0" />
+  <RootNode Type="EngineNS.GamePlay.Scene.TtNode@EngineCore" Order="0" />
+</Hash_8386443294966584186>

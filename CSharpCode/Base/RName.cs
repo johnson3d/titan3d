@@ -287,7 +287,7 @@ namespace EngineNS
                             HostProperty = info.HostProperty,
                         };
                         object macrossObjVal;
-                        PropertyGrid.DrawPropertyGridObjectItem(ref macrossObjInfo, out macrossObjVal);
+                        TtPropertyGrid.DrawPropertyGridObjectItem(ref macrossObjInfo, out macrossObjVal);
                     }
                 }
 

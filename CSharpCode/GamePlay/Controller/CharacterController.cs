@@ -20,7 +20,7 @@ namespace EngineNS.GamePlay.Controller
 {
     //[Bricks.CodeBuilder.ContextMenu("Movement", "Movement", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtCharacterController.TtCharacterControllerNodeData), DefaultNamePrefix = "CharacterController")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtCharacterController : TtNode, IController
     {
         public class TtCharacterControllerNodeData : TtNodeData
