@@ -380,7 +380,7 @@ namespace EngineNS.Thread
         {
             get;
         } = new Queue<Async.TtAsyncTaskStateBase>();
-        public void EnqueueContinue(Async.TtAsyncTaskStateBase evt)
+        public virtual void EnqueueContinue(Async.TtAsyncTaskStateBase evt)
         {
             System.Diagnostics.Debug.Assert(IsFinished == false);
             System.Diagnostics.Debug.Assert(evt.ContinueThread == this);
@@ -541,7 +541,7 @@ namespace EngineNS.Thread
                 {
                     lock (e.ContinueThread.ContinueEvents)
                     {
-                        e.ContinueThread.ContinueEvents.Enqueue(e);
+                        e.ContinueThread.EnqueueContinue(e);
                     }
                 }
             }

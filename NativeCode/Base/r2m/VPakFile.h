@@ -91,6 +91,7 @@ class VPackFile2Memory : public VRes2Memory
 {
 	friend class VPakFile;
 protected:
+	std::atomic<long> mPtrRef;
 	TWeakRefHandle<VPakFile>			mPakFile;
 	
 	VPakAssetDesc					mAssetDesc;
@@ -111,7 +112,7 @@ public:
 	/*!	\copydoc VRes2Memory::Name */
 	virtual  LPCSTR		Name() const override;
 
-	virtual  void		TryReleaseHolder() override;
+	virtual  bool		TryReleaseHolder() override;
 };
 
 NS_END

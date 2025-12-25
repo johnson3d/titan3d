@@ -952,7 +952,10 @@ namespace EngineNS.Bricks.DataCopyer
                 foreach (var j in i.Propertys)
                 {
                     if (j.FieldType==null)
+                    {
+                        System.Diagnostics.Debug.Assert(false);
                         continue;
+                    }
                     if (j.PropInfo != null)
                     {
                         var attr = j.PropInfo.GetCustomAttribute<Rtti.MetaAttribute>();

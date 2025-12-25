@@ -56,6 +56,13 @@ namespace EngineNS.IO
         {
             return new FScopedResMemory(this);
         }
+        public int ResRefCount
+        {
+            get
+            {
+                return mCoreObject.GetRefCount();
+            }
+        }
     }
     [Rtti.Meta("")]
     public class TtFileInfo

@@ -49,6 +49,7 @@ namespace EngineNS.IO
         {
             if (file == null)
                 return null;
+            //var t1 = Support.TtTime.HighPrecision_GetTickCount();
             var result = new TtXndHolder();
             using (var f2m = TtRes2Memory.CreateFromFile(file))
             {
@@ -59,6 +60,8 @@ namespace EngineNS.IO
 
                 result.mRootNode = new TtXndNode(result, new XndNode(result.mCoreObject.GetRootNode()));
                 result.mRootNode.Core_AddRef();
+                //var t2 = Support.TtTime.HighPrecision_GetTickCount();
+                //Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Info, $"LoadXnd {file} cost {(t2 - t1) / 1000} ms");
                 return result;
             }   
         }
@@ -96,6 +99,15 @@ namespace EngineNS.IO
                 {
                     mCoreObject.SetRootNode(value.mCoreObject);
                 }
+            }
+        }
+        public int ResRefCount
+        {
+            get
+            {
+                if (mCoreObject.GetResource().IsValidPointer == false)
+                    return -2;
+                return mCoreObject.GetResource().GetRefCount();
             }
         }
     }

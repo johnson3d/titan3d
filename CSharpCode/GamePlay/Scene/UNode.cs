@@ -849,37 +849,50 @@ namespace EngineNS.GamePlay.Scene
                 if (oldParent == value)
                     return;
                 var oldScene = GetNearestParentScene();
-
-                if (oldParent != null)
+                try
                 {
-                    oldParent.Children.Remove(this);
-                }
-                if (value != null)
-                {
-                    mParent = new WeakReference<TtNode>(value);
-                    if (value.Children.Contains(this) == false)
-                        value.Children.Add(this);
-                }
-                else
-                {
-                    mParent = null;
-                }
-                ParentChanged(oldParent, value);
-
-                var newScene = GetNearestParentScene();
-                if (oldScene != newScene)
-                {
-                    if (IsSceneManagedType() && IsSceneManaged)
+                    if (value != null)
                     {
-                        oldScene?.FreeId(this);
-                        newScene?.AllocId(this);
+                        System.Threading.Monitor.Enter(value);
                     }
-                    ParentSceneChanged(oldScene, newScene);
-                }
+                    if (oldParent != null)
+                    {
+                        oldParent.Children.Remove(this);
+                    }
+                    if (value != null)
+                    {
+                        mParent = new WeakReference<TtNode>(value);
+                        if (value.Children.Contains(this) == false)
+                            value.Children.Add(this);
+                    }
+                    else
+                    {
+                        mParent = null;
+                    }
+                    ParentChanged(oldParent, value);
 
-                if (value != null && Placement != null)
+                    var newScene = GetNearestParentScene();
+                    if (oldScene != newScene)
+                    {
+                        if (IsSceneManagedType() && IsSceneManaged)
+                        {
+                            oldScene?.FreeId(this);
+                            newScene?.AllocId(this);
+                        }
+                        ParentSceneChanged(oldScene, newScene);
+                    }
+
+                    if (value != null && Placement != null)
+                    {
+                        Placement.Position = Placement.Position;
+                    }
+                }
+                finally
                 {
-                    Placement.Position = Placement.Position;
+                    if (value != null)
+                    {
+                        System.Threading.Monitor.Exit(value);
+                    }
                 }
             }
         }

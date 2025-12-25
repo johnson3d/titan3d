@@ -184,19 +184,31 @@ vBOOL  VFile::Open(LPCSTR lpszFileName, UINT nOpenFlags)
 		int error_code = errno;
 		if (error_code == EMFILE)
 		{
-			{// try to close some openned files, avoid to fopen failed
-				int t = EngineNS::F2MManager::Instance->FileOpenNumber;
-				VFX_LTRACE(ELTT_Resource, "Try Close Openning Files Begin(%d)\n", t);
-				EngineNS::F2MManager::Instance->TryReleaseFile();
-				t = EngineNS::F2MManager::Instance->FileOpenNumber;
-				VFX_LTRACE(ELTT_Resource, "Try Close Openning Files End(%d)\n", t);
-			}
-			m_hFile = fopen(m_strFileName.c_str(), arg.c_str());
-			if (m_hFile == NULL)
+			while (true)
 			{
-				VFX_LTRACE(ELTT_Resource, "VFile::Open file(%s) (%s) open error = too many open files\n", m_strFileName.c_str(), arg.c_str());
-				GVFLostAssets[lpszFileName] = lpszFileName;
-				return FALSE;
+				{// try to close some openned files, avoid to fopen failed
+					EngineNS::F2MManager::Instance->TryReleaseFile(nullptr, 10);
+				}
+				m_hFile = fopen(m_strFileName.c_str(), arg.c_str());
+				if (m_hFile != NULL)
+				{
+					break;
+				}
+				else
+				{
+					error_code = errno;
+					if (EMFILE != errno)
+					{
+						const char* error_str = strerror(error_code);
+						VFX_LTRACE(ELTT_Resource, "VFile::Open file(%s) (%s) open error = %d,%s\n", m_strFileName.c_str(), arg.c_str(), error_code, error_str);
+						GVFLostAssets[lpszFileName] = lpszFileName;
+						return FALSE;
+					}
+					else
+					{
+						Sleep(100);
+					}
+				}
 			}
 		}
 		else

@@ -202,6 +202,7 @@ VResPtr VPackFile2Memory::Ptr(UINT64 offset, UINT64 size)
 
 	if (offset >= mPtrOffset && (offset - mPtrOffset) + size <= mCachedBuffer.size())
 	{
+		mPtrRef++;
 		return &mCachedBuffer[0];
 	}
 	
@@ -210,12 +211,16 @@ VResPtr VPackFile2Memory::Ptr(UINT64 offset, UINT64 size)
 	file->Seek(mAssetDesc.Offset + offset, VFile::begin);
 	auto readCount = file->Read(&mCachedBuffer[0], size);
 	if (readCount == size)
+	{
+		mPtrRef++;
 		return &mCachedBuffer[0];
+	}
 	return nullptr;
 }
 
 vBOOL VPackFile2Memory::Free()
 {	
+	mPtrRef--;
 	return TRUE;
 }
 
@@ -229,9 +234,17 @@ LPCSTR VPackFile2Memory::Name() const
 	return (mAssetDesc.FullPath).c_str();
 }
 
-void VPackFile2Memory::TryReleaseHolder()
+bool VPackFile2Memory::TryReleaseHolder()
 {
-	mCachedBuffer.clear();
+	if (mPtrRef == 0)
+	{
+		mCachedBuffer.clear();
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 VFile* VPackFile2Memory::GetFile() const

@@ -114,13 +114,27 @@ void F2MManager::Cleanup()
 	mF2Mems.clear();
 }
 
-void F2MManager::TryReleaseFile()
+int F2MManager::TryReleaseFile(VRes2Memory* exlude, int maxRelease)
 {
-	VAutoLock(mLocker);
+	VAutoLock(mTryReleaseLocker);
+	int t = FileOpenNumber;
+	int DoCount = 0;
+	int ReleaseCount = 0;
 	for (auto it = mF2Mems.begin(); it != mF2Mems.end(); it++)
 	{
-		it->second->TryReleaseHolder();
+		if (exlude == it->second)
+			continue;
+		if (it->second->TryReleaseHolder())
+		{
+			ReleaseCount++;
+			if (ReleaseCount >= maxRelease)
+				break;
+		}
+		DoCount++;
 	}
+	t = FileOpenNumber;
+	VFX_LTRACE(ELTT_Resource, "TryReleaseFile(%d/%d/%d)\n", ReleaseCount, DoCount, (int)mF2Mems.size());
+	return ReleaseCount;
 }
 
 NS_END

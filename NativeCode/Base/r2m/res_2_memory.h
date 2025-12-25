@@ -42,9 +42,9 @@ public:
 	virtual UINT64		Length() const = 0;
 	virtual LPCSTR		Name() const = 0; 
 
-	virtual void		TryReleaseHolder()
+	virtual bool		TryReleaseHolder()
 	{
-		return;
+		return false;
 	}
 	virtual long		GetRefCount()
 	{

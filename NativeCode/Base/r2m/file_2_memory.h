@@ -29,7 +29,7 @@ public:
 	virtual  UINT64		Length() const override;
 	virtual  LPCSTR		Name() const override; 
 
-	virtual  void		TryReleaseHolder() override;
+	virtual  bool		TryReleaseHolder() override;
 
 	void ClearCache();
 
@@ -51,9 +51,7 @@ private:
 	UINT64		mCachedStarter;
 	std::vector<BYTE>	mCachedBuffer;
 	
-	//INT			mPtrRef;
 	std::atomic<long> mPtrRef;
-	vBOOL		mIsClosing;
 };
 
 class VMemoryResPtr : public VRes2Memory

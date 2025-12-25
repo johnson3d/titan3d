@@ -8,6 +8,7 @@ class F2MManager
 {
 	friend class VPakFile;
 	VCritical				mLocker;
+	VCritical				mTryReleaseLocker;
 	std::map<VStringA, VRes2Memory*>	mF2Mems;
 
 	std::vector<VPakFile*>	mMountPaks;
@@ -19,7 +20,7 @@ public:
 
 	void Cleanup();
 
-	void TryReleaseFile();
+	int TryReleaseFile(VRes2Memory* exlude, int maxRelease);
 
 	VRes2Memory* GetF2M(LPCSTR file);
 private:

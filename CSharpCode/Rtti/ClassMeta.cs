@@ -993,16 +993,20 @@ namespace EngineNS.Rtti
                 {
                     mFieldType = propType;
                     CustumSerializer = null;
-                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"Property lost: Name = {mHostType}.{name}; Type = {fieldTypeStr}");
+                    if (mFieldType == null)
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"Property lost: Name = {mHostType}.{name}; Type = {fieldTypeStr}");
+                    }
                     return;
                 }
                 if (propType == null || propType.SystemType != info.PropertyType)
                 {
                     Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Property {mHostType}.{name}'s type is not match: {propType}!={info.PropertyType}");
+                    propType = TtTypeDesc.TypeOf(info.PropertyType);
                 }
                 //mPropInfoRef = info; dont set it this time
                 mHostType = metaVersion.HostClass.ClassType;
-                mFieldType = TtTypeDesc.TypeOf(info.PropertyType);// propType;
+                mFieldType = propType;// TtTypeDesc.TypeOf(info.PropertyType);// propType;
 
                 System.Diagnostics.Debug.Assert(info.DeclaringType == metaVersion.HostClass.ClassType.SystemType || metaVersion.HostClass.ClassType.SystemType.IsSubclassOf(info.DeclaringType));
                 //System.Diagnostics.Debug.Assert(info.PropertyType == propType.SystemType);

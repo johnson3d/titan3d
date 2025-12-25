@@ -774,23 +774,38 @@ namespace EngineNS.Graphics.Mesh
                 Meshes.Add(name, obj);
             }
         }
+        private Thread.TtAwaitSessionManager<RName, TtMaterialMesh> mCreatingSession = new();
         public async Thread.Async.TtTask<TtMaterialMesh> GetMaterialMesh(RName name)
         {
             if (name == null)
                 return null;
             TtMaterialMesh result;
-            if (Meshes.TryGetValue(name, out result))
-                return result;
+            lock (Meshes)
+            {
+                if (Meshes.TryGetValue(name, out result))
+                    return result;
+            }
+
+            Thread.TtSemaphore smp;
+            var session = mCreatingSession.GetOrNewSession(name, out smp);
+            if (smp != null)
+            {
+                await smp.Await();
+                return session.Result;
+            }
 
             result = await CreateMaterialMesh(name);
-
             if (result != null)
             {
                 if (result != null && result.AssetName != name)
                 {
                     Profiler.Log.WriteLine<Profiler.TtIOCategory>(ELogTag.Warning, $"MaterialMesh({name}): AssetName({result.AssetName})");
                 }
-                Meshes[name] = result;
+                lock (Meshes)
+                {
+                    Meshes[name] = result;
+                }
+                session.FinishSession(name, result);
                 return result;
             }
 

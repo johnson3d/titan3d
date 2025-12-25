@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Runtime.ConstrainedExecution;
 using System.Text;
 using System.Threading;
 using static EngineNS.Thread.TtThreadPool;
@@ -121,6 +122,11 @@ namespace EngineNS.Thread
                 Trigger.Set();
             }
         }
+        public override void EnqueueContinue(Async.TtAsyncTaskStateBase evt)
+        {
+            base.EnqueueContinue(evt);
+            HasWork = true;
+        }
         public enum EPoolThreadState
         {
             DoPrivate,
@@ -167,6 +173,12 @@ namespace EngineNS.Thread
                 TtEngine.Instance.ContextThreadManager.PushGlobalTask(i);
             }
             Suspended.Clear();
+
+            Async.TtAsyncTaskStateBase cur;
+            while (DoOneContinueEvent(out cur))
+            {
+
+            }
 
             WaitTask();
         }

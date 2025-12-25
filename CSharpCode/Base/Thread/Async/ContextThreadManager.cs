@@ -339,8 +339,11 @@ namespace EngineNS.Thread.Async
         int ParallelForNum = 0;
         public void ParallelFor(int numTask, Delegate_ParrallelForAction action, int numMicroThread = -1, object userData1 = null, object userData2 = null, int maxNumPerMicroThread = -1)
         {
-            System.Diagnostics.Debug.Assert(Thread.TtContextThread.CurrentContext.GetThreadType() != EAsyncTarget.TPools);
-
+            //System.Diagnostics.Debug.Assert(Thread.TtContextThread.CurrentContext.GetThreadType() != EAsyncTarget.TPools);
+            if (numTask == 0)
+            {
+                return;
+            }
             if (numMicroThread < 0)
             {
                 if (maxNumPerMicroThread>0)
@@ -360,12 +363,14 @@ namespace EngineNS.Thread.Async
             {
                 numMicroThread = 1;
             }
-            
-            if (numTask == 0)
+
+            if (Thread.TtContextThread.CurrentContext.GetThreadType() == EAsyncTarget.TPools)
             {
-                return;
+                Profiler.Log.WriteLine<Profiler.TtThreadGategory>(Profiler.ELogTag.Warning, "ThreadPool", "ThreadPool Thread can not call ParallelFor");
+                numMicroThread = 1;
             }
-            else if (numMicroThread == 1 || numTask==1)
+            
+            if (numMicroThread == 1 || numTask==1)
             {
                 var eh = TtAsyncTaskState<bool>.CreateInstance();
                 eh.UserArguments.Obj0 = action;

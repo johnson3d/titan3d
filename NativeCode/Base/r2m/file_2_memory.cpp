@@ -36,7 +36,6 @@ VFile2Memory::VFile2Memory()
 	: mPtrRef(0)
 {
 	mCachedStarter = 0;
-	mIsClosing = FALSE;
 }
 
 VFile2Memory::~VFile2Memory()
@@ -44,35 +43,18 @@ VFile2Memory::~VFile2Memory()
 	Close();
 }
 
+std::atomic<long> GPtrRef(0);
 VResPtr VFile2Memory::Ptr(UINT64 offset , UINT64 size)
 {
 	mLocker.Lock();
-    if(mPtrRef != 0)
+	GPtrRef++;
+	if (mPtrRef >= 1)
     {
         VFX_LTRACE(ELTT_Error,"%s(%d):F2M(%s) Ptr Refcount is not zero\r\n", __FILE__, __LINE__, mName.c_str());
     }
-	//ASSERT(mPtrRef == 0);
 	
 	++mPtrRef;
-	
-	while (mIsClosing)
-	{
-		Sleep(50);
-	}
-	
-	if (mFile.IsFileOpened() == false)
-	{
-		if (false == mFile.Open(mName.c_str(), VFile::modeRead))
-		{
-			VFX_LTRACE(ELTT_Error, "F2M Ptr [%s] open faile, someone deleted this file in runtime\r\n", mName.c_str());
-			return NULL;
-		}
-	}
-	else
-	{
-		mPtrRef++;
-		mPtrRef--;
-	}
+
 	if (size == 0)
 	{
 		size = (INT_PTR)mFile.GetLength() - offset;
@@ -82,6 +64,14 @@ VResPtr VFile2Memory::Ptr(UINT64 offset , UINT64 size)
 		mCachedBuffer.resize(size);
 		mCachedStarter = offset;
 
+		if (mFile.IsFileOpened() == false)
+		{
+			if (false == mFile.Open(mName.c_str(), VFile::modeRead))
+			{
+				VFX_LTRACE(ELTT_Error, "F2M Ptr [%s] open faile, someone deleted this file in runtime\r\n", mName.c_str());
+				return NULL;
+			}
+		}
 		mFile.Seek(offset, VFile::begin);
 		auto readCount = mFile.Read(&mCachedBuffer[0], size);
 		if (readCount != size)
@@ -101,7 +91,9 @@ VResPtr VFile2Memory::Ptr(UINT64 offset , UINT64 size)
 vBOOL VFile2Memory::Free()
 {
 	//ClearCache();
+	GPtrRef--;
 
+	ASSERT(mPtrRef > 0);
 	--mPtrRef;
 	mLocker.Unlock();
 	
@@ -114,31 +106,39 @@ void VFile2Memory::ClearCache()
 	mCachedBuffer = std::vector<BYTE>();
 }
 
-void VFile2Memory::TryReleaseHolder()
+bool VFile2Memory::TryReleaseHolder()
 {
-	VAutoLock(mLocker);
-	
-	ClearCache();
-
-	if(mPtrRef == 0)
+	if (mLocker.TryLock() == 0)
 	{
+		//todo: Choose to close the file and ClearCache based on long time no used
 		Close();
+		if (mPtrRef == 0)
+		{
+			ClearCache();
+		}
+		mLocker.Unlock();
+		return true;
 	}
 	else
 	{
-		//assert(false);
-		VFX_LTRACE(ELTT_Resource, "This isn't an error!TryReleaseHolder %s Ref!=0\r\n", mName.c_str());
+		return false;
 	}
 }
 
 UINT64 VFile2Memory::Length() const
 {
-	if (mFile.IsFileOpened() == false)
+	if (mFile.GetLength() == 0 && mFile.IsFileOpened() == false)
 	{
 		if (false == ((ViseFile*)&mFile)->Open(mName.c_str(), VFile::modeRead))
 		{
 			VFX_LTRACE(ELTT_Error, "F2M Ptr [%s] open faile, someone deleted this file in runtime\r\n", mName.c_str());
 			return 0;
+		}
+		else
+		{
+			auto ret = mFile.GetLength();
+			((ViseFile*)&mFile)->Close();
+			return ret;
 		}
 	}
 
@@ -155,20 +155,21 @@ vBOOL VFile2Memory::Create(LPCSTR pszFile,vBOOL bShareFile)
 	Close();
 
 	mName = pszFile;
-
-	return mFile.Open(pszFile, VFile::modeRead);
+	return true;
 }
 
 void VFile2Memory::Close()
 {
 	VAutoLock(mLocker);
-	mIsClosing = TRUE;
-	ClearCache();
-	mPtrRef = 0;
-
-	if(mFile.IsFileOpened())
+	
+	if (mFile.IsFileOpened())
+	{
 		mFile.Close();
-	mIsClosing = FALSE;
+	}
+	if (mPtrRef == 0)
+	{
+		ClearCache();
+	}
 }
 
 //--------------------------------------------------------------------------------------------------

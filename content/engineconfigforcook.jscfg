@@ -4,7 +4,7 @@
   "UsePhysxMT": true,
   "UseRenderDoc": false,
   "Feature_UseRVT": false,
-  "NumOfThreadPool": -1,
+  "NumOfThreadPool": 4,
   "IsParrallelWorldGather": true,
   "Interval": 15,
   "TargetFps": 66,
