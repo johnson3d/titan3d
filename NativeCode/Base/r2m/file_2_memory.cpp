@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "file_2_memory.h"
+#include <filesystem>
 
 //#include "../xnd/vfxxnd.h"
 
@@ -14,17 +15,18 @@ NS_BEGIN
 
 ENGINE_RTTI_IMPL(VFile2Memory);
 
-FResPointerGuard::FResPointerGuard(VRes2Memory* res, UINT64 offset, UINT64 size)
+FResPointerGuard::FResPointerGuard(VRes2Memory* res, UINT64 offset, UINT64 size, bool tryClearCache)
 {
 	Resource = res;
 	Offset = offset;
 	Size = size;
+	TryClearCache = tryClearCache;
 	Pointer = Resource->Ptr(offset, size);
 }
 
 FResPointerGuard::~FResPointerGuard()
 {
-	Resource->Free();
+	Resource->Free(TryClearCache);
 	Pointer = nullptr;
 	Resource = nullptr;
 	Offset = 0;
@@ -88,13 +90,17 @@ VResPtr VFile2Memory::Ptr(UINT64 offset , UINT64 size)
 	}
 }
 
-vBOOL VFile2Memory::Free()
+vBOOL VFile2Memory::Free(bool bTryClearCache)
 {
 	//ClearCache();
 	GPtrRef--;
 
 	ASSERT(mPtrRef > 0);
 	--mPtrRef;
+	if (bTryClearCache && mPtrRef == 0)
+	{
+		ClearCache();
+	}
 	mLocker.Unlock();
 	
 	return TRUE;
@@ -110,7 +116,6 @@ bool VFile2Memory::TryReleaseHolder()
 {
 	if (mLocker.TryLock() == 0)
 	{
-		//todo: Choose to close the file and ClearCache based on long time no used
 		Close();
 		if (mPtrRef == 0)
 		{
@@ -155,7 +160,8 @@ vBOOL VFile2Memory::Create(LPCSTR pszFile,vBOOL bShareFile)
 	Close();
 
 	mName = pszFile;
-	return true;
+
+	return std::filesystem::exists(mName) ? TRUE : FALSE;
 }
 
 void VFile2Memory::Close()
@@ -202,7 +208,7 @@ VResPtr VMemoryResPtr::Ptr(UINT64 offset , UINT64 size)
 	return (const BYTE*)m_ptrBase+offset;
 }
 
-vBOOL VMemoryResPtr::Free()
+vBOOL VMemoryResPtr::Free(bool bTryClearCache)
 {
 	return TRUE;
 }

@@ -135,6 +135,8 @@ bool XndHolder::LoadXnd(VRes2Memory* res)
 		if (mResource == nullptr)
 			return false;
 		UINT64 length = (UINT64)mResource->Length();
+		if (length < sizeof(UINT64))
+			return false;
 
 		UINT64 treeOffset = 0;
 		{
@@ -142,6 +144,9 @@ bool XndHolder::LoadXnd(VRes2Memory* res)
 			auto ptr = guard.Pointer;
 			memcpy(&treeOffset, ptr, sizeof(UINT64));
 		}
+
+		if (treeOffset >= length)
+			return false;
 
 		{
 			FResPointerGuard guard(mResource, treeOffset, length - treeOffset);

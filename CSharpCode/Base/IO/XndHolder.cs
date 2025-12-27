@@ -56,7 +56,8 @@ namespace EngineNS.IO
                 if (f2m == null)
                     return null;
 
-                result.mCoreObject.LoadXnd(f2m.mCoreObject);
+                if (false == result.mCoreObject.LoadXnd(f2m.mCoreObject))
+                    return null;
 
                 result.mRootNode = new TtXndNode(result, new XndNode(result.mCoreObject.GetRootNode()));
                 result.mRootNode.Core_AddRef();

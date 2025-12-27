@@ -23,7 +23,7 @@ class VFile2Memory : public VRes2Memory
 	VCritical					mLocker;
 protected:
 	virtual  VResPtr	Ptr(UINT64 offset, UINT64 size = 0) override;
-	virtual  vBOOL		Free() override;
+	virtual  vBOOL		Free(bool bTryClearCache = true) override;
 public:
 	ENGINE_RTTI(VFile2Memory);
 	virtual  UINT64		Length() const override;
@@ -58,7 +58,7 @@ class VMemoryResPtr : public VRes2Memory
 {
 protected:
 	virtual  VResPtr	Ptr(UINT64 offset = 0, UINT64 size = 0);
-	virtual  vBOOL		Free();
+	virtual  vBOOL		Free(bool bTryClearCache = true);
 public:
 	virtual  UINT64		Length() const;
 	virtual  LPCSTR		Name() const; 

@@ -319,6 +319,7 @@ namespace EngineNS.Bricks.Network.RPC
         public TtRpcPropertyDataManager()
         {
             RegisterHost(this);
+            //TtEngine.Instance.RpcModule.RpcManager.RpcPropertyDataManager.RegisterHost(this);
         }
         public struct TtPropKey
         {

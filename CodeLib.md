@@ -82,10 +82,10 @@ Plugins目录下CopyPlugins.bat在修改*.plugin后目前需要手工执行，刷新到插件目录
 1.目前需要在Base/BaseHead.h里面根据平台添加类似 **#define HasModule_NextRHI** 
 2.这个用来确保生成胶水代码参与编译构建，否则会发生C#调用C++找不到函数
 ## 4.RPC函数
-1.为函数添加URpcMethod属性
+1.为函数添加TtRpcMethod属性
 2.最后一个参数必须为UCallContext context，可以从中取出Connect
 ```C#
-		[URpcMethod(Index = RpcIndexStart + 2)]
+		[TtRpcMethod(Index = RpcIndexStart + 2)]
 		public async System.Threading.Tasks.Task<Bricks.Network.FNetworkPoint> SelectGateway(string user, Guid sessionId, UCallContext context)
 		{
 			ServerCommon.UServerBase slt = null;
@@ -117,52 +117,17 @@ Plugins目录下CopyPlugins.bat在修改*.plugin后目前需要手工执行，刷新到插件目录
 		}
 ```
 ## 5.自动同步对象
-- 派生IAutoSyncObject接口
-- 为类添加[UAutoSync()]属性
-- 添加属性，并用UAutoSync修饰
-- set的实现调用FSyncHelper.SetValue，注意Index参数和属性的Index一致
+- 所有IRpcHost派生类都可以作为自动同步对象
+- 利用TtEngine.Instance.RpcModule.RpcManager.RpcPropertyDataManager.RegisterHost(host)注册一个自动同步对象
+- 添加属性，并用TtRpcProperty修饰
+- TtRpcPropertyDataManager在Tick函数中会自动同步这些属性
 - 示例
 ```C#
-	[UAutoSync()]
-    public partial class IAutoSyncObject_Test0 : IAutoSyncObject
+	[TtRpcClassAttribute(RunTarget = ERunTarget.None, Executer = EExecuter.PropertyData, CallerInClass = true)]
+    public partial class TtRpcPropertyDataManager : AuxRpcHost<TtRpcPropertyDataManager>
     {
-        int mA;
-        [UAutoSync(Index = 0)]
-        public int A 
-        {
-            get => mA;
-            set
-            {
-                FSyncHelper.SetValue(this, 0, ref mA, in value);
-            }
-        }
-        float mB;
-        [UAutoSync(Index = 1)]
-        public float B
-        {
-            get => mB;
-            set
-            {
-                FSyncHelper.SetValue(this, 1, ref mB, in value);
-            }
-        }
-
-        public void RealObjectUpdate2Server()
-        {
-            using (var writer = Bricks.Network.RPC.UMemWriter.CreateInstance())
-            {
-                var ar = new IO.AuxWriter<Bricks.Network.RPC.UMemWriter>(writer);
-                FSyncHelper.BuildModify(this, ar);
-            }
-        }
-        public unsafe void GhostObjectUpdateByServer(Bricks.Network.RPC.UMemWriter writer)
-        {
-            using (var reader = Bricks.Network.RPC.UMemReader.CreateInstance((byte*)writer.Ptr, writer.GetPosition()))
-            {
-                var ar = new IO.AuxReader<Bricks.Network.RPC.UMemReader>(reader, null);
-                FSyncHelper.SyncValues(this, ar);
-            }
-        }
+        [TtRpcProperty]
+        public int TestSync1 { get; set; } = 1;
     }
 ```
 ## 6.增加一个材质编辑器可调用函数节点

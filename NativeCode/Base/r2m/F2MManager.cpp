@@ -116,8 +116,8 @@ void F2MManager::Cleanup()
 
 int F2MManager::TryReleaseFile(VRes2Memory* exlude, int maxRelease)
 {
+	//todo: Choose to close the file and ClearCache based on long time no used
 	VAutoLock(mTryReleaseLocker);
-	int t = FileOpenNumber;
 	int DoCount = 0;
 	int ReleaseCount = 0;
 	for (auto it = mF2Mems.begin(); it != mF2Mems.end(); it++)
@@ -132,8 +132,8 @@ int F2MManager::TryReleaseFile(VRes2Memory* exlude, int maxRelease)
 		}
 		DoCount++;
 	}
-	t = FileOpenNumber;
-	VFX_LTRACE(ELTT_Resource, "TryReleaseFile(%d/%d/%d)\n", ReleaseCount, DoCount, (int)mF2Mems.size());
+	auto t = (int)FileOpenNumber;
+	VFX_LTRACE(ELTT_Resource, "TryReleaseFile(%d/%d/%d)->%d\n", ReleaseCount, DoCount, (int)mF2Mems.size(), t);
 	return ReleaseCount;
 }
 

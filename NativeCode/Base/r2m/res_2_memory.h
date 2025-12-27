@@ -24,7 +24,8 @@ struct FResPointerGuard
 	UINT64 Offset = 0;
 	UINT64 Size = 0;
 	VResPtr Pointer = nullptr;
-	FResPointerGuard(VRes2Memory* res, UINT64 offset = 0, UINT64 size = 0);
+	bool TryClearCache = true;
+	FResPointerGuard(VRes2Memory* res, UINT64 offset = 0, UINT64 size = 0, bool tryClearCache = true);
 	~FResPointerGuard();
 };
 
@@ -37,7 +38,7 @@ protected:
 public:
 	static VRes2Memory* CreateFromFile(LPCSTR pszFile);
 	virtual VResPtr		Ptr(UINT64 offset = 0, UINT64 size = 0) = 0;
-	virtual vBOOL		Free() = 0;
+	virtual vBOOL		Free(bool bTryClearCache = true) = 0;
 
 	virtual UINT64		Length() const = 0;
 	virtual LPCSTR		Name() const = 0; 

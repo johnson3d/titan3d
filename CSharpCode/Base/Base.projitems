@@ -35,7 +35,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Support\UNativeDictionary.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\USdfGrid.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Thread\Async\Task.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Thread\Async\UJobSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Thread\Atomic.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UNativeWindow.cs" />
@@ -43,7 +42,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Profiler\TimeScope.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Thread\Async\AsyncObjManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Thread\Async\ContextThreadManager.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Thread\Async\TaskLoader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Thread\ContextThread.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Thread\EventPoster.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Thread\ThreadAsync.cs" />

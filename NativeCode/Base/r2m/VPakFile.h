@@ -106,7 +106,7 @@ public:
 
 	virtual  VResPtr	Ptr(UINT64 offset, UINT64 size = -1) override;
 	/*!	\copydoc VRes2Memory::Free */
-	virtual  vBOOL		Free() override;
+	virtual  vBOOL		Free(bool bTryClearCache = true) override;
 	/*!	\copydoc VRes2Memory::Length */
 	virtual  UINT64		Length() const override;
 	/*!	\copydoc VRes2Memory::Name */

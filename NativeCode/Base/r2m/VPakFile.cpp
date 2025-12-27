@@ -218,7 +218,7 @@ VResPtr VPackFile2Memory::Ptr(UINT64 offset, UINT64 size)
 	return nullptr;
 }
 
-vBOOL VPackFile2Memory::Free()
+vBOOL VPackFile2Memory::Free(bool bTryClearCache)
 {	
 	mPtrRef--;
 	return TRUE;

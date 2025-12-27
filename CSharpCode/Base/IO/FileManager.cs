@@ -18,8 +18,10 @@ namespace EngineNS.IO
         public IntPtr Pointer;
         public ulong Size;
         public TtRes2Memory Res2Mem;
-        public unsafe FScopedResMemory(TtRes2Memory r2m)
+        public bool TryClearCache;
+        public unsafe FScopedResMemory(TtRes2Memory r2m, bool tryClear)
         {
+            TryClearCache = tryClear;
             Res2Mem = r2m;
             Size = r2m.mCoreObject.Length();
             Pointer = (IntPtr)r2m.mCoreObject.Ptr(0, Size);
@@ -28,7 +30,7 @@ namespace EngineNS.IO
         {
             if (Res2Mem==null)
                 return;
-            Res2Mem.mCoreObject.Free();
+            Res2Mem.mCoreObject.Free(TryClearCache);
             Res2Mem = null;
             Pointer = IntPtr.Zero; 
             Size = 0;
@@ -52,9 +54,9 @@ namespace EngineNS.IO
         {
             mCoreObject = self;
         }
-        public FScopedResMemory GetMemory()
+        public FScopedResMemory GetMemory(bool tryClearCache = true)
         {
-            return new FScopedResMemory(this);
+            return new FScopedResMemory(this, tryClearCache);
         }
         public int ResRefCount
         {
