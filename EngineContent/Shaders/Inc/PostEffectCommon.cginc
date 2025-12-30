@@ -4,7 +4,7 @@
 
 half2 CalcVignetteVS(half2 NDCPos)
 {
-	half AspectRatio = (half)gViewportSizeAndRcp.y * (half)gViewportSizeAndRcp.z;
+	half AspectRatio = (half)ViewportSizeAndRcp.y * (half)ViewportSizeAndRcp.z;
 	half Scale = sqrt(2.0h) / sqrt(1.0h + AspectRatio * AspectRatio);
 	return NDCPos * half2(1.0h, AspectRatio) * Scale;
 }

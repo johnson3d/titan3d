@@ -39,7 +39,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	float2 BlurredData = gPickedBlurTex.Sample(Samp_gPickedBlurTex, uv).rg;
 
 	half2 Ifinal = half2(0.0h, 0.0h);
-	/*if (BaseData.g - BlurredData.g > min(max(Pow2(100.0h * BaseData.g), 0.1h), 40.0h) * rcp((half)gZFar))
+	/*if (BaseData.g - BlurredData.g > min(max(Pow2(100.0h * BaseData.g), 0.1h), 40.0h) * rcp((half)ZFar))
 	{
 		Ifinal = half2(BlurredData.r, BlurredData.g);
 	}

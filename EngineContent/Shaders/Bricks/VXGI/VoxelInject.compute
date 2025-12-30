@@ -16,7 +16,7 @@ float GetDepth(uint3 id)
 
 float3 GetWorldPosition(uint3 id, float LinearDepth, float depth)
 {
-	float NdcW = LinearDepth * gZFar;
+	float NdcW = LinearDepth * ZFar;
 	
 #if RHI_TYPE == RHI_GL
 	float PlatformFlag = -1.0f;
@@ -47,7 +47,7 @@ void CS_InjectVoxels(uint3 id : SV_DispatchThreadID,
 	/*if (all(rt0.xyz == 0.0f))
 		return;*/
 	float depth = GetDepth(id);
-	if (depth <= gZNear)
+	if (depth <= ZNear)
 		return;
 	//float3 pos = GetWorldPosition(id, rt0.w, depth);
 	float2 uv = ((float2)id.xy) / GBufferSize.xy;

@@ -54,34 +54,34 @@ namespace EngineNS.Graphics.Pipeline
             public NxRHI.FShaderVarDesc FogDensity;
 
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector2))]
-            public NxRHI.FShaderVarDesc gViewportSizeAndRcp;
+            public NxRHI.FShaderVarDesc ViewportSizeAndRcp;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector2))]
-            public NxRHI.FShaderVarDesc gDepthBiasAndZFarRcp;
+            public NxRHI.FShaderVarDesc DepthBiasAndZFarRcp;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector2))]
-            public NxRHI.FShaderVarDesc gFadeParam;
+            public NxRHI.FShaderVarDesc FadeParam;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector4))]
-            public NxRHI.FShaderVarDesc gShadowMapSizeAndRcp;
+            public NxRHI.FShaderVarDesc ShadowMapSizeAndRcp;
 
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Matrix))]
-            public NxRHI.FShaderVarDesc gViewer2ShadowMtx;
+            public NxRHI.FShaderVarDesc Viewer2ShadowMtx;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Matrix))]
-            public NxRHI.FShaderVarDesc gViewer2ShadowMtxArray;
+            public NxRHI.FShaderVarDesc Viewer2ShadowMtxArray;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector4))]
-            public NxRHI.FShaderVarDesc gCsmDistanceArray;
+            public NxRHI.FShaderVarDesc CsmDistanceArray;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector4))]
-            public NxRHI.FShaderVarDesc gShadowTransitionScaleArray;
+            public NxRHI.FShaderVarDesc ShadowTransitionScaleArray;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector4))]
-            public NxRHI.FShaderVarDesc gSunPosNDC;
+            public NxRHI.FShaderVarDesc SunPosNDC;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector2))]
-            public NxRHI.FShaderVarDesc gAoParam;
+            public NxRHI.FShaderVarDesc AoParam;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(float))]
-            public NxRHI.FShaderVarDesc gShadowTransitionScale;
+            public NxRHI.FShaderVarDesc ShadowTransitionScale;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(float))]
-            public NxRHI.FShaderVarDesc gShadowDistance;
+            public NxRHI.FShaderVarDesc ShadowDistance;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(float))]
-            public NxRHI.FShaderVarDesc gEnvMapMaxMipLevel;
+            public NxRHI.FShaderVarDesc EnvMapMaxMipLevel;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(float))]
-            public NxRHI.FShaderVarDesc gEyeEnvMapMaxMipLevel;
+            public NxRHI.FShaderVarDesc EyeEnvMapMaxMipLevel;
         }
         public class TtPerCameraCBufferVarIndexer : NxRHI.TtShader.AuxCBufferVarIndexer<TtPerCameraCBufferVarIndexer>
         {
@@ -114,11 +114,11 @@ namespace EngineNS.Graphics.Pipeline
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector3))]
             public NxRHI.FShaderVarDesc CameraPosition;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(uint))]
-            public NxRHI.FShaderVarDesc gZNear;
+            public NxRHI.FShaderVarDesc ZNear;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector3))]
             public NxRHI.FShaderVarDesc CameraLookAt;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(float))]
-            public NxRHI.FShaderVarDesc gZFar;
+            public NxRHI.FShaderVarDesc ZFar;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector3))]
             public NxRHI.FShaderVarDesc CameraDirection;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector3))]

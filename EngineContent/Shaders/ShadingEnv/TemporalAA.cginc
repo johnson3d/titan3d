@@ -46,7 +46,7 @@ struct TAA
     }
     float2 GetClosestUV(float2 uv)
     {
-        float2 k = gViewportSizeAndRcp.xy;
+        float2 k = ViewportSizeAndRcp.xy;
         const float4 neighborhood = float4(
             GetDepth(ViewportClamp(uv - k)),
             GetDepth(ViewportClamp(uv + float2(k.x, -k.y))),
@@ -125,8 +125,8 @@ struct TAA
         Depth.y = PrevDepthBuffer.Sample(Samp_PrevDepthBuffer, HistoryUV.xy).r;
 
         Depth = LinearFromDepth(Depth);
-        //Depth.x = LinearFromDepth(Depth.x) * (gZFar - gZNear);
-        //Depth.y = LinearFromDepth(Depth.y) * (gZFar - gZNear);
+        //Depth.x = LinearFromDepth(Depth.x) * (ZFar - ZNear);
+        //Depth.y = LinearFromDepth(Depth.y) * (ZFar - ZNear);
         //if (abs(Depth.y - Depth.x) > 0.05)
         //    //if (Depth.y != Depth.x)
         //{

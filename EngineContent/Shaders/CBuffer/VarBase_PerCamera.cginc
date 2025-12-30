@@ -36,10 +36,10 @@ cbuffer cbPerCamera DX_BIND_B(0)
     float ClipMaxPoint_Pad;
 
 	float3 CameraPosition;
-	float gZNear;
+	float ZNear;
 
 	float3 CameraLookAt;
-	float gZFar;
+	float ZFar;
 
 	float3 CameraDirection;
 	float pad0;
@@ -90,23 +90,23 @@ inline float LinearFromDepth(float z, float zNear, float zFar)
 
 inline float LinearFromDepth(float z)
 {
-    return LinearFromDepth(z, gZNear, gZFar);
+    return LinearFromDepth(z, ZNear, ZFar);
 }
 
 inline float NormalizedLinearFromDepth(float z)
 {
-    return (LinearFromDepth(z) - gZNear) / (gZFar - gZNear);
+    return (LinearFromDepth(z) - ZNear) / (ZFar - ZNear);
 }
 
 inline float2 LinearFromDepth(float2 z)
 {
 #if USE_INVERSE_Z == 1
-	float2 t = float2(gZNear, gZNear) - z * (gZNear - gZFar);
-	float t2 = gZNear * gZFar;
+	float2 t = float2(ZNear, ZNear) - z * (ZNear - ZFar);
+	float t2 = ZNear * ZFar;
 	return float2(t2,t2) / t;
 #else
-    float2 t = float2(gZFar, gZFar) - z * (gZFar - gZNear);
-    float t2 = gZNear * gZFar;
+    float2 t = float2(ZFar, ZFar) - z * (ZFar - ZNear);
+    float t2 = ZNear * ZFar;
     return float2(t2, t2) / t;
 #endif
 }

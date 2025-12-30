@@ -45,7 +45,7 @@ float ESM_GaussNxN(Texture2D Tex, SamplerState Sampler, float2 uv, int n, float2
             float2 coord = uv + float2(i, j) * stride;
             
             float depth = Tex.SampleLevel(Sampler, coord, 0).r;
-            color += GetESMValue(depth, gZNear, gZFar) * w;
+            color += GetESMValue(depth, ZNear, ZFar) * w;
             weight += w;
         }
     }
@@ -62,7 +62,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     
     //float depth = DepthBuffer.SampleLevel(Samp_DepthBuffer, uv, 0);
     
-    //output.RT0.r = GetESMValue(depth, gZNear, gZFar);
+    //output.RT0.r = GetESMValue(depth, ZNear, ZFar);
     
     output.RT0.r = ESM_GaussNxN(DepthBuffer, Samp_DepthBuffer, uv, 5, float2(1 / 128.0f, 1 / 128.0f), GaussSigma);
     return output;

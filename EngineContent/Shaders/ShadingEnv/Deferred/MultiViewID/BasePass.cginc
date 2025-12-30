@@ -130,7 +130,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 #else
 		UnlitShading.b = (half)floor(UnlitShading.b * AO_M);
 #endif
-		output.RT0 = half4(UnlitShading, PerPixelViewerDistance * rcp((half)gZFar));
+		output.RT0 = half4(UnlitShading, PerPixelViewerDistance * rcp((half)ZFar));
 
 		output.RT0.a = 1;
 	}
@@ -153,20 +153,20 @@ PS_OUTPUT PS_Main(PS_INPUT input)
         ShadowFilterData mSFD;
         mSFD.mShadowMap = gShadowMap;
         mSFD.mShadowMapSampler = Samp_gShadowMap;
-        mSFD.mShadowMapSizeAndRcp = gShadowMapSizeAndRcp;
-        mSFD.mShadowTransitionScale = (half) gShadowTransitionScale;
+        mSFD.mShadowMapSizeAndRcp = ShadowMapSizeAndRcp;
+        mSFD.mShadowTransitionScale = (half) ShadowTransitionScale;
 
         float4 ShadowMapUV = float4(0.0f, 0.0f, 0.0f, 0.0f);
 		//half PerPixelViewerDistance = (half)input.vPosition.w;
         half PerPixelViewerDistance = (half) input.psCustomUV0.w;
 
-        if (PerPixelViewerDistance > gShadowDistance || IsAcceptShadow() == false)
+        if (PerPixelViewerDistance > ShadowDistance || IsAcceptShadow() == false)
         {
             ShadowValue = 1.0h;
         }
         else
         {
-            ShadowMapUV = mul(float4(input.vWorldPos, 1.0f), gViewer2ShadowMtx[0]);
+            ShadowMapUV = mul(float4(input.vWorldPos, 1.0f), Viewer2ShadowMtx[0]);
 
             mSFD.mViewer2ShadowDepth = (half) ShadowMapUV.z;
 
@@ -176,7 +176,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 //			ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
 //			#endif
 
-            half FadeValue = (half) saturate(PerPixelViewerDistance * gFadeParam.x + gFadeParam.y);
+            half FadeValue = (half) saturate(PerPixelViewerDistance * FadeParam.x + FadeParam.y);
             ShadowValue = lerp(ShadowValue, 1.0h, FadeValue);
         }
 
@@ -234,7 +234,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		//sphere env mapping;
         half3 R = 2 * dot(V, N) * N - V;
         R = GetOffSpecularPeakReflectionDir(N, R, Roughness);
-        half EnvMipLevel = GetTexMipLevelFromRoughness(Roughness, (half)gEnvMapMaxMipLevel);
+        half EnvMipLevel = GetTexMipLevelFromRoughness(Roughness, (half)EnvMapMaxMipLevel);
         half3 EnvSpecLightColor = (half3) gEnvMap.SampleLevel(Samp_gEnvMap, R, EnvMipLevel).rgb;
         half Ihdr = max(0.6h, CalcLuminanceYCbCr(EnvSpecLightColor));
         Ihdr = exp2((Ihdr - 0.6h) * 7.5h);
@@ -262,7 +262,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 			float2 uv = input.psCustomUV0.xy;
 			/*uv.x = saturate( (input.vPosition.x + 1.0f) * 0.5f );
 			uv.y = saturate( (1.0f - input.vPosition.y) * 0.5f );*/
-			float2 tileIdxF = (uv.xy * gViewportSizeAndRcp.xy) / TileSize;
+			float2 tileIdxF = (uv.xy * ViewportSizeAndRcp.xy) / TileSize;
 			uint2 tileIdx = (uint2)tileIdxF;
 			uint indexOfTile = GetTileIndex(tileIdx.x, tileIdx.y);
 			uint NumOfLights = min(TilingBuffer[indexOfTile].NumPointLight, 32);
@@ -283,7 +283,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
         BaseShading.b = (half) floor(BaseShading.b * AO_M) + AoOffsetEncoded;
 #endif
 
-        output.RT0 = half4(BaseShading, PerPixelViewerDistance * rcp((half) gZFar));
+        output.RT0 = half4(BaseShading, PerPixelViewerDistance * rcp((half) ZFar));
         output.RT1 = half4(1, 1, 0, 1);
         //if (input.psCustomUV1.x == 0)
         //{

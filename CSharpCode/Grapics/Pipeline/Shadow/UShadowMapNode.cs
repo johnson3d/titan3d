@@ -456,7 +456,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 if (cBuffer != null)
                 {
                     var tmp = new Vector2(0.0f, 1.0f / shadowZFar);
-                    cBuffer.SetValue(TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gDepthBiasAndZFarRcp, in tmp);
+                    cBuffer.SetValue(TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.DepthBiasAndZFarRcp, in tmp);
                 }
 
                 //mShadowTransitionScale = 1.0f / (DepthBiasClipSpace + 0.00001f);

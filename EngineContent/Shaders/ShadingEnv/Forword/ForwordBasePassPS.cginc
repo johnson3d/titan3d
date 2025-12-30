@@ -55,7 +55,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 #else
 		UnlitShading.b = (half)floor(UnlitShading.b * AO_M);
 #endif
-		output.RT0 = half4(UnlitShading, PerPixelViewerDistance * rcp((half)gZFar));
+		output.RT0 = half4(UnlitShading, PerPixelViewerDistance * rcp((half)ZFar));
 
 		output.RT0.a = 1;
 	}
@@ -78,8 +78,8 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		ShadowFilterData mSFD;
 		mSFD.mShadowMap = gShadowMap;
 		mSFD.mShadowMapSampler = Samp_gShadowMap;
-		mSFD.mShadowMapSizeAndRcp = gShadowMapSizeAndRcp;
-		mSFD.mShadowTransitionScale = (half)gShadowTransitionScale;
+		mSFD.mShadowMapSizeAndRcp = ShadowMapSizeAndRcp;
+		mSFD.mShadowTransitionScale = (half)ShadowTransitionScale;
 
 		float4 ShadowMapUV = float4(0.0f, 0.0f, 0.0f, 0.0f);
 		//half PerPixelViewerDistance = (half)input.vPosition.w;
@@ -88,10 +88,10 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 	#if MODE_EDITOR == 1
 		for (int CsmIdx = 0; CsmIdx < CsmNum; CsmIdx++)
 		{
-			if (PerPixelViewerDistance < (half)gCsmDistanceArray[CsmIdx])
+			if (PerPixelViewerDistance < (half)CsmDistanceArray[CsmIdx])
 			{
-				ShadowMapUV = mul(float4(input.vWorldPos, 1.0f), gViewer2ShadowMtxArray[CsmIdx]);
-				mSFD.mShadowTransitionScale = (half)gShadowTransitionScaleArray[CsmIdx];
+				ShadowMapUV = mul(float4(input.vWorldPos, 1.0f), Viewer2ShadowMtxArray[CsmIdx]);
+				mSFD.mShadowTransitionScale = (half)ShadowTransitionScaleArray[CsmIdx];
 				break;
 			}
 		}
@@ -107,17 +107,17 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 			//#endif
 			//ShadowValue = NoFiltering(ShadowMapUV.xy, mSFD);
 			
-			half FadeValue = (half)saturate(PerPixelViewerDistance * gFadeParam.x + gFadeParam.y);
+			half FadeValue = (half)saturate(PerPixelViewerDistance * FadeParam.x + FadeParam.y);
 			ShadowValue = lerp(ShadowValue, 1.0h, FadeValue);
 		}
 	#else
-        if (PerPixelViewerDistance > gShadowDistance || IsAcceptShadow() == false)
+        if (PerPixelViewerDistance > ShadowDistance || IsAcceptShadow() == false)
 		{
 			ShadowValue = 1.0h;
 		}
 		else
 		{
-			ShadowMapUV = mul(float4(input.vWorldPos, 1.0f), gViewer2ShadowMtx[0]);
+			ShadowMapUV = mul(float4(input.vWorldPos, 1.0f), Viewer2ShadowMtx[0]);
 
 			mSFD.mViewer2ShadowDepth = (half)ShadowMapUV.z;
 
@@ -127,7 +127,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 //			ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
 //			#endif
 
-			half FadeValue = (half)saturate(PerPixelViewerDistance * gFadeParam.x + gFadeParam.y);
+			half FadeValue = (half)saturate(PerPixelViewerDistance * FadeParam.x + FadeParam.y);
 			ShadowValue = lerp(ShadowValue, 1.0h, FadeValue);
 		}
 	#endif//MODE_EDITOR
@@ -231,7 +231,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		//	//sphere env mapping;
 		//	half NoV = (half)max(dot((half3)input.vNormal, V), 0.0h);
 		//	half3 VrN = 2.0h * NoV * (half3)input.vNormal - V;
-		//	half3 EnvMapUV = CalcSphereMapUV(VrN, 0.8h, (half)gEnvMapMaxMipLevel);
+		//	half3 EnvMapUV = CalcSphereMapUV(VrN, 0.8h, (half)EnvMapMaxMipLevel);
 		//	half3 EnvSpecColor = (half3)gEnvMap.SampleLevel(Samp_gEnvMap, EnvMapUV.xy, EnvMapUV.z).rgb;
 		//	half3 EnvSpecShading = (half3)EnvSpecColor * 0.75h * Albedo;
 
@@ -261,7 +261,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 
 			//half3 VrN = 2.0h * NoV * N - V;
 
-			//half3 EnvMapUV = CalcSphereMapUV(VrN, 0.3h, (half)gEyeEnvMapMaxMipLevel);
+			//half3 EnvMapUV = CalcSphereMapUV(VrN, 0.3h, (half)EyeEnvMapMaxMipLevel);
 			//half3 EnvSpecLightColor = (half3)gEyeEnvMap.SampleLevel(Samp_gEyeEnvMap, EnvMapUV.xy, EnvMapUV.z).rgb;
 			//half Threshold = 0.5h;
 			//half Lum = max(0.0h, CalcLuminance(EnvSpecLightColor) - Threshold) * 2.0h;
@@ -304,7 +304,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		half3 R = 2 * dot(V, N) * N - V;
 		// Point lobe in off-specular peak direction
 		R = GetOffSpecularPeakReflectionDir(N, R, Roughness);
-		half EnvMipLevel = GetTexMipLevelFromRoughness(Roughness, (half)gEnvMapMaxMipLevel);
+		half EnvMipLevel = GetTexMipLevelFromRoughness(Roughness, (half)EnvMapMaxMipLevel);
 		half3 EnvSpecLightColor = (half3) gEnvMap.SampleLevel(Samp_gEnvMap, R, EnvMipLevel).rgb;
 		half Ihdr = max(0.6h, CalcLuminanceYCbCr(EnvSpecLightColor));
 		Ihdr = exp2((Ihdr - 0.6h) * 7.5h);
@@ -332,7 +332,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 			float2 uv = input.psCustomUV0.xy;
 			/*uv.x = saturate( (input.vPosition.x + 1.0f) * 0.5f );
 			uv.y = saturate( (1.0f - input.vPosition.y) * 0.5f );*/
-			float2 tileIdxF = (uv.xy * gViewportSizeAndRcp.xy) / TileSize;
+			float2 tileIdxF = (uv.xy * ViewportSizeAndRcp.xy) / TileSize;
 			uint2 tileIdx = (uint2)tileIdxF;
 			uint indexOfTile = GetTileIndex(tileIdx.x, tileIdx.y);
 			uint NumOfLights = min(TilingBuffer[indexOfTile].NumPointLight, 32);
@@ -357,7 +357,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		//BaseShading = lerp(BaseShading, FogShading, FogAlpha);
 
 		//output.RT0 = half4((half2)input.psCustomUV0.xy, 0.0h, 1.0h);
-		//float2 ViewportUV = input.vPosition.xy  * gViewportSizeAndRcp.zw;
+		//float2 ViewportUV = input.vPosition.xy  * ViewportSizeAndRcp.zw;
 		//output.RT0 = half4(ViewportUV, 0.0h, 1.0h);
 		//output.RT0 = half4(0.0h, (half)input.psCustomUV0.z, 0.0h, 1.0h);
 		//output.RT0 = half4(0.0h, input.vPosition.z, 0.0h, 1.0h);
@@ -367,7 +367,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		BaseShading.b = (half)floor(BaseShading.b * AO_M) + AoOffsetEncoded;
 #endif
 
-		output.RT0 = half4(BaseShading, PerPixelViewerDistance * rcp((half)gZFar));
+		output.RT0 = half4(BaseShading, PerPixelViewerDistance * rcp((half)ZFar));
 
 		//output.RT0.rgb = mtl.mAlbedo;
 		//output.RT0.a = Alpha;
@@ -380,7 +380,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		//output.RT0 = half4(N * 0.5h + 0.5h, 1.0f);
 		//output.RT0 = half4(1.0f, 1.0f, 1.0f, 1.0f);
 		//output.RT0 = half4(SkyShading, 1.0f);
-		//half3 NDCPos = half3((input.vPosition.xy * gViewportSizeAndRcp.zw - 0.5h) * half2(2.0h, -2.0h), input.vPosition.z);
+		//half3 NDCPos = half3((input.vPosition.xy * ViewportSizeAndRcp.zw - 0.5h) * half2(2.0h, -2.0h), input.vPosition.z);
 		//output.RT0 = half4(0.0h, NDCPos.y, 0.0h, 1.0h);
 
 		/*if (input.vPosition.w > 5.0h)

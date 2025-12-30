@@ -11,7 +11,6 @@ using EngineNS.Graphics.Pipeline;
 using EngineNS.Rtti;
 using EngineNS.Thread;
 using EngineNS.Thread.Async;
-using MathNet.Numerics.LinearAlgebra.Solvers;
 
 namespace EngineNS.Editor.Forms
 {

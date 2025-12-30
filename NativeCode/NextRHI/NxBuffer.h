@@ -544,15 +544,30 @@ namespace NxRHI
 		template<class _T>
 		void SetValue(const FShaderVarDesc* binder, const _T& v, bool bFlush, FCbvUpdater* pUpdater)
 		{
+			if (binder == nullptr)
+			{
+				ASSERT(false);
+				return;
+			}
 			SetValue(*binder, v, bFlush, pUpdater);
 		}
 		template<class _T>
 		void SetValue(const FShaderVarDesc* binder, int index, const _T& v, bool bFlush, FCbvUpdater* pUpdater)
 		{
+			if (binder == nullptr)
+			{
+				ASSERT(false);
+				return;
+			}
 			SetArrrayValue(*binder, index, &v, sizeof(v), bFlush, pUpdater);
 		}
 		void SetMatrix(const FShaderVarDesc* binder, const v3dxMatrix4& v, bool bTranspose, bool bFlush, FCbvUpdater* pUpdater)
 		{
+			if (binder == nullptr)
+			{
+				ASSERT(false);
+				return;
+			}
 			if (bTranspose)
 			{
 				v3dxMatrix4 tempM;

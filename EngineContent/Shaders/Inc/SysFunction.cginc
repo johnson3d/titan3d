@@ -278,8 +278,8 @@ void ScreenPos( float4 projPos, out float2 screenPos )
 
   screenPos.y = 1-screenPos.y;   
 
-  screenPos.x += 1.0f* gViewportSizeAndRcp.z*0.5f;
-  screenPos.y += 1.0f* gViewportSizeAndRcp.w*0.5f;
+  screenPos.x += 1.0f * ViewportSizeAndRcp.z*0.5f;
+  screenPos.y += 1.0f * ViewportSizeAndRcp.w*0.5f;
 }
 
 void TransformToWorldPos(float3 localPos, out float3 worldPos)

@@ -16,15 +16,15 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	output.vPosition = float4(input.vPosition.xyz, 1.0f);
 	output.vUV = input.vUV;
 
-	output.psCustomUV0.xy = input.vUV + float2(gViewportSizeAndRcp.z, 0.0f);
-	output.psCustomUV0.zw = input.vUV + float2(gViewportSizeAndRcp.z * 2.0f, 0.0f);
-	output.psCustomUV1.xy = input.vUV - float2(gViewportSizeAndRcp.z, 0.0f);
-	output.psCustomUV1.zw = input.vUV - float2(gViewportSizeAndRcp.z * 2.0f, 0.0f);
+	output.psCustomUV0.xy = input.vUV + float2(ViewportSizeAndRcp.z, 0.0f);
+	output.psCustomUV0.zw = input.vUV + float2(ViewportSizeAndRcp.z * 2.0f, 0.0f);
+	output.psCustomUV1.xy = input.vUV - float2(ViewportSizeAndRcp.z, 0.0f);
+	output.psCustomUV1.zw = input.vUV - float2(ViewportSizeAndRcp.z * 2.0f, 0.0f);
 
-	output.psCustomUV2.xy = input.vUV + float2(0.0f, gViewportSizeAndRcp.w);
-	output.psCustomUV2.zw = input.vUV + float2(0.0f, gViewportSizeAndRcp.w * 2.0f);
-	output.psCustomUV3.xy = input.vUV - float2(0.0f, gViewportSizeAndRcp.w);
-	output.psCustomUV3.zw = input.vUV - float2(0.0f, gViewportSizeAndRcp.w * 2.0f);
+	output.psCustomUV2.xy = input.vUV + float2(0.0f, ViewportSizeAndRcp.w);
+	output.psCustomUV2.zw = input.vUV + float2(0.0f, ViewportSizeAndRcp.w * 2.0f);
+	output.psCustomUV3.xy = input.vUV - float2(0.0f, ViewportSizeAndRcp.w);
+	output.psCustomUV3.zw = input.vUV - float2(0.0f, ViewportSizeAndRcp.w * 2.0f);
 
 	return output;
 }

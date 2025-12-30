@@ -9,8 +9,8 @@
 float GetReferValue()
 {
     float result = (float) PickedID; //cbPerMesh
-    result += (float) gZFar; //cbPerCamera
-    result += (float) gViewportSizeAndRcp.x; //cbPerViewport
+    result += (float) ZFar; //cbPerCamera
+    result += (float) ViewportSizeAndRcp.x; //cbPerViewport
     result += Time; //cbPerFrame
     result += HdrMiddleGrey; //cbPerGpuScene
     result += MaterialRenderFlags; //cbPerMaterial

@@ -47,9 +47,9 @@ PS_INPUT VS_Main(VS_INPUT input1)
 #if RHI_TYPE == RHI_GL
 	output.vUV.y = 1 - input.vUV.y;
 #endif
-	output.vLightMap.xy = gSunPosNDC.xy - input.vPosition.xy;
-	output.vLightMap.z = gSunPosNDC.z;
-	output.vLightMap.w = gSunPosNDC.w;
+	output.vLightMap.xy = SunPosNDC.xy - input.vPosition.xy;
+	output.vLightMap.z = SunPosNDC.z;
+	output.vLightMap.w = SunPosNDC.w;
 	output.vLightMap.xy = CalcVignetteVS(output.vPosition.xy);
 
 	return output;
@@ -73,7 +73,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	half4 TexelAA = FxaaMobilePS(
 		input.vUV,																//FxaaFloat2 pos,
 		TempTex,																//FxaaTex tex,
-		gViewportSizeAndRcp.zw,															//FxaaFloat2 fxaaQualityRcpFrame,
+		ViewportSizeAndRcp.zw,															//FxaaFloat2 fxaaQualityRcpFrame,
 		1.0,																			//highest value,FxaaFloat fxaaQualitySubpix,
 		0.166,																		//default value,FxaaFloat fxaaQualityEdgeThreshold,
 		0.0833																		//default value,FxaaFloat fxaaQualityEdgeThresholdMin,

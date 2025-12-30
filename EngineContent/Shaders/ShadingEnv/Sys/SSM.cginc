@@ -41,7 +41,7 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	output.vPosition = mul(float4(output.vPosition.xyz, 1), ShadowWVPMtx);
 #endif
 	
-	output.vPosition.z = output.vPosition.z + gDepthBiasAndZFarRcp.x;
+	output.vPosition.z = output.vPosition.z + DepthBiasAndZFarRcp.x;
 
 	return output;
 }

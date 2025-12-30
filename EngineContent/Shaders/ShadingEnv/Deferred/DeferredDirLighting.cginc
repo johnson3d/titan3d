@@ -90,9 +90,9 @@ PS_INPUT VS_Main(VS_INPUT input1)
 #if RHI_TYPE == RHI_GL
 	output.vUV.y = 1 - input.vUV.y;
 #endif
-	output.vLightMap.xy = gSunPosNDC.xy - input.vPosition.xy;
-	output.vLightMap.z = gSunPosNDC.z;
-	output.vLightMap.w = gSunPosNDC.w;
+	output.vLightMap.xy = SunPosNDC.xy - input.vPosition.xy;
+	output.vLightMap.z = SunPosNDC.z;
+	output.vLightMap.w = SunPosNDC.w;
 	output.vLightMap.xy = CalcVignetteVS((half2)output.vPosition.xy);
 
 	//output.SpecialData.x = input1.vVertexID;
@@ -177,10 +177,10 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	ShadowFilterData mSFD;
 	mSFD.mShadowMap = GShadowMap;
 	mSFD.mShadowMapSampler = Samp_GShadowMap;
-	mSFD.mShadowMapSizeAndRcp = gShadowMapSizeAndRcp;
-	mSFD.mShadowTransitionScale = (half)gShadowTransitionScale;
+	mSFD.mShadowMapSizeAndRcp = ShadowMapSizeAndRcp;
+	mSFD.mShadowTransitionScale = (half)ShadowTransitionScale;
 	
-	if (PerPixelViewerDistance > gShadowDistance || GBuffer.IsAcceptShadow() == false)
+	if (PerPixelViewerDistance > ShadowDistance || GBuffer.IsAcceptShadow() == false)
 	{
 		ShadowValue = 1.0h;
 	}
@@ -190,11 +190,11 @@ PS_OUTPUT PS_Main(PS_INPUT input)
         float clip_u_max = 0.25;
 		for (int CsmIdx = 0; CsmIdx < CsmNum; CsmIdx++)
 		{
-			if (PerPixelViewerDistance < (half)gCsmDistanceArray[CsmIdx])
+			if (PerPixelViewerDistance < (half)CsmDistanceArray[CsmIdx])
 			{
-				ShadowMapUV = mul(float4(WorldPos, 1.0f), gViewer2ShadowMtxArray[CsmIdx]);
+				ShadowMapUV = mul(float4(WorldPos, 1.0f), Viewer2ShadowMtxArray[CsmIdx]);
                 ShadowMapUV.z = ShadowMapUV.z / ShadowMapUV.w;
-				mSFD.mShadowTransitionScale = (half)gShadowTransitionScaleArray[CsmIdx];
+				mSFD.mShadowTransitionScale = (half)ShadowTransitionScaleArray[CsmIdx];
                 if (ShadowMapUV.x > clip_u_max || ShadowMapUV.x < clip_u_min)
                 {
 					#if USE_INVERSE_Z == 1
@@ -220,14 +220,14 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 			ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
 			//ShadowValue = NoFiltering(ShadowMapUV.xy, mSFD);
 			
-			half FadeValue = (half)saturate(PerPixelViewerDistance * gFadeParam.x + gFadeParam.y);
+			half FadeValue = (half)saturate(PerPixelViewerDistance * FadeParam.x + FadeParam.y);
 			ShadowValue = lerp(ShadowValue, 1.0h, FadeValue);
 		}
 		
 		if (ShadowValue < 1.0f)
 			output.RT0.a = 0.0h;
 
-		half FadeValue = (half)saturate(PerPixelViewerDistance * gFadeParam.x + gFadeParam.y);		
+		half FadeValue = (half)saturate(PerPixelViewerDistance * FadeParam.x + FadeParam.y);		
 		ShadowValue = lerp(ShadowValue, 1.0h, FadeValue);
 	}
 #elif ENV_EShadowMode == EShadowMode_Advance
@@ -316,7 +316,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     half3 EnvSpecLightColor = 0;
     if (GBuffer.IsDisableEnvColor() == false)
     {
-        half EnvMipLevel = GetTexMipLevelFromRoughness(Roughness, (half)gEnvMapMaxMipLevel);
+        half EnvMipLevel = GetTexMipLevelFromRoughness(Roughness, (half)EnvMapMaxMipLevel);
         EnvSpecLightColor = (half3) gEnvMap.SampleLevel(Samp_gEnvMap, R, EnvMipLevel).rgb;
     }
     else
@@ -336,7 +336,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 #if ENV_DISABLE_POINTLIGHTS == 0
 	if (NoPixel == false)
 	{
-		float2 tileIdxF = (uv * gViewportSizeAndRcp.xy) / TileSize;
+		float2 tileIdxF = (uv * ViewportSizeAndRcp.xy) / TileSize;
 		uint2 tileIdx = (uint2)tileIdxF;
 		uint indexOfTile = GetTileIndex(tileIdx.x, tileIdx.y);
 		uint NumOfLights = min(TilingBuffer[indexOfTile].NumPointLight, 32);

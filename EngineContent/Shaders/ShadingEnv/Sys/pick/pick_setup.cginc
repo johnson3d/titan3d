@@ -55,7 +55,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 {
 	PS_OUTPUT output = (PS_OUTPUT)0;
 	float PerPixelViewerDistance = input.psCustomUV0.w;
-	output.RT0 = float2(1.0f, PerPixelViewerDistance * rcp(gZFar));
+	output.RT0 = float2(1.0f, PerPixelViewerDistance * rcp(ZFar));
 
 	return output;
 }

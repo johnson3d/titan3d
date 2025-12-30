@@ -18,28 +18,28 @@ cbuffer cbPerViewport DX_BIND_B(1)
 	float FogVerticalRange;// = 150;
 	float FogDensity;// = 1.57;
 
-	float4 gViewportSizeAndRcp;
+	float4 ViewportSizeAndRcp;
 	
-	float2 gDepthBiasAndZFarRcp;
-	float2 gFadeParam;
+	float2 DepthBiasAndZFarRcp;
+	float2 FadeParam;
 
-	float4 gShadowMapSizeAndRcp;
+	float4 ShadowMapSizeAndRcp;
 
-	matrix gViewer2ShadowMtx[1];
+	matrix Viewer2ShadowMtx[1];
 
-	matrix gViewer2ShadowMtxArray[4];
+	matrix Viewer2ShadowMtxArray[4];
 	
-	float4 gCsmDistanceArray;
+	float4 CsmDistanceArray;
 
-	float4 gShadowTransitionScaleArray;
+	float4 ShadowTransitionScaleArray;
 	
-	float4 gSunPosNDC;
-	float4 gAoParam;//radius_platform_bias_dark;
+	float4 SunPosNDC;
+	float4 AoParam;//radius_platform_bias_dark;
 
-	float gShadowTransitionScale;
-	float gShadowDistance;
-	float gEnvMapMaxMipLevel;
-	float gEyeEnvMapMaxMipLevel;
+	float ShadowTransitionScale;
+	float ShadowDistance;
+	float EnvMapMaxMipLevel;
+	float EyeEnvMapMaxMipLevel;
 };
 
 #endif

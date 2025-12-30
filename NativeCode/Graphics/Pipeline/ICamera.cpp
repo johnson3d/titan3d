@@ -120,8 +120,8 @@ void ICamera::UpdateConstBufferData(EngineNS::NxRHI::IGpuDevice* device, EngineN
 		
 		buffer->SetValue(pBinder->FindField("JitterOffset"), GetJitterUV(), bFlush, pUpdater);
 		
-		buffer->SetValue(pBinder->FindField("gZNear"), mZNear, bFlush, pUpdater);
-		buffer->SetValue(pBinder->FindField("gZFar"), mZFar, bFlush, pUpdater);
+		buffer->SetValue(pBinder->FindField("ZNear"), mZNear, bFlush, pUpdater);
+		buffer->SetValue(pBinder->FindField("ZFar"), mZFar, bFlush, pUpdater);
 
 		auto cameraOffset = GetMatrixStartPosition().ToSingleVector();
 		buffer->SetValue(pBinder->FindField("CameraOffset"), cameraOffset, bFlush, pUpdater);

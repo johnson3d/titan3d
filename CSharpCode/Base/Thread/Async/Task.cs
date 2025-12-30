@@ -162,7 +162,7 @@ namespace EngineNS.Thread.Async
         #endregion
     }
 
-    public enum ETtTaskStatus
+    public enum ETaskStatus
     {
         NotInit = 0,
         Pending,
@@ -173,13 +173,13 @@ namespace EngineNS.Thread.Async
     public class TtTaskData<T> : IPooledObject
     {
         public bool IsAlloc { get; set; } = false;
-        internal ETtTaskStatus mStatus = ETtTaskStatus.NotInit;
+        internal ETaskStatus mStatus = ETaskStatus.NotInit;
         internal T mResult;
         internal Action mContinuation;
         internal Exception mException;
         public void Reset()
         {
-            mStatus = ETtTaskStatus.Pending;
+            mStatus = ETaskStatus.Pending;
             mResult = default(T);
             mContinuation = null;
             mException = null;
@@ -225,7 +225,7 @@ namespace EngineNS.Thread.Async
 
         public void Init(T result)
         {
-            mStatus = ETtTaskStatus.Success;
+            mStatus = ETaskStatus.Success;
             mResult = result;
 
             mContinuation = null;
@@ -234,7 +234,7 @@ namespace EngineNS.Thread.Async
 
         public void Init(Exception exception)
         {
-            mStatus = ETtTaskStatus.Failed;
+            mStatus = ETaskStatus.Failed;
             mException = exception;
 
             mResult = default;
@@ -243,7 +243,7 @@ namespace EngineNS.Thread.Async
 
         public void Init()
         {
-            this.mStatus = ETtTaskStatus.Pending;
+            this.mStatus = ETaskStatus.Pending;
 
             mException = null;
             mResult = default;
@@ -255,9 +255,9 @@ namespace EngineNS.Thread.Async
             {
                 switch (mStatus)
                 {
-                    case ETtTaskStatus.Success:
+                    case ETaskStatus.Success:
                         return mResult;
-                    case ETtTaskStatus.Failed:
+                    case ETaskStatus.Failed:
                         ExceptionDispatchInfo.Capture(mException).Throw();
                         return default;
                     default:
@@ -267,13 +267,13 @@ namespace EngineNS.Thread.Async
         }
         internal bool TrySetResult(T result)
         {
-            if (mStatus != ETtTaskStatus.Pending)
+            if (mStatus != ETaskStatus.Pending)
             {
                 return false;
             }
             else
             {
-                mStatus = ETtTaskStatus.Success;
+                mStatus = ETaskStatus.Success;
                 this.mResult = result;
                 if (this.mContinuation != null)
                     this.mContinuation();
@@ -283,13 +283,13 @@ namespace EngineNS.Thread.Async
 
         internal bool TrySetException(Exception exception)
         {
-            if (mStatus != ETtTaskStatus.Pending)
+            if (mStatus != ETaskStatus.Pending)
             {
                 return false;
             }
             else
             {
-                mStatus = ETtTaskStatus.Failed;
+                mStatus = ETaskStatus.Failed;
                 this.mException = exception;
                 this.mContinuation?.Invoke();
                 return true;
@@ -298,7 +298,7 @@ namespace EngineNS.Thread.Async
 
         internal void RegisterContinuation(Action cont)
         {
-            if (mStatus == ETtTaskStatus.Pending)
+            if (mStatus == ETaskStatus.Pending)
             {
                 if (this.mContinuation is null)
                 {
@@ -381,24 +381,17 @@ namespace EngineNS.Thread.Async
             get => mTaskData.mException; 
             private set => mTaskData.mException = value; 
         }
-        public ETtTaskStatus TaskState
+        public ETaskStatus TaskState
         {
             get
             {
                 if (mTaskData == null)
-                    return ETtTaskStatus.NotInit;
+                    return ETaskStatus.NotInit;
                 return mTaskData.mStatus;
             }
         }
-        public bool IsCompleted => mTaskData.mStatus != ETtTaskStatus.Pending;
-        public void Wait()
-        {
-            while (IsCompleted == false)
-            {
-                System.Threading.Thread.Sleep(0);
-            }
-        }
-
+        public bool IsCompleted => mTaskData.mStatus != ETaskStatus.Pending;
+        
         public TtFiberAwaiter<T> GetAwaiter()
         {
             return new TtFiberAwaiter<T>(this);
@@ -452,12 +445,12 @@ namespace EngineNS.Thread.Async
     public class TtTaskData : IPooledObject, IDisposable
     {
         public bool IsAlloc { get; set; } = false;
-        internal ETtTaskStatus mStatus;
+        internal ETaskStatus mStatus;
         internal Action mContinuation;
         internal Exception mException;
         public void Reset()
         {
-            mStatus = ETtTaskStatus.Pending;
+            mStatus = ETaskStatus.Pending;
             mContinuation = null;
             mException = null;
         }
@@ -490,30 +483,30 @@ namespace EngineNS.Thread.Async
         }
         #endregion
 
-        public void Init()
+        private void Init()
         {
-            mStatus = ETtTaskStatus.Pending;
+            mStatus = ETaskStatus.Pending;
             
             mContinuation = null;
             mException = null;
         }
 
-        public void Init(Exception exception)
+        private void Init(Exception exception)
         {
-            mStatus = ETtTaskStatus.Failed;
+            mStatus = ETaskStatus.Failed;
             mException = exception;
 
             mContinuation = null;
         }
         internal bool TrySetResult()
         {
-            if (mStatus != ETtTaskStatus.Pending)
+            if (mStatus != ETaskStatus.Pending)
             {
                 return false;
             }
             else
             {
-                mStatus = ETtTaskStatus.Success;
+                mStatus = ETaskStatus.Success;
                 if (this.mContinuation != null)
                     this.mContinuation();
                 return true;
@@ -521,13 +514,13 @@ namespace EngineNS.Thread.Async
         }
         internal bool TrySetException(Exception exception)
         {
-            if (mStatus != ETtTaskStatus.Pending)
+            if (mStatus != ETaskStatus.Pending)
             {
                 return false;
             }
             else
             {
-                mStatus = ETtTaskStatus.Failed;
+                mStatus = ETaskStatus.Failed;
                 this.mException = exception;
                 this.mContinuation?.Invoke();
                 return true;
@@ -536,7 +529,7 @@ namespace EngineNS.Thread.Async
 
         internal void RegisterContinuation(Action cont)
         {
-            if (mStatus == ETtTaskStatus.Pending)
+            if (mStatus == ETaskStatus.Pending)
             {
                 if (this.mContinuation is null)
                 {
@@ -642,7 +635,7 @@ namespace EngineNS.Thread.Async
             get => mTaskData.mException;
             private set => mTaskData.mException = value;
         }
-        public bool IsCompleted => mTaskData.mStatus != ETtTaskStatus.Pending;
+        public bool IsCompleted => mTaskData.mStatus != ETaskStatus.Pending;
         public void WaitCompleted()
         {
             TtContextThread.CurrentContext.WaitTask(this);

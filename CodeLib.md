@@ -187,12 +187,12 @@ Plugins目录下CopyPlugins.bat在修改*.plugin后目前需要手工执行，刷新到插件目录
 	}
 ```
 
-## 7.增加一个UMdfQueue处理顶点变换定制
+## 7.增加一个TtMdfQueue处理顶点变换定制
 - 参阅EngineNS.Graphics.Mesh.TtMdfStaticMesh
 - 核心是实现GetBaseBuilder函数提供MdfQueue的hlsl代码
 - 通过继续派生本类的泛型版本来控制MdfQueu的shader permutation
 
-## 8.增加一个UShadingEnv处理Shader总流程
+## 8.增加一个TtShadingEnv处理Shader总流程
 - 参阅Graphics.Pipeline.Deferred.TtOpaqueShading
 - 构造器中提供定制好的CodeName
 - 在BeginPermutaion和UpdatePermutation中添加PushPermutation来增加Permutaion

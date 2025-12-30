@@ -76,7 +76,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 	GBuffer.MotionVector.y = -GBuffer.MotionVector.y;
 
 	//float2 noJitterScreenPos = (input.psCustomUV3.xy / input.psCustomUV3.w) * 0.5 + 0.5;
-	//if (any(abs(currentScreenPos - (noJitterScreenPos + JitterOffset)) > gViewportSizeAndRcp.zw * 0.25f))
+	//if (any(abs(currentScreenPos - (noJitterScreenPos + JitterOffset)) > ViewportSizeAndRcp.zw * 0.25f))
 	////if (any(abs(currentScreenPos != (noJitterScreenPos + JitterOffset))))
 	//{
 	//	GBuffer.MtlColorRaw = half3(1,0,0);

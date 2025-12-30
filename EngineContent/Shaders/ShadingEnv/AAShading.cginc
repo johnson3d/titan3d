@@ -66,7 +66,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     half4 rt0 = FxaaMobilePS(
         uv.xy,																//FxaaFloat2 pos,
         TempTex,																//FxaaTex tex,
-        gViewportSizeAndRcp.zw,															//FxaaFloat2 fxaaQualityRcpFrame,
+        ViewportSizeAndRcp.zw,															//FxaaFloat2 fxaaQualityRcpFrame,
         1.0,																			//highest value,FxaaFloat fxaaQualitySubpix,
         0.166,																		//default value,FxaaFloat fxaaQualityEdgeThreshold,
         0.0833																		//default value,FxaaFloat fxaaQualityEdgeThresholdMin,

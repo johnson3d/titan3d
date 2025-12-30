@@ -49,7 +49,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     half2 PickedData = (half2) GPickedTex.Sample(Samp_GPickedTex, uv.xy).rg;
     half PickedContrast = 1.0h;
     half3 PickedEdgeColor = 0.0h;
-    half linearDepth = (half) (PerPixelViewerDistance / gZFar);
+    half linearDepth = (half) (PerPixelViewerDistance / ZFar);
     if (PickedData.g - linearDepth > 0.0h)
     {
         PickedEdgeColor = half3(1.0h, 0.0h, 0.0h) * PickedContrast;

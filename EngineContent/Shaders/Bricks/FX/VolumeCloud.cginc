@@ -218,7 +218,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     rayDir = normalize(rayDir);
                 
     // 执行光线步进
-    float4 cloudColor = RayMarchClouds(rayOrigin, rayDir, gZFar);
+    float4 cloudColor = RayMarchClouds(rayOrigin, rayDir, ZFar);
                 
     // 与场景混合（预乘Alpha混合）
     float3 result = sceneColor.rgb * (1.0 - cloudColor.a) + cloudColor.rgb;

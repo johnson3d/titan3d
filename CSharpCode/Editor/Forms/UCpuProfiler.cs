@@ -155,11 +155,11 @@ namespace EngineNS.Editor.Forms
         }
         private unsafe void OnDrawImpl()
         {
-            if (mRpcProfilerThreads.TaskState == Thread.Async.ETtTaskStatus.NotInit || mRpcProfilerThreads.IsCompleted)
+            if (mRpcProfilerThreads.TaskState == Thread.Async.ETaskStatus.NotInit || mRpcProfilerThreads.IsCompleted)
             {
                 if (TtEngine.Instance.RpcModule.RpcManager != null)
                 {
-                    if (mRpcProfilerThreads.TaskState == Thread.Async.ETtTaskStatus.Success)
+                    if (mRpcProfilerThreads.TaskState == Thread.Async.ETaskStatus.Success)
                     {
                         //从Task中得到Result，拷贝到ProfilerThreadNames
                         ProfilerThreadNames.Clear();
@@ -205,9 +205,9 @@ namespace EngineNS.Editor.Forms
                                 TimeScopeTree.Reset();
                             }
                             
-                            if (mRpcProfilerData.TaskState == Thread.Async.ETtTaskStatus.NotInit|| mRpcProfilerData.IsCompleted)
+                            if (mRpcProfilerData.TaskState == Thread.Async.ETaskStatus.NotInit|| mRpcProfilerData.IsCompleted)
                             {
-                                if (mRpcProfilerData.TaskState == Thread.Async.ETtTaskStatus.Success)// && mRpcProfilerData.DirectResult != null)
+                                if (mRpcProfilerData.TaskState == Thread.Async.ETaskStatus.Success)// && mRpcProfilerData.DirectResult != null)
                                 {
                                     var t = mRpcProfilerData.DirectResult;
                                     var scopes = t.Scopes;

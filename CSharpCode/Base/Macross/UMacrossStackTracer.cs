@@ -154,16 +154,22 @@ namespace EngineNS.Macross
                 return ThreadInstance.mFrames.Peek();
             }
         }
+        [ThreadStatic]
+        static int mStackDepth = 0;
         public static void PushFrame(TtMacrossStackFrame frame)
         {
+            System.Threading.Interlocked.Increment(ref mStackDepth);
             if (TtMacrossDebugger.Instance.IsEnableDebugger == false)
                 return;
+            
             ThreadInstance.mFrames.Push(frame);
         }
         public static void PopFrame()
         {
+            System.Threading.Interlocked.Decrement(ref mStackDepth);
             if (TtMacrossDebugger.Instance.IsEnableDebugger == false)
                 return;
+
             if (ThreadInstance.mFrames.Count > 0)
             {
                 var cur = ThreadInstance.mFrames.Peek();
