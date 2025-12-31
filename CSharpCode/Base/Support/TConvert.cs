@@ -257,6 +257,35 @@ namespace EngineNS.Support
                 return 0;
             }
         }
+        public static bool IsPrimitiveType(System.Type type)
+        {
+            if (type.IsPrimitive)
+                return true;
+            if (type.IsEnum)
+                return true;
+            if (type == typeof(string))
+                return true;
+            if (type == typeof(Vector4))
+                return true;
+            if (type == typeof(Vector3))
+                return true;
+            if (type == typeof(Color4f))
+                return true;
+            if (type == typeof(Color3f))
+                return true;
+            if (type == typeof(Color4b))
+                return true;
+            if (type == typeof(RName))
+                return true;
+            if (type == typeof(Guid))
+                return true;
+            if (type == typeof(FTransform))
+                return true;
+            if (type == typeof(Rtti.TtTypeDesc))
+                return true;
+
+            return false;
+        }
         public static object ToObject(Type type, object obj)
         {
             if (obj == null)

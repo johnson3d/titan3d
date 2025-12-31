@@ -66,7 +66,7 @@ namespace EngineNS.Editor.Forms
                 {
                     var sltFile = fileDlg.GetFilePathName();
 
-                    Config.SaveConfig(sltFile);
+                    Config.SaveConfig(sltFile, null);
                 }
                 fileDlg.CloseDialog();
             }

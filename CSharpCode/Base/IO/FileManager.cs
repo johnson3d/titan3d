@@ -1,4 +1,5 @@
-﻿using Org.BouncyCastle.Bcpg.OpenPgp;
+﻿
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -674,18 +675,42 @@ namespace EngineNS.IO
             var options = new JsonSerializerOptions { WriteIndented = true };
             return jsNode!.ToJsonString(options);
         }
-        public static string SaveObjectToJson(object obj)
+        public static string SaveObjectToJson(object obj, TtJsonOptions options = null)
         {
-            string jsonString = JsonSerializer.Serialize(obj, TtJsonOptions.Options);
+            //string jsonString = JsonSerializer.Serialize(obj, TtJsonOptions.Options);
+            //return jsonString;
+
+            var saveNode = new JsonObject();
+            TtAdvancedJsonPartialUpdater.SaveProperties(saveNode, obj, options);
+            var jsonString = saveNode.ToJsonString(TtJsonOptions.Options);
             return jsonString;
         }
-        public static T LoadObjectFromJson<T>(string jsonStr)
+        public static T LoadObjectFromJson<T>(string jsonStr) where T : class, new()
         {
-            return JsonSerializer.Deserialize<T>(jsonStr, TtJsonOptions.Options);
+            using JsonDocument doc = JsonDocument.Parse(jsonStr);
+            T result = new T();
+            TtAdvancedJsonPartialUpdater.LoadProperties(doc.RootElement, result, null, true);
+            //var saveNode = new JsonObject();
+            //TtAdvancedJsonPartialUpdater.SaveProperties(saveNode, result, null);
+            //var jsonString = saveNode.ToJsonString(TtJsonOptions.Options);
+            //File.WriteAllText("d:/tmp.json", jsonString);
+
+            //var s2 = SaveObjectToJson(result);
+            //File.WriteAllText("d:/tmp1.json", s2);
+            return result;
+            //if (result!=null)
+            //    return result;
+            //return JsonSerializer.Deserialize<T>(jsonStr, TtJsonOptions.Options);
         }
         public static object LoadObjectFromJson(System.Type type, string jsonStr)
         {
-            return JsonSerializer.Deserialize(jsonStr, type, TtJsonOptions.Options);
+            using JsonDocument doc = JsonDocument.Parse(jsonStr);
+            var result = Rtti.TtTypeDescManager.CreateInstance(type);
+
+            TtAdvancedJsonPartialUpdater.LoadProperties(doc.RootElement, result, null, true);
+            
+            return result;
+            //return JsonSerializer.Deserialize(jsonStr, type, TtJsonOptions.Options);
         }
         #endregion
     }

@@ -290,23 +290,19 @@ namespace EngineNS
             W = w;
         }
         #region Member
-        /// <summary>
-        /// X的坐标
-        /// </summary>
         public float X;
-        /// <summary>
-        /// Y的坐标
-        /// </summary>
-
         public float Y;
-        /// <summary>
-        /// Z的坐标
-        /// </summary>
         public float Z;
-        /// <summary>
-        /// W的值
-        /// </summary>
         public float W;
+
+        [Rtti.Meta("")]
+        public float x { get => X; set => X = value; }
+        [Rtti.Meta("")]
+        public float y { get => Y; set => Y = value; }
+        [Rtti.Meta("")]
+        public float z { get => Z; set => Z = value; }
+        [Rtti.Meta("")]
+        public float w { get => W; set => W = value; }
 
         public float Left => X;
         public float Top => Y;

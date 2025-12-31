@@ -69,12 +69,24 @@ namespace MainEditor
                 }
                 else
                 {
-                    EngineNS.IO.TtAdvancedJsonPartialUpdater.PartialUpdate(jsCode, Config, EngineNS.IO.TtJsonOptions.Options);
+                    EngineNS.IO.TtAdvancedJsonPartialUpdater.PartialUpdate<TtEngineConfig>(jsCode, Config, null);
                 }
             }
             else
             {
-                EngineNS.IO.TtFileManager.WriteAllText(mBin + "/../cache/config/engine.jscfg", "{\"NativeDll\": \"release\"}");
+                EngineNS.IO.TtJsonOptions options = new EngineNS.IO.TtJsonOptions();
+                options.SaveProperties = new List<string>() { "NativeDll",
+                            "UseRenderDoc",
+                            "HasDebugLayer",
+                            "IsGpuBaseValidation",
+                            "IsDebugShader",
+                            "IsGpuDred",
+                            "IsAftermath"
+                };
+                
+                Config = new TtEngineConfig();
+                Config.SaveConfig(mBin + "/../cache/config/engine.jscfg", options);
+                //EngineNS.IO.TtFileManager.WriteAllText(mBin + "/../cache/config/engine.jscfg", "{\"NativeDll\": \"release\"}");
                 
                 var cfg = FindArgument(args, "config=");
                 if (cfg == null)

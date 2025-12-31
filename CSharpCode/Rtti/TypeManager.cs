@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -194,6 +195,14 @@ namespace EngineNS.Rtti
     }
     public class TtTypeDesc
     {
+        //public static Type GetInterface([System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type t, string name)
+        public static Type GetInterface(Type t, string name)
+        {
+#pragma warning disable IL2072
+            return t.GetInterface(name);
+#pragma warning restore IL2072
+        }
+
         public bool IsRemoved = false;
         public Type SystemType;
         public TtAssemblyDesc Assembly;

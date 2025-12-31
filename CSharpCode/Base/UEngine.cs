@@ -44,12 +44,12 @@ namespace EngineNS
     {
         public const int MajorVersion = 1;
         public const int MiniVersion = 4;
-        public void SaveConfig(string sltFile)
+        public void SaveConfig(string sltFile, IO.TtJsonOptions options)
         {
             bool bJson = IO.TtFileManager.GetExtName(sltFile) == ".jscfg";
             if (bJson)
             {
-                var text = IO.TtFileManager.SaveObjectToJson(this);
+                var text = IO.TtFileManager.SaveObjectToJson(this, options);
                 IO.TtFileManager.WriteAllText(sltFile, text);
             }
             else
@@ -145,7 +145,7 @@ namespace EngineNS
         public bool IsScopeWithSource { get; set; } = false;
         [Rtti.Meta("")]
         [Category("Option")]
-        public string MainWindowType { get; set; }// = Rtti.TypeManager.Instance.GetTypeStringFromType(typeof(Editor.MainEditorWindow));
+        public string MainWindowType { get; set; } = "EngineNS.Editor.TtMainEditorApplication@EngineCore";
         [Rtti.Meta("")]
         [Category("Option")]
         public RName MainRPolicyName { get; set; }
@@ -369,7 +369,7 @@ namespace EngineNS
                 var patch_file = IO.TtFileManager.CombinePath(patch_dir, "engine.jscfg");
                 jsCode = IO.TtFileManager.ReadAllText(patch_file);
                 if (jsCode!=null)
-                    IO.TtAdvancedJsonPartialUpdater.PartialUpdate(jsCode, Config, IO.TtJsonOptions.Options);
+                    IO.TtAdvancedJsonPartialUpdater.PartialUpdate<TtEngineConfig>(jsCode, Config, null);
             }
             else
             {
@@ -384,10 +384,9 @@ namespace EngineNS
                 Config.DefaultTexture = RName.GetRName("texture/checkboard.txpic", RName.ERNameType.Engine);
                 Config.DefaultMaterial = RName.GetRName("material/SysDft.material", RName.ERNameType.Engine);
                 Config.DefaultMaterialInstance = RName.GetRName("material/box_wite.uminst", RName.ERNameType.Game);
-                Config.MainWindowType = Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Editor.TtMainEditorApplication));
                 Config.MainRPolicyName = RName.GetRName("utest/deferred.rpolicy", RName.ERNameType.Game);
                 Config.SimpleRPolicyName = RName.GetRName("graphics/deferred_simple.rpolicy", RName.ERNameType.Engine);
-                Config.SaveConfig(cfgFile);
+                Config.SaveConfig(cfgFile, null);
             }
         }
         public void InitTypes(string cfgFile, bool bNatvieMemory, bool bLoadPluginModuel)

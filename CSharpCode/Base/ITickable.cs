@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EngineNS
 {
@@ -31,10 +32,11 @@ namespace EngineNS
         public List<IMemberTickable> Members = new List<IMemberTickable>();
         public void CollectMembers(object host)
         {
+            var type = host.GetType();
             var props = host.GetType().GetProperties();
             foreach (var i in props)
             {
-                if (i.PropertyType.GetInterface("IMemberTickable") != null)
+                if (Rtti.TtTypeDesc.GetInterface(i.PropertyType,"IMemberTickable") != null)
                 {
                     var member = i.GetValue(host) as IMemberTickable;
                     if (member != null)

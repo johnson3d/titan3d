@@ -156,7 +156,7 @@ namespace EngineNS.IO
                 jsCode = IO.TtFileManager.ReadAllText(file);
                 if (jsCode != null)
                 {
-                    TtAdvancedJsonPartialUpdater.PartialUpdate(jsCode, cfg, TtJsonOptions.Options);
+                    TtAdvancedJsonPartialUpdater.PartialUpdate<IConfig>(jsCode, cfg, null);
                 }
                 return cfg;
             }
