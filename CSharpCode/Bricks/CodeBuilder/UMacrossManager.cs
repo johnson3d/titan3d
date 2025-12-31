@@ -33,7 +33,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 Config.GameReferenceAssemblies = new List<string>()
                 {
                     IO.TtFileManager.GetRelativePath(
-                        IO.TtFileManager.GetBaseDirectory(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameProject),
+                        IO.TtFileManager.GetBaseDirectory(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.ConfigManager.GetConfig<Editor.TtEditorConfig>().GameProject),
                         TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute)) + "Engine.Window.dll",
                 };
                 Config.GenProjects = new List<CodeCompiler.ProjectConfig>()
@@ -42,7 +42,7 @@ namespace EngineNS.Bricks.CodeBuilder
                     {
                         ProjectType = CodeCompiler.ProjectConfig.enProjectType.DefaultGame,
                         ProjectFile = IO.TtFileManager.GetRelativePath(
-                            IO.TtFileManager.GetBaseDirectory(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameProject),
+                            IO.TtFileManager.GetBaseDirectory(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.ConfigManager.GetConfig<Editor.TtEditorConfig>().GameProject),
                             TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game)) + "MacrossGenCSharp.shproj",
                         ProjectGuid = Guid.NewGuid(),
                         MinVSVersion = new Version(14, 0),
@@ -94,7 +94,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 return;
             NeedRegenGameProject = false;
 
-            var projFile = TtEngine.Instance.EditorInstance.Config.GameProject;
+            var projFile = TtEngine.Instance.ConfigManager.GetConfig<Editor.TtEditorConfig>().GameProject;
             if(!System.IO.Path.IsPathRooted(projFile))
                 projFile = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.EngineSource) + projFile;
             var projFolder = IO.TtFileManager.GetParentPathName(projFile);
@@ -164,7 +164,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
         public void ClearGameProjectTemplateBuildFiles()
         {
-            var projFile = TtEngine.Instance.EditorInstance.Config.GameProject;
+            var projFile = TtEngine.Instance.ConfigManager.GetConfig<Editor.TtEditorConfig>().GameProject;
             var projFolder = IO.TtFileManager.GetParentPathName(projFile);
             var objFolder = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + projFolder.TrimEnd('/') + "/obj";
             if(IO.TtFileManager.DirectoryExists(objFolder))

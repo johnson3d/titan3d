@@ -13,7 +13,7 @@ namespace EngineNS.Bricks.Procedure
         }
         public override Color4b GetBorderColor()
         {
-            return TtEngine.Instance.EditorInstance.Config.PgcBoderColor;
+            return TtEngine.Instance.ConfigManager.GetConfig<Editor.TtEditorConfig>().PgcBoderColor;
         }
         public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
         {

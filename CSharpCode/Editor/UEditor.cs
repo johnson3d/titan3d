@@ -5,9 +5,17 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Editor
 {
+    [IO.TtConfig(Path = "editor.jscfg")]
     [Rtti.Meta("")]
-    public partial class TtEditorConfig
+    public partial class TtEditorConfig : IO.IConfig
     {
+        public TtEditorConfig() 
+        {
+            GameProject = "Module/GameProject/GameProject.csproj";
+            PhyMaterialIconName = RName.GetRName("icons/phymaterialicon.uvanim", RName.ERNameType.Engine);
+            FontIconName = RName.GetRName("icons/font.uvanim", RName.ERNameType.Engine);
+            MacrossIconName = RName.GetRName("icons/macrossicon.uvanim", RName.ERNameType.Engine);
+        }
         public void SaveConfig(string sltFile)
         {
             IO.TtFileManager.SaveObjectToXml(sltFile, this);
@@ -66,7 +74,10 @@ namespace EngineNS.Editor
 
     public partial class TtEditor : TtModule<TtEngine>
     {
-        public TtEditorConfig Config { get; set; } = new TtEditorConfig();
+        public TtEditorConfig Config
+        {
+            get => TtEngine.Instance.ConfigManager.GetConfig<Editor.TtEditorConfig>();
+        }
         public EGui.TtUVAnim PhyMaterialIcon { get; set; }
         public EGui.TtUVAnim FontIcon { get; set; }
         public EGui.TtUVAnim MacrossIcon { get; set; }
@@ -78,17 +89,18 @@ namespace EngineNS.Editor
 
         public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
         {
-            var cfgFile = host.FileManager.GetRoot(IO.TtFileManager.ERootDir.Editor) + "EditorConfig.cfg";
-            Config = IO.TtFileManager.LoadXmlToObject<TtEditorConfig>(cfgFile);
-            if (Config == null)
-            {
-                Config = new TtEditorConfig();
-                Config.GameProject = "Module/GameProject/GameProject.csproj";
-                Config.PhyMaterialIconName = RName.GetRName("icons/phymaterialicon.uvanim", RName.ERNameType.Engine);
-                Config.FontIconName = RName.GetRName("icons/font.uvanim", RName.ERNameType.Engine);
-                Config.MacrossIconName = RName.GetRName("icons/macrossicon.uvanim", RName.ERNameType.Engine);
-                Config.SaveConfig(cfgFile);
-            }
+            var Config = TtEngine.Instance.ConfigManager.GetConfig<TtEditorConfig>();
+            //var cfgFile = host.FileManager.GetRoot(IO.TtFileManager.ERootDir.Editor) + "EditorConfig.cfg";
+            //Config = IO.TtFileManager.LoadXmlToObject<TtEditorConfig>(cfgFile);
+            //if (Config == null)
+            //{
+            //    Config = new TtEditorConfig();
+            //    Config.GameProject = "Module/GameProject/GameProject.csproj";
+            //    Config.PhyMaterialIconName = RName.GetRName("icons/phymaterialicon.uvanim", RName.ERNameType.Engine);
+            //    Config.FontIconName = RName.GetRName("icons/font.uvanim", RName.ERNameType.Engine);
+            //    Config.MacrossIconName = RName.GetRName("icons/macrossicon.uvanim", RName.ERNameType.Engine);
+            //    Config.SaveConfig(cfgFile);
+            //}
 
             var gameAssembly = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + Config.GameAssembly;
             

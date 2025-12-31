@@ -1,0 +1,91 @@
+{
+  "GameProject": "Module/GameProject/GameProject.csproj",
+  "GameModuleName": "GameProject.dll",
+  "PhyMaterialIconName": "icons/phymaterialicon.uvanim:Engine",
+  "FontIconName": "icons/font.uvanim:Engine",
+  "MacrossIconName": "icons/macrossicon.uvanim:Engine",
+  "PrefabBoderColor": {
+    "R": 255,
+    "G": 20,
+    "B": 147,
+    "A": 255,
+    "Name": "FFFF1493"
+  },
+  "SceneBoderColor": {
+    "R": 220,
+    "G": 20,
+    "B": 60,
+    "A": 255,
+    "Name": "FFDC143C"
+  },
+  "RenderPolicyBoderColor": {
+    "R": 255,
+    "G": 127,
+    "B": 80,
+    "A": 255,
+    "Name": "FFFF7F50"
+  },
+  "FontSDFBoderColor": {
+    "R": 211,
+    "G": 211,
+    "B": 211,
+    "A": 255,
+    "Name": "FFD3D3D3"
+  },
+  "NebulaBoderColor": {
+    "R": 255,
+    "G": 105,
+    "B": 180,
+    "A": 255,
+    "Name": "FFFF69B4"
+  },
+  "MaterialMeshBoderColor": {
+    "R": 255,
+    "G": 69,
+    "B": 0,
+    "A": 255,
+    "Name": "FFFF4500"
+  },
+  "MeshPrimitivesBoderColor": {
+    "R": 255,
+    "G": 255,
+    "B": 224,
+    "A": 255,
+    "Name": "FFFFFFE0"
+  },
+  "MaterialBoderColor": {
+    "R": 255,
+    "G": 215,
+    "B": 0,
+    "A": 255,
+    "Name": "FFFFD700"
+  },
+  "MaterialFunctionBoderColor": {
+    "R": 218,
+    "G": 165,
+    "B": 32,
+    "A": 255,
+    "Name": "FFDAA520"
+  },
+  "MaterialInstanceBoderColor": {
+    "R": 0,
+    "G": 255,
+    "B": 255,
+    "A": 255,
+    "Name": "FF00FFFF"
+  },
+  "TextureBoderColor": {
+    "R": 255,
+    "G": 182,
+    "B": 193,
+    "A": 255,
+    "Name": "FFFFB6C1"
+  },
+  "PgcBoderColor": {
+    "R": 240,
+    "G": 230,
+    "B": 140,
+    "A": 255,
+    "Name": "FFF0E68C"
+  }
+}

@@ -58,7 +58,7 @@ namespace EngineNS.Graphics.Mesh
         //}
         public override Color4b GetBorderColor()
         {
-            return TtEngine.Instance.EditorInstance.Config.MeshPrimitivesBoderColor;
+            return TtEngine.Instance.ConfigManager.GetConfig<Editor.TtEditorConfig>().MeshPrimitivesBoderColor;
         }
 
         [Rtti.Meta("")]

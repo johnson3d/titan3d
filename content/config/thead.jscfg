@@ -1,0 +1,8 @@
+{
+  "PoolStackSize": -1,
+  "LogicStackSize": -1,
+  "RenderStackSize": -1,
+  "AsyncIOStackSize": -1,
+  "PhysicsStackSize": -1,
+  "AsyncEditorStackSize": -1
+}

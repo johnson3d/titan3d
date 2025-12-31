@@ -159201,7 +159201,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = Survivor_TtWeaponProxyNode.CopyCurrentVersion;
 				kls.RegVersion(10759720178659608122, Survivor_TtWeaponProxyNode.Read_10759720178659608122);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("AD_D1_57_8E_99_38_CA_EB_DD_99_EE_74_9B_23_35_3F_AC_1A_A7_BE");
+			this.VersionHash = EngineNS.Hash160.Parse("82_B0_EB_AE_AE_C0_74_6B_8B_40_8C_B9_84_79_5C_F3_CD_ED_E5_72");
 		}
 	}
 }

@@ -85,32 +85,32 @@ namespace EngineNS.IO
         public static JsonSerializerOptions Options = new JsonSerializerOptions()
         {
             WriteIndented = true,
-            //TypeInfoResolver = new DefaultJsonTypeInfoResolver
-            //{
-            //    Modifiers =
-            //        {
-            //            static typeInfo =>
-            //            {
-            //                //if (typeInfo.Kind != JsonTypeInfoKind.Object)
-            //                //    return;
-            //                foreach (JsonPropertyInfo propertyInfo in typeInfo.Properties)
-            //                {
-            //                    var prop = typeInfo.Type.GetProperty(propertyInfo.Name);
-            //                    if(prop==null || prop.GetCustomAttribute<Rtti.MetaAttribute>(false)==null)
-            //                    {
-            //                        propertyInfo.IsRequired = false;
-            //                    }
-            //                    else
-            //                    {
-            //                        if(prop.PropertyType == typeof(RName))
-            //                        {
+            TypeInfoResolver = new DefaultJsonTypeInfoResolver
+            {
+                Modifiers =
+                    {
+                        static typeInfo =>
+                        {
+                            //if (typeInfo.Kind != JsonTypeInfoKind.Object)
+                            //    return;
+                            foreach (JsonPropertyInfo propertyInfo in typeInfo.Properties)
+                            {
+                                var prop = typeInfo.Type.GetProperty(propertyInfo.Name);
+                                if(prop==null || prop.GetCustomAttribute<Rtti.MetaAttribute>(false)==null)
+                                {
+                                    propertyInfo.IsRequired = false;
+                                }
+                                else
+                                {
+                                    if(prop.PropertyType == typeof(RName))
+                                    {
 
-            //                        }
-            //                    }
-            //                }
-            //            }
-            //        }
-            //},
+                                    }
+                                }
+                            }
+                        }
+                    }
+            },
             Converters = {
                 new CustomRNameConverter(),
                 new CustomRhiTypeConverter(),

@@ -1821,7 +1821,7 @@ namespace EngineNS.Macross
         partial void TryCompileCode(string assemblyFile, ref bool success, EPlatformType platformType)
         {
             var csFilesPath = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
-            var projectFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameProject;
+            var projectFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.ConfigManager.GetConfig<TtEditorConfig>().GameProject;
             success = CompileGameProject(csFilesPath, projectFile, assemblyFile, platformType);
         }
         public static bool CompileGameProject(string csFilesPath, string projectFile, string assemblyFile, EPlatformType platformType)

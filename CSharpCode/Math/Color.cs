@@ -710,21 +710,25 @@ namespace EngineNS
     public struct Color4b
     {
         public Byte4 Value;
+        [Rtti.Meta("")]
         public Byte R
         {
             get => Value.R;
             set => Value.R = value;
         }
+        [Rtti.Meta("")]
         public Byte G
         {
             get => Value.G;
             set => Value.G = value;
         }
+        [Rtti.Meta("")]
         public Byte B
         {
             get => Value.B;
             set => Value.B = value;
         }
+        [Rtti.Meta("")]
         public Byte A
         {
             get => Value.A;
