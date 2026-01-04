@@ -1,0 +1,15 @@
+{
+  "GameReferenceAssemblies": [
+    "../../binaries/Engine.Window.dll"
+  ],
+  "GenProjects": [
+    {
+      "ProjectType": "DefaultGame",
+      "ProjectGuid": "32eef776-58cb-4c93-96fe-9dc967f78085",
+      "ProjectFile": "../../content/MacrossGenCSharp.shproj",
+      "MinVSVersion": {},
+      "ReferenceProjects": null,
+      "CodeFiles": null
+    }
+  ]
+}

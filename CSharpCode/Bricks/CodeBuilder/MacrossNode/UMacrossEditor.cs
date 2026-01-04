@@ -1,11 +1,7 @@
-﻿using EngineNS.DesignMacross.Design;
-using EngineNS.Editor;
+﻿using EngineNS.Editor;
 using EngineNS.Macross;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
-using NPOI.SS.Formula.Functions;
-using NPOI.SS.UserModel;
-using NPOI.Util;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

@@ -36608,6 +36608,150 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
+	static class EngineNS_Bricks_CodeBuilder_TtMacrossConfig
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.TtMacrossConfig;
+			if (srcObj.GameReferenceAssemblies != null)
+			{
+				var Srclst = srcObj.GameReferenceAssemblies as System.Collections.Generic.List<System.String>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					ar.Write(Srclst[i]);
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+			if (srcObj.GenProjects != null)
+			{
+				var Srclst = srcObj.GenProjects as System.Collections.Generic.List<EngineNS.CodeCompiler.ProjectConfig>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.TtMacrossConfig;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.TtMacrossConfig;
+			if (srcObj.GameReferenceAssemblies != null)
+			{
+				if (tarObj.GameReferenceAssemblies == null)
+				{
+					tarObj.GameReferenceAssemblies = new();
+				}
+				if (tarObj.GameReferenceAssemblies != null)
+				{
+					var Tarlst = tarObj.GameReferenceAssemblies as System.Collections.Generic.List<System.String>;
+					var Srclst = srcObj.GameReferenceAssemblies as System.Collections.Generic.List<System.String>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						Tarlst.Add(Srclst[i]);
+					}
+				}
+			}
+			if (srcObj.GenProjects != null)
+			{
+				if (tarObj.GenProjects == null)
+				{
+					tarObj.GenProjects = new();
+				}
+				if (tarObj.GenProjects != null)
+				{
+					var Tarlst = tarObj.GenProjects as System.Collections.Generic.List<EngineNS.CodeCompiler.ProjectConfig>;
+					var Srclst = srcObj.GenProjects as System.Collections.Generic.List<EngineNS.CodeCompiler.ProjectConfig>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.CodeCompiler.ProjectConfig tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.CodeCompiler.ProjectConfig;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15312766952295074131 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.TtMacrossConfig;
+			System.Collections.Generic.List<System.String> t_GameReferenceAssemblies = null;
+			t_GameReferenceAssemblies = srcObj.GameReferenceAssemblies;
+			if (t_GameReferenceAssemblies == null)
+			{
+				t_GameReferenceAssemblies = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.String>)) as System.Collections.Generic.List<System.String>;
+			}
+			int count_GameReferenceAssemblies;
+			ar.Read(out count_GameReferenceAssemblies);
+			for(int i = 0; i<count_GameReferenceAssemblies; i++)
+			{
+				System.String t;
+				ar.Read(out t);
+				t_GameReferenceAssemblies.Add(t);
+			}
+			System.Collections.Generic.List<EngineNS.CodeCompiler.ProjectConfig> t_GenProjects = null;
+			t_GenProjects = srcObj.GenProjects;
+			if (t_GenProjects == null)
+			{
+				t_GenProjects = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.CodeCompiler.ProjectConfig>)) as System.Collections.Generic.List<EngineNS.CodeCompiler.ProjectConfig>;
+			}
+			int count_GenProjects;
+			ar.Read(out count_GenProjects);
+			for(int i = 0; i<count_GenProjects; i++)
+			{
+				EngineNS.CodeCompiler.ProjectConfig t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.CodeCompiler.ProjectConfig;
+						fn(ar, t);
+					}
+				}
+				t_GenProjects.Add(t);
+				srcObj.GenProjects = t_GenProjects;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.CodeCompiler.ProjectConfig>), false);
+					}
+				}
+			}
+		};
+	}
 	static class EngineNS_Bricks_CodeBuilder_TtMacrossSceneNode_TtMacrossSceneNodeData
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -39538,22 +39682,6 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9524687136534877311 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Bricks.CodeBuilder.UHLSLCodeGenerator;
-		};
-	}
-	static class EngineNS_Bricks_CodeBuilder_UMacrossConfig
-	{
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.Bricks.CodeBuilder.UMacrossConfig;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
-		{
-			var tarObj = tar as EngineNS.Bricks.CodeBuilder.UMacrossConfig;
-			var srcObj = src as EngineNS.Bricks.CodeBuilder.UMacrossConfig;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9524687136534877311 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.Bricks.CodeBuilder.UMacrossConfig;
 		};
 	}
 	static class EngineNS_Bricks_Collision_DDA_TtHierarchicalVoxelSpace3D
@@ -86263,15 +86391,206 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.CodeCompiler.ProjectConfig;
+			if (srcObj.CodeFiles != null)
+			{
+				var Srclst = srcObj.CodeFiles as System.Collections.Generic.List<System.String>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					ar.Write(Srclst[i]);
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+			if (srcObj.MinVSVersion != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.MinVSVersion.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.MinVSVersion);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
+			ar.Write(srcObj.ProjectFile);
+			ar.Write(srcObj.ProjectGuid);
+			ar.Write(srcObj.ProjectType);
+			if (srcObj.ReferenceProjects != null)
+			{
+				var Srclst = srcObj.ReferenceProjects as System.Collections.Generic.List<System.String>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					ar.Write(Srclst[i]);
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
 			var tarObj = tar as EngineNS.CodeCompiler.ProjectConfig;
 			var srcObj = src as EngineNS.CodeCompiler.ProjectConfig;
+			if (srcObj.CodeFiles != null)
+			{
+				if (tarObj.CodeFiles == null)
+				{
+					tarObj.CodeFiles = new();
+				}
+				if (tarObj.CodeFiles != null)
+				{
+					var Tarlst = tarObj.CodeFiles as System.Collections.Generic.List<System.String>;
+					var Srclst = srcObj.CodeFiles as System.Collections.Generic.List<System.String>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						Tarlst.Add(Srclst[i]);
+					}
+				}
+			}
+			if (srcObj.MinVSVersion != null)
+			{
+				if (tarObj.MinVSVersion == null || tarObj.MinVSVersion.GetType() != srcObj.MinVSVersion.GetType())
+				{
+					tarObj.MinVSVersion = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.MinVSVersion.GetType()) as System.Version;
+				}
+				if (tarObj.MinVSVersion != null)
+				{
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<System.Version>.TypeDesc.TypeString);
+					if (fn != null)
+					{
+						fn(tarObj.MinVSVersion, srcObj.MinVSVersion);
+					}
+				}
+			}
+			else if (srcObj.MinVSVersion == null)
+			{
+				tarObj.MinVSVersion = null;
+			}
+			tarObj.ProjectFile = srcObj.ProjectFile;
+			tarObj.ProjectGuid = srcObj.ProjectGuid;
+			tarObj.ProjectType = srcObj.ProjectType;
+			if (srcObj.ReferenceProjects != null)
+			{
+				if (tarObj.ReferenceProjects == null)
+				{
+					tarObj.ReferenceProjects = new();
+				}
+				if (tarObj.ReferenceProjects != null)
+				{
+					var Tarlst = tarObj.ReferenceProjects as System.Collections.Generic.List<System.String>;
+					var Srclst = srcObj.ReferenceProjects as System.Collections.Generic.List<System.String>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						Tarlst.Add(Srclst[i]);
+					}
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9524687136534877311 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.CodeCompiler.ProjectConfig;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_17793994687544633659 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.CodeCompiler.ProjectConfig;
+			System.Collections.Generic.List<System.String> t_CodeFiles = null;
+			t_CodeFiles = srcObj.CodeFiles;
+			if (t_CodeFiles == null)
+			{
+				t_CodeFiles = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.String>)) as System.Collections.Generic.List<System.String>;
+			}
+			int count_CodeFiles;
+			ar.Read(out count_CodeFiles);
+			for(int i = 0; i<count_CodeFiles; i++)
+			{
+				System.String t;
+				ar.Read(out t);
+				t_CodeFiles.Add(t);
+			}
+			EngineNS.Hash64 type_MinVSVersion;
+			ar.Read(out type_MinVSVersion);
+			var meta_MinVSVersion = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_MinVSVersion);
+			if(meta_MinVSVersion != null)
+			{
+				EngineNS.Hash64 ver_MinVSVersion;
+				ar.Read(out ver_MinVSVersion);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_MinVSVersion.ClassType.TypeString, ver_MinVSVersion );
+				if (fn != null)
+				{
+					System.Version t_MinVSVersion = null;
+					t_MinVSVersion = srcObj.MinVSVersion;
+					if (t_MinVSVersion == null)
+					{
+						t_MinVSVersion = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_MinVSVersion.ClassType) as System.Version;
+					}
+					fn(ar, t_MinVSVersion);
+					srcObj.MinVSVersion = t_MinVSVersion;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "MinVSVersion", false);
+						}
+					}
+				}
+			}
+			System.String t_ProjectFile;
+			ar.Read(out t_ProjectFile);
+			srcObj.ProjectFile = t_ProjectFile;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ProjectFile", false);
+				}
+			}
+			System.Guid t_ProjectGuid;
+			ar.Read(out t_ProjectGuid);
+			srcObj.ProjectGuid = t_ProjectGuid;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ProjectGuid", false);
+				}
+			}
+			EngineNS.CodeCompiler.ProjectConfig.enProjectType t_ProjectType;
+			ar.Read(out t_ProjectType);
+			srcObj.ProjectType = t_ProjectType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ProjectType", false);
+				}
+			}
+			System.Collections.Generic.List<System.String> t_ReferenceProjects = null;
+			t_ReferenceProjects = srcObj.ReferenceProjects;
+			if (t_ReferenceProjects == null)
+			{
+				t_ReferenceProjects = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.String>)) as System.Collections.Generic.List<System.String>;
+			}
+			int count_ReferenceProjects;
+			ar.Read(out count_ReferenceProjects);
+			for(int i = 0; i<count_ReferenceProjects; i++)
+			{
+				System.String t;
+				ar.Read(out t);
+				t_ReferenceProjects.Add(t);
+			}
 		};
 	}
 	static class EngineNS_DesignMacross_Base_Description_IClassDescription
@@ -155494,6 +155813,12 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(17593168523198211, EngineNS_Bricks_CodeBuilder_TtMacrossAMeta.Read_17593168523198211);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.TtMacrossConfig@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_TtMacrossConfig.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_TtMacrossConfig.CopyCurrentVersion;
+				kls.RegVersion(15312766952295074131, EngineNS_Bricks_CodeBuilder_TtMacrossConfig.Read_15312766952295074131);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.TtMacrossSceneNode.TtMacrossSceneNodeData@EngineCore");
 				kls.Writer = EngineNS_Bricks_CodeBuilder_TtMacrossSceneNode_TtMacrossSceneNodeData.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_TtMacrossSceneNode_TtMacrossSceneNodeData.CopyCurrentVersion;
@@ -155642,12 +155967,6 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Bricks_CodeBuilder_UHLSLCodeGenerator.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_UHLSLCodeGenerator.CopyCurrentVersion;
 				kls.RegVersion(9524687136534877311, EngineNS_Bricks_CodeBuilder_UHLSLCodeGenerator.Read_9524687136534877311);
-			}
-			{
-				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.UMacrossConfig@EngineCore");
-				kls.Writer = EngineNS_Bricks_CodeBuilder_UMacrossConfig.WriteCurrentVersion;
-				kls.Copy = EngineNS_Bricks_CodeBuilder_UMacrossConfig.CopyCurrentVersion;
-				kls.RegVersion(9524687136534877311, EngineNS_Bricks_CodeBuilder_UMacrossConfig.Read_9524687136534877311);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.Collision.DDA.TtHierarchicalVoxelSpace3D@EngineCore");
@@ -157022,6 +157341,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_CodeCompiler_ProjectConfig.WriteCurrentVersion;
 				kls.Copy = EngineNS_CodeCompiler_ProjectConfig.CopyCurrentVersion;
 				kls.RegVersion(9524687136534877311, EngineNS_CodeCompiler_ProjectConfig.Read_9524687136534877311);
+				kls.RegVersion(17793994687544633659, EngineNS_CodeCompiler_ProjectConfig.Read_17793994687544633659);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.DesignMacross.Base.Description.IClassDescription@EngineCore");
@@ -159201,7 +159521,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = Survivor_TtWeaponProxyNode.CopyCurrentVersion;
 				kls.RegVersion(10759720178659608122, Survivor_TtWeaponProxyNode.Read_10759720178659608122);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("82_B0_EB_AE_AE_C0_74_6B_8B_40_8C_B9_84_79_5C_F3_CD_ED_E5_72");
+			this.VersionHash = EngineNS.Hash160.Parse("BD_EB_40_24_86_DC_78_B0_AB_CB_39_9A_BE_97_40_FC_79_0B_EC_39");
 		}
 	}
 }

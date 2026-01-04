@@ -1,5 +1,4 @@
 ﻿
-using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -419,17 +418,42 @@ namespace EngineNS.IO
         {
             path = path.Replace('\\', '/');
 
-            var cur = path.IndexOf("/..");
-            while (cur >= 0)
+            string result = "";
+            var segs = path.Split('/');
+            List<string> stack = new List<string>();
+            for (int i = 0; i < segs.Length; i++)
             {
-                cur--;
-                var start = path.LastIndexOf('/', cur);
-                if (start < 0)
-                    return null;
-                path = path.Remove(start, cur + 1 - start + 3);
-                cur = path.IndexOf("/..");
+                if (segs[i] == ".")
+                    continue;
+                if (segs[i] == "")
+                    continue;
+                if (segs[i] == "..")
+                {
+                    if (stack.Count>1)
+                    {
+                        stack.RemoveAt(stack.Count-1);
+                    }
+                    else
+                    {
+                        return path;
+                    }
+                }
+                else
+                {
+                    stack.Add(segs[i]);
+                }
             }
-            return path;
+            var pathStartsWithSlash = path.StartsWith("/");
+            
+            foreach (var i in stack)
+            {
+                result += "/" + i;
+            }
+
+            if (!pathStartsWithSlash)
+                return result.Substring(1);
+            else
+                return result;
         }
         #endregion
 

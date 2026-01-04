@@ -14,9 +14,12 @@ namespace EngineNS.CodeCompiler
             DefaultEditor,
             Custom,
         }
-        public enProjectType ProjectType;
-        public Guid ProjectGuid;
-        public string ProjectFile;
+        [Rtti.Meta("")]
+        public enProjectType ProjectType { get; set; }
+        [Rtti.Meta("")]
+        public Guid ProjectGuid { get; set; }
+        [Rtti.Meta("")]
+        public string ProjectFile { get; set; }
         public string AbsProjectFile
         {
             get
@@ -24,9 +27,12 @@ namespace EngineNS.CodeCompiler
                 return IO.TtFileManager.GetBaseDirectory(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameProject) + ProjectFile;
             }
         }
-        public System.Version MinVSVersion;
-        public List<string> ReferenceProjects;
-        public List<string> CodeFiles;
+        [Rtti.Meta("")]
+        public System.Version MinVSVersion { get; set; }
+        [Rtti.Meta("")]
+        public List<string> ReferenceProjects { get; set; }
+        [Rtti.Meta("")]
+        public List<string> CodeFiles { get; set; }
     }
 
     public class ProjectGenerator

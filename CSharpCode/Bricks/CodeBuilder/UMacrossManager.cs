@@ -7,13 +7,37 @@ using System.Xml;
 namespace EngineNS.Bricks.CodeBuilder
 {
     [Rtti.Meta("")]
-    public partial class UMacrossConfig
+    [IO.TtConfig(Path = "macross.jscfg")]
+    public partial class TtMacrossConfig : IO.IConfig
     {
-        public List<string> GameReferenceAssemblies = new List<string>();
-        public List<CodeCompiler.ProjectConfig> GenProjects = new List<CodeCompiler.ProjectConfig>();
+        public TtMacrossConfig()
+        {
+            GameReferenceAssemblies = new List<string>()
+                {
+                    IO.TtFileManager.GetRelativePath(
+                        IO.TtFileManager.GetBaseDirectory(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.ConfigManager.GetConfig<Editor.TtEditorConfig>().GameProject),
+                        TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute)) + "Engine.Window.dll",
+                };
+            GenProjects = new List<CodeCompiler.ProjectConfig>()
+                {
+                    new CodeCompiler.ProjectConfig()
+                    {
+                        ProjectType = CodeCompiler.ProjectConfig.enProjectType.DefaultGame,
+                        ProjectFile = IO.TtFileManager.GetRegularPath(IO.TtFileManager.GetRelativePath(
+                            IO.TtFileManager.GetBaseDirectory(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.ConfigManager.GetConfig<Editor.TtEditorConfig>().GameProject),
+                            TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game)) + "MacrossGenCSharp.shproj"),
+                        ProjectGuid = Guid.NewGuid(),
+                        MinVSVersion = new Version(14, 0),
+                    }
+                };
+        }
+        [Rtti.Meta("")]
+        public List<string> GameReferenceAssemblies { get; set; } = new List<string>();
+        [Rtti.Meta("")]
+        public List<CodeCompiler.ProjectConfig> GenProjects { get; set; } = new List<CodeCompiler.ProjectConfig>();
     }
 
-    public class UMacrossManager : TtModule<TtEngine>
+    public class TtMacrossManager : TtModule<TtEngine>
     {
         public override int GetOrder()
         {
@@ -21,34 +45,34 @@ namespace EngineNS.Bricks.CodeBuilder
         }
         bool NeedRegenGameProject = false;
 
-        public UMacrossConfig Config { get; set; }
+        public TtMacrossConfig Config { get; set; }
 
         public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
         {
-            var cfgFile = host.FileManager.GetRoot(IO.TtFileManager.ERootDir.Editor) + "MacrossConfig.cfg";
-            Config = IO.TtFileManager.LoadXmlToObject<UMacrossConfig>(cfgFile);
-            if(Config == null)
-            {
-                Config = new UMacrossConfig();
-                Config.GameReferenceAssemblies = new List<string>()
-                {
-                    IO.TtFileManager.GetRelativePath(
-                        IO.TtFileManager.GetBaseDirectory(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.ConfigManager.GetConfig<Editor.TtEditorConfig>().GameProject),
-                        TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute)) + "Engine.Window.dll",
-                };
-                Config.GenProjects = new List<CodeCompiler.ProjectConfig>()
-                {
-                    new CodeCompiler.ProjectConfig()
-                    {
-                        ProjectType = CodeCompiler.ProjectConfig.enProjectType.DefaultGame,
-                        ProjectFile = IO.TtFileManager.GetRelativePath(
-                            IO.TtFileManager.GetBaseDirectory(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.ConfigManager.GetConfig<Editor.TtEditorConfig>().GameProject),
-                            TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game)) + "MacrossGenCSharp.shproj",
-                        ProjectGuid = Guid.NewGuid(),
-                        MinVSVersion = new Version(14, 0),
-                    }
-                };
-            }
+            //var cfgFile = host.FileManager.GetRoot(IO.TtFileManager.ERootDir.Editor) + "MacrossConfig.cfg";
+            //Config = IO.TtFileManager.LoadXmlToObject<TtMacrossConfig>(cfgFile);
+            //if(Config == null)
+            //{
+            //    Config = new TtMacrossConfig();
+            //    Config.GameReferenceAssemblies = new List<string>()
+            //    {
+            //        IO.TtFileManager.GetRelativePath(
+            //            IO.TtFileManager.GetBaseDirectory(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.ConfigManager.GetConfig<Editor.TtEditorConfig>().GameProject),
+            //            TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute)) + "Engine.Window.dll",
+            //    };
+            //    Config.GenProjects = new List<CodeCompiler.ProjectConfig>()
+            //    {
+            //        new CodeCompiler.ProjectConfig()
+            //        {
+            //            ProjectType = CodeCompiler.ProjectConfig.enProjectType.DefaultGame,
+            //            ProjectFile = IO.TtFileManager.GetRelativePath(
+            //                IO.TtFileManager.GetBaseDirectory(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.ConfigManager.GetConfig<Editor.TtEditorConfig>().GameProject),
+            //                TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game)) + "MacrossGenCSharp.shproj",
+            //            ProjectGuid = Guid.NewGuid(),
+            //            MinVSVersion = new Version(14, 0),
+            //        }
+            //    };
+            //}
 
             return await base.Initialize(host);
         }
@@ -184,6 +208,6 @@ namespace EngineNS
 {
     public partial class TtEngine
     {
-        public Bricks.CodeBuilder.UMacrossManager MacrossManager { get; } = new Bricks.CodeBuilder.UMacrossManager();
+        public Bricks.CodeBuilder.TtMacrossManager MacrossManager { get; } = new Bricks.CodeBuilder.TtMacrossManager();
     }
 }

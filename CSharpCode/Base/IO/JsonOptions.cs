@@ -225,19 +225,22 @@ namespace EngineNS.IO
                             foreach (var i in jsonElement.EnumerateArray())
                             {
                                 var eType = targetProperty.PropertyType.GetGenericArguments()[0];
-                                if (i.ValueKind != JsonValueKind.Object)
+                                if (i.ValueKind == JsonValueKind.Array)
+                                {
+                                    System.Diagnostics.Debug.Assert(false);
+                                }
+                                else if (i.ValueKind != JsonValueKind.Object)
                                 {
                                     var val = Support.TConvert.ToObject(eType, i.ToString());
                                     lst.Add(val);
                                     continue;
                                 }
-                                else if(i.ValueKind != JsonValueKind.Array)
+                                else
                                 {
-                                    System.Diagnostics.Debug.Assert(false);
+                                    var e = Rtti.TtTypeDescManager.CreateInstance(eType);
+                                    LoadProperties(i, e, options, checkMeta);
+                                    lst.Add(e);
                                 }
-                                var e = Rtti.TtTypeDescManager.CreateInstance(eType);
-                                LoadProperties(i, e, options, checkMeta);
-                                lst.Add(e);
                             }
                         }
                         break;
