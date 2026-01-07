@@ -3,6 +3,7 @@ using Assimp.Unmanaged;
 using EngineNS;
 using EngineNS.EGui.UIProxy;
 using EngineNS.Graphics.Pipeline;
+using EngineNS.IO;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -100,10 +101,11 @@ namespace MainEditor
                 }
             }
 
-            if (Config!=null)
+            string dllDir = "";
+            if (Config != null)
             {
                 Console.WriteLine($"NativeDLL={Config.NativeDll}");
-                EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/{Config.NativeDll}");
+                dllDir = $"{mBin}/{Config.NativeDll}";
             }
             else
             {
@@ -111,14 +113,22 @@ namespace MainEditor
                 if (cfg != null && cfg == "debug")
                 {
                     Console.WriteLine($"NativeDLL=debug");
-                    EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/debug");
+                    dllDir = $"{mBin}/debug";
+                    
                 }
                 else
                 {
                     Console.WriteLine($"NativeDLL=release");
-                    EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
+                    dllDir = $"{mBin}/release";
                 }
             }
+
+            if (!TtFileManager.FileExists(dllDir + "/Core.Window.dll"))
+            {
+                TtNativeWindow.MessageBoxA(IntPtr.Zero, $"{dllDir}: not found native dll, please compile Core.Window project", "Error", 0);
+                return;
+            }
+            EngineNS.TtNativeWindow.SetDllDirectoryA(dllDir);
 
             {
                 var ev1 = Environment.GetEnvironmentVariable("CORECLR_ENABLE_PROFILING");

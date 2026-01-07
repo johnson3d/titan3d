@@ -554,7 +554,7 @@ namespace EngineNS.Bricks.DataCopyer
             }
         }
         
-        public string GenCode(Hash160 hash)
+        public static string GenCode(Hash160 hash)
         {
             string code = "";
             var creator = new TtCodeWriter();
@@ -678,7 +678,7 @@ namespace EngineNS.Bricks.DataCopyer
                             type.GetInterface("IDictionary") != null;
             return !value;
         }
-        public void GenCode(Rtti.TtClassMeta meta, TtCodeWriter creator, ref string code)
+        public static void GenCode(Rtti.TtClassMeta meta, TtCodeWriter creator, ref string code)
         {
             if (meta.CurrentVersion == null)
             {
@@ -706,7 +706,7 @@ namespace EngineNS.Bricks.DataCopyer
             creator.PopSegment(ref code);
         }
 
-        public void GenWriteCurrentVersion(Rtti.TtClassMeta meta, TtCodeWriter creator, ref string code)
+        public static void GenWriteCurrentVersion(Rtti.TtClassMeta meta, TtCodeWriter creator, ref string code)
         {
             creator.AddLine($"internal static {typeof(FWrite).FullName.Replace('+', '.')} WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>", ref code);
             creator.PushSegment(ref code);
@@ -827,7 +827,7 @@ namespace EngineNS.Bricks.DataCopyer
             }
             creator.PopSegment(ref code, true);
         }
-        public void GenCopyVersion(Rtti.TtClassMeta meta, TtCodeWriter creator, ref string code, Rtti.TtMetaVersion i)
+        public static void GenCopyVersion(Rtti.TtClassMeta meta, TtCodeWriter creator, ref string code, Rtti.TtMetaVersion i)
         {
             creator.AddLine($"internal static {typeof(FCopy).FullName.Replace('+', '.')} CopyCurrentVersion = (object tar, object src)=>", ref code);
             creator.PushSegment(ref code);
@@ -943,7 +943,7 @@ namespace EngineNS.Bricks.DataCopyer
             }
             creator.PopSegment(ref code, true);
         }
-        public void GenReadVersion(Rtti.TtClassMeta meta, TtCodeWriter creator, ref string code, Rtti.TtMetaVersion i)
+        public static void GenReadVersion(Rtti.TtClassMeta meta, TtCodeWriter creator, ref string code, Rtti.TtMetaVersion i)
         {
             creator.AddLine($"internal static {typeof(FReader).FullName.Replace('+', '.')} Read_{i.MetaHash} = (EngineNS.IO.IReader ar, object obj)=>", ref code);
             creator.PushSegment(ref code);
@@ -1130,10 +1130,16 @@ namespace EngineNS
                     if (serverPlugin != null)
                     {
                         mDataCopyer = serverPlugin.GetPluginObject<TtDataCopyer>();
-                        var hash = Bricks.DataCopyer.TtDataCopyer.CalcVersionHash();
-                        if (hash != mDataCopyer.GetVersionHash())
+                        if (mDataCopyer == null)
                         {
-                            var code = mDataCopyer.GenCode(hash);
+#if PWindow
+                            TtNativeWindow.MessageBoxA(IntPtr.Zero, "Plugin DataCopyer load failed, Please compile the plugin and its dependencies", "DataCopyer", 0);
+#endif
+                        }
+                        var hash = Bricks.DataCopyer.TtDataCopyer.CalcVersionHash();
+                        if (mDataCopyer == null || hash != mDataCopyer.GetVersionHash())
+                        {
+                            var code = TtDataCopyer.GenCode(hash);
                             var file = this.FileManager.GetRoot(IO.TtFileManager.ERootDir.PluginSource) + "DataCopyer/DataCopyer/Copyer.gen.cs";
                             TtFileManager.WriteAllText(file, code);
 

@@ -555,6 +555,7 @@ namespace EngineNS.IO
         }
         public static void WriteAllText(string file, string text)
         {
+            SureDirectory(GetParentPathName(file));
             System.IO.File.WriteAllText(file, text);
         }
 
@@ -580,6 +581,7 @@ namespace EngineNS.IO
         }
         public static void WriteBytes(string file, byte[] data)
         {
+            SureDirectory(GetParentPathName(file));
             System.IO.File.WriteAllBytes(file, data);
         }
         #endregion

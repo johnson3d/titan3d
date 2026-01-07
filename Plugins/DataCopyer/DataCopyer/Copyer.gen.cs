@@ -157340,8 +157340,8 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.CodeCompiler.ProjectConfig@EngineCore");
 				kls.Writer = EngineNS_CodeCompiler_ProjectConfig.WriteCurrentVersion;
 				kls.Copy = EngineNS_CodeCompiler_ProjectConfig.CopyCurrentVersion;
-				kls.RegVersion(9524687136534877311, EngineNS_CodeCompiler_ProjectConfig.Read_9524687136534877311);
 				kls.RegVersion(17793994687544633659, EngineNS_CodeCompiler_ProjectConfig.Read_17793994687544633659);
+				kls.RegVersion(9524687136534877311, EngineNS_CodeCompiler_ProjectConfig.Read_9524687136534877311);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.DesignMacross.Base.Description.IClassDescription@EngineCore");

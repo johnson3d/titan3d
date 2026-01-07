@@ -489,8 +489,22 @@ namespace EngineNS.Editor.ShaderCompiler
 
                 int CP_SM_major = 6;
                 int CP_SM_minor = 5;
+                if (sm != null)
+                {
+                    var segs = sm.Split('_');
+                    if (segs.Length == 2)
+                    {
+                        CP_SM_major = int.Parse(segs[0]);
+                        CP_SM_minor = int.Parse(segs[1]);
+                    }
+                }
                 var cfg = TtEngine.Instance.Config;
                 int CompileCount = 0;
+                var compile_sm = sm;
+                if (sm == null)
+                {
+                    compile_sm = $"{CP_SM_major}_{CP_SM_minor}";
+                }
                 if (cfg.CookDXBC && ignoreDXBC == false)
                 {
                     if (type == NxRHI.EShaderType.SDT_MeshShader || type == NxRHI.EShaderType.SDT_AmplificationShader)
@@ -498,12 +512,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     defPtr.AddDefine("RHI_TYPE", "RHI_DX11");
                     defPtr.AddDefine("CP_SM_major", "5");
                     defPtr.AddDefine("CP_SM_minor", "0");
-                    var compile_sm = sm;
-                    if (sm == null)
-                    {
-                        compile_sm = "5_0";
-                    }
-                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion, null, asModule);
+                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, "5_0", defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion, null, asModule);
                     if (ok == false)
                         return null;
                     CompileCount++;
@@ -519,11 +528,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     {
                         defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
                     }
-                    var compile_sm = sm;
-                    if (sm == null)
-                    {
-                        compile_sm = $"{CP_SM_major}_{CP_SM_minor}";
-                    }
+                    
                     var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXIL, bDebugShader, extHlslVersion, null, asModule);
                     if (ok == false)
                         return null;
@@ -539,11 +544,6 @@ namespace EngineNS.Editor.ShaderCompiler
                     if (extHlslVersion != null)
                     {
                         defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
-                    }
-                    var compile_sm = sm;
-                    if (sm == null)
-                    {
-                        compile_sm = $"{CP_SM_major}_{CP_SM_minor}";
                     }
                     var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion, null, asModule);
                     if (ok == false)
@@ -561,11 +561,6 @@ namespace EngineNS.Editor.ShaderCompiler
                     {
                         defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
                     }
-                    var compile_sm = sm;
-                    if (sm == null)
-                    {
-                        compile_sm = $"{CP_SM_major}_{CP_SM_minor}";
-                    }
                     var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, 
                         extHlslVersion, null, asModule);
                     if (ok == false)
@@ -582,11 +577,6 @@ namespace EngineNS.Editor.ShaderCompiler
                     if (extHlslVersion != null)
                     {
                         defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
-                    }
-                    var compile_sm = sm;
-                    if (sm == null)
-                    {
-                        compile_sm = $"{CP_SM_major}_{CP_SM_minor}";
                     }
                     //var vkArgs = "-fvk-t-shift 100 0 -fvk-u-shift 200 0 -fvk-s-shift 300 0 -fvk-b-shift 0 0";
                     var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_SPIRV, bDebugShader,
