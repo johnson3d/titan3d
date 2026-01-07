@@ -1130,21 +1130,16 @@ namespace EngineNS
                     if (serverPlugin != null)
                     {
                         mDataCopyer = serverPlugin.GetPluginObject<TtDataCopyer>();
-                        if (mDataCopyer == null)
-                        {
-#if PWindow
-                            TtNativeWindow.MessageBoxA(IntPtr.Zero, "Plugin DataCopyer load failed, Please compile the plugin and its dependencies", "DataCopyer", 0);
-#endif
-                        }
                         var hash = Bricks.DataCopyer.TtDataCopyer.CalcVersionHash();
                         if (mDataCopyer == null || hash != mDataCopyer.GetVersionHash())
                         {
+#if PWindow
                             var code = TtDataCopyer.GenCode(hash);
                             var file = this.FileManager.GetRoot(IO.TtFileManager.ERootDir.PluginSource) + "DataCopyer/DataCopyer/Copyer.gen.cs";
                             TtFileManager.WriteAllText(file, code);
 
                             Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Plugin DataCopyer need build");
-#if PWindow
+
                             mDataCopyer = null;
                             var path = TtEngine.Instance.FileManager.GetRoot(TtFileManager.ERootDir.PluginSource);
                             var proj = TtFileManager.CombinePath(path, "DataCopyer/DataCopyer.All/DataCopyer.All.csproj");
@@ -1155,9 +1150,12 @@ namespace EngineNS
                             }
                             else
                             {
-                                TtNativeWindow.MessageBoxA(IntPtr.Zero, "Plugin DataCopyer need build", "DataCopyer", 0);
+                                TtNativeWindow.MessageBoxA(IntPtr.Zero, "Plugin DataCopyer built failed, Please compile the plugin and its dependencies", "DataCopyer", 0);
                                 TtEngine.Instance.PostQuitMessage();
                             }
+#else
+                            Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Plugin DataCopyer is null");
+                            TtEngine.Instance.PostQuitMessage();
 #endif
                             //rebuild plugin
                         }
