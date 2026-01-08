@@ -45,7 +45,13 @@ namespace EngineNS.Bricks.CodeBuilder
         }
         bool NeedRegenGameProject = false;
 
-        public TtMacrossConfig Config { get; set; }
+        public TtMacrossConfig Config 
+        { 
+            get
+            {
+                return TtEngine.Instance.ConfigManager.GetConfig<TtMacrossConfig>();
+            }
+        }
 
         public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
         {

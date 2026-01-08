@@ -335,9 +335,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 	partial class UTerrainMaterialId
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_GetRandomPlant_1199702923 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Terrain.CDLOD.UTerrainMaterialId->int GetRandomPlant(int rdValue)");
-		public unsafe int macross_GetRandomPlant (string nodeName, int rdValue) 
+		public unsafe int macross_GetRandomPlant (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int rdValue) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -345,7 +345,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 				}
 			}
 			var _return_value = GetRandomPlant(rdValue);
-			macross_break_GetRandomPlant_1199702923.TryBreak();
+			macross_break_GetRandomPlant_1199702923.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

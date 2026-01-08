@@ -1,20 +1,20 @@
--  Æô¶¯±à¼­Æ÷
-- - µ÷ÊÔÔËĞĞMainEditor¹¤³Ì
-- - ĞŞ¸ÄÆô¶¯ÅäÖÃ£¬ÆäÖĞjscfgÎÄ¼ş¿ÉÒÔĞŞ¸ÄÒıÇæµÄ¸÷ÖÖÆô¶¯²ÎÊı
-- - Cache/DynConfigData.dcdÎÄ¼şÊÇÒ»Ğ©µ±Ç°ÒıÇæ±à¼­Æ÷ÅäÖÃ±£´æÎÄ¼ş
-- - - ³ÌĞòÉèÖÃÅäÖÃÊ¾Àı£ºTtEngine.Instance.DynConfigData.SetConfig("LastPIEName", mCurrentName)
-- - - ³ÌĞò¶ÁÈ¡ÅäÖÃÊ¾Àı£ºvar cfgName = TtEngine.Instance.DynConfigData.GetConfig("LastPIEName") as RName;
-- - - ÅäÖÃ¸ñÊ½£º\{key\}:\{TypeString\}=\{Value\}
-- - - Ï£Íû×¢ÊÍÒ»ĞĞ£¬¾ÍÔÚĞĞ¿ªÊ¼ÓÃ##±êÖ¾
-- - - [Ö§³ÖµÄÅäÖÃ](editor/DynConfig.md)
-- - VSµ÷ÊÔÅäÖÃ
-![Æô¶¯ÅäÖÃ](picture/run_config.png)
-	- Æô¶¯Ò»¸öÅäÖÃÎÄ¼ş£¬ÊÇÒ»¸öjsonÎÄ¼ş:config=$(SolutionDir)content\EngineConfigDX12.jscfg
-	- ÊÇ·ñµ÷ÊÔC++ÒıÇæ´úÂë:NativeDLL=debug
-	- ÊÇ·ñ¿ªÆôC++ÄÚ´æ·ÖÎö:NativeMem=1
-	- [ÒıÇæÅäÖÃÎÄ¼ş](engine/EngineConfig.md)
--  ±à¼­Æ÷×ÜÀÀ
-![×ÜÀÀÍ¼](picture/main_edtor.png)
+-  å¯åŠ¨ç¼–è¾‘å™¨
+- - è°ƒè¯•è¿è¡ŒMainEditorå·¥ç¨‹
+- - ä¿®æ”¹å¯åŠ¨é…ç½®ï¼Œå…¶ä¸­jscfgæ–‡ä»¶å¯ä»¥ä¿®æ”¹å¼•æ“çš„å„ç§å¯åŠ¨å‚æ•°
+- - Cache/DynConfigData.dcdæ–‡ä»¶æ˜¯ä¸€äº›å½“å‰å¼•æ“ç¼–è¾‘å™¨é…ç½®ä¿å­˜æ–‡ä»¶
+- - - ç¨‹åºè®¾ç½®é…ç½®ç¤ºä¾‹ï¼šTtEngine.Instance.DynConfigData.SetConfig("LastPIEName", mCurrentName)
+- - - ç¨‹åºè¯»å–é…ç½®ç¤ºä¾‹ï¼švar cfgName = TtEngine.Instance.DynConfigData.GetConfig("LastPIEName") as RName;
+- - - é…ç½®æ ¼å¼ï¼š\{key\}:\{TypeString\}=\{Value\}
+- - - å¸Œæœ›æ³¨é‡Šä¸€è¡Œï¼Œå°±åœ¨è¡Œå¼€å§‹ç”¨##æ ‡å¿—
+- - - [æ”¯æŒçš„é…ç½®](editor/DynConfig.md)
+- - VSè°ƒè¯•é…ç½®
+![å¯åŠ¨é…ç½®](picture/run_config.png)
+	- å¯åŠ¨ä¸€ä¸ªé…ç½®æ–‡ä»¶ï¼Œæ˜¯ä¸€ä¸ªjsonæ–‡ä»¶:config=$(SolutionDir)content\EngineConfigDX12.jscfg
+	- æ˜¯å¦è°ƒè¯•C++å¼•æ“ä»£ç :NativeDLL=debug
+	- æ˜¯å¦å¼€å¯C++å†…å­˜åˆ†æ:NativeMem=1
+	- [å¼•æ“é…ç½®æ–‡ä»¶](engine/EngineConfig.md)
+-  ç¼–è¾‘å™¨æ€»è§ˆ
+![æ€»è§ˆå›¾](picture/main_edtor.png)
 - - **[ContentBrowser](editor/ContentBrowser.md)**
 - - **[LogWatcher&Command](editor/LogWatcher.md)**
 - - **[CpuProfiler](editor/CpuProfiler.md)**
@@ -23,26 +23,26 @@
 - - **[ClrProfiler](editor/ClrProfiler.md)**
 - - **[PIEController](editor/PIEController.md)**
 - MainMenu
-ÕâÀï¿ÉÒÔ´ò¿ªºÍ¹Ø±ÕÒ»Ğ©±à¼­Æ÷µÄ´°¿Ú
+è¿™é‡Œå¯ä»¥æ‰“å¼€å’Œå…³é—­ä¸€äº›ç¼–è¾‘å™¨çš„çª—å£
 
-![±à¼­´°¿Ú¿ª¹Ø](picture/menu_windows.png)
+![ç¼–è¾‘çª—å£å¼€å…³](picture/menu_windows.png)
 
-ÕâÀïÊÇÒ»Ğ©ÔËĞĞÊ±µÄ¹¤¾ß»òÕß¹¦ÄÜ
+è¿™é‡Œæ˜¯ä¸€äº›è¿è¡Œæ—¶çš„å·¥å…·æˆ–è€…åŠŸèƒ½
 
-![±à¼­´°¿Ú¿ª¹Ø](picture/menu_tools.png)
+![ç¼–è¾‘çª—å£å¼€å…³](picture/menu_tools.png)
 - ContentBrowser
-Ë«»÷×Ê²úÍ¼±ê¿ÉÒÔÆô¶¯¶ÔÓ¦×Ê²ú±à¼­Æ÷
+åŒå‡»èµ„äº§å›¾æ ‡å¯ä»¥å¯åŠ¨å¯¹åº”èµ„äº§ç¼–è¾‘å™¨
 
-![ĞÂ½¨×Ê²ú](picture/contentbrowser.png)
-ÓÒ¼ü¿Õ°×´¦¿ÉÒÔĞÂ½¨×Ê²ú
+![æ–°å»ºèµ„äº§](picture/contentbrowser.png)
+å³é”®ç©ºç™½å¤„å¯ä»¥æ–°å»ºèµ„äº§
 
-![ĞÂ½¨×Ê²ú](picture/new_assets.png)
+![æ–°å»ºèµ„äº§](picture/new_assets.png)
 
-- ´ø3DÔ¤ÀÀµÄ±à¼­Æ÷²Ù×÷
-- - **ÒÆ¶¯**:ASWD»òÕß°´×¡Êó±êÖĞ¼üÅÌÒÆ¶¯
-- - **ÈÆ¹Û²ìµãĞı×ª**:°´×¡Alt¼üºÍÊó±ê×ó¼üÍÏ¶¯
-- - **ÉãÏñ»ú×ÔÉíĞı×ª**:Êó±êÓÒ¼üÍÏ¶¯
-- ÄÚÖÃ±à¼­Æ÷
+- å¸¦3Dé¢„è§ˆçš„ç¼–è¾‘å™¨æ“ä½œ
+- - **ç§»åŠ¨**:ASWDæˆ–è€…æŒ‰ä½é¼ æ ‡ä¸­é”®ç›˜ç§»åŠ¨
+- - **ç»•è§‚å¯Ÿç‚¹æ—‹è½¬**:æŒ‰ä½Alté”®å’Œé¼ æ ‡å·¦é”®æ‹–åŠ¨
+- - **æ‘„åƒæœºè‡ªèº«æ—‹è½¬**:é¼ æ ‡å³é”®æ‹–åŠ¨
+- å†…ç½®ç¼–è¾‘å™¨
 - - **[TextureEditor](editor/TextureEditor.md)**
 - - **[MeshPrimitiveEditor](editor/MeshPrimitiveEditor.md)**
 - - **[MaterialEditor](editor/MaterialEditor.md)**
@@ -56,8 +56,8 @@
 - - **[PGCEditor](editor/PGCEditor.md)**
 - - **[UIEditor](editor/UIEditor.md)**
 
-- »ù´¡½Ì³Ì
-- ÔÚContentBrowserµÄtutorialsÏÂÃæÓĞ¶ÔÓ¦µÄ×ÓÄ¿Â¼
+- åŸºç¡€æ•™ç¨‹
+- åœ¨ContentBrowserçš„tutorialsä¸‹é¢æœ‰å¯¹åº”çš„å­ç›®å½•
 - - [helloworld](tutorials/helloworld.md)
 - - [material](tutorials/material.md)
 - - [mcshader](tutorials/mcshader.md)

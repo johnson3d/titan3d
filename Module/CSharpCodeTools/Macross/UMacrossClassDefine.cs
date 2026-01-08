@@ -204,13 +204,14 @@ namespace CSharpCodeTools.Macross
                         
                         AddLine($"private static EngineNS.Macross.TtMacrossBreak macross_break_{i.MethodSyntax.Identifier.Text}_{i.GetParameterHashCode()} = new EngineNS.Macross.TtMacrossBreak(\"{funName}\");");
                         if (i.ParamenterCount > 0)
-                            AddLine($"public {isStatic}{asyncStr}{i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text} {genericDef}(string nodeName, {i.GetParameterDefine()}) {constraint}");
+                            AddLine($"public {isStatic}{asyncStr}{i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text} {genericDef}(EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, {i.GetParameterDefine()}) {constraint}");
                         else
-                            AddLine($"public {isStatic}{asyncStr}{i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text} {genericDef}(string nodeName) {constraint}");
+                            AddLine($"public {isStatic}{asyncStr}{i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text} {genericDef}(EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) {constraint}");
                         PushBrackets();
                         {
                             bool hasOut = false;
-                            AddLine($"using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)");
+                            //AddLine($"using(var stackframe = mcStack.CurrentFrame)");
+                            AddLine($"var stackframe = mcStack.TopFrame;");
                             PushBrackets();
                             {
                                 AddLine($"if(stackframe != null)");
@@ -255,7 +256,7 @@ namespace CSharpCodeTools.Macross
 
                             if (hasOut)
                             {
-                                AddLine($"using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)");
+                                //AddLine($"using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)");
                                 PushBrackets();
                                 {
                                     AddLine($"if(stackframe != null)");
@@ -274,7 +275,7 @@ namespace CSharpCodeTools.Macross
                                 PopBrackets();
                             }
 
-                            AddLine($"macross_break_{i.MethodSyntax.Identifier.Text}_{i.GetParameterHashCode()}.TryBreak();");
+                            AddLine($"macross_break_{i.MethodSyntax.Identifier.Text}_{i.GetParameterHashCode()}.TryBreak(mcStack);");
 
                             if (needReturen)
                             {

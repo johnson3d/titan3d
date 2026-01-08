@@ -299,7 +299,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
     [Macross.TtMacross]
     [TtMacrossNodeCustomCodeGen]
-    public partial class TtSceneNodeMacrossBase : ISceneNodeMacross<object>
+    public partial class TtSceneNodeMacrossBase : Macross.AuxMacrossObject, ISceneNodeMacross<object>
     {
         public virtual void InitPros()
         {
@@ -510,9 +510,9 @@ namespace EngineNS.Bricks.CodeBuilder
 	partial class TtSceneNodeMacrossBase
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_BeginPlay_2673848221 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.TtSceneNodeMacrossBase->TtTask BeginPlay(TtNode host)");
-		public async TtTask macross_BeginPlay (string nodeName, TtNode host) 
+		public async TtTask macross_BeginPlay (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtNode host) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -520,12 +520,12 @@ namespace EngineNS.Bricks.CodeBuilder
 				}
 			}
 			await BeginPlay(host);
-			macross_break_BeginPlay_2673848221.TryBreak();
+			macross_break_BeginPlay_2673848221.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Tick_2673848221 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.TtSceneNodeMacrossBase->void Tick(TtNode host)");
-		public unsafe void macross_Tick (string nodeName, TtNode host) 
+		public unsafe void macross_Tick (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtNode host) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -533,12 +533,12 @@ namespace EngineNS.Bricks.CodeBuilder
 				}
 			}
 			Tick(host);
-			macross_break_Tick_2673848221.TryBreak();
+			macross_break_Tick_2673848221.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_DestroyNode_2673848221 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.TtSceneNodeMacrossBase->void DestroyNode(TtNode host)");
-		public unsafe void macross_DestroyNode (string nodeName, TtNode host) 
+		public unsafe void macross_DestroyNode (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtNode host) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -546,7 +546,7 @@ namespace EngineNS.Bricks.CodeBuilder
 				}
 			}
 			DestroyNode(host);
-			macross_break_DestroyNode_2673848221.TryBreak();
+			macross_break_DestroyNode_2673848221.TryBreak(mcStack);
 		}
 	}
 }

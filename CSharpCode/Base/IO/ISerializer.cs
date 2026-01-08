@@ -1234,9 +1234,9 @@ namespace EngineNS.UnitTest
 	partial class UTest_MetaObject
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_TestFunction1_4262414734 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UnitTest.UTest_MetaObject->void TestFunction1(float a)");
-		public unsafe void macross_TestFunction1 (string nodeName, float a) 
+		public unsafe void macross_TestFunction1 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float a) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1244,12 +1244,12 @@ namespace EngineNS.UnitTest
 				}
 			}
 			TestFunction1(a);
-			macross_break_TestFunction1_4262414734.TryBreak();
+			macross_break_TestFunction1_4262414734.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_TestStaticFunction1_650822939 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UnitTest.UTest_MetaObject->static void TestStaticFunction1(float a)");
-		public static unsafe void macross_TestStaticFunction1 (string nodeName, float a) 
+		public static unsafe void macross_TestStaticFunction1 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float a) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1257,12 +1257,12 @@ namespace EngineNS.UnitTest
 				}
 			}
 			TestStaticFunction1(a);
-			macross_break_TestStaticFunction1_650822939.TryBreak();
+			macross_break_TestStaticFunction1_650822939.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_TestOutArguments_730645439 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UnitTest.UTest_MetaObject->static object TestOutArguments(System.Type rType)");
-		public static unsafe object macross_TestOutArguments (string nodeName, System.Type rType) 
+		public static unsafe object macross_TestOutArguments (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, System.Type rType) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1270,13 +1270,13 @@ namespace EngineNS.UnitTest
 				}
 			}
 			var _return_value = TestOutArguments(rType);
-			macross_break_TestOutArguments_730645439.TryBreak();
+			macross_break_TestOutArguments_730645439.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_TestOut2_730645439 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UnitTest.UTest_MetaObject->static object TestOut2(System.Type rType)");
-		public static unsafe object macross_TestOut2 (string nodeName, System.Type rType) 
+		public static unsafe object macross_TestOut2 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, System.Type rType) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1284,7 +1284,7 @@ namespace EngineNS.UnitTest
 				}
 			}
 			var _return_value = TestOut2(rType);
-			macross_break_TestOut2_730645439.TryBreak();
+			macross_break_TestOut2_730645439.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

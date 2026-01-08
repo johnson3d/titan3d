@@ -177,9 +177,9 @@ namespace EngineNS.GamePlay
 	partial class TtMacrossFunctionLibrary
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_InstantiatePrefab_659189569 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtMacrossFunctionLibrary->static TtPrefabNode InstantiatePrefab(RName prefab, TtScene scene)");
-		public static unsafe TtPrefabNode macross_InstantiatePrefab (string nodeName, RName prefab, TtScene scene) 
+		public static unsafe TtPrefabNode macross_InstantiatePrefab (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, RName prefab, TtScene scene) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -188,13 +188,13 @@ namespace EngineNS.GamePlay
 				}
 			}
 			var _return_value = InstantiatePrefab(prefab, scene);
-			macross_break_InstantiatePrefab_659189569.TryBreak();
+			macross_break_InstantiatePrefab_659189569.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_DestroyPrefab_1775413286 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtMacrossFunctionLibrary->static void DestroyPrefab(TtPrefabNode prefab)");
-		public static unsafe void macross_DestroyPrefab (string nodeName, TtPrefabNode prefab) 
+		public static unsafe void macross_DestroyPrefab (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtPrefabNode prefab) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -202,12 +202,12 @@ namespace EngineNS.GamePlay
 				}
 			}
 			DestroyPrefab(prefab);
-			macross_break_DestroyPrefab_1775413286.TryBreak();
+			macross_break_DestroyPrefab_1775413286.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_SetPropertyTarget_889374708 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtMacrossFunctionLibrary->static void SetPropertyTarget(object obj)");
-		public static unsafe void macross_SetPropertyTarget (string nodeName, object obj) 
+		public static unsafe void macross_SetPropertyTarget (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, object obj) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -215,7 +215,7 @@ namespace EngineNS.GamePlay
 				}
 			}
 			SetPropertyTarget(obj);
-			macross_break_SetPropertyTarget_889374708.TryBreak();
+			macross_break_SetPropertyTarget_889374708.TryBreak(mcStack);
 		}
 	}
 }

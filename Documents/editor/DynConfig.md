@@ -1,16 +1,16 @@
-- ¼ÇÂ¼µÄ×îºóÒ»¸öÔËĞĞµÄPIE
+- è®°å½•çš„æœ€åä¸€ä¸ªè¿è¡Œçš„PIE
 	- LastPIEName:EngineNS.RName@EngineCore=tutorials/character/charactertestgame.macross:Game
-- ÊÇ·ñÊ¹ÓÃRenderDoc
+- æ˜¯å¦ä½¿ç”¨RenderDoc
 	- UseRenderDoc:System.Boolean@Unknown=False
-- ÊÇ·ñ´ò¿ªDevice Debug Layer
+- æ˜¯å¦æ‰“å¼€Device Debug Layer
 	- HasDebugLayer:System.Boolean@Unknown=True
-- ÊÇ·ñ´ò¿ªDX12 DRED
+- æ˜¯å¦æ‰“å¼€DX12 DRED
 	- IsGpuDred:System.Boolean@Unknown=True
-- ÊÇ·ñ´ò¿ªNV Aftermath
+- æ˜¯å¦æ‰“å¼€NV Aftermath
 	- IsAftermath:System.Boolean@Unknown=False
-- ¼ÇÂ¼µÄ×îºóÒ»¸öä¯ÀÀÄ¿Â¼
+- è®°å½•çš„æœ€åä¸€ä¸ªæµè§ˆç›®å½•
 	- ContentCurrentDir:EngineNS.RName@EngineCore=utest/:Game
-- ±£´æ×îĞÂ×Ê²úÀàĞÍÁĞ±í
+- ä¿å­˜æœ€æ–°èµ„äº§ç±»å‹åˆ—è¡¨
 	- CookSaveNewestAssetType:System.String@Unknown=Scene+Mesh+Material+MaterialInst+AnimClip+MeshPrimitive+UI+Prefab+Macross+UVAnim+RPolicy+AnimationClip
-- Æô¶¯C++µ÷Ê½¿â 
+- å¯åŠ¨C++è°ƒå¼åº“ 
 	- NativeDLL:System.String@Unknown=debug

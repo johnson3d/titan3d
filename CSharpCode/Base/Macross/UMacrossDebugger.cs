@@ -18,7 +18,7 @@ namespace EngineNS.Macross
             TtMacrossDebugger.Instance.AddBreak(this);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void TryBreak()
+        public void TryBreak(TtMacrossStackTracer stack = null)
         {
             if (Enable)
             {
@@ -26,18 +26,18 @@ namespace EngineNS.Macross
                 {//不能在主线程break住，否则没法调试了
                     return;
                 }
-                TryBreakInner();
+                TryBreakInner(stack);
             }
         }
-        private void TryBreakInner()
+        private void TryBreakInner(TtMacrossStackTracer stack)
         {
             lock (TtMacrossDebugger.Instance)
             {
                 if (TtMacrossDebugger.Instance.CurrrentBreak != null)
                     return;
-                StackTracer = TtMacrossStackTracer.ThreadInstance;
+                StackTracer = stack;
 
-                BreakStackFrame = TtMacrossStackTracer.CurrentFrame;
+                BreakStackFrame = StackTracer?.TopFrame;
                 TtMacrossDebugger.Instance.CurrrentBreak = this;
                 TtMacrossDebugger.Instance.BreakEvent.Reset();
                 TtEngine.Instance.ThreadLogic.MacrossDebug.Set();

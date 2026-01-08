@@ -1,3 +1,3 @@
-- Ö÷½çÃæ
+- ä¸»ç•Œé¢
 - - ![MainUI](MeshPrimitiveEditor/MainUI.png)
-	- °´Å¥N,TÁ½¸ö¿ÉÒÔÏÔÊ¾Normal,Tangent
+	- æŒ‰é’®N,Tä¸¤ä¸ªå¯ä»¥æ˜¾ç¤ºNormal,Tangent

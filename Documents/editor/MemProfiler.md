@@ -1,4 +1,4 @@
-- Ö÷½çÃæ
+- ä¸»ç•Œé¢
 - - ![MainUI](MemoryProfiler/MainUI.png)
 	- Drawcall
 	- NativeMemory

@@ -53,7 +53,7 @@ namespace EngineNS.DesignMacross
     {
     }
     [DesignMacross]
-    public class TtDesignMacrossBase
+    public class TtDesignMacrossBase : Macross.AuxMacrossObject
     {
         public TtNode MacrossNode{ get; set; } = null;
         public bool IsInitialized { get; set; } = false;

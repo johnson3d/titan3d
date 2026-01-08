@@ -342,9 +342,9 @@ namespace EngineNS.GamePlay.Scene
 	partial class TtSceneCapture
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_AddOnlyShowNode_467596569 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtSceneCapture->void AddOnlyShowNode(TtNode node)");
-		public unsafe void macross_AddOnlyShowNode (string nodeName, TtNode node) 
+		public unsafe void macross_AddOnlyShowNode (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtNode node) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -352,12 +352,12 @@ namespace EngineNS.GamePlay.Scene
 				}
 			}
 			AddOnlyShowNode(node);
-			macross_break_AddOnlyShowNode_467596569.TryBreak();
+			macross_break_AddOnlyShowNode_467596569.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_RemoveOnlyShowNode_467596569 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtSceneCapture->void RemoveOnlyShowNode(TtNode node)");
-		public unsafe void macross_RemoveOnlyShowNode (string nodeName, TtNode node) 
+		public unsafe void macross_RemoveOnlyShowNode (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtNode node) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -365,19 +365,19 @@ namespace EngineNS.GamePlay.Scene
 				}
 			}
 			RemoveOnlyShowNode(node);
-			macross_break_RemoveOnlyShowNode_467596569.TryBreak();
+			macross_break_RemoveOnlyShowNode_467596569.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_ClearOnlyShowNodes_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtSceneCapture->void ClearOnlyShowNodes()");
-		public unsafe void macross_ClearOnlyShowNodes (string nodeName) 
+		public unsafe void macross_ClearOnlyShowNodes (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
 				}
 			}
 			ClearOnlyShowNodes();
-			macross_break_ClearOnlyShowNodes_2609910045.TryBreak();
+			macross_break_ClearOnlyShowNodes_2609910045.TryBreak(mcStack);
 		}
 	}
 }

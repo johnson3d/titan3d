@@ -2011,21 +2011,21 @@ namespace EngineNS.GamePlay.Scene
 	partial class TtNode
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_DisposeWithChildren_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtNode->void DisposeWithChildren()");
-		public unsafe void macross_DisposeWithChildren (string nodeName) 
+		public unsafe void macross_DisposeWithChildren (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
 				}
 			}
 			DisposeWithChildren();
-			macross_break_DisposeWithChildren_2609910045.TryBreak();
+			macross_break_DisposeWithChildren_2609910045.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_SpawnNode_2578765284 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtNode->static Thread.Async.TtTask<TtNode> SpawnNode(TtNode parent, System.Type nodeType, FPostSpawnNode postAction, TtNodeData data, EBoundVolumeType bvType, Type placementType, TtWorld world, object extArg)");
-		public static async Thread.Async.TtTask<TtNode> macross_SpawnNode (string nodeName, TtNode parent, System.Type nodeType, FPostSpawnNode postAction, TtNodeData data, EBoundVolumeType bvType, Type placementType, TtWorld world, object extArg) 
+		public static async Thread.Async.TtTask<TtNode> macross_SpawnNode (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtNode parent, System.Type nodeType, FPostSpawnNode postAction, TtNodeData data, EBoundVolumeType bvType, Type placementType, TtWorld world, object extArg) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -2040,13 +2040,13 @@ namespace EngineNS.GamePlay.Scene
 				}
 			}
 			var _return_value = await SpawnNode(parent, nodeType, postAction, data, bvType, placementType, world, extArg);
-			macross_break_SpawnNode_2578765284.TryBreak();
+			macross_break_SpawnNode_2578765284.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_FindFirstChild_26975848 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtNode->TtNode FindFirstChild(string name, System.Type type, bool bRecursive)");
-		public unsafe TtNode macross_FindFirstChild (string nodeName, string name, System.Type type, bool bRecursive) 
+		public unsafe TtNode macross_FindFirstChild (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name, System.Type type, bool bRecursive) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -2056,20 +2056,20 @@ namespace EngineNS.GamePlay.Scene
 				}
 			}
 			var _return_value = FindFirstChild(name, type, bRecursive);
-			macross_break_FindFirstChild_26975848.TryBreak();
+			macross_break_FindFirstChild_26975848.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_RemoveFromWorld_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtNode->void RemoveFromWorld()");
-		public unsafe void macross_RemoveFromWorld (string nodeName) 
+		public unsafe void macross_RemoveFromWorld (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
 				}
 			}
 			RemoveFromWorld();
-			macross_break_RemoveFromWorld_2609910045.TryBreak();
+			macross_break_RemoveFromWorld_2609910045.TryBreak(mcStack);
 		}
 	}
 }

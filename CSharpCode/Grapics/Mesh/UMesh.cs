@@ -940,9 +940,9 @@ namespace EngineNS.Graphics.Mesh
 	partial class TtRenderMesh
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_GetMaterial_899003873 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Mesh.TtRenderMesh->Pipeline.Shader.TtMaterial GetMaterial(uint subMesh, uint atom)");
-		public unsafe Pipeline.Shader.TtMaterial macross_GetMaterial (string nodeName, uint subMesh, uint atom) 
+		public unsafe Pipeline.Shader.TtMaterial macross_GetMaterial (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, uint subMesh, uint atom) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -951,7 +951,7 @@ namespace EngineNS.Graphics.Mesh
 				}
 			}
 			var _return_value = GetMaterial(subMesh, atom);
-			macross_break_GetMaterial_899003873.TryBreak();
+			macross_break_GetMaterial_899003873.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

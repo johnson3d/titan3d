@@ -570,9 +570,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 	partial class TtCoreMaterialShader
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_SampleLevel2D_1619298209 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static Vector4 SampleLevel2D(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, float level, out Vector3 rgb, out float a)");
-		public static unsafe Vector4 macross_SampleLevel2D (string nodeName, Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, float level, out Vector3 rgb, out float a) 
+		public static unsafe Vector4 macross_SampleLevel2D (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, float level, out Vector3 rgb, out float a) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -583,7 +583,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = SampleLevel2D(texture, sampler, uv, level, out rgb, out a);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
@@ -591,13 +590,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 					stackframe.SetWatchVariable(nodeName + ":a", a);
 				}
 			}
-			macross_break_SampleLevel2D_1619298209.TryBreak();
+			macross_break_SampleLevel2D_1619298209.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Sample2D_22126203 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static Vector4 Sample2D(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, out Vector3 rgb, out float a)");
-		public static unsafe Vector4 macross_Sample2D (string nodeName, Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, out Vector3 rgb, out float a) 
+		public static unsafe Vector4 macross_Sample2D (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, out Vector3 rgb, out float a) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -607,7 +606,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = Sample2D(texture, sampler, uv, out rgb, out a);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
@@ -615,13 +613,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 					stackframe.SetWatchVariable(nodeName + ":a", a);
 				}
 			}
-			macross_break_Sample2D_22126203.TryBreak();
+			macross_break_Sample2D_22126203.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Sample2DBias_1637392118 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static Vector4 Sample2DBias(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, float bias, out Vector3 rgb, out float a)");
-		public static unsafe Vector4 macross_Sample2DBias (string nodeName, Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, float bias, out Vector3 rgb, out float a) 
+		public static unsafe Vector4 macross_Sample2DBias (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, float bias, out Vector3 rgb, out float a) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -632,7 +630,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = Sample2DBias(texture, sampler, uv, bias, out rgb, out a);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
@@ -640,13 +637,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 					stackframe.SetWatchVariable(nodeName + ":a", a);
 				}
 			}
-			macross_break_Sample2DBias_1637392118.TryBreak();
+			macross_break_Sample2DBias_1637392118.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_SampleArrayLevel2D_4198432855 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static Vector4 SampleArrayLevel2D(Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, float level, out Vector3 rgb, out float a)");
-		public static unsafe Vector4 macross_SampleArrayLevel2D (string nodeName, Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, float level, out Vector3 rgb, out float a) 
+		public static unsafe Vector4 macross_SampleArrayLevel2D (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, float level, out Vector3 rgb, out float a) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -658,7 +655,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = SampleArrayLevel2D(texture, sampler, uv, arrayIndex, level, out rgb, out a);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
@@ -666,13 +662,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 					stackframe.SetWatchVariable(nodeName + ":a", a);
 				}
 			}
-			macross_break_SampleArrayLevel2D_4198432855.TryBreak();
+			macross_break_SampleArrayLevel2D_4198432855.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_SampleArray2D_3585907133 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static Vector4 SampleArray2D(Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, out Vector3 rgb, out float a)");
-		public static unsafe Vector4 macross_SampleArray2D (string nodeName, Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, out Vector3 rgb, out float a) 
+		public static unsafe Vector4 macross_SampleArray2D (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, out Vector3 rgb, out float a) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -683,7 +679,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = SampleArray2D(texture, sampler, uv, arrayIndex, out rgb, out a);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
@@ -691,13 +686,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 					stackframe.SetWatchVariable(nodeName + ":a", a);
 				}
 			}
-			macross_break_SampleArray2D_3585907133.TryBreak();
+			macross_break_SampleArray2D_3585907133.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_TextureSize_3456849711 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static Vector2 TextureSize(Var.Texture2D texture)");
-		public static unsafe Vector2 macross_TextureSize (string nodeName, Var.Texture2D texture) 
+		public static unsafe Vector2 macross_TextureSize (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Var.Texture2D texture) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -705,13 +700,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = TextureSize(texture);
-			macross_break_TextureSize_3456849711.TryBreak();
+			macross_break_TextureSize_3456849711.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_GetTerrainDiffuse_2999334926 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static Vector3 GetTerrainDiffuse(Vector2 uv, Graphics.Pipeline.Shader.PS_INPUT input)");
-		public static unsafe Vector3 macross_GetTerrainDiffuse (string nodeName, Vector2 uv, Graphics.Pipeline.Shader.PS_INPUT input) 
+		public static unsafe Vector3 macross_GetTerrainDiffuse (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector2 uv, Graphics.Pipeline.Shader.PS_INPUT input) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -720,13 +715,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = GetTerrainDiffuse(uv, input);
-			macross_break_GetTerrainDiffuse_2999334926.TryBreak();
+			macross_break_GetTerrainDiffuse_2999334926.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_GetTerrainNormal_2999334926 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static Vector3 GetTerrainNormal(Vector2 uv, Graphics.Pipeline.Shader.PS_INPUT input)");
-		public static unsafe Vector3 macross_GetTerrainNormal (string nodeName, Vector2 uv, Graphics.Pipeline.Shader.PS_INPUT input) 
+		public static unsafe Vector3 macross_GetTerrainNormal (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector2 uv, Graphics.Pipeline.Shader.PS_INPUT input) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -735,13 +730,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = GetTerrainNormal(uv, input);
-			macross_break_GetTerrainNormal_2999334926.TryBreak();
+			macross_break_GetTerrainNormal_2999334926.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_GrayColor_2932943049 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static Vector3 GrayColor(Vector3 color)");
-		public static unsafe Vector3 macross_GrayColor (string nodeName, Vector3 color) 
+		public static unsafe Vector3 macross_GrayColor (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 color) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -749,13 +744,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = GrayColor(color);
-			macross_break_GrayColor_2932943049.TryBreak();
+			macross_break_GrayColor_2932943049.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_NormalMap_2670023119 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void NormalMap(Vector3 Nt, Vector4 Tw, Vector3 Nw, out Vector3 UnpackedNormal)");
-		public static unsafe void macross_NormalMap (string nodeName, Vector3 Nt, Vector4 Tw, Vector3 Nw, out Vector3 UnpackedNormal) 
+		public static unsafe void macross_NormalMap (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 Nt, Vector4 Tw, Vector3 Nw, out Vector3 UnpackedNormal) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -765,19 +760,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			NormalMap(Nt, Tw, Nw, out UnpackedNormal);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":UnpackedNormal", UnpackedNormal);
 				}
 			}
-			macross_break_NormalMap_2670023119.TryBreak();
+			macross_break_NormalMap_2670023119.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Panner_3502202686 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Panner(Vector2 uv, float time, Vector2 speed, Vector2 scale, out Vector2 outUV)");
-		public static unsafe void macross_Panner (string nodeName, Vector2 uv, float time, Vector2 speed, Vector2 scale, out Vector2 outUV) 
+		public static unsafe void macross_Panner (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector2 uv, float time, Vector2 speed, Vector2 scale, out Vector2 outUV) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -788,19 +782,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Panner(uv, time, speed, scale, out outUV);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":outUV", outUV);
 				}
 			}
-			macross_break_Panner_3502202686.TryBreak();
+			macross_break_Panner_3502202686.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Rotator_3937462911 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Rotator(Vector2 uv, float time, Vector2 center, Vector2 scale, float speed, out Vector2 outUV)");
-		public static unsafe void macross_Rotator (string nodeName, Vector2 uv, float time, Vector2 center, Vector2 scale, float speed, out Vector2 outUV) 
+		public static unsafe void macross_Rotator (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector2 uv, float time, Vector2 center, Vector2 scale, float speed, out Vector2 outUV) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -812,19 +805,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Rotator(uv, time, center, scale, speed, out outUV);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":outUV", outUV);
 				}
 			}
-			macross_break_Rotator_3937462911.TryBreak();
+			macross_break_Rotator_3937462911.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_TransformToWorldPos_1746925731 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void TransformToWorldPos(Vector3 localPos, out Vector3 worldPos)");
-		public static unsafe void macross_TransformToWorldPos (string nodeName, Vector3 localPos, out Vector3 worldPos) 
+		public static unsafe void macross_TransformToWorldPos (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 localPos, out Vector3 worldPos) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -832,19 +824,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			TransformToWorldPos(localPos, out worldPos);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":worldPos", worldPos);
 				}
 			}
-			macross_break_TransformToWorldPos_1746925731.TryBreak();
+			macross_break_TransformToWorldPos_1746925731.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Distortion_269822995 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Distortion(Vector4 localPos, Vector4 localNorm, Vector4 viewPos, Vector4 projPos, Vector3 localCameraPos, float strength, float transparency, float distortionOffset, out Vector2 distortionUV, out float distortionAlpha)");
-		public static unsafe void macross_Distortion (string nodeName, Vector4 localPos, Vector4 localNorm, Vector4 viewPos, Vector4 projPos, Vector3 localCameraPos, float strength, float transparency, float distortionOffset, out Vector2 distortionUV, out float distortionAlpha) 
+		public static unsafe void macross_Distortion (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector4 localPos, Vector4 localNorm, Vector4 viewPos, Vector4 projPos, Vector3 localCameraPos, float strength, float transparency, float distortionOffset, out Vector2 distortionUV, out float distortionAlpha) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -859,7 +850,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Distortion(localPos, localNorm, viewPos, projPos, localCameraPos, strength, transparency, distortionOffset, out distortionUV, out distortionAlpha);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
@@ -867,12 +857,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 					stackframe.SetWatchVariable(nodeName + ":distortionAlpha", distortionAlpha);
 				}
 			}
-			macross_break_Distortion_269822995.TryBreak();
+			macross_break_Distortion_269822995.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_RimLight_1487571022 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->void RimLight(Vector3 N, Vector3 V, float rimPower, float rimIntensity, out float OutRimFactor)");
-		public unsafe void macross_RimLight (string nodeName, Vector3 N, Vector3 V, float rimPower, float rimIntensity, out float OutRimFactor) 
+		public unsafe void macross_RimLight (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 N, Vector3 V, float rimPower, float rimIntensity, out float OutRimFactor) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -883,19 +873,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			RimLight(N, V, rimPower, rimIntensity, out OutRimFactor);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":OutRimFactor", OutRimFactor);
 				}
 			}
-			macross_break_RimLight_1487571022.TryBreak();
+			macross_break_RimLight_1487571022.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_VecMultiplyQuat_320759171 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void VecMultiplyQuat(Vector3 vec, Vector4 quat, out Vector3 outVector)");
-		public static unsafe void macross_VecMultiplyQuat (string nodeName, Vector3 vec, Vector4 quat, out Vector3 outVector) 
+		public static unsafe void macross_VecMultiplyQuat (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 vec, Vector4 quat, out Vector3 outVector) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -904,19 +893,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			VecMultiplyQuat(vec, quat, out outVector);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":outVector", outVector);
 				}
 			}
-			macross_break_VecMultiplyQuat_320759171.TryBreak();
+			macross_break_VecMultiplyQuat_320759171.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Dot3D_3561363165 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static float Dot3D(Vector3 v1, Vector3 v2)");
-		public static unsafe float macross_Dot3D (string nodeName, Vector3 v1, Vector3 v2) 
+		public static unsafe float macross_Dot3D (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 v1, Vector3 v2) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -925,13 +913,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = Dot3D(v1, v2);
-			macross_break_Dot3D_3561363165.TryBreak();
+			macross_break_Dot3D_3561363165.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Cross3D_3561363165 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static Vector3 Cross3D(Vector3 v1, Vector3 v2)");
-		public static unsafe Vector3 macross_Cross3D (string nodeName, Vector3 v1, Vector3 v2) 
+		public static unsafe Vector3 macross_Cross3D (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 v1, Vector3 v2) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -940,13 +928,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = Cross3D(v1, v2);
-			macross_break_Cross3D_3561363165.TryBreak();
+			macross_break_Cross3D_3561363165.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_UnpackNormal_1896727442 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void UnpackNormal(Vector3 packedNormal, out Vector3 normal)");
-		public static unsafe void macross_UnpackNormal (string nodeName, Vector3 packedNormal, out Vector3 normal) 
+		public static unsafe void macross_UnpackNormal (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 packedNormal, out Vector3 normal) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -954,19 +942,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			UnpackNormal(packedNormal, out normal);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":normal", normal);
 				}
 			}
-			macross_break_UnpackNormal_1896727442.TryBreak();
+			macross_break_UnpackNormal_1896727442.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_BumpToWorldNormal_2735709164 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static Vector3 BumpToWorldNormal(Vector3 normMap, PS_INPUT input)");
-		public static unsafe Vector3 macross_BumpToWorldNormal (string nodeName, Vector3 normMap, PS_INPUT input) 
+		public static unsafe Vector3 macross_BumpToWorldNormal (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 normMap, PS_INPUT input) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -975,13 +962,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = BumpToWorldNormal(normMap, input);
-			macross_break_BumpToWorldNormal_2735709164.TryBreak();
+			macross_break_BumpToWorldNormal_2735709164.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Frac_2667751931 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Frac(float x, out float ret)");
-		public static unsafe void macross_Frac (string nodeName, float x, out float ret) 
+		public static unsafe void macross_Frac (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float x, out float ret) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -989,19 +976,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Frac(x, out ret);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":ret", ret);
 				}
 			}
-			macross_break_Frac_2667751931.TryBreak();
+			macross_break_Frac_2667751931.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Pow_1037159604 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Pow(float v1, float v2, out float ret)");
-		public static unsafe void macross_Pow (string nodeName, float v1, float v2, out float ret) 
+		public static unsafe void macross_Pow (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float v1, float v2, out float ret) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1010,19 +996,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Pow(v1, v2, out ret);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":ret", ret);
 				}
 			}
-			macross_break_Pow_1037159604.TryBreak();
+			macross_break_Pow_1037159604.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Clamp_1427936477 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Clamp(float x, float min, float max, out float ret)");
-		public static unsafe void macross_Clamp (string nodeName, float x, float min, float max, out float ret) 
+		public static unsafe void macross_Clamp (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float x, float min, float max, out float ret) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1032,19 +1017,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Clamp(x, min, max, out ret);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":ret", ret);
 				}
 			}
-			macross_break_Clamp_1427936477.TryBreak();
+			macross_break_Clamp_1427936477.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Sin_1727491704 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Sin(float x, out float sin)");
-		public static unsafe void macross_Sin (string nodeName, float x, out float sin) 
+		public static unsafe void macross_Sin (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float x, out float sin) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1052,19 +1036,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Sin(x, out sin);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":sin", sin);
 				}
 			}
-			macross_break_Sin_1727491704.TryBreak();
+			macross_break_Sin_1727491704.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Cos_3143966799 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Cos(float x, out float cos)");
-		public static unsafe void macross_Cos (string nodeName, float x, out float cos) 
+		public static unsafe void macross_Cos (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float x, out float cos) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1072,19 +1055,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Cos(x, out cos);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":cos", cos);
 				}
 			}
-			macross_break_Cos_3143966799.TryBreak();
+			macross_break_Cos_3143966799.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_SinRemapped_292764772 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static float SinRemapped(float SinPhase, float v1, float v2)");
-		public static unsafe float macross_SinRemapped (string nodeName, float SinPhase, float v1, float v2) 
+		public static unsafe float macross_SinRemapped (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float SinPhase, float v1, float v2) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1094,13 +1076,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = SinRemapped(SinPhase, v1, v2);
-			macross_break_SinRemapped_292764772.TryBreak();
+			macross_break_SinRemapped_292764772.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_SinCos_1216592905 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void SinCos(float x, out float sin, out float cos)");
-		public static unsafe void macross_SinCos (string nodeName, float x, out float sin, out float cos) 
+		public static unsafe void macross_SinCos (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float x, out float sin, out float cos) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1108,7 +1090,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			SinCos(x, out sin, out cos);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
@@ -1116,12 +1097,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 					stackframe.SetWatchVariable(nodeName + ":cos", cos);
 				}
 			}
-			macross_break_SinCos_1216592905.TryBreak();
+			macross_break_SinCos_1216592905.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Ceil_2667751931 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Ceil(float x, out float ret)");
-		public static unsafe void macross_Ceil (string nodeName, float x, out float ret) 
+		public static unsafe void macross_Ceil (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float x, out float ret) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1129,19 +1110,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Ceil(x, out ret);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":ret", ret);
 				}
 			}
-			macross_break_Ceil_2667751931.TryBreak();
+			macross_break_Ceil_2667751931.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Max_1037159604 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Max(float v1, float v2, out float ret)");
-		public static unsafe void macross_Max (string nodeName, float v1, float v2, out float ret) 
+		public static unsafe void macross_Max (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float v1, float v2, out float ret) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1150,19 +1130,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Max(v1, v2, out ret);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":ret", ret);
 				}
 			}
-			macross_break_Max_1037159604.TryBreak();
+			macross_break_Max_1037159604.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Min_1037159604 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Min(float v1, float v2, out float ret)");
-		public static unsafe void macross_Min (string nodeName, float v1, float v2, out float ret) 
+		public static unsafe void macross_Min (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float v1, float v2, out float ret) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1171,19 +1150,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Min(v1, v2, out ret);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":ret", ret);
 				}
 			}
-			macross_break_Min_1037159604.TryBreak();
+			macross_break_Min_1037159604.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Lerp_2744330567 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Lerp(float v1, float v2, float s, out float ret)");
-		public static unsafe void macross_Lerp (string nodeName, float v1, float v2, float s, out float ret) 
+		public static unsafe void macross_Lerp (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float v1, float v2, float s, out float ret) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1193,19 +1171,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Lerp(v1, v2, s, out ret);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":ret", ret);
 				}
 			}
-			macross_break_Lerp_2744330567.TryBreak();
+			macross_break_Lerp_2744330567.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Lerp2D_212282019 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Lerp2D(Vector2 v1, Vector2 v2, Vector2 s, out Vector2 ret)");
-		public static unsafe void macross_Lerp2D (string nodeName, Vector2 v1, Vector2 v2, Vector2 s, out Vector2 ret) 
+		public static unsafe void macross_Lerp2D (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector2 v1, Vector2 v2, Vector2 s, out Vector2 ret) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1215,19 +1192,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Lerp2D(v1, v2, s, out ret);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":ret", ret);
 				}
 			}
-			macross_break_Lerp2D_212282019.TryBreak();
+			macross_break_Lerp2D_212282019.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Lerp3D_1881825247 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Lerp3D(Vector3 v1, Vector3 v2, Vector3 s, out Vector3 ret)");
-		public static unsafe void macross_Lerp3D (string nodeName, Vector3 v1, Vector3 v2, Vector3 s, out Vector3 ret) 
+		public static unsafe void macross_Lerp3D (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 v1, Vector3 v2, Vector3 s, out Vector3 ret) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1237,19 +1213,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Lerp3D(v1, v2, s, out ret);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":ret", ret);
 				}
 			}
-			macross_break_Lerp3D_1881825247.TryBreak();
+			macross_break_Lerp3D_1881825247.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Smoothstep3D_1143902460 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static Vector3 Smoothstep3D(Vector3 InColor)");
-		public static unsafe Vector3 macross_Smoothstep3D (string nodeName, Vector3 InColor) 
+		public static unsafe Vector3 macross_Smoothstep3D (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 InColor) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1257,13 +1232,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = Smoothstep3D(InColor);
-			macross_break_Smoothstep3D_1143902460.TryBreak();
+			macross_break_Smoothstep3D_1143902460.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_floor3D_1143902460 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static Vector3 floor3D(Vector3 InColor)");
-		public static unsafe Vector3 macross_floor3D (string nodeName, Vector3 InColor) 
+		public static unsafe Vector3 macross_floor3D (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 InColor) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1271,13 +1246,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = floor3D(InColor);
-			macross_break_floor3D_1143902460.TryBreak();
+			macross_break_floor3D_1143902460.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_PolarCoodP2D_1242339339 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void PolarCoodP2D(Vector2 uv, out Vector2 polar)");
-		public static unsafe void macross_PolarCoodP2D (string nodeName, Vector2 uv, out Vector2 polar) 
+		public static unsafe void macross_PolarCoodP2D (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector2 uv, out Vector2 polar) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1285,19 +1260,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			PolarCoodP2D(uv, out polar);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":polar", polar);
 				}
 			}
-			macross_break_PolarCoodP2D_1242339339.TryBreak();
+			macross_break_PolarCoodP2D_1242339339.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_PolarCoodD2P_1242339339 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void PolarCoodD2P(Vector2 uv, out Vector2 polar)");
-		public static unsafe void macross_PolarCoodD2P (string nodeName, Vector2 uv, out Vector2 polar) 
+		public static unsafe void macross_PolarCoodD2P (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector2 uv, out Vector2 polar) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1305,19 +1279,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			PolarCoodD2P(uv, out polar);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":polar", polar);
 				}
 			}
-			macross_break_PolarCoodD2P_1242339339.TryBreak();
+			macross_break_PolarCoodD2P_1242339339.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_SphereMask_315209473 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static float SphereMask(Vector3 A, Vector3 B, float Radius, float Hardness)");
-		public static unsafe float macross_SphereMask (string nodeName, Vector3 A, Vector3 B, float Radius, float Hardness) 
+		public static unsafe float macross_SphereMask (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 A, Vector3 B, float Radius, float Hardness) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1328,13 +1301,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = SphereMask(A, B, Radius, Hardness);
-			macross_break_SphereMask_315209473.TryBreak();
+			macross_break_SphereMask_315209473.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_RotateAboutAxis_585100803 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void RotateAboutAxis(Vector3 rotationAxis, float rotationAngle, Vector3 pivotPos, Vector3 localPos, out Vector3 localOffset)");
-		public static unsafe void macross_RotateAboutAxis (string nodeName, Vector3 rotationAxis, float rotationAngle, Vector3 pivotPos, Vector3 localPos, out Vector3 localOffset) 
+		public static unsafe void macross_RotateAboutAxis (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 rotationAxis, float rotationAngle, Vector3 pivotPos, Vector3 localPos, out Vector3 localOffset) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1345,19 +1318,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			RotateAboutAxis(rotationAxis, rotationAngle, pivotPos, localPos, out localOffset);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":localOffset", localOffset);
 				}
 			}
-			macross_break_RotateAboutAxis_585100803.TryBreak();
+			macross_break_RotateAboutAxis_585100803.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Pivot_DecodePosition_2998404746 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Pivot_DecodePosition(Vector3 rgb, out Vector3 localPos)");
-		public static unsafe void macross_Pivot_DecodePosition (string nodeName, Vector3 rgb, out Vector3 localPos) 
+		public static unsafe void macross_Pivot_DecodePosition (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 rgb, out Vector3 localPos) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1365,19 +1337,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Pivot_DecodePosition(rgb, out localPos);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":localPos", localPos);
 				}
 			}
-			macross_break_Pivot_DecodePosition_2998404746.TryBreak();
+			macross_break_Pivot_DecodePosition_2998404746.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Pivot_DecodeAxisVector_748401133 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Pivot_DecodeAxisVector(Vector3 rgb, out Vector3 localAxis)");
-		public static unsafe void macross_Pivot_DecodeAxisVector (string nodeName, Vector3 rgb, out Vector3 localAxis) 
+		public static unsafe void macross_Pivot_DecodeAxisVector (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 rgb, out Vector3 localAxis) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1385,19 +1356,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Pivot_DecodeAxisVector(rgb, out localAxis);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":localAxis", localAxis);
 				}
 			}
-			macross_break_Pivot_DecodeAxisVector_748401133.TryBreak();
+			macross_break_Pivot_DecodeAxisVector_748401133.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Pivot_UnpackIntAsFloat_650858670 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static float Pivot_UnpackIntAsFloat(float N)");
-		public static unsafe float macross_Pivot_UnpackIntAsFloat (string nodeName, float N) 
+		public static unsafe float macross_Pivot_UnpackIntAsFloat (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float N) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1405,13 +1375,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = Pivot_UnpackIntAsFloat(N);
-			macross_break_Pivot_UnpackIntAsFloat_650858670.TryBreak();
+			macross_break_Pivot_UnpackIntAsFloat_650858670.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Pivot_GetPivotIndex_291261633 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Pivot_GetPivotIndex(Vector2 uv, Vector2 texSize, out float index)");
-		public static unsafe void macross_Pivot_GetPivotIndex (string nodeName, Vector2 uv, Vector2 texSize, out float index) 
+		public static unsafe void macross_Pivot_GetPivotIndex (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector2 uv, Vector2 texSize, out float index) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1420,19 +1390,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Pivot_GetPivotIndex(uv, texSize, out index);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":index", index);
 				}
 			}
-			macross_break_Pivot_GetPivotIndex_291261633.TryBreak();
+			macross_break_Pivot_GetPivotIndex_291261633.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Pivot_GetParentPivotData_2749766402 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Pivot_GetParentPivotData(float parentIdx, Vector2 texSize, float currentIdx, out Vector2 parentUV, out float isChild)");
-		public static unsafe void macross_Pivot_GetParentPivotData (string nodeName, float parentIdx, Vector2 texSize, float currentIdx, out Vector2 parentUV, out float isChild) 
+		public static unsafe void macross_Pivot_GetParentPivotData (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float parentIdx, Vector2 texSize, float currentIdx, out Vector2 parentUV, out float isChild) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1442,7 +1411,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Pivot_GetParentPivotData(parentIdx, texSize, currentIdx, out parentUV, out isChild);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
@@ -1450,12 +1418,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 					stackframe.SetWatchVariable(nodeName + ":isChild", isChild);
 				}
 			}
-			macross_break_Pivot_GetParentPivotData_2749766402.TryBreak();
+			macross_break_Pivot_GetParentPivotData_2749766402.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Pivot_GetHierarchyData_1987431315 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Pivot_GetHierarchyData(float pivotDepth, Vector2 pivot1UV, Vector2 pivot2UV, Vector2 pivot3UV, Vector2 pivot4UV, out Vector2 rootUV, out Vector2 mainBranchUV, out Vector2 smallBranchUV, out Vector2 leaveUV, out float mainBranchMask, out float smallBranchMask, out float leaveMask)");
-		public static unsafe void macross_Pivot_GetHierarchyData (string nodeName, float pivotDepth, Vector2 pivot1UV, Vector2 pivot2UV, Vector2 pivot3UV, Vector2 pivot4UV, out Vector2 rootUV, out Vector2 mainBranchUV, out Vector2 smallBranchUV, out Vector2 leaveUV, out float mainBranchMask, out float smallBranchMask, out float leaveMask) 
+		public static unsafe void macross_Pivot_GetHierarchyData (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float pivotDepth, Vector2 pivot1UV, Vector2 pivot2UV, Vector2 pivot3UV, Vector2 pivot4UV, out Vector2 rootUV, out Vector2 mainBranchUV, out Vector2 smallBranchUV, out Vector2 leaveUV, out float mainBranchMask, out float smallBranchMask, out float leaveMask) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1467,7 +1435,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Pivot_GetHierarchyData(pivotDepth, pivot1UV, pivot2UV, pivot3UV, pivot4UV, out rootUV, out mainBranchUV, out smallBranchUV, out leaveUV, out mainBranchMask, out smallBranchMask, out leaveMask);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
@@ -1480,12 +1447,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 					stackframe.SetWatchVariable(nodeName + ":leaveMask", leaveMask);
 				}
 			}
-			macross_break_Pivot_GetHierarchyData_1987431315.TryBreak();
+			macross_break_Pivot_GetHierarchyData_1987431315.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Pivot_WindAnimation_1869733926 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Pivot_WindAnimation(Vector3 prePos, Var.Texture2D posTex, Var.Texture2D xTex, Var.SamplerState samp, Vector2 uv, float mask, Var.Texture2D windTex, float scale, float speedX, Vector3 windAxisX, float speedY, Vector3 windAxisY, Vector3 localPos, float rot, float rotOffset, float parentRot, float axisScale, float axisSpeedScale, out Vector3 localVertexOffset, out float rotationAngle)");
-		public static unsafe void macross_Pivot_WindAnimation (string nodeName, Vector3 prePos, Var.Texture2D posTex, Var.Texture2D xTex, Var.SamplerState samp, Vector2 uv, float mask, Var.Texture2D windTex, float scale, float speedX, Vector3 windAxisX, float speedY, Vector3 windAxisY, Vector3 localPos, float rot, float rotOffset, float parentRot, float axisScale, float axisSpeedScale, out Vector3 localVertexOffset, out float rotationAngle) 
+		public static unsafe void macross_Pivot_WindAnimation (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 prePos, Var.Texture2D posTex, Var.Texture2D xTex, Var.SamplerState samp, Vector2 uv, float mask, Var.Texture2D windTex, float scale, float speedX, Vector3 windAxisX, float speedY, Vector3 windAxisY, Vector3 localPos, float rot, float rotOffset, float parentRot, float axisScale, float axisSpeedScale, out Vector3 localVertexOffset, out float rotationAngle) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1510,7 +1477,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Pivot_WindAnimation(prePos, posTex, xTex, samp, uv, mask, windTex, scale, speedX, windAxisX, speedY, windAxisY, localPos, rot, rotOffset, parentRot, axisScale, axisSpeedScale, out localVertexOffset, out rotationAngle);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
@@ -1518,12 +1484,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 					stackframe.SetWatchVariable(nodeName + ":rotationAngle", rotationAngle);
 				}
 			}
-			macross_break_Pivot_WindAnimation_1869733926.TryBreak();
+			macross_break_Pivot_WindAnimation_1869733926.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Pivot_WindAnimation_Sway2_8267977 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Pivot_WindAnimation_Sway2(Vector3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, Vector3 localPos, float time, out Vector3 localVertexOffset)");
-		public static unsafe void macross_Pivot_WindAnimation_Sway2 (string nodeName, Vector3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, Vector3 localPos, float time, out Vector3 localVertexOffset) 
+		public static unsafe void macross_Pivot_WindAnimation_Sway2 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, Vector3 localPos, float time, out Vector3 localVertexOffset) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1535,19 +1501,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Pivot_WindAnimation_Sway2(windSwayDirection, windSwayGustFrequency, windSwayIntensity, localPos, time, out localVertexOffset);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":localVertexOffset", localVertexOffset);
 				}
 			}
-			macross_break_Pivot_WindAnimation_Sway2_8267977.TryBreak();
+			macross_break_Pivot_WindAnimation_Sway2_8267977.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Pivot_WindAnimation_Sway3_1685228346 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Pivot_WindAnimation_Sway3(Vector3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, Vector3 localPos, float time, float windSwayEffectOffset, float windSwayEffectFalloff, out Vector3 localVertexOffset)");
-		public static unsafe void macross_Pivot_WindAnimation_Sway3 (string nodeName, Vector3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, Vector3 localPos, float time, float windSwayEffectOffset, float windSwayEffectFalloff, out Vector3 localVertexOffset) 
+		public static unsafe void macross_Pivot_WindAnimation_Sway3 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, Vector3 localPos, float time, float windSwayEffectOffset, float windSwayEffectFalloff, out Vector3 localVertexOffset) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1561,19 +1526,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Pivot_WindAnimation_Sway3(windSwayDirection, windSwayGustFrequency, windSwayIntensity, localPos, time, windSwayEffectOffset, windSwayEffectFalloff, out localVertexOffset);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":localVertexOffset", localVertexOffset);
 				}
 			}
-			macross_break_Pivot_WindAnimation_Sway3_1685228346.TryBreak();
+			macross_break_Pivot_WindAnimation_Sway3_1685228346.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Pivot_WindAnimation_Rustle_701467676 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static void Pivot_WindAnimation_Rustle(float windSpeed, float windIntensity, Vector3 localPos, float time, out Vector3 localVertexOffset)");
-		public static unsafe void macross_Pivot_WindAnimation_Rustle (string nodeName, float windSpeed, float windIntensity, Vector3 localPos, float time, out Vector3 localVertexOffset) 
+		public static unsafe void macross_Pivot_WindAnimation_Rustle (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float windSpeed, float windIntensity, Vector3 localPos, float time, out Vector3 localVertexOffset) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1584,19 +1548,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			Pivot_WindAnimation_Rustle(windSpeed, windIntensity, localPos, time, out localVertexOffset);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":localVertexOffset", localVertexOffset);
 				}
 			}
-			macross_break_Pivot_WindAnimation_Rustle_701467676.TryBreak();
+			macross_break_Pivot_WindAnimation_Rustle_701467676.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Pivot_Gradient_3777521470 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static float Pivot_Gradient(Vector3 worldPos, float gradientOffset, float gradientFallout)");
-		public static unsafe float macross_Pivot_Gradient (string nodeName, Vector3 worldPos, float gradientOffset, float gradientFallout) 
+		public static unsafe float macross_Pivot_Gradient (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 worldPos, float gradientOffset, float gradientFallout) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1606,13 +1569,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = Pivot_Gradient(worldPos, gradientOffset, gradientFallout);
-			macross_break_Pivot_Gradient_3777521470.TryBreak();
+			macross_break_Pivot_Gradient_3777521470.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Pivot_LeafNormal_1940221793 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader->static Vector3 Pivot_LeafNormal(bool frontFace, Vector3 normal)");
-		public static unsafe Vector3 macross_Pivot_LeafNormal (string nodeName, bool frontFace, Vector3 normal) 
+		public static unsafe Vector3 macross_Pivot_LeafNormal (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, bool frontFace, Vector3 normal) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1621,7 +1584,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				}
 			}
 			var _return_value = Pivot_LeafNormal(frontFace, normal);
-			macross_break_Pivot_LeafNormal_1940221793.TryBreak();
+			macross_break_Pivot_LeafNormal_1940221793.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

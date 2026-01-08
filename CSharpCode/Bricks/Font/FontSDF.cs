@@ -560,9 +560,9 @@ namespace EngineNS.Bricks.Font
 	partial class TtFontHLSLMethod
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_GetFontSDF_1544034440 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Font.TtFontHLSLMethod->static Vector4 GetFontSDF(int effect, Vector3 baseColor, Vector3 borderColor, float alpha, float lowThreshold, float highThreshold, float smoothValue)");
-		public static unsafe Vector4 macross_GetFontSDF (string nodeName, int effect, Vector3 baseColor, Vector3 borderColor, float alpha, float lowThreshold, float highThreshold, float smoothValue) 
+		public static unsafe Vector4 macross_GetFontSDF (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int effect, Vector3 baseColor, Vector3 borderColor, float alpha, float lowThreshold, float highThreshold, float smoothValue) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -576,7 +576,7 @@ namespace EngineNS.Bricks.Font
 				}
 			}
 			var _return_value = GetFontSDF(effect, baseColor, borderColor, alpha, lowThreshold, highThreshold, smoothValue);
-			macross_break_GetFontSDF_1544034440.TryBreak();
+			macross_break_GetFontSDF_1544034440.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

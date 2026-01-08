@@ -947,7 +947,7 @@ namespace EngineNS.GamePlay.Scene
         }
     }
 
-    public partial class TtSceneMacrossBase
+    public partial class TtSceneMacrossBase : Macross.AuxMacrossObject
     {
         public TtScene Root;
 
@@ -1044,9 +1044,9 @@ namespace EngineNS.GamePlay.Scene
 	partial class TtScene
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_SetRenderPolicyToViewport_2302347641 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtScene->Thread.Async.TtTask<TtRenderPolicy> SetRenderPolicyToViewport(TtViewportSlate slate)");
-		public async Thread.Async.TtTask<TtRenderPolicy> macross_SetRenderPolicyToViewport (string nodeName, TtViewportSlate slate) 
+		public async Thread.Async.TtTask<TtRenderPolicy> macross_SetRenderPolicyToViewport (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtViewportSlate slate) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1054,7 +1054,7 @@ namespace EngineNS.GamePlay.Scene
 				}
 			}
 			var _return_value = await SetRenderPolicyToViewport(slate);
-			macross_break_SetRenderPolicyToViewport_2302347641.TryBreak();
+			macross_break_SetRenderPolicyToViewport_2302347641.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

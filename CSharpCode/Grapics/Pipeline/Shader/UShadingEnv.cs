@@ -709,7 +709,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public Shader.TtShaderAsset ShaderAsset { get; protected set; }
     }
     [Macross.TtMacross(IsGenShader = true)]
-    public partial class TtShadingMacross
+    public partial class TtShadingMacross : Macross.AuxMacrossObject
     {
         [Rtti.Meta("")]
         public virtual Vector3ui GetDispatchArg(TtMacrossShadingEnv shading)
@@ -1008,9 +1008,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
 	partial class TtShadingMacross
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_GetDispatchArg_2479636034 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtShadingMacross->Vector3ui GetDispatchArg(TtMacrossShadingEnv shading)");
-		public unsafe Vector3ui macross_GetDispatchArg (string nodeName, TtMacrossShadingEnv shading) 
+		public unsafe Vector3ui macross_GetDispatchArg (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtMacrossShadingEnv shading) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1018,13 +1018,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
 				}
 			}
 			var _return_value = GetDispatchArg(shading);
-			macross_break_GetDispatchArg_2479636034.TryBreak();
+			macross_break_GetDispatchArg_2479636034.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_CSMacrossShaderMain_2479636034 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtShadingMacross->void CSMacrossShaderMain(TtMacrossShadingEnv shading)");
-		public unsafe void macross_CSMacrossShaderMain (string nodeName, TtMacrossShadingEnv shading) 
+		public unsafe void macross_CSMacrossShaderMain (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtMacrossShadingEnv shading) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1032,7 +1032,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 				}
 			}
 			CSMacrossShaderMain(shading);
-			macross_break_CSMacrossShaderMain_2479636034.TryBreak();
+			macross_break_CSMacrossShaderMain_2479636034.TryBreak(mcStack);
 		}
 	}
 }

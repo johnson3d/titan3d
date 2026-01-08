@@ -98,9 +98,9 @@ namespace EngineNS.Bricks.FX.Hair
 	partial class TtHairShader
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_ShiftTangent_3711510590 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.FX.Hair.TtHairShader->static Vector3 ShiftTangent(Vector3 T, Vector3 N, float shift)");
-		public static unsafe Vector3 macross_ShiftTangent (string nodeName, Vector3 T, Vector3 N, float shift) 
+		public static unsafe Vector3 macross_ShiftTangent (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 T, Vector3 N, float shift) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -110,13 +110,13 @@ namespace EngineNS.Bricks.FX.Hair
 				}
 			}
 			var _return_value = ShiftTangent(T, N, shift);
-			macross_break_ShiftTangent_3711510590.TryBreak();
+			macross_break_ShiftTangent_3711510590.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_StrandSpecular_1272714413 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.FX.Hair.TtHairShader->static float StrandSpecular(Vector3 T, Vector3 V, Vector3 L, float exponent)");
-		public static unsafe float macross_StrandSpecular (string nodeName, Vector3 T, Vector3 V, Vector3 L, float exponent) 
+		public static unsafe float macross_StrandSpecular (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 T, Vector3 V, Vector3 L, float exponent) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -127,13 +127,13 @@ namespace EngineNS.Bricks.FX.Hair
 				}
 			}
 			var _return_value = StrandSpecular(T, V, L, exponent);
-			macross_break_StrandSpecular_1272714413.TryBreak();
+			macross_break_StrandSpecular_1272714413.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_GetAnisotropicNeubelt_288406621 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.FX.Hair.TtHairShader->static void GetAnisotropicNeubelt(float roughness, float anisotropic, out float ax, out float az)");
-		public static unsafe void macross_GetAnisotropicNeubelt (string nodeName, float roughness, float anisotropic, out float ax, out float az) 
+		public static unsafe void macross_GetAnisotropicNeubelt (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float roughness, float anisotropic, out float ax, out float az) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -142,7 +142,6 @@ namespace EngineNS.Bricks.FX.Hair
 				}
 			}
 			GetAnisotropicNeubelt(roughness, anisotropic, out ax, out az);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
@@ -150,12 +149,12 @@ namespace EngineNS.Bricks.FX.Hair
 					stackframe.SetWatchVariable(nodeName + ":az", az);
 				}
 			}
-			macross_break_GetAnisotropicNeubelt_288406621.TryBreak();
+			macross_break_GetAnisotropicNeubelt_288406621.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_GetAnisotropicBurley_288406621 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.FX.Hair.TtHairShader->static void GetAnisotropicBurley(float roughness, float anisotropic, out float ax, out float az)");
-		public static unsafe void macross_GetAnisotropicBurley (string nodeName, float roughness, float anisotropic, out float ax, out float az) 
+		public static unsafe void macross_GetAnisotropicBurley (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float roughness, float anisotropic, out float ax, out float az) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -164,7 +163,6 @@ namespace EngineNS.Bricks.FX.Hair
 				}
 			}
 			GetAnisotropicBurley(roughness, anisotropic, out ax, out az);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
@@ -172,12 +170,12 @@ namespace EngineNS.Bricks.FX.Hair
 					stackframe.SetWatchVariable(nodeName + ":az", az);
 				}
 			}
-			macross_break_GetAnisotropicBurley_288406621.TryBreak();
+			macross_break_GetAnisotropicBurley_288406621.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_GetAnisotropicKulla_288406621 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.FX.Hair.TtHairShader->static void GetAnisotropicKulla(float roughness, float anisotropic, out float ax, out float az)");
-		public static unsafe void macross_GetAnisotropicKulla (string nodeName, float roughness, float anisotropic, out float ax, out float az) 
+		public static unsafe void macross_GetAnisotropicKulla (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float roughness, float anisotropic, out float ax, out float az) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -186,7 +184,6 @@ namespace EngineNS.Bricks.FX.Hair
 				}
 			}
 			GetAnisotropicKulla(roughness, anisotropic, out ax, out az);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
@@ -194,12 +191,12 @@ namespace EngineNS.Bricks.FX.Hair
 					stackframe.SetWatchVariable(nodeName + ":az", az);
 				}
 			}
-			macross_break_GetAnisotropicKulla_288406621.TryBreak();
+			macross_break_GetAnisotropicKulla_288406621.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_D_Beckmann_aniso_3624923413 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.FX.Hair.TtHairShader->static float D_Beckmann_aniso(float ax, float az, float NoH, Vector3 H, Vector3 T, Vector3 B)");
-		public static unsafe float macross_D_Beckmann_aniso (string nodeName, float ax, float az, float NoH, Vector3 H, Vector3 T, Vector3 B) 
+		public static unsafe float macross_D_Beckmann_aniso (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float ax, float az, float NoH, Vector3 H, Vector3 T, Vector3 B) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -212,13 +209,13 @@ namespace EngineNS.Bricks.FX.Hair
 				}
 			}
 			var _return_value = D_Beckmann_aniso(ax, az, NoH, H, T, B);
-			macross_break_D_Beckmann_aniso_3624923413.TryBreak();
+			macross_break_D_Beckmann_aniso_3624923413.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_D_GGXaniso_3802984565 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.FX.Hair.TtHairShader->static float D_GGXaniso(float RoughnessX, float RoughnessZ, float NoH, Vector3 H, Vector3 T, Vector3 B)");
-		public static unsafe float macross_D_GGXaniso (string nodeName, float RoughnessX, float RoughnessZ, float NoH, Vector3 H, Vector3 T, Vector3 B) 
+		public static unsafe float macross_D_GGXaniso (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float RoughnessX, float RoughnessZ, float NoH, Vector3 H, Vector3 T, Vector3 B) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -231,7 +228,7 @@ namespace EngineNS.Bricks.FX.Hair
 				}
 			}
 			var _return_value = D_GGXaniso(RoughnessX, RoughnessZ, NoH, H, T, B);
-			macross_break_D_GGXaniso_3802984565.TryBreak();
+			macross_break_D_GGXaniso_3802984565.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

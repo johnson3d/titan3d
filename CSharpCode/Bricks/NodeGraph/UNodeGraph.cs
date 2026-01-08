@@ -1741,9 +1741,9 @@ namespace EngineNS.Bricks.NodeGraph
 	partial class TtNodeGraph
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_FindFirstNode_2300578384 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.NodeGraph.TtNodeGraph->TtNodeBase FindFirstNode(string name, bool findInSubGraphs)");
-		public unsafe TtNodeBase macross_FindFirstNode (string nodeName, string name, bool findInSubGraphs) 
+		public unsafe TtNodeBase macross_FindFirstNode (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name, bool findInSubGraphs) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1752,7 +1752,7 @@ namespace EngineNS.Bricks.NodeGraph
 				}
 			}
 			var _return_value = FindFirstNode(name, findInSubGraphs);
-			macross_break_FindFirstNode_2300578384.TryBreak();
+			macross_break_FindFirstNode_2300578384.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

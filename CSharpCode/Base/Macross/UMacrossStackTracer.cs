@@ -109,16 +109,16 @@ namespace EngineNS.Macross
                 return tmp.RefObject;
             }
         }
-        public void OnCallMethod(string nodeName, System.Reflection.MethodBase method)
-        {
-            //生成代码的时候做类似处理
-            var st = new System.Diagnostics.StackFrame();
-            var curFrame = TtMacrossStackTracer.CurrentFrame;
-            foreach (var i in method.GetParameters())
-            {
-                //curFrame.SetWatchVariable($"{nodeName}:{i.Name}", null);//null代码生成的时候传入参数名
-            }
-        }
+        //public void OnCallMethod(string nodeName, System.Reflection.MethodBase method)
+        //{
+        //    //生成代码的时候做类似处理
+        //    var st = new System.Diagnostics.StackFrame();
+        //    var curFrame = TtMacrossStackTracer.CurrentFrame;
+        //    foreach (var i in method.GetParameters())
+        //    {
+        //        //curFrame.SetWatchVariable($"{nodeName}:{i.Name}", null);//null代码生成的时候传入参数名
+        //    }
+        //}
     }
     public class TtMacrossStackTracer
     {
@@ -126,7 +126,7 @@ namespace EngineNS.Macross
         [ThreadStatic]
         private static TtMacrossStackTracer mThreadInstance;
         public Thread.TtContextThread mThreadContext { get; private set; }
-        public static TtMacrossStackTracer ThreadInstance
+        internal static TtMacrossStackTracer ThreadInstance
         {
             get
             {
@@ -143,54 +143,59 @@ namespace EngineNS.Macross
             }
         }
         public Stack<TtMacrossStackFrame> mFrames = new Stack<TtMacrossStackFrame>();
-        public static TtMacrossStackFrame CurrentFrame
+        public TtMacrossStackFrame TopFrame
         {
             get
             {
-                if (TtMacrossDebugger.Instance.IsEnableDebugger == false)
+                if (mFrames.Count == 0)
                     return null;
-                if (ThreadInstance.mFrames.Count == 0)
-                    return null;
-                return ThreadInstance.mFrames.Peek();
+                return mFrames.Peek();
             }
         }
-        [ThreadStatic]
+        //[ThreadStatic]
         static int mStackDepth = 0;
-        public static void PushFrame(TtMacrossStackFrame frame)
+        public static void PushFrame(TtMacrossStackTracer stack, TtMacrossStackFrame frame)
         {
             System.Threading.Interlocked.Increment(ref mStackDepth);
             if (TtMacrossDebugger.Instance.IsEnableDebugger == false)
                 return;
-            
-            ThreadInstance.mFrames.Push(frame);
+
+            stack?.mFrames.Push(frame);
         }
-        public static void PopFrame()
+        public static void PopFrame(TtMacrossStackTracer stack, TtMacrossStackFrame frame)
         {
             System.Threading.Interlocked.Decrement(ref mStackDepth);
             if (TtMacrossDebugger.Instance.IsEnableDebugger == false)
                 return;
 
-            if (ThreadInstance.mFrames.Count > 0)
+            if (stack !=null && stack.mFrames.Count > 0)
             {
-                var cur = ThreadInstance.mFrames.Peek();
-                cur.ClearDebugInfo();
-                ThreadInstance.mFrames.Pop();
-            }
-            else
-            {
-                System.Diagnostics.Debugger.Break();
+                var cur = stack.mFrames.Peek();
+                //System.Diagnostics.Debug.Assert(cur == frame);
+                frame.ClearDebugInfo();
+                stack.mFrames.Pop();
             }
         }
     }
     public struct TtMacrossStackGuard : IDisposable
     {
+        public TtMacrossStackTracer mStack;
+        public TtMacrossStackFrame mFrame;
+        public TtMacrossStackGuard(TtMacrossStackTracer stack, TtMacrossStackFrame frame)
+        {
+            mStack = stack;
+            TtMacrossStackTracer.PushFrame(mStack, frame);
+            mFrame = frame;
+        }
         public TtMacrossStackGuard(TtMacrossStackFrame frame)
         {
-            TtMacrossStackTracer.PushFrame(frame);
+            mStack = TtMacrossStackTracer.ThreadInstance;
+            TtMacrossStackTracer.PushFrame(mStack, frame);
+            mFrame = frame;
         }
         public void Dispose()
         {
-            TtMacrossStackTracer.PopFrame();
+            TtMacrossStackTracer.PopFrame(mStack, mFrame);
         }
     }
 }
@@ -200,45 +205,23 @@ namespace EngineNS.UnitTest
     [UnitTest.TtTest]
     class UTest_UMacrossStackTracer
     {
-
-/* 项目“Engine.Window”的未合并的更改
-在此之前:
-        Macross.UMacrossStackFrame mFrame_UnitTestEntrance = new Macross.UMacrossStackFrame() { MacrossName = RName.GetRName("") };
-        public unsafe void UnitTestEntrance()
-在此之后:
-        Macross.TtMacrossStackFrame mFrame_UnitTestEntrance = new Macross.TtMacrossStackFrame() { MacrossName = RName.GetRName("") };
-        public unsafe void UnitTestEntrance()
-*/
-
-/* 项目“Engine.Window”的未合并的更改
-在此之前:
-        Macross.TtMacrossStackFrame mFrame_UnitTestEntrance = new Macross.TtMacrossStackFrame() { MacrossName = RName.GetRName("") };
-        public unsafe void UnitTestEntrance()
-在此之后:
-        Macross.UMacrossStackFrame mFrame_UnitTestEntrance = new Macross.UMacrossStackFrame() { MacrossName = RName.GetRName("") };
-        public unsafe void UnitTestEntrance()
-*/
+        Macross.TtMacrossStackTracer mStack_UnitTestEntrance = new Macross.TtMacrossStackTracer();
         Macross.TtMacrossStackFrame mFrame_UnitTestEntrance = new Macross.TtMacrossStackFrame() { MacrossName = RName.GetRName("") };
         public unsafe void UnitTestEntrance()
         {
-            using(var guard = new Macross.TtMacrossStackGuard(mFrame_UnitTestEntrance))
+            using(var guard = new Macross.TtMacrossStackGuard(mStack_UnitTestEntrance, mFrame_UnitTestEntrance))
             {
                 float v = 3;
-                MathHelper.macross_Abs("static MathHelper.Abs(float v)", v);
+                //MathHelper.macross_Abs(mStack_UnitTestEntrance, "static MathHelper.Abs(float v)", v);
+                MathHelper.Abs(v);
+                mFrame_UnitTestEntrance.SetWatchVariable("v", v);
 
-                var frame = Macross.TtMacrossStackTracer.CurrentFrame;
-                foreach (var i in frame.mFrameStates)
-                {
-                    var name = i.Key;
-                    float debug_v = (float)i.Value.ToObject();
-                }
-                if (Macross.TtMacrossDebugger.Instance.CurrrentBreak != null)
-                {//如果break，在别的线程可以通过这个获得break的framestate
-                    foreach (var i in Macross.TtMacrossDebugger.Instance.CurrrentBreak.BreakStackFrame.mFrameStates)
-                    {
-
-                    }
-                }
+                //var frame = Macross.TtMacrossStackTracer.CurrentFrame;
+                //foreach (var i in frame.mFrameStates)
+                //{
+                //    var name = i.Key;
+                //    float debug_v = (float)i.Value.ToObject();
+                //}
             }
         }
     }

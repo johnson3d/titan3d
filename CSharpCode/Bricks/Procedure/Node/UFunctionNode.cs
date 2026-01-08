@@ -712,9 +712,9 @@ namespace EngineNS.Bricks.Procedure.Node
 	partial class UBezier
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_GetY_4262389589 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.Node.UBezier->float GetY(float x)");
-		public unsafe float macross_GetY (string nodeName, float x) 
+		public unsafe float macross_GetY (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float x) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -722,7 +722,7 @@ namespace EngineNS.Bricks.Procedure.Node
 				}
 			}
 			var _return_value = GetY(x);
-			macross_break_GetY_4262389589.TryBreak();
+			macross_break_GetY_4262389589.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

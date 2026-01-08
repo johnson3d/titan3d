@@ -523,9 +523,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
 	partial class TtMaterialFunction
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_SaveAssetTo_2037383663 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtMaterialFunction->void SaveAssetTo(RName name)");
-		public unsafe void macross_SaveAssetTo (string nodeName, RName name) 
+		public unsafe void macross_SaveAssetTo (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, RName name) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -533,7 +533,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 				}
 			}
 			SaveAssetTo(name);
-			macross_break_SaveAssetTo_2037383663.TryBreak();
+			macross_break_SaveAssetTo_2037383663.TryBreak(mcStack);
 		}
 	}
 }

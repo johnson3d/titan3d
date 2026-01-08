@@ -200,7 +200,8 @@ namespace EngineNS.Bricks.CodeBuilder
                 // debugger code
                 var frameName = $"mFrame_{methodDec.UniqueMethodName}";
                 data.CodeGen.AddLine($"EngineNS.Macross.TtMacrossStackFrame {frameName} = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName(\"{data.AssetName.Name}\", {RName.GetRNameTypeCodeString(data.AssetName.RNameType)}));", ref sourceCode);
-
+                var stackName = $"mStack_{methodDec.UniqueMethodName}";
+                data.CodeGen.AddLine($"EngineNS.Macross.TtMacrossStackTracer {stackName} = new EngineNS.Macross.TtMacrossStackTracer();", ref sourceCode);
                 GenCommentCodes(methodDec.Comment, ref data, ref sourceCode);
                 data.Method = methodDec;
                 for(int i=0; i<methodDec.Attributes.Count; i++)
@@ -287,7 +288,7 @@ namespace EngineNS.Bricks.CodeBuilder
                         data.CodeGen.AddLine("#if " + predefineMacrosCode, ref sourceCode);
                     }
 
-                    data.CodeGen.AddLine($"using(var guard_{methodDec.MethodName} = new EngineNS.Macross.TtMacrossStackGuard({frameName}))", ref sourceCode);
+                    data.CodeGen.AddLine($"using(var guard_{methodDec.MethodName} = new EngineNS.Macross.TtMacrossStackGuard({stackName},{frameName}))", ref sourceCode);
                     data.CodeGen.PushSegment(ref sourceCode, in data);
                     {
                         if(methodDec.ReturnValue != null)

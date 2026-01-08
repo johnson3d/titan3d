@@ -1,12 +1,12 @@
-- ÈÕÖ¾²é¿´
-- - Ñ¡ÔñcheckboxÉ¸Ñ¡ÏÔÊ¾µÄÈÕÖ¾
-  - Category¿ÉÒÔ½øÒ»²½É¸Ñ¡
+- æ—¥å¿—æŸ¥çœ‹
+- - é€‰æ‹©checkboxç­›é€‰æ˜¾ç¤ºçš„æ—¥å¿—
+  - Categoryå¯ä»¥è¿›ä¸€æ­¥ç­›é€‰
 - Command
-	- ÔÚÈçÍ¼ºì¼ıÍ·´¦ÊäÈëÃüÁîĞĞ
-    - ![Í¼Æ¬](LogWatcher/LogWatcher.png)
-	- ÃüÁî¸ñÊ½ CommandName ArgName1=XXXX ArgName2=YYYY
-	- ĞÂÔöÃüÁî
-	- - C#´úÂëÀ©Õ¹
+	- åœ¨å¦‚å›¾çº¢ç®­å¤´å¤„è¾“å…¥å‘½ä»¤è¡Œ
+    - ![å›¾ç‰‡](LogWatcher/LogWatcher.png)
+	- å‘½ä»¤æ ¼å¼ CommandName ArgName1=XXXX ArgName2=YYYY
+	- æ–°å¢å‘½ä»¤
+	- - C#ä»£ç æ‰©å±•
     ```C#
         public class TtCommand_DelMaterialShaderCache : TtCommand
         {
@@ -39,11 +39,11 @@
             }
         }
     ```
-	- - ºêÍ¼À©Õ¹
-      - ´´½¨Ò»¸öTtCommandMacross£¬²ÎÕÕ½Ì³Ì[McCmd](../tutorials/mc_cmd.md)ÖÆ×÷
-	- ÄÚÖÃ³£ÓÃÃüÁî
-    - - Æô¶¯Ò»¸öºêÍ¼ÃüÁî McCmd Macross=(string) OnGameThread=(bool)
-      - ÏÔÊ¾ËùÓĞÃüÁîÁĞ±í List Filter=(string)
-      - ÏÔÊ¾ÃüÁî°ïÖú Help Cmd=(string)
-      - ´òÓ¡RenderGraphµÄ³ØĞÅÏ¢ PrintAttachmentPool
-      - É¾³ıÖ¸¶¨²ÄÖÊµÄShaderCache DelMaterialCache Material={string}
+	- - å®å›¾æ‰©å±•
+      - åˆ›å»ºä¸€ä¸ªTtCommandMacrossï¼Œå‚ç…§æ•™ç¨‹[McCmd](../tutorials/mc_cmd.md)åˆ¶ä½œ
+	- å†…ç½®å¸¸ç”¨å‘½ä»¤
+    - - å¯åŠ¨ä¸€ä¸ªå®å›¾å‘½ä»¤ McCmd Macross=(string) OnGameThread=(bool)
+      - æ˜¾ç¤ºæ‰€æœ‰å‘½ä»¤åˆ—è¡¨ List Filter=(string)
+      - æ˜¾ç¤ºå‘½ä»¤å¸®åŠ© Help Cmd=(string)
+      - æ‰“å°RenderGraphçš„æ± ä¿¡æ¯ PrintAttachmentPool
+      - åˆ é™¤æŒ‡å®šæè´¨çš„ShaderCache DelMaterialCache Material={string}

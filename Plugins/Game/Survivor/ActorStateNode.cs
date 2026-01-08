@@ -67,15 +67,15 @@ namespace Survivor
         {
             return TtDatabase.Instance;
         }
-        //ÎïÆ·±³°ü
+        //ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½
         public Inventory.TtGoodsInventory GoodsInventory { get; } = new();
-        //Ö»¶ÁÎïÆ·±³°ü
+        //Ö»ï¿½ï¿½ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½
         public Inventory.TtGoodsUnlimitInventory ReadOnlyInventory { get; } = new();
-        //¼¼ÄÜ±³°ü
+        //ï¿½ï¿½ï¿½Ü±ï¿½ï¿½ï¿½
         public Inventory.TtSkillInventory SkillInventory { get; } = new();
-        //¼¼ÄÜÎïÆ·¿ì½ÝÍ¼±ê±³°ü
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ·ï¿½ï¿½ï¿½Í¼ï¿½ê±³ï¿½ï¿½
         public Inventory.TtProxyInventory ProxyInventory { get; } = new();
-        //ÈÎÎñ±³°ü
+        //ï¿½ï¿½ï¿½ñ±³°ï¿½
         public Inventory.TtMissionInventory MissionInventory { get; } = new();
         #endregion
         protected override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
@@ -144,9 +144,9 @@ namespace Survivor
 	partial class TtStateNode
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_BeAttacked_2499766893 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtStateNode->void BeAttacked(TtWeaponNode weaponNode)");
-		public unsafe void macross_BeAttacked (string nodeName, TtWeaponNode weaponNode) 
+		public unsafe void macross_BeAttacked (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtWeaponNode weaponNode) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -154,7 +154,7 @@ namespace Survivor
 				}
 			}
 			BeAttacked(weaponNode);
-			macross_break_BeAttacked_2499766893.TryBreak();
+			macross_break_BeAttacked_2499766893.TryBreak(mcStack);
 		}
 	}
 }

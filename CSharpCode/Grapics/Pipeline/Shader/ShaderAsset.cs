@@ -401,9 +401,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
 	partial class TtMacrossShaderUtility
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_InterlockedAddUInt32_1794783931 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtMacrossShaderUtility->static void InterlockedAddUInt32(ref uint location1, uint value, out uint oriValue)");
-		public static unsafe void macross_InterlockedAddUInt32 (string nodeName, ref uint location1, uint value, out uint oriValue) 
+		public static unsafe void macross_InterlockedAddUInt32 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, ref uint location1, uint value, out uint oriValue) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -412,19 +412,18 @@ namespace EngineNS.Graphics.Pipeline.Shader
 				}
 			}
 			InterlockedAddUInt32(ref location1, value, out oriValue);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":oriValue", oriValue);
 				}
 			}
-			macross_break_InterlockedAddUInt32_1794783931.TryBreak();
+			macross_break_InterlockedAddUInt32_1794783931.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_InterlockedAddInt32_655588434 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtMacrossShaderUtility->static void InterlockedAddInt32(ref int location1, int value, out int oriValue)");
-		public static unsafe void macross_InterlockedAddInt32 (string nodeName, ref int location1, int value, out int oriValue) 
+		public static unsafe void macross_InterlockedAddInt32 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, ref int location1, int value, out int oriValue) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -433,14 +432,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
 				}
 			}
 			InterlockedAddInt32(ref location1, value, out oriValue);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":oriValue", oriValue);
 				}
 			}
-			macross_break_InterlockedAddInt32_655588434.TryBreak();
+			macross_break_InterlockedAddInt32_655588434.TryBreak(mcStack);
 		}
 	}
 }

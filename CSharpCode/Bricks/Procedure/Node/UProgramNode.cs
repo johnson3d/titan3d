@@ -17,7 +17,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
     [Macross.TtMacross]
-    public partial class UProgram
+    public partial class UProgram : Macross.AuxMacrossObject
     {
         [Rtti.Meta("")]
         public virtual bool InitProcedure(UPgcGraph graph, UProgramNode node)
@@ -266,9 +266,9 @@ namespace EngineNS.Bricks.Procedure.Node
 	partial class UProgram
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_InitProcedure_4144588293 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.Node.UProgram->bool InitProcedure(UPgcGraph graph, UProgramNode node)");
-		public unsafe bool macross_InitProcedure (string nodeName, UPgcGraph graph, UProgramNode node) 
+		public unsafe bool macross_InitProcedure (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, UProgramNode node) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -277,13 +277,13 @@ namespace EngineNS.Bricks.Procedure.Node
 				}
 			}
 			var _return_value = InitProcedure(graph, node);
-			macross_break_InitProcedure_4144588293.TryBreak();
+			macross_break_InitProcedure_4144588293.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_OnProcedure_4144588293 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.Node.UProgram->bool OnProcedure(UPgcGraph graph, UProgramNode node)");
-		public unsafe bool macross_OnProcedure (string nodeName, UPgcGraph graph, UProgramNode node) 
+		public unsafe bool macross_OnProcedure (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, UProgramNode node) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -292,13 +292,13 @@ namespace EngineNS.Bricks.Procedure.Node
 				}
 			}
 			var _return_value = OnProcedure(graph, node);
-			macross_break_OnProcedure_4144588293.TryBreak();
+			macross_break_OnProcedure_4144588293.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_OnPerPixel_3552085012 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.Node.UProgram->void OnPerPixel(UPgcGraph graph, UProgramNode node, UBufferComponent resuilt, int x, int y, int z, object tag)");
-		public unsafe void macross_OnPerPixel (string nodeName, UPgcGraph graph, UProgramNode node, UBufferComponent resuilt, int x, int y, int z, object tag) 
+		public unsafe void macross_OnPerPixel (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, UProgramNode node, UBufferComponent resuilt, int x, int y, int z, object tag) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -312,7 +312,7 @@ namespace EngineNS.Bricks.Procedure.Node
 				}
 			}
 			OnPerPixel(graph, node, resuilt, x, y, z, tag);
-			macross_break_OnPerPixel_3552085012.TryBreak();
+			macross_break_OnPerPixel_3552085012.TryBreak(mcStack);
 		}
 	}
 }

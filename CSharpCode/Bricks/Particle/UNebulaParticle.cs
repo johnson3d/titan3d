@@ -267,7 +267,7 @@ namespace EngineNS.Bricks.Particle
     }
 
     [Macross.TtMacross]
-    public partial class TtNebulaMacross
+    public partial class TtNebulaMacross : Macross.AuxMacrossObject
     {
         [Rtti.Meta("")]
         public virtual void OnCreated(TtNebulaParticle nebula)
@@ -297,9 +297,9 @@ namespace EngineNS.Bricks.Particle
 	partial class TtNebulaParticle
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_AddEmitter_3553406330 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Particle.TtNebulaParticle->TtEmitter AddEmitter(System.Type type, string name)");
-		public unsafe TtEmitter macross_AddEmitter (string nodeName, System.Type type, string name) 
+		public unsafe TtEmitter macross_AddEmitter (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, System.Type type, string name) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -308,7 +308,7 @@ namespace EngineNS.Bricks.Particle
 				}
 			}
 			var _return_value = AddEmitter(type, name);
-			macross_break_AddEmitter_3553406330.TryBreak();
+			macross_break_AddEmitter_3553406330.TryBreak(mcStack);
 			return _return_value;
 		}
 	}
@@ -320,9 +320,9 @@ namespace EngineNS.Bricks.Particle
 	partial class TtNebulaMacross
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_OnCreated_2571610209 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Particle.TtNebulaMacross->void OnCreated(TtNebulaParticle nebula)");
-		public unsafe void macross_OnCreated (string nodeName, TtNebulaParticle nebula) 
+		public unsafe void macross_OnCreated (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtNebulaParticle nebula) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -330,12 +330,12 @@ namespace EngineNS.Bricks.Particle
 				}
 			}
 			OnCreated(nebula);
-			macross_break_OnCreated_2571610209.TryBreak();
+			macross_break_OnCreated_2571610209.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_OnUpdate_2992855503 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Particle.TtNebulaMacross->void OnUpdate(TtNebulaParticle nebula, UParticleGraphNode particleSystem, float elpased)");
-		public unsafe void macross_OnUpdate (string nodeName, TtNebulaParticle nebula, UParticleGraphNode particleSystem, float elpased) 
+		public unsafe void macross_OnUpdate (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtNebulaParticle nebula, UParticleGraphNode particleSystem, float elpased) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -345,12 +345,12 @@ namespace EngineNS.Bricks.Particle
 				}
 			}
 			OnUpdate(nebula, particleSystem, elpased);
-			macross_break_OnUpdate_2992855503.TryBreak();
+			macross_break_OnUpdate_2992855503.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_OnUpdateEmitter_525844223 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Particle.TtNebulaMacross->void OnUpdateEmitter(TtNebulaParticle nebula, TtEmitter emitter, UParticleGraphNode particleSystem, float elpased)");
-		public unsafe void macross_OnUpdateEmitter (string nodeName, TtNebulaParticle nebula, TtEmitter emitter, UParticleGraphNode particleSystem, float elpased) 
+		public unsafe void macross_OnUpdateEmitter (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtNebulaParticle nebula, TtEmitter emitter, UParticleGraphNode particleSystem, float elpased) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -361,7 +361,7 @@ namespace EngineNS.Bricks.Particle
 				}
 			}
 			OnUpdateEmitter(nebula, emitter, particleSystem, elpased);
-			macross_break_OnUpdateEmitter_525844223.TryBreak();
+			macross_break_OnUpdateEmitter_525844223.TryBreak(mcStack);
 		}
 	}
 }

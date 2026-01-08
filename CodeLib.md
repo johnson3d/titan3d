@@ -1,5 +1,5 @@
-# ³£ÓÃ´úÂë
-## 1.ĞÔÄÜ·ÖÎö
+# å¸¸ç”¨ä»£ç 
+## 1.æ€§èƒ½åˆ†æ
 ```C#
 [ThreadStatic]
 private static Profiler.TimeScope mScopeChildren;
@@ -17,12 +17,12 @@ using (new Profiler.TimeScopeHelper(ScopeChildren))
 	//do sth
 }
 ```
-## 2.²å¼ş¿ª·¢
-1.È·±£²å¼şdll°üº¬ÈçÏÂÊµÏÖ
-TtPluginLoaderÊÇÓÃÀ´ÃèÊö²å¼şµÄ
-AssemblyEntryÊÇÓÃÀ´ÃèÊöDLLÄ£¿éÔÚTtTypeDescµÄĞÅÏ¢µÄ£¬Í¨³£´¦ÀíÀàĞÍºÍMetaĞÅÏ¢
+## 2.æ’ä»¶å¼€å‘
+1.ç¡®ä¿æ’ä»¶dllåŒ…å«å¦‚ä¸‹å®ç°
+TtPluginLoaderæ˜¯ç”¨æ¥æè¿°æ’ä»¶çš„
+AssemblyEntryæ˜¯ç”¨æ¥æè¿°DLLæ¨¡å—åœ¨TtTypeDescçš„ä¿¡æ¯çš„ï¼Œé€šå¸¸å¤„ç†ç±»å‹å’ŒMetaä¿¡æ¯
 ```C#
-namespace EngineNS.Plugins.ÄãµÄ²å¼şÃû
+namespace EngineNS.Plugins.ä½ çš„æ’ä»¶å
 {
     public class TtPluginLoader
     {
@@ -42,13 +42,13 @@ namespace EngineNS.Rtti
         {
             public UGameServerAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:ÄãµÄ²å¼şÃû AssemblyDesc Created");
+                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:ä½ çš„æ’ä»¶å AssemblyDesc Created");
             }
             ~UGameServerAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:ÄãµÄ²å¼şÃû AssemblyDesc Destroyed");
+                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:ä½ çš„æ’ä»¶å AssemblyDesc Destroyed");
             }
-            public override string Name { get => "ÄãµÄ²å¼şÃû"; }
+            public override string Name { get => "ä½ çš„æ’ä»¶å"; }
             public override string Service { get { return "Plugins"; } }
             public override bool IsGameModule { get { return false; } }
             public override string Platform { get { return "Global"; } }
@@ -62,9 +62,9 @@ namespace EngineNS.Rtti
 }
 
 ```
-2.²å¼ş±àÒë½á¹ûÂ·¾¶
+2.æ’ä»¶ç¼–è¯‘ç»“æœè·¯å¾„
 binaries\Plugins\Debug\net7.0
-3.ÔÚ²å¼şÄ¿Â¼»¹ÒªÌí¼Ó²å¼şÍ¬Ãû.pluginÎÄ¼ş£¬ÄÚÈİ´óÖÂÈçÏÂ£º
+3.åœ¨æ’ä»¶ç›®å½•è¿˜è¦æ·»åŠ æ’ä»¶åŒå.pluginæ–‡ä»¶ï¼Œå†…å®¹å¤§è‡´å¦‚ä¸‹ï¼š
 ```JSON
 {
   "Enable": true,
@@ -77,13 +77,13 @@ binaries\Plugins\Debug\net7.0
   ]
 }
 ```
-PluginsÄ¿Â¼ÏÂCopyPlugins.batÔÚĞŞ¸Ä*.pluginºóÄ¿Ç°ĞèÒªÊÖ¹¤Ö´ĞĞ£¬Ë¢ĞÂµ½²å¼şÄ¿Â¼
-## 3.Native Bricks¿ª·¢
-1.Ä¿Ç°ĞèÒªÔÚBase/BaseHead.hÀïÃæ¸ù¾İÆ½Ì¨Ìí¼ÓÀàËÆ **#define HasModule_NextRHI** 
-2.Õâ¸öÓÃÀ´È·±£Éú³É½ºË®´úÂë²ÎÓë±àÒë¹¹½¨£¬·ñÔò»á·¢ÉúC#µ÷ÓÃC++ÕÒ²»µ½º¯Êı
-## 4.RPCº¯Êı
-1.Îªº¯ÊıÌí¼ÓTtRpcMethodÊôĞÔ
-2.×îºóÒ»¸ö²ÎÊı±ØĞëÎªUCallContext context£¬¿ÉÒÔ´ÓÖĞÈ¡³öConnect
+Pluginsç›®å½•ä¸‹CopyPlugins.batåœ¨ä¿®æ”¹*.pluginåç›®å‰éœ€è¦æ‰‹å·¥æ‰§è¡Œï¼Œåˆ·æ–°åˆ°æ’ä»¶ç›®å½•
+## 3.Native Brickså¼€å‘
+1.ç›®å‰éœ€è¦åœ¨Base/BaseHead.hé‡Œé¢æ ¹æ®å¹³å°æ·»åŠ ç±»ä¼¼ **#define HasModule_NextRHI** 
+2.è¿™ä¸ªç”¨æ¥ç¡®ä¿ç”Ÿæˆèƒ¶æ°´ä»£ç å‚ä¸ç¼–è¯‘æ„å»ºï¼Œå¦åˆ™ä¼šå‘ç”ŸC#è°ƒç”¨C++æ‰¾ä¸åˆ°å‡½æ•°
+## 4.RPCå‡½æ•°
+1.ä¸ºå‡½æ•°æ·»åŠ TtRpcMethodå±æ€§
+2.æœ€åä¸€ä¸ªå‚æ•°å¿…é¡»ä¸ºUCallContext contextï¼Œå¯ä»¥ä»ä¸­å–å‡ºConnect
 ```C#
 		[TtRpcMethod(Index = RpcIndexStart + 2)]
 		public async System.Threading.Tasks.Task<Bricks.Network.FNetworkPoint> SelectGateway(string user, Guid sessionId, UCallContext context)
@@ -116,12 +116,12 @@ PluginsÄ¿Â¼ÏÂCopyPlugins.batÔÚĞŞ¸Ä*.pluginºóÄ¿Ç°ĞèÒªÊÖ¹¤Ö´ĞĞ£¬Ë¢ĞÂµ½²å¼şÄ¿Â¼
             return slt.ListenPoint;
 		}
 ```
-## 5.×Ô¶¯Í¬²½¶ÔÏó
-- ËùÓĞIRpcHostÅÉÉúÀà¶¼¿ÉÒÔ×÷Îª×Ô¶¯Í¬²½¶ÔÏó
-- ÀûÓÃTtEngine.Instance.RpcModule.RpcManager.RpcPropertyDataManager.RegisterHost(host)×¢²áÒ»¸ö×Ô¶¯Í¬²½¶ÔÏó
-- Ìí¼ÓÊôĞÔ£¬²¢ÓÃTtRpcPropertyĞŞÊÎ
-- TtRpcPropertyDataManagerÔÚTickº¯ÊıÖĞ»á×Ô¶¯Í¬²½ÕâĞ©ÊôĞÔ
-- Ê¾Àı
+## 5.è‡ªåŠ¨åŒæ­¥å¯¹è±¡
+- æ‰€æœ‰IRpcHostæ´¾ç”Ÿç±»éƒ½å¯ä»¥ä½œä¸ºè‡ªåŠ¨åŒæ­¥å¯¹è±¡
+- åˆ©ç”¨TtEngine.Instance.RpcModule.RpcManager.RpcPropertyDataManager.RegisterHost(host)æ³¨å†Œä¸€ä¸ªè‡ªåŠ¨åŒæ­¥å¯¹è±¡
+- æ·»åŠ å±æ€§ï¼Œå¹¶ç”¨TtRpcPropertyä¿®é¥°
+- TtRpcPropertyDataManageråœ¨Tickå‡½æ•°ä¸­ä¼šè‡ªåŠ¨åŒæ­¥è¿™äº›å±æ€§
+- ç¤ºä¾‹
 ```C#
 	[TtRpcClassAttribute(RunTarget = ERunTarget.None, Executer = EExecuter.PropertyData, CallerInClass = true)]
     public partial class TtRpcPropertyDataManager : AuxRpcHost<TtRpcPropertyDataManager>
@@ -130,13 +130,13 @@ PluginsÄ¿Â¼ÏÂCopyPlugins.batÔÚĞŞ¸Ä*.pluginºóÄ¿Ç°ĞèÒªÊÖ¹¤Ö´ĞĞ£¬Ë¢ĞÂµ½²å¼şÄ¿Â¼
         public int TestSync1 { get; set; } = 1;
     }
 ```
-## 6.Ôö¼ÓÒ»¸ö²ÄÖÊ±à¼­Æ÷¿Éµ÷ÓÃº¯Êı½Úµã
-- ÔÚHLSLMethodÔö¼ÓÒ»¸ö¾²Ì¬º¯Êı
-- - ²ÎÊı±ØĞëÎªVector2/3/4ºÍÏµÍ³±äÁ¿SamplerState¡¢Texture2D
-- Ôö¼ÓRtti.MetaÊôĞÔĞŞÊÎ
-- Èç¹ûÊ¹ÓÃUserCallNodeÊôĞÔ£¬¿ÉÒÔ×Ô¶¨Òå²ÄÖÊ±à¼­Æ÷ÖĞµÄNode
-- Ê¹ÓÃContextMenuĞŞÊÎÔÚ²Ëµ¥ÖĞ³öÏÖµÄÎ»ÖÃ
-- ÏÂÃæÊÇÊ¾Àı
+## 6.å¢åŠ ä¸€ä¸ªæè´¨ç¼–è¾‘å™¨å¯è°ƒç”¨å‡½æ•°èŠ‚ç‚¹
+- åœ¨HLSLMethodå¢åŠ ä¸€ä¸ªé™æ€å‡½æ•°
+- - å‚æ•°å¿…é¡»ä¸ºVector2/3/4å’Œç³»ç»Ÿå˜é‡SamplerStateã€Texture2D
+- å¢åŠ Rtti.Metaå±æ€§ä¿®é¥°
+- å¦‚æœä½¿ç”¨UserCallNodeå±æ€§ï¼Œå¯ä»¥è‡ªå®šä¹‰æè´¨ç¼–è¾‘å™¨ä¸­çš„Node
+- ä½¿ç”¨ContextMenuä¿®é¥°åœ¨èœå•ä¸­å‡ºç°çš„ä½ç½®
+- ä¸‹é¢æ˜¯ç¤ºä¾‹
  ```C#
 	public partial class HLSLMethod
     {
@@ -187,38 +187,38 @@ PluginsÄ¿Â¼ÏÂCopyPlugins.batÔÚĞŞ¸Ä*.pluginºóÄ¿Ç°ĞèÒªÊÖ¹¤Ö´ĞĞ£¬Ë¢ĞÂµ½²å¼şÄ¿Â¼
 	}
 ```
 
-## 7.Ôö¼ÓÒ»¸öTtMdfQueue´¦Àí¶¥µã±ä»»¶¨ÖÆ
-- ²ÎÔÄEngineNS.Graphics.Mesh.TtMdfStaticMesh
-- ºËĞÄÊÇÊµÏÖGetBaseBuilderº¯ÊıÌá¹©MdfQueueµÄhlsl´úÂë
-- Í¨¹ı¼ÌĞøÅÉÉú±¾ÀàµÄ·ºĞÍ°æ±¾À´¿ØÖÆMdfQueuµÄshader permutation
+## 7.å¢åŠ ä¸€ä¸ªTtMdfQueueå¤„ç†é¡¶ç‚¹å˜æ¢å®šåˆ¶
+- å‚é˜…EngineNS.Graphics.Mesh.TtMdfStaticMesh
+- æ ¸å¿ƒæ˜¯å®ç°GetBaseBuilderå‡½æ•°æä¾›MdfQueueçš„hlslä»£ç 
+- é€šè¿‡ç»§ç»­æ´¾ç”Ÿæœ¬ç±»çš„æ³›å‹ç‰ˆæœ¬æ¥æ§åˆ¶MdfQueuçš„shader permutation
 
-## 8.Ôö¼ÓÒ»¸öTtShadingEnv´¦ÀíShader×ÜÁ÷³Ì
-- ²ÎÔÄGraphics.Pipeline.Deferred.TtOpaqueShading
-- ¹¹ÔìÆ÷ÖĞÌá¹©¶¨ÖÆºÃµÄCodeName
-- ÔÚBeginPermutaionºÍUpdatePermutationÖĞÌí¼ÓPushPermutationÀ´Ôö¼ÓPermutaion
-- Í¨¹ıPermuation¶ÔÏóµÄSetValueÀ´ÉèÖÃµ±Ç°Permutation
-- ¼ÇµÃÖØÔØGetNeedStreamsÀ´Ö¸¶¨ĞèÒªµÄVertexBuffer
-- Ë³µÀ¹Ø×¢Ò»ÏÂRenderGraphNode£¬Í¨³£Ëû¸ºÔğ×îÖÕÊ¹ÓÃÕâĞ©ShadingEnv
+## 8.å¢åŠ ä¸€ä¸ªTtShadingEnvå¤„ç†Shaderæ€»æµç¨‹
+- å‚é˜…Graphics.Pipeline.Deferred.TtOpaqueShading
+- æ„é€ å™¨ä¸­æä¾›å®šåˆ¶å¥½çš„CodeName
+- åœ¨BeginPermutaionå’ŒUpdatePermutationä¸­æ·»åŠ PushPermutationæ¥å¢åŠ Permutaion
+- é€šè¿‡Permuationå¯¹è±¡çš„SetValueæ¥è®¾ç½®å½“å‰Permutation
+- è®°å¾—é‡è½½GetNeedStreamsæ¥æŒ‡å®šéœ€è¦çš„VertexBuffer
+- é¡ºé“å…³æ³¨ä¸€ä¸‹RenderGraphNodeï¼Œé€šå¸¸ä»–è´Ÿè´£æœ€ç»ˆä½¿ç”¨è¿™äº›ShadingEnv
 
-## 9.¼ÓÔØÒ»¸ö×Ê²ú
-- ËùÓĞ×Ê²úÍ¨¹ıRNameÀ´Î¨Ò»±êÊ¶£¬¶øÍ¨¹ı´úÂë¹¹ÔìRNameµÄÎ¨Ò»Í¾¾¶ÊÇRName.GetRName
-- ¾ø´ó¶àÊıRNameÊÇÍ¨¹ıĞòÁĞ»¯²úÉúµÄ£¬ÔÚRNameÊôĞÔÉÏÌí¼Ó[Rtti.Meta("")]¾Í¿É±£Ö¤ĞòÁĞ»¯
-- ·ºĞÍRNameµÄGetAsset<T>()¸ºÔğ´ÓRName¼ÓÔØ×Ê²ú£¬TÊÇ×Ê²úÀàĞÍ
-- RNameÓÉÂ·¾¶ºÍÀàĞÍ×é³É£¬³£¼ûµÄÀàĞÍÓĞ
-  - Engine£ºÒıÇæ×Ô´øµÄ×Ê²ú£¬Í¨³£ÔÚEngineContentÄ¿Â¼ÏÂ
-  - Game£ºÓÎÏ·ÏîÄ¿µÄ×Ê²ú£¬Í¨³£ÔÚGame/ContentÄ¿Â¼ÏÂ
-  - Cloud£ºÔÆ¶Ë×Ê²ú£¬ÔÚ±¾µØ»áÓĞ»º´æ
+## 9.åŠ è½½ä¸€ä¸ªèµ„äº§
+- æ‰€æœ‰èµ„äº§é€šè¿‡RNameæ¥å”¯ä¸€æ ‡è¯†ï¼Œè€Œé€šè¿‡ä»£ç æ„é€ RNameçš„å”¯ä¸€é€”å¾„æ˜¯RName.GetRName
+- ç»å¤§å¤šæ•°RNameæ˜¯é€šè¿‡åºåˆ—åŒ–äº§ç”Ÿçš„ï¼Œåœ¨RNameå±æ€§ä¸Šæ·»åŠ [Rtti.Meta("")]å°±å¯ä¿è¯åºåˆ—åŒ–
+- æ³›å‹RNameçš„GetAsset<T>()è´Ÿè´£ä»RNameåŠ è½½èµ„äº§ï¼ŒTæ˜¯èµ„äº§ç±»å‹
+- RNameç”±è·¯å¾„å’Œç±»å‹ç»„æˆï¼Œå¸¸è§çš„ç±»å‹æœ‰
+  - Engineï¼šå¼•æ“è‡ªå¸¦çš„èµ„äº§ï¼Œé€šå¸¸åœ¨EngineContentç›®å½•ä¸‹
+  - Gameï¼šæ¸¸æˆé¡¹ç›®çš„èµ„äº§ï¼Œé€šå¸¸åœ¨Game/Contentç›®å½•ä¸‹
+  - Cloudï¼šäº‘ç«¯èµ„äº§ï¼Œåœ¨æœ¬åœ°ä¼šæœ‰ç¼“å­˜
 ```C#
 var textureName = RName.GetRName("texture/checkboard.txpic", RName.ERNameType.Engine);
-var texture = await textureName.GetAsset<NxRHI.TtSrView>();//Òì²½¼ÓÔØ
-var texture1 = textureName.GetAsset<NxRHI.TtSrView>().GetResultUntilCompleted();//Í¬²½¼ÓÔØ
+var texture = await textureName.GetAsset<NxRHI.TtSrView>();//å¼‚æ­¥åŠ è½½
+var texture1 = textureName.GetAsset<NxRHI.TtSrView>().GetResultUntilCompleted();//åŒæ­¥åŠ è½½
 ```
 
-## 10.Ôö¼ÓÒ»¸öConfigÅäÖÃÎÄ¼ş
-- ¶¨ÒåÒ»¸öIO.IConfig½Ó¿ÚµÄÀà
-- ¶Ô¸ÃÀàÌí¼Ó[IO.TtConfig(Path="ÄãµÄÅäÖÃÎÄ¼şÂ·¾¶")]ÊôĞÔ
-- ½«ĞèÒªÅäÖÃµÄÊôĞÔÔö¼Ó[Rtti.Meta("")]ÊôĞÔ
-- Í¨¹ıTtEngine.Instance.ConfigManager.GetConfig<TtCloudConfig>().CloudAssetUrlBaseÀàËÆ·½·¨·ÃÎÊÅäÖÃ
+## 10.å¢åŠ ä¸€ä¸ªConfigé…ç½®æ–‡ä»¶
+- å®šä¹‰ä¸€ä¸ªIO.IConfigæ¥å£çš„ç±»
+- å¯¹è¯¥ç±»æ·»åŠ [IO.TtConfig(Path="ä½ çš„é…ç½®æ–‡ä»¶è·¯å¾„")]å±æ€§
+- å°†éœ€è¦é…ç½®çš„å±æ€§å¢åŠ [Rtti.Meta("")]å±æ€§
+- é€šè¿‡TtEngine.Instance.ConfigManager.GetConfig<TtCloudConfig>().CloudAssetUrlBaseç±»ä¼¼æ–¹æ³•è®¿é—®é…ç½®
 ```C#
     [IO.TtConfig(Path = "cloud.jscfg")]
     public class TtCloudConfig : IO.IConfig
@@ -228,6 +228,9 @@ var texture1 = textureName.GetAsset<NxRHI.TtSrView>().GetResultUntilCompleted();
         [Rtti.Meta("")]
         public string WebApiUrlBase { get; set; } = "http://localhost:7000";
     }
-    //µ÷ÓÃ
+    //è°ƒç”¨
     TtEngine.Instance.ConfigManager.GetConfig<TtCloudConfig>().CloudAssetUrlBase;
 ```
+
+
+$$ \frac{a}{b} $$

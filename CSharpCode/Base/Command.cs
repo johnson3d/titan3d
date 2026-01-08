@@ -105,7 +105,7 @@ namespace EngineNS
     }
     
     [Macross.TtMacross()]
-    public partial class TtCommandMacross
+    public partial class TtCommandMacross : Macross.AuxMacrossObject
     {
         [Rtti.Meta("")]
         public delegate bool OnProcAsset(IO.IAssetMeta ameta);
@@ -343,9 +343,9 @@ namespace EngineNS
 	partial class TtCommandMacross
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_IterateDirectory_352688231 = new EngineNS.Macross.TtMacrossBreak("EngineNS.TtCommandMacross->void IterateDirectory(string dir, string ext, OnProcAsset fun, bool bAllDir)");
-		public unsafe void macross_IterateDirectory (string nodeName, string dir, string ext, OnProcAsset fun, bool bAllDir) 
+		public unsafe void macross_IterateDirectory (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string dir, string ext, OnProcAsset fun, bool bAllDir) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -356,12 +356,12 @@ namespace EngineNS
 				}
 			}
 			IterateDirectory(dir, ext, fun, bAllDir);
-			macross_break_IterateDirectory_352688231.TryBreak();
+			macross_break_IterateDirectory_352688231.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_DoCommand_2428257558 = new EngineNS.Macross.TtMacrossBreak("EngineNS.TtCommandMacross->Thread.Async.TtTask DoCommand(TtMcCommand host)");
-		public async Thread.Async.TtTask macross_DoCommand (string nodeName, TtMcCommand host) 
+		public async Thread.Async.TtTask macross_DoCommand (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtMcCommand host) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -369,7 +369,7 @@ namespace EngineNS
 				}
 			}
 			await DoCommand(host);
-			macross_break_DoCommand_2428257558.TryBreak();
+			macross_break_DoCommand_2428257558.TryBreak(mcStack);
 		}
 	}
 }
@@ -380,9 +380,9 @@ namespace EngineNS
 	partial class TtMcCommand
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_FindArgument_703518079 = new EngineNS.Macross.TtMacrossBreak("EngineNS.TtMcCommand->string FindArgument(string argName)");
-		public unsafe string macross_FindArgument (string nodeName, string argName) 
+		public unsafe string macross_FindArgument (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string argName) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -390,7 +390,7 @@ namespace EngineNS
 				}
 			}
 			var _return_value = FindArgument(argName);
-			macross_break_FindArgument_703518079.TryBreak();
+			macross_break_FindArgument_703518079.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

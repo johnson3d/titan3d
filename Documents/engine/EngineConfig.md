@@ -1,10 +1,10 @@
-- ±à¼­Config
+- ç¼–è¾‘Config
 - - ![MainUI](picture/EngineConfig.png)
-- - µã»÷Saveºó°ÑÅäÖÃ´æ´¢µ½Ö¸¶¨ÎÄ¼ş
-- - ÒıÇæÍ¨¹ıÆô¶¯²ÎÊıconfig= À´Ö¸¶¨ÅäÖÃÎÄ¼ş
-- - cache/config/engine.jscfgÒ²ÊÇÒ»¸öÒıÇæÅäÖÃÎÄ¼ş£¬Ëû»á¸²¸ÇÄ¬ÈÏÅäÖÃÎÄ¼ş
-- - content/configÄ¿Â¼ÏÂÓĞËùÓĞ×ÓÏµÍ³µÄ¿ÉÒÔÅäÖÃÎÄ¼ş¹©ÏîÄ¿ÅäÖÃ£¬ÕâĞ©ÅäÖÃÔÚcache/configÏÂ»áÓĞ¶ÔÓ¦µÄÎª¸öÈËµ÷ÊÔ»·¾³Ìá¹©µÄÍ¬Ãû¸²¸ÇÅäÖÃÎÄ¼ş,¾ßÌå²Î¿¼[Ôö¼ÓÒ»¸öConfigÅäÖÃÎÄ¼ş](../../CodeLib.md)
-- Êı¾İ½á¹¹
+- - ç‚¹å‡»SaveåæŠŠé…ç½®å­˜å‚¨åˆ°æŒ‡å®šæ–‡ä»¶
+- - å¼•æ“é€šè¿‡å¯åŠ¨å‚æ•°config= æ¥æŒ‡å®šé…ç½®æ–‡ä»¶
+- - cache/config/engine.jscfgä¹Ÿæ˜¯ä¸€ä¸ªå¼•æ“é…ç½®æ–‡ä»¶ï¼Œä»–ä¼šè¦†ç›–é»˜è®¤é…ç½®æ–‡ä»¶
+- - content/configç›®å½•ä¸‹æœ‰æ‰€æœ‰å­ç³»ç»Ÿçš„å¯ä»¥é…ç½®æ–‡ä»¶ä¾›é¡¹ç›®é…ç½®ï¼Œè¿™äº›é…ç½®åœ¨cache/configä¸‹ä¼šæœ‰å¯¹åº”çš„ä¸ºä¸ªäººè°ƒè¯•ç¯å¢ƒæä¾›çš„åŒåè¦†ç›–é…ç½®æ–‡ä»¶,å…·ä½“å‚è€ƒ[å¢åŠ ä¸€ä¸ªConfigé…ç½®æ–‡ä»¶](../../CodeLib.md)
+- æ•°æ®ç»“æ„
 ```C#
     public partial class TtEngineConfig
     {
@@ -118,7 +118,7 @@
         }
     }
 ```
-- ÅäÖÃÎÄ¼ş
+- é…ç½®æ–‡ä»¶
 ```Json
 {
   "IsReverseZ": true,
@@ -188,9 +188,9 @@
   }
 }
 ```
-- - UseRenderDoc£º´ò¿ªRenderDoc
-- - HasDebugLayer£º´ò¿ªäÖÈ¾Validation
-- - IsGpuBaseValidation£º´ò¿ªGPU²àValidation
-- - Feature_UseRVT£º´ò¿ªRVT
-- - Interval£ºÖ¡ĞİÏ¢×î´ó¼ä¸ô
-- - RHIType£ºÑ¡ÔñRHI
+- - UseRenderDocï¼šæ‰“å¼€RenderDoc
+- - HasDebugLayerï¼šæ‰“å¼€æ¸²æŸ“Validation
+- - IsGpuBaseValidationï¼šæ‰“å¼€GPUä¾§Validation
+- - Feature_UseRVTï¼šæ‰“å¼€RVT
+- - Intervalï¼šå¸§ä¼‘æ¯æœ€å¤§é—´éš”
+- - RHITypeï¼šé€‰æ‹©RHI

@@ -1,9 +1,9 @@
--  ÀûÓÃÔÚGPUÄÚ²åÈëBegin/End¶Ô²éÑ¯GpuÏûºÄ
-	- ±à¼­Æ÷¶ÁÈ¡
+-  åˆ©ç”¨åœ¨GPUå†…æ’å…¥Begin/Endå¯¹æŸ¥è¯¢Gpuæ¶ˆè€—
+	- ç¼–è¾‘å™¨è¯»å–
 	- - ![GPU](GpuProfiler/GpuProfiler.png)
-	  - Í¼ÉÏºì¿òÄÚÏÖÊµµÄDrawcallµÈÊı¾İ
-	  - ÏÂÃæÊÇCmdListÖ´ĞĞÄ³Ğ©ÈÎÎñµÄGPUÏûºÄÊ±¼ä
-	  - ºóĞø¼Æ»®¸øGpuScopeÔö¼ÓTreeModeÏÔÊ¾
-	- Ìí¼ÓTtGpuScope
-	- - È±Ê¡£¬ÔÚUCommandListÀàÖĞ£¬BeginPass/EndPass»áÅä¶Ôµ÷ÓÃTtGpuScope CurrentGpuScope½øĞĞÊ±¼ä²ÉÑù
-	- - ÀûÓÃÀàËÆCurrentGpuScope = TtEngine.Instance.ProfilerModule.GpuTimeScopeManager.GetGpuScope(name)·½·¨»ñµÃÒ»¸öÃüÃûµÄGpuScope
+	  - å›¾ä¸Šçº¢æ¡†å†…ç°å®çš„Drawcallç­‰æ•°æ®
+	  - ä¸‹é¢æ˜¯CmdListæ‰§è¡ŒæŸäº›ä»»åŠ¡çš„GPUæ¶ˆè€—æ—¶é—´
+	  - åç»­è®¡åˆ’ç»™GpuScopeå¢åŠ TreeModeæ˜¾ç¤º
+	- æ·»åŠ TtGpuScope
+	- - ç¼ºçœï¼Œåœ¨UCommandListç±»ä¸­ï¼ŒBeginPass/EndPassä¼šé…å¯¹è°ƒç”¨TtGpuScope CurrentGpuScopeè¿›è¡Œæ—¶é—´é‡‡æ ·
+	- - åˆ©ç”¨ç±»ä¼¼CurrentGpuScope = TtEngine.Instance.ProfilerModule.GpuTimeScopeManager.GetGpuScope(name)æ–¹æ³•è·å¾—ä¸€ä¸ªå‘½åçš„GpuScope

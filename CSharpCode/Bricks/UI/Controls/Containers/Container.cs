@@ -993,9 +993,9 @@ namespace EngineNS.UI.Controls.Containers
 	partial class TtUIElementCollection
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Add_3603961666 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UI.Controls.Containers.TtUIElementCollection->void Add(TtUIElement item)");
-		public unsafe void macross_Add (string nodeName, TtUIElement item) 
+		public unsafe void macross_Add (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtUIElement item) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -1003,7 +1003,7 @@ namespace EngineNS.UI.Controls.Containers
 				}
 			}
 			Add(item);
-			macross_break_Add_3603961666.TryBreak();
+			macross_break_Add_3603961666.TryBreak(mcStack);
 		}
 	}
 }

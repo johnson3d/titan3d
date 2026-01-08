@@ -1,9 +1,9 @@
-- Ö÷½çÃæ
+- ä¸»ç•Œé¢
 - - ![MainUI](MaterialEditor/MaterialEditor.png)
-	- äÖÈ¾×´Ì¬
+	- æ¸²æŸ“çŠ¶æ€
 	- ![RenderState](MaterialEditor/RenderState.png)
-	- ÕâÀï¿ÉÒÔÉèÖÃ²ÄÖÊµÄäÖÈ¾×´Ì¬
+	- è¿™é‡Œå¯ä»¥è®¾ç½®æè´¨çš„æ¸²æŸ“çŠ¶æ€
 	- ![MaterialSettings](MaterialEditor/MaterialSettings.png)
-	- ÕâÀïÉèÖÃ¹âÕÕÄ£Ê½£¬·¨ÏßÄ£Ê½£¬äÖÈ¾²ãµÈ
+	- è¿™é‡Œè®¾ç½®å…‰ç…§æ¨¡å¼ï¼Œæ³•çº¿æ¨¡å¼ï¼Œæ¸²æŸ“å±‚ç­‰
 	- ![CallMaterialFuncion](MaterialEditor/CallMaterialFunction.png)
-	- ºì¿òÄÚĞÂÔö²ÄÖÊº¯ÊıÁĞ±í£¬¿ÉÒÔ¸ø²ÄÖÊºÍ²ÄÖÊº¯ÊıÍ¼µ÷ÓÃ
+	- çº¢æ¡†å†…æ–°å¢æè´¨å‡½æ•°åˆ—è¡¨ï¼Œå¯ä»¥ç»™æè´¨å’Œæè´¨å‡½æ•°å›¾è°ƒç”¨

@@ -1,4 +1,4 @@
-﻿## [English Version](README-Eng.md)
+## [English Version](README-Eng.md)
 # 编译运行环境
 - Titan3D 启动！
 - ![总览图](Documents/picture/main_edtor.png)

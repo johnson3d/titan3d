@@ -726,9 +726,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
 	partial class TtMaterialInstanceManager
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_CreateMaterialInstance_3844077935 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceManager->TtMaterialInstance CreateMaterialInstance(TtMaterial mtl)");
-		public unsafe TtMaterialInstance macross_CreateMaterialInstance (string nodeName, TtMaterial mtl) 
+		public unsafe TtMaterialInstance macross_CreateMaterialInstance (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtMaterial mtl) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -736,7 +736,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 				}
 			}
 			var _return_value = CreateMaterialInstance(mtl);
-			macross_break_CreateMaterialInstance_3844077935.TryBreak();
+			macross_break_CreateMaterialInstance_3844077935.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

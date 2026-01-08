@@ -53,7 +53,7 @@ namespace Survivor
                 return mHpProgressUI;
             }
         }
-        //ÐèÒª´æÅÌ£¬±ÜÃâÎïÆ·¶ªÊ§
+        //ï¿½ï¿½Òªï¿½ï¿½ï¿½Ì£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ·ï¿½ï¿½Ê§
         public Inventory.TtItem SwapItem = null;
         public void ClickItem(Inventory.TtInventory targetInventory, short index)
         {
@@ -168,9 +168,9 @@ namespace Survivor
 	partial class TtGameMode
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_LoadWeapons_2037383663 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->void LoadWeapons(RName name)");
-		public unsafe void macross_LoadWeapons (string nodeName, RName name) 
+		public unsafe void macross_LoadWeapons (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, RName name) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -178,12 +178,12 @@ namespace Survivor
 				}
 			}
 			LoadWeapons(name);
-			macross_break_LoadWeapons_2037383663.TryBreak();
+			macross_break_LoadWeapons_2037383663.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_LoadHeros_2037383663 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->void LoadHeros(RName name)");
-		public unsafe void macross_LoadHeros (string nodeName, RName name) 
+		public unsafe void macross_LoadHeros (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, RName name) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -191,12 +191,12 @@ namespace Survivor
 				}
 			}
 			LoadHeros(name);
-			macross_break_LoadHeros_2037383663.TryBreak();
+			macross_break_LoadHeros_2037383663.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_LoadMonsters_2037383663 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->void LoadMonsters(RName name)");
-		public unsafe void macross_LoadMonsters (string nodeName, RName name) 
+		public unsafe void macross_LoadMonsters (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, RName name) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -204,24 +204,24 @@ namespace Survivor
 				}
 			}
 			LoadMonsters(name);
-			macross_break_LoadMonsters_2037383663.TryBreak();
+			macross_break_LoadMonsters_2037383663.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_InitMonsterSpawner_2609910045 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->TtTask InitMonsterSpawner()");
-		public async TtTask macross_InitMonsterSpawner (string nodeName) 
+		public async TtTask macross_InitMonsterSpawner (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
 				}
 			}
 			await InitMonsterSpawner();
-			macross_break_InitMonsterSpawner_2609910045.TryBreak();
+			macross_break_InitMonsterSpawner_2609910045.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_InitControlledCharacter_1038341169 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->TtTask<bool> InitControlledCharacter(EngineNS.GamePlay.Controller.TtCharacterController cc, int roleId)");
-		public async TtTask<bool> macross_InitControlledCharacter (string nodeName, EngineNS.GamePlay.Controller.TtCharacterController cc, int roleId) 
+		public async TtTask<bool> macross_InitControlledCharacter (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, EngineNS.GamePlay.Controller.TtCharacterController cc, int roleId) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -230,20 +230,20 @@ namespace Survivor
 				}
 			}
 			var _return_value = await InitControlledCharacter(cc, roleId);
-			macross_break_InitControlledCharacter_1038341169.TryBreak();
+			macross_break_InitControlledCharacter_1038341169.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_GetSurvivorGameMode_3323264318 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->static TtGameMode GetSurvivorGameMode()");
-		public static unsafe TtGameMode macross_GetSurvivorGameMode (string nodeName) 
+		public static unsafe TtGameMode macross_GetSurvivorGameMode (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
 				}
 			}
 			var _return_value = GetSurvivorGameMode();
-			macross_break_GetSurvivorGameMode_3323264318.TryBreak();
+			macross_break_GetSurvivorGameMode_3323264318.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

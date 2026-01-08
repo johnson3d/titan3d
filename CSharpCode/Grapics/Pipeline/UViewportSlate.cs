@@ -737,9 +737,9 @@ namespace EngineNS.Graphics.Pipeline
 	partial class TtViewportSlate
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Initialize_3328281008 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->Thread.Async.TtTask<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)");
-		public async Thread.Async.TtTask<bool> macross_Initialize (string nodeName, TtSlateApplication application, RName policyName, float zMin, float zMax) 
+		public async Thread.Async.TtTask<bool> macross_Initialize (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtSlateApplication application, RName policyName, float zMin, float zMax) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -750,13 +750,13 @@ namespace EngineNS.Graphics.Pipeline
 				}
 			}
 			var _return_value = await Initialize(application, policyName, zMin, zMax);
-			macross_break_Initialize_3328281008.TryBreak();
+			macross_break_Initialize_3328281008.TryBreak(mcStack);
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_SetHUD_3408856308 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->void SetHUD(UI.Controls.TtUIElement hud)");
-		public unsafe void macross_SetHUD (string nodeName, UI.Controls.TtUIElement hud) 
+		public unsafe void macross_SetHUD (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UI.Controls.TtUIElement hud) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -764,12 +764,12 @@ namespace EngineNS.Graphics.Pipeline
 				}
 			}
 			SetHUD(hud);
-			macross_break_SetHUD_3408856308.TryBreak();
+			macross_break_SetHUD_3408856308.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_PushHUD_3408856308 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->void PushHUD(UI.Controls.TtUIElement hud)");
-		public unsafe void macross_PushHUD (string nodeName, UI.Controls.TtUIElement hud) 
+		public unsafe void macross_PushHUD (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UI.Controls.TtUIElement hud) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -777,31 +777,31 @@ namespace EngineNS.Graphics.Pipeline
 				}
 			}
 			PushHUD(hud);
-			macross_break_PushHUD_3408856308.TryBreak();
+			macross_break_PushHUD_3408856308.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_PopHUD_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->void PopHUD()");
-		public unsafe void macross_PopHUD (string nodeName) 
+		public unsafe void macross_PopHUD (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
 				}
 			}
 			PopHUD();
-			macross_break_PopHUD_2609910045.TryBreak();
+			macross_break_PopHUD_2609910045.TryBreak(mcStack);
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_ClearHUDs_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->void ClearHUDs()");
-		public unsafe void macross_ClearHUDs (string nodeName) 
+		public unsafe void macross_ClearHUDs (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
 				}
 			}
 			ClearHUDs();
-			macross_break_ClearHUDs_2609910045.TryBreak();
+			macross_break_ClearHUDs_2609910045.TryBreak(mcStack);
 		}
 	}
 }

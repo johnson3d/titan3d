@@ -1,4 +1,4 @@
-﻿# Compilation and Runtime Environment
+# Compilation and Runtime Environment
 - Titan3D Launches!
 - ![Overview](Documents/picture/main_edtor.png)
 - 1. Install Visual Studio 2022

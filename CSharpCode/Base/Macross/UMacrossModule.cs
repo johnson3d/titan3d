@@ -45,7 +45,38 @@ namespace EngineNS.Macross
             InnerObject = null;
         }
     }
-    public class TtMacrossGetter<T> : TtMacrossGetterBase where T : class
+    public interface IMacrossObject : IDisposable
+    {
+        void ResetDebugger();
+    }
+    public class AuxMacrossObject : IMacrossObject
+    {
+        ~AuxMacrossObject()
+        {
+            Dispose();
+        }
+        public virtual void Dispose()
+        {
+            ResetDebugger();
+        }
+        public void ResetDebugger()
+        {
+            var type = GetType();
+            var fields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+            foreach (var f in fields)
+            {
+                if (f.FieldType == typeof(TtMacrossStackFrame))
+                {
+                    var frame = f.GetValue(this) as TtMacrossStackFrame;
+                    if (frame != null)
+                    {
+                        frame.ClearDebugInfo();
+                    }
+                }
+            }
+        }
+    }
+    public class TtMacrossGetter<T> : TtMacrossGetterBase where T : class, IMacrossObject
     {
         static int mNumOfMacrossGetter = 0;
         public static int NumOfMacrossGetter { get => mNumOfMacrossGetter; }

@@ -60,9 +60,9 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
 	partial class IActor
 	{
 		private static EngineNS.Macross.TtMacrossBreak macross_break_OnPickedItem_1798245635 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.WorldSimulator.GOAP.IActor->void OnPickedItem(IItem item, IInventory invetory, IItemContain contain)");
-		public unsafe void macross_OnPickedItem (string nodeName, IItem item, IInventory invetory, IItemContain contain) 
+		public unsafe void macross_OnPickedItem (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, IItem item, IInventory invetory, IItemContain contain) 
 		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
@@ -72,7 +72,7 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
 				}
 			}
 			OnPickedItem(item, invetory, contain);
-			macross_break_OnPickedItem_1798245635.TryBreak();
+			macross_break_OnPickedItem_1798245635.TryBreak(mcStack);
 		}
 	}
 }
