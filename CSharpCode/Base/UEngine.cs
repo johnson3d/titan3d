@@ -598,27 +598,31 @@ namespace EngineNS
                     }
 
                     var bCapturing = GfxDevice.RenderSwapQueue.BeginFrameCapture();
-
                     //Do engine frame tick
                     {
-                        TickBeginFrame();
-
-                        using (new Profiler.TimeScopeHelper(ScopeTickModules))
+                        GfxDevice?.BeginFrame();
                         {
-                            base.TickModules();
+                            TickBeginFrame();
+
+                            using (new Profiler.TimeScopeHelper(ScopeTickModules))
+                            {
+                                base.TickModules();
+                            }
+
+                            this.ThreadMain.Tick();
+
+                            TickSync();
+
+                            using (new Profiler.TimeScopeHelper(ScopeTickModules))
+                            {
+                                FContextTickableManager.GetInstance().ThreadTick();
+                                base.EndFrameModules();
+                            }
+
+                            this.TaskCollector.Tick();
                         }
-
-                        this.ThreadMain.Tick();
-
-                        TickSync();
-
-                        using (new Profiler.TimeScopeHelper(ScopeTickModules))
-                        {
-                            FContextTickableManager.GetInstance().ThreadTick();
-                            base.EndFrameModules();
-                        }
+                        GfxDevice?.EndFrame();
                     }
-
                     if (bCapturing)
                         GfxDevice.RenderSwapQueue.EndFrameCapture();
 

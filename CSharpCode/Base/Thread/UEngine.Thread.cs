@@ -245,6 +245,7 @@ namespace EngineNS
                 return mScopeTick_TickManager;
             }
         }
+        bool bRunLoop = false;
         public void TryTickLogic()
         {
             try
@@ -312,7 +313,6 @@ namespace EngineNS
             {
                 try
                 {
-                    GfxDevice?.BeginFrame();
                     for (int i = 0; i < TickableManager.Tickables.Count; i++)
                     {
                         try
@@ -420,12 +420,71 @@ namespace EngineNS
                 }
                 GfxDevice?.TickSync(this);
             }
-
-            this.TaskCollector.Tick();
-
-            GfxDevice?.EndFrame();
         }
 
+        public bool mIsRunLoop = true;
+        //用来处理主线程模态对话框，macross调试断点
+        public void RunLoop(Action tickAction = null)
+        {
+            //GfxDevice?.TickSync(this);
+            //GfxDevice?.EndFrame();
+
+            mIsRunLoop = true;
+
+            while (mIsRunLoop)
+            {
+                var t1 = Support.TtTime.GetTickCount();
+                using (new Profiler.TimeScopeHelper(ScopeInputSystem))
+                {
+                    InputSystem.BeforeTick();
+                    //SDL不让非主线程处理事件，所以RunLoop必须在主线程运行
+                    if (-1 == InputSystem.Tick(this))
+                    {
+                        QuitFrame = 2;
+                    }
+                }
+
+                GfxDevice?.BeginFrame();
+
+                tickAction?.Invoke();
+
+                try
+                {
+                    using (new Profiler.TimeScopeHelper(ScopeDrawSlateWindow))
+                    {
+                        DrawSlateWindow();
+                        TtEngine.Instance.GfxDevice.SlateApplication?.OnDrawSlate();
+                    }
+                    if (this.PlayMode != EPlayMode.Game)
+                    {
+                        TtEngine.Instance.AssetMetaManager.EditorCheckShowIconTimeout();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                }
+                
+                GfxDevice?.TickSync(this);
+                this.TaskCollector.Tick();
+                GfxDevice?.EndFrame();
+
+                using (new Profiler.TimeScopeHelper(ScopeInputSystem))
+                {
+                    InputSystem.AfterTick();
+
+                    Profiler.TimeScopeManager.UpdateAllInstance();
+                }
+
+                var t2 = Support.TtTime.GetTickCount();
+                if ((int)(t2 - t1)<20)
+                {
+                    System.Threading.Thread.Sleep(20 - (int)(t2- t1));
+                }
+            }
+
+            //GfxDevice?.BeginFrame();
+        }
         public static async System.Threading.Tasks.Task RunCoroutine<T>(IAsyncEnumerable<T> enumerable)
         {
             await foreach (var it in enumerable)

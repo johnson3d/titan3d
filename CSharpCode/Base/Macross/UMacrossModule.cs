@@ -73,6 +73,18 @@ namespace EngineNS.Macross
                         frame.ClearDebugInfo();
                     }
                 }
+                else if (f.FieldType == typeof(TtMacrossStackTracer))
+                {
+                    var stack = f.GetValue(this) as TtMacrossStackTracer;
+                    if (stack != null)
+                    {
+                        foreach (var i in stack.mFrames)
+                        {
+                            i.ClearDebugInfo();
+                        }
+                        stack.mFrames.Clear();
+                    }
+                }
             }
         }
     }
