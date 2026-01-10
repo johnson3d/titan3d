@@ -289,34 +289,26 @@ namespace EngineNS.Bricks.Procedure
 {
 	partial class UPgcGraphProgram
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_OnNodeInitialized_4068935686 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UPgcGraphProgram->bool OnNodeInitialized(UPgcGraph graph, UPgcNodeBase node)");
 		public unsafe bool macross_OnNodeInitialized (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, UPgcNodeBase node) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":graph", graph);
-					stackframe.SetWatchVariable(nodeName + ":node", node);
 				}
 			}
 			var _return_value = OnNodeInitialized(graph, node);
-			macross_break_OnNodeInitialized_4068935686.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_OnNodeProcedureFinished_4068935686 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UPgcGraphProgram->bool OnNodeProcedureFinished(UPgcGraph graph, UPgcNodeBase node)");
 		public unsafe bool macross_OnNodeProcedureFinished (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, UPgcNodeBase node) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":graph", graph);
-					stackframe.SetWatchVariable(nodeName + ":node", node);
 				}
 			}
 			var _return_value = OnNodeProcedureFinished(graph, node);
-			macross_break_OnNodeProcedureFinished_4068935686.TryBreak(mcStack);
 			return _return_value;
 		}
 	}
@@ -327,34 +319,26 @@ namespace EngineNS.Bricks.Procedure
 {
 	partial class UPgcGraph
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_RegBuffer_3107722689 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UPgcGraph->UBufferComponent RegBuffer(PinOut pin, UBufferComponent buffer)");
 		public unsafe UBufferComponent macross_RegBuffer (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, PinOut pin, UBufferComponent buffer) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":pin", pin);
-					stackframe.SetWatchVariable(nodeName + ":buffer", buffer);
 				}
 			}
 			var _return_value = RegBuffer(pin, buffer);
-			macross_break_RegBuffer_3107722689.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_FindPgcNodeByName_3440503648 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UPgcGraph->UPgcNodeBase FindPgcNodeByName(string name, System.Type type)");
 		public unsafe UPgcNodeBase macross_FindPgcNodeByName (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name, System.Type type) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":name", name);
-					stackframe.SetWatchVariable(nodeName + ":type", type);
 				}
 			}
 			var _return_value = FindPgcNodeByName(name, type);
-			macross_break_FindPgcNodeByName_3440503648.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

@@ -123,7 +123,6 @@ namespace EngineNS.Macross
 {
 	partial class BaseClass
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_BaseFunc_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.BaseClass->void BaseFunc()");
 		public unsafe void macross_BaseFunc (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
 			var stackframe = mcStack.TopFrame;
@@ -133,7 +132,6 @@ namespace EngineNS.Macross
 				}
 			}
 			BaseFunc();
-			macross_break_BaseFunc_2609910045.TryBreak(mcStack);
 		}
 	}
 }
@@ -143,7 +141,6 @@ namespace EngineNS.Macross
 {
 	partial class SubClass1
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SubFunc1_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.SubClass1->void SubFunc1()");
 		public unsafe void macross_SubFunc1 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
 			var stackframe = mcStack.TopFrame;
@@ -153,20 +150,16 @@ namespace EngineNS.Macross
 				}
 			}
 			SubFunc1();
-			macross_break_SubFunc1_2609910045.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_UseBaseClassFunc_368511151 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.SubClass1->BaseClass UseBaseClassFunc(BaseClass item)");
 		public unsafe BaseClass macross_UseBaseClassFunc (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, BaseClass item) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":item", item);
 				}
 			}
 			var _return_value = UseBaseClassFunc(item);
-			macross_break_UseBaseClassFunc_368511151.TryBreak(mcStack);
 			return _return_value;
 		}
 	}
@@ -177,7 +170,6 @@ namespace EngineNS.Macross
 {
 	partial class SubClass2
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SubFunc2_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.SubClass2->void SubFunc2()");
 		public unsafe void macross_SubFunc2 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
 			var stackframe = mcStack.TopFrame;
@@ -187,20 +179,16 @@ namespace EngineNS.Macross
 				}
 			}
 			SubFunc2();
-			macross_break_SubFunc2_2609910045.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_UseBaseClassFunc_368511151 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.SubClass2->BaseClass UseBaseClassFunc(BaseClass item)");
 		public unsafe BaseClass macross_UseBaseClassFunc (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, BaseClass item) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":item", item);
 				}
 			}
 			var _return_value = UseBaseClassFunc(item);
-			macross_break_UseBaseClassFunc_368511151.TryBreak(mcStack);
 			return _return_value;
 		}
 	}
@@ -211,7 +199,6 @@ namespace EngineNS.Macross
 {
 	partial class UMacrossTestClass
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_VirtualFunc1_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.UMacrossTestClass->void VirtualFunc1()");
 		public unsafe void macross_VirtualFunc1 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
 			var stackframe = mcStack.TopFrame;
@@ -221,9 +208,7 @@ namespace EngineNS.Macross
 				}
 			}
 			VirtualFunc1();
-			macross_break_VirtualFunc1_2609910045.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_ProtectedVirtualFunc_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.UMacrossTestClass->void ProtectedVirtualFunc()");
 		public unsafe void macross_ProtectedVirtualFunc (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
 			var stackframe = mcStack.TopFrame;
@@ -233,9 +218,7 @@ namespace EngineNS.Macross
 				}
 			}
 			ProtectedVirtualFunc();
-			macross_break_ProtectedVirtualFunc_2609910045.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_VirtualFunc2_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.UMacrossTestClass->int VirtualFunc2()");
 		public unsafe int macross_VirtualFunc2 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
 			var stackframe = mcStack.TopFrame;
@@ -245,139 +228,103 @@ namespace EngineNS.Macross
 				}
 			}
 			var _return_value = VirtualFunc2();
-			macross_break_VirtualFunc2_2609910045.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_VirtualFunc3_3538359930 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.UMacrossTestClass->void VirtualFunc3(int val1)");
 		public unsafe void macross_VirtualFunc3 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int val1) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":val1", val1);
 				}
 			}
 			VirtualFunc3(val1);
-			macross_break_VirtualFunc3_3538359930.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_VirtualFunc4_611716433 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.UMacrossTestClass->void VirtualFunc4(in int inValue, out int outValue, ref int refValue)");
 		public unsafe void macross_VirtualFunc4 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, in int inValue, out int outValue, ref int refValue) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":inValue", inValue);
-					stackframe.SetWatchVariable(nodeName + ":refValue", refValue);
 				}
 			}
 			VirtualFunc4(in inValue, out outValue, ref refValue);
-			{
-				if(stackframe != null)
-				{
-					stackframe.SetWatchVariable(nodeName + ":outValue", outValue);
-				}
-			}
-			macross_break_VirtualFunc4_611716433.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_VirtualFunc_params_1097178958 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.UMacrossTestClass->void VirtualFunc_params(int[] values)");
 		public unsafe void macross_VirtualFunc_params (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int[] values) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":values", values);
 				}
 			}
 			VirtualFunc_params(values);
-			macross_break_VirtualFunc_params_1097178958.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_FuncFloat_2659928112 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.UMacrossTestClass->float FuncFloat(float fVal)");
 		public unsafe float macross_FuncFloat (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float fVal) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":fVal", fVal);
 				}
 			}
 			var _return_value = FuncFloat(fVal);
-			macross_break_FuncFloat_2659928112.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_UseBaseClassFunc_368511151 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.UMacrossTestClass->BaseClass UseBaseClassFunc(BaseClass item)");
 		public unsafe BaseClass macross_UseBaseClassFunc (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, BaseClass item) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":item", item);
 				}
 			}
 			var _return_value = UseBaseClassFunc(item);
-			macross_break_UseBaseClassFunc_368511151.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_UseBaseClassFuncRef_2095380354 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.UMacrossTestClass->BaseClass UseBaseClassFuncRef(ref BaseClass item)");
 		public unsafe BaseClass macross_UseBaseClassFuncRef (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, ref BaseClass item) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":item", item);
 				}
 			}
 			var _return_value = UseBaseClassFuncRef(ref item);
-			macross_break_UseBaseClassFuncRef_2095380354.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_UseSubClass1Func_2236911147 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.UMacrossTestClass->SubClass1 UseSubClass1Func(SubClass1 item)");
 		public unsafe SubClass1 macross_UseSubClass1Func (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, SubClass1 item) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":item", item);
 				}
 			}
 			var _return_value = UseSubClass1Func(item);
-			macross_break_UseSubClass1Func_2236911147.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_UseSubClass2Func_2266639564 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.UMacrossTestClass->SubClass2 UseSubClass2Func(SubClass2 item)");
 		public unsafe SubClass2 macross_UseSubClass2Func (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, SubClass2 item) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":item", item);
 				}
 			}
 			var _return_value = UseSubClass2Func(item);
-			macross_break_UseSubClass2Func_2266639564.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_DelegateFunc_1915121968 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.UMacrossTestClass->void DelegateFunc(Delegate_DelegateTest func)");
 		public unsafe void macross_DelegateFunc (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Delegate_DelegateTest func) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":func", func);
 				}
 			}
 			DelegateFunc(func);
-			macross_break_DelegateFunc_1915121968.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_TaskFunction_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.UMacrossTestClass->Task<bool> TaskFunction()");
 		public async Task<bool> macross_TaskFunction (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
 			var stackframe = mcStack.TopFrame;
@@ -387,21 +334,17 @@ namespace EngineNS.Macross
 				}
 			}
 			var _return_value = await TaskFunction();
-			macross_break_TaskFunction_2609910045.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_UnsafeFunction_1055634221 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Macross.UMacrossTestClass->int* UnsafeFunction(float inValue)");
 		public unsafe int* macross_UnsafeFunction (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float inValue) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":inValue", inValue);
 				}
 			}
 			var _return_value = UnsafeFunction(inValue);
-			macross_break_UnsafeFunction_1055634221.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

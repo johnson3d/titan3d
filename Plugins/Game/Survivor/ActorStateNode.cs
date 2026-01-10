@@ -143,18 +143,15 @@ namespace Survivor
 {
 	partial class TtStateNode
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_BeAttacked_2499766893 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtStateNode->void BeAttacked(TtWeaponNode weaponNode)");
 		public unsafe void macross_BeAttacked (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtWeaponNode weaponNode) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":weaponNode", weaponNode);
 				}
 			}
 			BeAttacked(weaponNode);
-			macross_break_BeAttacked_2499766893.TryBreak(mcStack);
 		}
 	}
 }

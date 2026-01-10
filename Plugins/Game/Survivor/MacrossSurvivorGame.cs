@@ -58,7 +58,6 @@ namespace Survivor
 {
 	partial class TtMacrossSurvivorGame
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_OnPlayerDead_2609910045 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtMacrossSurvivorGame->void OnPlayerDead()");
 		public unsafe void macross_OnPlayerDead (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
 			var stackframe = mcStack.TopFrame;
@@ -68,7 +67,6 @@ namespace Survivor
 				}
 			}
 			OnPlayerDead();
-			macross_break_OnPlayerDead_2609910045.TryBreak(mcStack);
 		}
 	}
 }

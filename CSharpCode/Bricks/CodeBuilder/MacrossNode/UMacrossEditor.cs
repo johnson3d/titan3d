@@ -797,7 +797,19 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             public bool IsMouseDown;
             public bool IsMouseHover;
         }
-        STToolButtonData[] mToolBtnDatas = new STToolButtonData[7];
+        enum EToolBarButton : int
+        {
+            Save,
+            Debug,
+            Disable,
+            GenCode,
+            MethodCustum,
+            ClassSettings,
+            DebugTest,
+            Run,
+            Count,
+        }
+        STToolButtonData[] mToolBtnDatas = new STToolButtonData[(int)EToolBarButton.Count];
         public Action<ImDrawList> DrawToolbarAction;
         protected void DrawToolbar()
         {
@@ -811,22 +823,19 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (ameta == null)
                 return;
 
-            int toolBarItemIdx = 0;
             var spacing = EGui.UIProxy.StyleConfig.Instance.ToolbarSeparatorThickness + EGui.UIProxy.StyleConfig.Instance.ItemSpacing.X * 2;
             EGui.UIProxy.Toolbar.BeginToolbar(in drawList);
 
             if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, 
-                ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "  Save "))
+                ref mToolBtnDatas[(int)EToolBarButton.Save].IsMouseDown, ref mToolBtnDatas[(int)EToolBarButton.Save].IsMouseHover, null, "  Save "))
             {
                 Save();
             }
-            toolBarItemIdx++;
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawCheckBox(in drawList, null, "EditorDebug", ref mCSCodeGen.IsEditorDebug))
             {
                 
             }
-            toolBarItemIdx++;
             bool isDisable = ameta.IsDisable;
             if (isDisable)
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.ErrorStringColor);
@@ -838,30 +847,26 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 //TtEngine.Instance.MacrossManager.NeedRegenGameProject = true;
             }
             ImGuiAPI.PopStyleColor(1);
-            toolBarItemIdx++;
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
-                ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "GenCode", false, -1, 0, spacing))
+                ref mToolBtnDatas[(int)EToolBarButton.GenCode].IsMouseDown, ref mToolBtnDatas[(int)EToolBarButton.GenCode].IsMouseHover, null, "GenCode", false, -1, 0, spacing))
             {
                 GenerateCode();
                 CompileCode();
             }
-            toolBarItemIdx++;
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
-                ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "MethodCustum", false, -1, 0, spacing))
+                ref mToolBtnDatas[(int)EToolBarButton.MethodCustum].IsMouseDown, ref mToolBtnDatas[(int)EToolBarButton.MethodCustum].IsMouseHover, null, "MethodCustum", false, -1, 0, spacing))
             {
                 if (CurrentTextoutMethod != null)
                     CurrentTextoutMethod.CustumCode = mCodeEditor.Text;
             }
-            toolBarItemIdx++;
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
-                ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "ClassSettings", false, -1, 0, spacing))
+                ref mToolBtnDatas[(int)EToolBarButton.ClassSettings].IsMouseDown, ref mToolBtnDatas[(int)EToolBarButton.ClassSettings].IsMouseHover, null, "ClassSettings", false, -1, 0, spacing))
             {
                 PGMember.Target = DefClass;
             }
-            toolBarItemIdx++;
             // test ////////////////
             //if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, in Support.UAnyPointer.Default,
             //    ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "DebugTest"))
@@ -877,17 +882,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //    }, Thread.Async.EAsyncTarget.Logic);
             //}
             ////////////////////////
-            toolBarItemIdx++;
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             if(Macross.TtMacrossDebugger.Instance.CurrrentBreak != null)
             {
                 if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
-                    ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Run", false, -1, 0, spacing))
+                    ref mToolBtnDatas[(int)EToolBarButton.Run].IsMouseDown, ref mToolBtnDatas[(int)EToolBarButton.Run].IsMouseHover, null, "Run", false, -1, 0, spacing))
                 {
                     Macross.TtMacrossDebugger.Instance.Run();
                 }
             }
-
                 
             EGui.UIProxy.Toolbar.EndToolbar();
         }

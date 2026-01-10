@@ -8,7 +8,6 @@ using EngineNS.Bricks.NodeGraph;
 using EngineNS.EGui.Controls;
 using EngineNS.EGui.Controls.PropertyGrid;
 using Mono.CompilerServices.SymbolWriter;
-using NPOI.SS.UserModel;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {

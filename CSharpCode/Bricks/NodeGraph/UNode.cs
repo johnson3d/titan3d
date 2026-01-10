@@ -1,5 +1,6 @@
 ﻿using EngineNS.EGui.Controls;
 using EngineNS.EGui.Controls.PropertyGrid;
+using Mono.CompilerServices.SymbolWriter;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -848,21 +849,24 @@ namespace EngineNS.Bricks.NodeGraph
             var breakType = Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.Macross.TtMacrossBreak));
             var breakDef = new CodeBuilder.TtVariableDeclaration()
             {
+                IsStatic = true,
                 VariableType = new CodeBuilder.TtTypeReference(breakType),
                 VariableName = breakName,
                 InitValue = new CodeBuilder.TtCreateObjectExpression(data.CodeGen.GetTypeString(breakType), new CodeBuilder.TtPrimitiveExpression(breakName))
             };
             if (!data.ClassDec.PreDefineVariables.Contains(breakDef))
                 data.ClassDec.PreDefineVariables.Add(breakDef);
-            data.CurrentStatements.Add(new CodeBuilder.TtDebuggerTryBreak(breakName));
+            //var graph = data.NodeGraph as Bricks.CodeBuilder.MacrossNode.UMacrossMethodGraph;
+            string stackName = $"mStack_{data.MethodDec.UniqueMethodName}";
+            data.CurrentStatements.Add(new CodeBuilder.TtDebuggerTryBreak(breakName) { StackName = stackName });
         }
         public static string GetRuntimeValueString(string name)
         {
-            if (Macross.TtMacrossDebugger.Instance.CurrrentBreak != null && Macross.TtMacrossDebugger.Instance.CurrrentBreak.BreakStackFrame != null)
+            if (Macross.TtMacrossDebugger.Instance.CurrrentBreak != null && Macross.TtMacrossDebugger.Instance.CurrrentBreak.BreakFrame != null)
             {
-                if (Macross.TtMacrossDebugger.Instance.CurrrentBreak.BreakStackFrame.HasWatchVariable(name))
+                if (Macross.TtMacrossDebugger.Instance.CurrrentBreak.BreakFrame.HasWatchVariable(name))
                 {
-                    var obj = Macross.TtMacrossDebugger.Instance.CurrrentBreak.BreakStackFrame.GetWatchVariable(name);
+                    var obj = Macross.TtMacrossDebugger.Instance.CurrrentBreak.BreakFrame.GetWatchVariable(name);
                     return (obj == null) ? "null" : obj.ToString() + " ";
                 }
             }

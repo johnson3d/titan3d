@@ -799,62 +799,48 @@ namespace EngineNS.UI.Controls
 {
 	partial class TtUIElement
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_FindElement_107167771 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UI.Controls.TtUIElement->TtUIElement FindElement(string name)");
 		public unsafe TtUIElement macross_FindElement (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":name", name);
 				}
 			}
 			var _return_value = FindElement(name);
-			macross_break_FindElement_107167771.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_FindElement_2697509680 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UI.Controls.TtUIElement->TtUIElement FindElement(UInt64 id)");
 		public unsafe TtUIElement macross_FindElement (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UInt64 id) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":id", id);
 				}
 			}
 			var _return_value = FindElement(id);
-			macross_break_FindElement_2697509680.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_FindElement_4080205626 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UI.Controls.TtUIElement->TtUIElement FindElement(System.Type rType, string name)");
 		public unsafe TtUIElement macross_FindElement (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, System.Type rType, string name) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":rType", rType);
-					stackframe.SetWatchVariable(nodeName + ":name", name);
 				}
 			}
 			var _return_value = FindElement(rType, name);
-			macross_break_FindElement_4080205626.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_FindElement_2174374925 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UI.Controls.TtUIElement->TtUIElement FindElement(System.Type rType, UInt64 id)");
 		public unsafe TtUIElement macross_FindElement (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, System.Type rType, UInt64 id) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":rType", rType);
-					stackframe.SetWatchVariable(nodeName + ":id", id);
 				}
 			}
 			var _return_value = FindElement(rType, id);
-			macross_break_FindElement_2174374925.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

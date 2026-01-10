@@ -277,6 +277,9 @@ namespace EngineNS.Bricks.CodeBuilder
     public class TtDebuggerTryBreak : TtStatementBase
     {
         [Rtti.Meta("")]
+        public string StackName { get; set; }
+
+        [Rtti.Meta("")]
         public string BreakName { get; set; }
 
         public TtDebuggerTryBreak(string name)
@@ -378,6 +381,8 @@ namespace EngineNS.Bricks.CodeBuilder
         public bool IsPropertyVisibleDirty { get; set; } = false;
         [Rtti.Meta("")]
         public bool IsBrowsable { get; set; } = true;
+        [Rtti.Meta("")]
+        public bool IsStatic { get; set; } = false;
 
         public TtVariableDeclaration()
         {

@@ -296,19 +296,15 @@ namespace EngineNS.Bricks.Particle
 {
 	partial class TtNebulaParticle
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_AddEmitter_3553406330 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Particle.TtNebulaParticle->TtEmitter AddEmitter(System.Type type, string name)");
 		public unsafe TtEmitter macross_AddEmitter (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, System.Type type, string name) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":type", type);
-					stackframe.SetWatchVariable(nodeName + ":name", name);
 				}
 			}
 			var _return_value = AddEmitter(type, name);
-			macross_break_AddEmitter_3553406330.TryBreak(mcStack);
 			return _return_value;
 		}
 	}
@@ -319,49 +315,35 @@ namespace EngineNS.Bricks.Particle
 {
 	partial class TtNebulaMacross
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_OnCreated_2571610209 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Particle.TtNebulaMacross->void OnCreated(TtNebulaParticle nebula)");
 		public unsafe void macross_OnCreated (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtNebulaParticle nebula) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":nebula", nebula);
 				}
 			}
 			OnCreated(nebula);
-			macross_break_OnCreated_2571610209.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_OnUpdate_2992855503 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Particle.TtNebulaMacross->void OnUpdate(TtNebulaParticle nebula, UParticleGraphNode particleSystem, float elpased)");
 		public unsafe void macross_OnUpdate (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtNebulaParticle nebula, UParticleGraphNode particleSystem, float elpased) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":nebula", nebula);
-					stackframe.SetWatchVariable(nodeName + ":particleSystem", particleSystem);
-					stackframe.SetWatchVariable(nodeName + ":elpased", elpased);
 				}
 			}
 			OnUpdate(nebula, particleSystem, elpased);
-			macross_break_OnUpdate_2992855503.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_OnUpdateEmitter_525844223 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Particle.TtNebulaMacross->void OnUpdateEmitter(TtNebulaParticle nebula, TtEmitter emitter, UParticleGraphNode particleSystem, float elpased)");
 		public unsafe void macross_OnUpdateEmitter (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtNebulaParticle nebula, TtEmitter emitter, UParticleGraphNode particleSystem, float elpased) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":nebula", nebula);
-					stackframe.SetWatchVariable(nodeName + ":emitter", emitter);
-					stackframe.SetWatchVariable(nodeName + ":particleSystem", particleSystem);
-					stackframe.SetWatchVariable(nodeName + ":elpased", elpased);
 				}
 			}
 			OnUpdateEmitter(nebula, emitter, particleSystem, elpased);
-			macross_break_OnUpdateEmitter_525844223.TryBreak(mcStack);
 		}
 	}
 }

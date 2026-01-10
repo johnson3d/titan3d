@@ -180,31 +180,25 @@ namespace EngineNS
 {
 	partial class TtTickableManager
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_AddTickable_2414318340 = new EngineNS.Macross.TtMacrossBreak("EngineNS.TtTickableManager->void AddTickable(ITickable tickable)");
 		public unsafe void macross_AddTickable (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, ITickable tickable) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":tickable", tickable);
 				}
 			}
 			AddTickable(tickable);
-			macross_break_AddTickable_2414318340.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_RemoveTickable_2414318340 = new EngineNS.Macross.TtMacrossBreak("EngineNS.TtTickableManager->void RemoveTickable(ITickable tickable)");
 		public unsafe void macross_RemoveTickable (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, ITickable tickable) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":tickable", tickable);
 				}
 			}
 			RemoveTickable(tickable);
-			macross_break_RemoveTickable_2414318340.TryBreak(mcStack);
 		}
 	}
 }

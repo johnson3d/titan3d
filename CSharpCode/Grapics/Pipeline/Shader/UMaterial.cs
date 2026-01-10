@@ -1458,77 +1458,58 @@ namespace EngineNS.Graphics.Pipeline.Shader
 {
 	partial class TtMaterial
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SaveAssetTo_2037383663 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtMaterial->void SaveAssetTo(RName name)");
 		public unsafe void macross_SaveAssetTo (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, RName name) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":name", name);
 				}
 			}
 			SaveAssetTo(name);
-			macross_break_SaveAssetTo_2037383663.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SetSrv_1648643909 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtMaterial->bool SetSrv(string name, RName srv)");
 		public unsafe bool macross_SetSrv (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name, RName srv) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":name", name);
-					stackframe.SetWatchVariable(nodeName + ":srv", srv);
 				}
 			}
 			var _return_value = SetSrv(name, srv);
-			macross_break_SetSrv_1648643909.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SetColor4_1763676926 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtMaterial->bool SetColor4(string name, in Color4f color)");
 		public unsafe bool macross_SetColor4 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name, in Color4f color) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":name", name);
-					stackframe.SetWatchVariable(nodeName + ":color", color);
 				}
 			}
 			var _return_value = SetColor4(name, in color);
-			macross_break_SetColor4_1763676926.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SetColor3_1150647149 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtMaterial->bool SetColor3(string name, in Color3f color)");
 		public unsafe bool macross_SetColor3 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name, in Color3f color) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":name", name);
-					stackframe.SetWatchVariable(nodeName + ":color", color);
 				}
 			}
 			var _return_value = SetColor3(name, in color);
-			macross_break_SetColor3_1150647149.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SetFloat4_2589825864 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtMaterial->bool SetFloat4(string name, in Vector4 value)");
 		public unsafe bool macross_SetFloat4 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name, in Vector4 value) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":name", name);
-					stackframe.SetWatchVariable(nodeName + ":value", value);
 				}
 			}
 			var _return_value = SetFloat4(name, in value);
-			macross_break_SetFloat4_2589825864.TryBreak(mcStack);
 			return _return_value;
 		}
 	}
@@ -1539,32 +1520,26 @@ namespace EngineNS.Graphics.Pipeline.Shader
 {
 	partial class TtMaterialManager
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_FindMaterial_826345968 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtMaterialManager->TtMaterial FindMaterial(RName rn)");
 		public unsafe TtMaterial macross_FindMaterial (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, RName rn) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":rn", rn);
 				}
 			}
 			var _return_value = FindMaterial(rn);
-			macross_break_FindMaterial_826345968.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetMaterial_826345968 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtMaterialManager->Thread.Async.TtTask<TtMaterial> GetMaterial(RName rn)");
 		public async Thread.Async.TtTask<TtMaterial> macross_GetMaterial (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, RName rn) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":rn", rn);
 				}
 			}
 			var _return_value = await GetMaterial(rn);
-			macross_break_GetMaterial_826345968.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

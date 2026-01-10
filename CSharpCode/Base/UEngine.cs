@@ -729,19 +729,15 @@ namespace EngineNS
 {
 	partial class TtEngine
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetRName_1285856471 = new EngineNS.Macross.TtMacrossBreak("EngineNS.TtEngine->static RName GetRName(string name, RName.ERNameType type)");
 		public static unsafe RName macross_GetRName (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name, RName.ERNameType type) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":name", name);
-					stackframe.SetWatchVariable(nodeName + ":type", type);
 				}
 			}
 			var _return_value = GetRName(name, type);
-			macross_break_GetRName_1285856471.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

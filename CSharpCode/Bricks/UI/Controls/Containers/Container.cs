@@ -992,18 +992,15 @@ namespace EngineNS.UI.Controls.Containers
 {
 	partial class TtUIElementCollection
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_Add_3603961666 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UI.Controls.Containers.TtUIElementCollection->void Add(TtUIElement item)");
 		public unsafe void macross_Add (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtUIElement item) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":item", item);
 				}
 			}
 			Add(item);
-			macross_break_Add_3603961666.TryBreak(mcStack);
 		}
 	}
 }

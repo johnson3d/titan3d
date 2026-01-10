@@ -120,7 +120,6 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
 {
 	partial class IItem
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_UseItem_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.WorldSimulator.GOAP.IItem->void UseItem()");
 		public unsafe void macross_UseItem (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
 			var stackframe = mcStack.TopFrame;
@@ -130,7 +129,6 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
 				}
 			}
 			UseItem();
-			macross_break_UseItem_2609910045.TryBreak(mcStack);
 		}
 	}
 }
@@ -140,34 +138,26 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
 {
 	partial class IItemContain
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetItem_3440503648 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.WorldSimulator.GOAP.IItemContain->IItem GetItem(string name, System.Type type)");
 		public unsafe IItem macross_GetItem (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name, System.Type type) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":name", name);
-					stackframe.SetWatchVariable(nodeName + ":type", type);
 				}
 			}
 			var _return_value = GetItem(name, type);
-			macross_break_GetItem_3440503648.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_TakeItem_3440503648 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.WorldSimulator.GOAP.IItemContain->IItem TakeItem(string name, System.Type type)");
 		public unsafe IItem macross_TakeItem (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name, System.Type type) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":name", name);
-					stackframe.SetWatchVariable(nodeName + ":type", type);
 				}
 			}
 			var _return_value = TakeItem(name, type);
-			macross_break_TakeItem_3440503648.TryBreak(mcStack);
 			return _return_value;
 		}
 	}
@@ -178,65 +168,48 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
 {
 	partial class IInventory
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_HaveItem_107167771 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.WorldSimulator.GOAP.IInventory->bool HaveItem(string name)");
 		public unsafe bool macross_HaveItem (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":name", name);
 				}
 			}
 			var _return_value = HaveItem(name);
-			macross_break_HaveItem_107167771.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetItem_3440503648 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.WorldSimulator.GOAP.IInventory->IItem GetItem(string name, System.Type type)");
 		public unsafe IItem macross_GetItem (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name, System.Type type) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":name", name);
-					stackframe.SetWatchVariable(nodeName + ":type", type);
 				}
 			}
 			var _return_value = GetItem(name, type);
-			macross_break_GetItem_3440503648.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_TakeItem_3440503648 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.WorldSimulator.GOAP.IInventory->IItem TakeItem(string name, System.Type type)");
 		public unsafe IItem macross_TakeItem (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name, System.Type type) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":name", name);
-					stackframe.SetWatchVariable(nodeName + ":type", type);
 				}
 			}
 			var _return_value = TakeItem(name, type);
-			macross_break_TakeItem_3440503648.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_PutItem_1685709441 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.WorldSimulator.GOAP.IInventory->bool PutItem(IActor actor, string name, IItem item, string bagName)");
 		public unsafe bool macross_PutItem (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, IActor actor, string name, IItem item, string bagName) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":actor", actor);
-					stackframe.SetWatchVariable(nodeName + ":name", name);
-					stackframe.SetWatchVariable(nodeName + ":item", item);
-					stackframe.SetWatchVariable(nodeName + ":bagName", bagName);
 				}
 			}
 			var _return_value = PutItem(actor, name, item, bagName);
-			macross_break_PutItem_1685709441.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

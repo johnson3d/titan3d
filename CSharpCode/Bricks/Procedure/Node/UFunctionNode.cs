@@ -711,18 +711,15 @@ namespace EngineNS.Bricks.Procedure.Node
 {
 	partial class UBezier
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetY_4262389589 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.Node.UBezier->float GetY(float x)");
 		public unsafe float macross_GetY (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float x) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
 				}
 			}
 			var _return_value = GetY(x);
-			macross_break_GetY_4262389589.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

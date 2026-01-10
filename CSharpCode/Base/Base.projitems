@@ -13,7 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CNativeString.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Command.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ECS\ECSInterface.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IO\DynConfigData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\ConfigSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\IStreaming.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\JsonOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\UAssetOperator.cs" />

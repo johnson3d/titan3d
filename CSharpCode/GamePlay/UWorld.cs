@@ -610,18 +610,15 @@ namespace EngineNS.GamePlay
 {
 	partial class TtWorld
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetSun_1880456938 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtWorld->Scene.TtSunNode GetSun(int index)");
 		public unsafe Scene.TtSunNode macross_GetSun (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int index) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":index", index);
 				}
 			}
 			var _return_value = GetSun(index);
-			macross_break_GetSun_1880456938.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

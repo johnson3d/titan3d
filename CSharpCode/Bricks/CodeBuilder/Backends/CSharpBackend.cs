@@ -48,7 +48,10 @@ namespace EngineNS.Bricks.CodeBuilder
                 if (data.CodeGen.IsEditorDebug)
                 {
                     var exp = obj as TtDebuggerTryBreak;
-                    data.CodeGen.AddLine($"{exp.BreakName}.TryBreak();", ref sourceCode);
+                    if (exp.StackName == null)
+                        data.CodeGen.AddLine($"{exp.BreakName}.TryBreak(null, this);", ref sourceCode);
+                    else
+                        data.CodeGen.AddLine($"{exp.BreakName}.TryBreak({exp.StackName}, this);", ref sourceCode);
                 }
             }
         }
@@ -146,6 +149,11 @@ namespace EngineNS.Bricks.CodeBuilder
                                 codeStr += "internal ";
                                 break;
                         }
+                    }
+
+                    if (varDec.IsStatic)
+                    {
+                        codeStr += "static ";
                     }
                 }
                 codeStr += typeString + " " + varDec.VariableName;

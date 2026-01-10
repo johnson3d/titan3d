@@ -342,34 +342,25 @@ namespace EngineNS
 {
 	partial class TtCommandMacross
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_IterateDirectory_352688231 = new EngineNS.Macross.TtMacrossBreak("EngineNS.TtCommandMacross->void IterateDirectory(string dir, string ext, OnProcAsset fun, bool bAllDir)");
 		public unsafe void macross_IterateDirectory (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string dir, string ext, OnProcAsset fun, bool bAllDir) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":dir", dir);
-					stackframe.SetWatchVariable(nodeName + ":ext", ext);
-					stackframe.SetWatchVariable(nodeName + ":fun", fun);
-					stackframe.SetWatchVariable(nodeName + ":bAllDir", bAllDir);
 				}
 			}
 			IterateDirectory(dir, ext, fun, bAllDir);
-			macross_break_IterateDirectory_352688231.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_DoCommand_2428257558 = new EngineNS.Macross.TtMacrossBreak("EngineNS.TtCommandMacross->Thread.Async.TtTask DoCommand(TtMcCommand host)");
 		public async Thread.Async.TtTask macross_DoCommand (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtMcCommand host) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":host", host);
 				}
 			}
 			await DoCommand(host);
-			macross_break_DoCommand_2428257558.TryBreak(mcStack);
 		}
 	}
 }
@@ -379,18 +370,15 @@ namespace EngineNS
 {
 	partial class TtMcCommand
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_FindArgument_703518079 = new EngineNS.Macross.TtMacrossBreak("EngineNS.TtMcCommand->string FindArgument(string argName)");
 		public unsafe string macross_FindArgument (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string argName) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":argName", argName);
 				}
 			}
 			var _return_value = FindArgument(argName);
-			macross_break_FindArgument_703518079.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

@@ -202,7 +202,7 @@ namespace CSharpCodeTools.Macross
                             genericDef += ">";
                         }
                         
-                        AddLine($"private static EngineNS.Macross.TtMacrossBreak macross_break_{i.MethodSyntax.Identifier.Text}_{i.GetParameterHashCode()} = new EngineNS.Macross.TtMacrossBreak(\"{funName}\");");
+                        //AddLine($"private static EngineNS.Macross.TtMacrossBreak macross_break_{i.MethodSyntax.Identifier.Text}_{i.GetParameterHashCode()} = new EngineNS.Macross.TtMacrossBreak(\"{funName}\");");
                         if (i.ParamenterCount > 0)
                             AddLine($"public {isStatic}{asyncStr}{i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text} {genericDef}(EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, {i.GetParameterDefine()}) {constraint}");
                         else
@@ -217,15 +217,15 @@ namespace CSharpCodeTools.Macross
                                 AddLine($"if(stackframe != null)");
                                 PushBrackets();
                                 {
-                                    foreach (var j in i.MethodSyntax.ParameterList.Parameters)
-                                    {
-                                        if (j.ToString().StartsWith("out "))
-                                        {
-                                            hasOut = true;
-                                            continue;
-                                        }
-                                        AddLine($"stackframe.SetWatchVariable(nodeName + \":{j.Identifier.ValueText}\", {j.Identifier.ValueText});");
-                                    }
+                                    //foreach (var j in i.MethodSyntax.ParameterList.Parameters)
+                                    //{
+                                    //    if (j.ToString().StartsWith("out "))
+                                    //    {
+                                    //        hasOut = true;
+                                    //        continue;
+                                    //    }
+                                    //    AddLine($"stackframe.SetWatchVariable(nodeName + \":{j.Identifier.ValueText}\", {j.Identifier.ValueText});");
+                                    //}
                                 }
                                 PopBrackets();
                             }
@@ -262,20 +262,20 @@ namespace CSharpCodeTools.Macross
                                     AddLine($"if(stackframe != null)");
                                     PushBrackets();
                                     {
-                                        foreach (var j in i.MethodSyntax.ParameterList.Parameters)
-                                        {
-                                            if (j.ToString().StartsWith("out "))
-                                            {
-                                                AddLine($"stackframe.SetWatchVariable(nodeName + \":{j.Identifier.ValueText}\", {j.Identifier.ValueText});");
-                                            }
-                                        }
+                                        //foreach (var j in i.MethodSyntax.ParameterList.Parameters)
+                                        //{
+                                        //    if (j.ToString().StartsWith("out "))
+                                        //    {
+                                        //        AddLine($"stackframe.SetWatchVariable(nodeName + \":{j.Identifier.ValueText}\", {j.Identifier.ValueText});");
+                                        //    }
+                                        //}
                                     }
                                     PopBrackets();
                                 }
                                 PopBrackets();
                             }
 
-                            AddLine($"macross_break_{i.MethodSyntax.Identifier.Text}_{i.GetParameterHashCode()}.TryBreak(mcStack);");
+                            //AddLine($"macross_break_{i.MethodSyntax.Identifier.Text}_{i.GetParameterHashCode()}.TryBreak(mcStack);");
 
                             if (needReturen)
                             {

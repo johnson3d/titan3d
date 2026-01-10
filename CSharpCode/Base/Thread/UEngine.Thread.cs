@@ -422,7 +422,7 @@ namespace EngineNS
             }
         }
 
-        public bool mIsRunLoop = true;
+        public bool mIsRunLoop = false;
         //用来处理主线程模态对话框，macross调试断点
         public void RunLoop(Action tickAction = null)
         {

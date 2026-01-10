@@ -416,18 +416,15 @@ namespace EngineNS.UI
 {
 	partial class TtUIManager
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_Load_2037383663 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UI.TtUIManager->TtUIElement Load(RName name)");
 		public unsafe TtUIElement macross_Load (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, RName name) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":name", name);
 				}
 			}
 			var _return_value = Load(name);
-			macross_break_Load_2037383663.TryBreak(mcStack);
 			return _return_value;
 		}
 	}

@@ -7,10 +7,11 @@ namespace EngineNS.Macross
 {
     public class TtMacrossBreak
     {
+        public Func<IMacrossObject, bool> BreakCondition = null;
         public string BreakName;
         internal bool Enable;
-        public TtMacrossStackTracer StackTracer;
-        public TtMacrossStackFrame BreakStackFrame;
+        public TtMacrossStackTracer BreakStack;
+        public TtMacrossStackFrame BreakFrame;
         public TtMacrossBreak(string name, bool enable = false)
         {
             Enable = enable;
@@ -18,27 +19,60 @@ namespace EngineNS.Macross
             TtMacrossDebugger.Instance.AddBreak(this);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void TryBreak(TtMacrossStackTracer stack = null)
+        bool IsConditionTrue(IMacrossObject owner)
         {
-            if (Enable)
+            if (BreakCondition != null)
             {
-                if (Thread.TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadMain.ThreadId)
-                {//不能在主线程break住，否则没法调试了
-                    return;
-                }
-                TryBreakInner(stack);
+                return BreakCondition(owner);
             }
+            else if (TtMacrossDebugger.Instance.BreakCondition != null)
+            {
+                return TtMacrossDebugger.Instance.BreakCondition(owner, this);
+            }
+            return true;
         }
-        private void TryBreakInner(TtMacrossStackTracer stack)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void TryBreak(TtMacrossStackTracer stack = null, IMacrossObject owner = null)
         {
-            lock (TtMacrossDebugger.Instance)
+            if (Enable && IsConditionTrue(owner))
             {
                 if (TtMacrossDebugger.Instance.CurrrentBreak != null)
                     return;
-                StackTracer = stack;
-
-                BreakStackFrame = StackTracer?.TopFrame;
                 TtMacrossDebugger.Instance.CurrrentBreak = this;
+                BreakStack = stack;
+                BreakFrame = BreakStack?.TopFrame;
+
+                if (Thread.TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadMain.ThreadId)
+                {//主线程上打开断点，只能启动RunLoop来让编辑器处理继续工作
+                    TtEngine.Instance.RunLoop(() =>
+                    {
+                        if (Enable==false)
+                        {
+                            TtEngine.Instance.mIsRunLoop = false;
+                        }
+                    });
+                    return;
+                }
+                else if (Thread.TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadLogic.ThreadId)
+                {//在逻辑线程上打开断点，关键是给编辑器线程发送信号，让它处理断点
+                    TryBreakLogicTread(stack);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.Assert(false);
+
+                    lock (TtMacrossDebugger.Instance)
+                    {
+                        TtMacrossDebugger.Instance.BreakEvent.Reset();
+                    }
+                    TtMacrossDebugger.Instance.BreakEvent.WaitOne();
+                }
+            }
+        }
+        private void TryBreakLogicTread(TtMacrossStackTracer stack)
+        {
+            lock (TtMacrossDebugger.Instance)
+            {
                 TtMacrossDebugger.Instance.BreakEvent.Reset();
                 TtEngine.Instance.ThreadLogic.MacrossDebug.Set();
             }
@@ -48,7 +82,8 @@ namespace EngineNS.Macross
 
     public class TtMacrossDebugger
     {
-        public static TtMacrossDebugger Instance = new TtMacrossDebugger();
+        internal static TtMacrossDebugger Instance = new TtMacrossDebugger();
+        public Func<IMacrossObject, TtMacrossBreak, bool> BreakCondition = null;
         internal System.Threading.AutoResetEvent BreakEvent { get; } = new System.Threading.AutoResetEvent(false);
         internal TtMacrossBreak CurrrentBreak;
         public Dictionary<string, WeakReference<TtMacrossBreak>> Breaks = new();
@@ -68,7 +103,7 @@ namespace EngineNS.Macross
         }
         public void ClearDestroyedBreaks()
         {
-            lock (Instance)
+            lock (this)
             {
                 List<string> rvm = null;
                 foreach(var i in Breaks)
@@ -91,7 +126,7 @@ namespace EngineNS.Macross
         }
         public TtMacrossBreak Run()
         {
-            lock (Instance)
+            lock (this)
             {
                 if (CurrrentBreak == null)
                     return null;
@@ -100,6 +135,7 @@ namespace EngineNS.Macross
 
                 TtEngine.Instance.ThreadLogic.MacrossDebug.Reset();
                 BreakEvent.Set();
+                TtEngine.Instance.mIsRunLoop = false;
 
                 return result;
             }
@@ -119,7 +155,7 @@ namespace EngineNS.Macross
         }
         public void AddBreak(TtMacrossBreak brk)
         {
-            lock (Instance)
+            lock (this)
             {
                 Breaks[brk.BreakName] = new WeakReference<TtMacrossBreak>(brk);
 
@@ -131,7 +167,7 @@ namespace EngineNS.Macross
         }
         public void RemoveBreak(TtMacrossBreak brk)
         {
-            lock (Instance)
+            lock (this)
             {
                 brk.Enable = false;
                 Breaks.Remove(brk.BreakName);
@@ -140,7 +176,7 @@ namespace EngineNS.Macross
         }
         public void RemoveAllBreaks()
         {
-            lock (Instance)
+            lock (this)
             {
                 SetBreakStateAll(false);                
                 Breaks.Clear();
@@ -150,7 +186,7 @@ namespace EngineNS.Macross
         {
             ClearDestroyedBreaks();
 
-            lock (Instance)
+            lock (this)
             {
                 foreach (var i in Breaks.Values)
                 {
@@ -173,6 +209,18 @@ namespace EngineNS.Macross
                 }
             }
             return null;
+        }
+    }
+}
+
+namespace EngineNS
+{
+    partial class TtEngine
+    {
+        public Macross.TtMacrossDebugger MacrossDebugger
+        {
+            get => Macross.TtMacrossDebugger.Instance; 
+            set => Macross.TtMacrossDebugger.Instance = value; 
         }
     }
 }

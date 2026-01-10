@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace EngineNS.Bricks.Input
 {
     #region EventTrigger
-    internal class UEventTrigger
+    internal class TtEventTrigger
     {
         public List<IEvent> Events = new List<IEvent>();
         public void Trigging(Event e)
@@ -28,7 +28,7 @@ namespace EngineNS.Bricks.Input
     public partial class TtInputSystem 
     {
         public static readonly int MaxMultiTouchNumber = 10;    // 最多支持的触控点数量
-        Dictionary<EventType, UEventTrigger> EventTriggerDic = new Dictionary<EventType, UEventTrigger>();
+        Dictionary<EventType, TtEventTrigger> EventTriggerDic = new Dictionary<EventType, TtEventTrigger>();
 
         public bool[] OldKeyboards = new bool[(int)Scancode.NUM_SCANCODES];
         public bool[] Keyboards = new bool[(int)Scancode.NUM_SCANCODES];
@@ -52,7 +52,7 @@ namespace EngineNS.Bricks.Input
             var enumValues = Enum.GetValues(typeof(EventType));
             foreach (var enumValue in enumValues)
             {
-                EventTriggerDic.Add((EventType)enumValue, new UEventTrigger());
+                EventTriggerDic.Add((EventType)enumValue, new TtEventTrigger());
             }
 
             Mouse = new Device.Mouse.TtMouse();

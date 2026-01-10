@@ -34845,12 +34845,36 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var srcObj = obj as EngineNS.Bricks.CodeBuilder.TtDebuggerTryBreak;
 			ar.Write(srcObj.BreakName);
+			ar.Write(srcObj.StackName);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
 			var tarObj = tar as EngineNS.Bricks.CodeBuilder.TtDebuggerTryBreak;
 			var srcObj = src as EngineNS.Bricks.CodeBuilder.TtDebuggerTryBreak;
 			tarObj.BreakName = srcObj.BreakName;
+			tarObj.StackName = srcObj.StackName;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8881354467351499105 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.TtDebuggerTryBreak;
+			System.String t_BreakName;
+			ar.Read(out t_BreakName);
+			srcObj.BreakName = t_BreakName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BreakName", false);
+				}
+			}
+			System.String t_StackName;
+			ar.Read(out t_StackName);
+			srcObj.StackName = t_StackName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "StackName", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9485719560186331358 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -39043,6 +39067,7 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.IsAutoSaveLoad);
 			ar.Write(srcObj.IsBindable);
 			ar.Write(srcObj.IsBrowsable);
+			ar.Write(srcObj.IsStatic);
 			ar.Write(srcObj.VariableName);
 			if (srcObj.VariableType != null)
 			{
@@ -39127,6 +39152,7 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.IsAutoSaveLoad = srcObj.IsAutoSaveLoad;
 			tarObj.IsBindable = srcObj.IsBindable;
 			tarObj.IsBrowsable = srcObj.IsBrowsable;
+			tarObj.IsStatic = srcObj.IsStatic;
 			tarObj.VariableName = srcObj.VariableName;
 			if (srcObj.VariableType != null)
 			{
@@ -39268,6 +39294,185 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "IsBrowsable", false);
+				}
+			}
+			System.String t_VariableName;
+			ar.Read(out t_VariableName);
+			srcObj.VariableName = t_VariableName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "VariableName", false);
+				}
+			}
+			EngineNS.Hash64 type_VariableType;
+			ar.Read(out type_VariableType);
+			var meta_VariableType = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_VariableType);
+			if(meta_VariableType != null)
+			{
+				EngineNS.Hash64 ver_VariableType;
+				ar.Read(out ver_VariableType);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_VariableType.ClassType.TypeString, ver_VariableType );
+				if (fn != null)
+				{
+					EngineNS.Bricks.CodeBuilder.TtTypeReference t_VariableType = null;
+					t_VariableType = srcObj.VariableType;
+					if (t_VariableType == null)
+					{
+						t_VariableType = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_VariableType.ClassType) as EngineNS.Bricks.CodeBuilder.TtTypeReference;
+					}
+					fn(ar, t_VariableType);
+					srcObj.VariableType = t_VariableType;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "VariableType", false);
+						}
+					}
+				}
+			}
+			EngineNS.Bricks.CodeBuilder.EVisisMode t_VisitMode;
+			ar.Read(out t_VisitMode);
+			srcObj.VisitMode = t_VisitMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "VisitMode", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_13427408918941240506 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.TtVariableDeclaration;
+			System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtAttribute> t_Attributes = null;
+			t_Attributes = srcObj.Attributes;
+			if (t_Attributes == null)
+			{
+				t_Attributes = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtAttribute>)) as System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtAttribute>;
+			}
+			int count_Attributes;
+			ar.Read(out count_Attributes);
+			for(int i = 0; i<count_Attributes; i++)
+			{
+				EngineNS.Bricks.CodeBuilder.TtAttribute t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.CodeBuilder.TtAttribute;
+						fn(ar, t);
+					}
+				}
+				t_Attributes.Add(t);
+				srcObj.Attributes = t_Attributes;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtAttribute>), false);
+					}
+				}
+			}
+			System.String t_Category;
+			ar.Read(out t_Category);
+			srcObj.Category = t_Category;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Category", false);
+				}
+			}
+			EngineNS.Hash64 type_Comment;
+			ar.Read(out type_Comment);
+			var meta_Comment = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Comment);
+			if(meta_Comment != null)
+			{
+				EngineNS.Hash64 ver_Comment;
+				ar.Read(out ver_Comment);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Comment.ClassType.TypeString, ver_Comment );
+				if (fn != null)
+				{
+					EngineNS.Bricks.CodeBuilder.TtCommentStatement t_Comment = null;
+					t_Comment = srcObj.Comment;
+					if (t_Comment == null)
+					{
+						t_Comment = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Comment.ClassType) as EngineNS.Bricks.CodeBuilder.TtCommentStatement;
+					}
+					fn(ar, t_Comment);
+					srcObj.Comment = t_Comment;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Comment", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_InitValue;
+			ar.Read(out type_InitValue);
+			var meta_InitValue = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_InitValue);
+			if(meta_InitValue != null)
+			{
+				EngineNS.Hash64 ver_InitValue;
+				ar.Read(out ver_InitValue);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_InitValue.ClassType.TypeString, ver_InitValue );
+				if (fn != null)
+				{
+					EngineNS.Bricks.CodeBuilder.TtExpressionBase t_InitValue = null;
+					t_InitValue = srcObj.InitValue;
+					if (t_InitValue == null)
+					{
+						t_InitValue = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_InitValue.ClassType) as EngineNS.Bricks.CodeBuilder.TtExpressionBase;
+					}
+					fn(ar, t_InitValue);
+					srcObj.InitValue = t_InitValue;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "InitValue", false);
+						}
+					}
+				}
+			}
+			System.Boolean t_IsAutoSaveLoad;
+			ar.Read(out t_IsAutoSaveLoad);
+			srcObj.IsAutoSaveLoad = t_IsAutoSaveLoad;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsAutoSaveLoad", false);
+				}
+			}
+			System.Boolean t_IsBindable;
+			ar.Read(out t_IsBindable);
+			srcObj.IsBindable = t_IsBindable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsBindable", false);
+				}
+			}
+			System.Boolean t_IsBrowsable;
+			ar.Read(out t_IsBrowsable);
+			srcObj.IsBrowsable = t_IsBrowsable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsBrowsable", false);
+				}
+			}
+			System.Boolean t_IsStatic;
+			ar.Read(out t_IsStatic);
+			srcObj.IsStatic = t_IsStatic;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsStatic", false);
 				}
 			}
 			System.String t_VariableName;
@@ -155745,6 +155950,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Bricks_CodeBuilder_TtDebuggerTryBreak.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_TtDebuggerTryBreak.CopyCurrentVersion;
 				kls.RegVersion(9485719560186331358, EngineNS_Bricks_CodeBuilder_TtDebuggerTryBreak.Read_9485719560186331358);
+				kls.RegVersion(8881354467351499105, EngineNS_Bricks_CodeBuilder_TtDebuggerTryBreak.Read_8881354467351499105);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore");
@@ -155942,6 +156148,7 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore");
 				kls.Writer = EngineNS_Bricks_CodeBuilder_TtVariableDeclaration.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_TtVariableDeclaration.CopyCurrentVersion;
+				kls.RegVersion(13427408918941240506, EngineNS_Bricks_CodeBuilder_TtVariableDeclaration.Read_13427408918941240506);
 				kls.RegVersion(2791374450931995834, EngineNS_Bricks_CodeBuilder_TtVariableDeclaration.Read_2791374450931995834);
 			}
 			{
@@ -159521,7 +159728,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = Survivor_TtWeaponProxyNode.CopyCurrentVersion;
 				kls.RegVersion(10759720178659608122, Survivor_TtWeaponProxyNode.Read_10759720178659608122);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("BD_EB_40_24_86_DC_78_B0_AB_CB_39_9A_BE_97_40_FC_79_0B_EC_39");
+			this.VersionHash = EngineNS.Hash160.Parse("FA_28_F4_2E_A1_58_51_8B_18_BD_9D_DE_28_83_DD_68_9F_C6_98_BB");
 		}
 	}
 }

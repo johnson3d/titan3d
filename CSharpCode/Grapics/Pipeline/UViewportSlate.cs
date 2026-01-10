@@ -736,50 +736,37 @@ namespace EngineNS.Graphics.Pipeline
 {
 	partial class TtViewportSlate
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_Initialize_3328281008 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->Thread.Async.TtTask<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)");
 		public async Thread.Async.TtTask<bool> macross_Initialize (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtSlateApplication application, RName policyName, float zMin, float zMax) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":application", application);
-					stackframe.SetWatchVariable(nodeName + ":policyName", policyName);
-					stackframe.SetWatchVariable(nodeName + ":zMin", zMin);
-					stackframe.SetWatchVariable(nodeName + ":zMax", zMax);
 				}
 			}
 			var _return_value = await Initialize(application, policyName, zMin, zMax);
-			macross_break_Initialize_3328281008.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SetHUD_3408856308 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->void SetHUD(UI.Controls.TtUIElement hud)");
 		public unsafe void macross_SetHUD (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UI.Controls.TtUIElement hud) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":hud", hud);
 				}
 			}
 			SetHUD(hud);
-			macross_break_SetHUD_3408856308.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_PushHUD_3408856308 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->void PushHUD(UI.Controls.TtUIElement hud)");
 		public unsafe void macross_PushHUD (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UI.Controls.TtUIElement hud) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":hud", hud);
 				}
 			}
 			PushHUD(hud);
-			macross_break_PushHUD_3408856308.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_PopHUD_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->void PopHUD()");
 		public unsafe void macross_PopHUD (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
 			var stackframe = mcStack.TopFrame;
@@ -789,9 +776,7 @@ namespace EngineNS.Graphics.Pipeline
 				}
 			}
 			PopHUD();
-			macross_break_PopHUD_2609910045.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_ClearHUDs_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->void ClearHUDs()");
 		public unsafe void macross_ClearHUDs (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
 			var stackframe = mcStack.TopFrame;
@@ -801,7 +786,6 @@ namespace EngineNS.Graphics.Pipeline
 				}
 			}
 			ClearHUDs();
-			macross_break_ClearHUDs_2609910045.TryBreak(mcStack);
 		}
 	}
 }

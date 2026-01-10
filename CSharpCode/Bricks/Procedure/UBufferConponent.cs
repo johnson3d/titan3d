@@ -1429,37 +1429,27 @@ namespace EngineNS.Bricks.Procedure
 {
 	partial class UBufferComponent
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_IsValidPixel_1934018433 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->bool IsValidPixel(int x, int y, int z)");
 		public unsafe bool macross_IsValidPixel (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
 				}
 			}
 			var _return_value = IsValidPixel(x, y, z);
-			macross_break_IsValidPixel_1934018433.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_DispatchPixels_2295407738 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->void DispatchPixels(FOnPerPixel onPerPiexel, bool bMultThread)");
 		public unsafe void macross_DispatchPixels (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, FOnPerPixel onPerPiexel, bool bMultThread) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":onPerPiexel", onPerPiexel);
-					stackframe.SetWatchVariable(nodeName + ":bMultThread", bMultThread);
 				}
 			}
 			DispatchPixels(onPerPiexel, bMultThread);
-			macross_break_DispatchPixels_2295407738.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_Clone_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->UBufferComponent Clone()");
 		public unsafe UBufferComponent macross_Clone (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
 		{
 			var stackframe = mcStack.TopFrame;
@@ -1469,349 +1459,231 @@ namespace EngineNS.Bricks.Procedure
 				}
 			}
 			var _return_value = Clone();
-			macross_break_Clone_2609910045.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetUVW_1934018433 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->Vector3 GetUVW(int x, int y, int z)");
 		public unsafe Vector3 macross_GetUVW (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
 				}
 			}
 			var _return_value = GetUVW(x, y, z);
-			macross_break_GetUVW_1934018433.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetClampedUVW_1934018433 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->Vector3 GetClampedUVW(int x, int y, int z)");
 		public unsafe Vector3 macross_GetClampedUVW (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
 				}
 			}
 			var _return_value = GetClampedUVW(x, y, z);
-			macross_break_GetClampedUVW_1934018433.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetSuperPixelSpan_1168276306 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->Span<T> GetSuperPixelSpan(int x, int y, int z, int num)");
 		public unsafe Span<T> macross_GetSuperPixelSpan <T>(EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z, int num) where T : unmanaged 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
-					stackframe.SetWatchVariable(nodeName + ":num", num);
 				}
 			}
 			var _return_value = GetSuperPixelSpan<T>(x, y, z, num);
-			macross_break_GetSuperPixelSpan_1168276306.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetSuperPixelAddress_1964785413 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->void* GetSuperPixelAddress(int x, int y, int z, System.Type retType)");
 		public unsafe void* macross_GetSuperPixelAddress (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z, System.Type retType) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
-					stackframe.SetWatchVariable(nodeName + ":retType", retType);
 				}
 			}
 			var _return_value = GetSuperPixelAddress(x, y, z, retType);
-			macross_break_GetSuperPixelAddress_1964785413.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetSuperPixelAddressEX_1964785413 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->object GetSuperPixelAddressEX(int x, int y, int z, System.Type retType)");
 		public unsafe object macross_GetSuperPixelAddressEX (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z, System.Type retType) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
-					stackframe.SetWatchVariable(nodeName + ":retType", retType);
 				}
 			}
 			var _return_value = GetSuperPixelAddressEX(x, y, z, retType);
-			macross_break_GetSuperPixelAddressEX_1964785413.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetFloat1_1934018433 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->float GetFloat1(int x, int y, int z)");
 		public unsafe float macross_GetFloat1 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
 				}
 			}
 			var _return_value = GetFloat1(x, y, z);
-			macross_break_GetFloat1_1934018433.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_Sampler2DFloat1_3912165843 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->float Sampler2DFloat1(in Vector3 uvw, EBufferSamplerType type, EPixelAddressMode address)");
 		public unsafe float macross_Sampler2DFloat1 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, in Vector3 uvw, EBufferSamplerType type, EPixelAddressMode address) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":uvw", uvw);
-					stackframe.SetWatchVariable(nodeName + ":type", type);
-					stackframe.SetWatchVariable(nodeName + ":address", address);
 				}
 			}
 			var _return_value = Sampler2DFloat1(in uvw, type, address);
-			macross_break_Sampler2DFloat1_3912165843.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_Sampler2DFloat1_1691705750 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->float Sampler2DFloat1(float u, float v, float w, EBufferSamplerType type, EPixelAddressMode address)");
 		public unsafe float macross_Sampler2DFloat1 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float u, float v, float w, EBufferSamplerType type, EPixelAddressMode address) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":u", u);
-					stackframe.SetWatchVariable(nodeName + ":v", v);
-					stackframe.SetWatchVariable(nodeName + ":w", w);
-					stackframe.SetWatchVariable(nodeName + ":type", type);
-					stackframe.SetWatchVariable(nodeName + ":address", address);
 				}
 			}
 			var _return_value = Sampler2DFloat1(u, v, w, type, address);
-			macross_break_Sampler2DFloat1_1691705750.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SetFloat1_2263060511 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->void SetFloat1(int x, int y, int z, float v)");
 		public unsafe void macross_SetFloat1 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z, float v) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
-					stackframe.SetWatchVariable(nodeName + ":v", v);
 				}
 			}
 			SetFloat1(x, y, z, v);
-			macross_break_SetFloat1_2263060511.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetFloat2_1934018433 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->Vector2 GetFloat2(int x, int y, int z)");
 		public unsafe Vector2 macross_GetFloat2 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
 				}
 			}
 			var _return_value = GetFloat2(x, y, z);
-			macross_break_GetFloat2_1934018433.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SetFloat2_920579323 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->void SetFloat2(int x, int y, int z, in Vector2 v)");
 		public unsafe void macross_SetFloat2 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z, in Vector2 v) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
-					stackframe.SetWatchVariable(nodeName + ":v", v);
 				}
 			}
 			SetFloat2(x, y, z, in v);
-			macross_break_SetFloat2_920579323.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetFloat3_1934018433 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->Vector3 GetFloat3(int x, int y, int z)");
 		public unsafe Vector3 macross_GetFloat3 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
 				}
 			}
 			var _return_value = GetFloat3(x, y, z);
-			macross_break_GetFloat3_1934018433.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SetFloat3_920334554 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->void SetFloat3(int x, int y, int z, in Vector3 v)");
 		public unsafe void macross_SetFloat3 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z, in Vector3 v) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
-					stackframe.SetWatchVariable(nodeName + ":v", v);
 				}
 			}
 			SetFloat3(x, y, z, in v);
-			macross_break_SetFloat3_920334554.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetDouble3_1934018433 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->DVector3 GetDouble3(int x, int y, int z)");
 		public unsafe DVector3 macross_GetDouble3 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
 				}
 			}
 			var _return_value = GetDouble3(x, y, z);
-			macross_break_GetDouble3_1934018433.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SetDouble3_3269851548 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->void SetDouble3(int x, int y, int z, in DVector3 v)");
 		public unsafe void macross_SetDouble3 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z, in DVector3 v) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
-					stackframe.SetWatchVariable(nodeName + ":v", v);
 				}
 			}
 			SetDouble3(x, y, z, in v);
-			macross_break_SetDouble3_3269851548.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetInt1_1934018433 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->int GetInt1(int x, int y, int z)");
 		public unsafe int macross_GetInt1 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
 				}
 			}
 			var _return_value = GetInt1(x, y, z);
-			macross_break_GetInt1_1934018433.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SetInt1_3329638044 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->void SetInt1(int x, int y, int z, int v)");
 		public unsafe void macross_SetInt1 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z, int v) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
-					stackframe.SetWatchVariable(nodeName + ":v", v);
 				}
 			}
 			SetInt1(x, y, z, v);
-			macross_break_SetInt1_3329638044.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetInt2_1934018433 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->Vector2i GetInt2(int x, int y, int z)");
 		public unsafe Vector2i macross_GetInt2 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
 				}
 			}
 			var _return_value = GetInt2(x, y, z);
-			macross_break_GetInt2_1934018433.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SetInt2_4193583018 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->void SetInt2(int x, int y, int z, in Vector2i v)");
 		public unsafe void macross_SetInt2 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z, in Vector2i v) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
-					stackframe.SetWatchVariable(nodeName + ":v", v);
 				}
 			}
 			SetInt2(x, y, z, in v);
-			macross_break_SetInt2_4193583018.TryBreak(mcStack);
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_GetInt3_1934018433 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->Vector3i GetInt3(int x, int y, int z)");
 		public unsafe Vector3i macross_GetInt3 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
 				}
 			}
 			var _return_value = GetInt3(x, y, z);
-			macross_break_GetInt3_1934018433.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SetInt3_4190099243 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UBufferComponent->void SetInt3(int x, int y, int z, in Vector3i v)");
 		public unsafe void macross_SetInt3 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int x, int y, int z, in Vector3i v) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
-					stackframe.SetWatchVariable(nodeName + ":v", v);
 				}
 			}
 			SetInt3(x, y, z, in v);
-			macross_break_SetInt3_4190099243.TryBreak(mcStack);
 		}
 	}
 }

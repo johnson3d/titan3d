@@ -265,54 +265,37 @@ namespace EngineNS.Bricks.Procedure.Node
 {
 	partial class UProgram
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_InitProcedure_4144588293 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.Node.UProgram->bool InitProcedure(UPgcGraph graph, UProgramNode node)");
 		public unsafe bool macross_InitProcedure (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, UProgramNode node) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":graph", graph);
-					stackframe.SetWatchVariable(nodeName + ":node", node);
 				}
 			}
 			var _return_value = InitProcedure(graph, node);
-			macross_break_InitProcedure_4144588293.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_OnProcedure_4144588293 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.Node.UProgram->bool OnProcedure(UPgcGraph graph, UProgramNode node)");
 		public unsafe bool macross_OnProcedure (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, UProgramNode node) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":graph", graph);
-					stackframe.SetWatchVariable(nodeName + ":node", node);
 				}
 			}
 			var _return_value = OnProcedure(graph, node);
-			macross_break_OnProcedure_4144588293.TryBreak(mcStack);
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_OnPerPixel_3552085012 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.Node.UProgram->void OnPerPixel(UPgcGraph graph, UProgramNode node, UBufferComponent resuilt, int x, int y, int z, object tag)");
 		public unsafe void macross_OnPerPixel (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, UProgramNode node, UBufferComponent resuilt, int x, int y, int z, object tag) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":graph", graph);
-					stackframe.SetWatchVariable(nodeName + ":node", node);
-					stackframe.SetWatchVariable(nodeName + ":resuilt", resuilt);
-					stackframe.SetWatchVariable(nodeName + ":x", x);
-					stackframe.SetWatchVariable(nodeName + ":y", y);
-					stackframe.SetWatchVariable(nodeName + ":z", z);
-					stackframe.SetWatchVariable(nodeName + ":tag", tag);
 				}
 			}
 			OnPerPixel(graph, node, resuilt, x, y, z, tag);
-			macross_break_OnPerPixel_3552085012.TryBreak(mcStack);
 		}
 	}
 }

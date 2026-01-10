@@ -59,20 +59,15 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
 {
 	partial class IActor
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_OnPickedItem_1798245635 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.WorldSimulator.GOAP.IActor->void OnPickedItem(IItem item, IInventory invetory, IItemContain contain)");
 		public unsafe void macross_OnPickedItem (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, IItem item, IInventory invetory, IItemContain contain) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
 				if(stackframe != null)
 				{
-					stackframe.SetWatchVariable(nodeName + ":item", item);
-					stackframe.SetWatchVariable(nodeName + ":invetory", invetory);
-					stackframe.SetWatchVariable(nodeName + ":contain", contain);
 				}
 			}
 			OnPickedItem(item, invetory, contain);
-			macross_break_OnPickedItem_1798245635.TryBreak(mcStack);
 		}
 	}
 }
