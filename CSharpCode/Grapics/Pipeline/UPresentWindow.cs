@@ -99,39 +99,5 @@ namespace EngineNS.Graphics.Pipeline
             //    return true;
             //});
         }
-        public virtual void TickLogic(int ellapse)
-        {
-            //var cmdlist = SwapChainPass.DrawCmdList;
-            //if (cmdlist.BeginCommand())
-            //{
-            //    var passClears = new NxRHI.FRenderPassClears();
-            //    passClears.SetDefault();
-            //    passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
-            //    SwapChainBuffer.BuildFrameBuffers(null);
-            //    cmdlist.BeginPass(SwapChainBuffer.FrameBuffers, in passClears, "PresentSwapChain");
-            //    {
-            //        cmdlist.FlushDraws();
-            //    }
-            //    cmdlist.EndPass();
-            //    cmdlist.EndCommand();
-            //}
-            //policy.CommitCommandList(cmdlist);
-        }
-        public unsafe virtual void TickRender(int ellapse)
-        {
-            //var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            //var cmdlist = SwapChainPass.CommitCmdList.mCoreObject;
-            //cmdlist.Commit(rc.mCoreObject);
-        }
-        public virtual void TickSync(int ellapse)
-        {
-            OnDrawSlate();
-
-            SwapChain?.Present(0, 0);
-        }
-        public virtual void OnDrawSlate()
-        {
-            
-        }
     }
 }

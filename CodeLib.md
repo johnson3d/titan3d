@@ -232,5 +232,5 @@ var texture1 = textureName.GetAsset<NxRHI.TtSrView>().GetResultUntilCompleted();
     TtEngine.Instance.ConfigManager.GetConfig<TtCloudConfig>().CloudAssetUrlBase;
 ```
 
-
-$$ \frac{a}{b} $$
+## 这是没用的LaTex测试，请忽略
+$$\sum_{i=0}^{^9}{\left(\frac{a_i}{b_i}\right)}$$
