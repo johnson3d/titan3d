@@ -26,5 +26,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)UShader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UShaderCompiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UTexture.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UTextureHelper.cs" />
   </ItemGroup>
 </Project>

@@ -13,6 +13,7 @@
 #include <assert.h>
 #include "../string/vfxstring.h"
 #include "../CoreSDK.h"
+#include "../thread/vfxthread.h"
 //#define new VNEW
 
 #if !defined(PLATFORM_WIN)
@@ -50,13 +51,11 @@ void NoWin_Assert(const char* str, const char* file, int line)
 	}
 }
 
-extern const char* GetCurrentThreadName();
-
 void Call_WriteLogString(const char* msg, ELevelTraceType level, const char* file, int line)
 {
 	if (EngineNS::CoreSDK::mWriteLogString)
 	{
-		auto tname = GetCurrentThreadName();
+		auto tname = vfxThread::GetCurrentThreadName();
 		EngineNS::CoreSDK::mWriteLogString(tname, msg, level, file, line);
 	}
 	else

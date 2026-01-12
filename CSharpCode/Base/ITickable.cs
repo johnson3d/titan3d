@@ -29,7 +29,7 @@ namespace EngineNS
     }
     public class TtMemberTickables
     {
-        public List<IMemberTickable> Members = new List<IMemberTickable>();
+        private List<IMemberTickable> Members = new List<IMemberTickable>();
         public void CollectMembers(object host)
         {
             var type = host.GetType();

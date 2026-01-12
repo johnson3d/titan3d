@@ -388,7 +388,7 @@ namespace EngineNS.GamePlay.Scene
         Bricks.Collision.Octree.TtSceneOctree mSceneOctree = new Bricks.Collision.Octree.TtSceneOctree();
         [Category("Option")]
         public Bricks.Collision.Octree.TtSceneOctree SceneOctree { get => mSceneOctree; }
-        public override void Dispose()
+        public void Dispose_SceneOctree()
         {
             CoreSDK.DisposeObject(ref mSceneOctree);
         }

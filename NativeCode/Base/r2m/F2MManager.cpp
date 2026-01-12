@@ -23,7 +23,7 @@ VFile2Memory* F2MManager::_F2M(LPCSTR psz, vBOOL bShareWrite/* = FALSE*/)
 	vfxMemory_SetDebugInfo(pFM, psz);
 	if (FALSE == pFM->Create(psz, bShareWrite))
 	{
-		delete pFM;
+		pFM->Release();
 		return NULL;
 	}
 	return pFM;

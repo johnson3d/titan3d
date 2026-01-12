@@ -694,7 +694,7 @@ namespace EngineNS.Editor.Forms
                 Scene = await AssetName.GetAsset<TtScene>(PreviewViewport.World); // TtEngine.Instance.SceneManager.CreateScene(PreviewViewport.World, AssetName);
                 Scene.Parent = PreviewViewport.World.Root;
 
-                saved.Cleanup();
+                saved.Dispose();
             };
             action();
         }

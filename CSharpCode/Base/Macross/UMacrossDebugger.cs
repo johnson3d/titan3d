@@ -83,7 +83,23 @@ namespace EngineNS.Macross
     public class TtMacrossDebugger
     {
         internal static TtMacrossDebugger Instance = new TtMacrossDebugger();
-        public Func<IMacrossObject, TtMacrossBreak, bool> BreakCondition = null;
+        public Func<IMacrossObject, TtMacrossBreak, bool> BreakCondition = TestBreakCondition;
+        public static bool TestBreakCondition(IMacrossObject owner, TtMacrossBreak brk)
+        {
+            if (owner.MacrossGetter.Name==null)
+            {//必须是有名字的Macross对象才允许断点
+                if (brk.BreakName != null)
+                {
+
+                }
+                var game = owner as GamePlay.TtMacrossGame;
+                if (game != null)
+                {
+                    //for example:test instance name...
+                }
+            }
+            return true;
+        }
         internal System.Threading.AutoResetEvent BreakEvent { get; } = new System.Threading.AutoResetEvent(false);
         internal TtMacrossBreak CurrrentBreak;
         public Dictionary<string, WeakReference<TtMacrossBreak>> Breaks = new();

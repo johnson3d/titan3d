@@ -48,6 +48,7 @@ namespace EngineNS.Macross
     public interface IMacrossObject : IDisposable
     {
         void ResetDebugger();
+        TtMacrossGetterBase MacrossGetter { get; set; }
     }
     public class AuxMacrossObject : IMacrossObject
     {
@@ -59,6 +60,7 @@ namespace EngineNS.Macross
         {
             ResetDebugger();
         }
+        public TtMacrossGetterBase MacrossGetter { get; set; }
         public void ResetDebugger()
         {
             var type = GetType();
@@ -156,6 +158,7 @@ namespace EngineNS.Macross
                 mInnerObject = newObj;
                 Version = TtEngine.Instance.MacrossModule.Version;
                 InnerObjectName = Name;
+                mInnerObject.MacrossGetter = this;
             }
             return mInnerObject;
         }

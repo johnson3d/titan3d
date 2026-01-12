@@ -314,8 +314,8 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public void Cleanup(object host)
         {
-            mPxScene?.Dispose();
-            mPxScene = null;
+            CoreSDK.DisposeObject(ref mPxScene);
+            CoreSDK.DisposeObject(ref mPxceneDesc);
         }
         [ThreadStatic]
         private static Profiler.TimeScope mScopeTick;

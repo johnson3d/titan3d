@@ -1,16 +1,130 @@
-﻿using System;
+﻿using Assimp.Unmanaged;
 using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
 using EngineNS.Bricks.ImageDecoder;
 using EngineNS.EGui.Controls;
+using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.IO;
+using EngineNS.NxRHI;
+using EngineNS.Support;
 using Jither.OpenEXR;
 using Microsoft.Toolkit.HighPerformance;
 using StbImageSharp;
-using System.ComponentModel;
-using EngineNS.Graphics.Pipeline.Shader;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 using static EngineNS.RName;
+
+
+
+namespace EngineNS.NxRHI
+{
+    /// <summary>
+    /// Mipmap 资源守卫
+    /// 使用 RAII 模式自动管理 GCHandle 生命周期,防止内存泄漏
+    /// </summary>
+    public unsafe ref struct UMipmapResourceGuard
+    {
+        private GCHandle[] _handles;
+        private int _count;
+        private bool _disposed;
+
+        /// <summary>
+        /// 创建资源守卫
+        /// </summary>
+        /// <param name="count">mipmap 资源数量</param>
+        public UMipmapResourceGuard(int count)
+        {
+            if (count <= 0)
+                throw new ArgumentException("Count must be greater than 0", nameof(count));
+
+            _count = count;
+            _handles = new GCHandle[count];
+            _disposed = false;
+        }
+
+        /// <summary>
+        /// 设置字节型 mipmap 数据并获取指针
+        /// </summary>
+        /// <param name="index">mipmap 索引</param>
+        /// <param name="data">像素数据</param>
+        /// <returns>固定的数据指针</returns>
+        public void* SetData(int index, byte[] data)
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(UMipmapResourceGuard));
+
+            if (index < 0 || index >= _count)
+                throw new ArgumentOutOfRangeException(nameof(index));
+
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+
+            // 释放之前句柄(如果存在)
+            if (_handles[index].IsAllocated)
+            {
+                _handles[index].Free();
+            }
+
+            // 固定数组并返回指针
+            _handles[index] = GCHandle.Alloc(data, GCHandleType.Pinned);
+            return _handles[index].AddrOfPinnedObject().ToPointer();
+        }
+
+        /// <summary>
+        /// 设置浮点型 mipmap 数据并获取指针
+        /// </summary>
+        /// <param name="index">mipmap 索引</param>
+        /// <param name="data">浮点像素数据</param>
+        /// <returns>固定的数据指针</returns>
+        public void* SetDataFloat(int index, float[] data)
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(UMipmapResourceGuard));
+
+            if (index < 0 || index >= _count)
+                throw new ArgumentOutOfRangeException(nameof(index));
+
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+
+            // 释放之前句柄(如果存在)
+            if (_handles[index].IsAllocated)
+            {
+                _handles[index].Free();
+            }
+
+            // 固定数组并返回指针
+            _handles[index] = GCHandle.Alloc(data, GCHandleType.Pinned);
+            return _handles[index].AddrOfPinnedObject().ToPointer();
+        }
+
+        /// <summary>
+        /// 释放所有 GCHandle
+        /// </summary>
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+
+            for (int i = 0; i < _count; i++)
+            {
+                if (_handles[i].IsAllocated)
+                {
+                    _handles[i].Free();
+                }
+            }
+
+            _handles = null;
+            _disposed = true;
+        }
+    }
+}
+
+
+
+
 
 namespace EngineNS.NxRHI
 {
@@ -332,9 +446,9 @@ namespace EngineNS.NxRHI
             public EPixelFormat Format { get => Desc.Format; set => Desc.Format = value; }
             public uint CubeFaces { get => Desc.CubeFaces; set => Desc.CubeFaces = value; }
             public int MipLevel { get => Desc.MipLevel; set => Desc.MipLevel = value; }
-            [ReadOnly(true)]
+            //[ReadOnly(true)]
             public int Width { get => Desc.Width; set => Desc.Width = value; }
-            [ReadOnly(true)]
+            //[ReadOnly(true)]
             public int Height { get => Desc.Height; set => Desc.Height = value; }
             public byte BitNumRed { get => Desc.BitNumRed; set => Desc.BitNumRed = value; }
             public byte BitNumGreen { get => Desc.BitNumGreen; set => Desc.BitNumGreen = value; }
@@ -994,6 +1108,14 @@ namespace EngineNS.NxRHI
             }
             public unsafe RName ImportImageImpl(System.IO.Stream stream)
             {
+                {
+                    //Tests.Texture3DTest_Simple.RunTest();
+                    // RName rName = new RName("D:\\gradient_debug_hdr.srv", ERNameType.Game);
+                    // var xnd1 = IO.TtXndHolder.LoadXnd("D:\\gradient_debug_hdr.srv");
+                    // var desc = LoadPictureDesc(xnd1.RootNode);
+                    // LoadTexture2DMipLevel(rName, xnd1.RootNode, desc, 1, null);
+                }
+
                 if (stream == null)
                     return null;
 
@@ -1685,27 +1807,7 @@ namespace EngineNS.NxRHI
             }
             int mipLevel = 0;
             desc.MipSizes.Clear();
-            if (desc.DontCompress == false)
-            {
-                if (TtEngine.Instance.Config.CompressDxt)
-                {
-                    desc.CompressFormat = ETextureCompressFormat.TCF_BC6;
-                }
-                else if (TtEngine.Instance.Config.CompressAstc)
-                {
-                    System.Diagnostics.Debug.Assert(false);
-                    desc.CompressFormat = ETextureCompressFormat.TCF_Astc_4x4_Float;
-                }
-                else
-                {
-                    System.Diagnostics.Debug.Assert(false);
-                    desc.CompressFormat = ETextureCompressFormat.TCF_None;
-                }
-            }
-            else
-            {
-                desc.CompressFormat = ETextureCompressFormat.TCF_None;
-            }
+            desc.CompressFormat = TtTextureHelper.SelectHdrCompressFormat(desc);
 
             switch (desc.CompressFormat)
             {
@@ -1720,7 +1822,7 @@ namespace EngineNS.NxRHI
             {
                 desc.Desc.MipLevel = mipLevel;
                 desc.Desc.dwStructureSize = (uint)sizeof(FPictureDesc);
-                var attr = node.GetOrAddAttribute("Desc", 2, 0, true);
+                var attr = node.GetOrAddAttribute("Desc", 3, 0, true);
                 using (var ar = attr.GetWriter((ulong)sizeof(FPictureDesc)))
                 {
                     ar.Write(desc.Desc);
@@ -1734,6 +1836,7 @@ namespace EngineNS.NxRHI
                             ar.Write(Vector2i.Zero);
                     }
                     ar.Write(desc.BlockSize);
+                    ar.Write(desc.Depth);
                 }
             }
         }
@@ -1791,27 +1894,7 @@ namespace EngineNS.NxRHI
             int mipLevel = 0;
             var curImage = image;
             desc.MipSizes.Clear();
-            if (desc.DontCompress == false)
-            {
-                if (TtEngine.Instance.Config.CompressDxt)
-                {
-                    desc.CompressFormat = ETextureCompressFormat.TCF_BC6;
-                }
-                else if (TtEngine.Instance.Config.CompressAstc)
-                {
-                    System.Diagnostics.Debug.Assert(false);
-                    desc.CompressFormat = ETextureCompressFormat.TCF_Astc_4x4_Float;
-                }
-                else
-                {
-                    System.Diagnostics.Debug.Assert(false);
-                    desc.CompressFormat = ETextureCompressFormat.TCF_None;
-                }
-            }
-            else
-            {
-                desc.CompressFormat = ETextureCompressFormat.TCF_None;
-            }
+            desc.CompressFormat = TtTextureHelper.SelectHdrCompressFormat(desc);
             switch (desc.CompressFormat)
             {
                 case ETextureCompressFormat.TCF_None:
@@ -1862,7 +1945,7 @@ namespace EngineNS.NxRHI
             {
                 desc.Desc.MipLevel = mipLevel;
                 desc.Desc.dwStructureSize = (uint)sizeof(FPictureDesc);
-                var attr = node.GetOrAddAttribute("Desc", 2, 0, true);
+                var attr = node.GetOrAddAttribute("Desc", 3, 0, true);
                 using (var ar = attr.GetWriter((ulong)sizeof(FPictureDesc)))
                 {
                     ar.Write(desc.Desc);
@@ -1876,6 +1959,7 @@ namespace EngineNS.NxRHI
                             ar.Write(Vector2i.Zero);
                     }
                     ar.Write(desc.BlockSize);
+                    ar.Write(desc.Depth);
                 }
             }
         }
@@ -1946,57 +2030,7 @@ namespace EngineNS.NxRHI
             if (image.Comp == ColorComponents.RedGreenBlue || image.Comp == ColorComponents.Grey)
                 desc.BitNumAlpha = 0;
             desc.MipSizes.Clear();
-            if (desc.DontCompress == false)
-            {
-                if (TtEngine.Instance.Config.CompressDxt)
-                {
-                    if(desc.IsNormal)
-                    {
-                        desc.CompressFormat = ETextureCompressFormat.TCF_BC5;
-                    }
-                    else if (desc.BitNumAlpha == 8 || desc.BitNumAlpha == 4)
-                    {
-                        desc.CompressFormat = ETextureCompressFormat.TCF_Dxt3;
-                    }
-                    else if (desc.BitNumAlpha == 1)
-                    {
-                        desc.CompressFormat = ETextureCompressFormat.TCF_Dxt1a;
-                    }
-                    else
-                    {
-                        desc.CompressFormat = ETextureCompressFormat.TCF_Dxt1;
-                    }
-                }
-                else if (TtEngine.Instance.Config.CompressEtc)
-                {
-                    if (desc.BitNumAlpha == 8 || desc.BitNumAlpha == 4)
-                    {
-                        desc.CompressFormat = ETextureCompressFormat.TCF_Etc2_RGBA8;
-                    }
-                    else if (desc.BitNumAlpha == 1)
-                    {
-                        desc.CompressFormat = ETextureCompressFormat.TCF_Etc2_RGBA1;
-                    }
-                    else
-                    {
-                        desc.CompressFormat = ETextureCompressFormat.TCF_Etc2_RGB8;
-                    }
-                }
-                else if (TtEngine.Instance.Config.CompressAstc)
-                {
-                    System.Diagnostics.Debug.Assert(false);
-                    desc.CompressFormat = ETextureCompressFormat.TCF_Etc2_RGBA8;
-                }
-                else
-                {
-                    System.Diagnostics.Debug.Assert(false);
-                    desc.CompressFormat = ETextureCompressFormat.TCF_None;
-                }
-            }
-            else
-            {
-                desc.CompressFormat = ETextureCompressFormat.TCF_None;
-            }
+            desc.CompressFormat = TtTextureHelper.SelectLdrCompressFormat(desc);
             switch (desc.CompressFormat)
             {
                 case ETextureCompressFormat.TCF_None:
@@ -2083,7 +2117,7 @@ namespace EngineNS.NxRHI
             {
                 desc.Desc.MipLevel = mipLevel;
                 desc.Desc.dwStructureSize = (uint)sizeof(FPictureDesc);
-                var attr = node.GetOrAddAttribute("Desc", 2, 0, true);
+                var attr = node.GetOrAddAttribute("Desc", 3, 0, true);
                 using (var ar = attr.GetWriter((ulong)sizeof(FPictureDesc)))
                 {
                     ar.Write(desc.Desc);
@@ -2097,6 +2131,7 @@ namespace EngineNS.NxRHI
                             ar.Write(Vector2i.Zero);
                     }
                     ar.Write(desc.BlockSize);
+                    ar.Write(desc.Depth);
                 }
             }
         }
@@ -2246,9 +2281,9 @@ namespace EngineNS.NxRHI
             return mipLevel;
         }
 
-        public static int SaveHdrMips(XndNode pngMipsNode, StbImageSharp.ImageResultFloat curImage, TtPicDesc desc)
+        public static int SaveHdrMips(XndNode hdrMipsNode, StbImageSharp.ImageResultFloat curImage, TtPicDesc desc)
         {
-            int mipLevel = 0;
+            desc.CubeFaces = Math.Max(desc.CubeFaces, 1);
             int height = curImage.Height;
             int width = curImage.Width;
 
@@ -2265,88 +2300,441 @@ namespace EngineNS.NxRHI
                     break;
             }
 
-            desc.MipLevel = Math.Max(CalcMipLevel(curImage.Width, curImage.Height, true, 4), 1);
-            do
+            // 对于 3D Texture，从 2D image 中解析 slices
+            int sliceWidth, sliceHeight, sliceSize;
+            int slicesPerRow = 1, slicesPerColumn = 1;
+            int imageWidth = width;
+            int imageHeight = height;
+
+            if (desc.IsTexture3D && desc.Depth > 0)
             {
-                using (var memStream = new System.IO.MemoryStream())
+                // 1. 计算每个 slice 应该的尺寸（基于 desc）
+                sliceWidth = desc.Width;
+                sliceHeight = desc.Height;
+
+                // 重新计算MipLevel（基于单个slice的尺寸）
+                if (desc.MipLevel == 0)
+                    desc.MipLevel = Math.Max(CalcMipLevel(sliceWidth, sliceHeight, true, 4), 1);
+                else
+                    desc.MipLevel = Math.Min(desc.MipLevel, CalcMipLevel(sliceWidth, sliceHeight, true, 4));
+
+                // 2. 计算在 width 和 height 方向上各能容纳多少个 slices
+                int possibleSlicesPerRow = Math.Max(1, imageWidth / sliceWidth);
+                int possibleSlicesPerCol = Math.Max(1, imageHeight / sliceHeight);
+
+                // 3. 验证是否能容纳所有 slices
+                if (possibleSlicesPerRow * possibleSlicesPerCol < desc.Depth)
                 {
-                    var writer = new StbImageWriteSharp.ImageWriter();
-                    unsafe
+                    throw new System.InvalidOperationException(
+                        $"Invalid 3D texture layout. " +
+                        $"Image: {imageWidth}x{imageHeight}, " +
+                        $"Slice: {sliceWidth}x{sliceHeight}, " +
+                        $"Depth: {desc.Depth}, " +
+                        $"Can fit at most {possibleSlicesPerRow * possibleSlicesPerCol} slices, need {desc.Depth}");
+                }
+
+                slicesPerRow = possibleSlicesPerRow;
+                slicesPerColumn = (desc.Depth + slicesPerRow - 1) / slicesPerRow;
+
+                sliceSize = sliceWidth * sliceHeight;
+            }
+            else
+            {
+                // 2D Texture
+                if (desc.MipLevel == 0)
+                    desc.MipLevel = Math.Max(CalcMipLevel(curImage.Width, curImage.Height, true, 4), 1);
+                sliceWidth = imageWidth;
+                sliceHeight = imageHeight;
+                sliceSize = imageWidth * imageHeight;
+            }
+
+            desc.MipSizes.Clear();
+
+            for (uint i = 0; i < desc.Desc.CubeFaces; i++)
+            {
+                var faceNode = hdrMipsNode.GetOrAddNode($"Face{i}", 0, 0, true);
+
+                // 3D Texture：创建 DepthSlices 节点存储每一层的数据
+                XndNode depthSlicesNode = new XndNode();
+                if (desc.IsTexture3D && desc.Depth > 0)
+                {
+                    depthSlicesNode = faceNode.GetOrAddNode("DepthSlices", 0, 0, true);
+                }
+
+                for (uint j = 0; j < desc.MipLevel; j++)
+                {
+                    if (desc.IsTexture3D && desc.Depth > 0)
                     {
-                        var writeComp = UStbImageUtility.ConvertColorComponent(curImage.Comp);
-                        fixed (void* ptr = curImage.Data)
+                        // 3D Texture：为每个 mipmap 创建一个节点，包含所有 depth 层
+                        var mipNode = depthSlicesNode.GetOrAddNode($"Mip{j}", 0, 0, true);
+
+                        int mipDepth = Math.Max(1, desc.Depth >> (int)j);
+
+                        // 对每个 depth slice 进行降采样并保存
+                        for (int d = 0; d < mipDepth; d++)
                         {
-                            writer.WriteHdr(ptr, curImage.Width, curImage.Height, writeComp, memStream);
+                            // 提取当前 slice 的原始数据（从行列布局中）
+                            float[] sliceData = new float[sliceWidth * sliceHeight * (int)curImage.Comp];
+
+                            // 使用行列布局从 2D image 中提取 slice
+                            for (int y = 0; y < sliceHeight; y++)
+                            {
+                                for (int x = 0; x < sliceWidth; x++)
+                                {
+                                    int gridX = d % slicesPerRow;
+                                    int gridY = d / slicesPerRow;
+
+                                    int srcX = gridX * sliceWidth + x;
+                                    int srcY = gridY * sliceHeight + y;
+
+                                    int srcIndex = (srcY * imageWidth + srcX) * (int)curImage.Comp;
+                                    int dstIndex = (y * sliceWidth + x) * (int)curImage.Comp;
+
+                                    for (int c = 0; c < (int)curImage.Comp; c++)
+                                    {
+                                        sliceData[dstIndex + c] = curImage.Data[srcIndex + c];
+                                    }
+                                }
+                            }
+
+                            // 为当前 slice 创建 ImageResultFloat
+                            var sliceImage = new StbImageSharp.ImageResultFloat();
+                            unsafe
+                            {
+                                fixed (float* floatPtr = sliceData)
+                                {
+                                    sliceImage = StbImageSharp.ImageResultFloat.FromResult(floatPtr, sliceWidth, sliceHeight, curImage.Comp, curImage.Comp);
+                                }
+                            }
+
+                            // 使用 GetBoxDownSampler 生成当前 mipmap 层级
+                            StbImageSharp.ImageResultFloat downsampledSlice = sliceImage;
+                            int currentWidth = sliceWidth;
+                            int currentHeight = sliceHeight;
+
+                            // 降采样到目标 mipmap 层级
+                            for (uint m = 0; m < j; m++)
+                            {
+                                currentWidth = Math.Max(1, currentWidth / 2);
+                                currentHeight = Math.Max(1, currentHeight / 2);
+                                downsampledSlice = StbImageSharp.ImageProcessor.GetBoxDownSampler(downsampledSlice, currentWidth, currentHeight);
+                            }
+
+                            // 保存降采样后的 slice（直接在 mipNode 下创建 attribute）
+                            using (var memStream = new System.IO.MemoryStream())
+                            {
+                                var writer = new StbImageWriteSharp.ImageWriter();
+                                unsafe
+                                {
+                                    var writeComp = UStbImageUtility.ConvertColorComponent(downsampledSlice.Comp);
+                                    fixed (void* ptr = downsampledSlice.Data)
+                                    {
+                                        writer.WriteHdr(ptr, downsampledSlice.Width, downsampledSlice.Height, writeComp, memStream);
+                                    }
+                                }
+
+                                var hdrData = memStream.ToArray();
+                                var attr = mipNode.GetOrAddAttribute($"HdrMipSlice{d}", 0, 0, true);
+                                using (var ar = attr.GetWriter((ulong)memStream.Position))
+                                {
+                                    ar.WriteNoSize(hdrData, (int)memStream.Position);
+                                }
+                            }
+
+                            // 只在第一片添加 MipSizes
+                            if (i == 0 && d == 0)
+                            {
+                                desc.MipSizes.Add(new Vector3i()
+                                {
+                                    X = downsampledSlice.Width,
+                                    Y = downsampledSlice.Height,
+                                    Z = mipDepth
+                                });
+                            }
                         }
                     }
-
-                    var hdrData = memStream.ToArray();
-                    var attr = pngMipsNode.GetOrAddAttribute($"HdrMip{mipLevel}", 0, 0, true);
-                    using (var ar = attr.GetWriter((ulong)memStream.Position))
+                    else
                     {
-                        ar.WriteNoSize(hdrData, (int)memStream.Position);
+                        // 2D Texture：原有逻辑
+                        int currentMipLevel = (int)j;
+                        StbImageSharp.ImageResultFloat currentImage = curImage;
+                        int currentWidth = width;
+                        int currentHeight = height;
+
+                        // 降采样到目标 mipmap 层级
+                        for (int m = 0; m < j; m++)
+                        {
+                            currentWidth = Math.Max(1, currentWidth / 2);
+                            currentHeight = Math.Max(1, currentHeight / 2);
+                            currentImage = StbImageSharp.ImageProcessor.GetBoxDownSampler(currentImage, currentWidth, currentHeight);
+                        }
+
+                        using (var memStream = new System.IO.MemoryStream())
+                        {
+                            var writer = new StbImageWriteSharp.ImageWriter();
+                            unsafe
+                            {
+                                var writeComp = UStbImageUtility.ConvertColorComponent(currentImage.Comp);
+                                fixed (void* ptr = currentImage.Data)
+                                {
+                                    writer.WriteHdr(ptr, currentImage.Width, currentImage.Height, writeComp, memStream);
+                                }
+                            }
+
+                            var hdrData = memStream.ToArray();
+                            var attr = faceNode.GetOrAddAttribute($"HdrMip{currentMipLevel}", 0, 0, true);
+                            using (var ar = attr.GetWriter((ulong)memStream.Position))
+                            {
+                                ar.WriteNoSize(hdrData, (int)memStream.Position);
+                            }
+                        }
+
+                        desc.MipSizes.Add(new Vector3i()
+                        {
+                            X = currentImage.Width,
+                            Y = currentImage.Height,
+                            Z = currentImage.Width * (int)currentImage.Comp * sizeof(float)
+                        });
                     }
                 }
-                desc.MipSizes.Add(new Vector3i() { X = width, Y = height, Z = width * (int)curImage.Comp * sizeof(float) });
-                height = height / 2;
-                width = width / 2;
-                if ((height == 0 && width == 0))
-                {
-                    break;
-                }
-                mipLevel++;
-                if (height == 0)
-                    height = 1;
-                if (width == 0)
-                    width = 1;
-                curImage = StbImageSharp.ImageProcessor.GetBoxDownSampler(curImage, width, height);
-                if (desc.MipLevel > 0 && mipLevel == desc.MipLevel)
-                    break;
             }
-            while (true);
 
-            return mipLevel;
+            return desc.MipLevel;
         }
 
         public static int SavePngMips(XndNode pngMipsNode, StbImageSharp.TtMemImage curImage, TtPicDesc desc)
         {
-            int mipLevel = 0;
+            desc.CubeFaces = Math.Max(desc.CubeFaces, 1);
             int height = curImage.Height;
             int width = curImage.Width;
-            do
+
+            // 兼容性检查：如果是普通的2D纹理（CubeFaces=1 且 Depth<=1），使用旧的属性结构
+            bool useLegacyFormat = (desc.CubeFaces == 1 && desc.Depth <= 1);
+
+            // 对于 3D Texture，从 2D image 中解析 slices
+            int sliceWidth, sliceHeight, sliceSize;
+            int slicesPerRow = 1, slicesPerColumn = 1;
+            int imageWidth = width;
+            int imageHeight = height;
+
+            if (desc.IsTexture3D && desc.Depth > 0)
             {
-                using (var memStream = new System.IO.MemoryStream(curImage.Data.Length))
+                // 1. 计算每个 slice 应该的尺寸（基于 desc）
+                sliceWidth = desc.Width;
+                sliceHeight = desc.Height;
+
+                // 重新计算MipLevel（基于单个slice的尺寸）
+                if (desc.MipLevel == 0)
+                    desc.MipLevel = CalcMipLevel(sliceWidth, sliceHeight, true, 4);
+                else
+                    desc.MipLevel = Math.Min(desc.MipLevel, CalcMipLevel(sliceWidth, sliceHeight, true, 4));
+
+                // 2. 计算在 width 和 height 方向上各能容纳多少个 slices
+                int possibleSlicesPerRow = Math.Max(1, imageWidth / sliceWidth);
+                int possibleSlicesPerCol = Math.Max(1, imageHeight / sliceHeight);
+
+                // 3. 验证是否能容纳所有 slices
+                if (possibleSlicesPerRow * possibleSlicesPerCol < desc.Depth)
                 {
-                    var writer = new StbImageWriteSharp.ImageWriter();
-                    writer.WritePng(curImage.Data, curImage.Width, curImage.Height, GetImageWriteFormat(curImage), memStream);
-                    var pngData = memStream.ToArray();
-                    var attr = pngMipsNode.GetOrAddAttribute($"PngMip{mipLevel}", 0, 0, true);
-                    using (var ar = attr.GetWriter((ulong)memStream.Position))
+                    throw new System.InvalidOperationException(
+                        $"Invalid 3D texture layout. " +
+                        $"Image: {imageWidth}x{imageHeight}, " +
+                        $"Slice: {sliceWidth}x{sliceHeight}, " +
+                        $"Depth: {desc.Depth}, " +
+                        $"Can fit at most {possibleSlicesPerRow * possibleSlicesPerCol} slices, need {desc.Depth}");
+                }
+
+                slicesPerRow = possibleSlicesPerRow;
+                slicesPerColumn = (desc.Depth + slicesPerRow - 1) / slicesPerRow;
+
+                sliceSize = sliceWidth * sliceHeight;
+            }
+            else
+            {
+                // 2D Texture
+                if (desc.MipLevel == 0)
+                    desc.MipLevel = CalcMipLevel(curImage.Width, curImage.Height, true, 4);
+                sliceWidth = imageWidth;
+                sliceHeight = imageHeight;
+                sliceSize = imageWidth * imageHeight;
+            }
+
+            desc.MipSizes.Clear();
+
+            // 兼容性：普通2D纹理使用旧的属性结构（PngMipsNode/PngMip0, PngMip1...）
+            if (useLegacyFormat)
+            {
+                int mipLevel = 0;
+                do
+                {
+                    using (var memStream = new System.IO.MemoryStream(curImage.Data.Length))
                     {
-                        ar.WriteNoSize(pngData, (int)memStream.Position);
+                        var writer = new StbImageWriteSharp.ImageWriter();
+                        writer.WritePng(curImage.Data, curImage.Width, curImage.Height, GetImageWriteFormat(curImage), memStream);
+                        var pngData = memStream.ToArray();
+                        var attr = pngMipsNode.GetOrAddAttribute($"PngMip{mipLevel}", 0, 0, true);
+                        using (var ar = attr.GetWriter((ulong)memStream.Position))
+                        {
+                            ar.WriteNoSize(pngData, (int)memStream.Position);
+                        }
+                    }
+                    desc.MipSizes.Add(new Vector3i() { X = width, Y = height, Z = width * 4 });
+                    height = height / 2;
+                    width = width / 2;
+                    if ((height == 0 && width == 0))
+                    {
+                        break;
+                    }
+                    mipLevel++;
+                    if (height == 0)
+                        height = 1;
+                    if (width == 0)
+                        width = 1;
+                    curImage = StbImageSharp.ImageProcessor.GetBoxDownSampler(curImage, width, height);
+                    if (curImage == null)
+                        break;
+                    if (desc.MipLevel > 0 && mipLevel == desc.MipLevel)
+                        break;
+                }
+                while (true);
+
+                return mipLevel;
+            }
+
+            // 新格式：Cube或3D纹理使用节点结构（PngMipsNode/Face0/PngMip0, PngMipsNode/Face0/DepthSlices/Mip0/...）
+            for (uint i = 0; i < desc.Desc.CubeFaces; i++)
+            {
+                var faceNode = pngMipsNode.GetOrAddNode($"Face{i}", 0, 0, true);
+
+                // 3D Texture：创建 DepthSlices 节点存储每一层的数据
+                XndNode depthSlicesNode = new XndNode();
+                if (desc.IsTexture3D && desc.Depth > 0)
+                {
+                    depthSlicesNode = faceNode.GetOrAddNode("DepthSlices", 0, 0, true);
+                }
+
+                for (uint j = 0; j < desc.MipLevel; j++)
+                {
+                    if (desc.IsTexture3D && desc.Depth > 0)
+                    {
+                        // 3D Texture：为每个 mipmap 创建一个节点，包含所有 depth 层
+                        var mipNode = depthSlicesNode.GetOrAddNode($"Mip{j}", 0, 0, true);
+
+                        int mipDepth = Math.Max(1, desc.Depth >> (int)j);
+
+                        // 对每个 depth slice 进行降采样并保存
+                        for (int d = 0; d < mipDepth; d++)
+                        {
+                            // 提取当前 slice 的原始数据（从行列布局中）
+                            byte[] sliceData = new byte[sliceWidth * sliceHeight * 4];
+
+                            // 使用行列布局从 2D image 中提取 slice
+                            for (int y = 0; y < sliceHeight; y++)
+                            {
+                                for (int x = 0; x < sliceWidth; x++)
+                                {
+                                    int gridX = d % slicesPerRow;
+                                    int gridY = d / slicesPerRow;
+
+                                    int srcX = gridX * sliceWidth + x;
+                                    int srcY = gridY * sliceHeight + y;
+
+                                    int srcIndex = (srcY * imageWidth + srcX) * 4;
+                                    int dstIndex = (y * sliceWidth + x) * 4;
+
+                                    for (int c = 0; c < 4; c++)
+                                    {
+                                        sliceData[dstIndex + c] = curImage.Data[srcIndex + c];
+                                    }
+                                }
+                            }
+
+                            // 为当前 slice 创建 TtMemImage
+                            var sliceImage = new StbImageSharp.TtMemImage();
+                            sliceImage.Data = sliceData;
+                            sliceImage.Width = sliceWidth;
+                            sliceImage.Height = sliceHeight;
+                            sliceImage.Comp = StbImageSharp.ColorComponents.RedGreenBlueAlpha;
+
+                            // 使用 GetBoxDownSampler 生成当前 mipmap 层级
+                            StbImageSharp.TtMemImage downsampledSlice = sliceImage;
+                            int currentWidth = sliceWidth;
+                            int currentHeight = sliceHeight;
+
+                            // 降采样到目标 mipmap 层级
+                            for (uint m = 0; m < j; m++)
+                            {
+                                currentWidth = Math.Max(1, currentWidth / 2);
+                                currentHeight = Math.Max(1, currentHeight / 2);
+                                downsampledSlice = StbImageSharp.ImageProcessor.GetBoxDownSampler(downsampledSlice, currentWidth, currentHeight);
+                            }
+
+                            // 保存降采样后的 slice（直接在 mipNode 下创建 attribute）
+                            using (var memStream = new System.IO.MemoryStream(downsampledSlice.Data.Length))
+                            {
+                                var writer = new StbImageWriteSharp.ImageWriter();
+                                writer.WritePng(downsampledSlice.Data, downsampledSlice.Width, downsampledSlice.Height, GetImageWriteFormat(downsampledSlice), memStream);
+
+                                var pngData = memStream.ToArray();
+                                var attr = mipNode.GetOrAddAttribute($"PngMipSlice{d}", 0, 0, true);
+                                using (var ar = attr.GetWriter((ulong)memStream.Position))
+                                {
+                                    ar.WriteNoSize(pngData, (int)memStream.Position);
+                                }
+                            }
+
+                            // 只在第一片添加 MipSizes
+                            if (i == 0 && d == 0)
+                            {
+                                desc.MipSizes.Add(new Vector3i()
+                                {
+                                    X = downsampledSlice.Width,
+                                    Y = downsampledSlice.Height,
+                                    Z = mipDepth
+                                });
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // 2D Texture（Cube Texture的每个面）
+                        int currentMipLevel = (int)j;
+                        StbImageSharp.TtMemImage currentImage = curImage;
+                        int currentWidth = width;
+                        int currentHeight = height;
+
+                        // 降采样到目标 mipmap 层级
+                        for (int m = 0; m < j; m++)
+                        {
+                            currentWidth = Math.Max(1, currentWidth / 2);
+                            currentHeight = Math.Max(1, currentHeight / 2);
+                            currentImage = StbImageSharp.ImageProcessor.GetBoxDownSampler(currentImage, currentWidth, currentHeight);
+                        }
+
+                        using (var memStream = new System.IO.MemoryStream(currentImage.Data.Length))
+                        {
+                            var writer = new StbImageWriteSharp.ImageWriter();
+                            writer.WritePng(currentImage.Data, currentImage.Width, currentImage.Height, GetImageWriteFormat(currentImage), memStream);
+
+                            var pngData = memStream.ToArray();
+                            var attr = faceNode.GetOrAddAttribute($"PngMip{currentMipLevel}", 0, 0, true);
+                            using (var ar = attr.GetWriter((ulong)memStream.Position))
+                            {
+                                ar.WriteNoSize(pngData, (int)memStream.Position);
+                            }
+                        }
+
+                        desc.MipSizes.Add(new Vector3i()
+                        {
+                            X = currentImage.Width,
+                            Y = currentImage.Height,
+                            Z = currentImage.Width * 4
+                        });
                     }
                 }
-                desc.MipSizes.Add(new Vector3i() { X = width, Y = height, Z = width * 4 });
-                height = height / 2;
-                width = width / 2;
-                if ((height == 0 && width == 0))
-                {
-                    break;
-                }
-                mipLevel++;
-                if (height == 0)
-                    height = 1;
-                if (width == 0)
-                    width = 1;
-                curImage = StbImageSharp.ImageProcessor.GetBoxDownSampler(curImage, width, height);
-                if (curImage == null)
-                    break;
-                if (desc.MipLevel > 0 && mipLevel == desc.MipLevel)
-                    break;
             }
-            while (true);
 
-            return mipLevel;
+            return desc.MipLevel;
         }
         public unsafe static int SaveDxtMips(XndNode mipsNode, StbImageSharp.TtMemImage curImage, TtPicDesc desc)
         {
@@ -2444,6 +2832,13 @@ namespace EngineNS.NxRHI
                 sliceWidth = desc.Width;
                 sliceHeight = desc.Height;
 
+                // 重新计算MipLevel
+                if (desc.MipLevel == 0)
+                    desc.MipLevel = CalcMipLevel(sliceWidth, sliceHeight, true, 4);
+                else
+                    desc.MipLevel = Math.Min(desc.MipLevel, CalcMipLevel(sliceWidth, sliceHeight, true, 4));
+
+
                 // 2. 计算在 width 和 height 方向上各能容纳多少个 slices
                 int possibleSlicesPerRow = Math.Max(1, imageWidth / sliceWidth);
                 int possibleSlicesPerCol = Math.Max(1, imageHeight / sliceHeight);
@@ -2508,23 +2903,20 @@ namespace EngineNS.NxRHI
                         var mipNode = depthSlicesNode.GetOrAddNode($"Mip{j}", 0, 0, true);
 
                         // 计算当前 mipmap 的尺寸
-                        int mipWidth = Math.Max(1, sliceWidth >> (int)j);
-                        int mipHeight = Math.Max(1, sliceHeight >> (int)j);
                         int mipDepth = Math.Max(1, desc.Depth >> (int)j);
 
                         // 编码每一层并保存
                         for (int d = 0; d < mipDepth; d++)
                         {
-                            var sliceNode = mipNode.GetOrAddNode($"Slice{d}", 0, 0, true);
-                            var attr = sliceNode.GetOrAddAttribute($"DxtMip{j}", 0, 0, true);
+                            var attr = mipNode.GetOrAddAttribute($"DxtMipSlice{d}", 0, 0, true);
 
                             // 准备当前层的数据
-                            ColorRgbFloat[] colorDataSlice = new ColorRgbFloat[mipWidth * mipHeight];
+                            ColorRgbFloat[] colorDataSlice = new ColorRgbFloat[sliceWidth * sliceHeight];
 
                             // 使用行列布局从 2D image 中提取 slice
-                            for (int y = 0; y < mipHeight; y++)
+                            for (int y = 0; y < sliceHeight; y++)
                             {
-                                for (int x = 0; x < mipWidth; x++)
+                                for (int x = 0; x < sliceWidth; x++)
                                 {
                                     // 计算当前 slice 在源图像中的位置（基于行列网格布局）
                                     int gridX = d % slicesPerRow;
@@ -2535,7 +2927,7 @@ namespace EngineNS.NxRHI
                                     int srcY = gridY * sliceHeight + y;
 
                                     int srcIndex = (srcY * imageWidth + srcX) * (int)curImage.Comp;
-                                    int dstIndex = y * mipWidth + x;
+                                    int dstIndex = y * sliceWidth + x;
 
                                     colorDataSlice[dstIndex].r = curImage.Data[srcIndex];
                                     colorDataSlice[dstIndex].g = curImage.Data[srcIndex + 1];
@@ -2543,7 +2935,7 @@ namespace EngineNS.NxRHI
                                 }
                             }
 
-                            var memory2DSlice = colorDataSlice.AsMemory().AsMemory2D(mipHeight, mipWidth);
+                            var memory2DSlice = colorDataSlice.AsMemory().AsMemory2D(sliceHeight, sliceWidth);
 
                             // 编码当前层
                             var pixelsBcn = encoder.EncodeToRawBytesHdr(memory2DSlice, (int)j, out mipSize.X, out mipSize.Y);
@@ -2968,7 +3360,7 @@ namespace EngineNS.NxRHI
                         ar.Read(out tmp);
                     }
                     desc.MipSizes.Add(tmp);
-                    if (attr.Version == 2)
+                    if (attr.Version >= 2)
                     {
                         Vector2i blockDimension = new Vector2i();
                         ar.Read(out blockDimension);
@@ -2984,7 +3376,7 @@ namespace EngineNS.NxRHI
                     ar.Read(out desc.BlockSize);
                     desc.BlockDimenstions.Add(blockDimension);
                 }
-                else if(attr.Version==2)
+                else if(attr.Version>=2)
                 {
                     ar.Read(out desc.BlockSize);
                 }
@@ -3000,6 +3392,13 @@ namespace EngineNS.NxRHI
                         desc.MipLevel = i;
                         break;
                     }
+                }
+
+                if (attr.Version >= 3)
+                {
+                    int tempDepth;
+                    ar.Read(out tempDepth);
+                    desc.Depth = tempDepth;
                 }
             }
         }
@@ -3098,10 +3497,9 @@ namespace EngineNS.NxRHI
             var num = (int)desc.CubeFaces * mipLevel;
             if (num == 0)
                 return null;
-            var handles = stackalloc System.Runtime.InteropServices.GCHandle[num];
-            try
-            {
-                var pInitData = stackalloc FMappedSubResource[num];
+            // 使用 UMipmapResourceGuard 自动管理 GCHandle
+            using var guard = new UMipmapResourceGuard(num);
+            var pInitData = stackalloc FMappedSubResource[num];
 
 
                 for (uint i = 0; i < mipLevel; i++)
@@ -3117,8 +3515,7 @@ namespace EngineNS.NxRHI
                         ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
                     }
 
-                    handles[i] = System.Runtime.InteropServices.GCHandle.Alloc(data, System.Runtime.InteropServices.GCHandleType.Pinned);
-                    pInitData[i].m_pData = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(data, 0).ToPointer();
+                    pInitData[i].m_pData = guard.SetData((int)i, data);
                     pInitData[i].m_RowPitch = (uint)desc.MipSizes[(int)i].Z;
                     pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.MipSizes[(int)i].Y;
                 }
@@ -3136,15 +3533,6 @@ namespace EngineNS.NxRHI
                 if (result == null)
                     return null;
                 return result;
-            }
-            finally
-            {
-                for (uint i = 0; i < mipLevel; i++)
-                {
-                    if (handles[i].IsAllocated)
-                        handles[i].Free();
-                }
-            }
         }
         private static unsafe TtTexture LoadExrTexture2DMipLevel(RName rn, TtXndNode node, TtPicDesc desc, int mipLevel, int channelR, int channelG, int channelB, int channelA)
         {
@@ -3156,10 +3544,9 @@ namespace EngineNS.NxRHI
             if (exrNode.NativePointer == IntPtr.Zero)
                 return null;
 
-            var handles = stackalloc System.Runtime.InteropServices.GCHandle[mipLevel];
-            try
-            {
-                var pInitData = stackalloc FMappedSubResource[mipLevel];
+            // 使用 UMipmapResourceGuard 自动管理 GCHandle
+            using var guard = new UMipmapResourceGuard(mipLevel);
+            var pInitData = stackalloc FMappedSubResource[mipLevel];
 
 
                 for (uint i = 0; i < mipLevel; i++)
@@ -3248,16 +3635,14 @@ namespace EngineNS.NxRHI
                             }
                         }
 
-                        handles[i] = System.Runtime.InteropServices.GCHandle.Alloc(channelData, System.Runtime.InteropServices.GCHandleType.Pinned);
-                        pInitData[i].m_pData = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(channelData, 0).ToPointer();
+                        pInitData[i].m_pData = guard.SetData((int)i, channelData);
                         pInitData[i].m_RowPitch = (uint)desc.MipSizes[(int)i].Z;
                         pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.MipSizes[(int)i].Y;
 
                     }
                     else
                     {
-                        handles[i] = System.Runtime.InteropServices.GCHandle.Alloc(data, System.Runtime.InteropServices.GCHandleType.Pinned);
-                        pInitData[i].m_pData = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(data, 0).ToPointer();
+                        pInitData[i].m_pData = guard.SetData((int)i, data);
                         pInitData[i].m_RowPitch = (uint)desc.MipSizes[(int)i].Z;
                         pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.MipSizes[(int)i].Y;
                     }
@@ -3276,15 +3661,6 @@ namespace EngineNS.NxRHI
                 if (result == null)
                     return null;
                 return result;
-            }
-            finally
-            {
-                for (uint i = 0; i < mipLevel; i++)
-                {
-                    if (handles[i].IsAllocated)
-                        handles[i].Free();
-                }
-            }
         }
         private static unsafe TtTexture LoadHdrTexture2DMipLevel(RName rn, TtXndNode node, TtPicDesc desc, int mipLevel)
         {
@@ -3296,10 +3672,25 @@ namespace EngineNS.NxRHI
             if (hdrNode.NativePointer == IntPtr.Zero)
                 return null;
 
-            var handles = stackalloc System.Runtime.InteropServices.GCHandle[mipLevel];
-            try
+            // 判断是否为 3D Texture
+            bool isTexture3D = desc.IsTexture3D && desc.Depth > 0;
+
+            // 计算总的数据单元数
+            int totalDataUnits;
+            if (isTexture3D)
             {
-                var pInitData = stackalloc FMappedSubResource[mipLevel];
+                // 3D Texture：每个 mipmap level 对应一个数据单元
+                totalDataUnits = mipLevel;
+            }
+            else
+            {
+                // 2D Texture：每个 face 的每个 mipmap level 对应一个数据单元
+                totalDataUnits = (int)desc.CubeFaces * mipLevel;
+            }
+
+            // 使用 UMipmapResourceGuard 自动管理 GCHandle
+            using var guard = new UMipmapResourceGuard(totalDataUnits);
+            var pInitData = stackalloc FMappedSubResource[totalDataUnits];
 
                 StbImageSharp.ColorComponents colorComp = StbImageSharp.ColorComponents.RedGreenBlue;
                 switch (desc.Format)
@@ -3314,29 +3705,129 @@ namespace EngineNS.NxRHI
                         colorComp = ColorComponents.RedGreenBlueAlpha;
                         break;
                 }
-                for (uint i = 0; i < mipLevel; i++)
+
+                for (uint j = 0; j < desc.Desc.CubeFaces; j++)
                 {
-                    var realLevel = desc.MipLevel - mipLevel + i;
-                    var ptr = hdrNode.TryGetAttribute($"HdrMip{realLevel}");
-                    if (ptr.NativePointer == IntPtr.Zero)
-                        return null;
-                    var mipAttr = ptr;
-                    byte[] data;
-                    using (var ar = mipAttr.GetReader(null))
+                    var faceNode = hdrNode.TryGetChildNode($"Face{j}");
+                    if (faceNode.IsValidPointer == false)
                     {
-                        ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
+                        continue;
                     }
 
-                    StbImageSharp.ImageResultFloat image;
-                    using (var memStream = new System.IO.MemoryStream(data, false))
+                    if (isTexture3D)
                     {
-                        image = StbImageSharp.ImageResultFloat.FromStream(memStream, colorComp);
+                        // 3D Texture：从 DepthSlices 节点加载
+                        var depthSlicesNode = faceNode.TryGetChildNode("DepthSlices");
+                        if (depthSlicesNode.IsValidPointer == false)
+                            return null;
+
+                        for (uint i = 0; i < mipLevel; i++)
+                        {
+                            var realLevel = desc.MipLevel - mipLevel + i;
+                            var mipNode = depthSlicesNode.TryGetChildNode($"Mip{realLevel}");
+                            if (mipNode.IsValidPointer == false)
+                                return null;
+
+                            // 计算当前 mipmap level 的 depth
+                            int currentDepth = Math.Max(1, desc.Depth >> (int)realLevel);
+
+                            // 收集所有 slice 的数据
+                            var allSlicesData = new List<float[]>();
+                            uint totalRowPitch = 0;
+                            uint totalDepthPitch = 0;
+
+                            for (int d = 0; d < currentDepth; d++)
+                            {
+                                var ptr = mipNode.TryGetAttribute($"HdrMipSlice{d}");
+                                if (ptr.NativePointer == IntPtr.Zero)
+                                    return null;
+
+                                var mipAttr = ptr;
+                                byte[] data;
+                                using (var ar = mipAttr.GetReader(null))
+                                {
+                                    ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
+                                }
+
+                                // 解码 HDR 数据
+                                StbImageSharp.ImageResultFloat image;
+                                using (var memStream = new System.IO.MemoryStream(data, false))
+                                {
+                                    image = StbImageSharp.ImageResultFloat.FromStream(memStream, colorComp);
+                                }
+
+                            // debug test
+                            // 保存 ImageResultFloat为hdr                            //if(false)
+                            //{
+                            //    var fullPath = Path.Combine(Environment.CurrentDirectory, "content/UTest/texture/", string.Format("d{0}.hdr", d));
+                            //    using (var memStream = new System.IO.FileStream(fullPath, System.IO.FileMode.OpenOrCreate))
+                            //    {
+                            //        unsafe
+                            //        {
+                            //            fixed (float* floatPtrDebug = image.Data)
+                            //            {
+                            //                var writer = new StbImageWriteSharp.ImageWriter();
+                            //                writer.WriteHdr(floatPtrDebug, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
+                            //            }
+                            //        }
+                            //    }
+                            //}
+
+
+                                allSlicesData.Add(image.Data);
+
+                                if (d == 0)
+                                {
+                                    // 第一个 slice 的 RowPitch
+                                    totalRowPitch = (uint)image.Width * (uint)colorComp * sizeof(float);
+                                    totalDepthPitch = totalRowPitch * (uint)image.Height;
+                                }
+                            }
+
+                            // 将所有 slice 的数据合并成一个连续的缓冲区
+                            int totalFloats = allSlicesData.Sum(d => d.Length);
+                            float[] mergedData = new float[totalFloats];
+                            int offset = 0;
+                            foreach (var sliceData in allSlicesData)
+                            {
+                                Array.Copy(sliceData, 0, mergedData, offset, sliceData.Length);
+                                offset += sliceData.Length;
+                            }
+
+                            int dataIndex = (int)i;
+                            pInitData[dataIndex].m_pData = guard.SetDataFloat(dataIndex, mergedData);
+                            pInitData[dataIndex].m_RowPitch = totalRowPitch;
+                            pInitData[dataIndex].m_DepthPitch = totalDepthPitch;
+                        }
                     }
-                    handles[i] = System.Runtime.InteropServices.GCHandle.Alloc(image.Data, System.Runtime.InteropServices.GCHandleType.Pinned);
-                    //pInitData[i].SetDefault();
-                    pInitData[i].m_pData = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0).ToPointer();
-                    pInitData[i].m_RowPitch = (uint)image.Width * (uint)colorComp * sizeof(float);
-                    pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)image.Height;
+                    else
+                    {
+                        // 2D Texture：原有逻辑
+                        for (uint i = 0; i < mipLevel; i++)
+                        {
+                            var realLevel = desc.MipLevel - mipLevel + i;
+                            var ptr = faceNode.TryGetAttribute($"HdrMip{realLevel}");
+                            if (ptr.NativePointer == IntPtr.Zero)
+                                return null;
+                            var mipAttr = ptr;
+                            byte[] data;
+                            using (var ar = mipAttr.GetReader(null))
+                            {
+                                ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
+                            }
+
+                            StbImageSharp.ImageResultFloat image;
+                            using (var memStream = new System.IO.MemoryStream(data, false))
+                            {
+                                image = StbImageSharp.ImageResultFloat.FromStream(memStream, colorComp);
+                            }
+
+                            int dataIndex = (int)(j * mipLevel + i);
+                            pInitData[dataIndex].m_pData = guard.SetDataFloat(dataIndex, image.Data);
+                            pInitData[dataIndex].m_RowPitch = (uint)image.Width * (uint)colorComp * sizeof(float);
+                            pInitData[dataIndex].m_DepthPitch = pInitData[dataIndex].m_RowPitch * (uint)image.Height;
+                        }
+                    }
                 }
 
                 var texDesc = new FTextureDesc();
@@ -3347,20 +3838,17 @@ namespace EngineNS.NxRHI
                 texDesc.InitData = pInitData;
                 texDesc.Format = desc.Format;
 
+                if (isTexture3D)
+                {
+                    texDesc.Depth = (uint)desc.MipSizes[desc.MipLevel - mipLevel].Z;
+                    texDesc.ArraySize = 1;
+                }
+
                 var result = rc.CreateTexture(in texDesc);
                 CoreSDK.SetMemDebugText(result.mCoreObject, rn.ToString());
                 if (result == null)
                     return null;
                 return result;
-            }
-            finally
-            {
-                for (uint i = 0; i < mipLevel; i++)
-                {
-                    if (handles[i].IsAllocated)
-                        handles[i].Free();
-                }
-            }
         }
 
         private static unsafe TtTexture LoadPngTexture2DMipLevel(RName rn, TtXndNode node, TtPicDesc desc, int mipLevel)
@@ -3373,9 +3861,29 @@ namespace EngineNS.NxRHI
             if (pngNode.NativePointer == IntPtr.Zero)
                 return null;
 
-            var handles = stackalloc System.Runtime.InteropServices.GCHandle[mipLevel];
-            try
+            // 兼容性检测：检查是否存在 Face0 节点，如果不存在则使用旧的属性结构
+            bool useLegacyFormat = true;
+            if (desc.CubeFaces > 1 || desc.Depth > 1)
             {
+                // 如果是Cube或3D纹理，检查是否有Face节点
+                var testFace = pngNode.TryGetChildNode("Face0");
+                useLegacyFormat = (testFace.NativePointer == IntPtr.Zero);
+            }
+            else
+            {
+                // 如果是普通2D纹理，检查是否有PngMip0属性（旧格式）
+                var testAttr = pngNode.TryGetAttribute("PngMip0");
+                useLegacyFormat = (testAttr.NativePointer != IntPtr.Zero);
+            }
+
+            // 判断是否为 3D Texture
+            bool isTexture3D = desc.IsTexture3D && desc.Depth > 0;
+
+            // 旧格式：直接在 PngMips 节点下读取 PngMip0, PngMip1... 属性
+            if (useLegacyFormat)
+            {
+                // 使用 UMipmapResourceGuard 自动管理 GCHandle
+                using var guard = new UMipmapResourceGuard(mipLevel);
                 var pInitData = stackalloc FMappedSubResource[mipLevel];
 
                 StbImageSharp.ColorComponents colorComp = StbImageSharp.ColorComponents.RedGreenBlueAlpha;
@@ -3397,9 +3905,7 @@ namespace EngineNS.NxRHI
                     {
                         image = StbImageSharp.TtMemImage.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
                     }
-                    handles[i] = System.Runtime.InteropServices.GCHandle.Alloc(image.Data, System.Runtime.InteropServices.GCHandleType.Pinned);
-                    //pInitData[i].SetDefault();
-                    pInitData[i].m_pData = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0).ToPointer();
+                    pInitData[i].m_pData = guard.SetData((int)i, image.Data);
                     pInitData[i].m_RowPitch = (uint)image.Width * 4;
                     pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)image.Height;
 
@@ -3425,14 +3931,165 @@ namespace EngineNS.NxRHI
                     return null;
                 return result;
             }
-            finally
+
+            // 新格式：Cube或3D纹理使用节点结构（PngMips/Face0/PngMip0, PngMips/Face0/DepthSlices/Mip0/...）
+            // 计算总的数据单元数
+            int totalDataUnits;
+            if (isTexture3D)
             {
-                for (uint i = 0; i < mipLevel; i++)
+                // 3D Texture：每个 mipmap level 对应一个数据单元
+                totalDataUnits = mipLevel;
+            }
+            else
+            {
+                // 2D Texture：每个 face 的每个 mipmap level 对应一个数据单元
+                totalDataUnits = (int)desc.CubeFaces * mipLevel;
+            }
+
+            // 使用 UMipmapResourceGuard 自动管理 GCHandle
+            using var guardNew = new UMipmapResourceGuard(totalDataUnits);
+            var pInitDataNew = stackalloc FMappedSubResource[totalDataUnits];
+
+            StbImageSharp.ColorComponents colorCompNew = StbImageSharp.ColorComponents.RedGreenBlueAlpha;
+
+            for (uint j = 0; j < desc.Desc.CubeFaces; j++)
+            {
+                var faceNode = pngNode.TryGetChildNode($"Face{j}");
+                if (faceNode.IsValidPointer == false)
                 {
-                    if (handles[i].IsAllocated)
-                        handles[i].Free();
+                    continue;
+                }
+
+                if (isTexture3D)
+                {
+                    // 3D Texture：从 DepthSlices 节点加载
+                    var depthSlicesNode = faceNode.TryGetChildNode("DepthSlices");
+                    if (depthSlicesNode.IsValidPointer == false)
+                        return null;
+
+                    for (uint i = 0; i < mipLevel; i++)
+                    {
+                        var realLevel = desc.MipLevel - mipLevel + i;
+                        var mipNode = depthSlicesNode.TryGetChildNode($"Mip{realLevel}");
+                        if (mipNode.IsValidPointer == false)
+                            return null;
+
+                        // 计算当前 mipmap level 的 depth
+                        int currentDepth = Math.Max(1, desc.Depth >> (int)realLevel);
+
+                        // 收集所有 slice 的数据
+                        var allSlicesData = new List<byte[]>();
+                        uint totalRowPitch = 0;
+                        uint totalDepthPitch = 0;
+
+                        for (int d = 0; d < currentDepth; d++)
+                        {
+                            var ptr = mipNode.TryGetAttribute($"PngMipSlice{d}");
+                            if (ptr.NativePointer == IntPtr.Zero)
+                                return null;
+
+                            var mipAttr = ptr;
+                            byte[] data;
+                            using (var ar = mipAttr.GetReader(null))
+                            {
+                                ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
+                            }
+
+                            StbImageSharp.TtMemImage image;
+                            using (var memStream = new System.IO.MemoryStream(data, false))
+                            {
+                                image = StbImageSharp.TtMemImage.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                            }
+                            allSlicesData.Add(image.Data);
+                            colorCompNew = image.Comp;
+
+                            if (d == 0)
+                            {
+                                // 第一个 slice 的 RowPitch
+                                totalRowPitch = (uint)image.Width * 4;
+                                totalDepthPitch = totalRowPitch * (uint)image.Height;
+                            }
+                        }
+
+                        // 将所有 slice 的数据合并成一个连续的缓冲区
+                        int totalSize = allSlicesData.Sum(d => d.Length);
+                        byte[] mergedData = new byte[totalSize];
+                        int offset = 0;
+                        foreach (var sliceData in allSlicesData)
+                        {
+                            Buffer.BlockCopy(sliceData, 0, mergedData, offset, sliceData.Length);
+                            offset += sliceData.Length;
+                        }
+
+                        int dataIndex = (int)i;
+                        pInitDataNew[dataIndex].m_pData = guardNew.SetData(dataIndex, mergedData);
+                        pInitDataNew[dataIndex].m_RowPitch = totalRowPitch;
+                        pInitDataNew[dataIndex].m_DepthPitch = totalDepthPitch;
+                    }
+                }
+                else
+                {
+                    // 2D Texture：原有逻辑
+                    for (uint i = 0; i < mipLevel; i++)
+                    {
+                        var realLevel = desc.MipLevel - mipLevel + i;
+                        var ptr = faceNode.TryGetAttribute($"PngMip{realLevel}");
+                        if (ptr.NativePointer == IntPtr.Zero)
+                            return null;
+                        var mipAttr = ptr;
+                        byte[] data;
+                        using (var ar = mipAttr.GetReader(null))
+                        {
+                            ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
+                        }
+
+                        StbImageSharp.TtMemImage image;
+                        using (var memStream = new System.IO.MemoryStream(data, false))
+                        {
+                            image = StbImageSharp.TtMemImage.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                        }
+
+                        int dataIndex = (int)(j * mipLevel + i);
+                        pInitDataNew[dataIndex].m_pData = guardNew.SetData(dataIndex, image.Data);
+                        pInitDataNew[dataIndex].m_RowPitch = (uint)image.Width * 4;
+                        pInitDataNew[dataIndex].m_DepthPitch = pInitDataNew[dataIndex].m_RowPitch * (uint)image.Height;
+
+                        colorCompNew = image.Comp;
+                    }
                 }
             }
+
+            var texDescNew = new FTextureDesc();
+            texDescNew.SetDefault();
+            texDescNew.Width = (uint)desc.MipSizes[desc.MipLevel - mipLevel].X;
+            texDescNew.Height = (uint)desc.MipSizes[desc.MipLevel - mipLevel].Y;
+            texDescNew.MipLevels = (uint)mipLevel;
+            texDescNew.InitData = pInitDataNew;
+            switch (colorCompNew)
+            {
+                case StbImageSharp.ColorComponents.RedGreenBlueAlpha:
+                    texDescNew.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+                    break;
+            }
+
+            if (isTexture3D)
+            {
+                // 3D Texture
+                texDescNew.Depth = (uint)desc.MipSizes[desc.MipLevel - mipLevel].Z;
+                texDescNew.ArraySize = 1;
+            }
+            else if (desc.CubeFaces == 6)
+            {
+                // Cube Texture
+                texDescNew.ArraySize = 6;
+                texDescNew.MiscFlags = EResourceMiscFlag.RM_TEXTURECUBE;
+            }
+
+            var resultNew = rc.CreateTexture(in texDescNew);
+            CoreSDK.SetMemDebugText(resultNew.mCoreObject, rn.ToString());
+            if (resultNew == null)
+                return null;
+            return resultNew;
         }
         private static unsafe TtTexture LoadDxtTexture2DMipLevel(RName rn, TtXndNode node, TtPicDesc desc, int mipLevel)
         {
@@ -3460,10 +4117,9 @@ namespace EngineNS.NxRHI
                 totalDataUnits = (int)desc.CubeFaces * mipLevel;
             }
 
-            var handles = stackalloc System.Runtime.InteropServices.GCHandle[totalDataUnits];
-            try
-            {
-                var pInitData = stackalloc FMappedSubResource[totalDataUnits];
+            // 使用 UMipmapResourceGuard 自动管理 GCHandle
+            using var guard = new UMipmapResourceGuard(totalDataUnits);
+            var pInitData = stackalloc FMappedSubResource[totalDataUnits];
 
                 for (uint j = 0; j < desc.Desc.CubeFaces; j++)
                 {
@@ -3492,16 +4148,12 @@ namespace EngineNS.NxRHI
 
                             // 收集所有 slice 的数据
                             var allSlicesData = new List<byte[]>();
-                            uint totalPitch = 0;
+                            uint totalRowPitch = 0;
                             uint totalDepthPitch = 0;
 
                             for (int d = 0; d < currentDepth; d++)
                             {
-                                var sliceNode = mipNode.TryGetChildNode($"Slice{d}");
-                                if (sliceNode.IsValidPointer == false)
-                                    return null;
-
-                                var ptr = sliceNode.TryGetAttribute($"DxtMip{realLevel}");
+                                var ptr = mipNode.TryGetAttribute($"DxtMipSlice{d}");
                                 if (ptr.NativePointer == IntPtr.Zero)
                                     return null;
 
@@ -3518,13 +4170,14 @@ namespace EngineNS.NxRHI
                                     // 第一个 slice 的 RowPitch
                                     if (desc.BlockSize == 0)
                                     {
-                                        totalPitch = (uint)desc.MipSizes[(int)realLevel].Z;
+                                        totalRowPitch = (uint)desc.MipSizes[(int)realLevel].Z;
                                     }
                                     else
                                     {
                                         var blockWidth = desc.BlockDimenstions[(int)realLevel].X;
-                                        totalPitch = (uint)(blockWidth * desc.BlockSize);
+                                        totalRowPitch = (uint)(blockWidth * desc.BlockSize);
                                     }
+                                    totalDepthPitch = (uint)data.Length;
                                 }
                             }
 
@@ -3539,10 +4192,9 @@ namespace EngineNS.NxRHI
                             }
 
                             int dataIndex = (int)i;
-                            handles[dataIndex] = System.Runtime.InteropServices.GCHandle.Alloc(mergedData, System.Runtime.InteropServices.GCHandleType.Pinned);
-                            pInitData[dataIndex].m_pData = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(mergedData, 0).ToPointer();
-                            pInitData[dataIndex].m_RowPitch = totalPitch;
-                            pInitData[dataIndex].m_DepthPitch = (uint)totalSize;
+                            pInitData[dataIndex].m_pData = guard.SetData(dataIndex, mergedData);
+                            pInitData[dataIndex].m_RowPitch = totalRowPitch;
+                            pInitData[dataIndex].m_DepthPitch = totalDepthPitch;
                         }
                     }
                     else
@@ -3562,8 +4214,7 @@ namespace EngineNS.NxRHI
                             }
 
                             int dataIndex = (int)(j * mipLevel + i);
-                            handles[dataIndex] = System.Runtime.InteropServices.GCHandle.Alloc(data, System.Runtime.InteropServices.GCHandleType.Pinned);
-                            pInitData[dataIndex].m_pData = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(data, 0).ToPointer();
+                            pInitData[dataIndex].m_pData = guard.SetData(dataIndex, data);
                             if (desc.BlockSize==0)
                             {
                                 pInitData[dataIndex].m_RowPitch = (uint)desc.MipSizes[(int)realLevel].Z;
@@ -3597,7 +4248,7 @@ namespace EngineNS.NxRHI
                 if (isTexture3D)
                 {
                     // 3D Texture
-                    texDesc.Depth = (uint)desc.Depth;
+                    texDesc.Depth = (uint)desc.MipSizes[desc.MipLevel - mipLevel].Z;
                     texDesc.ArraySize = 1;
                 }
                 else if (desc.CubeFaces == 6)
@@ -3608,17 +4259,10 @@ namespace EngineNS.NxRHI
                 }
 
                 var result = rc.CreateTexture(in texDesc);
-                CoreSDK.SetMemDebugText(result.mCoreObject, rn.ToString());
+                if(result!=null)
+                    CoreSDK.SetMemDebugText(result.mCoreObject, rn.ToString());
                 return result;
-            }
-            finally
-            {
-                for (uint i = 0; i < totalDataUnits; i++)
-                {
-                    if (handles[i].IsAllocated)
-                        handles[i].Free();
-                }
-            }
+        
         }
 
         private static unsafe TtTexture LoadDxtTexture2DMipLevel(RName rn, TtXndNode node, TtPicDesc desc, int mipLevel, TtTexture oldTexture)
@@ -3844,6 +4488,11 @@ namespace EngineNS.NxRHI
             {
                 srvDesc.Type = ESrvType.ST_TextureCube;
                 srvDesc.TextureCube.MipLevels = (uint)mipLevel;
+            }
+            else if (desc.IsTexture3D)
+            {
+                srvDesc.Type = ESrvType.ST_Texture3D;
+                srvDesc.Texture3D.MipLevels = (uint)mipLevel;
             }
             else
             {

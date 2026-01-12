@@ -125,7 +125,7 @@ namespace NxRHI
 			MipLevel = 0;
 			Width = 0;
 			Height = 0;
-			CubeFaces = 0;
+			CubeFaces = 1;
 			DontCompress = FALSE;
 			Format = EPixelFormat::PXF_UNKNOWN;
 			sRGB = FALSE;

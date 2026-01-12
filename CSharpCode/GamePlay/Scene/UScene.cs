@@ -104,11 +104,13 @@ namespace EngineNS.GamePlay.Scene
         }
         ~TtScene()
         {
-            Cleanup();
+            Dispose();
         }
-        public void Cleanup()
+        public override void Dispose()
         {
             ClearChildren();
+            mMemberTickables.CleanupMembers(this);
+            Dispose_SceneOctree();
             TtEngine.Instance?.SceneManager.UnloadScene(this.AssetName);
         }
         public TtSceneData SceneData

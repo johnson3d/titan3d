@@ -480,6 +480,8 @@ namespace EngineNS.Graphics.Mesh
                 {
                     //如果需要这个Pass，那么BuildDrawCall中的policy.GetPassShading就应该能提供shading
                     System.Diagnostics.Debug.Assert(false);
+                    ResetDrawCalls();
+                    return null;
                 }
                 //检查shading切换参数
                 if (result.IsPermutationChanged())

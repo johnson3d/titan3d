@@ -20,18 +20,56 @@ bool vfxThread::IsGraphicsThread()
 	return GetCurrentThreadId() == GraphicsThreadId;
 }
 
-const char* GetCurrentThreadName()
+static thread_local bool has_set_thread_name = false;
+static thread_local char current_thread_name[256]{};
+const char* vfxThread::GetCurrentThreadName()
 {
-	auto thread = vfxThread::GetCurrentThreadId();
-	if (thread == GRenderThreadId)
-		return "RThread";
-	else if (thread == GLogicThreadId)
-		return "LThread";
-	else if (thread == GLoadThreadId)
-		return "IOThread";
-	else
-		return "UnkownThread";
+	if (has_set_thread_name == true)
+		return current_thread_name;
+	has_set_thread_name = true;
+#if defined(PLATFORM_WIN)
+	// Windows 10 1607+ ·½Ê½
+	using GetThreadDescriptionFunc = HRESULT(WINAPI*)(HANDLE, PWSTR*);
+	static auto pGetThreadDescription =
+		reinterpret_cast<GetThreadDescriptionFunc>(
+			GetProcAddress(GetModuleHandle("kernel32.dll"), "GetThreadDescription"));
+
+	if (pGetThreadDescription) {
+		PWSTR wname;
+		if (SUCCEEDED(pGetThreadDescription(GetCurrentThread(), &wname))) {
+			wcstombs(current_thread_name, wname, 256);
+			LocalFree(wname);
+			return current_thread_name;
+		}
+	}
+
+#elif defined(__linux__)
+	if (pthread_getname_np(pthread_self(), current_thread_name, 16) == 0) {
+		return current_thread_name;
+	}
+
+#elif defined(__APPLE__)
+	pthread_getname_np(pthread_self(), current_thread_name, 64);
+	return current_thread_name;
+#endif
+
+	auto id = std::hash<std::thread::id>{}(std::this_thread::get_id());
+	sprintf_s(current_thread_name, 256, "Thread-%zu", id);
+	return current_thread_name;
 }
+
+//const char* GetCurrentThreadName()
+//{
+//	auto thread = vfxThread::GetCurrentThreadId();
+//	if (thread == GRenderThreadId)
+//		return "RThread";
+//	else if (thread == GLogicThreadId)
+//		return "LThread";
+//	else if (thread == GLoadThreadId)
+//		return "IOThread";
+//	else
+//		return "UnkownThread";
+//}
 
 void vfxThread::Start(LPCSTR name, size_t stack, FThreadStarter fun, void* parameter)
 {

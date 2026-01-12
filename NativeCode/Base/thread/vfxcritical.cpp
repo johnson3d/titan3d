@@ -7,6 +7,7 @@
 //-----------------------------------------------------------------------------
 //#include "../precompile.h"
 #include "vfxcritical.h"
+#include "vfxthread.h"
 #include "../vfxsampcounter.h"
 #include "../CoreSDK.h"
 //#include "../generic/vfx_temp_base.h"
@@ -16,6 +17,21 @@
 typedef void(WINAPI *FMemoryFinalizer)();
 extern FMemoryFinalizer OnMemoryFinal;
 FMemoryFinalizer SavedOnMemoryFinal;
+
+#if defined(DEBUG_THREAD)
+void VCritical::EnterDebug()
+{
+	m_OwnerThread = vfxThread::GetCurrentThreadId;
+	mThreadName = vfxThread::GetCurrentThreadName();
+	m_LockCount++;
+}
+void VCritical::LeaveDebug()
+{
+	m_OwnerThread = nullptr;
+	mThreadName = nullptr;
+	m_LockCount--;
+}
+#endif
 
 void VCriticalInfoStack::PushLock(LPCSTR file, int line)
 {
@@ -175,6 +191,26 @@ VCritical::VCritical()
 VCritical::~VCritical()
 {
 	pthread_mutex_destroy(&m_Critical);
+}
+
+void VCritical::Lock()
+{
+	pthread_mutex_lock(&m_Critical);
+	EnterDebug();
+}
+
+void VCritical::Unlock()
+{
+	LeaveDebug();
+	pthread_mutex_unlock(&m_Critical);
+}
+
+int VCritical::TryLock()
+{
+	auto ret = pthread_mutex_trylock(&m_Critical);
+	if (ret == 0)
+		EnterDebug();
+	return ret;
 }
 
 VPagedCritical::VPagedCritical()
