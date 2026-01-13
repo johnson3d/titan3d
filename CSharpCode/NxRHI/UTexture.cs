@@ -1108,14 +1108,6 @@ namespace EngineNS.NxRHI
             }
             public unsafe RName ImportImageImpl(System.IO.Stream stream)
             {
-                {
-                    //Tests.Texture3DTest_Simple.RunTest();
-                    // RName rName = new RName("D:\\gradient_debug_hdr.srv", ERNameType.Game);
-                    // var xnd1 = IO.TtXndHolder.LoadXnd("D:\\gradient_debug_hdr.srv");
-                    // var desc = LoadPictureDesc(xnd1.RootNode);
-                    // LoadTexture2DMipLevel(rName, xnd1.RootNode, desc, 1, null);
-                }
-
                 if (stream == null)
                     return null;
 
@@ -1819,26 +1811,7 @@ namespace EngineNS.NxRHI
                     break;
             }
 
-            {
-                desc.Desc.MipLevel = mipLevel;
-                desc.Desc.dwStructureSize = (uint)sizeof(FPictureDesc);
-                var attr = node.GetOrAddAttribute("Desc", 3, 0, true);
-                using (var ar = attr.GetWriter((ulong)sizeof(FPictureDesc)))
-                {
-                    ar.Write(desc.Desc);
-                    ar.Write(desc.MipSizes.Count);
-                    for (int i = 0; i < desc.MipSizes.Count; i++)
-                    {
-                        ar.Write(desc.MipSizes[i]);
-                        if (i < desc.BlockDimenstions.Count)
-                            ar.Write(desc.BlockDimenstions[i]);
-                        else
-                            ar.Write(Vector2i.Zero);
-                    }
-                    ar.Write(desc.BlockSize);
-                    ar.Write(desc.Depth);
-                }
-            }
+            TtTextureHelper.SaveDescToNode(node, desc);
         }
         
         public static unsafe void SaveTexture(RName assetName, XndNode node, StbImageSharp.ImageResultFloat image, TtPicDesc desc)
@@ -1942,26 +1915,7 @@ namespace EngineNS.NxRHI
                     break;
             }
 
-            {
-                desc.Desc.MipLevel = mipLevel;
-                desc.Desc.dwStructureSize = (uint)sizeof(FPictureDesc);
-                var attr = node.GetOrAddAttribute("Desc", 3, 0, true);
-                using (var ar = attr.GetWriter((ulong)sizeof(FPictureDesc)))
-                {
-                    ar.Write(desc.Desc);
-                    ar.Write(desc.MipSizes.Count);
-                    for (int i = 0; i < desc.MipSizes.Count; i++)
-                    {
-                        ar.Write(desc.MipSizes[i]);
-                        if (i < desc.BlockDimenstions.Count)
-                            ar.Write(desc.BlockDimenstions[i]);
-                        else
-                            ar.Write(Vector2i.Zero);
-                    }
-                    ar.Write(desc.BlockSize);
-                    ar.Write(desc.Depth);
-                }
-            }
+            TtTextureHelper.SaveDescToNode(node, desc);
         }
         public static StbImageWriteSharp.ColorComponents GetImageWriteFormat(StbImageSharp.TtMemImage image)
         {
@@ -2114,26 +2068,7 @@ namespace EngineNS.NxRHI
                     break;
             }
 
-            {
-                desc.Desc.MipLevel = mipLevel;
-                desc.Desc.dwStructureSize = (uint)sizeof(FPictureDesc);
-                var attr = node.GetOrAddAttribute("Desc", 3, 0, true);
-                using (var ar = attr.GetWriter((ulong)sizeof(FPictureDesc)))
-                {
-                    ar.Write(desc.Desc);
-                    ar.Write(desc.MipSizes.Count);
-                    for (int i = 0; i < desc.MipSizes.Count; i++)
-                    {
-                        ar.Write(desc.MipSizes[i]);
-                        if(i < desc.BlockDimenstions.Count)
-                            ar.Write(desc.BlockDimenstions[i]);
-                        else
-                            ar.Write(Vector2i.Zero);
-                    }
-                    ar.Write(desc.BlockSize);
-                    ar.Write(desc.Depth);
-                }
-            }
+            TtTextureHelper.SaveDescToNode(node, desc);
         }
         public static int SaveExrMips(XndNode pngMipsNode, Jither.OpenEXR.EXRFile file, TtPicDesc desc)
         {
@@ -2308,41 +2243,22 @@ namespace EngineNS.NxRHI
 
             if (desc.IsTexture3D && desc.Depth > 0)
             {
-                // 1. 计算每个 slice 应该的尺寸（基于 desc）
-                sliceWidth = desc.Width;
-                sliceHeight = desc.Height;
+                // 使用 TtTextureHelper 计算 3D Texture 布局
+                var layout = TtTextureHelper.Calculate3DTextureLayout(imageWidth, imageHeight, desc);
+                sliceWidth = layout.SliceWidth;
+                sliceHeight = layout.SliceHeight;
+                slicesPerRow = layout.SlicesPerRow;
+                slicesPerColumn = layout.SlicesPerColumn;
 
                 // 重新计算MipLevel（基于单个slice的尺寸）
-                if (desc.MipLevel == 0)
-                    desc.MipLevel = Math.Max(CalcMipLevel(sliceWidth, sliceHeight, true, 4), 1);
-                else
-                    desc.MipLevel = Math.Min(desc.MipLevel, CalcMipLevel(sliceWidth, sliceHeight, true, 4));
-
-                // 2. 计算在 width 和 height 方向上各能容纳多少个 slices
-                int possibleSlicesPerRow = Math.Max(1, imageWidth / sliceWidth);
-                int possibleSlicesPerCol = Math.Max(1, imageHeight / sliceHeight);
-
-                // 3. 验证是否能容纳所有 slices
-                if (possibleSlicesPerRow * possibleSlicesPerCol < desc.Depth)
-                {
-                    throw new System.InvalidOperationException(
-                        $"Invalid 3D texture layout. " +
-                        $"Image: {imageWidth}x{imageHeight}, " +
-                        $"Slice: {sliceWidth}x{sliceHeight}, " +
-                        $"Depth: {desc.Depth}, " +
-                        $"Can fit at most {possibleSlicesPerRow * possibleSlicesPerCol} slices, need {desc.Depth}");
-                }
-
-                slicesPerRow = possibleSlicesPerRow;
-                slicesPerColumn = (desc.Depth + slicesPerRow - 1) / slicesPerRow;
+                TtTextureHelper.CalculateAndSetMipLevel(desc, sliceWidth, sliceHeight, true, 4);
 
                 sliceSize = sliceWidth * sliceHeight;
             }
             else
             {
                 // 2D Texture
-                if (desc.MipLevel == 0)
-                    desc.MipLevel = Math.Max(CalcMipLevel(curImage.Width, curImage.Height, true, 4), 1);
+                TtTextureHelper.CalculateAndSetMipLevel(desc, curImage.Width, curImage.Height, true, 4);
                 sliceWidth = imageWidth;
                 sliceHeight = imageHeight;
                 sliceSize = imageWidth * imageHeight;
@@ -2373,29 +2289,11 @@ namespace EngineNS.NxRHI
                         // 对每个 depth slice 进行降采样并保存
                         for (int d = 0; d < mipDepth; d++)
                         {
-                            // 提取当前 slice 的原始数据（从行列布局中）
-                            float[] sliceData = new float[sliceWidth * sliceHeight * (int)curImage.Comp];
-
-                            // 使用行列布局从 2D image 中提取 slice
-                            for (int y = 0; y < sliceHeight; y++)
-                            {
-                                for (int x = 0; x < sliceWidth; x++)
-                                {
-                                    int gridX = d % slicesPerRow;
-                                    int gridY = d / slicesPerRow;
-
-                                    int srcX = gridX * sliceWidth + x;
-                                    int srcY = gridY * sliceHeight + y;
-
-                                    int srcIndex = (srcY * imageWidth + srcX) * (int)curImage.Comp;
-                                    int dstIndex = (y * sliceWidth + x) * (int)curImage.Comp;
-
-                                    for (int c = 0; c < (int)curImage.Comp; c++)
-                                    {
-                                        sliceData[dstIndex + c] = curImage.Data[srcIndex + c];
-                                    }
-                                }
-                            }
+                            // 使用 TtTextureHelper 提取当前 slice 的原始数据
+                            float[] sliceData = TtTextureHelper.ExtractSliceFromGridLayoutFloat(
+                                curImage.Data, imageWidth, imageHeight,
+                                sliceWidth, sliceHeight, d,
+                                slicesPerRow, (int)curImage.Comp);
 
                             // 为当前 slice 创建 ImageResultFloat
                             var sliceImage = new StbImageSharp.ImageResultFloat();
@@ -2407,18 +2305,8 @@ namespace EngineNS.NxRHI
                                 }
                             }
 
-                            // 使用 GetBoxDownSampler 生成当前 mipmap 层级
-                            StbImageSharp.ImageResultFloat downsampledSlice = sliceImage;
-                            int currentWidth = sliceWidth;
-                            int currentHeight = sliceHeight;
-
-                            // 降采样到目标 mipmap 层级
-                            for (uint m = 0; m < j; m++)
-                            {
-                                currentWidth = Math.Max(1, currentWidth / 2);
-                                currentHeight = Math.Max(1, currentHeight / 2);
-                                downsampledSlice = StbImageSharp.ImageProcessor.GetBoxDownSampler(downsampledSlice, currentWidth, currentHeight);
-                            }
+                            // 使用 TtTextureHelper 降采样到目标 mipmap 层级
+                            StbImageSharp.ImageResultFloat downsampledSlice = TtTextureHelper.DownsampleToMipLevelFloat(sliceImage, j, out int currentWidth, out int currentHeight);
 
                             // 保存降采样后的 slice（直接在 mipNode 下创建 attribute）
                             using (var memStream = new System.IO.MemoryStream())
@@ -2519,41 +2407,22 @@ namespace EngineNS.NxRHI
 
             if (desc.IsTexture3D && desc.Depth > 0)
             {
-                // 1. 计算每个 slice 应该的尺寸（基于 desc）
-                sliceWidth = desc.Width;
-                sliceHeight = desc.Height;
+                // 使用 TtTextureHelper 计算 3D Texture 布局
+                var layout = TtTextureHelper.Calculate3DTextureLayout(imageWidth, imageHeight, desc);
+                sliceWidth = layout.SliceWidth;
+                sliceHeight = layout.SliceHeight;
+                slicesPerRow = layout.SlicesPerRow;
+                slicesPerColumn = layout.SlicesPerColumn;
 
                 // 重新计算MipLevel（基于单个slice的尺寸）
-                if (desc.MipLevel == 0)
-                    desc.MipLevel = CalcMipLevel(sliceWidth, sliceHeight, true, 4);
-                else
-                    desc.MipLevel = Math.Min(desc.MipLevel, CalcMipLevel(sliceWidth, sliceHeight, true, 4));
-
-                // 2. 计算在 width 和 height 方向上各能容纳多少个 slices
-                int possibleSlicesPerRow = Math.Max(1, imageWidth / sliceWidth);
-                int possibleSlicesPerCol = Math.Max(1, imageHeight / sliceHeight);
-
-                // 3. 验证是否能容纳所有 slices
-                if (possibleSlicesPerRow * possibleSlicesPerCol < desc.Depth)
-                {
-                    throw new System.InvalidOperationException(
-                        $"Invalid 3D texture layout. " +
-                        $"Image: {imageWidth}x{imageHeight}, " +
-                        $"Slice: {sliceWidth}x{sliceHeight}, " +
-                        $"Depth: {desc.Depth}, " +
-                        $"Can fit at most {possibleSlicesPerRow * possibleSlicesPerCol} slices, need {desc.Depth}");
-                }
-
-                slicesPerRow = possibleSlicesPerRow;
-                slicesPerColumn = (desc.Depth + slicesPerRow - 1) / slicesPerRow;
+                TtTextureHelper.CalculateAndSetMipLevel(desc, sliceWidth, sliceHeight, false, 4);
 
                 sliceSize = sliceWidth * sliceHeight;
             }
             else
             {
                 // 2D Texture
-                if (desc.MipLevel == 0)
-                    desc.MipLevel = CalcMipLevel(curImage.Width, curImage.Height, true, 4);
+                TtTextureHelper.CalculateAndSetMipLevel(desc, curImage.Width, curImage.Height, false, 4);
                 sliceWidth = imageWidth;
                 sliceHeight = imageHeight;
                 sliceSize = imageWidth * imageHeight;
@@ -2625,29 +2494,11 @@ namespace EngineNS.NxRHI
                         // 对每个 depth slice 进行降采样并保存
                         for (int d = 0; d < mipDepth; d++)
                         {
-                            // 提取当前 slice 的原始数据（从行列布局中）
-                            byte[] sliceData = new byte[sliceWidth * sliceHeight * 4];
-
-                            // 使用行列布局从 2D image 中提取 slice
-                            for (int y = 0; y < sliceHeight; y++)
-                            {
-                                for (int x = 0; x < sliceWidth; x++)
-                                {
-                                    int gridX = d % slicesPerRow;
-                                    int gridY = d / slicesPerRow;
-
-                                    int srcX = gridX * sliceWidth + x;
-                                    int srcY = gridY * sliceHeight + y;
-
-                                    int srcIndex = (srcY * imageWidth + srcX) * 4;
-                                    int dstIndex = (y * sliceWidth + x) * 4;
-
-                                    for (int c = 0; c < 4; c++)
-                                    {
-                                        sliceData[dstIndex + c] = curImage.Data[srcIndex + c];
-                                    }
-                                }
-                            }
+                            // 使用 TtTextureHelper 提取当前 slice 的原始数据
+                            byte[] sliceData = TtTextureHelper.ExtractSliceFromGridLayout(
+                                curImage.Data, imageWidth, imageHeight,
+                                sliceWidth, sliceHeight, d,
+                                slicesPerRow, 4);
 
                             // 为当前 slice 创建 TtMemImage
                             var sliceImage = new StbImageSharp.TtMemImage();
@@ -2656,18 +2507,8 @@ namespace EngineNS.NxRHI
                             sliceImage.Height = sliceHeight;
                             sliceImage.Comp = StbImageSharp.ColorComponents.RedGreenBlueAlpha;
 
-                            // 使用 GetBoxDownSampler 生成当前 mipmap 层级
-                            StbImageSharp.TtMemImage downsampledSlice = sliceImage;
-                            int currentWidth = sliceWidth;
-                            int currentHeight = sliceHeight;
-
-                            // 降采样到目标 mipmap 层级
-                            for (uint m = 0; m < j; m++)
-                            {
-                                currentWidth = Math.Max(1, currentWidth / 2);
-                                currentHeight = Math.Max(1, currentHeight / 2);
-                                downsampledSlice = StbImageSharp.ImageProcessor.GetBoxDownSampler(downsampledSlice, currentWidth, currentHeight);
-                            }
+                            // 使用 TtTextureHelper 降采样到目标 mipmap 层级
+                            StbImageSharp.TtMemImage downsampledSlice = TtTextureHelper.DownsampleToMipLevel(sliceImage, j, out int currentWidth, out int currentHeight);
 
                             // 保存降采样后的 slice（直接在 mipNode 下创建 attribute）
                             using (var memStream = new System.IO.MemoryStream(downsampledSlice.Data.Length))
@@ -2791,8 +2632,7 @@ namespace EngineNS.NxRHI
         {
             System.Diagnostics.Debug.Assert(desc.DontCompress == false);
 
-            if(desc.MipLevel == 0)
-                desc.MipLevel = CalcMipLevel(curImage.Width, curImage.Height, true, 4);
+            TtTextureHelper.CalculateAndSetMipLevel(desc, curImage.Width, curImage.Height, false, 4);
             EPixelFormat descPixelFormat = EPixelFormat.PXF_UNKNOWN;
             switch (desc.CompressFormat)
             {
@@ -2824,50 +2664,15 @@ namespace EngineNS.NxRHI
             int slicesPerRow = 1, slicesPerColumn = 1;
             if (desc.IsTexture3D && desc.Depth > 0)
             {
-                // 根据实际 image 尺寸和 desc 尺寸，自动推断行列布局
-                // 2D image 包含了 desc.Depth 个 slices，可能是网格排列
-                // 例如：desc = 64x64x4，image = 128x128，则 slicesPerRow = 2, slicesPerColumn = 2
-
-                // 1. 计算每个 slice 应该的尺寸（基于 desc）
-                sliceWidth = desc.Width;
-                sliceHeight = desc.Height;
+                // 使用 TtTextureHelper 计算 3D Texture 布局
+                var layout = TtTextureHelper.Calculate3DTextureLayout(imageWidth, imageHeight, desc);
+                sliceWidth = layout.SliceWidth;
+                sliceHeight = layout.SliceHeight;
+                slicesPerRow = layout.SlicesPerRow;
+                slicesPerColumn = layout.SlicesPerColumn;
 
                 // 重新计算MipLevel
-                if (desc.MipLevel == 0)
-                    desc.MipLevel = CalcMipLevel(sliceWidth, sliceHeight, true, 4);
-                else
-                    desc.MipLevel = Math.Min(desc.MipLevel, CalcMipLevel(sliceWidth, sliceHeight, true, 4));
-
-
-                // 2. 计算在 width 和 height 方向上各能容纳多少个 slices
-                int possibleSlicesPerRow = Math.Max(1, imageWidth / sliceWidth);
-                int possibleSlicesPerCol = Math.Max(1, imageHeight / sliceHeight);
-
-                // 3. 验证是否能容纳所有 slices
-                if (possibleSlicesPerRow * possibleSlicesPerCol < desc.Depth)
-                {
-                    throw new System.InvalidOperationException(
-                        $"Invalid 3D texture layout. " +
-                        $"Image: {imageWidth}x{imageHeight}, " +
-                        $"Slice: {sliceWidth}x{sliceHeight}, " +
-                        $"Depth: {desc.Depth}, " +
-                        $"Can fit at most {possibleSlicesPerRow * possibleSlicesPerCol} slices, need {desc.Depth}");
-                }
-
-                slicesPerRow = possibleSlicesPerRow;
-                slicesPerColumn = (desc.Depth + slicesPerRow - 1) / slicesPerRow;
-
-                // 4. 验证实际使用的区域
-                int usedWidth = Math.Min(slicesPerRow, desc.Depth) * sliceWidth;
-                int usedHeight = slicesPerColumn * sliceHeight;
-
-                if (usedWidth > imageWidth || usedHeight > imageHeight)
-                {
-                    throw new System.InvalidOperationException(
-                        $"Invalid 3D texture layout. " +
-                        $"Image: {imageWidth}x{imageHeight}, " +
-                        $"Required: {usedWidth}x{usedHeight}");
-                }
+                TtTextureHelper.CalculateAndSetMipLevel(desc, sliceWidth, sliceHeight, false, 4);
 
                 sliceSize = sliceWidth * sliceHeight;
             }
@@ -3240,7 +3045,7 @@ namespace EngineNS.NxRHI
             {
                 if (desc != null)
                 {
-                    LoadPictureDesc(xnd.RootNode, desc);
+                    TtTextureHelper.LoadPictureDesc(xnd.RootNode, desc);
                 }
 
                 var pngNode = xnd.RootNode.TryGetChildNode("PngMips");
@@ -3320,94 +3125,7 @@ namespace EngineNS.NxRHI
                 return null;
             }
         }
-        public static unsafe TtPicDesc LoadPictureDesc(RName name)
-        {
-            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
-            {
-                return LoadPictureDesc(xnd.RootNode);
-            }
-        }
-        public static unsafe void LoadPictureDesc(IO.TtXndNode node, TtPicDesc desc)
-        {
-            var attr = node.TryGetAttribute("Desc");
-            using (var ar = attr.GetReader(null))
-            {
-                //ar.Read(out desc.Desc);
-                uint headSize = 0;
-                ar.Read(out headSize);
-                System.Diagnostics.Debug.Assert(headSize <= sizeof(FPictureDesc));
-                fixed (FPictureDesc* pDesc = &desc.Desc)
-                {
-                    var pDescData = (byte*)pDesc + sizeof(uint);
-                    ar.ReadPtr(pDescData, (int)headSize - sizeof(uint));
-                }
 
-                int len;
-                ar.Read(out len);
-                desc.MipSizes.Clear();
-                desc.BlockDimenstions.Clear();
-                for (int i = 0; i < len; i++)
-                {
-                    Vector3i tmp = new Vector3i();
-                    if (headSize == 20)
-                    {
-                        ar.Read(out tmp.X);
-                        ar.Read(out tmp.Y);
-                        tmp.Z = tmp.X * 4;
-                    }
-                    else
-                    {
-                        ar.Read(out tmp);
-                    }
-                    desc.MipSizes.Add(tmp);
-                    if (attr.Version >= 2)
-                    {
-                        Vector2i blockDimension = new Vector2i();
-                        ar.Read(out blockDimension);
-                        desc.BlockDimenstions.Add(blockDimension);
-                    }
-                }
-
-                if (attr.Version==1)
-                {
-                    Vector2i blockDimension = new Vector2i();
-                    ar.Read(out blockDimension.X);
-                    ar.Read(out blockDimension.Y);
-                    ar.Read(out desc.BlockSize);
-                    desc.BlockDimenstions.Add(blockDimension);
-                }
-                else if(attr.Version>=2)
-                {
-                    ar.Read(out desc.BlockSize);
-                }
-
-                for (int i = 0; i < desc.MipLevel; i++)
-                {
-                    if (i > (desc.BlockDimenstions.Count-1))
-                        continue;
-                    var blockWidth = desc.BlockDimenstions[i].X;
-                    var blockHeight = desc.BlockDimenstions[i].Y;
-                    if (blockWidth % 4!=0 || blockHeight %4!=0)
-                    {
-                        desc.MipLevel = i;
-                        break;
-                    }
-                }
-
-                if (attr.Version >= 3)
-                {
-                    int tempDepth;
-                    ar.Read(out tempDepth);
-                    desc.Depth = tempDepth;
-                }
-            }
-        }
-        public static unsafe TtPicDesc LoadPictureDesc(IO.TtXndNode node)
-        {
-            TtPicDesc desc = new TtPicDesc();
-            LoadPictureDesc(node, desc);
-            return desc;
-        }
         public static unsafe TtTexture LoadTexture2DMipLevel(RName rn, IO.TtXndNode node, TtPicDesc desc, int level, TtTexture oldTexture)
         {
             switch (desc.CompressFormat)
@@ -3756,24 +3474,6 @@ namespace EngineNS.NxRHI
                                     image = StbImageSharp.ImageResultFloat.FromStream(memStream, colorComp);
                                 }
 
-                            // debug test
-                            // 保存 ImageResultFloat为hdr                            //if(false)
-                            //{
-                            //    var fullPath = Path.Combine(Environment.CurrentDirectory, "content/UTest/texture/", string.Format("d{0}.hdr", d));
-                            //    using (var memStream = new System.IO.FileStream(fullPath, System.IO.FileMode.OpenOrCreate))
-                            //    {
-                            //        unsafe
-                            //        {
-                            //            fixed (float* floatPtrDebug = image.Data)
-                            //            {
-                            //                var writer = new StbImageWriteSharp.ImageWriter();
-                            //                writer.WriteHdr(floatPtrDebug, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
-                            //            }
-                            //        }
-                            //    }
-                            //}
-
-
                                 allSlicesData.Add(image.Data);
 
                                 if (d == 0)
@@ -3861,20 +3561,8 @@ namespace EngineNS.NxRHI
             if (pngNode.NativePointer == IntPtr.Zero)
                 return null;
 
-            // 兼容性检测：检查是否存在 Face0 节点，如果不存在则使用旧的属性结构
-            bool useLegacyFormat = true;
-            if (desc.CubeFaces > 1 || desc.Depth > 1)
-            {
-                // 如果是Cube或3D纹理，检查是否有Face节点
-                var testFace = pngNode.TryGetChildNode("Face0");
-                useLegacyFormat = (testFace.NativePointer == IntPtr.Zero);
-            }
-            else
-            {
-                // 如果是普通2D纹理，检查是否有PngMip0属性（旧格式）
-                var testAttr = pngNode.TryGetAttribute("PngMip0");
-                useLegacyFormat = (testAttr.NativePointer != IntPtr.Zero);
-            }
+            // 使用 TtTextureHelper 检测旧格式
+            bool useLegacyFormat = TtTextureHelper.DetectLegacyFormat(pngNode, desc);
 
             // 判断是否为 3D Texture
             bool isTexture3D = desc.IsTexture3D && desc.Depth > 0;
@@ -4460,7 +4148,7 @@ namespace EngineNS.NxRHI
                     if (xnd == null)
                         return null;
 
-                    desc = LoadPictureDesc(xnd.RootNode);
+                    desc = TtTextureHelper.LoadPictureDesc(xnd.RootNode);
 
                     if (mipLevel == -1 || mipLevel > desc.MipLevel)
                         mipLevel = desc.MipLevel;
@@ -4521,7 +4209,7 @@ namespace EngineNS.NxRHI
                     if (xnd == null)
                         return null;
 
-                    desc = LoadPictureDesc(xnd.RootNode);
+                    desc = TtTextureHelper.LoadPictureDesc(xnd.RootNode);
 
                     if (mipLevel == -1 || mipLevel > desc.MipLevel)
                         mipLevel = desc.MipLevel;

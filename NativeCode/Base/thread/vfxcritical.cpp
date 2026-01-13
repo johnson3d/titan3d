@@ -18,21 +18,6 @@ typedef void(WINAPI *FMemoryFinalizer)();
 extern FMemoryFinalizer OnMemoryFinal;
 FMemoryFinalizer SavedOnMemoryFinal;
 
-#if defined(DEBUG_THREAD)
-void VCritical::EnterDebug()
-{
-	m_OwnerThread = vfxThread::GetCurrentThreadId;
-	mThreadName = vfxThread::GetCurrentThreadName();
-	m_LockCount++;
-}
-void VCritical::LeaveDebug()
-{
-	m_OwnerThread = nullptr;
-	mThreadName = nullptr;
-	m_LockCount--;
-}
-#endif
-
 void VCriticalInfoStack::PushLock(LPCSTR file, int line)
 {
 	mStacks.push_back(VCriticalInfo(file, line));
@@ -173,6 +158,9 @@ VStringA VCriticalInfoManager::PrintLockInfo()
 
 VCritical::VCritical()
 {
+#if defined(PLATFORM_WIN)
+	InitializeCriticalSection(&m_Section);
+#else
 	//pthread_mutex_init(&m_Critical, NULL);
 	//PTHREAD_PROCESS_PRIVATE
 	//m_Critical = PTHREAD_MUTEX_INITIALIZER;
@@ -187,28 +175,60 @@ VCritical::VCritical()
 	//pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_PRIVATE);
 	pthread_mutex_init(&m_Critical, &attr);
 	pthread_mutexattr_destroy(&attr);
+#endif
 }
 VCritical::~VCritical()
 {
+#if defined(PLATFORM_WIN)
+	DeleteCriticalSection(&m_Section);
+#else
 	pthread_mutex_destroy(&m_Critical);
+#endif
 }
+
+#if defined(DEBUG_THREAD)
+void VCritical::EnterDebug()
+{
+	m_OwnerThread = vfxThread::GetCurrentThreadId();
+	mThreadName = vfxThread::GetCurrentThreadName();
+	m_LockCount++;
+}
+void VCritical::LeaveDebug()
+{
+	m_OwnerThread = nullptr;
+	mThreadName = nullptr;
+	m_LockCount--;
+}
+#endif
 
 void VCritical::Lock()
 {
+#if defined(PLATFORM_WIN)
+	EnterCriticalSection(&m_Section);
+#else
 	pthread_mutex_lock(&m_Critical);
+#endif
 	EnterDebug();
 }
 
 void VCritical::Unlock()
 {
 	LeaveDebug();
+#if defined(PLATFORM_WIN)
+	LeaveCriticalSection(&m_Section);
+#else
 	pthread_mutex_unlock(&m_Critical);
+#endif
 }
 
-int VCritical::TryLock()
+bool VCritical::TryLock()
 {
-	auto ret = pthread_mutex_trylock(&m_Critical);
-	if (ret == 0)
+#if defined(PLATFORM_WIN)
+	auto ret = TryEnterCriticalSection(&m_Section);
+#else
+	auto ret = (pthread_mutex_trylock(&m_Critical) == 0) ? true : false;
+#endif
+	if (ret)
 		EnterDebug();
 	return ret;
 }

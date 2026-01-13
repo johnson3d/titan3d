@@ -16,7 +16,7 @@
 #if defined(_DEBUG)
 #define DEBUG_THREAD
 #endif
-#define DEBUG_THREAD
+//#define DEBUG_THREAD
 
 #include "../debug/vfxdebug.h"
 #include "../string/vfxstring.h"
@@ -26,7 +26,12 @@ struct VCritical;
 
 struct VCritical
 {
+#if defined(PLATFORM_WIN)
+	CRITICAL_SECTION m_Section;
+#else
 	pthread_mutex_t	m_Critical;
+#endif
+
 #if defined(DEBUG_THREAD)
 	std::atomic<int> m_LockCount = 0;
 	void* m_OwnerThread = nullptr;
@@ -35,34 +40,18 @@ struct VCritical
 	void LeaveDebug();
 #else
 	void EnterDebug()
-	{
-		
+	{	
 	}
 	void LeaveDebug()
-	{
-		
+	{	
 	}
 #endif
 
 	 VCritical();
 	 ~VCritical();
 	void Lock();
-	/*{
-		pthread_mutex_lock(&m_Critical);
-		EnterDebug();
-	}*/
 	void Unlock();
-	/*{
-		LeaveDebug();
-		pthread_mutex_unlock(&m_Critical);
-	}*/
-	int TryLock();
-	/*{
-		auto ret = pthread_mutex_trylock(&m_Critical);
-		if (ret == 0)
-			EnterDebug();
-		return ret;
-	}*/
+	bool TryLock();
 };
 
 struct VSLLock

@@ -245,7 +245,6 @@ namespace EngineNS
                 return mScopeTick_TickManager;
             }
         }
-        bool bRunLoop = false;
         public void TryTickLogic()
         {
             try

@@ -202,7 +202,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 return false;
             var dftLayer = MaterialIdArray[0];
             {
-                var txDesc = NxRHI.TtSrView.LoadPictureDesc(dftLayer.TexDiffuse);
+                var txDesc = NxRHI.TtTextureHelper.LoadPictureDesc(dftLayer.TexDiffuse);
 
                 var desc = new NxRHI.FTextureDesc();
                 desc.SetDefault();
@@ -262,7 +262,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             if (dftLayer.TexNormal != null)
             {
-                var txDesc = NxRHI.TtSrView.LoadPictureDesc(dftLayer.TexNormal);
+                var txDesc = NxRHI.TtTextureHelper.LoadPictureDesc(dftLayer.TexNormal);
 
                 var desc = new NxRHI.FTextureDesc();
                 desc.SetDefault();

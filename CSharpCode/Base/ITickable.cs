@@ -50,7 +50,7 @@ namespace EngineNS
             {
                 if (await i.Initialize(host) == false)
                 {
-                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Error, $"UMemberTickables:{i.GetType().FullName} Initialize failed");
+                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Error, $"TtMemberTickables:{i.GetType().FullName} Initialize failed");
                 }
             }
         }

@@ -136,16 +136,23 @@ namespace EngineNS.GamePlay.Scene
         [Rtti.Meta("")]
         public async Thread.Async.TtTask<TtRenderPolicy> SetRenderPolicyToViewport(TtViewportSlate slate)
         {
-            TtRenderPolicy policy = null;
-            var rpAsset = RPolicyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted();
-            if (rpAsset != null)
+            if (slate.RenderPolicy==null || slate.RenderPolicy.RPolicyName != RPolicyName)
             {
-                policy = rpAsset.CreateRenderPolicy(slate);
-                await policy.Initialize(null);
-                if (slate.Viewport.Width > 1 && slate.Viewport.Height > 1)
-                    policy.OnResize(slate.Viewport.Width, slate.Viewport.Height);
-                slate.RenderPolicy = policy;
-                return policy;
+                TtRenderPolicy policy = null;
+                var rpAsset = await RPolicyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>();
+                if (rpAsset != null)
+                {
+                    policy = rpAsset.CreateRenderPolicy(RPolicyName, slate);
+                    await policy.Initialize(null);
+                    if (slate.Viewport.Width > 1 && slate.Viewport.Height > 1)
+                        policy.OnResize(slate.Viewport.Width, slate.Viewport.Height);
+                    slate.RenderPolicy = policy;
+                    return policy;
+                }
+            }
+            else
+            {
+                return slate.RenderPolicy;
             }
             return null;
         }

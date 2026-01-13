@@ -29,7 +29,7 @@ namespace EngineNS.Editor.Forms
         {
             return 0;
         }
-        public class USceneEditorViewport : EGui.Slate.TtWorldViewportSlate
+        public class TtSceneEditorViewport : EGui.Slate.TtWorldViewportSlate
         {
             public TtSceneEditor HostEditor;
             
@@ -221,7 +221,7 @@ namespace EngineNS.Editor.Forms
             return Scene;
         }
         public GamePlay.Scene.TtScene Scene;
-        public USceneEditorViewport PreviewViewport = new USceneEditorViewport();
+        public TtSceneEditorViewport PreviewViewport = new TtSceneEditorViewport();
         public TtWorldOutliner mWorldOutliner;
         EGui.Controls.TtContentBrowser mContentBrowser = new EGui.Controls.TtContentBrowser();
 

@@ -68,7 +68,7 @@ namespace EngineNS.Editor
                 {
                     return null;
                 }
-                return rpAsset.CreateRenderPolicy(this);
+                return rpAsset.CreateRenderPolicy(policyName, this);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             
             await policy.Initialize(null);

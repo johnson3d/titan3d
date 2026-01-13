@@ -145,7 +145,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         }
         [Rtti.Meta("")]
         public TtPolicyGraph PolicyGraph { get; } = new TtPolicyGraph();
-        public Graphics.Pipeline.TtRenderPolicy CreateRenderPolicy(TtViewportSlate viewport, string endingName = "Copy2SwapChainNode")
+        public Graphics.Pipeline.TtRenderPolicy CreateRenderPolicy(RName rPolicyName, TtViewportSlate viewport, string endingName = "Copy2SwapChainNode")
         {
             var typeDesc = PolicyGraph.PolicyType;
             var policy = Rtti.TtTypeDescManager.CreateInstance(typeDesc) as Graphics.Pipeline.TtRenderPolicy; // new Graphics.Pipeline.URenderPolicy();
@@ -191,6 +191,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                 policy.Dispose();
                 return null;
             }
+            policy.RPolicyName = rPolicyName;
             return policy;
         }
     }

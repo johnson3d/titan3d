@@ -79,7 +79,6 @@ namespace EngineNS.Graphics.Pipeline
             get => mRenderPolicy; 
             set
             {
-                CoreSDK.DisposeObject(ref mRenderPolicy);
                 mRenderPolicy = value;
             }
         }
@@ -442,7 +441,7 @@ namespace EngineNS.Graphics.Pipeline
         [Rtti.Meta("")]
         public virtual async Thread.Async.TtTask<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
         {
-            var policy = policyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted().CreateRenderPolicy(this);
+            var policy = policyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted().CreateRenderPolicy(policyName, this);
             if (OnInitialize != null)
             {
                 await OnInitialize(this, application, policy, zMin, zMax);
@@ -681,9 +680,9 @@ namespace EngineNS.Graphics.Pipeline
             World.CameraOffset = offset;
             RenderPolicy.DefaultCamera.mCoreObject.SetMatrixStartPosition(in offset);
         }
-        public virtual async System.Threading.Tasks.Task Initialize(RName policyName)
+        public virtual async Thread.Async.TtTask Initialize(RName policyName)
         {
-            RenderPolicy = policyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted().CreateRenderPolicy(null);
+            RenderPolicy = policyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted().CreateRenderPolicy(policyName,  null);
             await RenderPolicy.Initialize(null);
 
             World = new GamePlay.TtWorld(null);

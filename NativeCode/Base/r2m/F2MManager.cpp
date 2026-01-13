@@ -8,14 +8,14 @@ F2MManager* F2MManager::Instance = nullptr;
 
 VRes2Memory* VRes2Memory::CreateFromFile(LPCSTR pszFile)
 {
-	auto result = F2MManager::Instance->GetF2M(pszFile);
+	auto result = F2MManager::Instance->GetFile2Memory(pszFile);
 	//result->AddRef();
 	return result;
 }
 
 //////////////////////////////////////////////////////////////////////////
 extern "C"  void vfxMemory_SetDebugInfo(void* memory, LPCSTR info);
-VFile2Memory* F2MManager::_F2M(LPCSTR psz, vBOOL bShareWrite/* = FALSE*/)
+VFile2Memory* F2MManager::CreateFile2Memory(LPCSTR psz, vBOOL bShareWrite/* = FALSE*/)
 {
 	if (psz == NULL || psz[0] == 0)
 		return NULL;
@@ -29,7 +29,7 @@ VFile2Memory* F2MManager::_F2M(LPCSTR psz, vBOOL bShareWrite/* = FALSE*/)
 	return pFM;
 }
 
-VRes2Memory* F2MManager::GetF2M(LPCSTR file)
+VRes2Memory* F2MManager::GetFile2Memory(LPCSTR file)
 {
 	if (file == nullptr)
 		return nullptr;
@@ -39,7 +39,7 @@ VRes2Memory* F2MManager::GetF2M(LPCSTR file)
 		//1.read from OS file system 
 		//2.read from apk on android platform
 		//3.read from mounted tpak
-		VRes2Memory* f2m = _F2M(file, FALSE);
+		VRes2Memory* f2m = CreateFile2Memory(file, FALSE);
 		if (f2m == nullptr)
 		{
 			for (auto p : mMountPaks)

@@ -49,13 +49,14 @@ namespace EngineNS.Graphics.Pipeline
         {
             NodeList.Host = this;
         }
+        public RName RPolicyName { get; set; }
         public static async Thread.Async.TtTask<TtRenderPolicy> CreatRenderPolicy(RName name)
         {
             Graphics.Pipeline.TtRenderPolicy policy = null;
             var rpAsset = name.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted();
             if (rpAsset != null)
             {
-                policy = rpAsset.CreateRenderPolicy(null);
+                policy = rpAsset.CreateRenderPolicy(name, null);
             }
             await policy.Initialize(null);
             return policy;

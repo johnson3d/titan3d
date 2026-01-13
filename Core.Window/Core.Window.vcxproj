@@ -279,7 +279,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="Titan.natvis" />
+    <Natvis Include="Titan.natvis">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </Natvis>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\3rd\native\crunch\crnlib\crnlib.2008.vcxproj">

@@ -49,7 +49,7 @@ namespace EngineNS.EGui.Slate
             var rpAsset = policyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted();
             if (rpAsset != null)
             {
-                policy = rpAsset.CreateRenderPolicy(this);
+                policy = rpAsset.CreateRenderPolicy(policyName, this);
             }
             if (false == await InitializeImpl(application, policy, zMin, zMax))
                 return false;

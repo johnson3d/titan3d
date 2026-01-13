@@ -114,13 +114,9 @@ void VFile2Memory::ClearCache()
 
 bool VFile2Memory::TryReleaseHolder()
 {
-	if (mLocker.TryLock() == 0)
+	if (mLocker.TryLock())
 	{
 		Close();
-		if (mPtrRef == 0)
-		{
-			ClearCache();
-		}
 		mLocker.Unlock();
 		return true;
 	}

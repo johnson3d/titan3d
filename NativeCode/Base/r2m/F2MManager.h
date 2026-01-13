@@ -22,9 +22,9 @@ public:
 
 	int TryReleaseFile(VRes2Memory* exlude, int maxRelease);
 
-	VRes2Memory* GetF2M(LPCSTR file);
+	VRes2Memory* GetFile2Memory(LPCSTR file);
 private:
-	static VFile2Memory* _F2M(LPCSTR psz, vBOOL bShareWrite/* = FALSE*/);
+	static VFile2Memory* CreateFile2Memory(LPCSTR psz, vBOOL bShareWrite/* = FALSE*/);
 };
 
 
