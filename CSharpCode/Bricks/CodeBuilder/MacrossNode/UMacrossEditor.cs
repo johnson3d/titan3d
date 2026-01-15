@@ -883,13 +883,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //}
             ////////////////////////
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
-            if(Macross.TtMacrossDebugger.Instance.CurrrentBreak != null)
-            {
-                if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
+            if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
                     ref mToolBtnDatas[(int)EToolBarButton.Run].IsMouseDown, ref mToolBtnDatas[(int)EToolBarButton.Run].IsMouseHover, null, "Run", false, -1, 0, spacing))
-                {
-                    Macross.TtMacrossDebugger.Instance.Run();
-                }
+            {
+                Macross.TtMacrossDebugger.Instance.Run();
             }
                 
             EGui.UIProxy.Toolbar.EndToolbar();

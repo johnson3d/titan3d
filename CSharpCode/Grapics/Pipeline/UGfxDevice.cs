@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using EngineNS.NxRHI;
+using Org.BouncyCastle.Asn1.Mozilla;
 
 namespace EngineNS.Graphics.Pipeline
 {
@@ -73,13 +74,16 @@ namespace EngineNS.Graphics.Pipeline
 
             return true;
         }
+        public bool IsRenderingFrame { get; private set; } = false;
         public void BeginFrame()
         {
+            IsRenderingFrame = true;
             RenderContext?.BeginFrame();
         }
         public void EndFrame()
         {
             RenderContext?.EndFrame();
+            IsRenderingFrame = false;
         }
         public override void TickModule(TtEngine engine)
         {

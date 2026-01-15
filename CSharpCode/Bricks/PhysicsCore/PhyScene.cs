@@ -205,21 +205,26 @@ namespace EngineNS.Bricks.PhysicsCore
 
             if (actor1 != null && actor2 != null)
             {
-                var task = TtEngine.Instance.EventPoster.CreatePostTask();
-                task.UserArguments.Obj1 = actor1;
-                task.UserArguments.Obj2 = actor2;
-                task.PostAction = static (state) =>
+                if (TtEngine.Instance.PhyModule.PhyContext.PhysicsConfig.IsCallbackInLogicThread)
                 {
-                    var actor1 = state.UserArguments.Obj1 as TtPhyActor;
-                    var actor2 = state.UserArguments.Obj2 as TtPhyActor;
+                    var task = TtEngine.Instance.EventPoster.CreatePostTask();
+                    task.UserArguments.Obj1 = actor1;
+                    task.UserArguments.Obj2 = actor2;
+                    task.PostAction = static (state) =>
+                    {
+                        var actor1 = state.UserArguments.Obj1 as TtPhyActor;
+                        var actor2 = state.UserArguments.Obj2 as TtPhyActor;
+                        actor1.RigidBodyNode.OnContact(actor1.TagNode, actor2.TagNode);
+                        actor2.RigidBodyNode.OnContact(actor2.TagNode, actor1.TagNode);
+                        return true;
+                    };
+                    TtEngine.Instance.EventPoster.PostTask(Thread.Async.EAsyncTarget.Logic, task);
+                }
+                else
+                {
                     actor1.RigidBodyNode.OnContact(actor1.TagNode, actor2.TagNode);
                     actor2.RigidBodyNode.OnContact(actor2.TagNode, actor1.TagNode);
-                    return true;
-                };
-                TtEngine.Instance.EventPoster.PostTask(Thread.Async.EAsyncTarget.Logic, task);
-
-                //actor1.RigidBodyNode.OnContact(actor1.TagNode, actor2.TagNode);
-                //actor2.RigidBodyNode.OnContact(actor2.TagNode, actor1.TagNode);
+                }
             }
         }
         public unsafe void OnTrigger(void* arg0, FPhyTriggerPair* arg1, uint arg2)
@@ -233,37 +238,49 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 if (EPhyPairFlag.eNOTIFY_TOUCH_FOUND == (arg1->status & EPhyPairFlag.eNOTIFY_TOUCH_FOUND))
                 {
-                    var task = TtEngine.Instance.EventPoster.CreatePostTask();
-                    task.UserArguments.Obj1 = triggerActor;
-                    task.UserArguments.Obj2 = otherController;
-                    task.PostAction = static (state) =>
+                    if (TtEngine.Instance.PhyModule.PhyContext.PhysicsConfig.IsCallbackInLogicThread)
                     {
-                        var triggerActor = state.UserArguments.Obj1 as TtPhyActor;
-                        var otherController = state.UserArguments.Obj2 as TtPhyController;
+                        var task = TtEngine.Instance.EventPoster.CreatePostTask();
+                        task.UserArguments.Obj1 = triggerActor;
+                        task.UserArguments.Obj2 = otherController;
+                        task.PostAction = static (state) =>
+                        {
+                            var triggerActor = state.UserArguments.Obj1 as TtPhyActor;
+                            var otherController = state.UserArguments.Obj2 as TtPhyController;
+                            triggerActor.RigidBodyNode.OnBeginTrigger(triggerActor.TagNode, otherController.TagNode);
+                            return true;
+                        };
+                        TtEngine.Instance.EventPoster.PostTask(Thread.Async.EAsyncTarget.Logic, task);
+                    }
+                    else
+                    {
                         triggerActor.RigidBodyNode.OnBeginTrigger(triggerActor.TagNode, otherController.TagNode);
-                        return true;
-                    };
-                    TtEngine.Instance.EventPoster.PostTask(Thread.Async.EAsyncTarget.Logic, task);
-                    //triggerActor.RigidBodyNode.OnBeginTrigger(triggerActor.TagNode, otherController.TagNode);
-                    //otherActor.RigidBodyNode.OnBeginTrigger(otherActor.TagNode, triggerActor.TagNode);
+                    }
+
                     return;
                 }
 
                 if (EPhyPairFlag.eNOTIFY_TOUCH_LOST == (arg1->status & EPhyPairFlag.eNOTIFY_TOUCH_LOST))
                 {
-                    var task = TtEngine.Instance.EventPoster.CreatePostTask();
-                    task.UserArguments.Obj1 = triggerActor;
-                    task.UserArguments.Obj2 = otherController;
-                    task.PostAction = static (state) =>
+                    if (TtEngine.Instance.PhyModule.PhyContext.PhysicsConfig.IsCallbackInLogicThread)
                     {
-                        var triggerActor = state.UserArguments.Obj1 as TtPhyActor;
-                        var otherController = state.UserArguments.Obj2 as TtPhyController;
-                        triggerActor.RigidBodyNode.OnBeginTrigger(triggerActor.TagNode, otherController.TagNode);
-                        return true;
-                    };
-                    TtEngine.Instance.EventPoster.PostTask(Thread.Async.EAsyncTarget.Logic, task);
-                    //triggerActor.RigidBodyNode.OnEndTrigger(triggerActor.TagNode, otherController.TagNode);
-                    //otherActor.RigidBodyNode.OnEndTrigger(otherActor.TagNode, triggerActor.TagNode);
+                        var task = TtEngine.Instance.EventPoster.CreatePostTask();
+                        task.UserArguments.Obj1 = triggerActor;
+                        task.UserArguments.Obj2 = otherController;
+                        task.PostAction = static (state) =>
+                        {
+                            var triggerActor = state.UserArguments.Obj1 as TtPhyActor;
+                            var otherController = state.UserArguments.Obj2 as TtPhyController;
+                            triggerActor.RigidBodyNode.OnBeginTrigger(triggerActor.TagNode, otherController.TagNode);
+                            return true;
+                        };
+                        TtEngine.Instance.EventPoster.PostTask(Thread.Async.EAsyncTarget.Logic, task);
+                    }
+                    else
+                    {
+                        triggerActor.RigidBodyNode.OnEndTrigger(triggerActor.TagNode, otherController.TagNode);
+                    }
+
                     return;
                 }
             }
@@ -273,41 +290,51 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 if (EPhyPairFlag.eNOTIFY_TOUCH_FOUND == (arg1->status & EPhyPairFlag.eNOTIFY_TOUCH_FOUND))
                 {
-                    var task = TtEngine.Instance.EventPoster.CreatePostTask();
-                    task.UserArguments.Obj1 = triggerActor;
-                    task.UserArguments.Obj2 = otherActor;
-                    task.PostAction = static (state) =>
+                    if (TtEngine.Instance.PhyModule.PhyContext.PhysicsConfig.IsCallbackInLogicThread)
                     {
-                        var triggerActor = state.UserArguments.Obj1 as TtPhyActor;
-                        var otherActor = state.UserArguments.Obj2 as TtPhyActor;
-                        triggerActor.RigidBodyNode.OnBeginTrigger(triggerActor.TagNode, otherActor.TagNode);
-                        otherActor.RigidBodyNode.OnBeginTrigger(otherActor.TagNode, triggerActor.TagNode);
-                        return true;
-                    };
-                    TtEngine.Instance.EventPoster.PostTask(Thread.Async.EAsyncTarget.Logic, task);
+                        var task = TtEngine.Instance.EventPoster.CreatePostTask();
+                        task.UserArguments.Obj1 = triggerActor;
+                        task.UserArguments.Obj2 = otherActor;
+                        task.PostAction = static (state) =>
+                        {
+                            var triggerActor = state.UserArguments.Obj1 as TtPhyActor;
+                            var otherActor = state.UserArguments.Obj2 as TtPhyActor;
+                            triggerActor.RigidBodyNode.OnBeginTrigger(triggerActor.TagNode, otherActor.TagNode);
+                            otherActor.RigidBodyNode.OnBeginTrigger(otherActor.TagNode, triggerActor.TagNode);
+                            return true;
+                        };
+                        TtEngine.Instance.EventPoster.PostTask(Thread.Async.EAsyncTarget.Logic, task);
+                    }
+                    else
+                    {
+                        triggerActor.RigidBodyNode.OnBeginTrigger(triggerActor.TagNode, otherActor.TagNode);                       
+                    }
 
-                    //triggerActor.RigidBodyNode.OnBeginTrigger(triggerActor.TagNode, otherActor.TagNode);
-                    //otherActor.RigidBodyNode.OnBeginTrigger(otherActor.TagNode, triggerActor.TagNode);
                     return;
                 }
 
                 if (EPhyPairFlag.eNOTIFY_TOUCH_LOST == (arg1->status & EPhyPairFlag.eNOTIFY_TOUCH_LOST))
                 {
-                    var task = TtEngine.Instance.EventPoster.CreatePostTask();
-                    task.UserArguments.Obj1 = triggerActor;
-                    task.UserArguments.Obj2 = otherActor;
-                    task.PostAction = static (state) =>
+                    if (TtEngine.Instance.PhyModule.PhyContext.PhysicsConfig.IsCallbackInLogicThread)
                     {
-                        var triggerActor = state.UserArguments.Obj1 as TtPhyActor;
-                        var otherActor = state.UserArguments.Obj2 as TtPhyActor;
+                        var task = TtEngine.Instance.EventPoster.CreatePostTask();
+                        task.UserArguments.Obj1 = triggerActor;
+                        task.UserArguments.Obj2 = otherActor;
+                        task.PostAction = static (state) =>
+                        {
+                            var triggerActor = state.UserArguments.Obj1 as TtPhyActor;
+                            var otherActor = state.UserArguments.Obj2 as TtPhyActor;
+                            triggerActor.RigidBodyNode.OnEndTrigger(triggerActor.TagNode, otherActor.TagNode);
+                            otherActor.RigidBodyNode.OnEndTrigger(otherActor.TagNode, triggerActor.TagNode);
+                            return true;
+                        };
+                        TtEngine.Instance.EventPoster.PostTask(Thread.Async.EAsyncTarget.Logic, task);
+                    }
+                    else
+                    {
                         triggerActor.RigidBodyNode.OnEndTrigger(triggerActor.TagNode, otherActor.TagNode);
-                        otherActor.RigidBodyNode.OnEndTrigger(otherActor.TagNode, triggerActor.TagNode);
-                        return true;
-                    };
-                    TtEngine.Instance.EventPoster.PostTask(Thread.Async.EAsyncTarget.Logic, task);
+                    }
 
-                    //triggerActor.RigidBodyNode.OnEndTrigger(triggerActor.TagNode, otherActor.TagNode);
-                    //otherActor.RigidBodyNode.OnEndTrigger(otherActor.TagNode, triggerActor.TagNode);
                     return;
                 }
             }

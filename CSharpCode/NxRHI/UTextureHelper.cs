@@ -1,6 +1,7 @@
 // UTextureHelper.cs
 // 纹理处理辅助函数集合，包含 mipmap 处理和压缩格式选择
 
+using BCnEncoder.Shared;
 using EngineNS.Bricks.ImageDecoder;
 using EngineNS.IO;
 using StbImageSharp;
@@ -508,6 +509,158 @@ namespace EngineNS.NxRHI
                 }
             }
         }
+        #endregion
+
+        #region 优化：2D Texture 批量生成 Mipmap
+
+        /// <summary>
+        /// 批量生成 2D Texture 的所有 mipmap 层级（HDR/Float）
+        /// 优化：级联降采样，避免重复从 mip0 开始降采样
+        /// </summary>
+        public static StbImageSharp.ImageResultFloat[] GenerateAllMips2DOptimized(
+            StbImageSharp.ImageResultFloat srcImage, int mipLevel)
+        {
+            StbImageSharp.ImageResultFloat[] mipLevels = new StbImageSharp.ImageResultFloat[mipLevel];
+            mipLevels[0] = srcImage; // Mip0 就是原始数据
+
+            // 级联降采样：从 Mip0 -> Mip1 -> Mip2 -> ...
+            for (int j = 1; j < mipLevel; j++)
+            {
+                int prevWidth = mipLevels[j - 1].Width;
+                int prevHeight = mipLevels[j - 1].Height;
+                int mipWidth = Math.Max(1, prevWidth / 2);
+                int mipHeight = Math.Max(1, prevHeight / 2);
+
+                mipLevels[j] = StbImageSharp.ImageProcessor.GetBoxDownSampler(
+                    mipLevels[j - 1], mipWidth, mipHeight);
+            }
+
+            return mipLevels;
+        }
+
+        /// <summary>
+        /// 批量生成 2D Texture 的所有 mipmap 层级（PNG/LDR）
+        /// 优化：级联降采样，避免重复从 mip0 开始降采样
+        /// </summary>
+        public static StbImageSharp.TtMemImage[] GenerateAllMips2DOptimizedPng(
+            StbImageSharp.TtMemImage srcImage, int mipLevel)
+        {
+            StbImageSharp.TtMemImage[] mipLevels = new StbImageSharp.TtMemImage[mipLevel];
+            mipLevels[0] = srcImage; // Mip0 就是原始数据
+
+            // 级联降采样：从 Mip0 -> Mip1 -> Mip2 -> ...
+            for (int j = 1; j < mipLevel; j++)
+            {
+                int prevWidth = mipLevels[j - 1].Width;
+                int prevHeight = mipLevels[j - 1].Height;
+                int mipWidth = Math.Max(1, prevWidth / 2);
+                int mipHeight = Math.Max(1, prevHeight / 2);
+
+                mipLevels[j] = StbImageSharp.ImageProcessor.GetBoxDownSampler(
+                    mipLevels[j - 1], mipWidth, mipHeight);
+            }
+
+            return mipLevels;
+        }
+
+        #endregion
+
+        #region 优化：3D Texture 批量生成 Mipmap
+
+        /// <summary>
+        /// 批量生成 3D Texture 的所有 mipmap 层级（HDR/Float）
+        /// 优化：一次性提取所有 slice，级联降采样，避免重复提取和重复降采样
+        /// </summary>
+        public static unsafe void GenerateAllMips3DOptimized(
+            float[] srcData, int srcWidth, int srcHeight,
+            int sliceWidth, int sliceHeight, int depth,
+            int slicesPerRow, int channelsPerPixel,
+            out StbImageSharp.ImageResultFloat[] allSlices)
+        {
+            // 一次性提取所有 slice（从原始数据）
+            allSlices = new StbImageSharp.ImageResultFloat[depth];
+            for (int d = 0; d < depth; d++)
+            {
+                float[] sliceData = ExtractSliceFromGridLayoutFloat(
+                    srcData, srcWidth, srcHeight,
+                    sliceWidth, sliceHeight, d,
+                    slicesPerRow, channelsPerPixel);
+
+                fixed (float* floatPtr = sliceData)
+                {
+                    allSlices[d] = StbImageSharp.ImageResultFloat.FromResult(
+                        floatPtr, sliceWidth, sliceHeight,
+                        (StbImageSharp.ColorComponents)channelsPerPixel,
+                        (StbImageSharp.ColorComponents)channelsPerPixel);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 批量生成 3D Texture 的所有 mipmap 层级（PNG/LDR）
+        /// 优化：一次性提取所有 slice，级联降采样，避免重复提取和重复降采样
+        /// </summary>
+        public static void GenerateAllMips3DOptimizedPng(
+            byte[] srcData, int srcWidth, int srcHeight,
+            int sliceWidth, int sliceHeight, int depth,
+            int slicesPerRow, out StbImageSharp.TtMemImage[] allSlices)
+        {
+            // 一次性提取所有 slice（从原始数据）
+            allSlices = new StbImageSharp.TtMemImage[depth];
+            for (int d = 0; d < depth; d++)
+            {
+                byte[] sliceData = ExtractSliceFromGridLayout(
+                    srcData, srcWidth, srcHeight,
+                    sliceWidth, sliceHeight, d,
+                    slicesPerRow, 4);
+
+                allSlices[d] = new StbImageSharp.TtMemImage();
+                allSlices[d].Data = sliceData;
+                allSlices[d].Width = sliceWidth;
+                allSlices[d].Height = sliceHeight;
+                allSlices[d].Comp = StbImageSharp.ColorComponents.RedGreenBlueAlpha;
+            }
+        }
+
+        /// <summary>
+        /// 批量提取 3D Texture 的所有 slice 数据（用于 BC6 压缩）
+        /// 优化：避免在 mipmap 循环中重复提取 slice 数据
+        /// </summary>
+        public static ColorRgbFloat[] ExtractAllSlicesForBc6(
+            float[] srcData, int srcWidth, int srcHeight,
+            int sliceWidth, int sliceHeight, int depth,
+            int slicesPerRow, int channelsPerPixel)
+        {
+            // 每个 slice 的大小
+            int sliceSize = sliceWidth * sliceHeight;
+            // 所有 slice 的总大小
+            int totalSize = sliceSize * depth;
+
+            ColorRgbFloat[] allSlices = new ColorRgbFloat[totalSize];
+
+            // 一次性提取所有 slice，复用 ExtractSliceFromGridLayoutFloat 方法
+            for (int d = 0; d < depth; d++)
+            {
+                // 使用现有方法提取 float[] 数据
+                float[] sliceDataFloat = ExtractSliceFromGridLayoutFloat(
+                    srcData, srcWidth, srcHeight,
+                    sliceWidth, sliceHeight, d,
+                    slicesPerRow, channelsPerPixel);
+
+                // 转换为 ColorRgbFloat[] 并拷贝到目标位置
+                int dstOffset = d * sliceSize;
+                for (int i = 0; i < sliceSize; i++)
+                {
+                    int floatIndex = i * channelsPerPixel;
+                    allSlices[dstOffset + i].r = sliceDataFloat[floatIndex];
+                    allSlices[dstOffset + i].g = sliceDataFloat[floatIndex + 1];
+                    allSlices[dstOffset + i].b = sliceDataFloat[floatIndex + 2];
+                }
+            }
+
+            return allSlices;
+        }
+
         #endregion
     }
 }

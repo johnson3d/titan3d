@@ -2270,45 +2270,52 @@ namespace EngineNS.NxRHI
             {
                 var faceNode = hdrMipsNode.GetOrAddNode($"Face{i}", 0, 0, true);
 
-                // 3D Texture：创建 DepthSlices 节点存储每一层的数据
-                XndNode depthSlicesNode = new XndNode();
+                // 优化：统一处理 2D 和 3D Texture 的 mipmap 生成
                 if (desc.IsTexture3D && desc.Depth > 0)
                 {
-                    depthSlicesNode = faceNode.GetOrAddNode("DepthSlices", 0, 0, true);
-                }
+                    // ===== 3D Texture 处理 =====
+                    var depthSlicesNode = faceNode.GetOrAddNode("DepthSlices", 0, 0, true);
 
-                for (uint j = 0; j < desc.MipLevel; j++)
-                {
-                    if (desc.IsTexture3D && desc.Depth > 0)
+                    // Step 1: 一次性提取所有原始 slice
+                    StbImageSharp.ImageResultFloat[] allOriginalSlices;
+                    TtTextureHelper.GenerateAllMips3DOptimized(
+                        curImage.Data, imageWidth, imageHeight,
+                        sliceWidth, sliceHeight, desc.Depth,
+                        slicesPerRow, (int)curImage.Comp,
+                        out allOriginalSlices);
+
+                    // Step 2: 级联生成所有 mipmap 层级
+                    StbImageSharp.ImageResultFloat[][] allMipLevels = new StbImageSharp.ImageResultFloat[desc.MipLevel][];
+                    allMipLevels[0] = allOriginalSlices; // Mip0 就是原始数据
+
+                    // Step 3: 从 Mip0 级联降采样生成后续各级
+                    for (uint j = 1; j < desc.MipLevel; j++)
                     {
-                        // 3D Texture：为每个 mipmap 创建一个节点，包含所有 depth 层
-                        var mipNode = depthSlicesNode.GetOrAddNode($"Mip{j}", 0, 0, true);
-
+                        int prevMipIndex = (int)j - 1;
+                        int mipWidth = Math.Max(1, sliceWidth >> (int)j);
+                        int mipHeight = Math.Max(1, sliceHeight >> (int)j);
                         int mipDepth = Math.Max(1, desc.Depth >> (int)j);
 
-                        // 对每个 depth slice 进行降采样并保存
+                        allMipLevels[j] = new StbImageSharp.ImageResultFloat[mipDepth];
+
+                        // 从上一级的每个 slice 降采样到当前级
                         for (int d = 0; d < mipDepth; d++)
                         {
-                            // 使用 TtTextureHelper 提取当前 slice 的原始数据
-                            float[] sliceData = TtTextureHelper.ExtractSliceFromGridLayoutFloat(
-                                curImage.Data, imageWidth, imageHeight,
-                                sliceWidth, sliceHeight, d,
-                                slicesPerRow, (int)curImage.Comp);
+                            allMipLevels[j][d] = StbImageSharp.ImageProcessor.GetBoxDownSampler(
+                                allMipLevels[prevMipIndex][d], mipWidth, mipHeight);
+                        }
+                    }
 
-                            // 为当前 slice 创建 ImageResultFloat
-                            var sliceImage = new StbImageSharp.ImageResultFloat();
-                            unsafe
-                            {
-                                fixed (float* floatPtr = sliceData)
-                                {
-                                    sliceImage = StbImageSharp.ImageResultFloat.FromResult(floatPtr, sliceWidth, sliceHeight, curImage.Comp, curImage.Comp);
-                                }
-                            }
+                    // Step 4: 保存所有 mipmap 数据到 XND
+                    for (uint j = 0; j < desc.MipLevel; j++)
+                    {
+                        var mipNode = depthSlicesNode.GetOrAddNode($"Mip{j}", 0, 0, true);
+                        int mipDepth = allMipLevels[j].Length;
 
-                            // 使用 TtTextureHelper 降采样到目标 mipmap 层级
-                            StbImageSharp.ImageResultFloat downsampledSlice = TtTextureHelper.DownsampleToMipLevelFloat(sliceImage, j, out int currentWidth, out int currentHeight);
+                        for (int d = 0; d < mipDepth; d++)
+                        {
+                            var downsampledSlice = allMipLevels[j][d];
 
-                            // 保存降采样后的 slice（直接在 mipNode 下创建 attribute）
                             using (var memStream = new System.IO.MemoryStream())
                             {
                                 var writer = new StbImageWriteSharp.ImageWriter();
@@ -2341,21 +2348,18 @@ namespace EngineNS.NxRHI
                             }
                         }
                     }
-                    else
-                    {
-                        // 2D Texture：原有逻辑
-                        int currentMipLevel = (int)j;
-                        StbImageSharp.ImageResultFloat currentImage = curImage;
-                        int currentWidth = width;
-                        int currentHeight = height;
+                }
+                else
+                {
+                    // ===== 2D Texture 处理 =====
+                    // 优化：级联生成所有 mipmap 层级
+                    StbImageSharp.ImageResultFloat[] mipLevels = TtTextureHelper.GenerateAllMips2DOptimized(
+                        curImage, (int)desc.MipLevel);
 
-                        // 降采样到目标 mipmap 层级
-                        for (int m = 0; m < j; m++)
-                        {
-                            currentWidth = Math.Max(1, currentWidth / 2);
-                            currentHeight = Math.Max(1, currentHeight / 2);
-                            currentImage = StbImageSharp.ImageProcessor.GetBoxDownSampler(currentImage, currentWidth, currentHeight);
-                        }
+                    // 保存所有 mipmap 数据到 XND
+                    for (uint j = 0; j < desc.MipLevel; j++)
+                    {
+                        var currentImage = mipLevels[j];
 
                         using (var memStream = new System.IO.MemoryStream())
                         {
@@ -2370,7 +2374,7 @@ namespace EngineNS.NxRHI
                             }
 
                             var hdrData = memStream.ToArray();
-                            var attr = faceNode.GetOrAddAttribute($"HdrMip{currentMipLevel}", 0, 0, true);
+                            var attr = faceNode.GetOrAddAttribute($"HdrMip{j}", 0, 0, true);
                             using (var ar = attr.GetWriter((ulong)memStream.Position))
                             {
                                 ar.WriteNoSize(hdrData, (int)memStream.Position);
@@ -2475,42 +2479,51 @@ namespace EngineNS.NxRHI
             {
                 var faceNode = pngMipsNode.GetOrAddNode($"Face{i}", 0, 0, true);
 
-                // 3D Texture：创建 DepthSlices 节点存储每一层的数据
-                XndNode depthSlicesNode = new XndNode();
+                // 优化：统一处理 2D 和 3D Texture 的 mipmap 生成
                 if (desc.IsTexture3D && desc.Depth > 0)
                 {
-                    depthSlicesNode = faceNode.GetOrAddNode("DepthSlices", 0, 0, true);
-                }
+                    // ===== 3D Texture 处理 =====
+                    var depthSlicesNode = faceNode.GetOrAddNode("DepthSlices", 0, 0, true);
 
-                for (uint j = 0; j < desc.MipLevel; j++)
-                {
-                    if (desc.IsTexture3D && desc.Depth > 0)
+                    // Step 1: 一次性提取所有原始 slice
+                    StbImageSharp.TtMemImage[] allOriginalSlices;
+                    TtTextureHelper.GenerateAllMips3DOptimizedPng(
+                        curImage.Data, imageWidth, imageHeight,
+                        sliceWidth, sliceHeight, desc.Depth,
+                        slicesPerRow, out allOriginalSlices);
+
+                    // Step 2: 级联生成所有 mipmap 层级
+                    StbImageSharp.TtMemImage[][] allMipLevels = new StbImageSharp.TtMemImage[desc.MipLevel][];
+                    allMipLevels[0] = allOriginalSlices; // Mip0 就是原始数据
+
+                    // Step 3: 从 Mip0 级联降采样生成后续各级
+                    for (uint j = 1; j < desc.MipLevel; j++)
                     {
-                        // 3D Texture：为每个 mipmap 创建一个节点，包含所有 depth 层
-                        var mipNode = depthSlicesNode.GetOrAddNode($"Mip{j}", 0, 0, true);
-
+                        int prevMipIndex = (int)j - 1;
+                        int mipWidth = Math.Max(1, sliceWidth >> (int)j);
+                        int mipHeight = Math.Max(1, sliceHeight >> (int)j);
                         int mipDepth = Math.Max(1, desc.Depth >> (int)j);
 
-                        // 对每个 depth slice 进行降采样并保存
+                        allMipLevels[j] = new StbImageSharp.TtMemImage[mipDepth];
+
+                        // 从上一级的每个 slice 降采样到当前级
                         for (int d = 0; d < mipDepth; d++)
                         {
-                            // 使用 TtTextureHelper 提取当前 slice 的原始数据
-                            byte[] sliceData = TtTextureHelper.ExtractSliceFromGridLayout(
-                                curImage.Data, imageWidth, imageHeight,
-                                sliceWidth, sliceHeight, d,
-                                slicesPerRow, 4);
+                            allMipLevels[j][d] = StbImageSharp.ImageProcessor.GetBoxDownSampler(
+                                allMipLevels[prevMipIndex][d], mipWidth, mipHeight);
+                        }
+                    }
 
-                            // 为当前 slice 创建 TtMemImage
-                            var sliceImage = new StbImageSharp.TtMemImage();
-                            sliceImage.Data = sliceData;
-                            sliceImage.Width = sliceWidth;
-                            sliceImage.Height = sliceHeight;
-                            sliceImage.Comp = StbImageSharp.ColorComponents.RedGreenBlueAlpha;
+                    // Step 4: 保存所有 mipmap 数据到 XND
+                    for (uint j = 0; j < desc.MipLevel; j++)
+                    {
+                        var mipNode = depthSlicesNode.GetOrAddNode($"Mip{j}", 0, 0, true);
+                        int mipDepth = allMipLevels[j].Length;
 
-                            // 使用 TtTextureHelper 降采样到目标 mipmap 层级
-                            StbImageSharp.TtMemImage downsampledSlice = TtTextureHelper.DownsampleToMipLevel(sliceImage, j, out int currentWidth, out int currentHeight);
+                        for (int d = 0; d < mipDepth; d++)
+                        {
+                            var downsampledSlice = allMipLevels[j][d];
 
-                            // 保存降采样后的 slice（直接在 mipNode 下创建 attribute）
                             using (var memStream = new System.IO.MemoryStream(downsampledSlice.Data.Length))
                             {
                                 var writer = new StbImageWriteSharp.ImageWriter();
@@ -2536,21 +2549,18 @@ namespace EngineNS.NxRHI
                             }
                         }
                     }
-                    else
-                    {
-                        // 2D Texture（Cube Texture的每个面）
-                        int currentMipLevel = (int)j;
-                        StbImageSharp.TtMemImage currentImage = curImage;
-                        int currentWidth = width;
-                        int currentHeight = height;
+                }
+                else
+                {
+                    // ===== 2D Texture 处理 =====
+                    // 优化：级联生成所有 mipmap 层级
+                    StbImageSharp.TtMemImage[] mipLevels = TtTextureHelper.GenerateAllMips2DOptimizedPng(
+                        curImage, (int)desc.MipLevel);
 
-                        // 降采样到目标 mipmap 层级
-                        for (int m = 0; m < j; m++)
-                        {
-                            currentWidth = Math.Max(1, currentWidth / 2);
-                            currentHeight = Math.Max(1, currentHeight / 2);
-                            currentImage = StbImageSharp.ImageProcessor.GetBoxDownSampler(currentImage, currentWidth, currentHeight);
-                        }
+                    // 保存所有 mipmap 数据到 XND
+                    for (uint j = 0; j < desc.MipLevel; j++)
+                    {
+                        var currentImage = mipLevels[j];
 
                         using (var memStream = new System.IO.MemoryStream(currentImage.Data.Length))
                         {
@@ -2558,7 +2568,7 @@ namespace EngineNS.NxRHI
                             writer.WritePng(currentImage.Data, currentImage.Width, currentImage.Height, GetImageWriteFormat(currentImage), memStream);
 
                             var pngData = memStream.ToArray();
-                            var attr = faceNode.GetOrAddAttribute($"PngMip{currentMipLevel}", 0, 0, true);
+                            var attr = faceNode.GetOrAddAttribute($"PngMip{j}", 0, 0, true);
                             using (var ar = attr.GetWriter((ulong)memStream.Position))
                             {
                                 ar.WriteNoSize(pngData, (int)memStream.Position);
@@ -2686,6 +2696,18 @@ namespace EngineNS.NxRHI
 
             System.DateTime beginTime = System.DateTime.Now;
             Profiler.Log.WriteInfoSimple("Start SaveDxtMips_BcEncoder");
+
+            // 优化：对于 3D Texture，一次性提取所有 slice 的原始数据，避免在 mipmap 循环中重复提取
+            ColorRgbFloat[] allSlicesOriginal = null;
+            if (desc.IsTexture3D && desc.Depth > 0)
+            {
+                // 使用优化方法一次性提取所有 slice
+                allSlicesOriginal = TtTextureHelper.ExtractAllSlicesForBc6(
+                    curImage.Data, imageWidth, imageHeight,
+                    sliceWidth, sliceHeight, desc.Depth,
+                    slicesPerRow, (int)curImage.Comp);
+            }
+
             for (uint i = 0; i < desc.Desc.CubeFaces; i++)
             {
                 var faceNode = mipsNode.GetOrAddNode($"Face{i}", 0, 0, true);
@@ -2715,30 +2737,10 @@ namespace EngineNS.NxRHI
                         {
                             var attr = mipNode.GetOrAddAttribute($"DxtMipSlice{d}", 0, 0, true);
 
-                            // 准备当前层的数据
-                            ColorRgbFloat[] colorDataSlice = new ColorRgbFloat[sliceWidth * sliceHeight];
-
-                            // 使用行列布局从 2D image 中提取 slice
-                            for (int y = 0; y < sliceHeight; y++)
-                            {
-                                for (int x = 0; x < sliceWidth; x++)
-                                {
-                                    // 计算当前 slice 在源图像中的位置（基于行列网格布局）
-                                    int gridX = d % slicesPerRow;
-                                    int gridY = d / slicesPerRow;
-
-                                    // 源图像中的坐标
-                                    int srcX = gridX * sliceWidth + x;
-                                    int srcY = gridY * sliceHeight + y;
-
-                                    int srcIndex = (srcY * imageWidth + srcX) * (int)curImage.Comp;
-                                    int dstIndex = y * sliceWidth + x;
-
-                                    colorDataSlice[dstIndex].r = curImage.Data[srcIndex];
-                                    colorDataSlice[dstIndex].g = curImage.Data[srcIndex + 1];
-                                    colorDataSlice[dstIndex].b = curImage.Data[srcIndex + 2];
-                                }
-                            }
+                            // 优化：使用预先提取的 slice 数据，避免重复提取
+                            int srcOffset = d * sliceSize;
+                            ColorRgbFloat[] colorDataSlice = new ColorRgbFloat[sliceSize];
+                            Array.Copy(allSlicesOriginal, srcOffset, colorDataSlice, 0, sliceSize);
 
                             var memory2DSlice = colorDataSlice.AsMemory().AsMemory2D(sliceHeight, sliceWidth);
 

@@ -44,9 +44,9 @@ namespace EngineNS.Macross
 
                 if (Thread.TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadMain.ThreadId)
                 {//主线程上打开断点，只能启动RunLoop来让编辑器处理继续工作
-                    TtEngine.Instance.RunLoop(() =>
+                    TtEngine.Instance.RunEditorLoop_MainThread(() =>
                     {
-                        if (Enable==false)
+                        if (Enable == false)
                         {
                             TtEngine.Instance.mIsRunLoop = false;
                         }

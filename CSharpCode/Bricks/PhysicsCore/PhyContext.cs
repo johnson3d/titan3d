@@ -4,6 +4,12 @@ using System.Text;
 
 namespace EngineNS.Bricks.PhysicsCore
 {
+    [IO.TtConfig(Path = "physics.jscfg")]
+    public class TtPhysicsConfig : IO.IConfig
+    {
+        [Rtti.Meta("")]
+        public bool IsCallbackInLogicThread { get; set; } = false;
+    }
     public struct FPxTransform
     {
         public Vector3 P;
@@ -11,6 +17,18 @@ namespace EngineNS.Bricks.PhysicsCore
     }
     public class TtPhyContext : AuxPtrType<PhyContext>
     {
+        public TtPhysicsConfig mPhysicsConfig = null;
+        public TtPhysicsConfig PhysicsConfig
+        {
+            get
+            {
+                if (mPhysicsConfig == null)
+                {
+                    mPhysicsConfig = TtEngine.Instance.ConfigManager.GetConfig<TtPhysicsConfig>();
+                }
+                return mPhysicsConfig;
+            }
+        }
         public TtPhyContext()
         {
             mCoreObject = PhyContext.CreateContext(EPhysicsContextType.NvPhysX);

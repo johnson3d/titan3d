@@ -423,10 +423,15 @@ namespace EngineNS
 
         public bool mIsRunLoop = false;
         //用来处理主线程模态对话框，macross调试断点
-        public void RunLoop(Action tickAction = null)
+        public void RunEditorLoop_MainThread(Action tickAction = null)
         {
-            //GfxDevice?.TickSync(this);
-            //GfxDevice?.EndFrame();
+            System.Diagnostics.Debug.Assert(Thread.TtContextThread.CurrentContext == this.ThreadMain);
+            bool IsRenderingFrame = GfxDevice.IsRenderingFrame;
+            if (IsRenderingFrame)
+            {
+                GfxDevice.TickSync(this);
+                GfxDevice.EndFrame();
+            }
 
             mIsRunLoop = true;
 
@@ -443,7 +448,7 @@ namespace EngineNS
                     }
                 }
 
-                GfxDevice?.BeginFrame();
+                GfxDevice.BeginFrame();
 
                 tickAction?.Invoke();
 
@@ -464,9 +469,9 @@ namespace EngineNS
                     Profiler.Log.WriteException(ex);
                 }
                 
-                GfxDevice?.TickSync(this);
+                GfxDevice.TickSync(this);
                 this.TaskCollector.Tick();
-                GfxDevice?.EndFrame();
+                GfxDevice.EndFrame();
 
                 using (new Profiler.TimeScopeHelper(ScopeInputSystem))
                 {
@@ -482,7 +487,10 @@ namespace EngineNS
                 }
             }
 
-            //GfxDevice?.BeginFrame();
+            if (IsRenderingFrame)
+            {
+                GfxDevice.BeginFrame();
+            }
         }
         public static async System.Threading.Tasks.Task RunCoroutine<T>(IAsyncEnumerable<T> enumerable)
         {
