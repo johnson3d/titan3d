@@ -22,8 +22,11 @@ namespace ImGui
 	{
 		if (mDialog)
 		{
+			FileDialogConfig config;
+			config.path = vPath;
+			config.flags = ImGuiFileDialogFlags_ShowDevicesButton | ImGuiFileDialogFlags_CaseInsensitiveExtentionFiltering;
 			mDialog->OpenDialog(
-				vKey, vTitle, vFilters, vPath);
+				vKey, vTitle, vFilters, config);
 		}
 	}
 
@@ -31,16 +34,23 @@ namespace ImGui
 	{
 		if (mDialog)
 		{
-			mDialog->OpenModal(
-				vKey, vTitle, vFilters, vPath);
+			FileDialogConfig config;
+			config.path = vPath;
+			config.flags = ImGuiFileDialogFlags_Default | ImGuiFileDialogFlags_ShowDevicesButton | ImGuiFileDialogFlags_CaseInsensitiveExtentionFiltering;
+			mDialog->OpenDialog(
+				vKey, vTitle, vFilters, config);
 		}
 	}
 	void ImGuiFileDialog::OpenModalWithMutiSelect(const char* vKey, const char* vTitle, const char* vFilters, const char* vPath, int vCountSelectionMax)
 	{
 		if (mDialog)
 		{
-			mDialog->OpenModal(
-				vKey, vTitle, vFilters, vPath, vCountSelectionMax);
+			FileDialogConfig config;
+			config.path = vPath;
+			config.countSelectionMax = vCountSelectionMax;
+			config.flags = ImGuiFileDialogFlags_Default | ImGuiFileDialogFlags_ShowDevicesButton | ImGuiFileDialogFlags_CaseInsensitiveExtentionFiltering;
+			mDialog->OpenDialog(
+				vKey, vTitle, vFilters, config);
 		}
 	}
 
@@ -168,48 +178,27 @@ namespace ImGui
 		return nullptr;
 	}
 
-	void ImGuiFileDialog::SetExtentionInfos(
+	void ImGuiFileDialog::SetFileStyle(
 		const char* vFilter,
 		ImVec4 vColor,
 		const char* vIcon)
 	{
-		if (mDialog)
-		{
-			mDialog->SetExtentionInfos(vFilter, vColor, vIcon);
-		}
+		// TODO
 	}
 
-	bool ImGuiFileDialog::GetExtentionInfos(
+	bool ImGuiFileDialog::GetFileStyle(
 		const char* vFilter,
 		ImVec4* vOutColor,
 		char** vOutIcon)
 	{
-		if (mDialog)
-		{
-			std::string icon;
-			bool res = mDialog->GetExtentionInfos(vFilter, vOutColor, &icon);
-			if (!icon.empty() && vOutIcon)
-			{
-				size_t siz = icon.size() + 1U;
-				*vOutIcon = new char[siz];
-#ifndef MSVC
-				strncpy(*vOutIcon, icon.c_str(), siz);
-#else
-				strncpy_s(*vOutIcon, siz, icon.c_str(), siz);
-#endif
-				* vOutIcon[siz - 1U] = '\0';
-			}
-			return res;
-		}
-
 		return false;
 	}
 
-	void ImGuiFileDialog::ClearExtentionInfos()
+	void ImGuiFileDialog::ClearFilesStyle()
 	{
 		if (mDialog)
 		{
-			mDialog->ClearExtentionInfos();
+			mDialog->ClearFilesStyle();
 		}
 	}
 

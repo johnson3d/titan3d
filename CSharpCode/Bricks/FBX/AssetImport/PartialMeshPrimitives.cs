@@ -73,7 +73,7 @@ namespace EngineNS.Graphics.Mesh
                                 var sz = new Vector2(-1, 0);
                                 if (ImGuiAPI.Button("Select FBX", in sz))
                                 {
-                                    mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".FBX,.fbx", ".");
+                                    mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".fbx", ".");
                                 }
                                 // display
                                 if (mFileDialog.DisplayDialog("ChooseFileDlgKey"))

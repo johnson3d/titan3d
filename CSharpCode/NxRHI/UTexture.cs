@@ -14,116 +14,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using EngineNS.EGui.Controls.PropertyGrid;
+using static EngineNS.EGui.Controls.PropertyGrid.PGPropertyOrderAttribute;
 using static EngineNS.RName;
-
-
-
-namespace EngineNS.NxRHI
-{
-    /// <summary>
-    /// Mipmap 资源守卫
-    /// 使用 RAII 模式自动管理 GCHandle 生命周期,防止内存泄漏
-    /// </summary>
-    public unsafe ref struct UMipmapResourceGuard
-    {
-        private GCHandle[] _handles;
-        private int _count;
-        private bool _disposed;
-
-        /// <summary>
-        /// 创建资源守卫
-        /// </summary>
-        /// <param name="count">mipmap 资源数量</param>
-        public UMipmapResourceGuard(int count)
-        {
-            if (count <= 0)
-                throw new ArgumentException("Count must be greater than 0", nameof(count));
-
-            _count = count;
-            _handles = new GCHandle[count];
-            _disposed = false;
-        }
-
-        /// <summary>
-        /// 设置字节型 mipmap 数据并获取指针
-        /// </summary>
-        /// <param name="index">mipmap 索引</param>
-        /// <param name="data">像素数据</param>
-        /// <returns>固定的数据指针</returns>
-        public void* SetData(int index, byte[] data)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(nameof(UMipmapResourceGuard));
-
-            if (index < 0 || index >= _count)
-                throw new ArgumentOutOfRangeException(nameof(index));
-
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-
-            // 释放之前句柄(如果存在)
-            if (_handles[index].IsAllocated)
-            {
-                _handles[index].Free();
-            }
-
-            // 固定数组并返回指针
-            _handles[index] = GCHandle.Alloc(data, GCHandleType.Pinned);
-            return _handles[index].AddrOfPinnedObject().ToPointer();
-        }
-
-        /// <summary>
-        /// 设置浮点型 mipmap 数据并获取指针
-        /// </summary>
-        /// <param name="index">mipmap 索引</param>
-        /// <param name="data">浮点像素数据</param>
-        /// <returns>固定的数据指针</returns>
-        public void* SetDataFloat(int index, float[] data)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(nameof(UMipmapResourceGuard));
-
-            if (index < 0 || index >= _count)
-                throw new ArgumentOutOfRangeException(nameof(index));
-
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-
-            // 释放之前句柄(如果存在)
-            if (_handles[index].IsAllocated)
-            {
-                _handles[index].Free();
-            }
-
-            // 固定数组并返回指针
-            _handles[index] = GCHandle.Alloc(data, GCHandleType.Pinned);
-            return _handles[index].AddrOfPinnedObject().ToPointer();
-        }
-
-        /// <summary>
-        /// 释放所有 GCHandle
-        /// </summary>
-        public void Dispose()
-        {
-            if (_disposed)
-                return;
-
-            for (int i = 0; i < _count; i++)
-            {
-                if (_handles[i].IsAllocated)
-                {
-                    _handles[i].Free();
-                }
-            }
-
-            _handles = null;
-            _disposed = true;
-        }
-    }
-}
-
-
-
 
 
 namespace EngineNS.NxRHI
@@ -432,6 +325,7 @@ namespace EngineNS.NxRHI
         {
             System.Threading.Interlocked.Decrement(ref NumOfInstance);
         }
+        [PGPropertyOrder(PGPropertyOrderAttribute.EPropertyOrder.DefinitionOrder)]
         public class TtPicDesc
         {
             public TtPicDesc()
@@ -444,21 +338,25 @@ namespace EngineNS.NxRHI
             public ETextureCompressFormat CompressFormat { get => Desc.CompressFormat; set => Desc.CompressFormat = value; }
             [ReadOnly(true)]
             public EPixelFormat Format { get => Desc.Format; set => Desc.Format = value; }
+            [Category("General")]
             public uint CubeFaces { get => Desc.CubeFaces; set => Desc.CubeFaces = value; }
+            [Category("General")]
             public int MipLevel { get => Desc.MipLevel; set => Desc.MipLevel = value; }
-            //[ReadOnly(true)]
+            [Category("Dimension")]
             public int Width { get => Desc.Width; set => Desc.Width = value; }
-            //[ReadOnly(true)]
+            [Category("Dimension")]
             public int Height { get => Desc.Height; set => Desc.Height = value; }
             public byte BitNumRed { get => Desc.BitNumRed; set => Desc.BitNumRed = value; }
             public byte BitNumGreen { get => Desc.BitNumGreen; set => Desc.BitNumGreen = value; }
             public byte BitNumBlue { get => Desc.BitNumBlue; set => Desc.BitNumBlue = value; }
             public byte BitNumAlpha { get => Desc.BitNumAlpha; set => Desc.BitNumAlpha = value; }
+            [Category("General")]
             public bool DontCompress 
             {
                 get => Desc.DontCompress != 0 ? true : false;
                 set => Desc.DontCompress = value ? 1 : 0;
             }
+            [Category("General")]
             public bool sRGB
             {
                 get => Desc.sRGB != 0 ? true : false;
@@ -470,6 +368,7 @@ namespace EngineNS.NxRHI
                 set => Desc.StripOriginSource = value ? 1 : 0;
             }
             int mDepth = 0;
+            [Category("Dimension")]
             public int Depth { get => mDepth; set => mDepth = value; }
             public bool IsTexture3D { get => Depth > 0; }
             bool mAutoCheckNormal = true;
@@ -539,434 +438,6 @@ namespace EngineNS.NxRHI
             mCoreObject.NativeSuper.SetDebugName(name);
         }
 
-        #region Cubemap
-        // transform world space vector to a space relative to the face
-        static Vector3 TransformSideToWorldSpace(uint CubemapFace, Vector3 InDirection)
-        {
-            float x = InDirection.X, y = InDirection.Y, z = InDirection.Z;
-
-            Vector3 Ret = new Vector3(0, 0, 0);
-
-            // see http://msdn.microsoft.com/en-us/library/bb204881(v=vs.85).aspx
-            switch (CubemapFace)
-            {
-                case 0: Ret = new Vector3(+z, -y, -x); break;
-                case 1: Ret = new Vector3(-z, -y, +x); break;
-                case 2: Ret = new Vector3(+x, +z, +y); break;
-                case 3: Ret = new Vector3(+x, -z, -y); break;
-                case 4: Ret = new Vector3(+x, -y, +z); break;
-                case 5: Ret = new Vector3(-x, -y, -z); break;
-            }
-
-            // this makes it with the Unreal way (z and y are flipped)
-            return Ret;
-        }
-
-        // transform vector relative to the face to world space
-        static Vector3 TransformWorldToSideSpace(uint CubemapFace, Vector3 InDirection)
-        {
-            // undo Unreal way (z and y are flipped)
-            float x = InDirection.X, y = InDirection.Z, z = InDirection.Y;
-
-            Vector3 Ret = new Vector3(0, 0, 0);
-
-            // see http://msdn.microsoft.com/en-us/library/bb204881(v=vs.85).aspx
-            switch (CubemapFace)
-            {
-                case 0: Ret = new Vector3(-z, -y, +x); break;
-                case 1: Ret = new Vector3(+z, -y, -x); break;
-                case 2: Ret = new Vector3(+x, +z, +y); break;
-                case 3: Ret = new Vector3(+x, -z, -y); break;
-                case 4: Ret = new Vector3(+x, -y, +z); break;
-                case 5: Ret = new Vector3(-x, -y, -z); break;
-            }
-
-            return Ret;
-        }
-
-        static Vector3 ComputeSSCubeDirectionAtTexelCenter(uint x, uint y, float InvSideExtent)
-        {
-            // center of the texels
-            Vector3 DirectionSS = new Vector3((x +0.5f) *InvSideExtent * 2 - 1, (y + 0.5f) * InvSideExtent * 2 - 1, 1);
-            DirectionSS.Normalize();
-            return DirectionSS;
-        }
-
-        static Vector3 ComputeWSCubeDirectionAtTexelCenter(uint CubemapFace, uint x, uint y, float InvSideExtent)
-        {
-            Vector3 DirectionSS = ComputeSSCubeDirectionAtTexelCenter(x, y, InvSideExtent);
-            Vector3 DirectionWS = TransformSideToWorldSpace(CubemapFace, DirectionSS);
-            return DirectionWS;
-        }
-
-        static int ComputeLongLatCubemapExtents(int SrcImageWidth, int MaxCubemapTextureResolution)
-        {
-            int width = 1 << (int)MathHelper.ILog2Const((uint)SrcImageWidth / 2);
-            return MathHelper.Clamp(width, 32, MaxCubemapTextureResolution);
-        }
-
-        /**
- * View in to an image that allows access by converting a direction to longitude and latitude.
- */
-        struct ImageViewLongLat
-        {
-            /** Image colors. */
-            Vector4[] ImageColors;
-            /** Width of the image. */
-            int SizeX;
-            /** Height of the image. */
-            int SizeY;
-
-            /** Initialization constructor. */
-            public ImageViewLongLat(ImageResultFloat Image)
-            {
-                SizeX = Image.Width;
-                SizeY = Image.Height;
-                ImageColors = new Vector4[Image.Width * Image.Height];
-                if (Image.Comp == ColorComponents.RedGreenBlueAlpha)
-                {
-                    for (int i = 0; i < ImageColors.Length; ++i)
-                    {
-                        ImageColors[i].X = Image.Data[i * 4 + 0];
-                        ImageColors[i].Y = Image.Data[i * 4 + 1];
-                        ImageColors[i].Z = Image.Data[i * 4 + 2];
-                        ImageColors[i].W = Image.Data[i * 4 + 3];
-                    }
-                }
-            }
-
-            /** Wraps X around W. */
-            static void WrapTo(ref int X, int W)
-            {
-                X = X % W;
-
-                if (X < 0)
-                {
-                    X += W;
-                }
-            }
-
-            /** Const access to a texel. */
-            Vector4 Access(int X, int Y)
-        	{
-		        return ImageColors[X + Y * SizeX];
-	        }
-
-            /** Makes a filtered lookup. */
-            Vector4 LookupFiltered(float X, float Y)
-    	    {
-                int X0 = (int)MathHelper.Floor(X);
-                int Y0 = (int)MathHelper.Floor(Y);
-
-                float FracX = X - X0;
-                float FracY = Y - Y0;
-
-                int X1 = X0 + 1;
-                int Y1 = Y0 + 1;
-
-                WrapTo(ref X0, SizeX);
-                WrapTo(ref X1, SizeX);
-                Y0 = MathHelper.Clamp(Y0, 0, (int) (SizeY - 1));
-		        Y1 = MathHelper.Clamp(Y1, 0, (int) (SizeY - 1));
-
-		        Vector4 CornerRGB00 = Access(X0, Y0);
-                Vector4 CornerRGB10 = Access(X1, Y0);
-                Vector4 CornerRGB01 = Access(X0, Y1);
-                Vector4 CornerRGB11 = Access(X1, Y1);
-
-                Vector4 CornerRGB0 = Vector4.Lerp(CornerRGB00, CornerRGB10, FracX);
-                Vector4 CornerRGB1 = Vector4.Lerp(CornerRGB01, CornerRGB11, FracX);
-
-		        return Vector4.Lerp(CornerRGB0, CornerRGB1, FracY);
-	        }
-
-            /** Makes a filtered lookup using a direction. */
-            public Vector4 LookupLongLat(Vector3 NormalizedDirection)
-	        {
-                // see http://gl.ict.usc.edu/Data/HighResProbes
-                // latitude-longitude panoramic format = equirectangular mapping
-                float X = (1 + MathHelper.Atan2(NormalizedDirection.X, NormalizedDirection.Z) / MathHelper.PI) / 2 * SizeX;
-                float Y = MathHelper.Acos(NormalizedDirection.Y) / MathHelper.PI * SizeY;
-
-                return LookupFiltered(X, Y);
-            }
-        };
-
-        static void CopyFaceToCubemapContinus(Vector4[] faceData, Vector4[] cubeMapExpand, int faceStartIndex, int Extent)
-        {
-            var faceDataSize = Extent * Extent;
-            for (int y = 0; y < Extent; ++y)
-            {
-                for (int x = 0; x < Extent; ++x)
-                {
-                    cubeMapExpand[faceStartIndex + x + y * 4 * Extent] = faceData[x + y * Extent];
-                }
-            }
-        }
-
-        /**
-         * Generates the base cubemap mip from a longitude-latitude 2D image.
-         * @param OutMip - The output mip.
-         * @param SrcImage - The source longlat image.
-         */
-        public static void GenerateBaseCubeMipFromLongitudeLatitude2D(ref StbImageSharp.ImageResultFloat OutMip, StbImageSharp.ImageResultFloat LongLatImage, int MaxCubemapTextureResolution)
-        {
-            ImageViewLongLat LongLatView = new ImageViewLongLat(LongLatImage);
-
-            // TODO_TEXTURE: Expose target size to user.
-            int Extent = ComputeLongLatCubemapExtents(LongLatImage.Width, MaxCubemapTextureResolution);
-            float InvExtent = 1.0f / Extent;
-
-            Vector4[] faceDataContinus = new Vector4[6 * Extent * Extent];
-            Vector4[][] faceDatas = new Vector4[6][];
-            for (uint Face = 0; Face < 6; ++Face)
-            {
-                faceDatas[Face] = new Vector4[Extent*Extent];
-                //Vector4[] faceData = new Vector4[Extent * Extent];
-                for (int y = 0; y < Extent; ++y)
-                {
-                    for (int x = 0; x < Extent; ++x)
-                    {
-                        Vector3 DirectionWS = ComputeWSCubeDirectionAtTexelCenter(Face, (uint)x, (uint)y, InvExtent);
-                        faceDatas[Face][x + y*Extent] = LongLatView.LookupLongLat(DirectionWS);
-                    }
-                }
-
-                faceDatas[Face].CopyTo(faceDataContinus, Face * Extent * Extent);
-            }
-
-            float[] floatArray = faceDataContinus.SelectMany(vector => new float[] { vector.X, vector.Y, vector.Z, vector.W }).ToArray();
-            unsafe
-            {
-                fixed (float* floatPtr = floatArray)
-                {
-                    OutMip = StbImageSharp.ImageResultFloat.FromResult(floatPtr, Extent, 6 * Extent, ColorComponents.RedGreenBlueAlpha, ColorComponents.RedGreenBlueAlpha);
-                }
-
-                #region Debug
-                bool bDebug = false;
-                if (bDebug)
-                {
-                    var faceDataSize = Extent * Extent;
-                    Vector4[] cubeMapExpand = new Vector4[4 * 3 * faceDataSize];
-
-                    CopyFaceToCubemapContinus(faceDatas[0], cubeMapExpand, 2 * Extent + 4 * faceDataSize, Extent);
-                    CopyFaceToCubemapContinus(faceDatas[1], cubeMapExpand, 4 * faceDataSize, Extent);
-                    CopyFaceToCubemapContinus(faceDatas[2], cubeMapExpand, 1 * Extent, Extent);
-                    CopyFaceToCubemapContinus(faceDatas[3], cubeMapExpand, 1 * Extent + 8 * faceDataSize, Extent);
-                    CopyFaceToCubemapContinus(faceDatas[4], cubeMapExpand, 1 * Extent + 4 * faceDataSize, Extent);
-                    CopyFaceToCubemapContinus(faceDatas[5], cubeMapExpand, 3 * Extent + 4 * faceDataSize, Extent);
-
-                    float[] floatArrayDebug = cubeMapExpand.SelectMany(vector => new float[] { vector.X, vector.Y, vector.Z, vector.W }).ToArray();
-
-                    fixed (float* floatPtrDebug = floatArrayDebug)
-                    {
-                        OutMip = StbImageSharp.ImageResultFloat.FromResult(floatPtrDebug, 4 * Extent, 3 * Extent, ColorComponents.RedGreenBlueAlpha, ColorComponents.RedGreenBlueAlpha);
-
-                        var sourceFile = "F:/CubeFaces" + ".hdr";
-                        using (var stream = System.IO.File.Create(sourceFile))
-                        {
-                            var writer = new StbImageWriteSharp.ImageWriter();
-                            writer.WriteHdr(floatPtrDebug, 4 * Extent, 3 * Extent, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
-                        }
-                    }
-                }
-                #endregion
-            }
-
-        }
-        #endregion
-
-        public class NormalmapChecker
-        {
-            // These values are the threshold values for the average vector's
-            // length to be considered within limits as a normal map normal
-            const float NormalMapMinLengthConfidenceThreshold = 0.55f;
-            const float NormalMapMaxLengthConfidenceThreshold = 1.1f;
-
-            // This value is the threshold value for the average vector to be considered
-            // to be going in the correct direction.
-            const float NormalMapDeviationThreshold = 0.8f;
-
-            // Samples from the texture will be taken in blocks of this size^2
-            const int SampleTileEdgeLength = 4;
-
-            // We sample up to this many tiles in each axis. Sampling more tiles
-            // will likely be more accurate, but will take longer.
-            const int MaxTilesPerAxis = 16;
-
-            // This is used in the comparison with "mid-gray"
-            const float ColorComponentNearlyZeroThreshold = (2.0f / 255.0f);
-
-            // This is used when comparing alpha to zero to avoid picking up sprites
-            const float AlphaComponentNearlyZeroThreshold = (1.0f / 255.0f);
-
-            // These values are chosen to make the threshold colors (from uint8 textures)
-            // discard the top most and bottom most two values, i.e. 0, 1, 254 and 255 on
-            // the assumption that these are likely invalid values for a general normal map
-            const float ColorComponentMinVectorThreshold = (2.0f / 255.0f) * 2.0f - 1.0f;
-            const float ColorComponentMaxVectorThreshold = (253.0f / 255.0f) * 2.0f - 1.0f;
-
-            // This is the threshold delta length for a vector to be considered as a unit vector
-            const float NormalVectorUnitLengthDeltaThreshold = 0.45f;
-
-            // Rejected to taken sample ratio threshold.
-            const float RejectedToTakenRatioThreshold = 0.33f;
-
-            void EvaluateSubBlock(StbImageSharp.TtMemImage image, int Left, int Top, int Width, int Height)
-            {
-                for (int Y = Top; Y != (Top + Height); Y++)
-                {
-                    for (int X = Left; X != (Left + Width); X++)
-                    {
-                        var ColorSample = image.GetPixel(X, Y).ToColor4Float();
-                        if (image.Comp == ColorComponents.RedGreenBlue || image.Comp == ColorComponents.Grey)
-                            ColorSample.Alpha = 1.0f;
-
-                        // Nearly black or transparent pixels don't contribute to the calculation
-                        if ((ColorSample.Alpha - AlphaComponentNearlyZeroThreshold) < MathHelper.Epsilon || 
-                            ColorSample.IsAlmostBlack())
-                        {
-                            continue;
-                        }
-
-                        // Scale and bias, if required, to get a signed vector
-                        float Vx = ColorSample.Red * 2.0f - 1.0f;
-                        float Vy = ColorSample.Green * 2.0f - 1.0f;
-                        float Vz = ColorSample.Blue * 2.0f - 1.0f;
-
-                        float Length = MathHelper.Sqrt(Vx * Vx + Vy * Vy + Vz * Vz);
-                        if (Length < ColorComponentNearlyZeroThreshold)
-                        {
-                            // mid-grey pixels representing (0,0,0) are also not considered as they may be used to denote unused areas
-                            continue;
-                        }
-
-                        // If the vector is sufficiently different in length from a unit vector, consider it invalid.
-                        if (MathHelper.Abs(Length - 1.0f) > NormalVectorUnitLengthDeltaThreshold)
-                        {
-                            NumSamplesRejected++;
-                            continue;
-                        }
-
-                        // If the vector is pointing backwards then it is an invalid sample, so consider it invalid
-                        if (Vz < 0.0f)
-                        {
-                            NumSamplesRejected++;
-                            continue;
-                        }
-
-                        AverageColor = AverageColor + ColorSample;
-                        NumSamplesTaken++;
-                    }
-                }
-            }
-
-            /**
-             * DoesTextureLookLikelyToBeANormalMap
-             *
-             * Makes a best guess as to whether a texture represents a normal map or not.
-             * Will not be 100% accurate, but aims to be as good as it can without usage
-             * information or relying on naming conventions.
-             *
-             * The heuristic takes samples in small blocks across the texture (if the texture
-             * is large enough). The assumption is that if the texture represents a normal map
-             * then the average direction of the resulting vector should be somewhere near {0,0,1}.
-             * It samples in a number of blocks spread out to decrease the chance of hitting a
-             * single unused/blank area of texture, which could happen depending on uv layout.
-             *
-             * Any pixels that are black, mid-gray or have a red or green value resulting in X or Y
-             * being -1 or +1 are ignored on the grounds that they are invalid values. Artists
-             * sometimes fill the unused areas of normal maps with color being the {0,0,1} vector,
-             * but that cannot be relied on - those areas are often black or gray instead.
-             *
-             * If the heuristic manages to sample enough valid pixels, the threshold being based
-             * on the total number of samples it will be looking at, then it takes the average
-             * vector of all the sampled pixels and checks to see if the length and direction are
-             * within a specific tolerance. See the namespace at the top of the file for tolerance
-             * value specifications. If the vector satisfies those tolerances then the texture is
-             * considered to be a normal map.
-             */
-            public bool DoesTextureLookLikelyToBeANormalMap(StbImageSharp.TtMemImage image)
-            {
-                int TextureSizeX = image.Width;
-                int TextureSizeY = image.Height;
-
-                // Calculate the number of tiles in each axis, but limit the number
-                // we interact with to a maximum of 16 tiles (4x4)
-                int NumTilesX = Math.Min(TextureSizeX / SampleTileEdgeLength, MaxTilesPerAxis);
-                int NumTilesY = Math.Min(TextureSizeY / SampleTileEdgeLength, MaxTilesPerAxis);
-
-                //if (!Sampler.SetSourceTexture(Texture))
-                //{
-                //    return false;
-                //}
-
-                if ((NumTilesX > 0) &&
-                    (NumTilesY > 0))
-                {
-                    // If texture is large enough then take samples spread out across the image
-                    NumSamplesThreshold = (NumTilesX * NumTilesY) * 4; // on average 4 samples per tile need to be valid...
-
-                    for (int TileY = 0; TileY < NumTilesY; TileY++)
-                    {
-                        int Top = (TextureSizeY / NumTilesY) * TileY;
-
-                        for (int TileX = 0; TileX < NumTilesX; TileX++)
-                        {
-                            int Left = (TextureSizeX / NumTilesX) * TileX;
-
-                            EvaluateSubBlock(image, Left, Top, SampleTileEdgeLength, SampleTileEdgeLength);
-                        }
-                    }
-                }
-                else
-                {
-                    NumSamplesThreshold = (TextureSizeX * TextureSizeY) / 4;
-
-                    // Texture is small enough to sample all texels
-                    EvaluateSubBlock(image, 0, 0, TextureSizeX, TextureSizeY);
-                }
-
-                // if we managed to take a reasonable number of samples then we can evaluate the result
-                if (NumSamplesTaken >= NumSamplesThreshold)
-                {
-                    float RejectedToTakenRatio = (float)(NumSamplesRejected) / (float)(NumSamplesTaken);
-                    if (RejectedToTakenRatio >= RejectedToTakenRatioThreshold)
-                    {
-                        // Too many invalid samples, probably not a normal map
-                        return false;
-                    }
-
-                    AverageColor = AverageColor * (1.0f/(float)NumSamplesTaken);
-
-                    // See if the resulting vector lies anywhere near the {0,0,1} vector
-                    float Vx = AverageColor.Red * 2.0f - 1.0f;
-                    float Vy = AverageColor.Green * 2.0f - 1.0f;
-                    float Vz = AverageColor.Blue * 2.0f - 1.0f;
-
-                    float Magnitude = MathHelper.Sqrt(Vx * Vx + Vy * Vy + Vz * Vz);
-
-                    // The normalized value of the Z component tells us how close to {0,0,1} the average vector is
-                    float NormalizedZ = Vz / Magnitude;
-
-                    // if the average vector is longer than or equal to the min length, shorter than the max length
-                    // and the normalized Z value means that the vector is close enough to {0,0,1} then we consider
-                    // this a normal map
-                    return ((Magnitude >= NormalMapMinLengthConfidenceThreshold) &&
-                            (Magnitude < NormalMapMaxLengthConfidenceThreshold) &&
-                            (NormalizedZ >= NormalMapDeviationThreshold));
-                }
-
-                // Not enough samples, don't trust the result at all
-                return false;
-            }
-
-            int NumSamplesTaken;
-            int NumSamplesRejected;
-            int NumSamplesThreshold;
-            Color4f AverageColor;
-        }
         public class ImportAttribute : IO.IAssetCreateAttribute
         {
             bool bPopOpen = false;
@@ -1012,7 +483,7 @@ namespace EngineNS.NxRHI
                         var sz = new Vector2(-1, 0);
                         if (ImGuiAPI.Button("Select Image", in sz))
                         {
-                            mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".png,.PNG,.jpg,.JPG,.bmp,.BMP,.tga,.TGA,.exr,.EXR,.hdr,.HDR", ".");
+                            mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".png,.jpg,.bmp,.tga,.exr,.hdr", ".");
                         }
                         // display
                         if (mFileDialog.DisplayDialog("ChooseFileDlgKey"))
@@ -1124,7 +595,7 @@ namespace EngineNS.NxRHI
                     StbImageSharp.ImageResultFloat processedImage = null;
                     if (mDesc.CubeFaces == 6)
                     {
-                        TtSrView.GenerateBaseCubeMipFromLongitudeLatitude2D(ref processedImage, imageFloat, 512);
+                        TtTextureHelper.GenerateBaseCubeMipFromLongitudeLatitude2D(ref processedImage, imageFloat, 512);
                     }
                     else
                         processedImage = imageFloat;
@@ -2974,73 +2445,6 @@ namespace EngineNS.NxRHI
             System.Diagnostics.Debug.Assert(false);
             return 0;
         }
-        public static uint GetPixelByteWidth(EPixelFormat format)
-        {
-            switch (format)
-            {
-                case EPixelFormat.PXF_R8G8B8A8_UNORM:
-                case EPixelFormat.PXF_R8G8B8A8_TYPELESS:
-                case EPixelFormat.PXF_R8G8B8A8_SINT:
-                case EPixelFormat.PXF_R8G8B8A8_UINT:
-                case EPixelFormat.PXF_B8G8R8A8_UNORM:
-                case EPixelFormat.PXF_B8G8R8A8_TYPELESS:
-                case EPixelFormat.PXF_B8G8R8A8_UNORM_SRGB:
-                    return 4;
-                default:
-                    return 0;
-            }
-        }
-        /* 
-        public static unsafe StbImageSharp.ImageResult[] LoadImageLevels(RName name, uint mipLevel, ref UPicDesc desc)
-        {
-            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
-            {
-                {
-                    if (desc != null)
-                    {
-                        var attr = xnd.RootNode.TryGetAttribute("Desc");
-                        using (var ar = attr.GetReader(null))
-                        {
-                            ar.Read(out desc.Desc);
-                        }
-                    }
-                }
-                var pngNode = xnd.RootNode.TryGetChildNode("PngMips");
-                if (pngNode.IsValidPointer)
-                {
-                    if (mipLevel == 0)
-                    {
-                        mipLevel = pngNode.GetNumOfAttribute();
-                    }
-                    var result = new StbImageSharp.ImageResult[mipLevel];
-                    for (uint i = 0; i < mipLevel; i++)
-                    {
-                        var mipAttr = pngNode.TryGetAttribute($"PngMip{i}");
-                        if (mipAttr.NativePointer == IntPtr.Zero)
-                            return null;
-
-                        byte[] data;
-                        using (var ar = mipAttr.GetReader(null))
-                        {
-                            ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
-                        }
-
-                        using (var memStream = new System.IO.MemoryStream(data, false))
-                        {
-                            result[i] = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
-                        }
-                    }
-                    return result;
-                }
-                else
-                {
-                    //todo
-                    pngNode = xnd.RootNode.TryGetChildNode("DxtMips");
-                }
-                return null;
-            }
-        }
-        */
         public static unsafe Support.TtBlobObject[] LoadPixelMipLevels(RName name, uint mipLevel, TtPicDesc desc)
         {
             using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
@@ -3166,42 +2570,6 @@ namespace EngineNS.NxRHI
                     return null;
             }
         }
-        public static unsafe TtTexture LoadTexture2DMipLevel(RName rn, IO.TtXndNode node, TtPicDesc desc, int level, int channelR, int channelG, int channelB, int channelA)
-        {
-            switch (desc.CompressFormat)
-            {
-                case ETextureCompressFormat.TCF_None:
-                    {
-                        var pngNode = node.TryGetChildNode("PngMips");
-                        if (pngNode.IsValidPointer)
-                            return LoadPngTexture2DMipLevel(rn, node, desc, level);
-                        else
-                        {
-                            var hdrNode = node.TryGetChildNode("HdrMips");
-                            if (hdrNode.IsValidPointer)
-                                return LoadHdrTexture2DMipLevel(rn, node, desc, level);
-                            else
-                            {
-                                var exrNode = node.TryGetChildNode("ExrMips");
-                                if (exrNode.IsValidPointer)
-                                    return LoadExrTexture2DMipLevel(rn, node, desc, level, channelR, channelG, channelB, channelA);
-                            }
-                        }
-                        return null;
-                    }
-                case ETextureCompressFormat.TCF_Dxt1:
-                case ETextureCompressFormat.TCF_Dxt1a:
-                case ETextureCompressFormat.TCF_Dxt3:
-                case ETextureCompressFormat.TCF_Dxt5:
-                case ETextureCompressFormat.TCF_BC6:
-                case ETextureCompressFormat.TCF_BC6_FLOAT:
-                    {
-                        return LoadDxtTexture2DMipLevel(rn, node, desc, level);
-                    }
-                default:
-                    return null;
-            }
-        }
         #region Load Mips
         private static unsafe TtTexture LoadExrTexture2DMipLevel(RName rn, TtXndNode node, TtPicDesc desc, int mipLevel)
         {
@@ -3217,7 +2585,7 @@ namespace EngineNS.NxRHI
             var num = (int)desc.CubeFaces * mipLevel;
             if (num == 0)
                 return null;
-            // 使用 UMipmapResourceGuard 自动管理 GCHandle
+
             using var guard = new UMipmapResourceGuard(num);
             var pInitData = stackalloc FMappedSubResource[num];
 
@@ -3254,134 +2622,6 @@ namespace EngineNS.NxRHI
                     return null;
                 return result;
         }
-        private static unsafe TtTexture LoadExrTexture2DMipLevel(RName rn, TtXndNode node, TtPicDesc desc, int mipLevel, int channelR, int channelG, int channelB, int channelA)
-        {
-            if (mipLevel == 0)
-                return null;
-            var rc = TtEngine.Instance.GfxDevice.RenderContext;
-
-            var exrNode = node.TryGetChildNode("ExrMips");
-            if (exrNode.NativePointer == IntPtr.Zero)
-                return null;
-
-            // 使用 UMipmapResourceGuard 自动管理 GCHandle
-            using var guard = new UMipmapResourceGuard(mipLevel);
-            var pInitData = stackalloc FMappedSubResource[mipLevel];
-
-
-                for (uint i = 0; i < mipLevel; i++)
-                {
-                    var realLevel = desc.MipLevel - mipLevel + i;
-                    var ptr = exrNode.TryGetAttribute($"ExrMip{realLevel}");
-                    if (ptr.NativePointer == IntPtr.Zero)
-                        return null;
-                    var mipAttr = ptr;
-                    byte[] data;
-                    using (var ar = mipAttr.GetReader(null))
-                    {
-                        ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
-                    }
-
-                    channelR = channelR == 0 ? 0 : 1;
-                    channelG = channelG == 0 ? 0 : 1;
-                    channelB = channelB == 0 ? 0 : 1;
-                    channelA = channelA == 0 ? 0 : 1;
-                    var channelCount = desc.Desc.PixelChannelCount();
-                    var byteWidth = desc.Desc.PixelByteWidth();
-                    int extractChannelCount = channelR + channelG + channelB + channelA;
-                    if(channelCount == 3)
-                    {
-                        extractChannelCount = channelR + channelG + channelB;
-                        channelA = 0;
-                    }
-                    else if (channelCount == 2)
-                    {
-                        extractChannelCount = channelR + channelG;
-                        channelB = channelA = 0;
-                    }
-                    else if (channelCount == 1)
-                    {
-                        extractChannelCount = channelR;
-                        channelG = channelB = channelA = 0;
-                    }
-                    if (channelCount > 1 && extractChannelCount > 0)
-                    {
-                        int pixelCount = desc.MipSizes[(int)i].X * desc.MipSizes[(int)i].Y;
-                        var channelByteWidth = byteWidth / channelCount;
-
-                        byte[] channelData = new byte[byteWidth * pixelCount];
-
-                        for( int j = 0; j < pixelCount; ++j )
-                        {
-                            if(extractChannelCount==1)
-                            {
-                                int iCopyIndex = 0;
-                                if (channelG != 0)
-                                    iCopyIndex = 1;
-                                if (channelB != 0)
-                                    iCopyIndex = 2;
-                                if (channelA != 0)
-                                    iCopyIndex = 3;
-
-                                for( int k = 0; k < channelCount; ++k )
-                                {
-                                    if (k == 3)
-                                    {
-                                        System.Half oneHalf = (System.Half)1.0f;
-                                        var oneBytes = BitConverter.GetBytes(oneHalf);
-                                        Array.Copy(oneBytes, 0, channelData, j * byteWidth + k * channelByteWidth, channelByteWidth);
-                                    }
-                                    else
-                                        Array.Copy(data, j * byteWidth + iCopyIndex * channelByteWidth, channelData, j * byteWidth + k * channelByteWidth, channelByteWidth);                                    
-                                }
-
-                            }
-                            else
-                            {
-                                if (channelR != 0)
-                                    Array.Copy(data, j * byteWidth, channelData, j * byteWidth, channelByteWidth);
-                                if (channelG != 0 && channelCount > 1)
-                                    Array.Copy(data, j * byteWidth + channelByteWidth, channelData, j * byteWidth + channelByteWidth, channelByteWidth);
-                                if (channelB != 0 && channelCount > 2)
-                                    Array.Copy(data, j * byteWidth + 2*channelByteWidth, channelData, j * byteWidth + 2*channelByteWidth, channelByteWidth);
-                                if (channelA != 0 && channelCount > 3)
-                                    Array.Copy(data, j * byteWidth + 3*channelByteWidth, channelData, j * byteWidth + 3*channelByteWidth, channelByteWidth);
-                                else
-                                {
-                                    System.Half oneHalf = (System.Half)1.0f;
-                                    var oneBytes = BitConverter.GetBytes(oneHalf);
-                                    Array.Copy(oneBytes, 0, channelData, j * byteWidth + 3 * channelByteWidth, channelByteWidth);
-                                }
-                            }
-                        }
-
-                        pInitData[i].m_pData = guard.SetData((int)i, channelData);
-                        pInitData[i].m_RowPitch = (uint)desc.MipSizes[(int)i].Z;
-                        pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.MipSizes[(int)i].Y;
-
-                    }
-                    else
-                    {
-                        pInitData[i].m_pData = guard.SetData((int)i, data);
-                        pInitData[i].m_RowPitch = (uint)desc.MipSizes[(int)i].Z;
-                        pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.MipSizes[(int)i].Y;
-                    }
-                }
-
-                var texDesc = new FTextureDesc();
-                texDesc.SetDefault();
-                texDesc.Width = (uint)desc.MipSizes[desc.MipLevel - mipLevel].X;
-                texDesc.Height = (uint)desc.MipSizes[desc.MipLevel - mipLevel].Y;
-                texDesc.MipLevels = (uint)mipLevel;
-                texDesc.InitData = pInitData;
-                texDesc.Format = desc.Format;
-
-                var result = rc.CreateTexture(in texDesc);
-                CoreSDK.SetMemDebugText(result.mCoreObject, rn.ToString());
-                if (result == null)
-                    return null;
-                return result;
-        }
         private static unsafe TtTexture LoadHdrTexture2DMipLevel(RName rn, TtXndNode node, TtPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
@@ -3395,36 +2635,17 @@ namespace EngineNS.NxRHI
             // 判断是否为 3D Texture
             bool isTexture3D = desc.IsTexture3D && desc.Depth > 0;
 
-            // 计算总的数据单元数
-            int totalDataUnits;
-            if (isTexture3D)
+            // 确定颜色组件数
+            StbImageSharp.ColorComponents colorComp = desc.Format switch
             {
-                // 3D Texture：每个 mipmap level 对应一个数据单元
-                totalDataUnits = mipLevel;
-            }
-            else
-            {
-                // 2D Texture：每个 face 的每个 mipmap level 对应一个数据单元
-                totalDataUnits = (int)desc.CubeFaces * mipLevel;
-            }
+                EPixelFormat.PXF_R32G32B32_FLOAT => ColorComponents.RedGreenBlue,
+                _ => ColorComponents.RedGreenBlueAlpha
+            };
 
-            // 使用 UMipmapResourceGuard 自动管理 GCHandle
+            // 计算数据单元数量
+            int totalDataUnits = isTexture3D ? mipLevel : (int)desc.CubeFaces * mipLevel;
             using var guard = new UMipmapResourceGuard(totalDataUnits);
             var pInitData = stackalloc FMappedSubResource[totalDataUnits];
-
-                StbImageSharp.ColorComponents colorComp = StbImageSharp.ColorComponents.RedGreenBlue;
-                switch (desc.Format)
-                {
-                    case EPixelFormat.PXF_R32G32B32_FLOAT:
-                        colorComp = ColorComponents.RedGreenBlue;
-                        break;
-                    case EPixelFormat.PXF_R32G32B32A32_FLOAT:
-                        colorComp = ColorComponents.RedGreenBlueAlpha;
-                        break;
-                    default:
-                        colorComp = ColorComponents.RedGreenBlueAlpha;
-                        break;
-                }
 
                 for (uint j = 0; j < desc.Desc.CubeFaces; j++)
                 {
@@ -3623,20 +2844,7 @@ namespace EngineNS.NxRHI
             }
 
             // 新格式：Cube或3D纹理使用节点结构（PngMips/Face0/PngMip0, PngMips/Face0/DepthSlices/Mip0/...）
-            // 计算总的数据单元数
-            int totalDataUnits;
-            if (isTexture3D)
-            {
-                // 3D Texture：每个 mipmap level 对应一个数据单元
-                totalDataUnits = mipLevel;
-            }
-            else
-            {
-                // 2D Texture：每个 face 的每个 mipmap level 对应一个数据单元
-                totalDataUnits = (int)desc.CubeFaces * mipLevel;
-            }
-
-            // 使用 UMipmapResourceGuard 自动管理 GCHandle
+            int totalDataUnits = isTexture3D ? mipLevel : (int)desc.CubeFaces * mipLevel;
             using var guardNew = new UMipmapResourceGuard(totalDataUnits);
             var pInitDataNew = stackalloc FMappedSubResource[totalDataUnits];
 
@@ -3787,33 +2995,21 @@ namespace EngineNS.NxRHI
                 return null;
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-            var pngNode = node.TryGetChildNode("DxtMips");
-            if (pngNode.NativePointer == IntPtr.Zero)
+            var dxtNode = node.TryGetChildNode("DxtMips");
+            if (dxtNode.NativePointer == IntPtr.Zero)
                 return null;
 
             // 判断是否为 3D Texture
             bool isTexture3D = desc.IsTexture3D && desc.Depth > 0;
 
-            // 计算总的数据单元数
-            int totalDataUnits;
-            if (isTexture3D)
-            {
-                // 3D Texture：每个 mipmap level 对应一个数据单元
-                totalDataUnits = mipLevel;
-            }
-            else
-            {
-                // 2D Texture：每个 face 的每个 mipmap level 对应一个数据单元
-                totalDataUnits = (int)desc.CubeFaces * mipLevel;
-            }
-
-            // 使用 UMipmapResourceGuard 自动管理 GCHandle
+            // 计算数据单元数量
+            int totalDataUnits = isTexture3D ? mipLevel : (int)desc.CubeFaces * mipLevel;
             using var guard = new UMipmapResourceGuard(totalDataUnits);
             var pInitData = stackalloc FMappedSubResource[totalDataUnits];
 
                 for (uint j = 0; j < desc.Desc.CubeFaces; j++)
                 {
-                    var faceNode = pngNode.TryGetChildNode($"Face{j}");
+                    var faceNode = dxtNode.TryGetChildNode($"Face{j}");
                     if (faceNode.IsValidPointer == false)
                     {
                         continue;
@@ -4199,46 +3395,6 @@ namespace EngineNS.NxRHI
             result.AssetName = rn;
 
             result.SetDebugName(rn.ToString());
-            return result;
-        }
-        public static async System.Threading.Tasks.Task<TtSrView> LoadSrvMipmap(RName rn, int mipLevel, int channelR, int channelG, int channelB, int channelA)
-        {
-            TtPicDesc desc = null;
-            var tex2d = await TtEngine.Instance.EventPoster.Post((state) =>
-            {
-                using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
-                {
-                    if (xnd == null)
-                        return null;
-
-                    desc = TtTextureHelper.LoadPictureDesc(xnd.RootNode);
-
-                    if (mipLevel == -1 || mipLevel > desc.MipLevel)
-                        mipLevel = desc.MipLevel;
-
-                    return LoadTexture2DMipLevel(rn, xnd.RootNode, desc, mipLevel, channelR, channelG, channelB, channelA);
-                }   
-            }, Thread.Async.EAsyncTarget.AsyncIO);
-
-            if (tex2d == null)
-            {
-                if (TtEngine.Instance.PlayMode == EPlayMode.Editor)
-                    SaveOriginImage(rn);
-                return null;
-            }
-
-            var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            var srvDesc = new FSrvDesc();
-            srvDesc.SetTexture2D();
-            srvDesc.Type = ESrvType.ST_Texture2D;
-            srvDesc.Format = tex2d.mCoreObject.Desc.Format;
-            srvDesc.Texture2D.MipLevels = (uint)mipLevel;
-
-            var result = rc.CreateSRV(tex2d, in srvDesc);
-            result.PicDesc = desc;
-            result.LevelOfDetail = mipLevel;
-            result.TargetLOD = mipLevel;
-            result.AssetName = rn;
             return result;
         }
         #endregion

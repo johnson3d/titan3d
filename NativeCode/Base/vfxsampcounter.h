@@ -139,6 +139,7 @@ class TR_CLASS()
 	v3dSampMgr : public IWeakRefObject
 {
 	int UpdateCount;
+	int ReEnterCount = 0;
 public:
 	typedef vfxHashString	HashString;
 	typedef _HashStringCompare	StringCompare;
@@ -202,7 +203,11 @@ public:
 
 	inline INT64 Begin(SampResult* pSampResult)
 	{
-		ASSERT(m_CurSamp != pSampResult);
+		if (m_CurSamp == pSampResult)
+		{
+			ReEnterCount++;
+			return 0;
+		}
 		pSampResult->mParent = m_CurSamp;
 		m_CurSamp = pSampResult;
 		if (pSampResult->mEnable)
@@ -220,6 +225,11 @@ public:
 
 	inline void End(INT64 begin, SampResult* pSamp)
 	{
+		if (ReEnterCount > 0)
+		{
+			ReEnterCount--;
+			return;
+		}
 		m_CurSamp = pSamp->mParent;
 		if (pSamp->mEnable == FALSE)
 		{

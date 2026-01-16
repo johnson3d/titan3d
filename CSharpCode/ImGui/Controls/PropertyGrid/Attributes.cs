@@ -7,6 +7,23 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 {
     public class PGHideBaseClassPropertiesAttribute : Attribute { }
     public class TtShowInPropertyGridAttribute : Attribute { }
+
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)]
+    public class PGPropertyOrderAttribute : Attribute
+    {
+        public enum EPropertyOrder
+        {
+            Alphabetical,    // 按字母排序（默认）
+            DefinitionOrder  // 按定义顺序
+        }
+
+        public EPropertyOrder Order { get; set; }
+
+        public PGPropertyOrderAttribute(EPropertyOrder order)
+        {
+            Order = order;
+        }
+    }
     public class TtCategoryFilters : Attribute 
     {
         public string[] ExcludeFilters = null;

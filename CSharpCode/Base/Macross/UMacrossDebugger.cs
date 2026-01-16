@@ -59,7 +59,7 @@ namespace EngineNS.Macross
                 }
                 else
                 {
-                    System.Diagnostics.Debug.Assert(false);
+                    //System.Diagnostics.Debug.Assert(false);
 
                     lock (TtMacrossDebugger.Instance)
                     {

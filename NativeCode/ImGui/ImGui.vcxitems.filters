@@ -23,13 +23,15 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_binding.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ImGuiFileDialog.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ImGuiFileDialogConfig.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)dirent_win.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_filedialog.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)misc\freetype\imgui_freetype.h">
       <Filter>freetype</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)ColorTextEditor\TextEditor.h">
       <Filter>ColorTextEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)dirent\dirent.h">
+      <Filter>dirent</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -38,6 +40,9 @@
     </Filter>
     <Filter Include="ColorTextEditor">
       <UniqueIdentifier>{81307d2c-5dfe-429c-8a05-413078e108fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dirent">
+      <UniqueIdentifier>{abde7f31-35e6-4e82-a3fd-3ddae9a5c4d9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -234,14 +234,17 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
     public class PropertyCustomizationHelper<T>
     {
-        public static void GetProperties(in T obj, ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        public static void GetProperties(in T obj, ref CustomPropertyDescriptorCollection collection, bool parentIsValueType, bool useDefinitionOrder = false)
         {
             var pros = TypeDescriptor.GetProperties(obj);
             var objType = Rtti.TtTypeDesc.TypeOf(obj.GetType());
+            int definitionOrder = 0;
             foreach (PropertyDescriptor prop in pros)
             {
                 var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
-                proDesc.InitValue(obj, objType, prop, parentIsValueType);
+                proDesc.InitValue(obj, objType, prop, parentIsValueType, useDefinitionOrder ? definitionOrder : -1);
+                if (useDefinitionOrder)
+                    definitionOrder++;
                 if (!proDesc.IsBrowsable)
                     continue;
                 collection.Add(proDesc);

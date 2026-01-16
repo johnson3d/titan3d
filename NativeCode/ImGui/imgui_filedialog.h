@@ -9,7 +9,7 @@ namespace ImGui
 	ImGuiFileDialog
 	{
 	public:
-			ImGuiFileDialog();
+		ImGuiFileDialog();
 		~ImGuiFileDialog();
 	public:
 		void OpenDialog(
@@ -43,15 +43,15 @@ namespace ImGui
 		const char* GetCurrentPath();
 		const char* GetCurrentFilter();
 		void* GetUserDatas();
-		void SetExtentionInfos(
+		void SetFileStyle(
 			const char* vFilter,
 			ImVec4 vColor,
 			const char* vIconText);
-		bool GetExtentionInfos(
+		bool GetFileStyle(
 			const char* vFilter,
 			ImVec4* vOutColor,
 			char** vOutIconText);
-		void ClearExtentionInfos();
+		void ClearFilesStyle();
 
 	private:
 		std::string mFilePathName;

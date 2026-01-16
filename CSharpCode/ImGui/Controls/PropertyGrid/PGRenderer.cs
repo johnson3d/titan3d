@@ -407,7 +407,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 return retString;
             }
         }
-        Dictionary<TargetKey, Dictionary<string, CustomPropertyDescriptorCollection>> mDrawTargetDic = new Dictionary<TargetKey, Dictionary<string, CustomPropertyDescriptorCollection>>();
+        Dictionary<TargetKey, SortedDictionary<string, CustomPropertyDescriptorCollection>> mDrawTargetDic = new Dictionary<TargetKey, SortedDictionary<string, CustomPropertyDescriptorCollection>>();
         
         private unsafe bool OnDraw(object target, out object targetNewValue, bool isSubPropertyGrid = false)
         {
@@ -442,7 +442,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             bool retValue = false;
             //var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen;
             bool useCategory = true;
-            Dictionary<string, CustomPropertyDescriptorCollection> propertiesDic;
+            SortedDictionary<string, CustomPropertyDescriptorCollection> propertiesDic;
             var key = new TargetKey(target);
             if(!mDrawTargetDic.TryGetValue(key, out propertiesDic) || PropertyCollection.PropertyCollectionIsDirty(target))
             {

@@ -425,11 +425,11 @@ namespace EngineNS
         //用来处理主线程模态对话框，macross调试断点
         public void RunEditorLoop_MainThread(Action tickAction = null)
         {
-            System.Diagnostics.Debug.Assert(Thread.TtContextThread.CurrentContext == this.ThreadMain);
+            System.Diagnostics.Debug.Assert(Thread.TtContextThread.CurrentContext.ThreadId == this.ThreadMain.ThreadId);
             bool IsRenderingFrame = GfxDevice.IsRenderingFrame;
             if (IsRenderingFrame)
             {
-                GfxDevice.TickSync(this);
+                //GfxDevice.TickSync_OnlySlate(this);
                 GfxDevice.EndFrame();
             }
 
@@ -441,7 +441,7 @@ namespace EngineNS
                 using (new Profiler.TimeScopeHelper(ScopeInputSystem))
                 {
                     InputSystem.BeforeTick();
-                    //SDL不让非主线程处理事件，所以RunLoop必须在主线程运行
+                    //SDL不让非主线程处理事件，所以RunEditorLoop_MainThread必须在主线程运行
                     if (-1 == InputSystem.Tick(this))
                     {
                         QuitFrame = 2;
@@ -469,7 +469,7 @@ namespace EngineNS
                     Profiler.Log.WriteException(ex);
                 }
                 
-                GfxDevice.TickSync(this);
+                GfxDevice.TickSync_OnlySlate(this);
                 this.TaskCollector.Tick();
                 GfxDevice.EndFrame();
 

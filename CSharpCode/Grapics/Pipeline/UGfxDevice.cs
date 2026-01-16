@@ -126,17 +126,20 @@ namespace EngineNS.Graphics.Pipeline
         {
             using (new Profiler.TimeScopeHelper(ScopeTickSync))
             {
-                var testTime = Support.TtTime.GetTickCount();
-                TtEngine.Instance.EventPoster.TickPostTickSyncEvents(testTime);
-                TtEngine.Instance.GfxDevice.RenderContext.TickPostEvents();
+                TickSync_OnlySlate(host);
 
                 AttachBufferManager.Tick();
-
-                RenderSwapQueue.TickSync(host.ElapsedSecond);
-                CbvUpdater.UpdateCBVs();
-
                 //RenderContext.SetDX12BreakOnId(EDx12MessageId.CREATE_HEAP, bSetBreakOnId);
             }
+        }
+        public void TickSync_OnlySlate(TtEngine host)
+        {
+            var testTime = Support.TtTime.GetTickCount();
+            TtEngine.Instance.EventPoster.TickPostTickSyncEvents(testTime);
+            TtEngine.Instance.GfxDevice.RenderContext.TickPostEvents();
+
+            RenderSwapQueue.TickSync(host.ElapsedSecond);
+            CbvUpdater.UpdateCBVs();
         }
         public override void EndFrame(TtEngine engine)
         {

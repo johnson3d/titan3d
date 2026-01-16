@@ -145,6 +145,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             set;
         }
 
+        public int DefinitionOrder { get; set; } = -1;
+
         PropertyMultiValue mMultiValue;
 
         #region UI
@@ -158,7 +160,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
 
         }
-        public void InitValue(object objIns, Rtti.TtTypeDesc insType, PropertyDescriptor property, bool parentIsValueType)
+        public void InitValue(object objIns, Rtti.TtTypeDesc insType, PropertyDescriptor property, bool parentIsValueType, int definitionOrder = -1)
         {
             //Propertys.Add(insType);
             Name = property.Name;
@@ -167,10 +169,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             mPropertyType = Rtti.TtTypeDesc.TypeOf(property.PropertyType);
             var atts = new Attribute[property.Attributes.Count];
             property.Attributes.CopyTo(atts, 0);
-            Attributes = new AttributeCollection(atts); 
+            Attributes = new AttributeCollection(atts);
             Description = property.Description;
             mIsReadonly = property.IsReadOnly;
             IsBrowsable = property.IsBrowsable;
+            DefinitionOrder = definitionOrder;
             foreach(var att in property.Attributes)
             {
                 if(att is TtPGCustomValueEditorAttribute)
@@ -197,7 +200,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             DeclaringType = Rtti.TtTypeDesc.TypeOf(property.ComponentType);
         }
 
-        public void InitValue(object objIns, Rtti.TtTypeDesc insType, System.Reflection.FieldInfo field, bool parentIsValueType)
+        public void InitValue(object objIns, Rtti.TtTypeDesc insType, System.Reflection.FieldInfo field, bool parentIsValueType, int definitionOrder = -1)
         {
             //Fields.Add(insType);
             Name = field.Name;
@@ -206,6 +209,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             if (disNameAtt != null && disNameAtt.Length > 0)
                 mDisplayName = ((DisplayNameAttribute)disNameAtt[0]).DisplayName;
             mPropertyType = Rtti.TtTypeDesc.TypeOf(field.FieldType);
+            DefinitionOrder = definitionOrder;
             var browsableAtt = field.GetCustomAttributes(typeof(BrowsableAttribute), true);
             if (browsableAtt != null && browsableAtt.Length > 0)
                 IsBrowsable = ((BrowsableAttribute)browsableAtt[0]).Browsable;
@@ -1055,7 +1059,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
         }
 
-        public void InitValue(object objIns, Rtti.TtTypeDesc ins, PropertyDescriptorCollection collection, bool parentIsValueType, HashSet<string> exceptProNames = null)
+        public void InitValue(object objIns, Rtti.TtTypeDesc ins, PropertyDescriptorCollection collection, bool parentIsValueType, HashSet<string> exceptProNames = null, bool useDefinitionOrder = false)
         {
             Cleanup();
 
@@ -1071,6 +1075,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ResizeList(collection.Count);
             }
             var count = 0;
+            int definitionOrder = 0;
             for (int i = 0; i < collection.Count; i++)
             {
                 var pro = collection[i];
@@ -1096,7 +1101,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         continue;
                 }
                 var proDesc = PropertyCollection.PropertyDescPool.QueryObjectSync(); //new CustomPropertyDescriptor(objIns, ins, pro, parentIsValueType);
-                proDesc.InitValue(objIns, ins, pro, parentIsValueType);
+                proDesc.InitValue(objIns, ins, pro, parentIsValueType, useDefinitionOrder ? definitionOrder : -1);
+                if(useDefinitionOrder)
+                    definitionOrder++;
                 if(!proDesc.IsBrowsable)
                 {
                     proDesc.ReleaseObject();
@@ -1107,7 +1114,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             Count = count;
         }
-        public void InitValue(object objIns, Rtti.TtTypeDesc ins, System.Reflection.FieldInfo[] fields, bool parentIsValueType)
+        public void InitValue(object objIns, Rtti.TtTypeDesc ins, System.Reflection.FieldInfo[] fields, bool parentIsValueType, bool useDefinitionOrder = false)
         {
             Cleanup();
 
@@ -1125,7 +1132,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     continue;
 
                 var proDesc = PropertyCollection.PropertyDescPool.QueryObjectSync();
-                proDesc.InitValue(objIns, ins, fields[i], parentIsValueType);
+                proDesc.InitValue(objIns, ins, fields[i], parentIsValueType, useDefinitionOrder ? count : -1);
                 mProperties[count] = proDesc;
                 count++;
             }
@@ -1238,7 +1245,48 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 return (nameX.Length > nameY.Length) ? 1 : -1;
             }
         }
+        class PropertyDefinitionOrderComparer : IComparer<CustomPropertyDescriptor>
+        {
+            public int Compare(CustomPropertyDescriptor proX, CustomPropertyDescriptor proY)
+            {
+                if (proX == null && proY == null)
+                    return 0;
+                if (proX == null && proY != null)
+                    return 1;
+                if (proX != null && proY == null)
+                    return -1;
+
+                // 如果有定义顺序，按定义顺序排序
+                if (proX.DefinitionOrder != -1 && proY.DefinitionOrder != -1)
+                {
+                    return proX.DefinitionOrder.CompareTo(proY.DefinitionOrder);
+                }
+                // 如果只有一个有定义顺序，有定义顺序的在前面
+                if (proX.DefinitionOrder != -1)
+                    return -1;
+                if (proY.DefinitionOrder != -1)
+                    return 1;
+
+                // 都没有定义顺序，按显示名称排序
+                var nameX = proX.GetDisplayName(null);
+                var nameY = proY.GetDisplayName(null);
+
+                var minLength = Math.Min(nameX.Length, nameY.Length);
+                for(int i=0; i<minLength; i++)
+                {
+                    if (nameX[i] > nameY[i])
+                        return 1;
+                    if (nameX[i] < nameY[i])
+                        return -1;
+                }
+
+                if (nameX.Length == nameY.Length)
+                    return 0;
+                return (nameX.Length > nameY.Length) ? 1 : -1;
+            }
+        }
         public readonly static IComparer<CustomPropertyDescriptor> CompareByDisplayName = new PropertyDisplayNameComparer();
+        public readonly static IComparer<CustomPropertyDescriptor> CompareByDefinitionOrder = new PropertyDefinitionOrderComparer();
         public void Sort(IComparer<CustomPropertyDescriptor> comparer)
         {
             mProperties.Sort(comparer);
@@ -1272,11 +1320,25 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public static TtObjectPool<CustomPropertyDescriptor> PropertyDescPool = new TtObjectPool<CustomPropertyDescriptor>();
         public static TtObjectPool<CustomPropertyDescriptorCollection> PropertyDescCollectionPool = new TtObjectPool<CustomPropertyDescriptorCollection>();
 
-        public static Dictionary<string, CustomPropertyDescriptorCollection> CollectionProperties(object instance, bool withCategoryGroup, bool parentIsValueType)
+        public static SortedDictionary<string, CustomPropertyDescriptorCollection> CollectionProperties(object instance, bool withCategoryGroup, bool parentIsValueType)
         {
-            Dictionary<string, CustomPropertyDescriptorCollection> categoryGroups = new Dictionary<string, CustomPropertyDescriptorCollection>();
+            SortedDictionary<string, CustomPropertyDescriptorCollection> categoryGroups = new SortedDictionary<string, CustomPropertyDescriptorCollection>();
             CustomPropertyDescriptorCollection properties = null;
             CustomPropertyDescriptorCollection fields = null;
+
+            // 检查是否需要按定义顺序排序
+            bool useDefinitionOrder = false;
+            if (instance != null)
+            {
+                var insType = instance.GetType();
+                var orderAtt = insType.GetCustomAttribute(typeof(PGPropertyOrderAttribute));
+                if (orderAtt != null)
+                {
+                    var pgOrder = orderAtt as PGPropertyOrderAttribute;
+                    useDefinitionOrder = (pgOrder.Order == PGPropertyOrderAttribute.EPropertyOrder.DefinitionOrder);
+                }
+            }
+
             var getFieldsFlag = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
             if(instance != null)
             {
@@ -1300,22 +1362,22 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         if (tc == null || !tc.GetPropertiesSupported())
                         {
                             if (objIns is IPropertyCustomization)
-                            {
-                                ((IPropertyCustomization)objIns).GetProperties(ref tempProperties, parentIsValueType);
-                            }
-                            else
-                            {
-                                pros = TypeDescriptor.GetProperties(objIns);
-                                tempProperties.InitValue(objIns, objTypeDesc, pros, parentIsValueType);
-                            }
+                                        {
+                            ((IPropertyCustomization)objIns).GetProperties(ref tempProperties, parentIsValueType);
                         }
                         else
                         {
-                            pros = tc.GetProperties(objIns);
-                            tempProperties.InitValue(objIns, objTypeDesc, pros, parentIsValueType);
+                            pros = TypeDescriptor.GetProperties(objIns);
+                            tempProperties.InitValue(objIns, objTypeDesc, pros, parentIsValueType, null, useDefinitionOrder);
                         }
+                    }
+                    else
+                    {
+                        pros = tc.GetProperties(objIns);
+                        tempProperties.InitValue(objIns, objTypeDesc, pros, parentIsValueType, null, useDefinitionOrder);
+                    }
 
-                        // 相同属性合并
+                    // 相同属性合并
                         if (properties == null)
                         {
                             properties = PropertyDescCollectionPool.QueryObjectSync();
@@ -1342,7 +1404,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
                         var fls = objType.GetFields(getFieldsFlag);
                         var tempFields = PropertyDescCollectionPool.QueryObjectSync();
-                        tempFields.InitValue(objIns, objTypeDesc, fls, parentIsValueType);
+                        tempFields.InitValue(objIns, objTypeDesc, fls, parentIsValueType, useDefinitionOrder);
 
                         // 相同成员合并
                         if (fields == null)
@@ -1386,18 +1448,18 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         else
                         {
                             pros = TypeDescriptor.GetProperties(instance);
-                            properties.InitValue(instance, insTypeDesc, pros, parentIsValueType);
+                            properties.InitValue(instance, insTypeDesc, pros, parentIsValueType, null, useDefinitionOrder);
                         }
                     }
                     else
                     {
                         pros = tc.GetProperties(instance);
-                        properties.InitValue(instance, insTypeDesc, pros, parentIsValueType);
+                        properties.InitValue(instance, insTypeDesc, pros, parentIsValueType, null, useDefinitionOrder);
                     }
 
                     var fls = insType.GetFields(getFieldsFlag);
                     fields = PropertyDescCollectionPool.QueryObjectSync();
-                    fields.InitValue(instance, insTypeDesc, fls, parentIsValueType);
+                    fields.InitValue(instance, insTypeDesc, fls, parentIsValueType, useDefinitionOrder);
                 }
             }
 
@@ -1407,7 +1469,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 fields = PropertyDescCollectionPool.QueryObjectSync();// new CustomPropertyDescriptorCollection(null);
 
             properties.Add(fields);
-            properties.Sort(CustomPropertyDescriptorCollection.CompareByDisplayName);
+            if (useDefinitionOrder)
+                properties.Sort(CustomPropertyDescriptorCollection.CompareByDefinitionOrder);
+            else
+                properties.Sort(CustomPropertyDescriptorCollection.CompareByDisplayName);
 
             if(withCategoryGroup)
             {
