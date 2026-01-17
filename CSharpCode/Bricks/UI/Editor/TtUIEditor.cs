@@ -1216,7 +1216,7 @@ namespace EngineNS.UI.Editor
             else
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.TextColor);
 
-            var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap;
+            var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
             var name = GetElementShowName(element) + "##" + idx++;
             if (mSelectedElements.Contains(element))
                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;

@@ -84,8 +84,8 @@ namespace EngineNS.DesignMacross.Design
             Debug.Assert(elementsList != null);
             Vector2 buttonSize = new Vector2(16, 16);
 
+            ImGuiAPI.SetNextItemAllowOverlap();
             var treeNodeResult = ImGuiAPI.TreeNodeEx("Methods",
-                ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap |
                 ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnDoubleClick |
                 ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen);
             var regionSize = ImGuiAPI.GetContentRegionAvail();

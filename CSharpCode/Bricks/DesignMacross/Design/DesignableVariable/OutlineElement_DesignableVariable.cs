@@ -50,7 +50,8 @@ namespace EngineNS.DesignMacross.Design
             var elementsList = renderableElement as TtOutlineElementsList_DesignableVariables;
             Vector2 buttonSize = new Vector2(16, 16);
 
-            var treeNodeResult = ImGuiAPI.TreeNodeEx("DesignableVariables", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen);
+            ImGuiAPI.SetNextItemAllowOverlap();
+            var treeNodeResult = ImGuiAPI.TreeNodeEx("DesignableVariables", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen);
             var regionSize = ImGuiAPI.GetContentRegionAvail();
             ImGuiAPI.SameLine(regionSize.X, -1.0f);
             if (EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))

@@ -118,7 +118,8 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
             bool treeNodeResult = true;
             if (!elementsList.IsHideTitle)
             {
-                treeNodeResult = ImGuiAPI.TreeNodeEx("CompoundStates", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnDoubleClick);
+                ImGuiAPI.SetNextItemAllowOverlap();
+                treeNodeResult = ImGuiAPI.TreeNodeEx("CompoundStates", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnDoubleClick);
             }
             ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
             if (EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))

@@ -1170,7 +1170,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         HashSet<string> mPropertyCategories = new HashSet<string>();
         protected unsafe void DrawClassView()
         {
-            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap;
+            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "ClassView", ref mClassViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
@@ -1180,7 +1180,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 //ImGuiAPI.SetNextItemWidth(-1);
                 var regionSize = ImGuiAPI.GetContentRegionAvail();
 
-                var membersTreeNodeResult = ImGuiAPI.TreeNodeEx("Members", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap);
+                ImGuiAPI.SetNextItemAllowOverlap();
+                var membersTreeNodeResult = ImGuiAPI.TreeNodeEx("Members", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None);
                 ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
                 if (EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))
                 {
@@ -1237,7 +1238,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         if (hasCategory)
                         {
                             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextDisableColor);
-                            categoryTreeNodeResult = ImGuiAPI.TreeNodeEx(categoryName, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap);
+                            ImGuiAPI.SetNextItemAllowOverlap();
+                            categoryTreeNodeResult = ImGuiAPI.TreeNodeEx(categoryName, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None);
                             ImGuiAPI.PopStyleColor(1);
                         }
                         if (categoryTreeNodeResult)
@@ -1280,7 +1282,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     }
                     ImGuiAPI.TreePop();
                 }
-                var methodsTreeNodeResult = ImGuiAPI.TreeNodeEx("Methods", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap);
+                ImGuiAPI.SetNextItemAllowOverlap();
+                var methodsTreeNodeResult = ImGuiAPI.TreeNodeEx("Methods", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None);
                 ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
                 if(EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))
                 {
@@ -1345,7 +1348,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
 
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextDisableColor);
-                var deletedMethodsTreeNodeResult = ImGuiAPI.TreeNodeEx("Deleted Methods", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap);
+                ImGuiAPI.SetNextItemAllowOverlap();
+                var deletedMethodsTreeNodeResult = ImGuiAPI.TreeNodeEx("Deleted Methods", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None);
                 if(deletedMethodsTreeNodeResult)
                 {
                     for(int i=MethodDeletedList.Count - 1; i >= 0; i--)
@@ -1369,7 +1373,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         private unsafe void DrawMethodLocalVars(in Vector2 regionSize, in Vector2 buttonSize, float buttonOffset, ImGuiTreeNodeFlags_ flags)
         {
-            var localVarsTreeNodeResult = ImGuiAPI.TreeNodeEx("LocalVars", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap);
+            ImGuiAPI.SetNextItemAllowOverlap();
+            var localVarsTreeNodeResult = ImGuiAPI.TreeNodeEx("LocalVars", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None);
             ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
             if (EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))
             {

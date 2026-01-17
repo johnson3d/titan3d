@@ -19,7 +19,8 @@ namespace EngineNS.Bricks.StateMachine.Macross
             var varibleName = stateMachineElement.Description.Name;
             Vector2 buttonSize = new Vector2(16, 16);
 
-            var treeNodeIsOpen = ImGuiAPI.TreeNodeEx(varibleName, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnDoubleClick);
+            ImGuiAPI.SetNextItemAllowOverlap();
+            var treeNodeIsOpen = ImGuiAPI.TreeNodeEx(varibleName, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnDoubleClick);
             var regionSize = ImGuiAPI.GetContentRegionAvail();
             ImGuiAPI.SameLine(regionSize.X , -1.0f);
             var isTreeNodeDoubleClicked = ImGuiAPI.IsItemDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);

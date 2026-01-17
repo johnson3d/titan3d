@@ -1484,10 +1484,10 @@ public:
 	{
 		return ImGui::GetItemRectSize();
 	}
-	static void          SetItemAllowOverlap()
+	/*static void          SetItemAllowOverlap()
 	{
 		return ImGui::SetItemAllowOverlap();
-	}
+	}*/
 	// Miscellaneous Utilities
 	static bool          IsRectVisible(const ImVec2* size)
 	{
@@ -1537,18 +1537,22 @@ public:
 	{
 		return ImGui::GetStateStorage();
 	}
+	static void SetNextItemAllowOverlap()
+	{
+		ImGui::SetNextItemAllowOverlap();
+	}
 	/*static void          CalcListClipping(int items_count, float items_height, int* out_items_display_start, int* out_items_display_end)
 	{
 		return ImGui::CalcListClipping(items_count, items_height, out_items_display_start, out_items_display_end);
 	}*/
-	static bool          BeginChildFrame(ImGuiID id, const ImVec2* size, ImGuiWindowFlags_ flags = (ImGuiWindowFlags_)0)
+	/*static bool          BeginChildFrame(ImGuiID id, const ImVec2* size, ImGuiWindowFlags_ flags = (ImGuiWindowFlags_)0)
 	{
 		return ImGui::BeginChildFrame(id, *size, flags);
 	}
 	static void          EndChildFrame()
 	{
 		return ImGui::EndChildFrame();
-	}
+	}*/
 	// Text Utilities
 	TR_FUNCTION(SV_ReturnConverter = v3dVector2_t)
 	static ImVec2        CalcTextSize(const char* text, bool hide_text_after_double_hash = false, float wrap_width = -1.0f)

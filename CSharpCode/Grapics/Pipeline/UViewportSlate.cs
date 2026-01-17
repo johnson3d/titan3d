@@ -169,7 +169,7 @@ namespace EngineNS.Graphics.Pipeline
                 var idStr = Title + "_Window";
                 var id = ImGuiAPI.GetID(idStr);
                 ImGuiAPI.PushID((int)id);
-                ImGuiAPI.SetKeyOwner(ImGuiKey.ImGuiKey_ModAlt, id, 0);
+                ImGuiAPI.SetKeyOwner(ImGuiKey.ImGuiMod_Alt, id, 0);
                 sz = ImGuiAPI.GetWindowSize();
                 var imViewport = ImGuiAPI.GetWindowViewport();
                 if ((IntPtr)imViewport->PlatformUserData != IntPtr.Zero)
