@@ -208,7 +208,6 @@ namespace EngineNS.Plugins.LevelServer
 			rpcArg.ExeIndex = RpcExecuteIndex;
 			rpcArg.NetConnect = GetRpcConnect(100 + 1);
 			ULevelClient_RpcCaller.UpdateAutoSyncData(data, rpcArg);
-			UpdateAutoSyncData(data, null);
 		}
 	}
 }

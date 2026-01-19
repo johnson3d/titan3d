@@ -724,7 +724,6 @@ namespace EngineNS.Profiler
 			rpcArg.ExeIndex = RpcExecuteIndex;
 			rpcArg.NetConnect = GetRpcConnect(2);
 			TtRpcProfiler_RpcCaller.ResetMaxTime(arg, rpcArg);
-			ResetMaxTime(arg, null);
 		}
 	}
 }

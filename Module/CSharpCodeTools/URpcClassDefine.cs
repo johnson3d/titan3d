@@ -246,7 +246,6 @@ namespace CSharpCodeTools
                 else
                 {
                     AddLine($"{this.Name}_RpcCaller.{i.Name}({argCallStr}rpcArg);");
-                    AddLine($"{i.Name}({argCallStr}null);");
                 }
             }
             PopBrackets();

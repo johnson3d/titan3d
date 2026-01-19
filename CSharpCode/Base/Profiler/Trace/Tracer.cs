@@ -360,7 +360,6 @@ namespace EngineNS.Profiler.Trace
 			rpcArg.ExeIndex = RpcExecuteIndex;
 			rpcArg.NetConnect = GetRpcConnect(0);
 			TtTracer_RpcCaller.ReciveFrame(frameData, rpcArg);
-			ReciveFrame(frameData, null);
 		}
 	}
 }

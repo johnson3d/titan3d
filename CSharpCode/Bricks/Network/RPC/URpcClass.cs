@@ -796,7 +796,6 @@ namespace EngineNS.Bricks.Network.RPC
 			rpcArg.ExeIndex = RpcExecuteIndex;
 			rpcArg.NetConnect = GetRpcConnect(0);
 			TtRpcPropertyDataManager_RpcCaller.SyncAllProperties(data, rpcArg);
-			SyncAllProperties(data, null);
 		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_CreateRpcHost = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
@@ -834,7 +833,6 @@ namespace EngineNS.Bricks.Network.RPC
 			rpcArg.ExeIndex = RpcExecuteIndex;
 			rpcArg.NetConnect = GetRpcConnect(1);
 			TtRpcPropertyDataManager_RpcCaller.CreateRpcHost(type, executeIndex, info, rpcArg);
-			CreateRpcHost(type, executeIndex, info, null);
 		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RemoveRpcHost = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
@@ -852,7 +850,6 @@ namespace EngineNS.Bricks.Network.RPC
 			rpcArg.ExeIndex = RpcExecuteIndex;
 			rpcArg.NetConnect = GetRpcConnect(2);
 			TtRpcPropertyDataManager_RpcCaller.RemoveRpcHost(executerType, executeIndex, info, rpcArg);
-			RemoveRpcHost(executerType, executeIndex, info, null);
 		}
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_QueryProperties = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
