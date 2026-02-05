@@ -918,42 +918,105 @@ namespace EngineNS.NxRHI
         }
 
         /// <summary>
-        /// 批量提取 3D Texture 的所有 slice 数据（用于 BC6 压缩）
-        /// 优化：避免在 mipmap 循环中重复提取 slice 数据
+        /// 批量生成 3D Texture 的所有 mipmap 层级（用于 BC6 压缩）
+        /// 优化：使用 GetBoxDownSampler 级联降采样，避免手动实现降采样逻辑
         /// </summary>
-        public static ColorRgbFloat[] ExtractAllSlicesForBc6(
+        public static unsafe ColorRgbFloat[][][] GenerateAllMips3DForBc6(
             float[] srcData, int srcWidth, int srcHeight,
             int sliceWidth, int sliceHeight, int depth,
-            int slicesPerRow, int channelsPerPixel)
+            int slicesPerRow, int channelsPerPixel,
+            int mipLevel)
         {
-            // 每个 slice 的大小
-            int sliceSize = sliceWidth * sliceHeight;
-            // 所有 slice 的总大小
-            int totalSize = sliceSize * depth;
+            // allMipLevels[j][d] = mipLevel j, slice d 的 ColorRgbFloat[] 数据
+            ColorRgbFloat[][][] allMipLevels = new ColorRgbFloat[mipLevel][][];
 
-            ColorRgbFloat[] allSlices = new ColorRgbFloat[totalSize];
-
-            // 一次性提取所有 slice，复用 ExtractSliceFromGridLayoutFloat 方法
+            // Step 1: 提取所有原始 slice (Mip0) 并转换为 ImageResultFloat
+            var mip0Slices = new StbImageSharp.ImageResultFloat[depth];
             for (int d = 0; d < depth; d++)
             {
-                // 使用现有方法提取 float[] 数据
                 float[] sliceDataFloat = ExtractSliceFromGridLayoutFloat(
                     srcData, srcWidth, srcHeight,
                     sliceWidth, sliceHeight, d,
                     slicesPerRow, channelsPerPixel);
 
-                // 转换为 ColorRgbFloat[] 并拷贝到目标位置
-                int dstOffset = d * sliceSize;
-                for (int i = 0; i < sliceSize; i++)
+                // 转换为 ImageResultFloat
+                mip0Slices[d] = new StbImageSharp.ImageResultFloat();
+                mip0Slices[d].Width = sliceWidth;
+                mip0Slices[d].Height = sliceHeight;
+                mip0Slices[d].Comp = StbImageSharp.ColorComponents.RedGreenBlueAlpha;
+                mip0Slices[d].SourceComp = StbImageSharp.ColorComponents.RedGreenBlueAlpha;
+
+                // 将 float[] 转换为 RGBA 格式 (添加 Alpha=1)
+                int pixelCount = sliceWidth * sliceHeight;
+                mip0Slices[d].Data = new float[pixelCount * 4];
+                for (int i = 0; i < pixelCount; i++)
                 {
                     int floatIndex = i * channelsPerPixel;
-                    allSlices[dstOffset + i].r = sliceDataFloat[floatIndex];
-                    allSlices[dstOffset + i].g = sliceDataFloat[floatIndex + 1];
-                    allSlices[dstOffset + i].b = sliceDataFloat[floatIndex + 2];
+                    mip0Slices[d].Data[i * 4] = sliceDataFloat[floatIndex];         // R
+                    mip0Slices[d].Data[i * 4 + 1] = sliceDataFloat[floatIndex + 1]; // G
+                    mip0Slices[d].Data[i * 4 + 2] = sliceDataFloat[floatIndex + 2]; // B
+                    mip0Slices[d].Data[i * 4 + 3] = 1.0f;                            // A
                 }
             }
 
-            return allSlices;
+            // Step 2: 级联降采样生成所有 mipmap 级别
+            allMipLevels[0] = new ColorRgbFloat[depth][];
+            for (int d = 0; d < depth; d++)
+            {
+                int sliceSize = sliceWidth * sliceHeight;
+                allMipLevels[0][d] = new ColorRgbFloat[sliceSize];
+                for (int i = 0; i < sliceSize; i++)
+                {
+                    allMipLevels[0][d][i].r = mip0Slices[d].Data[i * 4];
+                    allMipLevels[0][d][i].g = mip0Slices[d].Data[i * 4 + 1];
+                    allMipLevels[0][d][i].b = mip0Slices[d].Data[i * 4 + 2];
+                }
+            }
+
+            // 从 Mip1 开始级联降采样
+            // 使用临时数组保存上一级的 slice 数据
+            var prevSlices = new StbImageSharp.ImageResultFloat[depth];
+            for (int d = 0; d < depth; d++)
+            {
+                prevSlices[d] = mip0Slices[d];
+            }
+
+            for (int j = 1; j < mipLevel; j++)
+            {
+                int prevMipDepth = Math.Max(1, depth >> (j - 1));
+                int curMipDepth = Math.Max(1, depth >> j);
+                int prevMipWidth = Math.Max(1, sliceWidth >> (j - 1));
+                int prevMipHeight = Math.Max(1, sliceHeight >> (j - 1));
+                int curMipWidth = Math.Max(1, sliceWidth >> j);
+                int curMipHeight = Math.Max(1, sliceHeight >> j);
+
+                allMipLevels[j] = new ColorRgbFloat[curMipDepth][];
+
+                // 使用 GetBoxDownSampler3D 降采样（同时考虑 x, y, z 三个维度）
+                var downsampledSlices = StbImageSharp.ImageProcessor.GetBoxDownSampler3D(
+                    prevSlices, prevMipWidth, prevMipHeight, prevMipDepth,
+                    curMipWidth, curMipHeight, curMipDepth);
+
+                // 转换回 ColorRgbFloat[]
+                for (int d = 0; d < curMipDepth; d++)
+                {
+                    var downsampled = downsampledSlices[d];
+
+                    int curSliceSize = curMipWidth * curMipHeight;
+                    allMipLevels[j][d] = new ColorRgbFloat[curSliceSize];
+                    for (int i = 0; i < curSliceSize; i++)
+                    {
+                        allMipLevels[j][d][i].r = downsampled.Data[i * 4];
+                        allMipLevels[j][d][i].g = downsampled.Data[i * 4 + 1];
+                        allMipLevels[j][d][i].b = downsampled.Data[i * 4 + 2];
+                    }
+                }
+
+                // 更新 prevSlices 为当前级的数据，用于下一级降采样
+                prevSlices = downsampledSlices;
+            }
+
+            return allMipLevels;
         }
 
 

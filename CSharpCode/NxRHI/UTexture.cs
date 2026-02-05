@@ -1,20 +1,22 @@
 ﻿using Assimp.Unmanaged;
 using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
+using BCnEncoder.Shared.ImageFiles;
+using CommunityToolkit.HighPerformance;
 using EngineNS.Bricks.ImageDecoder;
 using EngineNS.EGui.Controls;
+using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.IO;
 using EngineNS.NxRHI;
 using EngineNS.Support;
 using Jither.OpenEXR;
-using CommunityToolkit.HighPerformance;
 using StbImageSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using EngineNS.EGui.Controls.PropertyGrid;
 using static EngineNS.EGui.Controls.PropertyGrid.PGPropertyOrderAttribute;
 using static EngineNS.RName;
 
@@ -1268,7 +1270,10 @@ namespace EngineNS.NxRHI
                 {
                     int srcIdx = i * totalChannels * bytesPerPixel + c * bytesPerPixel;
                     int destIdx = i * (int)colorComp + c;
-                    imageFloat_Mip0.Data[destIdx] = BitConverter.ToSingle(pixelData, srcIdx);
+                    if(part.Channels[0].Type == EXRDataType.Float)
+                        imageFloat_Mip0.Data[destIdx] = BitConverter.ToSingle(pixelData, srcIdx);
+                    else
+                        imageFloat_Mip0.Data[destIdx] = (float)BitConverter.ToHalf(pixelData, srcIdx);
                 }
             }
 
@@ -2014,15 +2019,16 @@ namespace EngineNS.NxRHI
             System.DateTime beginTime = System.DateTime.Now;
             Profiler.Log.WriteInfoSimple("Start SaveDxtMips_BcEncoder");
 
-            // 优化：对于 3D Texture，一次性提取所有 slice 的原始数据，避免在 mipmap 循环中重复提取
-            ColorRgbFloat[] allSlicesOriginal = null;
+            // 优化：对于 3D Texture，使用 GetBoxDownSampler 预先生成所有 mipmap 级别的数据
+            ColorRgbFloat[][][] allMipLevelsData = null;
             if (desc.IsTexture3D && desc.Depth > 0)
             {
-                // 使用优化方法一次性提取所有 slice
-                allSlicesOriginal = TtTextureHelper.ExtractAllSlicesForBc6(
+                // 使用 GetBoxDownSampler 级联降采样，生成所有 mipmap 级别
+                allMipLevelsData = TtTextureHelper.GenerateAllMips3DForBc6(
                     curImage.Data, imageWidth, imageHeight,
                     sliceWidth, sliceHeight, desc.Depth,
-                    slicesPerRow, (int)curImage.Comp);
+                    slicesPerRow, (int)curImage.Comp,
+                    (int)desc.MipLevel);
             }
 
             for (uint i = 0; i < desc.Desc.CubeFaces; i++)
@@ -2062,21 +2068,21 @@ namespace EngineNS.NxRHI
 
                         // 计算当前 mipmap 的尺寸
                         int mipDepth = Math.Max(1, desc.Depth >> (int)j);
+                        int mipWidth = Math.Max(1, sliceWidth >> (int)j);
+                        int mipHeight = Math.Max(1, sliceHeight >> (int)j);
 
                         // 编码每一层并保存
                         for (int d = 0; d < mipDepth; d++)
                         {
                             var attr = mipNode.GetOrAddAttribute($"DxtMipSlice{d}", 0, 0, true);
 
-                            // 优化：使用预先提取的 slice 数据，避免重复提取
-                            int srcOffset = d * sliceSize;
-                            ColorRgbFloat[] colorDataSlice = new ColorRgbFloat[sliceSize];
-                            Array.Copy(allSlicesOriginal, srcOffset, colorDataSlice, 0, sliceSize);
+                            // 优化：使用预先生成的 mipmap 数据（已经过级联降采样）
+                            ColorRgbFloat[] colorDataSlice = allMipLevelsData[j][d];
 
-                            var memory2DSlice = colorDataSlice.AsMemory().AsMemory2D(sliceHeight, sliceWidth);
+                            var memory2DSlice = colorDataSlice.AsMemory().AsMemory2D(mipHeight, mipWidth);
 
-                            // 编码当前层
-                            var pixelsBcn = encoder.EncodeToRawBytesHdr(memory2DSlice, (int)j, out mipSize.X, out mipSize.Y);
+                            // 编码当前层（传入 0 表示数据已经降采样）
+                            var pixelsBcn = encoder.EncodeToRawBytesHdr(memory2DSlice, 0, out mipSize.X, out mipSize.Y);
 
                             encoder.GetBlockCount(mipSize.X, mipSize.Y, out blockDimension.X, out blockDimension.Y);
                             desc.BlockSize = encoder.GetBlockSize();
