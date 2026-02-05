@@ -154,6 +154,9 @@ namespace EngineNS
         public RName SimpleRPolicyName { get; set; }
         [Rtti.Meta("")]
         [Category("Option")]
+        public RName DefaultGame { get; set; }
+        [Rtti.Meta("")]
+        [Category("Option")]
         public string RpcRootType { get; set; }// = Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.UnitTest.UTest_Rpc));
         [Rtti.Meta("")]
         [Category("Option")]

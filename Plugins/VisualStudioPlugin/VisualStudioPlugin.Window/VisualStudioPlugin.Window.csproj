@@ -6,6 +6,9 @@
     <Nullable>disable</Nullable>
     <BaseOutputPath>$(SolutionDir)\binaries\Plugins</BaseOutputPath>
 	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	<EnableComHosting>true</EnableComHosting>
+	<PublishTrimmed>false</PublishTrimmed>
+	<!--<TrimMode>partial</TrimMode>-->
   </PropertyGroup>
 
   <Import Project="..\VisualStudioPlugin\VisualStudioPlugin.projitems" Label="Shared" />
@@ -16,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Module\Engine.Window\Engine.Window.csproj" />
+	<TrimmerRootAssembly Include="System.Runtime.InteropServices" />
   </ItemGroup>
 
 </Project>

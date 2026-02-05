@@ -112,8 +112,8 @@ namespace EngineNS.EGui.UIProxy
             var hovered = ImGuiAPI.IsMouseHoveringRectInCurrentWindow(in cursorPos, in endPos, true);
             if (hovered)
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, EGui.UIProxy.StyleConfig.Instance.PGItemBorderHoveredColor);
-            var comboOpen = ImGuiAPI.BeginCombo(name, previewValue, flags, winFlags);
-            //var comboOpen = ImGuiAPI.BeginCombo(name, previewValue, flags);
+            //var comboOpen = ImGuiAPI.BeginCombo(name, previewValue, flags, winFlags);
+            var comboOpen = ImGuiAPI.BeginCombo(name, previewValue, flags);
             if (hovered)
                 ImGuiAPI.PopStyleColor(1);
 

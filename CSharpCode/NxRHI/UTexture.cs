@@ -8,7 +8,7 @@ using EngineNS.IO;
 using EngineNS.NxRHI;
 using EngineNS.Support;
 using Jither.OpenEXR;
-using Microsoft.Toolkit.HighPerformance;
+using CommunityToolkit.HighPerformance;
 using StbImageSharp;
 using System;
 using System.Collections.Generic;
@@ -459,14 +459,25 @@ namespace EngineNS.NxRHI
             {
                 using (var stream = System.IO.File.OpenRead(mSourceFile))
                 {
-                    var image = StbImageSharp.TtMemImage.FromStream(stream, StbImageSharp.ColorComponents.Default);
-                    if (image != null)
+                    var filter = mFileDialog.GetCurrentFilter();
+                    if(filter == ".exr")
                     {
-                        mDesc.Width = image.Width;
-                        mDesc.Height = image.Height;
+                        var exrFile = new Jither.OpenEXR.EXRFile(stream);
+                        var part = exrFile.Parts[0];
 
-                        mDesc.MipLevel = Math.Max(CalcMipLevel(mDesc.Width, mDesc.Height, true, 4), 1);
+                        mDesc.Width = part.DisplayWindow.Width;
+                        mDesc.Height = part.DisplayWindow.Height;
                     }
+                    else
+                    {
+                        var image = StbImageSharp.TtMemImage.FromStream(stream, StbImageSharp.ColorComponents.Default);
+                        if (image != null)
+                        {
+                            mDesc.Width = image.Width;
+                            mDesc.Height = image.Height;
+                        }
+                    }
+                    mDesc.MipLevel = Math.Max(CalcMipLevel(mDesc.Width, mDesc.Height, true, 4), 1);
                 }
             }
             public override unsafe bool OnDraw(EGui.Controls.TtContentBrowser ContentBrowser)
@@ -1229,60 +1240,40 @@ namespace EngineNS.NxRHI
         {
             var part = file.Parts[0];
             System.Diagnostics.Debug.Assert(part.DataReader != null);
-            byte[] pixelData = new byte[part.DataReader.GetTotalByteCount()];
-            string[] channelNames = new[] { "R", "G", "B", "A" };
-            if (part.Channels.Count == 3)
-                channelNames = new[] { "R", "G", "B" };
-            part.DataReader.ReadInterleaved(pixelData, channelNames);
+            System.Diagnostics.Debug.Assert(part.Channels.Count > 0);
 
-            desc.Width = part.DisplayWindow.Width;
-            desc.Height = part.DisplayWindow.Height;
+            int width = part.DisplayWindow.Width;
+            int height = part.DisplayWindow.Height;
 
-            if (desc.StripOriginSource && assetName != null)
+            // 读取原始数据用于降采样
+            var dataSize = part.DataReader.GetTotalByteCount();
+            byte[] pixelData = new byte[dataSize];
+            part.DataReader.ReadInterleaved(pixelData, new[] { "R", "G", "B", "A" });
+
+            // 将Mip0（原始数据）转换为 ImageResultFloat
+            int totalChannels = part.Channels.Count;
+            int bytesPerPixel = part.Channels[0].Type.GetBytesPerPixel();
+            StbImageSharp.ColorComponents colorComp = part.Channels.Count == 3 ? StbImageSharp.ColorComponents.RedGreenBlue : StbImageSharp.ColorComponents.RedGreenBlueAlpha;
+            var imageFloat_Mip0 = new StbImageSharp.ImageResultFloat()
             {
-                using (var memStream = new System.IO.FileStream(assetName.Address + ".exr", System.IO.FileMode.OpenOrCreate))
+                Width = width,
+                Height = height,
+                Comp = colorComp,
+                Data = new float[width * height * (int)colorComp]
+            };
+            // 转换像素数据, uint/half/float->float
+            for (int i = 0; i < width * height; ++i)
+            {
+                for (int c = 0; c < (int)colorComp && c < totalChannels; ++c)
                 {
-                    file.Write(memStream);
-                    part.DataWriter.WriteInterleaved(pixelData, channelNames);
+                    int srcIdx = i * totalChannels * bytesPerPixel + c * bytesPerPixel;
+                    int destIdx = i * (int)colorComp + c;
+                    imageFloat_Mip0.Data[destIdx] = BitConverter.ToSingle(pixelData, srcIdx);
                 }
             }
-            else
-            {
-                using (var memStream = new System.IO.MemoryStream())
-                {
-                    file.Write(memStream);
-                    part.DataWriter.WriteInterleaved(pixelData, channelNames);
 
-                    var rawData = memStream.ToArray();
-                    var rawAttr = node.GetOrAddAttribute("Exr", 0, 0, true);
-                    using (var ar = rawAttr.GetWriter((ulong)memStream.Position))
-                    {
-                        ar.WriteNoSize(rawData, (int)memStream.Position);
-                    }
-                }
-            }
-
-            // TODO: suport compress exr
-            desc.DontCompress = true;
-            if (desc.Width % 4 != 0 || desc.Height % 4 != 0)
-            {
-                desc.DontCompress = true;
-            }
-            int mipLevel = 0;
-            desc.MipSizes.Clear();
-            desc.CompressFormat = TtTextureHelper.SelectHdrCompressFormat(desc);
-
-            switch (desc.CompressFormat)
-            {
-                case ETextureCompressFormat.TCF_None:
-                    {
-                        var hdrMipsNode = node.GetOrAddNode("ExrMips", 0, 0, true);
-                        mipLevel = SaveExrMips(hdrMipsNode, file, desc);
-                    }
-                    break;
-            }
-
-            TtTextureHelper.SaveDescToNode(node, desc);
+            // 使用ImageResultFloat的序列化
+            SaveTexture(assetName, node, imageFloat_Mip0, desc);
         }
         
         public static unsafe void SaveTexture(RName assetName, XndNode node, StbImageSharp.ImageResultFloat image, TtPicDesc desc)
@@ -1338,7 +1329,7 @@ namespace EngineNS.NxRHI
             int mipLevel = 0;
             var curImage = image;
             desc.MipSizes.Clear();
-            desc.CompressFormat = TtTextureHelper.SelectHdrCompressFormat(desc);
+            desc.CompressFormat = TtTextureHelper.SelectCompressFormat(desc);
             switch (desc.CompressFormat)
             {
                 case ETextureCompressFormat.TCF_None:
@@ -1540,151 +1531,6 @@ namespace EngineNS.NxRHI
             }
 
             TtTextureHelper.SaveDescToNode(node, desc);
-        }
-        public static int SaveExrMips(XndNode pngMipsNode, Jither.OpenEXR.EXRFile file, TtPicDesc desc)
-        {
-            int mipLevel = 0;
-            var part = file.Parts[0];
-            System.Diagnostics.Debug.Assert(part.DataReader != null);
-            int height = part.DisplayWindow.Height;
-            int width = part.DisplayWindow.Width;
-            System.Diagnostics.Debug.Assert(part.Channels.Count > 0);
-            switch( part.Channels[0].Type )
-            {
-                case Jither.OpenEXR.EXRDataType.Float:
-                    if (part.Channels.Count == 1)
-                        desc.Format = EPixelFormat.PXF_R32_FLOAT;
-                    else if (part.Channels.Count == 3)
-                        desc.Format = EPixelFormat.PXF_R32G32B32_FLOAT;
-                    else if (part.Channels.Count == 4)
-                        desc.Format = EPixelFormat.PXF_R32G32B32A32_FLOAT;
-                    break;
-                case Jither.OpenEXR.EXRDataType.Half:
-                    if (part.Channels.Count == 1)
-                        desc.Format = EPixelFormat.PXF_R16_FLOAT;
-                    else if (part.Channels.Count == 3)
-                        desc.Format = EPixelFormat.PXF_R16G16B16A16_FLOAT;
-                    else if (part.Channels.Count == 4)
-                        desc.Format = EPixelFormat.PXF_R16G16B16A16_FLOAT;
-                    break;
-                default:
-                    System.Diagnostics.Debug.Assert(false);
-                    break;
-            }
-
-            desc.MipLevel = 1;
-            if(part.TilingInformation!=null)
-            {
-                switch (part.TilingInformation.LevelMode)
-                {
-                    case Jither.OpenEXR.LevelMode.One:
-                    case Jither.OpenEXR.LevelMode.RipMap:
-                        desc.MipLevel = 1;
-                        break;
-                    case Jither.OpenEXR.LevelMode.MipMap:
-                        desc.MipLevel = part.TilingInformation.Levels.Count;
-                        break;
-                }
-            }
-            do
-            {
-                var attr = pngMipsNode.GetOrAddAttribute($"ExrMip{mipLevel}", 0, 0, true);
-                var dataSize = part.DataReader.GetTotalByteCount();
-                byte[] pixelData = new byte[dataSize];
-                int destChannelCount = part.Channels.Count;
-
-                if (part.Channels.Count == 3 && part.Channels[0].Type == Jither.OpenEXR.EXRDataType.Half)
-                {
-                    destChannelCount = 4;
-                    part.DataReader.ReadInterleaved(pixelData, new[] { "R", "G", "B" });
-                    var pixelCount = width * height;
-                    var pixelBytes = part.Channels[0].Type.GetBytesPerPixel();
-                    byte[] destPixelData = new byte[pixelCount * 4 * pixelBytes];
-                    System.Half halfOne = (System.Half)1.0;
-                    byte[] halfByteArray = BitConverter.GetBytes(halfOne);
-                    for (int i = 0; i < pixelCount; ++i)
-                    {
-                        Array.Copy(pixelData, i * 3 * pixelBytes, destPixelData, i * 4 * pixelBytes, 3 * pixelBytes);
-                        Array.Copy(halfByteArray, 0, destPixelData, (i * 4 + 3) * pixelBytes, 2);
-                    }
-                    using (var ar = attr.GetWriter((ulong)destPixelData.Length))
-                    {
-                        ar.WriteNoSize(destPixelData, (int)(destPixelData.Length));
-                    }
-
-                    #region exrtest
-                    bool bExrtest = false;
-                    if (bExrtest)
-                    {
-                        System.Half[] halfPixelData = new System.Half[width * height * 4];
-                        for (int i = 0; i < width * height; ++i)
-                        {
-                            int startIndex = i * 4;
-                            halfPixelData[4 * i + 0] = BitConverter.ToHalf(destPixelData, startIndex * 2);
-                            halfPixelData[4 * i + 1] = BitConverter.ToHalf(destPixelData, (startIndex + 1) * 2);
-                            halfPixelData[4 * i + 2] = BitConverter.ToHalf(destPixelData, (startIndex + 2) * 2);
-                            halfPixelData[4 * i + 3] = BitConverter.ToHalf(destPixelData, (startIndex + 3) * 2);
-                        }
-
-                        float[] floatPixelData = new float[width * height * 4];
-                        for (int i = 0; i < halfPixelData.Length; ++i)
-                        {
-                            floatPixelData[i] = (float)halfPixelData[i];
-                        }
-                    }
-                    #endregion
-                }
-                else
-                {
-                    part.DataReader.ReadInterleaved(pixelData, new[] { "R", "G", "B", "A" });
-                    using (var ar = attr.GetWriter((ulong)dataSize))
-                    {
-                        ar.WriteNoSize(pixelData, (int)dataSize);
-                    }
-
-                    #region exrtest
-                    bool bExrtest = false;
-                    if (bExrtest)
-                    {
-                        System.Half[] halfPixelData = new System.Half[width * height * 4];
-                        for (int i = 0; i < width * height; ++i)
-                        {
-                            int startIndex = i * 4;
-                            halfPixelData[4 * i + 0] = BitConverter.ToHalf(pixelData, startIndex * 2);
-                            halfPixelData[4 * i + 1] = BitConverter.ToHalf(pixelData, (startIndex + 1) * 2);
-                            halfPixelData[4 * i + 2] = BitConverter.ToHalf(pixelData, (startIndex + 2) * 2);
-                            halfPixelData[4 * i + 3] = BitConverter.ToHalf(pixelData, (startIndex + 3) * 2);
-                        }
-
-                        float[] floatPixelData = new float[width * height * 4];
-                        for (int i = 0; i < halfPixelData.Length; ++i)
-                        {
-                            floatPixelData[i] = (float)halfPixelData[i];
-                        }
-                    }
-                    #endregion
-                }
-
-                desc.MipSizes.Add(new Vector3i() { X = width, Y = height, Z = width * destChannelCount * part.Channels[0].Type.GetBytesPerPixel() });
-                height = height / 2;
-                width = width / 2;
-                if ((height == 0 && width == 0))
-                {
-                    break;
-                }
-                mipLevel++;
-                if (height == 0)
-                    height = 1;
-                if (width == 0)
-                    width = 1;
-                // TODO: get exr mips data
-                //curImage = StbImageSharp.ImageProcessor.GetBoxDownSampler(curImage, width, height);
-                if (desc.MipLevel > 0 && mipLevel == desc.MipLevel)
-                    break;
-            }
-            while (true);
-
-            return mipLevel;
         }
 
         public static int SaveHdrMips(XndNode hdrMipsNode, StbImageSharp.ImageResultFloat curImage, TtPicDesc desc)
@@ -2126,7 +1972,7 @@ namespace EngineNS.NxRHI
 
             BcEncoder encoder = new BcEncoder();
             encoder.OutputOptions.GenerateMipMaps = true;
-            encoder.OutputOptions.Quality = CompressionQuality.Balanced;
+            encoder.OutputOptions.Quality = CompressionQuality.BestQuality;
             encoder.OutputOptions.Format = CompressionFormat.Bc6U;
             encoder.OutputOptions.FileFormat = OutputFileFormat.Dds;
 
@@ -2183,11 +2029,25 @@ namespace EngineNS.NxRHI
             {
                 var faceNode = mipsNode.GetOrAddNode($"Face{i}", 0, 0, true);
 
+                byte[][] pixelsBcnMips = null;
                 // 3D Texture：创建 DepthSlices 节点存储每一层的数据
                 XndNode depthSlicesNode = new XndNode();
                 if (desc.IsTexture3D && desc.Depth > 0)
                 {
                     depthSlicesNode = faceNode.GetOrAddNode("DepthSlices", 0, 0, true);
+                }
+                else
+                {
+                    // 2D Texture：原有逻辑
+                    ColorRgbFloat[] colorDataFace = new ColorRgbFloat[sliceSize];
+                    for (int iC = 0; iC < sliceSize; ++iC)
+                    {
+                        colorDataFace[iC].r = curImage.Data[(i * sliceSize + iC) * (int)curImage.Comp];
+                        colorDataFace[iC].g = curImage.Data[(i * sliceSize + iC) * (int)curImage.Comp + Math.Min(1, (int)curImage.Comp - 1)];
+                        colorDataFace[iC].b = curImage.Data[(i * sliceSize + iC) * (int)curImage.Comp + Math.Min(2, (int)curImage.Comp - 1)];
+                    }
+                    var memory2DFace = colorDataFace.AsMemory().AsMemory2D(sliceHeight, sliceWidth);
+                    pixelsBcnMips = encoder.EncodeToRawBytesHdr(memory2DFace);
                 }
 
                 for (uint j = 0; j < desc.MipLevel; j++)
@@ -2237,18 +2097,9 @@ namespace EngineNS.NxRHI
                     }
                     else
                     {
-                        // 2D Texture：原有逻辑
-                        ColorRgbFloat[] colorDataFace = new ColorRgbFloat[sliceSize];
-                        for (int iC = 0; iC < sliceSize; ++iC)
-                        {
-                            colorDataFace[iC].r = curImage.Data[(i * sliceSize + iC) * (int)curImage.Comp];
-                            colorDataFace[iC].g = curImage.Data[(i * sliceSize + iC) * (int)curImage.Comp + Math.Min(1, (int)curImage.Comp - 1)];
-                            colorDataFace[iC].b = curImage.Data[(i * sliceSize + iC) * (int)curImage.Comp + Math.Min(2, (int)curImage.Comp - 1)];
-                        }
-                        var memory2DFace = colorDataFace.AsMemory().AsMemory2D(sliceHeight, sliceWidth);
+                        var pixelsBcn = pixelsBcnMips[j];
 
-                        var pixelsBcn = encoder.EncodeToRawBytesHdr(memory2DFace, (int)j, out mipSize.X, out mipSize.Y);
-
+                        encoder.CalculateMipMapSize(sliceWidth, sliceHeight, (int)j, out mipSize.X, out mipSize.Y);
                         encoder.GetBlockCount(mipSize.X, mipSize.Y, out blockDimension.X, out blockDimension.Y);
                         desc.BlockSize = encoder.GetBlockSize();
                         if(desc.MipSizes.Count < desc.MipLevel)
@@ -2546,12 +2397,6 @@ namespace EngineNS.NxRHI
                             var hdrNode = node.TryGetChildNode("HdrMips");
                             if (hdrNode.IsValidPointer)
                                 return LoadHdrTexture2DMipLevel(rn, node, desc, level);
-                            else
-                            {
-                                var exrNode = node.TryGetChildNode("ExrMips");
-                                if (exrNode.IsValidPointer)
-                                    return LoadExrTexture2DMipLevel(rn, node, desc, level);
-                            }
                         }
                         return null;
                     }
@@ -2571,57 +2416,6 @@ namespace EngineNS.NxRHI
             }
         }
         #region Load Mips
-        private static unsafe TtTexture LoadExrTexture2DMipLevel(RName rn, TtXndNode node, TtPicDesc desc, int mipLevel)
-        {
-            if (mipLevel == 0)
-                return null;
-            var rc = TtEngine.Instance.GfxDevice.RenderContext;
-
-            var exrNode = node.TryGetChildNode("ExrMips");
-            if (exrNode.NativePointer == IntPtr.Zero)
-                return null;
-
-            desc.CubeFaces = Math.Max(desc.CubeFaces, 1);
-            var num = (int)desc.CubeFaces * mipLevel;
-            if (num == 0)
-                return null;
-
-            using var guard = new UMipmapResourceGuard(num);
-            var pInitData = stackalloc FMappedSubResource[num];
-
-
-                for (uint i = 0; i < mipLevel; i++)
-                {
-                    var realLevel = desc.MipLevel - mipLevel + i;
-                    var ptr = exrNode.TryGetAttribute($"ExrMip{realLevel}");
-                    if (ptr.NativePointer == IntPtr.Zero)
-                        return null;
-                    var mipAttr = ptr;
-                    byte[] data;
-                    using (var ar = mipAttr.GetReader(null))
-                    {
-                        ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
-                    }
-
-                    pInitData[i].m_pData = guard.SetData((int)i, data);
-                    pInitData[i].m_RowPitch = (uint)desc.MipSizes[(int)i].Z;
-                    pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.MipSizes[(int)i].Y;
-                }
-
-                var texDesc = new FTextureDesc();
-                texDesc.SetDefault();
-                texDesc.Width = (uint)desc.MipSizes[desc.MipLevel - mipLevel].X;
-                texDesc.Height = (uint)desc.MipSizes[desc.MipLevel - mipLevel].Y;
-                texDesc.MipLevels = (uint)mipLevel;
-                texDesc.InitData = pInitData;
-                texDesc.Format = desc.Format;
-
-                var result = rc.CreateTexture(in texDesc);
-                CoreSDK.SetMemDebugText(result.mCoreObject, rn.ToString());
-                if (result == null)
-                    return null;
-                return result;
-        }
         private static unsafe TtTexture LoadHdrTexture2DMipLevel(RName rn, TtXndNode node, TtPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)

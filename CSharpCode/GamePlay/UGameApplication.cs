@@ -24,17 +24,20 @@ namespace EngineNS.GamePlay
         {
             await base.InitializeApplication(rc, rpName);
             TtEngine.Instance.PlayMode = EPlayMode.Game;
-            await TtEngine.Instance.PIEModule.StartPlayInEditor(this, rpName, false);
+            await TtEngine.Instance.PIEModule.StartPlayInEditor(this, TtEngine.Instance.Config.DefaultGame, false);
             
             TtEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
         protected unsafe override void OnDrawUI()
         {
-            var worldSlate = GameInstance.WorldViewportSlate;
-            worldSlate.IsSetViewportPos = true;            
-            worldSlate.GameViewportPos = new Vector2(0);
-            worldSlate.GameViewportSize = this.NativeWindow.GetWindowSize();
+            if (GameInstance != null)
+            {
+                var worldSlate = GameInstance.WorldViewportSlate;
+                worldSlate.IsSetViewportPos = true;
+                worldSlate.GameViewportPos = new Vector2(0);
+                worldSlate.GameViewportSize = this.NativeWindow.GetWindowSize();
+            }
 
             TtEngine.RootFormManager.DrawRootForms();
         }

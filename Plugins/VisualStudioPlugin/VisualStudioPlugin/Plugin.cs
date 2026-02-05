@@ -82,11 +82,19 @@ namespace EngineNS.Plugins.DataCopyer
                     NativeMethods.CLSIDFromProgID(id, out clsid);
                 }
 
-                NativeMethods.GetActiveObject(ref clsid, IntPtr.Zero, out var obj);
-                if (obj!=null)
+                try
                 {
-                    // 返回第一个找到的Visual Studio实例
-                    return obj;
+                    NativeMethods.GetActiveObject(ref clsid, IntPtr.Zero, out var obj);
+                    if (obj!=null)
+                    {
+                        // 返回第一个找到的Visual Studio实例
+                        return obj;
+                    }
+                }
+                catch
+                {
+                    // 如果没有找到活动对象，继续尝试下一个ProgID
+                    continue;
                 }
             }
             

@@ -8,7 +8,7 @@ using EngineNS.GamePlay.Scene;
 using EngineNS.Thread.Async;
 using EngineNS.GamePlay;
 using System.ComponentModel;
-using Microsoft.Toolkit.HighPerformance.Buffers;
+//using Microsoft.Toolkit.HighPerformance.Buffers;
 
 namespace EngineNS.Bricks.AdvanceShadow
 {

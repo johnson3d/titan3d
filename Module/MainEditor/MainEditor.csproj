@@ -3,9 +3,13 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <PublishAot>True</PublishAot>
+    <PublishAot>False</PublishAot>
   </PropertyGroup>
 
+  <ItemGroup>
+	<ProjectReference Include="..\Engine.Window\Engine.Window.csproj" />
+  </ItemGroup>
+	
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>..\..\binaries\</OutputPath>
     <PlatformTarget>x64</PlatformTarget>
@@ -23,10 +27,6 @@
     <DebugType>full</DebugType>
     <Optimize>True</Optimize>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Engine.Window\Engine.Window.csproj" />
-  </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 

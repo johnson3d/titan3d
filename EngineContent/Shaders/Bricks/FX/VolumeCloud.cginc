@@ -9,12 +9,12 @@
 
 #include "../../Inc/SysFunctionDefImpl.cginc"
 
-// ÔëÉùÍ¼ 
+// å™ªå£°å›¾ 
 Texture3D CloudNoiseTex;
 SamplerState Samp_CloudNoiseTex;
 Texture2D WeatherTex;
 SamplerState Samp_WeatherTex;
-// ÆÁÄ»ÎÆÀí
+// å±å¹•çº¹ç†
 Texture2D ColorBuffer;
 SamplerState Samp_ColorBuffer;
 
@@ -55,7 +55,7 @@ PS_INPUT VS_Main(VS_INPUT input1)
     return output;
 }
 
-// ¹âÏßÓëAABBÏà½»²âÊÔ
+// å…‰çº¿ä¸AABBç›¸äº¤æµ‹è¯•
 bool RayBoxIntersection(float3 rayOrigin, float3 rayDir,
                                    float3 boxMin, float3 boxMax,
                                    out float tMin, out float tMax)
@@ -73,46 +73,46 @@ bool RayBoxIntersection(float3 rayOrigin, float3 rayDir,
     return tMax > max(tMin, 0.0);
 }
             
-// »ñÈ¡ÔÆÃÜ¶È
+// è·å–äº‘å¯†åº¦
 float GetCloudDensity(float3 worldPos)
 {
-    // ¼ÆËãUV
+    // è®¡ç®—UV
     float2 uv = worldPos.xz * ShadingStruct.CloudScale;
     float height = worldPos.y;
                 
-    // ¸ß¶ÈÒò×Ó
+    // é«˜åº¦å› å­
     float heightFactor = saturate((height - ShadingStruct.CloudHeightMin) / (ShadingStruct.CloudHeightMax - ShadingStruct.CloudHeightMin));
     float heightGradient = 4.0 * heightFactor * (1.0 - heightFactor);
                 
-    // ²ÉÑùÌìÆøÍ¼
+    // é‡‡æ ·å¤©æ°”å›¾
     float4 weatherData = WeatherTex.SampleLevel(Samp_WeatherTex, uv, 0);
     float coverage = weatherData.a * ShadingStruct.CloudCoverage;
                 
-    // »ù´¡ÃÜ¶È
+    // åŸºç¡€å¯†åº¦
     float baseDensity = CloudNoiseTex.Sample(Samp_CloudNoiseTex, float3(uv * 0.5, height * 0.0005)).r;
                 
-    // Ìí¼ÓÏ¸½Ú
+    // æ·»åŠ ç»†èŠ‚
     float detailNoise = CloudNoiseTex.Sample(Samp_CloudNoiseTex, float3(uv * 2.0, height * 0.001)).r * 0.5;
-    // ÇÖÊ´Ğ§¹û
+    // ä¾µèš€æ•ˆæœ
     baseDensity = saturate(baseDensity - detailNoise * 0.2);
                 
-    // Ó¦ÓÃ¸²¸ÇÂÊºÍ¸ß¶È£¬Õâ¸ö¹«Ê½ĞèÒªÏë°ì·¨´¦Àí±ßÔµµÄÈáºÍ¹ı¶É£¬·ñÔò¿ÉÄÜ³öÏÖÒ»ÌõÖ±Ïß
+    // åº”ç”¨è¦†ç›–ç‡å’Œé«˜åº¦ï¼Œè¿™ä¸ªå…¬å¼éœ€è¦æƒ³åŠæ³•å¤„ç†è¾¹ç¼˜çš„æŸ”å’Œè¿‡æ¸¡ï¼Œå¦åˆ™å¯èƒ½å‡ºç°ä¸€æ¡ç›´çº¿
     float density = saturate(baseDensity - (1.0 - coverage)) * heightGradient;
                 
-    // ÖØÓ³Éä
+    // é‡æ˜ å°„
     density = saturate(density * ShadingStruct.CloudDensity * 4.0);
                 
     return density;
 }
             
-// ¹âÏß²½½øÖĞµÄ¹âÕÕ¼ÆËã
+// å…‰çº¿æ­¥è¿›ä¸­çš„å…‰ç…§è®¡ç®—
 float LightMarch(float3 pos)
 {
-    float3 lightStep = ShadingStruct.LightDir * 50.0; // ¹âÕÕ²½³¤
+    float3 lightStep = ShadingStruct.LightDir * 50.0; // å…‰ç…§æ­¥é•¿
     float totalDensity = 0.0;
     float transmittance = 1.0;
                 
-    // Ïò¹âÔ´·½Ïò²½½ø
+    // å‘å…‰æºæ–¹å‘æ­¥è¿›
     [loop]
     for (int i = 0; i < 8; i++)
     {
@@ -120,10 +120,10 @@ float LightMarch(float3 pos)
         float density = GetCloudDensity(pos);
         totalDensity += density;
                     
-        // ¼ÆËãÍ¸ÉäÂÊ
+        // è®¡ç®—é€å°„ç‡
         transmittance *= exp(-density * ShadingStruct.LightAbsorption);
                     
-        // ÌáÇ°ÍË³ö
+        // æå‰é€€å‡º
         if (transmittance < ShadingStruct.DarknessThreshold)
             break;
     }
@@ -131,68 +131,68 @@ float LightMarch(float3 pos)
     return transmittance;
 }
             
-// Ö÷¹âÏß²½½øº¯Êı
+// ä¸»å…‰çº¿æ­¥è¿›å‡½æ•°
 float4 RayMarchClouds(float3 rayOrigin, float3 rayDir, float maxDistance)
 {
-    // ¶¨ÒåÔÆ²ã±ß½ç¿ò
+    // å®šä¹‰äº‘å±‚è¾¹ç•Œæ¡†
     float3 boxMin = float3(-10000, ShadingStruct.CloudHeightMin, -10000);
     float3 boxMax = float3(10000, ShadingStruct.CloudHeightMax, 10000);
                 
-                // ¼ÆËãÓëÔÆ²ãÏà½»
+                // è®¡ç®—ä¸äº‘å±‚ç›¸äº¤
     float tMin, tMax;
     if (!RayBoxIntersection(rayOrigin, rayDir, boxMin, boxMax, tMin, tMax))
         return float4(0, 0, 0, 0);
                 
-    // ÏŞÖÆ¾àÀë
+    // é™åˆ¶è·ç¦»
     tMin = max(tMin, 0);
     tMax = min(tMax, maxDistance);
                 
-    // ¼ÆËã²½³¤
+    // è®¡ç®—æ­¥é•¿
     float rayLength = tMax - tMin;
     float stepSize = rayLength / ShadingStruct.MaxSteps;
                 
-    // Ëæ»úÆğÊ¼Æ«ÒÆ£¨¼õÉÙÌõ´øÎ±Ó°£©
+    // éšæœºèµ·å§‹åç§»ï¼ˆå‡å°‘æ¡å¸¦ä¼ªå½±ï¼‰
     float offset = frac(sin(dot(rayDir, float3(12.9898, 78.233, 45.5432))) * 43758.5453);
     float3 currentPos = rayOrigin + rayDir * (tMin + offset * stepSize);
                 
-    // ÀÛ»ıÑÕÉ«ºÍÍ¸Ã÷¶È
+    // ç´¯ç§¯é¢œè‰²å’Œé€æ˜åº¦
     float3 totalColor = float3(0, 0, 0);
     float transmittance = 1.0;
                 
     [loop]
     for (int i = 0; i < ShadingStruct.MaxSteps; i++)
     {
-        // ²ÉÑùÃÜ¶È
+        // é‡‡æ ·å¯†åº¦
         float density = GetCloudDensity(currentPos);
                     
         if (density > 0.01)
         {
-            // ¼ÆËã¹âÕÕ
+            // è®¡ç®—å…‰ç…§
             float lightTransmittance = LightMarch(currentPos);
                         
-            // »ù´¡ÑÕÉ«
+            // åŸºç¡€é¢œè‰²
             float3 cloudColor = lerp(ShadingStruct.ShadowColor.rgb, ShadingStruct.CloudColor.rgb,
                                                 saturate(lightTransmittance * 2.0));
                         
-            // ³ËÒÔ¹âÕÕÑÕÉ«
+            // ä¹˜ä»¥å…‰ç…§é¢œè‰²
             cloudColor *= ShadingStruct.LightColor.rgb;
                         
-            // ¼ÆËãË¥¼õ
+            // è®¡ç®—è¡°å‡
             float alpha = 1.0 - exp(-density * stepSize * 0.1);
                         
-            // ÀÛ»ıÑÕÉ«£¨´ÓÇ°µ½ºó»ìºÏ£©
+            // ç´¯ç§¯é¢œè‰²ï¼ˆä»å‰åˆ°åæ··åˆï¼‰
             totalColor += transmittance * cloudColor * alpha;
             transmittance *= (1.0 - alpha);
                         
-            // ÌáÇ°ÍË³ö
+            // æå‰é€€å‡º
             if (transmittance < 0.01)
                 break;
         }
                     
-        // Ç°½ø
+        // å‰è¿›
         currentPos += rayDir * stepSize;
                     
-        // ±ß½ç¼ì²é
+        // è¾¹ç•Œæ£€æŸ¥
         if (distance(currentPos, rayOrigin) > tMax)
             break;
     }
@@ -209,18 +209,18 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 {
     PS_OUTPUT output = (PS_OUTPUT) 0;
     float2 uv = input.vUV;
-    // »ñÈ¡±³¾°ÑÕÉ«
+    // è·å–èƒŒæ™¯é¢œè‰²
     float4 sceneColor = ColorBuffer.SampleLevel(Samp_ColorBuffer, uv, 0);
                 
-    // ¼ÆËãÊÀ½ç¿Õ¼äÉäÏß
+    // è®¡ç®—ä¸–ç•Œç©ºé—´å°„çº¿
     float3 rayOrigin = CameraPosition;
     float3 rayDir = input.Get_ScreenViewVector();
     rayDir = normalize(rayDir);
                 
-    // Ö´ĞĞ¹âÏß²½½ø
+    // æ‰§è¡Œå…‰çº¿æ­¥è¿›
     float4 cloudColor = RayMarchClouds(rayOrigin, rayDir, ZFar);
                 
-    // Óë³¡¾°»ìºÏ£¨Ô¤³ËAlpha»ìºÏ£©
+    // ä¸åœºæ™¯æ··åˆï¼ˆé¢„ä¹˜Alphaæ··åˆï¼‰
     float3 result = sceneColor.rgb * (1.0 - cloudColor.a) + cloudColor.rgb;
                 
     output.RT0 = float4(result, 1);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using StbImageWriteSharp;
 
 namespace EngineNS.NxRHI
 {
@@ -261,6 +262,46 @@ namespace EngineNS.NxRHI
             public unsafe void DesctroyPixels(void* pixel)
             {
                 CoreSDK.Free(pixel);
+            }
+
+            /// <summary>
+            /// 将纹理层保存为PNG文件
+            /// </summary>
+            /// <param name="filePath">保存路径（绝对路径）</param>
+            /// <param name="quality">PNG压缩级别（0-9，9为最高质量/最慢）</param>
+            public bool SaveToPNG(string filePath, int quality = 9)
+            {
+                if (Pixels == null || Width <= 0 || Height <= 0)
+                    return false;
+
+                try
+                {
+                    // 准备像素数据（RGBA格式）
+                    byte[] pixelData = new byte[Pixels.Length * 4];
+                    for (int i = 0; i < Pixels.Length; i++)
+                    {
+                        int idx = i * 4;
+                        pixelData[idx] = (byte)(Pixels[i].Red * 255.0f);   // R
+                        pixelData[idx + 1] = (byte)(Pixels[i].Green * 255.0f); // G
+                        pixelData[idx + 2] = (byte)(Pixels[i].Blue * 255.0f);  // B
+                        pixelData[idx + 3] = (byte)(Pixels[i].Alpha * 255.0f); // A
+                    }
+
+                    using (var memStream = new System.IO.FileStream(filePath, System.IO.FileMode.OpenOrCreate))
+                    {
+                        if (memStream == null)
+                            return false;
+                        var writer = new StbImageWriteSharp.ImageWriter();
+                        writer.WritePng(pixelData, Width, Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
+                    }
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"SaveToPNG failed: {ex.Message}");
+                    return false;
+                }
             }
         }
         public static TtTex2dLayer GenerateMipLayer2D(TtTex2dLayer sourceLayer, int w, int h)

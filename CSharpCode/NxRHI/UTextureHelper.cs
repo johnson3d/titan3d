@@ -658,7 +658,7 @@ namespace EngineNS.NxRHI
         /// </summary>
         /// <param name="desc">纹理描述符</param>
         /// <returns>压缩格式</returns>
-        public static ETextureCompressFormat SelectHdrCompressFormat(TtPicDesc desc)
+        public static ETextureCompressFormat SelectCompressFormat(TtPicDesc desc)
         {
             // 如果不压缩，返回 None
             if (desc.DontCompress)

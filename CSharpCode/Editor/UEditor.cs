@@ -89,25 +89,6 @@ namespace EngineNS.Editor
 
         public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
         {
-            var Config = TtEngine.Instance.ConfigManager.GetConfig<TtEditorConfig>();
-            //var cfgFile = host.FileManager.GetRoot(IO.TtFileManager.ERootDir.Editor) + "EditorConfig.cfg";
-            //Config = IO.TtFileManager.LoadXmlToObject<TtEditorConfig>(cfgFile);
-            //if (Config == null)
-            //{
-            //    Config = new TtEditorConfig();
-            //    Config.GameProject = "Module/GameProject/GameProject.csproj";
-            //    Config.PhyMaterialIconName = RName.GetRName("icons/phymaterialicon.uvanim", RName.ERNameType.Engine);
-            //    Config.FontIconName = RName.GetRName("icons/font.uvanim", RName.ERNameType.Engine);
-            //    Config.MacrossIconName = RName.GetRName("icons/macrossicon.uvanim", RName.ERNameType.Engine);
-            //    Config.SaveConfig(cfgFile);
-            //}
-
-            var gameAssembly = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + Config.GameAssembly;
-            
-            TtEngine.Instance.MacrossModule.ReloadAssembly(gameAssembly);
-
-            //await RNamePopupContentBrowser.Initialize();
-
             return await base.Initialize(host);
         }
         public override async Task<bool> PostInitialize(TtEngine host)

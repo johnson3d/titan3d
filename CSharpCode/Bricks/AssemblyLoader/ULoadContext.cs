@@ -92,7 +92,7 @@ namespace EngineNS.Bricks.AssemblyLoader
                             return this.LoadFromStream(mrs, pdbmrs);
                         }
                     }
-                    else if (!IO.TtFileManager.FileExists(tdbPath) || IO.TtFileManager.FileExists(pdbPath))
+                    else if (!IO.TtFileManager.FileExists(tdbPath) && IO.TtFileManager.FileExists(pdbPath))
                     {
                         TtFileManager.MoveFile(pdbPath, tdbPath);
                         using (FileStream pdbStream = new FileStream(tdbPath, FileMode.Open, FileAccess.Read))
