@@ -48,7 +48,8 @@ SamplerState Samp_PrevDepthBuffer;
 
 cbuffer cbShadingEnv DX_AUTOBIND
 {
-    float2 JitterUV;
+    // jitter 已统一由 cbPerCamera.JitterOffset / PreJitterOffset 提供 (UV 单位),
+    // 这里不再单独写一份, 避免两路写入约定不一致 (历史 bug 见 git log).
     float TaaBlendAlpha;
 }
 
@@ -59,7 +60,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     float2 uv = input.vUV;
 #if ENV_TypeAA == ETypeAA_None//none
     half4 rt0 = (half4)ColorBuffer.SampleLevel(Samp_ColorBuffer, uv, 0);
-#elif ENV_TypeAA == TETypeAA_Fsaa//fsaa
+#elif ENV_TypeAA == ETypeAA_Fsaa//fsaa
     FxaaTex TempTex;
     TempTex.smpl = Samp_ColorBuffer;
     TempTex.tex = ColorBuffer;
@@ -71,7 +72,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
         0.166,																		//default value,FxaaFloat fxaaQualityEdgeThreshold,
         0.0833																		//default value,FxaaFloat fxaaQualityEdgeThresholdMin,
     );
-#elif ENV_TypeAA == TETypeAA_Taa//taa
+#elif ENV_TypeAA == ETypeAA_Taa//taa
     half4 rt0;
     TAA taa;
     taa.ColorBuffer = ColorBuffer;
@@ -89,18 +90,16 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     taa.MotionBuffer = MotionBuffer;
     taa.Samp_MotionBuffer = Samp_MotionBuffer;
 
+    // JitterOffset / PreJitterOffset 来自 cbPerCamera (与 GBuffer VS 注入 SV_Position 的 jitter 同源同方向).
+    // TAA 在 PS 端用 currUV = screen_uv - JitterOffset 反偏当前帧回像素中心采样,
+    // 同时 HistoryUV 也要减去 PreJitterOffset 反偏上一帧的 jitter, 否则静止场景会抖动.
     if (true)
     {
-        /*float2 motionVector = GBufferData::DecodeMotionVector(rt3.rg);
-        float2 prev_uv = uv.xy - motionVector.xy;
-
-        half4 prev_rt0 = (half4)PrevRT0.SampleLevel(Samp_PrevRT0, prev_uv.xy, 0);
-        rt0.rgb = lerp(prev_rt0.rgb, rt0.rgb, TaaBlendAlpha);*/
-        rt0.rgb = taa.GetTAAColor(input.vUV.xy, JitterUV, TaaBlendAlpha);
+        rt0.rgb = taa.GetTAAColor(input.vUV.xy, JitterOffset, PreJitterOffset, TaaBlendAlpha);
     }
     else
     {
-        rt0.rgb = taa.GetTAAColor2(input.vUV.xy, JitterUV, TaaBlendAlpha);
+        rt0.rgb = taa.GetTAAColor2(input.vUV.xy, JitterOffset, PreJitterOffset, TaaBlendAlpha);
     }
 #else
     half4 rt0 = (half4)ColorBuffer.SampleLevel(Samp_ColorBuffer, uv, 0);

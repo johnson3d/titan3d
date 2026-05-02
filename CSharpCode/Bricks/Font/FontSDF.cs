@@ -175,7 +175,7 @@ namespace EngineNS.Bricks.Font
                 var ameta = new TtFontSDFAMeta();
                 ameta.SetAssetName(rn);
                 ameta.AssetId = Guid.NewGuid();
-                ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtFontSDFAMeta));
+                ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtFontSDFAMeta)).TypeString;
                 ameta.Description = $"This is a {typeof(TtFontSDFAMeta).FullName}\n";
                 ameta.SaveAMeta((IO.IAsset)null);
 

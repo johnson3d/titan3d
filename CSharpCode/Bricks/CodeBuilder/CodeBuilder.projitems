@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -20,7 +20,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\CreatorNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\MacrossNodeBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\MethodGraph.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\UMacrossEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\MacrossEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\Exception.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\FlowControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\INodeExpr.cs" />
@@ -39,10 +39,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\IBaseNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\MaterialFunctionEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Operator\Binocular.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\UMaterialOutput.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\MaterialOutput.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\MaterialEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\UMaterialGraph.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\UUniformVar.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\MaterialGraph.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\UniformVar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Var\SamplerState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Var\Texture2D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Var\VarDim1.cs" />
@@ -52,9 +52,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Var\VarDim3x3.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Var\VarDim4.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Var\VarDim4x4.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UClassLayoutBuilder.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UMacross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UMacrossManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassLayoutBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MacrossManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)CodeBuilder.brick" />

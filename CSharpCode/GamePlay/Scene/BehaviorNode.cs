@@ -1,4 +1,4 @@
-﻿using EngineNS.Thread.Async;
+using EngineNS.Thread.Async;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -142,7 +142,7 @@ namespace EngineNS.GamePlay.Scene
                 var ameta = new TtBehaviorAMeta();
                 ameta.SetAssetName(assetName);
                 ameta.AssetId = Guid.NewGuid();
-                ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtBehavior));
+                ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtBehavior)).TypeString;
                 ameta.Description = $"This is a behavior\n";
                 ameta.SaveAMeta((IO.IAsset)null);
                 TtEngine.Instance.AssetMetaManager.RegAsset(ameta);

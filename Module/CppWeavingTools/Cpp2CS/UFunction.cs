@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -160,6 +160,10 @@ namespace CppWeaving.Cpp2CS
                     if (usage == EParameterDefineUsage.DLLImport && string.IsNullOrEmpty(j.MarshalTypeCS) == false)
                     {
 						result += $"[MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof({j.MarshalTypeCS}))] ";
+                    }
+                    else if (usage == EParameterDefineUsage.DLLImport && argType == "string")
+                    {
+						result += $"[MarshalAs(UnmanagedType.LPUTF8Str)] ";
                     }
                     result += $"{argType} {j.Name}";
 				}

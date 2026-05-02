@@ -34,10 +34,10 @@ PS_INPUT VS_Main(VS_INPUT input1)
 #if !defined(VS_NO_WorldTransform)
 	output.vPosition.xyz += mtl.mVertexOffset;
 	
-	matrix ShadowWVPMtx = mul(WorldMatrix, GetViewPrjMtx(false));
+	matrix ShadowWVPMtx = mul(WorldMatrix, GetViewPrjMtx());
 	output.vPosition = mul(float4(output.vPosition.xyz, 1), ShadowWVPMtx);
 #else
-	matrix ShadowWVPMtx = GetViewPrjMtx(false);
+	matrix ShadowWVPMtx = GetViewPrjMtx();
 	output.vPosition = mul(float4(output.vPosition.xyz, 1), ShadowWVPMtx);
 #endif
 	

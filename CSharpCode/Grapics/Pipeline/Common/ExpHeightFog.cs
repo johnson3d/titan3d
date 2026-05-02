@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -13,7 +13,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             if ((uint)deferredPolicy.TypeFog != TypeFog.GetValue())
             {
                 TypeFog.SetValue((uint)deferredPolicy.TypeFog);
-                this.UpdatePermutation();
+                this.UpdatePermutation().AddWaitTask();
             }
             if (deferredPolicy.TypeFog != TtRenderPolicy.ETypeFog.None)
             {

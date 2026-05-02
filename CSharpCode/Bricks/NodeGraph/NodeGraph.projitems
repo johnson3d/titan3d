@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -10,13 +10,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Attribute.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UEditableValue.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UGraphRenderer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ULinker.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UMenuItem.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UNodeGraph.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UNodeGraphStyles.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UUnionNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EditableValue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GraphRenderer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Linker.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MenuItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NodeGraph.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NodeGraphStyles.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UnionNode.cs" />
   </ItemGroup>
 </Project>

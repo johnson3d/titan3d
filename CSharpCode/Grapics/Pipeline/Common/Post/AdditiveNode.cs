@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using EngineNS.GamePlay;
+﻿using EngineNS.GamePlay;
 using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using static EngineNS.Graphics.Pipeline.Common.Post.TtAdditiveNode;
 
 namespace EngineNS.Graphics.Pipeline.Common.Post
 {
@@ -14,7 +15,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Post/AdditiveShading.cginc", RName.ERNameType.Engine);
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
@@ -60,6 +61,9 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 if (aaNode.CBShadingEnv == null)
                 {
                     aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    aaNode.CBShadingEnv.SetValue("AdditiveStruct", in aaNode.mAdditiveStruct);
+                    aaNode.CBShadingEnv.MarkDirty();
+                    aaNode.CBShadingEnv.FlushDirty();
                 }
                 drawcall.BindCBV(index, aaNode.CBShadingEnv);
             }
@@ -93,10 +97,10 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAdditiveShading>();
+            mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtAdditiveShading>();
         }
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
-        struct FAdditiveStruct
+        internal struct FAdditiveStruct
         {
             public void SetDefault()
             {
@@ -106,7 +110,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             public float Factor1;
             public float Factor2;
         }
-        FAdditiveStruct mAdditiveStruct = new FAdditiveStruct();
+        internal FAdditiveStruct mAdditiveStruct = new FAdditiveStruct();
         [Category("Option")]
         [Rtti.Meta("")]
         public float Factor1
@@ -122,15 +126,15 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             set => mAdditiveStruct.Factor2 = value;
         }
         public NxRHI.TtCbView CBShadingEnv;
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            base.TickLogic(world, policy, frameCmdList, bClear);
+            base.Tick(world, policy, frameCmdList, bClear);
             if (CBShadingEnv != null)
             {
                 CBShadingEnv.SetValue("AdditiveStruct", in mAdditiveStruct);
             }
         }
-        public override void BeforeTickLogic(TtRenderPolicy policy)
+        public override void BeforeTick(TtRenderPolicy policy)
         {
             var buffer = this.FindAttachBuffer(Color1PinIn);
             if (buffer != null)
@@ -170,7 +174,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mAdditiveLumShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAdditiveLumShading>();
+            mAdditiveLumShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtAdditiveLumShading>();
         }
     }
 }

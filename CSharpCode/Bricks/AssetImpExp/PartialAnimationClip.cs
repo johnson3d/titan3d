@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.AssetImpExp;
+using EngineNS.Bricks.AssetImpExp;
 using EngineNS.Graphics.Mesh;
 using System;
 using System.Collections.Generic;
@@ -207,7 +207,7 @@ namespace EngineNS.Animation.Asset
                         var ameta = new TtAnimationClipAMeta();
                         ameta.SetAssetName(rn);
                         ameta.AssetId = Guid.NewGuid();
-                        ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtAnimationClip));
+                        ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtAnimationClip)).TypeString;
                         ameta.Description = $"This is a {typeof(TtAnimationClip).FullName}\n";
                         ameta.SaveAMeta(animClip);
                         TtEngine.Instance.AssetMetaManager.RegAsset(ameta);

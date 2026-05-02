@@ -1,4 +1,4 @@
-﻿using EngineNS;
+using EngineNS;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.Input;
 using EngineNS.EGui.UIProxy;
@@ -258,7 +258,7 @@ namespace EngineNS.UI.Editor
             //UIAsset.MacrossEditor.CompileCode();
             UIAsset.UIHost = mUIHost;
             UIAsset.SaveAssetTo(UIAsset.AssetName);
-            EngineNS.Editor.USnapshot.Save(AssetName, TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName), PreviewViewport.RenderPolicy.GetFinalShowRSV());
+            EngineNS.Editor.TtSnapshot.Save(AssetName, TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName), PreviewViewport.RenderPolicy.GetFinalShowRSV());
         }
         protected unsafe void DrawToolBar()
         {
@@ -1486,13 +1486,13 @@ namespace EngineNS.UI.Editor
         }
         bool mIsWireFrame = false;
         //string mDimensionToolButtonName = "3D";
-        void DrawViewportUIAction(in Vector2 startDrawPos)
+        Vector2 DrawViewportUIAction(in Vector2 startDrawPos)
         {
             Vector2 itemRectMin, itemRectMax;
             if (AssetName != null)
             {
                 if (EGui.UIProxy.CustomButton.ToolButton("S", in Vector2.Zero))
-                    EngineNS.Editor.USnapshot.Save(AssetName, TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName), PreviewViewport.RenderPolicy.GetFinalShowRSV());
+                    EngineNS.Editor.TtSnapshot.Save(AssetName, TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName), PreviewViewport.RenderPolicy.GetFinalShowRSV());
                 itemRectMin = ImGuiAPI.GetItemRectMin();
                 itemRectMax = ImGuiAPI.GetItemRectMax();
                 PreviewViewport.RegisterOverlappedArea("S", new RectangleF(in itemRectMin, in itemRectMax));
@@ -1623,6 +1623,11 @@ namespace EngineNS.UI.Editor
                 }
                 ImGuiAPI.EndPopup();
             }
+            var currentPos = ImGuiAPI.GetCursorScreenPos();
+            var usedSize = Vector2.Zero;
+            usedSize.X = currentPos.X - startDrawPos.X;
+            usedSize.Y = currentPos.Y - startDrawPos.Y;
+            return usedSize;
         }
         Vector2i mDesignResolution;
         Vector2i DesignResolution

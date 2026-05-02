@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.Bricks.NodeGraph;
@@ -45,13 +45,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     TextureSRV = await value.GetAsset<NxRHI.TtSrView>();
 
                     mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
-                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>(),
+                        await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>(),
                         TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
                 };
                 exec();
             }
         }
-        TtEffect mSlateEffect;
+        TtGraphicsEffect mSlateEffect;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta("")]
@@ -169,14 +169,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     TextureSRV = await value.GetAsset<NxRHI.TtSrView>();
 
                     mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
-                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>(),
+                        await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>(),
                         TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
 
                 };
                 exec();
             }
         }
-        TtEffect mSlateEffect;
+        TtGraphicsEffect mSlateEffect;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta("")]
@@ -304,14 +304,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     TextureSRV = await value.GetAsset<NxRHI.TtSrView>();
 
                     mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
-                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>(),
+                        await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>(),
                         TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
 
                 };
                 exec();
             }
         }
-        TtEffect mSlateEffect;
+        TtGraphicsEffect mSlateEffect;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta("")]
@@ -430,13 +430,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     TextureSRV = await value.GetAsset<NxRHI.TtSrView>();
 
                     mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
-                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>(),
+                        await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>(),
                         TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
                 };
                 exec();
             }
         }
-        TtEffect mSlateEffect;
+        TtGraphicsEffect mSlateEffect;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta("")]
@@ -550,13 +550,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 {
                     TextureSRV = await value.GetAsset<NxRHI.TtSrView>();
                     mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
-                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>(),
+                        await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>(),
                         TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
                 };
                 exec();
             }
         }
-        TtEffect mSlateEffect;
+        TtGraphicsEffect mSlateEffect;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta("")]

@@ -74,8 +74,8 @@ namespace NxRHI
 
 		virtual void WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters) override;
 
-		virtual void BeginEvent(const char* info) override;
-		void BeginEvent(std::wstring& info);
+		virtual void BeginEvent(const char* info, DWORD color = 0) override;
+		void BeginEvent(std::wstring& info, DWORD color = 0);
 		virtual void EndEvent() override;
 	public:
 		void Commit(DX12CmdQueue* cmdQueue, EQueueType type);

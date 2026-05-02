@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -150,7 +150,7 @@ namespace CppWeaving.Cpp2CS
                             if (i.ReturnType.NumOfElement <= 0 && retTypeStr == "sbyte*")
                             {
                                 retTypeStr = "string";
-                                marshalReturn = $"EngineNS.Rtti.TtNativeCoreProvider.MarshalPtrAnsi";
+                                marshalReturn = $"EngineNS.Rtti.TtNativeCoreProvider.MarshalPtrUtf8";
                             }
                         }
                     }
@@ -330,7 +330,7 @@ namespace CppWeaving.Cpp2CS
                             if (i.NumOfElement <= 0 && retType == "sbyte*")
                             {
                                 retType = "string";
-                                marshalReturn = $"EngineNS.Rtti.TtNativeCoreProvider.MarshalPtrAnsi";
+                                marshalReturn = $"EngineNS.Rtti.TtNativeCoreProvider.MarshalPtrUtf8";
                             }
                         }
                         if (i.IsTypeDef)
@@ -439,7 +439,10 @@ namespace CppWeaving.Cpp2CS
                         }
                     }
                     UTypeManager.WritePInvokeAttribute(this, i);
-                    AddLine($"extern static void TSDK_{mClass.VisitorPInvoke}_FieldSet__{i.Name}(void* self, {retType} value);");
+                    if (retType == "string")
+                        AddLine($"extern static void TSDK_{mClass.VisitorPInvoke}_FieldSet__{i.Name}(void* self, [MarshalAs(UnmanagedType.LPUTF8Str)] {retType} value);");
+                    else
+                        AddLine($"extern static void TSDK_{mClass.VisitorPInvoke}_FieldSet__{i.Name}(void* self, {retType} value);");
                 }
             }
         }
@@ -473,7 +476,7 @@ namespace CppWeaving.Cpp2CS
                         if (i.ReturnType.NumOfElement <= 0 && retTypeStr == "sbyte*")
                         {
                             retTypeStr = "string";
-                            marshalReturn = $"EngineNS.Rtti.TtNativeCoreProvider.MarshalPtrAnsi";
+                            marshalReturn = $"EngineNS.Rtti.TtNativeCoreProvider.MarshalPtrUtf8";
                         }
                     }
                 }

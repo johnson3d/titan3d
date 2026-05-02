@@ -18,6 +18,16 @@ namespace GpuDump
 		static void RegByteCode(const char* name, void* pCode, UINT size);
 
 		static void OnDredDump(NxRHI::IGpuDevice* device, const char* dir);
+
+		// Set the root directory where all Aftermath output files (crash dumps, shader debug info,
+		// shader binaries, JSON, etc.) will be written. The directory is created if it does not
+		// exist. Trailing slashes are normalized. Pass an empty string to fall back to the current
+		// working directory (default behavior).
+		// Should be called once during engine initialization, before InitDump.
+		static void SetOutputRoot(const char* root);
+
+		// Get the currently configured output root (always ends with '/' if non-empty).
+		static const std::string& GetOutputRoot();
 	};
 };
 

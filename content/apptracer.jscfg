@@ -1,7 +1,7 @@
 {
   "AutoSyncPropertyData": false,
   "IsReverseZ": true,
-  "MultiRenderMode": 2,
+  "MultiRenderMode": "Queue",
   "UsePhysxMT": true,
   "UseRenderDoc": false,
   "Feature_UseRVT": true,
@@ -36,8 +36,7 @@
   "IsAftermath": false,
   "IsScopeWithSource": true,
   "MainWindowType": "Tracer.TtTraceApplication@Unknown",
-  "MainRPolicyName": "utest/deferred.rpolicy:Game",
-  "SimpleRPolicyName": "graphics/deferred_simple.rpolicy:Engine",
+  "MainRPolicyName": "graphics/deferred_simple.rpolicy:Engine",
   "RpcRootType": "Tracer.TtTraceRpcManager@Unknown",
   "CookDXBC": true,
   "CookDXIL": true,

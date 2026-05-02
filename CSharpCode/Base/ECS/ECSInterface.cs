@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -145,7 +145,14 @@ namespace EngineNS.ECS
                         entity.Id = -1; // Reset ID to indicate removal
                     }
 
-                    Entities[id].SetTarget(null);
+                    try
+                    {
+                        Entities[id].SetTarget(null);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        Entities[id] = null;
+                    }
                     EntityCount--;
                 }
                 return true;

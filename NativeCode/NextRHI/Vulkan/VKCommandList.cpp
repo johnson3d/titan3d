@@ -715,7 +715,7 @@ namespace NxRHI
 		vkCmdSetScissor(GetVKCmdRecorder()->mCommandBuffer, 0, (UINT)mCurrentScissorRects.size(), &mCurrentScissorRects[0]);
 	}
 	
-	void VKCommandList::BeginEvent(const char* info)
+	void VKCommandList::BeginEvent(const char* info, DWORD color)
 	{
 		ASSERT(mCmdListState == ECmdListState::Recording);
 		GetCmdRecorder()->mDirectDrawNum++;
@@ -724,6 +724,10 @@ namespace NxRHI
 			VkDebugUtilsLabelEXT markerInfo{};
 			markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
 			markerInfo.pLabelName = info;
+			markerInfo.color[0] = ((color >> 16) & 0xFF) / 255.0f;
+			markerInfo.color[1] = ((color >> 8) & 0xFF) / 255.0f;
+			markerInfo.color[2] = (color & 0xFF) / 255.0f;
+			markerInfo.color[3] = ((color >> 24) & 0xFF) / 255.0f;
 			VKGpuSystem::vkCmdBeginDebugUtilsLabelEXT(GetVKCmdRecorder()->mCommandBuffer, &markerInfo);
 		}
 		else if (VKGpuSystem::vkCmdDebugMarkerBeginEXT != nullptr)
@@ -731,6 +735,10 @@ namespace NxRHI
 			VkDebugMarkerMarkerInfoEXT markerInfo{};
 			markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
 			markerInfo.pMarkerName = info;
+			markerInfo.color[0] = ((color >> 16) & 0xFF) / 255.0f;
+			markerInfo.color[1] = ((color >> 8) & 0xFF) / 255.0f;
+			markerInfo.color[2] = (color & 0xFF) / 255.0f;
+			markerInfo.color[3] = ((color >> 24) & 0xFF) / 255.0f;
 			VKGpuSystem::vkCmdDebugMarkerBeginEXT(GetVKCmdRecorder()->mCommandBuffer, &markerInfo);
 		}
 	}

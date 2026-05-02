@@ -45,6 +45,10 @@ namespace EngineNS.IO
                 return null;
             return new TtRes2Memory(ptr);
         }
+        public static void OnAfterWriteFile(string file)
+        {
+            VRes2Memory.OnAfterWriteFile(file);
+        }
         public override void Dispose()
         {
             mCoreObject.TryReleaseHolder();
@@ -159,6 +163,7 @@ namespace EngineNS.IO
             SetSysDir(ESystemDir.PSO, "pso");
             SetSysDir(ESystemDir.RenderDoc, "renderdoc");
             SetSysDir(ESystemDir.DebugUtility, "debugutility");
+            SetSysDir(ESystemDir.AfterMath, "aftermath");
             SureDirectory(GetPath(ERootDir.Engine, ESystemDir.MetaData));
             SureDirectory(GetPath(ERootDir.Game, ESystemDir.Config));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.GraphicEffect));
@@ -166,6 +171,8 @@ namespace EngineNS.IO
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.PSO));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.RenderDoc));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.DebugUtility));
+            SureDirectory(GetPath(ERootDir.Cache, ESystemDir.AfterMath));
+            GpuDump.NvAftermath.SetOutputRoot(GetPath(ERootDir.Cache, ESystemDir.AfterMath));
         }
         partial void InitDirectory(string[] args);
         public enum ERootDir
@@ -194,6 +201,7 @@ namespace EngineNS.IO
             PSO,
             RenderDoc,
             DebugUtility,
+            AfterMath,
             Count,
         }
         public string BinariesDir { get; private set; }
@@ -556,9 +564,24 @@ namespace EngineNS.IO
         public static void WriteAllText(string file, string text)
         {
             SureDirectory(GetParentPathName(file));
-            System.IO.File.WriteAllText(file, text);
+            WriteAllTextImmediately(file, text);
         }
+        public static void WriteAllTextImmediately(string path, string contents)
+        {
+            //System.IO.File.WriteAllText(path, contents);
+            // 获取文件的字节数据
+            byte[] data = Encoding.UTF8.GetBytes(contents);
 
+            // 关键点：使用 FileOptions.WriteThrough
+            using (var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 4096, FileOptions.WriteThrough))
+            {
+                fs.Write(data, 0, data.Length);
+                // 注意：对于 WriteThrough，调用 Flush 并不是严格必需的，
+                // 但调用 Flush(true) 可以进一步确保数据已到达磁盘。
+                fs.Flush(true);
+            }
+            TtRes2Memory.OnAfterWriteFile(path);
+        }
         public static unsafe byte[] ReadAllBytes(string file)
         {
             if (FileExists(file) == false)

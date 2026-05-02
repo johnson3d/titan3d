@@ -126,10 +126,10 @@ private:
 
     // App-managed marker resolve callback
     static void ResolveMarkerCallback(
-        const void* pMarker,
+        const void* pMarkerData,
+        const uint32_t markerDataSize,
         void* pUserData,
-        void** resolvedMarkerData,
-        uint32_t* markerSize);
+        PFN_GFSDK_Aftermath_ResolveMarker resolveMarker);
 
     // Shader debug information lookup callback.
     static void ShaderDebugInfoLookupCallback(

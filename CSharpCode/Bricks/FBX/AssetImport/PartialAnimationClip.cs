@@ -1,4 +1,4 @@
-﻿using EngineNS.EGui.Controls;
+using EngineNS.EGui.Controls;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -136,7 +136,7 @@ namespace EngineNS.Animation.Asset
                             var ameta = new TtAnimationClipAMeta();
                             ameta.SetAssetName(rn);
                             ameta.AssetId = Guid.NewGuid();
-                            ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtAnimationClip));
+                            ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtAnimationClip)).TypeString;
                             ameta.Description = $"This is a {typeof(TtAnimationClip).FullName}\n";
                             ameta.SaveAMeta(animClip);
                             TtEngine.Instance.AssetMetaManager.RegAsset(ameta);

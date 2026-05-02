@@ -44,28 +44,29 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	float4 wp4 = float4(output.vPosition.xyz, 1);
 #endif
 
+	// 投影矩阵已经不含 jitter, prePos / output.vPosition 都是纯 view-projection 结果.
+	// motion vector 由 PS 端按 (currClip - prevClip) 计算, 完全不受 jitter 影响.
 	float3 preWorldPos = mul(float4(output.vPosition.xyz, 1), PreWorldMatrix).xyz;
-	float4 prePos = mul(float4(preWorldPos, 1), GetPreFrameViewPrjMtx(true));
-	//float4 noJitterPos = mul(float4(output.vWorldPos, 1), GetViewPrjMtx(false));
-	//prePos /= prePos.w;
+	float4 prePos = mul(float4(preWorldPos, 1), GetPreFrameViewPrjMtx());
 
-	//output.vPosition = mul(float4(output.vWorldPos, 1), GetViewPrjMtx(true));
-	output.vPosition = mul(wp4, GetViewPrjMtx(true));
-	
-	//float2 previousScreenPos = prePos.xy * 0.5 + 0.5;
-	//float2 currentScreenPos = (output.vPosition.xy / output.vPosition.w) * 0.5 + 0.5;
-	//output.psCustomUV0.xy = currentScreenPos - previousScreenPos;
+	output.vPosition = mul(wp4, GetViewPrjMtx());
 
 #if USE_PS_Custom1 == 1
+	// 上一帧 clip-space, 用于 PS 端算 MV. 必须在注入 jitter 之前赋值, 保持纯几何位移.
 	output.psCustomUV1 = prePos;
 #endif
 
 #if USE_PS_Custom2 == 1
+	// 当前帧 clip-space (无 jitter), 用于 PS 端算 MV.
 	output.psCustomUV2 = output.vPosition;
 #endif
-	//output.psCustomUV3 = noJitterPos;
-	//output.psCustomUV0.xy = float2(output.vPosition.xy / output.vPosition.w) * float2(0.5f, -0.5f) + float2(0.5f, 0.5f);
-	//output.psCustomUV0.z = float(output.vPosition.z / output.vPosition.w);
+
+	// 把 jitter 注入到 SV_Position (clip space). 仅影响光栅化采样位置, 不影响:
+	//   - psCustomUV1/UV2 (上面已经先赋值好的 MV 用纯净 clip)
+	//   - cbPerCamera 的任何矩阵
+	//   - 其他 pass (shadow / GI / 反射等) 的几何
+	// JitterOffset 本身就是屏幕空间的亚像素偏移, 直接加到 clip.xy 即可.
+	output.vPosition.xy += JitterOffset.xy;
 #if USE_PS_Custom0 == 1
 	output.psCustomUV0.w = output.vPosition.w;
 #endif

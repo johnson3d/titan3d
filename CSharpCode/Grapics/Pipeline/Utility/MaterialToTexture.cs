@@ -1,4 +1,4 @@
-﻿using EngineNS.Graphics.Pipeline.Shader;
+using EngineNS.Graphics.Pipeline.Shader;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -47,7 +47,7 @@ namespace EngineNS.Graphics.Pipeline.Utility
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtMaterialToTextureShading>();
+            mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtMaterialToTextureShading>();
         }
         [RName.PGRName(FilterExts = TtMaterial.AssetExt + "," + TtMaterialInstance.AssetExt)]
         [Category("Option")]

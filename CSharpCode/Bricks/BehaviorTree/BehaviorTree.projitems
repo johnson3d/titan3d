@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -28,8 +28,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Leaf\Action\MoveToBehavior.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Leaf\Condition\ConditionBehavior.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Leaf\LeafBehavior.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Macross\UBehaviorTreeMacross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Macross\UBehaviorTreeMacrossEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BehaviorTreeMacross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BehaviorTreeMacrossEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Service\CustomFunctionService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Service\ServiceBehavior.cs" />
   </ItemGroup>

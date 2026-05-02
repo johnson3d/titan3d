@@ -32,13 +32,13 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
         {
             if (IsCapture)
             {
-                TtEngine.Instance.GfxDevice.RenderSwapQueue.CaptureRenderDocFrame = true;
-                TtEngine.Instance.GfxDevice.RenderSwapQueue.BeginFrameCapture();
+                TtEngine.Instance.GfxDevice.RenderQueue.CaptureRenderDocFrame = true;
+                TtEngine.Instance.GfxDevice.RenderQueue.BeginFrameCapture();
             }
             GpuProcessor.Process();
             if (IsCapture)
             {
-                TtEngine.Instance.GfxDevice.RenderSwapQueue.EndFrameCapture(this.Name);
+                TtEngine.Instance.GfxDevice.RenderQueue.EndFrameCapture(this.Name);
             }
         }
     }

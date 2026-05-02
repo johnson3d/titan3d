@@ -1,4 +1,4 @@
-#include "VKShader.h"
+ï»¿#include "VKShader.h"
 #include "VKGpuDevice.h"
 #include "VKBuffer.h"
 #include "VKGpuState.h"
@@ -109,12 +109,12 @@ namespace NxRHI
 			void* user_data,
 			const spv_parsed_instruction_t* inst) {
 
-			// »ñÈ¡ÓÃ»§Êı¾İ£¨°üº¬°ó¶¨ĞŞ¸ÄĞÅÏ¢£©
+			// è·å–ç”¨æˆ·æ•°æ®ï¼ˆåŒ…å«ç»‘å®šä¿®æ”¹ä¿¡æ¯ï¼‰
 			uint32_t* bindings = static_cast<uint32_t*>(user_data);
 			uint32_t old_binding = bindings[0];
 			uint32_t new_binding = bindings[1];
 
-			// ¼ì²éÊÇ·ñÊÇ OpDecorate Ö¸Áî
+			// æ£€æŸ¥æ˜¯å¦æ˜¯ OpDecorate æŒ‡ä»¤
 			if (inst->opcode == SPV_OPERAND_TYPE_DECORATION) {
 				
 			}
@@ -128,11 +128,11 @@ namespace NxRHI
 			spv_diagnostic diagnostic = nullptr;
 			spv_result_t result = spvBinaryParse(
 				context,
-				this, // ÓÃ»§Êı¾İ
+				this, // ç”¨æˆ·æ•°æ®
 				(UINT*)src.data(),
 				src.size()/sizeof(UINT),
-				nullptr, // Í·²¿»Øµ÷
-				modify_binding_callback, // Ö¸Áî»Øµ÷
+				nullptr, // å¤´éƒ¨å›è°ƒ
+				modify_binding_callback, // æŒ‡ä»¤å›è°ƒ
 				&diagnostic
 			);
 		}
@@ -149,23 +149,23 @@ namespace NxRHI
 			return true;
 		}
 		static bool compileGLSL(const char* shaderCode, const char* entry, EShLanguage stage, std::vector<uint32_t>& spirv) {
-			// 1. ´´½¨×ÅÉ«Æ÷¶ÔÏó
+			// 1. åˆ›å»ºç€è‰²å™¨å¯¹è±¡
 			glslang::TShader shader(stage);
 			shader.setStrings(&shaderCode, 1);
 			shader.setEntryPoint(entry);
 			shader.setSourceEntryPoint(entry);
 
-			// 2. ÉèÖÃ±àÒëÑ¡Ïî
+			// 2. è®¾ç½®ç¼–è¯‘é€‰é¡¹
 			const TBuiltInResource* resources = nullptr;// GetDefaultResources();
-			EShMessages messages = (EShMessages)(EShMsgSpvRules | EShMsgVulkanRules); // Ä¿±ê¹æÔò
+			EShMessages messages = (EShMessages)(EShMsgSpvRules | EShMsgVulkanRules); // ç›®æ ‡è§„åˆ™
 
-			// 3. Ô¤´¦Àí + ½âÎö
-			if (!shader.parse(resources, 450, false, messages)) { // 450 = GLSL°æ±¾
+			// 3. é¢„å¤„ç† + è§£æ
+			if (!shader.parse(resources, 450, false, messages)) { // 450 = GLSLç‰ˆæœ¬
 				std::cerr << "Parse failed:\n" << shader.getInfoLog() << std::endl;
 				return false;
 			}
 
-			// 4. Á´½Óµ½³ÌĞò
+			// 4. é“¾æ¥åˆ°ç¨‹åº
 			glslang::TProgram program;
 			program.addShader(&shader);
 			if (!program.link(messages)) {
@@ -173,7 +173,7 @@ namespace NxRHI
 				return false;
 			}
 
-			// 5. Éú³É SPIR-V
+			// 5. ç”Ÿæˆ SPIR-V
 			glslang::SpvOptions spvOptions;
 			glslang::GlslangToSpv(*program.getIntermediate(stage), spirv, &spvOptions);
 			return true;

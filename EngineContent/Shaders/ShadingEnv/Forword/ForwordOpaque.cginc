@@ -46,7 +46,7 @@ PS_INPUT VS_Main(VS_INPUT input1)
 
     output.Set_vWorldPos(wp4.xyz);
 	
-	output.vPosition = mul(wp4, GetViewPrjMtx(false));
+	output.vPosition = mul(wp4, GetViewPrjMtx());
 
 #if USE_PS_Custom0 == 1
 #if ENV_DISABLE_POINTLIGHTS == 0

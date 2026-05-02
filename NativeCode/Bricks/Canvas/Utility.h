@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "FCanvasDefine.h"
 
 NS_BEGIN
@@ -29,7 +29,7 @@ namespace Canvas
 
 		// Clip polygon by a rect window.
 		// It is supposed to be non self-intersect.
-		// https://en.wikipedia.org/wiki/Sutherland�CHodgman_algorithm
+		// https://en.wikipedia.org/wiki/Sutherland–Hodgman_algorithm
 		static void SutherlandHodgmanClip(const FRectanglef& Rect,
 			const v3dxVector2* InVerts, UINT NumVerts,
 			std::vector<v3dxVector2>& OutVerts,

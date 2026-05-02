@@ -51,6 +51,7 @@
     <None Include="$(MSBuildThisFileDirectory)Compute\MacrossComputeShadingEnvImpl.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Font.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)FSBase.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)GI\SH\SHCoefficients.cginc" />
     <None Include="$(MSBuildThisFileDirectory)GI\TrayTracing\HSDF.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Algorithm\Queue.cginc" />
@@ -156,11 +157,17 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\Cluster.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\Hzb.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\VirtualTexture.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRInitialSampling.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRTemporalReuse.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRSpatialReuse.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRResolve.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\HashSparseSpace.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\MacrossComputShading.shader" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\AvgBrightness.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\Tiling.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box3.cginc" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\SpatialDenoise.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\TemporalDenoise.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)ShadingEnv\RayTracing\Raytracing.hlsl" />
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation.Base;
+using EngineNS.Animation.Base;
 using EngineNS.Animation.Curve;
 using EngineNS.IO;
 using EngineNS.Rtti;
@@ -98,7 +98,7 @@ namespace EngineNS.Animation.Asset
         public void SaveAssetTo(RName name)
         {
             name.AMeta.ClearAssetFiles();
-            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            var typeStr = Rtti.TtTypeDesc.TypeOf(this.GetType()).TypeString;
             var xnd = new IO.TtXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("AnimationClip", 0, 0))
             {

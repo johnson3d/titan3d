@@ -78,84 +78,91 @@ struct TAA
         return lerp(History, Filtered, ClipBlend);
     }
 
-    float GetBlendFactor(float4 Color, inout float4 HistoryColor, float2 Depth, float2 uv, float2 HistoryUV, float Motion, float alpha)
+    // YCoCg 颜色空间下的 neighborhood clamp + 时序权重计算
+    float GetBlendFactor(half4 Color, inout half4 HistoryColor, float2 Depth, float2 uv, float2 HistoryUV, float2 Motion, float alpha)
     {
-        // �� YCoCgɫ�ʿռ��н���Clip�ж�
-        float3 AABBMin, AABBMax;
-        AABBMax = AABBMin = RGBToYCoCg(Color);
+        // 3x3 邻域 AABB
+        half3 AABBMin, AABBMax;
+        AABBMax = AABBMin = RGBToYCoCg(Color.rgb);
         for (int k = 0; k < 9; k++)
         {
-            float3 C = RGBToYCoCg(ColorBuffer.Sample(Samp_ColorBuffer, uv, kOffsets3x3[k]));
+            half3 C = RGBToYCoCg(ColorBuffer.SampleLevel(Samp_ColorBuffer, uv + (kOffsets3x3[k] * ViewportSizeAndRcp.zw), 0));
             AABBMin = min(AABBMin, C);
             AABBMax = max(AABBMax, C);
         }
-        float3 HistoryYCoCg = RGBToYCoCg(HistoryColor);
-        //����AABB��Χ�н���Clip����:
-        //HistoryColor.rgb = YCoCgToRGB(ClipHistory(HistoryYCoCg, AABBMin, AABBMax));
-        // Clamp����
+        half3 HistoryYCoCg = RGBToYCoCg(HistoryColor);
+        // Clamp 比 Clip 更稳, 不容易出现 disocclusion 时的 ghost 残留
         HistoryColor.rgb = YCoCgToRGB(clamp(HistoryYCoCg, AABBMin, AABBMax));
 
-        //�����ٶȱ仯���ϵ��
+        // 速度越大, 越偏向当前帧 (减少快速运动时的拖尾)
         float scaleLength = 1000;
         float BlendFactor = saturate(alpha + length(Motion) * scaleLength);
-
-        if (abs(Depth.y - Depth.x) > 0.05)
-        //if (Depth.y != Depth.x)
-        {
-            BlendFactor = 1.0f;
-        }
+        
+        // 深度 reject: 去掉了，这个不应该开启，边缘如果reject，那么线条永远无法AA
+        //float depthRefer = max(Depth.x, 1e-3f);
+        //float depthThreshold = 0.1f * depthRefer + 0.5f;
+        //if (abs(Depth.y - Depth.x) > depthThreshold)
+        //{
+        //    BlendFactor = 1.0f;
+        //}
+        // History 采样越界 (上帧物体不在屏幕里), 直接抛弃
         if (HistoryUV.x < 0 || HistoryUV.y < 0 || HistoryUV.x > 1.0f || HistoryUV.y > 1.0f)
         {
             BlendFactor = 1.0f;
         }
+        //BlendFactor = alpha;
         return BlendFactor;
     }
-    float3 GetTAAColor(float2 screen_uv, float2 JitterUV, float alpha)
+    float3 GetTAAColor(float2 screen_uv, float2 JitterUV, float2 PreJitterUV, float alpha)
     {
+        float2 currUV = screen_uv;
+        half4 Color = (half4) ColorBuffer.SampleLevel(Samp_ColorBuffer, currUV, 0);
+        //return Color;
+        Color.rgb = sRGB2Linear(Color.rgb);
         float2 Depth;
-        float2 uv = screen_uv + JitterUV;
-        float4 Color = ColorBuffer.Sample(Samp_ColorBuffer, uv);
-        Color.rgb = sRGB2Linear((half3)Color.rgb);
-        Depth.x = DepthBuffer.Sample(Samp_DepthBuffer, uv).r;
-
-        float2 Motion = DecodeMotionVector(MotionBuffer.SampleLevel(Samp_MotionBuffer, uv.xy, 0).xy);
-        float2 HistoryUV = uv.xy - Motion.xy;
-        half4 HistoryColor = (half4)PrevColorBuffer.SampleLevel(Samp_PrevColorBuffer, HistoryUV.xy, 0);
-        HistoryColor.rgb = sRGB2Linear((half3)HistoryColor.rgb);
-        Depth.y = PrevDepthBuffer.Sample(Samp_PrevDepthBuffer, HistoryUV.xy).r;
+        Depth.x = DepthBuffer.SampleLevel(Samp_DepthBuffer, currUV, 0).r;
+        
+        float2 Motion = DecodeMotionVector(MotionBuffer.SampleLevel(Samp_MotionBuffer, currUV.xy, 0).xy);
+        // History 采样也需要反偏上一帧的 jitter, 否则静止场景下当前帧和历史帧的
+        // jitter 不同会导致混合结果在帧间跳动.
+        float2 HistoryUV = screen_uv.xy - JitterUV - Motion.xy + PreJitterUV;
+        half4 HistoryColor = (half4) PrevColorBuffer.SampleLevel(Samp_PrevColorBuffer, HistoryUV.xy, 0);
+        HistoryColor.rgb = sRGB2Linear((half3) HistoryColor.rgb);
+        Depth.y = PrevDepthBuffer.SampleLevel(Samp_PrevDepthBuffer, HistoryUV.xy, 0).r;
 
         Depth = LinearFromDepth(Depth);
-        //Depth.x = LinearFromDepth(Depth.x) * (ZFar - ZNear);
-        //Depth.y = LinearFromDepth(Depth.y) * (ZFar - ZNear);
-        //if (abs(Depth.y - Depth.x) > 0.05)
-        //    //if (Depth.y != Depth.x)
-        //{
-        //    return float3(1,0,0);
-        //}
 
-        float blendFactor = GetBlendFactor(Color, HistoryColor, Depth, uv, HistoryUV, Motion, alpha);
+         // 邻域 AABB 也用 currUV 作为中心, 保证 clamp 范围与 Color 来自同一空间.
+        float blendFactor = GetBlendFactor(Color, HistoryColor, Depth, currUV, HistoryUV, Motion, alpha);
         float3 result = lerp(HistoryColor.rgb, Color.rgb, blendFactor);
-        result.rgb = Linear2sRGB((half3)result.rgb);
+        result.rgb = Linear2sRGB((half3) result.rgb);
         return result;
     }
-    float3 GetTAAColor2(float2 screen_uv, float2 JitterUV, float alpha)
+    // GetTAAColor2: 用 closest depth 邻域选 motion 的版本 (适合处理边缘/遮挡变化更稳).
+    // 反 jitter 的处理与 GetTAAColor 一致, 详见上面的注释.
+    float3 GetTAAColor2(float2 screen_uv, float2 JitterUV, float2 PreJitterUV, float alpha)
     {
-        float2 Depth;
-        float2 uv = screen_uv + JitterUV;
-        float4 Color = ColorBuffer.Sample(Samp_ColorBuffer, uv);
-        Color.rgb = sRGB2Linear((half3)Color.rgb);
-        Depth.x = DepthBuffer.Sample(Samp_DepthBuffer, uv).r;
-        //��Ϊ��ͷ���ƶ��ᵼ�����屻�ڵ���ϵ�仯���ⲽ��Ŀ����ѡ�����Χ���뾵ͷ����ĵ�
-        float2 closest = GetClosestUV(screen_uv.xy);
+        float2 currUV = screen_uv - JitterUV;
 
-        //�õ�����Ļ�ռ��У�����֡���UVƫ�Ƶľ���
+        float2 Depth;
+        half4 Color = (half4)ColorBuffer.Sample(Samp_ColorBuffer, currUV);
+        Color.rgb = sRGB2Linear(Color.rgb);
+        Depth.x = DepthBuffer.Sample(Samp_DepthBuffer, currUV).r;
+
+        // 在 3x3 邻域里挑离镜头最近的点的 UV, 用它去采 motion vector.
+        // 物体边缘上选最近点能避免 disocclusion 像素拿到错误的 motion (背景的 motion).
+        float2 closest = GetClosestUV(currUV.xy);
         float2 Motion = DecodeMotionVector(MotionBuffer.SampleLevel(Samp_MotionBuffer, closest.xy, 0).xy);
-        float2 HistoryUV = screen_uv.xy - Motion;
+        // History 采样也需要反偏上一帧的 jitter, 与 GetTAAColor 保持一致.
+        float2 HistoryUV = screen_uv.xy - Motion - PreJitterUV;
         half4 HistoryColor = PrevColorBuffer.Sample(Samp_PrevColorBuffer, HistoryUV);
         HistoryColor.rgb = sRGB2Linear((half3)HistoryColor.rgb);
         Depth.y = PrevDepthBuffer.Sample(Samp_PrevDepthBuffer, HistoryUV.xy).r;
 
-        float blendFactor = GetBlendFactor(Color, HistoryColor, Depth, uv, HistoryUV, Motion, alpha);
+        // 注意: GetTAAColor2 旧实现没有调用 LinearFromDepth, 这里保持原样.
+        // 如果想启用相对深度 reject, 需要先调 LinearFromDepth 再传给 GetBlendFactor.
+
+        float blendFactor = GetBlendFactor(Color, HistoryColor, Depth, screen_uv, HistoryUV, Motion, alpha);
         float3 result = lerp(HistoryColor.rgb, Color.rgb, blendFactor);
         result.rgb = Linear2sRGB((half3)result.rgb);
         return result;

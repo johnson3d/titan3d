@@ -89,7 +89,7 @@ void MdfQueueDoModifiers(inout PS_INPUT output, VS_MODIFIER input)
 //	Default_VSInput2PSInput(output, input);
 //	
 //	output.vWorldPos = output.vPosition.xyz;
-//	output.vPosition = mul(float4(output.vWorldPos, 1), GetViewPrjMtx(true));
+//	output.vPosition = mul(float4(output.vWorldPos, 1), GetViewPrjMtx());
 //	
 //	output.psCustomUV0.w = output.vPosition.w;
 //

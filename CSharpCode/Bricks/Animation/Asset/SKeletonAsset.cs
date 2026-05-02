@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using EngineNS.IO;
 using System.Collections.Generic;
 using System.Text;
@@ -57,7 +57,7 @@ namespace EngineNS.Animation.Asset
         public void SaveAssetTo(RName name)
         {
             AssetName = name;
-            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            var typeStr = Rtti.TtTypeDesc.TypeOf(this.GetType()).TypeString;
             var xnd = new IO.TtXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("SkeletonAsset", 0, 0))
             {

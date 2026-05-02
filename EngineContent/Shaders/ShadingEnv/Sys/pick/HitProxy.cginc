@@ -37,7 +37,7 @@ PS_INPUT VS_Main(VS_INPUT input1)
 
 #endif
 
-	output.vPosition = mul(float4(output.vWorldPos, 1), GetViewPrjMtx(true));
+	output.vPosition = mul(float4(output.vWorldPos, 1), GetViewPrjMtx());
 
 	return output;
 }

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -12,7 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CodeEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\BezierControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\FolderView.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Controls\UContentBrowser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\ContentBrowser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\CtrlUtility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\Attributes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\KeyValueCreator.cs" />
@@ -20,15 +20,16 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PropertyCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PropertyGrid.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\TypeEditors.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Controls\UItemDragging.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\ItemDragging.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\MenuItem.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Controls\UTypeSelector.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Controls\UAssetSelector.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Controls\ULogWatcher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\TypeSelector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\AssetSelector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\LogWatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiAPI.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Slate\UBaseRenderer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Slate\UWorldViewportSlate.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UCoreStyles.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Slate\TtWorldViewportInteractiveMode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Slate\BaseRenderer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Slate\WorldViewportSlate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CoreStyles.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIEditor\EditableFormData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Elements\Columns.cs" />
@@ -38,7 +39,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Elements\Text.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Form.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIEditor\FormStructureEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UImDrawDataRHI.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ImDrawDataRHI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Base.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Button.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\CheckBox.cs" />
@@ -53,8 +54,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\SearchBar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\StyleConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Toolbar.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UUvAnimEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UVAnim.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UvAnimEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VAnim.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)ImGui.brick" />

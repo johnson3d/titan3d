@@ -168,7 +168,7 @@ namespace NxRHI
 		this->FlushDraws();
 		mCurrentFrameBuffers = nullptr;
 	}
-	void DX11CommandList::BeginEvent(const char* info)
+	void DX11CommandList::BeginEvent(const char* info, DWORD color)
 	{
 		if (mIsRecording)
 			return;

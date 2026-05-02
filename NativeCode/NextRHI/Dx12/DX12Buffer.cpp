@@ -326,7 +326,7 @@ namespace NxRHI
 
 	void DX12Buffer::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* pFootPrint)
 	{
-		if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
+		if (cmd != nullptr && Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
 			auto device = mDeviceRef.GetPtr();
 			
@@ -368,6 +368,10 @@ namespace NxRHI
 			{
 				memcpy(mapped.pData, pData, pFootPrint->RowPitch);
 				this->Unmap(subRes);
+			}
+			else
+			{
+				ASSERT(false);
 			}
 		}
 	}

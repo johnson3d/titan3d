@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
+using EngineNS.Bricks.CodeBuilder.MacrossNode;
 using EngineNS.EGui.Controls;
 using EngineNS.Thread;
 //using Microsoft.Toolkit.HighPerformance;
@@ -175,7 +175,7 @@ namespace EngineNS.IO
             var ameta = mAsset.CreateAMeta();
             ameta.SetAssetName(mAsset.AssetName);
             ameta.AssetId = Guid.NewGuid();
-            ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(mAsset.GetType());
+            ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(mAsset.GetType()).TypeString;
             ameta.Description = $"This is a {mAsset.GetType().FullName}\n";
             ameta.SaveAMeta((IAsset)null);
 
@@ -256,8 +256,8 @@ namespace EngineNS.IO
         {
             if (Task != null)
             {
-                if (Task.IsCompleted && Task.Result != null)
-                    Task.Result.mTextureRSV = null;
+                if (Task.Value.IsCompleted && Task.Value.DirectResult != null)
+                    Task.Value.DirectResult.mTextureRSV = null;
                 Task = null;
             }
         }
@@ -396,7 +396,7 @@ namespace EngineNS.IO
                 return;
             var tarName = RName.GetRName(name, type);
             var ameta = TtEngine.Instance.AssetMetaManager.NewAMeta(tarName, asset.GetAMeta().GetType());
-            ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(asset.GetType());
+            ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(asset.GetType()).TypeString;
             foreach (var i in this.RefAssetRNames)
             {
                 ameta.RefAssetRNames.Add(i);
@@ -444,7 +444,7 @@ namespace EngineNS.IO
             {
                 if (asset != null)
                 {
-                    TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(asset.GetType());
+                    TypeStr = Rtti.TtTypeDesc.TypeOf(asset.GetType()).TypeString;
                 }
                 var fileName = mAssetName.Address + MetaExt;
                 SaveAMeta(fileName);
@@ -578,7 +578,7 @@ namespace EngineNS.IO
         protected EGui.UIProxy.MenuItemProxy.MenuState mMoveToMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         protected EGui.UIProxy.MenuItemProxy.MenuState mCopyToMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         protected EGui.UIProxy.MenuItemProxy.MenuState mPackToMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
-        internal System.Threading.Tasks.Task<Editor.USnapshot> Task;
+        internal Thread.Async.TtTask<Editor.TtSnapshot>? Task;
         public virtual Color4b GetBorderColor()
         {
             return EGui.UCoreStyles.Instance.SnapBorderColor;
@@ -717,7 +717,10 @@ namespace EngineNS.IO
             {
                 ContentBrowser.OperationAsset(this, EGui.Controls.TtContentBrowser.EAssetOperationType.PackTo);
             }
-
+            if (EGui.UIProxy.MenuItemProxy.MenuItem("GenSnapshot", null, false, null, in drawList, in menuData, ref mPackToMenuState))
+            {
+                this.AutoGenSnapshot().AddWaitTask();
+            }
             if (OnDrawContextMenu(ref drawList))
                 ContentBrowser.CreateNewAssets = createNewAssetValueStore;
         }
@@ -727,9 +730,9 @@ namespace EngineNS.IO
         }
         public virtual void OnShowIconTimout(int time)
         {
-            if (Task != null && Task.IsCompleted)
+            if (Task != null && Task.Value.IsCompleted)
             {
-                Task.Result?.mTextureRSV?.Dispose();
+                Task.Value.DirectResult?.mTextureRSV?.Dispose();
                 Task = null;
             }
         }
@@ -740,12 +743,12 @@ namespace EngineNS.IO
             
             if (Task == null)
             {
-                Task = Editor.USnapshot.Load(GetAssetName().Address + ".snap");
+                Task = Editor.TtSnapshot.Load(this);
                 return;
             }
-            else if (Task.IsCompleted == true)
+            else if (Task.Value.IsCompleted == true)
             {
-                if (Task.Result == null)
+                if (Task.Value.DirectResult == null)
                 {
                     HasSnapshot = false;
                     Task = null;
@@ -753,7 +756,7 @@ namespace EngineNS.IO
                 else
                 {
                     ImTextureRef imTextureRef = new ImTextureRef();
-                    imTextureRef.m__TexID = (ulong)Task.Result.mTextureRSV.GetTextureHandle();
+                    imTextureRef.m__TexID = (ulong)Task.Value.DirectResult.mTextureRSV.GetTextureHandle();
                     cmdlist.AddImage(imTextureRef, in start, in end, in Vector2.Zero, in Vector2.One, 0xFFFFFFFF);
                 }
             }
@@ -762,9 +765,22 @@ namespace EngineNS.IO
         {
         }
 
-        public virtual async Thread.Async.TtTask<bool> AutoGenSnap()
+        public async Thread.Async.TtTask<bool> AutoGenSnapshot()
         {
-            return true;
+            using (var creator = new Editor.TtSnapshotCreator())
+            {
+                await creator.Initialize();
+                return await creator.Snapshot(this, false);
+            }   
+        }
+        public virtual async Thread.Async.TtTask<List<GamePlay.Scene.TtNode>> GetSnapshotNodes(Graphics.Pipeline.TtOffscreenRenderer renderer)
+        {
+            await Thread.TtAsyncDummyClass.DummyFunc();
+            return null;
+        }
+        public virtual UI.Controls.TtUIElement GetSnapshotHUD()
+        {
+            return null;
         }
         #endregion
 
@@ -993,7 +1009,7 @@ namespace EngineNS.IO
             ameta = asset.CreateAMeta();
             ameta.SetAssetName(name);
             ameta.AssetId = Guid.NewGuid();
-            ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(T));
+            ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(T)).TypeString;
             ameta.SaveAMeta(asset);
             Assets.Add(ameta.AssetId, ameta);
             RNameAssets.Add(ameta.GetAssetName(), ameta);
@@ -1014,7 +1030,7 @@ namespace EngineNS.IO
             ameta = asset.CreateAMeta();
             ameta.SetAssetName(name);
             ameta.AssetId = Guid.NewGuid();
-            ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(type);
+            ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(type).TypeString;
             ameta.SaveAMeta(asset);
             Assets.Add(ameta.AssetId, ameta);
             RNameAssets.Add(ameta.GetAssetName(), ameta);

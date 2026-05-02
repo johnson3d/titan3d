@@ -1,23 +1,23 @@
 /*
-* Copyright (c) 2016-2023, NVIDIA CORPORATION.  All rights reserved.
-*
-* NVIDIA CORPORATION and its licensors retain all intellectual property
-* and proprietary rights in and to this software, related documentation
-* and any modifications thereto.  Any use, reproduction, disclosure or
-* distribution of this software and related documentation without an express
-* license agreement from NVIDIA CORPORATION is strictly prohibited.
-*/
+ * Copyright (c) 2016-2024, NVIDIA CORPORATION.  All rights reserved.
+ *
+ * NVIDIA CORPORATION and its licensors retain all intellectual property
+ * and proprietary rights in and to this software, related documentation
+ * and any modifications thereto.  Any use, reproduction, disclosure or
+ * distribution of this software and related documentation without an express
+ * license agreement from NVIDIA CORPORATION is strictly prohibited.
+ */
 
 /*
-*   █████  █████ ██████ ████  ████   ███████   ████  ██████ ██   ██
-*   ██  ██ ██      ██   ██    ██  ██ ██ ██ ██ ██  ██   ██   ██   ██
-*   ██  ██ ██      ██   ██    ██  ██ ██ ██ ██ ██  ██   ██   ██   ██
-*   ██████ ████    ██   ████  █████  ██ ██ ██ ██████   ██   ███████
-*   ██  ██ ██      ██   ██    ██  ██ ██    ██ ██  ██   ██   ██   ██
-*   ██  ██ ██      ██   █████ ██  ██ ██    ██ ██  ██   ██   ██   ██   DEBUGGER
-*                                                           ██   ██
-*  ████████████████████████████████████████████████████████ ██ █ ██ ████████████
-*/
+ *   █████  █████ ██████ ████  ████   ███████   ████  ██████ ██   ██
+ *   ██  ██ ██      ██   ██    ██  ██ ██ ██ ██ ██  ██   ██   ██   ██
+ *   ██  ██ ██      ██   ██    ██  ██ ██ ██ ██ ██  ██   ██   ██   ██
+ *   ██████ ████    ██   ████  █████  ██ ██ ██ ██████   ██   ███████
+ *   ██  ██ ██      ██   ██    ██  ██ ██    ██ ██  ██   ██   ██   ██
+ *   ██  ██ ██      ██   █████ ██  ██ ██    ██ ██  ██   ██   ██   ██   DEBUGGER
+ *                                                           ██   ██
+ *  ████████████████████████████████████████████████████████ ██ █ ██ ████████████
+ */
 
 #ifndef GFSDK_Aftermath_Defines_H
 #define GFSDK_Aftermath_Defines_H
@@ -41,8 +41,8 @@
 #ifdef __cplusplus
 #include <cstdint>
 #else
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 #endif
 
 // Library stuff...
@@ -71,14 +71,31 @@
 // Helper macros for declaring struct members and types with guaranteed properties.
 //
 /////////////////////////////////////////////////////////////////////////
-#define GFSDK_AFTERMATH_DECLARE_HANDLE(name) struct name##__ { int32_t ID; }; typedef struct name##__ *name
+#define GFSDK_AFTERMATH_DECLARE_HANDLE(name) \
+    struct name##__                          \
+    {                                        \
+        int32_t ID;                          \
+    };                                       \
+    typedef struct name##__* name
 #ifdef __cplusplus
 #define GFSDK_AFTERMATH_DECLARE_ENUM(name) enum GFSDK_Aftermath_##name : uint32_t
 #else
-#define GFSDK_AFTERMATH_DECLARE_ENUM(name) typedef uint32_t GFSDK_Aftermath_##name; enum GFSDK_Aftermath_##name
+#define GFSDK_AFTERMATH_DECLARE_ENUM(name)   \
+    typedef uint32_t GFSDK_Aftermath_##name; \
+    enum GFSDK_Aftermath_##name
 #endif
-#define GFSDK_AFTERMATH_DECLARE_POINTER_MEMBER(type, name) union { type name; uint64_t ptr_align_##name; }
-#define GFSDK_AFTERMATH_DECLARE_BOOLEAN_MEMBER(name) union { bool name; uint32_t bool_align_##name; }
+#define GFSDK_AFTERMATH_DECLARE_POINTER_MEMBER(type, name) \
+    union                                                  \
+    {                                                      \
+        type name;                                         \
+        uint64_t ptr_align_##name;                         \
+    }
+#define GFSDK_AFTERMATH_DECLARE_BOOLEAN_MEMBER(name) \
+    union                                            \
+    {                                                \
+        bool name;                                   \
+        uint32_t bool_align_##name;                  \
+    }
 
 /////////////////////////////////////////////////////////////////////////
 // GFSDK_Aftermath_Version
@@ -92,9 +109,8 @@
 // library loaded by the application.
 //
 /////////////////////////////////////////////////////////////////////////
-GFSDK_AFTERMATH_DECLARE_ENUM(Version)
-{
-    GFSDK_Aftermath_Version_API = 0x0000214  // Version 2.20
+GFSDK_AFTERMATH_DECLARE_ENUM(Version){
+    GFSDK_Aftermath_Version_API = 0x000021A // Version 2.26
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -104,8 +120,7 @@ GFSDK_AFTERMATH_DECLARE_ENUM(Version)
 // Result codes returned by Aftermath API functions
 //
 /////////////////////////////////////////////////////////////////////////
-GFSDK_AFTERMATH_DECLARE_ENUM(Result)
-{
+GFSDK_AFTERMATH_DECLARE_ENUM(Result){
     // The call was successful.
     GFSDK_Aftermath_Result_Success = 0x1,
 
@@ -216,8 +231,7 @@ GFSDK_AFTERMATH_DECLARE_ENUM(Result)
 // Status of an Aftermath context.
 //
 /////////////////////////////////////////////////////////////////////////
-GFSDK_AFTERMATH_DECLARE_ENUM(Context_Status)
-{
+GFSDK_AFTERMATH_DECLARE_ENUM(Context_Status){
     // The GPU has not started processing this command list yet.
     GFSDK_Aftermath_Context_Status_NotStarted = 0,
 
@@ -238,8 +252,7 @@ GFSDK_AFTERMATH_DECLARE_ENUM(Context_Status)
 // Status of a D3D device.
 //
 /////////////////////////////////////////////////////////////////////////
-GFSDK_AFTERMATH_DECLARE_ENUM(Device_Status)
-{
+GFSDK_AFTERMATH_DECLARE_ENUM(Device_Status){
     // The device is still active and hasn't gone down.
     GFSDK_Aftermath_Device_Status_Active = 0,
 
@@ -265,6 +278,9 @@ GFSDK_AFTERMATH_DECLARE_ENUM(Device_Status)
 
     // An invalid rendering call has percolated through the driver.
     GFSDK_Aftermath_Device_Status_DmaFault,
+
+    // The device was removed but no GPU fault was detected.
+    GFSDK_Aftermath_Device_Status_DeviceRemovedNoGpuFault,
 };
 
 #pragma pack(pop)

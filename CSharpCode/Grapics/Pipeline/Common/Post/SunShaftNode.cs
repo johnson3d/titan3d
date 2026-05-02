@@ -35,7 +35,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Post/SunShaft/DepthThresholeShading.cginc", RName.ERNameType.Engine);
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
@@ -110,7 +110,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDepthThresholeShading>();
+            mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtDepthThresholeShading>();
         }
 
         FSunShaftStruct mSunShaftStruct = new FSunShaftStruct();
@@ -146,9 +146,9 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
         }
         public NxRHI.TtCbView CBShadingEnv;
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            base.TickLogic(world, policy, frameCmdList, bClear);
+            base.Tick(world, policy, frameCmdList, bClear);
 
             var toViewport = policy.DefaultCamera.GetViewProjection();
             var clipPos = Vector3.Transform(new Vector3(100,100,100), in toViewport);
@@ -166,7 +166,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             base.TickSync(policy);
         }
-        public override void BeforeTickLogic(TtRenderPolicy policy)
+        public override void BeforeTick(TtRenderPolicy policy)
         {
             //var buffer = this.FindAttachBuffer(ColorPinIn);
             //if (buffer != null)
@@ -184,7 +184,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Post/SunShaft/RadialBlurShading.cginc", RName.ERNameType.Engine);
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
@@ -248,7 +248,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtRadialBlurShading>();
+            mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtRadialBlurShading>();
         }
 
         FSunShaftStruct mSunShaftStruct = new FSunShaftStruct();
@@ -279,7 +279,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
         }
         public NxRHI.TtCbView CBShadingEnv;
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             var toViewport = policy.DefaultCamera.GetViewProjection();
             var clipPos = Vector3.Transform(new Vector3(100, 100, 100), in toViewport);
@@ -292,13 +292,13 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             {
                 CBShadingEnv.SetValue("SunShaftStruct", in mSunShaftStruct);
             }
-            base.TickLogic(world, policy, frameCmdList, bClear);
+            base.Tick(world, policy, frameCmdList, bClear);
         }
         public override void TickSync(TtRenderPolicy policy)
         {
             base.TickSync(policy);
         }
-        public override void BeforeTickLogic(TtRenderPolicy policy)
+        public override void BeforeTick(TtRenderPolicy policy)
         {
             var buffer = this.FindAttachBuffer(ColorPinIn);
             if (buffer != null)

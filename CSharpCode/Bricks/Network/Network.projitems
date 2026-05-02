@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -12,12 +12,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)INetConnect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RPC\FPkgHeader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RPC\NetPacketParser.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)RPC\URpcModule.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)RPC\UNetworkPackage.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)RPC\URpcAwaiter.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)RPC\URpcClass.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UNetPackageManager.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UTcpClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RPC\RpcModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RPC\NetworkPackage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RPC\RpcAwaiter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RPC\RpcClass.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NetPackageManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TcpClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Network.brick" />

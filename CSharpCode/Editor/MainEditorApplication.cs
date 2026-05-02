@@ -1,0 +1,999 @@
+﻿//#define UseWindowTest
+
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Linq;
+using System.Xml;
+using System.Xml.Linq;
+using EngineNS.UI.Editor;
+using EngineNS.Macross;
+using System.Runtime.InteropServices;
+using EngineNS.GamePlay.Scene;
+using System.Diagnostics;
+//using SDL2;
+
+namespace EngineNS.Editor
+{
+    public partial class TtMainEditorApplication : TtSlateApplication, ITickable
+    {
+        public int GetTickOrder()
+        {
+            return 0;
+        }
+        public TtAssetEditorManager AssetEditorManager { get; } = new TtAssetEditorManager();
+        
+        public TtMainEditorApplication()
+        {
+            mLogWatcher = new EGui.Controls.TtLogWatcher();
+            mCpuProfiler = new Editor.Forms.TtCpuProfilerForm();
+            mGpuProfiler = new Editor.Forms.TtGpuProfiler();
+            mMemProfiler = new Forms.TtMemoryProfiler();
+            mMainInspector = new Forms.TtInspector();
+            mMetaViewer = new TtMetaVersionViewer();
+            //WorldViewportSlate = new UEditorWorldViewportSlate(true);
+            //mWorldOutliner = new Editor.Forms.UWorldOutliner(WorldViewportSlate);
+
+            mBrickManager = new Bricks.ProjectGen.UBrickManager();
+            mEditorSettings = new Forms.TtEditorSettings();
+            mPIEController = new TtPIEController();
+        }
+        private bool IsVisible = true;
+        //public Editor.Forms.UWorldOutliner mWorldOutliner;
+        public EGui.Controls.TtLogWatcher mLogWatcher;
+        public Editor.Forms.TtCpuProfilerForm mCpuProfiler;
+        public Editor.Forms.TtGpuProfiler mGpuProfiler;
+        public Editor.Forms.TtMemoryProfiler mMemProfiler;
+        public Editor.Forms.TtInspector mMainInspector;
+        public TtMetaVersionViewer mMetaViewer;
+        public Bricks.ProjectGen.UBrickManager mBrickManager = null;
+        public Editor.Forms.TtEditorSettings mEditorSettings;
+        public TtPIEController mPIEController;
+
+        //public UEditorWorldViewportSlate WorldViewportSlate = null;
+        //public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
+        //{
+        //    return WorldViewportSlate;
+        //}        
+        ///////////////////////////////////////////
+        public EGui.Controls.TtContentBrowser ContentBrowser = new EGui.Controls.TtContentBrowser();
+        public override void Cleanup()
+        {
+            TtEngine.Instance?.TickableManager.RemoveTickable(this);
+#if (UseWindowTest)
+            mWinTest.Cleanup();
+#endif
+            CoreCLRManager.Stop();
+            CoreSDK.DisposeObject(ref mClrProfiler);
+            base.Cleanup();
+        }
+        public override async Thread.Async.TtTask<bool> InitializeApplication(NxRHI.TtGpuDevice rc, RName rpName)
+        {
+            await base.InitializeApplication(rc, rpName);
+
+            await ContentBrowser.Initialize();
+            TtEngine.RootFormManager.RegRootForm(ContentBrowser);
+
+            //await WorldViewportSlate.Initialize(this, rpName, 0, 1);
+
+            await mMainInspector.Initialize();
+
+            await mEditorSettings.Initialize();
+            //TtEngine.Instance.Config.PlayGameName = RName.GetRName("utest/test_game01.macross");
+
+            mMainInspector.PropertyGrid.PGName = "MainInspector";
+            mMainInspector.PropertyGrid.Target = EGui.UIProxy.StyleConfig.Instance;// WorldViewportSlate;
+
+            TtEngine.Instance.TickableManager.AddTickable(this);
+
+            EGui.UIProxy.StyleConfig.Instance.ResetStyle();
+            /////////////////////////////////
+#if (UseWindowTest)
+            mWinTest.Initialize();
+            Editor.UMainEditorApplication.RegRootForm(mWinTest);
+#endif
+            /////////////////////////////////
+
+            InitMainMenu();
+
+            await AssetEditorManager.Initialize();
+            return true;
+        }
+#if PWindow
+        [DllImport("kernel32.dll")]
+        static extern IntPtr GetConsoleWindow();
+        [DllImport("user32.dll")]
+        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+#endif
+        public void InitMainMenu()
+        {
+            mMenuItems = new List<EGui.UIProxy.MenuItemProxy>()
+            {
+                new EGui.UIProxy.MenuItemProxy()
+                {
+                    MenuName = "File",
+                    IsTopMenuItem = true,
+                    SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
+                    {
+                        new EGui.UIProxy.NamedMenuSeparator()
+                        {
+                            Name = "OPEN",
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "Load...",
+                            Shortcut = "Ctrl+L",
+                            Icon = new EGui.UIProxy.ImageProxy()
+                            {
+                                ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
+                                ImageSize = new Vector2(16, 16),
+                                UVMin = new Vector2(140.0f/1024, 265.0f/1024),
+                                UVMax = new Vector2(156.0f/1024, 281.0f/1024),
+                            },
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                // Do sth
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "Save...",
+                            Shortcut = "Ctrl+S",
+                            Icon = new EGui.UIProxy.ImageProxy()
+                            {
+                                ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
+                                ImageSize = new Vector2(16, 16),
+                                UVMin = new Vector2(124.0f/1024, 305.0f/1024),
+                                UVMax = new Vector2(140.0f/1024, 321.0f/1024),
+                            },
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                // Do sth
+                            },
+                        },
+                    },
+                },
+                new EGui.UIProxy.MenuItemProxy()
+                {
+                    MenuName = "Tools",
+                    IsTopMenuItem = true,
+                    SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
+                    {
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "CompileMacross",
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                var csFilesPath = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
+                                var projectFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameProject;
+                                var assemblyFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameAssembly;
+
+                                if (TtMacrossModule.CompileGameProject(csFilesPath, projectFile, assemblyFile, TtEngine.Instance.CurrentPlatform))
+                                {
+                                    TtEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
+                                }
+                                //var gameAssembly = TtEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + TtEngine.Instance.EditorInstance.Config.GameAssembly;
+
+                                //TtEngine.Instance.MacrossModule.ReloadAssembly(gameAssembly);
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "PrintAttachmentPool",
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                TtEngine.Instance.GfxDevice.AttachBufferManager.PrintCachedBuffer = true;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "Cap",
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                unsafe
+                                {
+                                    IRenderDocTool.GetInstance().SetGpuDevice(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject);
+                                    IRenderDocTool.GetInstance().SetActiveWindow(this.NativeWindow.HWindow.ToPointer());
+                                    TtEngine.Instance.GfxDevice.RenderQueue.CaptureRenderDocFrame = true;
+                                }
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "CapMem",
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                var save = PrevMemCapture;
+                                PrevMemCapture = new EngineNS.Profiler.TtNativeMemCapture();
+                                PrevMemCapture.CaptureNativeMemoryState();
+                                if (save != null)
+                                    PrevMemCapture.GetIncreaseTypes(save);
+                                    
+                                //TtEngine.Instance.EventPoster.RunOn((state)=>
+                                //{
+                                    //return true;
+                                //}, Thread.Async.EAsyncTarget.Main);
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "ShowConsole",
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                item.Selected = !item.Selected;
+#if PWindow
+                                var handle = GetConsoleWindow();
+                                ShowWindow(handle, item.Selected ? 1 : 0);
+#endif
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "OpenTracer",
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                //test and start tracer process...
+                                Action action = async ()=>
+                                {
+                                    if(false == await TtEngine.Instance.Tracer.OpenTrace())
+                                    {
+                                        var apps = Process.GetProcessesByName("Tracer");
+                                        if(apps.Length == 0)
+                                        {
+                                            bool bDSStarted = false;
+                                            var startInfo = new ProcessStartInfo();
+                                            var dir = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
+                                            startInfo.FileName = IO.TtFileManager.CombinePath(dir, $"Binaries/Tracer/debug/{TtEngine.DotNetVersion}/Tracer.exe");
+                                            startInfo.Arguments = $"EngineRoot={dir} config={dir}content\\apptracer.jscfg NativeDLL={TtEngine.Instance.Config.NativeDll}";
+                                            startInfo.UseShellExecute = false;
+                                            startInfo.RedirectStandardOutput = true;
+                                            var ProcessTracer = new Process();
+                                            ProcessTracer.StartInfo = startInfo;
+                                            ProcessTracer.EnableRaisingEvents = true;
+                                            ProcessTracer.OutputDataReceived += (sender, e) =>
+                                            {
+                                                if (e.Data == "Tracer Server start success.")
+                                                {
+                                                    bDSStarted = true;
+                                                }
+                                            };
+                                            ProcessTracer.Start();
+                                            ProcessTracer.BeginOutputReadLine();
+                                            while (bDSStarted==false)
+                                            {
+                                                System.Threading.Thread.Sleep(100);
+                                            }
+                                            ProcessTracer.CancelOutputRead();
+    
+                                            //ProcessTracer.StandardOutput?.Close();
+                                            if(await TtEngine.Instance.Tracer.OpenTrace()==false)
+                                            {
+                                                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Tracer server start failed!");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Tracer server down!");
+                                        }
+                                    }
+                                };
+                                action();
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "CloseTracer",
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                TtEngine.Instance.Tracer.CloseTrace();
+                            },
+                        },
+                    },
+                },
+                new EGui.UIProxy.MenuItemProxy()
+                {
+                    MenuName = "Windows",
+                    IsTopMenuItem = true,
+                    SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
+                    {
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "GC",
+                            Selected = false,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                System.GC.Collect();
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "ContentBrowser",
+                            Selected = true,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                ContentBrowser.Visible = !ContentBrowser.Visible;
+                                var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.TtMainEditorApplication;
+                                item.Selected = ContentBrowser.Visible;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "LogWatcher",
+                            Selected = true,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                mLogWatcher.Visible = !mLogWatcher.Visible;
+                                var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.TtMainEditorApplication;
+                                item.Selected = mLogWatcher.Visible;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "CpuProfiler",
+                            Selected = true,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                mCpuProfiler.Visible = !mCpuProfiler.Visible;
+                                var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.TtMainEditorApplication;
+                                //mCpuProfiler.DockId = application.CenterDockId;
+                                item.Selected = mCpuProfiler.Visible;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "GpuProfiler",
+                            Selected = true,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                mGpuProfiler.Visible = !mGpuProfiler.Visible;
+                                var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.TtMainEditorApplication;
+                                //mCpuProfiler.DockId = application.CenterDockId;
+                                item.Selected = mGpuProfiler.Visible;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "MemProfiler",
+                            Selected = true,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                mMemProfiler.Visible = !mMemProfiler.Visible;
+                                var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.TtMainEditorApplication;
+                                item.Selected = mMemProfiler.Visible;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "MainInspector",
+                            Selected = true,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                mMainInspector.Visible = !mMainInspector.Visible;
+                                item.Selected = mMainInspector.Visible;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "MetaViewer",
+                            Selected = true,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                mMetaViewer.Visible = !mMetaViewer.Visible;
+                                item.Selected = mMetaViewer.Visible;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "BrickManager",
+                            Selected = false,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                mBrickManager.Visible = !mBrickManager.Visible;
+                                item.Selected = mBrickManager.Visible;
+                                if(mBrickManager.Visible)
+                                {
+                                    var task = mBrickManager.Initialize();
+                                }
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "PIE Controller",
+                            Selected = false,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                mPIEController.Visible = !mPIEController.Visible;
+                                item.Selected = mPIEController.Visible;
+                                if(mPIEController.Visible)
+                                    TtEngine.Instance.TaskCollector.AddWaitTask(mPIEController.Initialize());
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "Settings",
+                            Selected = false,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                mEditorSettings.Visible = !mEditorSettings.Visible;
+                                item.Selected = mEditorSettings.Visible;
+                                if(mEditorSettings.Visible)
+                                    TtEngine.Instance.TaskCollector.AddWaitTask(mEditorSettings.Initialize());
+                            },
+                        },
+                    },
+                },
+            };
+        }
+
+        #region DrawGui
+        bool _showDemoWindow = false;
+        public float LeftWidth = 0;
+        public float CenterWidth = 0;
+        static string mNeedFocusWindowName;
+        public static string NeedFocusPanelName;
+        static int mFrameDelay = 0;
+        public static string NeedFocusWindowName
+        {
+            get => mNeedFocusWindowName;
+            set
+            {
+                mNeedFocusWindowName = value;
+                mFrameDelay = 2;
+            }
+        }
+
+        ////////////////////////
+#if (UseWindowTest)
+        UIWindowsTest mWinTest = new UIWindowsTest();
+#endif
+        ////////////////////////
+
+        //public uint LeftDockId { get; private set; } = 0;
+        //public uint CenterDockId { get; private set; } = 0;
+
+        public UInt32 ActiveViewportId = UInt32.MaxValue;
+        protected unsafe override void OnDrawUI()
+        {
+            {
+                var count = ImGuiAPI.PlatformIO_Viewports_Size(ImGuiAPI.GetPlatformIO());
+                for (int i = 0; i < count; i++)
+                {
+                    var pViewport = ImGuiAPI.PlatformIO_Viewports_Get(ImGuiAPI.GetPlatformIO(), i);
+                    var nativeWindow = pViewport->PlatformHandle;
+                    if (TtNativeWindow.IsInputFocus((IntPtr)nativeWindow))
+                    {
+                        ActiveViewportId = pViewport->ID;
+                    }
+                }
+            }
+            if (IsVisible == false)
+            {
+                AssetEditorManager.CloseAll();
+                var num = ImGuiAPI.PlatformIO_Viewports_Size(ImGuiAPI.GetPlatformIO());
+                if (num == 1)
+                {//只剩下被特意隐藏的主Viewport了
+                    TtEngine.Instance.PostQuitMessage();
+                }
+                return;
+            }
+
+//            if (LeftDockId == 0)
+//            {
+//                LeftDockId = ImGuiAPI.GetID("LeftDocker");
+//                CenterDockId = ImGuiAPI.GetID("CenterDocker");
+
+//                mCpuProfiler.DockId = CenterDockId;
+//#if PWindow
+//                mClrProfiler.DockId = CenterDockId;
+//#endif
+//                //WorldViewportSlate.DockId = CenterDockId;
+//                //mWorldOutliner.DockId = LeftDockId;
+//                ContentBrowser.DockId = CenterDockId;
+//                mBrickManager.DockId = CenterDockId;
+//                mEditorSettings.DockId = LeftDockId;
+//            }
+
+            var io = ImGuiAPI.GetIO();
+            if ((io.ConfigFlags & ImGuiConfigFlags_.ImGuiConfigFlags_DockingEnable) != 0)
+            {
+                //ImGuiAPI.DockSpaceOverViewport(0, ImGuiAPI.GetMainViewport(), ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, null);
+                
+                //var dockspace_id = ImGuiAPI.GetID("MyDockSpace");
+                //ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
+                //var winClass = new ImGuiWindowClass();
+                //winClass.UnsafeCallConstructor();
+                //var sz = new Vector2(0.0f, 0.0f);                
+                //ImGuiAPI.DockSpace(dockspace_id, ref sz, dockspace_flags, ref winClass);
+                //winClass.UnsafeCallDestructor();
+            }
+            try
+            {
+                var mainPos = new Vector2(0);
+                ImGuiAPI.SetNextWindowPos(in mainPos, ImGuiCond_.ImGuiCond_FirstUseEver, in mainPos);
+                var wsz = new Vector2(1290, 800);
+                ImGuiAPI.SetNextWindowSize(in wsz, ImGuiCond_.ImGuiCond_FirstUseEver);
+                uint dockId = 0;
+                var result = EGui.UIProxy.DockProxy.BeginMainForm(TtEngine.Instance.Config.ConfigName, ref IsVisible, ref dockId, //ImGuiWindowFlags_.ImGuiWindowFlags_NoMove |
+                                                                                                                                 //ImGuiWindowFlags_.ImGuiWindowFlags_NoResize |
+                    ImGuiWindowFlags_.ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar |
+                    ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar);
+                if (result)
+                {
+                    wsz = ImGuiAPI.GetWindowSize();
+                    mainPos = ImGuiAPI.GetWindowPos();
+                    //DrawToolBar();
+                    DrawMainMenu();
+
+                    //ImGuiAPI.Separator();
+                    //ImGuiAPI.Columns(2, null, true);
+                    //if (LeftWidth == 0)
+                    //{
+                    //    ImGuiAPI.SetColumnWidth(0, wsz.X * 0.15f);
+                    //}
+                    //var min = ImGuiAPI.GetWindowContentRegionMin();
+                    //var max = ImGuiAPI.GetWindowContentRegionMax();
+
+                    //DrawLeft(ref min, ref max);
+                    //LeftWidth = ImGuiAPI.GetColumnWidth(0);
+                    //ImGuiAPI.NextColumn();
+
+                    //DrawCenter(ref min, ref max);
+                    //CenterWidth = ImGuiAPI.GetColumnWidth(1);
+                    //ImGuiAPI.NextColumn();
+
+                    //ImGuiAPI.Columns(1, null, true);
+                    if (ImGuiAPI.BeginChild("CenterWindow", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                    {
+                        ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
+                        var sz = new Vector2(0.0f, 0.0f);
+                        //var winClass = new ImGuiWindowClass();
+                        //winClass.UnsafeCallConstructor();
+                        //ImGuiAPI.DockSpace(CenterDockId, ref sz, dockspace_flags, ref winClass);
+                        //winClass.UnsafeCallDestructor();
+
+                        fixed(ImGuiWindowClass* dockclsPtr = &EGui.UIProxy.DockProxy.MainFormDockClass)
+                        {
+                            ImGuiAPI.DockSpace(EGui.UIProxy.DockProxy.MainFormDockClass.m_ClassId, &sz, dockspace_flags, dockclsPtr);
+                        }
+                    }
+                    ImGuiAPI.EndChild();
+                }
+                EGui.UIProxy.DockProxy.EndMainForm(result);
+
+                //WorldViewportSlate.DockId = CenterDockId;
+
+                TtEngine.RootFormManager.DrawRootForms();
+#if (UseWindowTest)
+                mWinTest.OnDraw();
+#endif
+                AssetEditorManager.OnDraw();
+
+                //TtEngine.Instance.StopOperateCover.OnDraw(in mainPos, in wsz);
+            }
+            catch
+            {
+
+            }
+
+            if (_showDemoWindow)
+            {
+                // Normally user code doesn't need/want to call this because positions are saved in .ini file anyway.
+                // Here we just want to make the demo initial state a bit more friendly!
+                var pos = new Vector2(650, 20);
+                var pivot = new Vector2(0, 0);
+                ImGuiAPI.SetNextWindowPos(in pos, ImGuiCond_.ImGuiCond_FirstUseEver, in pivot);
+                ImGuiAPI.ShowDemoWindow(ref _showDemoWindow);
+            }
+
+            TickToOperationMenus();
+
+            if(!string.IsNullOrEmpty(NeedFocusWindowName))
+            {
+                // 延迟几帧重新focus，避免打开的dock窗口没有显示在前面
+                mFrameDelay--;
+                if(mFrameDelay <= 0)
+                {
+                    ImGuiAPI.SetWindowFocus(NeedFocusWindowName);
+                    NeedFocusWindowName = null;
+                }
+            }
+        }
+        List<EGui.UIProxy.MenuItemProxy> mMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
+        List<EGui.UIProxy.MenuItemProxy> mMenusToRemove = new List<EGui.UIProxy.MenuItemProxy>();
+        List<EGui.UIProxy.MenuItemProxy> mMenusToAdd = new List<EGui.UIProxy.MenuItemProxy>();
+        byte mDelayFrame = 0;
+        public void AppendToMainMenu(params EGui.UIProxy.MenuItemProxy[] menus)
+        {
+            TtEngine.Instance.EventPoster.RunOn((state) =>
+            {
+                mMenusToAdd.AddRange(menus);
+                mDelayFrame = 2;
+                return true;
+            }, Thread.Async.EAsyncTarget.Main);
+        }
+        public void AppendToMainMenu(List<EGui.UIProxy.MenuItemProxy> menus)
+        {
+            TtEngine.Instance.EventPoster.RunOn((state) =>
+            {
+                mMenusToAdd.AddRange(menus);
+                mDelayFrame = 2;
+                return true;
+            }, Thread.Async.EAsyncTarget.Main);
+        }
+        public void RemoveFromMainMenu(params EGui.UIProxy.MenuItemProxy[] menus)
+        {
+            TtEngine.Instance.EventPoster.RunOn((state) =>
+            {
+                mMenusToRemove.AddRange(menus);
+                mDelayFrame = 2;
+                return true;
+            }, Thread.Async.EAsyncTarget.Main);
+        }
+        public void RemoveFromMainMenu(List<EGui.UIProxy.MenuItemProxy> menus)
+        {
+            TtEngine.Instance.EventPoster.RunOn((state) =>
+            {
+                mMenusToRemove.AddRange(menus);
+                mDelayFrame = 2;
+                return true;
+            }, Thread.Async.EAsyncTarget.Main);
+        }
+        void TickToOperationMenus()
+        {
+            if (mDelayFrame > 0)
+            {
+                mDelayFrame--;
+                return;
+            }
+            for (int i=0; i< mMenusToRemove.Count; i++)
+            {
+                if (mMenuItems.Contains(mMenusToRemove[i]))
+                    mMenuItems.Remove(mMenusToRemove[i]);
+                else
+                {
+                    for(int j=0; j<mMenuItems.Count; j++)
+                    {
+                        if (mMenuItems[j].MenuName == mMenusToRemove[i].MenuName)
+                        {
+                            mMenuItems[j].Eliminate(mMenusToRemove[i]);
+                            break;
+                        }
+                    }
+                }
+            }
+            mMenusToRemove.Clear();
+
+            for (int i = 0; i < mMenusToAdd.Count; i++)
+            {
+                if (mMenuItems.Contains(mMenusToAdd[i]))
+                    continue;
+
+                bool hasSameName = false;
+                for (int j = 0; j < mMenuItems.Count; j++)
+                {
+                    if (mMenuItems[j].MenuName == mMenusToAdd[i].MenuName)
+                    {
+                        hasSameName = true;
+                        mMenuItems[j].Merge(mMenusToAdd[i]);
+                        break;
+                    }
+                }
+                if (!hasSameName)
+                    mMenuItems.Add(mMenusToAdd[i]);
+            }
+            mMenusToAdd.Clear();
+        }
+        private void DrawMainMenu()
+        {
+            if (ImGuiAPI.BeginMenuBar())
+            {
+                var drawList = ImGuiAPI.GetWindowDrawList();
+                for (int i = 0; i < mMenuItems.Count; i++)
+                {
+                    mMenuItems[i].OnDraw(in drawList, in Support.TtAnyPointer.Default);
+                }
+                ImGuiAPI.EndMenuBar();
+            }
+            //if (ImGuiAPI.BeginMenuBar())
+            //{
+            //    if (ImGuiAPI.BeginMenu("File", true))
+            //    {
+            //        if (ImGuiAPI.MenuItem("Load", null, false, true))
+            //        {
+                        
+            //        }
+            //        if (ImGuiAPI.MenuItem("Save", null, false, true))
+            //        {
+                        
+            //        }
+            //        ImGuiAPI.EndMenu();
+            //    }
+            //    if (ImGuiAPI.BeginMenu("Windows", true))
+            //    {
+            //        var check = mWorldOutliner.Visible;
+            //        ImGuiAPI.Checkbox("##mWorldOutliner", ref check);
+            //        ImGuiAPI.SameLine(0, -1);
+            //        if ( ImGuiAPI.MenuItem("WorldOutliner", null, false, true))
+            //        {
+            //            mWorldOutliner.Visible = !mWorldOutliner.Visible;
+            //        }
+            //        check = mCpuProfiler.Visible;
+            //        ImGuiAPI.Checkbox("##mCpuProfiler", ref check);
+            //        ImGuiAPI.SameLine(0, -1);
+            //        if (ImGuiAPI.MenuItem("CpuProfiler", null, false, true))
+            //        {
+            //            mCpuProfiler.Visible = !mCpuProfiler.Visible;
+            //        }
+            //        check = mMainInspector.Visible;
+            //        ImGuiAPI.Checkbox("##mMainInspector", ref check);
+            //        ImGuiAPI.SameLine(0, -1);
+            //        if (ImGuiAPI.MenuItem("MainInspector", null, false, true))
+            //        {
+            //            mMainInspector.Visible = !mMainInspector.Visible;
+            //        }
+            //        check = mMetaViewer.Visible;
+            //        ImGuiAPI.Checkbox("##mMetaViewer", ref check);
+            //        ImGuiAPI.SameLine(0, -1);
+            //        if (ImGuiAPI.MenuItem("MetaViewer", null, false, true))
+            //        {
+            //            mMetaViewer.Visible = !mMetaViewer.Visible;
+            //        }
+            //        ImGuiAPI.EndMenu();
+            //    }
+            //    if (ImGuiAPI.BeginMenu("View", true))
+            //    {
+            //        var check = this.WorldViewportSlate.RenderPolicy.DisableShadow;
+            //        ImGuiAPI.Checkbox("##DisableShadow", ref check);
+            //        ImGuiAPI.SameLine(0, -1);
+            //        if (ImGuiAPI.MenuItem("DisableShadow", null, false, true))
+            //        {
+            //            this.WorldViewportSlate.RenderPolicy.DisableShadow = !check;
+            //        }
+
+            //        check = this.WorldViewportSlate.RenderPolicy.DisableAO;
+            //        ImGuiAPI.Checkbox("##DisableAO", ref check);
+            //        ImGuiAPI.SameLine(0, -1);
+            //        if (ImGuiAPI.MenuItem("DisableAO", null, false, true))
+            //        {
+            //            this.WorldViewportSlate.RenderPolicy.DisableAO = !check;
+            //        }
+
+            //        ImGuiAPI.EndMenu();
+            //    }
+            //    ImGuiAPI.EndMenuBar();
+            //}
+        }
+        //bool[] mToolBtn_IsMouseDown = new bool[4];
+        //bool[] mToolBtn_IsMouseHover = new bool[4];
+        //private unsafe void DrawToolBar()
+        //{
+        //    var drawList = ImGuiAPI.GetWindowDrawList();
+        //    EGui.UIProxy.Toolbar.BeginToolbar(drawList);
+
+        //    if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(drawList, ref mToolBtn_IsMouseDown[1], ref mToolBtn_IsMouseHover[1], null, "Play"))
+        //    {
+        //        var task = OnPlayGame(TtEngine.Instance.Config.PlayGameName);
+        //    }
+        //    if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(drawList, ref mToolBtn_IsMouseDown[2], ref mToolBtn_IsMouseHover[2], null, "Stop"))
+        //    {
+
+        //    }
+
+        //    EGui.UIProxy.Toolbar.EndToolbar();
+        //}
+        //protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
+        //{
+        //    var size = new Vector2(-1, -1);
+        //    if (ImGuiAPI.BeginChild("LeftWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+        //    {
+        //        ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
+        //        var winClass = new ImGuiWindowClass();
+        //        winClass.UnsafeCallConstructor();
+        //        var sz = new Vector2(0.0f, 0.0f);
+        //        ImGuiAPI.DockSpace(LeftDockId, in sz, dockspace_flags, in winClass);
+        //        winClass.UnsafeCallDestructor();
+        //    }
+        //    ImGuiAPI.EndChild();
+        //}
+        //protected unsafe void DrawCenter(ref Vector2 min, ref Vector2 max)
+        //{
+        //    var size = new Vector2(-1, -1);
+        //    if (ImGuiAPI.BeginChild("CenterWindow", in size, false, 
+        //        ImGuiWindowFlags_.ImGuiWindowFlags_None))
+        //    {
+        //        ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
+        //        var sz = new Vector2(0.0f, 0.0f);
+        //        //var winClass = new ImGuiWindowClass();
+        //        //winClass.UnsafeCallConstructor();
+        //        //ImGuiAPI.DockSpace(CenterDockId, ref sz, dockspace_flags, ref winClass);
+        //        //winClass.UnsafeCallDestructor();
+
+        //        ImGuiAPI.DockSpace(CenterDockId, &sz, dockspace_flags, (ImGuiWindowClass*)0);
+        //    }
+        //    ImGuiAPI.EndChild();
+        //}
+        //protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
+        //{
+        //    //var size = new Vector2(-1, -1);
+        //    //if (ImGuiAPI.BeginChild("RightWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+        //    //{
+        //    //    ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
+        //    //    var winClass = new ImGuiWindowClass();
+        //    //    winClass.UnsafeCallConstructor();
+        //    //    var sz = new Vector2(0.0f, 0.0f);
+        //    //    ImGuiAPI.DockSpace(RightDockId, in sz, dockspace_flags, in winClass);
+        //    //    winClass.UnsafeCallDestructor();
+        //    //}
+        //    //ImGuiAPI.EndChild();
+        //}
+        #endregion
+
+        //async System.Threading.Tasks.Task OnPlayGame(RName assetName)
+        //{
+        //    await TtEngine.Instance.StartPlayInEditor(TtEngine.Instance.GfxDevice.SlateApplication, assetName);
+        //}
+        #region TestCode
+        public static async System.Threading.Tasks.Task TestCreateScene(Graphics.Pipeline.TtViewportSlate vpSlate,GamePlay.TtWorld world, GamePlay.Scene.TtNode root, bool hideTerrain = false)
+        {
+            var materials = new Graphics.Pipeline.Shader.TtMaterialInstance[2];
+            materials[0] = await RName.GetRName("utest/ddd.uminst").GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
+            materials[1] = await RName.GetRName("utest/ground.uminst").GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>(   );
+            if (materials[0] == null)
+                return;
+            {
+                var meshData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
+                meshData.MeshName = RName.GetRName("utest/mesh/skysphere001.ums");
+                var meshNode = await TtNode.SpawnNode<GamePlay.Scene.TtSkyNode>(root, async (nd) =>
+                {
+                    nd.Parent = root;
+                    nd.Placement.Scale = new Vector3(800.0f);
+                    nd.Placement.Position = DVector3.Zero;
+                    nd.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
+                    nd.NodeData.Name = "SkySphere";
+                    nd.IsAcceptShadow = false;
+                    nd.IsCastShadow = false;
+                }, meshData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
+            }
+
+            {
+                var meshData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
+                meshData.MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
+                meshData.CollideName = RName.GetRName("utest/puppet/mesh/puppet.vms");
+                var meshNode = await TtNode.SpawnNode<GamePlay.Scene.TtMeshNode>(root, async (nd)=>
+                {
+                    nd.Placement.SetTransform(new DVector3(0, 0, 0), new Vector3(0.01f), Quaternion.Identity);
+                    nd.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
+                    nd.NodeData.Name = "Robot0";
+                    nd.IsAcceptShadow = false;
+                    nd.IsCastShadow = true;
+                }, meshData);
+
+                {
+                    var mesh1 = new Graphics.Mesh.TtRenderMesh();
+                    await mesh1.Initialize(RName.GetRName("utest/puppet/mesh/puppet.ums"), Rtti.TtTypeDesc.TypeOf(typeof(Graphics.Mesh.TtMdfSkinMesh)));
+                    var meshData1 = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
+                    var meshNode1 = await TtNode.SpawnNode<GamePlay.Scene.TtMeshNode>(meshNode, async (nd) =>
+                    {
+                        nd.RenderMesh = mesh1;
+                        nd.NodeData.Name = "Robot1";
+                        nd.Parent = meshNode;
+                        nd.Placement.SetTransform(new DVector3(3, 3, 3), new Vector3(0.01f), Quaternion.RotationAxis(Vector3.UnitY, (float)Math.PI / 4));
+                        nd.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.FollowParent;
+                        nd.IsAcceptShadow = false;
+                        nd.IsCastShadow = true;
+
+                        nd.MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
+                        (nd.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).MdfQueueType = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMdfSkinMesh));
+                        (nd.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).AtomType = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtRenderMesh.TtAtom));
+                    }, meshData1);
+                }
+            }
+
+            {
+                var meshData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
+                meshData.MeshName = RName.GetRName("utest/brdf_test/chair2.ums");
+                //meshData.CollideName = RName.GetRName("utest/puppet/mesh/puppet.vms");
+                var meshNode = await TtNode.SpawnNode<GamePlay.Scene.TtMeshNode>(root, async (nd)=>
+                {
+                    nd.Placement.SetTransform(new DVector3(0, 10, 0), new Vector3(1.0f), Quaternion.Identity);
+                    nd.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
+                    nd.NodeData.Name = "Robot_Chair";
+                    nd.IsAcceptShadow = false;
+                    nd.IsCastShadow = true;
+                }, meshData);
+            }
+
+            {
+                var meshData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
+                meshData.MeshName = RName.GetRName("utest/brdf_test/chair2.ums");
+                //meshData.CollideName = RName.GetRName("utest/puppet/mesh/puppet.vms");
+                var meshNode = await TtNode.SpawnNode<GamePlay.Scene.TtMeshNode>(root, async (nd)=>
+                {
+                    nd.Placement.SetTransform(new DVector3(0, 10, 0), new Vector3(1.0f), Quaternion.Identity);
+                    nd.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
+                    nd.NodeData.Name = "Robot_Chair_Far";
+                    nd.IsAcceptShadow = false;
+                    nd.IsCastShadow = true;
+
+                    nd.Placement.Position = new DVector3(1024 * 100, 0, 0);
+                }, meshData);
+            }
+
+            {
+                var nebulaData = new Bricks.Particle.TtNebulaNode.TtNebulaNodeData();
+                //nebulaData.MeshName = RName.GetRName("utest/mesh/unit_sphere.ums");
+                nebulaData.NebulaName = RName.GetRName("utest/particle001.nebula");
+                var meshNode = await TtNode.SpawnNode<Bricks.Particle.TtNebulaNode>(root, async (nd)=>
+                {
+                    nd.Placement.Position = DVector3.Zero;
+                    nd.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
+                    nd.NodeData.Name = "NebulaParticle";
+                    nd.IsAcceptShadow = false;
+                    nd.IsCastShadow = false;
+                }, nebulaData);
+            }
+
+            {
+                var lightData = new GamePlay.Scene.TtPointLightNode.TtLightNodeData();
+                lightData.Name = "PointLight0";
+                lightData.Intensity = 100.0f;
+                lightData.Radius = 20.0f;
+                lightData.Color = new Vector3(1, 0, 0);
+                var lightNode = GamePlay.Scene.TtPointLightNode.AddPointLightNode(world, root, lightData, new DVector3(10, 10, 10));
+            }
+
+            if (hideTerrain == false)
+            {
+                var terrainData = new Bricks.Terrain.CDLOD.TtTerrainNode.TtTerrainData();
+                terrainData.Name = "TerrainGen";
+                terrainData.PgcName = RName.GetRName("UTest/terraingen.pgc");
+                var terrainNode = await TtNode.SpawnNode<Bricks.Terrain.CDLOD.TtTerrainNode>(root, null, terrainData);
+                terrainNode.Placement.Position = DVector3.Zero;
+                terrainNode.IsAcceptShadow = true;
+                terrainNode.SetActiveCenter(in DVector3.Zero);
+            }
+
+            var gridNode = await GamePlay.Scene.TtGridNode.AddGridNode(world, root);
+            //gridNode.SetStyle(GamePlay.Scene.UNode.ENodeStyles.Invisible);
+
+            gridNode.ViewportSlate = vpSlate;
+
+        }
+
+        public static async System.Threading.Tasks.Task TestCreateCharacter(GamePlay.TtWorld world, GamePlay.Scene.TtNode root, bool hideTerrain = false)
+        {
+            var characterController = new GamePlay.Controller.TtCharacterController();
+            var playerData = new GamePlay.Player.TtPlayer.TtPlayerData() { CharacterController = characterController };
+            var player = await TtNode.SpawnNode<GamePlay.Player.TtPlayer>(root, null, playerData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
+            
+            var character = await TtNode.SpawnNode<GamePlay.Character.TtCharacter>(null, null, null, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement), world);
+            characterController.ControlledCharacter = character;
+            var movement = new GamePlay.Movemnet.TtMovement();
+            movement.Parent = character;
+        }
+        #endregion
+
+        #region Tick
+        public void TickLogic(float ellapse)
+        {
+            //WorldViewportSlate.TickLogic(ellapse);
+        }
+        public void TickRender(float ellapse)
+        {
+            //WorldViewportSlate.TickRender(ellapse);
+        }
+        public void TickBeginFrame(float ellapse)
+        {
+
+        }
+        public void TickSync(float ellapse)
+        {
+            //WorldViewportSlate.TickSync(ellapse);
+
+            //OnDrawSlate();
+        }
+        #endregion
+
+        public EngineNS.Profiler.TtNativeMemCapture PrevMemCapture;
+    }
+}

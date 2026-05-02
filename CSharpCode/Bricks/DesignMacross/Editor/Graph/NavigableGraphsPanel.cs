@@ -43,7 +43,7 @@ namespace EngineNS.DesignMacross.Editor.GraphPanel
                 {
                     var graph = navigableGraphsPanel.Navigation.Peek() as TtGraph;
                     var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(context.DesignMacrossAssetName);
-                    EngineNS.Editor.USnapshot.Save(context.DesignMacrossAssetName, ameta, presentWindow.SwapChain.mCoreObject.GetBackBuffer(0),
+                    EngineNS.Editor.TtSnapshot.Save(context.DesignMacrossAssetName, ameta, presentWindow.SwapChain.mCoreObject.GetBackBuffer(0),
                         (uint)graph.ViewPort.Location.X, (uint)graph.ViewPort.Location.Y, (uint)graph.ViewPort.Size.Width, (uint)graph.ViewPort.Size.Height);
                 }
             }

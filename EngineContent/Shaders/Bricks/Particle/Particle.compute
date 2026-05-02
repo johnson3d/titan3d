@@ -31,6 +31,7 @@ RWByteAddressBuffer				bfDispatchArg;
 RWByteAddressBuffer				bfDrawArg;
 
 groupshared int GroupRunParticleNumber = 0;
+//groupshared uint CountOfAlive = 0;
 
 TtRawRingBuffer GetAllocator()
 {
@@ -86,15 +87,16 @@ void CS_Particle_Update(uint3 Id : SV_DispatchThreadID,
     }
     DoUpdateSystem(emt);
     
-    TtRawRingBuffer Allocator = GetAllocator();
     TtReadonlyRawArray CurAlives = GetCurrentAlives();
+    uint CountOfAlive = CurAlives.GetCount();
     TtRawArray BackendAlives = GetBackendAlives();
-	
+    TtRawRingBuffer Allocator = GetAllocator();
+    
     GroupRunParticleNumber = 0;
 	GroupMemoryBarrierWithGroupSync();
 	
     int tmpCount;
-    uint CountOfAlive = CurAlives.GetCount();
+    
     if (Id.x < CountOfAlive)
 	{
         int idx = CurAlives.GetValue(Id.x);
@@ -113,16 +115,23 @@ void CS_Particle_Update(uint3 Id : SV_DispatchThreadID,
             OnParticleTick(emt, ParticleElapsedTime, bfParticles[idx]);
             
             bfParticles[idx].Location += bfParticles[idx].Velocity * ParticleElapsedTime;
+            //debug code
+            //if (bfEmitterData[0].TempData.y != CountOfAlive)
+            //{
+            //    bfParticles[idx].Color = 0xFF0000FF;
+            //}
         }
 		InterlockedAdd(GroupRunParticleNumber, 1, tmpCount);
 	}
 	GroupMemoryBarrierWithGroupSync();
 	
     InterlockedAdd(bfEmitterData[0].TempData.x, GroupRunParticleNumber, tmpCount);
-    if (tmpCount + GroupRunParticleNumber >= CountOfAlive)
+    if (tmpCount + GroupRunParticleNumber >= CountOfAlive && GroupThreadId.x == 0)
     {
-        bfCurAlives.Store(0, 0);
+        InterlockedExchange(bfEmitterData[0].TempData.x, 0, tmpCount);
+        CurAlives.UnsafeSetCount(0);
         uint num = BackendAlives.GetCount();
+        //InterlockedExchange(bfEmitterData[0].TempData.y, num, tmpCount);
         SetIndirectDrawIndexArg(bfDrawArg, 0,
 				Draw_IndexCountPerInstance,
 				num,

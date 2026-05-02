@@ -1,4 +1,4 @@
-﻿using EngineNS.Graphics.Pipeline.Shader;
+using EngineNS.Graphics.Pipeline.Shader;
 using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
@@ -30,7 +30,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 {
                     TextureSRV = await value.GetAsset<NxRHI.TtSrView>();
                     mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
-                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>(),
+                        await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<EngineNS.Editor.Forms.TtSlateTextureViewerShading>(),
                         TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
                 };
                 exec();
@@ -59,14 +59,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         {
             return VarType;
         }
-        TtEffect mSlateEffect;
+        TtGraphicsEffect mSlateEffect;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta("")]
         [Category("Option")]
         public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
         private NxRHI.TtSrView TextureSRV;
-        public static unsafe void PreviewDraw(ref Editor.Forms.TtTextureViewerCmdParams CmdParameters, TtEffect mSlateEffect, NxRHI.TtSrView TextureSRV, 
+        public static unsafe void PreviewDraw(ref Editor.Forms.TtTextureViewerCmdParams CmdParameters, TtGraphicsEffect mSlateEffect, NxRHI.TtSrView TextureSRV, 
             in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
             if (TextureSRV == null || mSlateEffect == null)
@@ -91,6 +91,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
                 var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<EngineNS.Editor.Forms.TtTextureViewerCmdParams>();
                 var cbBinder = mSlateEffect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");
+                if (cbBinder == null)
+                {
+                    Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, "Texture2D", $"Find binder ProjectionMatrixBuffer");
+                    return;
+                }
                 cmdParams.CBuffer = rc.CreateCBV(cbBinder);
                 cmdParams.Drawcall.BindShaderEffect(mSlateEffect);
                 cmdParams.Drawcall.BindCBV(cbBinder.mCoreObject, cmdParams.CBuffer);

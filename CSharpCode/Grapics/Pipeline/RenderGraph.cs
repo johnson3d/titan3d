@@ -1,4 +1,5 @@
-﻿using System;
+using EngineNS.Graphics.Pipeline.Common;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -25,7 +26,11 @@ namespace EngineNS.Graphics.Pipeline
             }
             GraphNodes.Clear();
         }
-        public Common.TtEndingNode RootNode { get; set; }
+        public Common.TtEndingNode RootNode 
+        { 
+            get;
+            set; 
+        }
         public Dictionary<Guid, TtRenderGraphNode> GraphNodes { get; } = new Dictionary<Guid, TtRenderGraphNode>();
         public List<TtRenderGraphNode>[] NodeLayers;
         public List<TtRenderGraphLinker> Linkers { get; } = new List<TtRenderGraphLinker>();
@@ -170,19 +175,34 @@ namespace EngineNS.Graphics.Pipeline
         {
             if (RootNode == null)
                 return;
+
+            List<TtEndingNode> endingNodes = new List<TtEndingNode>();
             foreach (var i in GraphNodes)
             {
                 i.Value.InitNodePins();
                 i.Value.IsUsed = false;
+
+                if (i.Value is TtEndingNode enode && enode.IsMainRoot == false)
+                {
+                    endingNodes.Add(enode);
+                }
             }
 
             SetUsedNode(RootNode);
+            foreach (var i in endingNodes)
+            {
+                SetUsedNode(i);
+            }
 
             OnBuildGraph();
 
             if (RootNode != null)
             {
                 UpdateNodeTree(RootNode, ref hasInputError);
+                foreach (var i in endingNodes)
+                {
+                    UpdateNodeTree(i, ref hasInputError);
+                }
                 int maxDistance = 0;
                 foreach (var i in GraphNodes)
                 {
@@ -292,19 +312,19 @@ namespace EngineNS.Graphics.Pipeline
             //}
         }
         [ThreadStatic]
-        private static Profiler.TimeScope mScopeBeginTickLogic;
-        private static Profiler.TimeScope ScopeBeginTickLogic
+        private static Profiler.TimeScope mScopeBeginTick;
+        private static Profiler.TimeScope ScopeBeginTick
         {
             get
             {
-                if (mScopeBeginTickLogic == null)
-                    mScopeBeginTickLogic = new Profiler.TimeScope(typeof(TtRenderGraph), nameof(BeginTickLogic));
-                return mScopeBeginTickLogic;
+                if (mScopeBeginTick == null)
+                    mScopeBeginTick = new Profiler.TimeScope(typeof(TtRenderGraph), nameof(BeginTick));
+                return mScopeBeginTick;
             }
         }
-        public virtual void BeginTickLogic(GamePlay.TtWorld world)
+        public virtual void BeginTick(GamePlay.TtWorld world)
         {
-            using (new Profiler.TimeScopeHelper(ScopeBeginTickLogic))
+            using (new Profiler.TimeScopeHelper(ScopeBeginTick))
             {
                 FrameBuild(this as TtRenderPolicy);
 
@@ -316,26 +336,26 @@ namespace EngineNS.Graphics.Pipeline
                         {
                             if (j.IsUsed == false || j.Enable == false)
                                 continue;
-                            j.BeginTickLogic(world, this as TtRenderPolicy, true);
+                            j.BeginTick(world, this as TtRenderPolicy, true);
                         }
                     }
                 }
             }   
         }
         [ThreadStatic]
-        private static Profiler.TimeScope mScopeEndTickLogic;
-        private static Profiler.TimeScope ScopeEndTickLogic
+        private static Profiler.TimeScope mScopeEndTick;
+        private static Profiler.TimeScope ScopeEndTick
         {
             get
             {
-                if (mScopeEndTickLogic == null)
-                    mScopeEndTickLogic = new Profiler.TimeScope(typeof(TtRenderGraph), nameof(EndTickLogic));
-                return mScopeEndTickLogic;
+                if (mScopeEndTick == null)
+                    mScopeEndTick = new Profiler.TimeScope(typeof(TtRenderGraph), nameof(EndTick));
+                return mScopeEndTick;
             }
         }
-        public virtual void EndTickLogic(GamePlay.TtWorld world)
+        public virtual void EndTick(GamePlay.TtWorld world)
         {
-            using (new Profiler.TimeScopeHelper(ScopeEndTickLogic))
+            using (new Profiler.TimeScopeHelper(ScopeEndTick))
             {
                 if (NodeLayers != null)
                 {
@@ -345,7 +365,7 @@ namespace EngineNS.Graphics.Pipeline
                         {
                             if (j.IsUsed == false || j.Enable == false)
                                 continue;
-                            j.EndTickLogic(world, this as TtRenderPolicy, true);
+                            j.EndTick(world, this as TtRenderPolicy, true);
                         }
                     }
                 }
@@ -353,20 +373,20 @@ namespace EngineNS.Graphics.Pipeline
         }
         private List<TtRenderGraphLinker> mTempTryReleaseLinkers = new List<TtRenderGraphLinker>();
         [ThreadStatic]
-        private static Profiler.TimeScope mScopeTickLogic;
-        private static Profiler.TimeScope ScopeTickLogic
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
         {
             get
             {
-                if (mScopeTickLogic == null)
-                    mScopeTickLogic = new Profiler.TimeScope(typeof(TtRenderGraph), nameof(TickLogic));
-                return mScopeTickLogic;
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(TtRenderGraph), nameof(Tick));
+                return mScopeTick;
             }
         }
-        public virtual unsafe void TickLogic(GamePlay.TtWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
+        public virtual unsafe void Tick(GamePlay.TtWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
         {
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new Profiler.TimeScopeHelper(ScopeTickLogic))
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             using (new NxRHI.TtCmdListScope(cmdlist, "RenderGraphFrame"))
             {
                 if (NodeLayers != null)
@@ -378,16 +398,16 @@ namespace EngineNS.Graphics.Pipeline
                             if (j.IsUsed == false || j.Enable == false)
                                 continue;
 
-                            var scope = j.RDGTickLogicScope;
+                            var scope = j.RDGTickScope;
                             using (new Profiler.TimeScopeHelper(scope))
                             {
-                                j.BeforeTickLogic((TtRenderPolicy)this);
+                                j.BeforeTick((TtRenderPolicy)this);
 
-                                j.TickLogic(world, (TtRenderPolicy)this, cmdlist, true);
+                                j.Tick(world, (TtRenderPolicy)this, cmdlist, true);
 
                                 j.TryReleaseBufers(mTempTryReleaseLinkers, onRemove);
                             }
-                            //System.Diagnostics.Debug.Assert(j.RDGTickLogicScope.mCoreObject.mParent.CppPointer == ScopeTickLogic.mCoreObject.CppPointer);
+                            //System.Diagnostics.Debug.Assert(j.RDGTickScope.mCoreObject.mParent.CppPointer == ScopeTick.mCoreObject.CppPointer);
                             //int NunOfRefZero = 0; 
                             //foreach (var ca in this.AttachmentCache.CachedAttachments)
                             //{
@@ -403,7 +423,7 @@ namespace EngineNS.Graphics.Pipeline
                         }
                     }
                 }
-                //EndTickLogic(world);
+                //EndTick(world);
 
                 mTempTryReleaseLinkers.Clear();
             }

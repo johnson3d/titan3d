@@ -1,4 +1,4 @@
-#include "VKGpuDevice.h"
+ï»¿#include "VKGpuDevice.h"
 #include "VKCommandList.h"
 #include "VKShader.h"
 #include "VKBuffer.h"
@@ -69,7 +69,7 @@ namespace NxRHI
 	bool isDebugSafe()
 	{
 #if PLATFORM_WIN
-		// ×î¼òµ¥µ«¿É¿¿µÄ¼ì²â£ºÖ»ÓĞÃ÷È·¼ì²âµ½µ÷ÊÔ¹¤¾ßÊ±²ÅÆôÓÃ
+		// æœ€ç®€å•ä½†å¯é çš„æ£€æµ‹ï¼šåªæœ‰æ˜ç¡®æ£€æµ‹åˆ°è°ƒè¯•å·¥å…·æ—¶æ‰å¯ç”¨
 		static bool checked = false;
 		static bool safe = false;
 

@@ -27,7 +27,7 @@ float3 GetWorldPosition(uint3 id, float LinearDepth, float depth)
 	float2 uv = ((float2)id.xy) / GBufferSize.xy;
 
 	//float3 PosVS = ReconstructPosWorldSpace(uv, NdcW, ViewPrjInvMtx, depth, PlatformFlag);
-	float3 PosVS = ReconstructPosWorldSpace2(uv, NdcW, GetViewPrjMtxInverse(true), PlatformFlag);
+	float3 PosVS = ReconstructPosWorldSpace2(uv, NdcW, GetViewPrjMtxInverse(), PlatformFlag);
 
 	return PosVS;
 }

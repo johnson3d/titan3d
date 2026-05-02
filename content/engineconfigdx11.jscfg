@@ -1,6 +1,7 @@
 {
   "IsReverseZ": true,
-  "MultiRenderMode": 2,
+  "MultiRenderMode": "Queue",
+  "UseRenderThread": true,
   "UsePhysxMT": true,
   "UseRenderDoc": false,
   "Feature_UseRVT": true,
@@ -33,8 +34,7 @@
   "IsGpuDred": false,
   "IsAftermath": false,
   "MainWindowType": "EngineNS.Editor.TtMainEditorApplication@EngineCore",
-  "MainRPolicyName": "graphics/deferred.rpolicy:Engine",
-  "SimpleRPolicyName": "graphics/deferred_simple.rpolicy:Engine",
+  "MainRPolicyName": "graphics/deferred_simple.rpolicy:Engine",
   "RpcRootType": "EngineNS.UnitTest.UTest_Rpc@EngineCore",
   "CookDXBC": true,
   "CookDXIL": true,

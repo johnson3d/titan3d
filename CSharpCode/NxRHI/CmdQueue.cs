@@ -4,9 +4,16 @@ using System.Text;
 
 namespace EngineNS.NxRHI
 {
-    public delegate void FRenderCmd(ICommandList ImCmdlist, ref FRCmdInfo info);
+    public enum ERCmdType : int
+    {
+        Cmd,
+        Cmdlist,
+        FrameEnd,
+    }
+    public delegate void FRenderCmd(TtRCmdQueue queue, ref FRCmdInfo info);
     public struct FRCmdInfo
     {
+        public ERCmdType CmdType;
         public FRenderCmd Cmd;
         public EQueueType QueueType;
         public string Name;
@@ -15,231 +22,7 @@ namespace EngineNS.NxRHI
 
     public class TtRCmdQueue
     {
-        public Queue<FRCmdInfo> Cmds = new Queue<FRCmdInfo>();
-        public class UQueueStat
-        {
-            public uint NumOfCmdlist;
-            public uint NumOfDrawcall;
-            public uint NumOfPrimitive;
-            public void Reset()
-            {
-                NumOfCmdlist = 0;
-                NumOfDrawcall = 0;
-                NumOfPrimitive = 0;
-            }
-        }
-        public UQueueStat QueueStats = new UQueueStat();
-
-        public void QueueCmd(FRenderCmd cmd, string name, object tag = null, NxRHI.EQueueType qType = EQueueType.QU_Default)
-        {
-            var info = new FRCmdInfo();
-            info.Name = name;
-            info.QueueType = qType;
-            info.Cmd = cmd;
-            info.Tag = tag;
-            Cmds.Enqueue(info);
-        }
-        public void QueueCmdlist(TtCommandList cmd, string name = null, EQueueType qType = EQueueType.QU_Default)
-        {
-            System.Diagnostics.Debug.Assert(cmd.mCoreObject.IsRecording() == false);
-            var info = new FRCmdInfo();
-            info.QueueType = qType;
-            info.Name = name;
-            info.Tag = cmd;
-            info.Cmd = static (NxRHI.ICommandList im_cmd, ref FRCmdInfo info) =>
-            {
-                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(info.Tag as TtCommandList, info.QueueType);
-                //TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.mCoreObject.Flush(info.QueueType);
-            };
-            Cmds.Enqueue(info);
-
-            QueueStats.NumOfDrawcall += cmd.mCoreObject.GetDrawcallNumber();
-            QueueStats.NumOfCmdlist++;
-            QueueStats.NumOfPrimitive += cmd.mCoreObject.GetPrimitiveNumber();
-        }
-
-        public void Execute(ICommandList ImCmdlist)
-        {
-            var curCmds = Cmds;
-            while (curCmds.Count > 0)
-            {
-                try
-                {
-                    NxRHI.FRCmdInfo cmd;
-
-                    cmd = curCmds.Peek();
-                    curCmds.Dequeue();
-
-                    cmd.Cmd(ImCmdlist, ref cmd);
-                }
-                catch (Exception ex)
-                {
-                    Profiler.Log.WriteException(ex);
-                }
-            }
-        }
-    }
-    public class TtRenderSwapQueue
-    {
-        public int GetTickOrder()
-        {
-            return 0;
-        }
-        public TtRCmdQueue.UQueueStat GetStat()
-        {
-            return RenderCmds[1].QueueStats;
-        }
-        public readonly TtRCmdQueue[] RenderCmds = new TtRCmdQueue[2];
-        public TtRenderSwapQueue()
-        {
-            RenderCmds[0] = new TtRCmdQueue();
-            RenderCmds[1] = new TtRCmdQueue();
-        }
-        public void Reset()
-        {
-            lock (RenderCmds)
-            {
-                TickRender(0);
-                TickSync(0);
-                TickRender(0);
-                TickSync(0);
-
-                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
-                var count = RenderCmds[0].Cmds.Count + RenderCmds[1].Cmds.Count;
-                System.Diagnostics.Debug.Assert(count == 0);
-            }
-        }
-        public void QueueCmd(FRenderCmd cmd, string name, object tag = null, NxRHI.EQueueType qType = EQueueType.QU_Default)
-        {
-            lock (RenderCmds)
-            {
-                if (TtEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.None)
-                {
-                    var info = new FRCmdInfo();
-                    info.Name = name;
-                    info.QueueType = qType;
-                    info.Cmd = cmd;
-                    info.Tag = tag;
-                    using (var tCmd = new FTransientCmd(EQueueType.QU_Default, "TickRender"))
-                    {
-                        cmd(tCmd.CmdList, ref info);
-                    }
-                }
-                else
-                {
-                    RenderCmds[0].QueueCmd(cmd, name, tag, qType);
-                }
-            }   
-        }
-        public void QueueCmdlist(TtCommandList cmd, string name = null, EQueueType qType = EQueueType.QU_Default)
-        {
-            System.Diagnostics.Debug.Assert(cmd.mCoreObject.IsRecording() == false);
-            lock (RenderCmds)
-            {
-                if (TtEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.None)
-                {
-                    TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(cmd, qType);
-                }
-                else
-                {
-                    RenderCmds[0].QueueCmdlist(cmd, name, qType);
-                }
-            }
-        }
-        public void TickLogic(float ellapse)
-        {
-
-        }
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeRenderTick;
-        private static Profiler.TimeScope ScopeRenderTick
-        {
-            get
-            {
-                if (mScopeRenderTick == null)
-                    mScopeRenderTick = new Profiler.TimeScope(typeof(TtRenderSwapQueue), nameof(TickRender));
-                return mScopeRenderTick;
-            }
-        }
-        public void TickRender(float ellapse)
-        {
-            var cmdQueue = TtEngine.Instance.GfxDevice.RenderContext.GpuQueue;
-
-            using (new Profiler.TimeScopeHelper(ScopeRenderTick))
-            {
-                using (var cmd = new FTransientCmd(EQueueType.QU_Default, "TickRender"))
-                {
-                    TickRenderImpl(cmd.CmdList);
-                }
-            }
-        }
-        private void TickRenderImpl(ICommandList ImCmdlist)
-        {
-            if (TtEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.Queue)
-            {
-                var curCmds = RenderCmds[0].Cmds;
-                while (true)
-                {
-                    if (curCmds.Count > 0)
-                    {
-                        try
-                        {
-                            FRCmdInfo cmd;
-                            lock (RenderCmds)
-                            {
-                                cmd = curCmds.Peek();
-                                curCmds.Dequeue();
-                            }
-                            cmd.Cmd(ImCmdlist, ref cmd);
-                            if (cmd.Name == "#TickLogicEnd#")
-                            {
-                                System.Diagnostics.Debug.Assert(curCmds.Count == 0);
-                                break;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Profiler.Log.WriteException(ex);
-                        }
-                    }
-                }
-            }
-            else if (TtEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.QueueNextFrame)
-            {
-                RenderCmds[1].Execute(ImCmdlist);
-            }
-        }
-        public void TickBeginFrame(float ellapse)
-        {
-
-        }
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeSyncTick;
-        private static Profiler.TimeScope ScopeSyncTick
-        {
-            get
-            {
-                if (mScopeSyncTick == null)
-                    mScopeSyncTick = new Profiler.TimeScope(typeof(TtRenderSwapQueue), nameof(TickSync));
-                return mScopeSyncTick;
-            }
-        }
-        public void TickSync(float ellapse)
-        {
-            using (new Profiler.TimeScopeHelper(ScopeSyncTick))
-            {
-                var cmdQueue = TtEngine.Instance.GfxDevice.RenderContext.GpuQueue;
-
-                Swap(ref RenderCmds[0], ref RenderCmds[1]);
-                RenderCmds[0].QueueStats.Reset();
-            }
-        }
-        public void Swap<T>(ref T l, ref T r)
-        {
-            var save = l;
-            l = r;
-            r = save;
-        }
+        #region RenderDoc Capture
         public bool CaptureRenderDocFrame = false;
         public bool BeginFrameCapture()
         {
@@ -295,6 +78,185 @@ namespace EngineNS.NxRHI
                 return tarFile;
             }
             return null;
+        }
+        #endregion
+        public Queue<FRCmdInfo> Cmds = new Queue<FRCmdInfo>();
+        public class TtQueueStat
+        {
+            public uint NumOfCmdlist;
+            public uint NumOfDrawcall;
+            public uint NumOfPrimitive;
+            public void Reset()
+            {
+                NumOfCmdlist = 0;
+                NumOfDrawcall = 0;
+                NumOfPrimitive = 0;
+            }
+        }
+        public TtQueueStat QueueStats = new TtQueueStat();
+        public void Flush()
+        {
+            lock (Cmds)
+            {
+                using (var tsCmd = new NxRHI.FTransientCmd(NxRHI.EQueueType.QU_Default, "TtRCmdQueue.Reset"))
+                {
+                    FlushExecute(tsCmd.CmdList);
+                }
+                TickSync(0);
+
+                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
+                //System.Diagnostics.Debug.Assert(Cmds.Count == 0);
+            }
+        }
+        public void TickSync(float elapsedTime)
+        {
+
+        }
+        public void TickLogic(float elapsedTime)
+        {
+
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeRenderTick;
+        private static Profiler.TimeScope ScopeRenderTick
+        {
+            get
+            {
+                if (mScopeRenderTick == null)
+                    mScopeRenderTick = new Profiler.TimeScope(typeof(TtRCmdQueue), nameof(TickRender));
+                return mScopeRenderTick;
+            }
+        }
+        public void TickRender(float elapsedTime)
+        {
+            var cmdQueue = TtEngine.Instance.GfxDevice.RenderContext.GpuQueue;
+
+            using (new Profiler.TimeScopeHelper(ScopeRenderTick))
+            {
+                TickRenderImpl();
+            }
+        }
+        private void TickRenderImpl()
+        {
+            while (true)
+            {
+                //todo:这里可以考虑，多个cmdlist合并一起，一次执行TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandLists
+                if (Cmds.Count > 0)
+                {
+                    try
+                    {
+                        FRCmdInfo cmd;
+                        lock (Cmds)
+                        {
+                            cmd = Cmds.Peek();
+                            Cmds.Dequeue();
+                        }
+                        cmd.Cmd(this, ref cmd);
+                        if (cmd.CmdType == ERCmdType.FrameEnd)
+                        {
+                            break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                    }
+                }
+            }
+            //if (TtEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.Queue)
+            //{
+                
+            //}
+        }
+        public void QueueCmd(FRenderCmd cmd, string name, object tag = null, NxRHI.EQueueType qType = EQueueType.QU_Default, ERCmdType type = ERCmdType.Cmd)
+        {
+            var info = new FRCmdInfo();
+            info.CmdType = type;
+            info.Name = name;
+            info.QueueType = qType;
+            info.Cmd = cmd;
+            info.Tag = tag;
+            lock (Cmds)
+            {
+                ProcCmd(ref info);
+            }
+        }
+        public void QueueCmdlist(TtCommandList cmd, string name = null, EQueueType qType = EQueueType.QU_Default)
+        {
+            System.Diagnostics.Debug.Assert(cmd.mCoreObject.IsRecording() == false);
+            var info = new FRCmdInfo();
+            info.CmdType = ERCmdType.Cmdlist;
+            info.QueueType = qType;
+            info.Name = name;
+            info.Tag = cmd;
+            info.Cmd = static (TtRCmdQueue queue, ref FRCmdInfo info) =>
+            {
+                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(info.Tag as TtCommandList, info.QueueType);
+                //TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.mCoreObject.Flush(info.QueueType);
+            };
+            lock (Cmds)
+            {
+                ProcCmd(ref info);
+                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.mCoreObject.Flush(info.QueueType);
+            }
+            QueueStats.NumOfDrawcall += cmd.mCoreObject.GetDrawcallNumber();
+            QueueStats.NumOfCmdlist++;
+            QueueStats.NumOfPrimitive += cmd.mCoreObject.GetPrimitiveNumber();
+        }
+        private void ProcCmd(ref FRCmdInfo info)
+        {
+            if (TtEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.Queue)
+            {
+                Cmds.Enqueue(info);
+            }
+            else
+            {
+                if (info.CmdType == ERCmdType.FrameEnd)
+                {
+                    Cmds.Enqueue(info);
+                }
+                else
+                {
+                    info.Cmd(this, ref info);
+                }
+            }
+        }
+        public void FlushExecute(ICommandList ImCmdlist)
+        {
+            bool bFindFrameEnd = false;
+            NxRHI.FRCmdInfo endCmd = new();
+            while (Cmds.Count > 0)
+            {
+                try
+                {
+                    NxRHI.FRCmdInfo cmd;
+                    lock (Cmds)
+                    {
+                        cmd = Cmds.Peek();
+                        if (cmd.CmdType == ERCmdType.FrameEnd)
+                        {
+                            bFindFrameEnd = true;
+                            endCmd = cmd;
+                        }
+                        Cmds.Dequeue();
+                    }
+
+                    cmd.Cmd(this, ref cmd);
+                }
+                catch (Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                }
+            }
+
+            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
+            if (bFindFrameEnd)
+            {
+                lock (Cmds)
+                {
+                    Cmds.Enqueue(endCmd);
+                }
+            }
         }
     }
 }

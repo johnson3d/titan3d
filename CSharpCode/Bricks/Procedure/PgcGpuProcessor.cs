@@ -10,9 +10,9 @@ namespace EngineNS.Bricks.Procedure
         public Action<Graphics.Pipeline.TtRenderGraphNode, Graphics.Pipeline.TtRenderGraphPin, Graphics.Pipeline.TtAttachBuffer> OnBufferRemoved = null;
         public void Process()
         {
-            Policy.BeginTickLogic(null);
-            Policy.TickLogic(null, OnBufferRemoved);
-            Policy.EndTickLogic(null);
+            Policy.BeginTick(null);
+            Policy.Tick(null, OnBufferRemoved);
+            Policy.EndTick(null);
             //Policy.AttachmentCache.FindAttachement();
         }
     }

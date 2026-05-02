@@ -63,7 +63,7 @@ void IEmitter::Update(float elapsed)
 
 	if (IsChanged())
 	{
-		for (auto i : *mPool.mBackendAlives)
+		for (auto i : mPool.mAliveBuffer.GetBackBuffer())
 		{
 			UINT addr = i;
 			auto pParticle = mPool.GetParticle(addr);

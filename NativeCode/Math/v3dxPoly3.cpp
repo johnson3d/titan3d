@@ -1,4 +1,4 @@
-/********************************************************************
+ï»¿/********************************************************************
 	V3D					A Powerful 3D Enjine
 	File:				v3dxpoly3.cpp
 	Created Time:		30:6:2002   16:34
@@ -145,14 +145,14 @@ int v3dxPoly3::addVertex (float x, float y, float z,vBOOL bUpdateNormal)
 void v3dxPoly3::splitWithPlane (v3dxPoly3& poly1, v3dxPoly3& poly2,
 				  const v3dxPlane3& split_plane) const
 {
-	poly1.makeEmpty ();//µÈ´ı½ÓÊÜ·Ö¸îºóµÄÇ°Ãæ²¿·Ö
-	poly2.makeEmpty ();//µÈ´ı½ÓÊÜ·Ö¸îºóµÄºóÃæ²¿·Ö
+	poly1.makeEmpty ();//ç­‰å¾…æ¥å—åˆ†å‰²åçš„å‰é¢éƒ¨åˆ†
+	poly2.makeEmpty ();//ç­‰å¾…æ¥å—åˆ†å‰²åçš„åé¢éƒ¨åˆ†
 
 	v3dxVector3 ptB;
 	float sideA, sideB;
-	v3dxVector3 ptA = vertices[num_vertices - 1];//È¡³ö¶à±ßĞÎ×îºóµÄ¶¥µã
-	sideA = split_plane.classify (ptA);//¶¥µãµ½Õâ¸ö·Ö¸îÆ½ÃæµÄ¾àÀë
-	if (std::abs (sideA) < SMALL_EPSILON) //¶¥µãÔÚ·Ö¸îÆ½ÃæÉÏ
+	v3dxVector3 ptA = vertices[num_vertices - 1];//å–å‡ºå¤šè¾¹å½¢æœ€åçš„é¡¶ç‚¹
+	sideA = split_plane.classify (ptA);//é¡¶ç‚¹åˆ°è¿™ä¸ªåˆ†å‰²å¹³é¢çš„è·ç¦»
+	if (std::abs (sideA) < SMALL_EPSILON) //é¡¶ç‚¹åœ¨åˆ†å‰²å¹³é¢ä¸Š
 		sideA = 0;
 
 	for (int i = -1 ; ++i < num_vertices ; )
@@ -163,11 +163,11 @@ void v3dxPoly3::splitWithPlane (v3dxPoly3& poly1, v3dxPoly3& poly2,
 			sideB = 0.f;
 		if (sideB < 0.f)
 		{
-			if (sideA > 0.f)//×îºó¶¥µãÔÚ·Ö¸îÆ½Ãæºó·½
+			if (sideA > 0.f)//æœ€åé¡¶ç‚¹åœ¨åˆ†å‰²å¹³é¢åæ–¹
 			{
-				//¼ÆËãÖ±ÏßÓë·Ö¸îÆ½ÃæµÄ½»µã£¬ÕâÊÇÒ»¸ö¼òµ¥µÄÏß----Ãæ½»²æ
+				//è®¡ç®—ç›´çº¿ä¸åˆ†å‰²å¹³é¢çš„äº¤ç‚¹ï¼Œè¿™æ˜¯ä¸€ä¸ªç®€å•çš„çº¿----é¢äº¤å‰
 				v3dxVector3 v = ptB; 
-				v -= ptA;//µÃµ½Ò»¸öÏòÁ¿£¬ÖÕµãÊÇµ±Ç°¼ÆËãµã£¬ÆğµãÊÇ¶à±ßĞÎ×îºóµã
+				v -= ptA;//å¾—åˆ°ä¸€ä¸ªå‘é‡ï¼Œç»ˆç‚¹æ˜¯å½“å‰è®¡ç®—ç‚¹ï¼Œèµ·ç‚¹æ˜¯å¤šè¾¹å½¢æœ€åç‚¹
 				float sect = - split_plane.classify (ptA) / ( split_plane.getNormal ().dotProduct(v)  ) ;
 				v *= sect; v += ptA;
 				poly1.addVertex (v);
@@ -179,7 +179,7 @@ void v3dxPoly3::splitWithPlane (v3dxPoly3& poly1, v3dxPoly3& poly2,
 		{
 			if (sideA < 0.f)
 			{
-				//¼ÆËãÖ±ÏßÓë·Ö¸îÆ½ÃæµÄ½»µã£¬ÕâÊÇÒ»¸ö¼òµ¥µÄÏß----Ãæ½»²æ
+				//è®¡ç®—ç›´çº¿ä¸åˆ†å‰²å¹³é¢çš„äº¤ç‚¹ï¼Œè¿™æ˜¯ä¸€ä¸ªç®€å•çš„çº¿----é¢äº¤å‰
 				v3dxVector3 v = ptB; v -= ptA;
 				float sect = - split_plane.classify (ptA) / ( split_plane.getNormal ().dotProduct(v) );
 				v *= sect; v += ptA;
@@ -433,7 +433,7 @@ v3dxVector3 v3dxPoly3::computeNormal (v3dxVector3* vertices, int num)
 		x1 = vertices[i1].X;
 		y1 = vertices[i1].Y;
 		z1 = vertices[i1].Z;
-		ayz += (z1+z) * (y-y1);//°´ÕÕË³Ê±Õë£¬Öğ¸ö±ßµÄ¼ÆËã·¨ÏòÁ¿µÄÀÛ¼Ó
+		ayz += (z1+z) * (y-y1);//æŒ‰ç…§é¡ºæ—¶é’ˆï¼Œé€ä¸ªè¾¹çš„è®¡ç®—æ³•å‘é‡çš„ç´¯åŠ 
 		azx += (x1+x) * (z-z1);
 		axy += (y1+y) * (x-x1);
 		i1 = i;
@@ -448,8 +448,8 @@ v3dxVector3 v3dxPoly3::computeNormal (v3dxVector3* vertices, int num)
 
 	v3dxVector3 vec = v3dxVector3 (ayz * invd, azx * invd, axy * invd);
 	v3dxVec3Normalize(&vec,&vec);
-	// @note noslopforever 2007-2-6 ÕâÑùµÄ½á¹ûÊÇÒ»¸öÓÒÊÖ×ø±êÏµ½á¹û
-	// fixµ½Ò»¸ö×óÊÖ×ø±êÏµ½á¹û
+	// @note noslopforever 2007-2-6 è¿™æ ·çš„ç»“æœæ˜¯ä¸€ä¸ªå³æ‰‹åæ ‡ç³»ç»“æœ
+	// fixåˆ°ä¸€ä¸ªå·¦æ‰‹åæ ‡ç³»ç»“æœ
 	vec = -vec;
 	return vec;
 }

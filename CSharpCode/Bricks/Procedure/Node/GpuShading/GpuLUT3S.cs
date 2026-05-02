@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using EngineNS.Graphics.Pipeline;
 
@@ -15,7 +15,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             CodeName = RName.GetRName("Shaders/Bricks/Procedure/Lut3S/SkinLUT3SGen.cginc", RName.ERNameType.Engine);
             MainName = "CSMain";
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
@@ -87,7 +87,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ShadingEnv = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtWaterBasinShading>();
+            ShadingEnv = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtWaterBasinShading>();
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             mCmdList = rc.CreateCommandList();
@@ -95,7 +95,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             mDrawcall.TagObject = this;
             mCopyDrawcall = rc.CreateCopyDraw();
         }
-        public unsafe override void BeforeTickLogic(TtRenderPolicy policy)
+        public unsafe override void BeforeTick(TtRenderPolicy policy)
         {
             var water = policy.AttachmentCache.FindAttachement(WaterPinInOut);
 
@@ -106,7 +106,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             }
             mCopyDrawcall.Copy(PrevWaterTexture.GpuBuffer, water.Buffer as NxRHI.TtBuffer);
         }
-        public unsafe override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public unsafe override void Tick(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             using (new NxRHI.TtCmdListScope(mCmdList, "PCG.kinLUT3SGen"))
             {

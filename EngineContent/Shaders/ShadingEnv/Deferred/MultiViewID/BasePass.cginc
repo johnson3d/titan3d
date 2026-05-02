@@ -51,14 +51,14 @@ PS_INPUT VS_Main(VS_INPUT input1)
     if (input.vViewID == 0)
     {
         wp4.x += 2.0f;
-        output.vPosition = mul(wp4, GetViewPrjMtx(false));
+        output.vPosition = mul(wp4, GetViewPrjMtx());
     }
     else if (input.vViewID == 1)
     {
         wp4.x -= 2.0f;
-        output.vPosition = mul(wp4, GetViewPrjMtx(false));
+        output.vPosition = mul(wp4, GetViewPrjMtx());
     }
-    //output.vPosition = mul(wp4, GetViewPrjMtx(false));
+    //output.vPosition = mul(wp4, GetViewPrjMtx());
 
 #if USE_PS_Custom0 == 1
 #if ENV_DISABLE_POINTLIGHTS == 0

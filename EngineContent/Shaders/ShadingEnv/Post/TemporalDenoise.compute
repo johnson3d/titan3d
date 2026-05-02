@@ -1,0 +1,153 @@
+// Temporal Denoise - 时域反馈滤波 (motion-vector reprojection + neighborhood color clamp)
+// 用于在 SpatialDenoise 之后消除帧间闪烁; 是 SSR / 低 spp ReSTIR 模式下消除闪烁的关键 pass.
+//
+// 原理:
+//   final = lerp(history_reprojected_clamped, current_spatial, alpha)
+//   alpha 越小 (例如 0.1) 历史能量占比越高, 噪点抑制越强, 但移动物体 ghosting 也越强.
+//
+// 历史失效规则 (任一命中则强制 alpha=1, 不混历史):
+//   1. 重投影 UV 越界
+//   2. 法线差异 dot(n_curr, n_prev) < NormalThreshold
+//   3. 深度差异超过 DepthThreshold * |viewZ|
+//   4. 首帧 / resize 后 (DisableHistory=1)
+//
+// Neighborhood color clamp (Karis "high quality temporal supersampling" 思路):
+//   即使重投影通过, 也用本帧 3x3 邻域计算颜色 bbox, 把 history color clamp 到 bbox 内,
+//   防止 disocclusion 边缘 / 高频纹理移动产生的拖尾 ghosting.
+
+#include "../../Inc/GlobalDefine.cginc"
+#include "../../Inc/Math.cginc"
+#include "../../CBuffer/VarBase_PerCamera.cginc"
+#include "../../Inc/SysFunction.cginc"
+#include "../../ShadingEnv/Deferred/DeferredCommon.cginc"
+
+cbuffer cbTemporalDenoise
+{
+    uint2 ScreenSize;
+    float TemporalAlpha;        // 当前帧权重, 越小越稳但 ghosting 越强 (默认 0.1)
+    float NormalThreshold;      // 法线一致性阈值 (默认 0.9, dot 小于则拒绝历史)
+    float DepthThreshold;       // 相对深度阈值 (默认 0.05)
+    int   DisableHistory;       // 首帧/resize 后强制 1, 屏蔽历史
+    float MaxLuminance;         // 二次保险的 firefly clamp (默认 5.0)
+    float _pad0;
+};
+
+Texture2D<float4> ColorInput;          // 本帧 SpatialDenoise 输出
+Texture2D<float4> HistoryColor;        // 上一帧 final (本节点上一帧的 ResultPinOut 拷贝)
+Texture2D<float4> GBufferRT1;          // 当前帧法线 (packed N*0.5+0.5)
+Texture2D<float>  DepthBuffer;         // 当前帧深度
+Texture2D<float4> MotionVector;        // .rg = encoded motion (与 ReSTIR 一致, 用 DecodeMotionVector)
+
+SamplerState Samp_PointClamp;
+SamplerState Samp_LinearClamp;
+
+RWTexture2D<float4> DenoiseOutput;
+
+float LuminanceFromRGB(float3 c) { return dot(c, float3(0.2126f, 0.7152f, 0.0722f)); }
+
+float3 ClampFirefly(float3 color)
+{
+    float lum = LuminanceFromRGB(color);
+    if (lum > MaxLuminance && lum > 1e-6f)
+        color *= (MaxLuminance / lum);
+    return color;
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_Main(uint3 id : SV_DispatchThreadID)
+{
+    if (any(id.xy >= ScreenSize))
+        return;
+
+    int2  pix = int2(id.xy);
+    float2 uv = (float2(pix) + 0.5f) / float2(ScreenSize);
+
+    float4 currentColor = ColorInput.SampleLevel(Samp_PointClamp, uv, 0);
+    currentColor.rgb = ClampFirefly(currentColor.rgb);
+
+    float curDepth = DepthBuffer.SampleLevel(Samp_PointClamp, uv, 0).r;
+
+#if USE_INVERSE_Z == 1
+    bool validPixel = curDepth > 0.0f;
+#else
+    bool validPixel = curDepth < 1.0f;
+#endif
+
+    // 天空 / 远平面 / 关闭历史: 直接输出当前帧
+    if (!validPixel || DisableHistory != 0)
+    {
+        DenoiseOutput[pix] = currentColor;
+        return;
+    }
+
+    float3 curNormal = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, uv, 0).xyz * 2.0f - 1.0f);
+
+    // -------- 计算重投影 UV --------
+    // ReSTIR 与本节点共用同一个 motion 编码; DecodeMotionVector 在 DeferredCommon.cginc 中定义.
+    float2 motionRaw = MotionVector.SampleLevel(Samp_PointClamp, uv, 0).rg;
+    float2 motion    = DecodeMotionVector(motionRaw);
+    float2 prevUV    = uv - motion;
+
+    bool inBounds = all(prevUV >= 0.0f) && all(prevUV <= 1.0f);
+    if (!inBounds)
+    {
+        DenoiseOutput[pix] = currentColor;
+        return;
+    }
+
+    // -------- 历史采样 + 一致性校验 --------
+    // 历史 color: 双线性, 因为重投影后通常落在亚像素, 否则严重 aliasing
+    float4 historyColor = HistoryColor.SampleLevel(Samp_LinearClamp, prevUV, 0);
+    historyColor.rgb = ClampFirefly(historyColor.rgb);
+
+    // 历史法线 / 深度: 注意采样的是 *当前帧* 的 GBuffer, 但 UV 是上一帧的 (prevUV).
+    // 严格来说应该用上一帧的 GBuffer history, 这里为简化用当前帧 GBuffer 在 prevUV 处的值
+    // 做几何近似 (假设静态几何在 1 帧内不会跨大法线/深度断面). 在 SSR 模式下足够稳.
+    float3 prevNormal = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, prevUV, 0).xyz * 2.0f - 1.0f);
+    float  prevDepth  = DepthBuffer.SampleLevel(Samp_PointClamp, prevUV, 0).r;
+
+    bool consistent = true;
+
+    if (dot(curNormal, prevNormal) < NormalThreshold)
+        consistent = false;
+
+    // 深度比较使用相对差异 (避免远处的小绝对差被放大)
+    float depthRel = abs(curDepth - prevDepth) / max(abs(curDepth), 1e-4f);
+    if (depthRel > DepthThreshold)
+        consistent = false;
+
+    if (!consistent)
+    {
+        DenoiseOutput[pix] = currentColor;
+        return;
+    }
+
+    // -------- Neighborhood color bbox clamp (防 ghosting) --------
+    // 用本帧 3x3 邻域的 min/max 颜色形成 bounding box, 把 history color 钳到 box 内.
+    // 即使重投影 + 几何一致性都通过, 高频纹理的运动也可能让 history color 落在
+    // 当前帧色域外 (典型表现: 拖尾、残影). bbox clamp 是 TAA 通用做法.
+    float3 nMin = currentColor.rgb;
+    float3 nMax = currentColor.rgb;
+    [unroll]
+    for (int dy = -1; dy <= 1; ++dy)
+    {
+        [unroll]
+        for (int dx = -1; dx <= 1; ++dx)
+        {
+            if (dx == 0 && dy == 0) continue;
+            int2 npx = clamp(pix + int2(dx, dy), int2(0, 0), int2(ScreenSize) - 1);
+            float3 nc = ColorInput.Load(int3(npx, 0)).rgb;
+            nc = ClampFirefly(nc);
+            nMin = min(nMin, nc);
+            nMax = max(nMax, nc);
+        }
+    }
+    historyColor.rgb = clamp(historyColor.rgb, nMin, nMax);
+
+    // -------- 时域混合 --------
+    // alpha 是"当前帧"的权重: alpha 小 = 历史占比大 = 更稳 + 更糊 (拖影).
+    float alpha = saturate(TemporalAlpha);
+    float3 blended = lerp(historyColor.rgb, currentColor.rgb, alpha);
+
+    DenoiseOutput[pix] = float4(blended, currentColor.a);
+}

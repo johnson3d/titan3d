@@ -105,6 +105,7 @@ float GaussWeight2D(float x, float y, float sigma)
 
 float3 GaussNxN(Texture2D Tex, SamplerState Sampler, float2 uv, int n, float2 stride, float sigma)
 {
+    n = min(n, 32);
 	float3 color = float3(0, 0, 0);
 	int r = n / 2;
 	float weight = 0.0;
@@ -127,6 +128,7 @@ float3 GaussNxN(Texture2D Tex, SamplerState Sampler, float2 uv, int n, float2 st
 //Karis Average
 float3 GaussNxN_KarisAverage(Texture2D Tex, SamplerState Sampler, float2 uv, int n, float2 stride, float sigma)
 {
+    n = min(n, 32);
 	float3 color = float3(0, 0, 0);
 	int r = n / 2;
 	float weight = 0.0;

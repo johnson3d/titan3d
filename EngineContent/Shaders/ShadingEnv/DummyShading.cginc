@@ -43,7 +43,7 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	output.vNormal = normalize(mul(float4(output.vNormal.xyz, 0), WorldMatrix).xyz);
 	output.vTangent.xyz = normalize(mul(float4(output.vTangent.xyz, 0), WorldMatrix).xyz);
 #endif
-	output.vPosition = mul(float4(output.vWorldPos, 1), GetViewPrjMtx(true));
+	output.vPosition = mul(float4(output.vWorldPos, 1), GetViewPrjMtx());
     output.vPosition.x = GetReferValue();
 
 	return output;

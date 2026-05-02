@@ -466,7 +466,7 @@ namespace EngineNS.UI.Event
             {
                 if(mHandler is TtRoutedEventHandler)
                 {
-                    ((TtRoutedEventHandler)mHandler)(target, args);
+                    ((TtRoutedEventHandler)mHandler)(target, args).AddWaitTask();
                 }
                 else
                 {

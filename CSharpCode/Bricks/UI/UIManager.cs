@@ -269,7 +269,7 @@ namespace EngineNS.UI
         {
             if (element == null)
                 return;
-            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(element.GetType());
+            var typeStr = Rtti.TtTypeDesc.TypeOf(element.GetType()).TypeString;
             using (var xnd = new IO.TtXndHolder(typeStr, 0, 0))
             {
                 using (var attr = xnd.NewAttribute("UI", 0, 0))

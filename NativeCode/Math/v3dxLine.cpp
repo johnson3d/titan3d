@@ -1,4 +1,4 @@
-#include "v3dxVector3.h"
+ï»¿#include "v3dxVector3.h"
 #include "v3dxLine.h"
 #include "v3dxBox3.h"
 #include "v3dxSphere.h"
@@ -210,11 +210,11 @@ bool v3dxLine3::intersect( const v3dxCylinder &cyl, float &enter, float &exit ) 
 
 	RC = m_point - apos;
 
-	// ÓëÔ²ÖùÖáÏòÁ¿×ö²æ³Ë
+	// ä¸åœ†æŸ±è½´å‘é‡åšå‰ä¹˜
 	v3dxVec3Cross( &n, &m_direct, &adir );
 	ln =  n.getLength();
 	
-	// Èç¹ûÓëÔ²ÖùÖáÏòÁ¿Æ½ĞĞ
+	// å¦‚æœä¸åœ†æŸ±è½´å‘é‡å¹³è¡Œ
 	if(ln == 0)
 	{
 		D  = RC - (RC.dotProduct(adir)) * adir;

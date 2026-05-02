@@ -431,7 +431,7 @@ namespace EngineNS.Rtti
         }
         public static string TypeStr(TtTypeDesc type)
         {
-            return TtTypeDescManager.Instance.GetTypeStringFromType(type.SystemType);
+            return type.TypeString;// TtTypeDescManager.Instance.GetTypeStringFromType(type.SystemType);
         }
         public static string TypeStr(System.Type type)
         {
@@ -918,7 +918,7 @@ namespace EngineNS.Rtti
             return null;
         }
         public Dictionary<string, string> StringMap = new Dictionary<string, string>();
-        public string GetTypeStringFromType(Type type, bool tryAdd2Manager = true)
+        internal string GetTypeStringFromType(Type type, bool tryAdd2Manager = true)
         {
             var originName = type.ToString();// type.FullName;
             if (originName == null)

@@ -1,0 +1,99 @@
+// ReSTIR GI - Pass 2: Temporal Reuse
+// 用 motion vector 把上一帧 reservoir 重投影到当前像素并合并
+
+#include "ReSTIRCommon.cginc"
+
+Texture2D<float4> GBufferRT1;       // 当前帧 normal + flags
+Texture2D<float>  DepthBuffer;      // 当前帧深度
+Texture2D<float4> MotionVector;     // 来自 Deferred MRT3, .rg 是 EncodeMotionVector 编码后的 motion
+
+SamplerState Samp_PointClamp;
+
+StructuredBuffer<ReSTIRPackedReservoir>   InCurrentReservoirs;
+StructuredBuffer<ReSTIRPackedReservoir>   InHistoryReservoirs;
+RWStructuredBuffer<ReSTIRPackedReservoir> OutReservoirs;
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_Main(uint3 id : SV_DispatchThreadID)
+{
+    if (any(id.xy >= ScreenSize))
+        return;
+
+    uint pixelIndex = id.y * ScreenSize.x + id.x;
+    float2 uv = (float2(id.xy) + 0.5f) / float2(ScreenSize);
+
+    ReSTIRReservoir current = UnpackReservoir(InCurrentReservoirs[pixelIndex]);
+
+    float depth = DepthBuffer.SampleLevel(Samp_PointClamp, uv, 0).r;
+#if USE_INVERSE_Z == 1
+    bool validPixel = depth > 0.0f;
+#else
+    bool validPixel = depth < 1.0f;
+#endif
+
+    if (!validPixel)
+    {
+        OutReservoirs[pixelIndex] = InCurrentReservoirs[pixelIndex];
+        return;
+    }
+
+    float3 currN = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, uv, 0).xyz * 2.0f - 1.0f);
+
+    // motion vector: 当前 uv -> 上一帧 uv 的位移
+    float2 motionRaw = MotionVector.SampleLevel(Samp_PointClamp, uv, 0).rg;
+    float2 motion = DecodeMotionVector(motionRaw);
+    float2 prevUV = uv - motion;
+
+    uint rng = PcgHash(pixelIndex ^ (FrameIndex * 0x85EBCA6Bu) ^ 0x12345u);
+
+    [branch]
+    if (all(prevUV >= 0.0f) && all(prevUV <= 1.0f))
+    {
+        int2 prevPixel = int2(prevUV * float2(ScreenSize));
+        prevPixel = clamp(prevPixel, int2(0, 0), int2(ScreenSize) - 1);
+        uint prevIndex = uint(prevPixel.y) * ScreenSize.x + uint(prevPixel.x);
+
+        ReSTIRReservoir history = UnpackReservoir(InHistoryReservoirs[prevIndex]);
+
+        // 几何一致性校验: 法线 + 距离
+        bool consistent = true;
+        if (history.M > 0.0f)
+        {
+            float3 prevVisN = history.Sample.VisibleNormal;
+            float ndotn = dot(prevVisN, currN);
+            if (ndotn < NormalThreshold)
+                consistent = false;
+
+            float3 currWP = ReconstructWorldPos(uv, depth);
+            float3 prevWP = history.Sample.VisiblePosition;
+            float distScale = max(length(currWP) * DepthThreshold, 0.05f);
+            if (length(currWP - prevWP) > distScale)
+                consistent = false;
+        }
+        else
+        {
+            consistent = false;
+        }
+
+        if (consistent)
+        {
+            // M clamp 防止收敛过快导致的鬼影
+            history.M = min(history.M, TemporalMaxM);
+
+            // 用当前像素的 visible point 作为目标域计算 p_hat
+            ReSTIRSample remapped = history.Sample;
+            remapped.VisiblePosition = ReconstructWorldPos(uv, depth);
+            remapped.VisibleNormal = currN;
+            float pHatHistory = TargetFunctionLuminance(remapped);
+            history.Sample = remapped;
+
+            CombineReservoir(current, history, pHatHistory, Rand01(rng));
+        }
+    }
+
+    FinalizeReservoir(current);
+
+    ReSTIRPackedReservoir packed;
+    PackReservoir(current, packed);
+    OutReservoirs[pixelIndex] = packed;
+}

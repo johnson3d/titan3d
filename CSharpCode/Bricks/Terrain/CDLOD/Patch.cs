@@ -1,0 +1,377 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace EngineNS.Bricks.Terrain.CDLOD
+{
+    public class TtPatchLayers
+    {
+        public class TtPatchLayer
+        {
+            public string Name { get; set; }
+            public float[,] WeightData = null;
+        }
+        public List<TtPatchLayer> Layers = new List<TtPatchLayer>();
+        internal int CurrentLayer = -1;
+        public void SetLayerData(TtLayerManager mgr, int x, int z, float data)
+        {
+            if (CurrentLayer < 0 || Layers[CurrentLayer].Name != mgr.CurrentLayerName)
+            {
+                CurrentLayer = GetLayer(mgr.CurrentLayerName);
+                if (CurrentLayer < 0)
+                {
+                    CurrentLayer = AddLayer(mgr.CurrentLayerName);
+                }
+            }
+            Layers[CurrentLayer].WeightData[z, x] = data;
+        }
+        public float GetLayerData(TtLayerManager mgr, int x, int z)
+        {
+            if (CurrentLayer < 0 || Layers[CurrentLayer].Name != mgr.CurrentLayerName)
+            {
+                CurrentLayer = GetLayer(mgr.CurrentLayerName);
+            }
+            if (CurrentLayer < 0)
+                return float.NaN;
+            return Layers[CurrentLayer].WeightData[z, x];
+        }
+        public int GetLayer(string name)
+        {
+            for (int i = 0; i < Layers.Count; i++)
+            {
+                if (Layers[i].Name == name)
+                    return i;
+            }
+            return -1;
+        }
+        public int AddLayer(string name)
+        {
+            for (int i = 0; i < Layers.Count; i++)
+            {
+                if (Layers[i].Name == name)
+                    return i;
+            }
+            Layers.Add(new TtPatchLayer());
+            return Layers.Count - 1;
+        }
+    }
+
+    public class TtLayerManager : IO.BaseSerializer
+    {
+        public string CurrentLayerName { get; set; } = null;
+        [Rtti.Meta("")]
+        public List<string> LayerNames { get; set; } = new List<string>();
+    }
+
+    public class TtPatch : IDisposable
+    {
+        public int IndexX;
+        public int IndexZ;
+        public int XInLevel;
+        public int ZInLevel;
+        public DBoundingBox AABB;
+
+        public TtPatchLayers Layers = new TtPatchLayers();
+
+        public UTerrainLevelData Level;
+        public TtTerrainNode TerrainNode
+        {
+            get => Level.Level.Node;
+        }
+        public Graphics.Mesh.TtRenderMesh[] TerrainMesh;
+        public Graphics.Mesh.TtRenderMesh[] WaterMesh;
+        public Graphics.Mesh.TtRenderMesh[] WireFrameTerrainMesh;
+        //public Graphics.Pipeline.Shader.UMaterialInstance Material;
+        //public Graphics.Pipeline.Shader.UMaterialInstance WaterMaterial;
+        public NxRHI.TtCbView PatchCBuffer;
+        public void SureCBuffer(NxRHI.IGraphicsEffect shaderProg, ref NxRHI.TtCbView cbuffer)
+        {
+            var coreBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerTerrainPatchCBufferVarIndexer.Instance;
+            if (cbuffer == null)
+            {
+                coreBinder.UpdateFieldVar(shaderProg, "cbPerPatch");
+                cbuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.Binder.mCoreObject);
+
+                // Defensive init: fill safe defaults right after creation so the cbuffer is never
+                // read as uninitialized garbage by the GPU (real values get written by the caller
+                // before BindCBV in TerrainMdfQueue, but we guard against any reordering issue).
+                cbuffer.SetValue(coreBinder.StartPosition, in StartPosition);
+                cbuffer.SetValue(coreBinder.CurrentLOD, mCurrentLOD);
+                cbuffer.SetValue(coreBinder.TexUVOffset, in TexUVOffset);
+            }
+            if (TerrainNode.TerrainCBuffer == null)
+            {
+                coreBinder.UpdateFieldVar(shaderProg, "cbPerTerrain");
+                TerrainNode.TerrainCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.Binder.mCoreObject);
+
+                // Defensive init: trigger TerrainNode's own cbuffer fill logic right away so that
+                // the very first frame after creation never binds an uninitialized TerrainCBuffer.
+                // Without this, if SureCBuffer happens to run after TerrainNode.UpdateCBuffer() in
+                // the same frame, the cbuffer would be bound with garbage data for one frame.
+                TerrainNode.SureTerrainCBufferInitialized();
+            }
+        }
+
+        public UTerrainGrassManager GrassManager;
+
+        public Vector3 StartPosition = new Vector3(0);
+        public Vector2 TexUVOffset;        
+        int mCurrentLOD;
+        public int CurrentLOD
+        {
+            get => mCurrentLOD;
+            set
+            {
+                mCurrentLOD = value;
+            }
+        }
+        ~TtPatch()
+        {
+            Dispose();
+        }
+        public void Dispose()
+        {
+            CoreSDK.DisposeObject(ref PatchCBuffer);
+            if (TerrainMesh != null)
+            {
+                foreach(var i in TerrainMesh)
+                {
+                    i.Dispose();
+                }
+                TerrainMesh = null;
+            }
+            if (WaterMesh != null)
+            {
+                foreach (var i in WaterMesh)
+                {
+                    i.Dispose();
+                }
+                WaterMesh = null;
+            }
+            if (WireFrameTerrainMesh != null)
+            {
+                foreach (var i in WireFrameTerrainMesh)
+                {
+                    i.Dispose();
+                }
+                WireFrameTerrainMesh = null;
+            }
+            CoreSDK.DisposeObject(ref GrassManager);
+        }
+        public void Initialize(UTerrainLevelData level, int x, int z, Bricks.Procedure.UBufferComponent HeightMap)
+        {
+            Level = level;
+
+            if (x == 16 || z == 16)
+            {
+                return;
+            }
+            XInLevel = x;
+            ZInLevel = z;
+            var terrain = level.GetTerrainNode().Terrain;
+            IndexX = x + level.Level.LevelX * level.GetTerrainNode().PatchSide;
+            IndexZ = z + level.Level.LevelZ * level.GetTerrainNode().PatchSide;
+
+            //Material = Graphics.Pipeline.Shader.UMaterialInstance.CreateMaterialInstance(terrain.Material);
+            //WaterMaterial = Graphics.Pipeline.Shader.UMaterialInstance.CreateMaterialInstance(terrain.WaterMaterial);
+            //var srv = Material.FindSRV("Diffuse");
+            //if (srv != null)
+            //{
+            //    //srv.Value = RName.GetRName("");
+            //}
+
+            var mdfType = Rtti.TtTypeDesc.TypeOf(typeof(UTerrainMdfQueue));
+            var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
+            tMaterials[0] = terrain.Material;
+
+            var tWireFrameMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
+            tWireFrameMaterials[0] = (terrain as UTerrainSystem).WireFrameMaterial;
+
+            var twMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
+            twMaterials[0] = terrain.WaterMaterial;
+
+            TerrainMesh = new Graphics.Mesh.TtRenderMesh[terrain.GridMipLevels.Length];
+            WaterMesh = new Graphics.Mesh.TtRenderMesh[terrain.GridMipLevels.Length];
+            WireFrameTerrainMesh = new Graphics.Mesh.TtRenderMesh[terrain.GridMipLevels.Length];
+            
+            for (int i = 0; i < terrain.GridMipLevels.Length; i++)
+            {
+                TerrainMesh[i] = new Graphics.Mesh.TtRenderMesh();
+                TerrainMesh[i].Initialize(terrain.GridMipLevels[i], tMaterials, mdfType);
+                var trMdfQueue = TerrainMesh[i].MdfQueue as UTerrainMdfQueue;
+                trMdfQueue.TerrainModifier.TerrainNode = this.TerrainNode;
+                trMdfQueue.TerrainModifier.Patch = this;
+                trMdfQueue.TerrainModifier.Dimension = (int)Math.Pow(2, terrain.GridMipLevels.Length - i - 1);
+
+                WireFrameTerrainMesh[i] = new Graphics.Mesh.TtRenderMesh();
+                WireFrameTerrainMesh[i].Initialize(terrain.GridMipLevels[i], tWireFrameMaterials, mdfType);
+                trMdfQueue = WireFrameTerrainMesh[i].MdfQueue as UTerrainMdfQueue;
+                trMdfQueue.TerrainModifier.TerrainNode = this.TerrainNode;
+                trMdfQueue.TerrainModifier.Patch = this;
+                trMdfQueue.TerrainModifier.Dimension = (int)Math.Pow(2, terrain.GridMipLevels.Length - i - 1);
+
+                WaterMesh[i] = new Graphics.Mesh.TtRenderMesh();
+                WaterMesh[i].Initialize(terrain.GridMipLevels[i], twMaterials, mdfType);
+                trMdfQueue = WaterMesh[i].MdfQueue as UTerrainMdfQueue;
+                trMdfQueue.TerrainModifier.TerrainNode = this.TerrainNode;
+                trMdfQueue.TerrainModifier.Patch = this;
+                trMdfQueue.TerrainModifier.Dimension = (int)Math.Pow(2, terrain.GridMipLevels.Length - i - 1);
+                trMdfQueue.TerrainModifier.IsWater = true;
+
+                //trMdfQueue.StartPosition.X = IndexX * terrain.PatchSize;
+                //trMdfQueue.StartPosition.Z = IndexZ * terrain.PatchSize;
+
+                //trMdfQueue.StartPosition += node.StartPosition;
+            }
+
+            var PatchSize = level.GetTerrainNode().PatchSize;
+
+            AABB.Minimum.X = IndexX * PatchSize;
+            AABB.Minimum.Z = IndexZ * PatchSize;
+            AABB.Minimum.Y = double.MaxValue;
+
+            AABB.Maximum.X = (IndexX + 1) * PatchSize;
+            AABB.Maximum.Z = (IndexZ + 1) * PatchSize;
+            AABB.Maximum.Y = double.MinValue;
+
+            UpdateAABB(HeightMap, null);
+            
+            AABB.Minimum += level.GetTerrainNode().Placement.AbsTransform.mPosition;
+            AABB.Maximum += level.GetTerrainNode().Placement.AbsTransform.mPosition;
+
+            var terrainNode = this.Level.Level.Node;
+            OnAbsTransformChanged(terrainNode, terrainNode.GetWorld());
+            UpdateCameraOffset(terrainNode.GetWorld());
+            SetAcceptShadow(level.GetTerrainNode().IsAcceptShadow);
+
+            GrassManager = new UTerrainGrassManager(this);
+        }
+        public void UpdateAABB(Bricks.Procedure.UBufferComponent HeightMap, Bricks.Procedure.UBufferComponent WaterHMap)
+        {
+            int TexSizePerPatch = Level.GetTerrainNode().TexSizePerPatch;
+            for (int i = 0; i < TexSizePerPatch; i++)
+            {
+                for (int j = 0; j < TexSizePerPatch; j++)
+                {
+                    float alt = HeightMap.GetPixel<float>(XInLevel * TexSizePerPatch + j, ZInLevel * TexSizePerPatch + i);
+                    AABB.Maximum.Y = MathHelper.Max(alt, AABB.Maximum.Y);
+                    AABB.Minimum.Y = MathHelper.Min(alt, AABB.Minimum.Y);
+
+                    if (WaterHMap != null)
+                    {
+                        alt = WaterHMap.GetPixel<float>(XInLevel * TexSizePerPatch + j, ZInLevel * TexSizePerPatch + i);
+                        AABB.Maximum.Y = MathHelper.Max(alt, AABB.Maximum.Y);
+                        AABB.Minimum.Y = MathHelper.Min(alt, AABB.Minimum.Y);
+                    }
+                }
+            }
+        }
+        public void SetAcceptShadow(bool value)
+        {
+            for (int i = 0; i < TerrainMesh.Length; i++)
+            {
+                var mMesh = TerrainMesh[i];
+                if (mMesh == null)
+                    return;
+
+                //var saved = mMesh.MdfQueue.MdfDatas;
+                //Rtti.TtTypeDesc mdfQueueType;
+                //if (value)
+                //{
+                //    mdfQueueType = mMesh.MdfQueue.MdfPermutations.ReplacePermutation<Graphics.Pipeline.Shader.UMdf_NoShadow, Graphics.Pipeline.Shader.UMdf_Shadow>();
+                //}
+                //else
+                //{
+                //    mdfQueueType = mMesh.MdfQueue.MdfPermutations.ReplacePermutation<Graphics.Pipeline.Shader.UMdf_Shadow, Graphics.Pipeline.Shader.UMdf_NoShadow>();
+                //}
+                //mMesh.SetMdfQueueType(mdfQueueType);
+                //mMesh.MdfQueue.MdfDatas = saved;
+
+                //int ObjectFlags_2Bit = 0;
+                //if (value)
+                //    ObjectFlags_2Bit |= 1;
+                //else
+                //    ObjectFlags_2Bit &= (~1);
+                //mMesh.PerMeshCBuffer.SetValue(NxRHI.UBuffer.mPerMeshIndexer.ObjectFLags_2Bit, in ObjectFlags_2Bit);
+                mMesh.IsAcceptShadow = value;
+            }
+        }
+        public void Tick(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        {
+            if (TerrainMesh == null)
+                return;
+
+            var node = Level.GetTerrainNode();
+            var patchSize = node.PatchSize;
+            
+            DVector3 CameraOffset = node.Placement.AbsTransform.mPosition - world.CameraOffset;
+
+            StartPosition.X = (float)(((double)(IndexX * patchSize)) + CameraOffset.X);
+            StartPosition.Z = (float)(((double)(IndexZ * patchSize)) + CameraOffset.Z);
+            StartPosition.Y = (float)(Level.HeightMapMinHeight + CameraOffset.Y);
+        }        
+        public void OnAbsTransformChanged(TtTerrainNode node, GamePlay.TtWorld world)
+        {
+            ref var transform = ref node.Placement.AbsTransform;
+            foreach (var i in TerrainMesh)
+            {
+                i.SetWorldTransform(in transform, world, false);
+            }
+            foreach (var i in WireFrameTerrainMesh)
+            {
+                i.SetWorldTransform(in transform, world, false);
+            }
+            foreach (var i in WaterMesh)
+            {
+                i.SetWorldTransform(in transform, world, false);
+            }
+        }
+        public void UpdateCameraOffset(GamePlay.TtWorld world)
+        {
+            foreach (var i in TerrainMesh)
+            {
+                if (i==null)
+                    continue;
+                i.UpdateCameraOffset(world);
+            }
+            foreach (var i in WireFrameTerrainMesh)
+            {
+                if (i==null)
+                    continue;
+                i.UpdateCameraOffset(world);
+            }
+            foreach (var i in WaterMesh)
+            {
+                if (i==null)
+                    continue;
+                i.UpdateCameraOffset(world);
+            }
+        }
+        public void OnGatherVisibleMeshes(GamePlay.TtWorld.TtVisParameter rp)
+        {
+            if (CurrentLOD >= TerrainMesh.Length)
+                return;
+
+            switch (Level.GetTerrainNode().Terrain.ShowMode)
+            {
+                case UTerrainSystem.EShowMode.Normal:
+                    rp.AddVisibleMesh(TerrainMesh[CurrentLOD]);
+                    break;
+                case UTerrainSystem.EShowMode.WireFrame:
+                    rp.AddVisibleMesh(WireFrameTerrainMesh[CurrentLOD]);
+                    break;
+                case UTerrainSystem.EShowMode.Both:
+                    {
+                        rp.AddVisibleMesh(TerrainMesh[CurrentLOD]);
+                        rp.AddVisibleMesh(WireFrameTerrainMesh[CurrentLOD]);
+                    }
+                    break;
+            }
+
+            if (Level.GetTerrainNode().Terrain.IsShowWater)
+                rp.AddVisibleMesh(WaterMesh[CurrentLOD]);
+
+            GrassManager?.OnGatherVisibleMeshes(rp);
+        }
+    }
+}

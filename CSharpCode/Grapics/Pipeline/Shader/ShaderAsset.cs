@@ -332,8 +332,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (EGui.UIProxy.CustomButton.ToolButton("Snapshot", in btSize))
             {
                 var presentWindow = ImGuiAPI.GetWindowViewportData();
-                Editor.USnapshot.Save(AssetName, ShaderAsset.GetAMeta(), presentWindow.SwapChain.mCoreObject.GetBackBuffer(0),
-                            (uint)DrawOffset.X, (uint)DrawOffset.Y, (uint)GraphSize.X, (uint)GraphSize.Y, Editor.USnapshot.ESnapSide.Left);
+                Editor.TtSnapshot.Save(AssetName, ShaderAsset.GetAMeta(), presentWindow.SwapChain.mCoreObject.GetBackBuffer(0),
+                            (uint)DrawOffset.X, (uint)DrawOffset.Y, (uint)GraphSize.X, (uint)GraphSize.Y, Editor.TtSnapshot.ESnapSide.Left);
             }
         }
 

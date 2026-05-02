@@ -23,6 +23,7 @@ public:
 	int TryReleaseFile(VRes2Memory* exlude, int maxRelease);
 
 	VRes2Memory* GetFile2Memory(LPCSTR file);
+	void OnAfterWriteFile(LPCSTR file);
 private:
 	static VFile2Memory* CreateFile2Memory(LPCSTR psz, vBOOL bShareWrite/* = FALSE*/);
 };

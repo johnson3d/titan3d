@@ -1,4 +1,4 @@
-#include "IRenderDocTool.h"
+ï»¿#include "IRenderDocTool.h"
 #include "../../../NativeCode/NextRHI/Dx11/DX11GpuDevice.h"
 #include "../../../NativeCode/NextRHI/Dx12/DX12GpuDevice.h"
 #include "../../../NativeCode/NextRHI/Vulkan/VKGpuDevice.h"
@@ -40,7 +40,7 @@ void IRenderDocTool::InitRenderDoc(const char* path)
 		mApi->SetCaptureOptionU32(RENDERDOC_CaptureOption::eRENDERDOC_Option_SaveAllInitials, opt);
 		
 		mApi->SetCaptureOptionU32(RENDERDOC_CaptureOption::eRENDERDOC_Option_AllowUnsupportedVendorExtensions, 1);
-		mApi->SetCaptureOptionU32(RENDERDOC_CaptureOption::eRENDERDOC_Option_AllowVSync, 0); // ½ûÓÃ´¹Ö±Í¬²½
+		mApi->SetCaptureOptionU32(RENDERDOC_CaptureOption::eRENDERDOC_Option_AllowVSync, 0); // ç¦ç”¨åž‚ç›´åŒæ­¥
 
 
 		mApi->MaskOverlayBits(RENDERDOC_OverlayBits::eRENDERDOC_Overlay_None, RENDERDOC_OverlayBits::eRENDERDOC_Overlay_None);
@@ -132,7 +132,7 @@ const char* IRenderDocTool::GetCapture(UINT idx, UINT64* timestamp)
 	uint32_t LogPathLength = 512;
 	memset(mTempLogFile, 0, sizeof(mTempLogFile));
 	if (mApi->GetCapture(idx, mTempLogFile, &LogPathLength, timestamp))
-	{
+	{//GetCapture return utf8
 		return mTempLogFile;
 	}
 	else

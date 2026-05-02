@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.NxRHI;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -55,10 +56,10 @@ namespace EngineNS.Thread
                 TtEngine.Instance.TryTickLogic();
             }
 
-            TtEngine.Instance.GfxDevice?.RenderSwapQueue?.QueueCmd(static (NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
+            TtEngine.Instance.GfxDevice?.RenderQueue?.QueueCmd(static (TtRCmdQueue queue, ref NxRHI.FRCmdInfo info) =>
             {
 
-            }, "#TickLogicEnd#");
+            }, "#TickLogicEnd#", null, EQueueType.QU_Default, ERCmdType.FrameEnd);
             IsTicking = false;
             LogicEnd.Set();
         }

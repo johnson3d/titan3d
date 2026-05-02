@@ -21,7 +21,7 @@ namespace EngineNS.Bricks.GpuDriven
             CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/ClusterCulling.cginc", RName.ERNameType.Engine);
             MainName = "CS_ClusterCullingMain";
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
@@ -131,7 +131,7 @@ namespace EngineNS.Bricks.GpuDriven
             
             CoreSDK.DisposeObject(ref CullClusterShadingDrawcall);
             CullClusterShadingDrawcall = rc.CreateComputeDraw();
-            CullClusterShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtCullClusterShading>();
+            CullClusterShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtCullClusterShading>();
 
             Vertices.Initialize(NxRHI.EBufferType.BFT_SRV);
             Indices.Initialize(NxRHI.EBufferType.BFT_SRV);
@@ -253,9 +253,9 @@ namespace EngineNS.Bricks.GpuDriven
                 attachment.Srv = SrcClusters.Srv;
             }
         }
-        public override void BeforeTickLogic(TtRenderPolicy policy)
+        public override void BeforeTick(TtRenderPolicy policy)
         {
-            base.BeforeTickLogic(policy);
+            base.BeforeTick(policy);
 
             {
                 var attachment = ImportAttachment(VisibleClutersPinOut, VisibleClutersAttachment);
@@ -264,7 +264,7 @@ namespace EngineNS.Bricks.GpuDriven
             }
         }
         public GamePlay.TtWorld.TtVisParameter VisParameter = new();
-        public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public unsafe override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             if (CBCameraFrustum != null)
             {

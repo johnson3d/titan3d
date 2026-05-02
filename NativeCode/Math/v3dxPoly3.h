@@ -1,4 +1,4 @@
-/********************************************************************
+ï»¿/********************************************************************
 	V3D					A Powerful 3D Enjine
 	File:				v3dxpoly3.h
 	Created Time:		30:6:2002   16:30
@@ -29,21 +29,21 @@ class v3dxPoly3
 {
 public:
 	v3dxVector3							PlaneNormal;
-	v3dxVector3							*vertices;//3d¶¥µã
-	int									num_vertices;//¶¥µãÊıÄ¿
-	int									max_vertices;//×î´ó¶¥µãÊıÄ¿
+	v3dxVector3							*vertices;//3dé¡¶ç‚¹
+	int									num_vertices;//é¡¶ç‚¹æ•°ç›®
+	int									max_vertices;//æœ€å¤§é¡¶ç‚¹æ•°ç›®
 public:
-	 v3dxPoly3 (int start_size = 12);//¹¹Ôìº¯Êı
-	 v3dxPoly3 (const v3dxPoly3& copy);//¿½±´¹¹Ôìº¯Êı
-	 v3dxPoly3 & operator = (const v3dxPoly3& copy);//¿½±´¸´ÖÆº¯Êı
-	 ~v3dxPoly3 ();//Îö¹¹º¯Êı
+	 v3dxPoly3 (int start_size = 12);//æ„é€ å‡½æ•°
+	 v3dxPoly3 (const v3dxPoly3& copy);//æ‹·è´æ„é€ å‡½æ•°
+	 v3dxPoly3 & operator = (const v3dxPoly3& copy);//æ‹·è´å¤åˆ¶å‡½æ•°
+	 ~v3dxPoly3 ();//ææ„å‡½æ•°
 
 	inline void UpdatePlaneNormal()
 	{
 		PlaneNormal = computeNormal();
 	}
 	 void getInversePoly( v3dxPoly3* pPoly );
-	void makeEmpty (){//³õÊ¼»¯Ò»¸ö¶à±ßĞÎÎª¿ÕµÄ
+	void makeEmpty (){//åˆå§‹åŒ–ä¸€ä¸ªå¤šè¾¹å½¢ä¸ºç©ºçš„
 		num_vertices = 0; 
 	}
 	int getNumVertices () const { 
@@ -73,9 +73,9 @@ public:
 		else 
 			return &vertices[num_vertices-1]; 
 	}
-	//²âÊÔÒ»¸ö¶¥µãÊÇ·ñÔÚ¶à±ßĞÎÄÚ²¿
+	//æµ‹è¯•ä¸€ä¸ªé¡¶ç‚¹æ˜¯å¦åœ¨å¤šè¾¹å½¢å†…éƒ¨
 	 bool in (const v3dxVector3& v) const;
-	//²âÊÔÒ»¸ö¶¥µãÊÇ·ñÔÚ¶à±ßĞÎÄÚ²¿
+	//æµ‹è¯•ä¸€ä¸ªé¡¶ç‚¹æ˜¯å¦åœ¨å¤šè¾¹å½¢å†…éƒ¨
 	bool InDFace ( const v3dxVector3& v ) const{
 		int i, i1;
 		i1 = num_vertices-1;
@@ -91,11 +91,11 @@ public:
 		return true;
 	}
 	 static bool in (v3dxVector3* poly, int num_poly, const v3dxVector3& v);
-	//½¨Á¢Ò»¸öÖ¸¶¨×î¶àÊıÄ¿¶¥µãµÄ¶à±ßĞÎ
+	//å»ºç«‹ä¸€ä¸ªæŒ‡å®šæœ€å¤šæ•°ç›®é¡¶ç‚¹çš„å¤šè¾¹å½¢
 	 void makeRoom (int new_max);
 	void setNumVertices (int n) { makeRoom (n); num_vertices = n; }
 	
-	//Ìí¼ÓÒ»¸ö¶¥µãµ½¶à±ßĞÎ£¬·µ»Ø±»Ìí¼ÓµÄ¶¥µãµÄË÷Òı
+	//æ·»åŠ ä¸€ä¸ªé¡¶ç‚¹åˆ°å¤šè¾¹å½¢ï¼Œè¿”å›è¢«æ·»åŠ çš„é¡¶ç‚¹çš„ç´¢å¼•
 	 int addVertex (float x, float y, float z,vBOOL bUpdateNormal=FALSE);
 	int addVertex (const v3dxVector3& v) { 
 		return addVertex (v.X, v.Y, v.Z); 
@@ -105,52 +105,52 @@ public:
 		memcpy (vertices, v, (num_vertices = num) * sizeof (v3dxVector3)); 
 	}
 	
-	//Çø·ÖÕâ¸ö¶à±ßĞÎÔÚÒ»¸öÆ½ÃæµÄÄÇ¸öÎ»ÖÃ
-	//Èç¹ûÔÚÕâ¸öÃæÉÏ£¬·µ»ØPOL_SAME_PLANE
-	//Èç¹ûÍêÈ«ÔÙÕâ¸öÆ½ÃæÇ°Ãæ£¬·µ»ØPOL_FRONT
-	//Èç¹ûÍêÈ«ÔÙÕâ¸öÆ½Ãæ±³ºó£¬·µ»ØPOL_BACK
-	//·ñÔò£¬·µ»ØPOL_SPLIT_NEEDED
+	//åŒºåˆ†è¿™ä¸ªå¤šè¾¹å½¢åœ¨ä¸€ä¸ªå¹³é¢çš„é‚£ä¸ªä½ç½®
+	//å¦‚æœåœ¨è¿™ä¸ªé¢ä¸Šï¼Œè¿”å›POL_SAME_PLANE
+	//å¦‚æœå®Œå…¨å†è¿™ä¸ªå¹³é¢å‰é¢ï¼Œè¿”å›POL_FRONT
+	//å¦‚æœå®Œå…¨å†è¿™ä¸ªå¹³é¢èƒŒåï¼Œè¿”å›POL_BACK
+	//å¦åˆ™ï¼Œè¿”å›POL_SPLIT_NEEDED
 	int classify (const v3dxPlane3& pl) const;
 	
-	//´¹Ö±×ø±êÖáµÄÌØÊâÇé¿ö
+	//å‚ç›´åæ ‡è½´çš„ç‰¹æ®Šæƒ…å†µ
 	int classifyX (float x) const;
 	int classifyY (float y) const;
 	int classifyZ (float z) const;
 
-	//·Ö¸îÕâ¸ö¶à±ßĞÎ£¬²¢ÇÒÖ»ÁôÏÂÇ°ÃæµÄ
+	//åˆ†å‰²è¿™ä¸ªå¤šè¾¹å½¢ï¼Œå¹¶ä¸”åªç•™ä¸‹å‰é¢çš„
 	void cutToPlane (const v3dxPlane3& split_plane);
 
-	//ÓÃ¸ø¶¨µÄÆ½Ãæ£¬·Ö¸îÕâ¸ö¶à±ßĞÎ
+	//ç”¨ç»™å®šçš„å¹³é¢ï¼Œåˆ†å‰²è¿™ä¸ªå¤šè¾¹å½¢
 	 void splitWithPlane (v3dxPoly3& front, v3dxPoly3& back,
   			const v3dxPlane3& split_plane) const;
 
-	// Çó±»ËùÓĞPlane·Ö¸îºóµÄÕıÃæPolygon
+	// æ±‚è¢«æ‰€æœ‰Planeåˆ†å‰²åçš„æ­£é¢Polygon
 	 v3dxPoly3 clipByPlanes(v3dxPlane3* Planes, int PlaneCount);
 
 
-	//·Ö¸îÌØÊâÇé¿ö
+	//åˆ†å‰²ç‰¹æ®Šæƒ…å†µ
 	 void splitWithPlaneX (v3dxPoly3& front, v3dxPoly3& back, float x) const;
 	 void splitWithPlaneY (v3dxPoly3& front, v3dxPoly3& back, float y) const;
 	 void splitWithPlaneZ (v3dxPoly3& front, v3dxPoly3& back, float z) const;
 	
-	//¼ÆËã·¨ÏòÁ¿
+	//è®¡ç®—æ³•å‘é‡
 	 static v3dxVector3 computeNormal (v3dxVector3* vertices, int num);
 	inline v3dxVector3 computeNormal () const{
 		return computeNormal (vertices, num_vertices);
 	}
 
-	//¼ÆËã¶à±ßĞÎµÄÆ½Ãæ??(Õâ¸öÆ½ÃæÓÃÀ´×öÊ²Ã´ÄØ£¿)
+	//è®¡ç®—å¤šè¾¹å½¢çš„å¹³é¢??(è¿™ä¸ªå¹³é¢ç”¨æ¥åšä»€ä¹ˆå‘¢ï¼Ÿ)
 	 static v3dxPlane3 computePlane (v3dxVector3* vertices, int num);
 
-	//¼ÆËãÕâ¸ö¶à±ßĞÎµÄÆ½Ãæ
+	//è®¡ç®—è¿™ä¸ªå¤šè¾¹å½¢çš„å¹³é¢
 	v3dxPlane3 computePlane () const{
 		return computePlane (vertices, num_vertices);
 	}
 
-	//¼ÆËã¶à±ßĞÎÃæ»ı
+	//è®¡ç®—å¤šè¾¹å½¢é¢ç§¯
 	 float getSignedArea() const;
   
-	//¼ÆËã¶à±ßĞÎÖĞĞÄ
+	//è®¡ç®—å¤šè¾¹å½¢ä¸­å¿ƒ
 	v3dxVector3 getCenter () const;
 };
 
@@ -235,7 +235,7 @@ inline int v3dxPoly3::classifyZ (float z) const
 inline float v3dxPoly3::getSignedArea () const
 {
 	float area = 0.0;
-	//Èı½ÇÁ´»¯¶à±ßĞÎ£¬Èı½ÇĞÎÊÇ(0,1,2), (0,2,3), (0,3,4), µÈµÈ..
+	//ä¸‰è§’é“¾åŒ–å¤šè¾¹å½¢ï¼Œä¸‰è§’å½¢æ˜¯(0,1,2), (0,2,3), (0,3,4), ç­‰ç­‰..
 	for (int i=0 ; i < num_vertices-2 ; i++)
 		area += (float)v3dxArea3 ( &vertices[0], &vertices[i+1], &vertices[i+2] );
 	return area / 2.0f;

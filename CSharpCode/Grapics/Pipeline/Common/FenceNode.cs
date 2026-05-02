@@ -27,7 +27,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             get;
             set;
         }
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, TtCommandList frameCmdList, bool bClear)
+        public override void Tick(TtWorld world, TtRenderPolicy policy, TtCommandList frameCmdList, bool bClear)
         {
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist, "Fence"))
@@ -62,7 +62,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             FencePinIn.LinkType = "Fence";
             AddOutput(AfterPinOut);
         }
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, TtCommandList frameCmdList, bool bClear)
+        public override void Tick(TtWorld world, TtRenderPolicy policy, TtCommandList frameCmdList, bool bClear)
         {
             var linker = policy.FindInLinker(FencePinIn);
             if (linker == null)
@@ -73,7 +73,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             NxRHI.TtFence fence = policy.FindFence(fenceNode.Name);
             if (fence == null)
                 return;
-            policy.QueueCmd((ICommandList ImCmdlist, ref FRCmdInfo info) =>
+            policy.QueueCmd((TtRCmdQueue queue, ref FRCmdInfo info) =>
             {
                 TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.WaitFence(fence, fenceNode.ExpectValue, EQueueType.QU_Default);
             }, "WaitFence");

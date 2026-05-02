@@ -10,6 +10,7 @@
 #include "../NxDrawcall.h"
 //#include "../../Bricks/RenderDoc/IRenderDocTool.h"
 //#include "../../../3rd/native/renderdoc/renderdoc_app.h"
+#define USE_PIX
 #include <pix3.h>
 
 #define new VNEW
@@ -167,17 +168,11 @@ namespace NxRHI
 
 		if (GetCmdRecorder()->GetDrawcallNumber() > 0)
 		{
-			//todo: select d3d12queue
-			//auto n = StringHelper::strtowstr(mDebugName.c_str());
-			//PIXBeginEvent(cmdQueue->mCmdQueue.GetPtr(), 0, n.c_str());
 			cmdQueue->mCmdQueue->ExecuteCommandLists(1, (ID3D12CommandList**)&mContext);
-			//PIXEndEvent(cmdQueue->mCmdQueue.GetPtr());
 		}
 		else
 		{
-			PIXBeginEvent(cmdQueue->mCmdQueue.GetPtr(), 0, mDebugNameW.c_str());
 			//cmdQueue->mCmdQueue->ExecuteCommandLists(1, (ID3D12CommandList**)&mContext);
-			PIXEndEvent(cmdQueue->mCmdQueue.GetPtr());
 		}
 		mCmdListState = ECmdListState::None;
 
@@ -323,33 +318,20 @@ namespace NxRHI
 		ASSERT(mCmdListState == ECmdListState::Recording);
 	}
 
-	void DX12CommandList::BeginEvent(std::wstring& info)
+	void DX12CommandList::BeginEvent(std::wstring& info, DWORD color)
 	{
-		//PIXBeginEvent(mContext.GetPtr(), 0, info.c_str());
-		mContext->BeginEvent(0, info.c_str(), (UINT)info.length() * sizeof(WCHAR));
-		/*auto rdoc = IRenderDocTool::GetInstance();
-		if (rdoc != nullptr)
-		{
-			rdoc->GetAPI()->Start
-		}*/
+		PIXBeginEvent(mContext.GetPtr(), color, info.c_str());
 		GetCmdRecorder()->mDirectDrawNum++;
 	}
-	void DX12CommandList::BeginEvent(const char* info)
+
+	void DX12CommandList::BeginEvent(const char* info, DWORD color)
 	{
-		//ASSERT(mIsRecording);
-		//mContext->BeginEvent(1, info, strlen(info));
-		auto n = StringHelper::strtowstr(info);
-		//PIXBeginEvent(mContext.GetPtr(), 0, n.c_str());
-		mContext->BeginEvent(0, n.c_str(), (UINT)n.length() * sizeof(WCHAR));
-		//mContext->BeginEvent(0, info, (UINT)strlen(info));
-		//mContext->SetName(n.c_str());
+		PIXBeginEvent(mContext.GetPtr(), color, info);
 		GetCmdRecorder()->mDirectDrawNum++;
 	}
 	void DX12CommandList::EndEvent()
 	{
-		//ASSERT(mIsRecording);
-		mContext->EndEvent();
-		//PIXEndEvent(mContext.GetPtr());
+		PIXEndEvent(mContext.GetPtr());
 	}
 
 	void DX12CommandList::SetViewport(UINT Num, const FViewPort* pViewports)

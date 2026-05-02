@@ -4,6 +4,7 @@ using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
@@ -15,11 +16,10 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/AAShading.cginc", RName.ERNameType.Engine);
 
-            TypeAA = this.PushPermutation<Graphics.Pipeline.TtRenderPolicy.ETypeAA>("ENV_TypeAA", (int)Graphics.Pipeline.TtRenderPolicy.ETypeAA.TypeCount);
+            TypeAA = this.PushPermutation<TtAntiAliasingNode.ETypeAA>("ENV_TypeAA", (int)TtAntiAliasingNode.ETypeAA.TypeCount);
 
-            TypeAA.SetValue((int)Graphics.Pipeline.TtRenderPolicy.ETypeAA.None);
-
-            this.UpdatePermutation();
+            TypeAA.SetValue((uint)TtAntiAliasingNode.ETypeAA.Taa);
+            this.UpdatePermutation().AddWaitTask();
         }
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
@@ -28,33 +28,30 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         protected override void EnvShadingDefines(in FPermutationId id, TtShaderDefinitions defines)
         {
-            defines.AddDefine("ETypeAA_None", (int)Graphics.Pipeline.TtRenderPolicy.ETypeAA.None);
-            defines.AddDefine("TETypeAA_Fsaa", (int)Graphics.Pipeline.TtRenderPolicy.ETypeAA.Fsaa);
-            defines.AddDefine("TETypeAA_Taa", (int)Graphics.Pipeline.TtRenderPolicy.ETypeAA.Taa);
         }
-        public UPermutationItem TypeAA
+        public TtPermutationItem TypeAA
         {
             get;
             set;
         }
         private void OnDrawcallTAA(NxRHI.TtGraphicDraw drawcall, TtRenderPolicy deferredPolicy, TtAntiAliasingNode aaNode)
         {
-            if (deferredPolicy.TypeAA == TtRenderPolicy.ETypeAA.Taa)
+            if (TypeAA.GetValue() == (int)TtAntiAliasingNode.ETypeAA.Taa)
             {
+                // 注意: 这里所有 binder 找不到的分支严禁再触发
+                //   TypeAA.SetValue(...).UpdatePermutation().AddWaitTask()
+                // 旧实现这么做会在 OnDrawCall 热路径上每帧 stall 主线程等待 effect 重建,
+                // 而且会进入死循环 (binder 不存在 → 重建 effect → 仍然不存在 → 再重建).
+                // Permutation 应在 ctor / Initialize 阶段一次性设好.
                 var index = drawcall.FindBinder("ColorBuffer");
                 if (index.IsValidPointer)
                 {
                     var attachBuffer = aaNode.GetAttachBuffer(aaNode.ColorPinIn);
                     drawcall.BindSRV(index, attachBuffer.Srv);
                 }
-                else
-                {
-                    TypeAA.SetValue((uint)TtRenderPolicy.ETypeAA.Taa);
-                    this.UpdatePermutation();
-                }
                 index = drawcall.FindBinder("Samp_ColorBuffer");
                 if (index.IsValidPointer)
-                    drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                    drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
                 index = drawcall.FindBinder("DepthBuffer");
                 if (index.IsValidPointer)
@@ -82,11 +79,6 @@ namespace EngineNS.Graphics.Pipeline.Common
                     var attachBuffer = aaNode.GetAttachBuffer(aaNode.PreColorPinIn);
                     drawcall.BindSRV(index, attachBuffer.Srv);
                 }
-                else
-                {
-                    TypeAA.SetValue((uint)TtRenderPolicy.ETypeAA.Taa);
-                    this.UpdatePermutation();
-                }
                 index = drawcall.FindBinder("Samp_PrevColorBuffer");
                 if (index.IsValidPointer)
                     drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
@@ -108,24 +100,20 @@ namespace EngineNS.Graphics.Pipeline.Common
                     if (aaNode.CBShadingEnv == null)
                     {
                         aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
-                        var jitterUV = deferredPolicy.DefaultCamera.mCoreObject.GetJitterUV();
-                        aaNode.CBShadingEnv.SetValue("JitterUV", in jitterUV);
+                        // 首帧立刻写一次 TaaBlendAlpha, 保证 cb 不是 0 初始化值.
+                        aaNode.UpdateShadingCBuffer(deferredPolicy);
                     }
                     drawcall.BindCBV(index, aaNode.CBShadingEnv);
                 }
             }
             else
             {
+                // FSAA / None 分支同样禁止热路径 UpdatePermutation, 见上面的注释.
                 var index = drawcall.FindBinder("ColorBuffer");
                 if (index.IsValidPointer)
                 {
                     var attachBuffer = aaNode.GetAttachBuffer(aaNode.ColorPinIn);
                     drawcall.BindSRV(index, attachBuffer.Srv);
-                }
-                else
-                {
-                    TypeAA.SetValue((uint)TtRenderPolicy.ETypeAA.Taa);
-                    this.UpdatePermutation();
                 }
                 index = drawcall.FindBinder("Samp_ColorBuffer");
                 if (index.IsValidPointer)
@@ -151,12 +139,21 @@ namespace EngineNS.Graphics.Pipeline.Common
         public TtRenderGraphPin PreDepthPinIn = TtRenderGraphPin.CreateInput("PreDepth", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin MotionVectorPinIn = TtRenderGraphPin.CreateInput("MotionVector", NxRHI.EBufferType.BFT_SRV);
 
-        public NxRHI.TtCopyDraw mCopyColorDrawcall;
-        public NxRHI.TtCopyDraw mCopyDepthDrawcall;
+        // 节点内部不再持有 history buffer / copy drawcall,
+        // 由外部独立的 PrevColor / PrevDepth Aux 节点统一管理.
+        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "ETypeAA")]
+        [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA@EngineCore", "EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA" })]
+        public enum ETypeAA : uint
+        {
+            None = 0,
+            Fsaa,
+            Taa,
 
-        public TtAttachBuffer[] ResultBuffer = new TtAttachBuffer[2];
-        public TtAttachBuffer PreColor { get => ResultBuffer[0]; }
-        public TtAttachBuffer PreDepth { get => ResultBuffer[1]; }
+            TypeCount,
+        }
+        [Category("Option")]
+        [Rtti.Meta("")]
+        public ETypeAA TypeAA { get; set; } = ETypeAA.Taa;
         public TtAntiAliasingNode()
         {
             Name = "TaaNode";
@@ -175,10 +172,6 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void Dispose()
         {
-            CoreSDK.DisposeObject(ref ResultBuffer[0]);
-            CoreSDK.DisposeObject(ref ResultBuffer[1]);
-            CoreSDK.DisposeObject(ref mCopyColorDrawcall);
-            CoreSDK.DisposeObject(ref mCopyDepthDrawcall);
             base.Dispose();
         }
         public TtAntiAliasingShading mBasePassShading;
@@ -189,13 +182,15 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
+            mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtAntiAliasingShading>();
 
-            var rc = TtEngine.Instance.GfxDevice.RenderContext;
-
-            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAntiAliasingShading>();
-
-            mCopyColorDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
-            mCopyDepthDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
+            // 按节点字段一次性把 effect 的 permutation 设成对应分支并重建 PSO.
+            // 注意: 这里只 SetValue, *不* await UpdatePermutation; UpdatePermutation 在 RenderPolicy
+            // 完整初始化序列里 await 容易导致后续节点的注册顺序错乱 (上一次实测 TaaNode 直接从图里消失).
+            // 真正的 effect 重建延迟到首次 TickLogic 时由 mEffectPermutationDirty 触发, 此时 RenderGraph
+            // 已经稳定, 重建 effect 不会动节点拓扑.
+            mBasePassShading.TypeAA.SetValue((uint)TypeAA);
+            mBasePassShading.UpdatePermutation().AddWaitTask();
         }
 
         public NxRHI.TtCbView CBShadingEnv;
@@ -229,24 +224,28 @@ namespace EngineNS.Graphics.Pipeline.Common
         };
         private int CurrentOffsetIndex = 0;
         public float TaaBlendAlpha { get; set; } = 0.05f;
+        // cbShadingEnv 现在只承担 TAA 调参 (TaaBlendAlpha). jitter 由 cbPerCamera.JitterOffset
+        // / PreJitterOffset 统一提供, 这里不再写入 JitterUV, 避免两路 jitter 同步出错的历史 bug.
+        internal void UpdateShadingCBuffer(TtRenderPolicy policy)
+        {
+            if (CBShadingEnv == null)
+                return;
+            CBShadingEnv.SetValue("TaaBlendAlpha", TaaBlendAlpha);
+        }
+
         private void TickSyncTAA(TtRenderPolicy policy)
         {
-            if (CBShadingEnv != null)
-            {
-                var jitterUV = policy.DefaultCamera.mCoreObject.GetJitterUV();
-                jitterUV.Y = -jitterUV.Y;
-                CBShadingEnv.SetValue("JitterUV", in jitterUV);
-                //if (CurrentOffsetIndex % 2 == 1)
-                //    TaaBlendAlpha = 0.0f;
-                //else
-                //    TaaBlendAlpha = 1.0f;
-                CBShadingEnv.SetValue("TaaBlendAlpha", TaaBlendAlpha);
-            }
-
+            // 推进本帧 jitter 到 Camera. SetJitterOffset 不再触发投影矩阵重算
+            // (投影矩阵已是纯净 view-projection), jitter 仅以 cbPerCamera.JitterOffset
+            // / PreJitterOffset 形式参与 GBuffer VS 的 SV_Position 偏移和 TAA 的反 jitter 采样.
+            // 上一帧 jitter 的推进 (mPreJitterOffset = mJitterOffset) 由 native 端
+            // ICamera::UpdateConstBufferData 一帧一次维护, 不要在这里做.
             CurrentOffsetIndex++;
             CurrentOffsetIndex = CurrentOffsetIndex % OffsetHaltonSequencer.Length;
-            if (policy.TypeAA == TtRenderPolicy.ETypeAA.Taa)
+            if (TypeAA == ETypeAA.Taa)
             {
+                // OffsetHaltonSequencer 里存的是 [0,1) 的 Halton 原始值, 直接交给 Camera;
+                // C++ 端 GetJitterUV() 会自己做 (x-0.5)/size 的中心化 + 归一化.
                 Vector2 offset = OffsetHaltonSequencer[CurrentOffsetIndex];
                 policy.DefaultCamera.JitterOffset = offset;
             }
@@ -254,6 +253,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 policy.DefaultCamera.JitterOffset = new Vector2(0.5f, 0.5f);
             }
+
+            UpdateShadingCBuffer(policy);
         }
 
         public override void FrameBuild(TtRenderPolicy policy)
@@ -261,9 +262,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             base.FrameBuild(policy);
         }
 
-        public override void BeforeTickLogic(TtRenderPolicy policy)
+        public override void BeforeTick(TtRenderPolicy policy)
         {
-            if (policy.TypeAA == TtRenderPolicy.ETypeAA.None)
+            if (TypeAA == ETypeAA.None)
             {
                 this.MoveAttachment(ColorPinIn, ResultPinOut);
                 return;
@@ -277,90 +278,47 @@ namespace EngineNS.Graphics.Pipeline.Common
                     ResultPinOut.Attachement.Format = buffer.BufferDesc.Format;
                 }
             }
-            if (policy.TypeAA == TtRenderPolicy.ETypeAA.Taa)
-            {
-                if ((PreColor == null || PreDepth == null) || (PreColor.BufferDesc.Format != ResultPinOut.Attachement.Format
-                 || PreColor.BufferDesc.Width != ResultPinOut.Attachement.Width
-                 || PreColor.BufferDesc.Height != ResultPinOut.Attachement.Height))
-                {
-                    CoreSDK.DisposeObject(ref ResultBuffer[0]);
-                    CoreSDK.DisposeObject(ref ResultBuffer[1]);
-                    ResultBuffer[0] = new TtAttachBuffer();
-                    ResultBuffer[1] = new TtAttachBuffer();
-                    ResultBuffer[0].BufferDesc = ResultPinOut.Attachement.BufferDesc;
-                    ResultBuffer[0].CreateBufferViews(in ResultBuffer[0].BufferDesc);
-
-                    ResultBuffer[1].BufferDesc = ResultPinOut.Attachement.BufferDesc;
-                    ResultBuffer[1].CreateBufferViews(in ResultBuffer[0].BufferDesc);
-                }
-            }
+            // History (PreColor/PreDepth) 由外部独立的 PrevColor/PrevDepth Aux 拷贝节点提供,
+            // 节点本身不再维护 ResultBuffer[0]/[1] 与 TickCopyLogic 拷贝逻辑,
+            // 否则会和图里的 PrevColor/PrevDepth 节点重复拷贝并把 ImportedBuffer 互相覆盖.
         }
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            switch (policy.TypeAA)
+            switch (TypeAA)
             {
-                case TtRenderPolicy.ETypeAA.None:
+                case ETypeAA.None:
                     break;
-                case TtRenderPolicy.ETypeAA.Taa:
-                    PreColorPinIn.ImportedBuffer = PreColor;
-                    base.TickLogic(world, policy, frameCmdList, bClear);
-                    TickCopyLogic(policy);
-                    break;
-                case TtRenderPolicy.ETypeAA.Fsaa:
-                    base.TickLogic(world, policy, frameCmdList, bClear);
+                case ETypeAA.Taa:
+                case ETypeAA.Fsaa:
+                    base.Tick(world, policy, frameCmdList, bClear);
                     break;
             }
-        }
-
-        public void CopyAttachBuff(TtRenderGraphPin SrcPin, TtAttachBuffer DesAttachBuffer, NxRHI.TtCopyDraw CopyDrawcall, NxRHI.TtCommandList DrawCommandList)
-        {
-            var srcPin = GetAttachBuffer(SrcPin);
-
-            if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer) && DesAttachBuffer.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
-            {
-                CopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
-            }
-            else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && DesAttachBuffer.GpuResource.GetType() == typeof(NxRHI.TtTexture))
-            {
-                CopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
-            }
-            else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && DesAttachBuffer.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
-            {
-                CopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
-            }
-            else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && DesAttachBuffer.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
-            {
-                CopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Texture;
-            }
-            CopyDrawcall.BindSrc(srcPin.GpuResource);
-            CopyDrawcall.BindDest(DesAttachBuffer.GpuResource);
-
-            DrawCommandList.PushGpuDraw(CopyDrawcall);
-            //var fp = new NxRHI.FSubResourceFootPrint();
-            //fp.SetDefault();
-            //mCopyDrawcall.mCoreObject.FootPrint = fp;
-        }
-
-        public unsafe void TickCopyLogic(TtRenderPolicy policy)
-        {
-            if (mCopyColorDrawcall == null || mCopyDepthDrawcall == null)
-                return;
-
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmdlist, "AA"))
-            {
-                CopyAttachBuff(ResultPinOut, PreColor, mCopyColorDrawcall, cmdlist);
-                cmdlist.FlushDraws();
-            }
-            policy.CommitCommandList(cmdlist, "AA");
         }
         public override void TickSync(TtRenderPolicy policy)
         {
-            if (policy.TypeAA == TtRenderPolicy.ETypeAA.None)
+            base.TickSync(policy);
+
+            // gate: 只在 "节点字段 = Taa" 且 "effect permutation 实际编译为 Taa" 时才注入 jitter.
+            // 不再依赖 "上一帧 TickLogic 是否跑过" 这种跨方法时序状态:
+            //   - 渲染线程 / 逻辑线程的 TickLogic / TickSync 顺序在不同管线下不固定,
+            //     用 mTaaTickLogicRanLastFrame 这种 "本帧入口被置 false, 跑完才置 true" 的状态
+            //     做 gate 会出现 "TickSync 永远看到 false → jitter 一直被复位为 (0.5,0.5)
+            //     → cbShadingEnv.JitterUV ≈ 0 → TAA 永远收敛不了" 的 bug, RenderDoc 抓帧
+            //     已确认是这种状态.
+            //   - 真正稳定的判定就是 "节点要跑 TAA 且 effect 已经被构建成 TAA permutation",
+            //     这两条满足就一定有 TaaNode draw 提交.
+            bool taaActive = TypeAA == ETypeAA.Taa
+                && mBasePassShading != null
+                && mBasePassShading.TypeAA.GetValue() == (uint)ETypeAA.Taa;
+            if (!taaActive)
             {
+                // 没跑 TAA 时把 Camera 的 JitterOffset 复位为 (0.5, 0.5),
+                // 这样 GetJitterUV() 返回 (0,0), JitterProjectionMatrix == ProjectionMatrix,
+                // 不会有残留的 jitter 影响其他 pass.
+                if (policy.DefaultCamera != null)
+                    policy.DefaultCamera.JitterOffset = new Vector2(0.5f, 0.5f);
                 return;
             }
-            base.TickSync(policy);
 
             TickSyncTAA(policy);
         }

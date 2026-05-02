@@ -53,25 +53,25 @@ int3 GetVxGroupFromVoxelIndexer(int3 vxIdx)
 	return vxIdx / VxGroupCubeSide;
 }
 
-float3 ReconstructPosViewSpace(float2 uv, float w, matrix PrjInvMtx, float depth, float platform_uv_flag, bool bJitter = true)
+float3 ReconstructPosViewSpace(float2 uv, float w, matrix PrjInvMtx, float depth, float platform_uv_flag)
 {
 	float4 PosCS = float4(uv.x * 2.0f - 1.0f, (1.0f - uv.y * 2.0f) * platform_uv_flag, depth, 1.0f) * w;
-	float4 PosVS = mul(PosCS, GetPrjMtxInverse(bJitter));
+	float4 PosVS = mul(PosCS, GetPrjMtxInverse());
 	return PosVS.xyz;
 }
 
-float3 ReconstructPosWorldSpace(float2 uv, float w, matrix ViewPrjInvMtx, float depth, float platform_uv_flag, bool bJitter = true)
+float3 ReconstructPosWorldSpace(float2 uv, float w, matrix ViewPrjInvMtx, float depth, float platform_uv_flag)
 {
 	float4 PosCS = float4(uv.x * 2.0f - 1.0f, (1.0f - uv.y * 2.0f) * platform_uv_flag, depth, 1.0f) * w;
-	float4 PosWS = mul(PosCS, GetViewPrjMtxInverse(bJitter));
+	float4 PosWS = mul(PosCS, GetViewPrjMtxInverse());
 	return PosWS.xyz;
 }
 
-float3 ReconstructPosWorldSpace2(float2 uv, float w, matrix ViewPrjInvMtx, float platform_uv_flag, bool bJitter = true)
+float3 ReconstructPosWorldSpace2(float2 uv, float w, matrix ViewPrjInvMtx, float platform_uv_flag)
 {
 	float depth =  ReconstructPosArg.x + ReconstructPosArg.y / w;
 	float4 PosCS = float4(uv.x * 2.0f - 1.0f, (1.0f - uv.y * 2.0f) * platform_uv_flag, depth, 1.0f) * w;
-	float4 PosWS = mul(PosCS, GetViewPrjMtxInverse(bJitter));
+	float4 PosWS = mul(PosCS, GetViewPrjMtxInverse());
 	return PosWS.xyz;
 }
 

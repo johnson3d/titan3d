@@ -24,8 +24,10 @@
 #include "../../../Base/IUnknown.h"
 #include <fstream>
 #include <iomanip>
+#include <filesystem>
 #define VULKAN_HPP_NO_TO_STRING
 #include "NsightAftermathShaderDatabase.h"
+#include "../NvAftermath.h"
 
 bool VKShaderDatabase::IsSpirV = false;
 //*********************************************************
@@ -72,6 +74,19 @@ void VKShaderDatabase::AddShaderBinary(const char* name, std::vector<uint8_t>& d
     tmp.ByteCode = data;
     tmp.DebugName = name;
 	m_shaderBinaries[shaderHash] = tmp;
+
+    // Write shader binary to disk so Nsight Graphics can find it during offline analysis.
+    // Files go under <outputRoot>/aftermath-shaders/ so all Aftermath outputs share the
+    // same configurable root specified by NvAftermath::SetOutputRoot at engine init time.
+    const std::string& outputRoot = EngineNS::GpuDump::NvAftermath::GetOutputRoot();
+    const std::string shaderDir = outputRoot + "aftermath-shaders";
+    std::filesystem::create_directories(shaderDir);
+    const std::string shaderFileName = shaderDir + "/" + std::to_string(shaderHash) + (IsSpirV ? ".spv" : ".dxil");
+    std::ofstream shaderFile(shaderFileName, std::ios::out | std::ios::binary);
+    if (shaderFile)
+    {
+        shaderFile.write(reinterpret_cast<const char*>(data.data()), data.size());
+    }
 }
 
 void VKShaderDatabase::AddShaderBinaryWithDebugInfo(const char* name, std::vector<uint8_t>& strippedData, std::vector<uint8_t>& data)

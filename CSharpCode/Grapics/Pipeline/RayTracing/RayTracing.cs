@@ -98,7 +98,7 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtRayTracingEnv>();
+            mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtRayTracingEnv>();
             var binder = mBasePassShading.CurrentEffect.FindBinder(EShaderBindType.SBT_CBV, "g_sceneCB");
             if (binder.IsValidPointer)
             {
@@ -152,7 +152,7 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
             LightingPinOut.Attachement.Width = (uint)x;
             LightingPinOut.Attachement.Height = (uint)y;
         }
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             if (mRayTracingDraw == null)
             {

@@ -13,11 +13,11 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/FogShading.cginc", RName.ERNameType.Engine);
 
-            TypeFog = this.PushPermutation<Graphics.Pipeline.TtRenderPolicy.ETypeAA>("ENV_FOGFACTOR_TYPE", (int)Graphics.Pipeline.TtRenderPolicy.ETypeFog.TypeCount);
+            TypeFog = this.PushPermutation<Graphics.Pipeline.TtRenderPolicy.ETypeFog>("ENV_FOGFACTOR_TYPE", (int)Graphics.Pipeline.TtRenderPolicy.ETypeFog.TypeCount);
 
             TypeFog.SetValue((int)Graphics.Pipeline.TtRenderPolicy.ETypeFog.None);
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
@@ -30,7 +30,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             defines.AddDefine("TypeFog_ExpHeight", (int)Graphics.Pipeline.TtRenderPolicy.ETypeFog.ExpHeight);
         }
 
-        public UPermutationItem TypeFog
+        public TtPermutationItem TypeFog
         {
             get;
             set;
@@ -85,13 +85,13 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtFogShading>();
+            mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtFogShading>();
         }
         public override void FrameBuild(TtRenderPolicy policy)
         {
             base.FrameBuild(policy);
         }
-        public override void BeforeTickLogic(TtRenderPolicy policy)
+        public override void BeforeTick(TtRenderPolicy policy)
         {
             if (policy.TypeFog == TtRenderPolicy.ETypeFog.None)
             {
@@ -110,13 +110,13 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
         public NxRHI.TtCbView CBShadingEnv;
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             if (policy.TypeFog == TtRenderPolicy.ETypeFog.None)
             {
                 return;
             }
-            base.TickLogic(world, policy, frameCmdList, bClear);
+            base.Tick(world, policy, frameCmdList, bClear);
         }
         public override void TickSync(TtRenderPolicy policy)
         {

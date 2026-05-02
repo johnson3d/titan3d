@@ -1,4 +1,4 @@
-#include "IMeshSimplify.h"
+ï»¿#include "IMeshSimplify.h"
 #include "Simplify.h"
 #include "../../Graphics/Mesh/MeshDataProvider.h"
 #include "meshoptimizer.h"
@@ -86,7 +86,7 @@ UINT IMeshOptimizer::BuildMeshlets(IBlobObject* meshlets, IBlobObject* meshletMa
 	mesh->ConvertToIndex32();
 	auto pIndices = mesh->IndexBuffer->GetDataPtr<UINT>();
 	auto vb = mesh->mVertexBuffers[NxRHI::VST_Position];
-	//ÕâÀïÆäÊµĞèÒª·Ö²ÄÖÊBuild
+	//è¿™é‡Œå…¶å®éœ€è¦åˆ†æè´¨Build
 	for (UINT i = 0; i < mesh->GetAtomNumber(); i++)
 	{
 		auto pAtom = mesh->GetAtom(i, 0);
@@ -137,18 +137,18 @@ typedef CGAL::Triangulation_vertex_base_with_info_3<int, K> Vb;
 typedef CGAL::Triangulation_cell_base_3<K> Cb;
 typedef CGAL::Triangulation_data_structure_3<Vb, Cb> Tds;
 
-// ¶¨ÒåDelaunayÈı½ÇÆÊ·ÖÀàĞÍ£¬´øintµÄinfo 
+// å®šä¹‰Delaunayä¸‰è§’å‰–åˆ†ç±»å‹ï¼Œå¸¦intçš„info 
 typedef CGAL::Delaunay_triangulation_3<K, Tds> Delaunay;
 //typedef CGAL::Delaunay_triangulation_3<K> Delaunay;
-// ¶¨ÒåµãÀàĞÍ
+// å®šä¹‰ç‚¹ç±»å‹
 typedef K::Point_3 Point_3;
-// ¶¨ÒåËÄÃæÌå£¨µ¥Ôª£©ÀàĞÍ
+// å®šä¹‰å››é¢ä½“ï¼ˆå•å…ƒï¼‰ç±»å‹
 typedef Delaunay::Cell_handle Cell_handle;
 typedef Delaunay::Vertex_handle Vertex_handle;
 
 bool VPointCloud::BuildTetrahedron(v3dxVector3* positions, int num, IBlobObject* outTraahedrons)
 {
-	// ´´½¨Ò»¸öËæ»úµãÔÆ×÷ÎªÊ¾Àı
+	// åˆ›å»ºä¸€ä¸ªéšæœºç‚¹äº‘ä½œä¸ºç¤ºä¾‹
 	std::vector<std::pair<Point_3, int>> points;
 	for (int i = 0; i < num; ++i) 
 	{
@@ -156,28 +156,28 @@ bool VPointCloud::BuildTetrahedron(v3dxVector3* positions, int num, IBlobObject*
 		points.push_back({ t, i});
 	}
 
-	// ´´½¨DelaunayÈı½ÇÆÊ·Ö
+	// åˆ›å»ºDelaunayä¸‰è§’å‰–åˆ†
 	Delaunay dt(points.begin(), points.end());
 
-	// ÑéÖ¤Èı½ÇÆÊ·ÖÊÇ·ñÓĞĞ§
+	// éªŒè¯ä¸‰è§’å‰–åˆ†æ˜¯å¦æœ‰æ•ˆ
 	if (dt.is_valid() == false)
 		return false;
 
-	// Êä³ö»ù±¾ĞÅÏ¢
+	// è¾“å‡ºåŸºæœ¬ä¿¡æ¯
 	std::cout << "Number of vertices: " << dt.number_of_vertices() << std::endl;
 	std::cout << "Number of finite cells (tetrahedra): " << dt.number_of_finite_cells() << std::endl;
 	std::cout << "Number of infinite cells: " << dt.number_of_cells() - dt.number_of_finite_cells() << std::endl;
 
 	outTraahedrons->ReSize(0);
 	outTraahedrons->PushData((UINT)dt.number_of_finite_cells());
-	// µü´ú±éÀúËùÓĞÓĞÏŞËÄÃæÌå£¨µ¥Ôª£©
+	// è¿­ä»£éå†æ‰€æœ‰æœ‰é™å››é¢ä½“ï¼ˆå•å…ƒï¼‰
 	for (Cell_handle cell : dt.finite_cell_handles()) 
 	{	
-		// Ã¿¸öËÄÃæÌåÓĞ4¸ö¶¥µã
+		// æ¯ä¸ªå››é¢ä½“æœ‰4ä¸ªé¡¶ç‚¹
 		for (int i = 0; i < 4; ++i) 
 		{
 			Vertex_handle vh = cell->vertex(i);
-			// È·±£¶¥µãÓĞĞ§£¨ÎŞÏŞ¶¥µã²»´æÔÚ£©
+			// ç¡®ä¿é¡¶ç‚¹æœ‰æ•ˆï¼ˆæ— é™é¡¶ç‚¹ä¸å­˜åœ¨ï¼‰
 			if (dt.is_infinite(vh)) 
 			{
 				outTraahedrons->PushData((int)-1);

@@ -56,6 +56,16 @@
 - - **[PGCEditor](editor/PGCEditor.md)**
 - - **[UIEditor](editor/UIEditor.md)**
 
+- **架构与行业对比**
+- - **[Render Graph 与业界主流引擎横向对比](engine/RenderGraph.Industry.Compare.md)**
+    - TitanEngine 自研 RDG (`TtRenderGraph` / `TtAttachmentCache`) 与
+      UE5 RDG / Unity URP-HDRP RG / Frostbite FrameGraph / Granite / O3DE Atom /
+      Stride GraphicsCompositor / Falcor / Bevy bevy_render 的全维度横向对比。
+    - 一句话定位: **业界第一档 RDG 能力 + 业界少见的"主渲染管线可视化编辑器"
+      + Permutation / RenderPolicy 资产化, 三者同时具备的引擎全球不超过 5 个**。
+    - 含演进路线图 (memory aliasing / pass merging / async compute 自动调度等)。
+    - 对外宣讲 / 行业汇报 / 招聘材料的"硬数据"统一来源, 持续更新。
+
 - 基础教程
 - 在ContentBrowser的tutorials下面有对应的子目录
 - - [helloworld](tutorials/helloworld.md)

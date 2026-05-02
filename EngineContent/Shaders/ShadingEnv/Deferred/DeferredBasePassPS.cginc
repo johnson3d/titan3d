@@ -68,12 +68,9 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
     GBuffer.RenderFlags_10Bit = MaterialRenderFlags;
 	//GBuffer.MotionVector.xy = input.psCustomUV0.xy;
 	
-	float2 previousScreenPos = (input.psCustomUV1.xy / input.psCustomUV1.w) * 0.5 + 0.5;
-	float2 currentScreenPos = (input.psCustomUV2.xy / input.psCustomUV2.w) * 0.5 + 0.5;
-	//previousScreenPos.y = 1.0 - previousScreenPos.y;
-	//currentScreenPos.y = 1.0 - currentScreenPos.y;
-    GBuffer.MotionVector.xy = (half2) (currentScreenPos - previousScreenPos);
-	GBuffer.MotionVector.y = -GBuffer.MotionVector.y;
+    float2 previousScreenPos = (input.psCustomUV1.xy / input.psCustomUV1.w) * 0.5 + 0.5;
+    float2 currentScreenPos = (input.psCustomUV2.xy / input.psCustomUV2.w) * 0.5 + 0.5;
+	GBuffer.MotionVector.xy = (half2) (currentScreenPos - previousScreenPos);
 
 	//float2 noJitterScreenPos = (input.psCustomUV3.xy / input.psCustomUV3.w) * 0.5 + 0.5;
 	//if (any(abs(currentScreenPos - (noJitterScreenPos + JitterOffset)) > ViewportSizeAndRcp.zw * 0.25f))

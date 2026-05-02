@@ -234,6 +234,14 @@ namespace NxRHI
 		auto device = GetGpuDevice();
 		for (UINT i = 0; i < Count; i++)
 		{
+			if (BufferWriters[i].Buffer->Map(0, &mapped, false))
+			{
+				auto ptr = (UINT*)((BYTE*)mapped.pData + BufferWriters[i].Offset);
+				ptr[i] = BufferWriters[i].Value;
+				BufferWriters[i].Buffer->Unmap(0);
+				continue;
+			}
+
 			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
 			cpDraw->BindBufferDest(BufferWriters[i].Buffer);
 			cpDraw->BindBufferSrc(copyBuffer);

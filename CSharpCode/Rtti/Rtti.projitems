@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -13,7 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)TypeInheritTree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TypeManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClassMeta.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UNativeCoreProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NativeCoreProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Rtti.brick" />

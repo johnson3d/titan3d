@@ -43,6 +43,7 @@ namespace NxRHI
 				return false;
 
 			auto desc = Desc;
+			desc.Type = EBufferType::BFT_NONE;
 			desc.CpuAccess = ECpuAccess::CAS_READ;
 			desc.Usage = EGpuUsage::USAGE_STAGING;
 			desc.RowPitch = Desc.Size;

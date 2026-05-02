@@ -51,7 +51,8 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     float4 color = float4(0, 0, 0, 1);
     float2 uv = input.vUV;
     
-    color.rgb = GaussNxN(ColorBuffer, Samp_ColorBuffer, uv, GaussStruct.BlurSize, GaussStruct.StrideUV, GaussStruct.BlurSigma);
+    int n = GaussStruct.BlurSize; //min(5, GaussStruct.BlurSize);
+    color.rgb = GaussNxN(ColorBuffer, Samp_ColorBuffer, uv, n, GaussStruct.StrideUV, GaussStruct.BlurSigma);
     output.RT0 = color;
 
     return output;

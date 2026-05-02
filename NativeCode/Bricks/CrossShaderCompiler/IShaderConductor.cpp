@@ -1,4 +1,4 @@
-#include "IShaderConductor.h"
+ï»¿#include "IShaderConductor.h"
 #include "../../NextRHI/NxRHI.h"
 #include "../../Base/io/vfxfile.h"
 #include "../../Base/io/MemStream.h"
@@ -485,17 +485,17 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 //bool CompileRayTracingLibrary(IDxcBlob** ppDXILBlob) 
 //{
 //	try {
-//		// ³õÊ¼»¯DXC
+//		// åˆå§‹åŒ–DXC
 //		CComPtr<IDxcUtils> pUtils;
 //		CComPtr<IDxcCompiler3> pCompiler;
 //		DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&pUtils));
 //		DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&pCompiler));
 //
-//		// ¼ÓÔØHLSLÔ´Âë
+//		// åŠ è½½HLSLæºç 
 //		CComPtr<IDxcBlobEncoding> pSource;
 //		pUtils->LoadFile(L"RayTracing.hlsl", nullptr, &pSource);
 //
-//		// ÅäÖÃ±àÒë²ÎÊı
+//		// é…ç½®ç¼–è¯‘å‚æ•°
 //		std::vector<LPCWSTR> args = {
 //			L"-T", L"lib_6_6",
 //			L"-E", L"RayGen",
@@ -503,7 +503,7 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 //			DXC_ARG_WARNINGS_ARE_ERRORS
 //		};
 //
-//		// Ö´ĞĞ±àÒë
+//		// æ‰§è¡Œç¼–è¯‘
 //		DxcBuffer sourceBuffer = {
 //			pSource->GetBufferPointer(),
 //			pSource->GetBufferSize(),
@@ -514,7 +514,7 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 //		pCompiler->Compile(&sourceBuffer, args.data(), (UINT)args.size(),
 //			nullptr, IID_PPV_ARGS(&pResult));
 //
-//		// ´íÎó´¦Àí
+//		// é”™è¯¯å¤„ç†
 //		CComPtr<IDxcBlobUtf8> pErrors;
 //		pResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr);
 //		if (pErrors && pErrors->GetStringLength() > 0) {
@@ -525,7 +525,7 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 //		pResult->GetStatus(&status);
 //		if (FAILED(status)) return false;
 //
-//		// ÌáÈ¡DXIL
+//		// æå–DXIL
 //		return SUCCEEDED(pResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(ppDXILBlob), nullptr));
 //	}
 //	catch (...) {

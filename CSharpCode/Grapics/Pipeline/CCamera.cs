@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -294,14 +294,6 @@ namespace EngineNS.Graphics.Pipeline
         {
             return mCoreObject.GetViewProjection();
         }
-        public EngineNS.Matrix GetJitterViewProjection()
-        {
-            return mCoreObject.GetJitterViewProjection();
-        }
-        public EngineNS.Matrix GetJitterViewProjectionInverse()
-        {
-            return mCoreObject.GetJitterViewProjectionInverse();
-        }
         public EngineNS.Matrix GetViewProjectionInverse()
         {
             return mCoreObject.GetViewProjectionInverse();
@@ -312,19 +304,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public void UpdateConstBufferData(NxRHI.TtGpuDevice rc, NxRHI.TtCbView.EUpdateMode mode = NxRHI.TtCbView.EUpdateMode.Auto)
         {
-            if (PreFrameViewProjectionMatrix == null)
-            {
-                PreFrameViewProjectionMatrix = GetViewProjection();
-            }
-            if (JitterPreFrameViewProjectionMatrix == null)
-            {
-                JitterPreFrameViewProjectionMatrix = GetJitterViewProjection();
-            }
-            PerCameraCBuffer.SetMatrix(TtCoreShaderBinder.TtPerCameraCBufferVarIndexer.Instance.PreFrameViewPrjMtx, PreFrameViewProjectionMatrix.Value, true, mode);
-            PerCameraCBuffer.SetMatrix(TtCoreShaderBinder.TtPerCameraCBufferVarIndexer.Instance.JitterPreFrameViewPrjMtx, JitterPreFrameViewProjectionMatrix.Value, true, mode);
             mCoreObject.UpdateConstBufferData(rc.mCoreObject, PerCameraCBuffer.mCoreObject, true, mode == NxRHI.TtCbView.EUpdateMode.Immediately ? new NxRHI.FCbvUpdater() : TtEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
-            PreFrameViewProjectionMatrix = GetViewProjection();
-            JitterPreFrameViewProjectionMatrix = GetJitterViewProjection();
         }
 
         public void TickLogic(float ellapse)
@@ -393,8 +373,6 @@ namespace EngineNS.Graphics.Pipeline
         {
         }
 
-        Matrix? PreFrameViewProjectionMatrix = null;
-        Matrix? JitterPreFrameViewProjectionMatrix = null;
         #endregion
     }
 

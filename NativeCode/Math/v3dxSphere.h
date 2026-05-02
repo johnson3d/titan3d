@@ -1,4 +1,4 @@
-#ifndef __v3dxSphere__H__
+ï»¿#ifndef __v3dxSphere__H__
 #define __v3dxSphere__H__
 
 #include "v3dxVector3.h"
@@ -6,7 +6,7 @@
 #pragma pack(push,4)
 
 /** A sphere primitive, mostly used for bounds checking. 
-ÇòµÄÍ¼Ôª£¬ÓÃÓÚ°ó¶¨¼ì²â¡£
+çƒçš„å›¾å…ƒï¼Œç”¨äºç»‘å®šæ£€æµ‹ã€‚
 */
 class v3dxSphere
 {
@@ -26,28 +26,28 @@ public:
 	v3dxSphere(const v3dxVector3& center, float radius): mRadius(radius), mCenter(center) {}
 
 	/** Returns the radius of the sphere. 
-	·µ»ØÇòµÄ°ë¾¶
+	è¿”å›çƒçš„åŠå¾„
 	*/
 	float getRadius(void) const { 
 		return mRadius; 
 	}
 
 	/** Sets the radius of the sphere. 
-	ÉèÖÃÇòµÄ°ë¾¶
+	è®¾ç½®çƒçš„åŠå¾„
 	*/
 	void setRadius(float radius) { 
 		mRadius = radius; 
 	}
 
 	/** Returns the center point of the sphere. 
-	·µ»ØÇòµÄÖĞµã
+	è¿”å›çƒçš„ä¸­ç‚¹
 	*/
 	const v3dxVector3& getCenter(void) const { 
 		return mCenter; 
 	}
 
 	/** Sets the center point of the sphere. 
-	ÉèÖÃÇòµÄÖĞµã
+	è®¾ç½®çƒçš„ä¸­ç‚¹
 	*/
 	void setCenter(const v3dxVector3& center) { 
 		mCenter = center; 

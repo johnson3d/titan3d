@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "NxMatrix.h"
 
 namespace NxMath
@@ -11,7 +11,7 @@ namespace NxMath
 		using Vector3 = NxVector3<Type>;
 		NxQuat<Type> Quat;
 		NxVector3<Type> Position;
-		NxVector3<Type> Scale;//ÎªÁËHierarchical¼ÆËã·½±ã£¬ÎÒÃÇÉè¶¨mScaleÔÚTransformÖĞÖ»Ó°Ïì±¾½Úµã¶ø²»´«µİ£¬Èç¹ûĞèÒªÕûÌå·ÅËõ£¬ÔÚNodeÉÏĞÂÔöÒ»¸öScaleMatrix
+		NxVector3<Type> Scale;//ä¸ºäº†Hierarchicalè®¡ç®—æ–¹ä¾¿ï¼Œæˆ‘ä»¬è®¾å®šmScaleåœ¨Transformä¸­åªå½±å“æœ¬èŠ‚ç‚¹è€Œä¸ä¼ é€’ï¼Œå¦‚æœéœ€è¦æ•´ä½“æ”¾ç¼©ï¼Œåœ¨Nodeä¸Šæ–°å¢ä¸€ä¸ªScaleMatrix
 		NxTransform()
 			: Quat(NxQuat<Type>::Identity())
 			, Position(Vector3::Zero())

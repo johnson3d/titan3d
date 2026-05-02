@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -13,35 +13,36 @@
     <Compile Include="$(MSBuildThisFileDirectory)Forms\GpuProfiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\MemoryProfiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\AnimationBlendSpaceEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Forms\USceneEditor_Macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Forms\ULightEnvironemntEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Forms\USkeletonEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Forms\UAnimationClipEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Forms\UAssetReferViewer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Forms\UCpuProfiler.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Forms\UEditorSettings.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Forms\UFileDialog.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Forms\UInspector.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Forms\UMaterialInstanceEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Forms\UMeshEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Forms\UMeshPrimitiveEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Forms\USceneEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Forms\UTextureViewer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Forms\UWorldOutliner.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\SceneEditor_Macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\LightEnvironemntEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\SkeletonEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\AnimationClipEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\AssetReferViewer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\CpuProfiler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\EditorSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\FileDialog.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\Inspector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\MaterialInstanceEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\MeshEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\MeshPrimitiveEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\SceneEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\TextureViewer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\WorldOutliner.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IAssetEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EditorAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TtPreviewViewportInteractiveMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIWindowsTest.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UMainEditorApplication.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UMetaViewEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MainEditorApplication.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MetaViewEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayInEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ShaderCompiler\UHLSLCompiler.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ShaderCompiler\UShaderCode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShaderCompiler\HLSLCompiler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShaderCompiler\ShaderCode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)INodeUIProvider.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UEditorWorldViewportSlate.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UPreviewViewport.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)USdfPreviewViewport.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)USnapshot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EditorWorldViewportSlate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PreviewViewport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SdfPreviewViewport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Snapshot.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Editor.brick" />

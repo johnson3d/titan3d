@@ -1,4 +1,4 @@
-﻿using EngineNS.IO;
+using EngineNS.IO;
 using EngineNS.Thread.Async;
 using System;
 using System.Collections.Generic;
@@ -186,7 +186,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
                 UpdateAMetaReferences(ameta);
                 ameta.SaveAMeta(this);
             }
-            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            var typeStr = Rtti.TtTypeDesc.TypeOf(this.GetType()).TypeString;
             var xnd = new IO.TtXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("BlendSpace", 0, 0))
             {

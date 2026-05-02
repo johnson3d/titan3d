@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "NxConstraint.h"
 
 NS_BEGIN
@@ -15,18 +15,18 @@ namespace NxPhysics
 			const NxReal& c, const NxVector3* gradient, const NxReal* w, int num , 
 			const NxReal& compliance, const NxReal& stepTime)
 		{
-			/* CFunc()ÎªÔ¼Êøº¯Êı£¬Grad[]ÎªÇóµ¼
-			* Ô¼Êø·½³ÌCFuncÕÒµ½Ò»¸ödpÊ¹µÃµÈÓÚ0£¬ÕâÀïµÚÒ»¸öµÈÓÚÊÇÌ©ÀÕÒ»½×Õ¹¿ªµÄ½üËÆ
-			* ·½³Ì1: CFunc(p+dp) = CFunc(p) + Grad[C(p)] * dp = 0
-			* ·½³Ì2: dp = Lambda * Grad[C(p)]
-			* ·½³Ì2´úÈë·½³Ì1£¬½âµÃ
+			/* CFunc()ä¸ºçº¦æŸå‡½æ•°ï¼ŒGrad[]ä¸ºæ±‚å¯¼
+			* çº¦æŸæ–¹ç¨‹CFuncæ‰¾åˆ°ä¸€ä¸ªdpä½¿å¾—ç­‰äº0ï¼Œè¿™é‡Œç¬¬ä¸€ä¸ªç­‰äºæ˜¯æ³°å‹’ä¸€é˜¶å±•å¼€çš„è¿‘ä¼¼
+			* æ–¹ç¨‹1: CFunc(p+dp) = CFunc(p) + Grad[C(p)] * dp = 0
+			* æ–¹ç¨‹2: dp = Lambda * Grad[C(p)]
+			* æ–¹ç¨‹2ä»£å…¥æ–¹ç¨‹1ï¼Œè§£å¾—
 			* Lambda = -CFunc(p)/(|Grad[C(p)]|^2)
-			* ÔÙ´øÈë·½³Ì2£¬¿ÉµÃµ½dp = (-CFunc(p)/(|Grad[C(p)]|^2)) * Grad[C(p)]
-			* ×îÖÕ±ä³É¶àÔªº¯ÊıÓ¦ÓÃÀ­¸ñÀÊÈÕ³Ë·¨×ÓÇódp¼«Öµ
-			* º¯ÊıÉÏ¾ßÌåÃ¿¸öµãÓĞdp[i] = S * Grad[C(p[i])];
-			* ËùÒÔÎÒÃÇĞèÒª¼ÆËã³öÀ´À­¸ñÀÊÈÕ³Ë·¨×ÓS£¬ÔÙ¿¼ÂÇÖÊÁ¿Ó°Ïì£¬ÒıÈëÖÊÁ¿µÄµ¼Êı¼ÓÈ¨ĞŞÕıw = 1 / m£¬
+			* å†å¸¦å…¥æ–¹ç¨‹2ï¼Œå¯å¾—åˆ°dp = (-CFunc(p)/(|Grad[C(p)]|^2)) * Grad[C(p)]
+			* æœ€ç»ˆå˜æˆå¤šå…ƒå‡½æ•°åº”ç”¨æ‹‰æ ¼æœ—æ—¥ä¹˜æ³•å­æ±‚dpæå€¼
+			* å‡½æ•°ä¸Šå…·ä½“æ¯ä¸ªç‚¹æœ‰dp[i] = S * Grad[C(p[i])];
+			* æ‰€ä»¥æˆ‘ä»¬éœ€è¦è®¡ç®—å‡ºæ¥æ‹‰æ ¼æœ—æ—¥ä¹˜æ³•å­Sï¼Œå†è€ƒè™‘è´¨é‡å½±å“ï¼Œå¼•å…¥è´¨é‡çš„å¯¼æ•°åŠ æƒä¿®æ­£w = 1 / mï¼Œ
 			* S = CFunc(p) / Sum( (|Grad[C(p)]|^2) * w[i] )
-			* |Grad[C(p)]|^2ÏòÁ¿Ä£Æ½·½£¬ÕıºÃÍ¨¹ıLengthSquared()»ñµÃ
+			* |Grad[C(p)]|^2å‘é‡æ¨¡å¹³æ–¹ï¼Œæ­£å¥½é€šè¿‡LengthSquared()è·å¾—
 			*/
 			NxReal dv = NxReal::Zero();
 			for (int i = 0; i < num; i++)
@@ -52,7 +52,7 @@ namespace NxPhysics
 			return (NxRigidBody*)mShapePair.second->GetActor();
 		}
 
-		NxReal mCompliance = NxReal::Zero();//Èá¶È¶ÔÓ¦ÓÚ¸Õ¶ÈµÄµ¹Êı£¬µ¥Î»ÊÇÃ×/Å£¶Ù
+		NxReal mCompliance = NxReal::Zero();//æŸ”åº¦å¯¹åº”äºåˆšåº¦çš„å€’æ•°ï¼Œå•ä½æ˜¯ç±³/ç‰›é¡¿
 		NxVector3 mContactDirection;
 		
 		inline NxReal GetRagrange() const {

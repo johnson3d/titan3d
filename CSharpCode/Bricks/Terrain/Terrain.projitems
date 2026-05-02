@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -9,19 +9,19 @@
     <Import_RootNamespace>EngineNS.Bricks.Terrain</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\ULevelStreaming.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UPatch.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrain.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainLevel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainMaterial.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainMdfQueue.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainPlant.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\LevelStreaming.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\Patch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\Terrain.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainLevel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainMaterial.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainMdfQueue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainPlant.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Grass\TtGrassModifier.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Grass\UMdfGrassStaticMesh.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UQTree.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainGrass.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UTerrainModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Grass\MdfGrassStaticMesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QTree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainGrass.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TerrainModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Terrain.brick" />

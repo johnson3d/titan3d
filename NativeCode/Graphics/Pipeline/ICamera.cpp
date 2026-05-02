@@ -21,8 +21,8 @@ void ICamera::CopyDataTo(ICamera* target)
 	target->mHeight = mHeight;
 
 	target->mJitterOffset = mJitterOffset;
+	target->mPreJitterOffset = mPreJitterOffset;
 	*target->mLogicData = *mLogicData;
-	*target->mRenderData = *mRenderData;
 }
 
 ICamera::ICamera()
@@ -33,13 +33,14 @@ ICamera::ICamera()
 	mHeight = 0;
 	
 	mLogicData = new CameraData();
-	mRenderData = new CameraData();
 
 	mFov = V_PI / 2.0f;
 	mZNear = 0.1f;
 	mZFar = 500.0f;
 	mJitterOffset.X = 0.5f;
 	mJitterOffset.Y = 0.5f;
+	mPreJitterOffset.X = 0.5f;
+	mPreJitterOffset.Y = 0.5f;
 	PerspectiveFovLH(mFov, 800.0f, 600.0f, mZNear, mZFar);
 	v3dxDVector3 eye(0, 10, -10);
 	v3dxDVector3 lookAt(0, 0, 0);
@@ -51,7 +52,6 @@ ICamera::~ICamera()
 {
 	Cleanup();
 	Safe_Delete(mLogicData);
-	Safe_Delete(mRenderData);
 }
 
 void ICamera::Cleanup()
@@ -64,7 +64,6 @@ void ICamera::UpdateConstBufferData(EngineNS::NxRHI::IGpuDevice* device, EngineN
 	VAutoVSLLock lk(mLocker);
 	auto pBinder = buffer->GetShaderBinder();
 	v3dxMatrix4 tempM;	
-	memcpy(mRenderData, mLogicData, sizeof(CameraData));
 	if (pBinder != nullptr)
 	{
 		auto pos = mLogicData->GetLocalPosition();
@@ -112,14 +111,33 @@ void ICamera::UpdateConstBufferData(EngineNS::NxRHI::IGpuDevice* device, EngineN
 			buffer->SetValue(pBinder->FindField("ClipPlanesW"), planesW, bFlush, pUpdater);
 		}
 
-		//ASSERT(mLogicData->mJitterViewProjection.m11 == mLogicData->mViewProjection.m11);
-		buffer->SetMatrix(pBinder->FindField("JitterPrjMtx"), mLogicData->mJitterProjectionMatrix, true, bFlush, pUpdater);
-		buffer->SetMatrix(pBinder->FindField("JitterPrjInvMtx"), mLogicData->mJitterProjectionInverse, true, bFlush, pUpdater);
-		buffer->SetMatrix(pBinder->FindField("JitterViewPrjMtx"), mLogicData->mJitterViewProjection, true, bFlush, pUpdater);
-		buffer->SetMatrix(pBinder->FindField("JitterViewPrjInvMtx"), mLogicData->mJitterViewProjectionInverse, true, bFlush, pUpdater);
-		
-		buffer->SetValue(pBinder->FindField("JitterOffset"), GetJitterUV(), bFlush, pUpdater);
-		
+		// =========================================================================
+		// 上一帧 VP 矩阵 + 上一帧 jitter 的写入与推进
+		//   矩阵保持纯 view-projection (不含 jitter), jitter 仅以 JitterOffset /
+		//   PreJitterOffset 两个 UV 偏移参与 shader (TAA / motion vector / reproject).
+		//   1) 先用 *缓存的上一帧值* 写 cb 的 PreFrameViewPrjMtx / PreJitterOffset
+		//   2) 再用 *本帧* 的值覆盖缓存, 给下一帧用
+		//   关键: 必须放在 cb 写完之后才推进缓存; 顺序错了会用本帧值写 cb,
+		//        motion vector 永远 = 0, jitter reproject 也对不上.
+		//   首帧没有真正的"上一帧", 用本帧值兜底, 避免一开始 motion / jitter 出现跳变.
+		// =========================================================================
+		const v3dxMatrix4& prevVP = mLogicData->mHasValidPreFrameMatrix
+			? mLogicData->mPreFrameViewProjection
+			: mLogicData->mViewProjection;
+		buffer->SetMatrix(pBinder->FindField("PreFrameViewPrjMtx"), prevVP, true, bFlush, pUpdater);
+
+		v3dxVector2 jitterUV = GetJitterUV();
+		v3dxVector2 prevJitterUV = mLogicData->mHasValidPreFrameMatrix
+			? GetPreJitterUV()
+			: jitterUV;
+		buffer->SetValue(pBinder->FindField("JitterOffset"), jitterUV, bFlush, pUpdater);
+		buffer->SetValue(pBinder->FindField("PreJitterOffset"), prevJitterUV, bFlush, pUpdater);
+
+		// 推进缓存: 本帧的 VP / jitter 成为下一帧的"上一帧"
+		mLogicData->mPreFrameViewProjection = mLogicData->mViewProjection;
+		mPreJitterOffset = mJitterOffset;
+		mLogicData->mHasValidPreFrameMatrix = true;
+
 		buffer->SetValue(pBinder->FindField("ZNear"), mZNear, bFlush, pUpdater);
 		buffer->SetValue(pBinder->FindField("ZFar"), mZFar, bFlush, pUpdater);
 
@@ -289,23 +307,18 @@ void ICamera::PerspectiveFovLH(float fov, float width, float height, float zMin,
 	{
 		v3dxMatrix4Perspective(&mLogicData->mProjectionMatrix, fov, mAspect, zMin, zMax);
 	}
-	mLogicData->mJitterProjectionMatrix = mLogicData->mProjectionMatrix;
-	auto jitterUV = GetJitterUV();
-	mLogicData->mJitterProjectionMatrix.m31 += jitterUV.X * 2.0f;
-	mLogicData->mJitterProjectionMatrix.m32 += jitterUV.Y * 2.0f;
+	// 矩阵保持纯投影, 不再把 jitter 烘到投影矩阵的 m31/m32 上.
+	// jitter 由 cbPerCamera.JitterOffset / PreJitterOffset 单独传给 shader 处理,
+	// motion vector / TAA reproject 都基于无 jitter 的 currClip / prevClip + jitter UV 偏移做.
 	v3dxMatrix4Inverse(&mLogicData->mProjectionInverse, &mLogicData->mProjectionMatrix, NULL);
-	v3dxMatrix4Inverse(&mLogicData->mJitterProjectionInverse, &mLogicData->mJitterProjectionMatrix, NULL);
 
 	mLogicData->mViewProjection = mLogicData->mViewMatrix * mLogicData->mProjectionMatrix;
-	mLogicData->mJitterViewProjection = mLogicData->mViewMatrix * mLogicData->mJitterProjectionMatrix;
 	v3dxMatrix4Inverse(&mLogicData->mViewProjectionInverse, &mLogicData->mViewProjection, NULL);
-	v3dxMatrix4Inverse(&mLogicData->mJitterViewProjectionInverse, &mLogicData->mJitterViewProjection, NULL);
 
 	mLogicData->mViewPortOffsetMatrix.scaleMatrix(width * 0.5f, height * -0.5f, 1.0f);
 	mLogicData->mViewPortOffsetMatrix.setTrans(width * 0.5f, height * 0.5f, 0.0f);
 	
 	v3dxMatrix4Mul(&mLogicData->mToViewPortMatrix, &mLogicData->mViewProjection, &mLogicData->mViewPortOffsetMatrix);
-	v3dxMatrix4Mul(&mLogicData->mJitterToViewPortMatrix, &mLogicData->mJitterViewProjection, &mLogicData->mViewPortOffsetMatrix);
 	//UpdateConstBufferData();
 	UpdateFrustum();
 }
@@ -414,12 +427,9 @@ void ICamera::LookAtLH(const v3dxDVector3* eye, const v3dxDVector3* lookAt, cons
 	v3dxMatrix4Inverse(&mLogicData->mViewInverse, &mLogicData->mViewMatrix, NULL);
 
 	mLogicData->mViewProjection = mLogicData->mViewMatrix * mLogicData->mProjectionMatrix;
-	mLogicData->mJitterViewProjection = mLogicData->mViewMatrix * mLogicData->mJitterProjectionMatrix;
 	v3dxMatrix4Inverse(&mLogicData->mViewProjectionInverse, &mLogicData->mViewProjection, NULL);
-	v3dxMatrix4Inverse(&mLogicData->mJitterViewProjectionInverse, &mLogicData->mJitterViewProjection, NULL);
 
 	v3dxMatrix4Mul(&mLogicData->mToViewPortMatrix, &mLogicData->mViewProjection, &mLogicData->mViewPortOffsetMatrix);
-	v3dxMatrix4Mul(&mLogicData->mJitterToViewPortMatrix, &mLogicData->mJitterViewProjection, &mLogicData->mViewPortOffsetMatrix);
 	//UpdateConstBufferData();
 	UpdateFrustum();
 }

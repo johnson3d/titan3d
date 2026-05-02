@@ -15,7 +15,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             get => new Vector3ui(64, 1, 1);
         }
-        public UPermutationItem TypeUpSampleMode
+        public TtPermutationItem TypeUpSampleMode
         {
             get;
             set;
@@ -36,7 +36,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
             TypeUpSampleMode.SetValue((int)EUpSampleMode.EASU);
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         protected override void EnvShadingDefines(in FPermutationId id, TtShaderDefinitions defines)
         {
@@ -92,7 +92,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             CodeName = RName.GetRName("shaders/ShadingEnv/Post/FsrShading.compute", RName.ERNameType.Engine);
             MainName = "CS_FsrMain";
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         protected override void EnvShadingDefines(in FPermutationId id, TtShaderDefinitions defines)
         {
@@ -183,17 +183,17 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             
             CoreSDK.DisposeObject(ref UpSampleDrawcall);
             UpSampleDrawcall = rc.CreateComputeDraw();
-            UpSampleShadingEnv = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtFsrUpSampleShading>();
+            UpSampleShadingEnv = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtFsrUpSampleShading>();
             RCASDrawcall = rc.CreateComputeDraw();
-            RCASShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtRCASShading>();
+            RCASShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtRCASShading>();
         }
         public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             base.OnResize(policy, x, y);            
         }
-        public override void BeforeTickLogic(TtRenderPolicy policy)
+        public override void BeforeTick(TtRenderPolicy policy)
         {
-            base.BeforeTickLogic(policy);
+            base.BeforeTick(policy);
 
             var src = GetAttachBuffer(ColorPinIn);
             if (src != null)
@@ -220,7 +220,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 }
             }
         }
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             const uint threadGroupWorkRegionDim = 16;
             var dispatchX = MathHelper.Roundup(UpSamplePinOut.Attachement.Width, threadGroupWorkRegionDim);

@@ -1,3 +1,11 @@
+# Architecture Highlights (Industry Comparison)
+
+> **TitanEngine's Render Dependency Graph (`TtRenderGraph` / `TtAttachmentCache`) is benchmarked against UE5 RDG / Unity URP-HDRP Render Graph / Frostbite FrameGraph / Granite / O3DE Atom / Stride GraphicsCompositor / Falcor / Bevy bevy_render.**
+>
+> **One-line positioning: Tier-1 RDG capabilities (topology pruning / refcount / transient pooling / auto barrier all in place) + a rare visual editor for the *main* rendering pipeline + Permutation / RenderPolicy as first-class editable assets — fewer than 5 engines worldwide combine all three.** Both UE5 and Unity expose their RDG as pure C++/C# API; the main pipeline is *not* visually editable.
+>
+> Full feature matrix, roadmap, and design-philosophy comparison: → **[documents/engine/RenderGraph.Industry.Compare.md](documents/engine/RenderGraph.Industry.Compare.md)**
+
 # Compilation and Runtime Environment
 - Titan3D Launches!
 - ![Overview](Documents/picture/main_edtor.png)
@@ -58,6 +66,11 @@ All rendering pipelines are configured through node connections. Therefore, don'
    - Additive: Color blending
    - SunShaftDepthThreshole/SunShaftRadialBlur: God Ray effect nodes
    - TAA: Temporal anti-aliasing (works with velocity output)
+- 15. Realtime Global Illumination & Denoising Nodes (ReSTIR GI Pipeline)
+   - ReSTIRGI (`TtReSTIRGINode`): Realtime GI based on the [ReSTIR GI](https://research.nvidia.com/publication/2021-06_restir-gi-path-resampling-real-time-path-tracing) paper. A single node hosts 4 compute passes: Initial Sampling / Temporal Reuse / Spatial Reuse / Resolve. Supports hardware RT (DXR) and software RT (SDF / BVH) via Permutation switch, plus SkyCube / constant-sky miss shading modes.
+   - Denoise (`TtDenoiseNode`): Combined spatial + temporal denoiser in one node:
+     - **Spatial**: à-trous wavelet edge-aware bilateral filter, multi-iteration ping-pong (4 iters by default, StepSize = 1/2/4/8), edge-stopping driven by GBuffer Normal + Depth, with built-in firefly luminance clamp to suppress ReSTIR resolve outliers.
+     - **Temporal**: motion-vector reprojection + history ping-pong + normal/depth consistency validation. Critical for eliminating frame-to-frame flicker under low-spp ReSTIR / SSR. Toggleable via `EnableTemporal` (auto-falls back to pure spatial if MotionVector pin is left unconnected).
 
 # Compilation and Building
 ## Windows Engine Compilation

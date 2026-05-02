@@ -135,7 +135,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Deferred.TtDeferredOpaque>();
+            mOpaqueShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<Graphics.Pipeline.Deferred.TtDeferredOpaque>();
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             
             var linker = VisiblesPinIn.FindInLinker();
@@ -145,11 +145,11 @@ namespace EngineNS.Graphics.Pipeline
             }
             System.Diagnostics.Debug.Assert(CpuCullNode != null);
 
-            GpuCullSetupShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Mesh.Modifier.TtGpuCullSetupShading>();
-            GpuCullFlushShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Mesh.Modifier.TtGpuCullFlushShading>();
-            GpuCullShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Mesh.Modifier.TtGpuCullShading>();
+            GpuCullSetupShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<Mesh.Modifier.TtGpuCullSetupShading>();
+            GpuCullFlushShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<Mesh.Modifier.TtGpuCullFlushShading>();
+            GpuCullShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<Mesh.Modifier.TtGpuCullShading>();
         }
-        public override unsafe void TickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public override unsafe void Tick(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmd, "GpuCulling"))

@@ -113,7 +113,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             HLSLCode = GenMateralFunctionGraphCode(new UHLSLCodeGenerator(), MaterialGraph, new TtMaterial());
 
-            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            var typeStr = Rtti.TtTypeDesc.TypeOf(this.GetType()).TypeString;
             using (var xnd = new IO.TtXndHolder(typeStr, 0, 0))
             {
                 using (var attr = xnd.NewAttribute("MaterialFunction", 0, 0))

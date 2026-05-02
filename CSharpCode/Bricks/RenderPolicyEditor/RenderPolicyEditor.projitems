@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -9,8 +9,8 @@
     <Import_RootNamespace>EngineNS.Bricks.RenderPolicyEditor</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)UPolicyEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UPolicyGraph.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)URenderPolicyAsset.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PolicyEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PolicyGraph.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RenderPolicyAsset.cs" />
   </ItemGroup>
 </Project>

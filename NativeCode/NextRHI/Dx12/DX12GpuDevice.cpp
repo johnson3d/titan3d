@@ -244,7 +244,7 @@ namespace NxRHI
 			{
 				mDredSettings->SetAutoBreadcrumbsEnablement(D3D12_DRED_ENABLEMENT_FORCED_ON);
 				mDredSettings->SetPageFaultEnablement(D3D12_DRED_ENABLEMENT_FORCED_ON);
-				//mDredSettings
+				mDredSettings->SetWatsonDumpEnablement(D3D12_DRED_ENABLEMENT_FORCED_ON);
 			}
 		}
 #if defined(HasModule_GpuDump)
@@ -1097,7 +1097,7 @@ namespace NxRHI
 		
 		if (CoreSDK::OnGpuDeviceRemoved != nullptr)
 		{
-			GpuDump::NvAftermath::OnDredDump(this, nullptr);
+			GpuDump::NvAftermath::OnDredDump(this, mDredDir.c_str());
 			CoreSDK::OnGpuDeviceRemoved(this);
 			//GpuDump::NvAftermath::OnDredDump(this);
 		}
@@ -1360,10 +1360,10 @@ namespace NxRHI
 		IncreaseSignal(mFlushFence, type);
 		return mFlushFence->WaitToExpect();
 	}
-	void DX12CmdQueue::BeginEvent(const char* info)
+	void DX12CmdQueue::BeginEvent(const char* info, DWORD color)
 	{
 		auto infoW = StringHelper::strtowstr(info);
-		PIXBeginEvent(mCmdQueue.GetPtr(), 0, infoW.c_str());
+		PIXBeginEvent(mCmdQueue.GetPtr(), (UINT64)color, infoW.c_str());
 	}
 	
 	void DX12CmdQueue::EndEvent(const char* info)

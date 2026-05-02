@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "NxUtility.h"
 
 #ifndef ASSERT
@@ -564,18 +564,18 @@ namespace NxMath
 		}		
 		//inline static ThisType Log(const ThisType& x)
 		//{
-		//	//Ì©ÀÕÕ¹¿ª
+		//	//æ³°å‹’å±•å¼€
 		//	//ln(x+1) = x - x^2/2 + x^3/3 - x^4/4 + ... + (-1)^(n-1) * x^n/n + ...
-		//	ThisType term = x - 1.0f;  // µÚÒ»¸öÏî
+		//	ThisType term = x - 1.0f;  // ç¬¬ä¸€ä¸ªé¡¹
 		//	const auto step = term;
-		//	ThisType result = term;    // ÀÛ¼ÆÇóºÍ
+		//	ThisType result = term;    // ç´¯è®¡æ±‚å’Œ
 		//	ThisType sign(1.0f);
 		//	const int IterateTimes = 100;
 		//	const auto epsilon = GetEpsilon();
 		//	for (int i = 1; i <= IterateTimes; i++)
 		//	{
-		//		result = result  + sign * (term / ThisType(i)); // ÀÛ¼Óµ½ÇóºÍ½á¹ûÖÐ
-		//		term = term * step;  // ¼ÆËãÏÂÒ»¸öÏî
+		//		result = result  + sign * (term / ThisType(i)); // ç´¯åŠ åˆ°æ±‚å’Œç»“æžœä¸­
+		//		term = term * step;  // è®¡ç®—ä¸‹ä¸€ä¸ªé¡¹
 		//		/*if (Abs(term) < epsilon)
 		//			break;*/
 		//		
@@ -622,9 +622,9 @@ namespace NxMath
 			}
 			return x;
 		}
-		//É÷ÓÃExpº¯Êý
-		//ÔÚ20Î»Ð¡ÊýµÄÇé¿ö£¬Ç§Íò²»Òª³¬¹ý30´Î·½£¬·ñÔò»áÒç³ö
-		//´ËÍâ£¬´óÓÚ10´Î·½ºó£¬¸ºÖ¸ÊýÈÝÒ×µ¼ÖÂ(1 / ef)¾«¶È¶ªÊ§ÑÏÖØ
+		//æ…Žç”¨Expå‡½æ•°
+		//åœ¨20ä½å°æ•°çš„æƒ…å†µï¼Œåƒä¸‡ä¸è¦è¶…è¿‡30æ¬¡æ–¹ï¼Œå¦åˆ™ä¼šæº¢å‡º
+		//æ­¤å¤–ï¼Œå¤§äºŽ10æ¬¡æ–¹åŽï¼Œè´ŸæŒ‡æ•°å®¹æ˜“å¯¼è‡´(1 / ef)ç²¾åº¦ä¸¢å¤±ä¸¥é‡
 		inline static ThisType Exp(ThisType x) 
 		{
 			//https://blog.51cto.com/lifj07/162952
@@ -686,7 +686,7 @@ namespace NxMath
 		}
 		inline static ThisType Sqrt(const ThisType& c)
 		{
-			//Å£¶Ùµü´ú¼ÆËãf(x) = x * x -c = 0;
+			//ç‰›é¡¿è¿­ä»£è®¡ç®—f(x) = x * x -c = 0;
 			//f(x)' = 2 * x
 			//x1 = (x0 + c/x0)/2
 			if (c < ThisType(0))
@@ -848,7 +848,7 @@ namespace NxMath
 	private:
 		static ThisType Logarithm(ThisType y)
 		{
-			// y in ( -0.05-£¬0.05+ ), return ln((1+y)/(1-y))
+			// y in ( -0.05-ï¼Œ0.05+ ), return ln((1+y)/(1-y))
 			ThisType v = 1.0f;
 			ThisType y2 = y * y;
 			ThisType t = y2;
@@ -861,19 +861,19 @@ namespace NxMath
 		}
 		inline static ThisType ATan_Base(const ThisType& x)
 		{
-			//Ì©ÀÕÕ¹¿ª
+			//æ³°å‹’å±•å¼€
 			//atan(x) = x - x^3/3 + x^5/5 - x^7/7 + x^9/9......(-1)^(n+1)*x^(2n+1)/(2n+1)......
 			//atan(x) = atan(y) + atan((x-y)/(1+x*y))
-			//Îó²î 0.25^IterateTimes / (IterateTimes+1)
+			//è¯¯å·® 0.25^IterateTimes / (IterateTimes+1)
 			ThisType result(0.0f);
 			ThisType term1(x);
 			ThisType term2(1);
 			ThisType term(x);
 			ThisType sign(1.0f);
 
-			//todo:¸Ð¾õÕâÀïµÄsign»¹²»ÈçÓÃÒ»¸öboolÀ´´¦ÀíÐ§ÂÊ¸ß°É
-			//Ò»¸öÊÇÖØÔØ*µÄ64Bit³Ë·¨+ÓÒÒÆ
-			//Ò»¸öÊÇ·ÖÖ§Ìø×ª
+			//todo:æ„Ÿè§‰è¿™é‡Œçš„signè¿˜ä¸å¦‚ç”¨ä¸€ä¸ªboolæ¥å¤„ç†æ•ˆçŽ‡é«˜å§
+			//ä¸€ä¸ªæ˜¯é‡è½½*çš„64Bitä¹˜æ³•+å³ç§»
+			//ä¸€ä¸ªæ˜¯åˆ†æ”¯è·³è½¬
 			const int IterateTimes = 100;
 			const auto epsilon = Epsilon();
 			for (int i = 0; i <= IterateTimes; i += 2)
@@ -892,7 +892,7 @@ namespace NxMath
 		}
 		inline static ThisType Sin_Phase1(const ThisType& x)
 		{
-			//Ì©ÀÕÕ¹¿ª
+			//æ³°å‹’å±•å¼€
 			//sin(x) = x - (x^3 / 3!) + (x^5 / 5!) - (x^7 / 7!) + ...
 			ThisType result(0.0f);
 			ThisType term(x);
@@ -914,7 +914,7 @@ namespace NxMath
 		}
 		inline static ThisType Cos_Phase1(const ThisType& x)
 		{
-			//Ì©ÀÕÕ¹¿ª
+			//æ³°å‹’å±•å¼€
 			//cosx = 1 - (x^2) / 2!+ (x^4) / 4!- (x^6) / 6! + ...
 			ThisType result(0.0f);
 			ThisType term(1.0f);

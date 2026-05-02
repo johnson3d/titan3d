@@ -338,7 +338,10 @@ namespace NxRHI
 			NotDirty,
 		};
 		inline bool IsDirty() const {
-			return Dirty;
+			return DirtyState == EDirtyState::Dirty;
+		}
+		inline void MarkDirty() {
+			DirtyState = EDirtyState::Dirty;
 		}
 	public:
 		FBufferDesc			Desc;
@@ -626,6 +629,12 @@ namespace NxRHI
 		void FlushDirty(bool clear = false)
 		{
 			Buffer->FlushDirty(clear);
+		}
+		inline bool IsDirty() const {
+			return Buffer->IsDirty();
+		}
+		inline void MarkDirty() {
+			Buffer->MarkDirty();
 		}
 	public:
 		FCbvUpdater*		Updater = nullptr;

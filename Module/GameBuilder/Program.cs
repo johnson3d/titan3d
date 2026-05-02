@@ -36,7 +36,7 @@ try
     }
     catch (Exception ex)
     {
-        System.Console.WriteLine($"try debug Core.Window.dll");
+        System.Console.WriteLine($"try debug Core.Window.dll:{ex}");
         EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/debug");
         EngineNS.TtEngine.InitForGameBuilder(new EngineNS.TtEngine(args), cfgFile, false);
     }

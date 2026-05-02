@@ -1,4 +1,4 @@
-#include "NxJoint.h"
+ï»¿#include "NxJoint.h"
 #include "NxActor.h"
 
 NS_BEGIN
@@ -17,16 +17,16 @@ namespace NxPhysics
 	{
 		NxReal len;
 		NxVector3 dir;
-		//¼ÆËãÐèÒªÐÞÕýµÄ¾àÀëºÍ·½Ïò
+		//è®¡ç®—éœ€è¦ä¿®æ­£çš„è·ç¦»å’Œæ–¹å‘
 		if (NxShape::Contact(mShapePair.first, mShapePair.second, len, dir) == false)
 		{
 			return;
 		}
-		//ÒÔÏÂÎªÔ­ÀíÑÝÊ¾£¬Ã»ÓÐÈÎºÎÓÅ»¯
+		//ä»¥ä¸‹ä¸ºåŽŸç†æ¼”ç¤ºï¼Œæ²¡æœ‰ä»»ä½•ä¼˜åŒ–
 		auto mBody0 = (NxRigidBody*)mShapePair.first->GetActor();
 		auto mBody1 = (NxRigidBody*)mShapePair.second->GetActor();
 
-		//¼ÆËãp0ºÍp1µÄµ¼Êý£¨Ö±ÏßÔ¼Êø£¬Ö±½Ó¼ÆËãÌÝ¶È¼´¿É£©
+		//è®¡ç®—p0å’Œp1çš„å¯¼æ•°ï¼ˆç›´çº¿çº¦æŸï¼Œç›´æŽ¥è®¡ç®—æ¢¯åº¦å³å¯ï¼‰
 		NxVector3 gradients[2];
 		gradients[0] = dir;
 		gradients[1] = -dir;
@@ -35,17 +35,17 @@ namespace NxPhysics
 		w[0] = mBody0->mDesc.InvMass;
 		w[1] = mBody1->mDesc.InvMass;
 
-		//Ô¼Êøº¯Êýf(x) = |p0 - p1| - d
-		//ÔÚÕâÀï£¬Ô¼Êøc¾ÍÊÇÐÝÒªÐÞÕýµÄ¾àÀëlen
-		//ÕâÀïÆäÊµ¿ÉÒÔÓÅ»¯£¬ÒòÎªp0,p1Á½´¦µÄµ¼ÊýÄ£µÄÆ½·½¶¼ÊÇ1£¬ËùÒÔ±ÈÀýÏµÊýs = c / (w0 + w1)
+		//çº¦æŸå‡½æ•°f(x) = |p0 - p1| - d
+		//åœ¨è¿™é‡Œï¼Œçº¦æŸcå°±æ˜¯ä¼‘è¦ä¿®æ­£çš„è·ç¦»len
+		//è¿™é‡Œå…¶å®žå¯ä»¥ä¼˜åŒ–ï¼Œå› ä¸ºp0,p1ä¸¤å¤„çš„å¯¼æ•°æ¨¡çš„å¹³æ–¹éƒ½æ˜¯1ï¼Œæ‰€ä»¥æ¯”ä¾‹ç³»æ•°s = c / (w0 + w1)
 		auto s = NxJoint::CalcLagrange(mRagrange, len, gradients, w, 2, mCompliance, time);
 		mRagrange += s;
 		
-		//ÐÞÕýÁ¿Dp(i) = s * W(i) * µ¼Êý(i)
+		//ä¿®æ­£é‡Dp(i) = s * W(i) * å¯¼æ•°(i)
 		auto delta_p0 = gradients[0] * (w[0] * s);
 		auto delta_p1 = gradients[1] * (w[1] * s);
 
-		//ÐÞÕýÎ»ÖÃ
+		//ä¿®æ­£ä½ç½®
 		mBody0->GetTransform()->Position += delta_p0;
 		mBody1->GetTransform()->Position += delta_p1;
 

@@ -1,4 +1,4 @@
-#include "VKFrameBuffers.h"
+ï»¿#include "VKFrameBuffers.h"
 #include "VKBuffer.h"
 #include "VKGpuDevice.h"
 #include "VKEvent.h"
@@ -99,7 +99,7 @@ namespace NxRHI
 
 		std::vector<VkSubpassDependency> dependencies;
 
-		// 1. Íâ²¿µ½×ÓÍ¨µÀ0µÄÒÀÀµ (äÖÈ¾Í¨µÀ¿ªÊ¼Ç°)
+		// 1. å¤–éƒ¨åˆ°å­é€šé“0çš„ä¾èµ– (æ¸²æŸ“é€šé“å¼€å§‹å‰)
 		VkSubpassDependency externalToSubpass = {};
 		externalToSubpass.srcSubpass = VK_SUBPASS_EXTERNAL;
 		externalToSubpass.dstSubpass = 0;
@@ -110,7 +110,7 @@ namespace NxRHI
 		externalToSubpass.dependencyFlags = 0;
 		dependencies.push_back(externalToSubpass);
 
-		// 2. ×ÓÍ¨µÀ0µÄ×ÔÒÀÀµ (×ÓÍ¨µÀÄÚ²¿Í¬²½)
+		// 2. å­é€šé“0çš„è‡ªä¾èµ– (å­é€šé“å†…éƒ¨åŒæ­¥)
 		VkSubpassDependency selfDependency = {};
 		selfDependency.srcSubpass = 0;
 		selfDependency.dstSubpass = 0;
@@ -121,7 +121,7 @@ namespace NxRHI
 		selfDependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 		dependencies.push_back(selfDependency);
 
-		// 3. ×ÓÍ¨µÀ0µ½Íâ²¿µÄÒÀÀµ (äÖÈ¾Í¨µÀ½áÊøºó)
+		// 3. å­é€šé“0åˆ°å¤–éƒ¨çš„ä¾èµ– (æ¸²æŸ“é€šé“ç»“æŸå)
 		VkSubpassDependency subpassToExternal = {};
 		subpassToExternal.srcSubpass = 0;
 		subpassToExternal.dstSubpass = VK_SUBPASS_EXTERNAL;

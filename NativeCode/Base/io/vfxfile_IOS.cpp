@@ -1,4 +1,4 @@
-#include "../../BaseHead.h"
+ï»¿#include "../../BaseHead.h"
 //#include "../../Core/r2m/file_2_memory.h"
 #include "vfxfile_IOS.h"
 
@@ -43,7 +43,7 @@ vBOOL VFile_IOS::Open(LPCSTR lpszFileName, UINT nOpenFlags)
 	if ((nOpenFlags & 3) == modeRead)
 	{
 		if (GLostAssets.find(lpszFileName) != GLostAssets.end())
-			return FALSE;// ²»ÔÚapkµÄ×ÊÔ´
+			return FALSE;// ä¸åœ¨apkçš„èµ„æº
 	}
 
 	m_bCloseOnDelete = FALSE;
@@ -77,12 +77,12 @@ vBOOL VFile_IOS::Open(LPCSTR lpszFileName, UINT nOpenFlags)
 	}
 
     extern int errno;
-	// ÓÅÏÈ³¢ÊÔ¶ÁÈ¡DocumentsÄ¿Â¼ÎÄ¼ş
+	// ä¼˜å…ˆå°è¯•è¯»å–Documentsç›®å½•æ–‡ä»¶
 	m_hFile = fopen(assetsName, arg.c_str());
 	if (m_hFile == NULL)
 	{
 		memset(assetsName, 0, sizeof(assetsName));
-		// ³¢ÊÔ¶ÁÈ¡assetsÄ¿Â¼ÎÄ¼ş
+		// å°è¯•è¯»å–assetsç›®å½•æ–‡ä»¶
 		g_GetAssetsFileNameEvent(assetsName, 256, lpszFileName, FALSE);
 		m_strFileName = "@Assets/";
 		m_strFileName += assetsName;

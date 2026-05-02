@@ -37,7 +37,7 @@ PS_INPUT VS_Main(VS_INPUT input1)
 #endif
 
     float4 wp4 = mul(float4(output.vPosition.xyz, 1), WorldMatrix);
-    output.vPosition = mul(wp4, GetViewPrjMtx(true));
+    output.vPosition = mul(wp4, GetViewPrjMtx());
 
 	//output.psCustomUV0.xy = float2(output.vPosition.xy / output.vPosition.w) * float2(0.5f, -0.5f) + float2(0.5f, 0.5f);
 	//output.psCustomUV0.z = float(output.vPosition.z / output.vPosition.w);

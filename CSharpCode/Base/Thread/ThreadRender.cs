@@ -36,10 +36,29 @@ namespace EngineNS.Thread
 
                 try
                 {
-                    if (RenderAction != null)
+                    while (true)
                     {
-                        RenderAction();
-                        RenderAction = null;
+                        FRenderAction action;
+                        if (RenderActions.Count > 0)
+                        {
+                            lock (RenderActions)
+                            {
+                                action = RenderActions.Peek();
+                                RenderActions.Dequeue();
+                            }
+                            if (action.Action != null)
+                            {
+                                action.Action();
+                            }
+                            if (action.Name == "##FrameFinished##")
+                            {
+                                break;
+                            }
+                        }
+                        else if (mIsRun == false)
+                        {
+                            break;
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -47,21 +66,44 @@ namespace EngineNS.Thread
                     Profiler.Log.WriteException(ex);
                 }
             }
-
             mRenderEnd.Set();
         }
         public System.Threading.AutoResetEvent mRenderBegin = new System.Threading.AutoResetEvent(false);
         public System.Threading.AutoResetEvent mRenderEnd = new System.Threading.AutoResetEvent(false);
-        System.Action RenderAction;
-        public void PostRenderAction(System.Action action)
+        public struct FRenderAction
         {
-            action();
+            public string Name;
+            public System.Action Action;
+        }
+        Queue<FRenderAction> RenderActions = new Queue<FRenderAction>();
+        public void PostRenderAction(string name, System.Action action)
+        {
             if (this.IsFinished)
             {
                 return;
             }
-            RenderAction = action;
+            lock (RenderActions)
+            {
+                FRenderAction RAct;
+                RAct.Name = name;
+                RAct.Action = action;
+                RenderActions.Enqueue(RAct);
+            }
             mRenderBegin.Set();
+        }
+        public void FinishRenderAction()
+        {
+            if (this.IsFinished)
+            {
+                return;
+            }
+            lock (RenderActions)
+            {
+                FRenderAction RAct;
+                RAct.Name = "##FrameFinished##";
+                RAct.Action = null;
+                RenderActions.Enqueue(RAct);
+            }
         }
         [ThreadStatic]
         private static Profiler.TimeScope mScopeWaitRender;

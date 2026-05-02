@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -116,6 +116,13 @@ namespace EngineNS.Profiler
         public override string ToString()
         {
             return "Thread";
+        }
+    }
+    public class TtMCPGategory : TtLogCategory
+    {
+        public override string ToString()
+        {
+            return "MCP";
         }
     }
     public class TtLogCategoryGetter<T> where T : TtLogCategory, new()

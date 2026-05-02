@@ -36,9 +36,10 @@ a very light-weight event marker design.
 
 Nevertheless, there is still considerable performance overhead associated with
 event markers and they should be used only for debugging purposes on development
-or QA systems. Therefore, starting with the R495 NVIDIA graphics driver,
+or QA systems. Therefore, on some versions of NVIDIA graphics drivers,
 Aftermath event marker tracking on D3D11 and D3D12 is only available if the
-Nsight Aftermath GPU Crash Dump Monitor is running on the system. No Aftermath
+Nsight Aftermath GPU Crash Dump Monitor is running on the system. This requirement
+applies to R495 to R530 drivers for D3D12 and R495+ drivers for D3D11. No Aftermath
 configuration needs to be made in the Monitor. It serves only as a dongle to
 ensure Aftermath event markers do not impact application performance on end user
 systems.
@@ -81,7 +82,7 @@ third-party component used within this product.
 
 ## Support
 
-* Microsoft Windows 10 (Version 1809 or newer)
+* Microsoft Windows 10 or newer
 
 * Linux (kernel 4.15.0 or newer)
 
@@ -197,10 +198,10 @@ the Vulkan API.
     }
 
     // Static wrapper for the resolve marker handler. See the 'Handling Marker Resolve Callbacks' section for details.
-    void MyApp::ResolveMarkerCallback(const void* pMarker, void* pUserData, void** resolvedMarkerData, uint32_t* markerSize)
+    void MyApp::ResolveMarkerCallback(const void* pMarkerData, const uint32_t markerDataSize, void* pUserData, void** ppResolvedMarkerData, uint32_t* pResolvedMarkerDataSize)
     {
         GpuCrashTracker* pGpuCrashTracker = reinterpret_cast<GpuCrashTracker*>(pUserData);
-        pGpuCrashTracker->onResolveMarker(pMarker, resolvedMarkerData, markerSize);
+        pGpuCrashTracker->OnResolveMarker(pMarkerData, markerDataSize, ppResolvedMarkerData, pResolvedMarkerDataSize);
     }
 ```
 
@@ -233,8 +234,10 @@ are the following:
 
   Overhead Note: Using event markers (checkpoints) should be considered
   carefully.  Injecting markers in high-frequency code paths can introduce high
-  CPU overhead. Therefore, the DX event marker feature is only available if the
-  Nsight Aftermath GPU Crash Dump Monitor is running on the system. No Aftermath
+  CPU overhead. Therefore, on some versions of NVIDIA graphics drivers,
+  the DX event marker feature is only available if the Nsight Aftermath
+  GPU Crash Dump Monitor is running on the system. This requirement applies
+  to R495 to R530 drivers for D3D12 and R495+ drivers for D3D11. No Aftermath
   configuration needs to be made in the Monitor. It serves only as a dongle to
   ensure Aftermath event markers do not impact application performance on end
   user systems.
@@ -249,9 +252,15 @@ are the following:
   were issued nearest to that causing the crash. This feature is only available
   if the event marker feature is enabled, too.
 
-  Overhead Note: Using this option should be considered carefully. Enabling call
-  stack capturing can cause considerable CPU overhead during command list
-  recording.
+  Overhead Note: Enabling this feature will cause very high CPU overhead during
+  command list recording. Due to the inherent overhead, call stack capturing
+  should only be used for debugging purposes on development or QA systems and
+  should not be enabled in applications shipped to customers. Therefore, on
+  R495+ NVIDIA graphics drivers, the DX call stack capturing feature is only
+  available if the Nsight Aftermath GPU Crash Dump Monitor is running on the
+  system. No Aftermath configuration needs to be made in the Monitor. It serves
+  only as a dongle to ensure Aftermath call stack capturing does not impact
+  application performance on end user systems.
 
   Note: When enabling this feature, Aftermath GPU crash dumps will include file
   paths to the crashing application's executable as well as all DLLs it has
@@ -429,7 +438,7 @@ based on requirements and acceptable overhead.
 
         // Set up device creation info.
         VkDeviceCreateInfo deviceInfo = {};
-        deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
         deviceInfo.pNext = &aftermathInfo;
         deviceInfo.queueCreateInfoCount = 1;
         deviceInfo.pQueueCreateInfos = &queueInfo;
@@ -454,10 +463,17 @@ context handle with `GFSDK_Aftermath_DX12_CreateContextHandle` and how to
 call `GFSDK_Aftermath_SetEventMarker` to set a simple event marker with a
 character string as payload.
 
+Note: The command list passed into `GFSDK_Aftermath_DX12_CreateContextHandle`
+must be in the recording state for the returned context handle to be valid.
+The context handle will remain valid even if the command list is subsequently
+closed and reset, but the command list also must be in the recording state
+when its context handle is passed into `GFSDK_Aftermath_SetEventMarker`.
+
 Note: Calls of `GFSDK_Aftermath_SetEventMarker` are only effective if the
 `GFSDK_Aftermath_FeatureFlags_EnableMarkers` option was provided to
 `GFSDK_Aftermath_DX12_Initialize` and the Nsight Aftermath GPU Crash Dump
-Monitor is running on the system.
+Monitor is running on the system. This Monitor requirement applies to
+R495 to R530 drivers for D3D12 and R495+ drivers for D3D11.
 
 ```C++
     void MyApp::PopulateCommandList()
@@ -466,6 +482,8 @@ Monitor is running on the system.
         m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocator.Get(), m_pipelineState.Get(), IID_PPV_ARGS(&m_commandList)));
 
         // Create an Nsight Aftermath context handle for setting Aftermath event markers in this command list.
+        // Note that the command list must be in the recording state for this function, so if it is closed it must be reset first
+        // (e.g. if it was created above with ID3D12Device4::CreateCommandList1 instead of ID3D12Device::CreateCommandList).
         AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_DX12_CreateContextHandle(m_commandList.Get(), &m_hAftermathCommandListContext));
 
         [...]
@@ -640,18 +658,21 @@ Pointers to the application-managed marker data is usually a viable token,
 since if the application is keeping all marker data in memory, different
 markers will have unique pointer values by definition.
 
-The pointer to the marker data passed back to the crash dump process from
-the application must be valid for the duration of crash dump generation.
-Crash dump generation is complete when the GPU crash dump callback is called.
+The pointer to the marker data passed back to the crash dump process from the
+application must be valid until the next call of ResolveMarkerCallback or for
+the duration crash dump generation. Crash dump generation is complete when the
+GPU crash dump callback is called.
 
-If the application does not implement this callback, or does not pass marker
-data back for a zero-size/Vulkan marker, then only the marker's address will be
-added to the crash dump. The same will happen if the NVIDIA graphics driver does
-not support the feature, i.e, if the driver release version is less than R495.
+If the application does not implement this callback, or does not pass the
+resolved marker data and size back, then the original marker payload (or only
+the marker's address for zero-size/Vulkan marker) will be added to the crash
+dump. The same will happen if the NVIDIA graphics driver does not support the
+feature, i.e, if the driver release version is less than R495.
 
 If the marker is still considered valid, but the application does not have an
-associated payload (payloads lifetime expired, marker is the payload, etc.), you may consider
-returning a string representation of the marker in the callback implementation.
+associated payload (payloads lifetime expired, marker is the payload, etc.),
+you may consider returning a string representation of the marker in the callback
+implementation.
 
 ```C++
 // Simple data structure used to store marker tokens. This is managed by the application.
@@ -659,23 +680,30 @@ returning a string representation of the marker in the callback implementation.
 std::map<uint64_t, std::string> appManagedMarkers;
 
 // Example handler for resolving markers (called by ResolveMarkerCallback)
-void GpuCrashTracker::OnResolveMarker(const void* pMarker, void** resolvedMarkerData, uint32_t* markerSize)
+void GpuCrashTracker::OnResolveMarker(const void* pMarkerData, const uint32_t markerDataSize, void** ppResolvedMarkerData, uint32_t* pResolvedMarkerDataSize)
 {
-    // Important: the pointer passed back via resolvedMarkerData must remain valid after this function returns.
-    // Using references for all of the appManagedMarkers accesses ensures that the pointers refer to the persistent data
-    const auto& foundMarker = appManagedMarkers->find((uint64_t)pMarker);
-    if (foundMarker != appManagedMarkers->end())
+    // In this example, we set the (uint64_t) key of the 'appManagedMarkers' to the 'markerData'
+    // and set the 'markerDataSize' to zero when we call the 'GFSDK_Aftermath_SetEventMarker'.
+    // So we are only interested in zero size markers here.
+    if (markerDataSize == 0)
     {
-        const std::string& markerData = foundMarker->second;
-        // std::string::data() will return a valid pointer until the string is next modified
-        // we don't modify the string after calling data() here, so the pointer should remain valid
-        *resolvedMarkerData = (void*)markerData.data();
-        *markerSize = (uint32_t)markerData.length();
-        return;
+        // Important: the pointer passed back via ppResolvedMarkerData must remain valid after this function returns.
+        // Using references for all of the appManagedMarkers accesses ensures that the pointers refer to the persistent data
+        const auto& foundMarker = appManagedMarkers->find((uint64_t)pMarkerData);
+        if (foundMarker != appManagedMarkers->end())
+        {
+            const std::string& markerString = foundMarker->second;
+            // std::string::data() will return a valid pointer until the string is next modified
+            // we don't modify the string after calling data() here, so the pointer should remain valid
+            *ppResolvedMarkerData = (void*)markerString.data();
+            *pResolvedMarkerDataSize = (uint32_t)markerString.length();
+            return;
+        }
     }
-    // Marker was not found, so we return without setting any marker data. Only the marker's pointer
-    // will be stored in Aftermath.
-    // When capturing lots of markers, it may be unfeasable to to maintain the lifetime of all markers.
+    // Marker was not found or we are not interested in it. So we return without setting any resolved
+    // marker data or size. The marker's original payload (or the marker's pointer/token for zero-size
+    // marker) will be stored in the Aftermath crash dump.
+    // When capturing lots of markers, it may be unfeasible to to maintain the lifetime of all markers.
     // It may be desirable to maintain only markers recorded in the most recent render calls.
 }
 ```
@@ -799,17 +827,26 @@ dump using a previously created decoder object:
         Utility::Printf("Access Type: %u", pageFaultInfo.accessType);
         Utility::Printf("Engine: %u", pageFaultInfo.engine);
         Utility::Printf("Client: %u", pageFaultInfo.client);
-        if (pageFaultInfo.bHasResourceInfo)
+        if (pageFaultInfo.resourceInfoCount > 0)
         {
-            Utility::Printf("Fault in resource starting at 0x%016llx", pageFaultInfo.resourceInfo.gpuVa);
-            Utility::Printf("Size of resource: (w x h x d x ml) = {%u, %u, %u, %u} = %llu bytes",
-                pageFaultInfo.resourceInfo.width,
-                pageFaultInfo.resourceInfo.height,
-                pageFaultInfo.resourceInfo.depth,
-                pageFaultInfo.resourceInfo.mipLevels,
-                pageFaultInfo.resourceInfo.size);
-            Utility::Printf("Format of resource: %u", pageFaultInfo.resourceInfo.format);
-            Utility::Printf("Resource was destroyed: %d", pageFaultInfo.resourceInfo.bWasDestroyed);
+            std::vector<GFSDK_Aftermath_GpuCrashDump_ResourceInfo> resourceInfos(pageFaultInfo.resourceInfoCount);
+            GFSDK_Aftermath_GpuCrashDump_GetPageFaultResourceInfo(decoder, pageFaultInfo.resourceInfoCount, resourceInfos.data());
+
+            int index = 0;
+            for (auto resourceInfo : resourceInfos)
+            {
+                Utility::Printf("Resource[%d]", index);
+                Utility::Printf("\tFault in resource starting at 0x%016llx", resourceInfo.gpuVa);
+                Utility::Printf("\tSize of resource: (w x h x d x ml) = {%u, %u, %u, %u} = %llu bytes",
+                    resourceInfo.width,
+                    resourceInfo.height,
+                    resourceInfo.depth,
+                    resourceInfo.mipLevels,
+                    resourceInfo.size);
+                Utility::Printf("\tFormat of resource: %u", resourceInfo.format);
+                Utility::Printf("\tResource was destroyed: %d", resourceInfo.bWasDestroyed);
+                index++;
+            }
         }
     }
 ```
@@ -837,9 +874,9 @@ the time of the GPU crash or hang could look like this:
             // Print information for each active shader
             for (const GFSDK_Aftermath_GpuCrashDump_ShaderInfo& shaderInfo : shaderInfos)
             {
-                Utility::Printf("Active shader: ShaderHash = 0x%016llx ShaderInstance = 0x%016llx Shadertype = %u",
+                Utility::Printf("Active shader: ShaderHash = 0x%016llx ShaderDebugInfoUid = 0x%016llx Shadertype = %u",
                     shaderInfo.shaderHash,
-                    shaderInfo.shaderInstance,
+                    shaderInfo.shaderDebugInfoUid,
                     shaderInfo.shaderType);
             }
         }
@@ -1127,7 +1164,7 @@ of generating source shader debug information:
 
    The (crash dump decoder) application then needs to pass the contents of the
    `full/shader.spv` and `stripped/shader.spv` pair to
-   `GFSDK_Aftermath_GetDebugNameSpirv` to generate the shader DebugName to use
+   `GFSDK_Aftermath_GetShaderDebugNameSpirv` to generate the shader DebugName to use
    with `ShaderSourceDebugInfoLookupCallback`.
 
 # Limitations and Known Issues
@@ -1144,7 +1181,7 @@ of generating source shader debug information:
   with a reduced feature set (no API resource tracking and no shader address
   mapping) is available for D3D11 devices.
 
-* Nsight Aftermath is fully supported on Windows 10, with limited support on
+* Nsight Aftermath is fully supported on Windows 10 and newer, with limited support on
   Windows 7.
 
 * Nsight Aftermath event markers and resource tracking is incompatible with the
@@ -1159,8 +1196,10 @@ of generating source shader debug information:
 
 ## Vulkan
 
-* Shader line mappings are not yet supported for shaders compiled with the
-  NonSemantic.Vulkan.DebugInfo.100 extension.
+* Shader line mappings are not yet supported for SPIR-V shaders compiled with the
+  NonSemantic.Shader.DebugInfo.100 extended instruction set, i.e., shaders compiled
+  with the `-gVS` option of `glslangValidator` or the `-fspv-debug=vulkan-with-source`
+  option of the DirectX Shader Compiler.
 
 # Copyright and Licenses
 

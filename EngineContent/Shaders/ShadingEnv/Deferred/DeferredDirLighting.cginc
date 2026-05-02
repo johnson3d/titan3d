@@ -75,7 +75,7 @@ float4	GetWorldPosition(float4 PosProj, float vDepth)
 	VPos.z = vDepth;
 	//VPos.w = 1.0f;
 	// Inverse ViewProjection Matrix
-	VPos = mul(VPos, GetViewPrjMtxInverse(true));
+	VPos = mul(VPos, GetViewPrjMtxInverse());
 	VPos.xyzw /= VPos.w;
 	return VPos;
 }

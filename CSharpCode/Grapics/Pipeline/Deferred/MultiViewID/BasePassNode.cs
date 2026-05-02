@@ -9,17 +9,17 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
 {
     public class TtBasePassShading : Shader.TtGraphicsShadingEnv
     {
-        public UPermutationItem DisableAO
+        public TtPermutationItem DisableAO
         {
             get;
             set;
         }
-        public UPermutationItem DisablePointLights
+        public TtPermutationItem DisablePointLights
         {
             get;
             set;
         }
-        public UPermutationItem DisableShadow
+        public TtPermutationItem DisableShadow
         {
             get;
             set;
@@ -38,7 +38,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
             DisablePointLights.SetValue((int)Shader.EPermutation_Bool.FalseValue);
             editorMode.SetValue((int)Shader.EPermutation_Bool.TrueValue);
 
-            UpdatePermutation();
+            UpdatePermutation().AddWaitTask();
         }
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
@@ -142,7 +142,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
 
             CreateGBuffers(policy, Rt0PinOut.Attachement.Format);
 
-            mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtBasePassShading>();
+            mOpaqueShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtBasePassShading>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
@@ -206,7 +206,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
         {
             return mOpaqueShading;
         }
-        public override void BeforeTickLogic(TtRenderPolicy policy)
+        public override void BeforeTick(TtRenderPolicy policy)
         {
             if (policy.DisableHDR)
             {
@@ -249,7 +249,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
                 return mScopePushGpuDraw;
             }
         } 
-        public unsafe override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public unsafe override void Tick(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             if (mOpaqueShading == null)
                 return;

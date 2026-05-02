@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="CBuffer">
@@ -120,6 +120,9 @@
     </Filter>
     <Filter Include="GI\SH">
       <UniqueIdentifier>{59e917fa-99f5-4e20-a343-8c718d286b93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GI\ReSTIR">
+      <UniqueIdentifier>{c4f3a8e1-7b2d-4f56-9c01-1d3a5e7b9f24}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -475,6 +478,9 @@
     <None Include="$(MSBuildThisFileDirectory)GI\TrayTracing\HSDF.cginc">
       <Filter>GI\RayTracing</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRCommon.cginc">
+      <Filter>GI\ReSTIR</Filter>
+    </None>
     <None Include="$(MSBuildThisFileDirectory)Bricks\FX\VolumeCloud.cginc">
       <Filter>Bricks\FX</Filter>
     </None>
@@ -554,6 +560,24 @@
     </FxCompile>
     <FxCompile Include="$(MSBuildThisFileDirectory)ShadingEnv\RayTracing\Raytracing.hlsl">
       <Filter>ShadingEnv\RayTracing</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRInitialSampling.compute">
+      <Filter>GI\ReSTIR</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRTemporalReuse.compute">
+      <Filter>GI\ReSTIR</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRSpatialReuse.compute">
+      <Filter>GI\ReSTIR</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRResolve.compute">
+      <Filter>GI\ReSTIR</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\SpatialDenoise.compute">
+      <Filter>ShadingEnv\Post</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\TemporalDenoise.compute">
+      <Filter>ShadingEnv\Post</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

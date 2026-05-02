@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.GamePlay;
@@ -14,7 +14,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Post/GaussShading.cginc", RName.ERNameType.Engine);
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
@@ -78,7 +78,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGaussShading>();
+            mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtGaussShading>();
         }
         public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
@@ -122,9 +122,9 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             set => mGaussStruct.BlurSigma = value;
         }
         public NxRHI.TtCbView CBShadingEnv;
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            base.TickLogic(world, policy, frameCmdList, bClear);
+            base.Tick(world, policy, frameCmdList, bClear);
             if (CBShadingEnv != null)
             {
                 var buffer = this.FindAttachBuffer(ColorPinIn);
@@ -138,10 +138,11 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                     mGaussStruct.StrideUV.X = mGaussStruct.Stride * (1.0f / (float)policy.DefaultCamera.Width);
                     mGaussStruct.StrideUV.Y = mGaussStruct.Stride * (1.0f / (float)policy.DefaultCamera.Height);
                 }
+                mGaussStruct.BlurSize = Math.Min(5, mGaussStruct.BlurSize);
                 CBShadingEnv.SetValue("GaussStruct", in mGaussStruct);
             }
         }
-        public override void BeforeTickLogic(TtRenderPolicy policy)
+        public override void BeforeTick(TtRenderPolicy policy)
         {
             var buffer = this.FindAttachBuffer(ColorPinIn);
             if (buffer != null)
@@ -172,6 +173,24 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 if (CBShadingEnv == null)
                 {
                     CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    // First-time creation: ensure StrideUV is calculated and cbuffer is filled
+                    // before binding, otherwise the GPU will read uninitialized garbage data
+                    // (BlurSize could be huge, causing the shader loop to explode and hang the GPU).
+                    var attachBuffer = this.FindAttachBuffer(ColorPinIn);
+                    if (attachBuffer != null)
+                    {
+                        mGaussStruct.StrideUV.X = mGaussStruct.Stride * (1.0f / (float)attachBuffer.BufferDesc.Width);
+                        mGaussStruct.StrideUV.Y = mGaussStruct.Stride * (1.0f / (float)attachBuffer.BufferDesc.Height);
+                    }
+                    else
+                    {
+                        mGaussStruct.StrideUV.X = mGaussStruct.Stride * (1.0f / (float)policy.DefaultCamera.Width);
+                        mGaussStruct.StrideUV.Y = mGaussStruct.Stride * (1.0f / (float)policy.DefaultCamera.Height);
+                    }
+                    mGaussStruct.BlurSize = Math.Min(5, mGaussStruct.BlurSize);
+                    CBShadingEnv.SetValue("GaussStruct", in mGaussStruct);
+                    CBShadingEnv.MarkDirty();
+                    CBShadingEnv.FlushDirty();
                 }
                 drawcall.BindCBV(index, CBShadingEnv);
             }
@@ -184,7 +203,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Post/GaussAdditiveShading.cginc", RName.ERNameType.Engine);
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
@@ -226,6 +245,10 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 if (aaNode.CBShadingEnv == null)
                 {
                     aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    aaNode.BlurSize = Math.Min(5, aaNode.BlurSize);
+                    aaNode.CBShadingEnv.SetValue("GaussStruct", aaNode.GaussStruct);
+                    aaNode.CBShadingEnv.MarkDirty();
+                    aaNode.CBShadingEnv.FlushDirty();
                 }
                 drawcall.BindCBV(index, aaNode.CBShadingEnv);
             }
@@ -259,10 +282,10 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGaussAdditiveShading>();
+            mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtGaussAdditiveShading>();
         }
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
-        struct FGaussStruct
+        public struct FGaussStruct
         {
             public void SetDefault()
             {
@@ -279,6 +302,10 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             public float BlurSigma;
         }
         FGaussStruct mGaussStruct;
+        public FGaussStruct GaussStruct
+        {
+            get => mGaussStruct;
+        }
         [Category("Option")]
         public float Stride1
         {
@@ -304,9 +331,9 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             set => mGaussStruct.BlurSigma = value;
         }
         public NxRHI.TtCbView CBShadingEnv;
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            base.TickLogic(world, policy, frameCmdList, bClear);
+            base.Tick(world, policy, frameCmdList, bClear);
             if (CBShadingEnv != null)
             {
                 var buffer = this.FindAttachBuffer(Color1PinIn);
@@ -331,6 +358,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                     mGaussStruct.StrideUV2.X = mGaussStruct.Stride2 * (1.0f / (float)policy.DefaultCamera.Width);
                     mGaussStruct.StrideUV2.Y = mGaussStruct.Stride2 * (1.0f / (float)policy.DefaultCamera.Height);
                 }
+                mGaussStruct.BlurSize = Math.Min(5, mGaussStruct.BlurSize);
                 CBShadingEnv.SetValue("GaussStruct", in mGaussStruct);
             }
         }
@@ -338,7 +366,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             base.TickSync(policy);
         }
-        public override void BeforeTickLogic(TtRenderPolicy policy)
+        public override void BeforeTick(TtRenderPolicy policy)
         {
             var buffer = this.FindAttachBuffer(Color1PinIn);
             if (buffer != null)

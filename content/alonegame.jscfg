@@ -1,7 +1,7 @@
 {
   "AutoSyncPropertyData": false,
   "IsReverseZ": true,
-  "MultiRenderMode": 2,
+  "MultiRenderMode": "Queue",
   "UsePhysxMT": true,
   "UseRenderDoc": false,
   "Feature_UseRVT": true,
@@ -36,8 +36,7 @@
   "IsAftermath": false,
   "IsScopeWithSource": true,
   "MainWindowType": "AloneGame.TtAloneGameApplication@Unknown",
-  "MainRPolicyName": "utest/deferred.rpolicy:Game",
-  "SimpleRPolicyName": "graphics/deferred_simple.rpolicy:Engine",
+  "MainRPolicyName": "graphics/deferred_simple.rpolicy:Engine",
   "DefaultGame": "survivor/survivorgame.macross:Game",
   "RpcRootType": "EngineNS.UnitTest.UTest_Rpc@EngineCore",
   "CookDXBC": true,

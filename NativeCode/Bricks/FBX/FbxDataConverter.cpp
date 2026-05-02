@@ -258,13 +258,13 @@ FbxString FBXDataConverter::ConvertToFbxString(const char* string)
 
 std::string FBXDataConverter::ConvertToStdString(const FbxString& fbxString)
 {
-	std::string retStr(VStringA_Utf82Gbk(fbxString.Buffer()).c_str());
+	std::string retStr(fbxString.Buffer());
 	return retStr;
 }
 
 std::string FBXDataConverter::ConvertToStdString(const char* string)
 {
-	std::string retStr (VStringA_Utf82Gbk(string).c_str());
+	std::string retStr(string);
 	return retStr;
 }
 

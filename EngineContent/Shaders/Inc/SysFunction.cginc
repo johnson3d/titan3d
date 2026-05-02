@@ -317,7 +317,7 @@ void Distortion( float4 localPos, float4 localNorm, float4 viewPos, float4 projP
 //	distortionColor.a = distortion / transparency;
 //}
 
-float4	CalcWorldPosition(float4 PosProj, float vDepth, bool bJitter = true)
+float4	CalcWorldPosition(float4 PosProj, float vDepth)
 {
 	// Position
 	float4 VPos = PosProj;
@@ -325,7 +325,7 @@ float4	CalcWorldPosition(float4 PosProj, float vDepth, bool bJitter = true)
 	VPos.z = vDepth;
 	VPos.w = 1.0f;
 	// Inverse ViewProjection Matrix
-	VPos = mul(VPos, GetViewPrjMtxInverse(true));
+	VPos = mul(VPos, GetViewPrjMtxInverse());
 	VPos.xyz /= VPos.www;
 	VPos.w = 1.0f;
 	return VPos;
@@ -343,7 +343,7 @@ float4	CalcWorldPosition(float4 PosProj, float vDepth, bool bJitter = true)
 //	worldYBias = worldPos1.y - worldPos2.y;
 //}
 
-float4	CalcViewPosition(float4 PosProj, float vDepth, bool bJitter = true)
+float4	CalcViewPosition(float4 PosProj, float vDepth)
 {
 	// Position
 	float4 VPos = PosProj;
@@ -351,7 +351,7 @@ float4	CalcViewPosition(float4 PosProj, float vDepth, bool bJitter = true)
 	VPos.z = vDepth;
 	VPos.w = 1.0f;
 	// Inverse Projection Matrix
-	VPos = mul(VPos, GetPrjMtxInverse(bJitter));
+	VPos = mul(VPos, GetPrjMtxInverse());
 	VPos.xyz /= VPos.www;
 	VPos.w = 1.0f;
 	return VPos;

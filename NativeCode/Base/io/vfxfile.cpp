@@ -328,8 +328,21 @@ vBOOL  VFile::SetLength(UINT_PTR dwNewLen)
 	return fseek(m_hFile, (long)dwNewLen, SEEK_SET)==dwNewLen;
 }
 
-UINT_PTR  VFile::GetLength() const
+void VFile::UpdateFileLength()
 {
+	if (m_strFileName.length() > 0)
+	{
+		Open(m_strFileName.c_str(), modeRead);
+		Close();
+	}
+}
+
+UINT_PTR VFile::GetLength() const
+{
+	if (mFileLength == 0)
+	{
+		((VFile*)this)->UpdateFileLength();
+	}
 	return mFileLength;
 	//UINT_PTR dwLen, dwCur;
 

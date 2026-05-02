@@ -205,6 +205,7 @@ public:
 	virtual INT_PTR  Seek(INT_PTR lOff, SeekPosition nFrom);
 	virtual vBOOL  SetLength(UINT_PTR dwNewLen);
 	virtual UINT_PTR  GetLength() const;
+	void UpdateFileLength();
 
 	virtual UINT_PTR  Read(void* lpBuf, UINT_PTR nCount);
 	virtual UINT_PTR  Write(const void* lpBuf, UINT_PTR nCount);

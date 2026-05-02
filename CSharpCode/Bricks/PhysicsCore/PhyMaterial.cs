@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -95,7 +95,7 @@ namespace EngineNS.Bricks.PhysicsCore
         public void SaveAssetTo(RName name)
         {
             name.AMeta.ClearAssetFiles();
-            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            var typeStr = Rtti.TtTypeDesc.TypeOf(this.GetType()).TypeString;
             var xnd = new IO.TtXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("Material", 0, 0))
             {

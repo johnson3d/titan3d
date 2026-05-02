@@ -71,7 +71,7 @@ namespace NxRHI
 
 		virtual void WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters) override;
 
-		virtual void BeginEvent(const char* info) override;
+		virtual void BeginEvent(const char* info, DWORD color = 0) override;
 		virtual void EndEvent() override;
 	public:
 		void Commit(ID3D11DeviceContext* imContex);

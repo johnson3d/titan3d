@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -9,9 +9,9 @@
     <Import_RootNamespace>EngineNS.GamePlay</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Action\UAction.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Action\UActionRecorder.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Action\UPropertyUtility.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Action\Action.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Action\ActionRecorder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Action\PropertyUtility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Axis.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Camera\ICameraControlNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Camera\Camera.cs" />
@@ -24,23 +24,23 @@
     <Compile Include="$(MSBuildThisFileDirectory)Scene\HubNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\PrefabNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\SunNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Scene\UPBRTestNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UCenterData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\PBRTestNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CenterData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controller\IController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controller\AIController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controller\CharacterController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Movemnet\CharacterMovement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Movemnet\Movement.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Scene\Actor\UActor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\Actor\Actor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\Player.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Scene\UBezierSplineNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Scene\UGridNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Scene\UMeshNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Scene\UNode_Editor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Scene\USceneCapture.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Scene\UScenePartitionNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Scene\UPointLightNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Scene\USkyNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\BezierSplineNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\GridNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\MeshNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\Node_Editor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\SceneCapture.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\ScenePartitionNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\PointLightNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\SkyNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StateMachine\AnimationStateMachine\IAnimationState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StateMachine\AnimationStateMachine\AnimationState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StateMachine\AnimationStateMachine\AnimationStateMachine.cs" />
@@ -51,15 +51,15 @@
     <Compile Include="$(MSBuildThisFileDirectory)StateMachine\GamePlayState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StateMachine\GamePlayStateMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StateMachine\GamePlayTransition.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UDirectionLight.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UGameApplication.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UGameViewportSlate.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UPlacement.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UWorld.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Scene\UBoundVolume.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Scene\UNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Scene\UScene.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UGameBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DirectionLight.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameApplication.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameViewportSlate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Placement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)World.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\BoundVolume.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\Node.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\Scene.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)GamePlay.brick" />

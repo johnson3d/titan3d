@@ -58,7 +58,7 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	float4 wp4 = float4(output.vPosition.xyz, 1);
 #endif
 
-	output.vPosition = mul(wp4, GetViewPrjMtx(false));
+	output.vPosition = mul(wp4, GetViewPrjMtx());
 
 	return output;
 }

@@ -148,7 +148,7 @@ namespace EngineNS.IO
                 Write(ar, null, null);
                 return;
             }
-            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(obj.GetType());
+            var typeStr = Rtti.TtTypeDesc.TypeOf(obj.GetType()).TypeString;
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
             Write(ar, obj, meta.CurrentVersion);
         }
@@ -244,7 +244,7 @@ namespace EngineNS.IO
                 return true;
             }
             ar.Write(isNull);
-            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(obj.GetType());
+            var typeStr = Rtti.TtTypeDesc.TypeOf(obj.GetType()).TypeString;
             if (metaVersion == null)
             {
                 var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
@@ -320,7 +320,7 @@ namespace EngineNS.IO
         {
             if (obj == null)
                 return false;
-            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(obj.GetType());
+            var typeStr = Rtti.TtTypeDesc.TypeOf(obj.GetType()).TypeString;
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
 
             if (meta.MetaAttribute == null && obj.GetType().GetInterface(nameof(IO.ISerializer)) == null)
@@ -1023,7 +1023,7 @@ namespace EngineNS.IO
             }
             else
             {
-                var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(t);
+                var typeStr = Rtti.TtTypeDesc.TypeOf(t).TypeString;
                 var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
             }
             return null;

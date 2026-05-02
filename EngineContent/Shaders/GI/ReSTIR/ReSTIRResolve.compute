@@ -1,0 +1,111 @@
+// ReSTIR GI - Pass 4: Resolve
+// 根据最终 reservoir 计算 indirect diffuse, 输出到一张 RGBA16F RT
+
+#include "ReSTIRCommon.cginc"
+
+Texture2D<float4> GBufferRT0;       // base color
+Texture2D<float4> GBufferRT1;       // normal
+Texture2D<float4> GBufferRT2;       // metallic, specular, roughness, ao
+Texture2D<float>  DepthBuffer;
+SamplerState Samp_PointClamp;
+
+StructuredBuffer<ReSTIRPackedReservoir> InReservoirs;
+RWTexture2D<float4> OutIndirectDiffuse;
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_Main(uint3 id : SV_DispatchThreadID)
+{
+    if (any(id.xy >= ScreenSize))
+        return;
+
+    uint pixelIndex = id.y * ScreenSize.x + id.x;
+    float2 uv = (float2(id.xy) + 0.5f) / float2(ScreenSize);
+    float depth = DepthBuffer.SampleLevel(Samp_PointClamp, uv, 0).r;
+
+#if USE_INVERSE_Z == 1
+    bool validPixel = depth > 0.0f;
+#else
+    bool validPixel = depth < 1.0f;
+#endif
+    if (!validPixel)
+    {
+        OutIndirectDiffuse[id.xy] = float4(0, 0, 0, 0);
+        return;
+    }
+
+    ReSTIRReservoir r = UnpackReservoir(InReservoirs[pixelIndex]);
+    if (r.M <= 0.0f || r.W <= 0.0f)
+    {
+        OutIndirectDiffuse[id.xy] = float4(0, 0, 0, 1);
+        return;
+    }
+
+    float4 rt0 = GBufferRT0.SampleLevel(Samp_PointClamp, uv, 0);
+    float4 rt1 = GBufferRT1.SampleLevel(Samp_PointClamp, uv, 0);
+    float4 rt2 = GBufferRT2.SampleLevel(Samp_PointClamp, uv, 0);
+    GBufferData gbuffer = (GBufferData)0;
+    gbuffer.DecodeGBuffer(rt0, rt1, rt2, float4(0, 0, 0, 0));
+
+    float metallic = (float)gbuffer.Metallicity;
+    float3 albedo = (float3)gbuffer.MtlColorRaw;
+    float3 diffuseAlbedo = albedo * (1.0f - metallic);
+
+    float3 toSample = r.Sample.SamplePosition - r.Sample.VisiblePosition;
+    float dist2 = max(dot(toSample, toSample), 1e-6f);
+    float3 dir = toSample * rsqrt(dist2);
+    float NoL = max(dot(r.Sample.VisibleNormal, dir), 0.0f);
+
+    // ===== Step 1: 命中点 radiance soft compression (Karis 2013 firefly suppression) =====
+    //
+    // 问题场景: 局部高对比度 emissive 间接光命中点 (例如怪物嘴内壁红色 emissive)
+    //   - 嘴内壁 radiance 可能高达 50~200, 周围环境只有 0~2
+    //   - SSR ray 每帧能不能 march 到嘴内、命中嘴内哪个像素, 严重依赖摄像机微动
+    //   - 结果: 嘴外像素的间接光在 "命中嘴内 -> 巨亮" / "未命中 -> 普通" 之间二值切换
+    //   - SVGF / temporal blend 拦不住, 因为这不是 outlier, 是真实的高方差 binary 信号
+    //
+    // 解决思路: 把 radiance 用 reciprocal compression 软化, 不是硬截断:
+    //     L_out = L / (1 + L / T)
+    //   性质:
+    //     - L << T 时 L_out ≈ L (不影响低亮度区域)
+    //     - L >> T 时 L_out → T (高亮度渐近收敛到 T, 而非线性增长)
+    //   效果:
+    //     - 命中 emissive (L=100, T=4) -> L_out ≈ 3.85 (压成 ~3.85 倍 T)
+    //     - 未命中 (L=1.5)             -> L_out ≈ 1.10 (几乎不变)
+    //   命中/未命中能量比从 100/1.5 ≈ 67x 降到 3.85/1.10 ≈ 3.5x,
+    //   这个比值 temporal α=0.02 + bbox clamp 完全能消化.
+    //
+    // 阈值 SoftClampThreshold = MaxRadiance * 0.25 经验值: MaxRadiance 是物理上限,
+    // 间接光普遍弱于直接光, 0.25 倍是个保守的 "渐近上限".
+    // 按亮度做 (保色相), 不要分通道做 (会偏色).
+    float3 rawRadiance = min(r.Sample.Radiance, MaxRadiance.xxx);
+    float radLum = dot(rawRadiance, float3(0.2126f, 0.7152f, 0.0722f));
+    float softThreshold = MaxRadiance * 0.25f;
+    float compressedLum = radLum / (1.0f + radLum / max(softThreshold, 1e-6f));
+    float3 radiance = (radLum > 1e-6f) ? rawRadiance * (compressedLum / radLum) : rawRadiance;
+
+    // ===== Step 2: r.W clamp (防 W 数值突刺) =====
+    //
+    // r.W = WeightSum / (M * pHat) 理论无界. SSR 模式下 hit 点每帧抖动 +
+    // grazing angle 的 NoL/dist2 突变会让 r.W 在相邻帧间剧烈变化 (从 0.1 跳到 50),
+    // 表现为屏幕上的"低亮度色点闪烁"(RDC 实测 ColorInput.r max=1.21 但 mean 0.006,
+    // max/mean ≈ 200x, 说明能量集中在少数 hot pixel).
+    //
+    // 在乘出 indirect 之前先 clamp r.W: 把超过经验上限的权重压回, 直接斩断闪烁源头.
+    // 上限取 16.0 是经验值: 正常 ReSTIR W 在 0.1~5 之间, 16 之上几乎都是异常突刺.
+    // 这里 *没有* 改 reservoir 本身 (r.W 仍然存原值供下一帧 temporal/spatial reuse),
+    // 只在最终 resolve 输出时压制.
+    float wClamped = min(r.W, 16.0f);
+    float3 indirect = diffuseAlbedo * radiance * NoL * wClamped * (Intensity / 3.14159265f);
+
+    // ===== Step 3: 最终 luminance hard clamp (三道保险) =====
+    //
+    // 即使 radiance 已经 soft compress + W 已经 clamp, 极端 grazing angle 下
+    // diffuseAlbedo * NoL * W 仍可能放大. 按亮度等比缩放保色相.
+    // 阈值用 MaxRadiance * 0.5: 间接光物理上不可能比 MaxRadiance 一半还亮.
+    float lum = dot(indirect, float3(0.2126f, 0.7152f, 0.0722f));
+    float lumLimit = MaxRadiance * 0.5f;
+    if (lum > lumLimit)
+        indirect *= lumLimit / lum;
+
+    OutIndirectDiffuse[id.xy] = float4(indirect, 1.0f);
+}

@@ -12,15 +12,11 @@ cbuffer cbPerCamera DX_BIND_B(0)
 	matrix ViewPrjMtx;
 	matrix ViewPrjInvMtx;
 	matrix PreFrameViewPrjMtx;
-	
-	matrix JitterPrjMtx;
-	matrix JitterPrjInvMtx;
-	matrix JitterViewPrjMtx;
-	matrix JitterViewPrjInvMtx;
-	matrix JitterPreFrameViewPrjMtx;
 
-	float2 JitterOffset;
-    float2 JitterOffset_Pad;
+	// 矩阵保持纯 view-projection (不再含 jitter).
+	// jitter 由下面两个 UV 偏移单独传给 shader, 由 motion vector / TAA 等单独消费.
+	float2 JitterOffset;     // 当前帧 jitter, UV 单位, 范围约 [-0.5/W, 0.5/W) x [-0.5/H, 0.5/H)
+	float2 PreJitterOffset;  // 上一帧 jitter, UV 单位, 与 JitterOffset 同口径
 
 	float4 CornerRays[4];
 	float4 ClipPlanes[6];
@@ -53,29 +49,31 @@ cbuffer cbPerCamera DX_BIND_B(0)
 	float3 CameraOffset;
 };
 
-inline matrix GetPrjMtx(bool bJitter = true)
+// jitter 已从矩阵中剥离, 由 cbPerCamera.JitterOffset / PreJitterOffset 单独参与计算,
+// 因此这里所有 Get*Mtx 函数都不再接受 bJitter 参数, 永远返回纯净矩阵.
+inline matrix GetPrjMtx()
 {
-	return bJitter ? JitterPrjMtx : PrjMtx;
+	return PrjMtx;
 }
 
-inline matrix GetPrjMtxInverse(bool bJitter = true)
+inline matrix GetPrjMtxInverse()
 {
-	return bJitter ? JitterPrjInvMtx : PrjInvMtx;
+	return PrjInvMtx;
 }
 
-inline matrix GetViewPrjMtx(bool bJitter = true)
+inline matrix GetViewPrjMtx()
 {
-	return bJitter ? JitterViewPrjMtx : ViewPrjMtx;
+	return ViewPrjMtx;
 }
 
-inline matrix GetViewPrjMtxInverse(bool bJitter = true)
+inline matrix GetViewPrjMtxInverse()
 {
-	return bJitter ? JitterViewPrjInvMtx : ViewPrjInvMtx;
+	return ViewPrjInvMtx;
 }
 
-inline matrix GetPreFrameViewPrjMtx(bool bJitter = true)
+inline matrix GetPreFrameViewPrjMtx()
 {
-	return bJitter ? JitterPreFrameViewPrjMtx : PreFrameViewPrjMtx;
+	return PreFrameViewPrjMtx;
 }
 
 inline float LinearFromDepth(float z, float zNear, float zFar)
@@ -111,10 +109,10 @@ inline float2 LinearFromDepth(float2 z)
 #endif
 }
 
-float4 GetWorldPositionFromDepthValue(float2 uv, float depthNdc, bool bJitter = true)
+float4 GetWorldPositionFromDepthValue(float2 uv, float depthNdc)
 {
     float4 H = float4(uv.x * 2.0f - 1.0f, 1.0f - uv.y * 2.0f, depthNdc, 1.0f);
-    float4 D = mul(H, GetViewPrjMtxInverse(bJitter));
+    float4 D = mul(H, GetViewPrjMtxInverse());
     return D / D.w;
 }
 

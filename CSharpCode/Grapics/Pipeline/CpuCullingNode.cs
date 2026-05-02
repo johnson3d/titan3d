@@ -100,7 +100,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public delegate void FTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear);
         public FTickLogic UserTickLogic = null;
-        public override void TickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public override void Tick(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             //if (GetInput(0).FindInLinker() == null)
             //{

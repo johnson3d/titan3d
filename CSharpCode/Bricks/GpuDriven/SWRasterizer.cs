@@ -228,7 +228,7 @@ namespace EngineNS.Bricks.GpuDriven
             CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/SWRasterizer.compute", RName.ERNameType.Engine);
             MainName = "CS_GetClustersCount";
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
@@ -265,7 +265,7 @@ namespace EngineNS.Bricks.GpuDriven
             CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/SWRasterizer.compute", RName.ERNameType.Engine);
             MainName = "CS_SetUpRasterizer";
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
@@ -300,7 +300,7 @@ namespace EngineNS.Bricks.GpuDriven
             CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/SWRasterizer.compute", RName.ERNameType.Engine);
             MainName = "CS_RasterizeClusters";
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
@@ -415,15 +415,15 @@ namespace EngineNS.Bricks.GpuDriven
             mShadingStruct.SetDefault();
             CoreSDK.DisposeObject(ref SWRasterizerDrawcall);
             SWRasterizerDrawcall = rc.CreateComputeDraw();
-            SWRasterizer = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeShading>();
+            SWRasterizer = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtSwRasterizeShading>();
 
             CoreSDK.DisposeObject(ref DispatchArgShadingDrawcall);
             DispatchArgShadingDrawcall = rc.CreateComputeDraw();
-            DispatchArgShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeDispatchArgShading>();
+            DispatchArgShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtSwRasterizeDispatchArgShading>();
 
             CoreSDK.DisposeObject(ref SetUpRasterizeDrawcall);
             SetUpRasterizeDrawcall = rc.CreateComputeDraw();
-            SetUpRasterizeShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeSetUpShading>();
+            SetUpRasterizeShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtSwRasterizeSetUpShading>();
 
             mShadingStruct.DispatchArg = SWRasterizer.DispatchArg;
             //unsafe
@@ -446,7 +446,7 @@ namespace EngineNS.Bricks.GpuDriven
             idArg.Z = 1;
             IndirectArgBuffer.SetSize(size + 1, &idArg, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_IndirectArgs);
         }
-        public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public unsafe override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             var attachment = GetAttachBuffer(ClustersPinIn);
             if (attachment.Srv != null)
@@ -492,7 +492,7 @@ namespace EngineNS.Bricks.GpuDriven
         {
             CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/QuarkResolve.cginc", RName.ERNameType.Engine);
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
@@ -561,7 +561,7 @@ namespace EngineNS.Bricks.GpuDriven
 
             CreateGBuffers(policy, DepthStencilPinIn.Attachement.Format);
 
-            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtQuarkResolveShading>();
+            mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtQuarkResolveShading>();
         }
 
         public override unsafe TtGraphicsBuffers CreateGBuffers(TtRenderPolicy policy, EPixelFormat format)

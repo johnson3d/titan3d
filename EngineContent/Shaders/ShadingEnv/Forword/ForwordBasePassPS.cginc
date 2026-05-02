@@ -391,7 +391,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		{
 			output.RT0 = half4(0.0h, 1.0h, 0.0h, 1.0h);
 		}*/
-		/*half4 ClipPos = mul(half4(input.vWorldPos, 1.0h), GetViewPrjMtx(true));
+		/*half4 ClipPos = mul(half4(input.vWorldPos, 1.0h), GetViewPrjMtx());
 		if (ClipPos.w > 5.0h)
 		{
 			output.RT0 = half4(1.0h, 0.0h, 0.0h, 1.0h);

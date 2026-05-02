@@ -182,7 +182,7 @@ namespace EngineNS.Editor
                 EndMultiPlayInEditor(i);
             }
 
-            Thread.TtContextThread.CurrentContext.FlushAllThreadEvents();
+            Thread.TtContextThread.CurrentContext.FlushAllThreadEvents(false);
             AwaitEndPlayInEditor().WaitCompletedAndDispose();
             for (int i = 0; i < 5; i++)
             {

@@ -1,4 +1,4 @@
-#include "DX12GpuState.h"
+ï»¿#include "DX12GpuState.h"
 #include "DX12GpuDevice.h"
 #include "DX12FrameBuffers.h"
 #include "DX12Effect.h"
@@ -327,7 +327,7 @@ namespace NxRHI
 		std::vector<D3D12_INPUT_ELEMENT_DESC> mDx12Elements;
 		pInputLayout->GetDX12Elements(mDx12Elements);
 
-		//Èç¹ûÒªÆô¶¯ViewID£¬ĞèÒª×Ô¼º×öPipelineState
+		//å¦‚æœè¦å¯åŠ¨ViewIDï¼Œéœ€è¦è‡ªå·±åšPipelineState
 		//ViewID: https://microsoft.github.io/DirectX-Specs/d3d/ViewInstancing.html#view-instancing-work-ordering-semantics 
 		
 		struct PipelineStateStream

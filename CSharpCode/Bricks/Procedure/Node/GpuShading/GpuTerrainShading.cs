@@ -16,7 +16,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             CodeName = RName.GetRName("Shaders/Bricks/Procedure/Erosion/IncWater.compute", RName.ERNameType.Engine);
             MainName = "CS_IncWaterMain";
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
@@ -102,14 +102,14 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ShadingEnv = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtErosionIncWaterShading>();
+            ShadingEnv = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtErosionIncWaterShading>();
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             mCmdList = rc.CreateCommandList();
             mDrawcall = rc.CreateComputeDraw();
             mDrawcall.TagObject = this;
         }
-        public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public unsafe override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             using (new NxRHI.TtCmdListScope(mCmdList, "PCG.ErosionIncWater"))
             {
@@ -136,7 +136,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             CodeName = RName.GetRName("Shaders/Bricks/Procedure/Height2FlowMap.compute", RName.ERNameType.Engine);
             MainName = "CS_Heigh2FlowMapMain";
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
@@ -198,14 +198,14 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ShadingEnv = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtHeigh2FlowMapShading>();
+            ShadingEnv = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtHeigh2FlowMapShading>();
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             mCmdList = rc.CreateCommandList();
             mDrawcall = rc.CreateComputeDraw();
             mDrawcall.TagObject = this;
         }
-        public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public unsafe override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             using (new NxRHI.TtCmdListScope(mCmdList, "PCG.Height2Flow"))
             {
@@ -229,7 +229,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             CodeName = RName.GetRName("Shaders/Bricks/Procedure/WaterBasin.compute", RName.ERNameType.Engine);
             MainName = "CS_WaterBasinMain";
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
@@ -302,7 +302,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ShadingEnv = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtWaterBasinShading>();
+            ShadingEnv = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtWaterBasinShading>();
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             mCmdList = rc.CreateCommandList();
@@ -310,7 +310,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             mDrawcall.TagObject = this;
             mCopyDrawcall = rc.CreateCopyDraw();
         }
-        public unsafe override void BeforeTickLogic(TtRenderPolicy policy)
+        public unsafe override void BeforeTick(TtRenderPolicy policy)
         {
             var water = policy.AttachmentCache.FindAttachement(WaterPinInOut);
 
@@ -321,7 +321,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             }
             mCopyDrawcall.Copy(PrevWaterTexture.GpuBuffer, water.Buffer as NxRHI.TtBuffer);
         }
-        public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public unsafe override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             using (new NxRHI.TtCmdListScope(mCmdList, "PCG.WaterBasin"))
             {

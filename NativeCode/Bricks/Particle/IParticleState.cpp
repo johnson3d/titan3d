@@ -61,10 +61,7 @@ bool IParticlePool::InitPool(UINT dataStride, UINT maxNum)
 		//mFreeParticles[i] = (UINT)i;
 		mFreeParticles.push((UINT)i);
 	}
-	mLivedParticles[0].clear();
-	mLivedParticles[1].clear();
-	mCurAlives = &mLivedParticles[0];
-	mBackendAlives = &mLivedParticles[1];
+	mAliveBuffer.Clear();
 	mChanged = false;
 
 	return true;
@@ -88,10 +85,10 @@ UINT IParticlePool::Alloc(IEmitter* pEmitter, UINT num, UINT flags, float life)
 		pParticle->Flags = flags;
 		ASSERT(pParticle->Life <= 0);
 		pParticle->Life = life;
-		mBackendAlives->push_back(addr);
+		mAliveBuffer.GetBackBuffer().push_back(addr);
 	}
 	mChanged = true;
-	//mBackendAlives->insert(mBackendAlives->begin(), mFreeParticles.begin(), mFreeParticles.begin() + num);
+	//mAliveBuffer.GetBackBuffer().insert(mAliveBuffer.GetBackBuffer().begin(), mFreeParticles.begin(), mFreeParticles.begin() + num);
 	//mFreeParticles.erase(mFreeParticles.begin(), mFreeParticles.begin() + num);
 
 	return num;
@@ -99,8 +96,8 @@ UINT IParticlePool::Alloc(IEmitter* pEmitter, UINT num, UINT flags, float life)
 void IParticlePool::Recycle(IEmitter* pEmitter)
 {
 	VAutoVSLLock lk(mLocker);
-	std::vector<UINT>& prev = *mCurAlives;
-	std::vector<UINT>& cur = *mBackendAlives;
+	std::vector<UINT>& prev = mAliveBuffer.GetCurBuffer();
+	std::vector<UINT>& cur = mAliveBuffer.GetBackBuffer();
 	for (size_t i = 0; i < prev.size(); i++)
 	{
 		UINT addr = prev[i];
@@ -115,8 +112,7 @@ void IParticlePool::Recycle(IEmitter* pEmitter)
 		}
 	}
 	prev.clear();
-	mCurAlives = &cur;
-	mBackendAlives = &prev;
+	mAliveBuffer.Swap();
 	mChanged = false;
 }
 

@@ -1,0 +1,323 @@
+// ReSTIR GI - Pass 1: Initial Sampling
+// 对每个像素生成一条候选 indirect diffuse 路径:
+//   1. 重建可见点 (X) 的世界位置和法线
+//   2. 在 X 的余弦半球采样一个方向 omega
+//   3. 沿 omega 求交得到 sample 点:
+//        ENV_USE_HW_RT == 0: 屏幕空间线性 ray march (跨平台 fallback)
+//        ENV_USE_HW_RT == 1: Inline RayQuery (DXR 1.1, 需要 SceneTLAS, cs_6_5)
+//   4. 从上一帧 lighting buffer 取出 sample 点的辐射作为 indirect light
+//   5. 用 RIS 把候选写入新的 reservoir
+
+// 由 C# 端 UPermutationItem "ENV_USE_HW_RT" 自动注入 (Permutation 系统)
+// 0 = 屏幕空间 ray march, 1 = Inline RayQuery
+// 缺省为 0 仅为 IDE 静态分析时不报未定义符号, 实际编译时 Permutation 系统总会写入此宏
+#ifndef ENV_USE_HW_RT
+#define ENV_USE_HW_RT 0
+#endif
+
+// 由 C# 端 UPermutationItem "ENV_USE_SKY_CUBE" 自动注入
+// 0 = miss 时用 cbReSTIR.SkyColor 常量天光, 1 = 采样 EnvMap (TextureCube)
+// EnvMap pin 悬空时, C# 端会强制保持为 0
+#ifndef ENV_USE_SKY_CUBE
+#define ENV_USE_SKY_CUBE 0
+#endif
+
+// 注意: SampleSkyRadiance 写在 ReSTIRCommon.cginc 内, 该函数会在
+// ENV_USE_SKY_CUBE == 1 分支引用 EnvMap / Samp_EnvMap 这两个全局符号,
+// 因此必须先声明这两个资源, 再 include common 头.
+#if ENV_USE_SKY_CUBE
+TextureCube<float4> EnvMap;
+SamplerState        Samp_EnvMap;
+#endif
+
+#include "ReSTIRCommon.cginc"
+
+Texture2D<float4> GBufferRT0;       // base color
+Texture2D<float4> GBufferRT1;       // normal + flags
+Texture2D<float>  DepthBuffer;
+Texture2D<float4> PrevColor;        // 上一帧最终光照 (含 indirect, AntiAliasing 节点输出的 PreColor)
+
+SamplerState     Samp_PointClamp;
+
+#if ENV_USE_HW_RT
+// Inline RayQuery 的 TLAS, 由 C# 端从 TtTopAccelerationStructure 提取 GpuBufferSRV 绑定
+RaytracingAccelerationStructure SceneTLAS;
+#endif
+
+RWStructuredBuffer<ReSTIRPackedReservoir> OutReservoirs;
+
+// =============================================================================
+// 通用结果结构: 屏幕空间命中和 HW RT 命中都映射成 (hitPosWS, hitNormalWS, hitRadiance, valid)
+// SS 路径靠 hitUV 反解 hitPosWS 和 hitN, HW 路径直接拿 world hit
+// IsSky=true 表示这是一个"miss → 天光"伪命中, sample 位置在很远处,
+// spatial reuse 的距离判定会自然把它和真几何 sample 区分开
+// =============================================================================
+struct RayHitInfo
+{
+    bool   Valid;
+    bool   IsSky;
+    float3 HitPosWS;
+    float3 HitNormalWS;
+    float3 HitRadiance;
+};
+
+// 把 miss 包装成"天光伪命中": 远处的 sample 点 + 反向 dir 的法线 + 天光 radiance
+// SamplePosition 设得非常远, 让 spatial reuse 的 length(currWP - prevWP) 判定
+// 自动把 sky sample 与真几何 sample 分到两类, 避免错误复用
+RayHitInfo MakeSkyHit(float3 originWS, float3 dirWS)
+{
+    RayHitInfo info;
+    info.Valid = true;
+    info.IsSky = true;
+    info.HitPosWS = originWS + dirWS * 1e6f;
+    info.HitNormalWS = -dirWS;
+    info.HitRadiance = SampleSkyRadiance(dirWS);
+    return info;
+}
+
+#if ENV_USE_HW_RT == 0
+// -----------------------------------------------------------------------------
+// SS 路径: 屏幕空间线性 ray march, 命中后从当前 GBuffer/PrevColor 还原命中点
+// -----------------------------------------------------------------------------
+RayHitInfo CastIndirectRay(float3 originWS, float3 dirWS, inout uint rng)
+{
+    RayHitInfo info;
+    info.Valid = false;
+    info.IsSky = false;
+    info.HitPosWS = 0;
+    info.HitNormalWS = 0;
+    info.HitRadiance = 0;
+
+    float linearDepth0;
+    float3 startSS = WorldToScreen(originWS, linearDepth0);
+    float endDepth;
+    float3 endSS   = WorldToScreen(originWS + dirWS * MaxRayDistance, endDepth);
+
+    float3 stepSS = (endSS - startSS) / float(MaxRayMarchSteps);
+    float3 curSS = startSS + stepSS;
+
+    float2 hitUV = 0;
+    float  hitSceneZ = 0;
+    bool   hit = false;
+
+    [loop]
+    for (uint i = 0; i < MaxRayMarchSteps; ++i)
+    {
+        if (any(curSS.xy < 0.0f) || any(curSS.xy > 1.0f) || curSS.z < 0.0f || curSS.z > 1.0f)
+            break;
+
+        float sceneZ = DepthBuffer.SampleLevel(Samp_PointClamp, curSS.xy, 0).r;
+        float diff = curSS.z - sceneZ;
+#if USE_INVERSE_Z == 1
+        if (diff < 0.0f && diff > -ThicknessBias)
+#else
+        if (diff > 0.0f && diff < ThicknessBias)
+#endif
+        {
+            hitUV = curSS.xy;
+            hitSceneZ = sceneZ;
+            hit = true;
+            break;
+        }
+        curSS += stepSS;
+    }
+
+    // 真 miss: ray 走完全程都没撞到屏幕上的几何 -> 视作天光命中
+    // 注意: ray 半路出屏 (curSS.xy 越界) 也会走到这里, 在 SS GI 里
+    // 出屏方向通常意味着"指向场景外/天空", 当作 sky hit 是合理的近似
+    if (!hit)
+        return MakeSkyHit(originWS, dirWS);
+
+    info.Valid = true;
+    info.IsSky = false;
+    info.HitPosWS = ReconstructWorldPos(hitUV, hitSceneZ);
+    info.HitNormalWS = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, hitUV, 0).xyz * 2.0f - 1.0f);
+    info.HitRadiance = PrevColor.SampleLevel(Samp_PointClamp, hitUV, 0).rgb;
+    return info;
+}
+#else
+// -----------------------------------------------------------------------------
+// HW RT 路径: Inline RayQuery 在世界空间打 ray, 求交结果比 SS 更可靠
+// (能命中屏幕外、被遮挡的几何). 但二级光照来源仍然走"hit 点反投影到屏幕,
+// 取 PrevColor 作为 incoming radiance" - 这是 Hybrid GI 的常见取舍, 完全
+// 摆脱屏幕空间需要 bindless material + light list + sky cubemap, 仓库当前
+// 不具备相关基础设施, 后续接入二级 NEE/Surface Cache 时只需替换本函数.
+//
+// 命中后若反投影出屏: 没有可信的二级 radiance / normal 来源, 视为 miss
+// 让 reservoir 自然走 update(weight=0) 路径, 而不是杜撰一个假法线和 0 radiance
+// (假法线会污染后续 spatial reuse 的几何相似性判断)
+// -----------------------------------------------------------------------------
+RayHitInfo CastIndirectRay(float3 originWS, float3 dirWS, inout uint rng)
+{
+    RayHitInfo info;
+    info.Valid = false;
+    info.IsSky = false;
+    info.HitPosWS = 0;
+    info.HitNormalWS = 0;
+    info.HitRadiance = 0;
+
+    RayDesc ray;
+    ray.Origin = originWS;
+    ray.Direction = dirWS;
+    ray.TMin = 0.001f;
+    ray.TMax = MaxRayDistance;
+
+    // 模板参数 = 编译期 static flag (cull back face + force opaque, 无 anyhit 调度)
+    // TraceRayInline 第二参数 = 运行期 dynamic flag, 这里无追加, 故传 RAY_FLAG_NONE
+    // 二者会合并生效, 实际 ray flag = 模板参数. InstanceInclusionMask=0xFF 接受所有实例.
+    RayQuery<RAY_FLAG_CULL_BACK_FACING_TRIANGLES | RAY_FLAG_FORCE_OPAQUE> q;
+    q.TraceRayInline(SceneTLAS, RAY_FLAG_NONE, 0xFFu, ray);
+    q.Proceed();
+
+    // ray 没命中任何几何 -> 真 miss, 走天光
+    if (q.CommittedStatus() != COMMITTED_TRIANGLE_HIT)
+        return MakeSkyHit(originWS, dirWS);
+
+    float t = q.CommittedRayT();
+    float3 hitPosWS = originWS + dirWS * t;
+
+    // ===== 反投影命中世界点取 GBuffer normal / PrevColor radiance =====
+    //
+    // Hybrid GI 的取舍: HW RT 给出真实几何命中, 但二级 lighting 仍取自屏幕空间的
+    // PrevColor (避免接 bindless material / NEE / surface cache 等大基础设施).
+    //
+    // 这意味着我们必须确保: 屏幕反投影到的像素, 它当前可见的几何 *就是* hitPosWS,
+    // 而不是被前景挡住的另一个表面. 否则会出现"HW RT 命中了嘴内壁的红色 emissive,
+    // 但屏幕上那个像素是被前景牙齿挡住的, 取到的是牙齿的高光" - 这种错误关联在
+    // 摄像机微动时表现为剧烈闪烁 (摄像机一动 -> ray 命中点变 -> 反投影到不同的
+    // 前景像素 -> 取到完全不同的颜色).
+    //
+    // 出/被挡 case 都退化成 sky hit, 比"用错误的前景颜色当成 indirect radiance"
+    // 物理上更接近现实 (起码不会把前景颜色错算成嘴内的间接光).
+
+    // Case 1: 反投影出屏 -> 屏幕外没有任何 lighting buffer 信息 -> sky
+    float hitLinearDepth;
+    float3 hitSS = WorldToScreen(hitPosWS, hitLinearDepth);
+    if (any(hitSS.xy < 0.0f) || any(hitSS.xy > 1.0f))
+        return MakeSkyHit(originWS, dirWS);
+
+    // 命中点在相机背后 -> 不可能反投影出有效屏幕坐标 -> sky
+    if (hitLinearDepth <= 0.0f)
+        return MakeSkyHit(originWS, dirWS);
+
+    // Case 2: 屏幕这个像素的可见几何 != hitPosWS (前景遮挡 / 命中物体背面 / 命中视锥外)
+    //
+    // 检查方式: 把屏幕该像素的 depth 反投影回世界空间得到 visibleAtPixelWS,
+    // 比较它与 hitPosWS 的世界距离, 若超过 tolerance 就说明 PrevColor / GBuffer
+    // 描述的是另一个表面, 取来的 radiance 不可信.
+    //
+    // tolerance 设计: max(5cm 绝对值, 5% * 命中点距离). 远处投影像素覆盖
+    // 物理上更大区域, 必须按距离比例放宽; 近处必须严格 (5cm 是怪物嘴内/
+    // 牙齿前后这种小尺度遮挡的合理阈值).
+    float sceneZ_NDC = DepthBuffer.SampleLevel(Samp_PointClamp, hitSS.xy, 0).r;
+
+#if USE_INVERSE_Z == 1
+    bool sceneHasGeometry = sceneZ_NDC > 0.0f;
+#else
+    bool sceneHasGeometry = sceneZ_NDC < 1.0f;
+#endif
+    if (!sceneHasGeometry)
+        return MakeSkyHit(originWS, dirWS);  // 屏幕该像素是天空, 没有 PrevColor 可用
+
+    float3 visibleAtPixelWS = ReconstructWorldPos(hitSS.xy, sceneZ_NDC);
+    float depthMismatch = length(visibleAtPixelWS - hitPosWS);
+    float tolerance = max(0.05f, hitLinearDepth * 0.05f);
+    if (depthMismatch > tolerance)
+        return MakeSkyHit(originWS, dirWS);
+
+    // 通过所有遮挡检查 -> PrevColor / GBuffer 在 hitSS 上确实描述的是 hitPosWS,
+    // 取值是可信的二级 lighting 来源.
+    info.Valid = true;
+    info.IsSky = false;
+    info.HitPosWS = hitPosWS;
+    info.HitNormalWS = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, hitSS.xy, 0).xyz * 2.0f - 1.0f);
+    info.HitRadiance = PrevColor.SampleLevel(Samp_PointClamp, hitSS.xy, 0).rgb;
+    return info;
+}
+#endif // ENV_USE_HW_RT
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_Main(uint3 id : SV_DispatchThreadID)
+{
+    if (any(id.xy >= ScreenSize))
+        return;
+
+    uint pixelIndex = id.y * ScreenSize.x + id.x;
+    float2 uv = (float2(id.xy) + 0.5f) / float2(ScreenSize);
+
+    ReSTIRReservoir reservoir;
+    InitReservoir(reservoir);
+
+    float depth = DepthBuffer.SampleLevel(Samp_PointClamp, uv, 0).r;
+
+    // 远平面/天空像素直接写空 reservoir
+#if USE_INVERSE_Z == 1
+    bool validPixel = depth > 0.0f;
+#else
+    bool validPixel = depth < 1.0f;
+#endif
+    if (!validPixel)
+    {
+        ReSTIRPackedReservoir packed;
+        PackReservoir(reservoir, packed);
+        OutReservoirs[pixelIndex] = packed;
+        return;
+    }
+
+    float4 rt0 = GBufferRT0.SampleLevel(Samp_PointClamp, uv, 0);
+    float4 rt1 = GBufferRT1.SampleLevel(Samp_PointClamp, uv, 0);
+    float4 rt2 = float4(0, 0, 0, 0);
+    float4 rt3 = float4(0, 0, 0, 0);
+
+    GBufferData gbuffer = (GBufferData)0;
+    gbuffer.DecodeGBuffer(rt0, rt1, rt2, rt3);
+
+    float3 visiblePos = ReconstructWorldPos(uv, depth);
+    float3 visibleN = normalize(gbuffer.WorldNormal);
+    if (dot(visibleN, visibleN) < 0.01f)
+    {
+        ReSTIRPackedReservoir packed;
+        PackReservoir(reservoir, packed);
+        OutReservoirs[pixelIndex] = packed;
+        return;
+    }
+
+    // RNG seed
+    uint rng = PcgHash(pixelIndex ^ (FrameIndex * 0x9E3779B1u));
+
+    uint sampleCount = clamp(InitialSampleCount, 1u, 32u);
+    [loop]
+    for (uint s = 0; s < sampleCount; ++s)
+    {
+        float2 u2 = float2(Rand01(rng), Rand01(rng));
+        float3 dirWS = SampleCosineHemisphere(u2, visibleN);
+
+        RayHitInfo hit = CastIndirectRay(visiblePos + visibleN * 0.01f, dirWS, rng);
+
+        // miss 已在 CastIndirectRay 内统一包装成 sky hit (Valid=true, IsSky=true)
+        // 这里不再有 !hit.Valid 分支, 所有候选 (几何/天光) 走相同的 RIS update 逻辑
+        ReSTIRSample candidate;
+        candidate.VisiblePosition = visiblePos;
+        candidate.VisibleNormal   = visibleN;
+        candidate.SamplePosition  = hit.HitPosWS;
+        candidate.SampleNormal    = hit.HitNormalWS;
+        candidate.Radiance        = hit.HitRadiance;
+
+        float pHat = TargetFunctionLuminance(candidate);
+        // 源 PDF: 余弦半球, p = NoL / PI
+        // 对 sky hit 用原始 dirWS 算 NoL (而不是 normalize(hit.HitPosWS - visiblePos),
+        // 因为 1e6 * dir + visiblePos ≈ 1e6 * dir, 数值上等价但更稳定)
+        float3 toS = hit.IsSky ? dirWS : normalize(hit.HitPosWS - visiblePos);
+        float NoL = max(dot(visibleN, toS), 1e-4f);
+        float srcPdf = NoL / 3.14159265f;
+        float weight = (srcPdf > 0.0f) ? (pHat / srcPdf) : 0.0f;
+
+        UpdateReservoir(reservoir, candidate, weight, Rand01(rng));
+    }
+
+    FinalizeReservoir(reservoir);
+
+    ReSTIRPackedReservoir packed;
+    PackReservoir(reservoir, packed);
+    OutReservoirs[pixelIndex] = packed;
+}

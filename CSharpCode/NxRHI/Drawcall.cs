@@ -1,0 +1,597 @@
+using EngineNS.Graphics.Pipeline;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace EngineNS.NxRHI
+{
+    public partial class TtMeshAtomDesc : AuxPtrType<NxRHI.TMeshAtomDesc>
+    {
+        public TtMeshAtomDesc()
+        {
+            mCoreObject = NxRHI.TMeshAtomDesc.CreateInstance();
+        }
+    }
+
+    public partial class TtGraphicDraw : AuxPtrType<NxRHI.IGraphicDraw>
+    {
+        public object TagObject = null;
+        public override void Dispose()
+        {
+            TagObject = null;
+            if (IsDisposed == false)
+                TtStatistic.Instance.GraphicsDrawcall--;
+            base.Dispose();
+        }
+        public void ResetResources()
+        {
+            mCoreObject.ResetResources();
+        }
+        public uint DrawInstance
+        {
+            get { return mCoreObject.DrawInstance; }
+            set { mCoreObject.DrawInstance = (ushort)value; }
+        }
+        public byte MeshAtom
+        {
+            get { return mCoreObject.MeshAtom; }
+            set { mCoreObject.MeshAtom = value; }
+        }
+        public byte MeshLOD
+        {
+            get { return mCoreObject.MeshLOD; }
+            set { mCoreObject.MeshLOD = value; }
+        }
+
+        public IGraphicsEffect GraphicsEffect
+        {
+            get
+            {
+                return mCoreObject.GetGraphicsEffect();
+            }
+        }
+        public TtBindless CreateBindless(string name)
+        {
+            var ptr = mCoreObject.NativeSuper.CreateBindless(name);
+            if (ptr.IsValidPointer == false)
+                return null;
+            return new TtBindless(ptr);
+        }
+        public void Commit(ICommandList cmdlist)
+        {
+            mCoreObject.NativeSuper.Commit(cmdlist, false);
+        }
+        public void Commit(TtCommandList cmdlist)
+        {
+            mCoreObject.NativeSuper.Commit(cmdlist.mCoreObject, false);
+        }
+        public FEffectBinder FindBinder(string name)
+        {
+            return mCoreObject.FindBinder(name);
+        }
+        
+        public void BindPipeline(TtGpuPipeline pipeline)
+        {
+            mCoreObject.BindPipeline(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, pipeline.mCoreObject);
+        }
+        public bool BindCBV(VNameString name, TtCbView buffer)
+        {
+            return mCoreObject.BindResource(name, buffer.mCoreObject.NativeSuper);
+        }
+        public void BindCBV(FEffectBinder binder, TtCbView buffer)
+        {
+            if (binder.IsValidPointer == false || buffer == null || binder.BindType != EShaderBindType.SBT_CBV)
+                return;
+            mCoreObject.BindResource(binder, buffer.mCoreObject.NativeSuper);
+        }
+        public void BindCBV(TtEffectBinder binder, TtCbView buffer)
+        {
+            if (binder == null || buffer == null)
+                return;
+            BindCBV(binder.mCoreObject, buffer);
+        }
+        public bool BindSRV(string name, TtSrView srv)
+        {
+            return BindSRV(VNameString.FromString(name), srv);
+        }
+        public bool BindSRV(VNameString name, TtSrView srv)
+        {
+            if (srv == null)
+                return false;
+            return mCoreObject.BindResource(name, srv.mCoreObject.NativeSuper);
+        }
+        public void BindSRV(FEffectBinder binder, TtSrView srv)
+        {
+            if (binder.IsValidPointer == false || binder.BindType != EShaderBindType.SBT_SRV)
+                return;
+            var res = (srv == null) ? new IGpuResource() : srv.mCoreObject.NativeSuper;
+            mCoreObject.BindResource(binder, res);
+        }
+        public void BindSRV(NxRHI.TtEffectBinder binder, TtSrView srv)
+        {
+            if (binder == null)
+                return;
+            BindSRV(binder.mCoreObject, srv);
+        }
+        public bool BindUAV(VNameString name, TtUaView uav)
+        {
+            return mCoreObject.BindResource(name, uav.mCoreObject.NativeSuper);
+        }
+        public void BindUAV(FEffectBinder binder, TtUaView uav)
+        {
+            if (binder.IsValidPointer == false || uav == null || binder.BindType != EShaderBindType.SBT_UAV)
+                return;
+            mCoreObject.BindResource(binder, uav.mCoreObject.NativeSuper);
+        }
+        public void BindUAV(TtEffectBinder binder, TtUaView uav)
+        {
+            if (binder == null || uav == null)
+                return;
+            BindUAV(binder.mCoreObject, uav);
+        }
+        public bool BindSampler(VNameString name, TtSampler sampler)
+        {
+            if (sampler == null)
+                return false;
+            return mCoreObject.BindResource(name, sampler.mCoreObject.NativeSuper);
+        }
+        public void BindSampler(FEffectBinder binder, TtSampler sampler)
+        {
+            if (binder.IsValidPointer == false || sampler == null || binder.BindType != EShaderBindType.SBT_Sampler)
+                return;
+            mCoreObject.BindResource(binder, sampler.mCoreObject.NativeSuper);
+        }
+        public void BindSampler(TtEffectBinder binder, TtSampler sampler)
+        {
+            if (binder == null || sampler == null )
+                return;
+            BindSampler(binder.mCoreObject, sampler);
+        }
+        public void BindGeomMesh(TtGeomMesh mesh)
+        {
+            mCoreObject.BindGeomMesh(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, mesh.mCoreObject);
+        }
+        public void BindGeomMesh(FGeomMesh mesh)
+        {
+            mCoreObject.BindGeomMesh(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, mesh);
+        }
+        public void BindAttachVertexArray(TtVertexArray va)
+        {
+            mCoreObject.BindAttachVertexArray(va.mCoreObject);
+        }
+        public void BindIndirectDrawArgsBuffer(TtBuffer buffer, uint offset)
+        {
+            if (buffer == null)
+            {
+                mCoreObject.BindIndirectDrawArgsBuffer(new IBuffer(), offset);
+                return;
+            }
+            mCoreObject.BindIndirectDrawArgsBuffer(buffer.mCoreObject, offset);
+        }
+        public void SetDebugName(string name)
+        {
+            mCoreObject.NativeSuper.SetDebugName(name);
+        }
+    }
+    public class TtComputeDraw : AuxPtrType<NxRHI.IComputeDraw>
+    {
+        public object TagObject = null;
+        public override void Dispose()
+        {
+            TagObject = null;
+            if (IsDisposed == false)
+                TtStatistic.Instance.ComputeDrawcall--;
+            base.Dispose();
+        }
+        public void ResetResources()
+        {
+            mCoreObject.ResetResources();
+        }
+        public TtBindless CreateBindless(string name)
+        {
+            var ptr = mCoreObject.NativeSuper.CreateBindless(name);
+            if (ptr.IsValidPointer == false)
+                return null;
+            return new TtBindless(ptr);
+        }
+        public void Commit(ICommandList cmdlist)
+        {
+            mCoreObject.NativeSuper.Commit(cmdlist, false);
+        }
+        public void Commit(TtCommandList cmdlist)
+        {
+            mCoreObject.NativeSuper.Commit(cmdlist.mCoreObject, false);
+        }
+        public void BindShaderEffect(TtComputeEffect effect)
+        {
+            mCoreObject.BindShaderEffect(effect.mCoreObject);
+        }
+        public void SetDispatch(uint x, uint y, uint z)
+        {
+            mCoreObject.SetDispatch(x, y, z);
+        }
+        public void BindIndirectDispatchArgsBuffer(TtBuffer buffer)
+        {
+            if (buffer == null)
+                return;
+            if (buffer != null)
+                mCoreObject.BindIndirectDispatchArgsBuffer(buffer.mCoreObject);
+        }
+        public FShaderBinder FindBinder(EShaderBindType type, string name)
+        {
+            return mCoreObject.FindBinder(type, name);
+        }
+        public void BindCBV(FShaderBinder binder, TtCbView resource)
+        {
+            if (resource == null || binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+        }
+        // RHI 直通重载: 接受底层 ICbView (核心对象), 用于已经持有 mCoreObject 句柄
+        // 而不需要走托管包装的场景 (例如外部 RHI 模块或 acceleration structure 暴露的 view).
+        public void BindCBV(FShaderBinder binder, ICbView resource)
+        {
+            if (binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.NativeSuper);
+        }
+        public void BindCBV(string name, TtCbView resource)
+        {
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_CBV, name);
+            if (binder.IsValidPointer)
+                BindCBV(binder, resource);
+        }
+        public void BindCBV(string name, ref TtCbView resource)
+        {
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_CBV, name);
+            if (binder.IsValidPointer == false)
+                return;
+            if (resource == null)
+            {
+                resource = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+            }
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+        }
+        public void BindSrv(FShaderBinder binder, TtSrView resource)
+        {
+            if (resource == null || binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+        }
+        // RHI 直通重载: 接受底层 ISrView, 主要用于绑定 acceleration structure 的 SRV
+        // (TtTopAccelerationStructure.mCoreObject.GetGpuBufferSRV() 返回此类型),
+        // 与 TtGraphicDraw / TtRayTracingDraw 的 BindSrv(FShaderBinder, ISrView) 保持对称.
+        public void BindSrv(FShaderBinder binder, ISrView resource)
+        {
+            if (binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.NativeSuper);
+        }
+        public void BindSrv(string name, TtSrView resource)
+        {
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_SRV, name);
+            if (binder.IsValidPointer)
+                BindSrv(binder, resource);
+        }
+        public void BindUav(FShaderBinder binder, TtUaView resource)
+        {
+            if (resource == null || binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+        }
+        // RHI 直通重载: 接受底层 IUaView, 与 BindSrv(FShaderBinder, ISrView) 对称完整.
+        public void BindUav(FShaderBinder binder, IUaView resource)
+        {
+            if (binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.NativeSuper);
+        }
+        public void BindUav(string name, TtUaView resource)
+        {
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_UAV, name);
+            if (binder.IsValidPointer)
+                BindUav(binder, resource);
+        }
+        public void BindSampler(FShaderBinder binder, TtSampler resource)
+        {
+            if (resource == null || binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+        }
+        public void BindSampler(string name, TtSampler resource)
+        {
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_Sampler, name);
+            if (binder.IsValidPointer)
+                BindSampler(binder, resource);
+        }
+        public void SetDebugName(string name)
+        {
+            mCoreObject.NativeSuper.SetDebugName(name);
+        }
+    }
+    public class TtRayTracingDraw : AuxPtrType<NxRHI.IRayTracingDraw>
+    {
+        public object TagObject = null;
+        public override void Dispose()
+        {
+            TagObject = null;
+            if (IsDisposed == false)
+                TtStatistic.Instance.RayTracingDrawcall--;
+            base.Dispose();
+        }
+        public TtBindless CreateBindless(string name)
+        {
+            var ptr = mCoreObject.NativeSuper.CreateBindless(name);
+            if (ptr.IsValidPointer == false)
+                return null;
+            return new TtBindless(ptr);
+        }
+        public void Commit(ICommandList cmdlist)
+        {
+            mCoreObject.NativeSuper.Commit(cmdlist, false);
+        }
+        public void Commit(TtCommandList cmdlist)
+        {
+            mCoreObject.NativeSuper.Commit(cmdlist.mCoreObject, false);
+        }
+        public void BindShaderEffect(TtRayTracingEffect effect)
+        {
+            mCoreObject.BindShaderEffect(effect.mCoreObject);
+        }
+        public void SetDispatchRay(uint w, uint h, uint d)
+        {
+            mCoreObject.Width = w;
+            mCoreObject.Height = h;
+            mCoreObject.Depth = d;
+        }
+        public void BindIndirectDispatchArgsBuffer(TtBuffer buffer)
+        {
+            if (buffer == null)
+                return;
+            if (buffer != null)
+            {
+                //mCoreObject.BindIndirectDispatchArgsBuffer(buffer.mCoreObject);
+            }
+        }
+        public FShaderBinder FindBinder(EShaderBindType type, string name)
+        {
+            return mCoreObject.FindBinder(type, name);
+        }
+        public void BindCBV(FShaderBinder binder, TtCbView resource)
+        {
+            if (resource == null || binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+        }
+        public void BindCBV(FShaderBinder binder, ICbView resource)
+        {
+            if (binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.NativeSuper);
+        }
+        public void BindCBV(string name, TtCbView resource)
+        {
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_CBV, name);
+            if (binder.IsValidPointer)
+                BindCBV(binder, resource);
+        }
+        public void BindCBV(string name, ref TtCbView resource)
+        {
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_CBV, name);
+            if (binder.IsValidPointer == false)
+                return;
+            if (resource == null)
+            {
+                resource = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+            }
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+        }
+        public void BindSrv(FShaderBinder binder, TtSrView resource)
+        {
+            if (resource == null || binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+        }
+        public void BindSrv(FShaderBinder binder, ISrView resource)
+        {
+            if (binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.NativeSuper);
+        }
+        public void BindSrv(string name, TtSrView resource)
+        {
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_SRV, name);
+            if (binder.IsValidPointer)
+                BindSrv(binder, resource);
+        }
+        public void BindUav(FShaderBinder binder, TtUaView resource)
+        {
+            if (resource == null || binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+        }
+        public void BindUav(FShaderBinder binder, IUaView resource)
+        {
+            if (binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.NativeSuper);
+        }
+        public void BindUav(string name, TtUaView resource)
+        {
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_UAV, name);
+            if (binder.IsValidPointer)
+                BindUav(binder, resource);
+        }
+        public void BindSampler(FShaderBinder binder, TtSampler resource)
+        {
+            if (resource == null || binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+        }
+        public void BindSampler(string name, TtSampler resource)
+        {
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_Sampler, name);
+            if (binder.IsValidPointer)
+                BindSampler(binder, resource);
+        }
+        public void SetDebugName(string name)
+        {
+            mCoreObject.NativeSuper.SetDebugName(name);
+        }
+    }
+    public class TtCopyDraw : AuxPtrType<NxRHI.ICopyDraw>
+    {
+        public override void Dispose()
+        {
+            if (IsDisposed == false)
+                TtStatistic.Instance.TransferDrawcall--;
+            base.Dispose();
+        }
+        public void ResetResources()
+        {
+            mCoreObject.ResetResources();
+        }
+        public void Commit(ICommandList cmdlist)
+        {
+            mCoreObject.NativeSuper.Commit(cmdlist, false);
+        }
+        public void Commit(TtCommandList cmdlist)
+        {
+            mCoreObject.NativeSuper.Commit(cmdlist.mCoreObject, false);
+        }
+        public ECopyDrawMode Mode
+        {
+            get
+            {
+                return mCoreObject.Mode;
+            }
+            set
+            {
+                mCoreObject.Mode = value;
+            }
+        }
+        public uint SrcSubResource
+        {
+            get => mCoreObject.SrcSubResource;
+            set => mCoreObject.SrcSubResource = value;
+        }
+        public uint DestSubResource
+        {
+            get => mCoreObject.DestSubResource;
+            set => mCoreObject.DestSubResource = value;
+        }
+        public uint DstX
+        {
+            get => mCoreObject.DstX;
+            set => mCoreObject.DstX = value;
+        }
+        public uint DstY
+        {
+            get => mCoreObject.DstY;
+            set => mCoreObject.DstY = value;
+        }
+        public uint DstZ
+        {
+            get => mCoreObject.DstZ;
+            set => mCoreObject.DstZ = value;
+        }
+        public ref FSubResourceFootPrint FootPrint
+        {
+            get
+            {
+                unsafe
+                {
+                    return ref *mCoreObject.GetFootPrint();
+                }
+            }
+        }
+        public void BindSrc(TtGpuResource res)
+        {
+            var bf = res as TtBuffer;
+            if (bf != null)
+            {
+                mCoreObject.BindBufferSrc(bf.mCoreObject);
+            }
+            else
+            {
+                var tex = res as TtTexture;
+                if (tex != null)
+                {
+                    mCoreObject.BindTextureSrc(tex.mCoreObject);
+                }
+            }
+        }
+        public void BindDest(TtGpuResource res)
+        {
+            var bf = res as TtBuffer;
+            if (bf != null)
+            {
+                mCoreObject.BindBufferDest(bf.mCoreObject);
+            }
+            else
+            {
+                var tex = res as TtTexture;
+                if (tex != null)
+                {
+                    mCoreObject.BindTextureDest(tex.mCoreObject);
+                }
+            }
+        }
+        public void BindBufferSrc(TtBuffer res)
+        {
+            mCoreObject.BindBufferSrc(res.mCoreObject);
+        }
+        public void BindTextureSrc(TtTexture res)
+        {
+            mCoreObject.BindTextureSrc(res.mCoreObject);
+        }
+        public void BindTextureSrc(ITexture res)
+        {
+            mCoreObject.BindTextureSrc(res);
+        }
+        public void BindBufferDest(TtBuffer res)
+        {
+            mCoreObject.BindBufferDest(res.mCoreObject);
+        }
+        public void BindTextureDest(TtTexture res)
+        {
+            mCoreObject.BindTextureDest(res.mCoreObject);
+        }
+        public void BindTextureDest(ITexture res)
+        {
+            mCoreObject.BindTextureDest(res);
+        }
+        public void SetDebugName(string name)
+        {
+            mCoreObject.NativeSuper.SetDebugName(name);
+        }
+        public void Copy(TtBuffer tar, TtBuffer src, uint size = 0, uint tarOffset = 0, uint srcOffset = 0)
+        {
+            if (size == 0)
+            {
+                size = tar.mCoreObject.Desc.Size;
+            }
+            mCoreObject.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
+            BindBufferSrc(src);
+            BindBufferDest(tar);
+            SrcSubResource = 0;
+            this.DestSubResource = 0;
+            this.DstX = tarOffset;
+            var footPrint = new NxRHI.FSubResourceFootPrint();
+            footPrint.SetDefault();
+            footPrint.X = (int)srcOffset;
+            footPrint.Width = size;
+            mCoreObject.FootPrint = footPrint;
+        }
+    }
+
+    public class TtActionDraw : AuxPtrType<NxRHI.IActionDraw>
+    {
+        public override void Dispose()
+        {
+            if (IsDisposed == false)
+                TtStatistic.Instance.ActionDrawcall--;
+            base.Dispose();
+        }
+    }
+}

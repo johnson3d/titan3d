@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 	<Type Name="VNameString">
-		<DisplayString> {{ Name = {c_str()} }}</DisplayString>
+		<DisplayString> {{ Name = {c_str(),s8} }}</DisplayString>
 		<Expand>
 			<Item Name="[Index]">Index</Item>
-			<!--<ArrayItems>
-				<Size>size</Size>
-				<ValuePointer>data</ValuePointer>
-			</ArrayItems>-->
+			<Item Name="[UTF-8]">c_str(),s8</Item>
 		</Expand>
+	</Type>
+	<Type Name="VStringA">
+		<DisplayString>{((char*)this),s8}</DisplayString>
 	</Type>
 	<Type Name="NxMath::NxFloat">
 		<DisplayString> {{ {mValue} }}</DisplayString>

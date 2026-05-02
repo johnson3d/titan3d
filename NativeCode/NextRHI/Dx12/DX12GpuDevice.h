@@ -171,7 +171,7 @@ namespace NxRHI
 		void ClearIdleCmdlists();
 		void TryRecycle();
 
-		virtual void BeginEvent(const char* info) override;
+		virtual void BeginEvent(const char* info, DWORD color = 0) override;
 		virtual void EndEvent(const char* info) override;
 
 		DX12GpuDevice*					mDevice = nullptr;

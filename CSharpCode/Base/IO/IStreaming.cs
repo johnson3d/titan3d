@@ -68,6 +68,19 @@ namespace EngineNS.IO
                 }   
             }
         }
+        public int GetNeedStreamingNumber()
+        {
+            int count = 0;
+            foreach (var i in StreamingAssets.Values)
+            {
+                if (i.LevelOfDetail == i.TargetLOD)
+                {
+                    continue;
+                }
+                count++;
+            }
+            return count;
+        }
         public virtual bool UpdateTargetLOD(IStreaming asset)
         {
             return true;

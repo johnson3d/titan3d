@@ -1,4 +1,4 @@
-﻿using EngineNS.Graphics.Pipeline.Common;
+using EngineNS.Graphics.Pipeline.Common;
 using NPOI.Util;
 using System;
 using System.Collections.Generic;
@@ -134,12 +134,13 @@ namespace EngineNS.Graphics.Pipeline
             set
             {
                 mName = value;
-                foreach (var i in OutputGraphPins)
-                {
-                    i.Attachement.AttachmentName = FHashText.Create($"{Name}->{i.Name}");
-                }
+                //foreach (var i in OutputGraphPins)
+                //{
+                //    i.Attachement.AttachmentName = FHashText.Create($"{Name}->{i.Name}");
+                //}
             }
         }
+        public Guid UniqueId { get; } = Guid.NewGuid();
         public virtual Color4b GetTileColor()
         {
             return Color4b.FromRgb(255, 0, 255);
@@ -183,7 +184,7 @@ namespace EngineNS.Graphics.Pipeline
                 if (i.Name == pin.Name)
                     return false;
             }
-            pin.Attachement.AttachmentName = FHashText.Create($"{Name}->{pin.Name}");
+            pin.Attachement.AttachmentName = FHashText.Create($"{UniqueId}->{pin.Name}");
             pin.HostNode = this;
             OutputGraphPins.Add(pin);
             return true;
@@ -192,7 +193,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             if (pin.PinType != TtRenderGraphPin.EPinType.InputOutput)
                 return false;
-            pin.Attachement.AttachmentName = FHashText.Create($"{Name}->{pin.Name}");
+            pin.Attachement.AttachmentName = FHashText.Create($"{UniqueId}->{pin.Name}");
             pin.HostNode = this;
             foreach (var i in InputGraphPins)
             {
@@ -286,32 +287,32 @@ namespace EngineNS.Graphics.Pipeline
         {
 
         }
-        public virtual void BeginTickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
+        public virtual void BeginTick(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
         {
 
         }
-        public virtual void EndTickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
+        public virtual void EndTick(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
         {
 
         }
-        public abstract ref Profiler.TimeScope GetThreadStaticRDGTickLogicScope();
-        public Profiler.TimeScope RDGTickLogicScope
+        public abstract ref Profiler.TimeScope GetThreadStaticRDGTickScope();
+        public Profiler.TimeScope RDGTickScope
         {
             get
             {
-                ref var scorp = ref GetThreadStaticRDGTickLogicScope();
+                ref var scorp = ref GetThreadStaticRDGTickScope();
                 if (scorp == null)
                 {
-                    scorp = new Profiler.TimeScope(this.GetType(), nameof(TickLogic));
+                    scorp = new Profiler.TimeScope(this.GetType(), nameof(Tick));
                 }
                 return scorp;
             }
         }
-        public virtual void BeforeTickLogic(TtRenderPolicy policy)
+        public virtual void BeforeTick(TtRenderPolicy policy)
         {
 
         }
-        public virtual void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public virtual void Tick(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
 
         }
@@ -405,13 +406,13 @@ namespace EngineNS.Graphics.Pipeline
         }
     }
 
-    public abstract class TAuxRenderGraphNode<T> : TtRenderGraphNode
+    public abstract class TAuxRenderGraphNode<T> : TtRenderGraphNode 
     {
         [ThreadStatic]
-        private static Profiler.TimeScope mRDGTickLogicScope = null;
-        public override ref Profiler.TimeScope GetThreadStaticRDGTickLogicScope()
+        private static Profiler.TimeScope mRDGTickScope = null;
+        public override ref Profiler.TimeScope GetThreadStaticRDGTickScope()
         {
-            return ref mRDGTickLogicScope;
+            return ref mRDGTickScope;
         }
     }
 }

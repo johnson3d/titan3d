@@ -1,4 +1,4 @@
-#include "vfxthread.h"
+﻿#include "vfxthread.h"
 
 #if defined(PLATFORM_DROID)
 #include <sys/prctl.h>
@@ -28,7 +28,7 @@ const char* vfxThread::GetCurrentThreadName()
 		return current_thread_name;
 	has_set_thread_name = true;
 #if defined(PLATFORM_WIN)
-	// Windows 10 1607+ ��ʽ
+	// Windows 10 1607+ 方式
 	using GetThreadDescriptionFunc = HRESULT(WINAPI*)(HANDLE, PWSTR*);
 	static auto pGetThreadDescription =
 		reinterpret_cast<GetThreadDescriptionFunc>(

@@ -1,118 +1,236 @@
-/********************************************************************
+ï»¿/********************************************************************
+
 	created:	2002/12/25
+
 	created:	25:12:2002   20:39
+
 	filename: 	geometry\v3dxOBB.h
+
 	file path:	geometry
+
 	file base:	v3dxOBB
+
 	file ext:	h
+
 	author:		johnson
+
 	modify:		
+
 	
+
 	purpose:	
+
 *********************************************************************/
+
 #ifndef __v3dxOBB__h__25_12_2002_20_39__
+
 #define __v3dxOBB__h__25_12_2002_20_39__
+
 #include "v3dxMatrix4.h"
+
 #include "v3dxPlane3.h"
+
 #include "v3dxBox3.h"
+
+
 
 #pragma pack(push,4)
 
+
+
 struct v3dTransUtility
+
 {
-	//´ÓÁ½¸ö±ä»»£¬»ñµÃFromTMµ½ToTMµÄÏà¶Ô±ä»»
-	//ToTM£º±»±ä»»µ½µÄÄ¿±ê¿Õ¼ä
-	//FromTM£º´Ó´ËÄ¿±ê±ä»»
+
+	//ä»Žä¸¤ä¸ªå˜æ¢ï¼ŒèŽ·å¾—FromTMåˆ°ToTMçš„ç›¸å¯¹å˜æ¢
+
+	//ToTMï¼šè¢«å˜æ¢åˆ°çš„ç›®æ ‡ç©ºé—´
+
+	//FromTMï¼šä»Žæ­¤ç›®æ ‡å˜æ¢
+
 	static  v3dxMatrix4 GetRelativeTM( const v3dxMatrix4& ToTM , const v3dxMatrix4& FromTM );
 
-	//°ÑÏà¶Ô±ä»»±ä»»³ÉÎª¾ø¶Ô±ä»»
+
+
+	//æŠŠç›¸å¯¹å˜æ¢å˜æ¢æˆä¸ºç»å¯¹å˜æ¢
+
 	static  v3dxMatrix4 GetAbsTM( const v3dxMatrix4& BaseTM , const v3dxMatrix4& RelativeTM );
 
-	//°Ñ¾ø¶Ô×ø±êÎ»ÖÃ±ä»»³ÉÎªÏà¶Ô×ø±ê
+
+
+	//æŠŠç»å¯¹åæ ‡ä½ç½®å˜æ¢æˆä¸ºç›¸å¯¹åæ ‡
+
 	static  v3dxVector3 GetRelativePos( const v3dxMatrix4& BaseTM , const v3dxVector3& AbsPos );
-	//°Ñ¾ø¶Ô×ø±êÏòÁ¿±ä»»³ÉÎªÏà¶Ô×ø±ê
+
+	//æŠŠç»å¯¹åæ ‡å‘é‡å˜æ¢æˆä¸ºç›¸å¯¹åæ ‡
+
 	static  v3dxVector3 GetRelativeNormal( const v3dxMatrix4& BaseTM , const v3dxVector3& AbsNormal );
+
 };
+
+
 
 class v3dxOBB
+
 {
+
 public:
+
 	static  bool ComputeBestObbMatrix(size_t vcount,     // number of input data points
+
 		const float *points,     // starting address of points array.
+
 		size_t vstride,    // stride between input points.
+
 		const float *weights,    // *optional point weighting values.
+
 		size_t wstride,    // weight stride for each vertex.
+
 		float *matrix);
 
-	//²âÊÔobbÊÇ·ñÔÚ±¾obbµÄ6¸öÃæµÄÍâÃæ£¬ÒªÍêÕûÅÐ¶Ï2¸öobbÊÇ·ñÏà½»£¬»¹ÐèÒªÈÃ¶Ô·½obbÀ´²âÊÔ×Ô¼º
-	//´ËÍâ,»¹ÓÐÄÇÖÖÁ½¸öobb¶¼²à×Å¿çÔ½Æ½ÃæµÄÇé¿öºÜ²»ºÃÅÐ¶Ï
+
+
+	//æµ‹è¯•obbæ˜¯å¦åœ¨æœ¬obbçš„6ä¸ªé¢çš„å¤–é¢ï¼Œè¦å®Œæ•´åˆ¤æ–­2ä¸ªobbæ˜¯å¦ç›¸äº¤ï¼Œè¿˜éœ€è¦è®©å¯¹æ–¹obbæ¥æµ‹è¯•è‡ªå·±
+
+	//æ­¤å¤–,è¿˜æœ‰é‚£ç§ä¸¤ä¸ªobbéƒ½ä¾§ç€è·¨è¶Šå¹³é¢çš„æƒ…å†µå¾ˆä¸å¥½åˆ¤æ–­
+
 	 vBOOL IsFastOutRef( const v3dxOBB& obb , const v3dxMatrix4& tar_tm );
-	//¾«È·¼ÆËãÊÇ·ñobbÏà½»
-	//tar_tmÐèÒªÊÇ:
-	//Ïà¶Ô±¾OBB×ø±êÏµµÄÄ¿±êOBBµÄ±ä»»¾ØÕó
+
+	//ç²¾ç¡®è®¡ç®—æ˜¯å¦obbç›¸äº¤
+
+	//tar_tméœ€è¦æ˜¯:
+
+	//ç›¸å¯¹æœ¬OBBåæ ‡ç³»çš„ç›®æ ‡OBBçš„å˜æ¢çŸ©é˜µ
+
 	 bool IsOverlap( const v3dxOBB& obb , const v3dxMatrix4& tar_tm ) const;
-	//Ïß¶ÎÏà½»
-	//pvFrom,pvDirÐèÒª±ä»»µ½±¾OBBµÄ×ø±ê¿Õ¼äÖÐÀ´
+
+	//çº¿æ®µç›¸äº¤
+
+	//pvFrom,pvDiréœ€è¦å˜æ¢åˆ°æœ¬OBBçš„åæ ‡ç©ºé—´ä¸­æ¥
+
 	 bool IsIntersect( float *pfT_n,
+
 		v3dxVector3 *pvPoint_n,
+
 		float *pfT_f,
+
 		v3dxVector3 *pvPoint_f,
+
 		const v3dxVector3 *pvFrom,
+
 		const v3dxVector3 *pvDir );
-	//vector°üº¬
-	//vÐèÒª±ä»»µ½±¾OBBµÄ×ø±ê¿Õ¼äÖÐÀ´
+
+	//vectoråŒ…å«
+
+	//véœ€è¦å˜æ¢åˆ°æœ¬OBBçš„åæ ‡ç©ºé—´ä¸­æ¥
+
 	inline bool In( const v3dxVector3& v ){
+
 		if( v.X>m_vExtent.X || v.X<-m_vExtent.X ||
+
 			v.Y>m_vExtent.Y || v.Y<-m_vExtent.Y || 
+
 			v.Z>m_vExtent.Z || v.Z<-m_vExtent.Z )
+
 			return false;
+
 		return true;
+
 	}
 
+
+
 	inline v3dxPlane3 GetXPlane1() const{
+
 		return v3dxPlane3( -1.f , 0.f , 0.f , -m_vExtent.X );
+
 	}
+
 	inline v3dxPlane3 GetXPlane2() const{
+
 		return v3dxPlane3( 1.f , 0.f , 0.f , m_vExtent.X );
+
 	}
+
 	inline v3dxPlane3 GetYPlane1() const{
+
 		return v3dxPlane3( 0.f , -1.f , 0.f , -m_vExtent.Y );
+
 	}
+
 	inline v3dxPlane3 GetYPlane2() const{
+
 		return v3dxPlane3( 0.f , 1.f , 0.f , m_vExtent.Y );
+
 	}
+
 	inline v3dxPlane3 GetZPlane1() const{
+
 		return v3dxPlane3( 0.f , 0.f , -1.f , -m_vExtent.Z );
+
 	}
+
 	inline v3dxPlane3 GetZPlane2() const{
+
 		return v3dxPlane3( 0.f , 0.f , 1.f , m_vExtent.Z );
+
 	}
+
 	inline v3dxVector3 GetCorner( int e ) const{
+
 		switch( e ){
+
 			case BOX3_CORNER_xyz:
+
 				return v3dxVector3(-m_vExtent.X,-m_vExtent.Y,-m_vExtent.Z);
+
 			case BOX3_CORNER_xyZ:
+
 				return v3dxVector3(-m_vExtent.X,-m_vExtent.Y,m_vExtent.Z);
+
 			case BOX3_CORNER_xYz:
+
 				return v3dxVector3(-m_vExtent.X,m_vExtent.Y,-m_vExtent.Z);
+
 			case BOX3_CORNER_xYZ:
+
 				return v3dxVector3(-m_vExtent.X,m_vExtent.Y,m_vExtent.Z);
+
 			case BOX3_CORNER_Xyz:
+
 				return v3dxVector3(m_vExtent.X,-m_vExtent.Y,-m_vExtent.Z);
+
 			case BOX3_CORNER_XyZ:
+
 				return v3dxVector3(m_vExtent.X,-m_vExtent.Y,m_vExtent.Z);
+
 			case BOX3_CORNER_XYz:
+
 				return v3dxVector3(m_vExtent.X,m_vExtent.Y,-m_vExtent.Z);
+
 			case BOX3_CORNER_XYZ:
+
 				return m_vExtent;
+
 			default:
+
 				return v3dxVector3::ZERO;
+
 		}
+
 	}
+
 public:
+
 	v3dxVector3			m_vExtent;
+
 };
+
+
 
 #pragma pack(pop)
 
+
+
 #endif//#ifndef __v3dxOBB__h__25_12_2002_20_39__
+

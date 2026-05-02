@@ -3,6 +3,8 @@
 #include "../../NextRHI/Dx12/DX12GpuDevice.h"
 #include "../../Base/io/vfxfile.h"
 
+#include <filesystem>
+
 #define VULKAN_HPP_NO_TO_STRING
 #include "NsightDumpVK/NsightAftermathGpuCrashTracker.h"
 
@@ -16,6 +18,34 @@ namespace GpuDump
 {
 	VKGpuCrashTracker::MarkerMap markerMap;
 	VKGpuCrashTracker gNvGpuCrashTracker(markerMap);
+
+	// Root directory for all Aftermath output files. Empty means current working directory.
+	// Always normalized to end with '/' when non-empty so callers can do `root + filename`.
+	static std::string gNvAftermathOutputRoot;
+
+	void NvAftermath::SetOutputRoot(const char* root)
+	{
+		if (root == nullptr || root[0] == '\0')
+		{
+			gNvAftermathOutputRoot.clear();
+			return;
+		}
+		gNvAftermathOutputRoot = root;
+		// Normalize trailing slash so concatenation is straightforward.
+		const char last = gNvAftermathOutputRoot.back();
+		if (last != '/' && last != '\\')
+			gNvAftermathOutputRoot += '/';
+
+		// Ensure the directory exists; ignore errors so a misconfigured path
+		// doesn't crash the engine during init.
+		std::error_code ec;
+		std::filesystem::create_directories(gNvAftermathOutputRoot, ec);
+	}
+
+	const std::string& NvAftermath::GetOutputRoot()
+	{
+		return gNvAftermathOutputRoot;
+	}
 	/*void GFSDK_AFTERMATH_CALL Aftermath_GpuCrashDumpCb(const void* pGpuCrashDump, const uint32_t gpuCrashDumpSize, void* pUserData)
 	{
 
@@ -372,21 +402,60 @@ namespace GpuDump
 		}
 		
 	}
+
+	void LogDeviceRemove(ID3D12Device* mDevice)
+	{
+		__try
+		{
+			auto reason = mDevice->GetDeviceRemovedReason();
+			switch (reason)
+			{
+			case DXGI_ERROR_DEVICE_HUNG:
+				VFX_LTRACE(ELTT_Error, "GPU hung - device stopped responding\n");
+				break;
+
+			case DXGI_ERROR_DEVICE_REMOVED:
+				VFX_LTRACE(ELTT_Error, "Device removed\n");
+				break;
+
+			case DXGI_ERROR_DEVICE_RESET:
+				VFX_LTRACE(ELTT_Error, "Device reset\n");
+				break;
+
+			case DXGI_ERROR_DRIVER_INTERNAL_ERROR:
+				VFX_LTRACE(ELTT_Error, "Driver internal error\n");
+				break;
+
+			case DXGI_ERROR_INVALID_CALL:
+				VFX_LTRACE(ELTT_Error, "Invalid API call\n");
+				break;
+
+			default:
+				VFX_LTRACE(ELTT_Error, "Unknown device error: 0x%08X\n", reason);
+				break;
+			}
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+
+		}
+	}
 	void DX12_OnDredDump(ID3D12Device* mDevice, ID3D12DeviceRemovedExtendedDataSettings1* mDredSettings, const char* GDredDir)
 	{
 		auto err = ::GetLastError();
 		//ASSERT(false);
-		//auto hr = mDevice->GetDeviceRemovedReason();
+		LogDeviceRemove(mDevice);
+		
 		if (mDredSettings != nullptr)
 		{
-			AutoRef<ID3D12DeviceRemovedExtendedData1> pDred;
+			AutoRef<ID3D12DeviceRemovedExtendedData2> pDred;
 			mDevice->QueryInterface(IID_PPV_ARGS(pDred.GetAddressOf()));
 
 			D3D12_DRED_AUTO_BREADCRUMBS_OUTPUT1 DredAutoBreadcrumbsOutput{};
-			D3D12_DRED_PAGE_FAULT_OUTPUT1 DredPageFaultOutput{};
+			D3D12_DRED_PAGE_FAULT_OUTPUT2 DredPageFaultOutput{};
 			auto hr = pDred->GetAutoBreadcrumbsOutput1(&DredAutoBreadcrumbsOutput);
 			ASSERT(hr == S_OK);
-			hr = pDred->GetPageFaultAllocationOutput1(&DredPageFaultOutput);
+			hr = pDred->GetPageFaultAllocationOutput2(&DredPageFaultOutput);
 			ASSERT(hr == S_OK);
 
 #define AddCodeLine(txt, ...) {code.AddLine(VStringA_FormatV(txt, __VA_ARGS__).c_str());}
@@ -422,12 +491,13 @@ namespace GpuDump
 					if (curNode->pLastBreadcrumbValue != nullptr)
 					{
 						auto lastIndex = *curNode->pLastBreadcrumbValue;
+						ASSERT(lastIndex <= curNode->BreadcrumbCount);
 						if (curNode->BreadcrumbCount > lastIndex)
 						{
 							crashed = VStringA_FormatV("_crash_%d", *curNode->pLastBreadcrumbValue);
 						}
-						auto lastOp = curNode->pCommandHistory[*curNode->pLastBreadcrumbValue];
-						AddCodeLine("Dred {%s} LastOp = %s[%d]\r\n", n.c_str(), GetOpStr(lastOp).c_str(), *curNode->pLastBreadcrumbValue);
+						auto lastOp = curNode->pCommandHistory[lastIndex];
+						AddCodeLine("Dred {%s} LastOp = %s[%d]\r\n", n.c_str(), GetOpStr(lastOp).c_str(), lastIndex);
 					}
 
 
@@ -449,6 +519,7 @@ namespace GpuDump
 			{
 				FCodeWriter code;
 				auto curNode = DredPageFaultOutput.pHeadRecentFreedAllocationNode;
+				AddCodeLine("DredPageFaultOutput.PageFaultFlags  = %d\r\n", DredPageFaultOutput.PageFaultFlags);
 				while (curNode != nullptr)
 				{
 					std::string n;
@@ -544,9 +615,12 @@ namespace GpuDump
 					default:
 						break;
 					}
+					
 					AddCodeLine("Dred RecentFree {%s} = %s\r\n", n.c_str(), opStr.c_str());
+
 					curNode = curNode->pNext;
 				}
+				
 				auto file = std::string(GDredDir) + VStringA_FormatV("RecentFreedAllocationNode.rfa");
 				VFile io;
 				if (io.Open(file.c_str(), VFile::modeWrite | VFile::modeCreate))

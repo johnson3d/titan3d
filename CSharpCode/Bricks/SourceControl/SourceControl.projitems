@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -9,10 +9,10 @@
     <Import_RootNamespace>EngineNS.Bricks.SourceControl</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Git\UGitRepository.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Git\UGitSource.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)URepository.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)USource.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Git\GitRepository.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Git\GitSource.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Repository.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Source.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)SourceControl.brick" />

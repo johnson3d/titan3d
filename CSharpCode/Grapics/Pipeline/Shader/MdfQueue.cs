@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
+using EngineNS.Bricks.CodeBuilder.MacrossNode;
 using Org.BouncyCastle.Asn1.Mozilla;
 using System;
 using System.Collections.Generic;
@@ -283,7 +283,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         public override string ToString()
         {
-            return Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            return Rtti.TtTypeDesc.TypeOf(this.GetType()).TypeString;
             //string result = $"Var: {DefineCode?.AsText}\n";
             //result += $"Code: {SourceCode.AsText}\n";
             //return result;

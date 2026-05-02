@@ -366,7 +366,7 @@ namespace EngineNS.Bricks.FX.Weather
         {
             CodeName = RName.GetRName("shaders/bricks/fx/volumecloud.cginc", RName.ERNameType.Engine);
 
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
@@ -447,9 +447,9 @@ namespace EngineNS.Bricks.FX.Weather
         public override async Thread.Async.TtTask Initialize(Graphics.Pipeline.TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtVolumeCloudShading>();
+            mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtVolumeCloudShading>();
         }
-        public override void TickLogic(TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public override void Tick(TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             if (SceneNode==null)
             {
@@ -460,7 +460,7 @@ namespace EngineNS.Bricks.FX.Weather
             {
                 ShadingCbv.SetValue("ShadingStruct", in SceneNode.ShadingStruct);
             }
-            base.TickLogic(world, policy, frameCmdList, bClear);
+            base.Tick(world, policy, frameCmdList, bClear);
         }
         #region Rhi Resouces
         public NxRHI.TtCbView ShadingCbv;

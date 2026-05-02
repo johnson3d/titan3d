@@ -1,0 +1,502 @@
+﻿using EngineNS.Bricks.VXGI;
+using System;
+using System.Collections.Generic;
+using EngineNS.Graphics.Pipeline.Shader;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
+namespace EngineNS.Graphics.Pipeline.Deferred
+{
+    public class TtOpaqueShading : Shader.TtGraphicsShadingEnv
+    {
+        public TtPermutationItem DisableAO
+        {
+            get;
+            set;
+        }
+        public TtPermutationItem DisablePointLights
+        {
+            get;
+            set;
+        }
+        public TtPermutationItem DisableShadow
+        {
+            get;
+            set;
+        }
+        public TtOpaqueShading()
+        {
+            CodeName = RName.GetRName("shaders/ShadingEnv/forword/ForwordOpaque.cginc", RName.ERNameType.Engine);
+
+            this.BeginPermutaion();
+            DisableAO = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_AO", (int)Shader.EPermutation_Bool.BitWidth);
+            DisablePointLights = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_POINTLIGHTS", (int)Shader.EPermutation_Bool.BitWidth);
+            DisableShadow = this.PushPermutation<Shader.EPermutation_Bool>("DISABLE_SHADOW_ALL", (int)Shader.EPermutation_Bool.BitWidth);
+            var editorMode = this.PushPermutation<Shader.EPermutation_Bool>("MODE_EDITOR", (int)Shader.EPermutation_Bool.BitWidth);
+
+            DisableAO.SetValue((int)Shader.EPermutation_Bool.FalseValue);
+            DisableShadow.SetValue((int)Shader.EPermutation_Bool.FalseValue);
+            DisablePointLights.SetValue((int)Shader.EPermutation_Bool.FalseValue);
+            editorMode.SetValue((int)Shader.EPermutation_Bool.TrueValue);
+
+            UpdatePermutation().AddWaitTask();
+        }
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
+        {
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_Normal,
+                NxRHI.EVertexStreamType.VST_Tangent,
+                NxRHI.EVertexStreamType.VST_Color,
+                NxRHI.EVertexStreamType.VST_LightMap,
+                NxRHI.EVertexStreamType.VST_UV,};
+        }
+        public override EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return new EPixelShaderInput[] {
+                EPixelShaderInput.PST_Position,
+                EPixelShaderInput.PST_WorldPos,
+                EPixelShaderInput.PST_Normal,
+                EPixelShaderInput.PST_UV,
+                EPixelShaderInput.PST_Color,
+                EPixelShaderInput.PST_Custom0,
+                EPixelShaderInput.PST_Custom1,
+                EPixelShaderInput.PST_Custom2,
+            };
+        }
+    }
+    public class TtTranslucentShading : Shader.TtGraphicsShadingEnv
+    {
+        public TtTranslucentShading()
+        {
+            CodeName = RName.GetRName("shaders/ShadingEnv/Forword/ForwordTranslucent.cginc", RName.ERNameType.Engine);
+        }
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
+        {
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_Normal,
+                NxRHI.EVertexStreamType.VST_Tangent,
+                NxRHI.EVertexStreamType.VST_Color,
+                NxRHI.EVertexStreamType.VST_LightMap,
+                NxRHI.EVertexStreamType.VST_UV,};
+        }
+        public override EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return new EPixelShaderInput[] {
+                EPixelShaderInput.PST_Position,
+                EPixelShaderInput.PST_WorldPos,
+                EPixelShaderInput.PST_UV,
+            };
+        }
+    }
+    [Bricks.CodeBuilder.ContextMenu("Forword", "Deferred\\Forword", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.UForwordNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.UForwordNode" })]
+    public class TtForwordNode : Common.TtBasePassNode
+    {
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
+        public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color", true, EPixelFormat.PXF_R10G10B10A2_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth", true, EPixelFormat.PXF_D16_UNORM, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+        public TtForwordNode()
+        {
+            Name = "UForwordNode";
+        }
+        public override void InitNodePins()
+        {
+            AddInput(VisiblesPinIn);
+            AddInputOutput(ColorPinInOut);
+            AddInputOutput(DepthPinInOut);
+        }
+        public TtOpaqueShading mOpaqueShading;
+        public TtTranslucentShading mTranslucentShading;
+        public TtLayerDrawBuffers LayerBasePass = new TtLayerDrawBuffers();
+        public NxRHI.TtRenderPass RenderPass;
+        public TtCpuCullingNode CpuCullNode = null;
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
+        {
+            await Thread.TtAsyncDummyClass.DummyFunc();
+
+            var dfPolicy = policy;// as UDeferredPolicy;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            LayerBasePass.Initialize(rc, debugName + ".ForwordPass");
+
+            CreateGBuffers(policy, ColorPinInOut.Attachement.Format);
+
+            mOpaqueShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtOpaqueShading>();
+            mTranslucentShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtTranslucentShading>();
+
+            var linker = VisiblesPinIn.FindInLinker();
+            if (linker != null)
+            {
+                CpuCullNode = linker.OutPin.GetNakedHostNode<TtCpuCullingNode>();
+            }
+        }
+        public virtual unsafe TtGraphicsBuffers CreateGBuffers(TtRenderPolicy policy, EPixelFormat format)
+        {
+            var PassDesc = new NxRHI.FRenderPassDesc();
+
+            PassDesc.NumOfMRT = 1;
+            PassDesc.AttachmentMRTs[0].Format = format;
+            PassDesc.AttachmentMRTs[0].Samples = 1;
+            PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+            PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+            PassDesc.m_AttachmentDepthStencil.Format = DepthPinInOut.Attachement.Format;// dfPolicy.BasePassNode.GBuffers.DepthStencil.AttachBuffer.Srv.mCoreObject.GetFormat(); //dsFmt;
+            PassDesc.m_AttachmentDepthStencil.Samples = 1;
+            PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+            PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+            PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+            PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+            //PassDesc.mFBClearColorRT0 = new Color4f(1, 0, 0, 0);
+            //PassDesc.mDepthClearValue = 1.0f;
+            //PassDesc.mStencilClearValue = 0u;
+
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
+
+            GBuffers.Initialize(policy, RenderPass);
+            GBuffers.SetRenderTarget(policy, 0, ColorPinInOut);
+            GBuffers.SetDepthStencil(policy, DepthPinInOut);
+            GBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
+
+            return GBuffers;
+        }
+        public override void Dispose()
+        {
+            if (mOpaqueShading == null)
+                return;
+            GBuffers?.Dispose();
+            GBuffers = null;
+
+            base.Dispose();
+        }
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
+        {
+            if (mOpaqueShading == null)
+                return;
+            if (GBuffers != null)
+            {
+                GBuffers.SetSize(x, y);
+            }
+        }
+        public override Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtRenderMesh.TtAtom atom)
+        {
+            switch (atom.Material.RenderLayer)
+            {
+                case ERenderLayer.RL_Translucent:
+                case ERenderLayer.RL_Sky:
+                    return mTranslucentShading;
+                case ERenderLayer.RL_Opaque:
+                    return mTranslucentShading;
+                default:
+                    return mOpaqueShading;
+            }
+        }
+        public override void BeforeTick(TtRenderPolicy policy)
+        {
+            var buffer = this.FindAttachBuffer(ColorPinInOut);
+            if (buffer != null)
+            {
+                if (ColorPinInOut.Attachement.Format != buffer.BufferDesc.Format)
+                {
+                    this.CreateGBuffers(policy, buffer.BufferDesc.Format);
+                    ColorPinInOut.Attachement.Format = buffer.BufferDesc.Format;
+                }
+            }
+        }
+        [Category("Option")]
+        [Rtti.Meta("")]
+        public List<ERenderLayer> LayerFilters { get; set; } = new List<ERenderLayer> { ERenderLayer.RL_Opaque, ERenderLayer.RL_Translucent, ERenderLayer.RL_Sky };
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool IsFilters(ERenderLayer layer)
+        {
+            foreach(var i in LayerFilters)
+            {
+                if (i == layer)
+                    return true;
+            }
+            return false;
+        }
+        public unsafe override void Tick(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        {
+            if (mOpaqueShading == null)
+                return;
+
+            GBuffers?.SetViewportCBuffer(world, policy);
+
+            using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
+            {
+                var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
+                for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
+                {
+                    passClears[i].SetDefault();
+                    passClears[i].SetClearColor(0, new Color4f(0, 0, 0, 0));
+                    passClears[i].ClearFlags = 0;
+                }
+
+                GBuffers.BuildFrameBuffers(policy);
+                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                using (new NxRHI.TtCmdListScope(cmdlist, "Forword"))
+                {
+                    var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
+                    foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
+                    {
+                        if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
+                            continue;
+                        foreach (var j in i.Mesh.SubMeshes)
+                        {
+                            foreach (var k in j.Atoms)
+                            {
+                                if (k == null || k.Material == null)
+                                    continue;
+
+                                var layer = k.Material.RenderLayer;
+                                if (IsFilters(layer))
+                                {
+                                    var recorder = LayerBasePass.GetCmdRecorder(layer);
+                                    var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
+                                    if (drawcall != null)
+                                    {
+                                        drawcall.BindGBuffer(camera, GBuffers);
+                                        //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+
+                                        recorder.PushGpuDraw(drawcall);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    LayerBasePass.BuildRenderPass(cmdlist, policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GBuffers, "Forword:");
+                }
+
+                policy.CommitCommandList(cmdlist, "Forword");
+            }
+        }
+        public override void TickSync(TtRenderPolicy policy)
+        {
+            if (mOpaqueShading == null)
+                return;
+            //GBuffers?.Camera?.mCoreObject.UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, 1);
+        }
+        public override void FrameBuild(TtRenderPolicy policy)
+        {
+            base.FrameBuild(policy);
+        }
+    }
+
+    [Bricks.CodeBuilder.ContextMenu("Gizmos", "Deferred\\Gizmos", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    public class TtGizmosNode : Common.TtBasePassNode
+    {
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
+        public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth", NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin GizmosDepthPinOut = TtRenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D24_UNORM_S8_UINT, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+
+        public TtOpaqueShading mOpaqueShading;
+        public TtTranslucentShading mTranslucentShading;
+        public TtLayerDrawBuffers LayerBasePass = new TtLayerDrawBuffers();
+        public NxRHI.TtRenderPass GizmosRenderPass;
+
+        public NxRHI.TtRenderPass WithDepthRenderPass;
+        public TtGraphicsBuffers WithDepthGBuffers { get; protected set; } = new TtGraphicsBuffers();
+        public TtGizmosNode()
+        {
+            Name = "GizmosNode";
+        }
+        public override void InitNodePins()
+        {
+            AddInput(VisiblesPinIn);
+            AddInputOutput(ColorPinInOut);
+            AddInputOutput(DepthPinInOut);
+
+            AddOutput(GizmosDepthPinOut);
+        }
+        public TtCpuCullingNode CpuCullNode = null;
+        public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
+        {
+            await Thread.TtAsyncDummyClass.DummyFunc();
+
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            LayerBasePass.Initialize(rc, debugName + ".GizmosPass");
+
+            CreateGBuffers(policy, ColorPinInOut.Attachement.Format);
+
+            mOpaqueShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtOpaqueShading>();
+            mTranslucentShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtTranslucentShading>();
+
+            var linker = VisiblesPinIn.FindInLinker();
+            if (linker != null)
+            {
+                CpuCullNode = linker.OutPin.GetNakedHostNode<TtCpuCullingNode>();
+            }
+        }
+        public virtual unsafe TtGraphicsBuffers CreateGBuffers(TtRenderPolicy policy, EPixelFormat format)
+        {
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            {
+                var PassDesc = new NxRHI.FRenderPassDesc();
+
+                PassDesc.NumOfMRT = 1;
+                PassDesc.AttachmentMRTs[0].Format = format;
+                PassDesc.AttachmentMRTs[0].Samples = 1;
+                PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                PassDesc.m_AttachmentDepthStencil.Format = DepthPinInOut.Attachement.Format;// dfPolicy.BasePassNode.GBuffers.DepthStencil.AttachBuffer.Srv.mCoreObject.GetFormat(); //dsFmt;
+                PassDesc.m_AttachmentDepthStencil.Samples = 1;
+                PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                //PassDesc.mFBClearColorRT0 = new Color4f(1, 0, 0, 0);
+                //PassDesc.mDepthClearValue = 1.0f;
+                //PassDesc.mStencilClearValue = 0u;
+
+                WithDepthRenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
+
+                WithDepthGBuffers.Initialize(policy, WithDepthRenderPass);
+                WithDepthGBuffers.SetRenderTarget(policy, 0, ColorPinInOut);
+                WithDepthGBuffers.SetDepthStencil(policy, DepthPinInOut);
+                WithDepthGBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
+            }
+
+            {
+                var GizmosPassDesc = new NxRHI.FRenderPassDesc();
+                GizmosPassDesc.NumOfMRT = 1;
+                GizmosPassDesc.AttachmentMRTs[0].Format = format;
+                GizmosPassDesc.AttachmentMRTs[0].Samples = 1;
+                GizmosPassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                GizmosPassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                GizmosPassDesc.m_AttachmentDepthStencil.Format = GizmosDepthPinOut.Attachement.Format;
+                GizmosPassDesc.m_AttachmentDepthStencil.Samples = 1;
+                GizmosPassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                GizmosPassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                GizmosPassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                GizmosPassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                //GizmosPassDesc.mFBClearColorRT0 = new Color4f(1, 0, 0, 0);
+                //GizmosPassDesc.mDepthClearValue = 1.0f;
+                //GizmosPassDesc.mStencilClearValue = 0u;
+                GizmosRenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in GizmosPassDesc);
+
+                GBuffers.Initialize(policy, GizmosRenderPass);
+                GBuffers.SetRenderTarget(policy, 0, ColorPinInOut);
+                GBuffers.SetDepthStencil(policy, GizmosDepthPinOut);
+                GBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
+            }
+            
+            return GBuffers;
+        }
+        public override void Dispose()
+        {
+            if (mOpaqueShading == null)
+                return;
+            
+            GBuffers?.Dispose();
+            GBuffers = null;
+
+            WithDepthGBuffers?.Dispose();
+            WithDepthGBuffers = null;
+
+            base.Dispose();
+        }
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
+        {
+            if (mOpaqueShading == null)
+                return;
+            if (GBuffers != null)
+            {
+                GBuffers.SetSize(x, y);
+            }
+            if (WithDepthGBuffers != null)
+            {
+                WithDepthGBuffers.SetSize(x, y);
+            }
+        }
+        public override Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtRenderMesh.TtAtom atom)
+        {
+            switch (atom.Material.RenderLayer)
+            {
+                case ERenderLayer.RL_PostTranslucent:
+                case ERenderLayer.RL_TranslucentGizmos:
+                    return mTranslucentShading;
+                default:
+                    return mOpaqueShading;
+            }
+        }
+        public override void BeforeTick(TtRenderPolicy policy)
+        {
+            var buffer = this.FindAttachBuffer(ColorPinInOut);
+            if (buffer != null)
+            {
+                if (ColorPinInOut.Attachement.Format != buffer.BufferDesc.Format)
+                {
+                    this.CreateGBuffers(policy, buffer.BufferDesc.Format);
+                    ColorPinInOut.Attachement.Format = buffer.BufferDesc.Format;
+                }
+            }
+        }
+        public unsafe override void Tick(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        {
+            if (mOpaqueShading == null)
+                return;
+
+            GBuffers?.SetViewportCBuffer(world, policy);
+
+            using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
+            {
+                var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];
+                for (int i = 0; i < (int)ERenderLayer.RL_Num; i++)
+                {
+                    passClears[i].SetDefault();
+                    passClears[i].SetClearColor(0, new Color4f(0, 0, 0, 0));
+                    passClears[i].ClearFlags = 0;
+                }
+                passClears[(int)ERenderLayer.RL_Gizmos].ClearFlags = NxRHI.ERenderPassClearFlags.CLEAR_DEPTH;
+
+                WithDepthGBuffers.BuildFrameBuffers(policy);
+                GBuffers.BuildFrameBuffers(policy);
+
+                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                using (new NxRHI.TtCmdListScope(cmdlist, "Gizmos"))
+                {
+                    var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
+                    foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
+                    {
+                        foreach (var j in i.Mesh.SubMeshes)
+                        {
+                            if (j == null)
+                                continue;
+                            foreach (var k in j.Atoms)
+                            {
+                                if (k == null)
+                                    continue;
+
+                                if (k.Material == null)
+                                    continue;
+                                var layer = k.Material.RenderLayer;
+                                if (layer == ERenderLayer.RL_PostOpaque || layer == ERenderLayer.RL_PostTranslucent
+                                    || layer == ERenderLayer.RL_TranslucentGizmos || layer == ERenderLayer.RL_Gizmos)
+                                {
+                                    var recorder = LayerBasePass.GetCmdRecorder(layer);
+                                    var drawcall = k.GetDrawCall(cmdlist.mCoreObject, GBuffers, policy, this);
+                                    if (drawcall != null)
+                                    {
+                                        drawcall.BindGBuffer(camera, GBuffers);
+                                        //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+
+                                        recorder.PushGpuDraw(drawcall);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    LayerBasePass.BuildRenderPass(cmdlist, policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, WithDepthGBuffers, GBuffers, "Gizmos:");
+                }
+                policy.CommitCommandList(cmdlist, "Gizmos");
+            }
+        }
+        public override void TickSync(TtRenderPolicy policy)
+        {
+            if (mOpaqueShading == null)
+                return;
+            //GBuffers?.Camera?.mCoreObject.UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, 1);
+        }
+    }
+}

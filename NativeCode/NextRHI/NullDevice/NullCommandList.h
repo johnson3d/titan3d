@@ -56,7 +56,7 @@ namespace NxRHI
 		virtual void CopyBufferToTexture(ITexture* target, UINT subRes, IBuffer* src, const FSubResourceFootPrint* footprint) override;
 		virtual void CopyTextureToBuffer(IBuffer* target, const FSubResourceFootPrint* footprint, ITexture* src, UINT subRes) override;
 
-		virtual void BeginEvent(const char* info) override;
+		virtual void BeginEvent(const char* info, DWORD color = 0) override;
 		virtual void EndEvent() override;
 
 		AutoRef<ICmdRecorder> mCmdRecorder;

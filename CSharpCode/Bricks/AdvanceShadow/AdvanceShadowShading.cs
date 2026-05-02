@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline;
@@ -147,8 +147,8 @@ namespace EngineNS.Bricks.AdvanceShadow
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            mShadowShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAdvanceShadowShading>();
-            mEsmShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtESMShading>();
+            mShadowShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtAdvanceShadowShading>();
+            mEsmShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtESMShading>();
 
             FTextureDesc desc = new FTextureDesc();
             desc.SetDefault();
@@ -227,7 +227,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             }
         }
         public GamePlay.TtWorld.TtVisParameter mVisParameter = new GamePlay.TtWorld.TtVisParameter();
-        public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public override unsafe void Tick(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             if (mShadowQTree == null)
             {
@@ -319,7 +319,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             mVisParameter.World = world;
             mVisParameter.IsGatherVisibleNodes = false;
 
-            policy.QueueCmd((ICommandList ImCmdlist, ref FRCmdInfo info) =>
+            policy.QueueCmd((TtRCmdQueue queue, ref FRCmdInfo info) =>
             {
                 TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.BeginEvent("AdvShadowDrawShadowMap");
             }, "BeginAdvShadowDrawShadowMap");
@@ -327,7 +327,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             {
                 DrawShadowObjects(world, policy, i, i.ShadowObjects);
             }
-            policy.QueueCmd((ICommandList ImCmdlist, ref FRCmdInfo info) =>
+            policy.QueueCmd((TtRCmdQueue queue, ref FRCmdInfo info) =>
             {
                 TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.EndEvent("AdvShadowDrawShadowMap");
             }, "EndAdvShadowDrawShadowMap");
@@ -514,11 +514,14 @@ namespace EngineNS.Bricks.AdvanceShadow
 
                         mDirLightingCBV.SetValue(indexLayerData, i, in layerData); 
                     }
+                    mDirLightingCBV.MarkDirty();
+                    mDirLightingCBV.FlushDirty();
                 }
                 
                 mDirLightingCBV.SetValue("EsmConstant", mShadowQTree.EsmConstant);
                 mDirLightingCBV.SetValue("MaxExp", mShadowQTree.MaxExp);
                 mDirLightingCBV.SetValue("GaussSigma", mShadowQTree.GaussSigma);
+                
                 drawcall.BindCBV(index, mDirLightingCBV);
             }
         }

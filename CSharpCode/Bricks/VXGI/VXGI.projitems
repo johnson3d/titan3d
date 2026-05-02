@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -9,8 +9,8 @@
     <Import_RootNamespace>EngineNS.Bricks.VXGI</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)UVoxelDebugger.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UVoxelsNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VoxelDebugger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VoxelsNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)VXGI.brick" />

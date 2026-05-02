@@ -323,7 +323,7 @@ namespace EngineNS
             var files = IO.TtFileManager.GetFiles(TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.GraphicEffect), "*.effect", true);
             foreach (var i in files)
             {
-                var desc = Graphics.Pipeline.Shader.TtEffect.LoadEffectDesc(i);
+                var desc = Graphics.Pipeline.Shader.TtGraphicsEffect.LoadEffectDesc(i);
                 if (desc.MaterialHash == mtl.MaterialHash)
                 {
                     IO.TtFileManager.DeleteFile(i);

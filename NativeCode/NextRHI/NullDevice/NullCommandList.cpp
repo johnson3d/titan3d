@@ -57,7 +57,7 @@ namespace NxRHI
 	void NullCommandList::EndPass()
 	{
 	}
-	void NullCommandList::BeginEvent(const char* info)
+	void NullCommandList::BeginEvent(const char* info, DWORD color)
 	{
 		
 	}

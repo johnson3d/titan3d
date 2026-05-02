@@ -1,4 +1,4 @@
-#include "NxConstraint.h"
+ï»¿#include "NxConstraint.h"
 
 NS_BEGIN
 
@@ -8,19 +8,19 @@ namespace NxPhysics
 
 	namespace XPBD 
 	{
-        // ---------------------------- Ö÷º¯Êı²âÊÔ ----------------------------
+        // ---------------------------- ä¸»å‡½æ•°æµ‹è¯• ----------------------------
         int test() {
-            // 1. ³õÊ¼»¯ÒıÇæ
+            // 1. åˆå§‹åŒ–å¼•æ“
             XPBDEngine<NxVector3> engine;
 
-            // 2. Ìí¼ÓÁ£×Ó
-            engine.addParticle(NxVector3(0, 0, 0), 1.0f); // Á£×Ó0£¨¹Ì¶¨£©
-            engine.addParticle(NxVector3(0.5, 0, 0), 1.0f); // Á£×Ó1
+            // 2. æ·»åŠ ç²’å­
+            engine.addParticle(NxVector3(0, 0, 0), 1.0f); // ç²’å­0ï¼ˆå›ºå®šï¼‰
+            engine.addParticle(NxVector3(0.5, 0, 0), 1.0f); // ç²’å­1
 
-            // 3. Ìí¼Ó¾àÀëÔ¼Êø
+            // 3. æ·»åŠ è·ç¦»çº¦æŸ
             engine.addConstraint<DistanceConstraint<NxVector3>>(0, 1, 1.0f);
 
-            // 4. Ä£ÄâÑ­»·
+            // 4. æ¨¡æ‹Ÿå¾ªç¯
             for (int step = 0; step < 100; ++step) {
                 engine.update();
                 const auto& particles = engine.getParticles();

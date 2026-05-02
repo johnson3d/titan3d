@@ -1,0 +1,170 @@
+// Spatial Denoise - Edge-aware à-trous wavelet bilateral filter (SVGF-style)
+// 用于对低 spp 的间接光照 (如 ReSTIR GI) 做空间降噪
+// 参考: "Spatiotemporal Variance-Guided Filtering" (SVGF), Schied et al. 2017, Eq.2
+//
+// 需要多 pass 迭代 (通常 3-5 次), 每次 stepSize 翻倍 (1, 2, 4, 8, 16)
+// C# 端通过 cbDenoise.StepSize 控制当前迭代的步长.
+//
+// 颜色权重设计 (与朴素 bilateral 不同):
+//   朴素:  w_c = exp(-|lc - cc| / Phi)
+//   SVGF: w_c = exp(-|lc - cc|^2 / (Phi * sigma_l + eps))
+//   其中 sigma_l 是中心像素 3x3 邻域的亮度标准差.
+//   含义: 噪点剧烈的区域 (sigma 大) 放宽颜色阈值 -> 邻域更愿意混 -> 强降噪;
+//        真特征边缘 (sigma 小, 颜色突变是单步阶跃) -> 保持严格 -> 不糊边.
+//   这是 ReSTIR / Path Tracing 这类高方差输入的标准做法.
+
+cbuffer cbDenoise
+{
+    uint2  ScreenSize;
+    int    StepSize;            // à-trous 步长: 1, 2, 4, 8, ...
+    float  PhiColor;            // 颜色权重衰减系数, 越大越模糊, 默认 1.0
+    float  PhiNormal;           // 法线权重衰减系数, 越大越保留跨法线差异, 默认 32.0
+    float  PhiDepth;            // 深度权重衰减系数, 越大越保留跨深度差异, 默认 1.0
+    float  MaxLuminance;        // Firefly clamp 上限, 超过此亮度的像素按比例压回, 默认 5.0
+};
+
+Texture2D<float4> ColorInput;      // 待降噪的间接光 (或上一轮 denoise 输出)
+Texture2D<float4> GBufferRT1;      // 世界法线 (packed: N * 0.5 + 0.5)
+Texture2D<float>  DepthBuffer;
+
+SamplerState Samp_PointClamp;
+
+RWTexture2D<float4> DenoiseOutput;
+
+// 5x5 à-trous kernel 权重 (对称, 归一化)
+// h = [1/16, 1/4, 3/8, 1/4, 1/16]
+// kernel[i][j] = h[i] * h[j]
+static const float atrousKernel[3] = { 1.0f, 2.0f / 3.0f, 1.0f / 6.0f };
+
+float LuminanceFromRGB(float3 color)
+{
+    return dot(color, float3(0.2126f, 0.7152f, 0.0722f));
+}
+
+// 把超过 MaxLuminance 的像素按比例压回 (保持 hue / chroma).
+// ReSTIR resolve 偶发 outlier 可达几百~几千, 不 clamp 的话 à-trous 只会把它
+// 摊薄成"喷溅"而不是消除.
+float3 ClampFirefly(float3 color)
+{
+    float lum = LuminanceFromRGB(color);
+    if (lum > MaxLuminance && lum > 1e-6f)
+        color *= (MaxLuminance / lum);
+    return color;
+}
+
+// 估计中心像素的 3x3 邻域亮度标准差 (SVGF Eq.5 的简化版本).
+// 结果用作 SVGF 颜色权重分母里的 sigma_l: sigma 越大 -> 越愿意接受邻域差异 -> 越强降噪.
+// 这里用 3x3 而不是更大的窗口, 因为我们要捕捉的是"局部噪声水平"而不是"区域平均",
+// 太大窗口会把跨边缘的颜色差也算进 sigma, 反而误导.
+float EstimateLocalLuminanceStdDev(int2 centerPx)
+{
+    float sumLum = 0.0f;
+    float sumLum2 = 0.0f;
+    int count = 0;
+    [unroll]
+    for (int sy = -1; sy <= 1; ++sy)
+    {
+        [unroll]
+        for (int sx = -1; sx <= 1; ++sx)
+        {
+            int2 p = clamp(centerPx + int2(sx, sy), int2(0, 0), int2(ScreenSize) - 1);
+            float3 c = ColorInput.Load(int3(p, 0)).rgb;
+            c = ClampFirefly(c);
+            float l = LuminanceFromRGB(c);
+            sumLum += l;
+            sumLum2 += l * l;
+            count += 1;
+        }
+    }
+    float invN = 1.0f / float(count);
+    float mean = sumLum * invN;
+    float var = max(sumLum2 * invN - mean * mean, 0.0f);
+    return sqrt(var);
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_Main(uint3 id : SV_DispatchThreadID)
+{
+    if (any(id.xy >= ScreenSize))
+        return;
+
+    int2 centerPx = int2(id.xy);
+    float2 uv = (float2(centerPx) + 0.5f) / float2(ScreenSize);
+
+    float4 centerColor = ColorInput.SampleLevel(Samp_PointClamp, uv, 0);
+    centerColor.rgb = ClampFirefly(centerColor.rgb);
+    float3 centerNormal = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, uv, 0).xyz * 2.0f - 1.0f);
+    float  centerDepth = DepthBuffer.SampleLevel(Samp_PointClamp, uv, 0).r;
+    float  centerLum = LuminanceFromRGB(centerColor.rgb);
+
+    // 天空/远平面像素直接输出原值
+#if USE_INVERSE_Z == 1
+    bool validPixel = centerDepth > 0.0f;
+#else
+    bool validPixel = centerDepth < 1.0f;
+#endif
+    if (!validPixel)
+    {
+        DenoiseOutput[id.xy] = centerColor;
+        return;
+    }
+
+    // 局部亮度方差 -> 颜色权重分母里的 sigma_l (SVGF Eq.5 简化版).
+    // 加 0.01 防止平坦区域 sigma=0 让分母爆炸.
+    float sigmaL = EstimateLocalLuminanceStdDev(centerPx) + 0.01f;
+
+    float4 colorSum = centerColor * atrousKernel[0] * atrousKernel[0];
+    float weightSum = atrousKernel[0] * atrousKernel[0];
+
+    [unroll]
+    for (int dy = -2; dy <= 2; ++dy)
+    {
+        [unroll]
+        for (int dx = -2; dx <= 2; ++dx)
+        {
+            if (dx == 0 && dy == 0)
+                continue;
+
+            int2 offset = int2(dx, dy) * StepSize;
+            int2 samplePos = centerPx + offset;
+
+            if (any(samplePos < int2(0, 0)) || any(samplePos >= int2(ScreenSize)))
+                continue;
+
+            float2 sampleUV = (float2(samplePos) + 0.5f) / float2(ScreenSize);
+
+            float4 sampleColor = ColorInput.SampleLevel(Samp_PointClamp, sampleUV, 0);
+            sampleColor.rgb = ClampFirefly(sampleColor.rgb);
+            float3 sampleNormal = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, sampleUV, 0).xyz * 2.0f - 1.0f);
+            float  sampleDepth = DepthBuffer.SampleLevel(Samp_PointClamp, sampleUV, 0).r;
+
+            // à-trous kernel 空间权重
+            float kernelW = atrousKernel[abs(dx)] * atrousKernel[abs(dy)];
+
+            // SVGF 颜色权重: 用平方差 / (PhiColor * sigma_l + eps).
+            // - 噪点区 sigma_l 大 -> 分母大 -> 颜色差异被淡化 -> 邻域权重高 -> 强降噪
+            // - 边缘 sigma_l 小 -> 分母小 -> 颜色差异被放大 -> 邻域权重低 -> 保边
+            // PhiColor 现在的语义是 "sigma 缩放系数" (默认 1.0). 想更激进降噪可调到 2~4.
+            float sampleLum = LuminanceFromRGB(sampleColor.rgb);
+            float lumDiff = abs(centerLum - sampleLum);
+            float colorW = exp(-(lumDiff * lumDiff) / (PhiColor * sigmaL + 1e-6f));
+
+            // 法线相似性权重 (与之前相同)
+            float normalDot = max(dot(centerNormal, sampleNormal), 0.0f);
+            float normalW = pow(normalDot, PhiNormal);
+
+            // 深度相似性权重 (与之前相同)
+            float depthDiff = abs(centerDepth - sampleDepth);
+            float depthW = exp(-depthDiff / max(PhiDepth * abs(float(StepSize)), 1e-6f));
+
+            float weight = kernelW * colorW * normalW * depthW;
+
+            colorSum += sampleColor * weight;
+            weightSum += weight;
+        }
+    }
+
+    float4 result = colorSum / max(weightSum, 1e-6f);
+    result.a = centerColor.a;
+    DenoiseOutput[id.xy] = result;
+}

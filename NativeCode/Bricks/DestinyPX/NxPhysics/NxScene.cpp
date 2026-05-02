@@ -1,4 +1,4 @@
-#include "NxScene.h"
+ï»¿#include "NxScene.h"
 #include "NxActor.h"
 #include "NxJoint.h"
 
@@ -58,15 +58,15 @@ namespace NxPhysics
 			if (step == NxReal::Zero())
 				continue;
 
-			//ÏÔÊ½Å·À­»ı·Ö
+			//æ˜¾å¼æ¬§æ‹‰ç§¯åˆ†
 			Forward(step);
 
-			//´¦ÀíÔ¼Êø
+			//å¤„ç†çº¦æŸ
 			SolveJoints(step);
 			CollectRBContacts();
 			SolveRBContacts(step);
 
-			//¸üĞÂ×îÖÕ×´Ì¬
+			//æ›´æ–°æœ€ç»ˆçŠ¶æ€
 			UpdatePosition(step);
 			UpdateVelocity(step);
 		}

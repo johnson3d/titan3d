@@ -56,6 +56,37 @@ class TR_CLASS()
 	}
 };
 
+template<typename T>
+struct FPingpongBuffer
+{
+	std::vector<T>	Buffers[2];
+	UINT			CurIndex;
+	FPingpongBuffer()
+	{
+		CurIndex = 0;
+	}
+	const std::vector<T>& GetCurBuffer() const{
+		return Buffers[CurIndex];
+	}
+	std::vector<T>& GetCurBuffer() {
+		return Buffers[CurIndex];
+	}
+	const std::vector<T>& GetBackBuffer() const {
+		return Buffers[CurIndex ^ 1];
+	}
+	std::vector<T>& GetBackBuffer(){
+		return Buffers[CurIndex ^ 1];
+	}
+	void Clear() {
+		Buffers[0].clear();
+		Buffers[1].clear();
+		CurIndex = 0;
+	}
+	void Swap() {
+		CurIndex ^= 1;
+	}
+};
+
 class IEmitter;
 class IParticlePool
 {
@@ -63,9 +94,9 @@ public:
 	UINT					mDataStride;
 	std::vector<BYTE>		mParticleArray;
 	std::queue<UINT>		mFreeParticles;//need be a queue
-	std::vector<UINT>*		mCurAlives;
-	std::vector<UINT>*		mBackendAlives;
-	std::vector<UINT>		mLivedParticles[2];
+	
+	FPingpongBuffer<UINT>	mAliveBuffer;
+
 	bool					mChanged;
 	VSLLock					mLocker;
 public:
@@ -84,26 +115,26 @@ public:
 		return mParticleArray.data();
 	}
 	inline UINT* GetCurrentAliveAddress() {
-		return mCurAlives->data();
+		return mAliveBuffer.GetCurBuffer().data();
 	}
 	inline UINT* GetBackendAliveAddress() {
-		return mBackendAlives->data();
+		return mAliveBuffer.GetBackBuffer().data();
 	}
 	inline IBaseParticleState* GetParticle(UINT index) {
 		return (IBaseParticleState*)&mParticleArray[(size_t)index * mDataStride];
 	}
 	inline std::vector<UINT>* GetCurAlives() {
-		return mCurAlives;
+		return &mAliveBuffer.GetCurBuffer();
 	}
 	inline UINT GetLiveNumber() const{
-		return (UINT)mCurAlives->size();
+		return (UINT)mAliveBuffer.GetCurBuffer().size();
 	}
 	inline UINT GetBackendNumber() const {
-		return (UINT)mBackendAlives->size();
+		return (UINT)mAliveBuffer.GetBackBuffer().size();
 	}
 	inline IBaseParticleState* GetLiveParticle(UINT index)
 	{
-		auto addr = (*mCurAlives)[index];
+		auto addr = (mAliveBuffer.GetCurBuffer())[index];
 		return (IBaseParticleState*)&mParticleArray[addr * mDataStride];
 	}
 };

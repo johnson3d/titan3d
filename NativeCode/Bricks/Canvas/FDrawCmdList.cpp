@@ -1,4 +1,4 @@
-#include "FDrawCmdList.h"
+ï»¿#include "FDrawCmdList.h"
 #include "FCanvas.h"
 #include "FTFont.h"
 #include "../../Graphics/Mesh/MeshDataProvider.h"
@@ -963,7 +963,7 @@ namespace Canvas
 		auto vtStart = (UINT)vertices.size();
 		auto idxStart = (UINT)indices.size();
 
-		// Ê¾Àı£ºÊµ¼Ê¶¥µãË³ĞòÂÔÓĞ²îÒì
+		// ç¤ºä¾‹ï¼šå®é™…é¡¶ç‚¹é¡ºåºç•¥æœ‰å·®å¼‚
 		//        /p26 ----------- p24 \
 		//    p28   |                |   p22
 		//    /    p27 ----------- p25     \

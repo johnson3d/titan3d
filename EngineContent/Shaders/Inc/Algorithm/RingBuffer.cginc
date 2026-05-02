@@ -55,7 +55,7 @@ struct TtRawArray
     int Capacity;
     int GetCount()
     {
-        return RawBuffer.Load(0);
+        return min(RawBuffer.Load(0), Capacity);
     }
     void Clear()
     {
@@ -93,11 +93,15 @@ struct TtReadonlyRawArray
     int Capacity;
     int GetCount()
     {
-        return RawBuffer.Load(0);
+        return min(RawBuffer.Load(0), Capacity);
     }
     uint GetValue(int index)
     {
         return RawBuffer.Load((index % Capacity) * 4 + 4);
+    }
+    void UnsafeSetCount(int count)
+    {
+        RawBuffer.Store(0, count);
     }
 };
 

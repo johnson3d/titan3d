@@ -31,7 +31,11 @@ namespace EngineNS.Thread
                 TtContextThread context;
                 if (i.TryGetTarget(out context))
                 {
-                    count += context.TotalEvents;
+                    var e = context.TotalEvents;
+                    if (e > 0)
+                        count += e;
+                    else
+                        count += 0;//for debug
                 }
             }
             return count;
@@ -136,7 +140,7 @@ namespace EngineNS.Thread
             }
             mThread = null;
         }
-        public void FlushAllThreadEvents()
+        public void FlushAllThreadEvents(bool bFlushStreaming = true)
         {
             EnterWaitingThread(this);
 
@@ -155,6 +159,10 @@ namespace EngineNS.Thread
                     TtEngine.Instance.ThreadMain.TickAwaitEvent();
                 }
                 TtEngine.Instance.TaskCollector.Tick();
+                //if (bFlushStreaming && TtEngine.Instance.GfxDevice.TextureManager.GetNeedStreamingNumber() > 0)
+                //{
+                //    continue;
+                //}
                 if (TtContextThread.GetTotalEventNumber() == 0)
                 {
                     LeaveWaitingThread(this);

@@ -1,4 +1,13 @@
 ## [English Version](README-Eng.md)
+
+# 为什么用TitanEngine
+
+> **TitanEngine 的 Render Dependency Graph (`TtRenderGraph` / `TtAttachmentCache`) 横向对标 UE5 RDG / Unity URP-HDRP RG / Frostbite FrameGraph / Granite / O3DE Atom / Stride GraphicsCompositor / Falcor / Bevy bevy_render。**
+>
+> **一句话定位：业界第一档 RDG 能力 (拓扑剪枝 / 引用计数 / Transient 池化 / 自动 barrier 全部具备) + 业界少见的"主渲染管线可视化编辑器" + Permutation / RenderPolicy 资产化 — 三者同时具备的引擎全球不超过 5 个。** UE5 / Unity 的 RDG 都是纯 API，主管线无可视化。
+>
+> 完整对照表 / 演进路线图 / 设计哲学对比见 → **[documents/engine/RenderGraph.Industry.Compare.md](documents/engine/RenderGraph.Industry.Compare.md)**
+
 # 编译运行环境
 - Titan3D 启动！
 - ![总览图](Documents/picture/main_edtor.png)
@@ -55,6 +64,11 @@
 - - 5.Additive，叠加颜色
 - - 6.SunShaftDepthThreshole,SunShaftRadialBlur用来做God Ray的系列节点
 - - 7.Taa，时域反走样，和前面输出的velocity配合使用
+- 13.实时全局光照与降噪节点 (ReSTIR GI Pipeline)
+- - 1.ReSTIRGI (`TtReSTIRGINode`)，基于 [ReSTIR GI](https://research.nvidia.com/publication/2021-06_restir-gi-path-resampling-real-time-path-tracing) 论文的实时全局光照, 单节点内含 4 个 compute pass: Initial Sampling / Temporal Reuse / Spatial Reuse / Resolve, 支持硬件 RT (DXR) 和软件 RT (SDF / BVH) Permutation 切换, 支持 SkyCube / 常量天光两种 miss 着色模式
+- - 2.Denoise (`TtDenoiseNode`)，空间 + 时域联合降噪节点, 一个节点串完整条降噪管线:
+- - - 空间降噪: à-trous wavelet edge-aware bilateral filter, 多迭代 ping-pong (默认 4 iter, StepSize = 1/2/4/8), 用 GBuffer Normal + Depth 做 edge-stopping, 内置 firefly luminance clamp 消除 ReSTIR resolve 偶发 outlier
+- - - 时域降噪: motion-vector reprojection + history ping-pong + 法线/深度一致性校验, 是低 spp ReSTIR / SSR 模式下消除帧间闪烁的关键 pass, 可通过 `EnableTemporal` 开关 (MotionVector pin 未连时自动 fallback 到纯空间降噪)
 # 编译构建
 ## Windows编译引擎
 1. **第一次编译引擎，很多时候需要单独调试运行CppWeavingTools和CSharpCodeTools两个工程一次，确保codegen下面NativeBinder和Cs2Cpp目录产生了必要的临时cpp,cs文件** 

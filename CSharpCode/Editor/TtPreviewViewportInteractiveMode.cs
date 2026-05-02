@@ -1,0 +1,128 @@
+using EngineNS.EGui.Slate;
+using EngineNS.Graphics.Pipeline;
+
+namespace EngineNS.Editor
+{
+    public class TtPreviewViewportInteractiveMode : TtWorldViewportInteractiveMode
+    {
+        protected TtPreviewViewport PreviewViewport => Viewport as TtPreviewViewport;
+
+        Vector2 mPreMousePt;
+
+        public override bool OnEvent(in Bricks.Input.Event e)
+        {
+            var previewViewport = PreviewViewport;
+            if (previewViewport == null)
+                return true;
+
+            if (!previewViewport.IsDrawing)
+                return true;
+
+            if (e.Type == Bricks.Input.EventType.MOUSEBUTTONDOWN)
+            {
+                mPreMousePt.X = e.MouseButton.X;
+                mPreMousePt.Y = e.MouseButton.Y;
+            }
+
+            var viewportPoint = new Vector2(e.MouseMotion.X, e.MouseMotion.Y) + previewViewport.ViewportPos;
+            if (previewViewport.PointInOverlappedArea(in viewportPoint))
+                return true;
+
+            previewViewport.OnEventAction?.Invoke(in e);
+
+            if (previewViewport.FreezCameraControl)
+                return true;
+
+            var keyboards = TtEngine.Instance.InputSystem;
+            if (e.Type == Bricks.Input.EventType.MOUSEMOTION)
+            {
+                if (previewViewport.IsFocused == false)
+                {
+                    return true;
+                }
+                if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
+                {
+                    if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
+                    {
+                        previewViewport.CameraController.Rotate(ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * previewViewport.CameraMouseRotSpeed * TtEngine.Instance.ElapsedSecond);
+                        previewViewport.CameraController.Rotate(ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * previewViewport.CameraMouseRotSpeed * TtEngine.Instance.ElapsedSecond);
+                        previewViewport.ViewportMotion = TtPreviewViewport.EViewportMotion.Rotate;
+                    }
+                }
+                else if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_MIDDLE)
+                {
+                    previewViewport.CameraController.Move(ECameraAxis.Right, (e.MouseMotion.X - mPreMousePt.X) * previewViewport.CameraMoveSpeed * TtEngine.Instance.ElapsedSecond);
+                    previewViewport.CameraController.Move(ECameraAxis.Up, (e.MouseMotion.Y - mPreMousePt.Y) * previewViewport.CameraMoveSpeed * TtEngine.Instance.ElapsedSecond);
+                    previewViewport.ViewportMotion = TtPreviewViewport.EViewportMotion.Move;
+                }
+                else if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_X1)
+                {
+                    if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
+                    {
+                        previewViewport.CameraController.Move(ECameraAxis.Forward, (e.MouseMotion.Y - mPreMousePt.Y) * 0.03f);
+                        previewViewport.ViewportMotion = TtPreviewViewport.EViewportMotion.Zoom;
+                    }
+                    else
+                    {
+                        previewViewport.CameraController.Rotate(ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * previewViewport.CameraMouseRotSpeed * TtEngine.Instance.ElapsedSecond, true);
+                        previewViewport.CameraController.Rotate(ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * previewViewport.CameraMouseRotSpeed * TtEngine.Instance.ElapsedSecond, true);
+                        previewViewport.ViewportMotion = TtPreviewViewport.EViewportMotion.Move;
+                    }
+                }
+
+                mPreMousePt.X = e.MouseMotion.X;
+                mPreMousePt.Y = e.MouseMotion.Y;
+            }
+            else if (e.Type == Bricks.Input.EventType.MOUSEWHEEL)
+            {
+                if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
+                {
+                    previewViewport.CameraMoveSpeed += (float)(e.MouseWheel.Y * 0.01f);
+                    previewViewport.ViewportMotion = TtPreviewViewport.EViewportMotion.ChangeMoveSpeed;
+                }
+                else
+                {
+                    previewViewport.CameraController.Move(ECameraAxis.Forward, e.MouseWheel.Y * previewViewport.CameraMouseWheelSpeed);
+                    previewViewport.ViewportMotion = TtPreviewViewport.EViewportMotion.Zoom;
+                }
+            }
+            else if (e.Type == Bricks.Input.EventType.MOUSEBUTTONUP)
+            {
+                previewViewport.ViewportMotion = TtPreviewViewport.EViewportMotion.None;
+                OnMouseUp(in e);
+            }
+            else if (e.Type == Bricks.Input.EventType.MOUSEBUTTONDOWN)
+            {
+                OnMouseDown(in e);
+            }
+            return true;
+        }
+
+        public override void TickOnFocus()
+        {
+            var previewViewport = PreviewViewport;
+            if (previewViewport == null)
+                return;
+
+            float step = (TtEngine.Instance.ElapseTickCountMS * 0.001f) * previewViewport.CameraMoveSpeed;
+            var keyboards = TtEngine.Instance.InputSystem;
+            if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_w))
+            {
+                previewViewport.CameraController.Move(ECameraAxis.Forward, step, true);
+            }
+            else if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_s))
+            {
+                previewViewport.CameraController.Move(ECameraAxis.Forward, -step, true);
+            }
+
+            if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_a))
+            {
+                previewViewport.CameraController.Move(ECameraAxis.Right, step, true);
+            }
+            else if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_d))
+            {
+                previewViewport.CameraController.Move(ECameraAxis.Right, -step, true);
+            }
+        }
+    }
+}

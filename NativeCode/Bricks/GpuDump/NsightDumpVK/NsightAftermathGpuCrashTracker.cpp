@@ -34,6 +34,10 @@
 #include "../../NextRHI/Dx12/DX12PreHead.h"
 #endif
 
+// NvAftermath::GetOutputRoot is used to prefix all output file paths so that
+// crash dumps / shader debug info / json files all land in a configurable
+// directory specified at engine init time.
+
 //*********************************************************
 // GpuCrashTracker implementation
 //*********************************************************
@@ -232,8 +236,11 @@ void VKGpuCrashTracker::WriteGpuCrashDumpToFile(const void* pGpuCrashDump, const
     // driver release) we may see redundant crash dumps. As a workaround,
     // attach a unique count to each generated file name.
     static int count = 0;
+    // Prefix all output with the configured root (empty -> current working directory).
+    const std::string& outputRoot = EngineNS::GpuDump::NvAftermath::GetOutputRoot();
     const std::string baseFileName =
-        std::string(applicationName.data())
+        outputRoot
+        + std::string(applicationName.data())
         + "-"
         + std::to_string(baseInfo.pid)
         + "-"
@@ -288,8 +295,10 @@ void VKGpuCrashTracker::WriteShaderDebugInformationToFile(
     const void* pShaderDebugInfo,
     const uint32_t shaderDebugInfoSize)
 {
-    // Create a unique file name.
-    const std::string filePath = "shader-" + std::to_string(identifier) + ".nvdbg";
+    // Create a unique file name under the configured output root
+    // (empty root -> current working directory).
+    const std::string& outputRoot = EngineNS::GpuDump::NvAftermath::GetOutputRoot();
+    const std::string filePath = outputRoot + "shader-" + std::to_string(identifier) + ".nvdbg";
 
     std::ofstream f(filePath, std::ios::out | std::ios::binary);
     if (f)
@@ -394,13 +403,32 @@ void VKGpuCrashTracker::CrashDumpDescriptionCallback(
 
 // Static callback wrapper for OnResolveMarker
 void VKGpuCrashTracker::ResolveMarkerCallback(
-    const void* pMarker,
+    const void* pMarkerData,
+    const uint32_t markerDataSize,
     void* pUserData,
-    void** resolvedMarkerData,
-    uint32_t* markerSize)
+    PFN_GFSDK_Aftermath_ResolveMarker resolveMarker)
 {
     VKGpuCrashTracker* pGpuCrashTracker = reinterpret_cast<VKGpuCrashTracker*>(pUserData);
-    pGpuCrashTracker->OnResolveMarker(pMarker, resolvedMarkerData, markerSize);
+
+    // pMarkerData contains the raw marker value (typically a uint64_t set via vkCmdSetCheckpointNV).
+    // Look it up in the marker map to find the human-readable string.
+    if (markerDataSize >= sizeof(uint64_t))
+    {
+        uint64_t markerValue = *reinterpret_cast<const uint64_t*>(pMarkerData);
+        for (const auto& map : pGpuCrashTracker->m_markerMap)
+        {
+            const auto& foundMarker = map.find(markerValue);
+            if (foundMarker != map.end())
+            {
+                const std::string& markerString = foundMarker->second;
+                resolveMarker(markerString.data(), (uint32_t)markerString.length());
+                return;
+            }
+        }
+    }
+
+    // Fallback: pass through the original marker data if no mapping was found
+    resolveMarker(pMarkerData, markerDataSize);
 }
 
 // Static callback wrapper for OnShaderDebugInfoLookup

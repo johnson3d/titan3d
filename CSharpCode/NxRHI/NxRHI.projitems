@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -12,20 +12,20 @@
     <Compile Include="$(MSBuildThisFileDirectory)CmdQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RayTracing.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TextureUtility.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UBuffer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UCommandList.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UDrawcall.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UFrameBuffers.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UGeomMesh.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)USamplerDesc.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UShaderEffect.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UEvent.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UGpuDevice.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UGpuState.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UInputAssembly.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UShader.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UShaderCompiler.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UTexture.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UTextureHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Buffer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CommandList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Drawcall.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FrameBuffers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GeomMesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SamplerDesc.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShaderEffect.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Event.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GpuDevice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GpuState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)InputAssembly.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShaderCompiler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Texture.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TextureHelper.cs" />
   </ItemGroup>
 </Project>

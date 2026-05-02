@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.RenderPolicyEditor.TtRenderPolicyAssetAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="7ed5c1ceaa5ba8bb76d8d79c814781581280d8fca661fdc5ee00a91093ba5649" />
+      <Path Type="System.String@Unknown" Value="deferred.rpolicy" />
+    </e_0>
+  </AssetFiles>
   <AssetId Type="System.Guid@Unknown" Value="efdf8adb-02ca-43e6-b536-8c3f3fb0c9da" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,graphics/deferred.rpolicy,efdf8adb-02ca-43e6-b536-8c3f3fb0c9da" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.RenderPolicyEditor.URenderPolicyAsset&#xA;Hahah" />

@@ -1,0 +1,94 @@
+// ReSTIR GI - Pass 3: Spatial Reuse
+// 在邻域内 K 个像素中重采样 reservoir, 利用空间相干性提升单帧质量
+
+#include "ReSTIRCommon.cginc"
+
+Texture2D<float4> GBufferRT1;       // normal + flags
+Texture2D<float>  DepthBuffer;
+
+SamplerState Samp_PointClamp;
+
+StructuredBuffer<ReSTIRPackedReservoir>   InReservoirs;
+RWStructuredBuffer<ReSTIRPackedReservoir> OutReservoirs;
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_Main(uint3 id : SV_DispatchThreadID)
+{
+    if (any(id.xy >= ScreenSize))
+        return;
+
+    uint pixelIndex = id.y * ScreenSize.x + id.x;
+    float2 uv = (float2(id.xy) + 0.5f) / float2(ScreenSize);
+
+    ReSTIRReservoir self = UnpackReservoir(InReservoirs[pixelIndex]);
+
+    float depth = DepthBuffer.SampleLevel(Samp_PointClamp, uv, 0).r;
+#if USE_INVERSE_Z == 1
+    bool validPixel = depth > 0.0f;
+#else
+    bool validPixel = depth < 1.0f;
+#endif
+    if (!validPixel)
+    {
+        OutReservoirs[pixelIndex] = InReservoirs[pixelIndex];
+        return;
+    }
+
+    float3 currN = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, uv, 0).xyz * 2.0f - 1.0f);
+    float3 currWP = ReconstructWorldPos(uv, depth);
+
+    uint rng = PcgHash(pixelIndex ^ (FrameIndex * 0xC2B2AE3Du) ^ 0xABCDEu);
+
+    uint sampleCount = clamp(SpatialSampleCount, 1u, 8u);
+    [loop]
+    for (uint i = 0; i < sampleCount; ++i)
+    {
+        float r = Rand01(rng);
+        float theta = Rand01(rng) * 6.2831853f;
+        float radius = sqrt(r) * SpatialRadius;
+        int2 offset = int2(round(radius * float2(cos(theta), sin(theta))));
+        int2 nb = int2(id.xy) + offset;
+        if (nb.x == int(id.x) && nb.y == int(id.y))
+            continue;
+        if (any(nb < int2(0, 0)) || any(nb >= int2(ScreenSize)))
+            continue;
+
+        float2 nbUV = (float2(nb) + 0.5f) / float2(ScreenSize);
+        float nbDepth = DepthBuffer.SampleLevel(Samp_PointClamp, nbUV, 0).r;
+
+#if USE_INVERSE_Z == 1
+        if (nbDepth <= 0.0f) continue;
+#else
+        if (nbDepth >= 1.0f) continue;
+#endif
+
+        float3 nbN = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, nbUV, 0).xyz * 2.0f - 1.0f);
+        if (dot(nbN, currN) < NormalThreshold)
+            continue;
+
+        float3 nbWP = ReconstructWorldPos(nbUV, nbDepth);
+        float distScale = max(length(currWP) * DepthThreshold, 0.05f);
+        if (length(nbWP - currWP) > distScale)
+            continue;
+
+        uint nbIndex = uint(nb.y) * ScreenSize.x + uint(nb.x);
+        ReSTIRReservoir nbRes = UnpackReservoir(InReservoirs[nbIndex]);
+        if (nbRes.M <= 0.0f || nbRes.W <= 0.0f)
+            continue;
+
+        // 把邻居的 sample 移到本像素的 visible point 下评估 p_hat
+        ReSTIRSample remapped = nbRes.Sample;
+        remapped.VisiblePosition = currWP;
+        remapped.VisibleNormal = currN;
+        float pHat = TargetFunctionLuminance(remapped);
+        nbRes.Sample = remapped;
+
+        CombineReservoir(self, nbRes, pHat, Rand01(rng));
+    }
+
+    FinalizeReservoir(self);
+
+    ReSTIRPackedReservoir packed;
+    PackReservoir(self, packed);
+    OutReservoirs[pixelIndex] = packed;
+}

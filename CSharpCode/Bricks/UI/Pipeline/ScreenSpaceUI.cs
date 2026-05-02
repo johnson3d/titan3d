@@ -13,7 +13,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public TtScreenSpaceUIShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/ScreenSpaceUI.cginc", RName.ERNameType.Engine);
-            this.UpdatePermutation();
+            this.UpdatePermutation().AddWaitTask();
         }
         public override EVertexStreamType[] GetNeedStreams()
         {
@@ -57,7 +57,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             DebugName = debugName;
 
-            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtScreenSpaceUIShading>();
+            mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtScreenSpaceUIShading>();
         }
         public override unsafe TtGraphicsBuffers CreateGBuffers(TtRenderPolicy policy, EPixelFormat format)
         {
@@ -92,7 +92,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 GBuffers.SetSize(x * OutputScaleFactor, y * OutputScaleFactor);
             }
         }
-        public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        public unsafe override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist, "ScreenSpaceUI"))
@@ -110,7 +110,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 passClears.ClearFlags = ERenderPassClearFlags.CLEAR_NONE;
                 GBuffers.BuildFrameBuffers(policy);
                 cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, DebugName);
-                var hud = policy.ViewportSlate?.HUD;
+                var hud = policy.RenderViewport?.HUD;
                 if (hud != null)
                 {
                     var host = hud;

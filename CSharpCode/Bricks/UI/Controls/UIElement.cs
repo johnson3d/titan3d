@@ -678,9 +678,9 @@ namespace EngineNS.UI.Controls
                     if(expr.Key.IsAttachedProperty)
                     {
                         count++;
-                        ar.Write(Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(expr.Key.HostType.SystemType));
+                        ar.Write(Rtti.TtTypeDesc.TypeOf(expr.Key.HostType.SystemType).TypeString);
                         ar.Write(expr.Key.Name);
-                        ar.Write(Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(expr.Key.PropertyType.SystemType));
+                        ar.Write(Rtti.TtTypeDesc.TypeOf(expr.Key.PropertyType.SystemType).TypeString);
                         var offset = SerializerHelper.WriteSkippable(ar);
                         var value = expr.Value.GetValue<object>(expr.Key);
                         Bricks.DataCopyer.TtDataCopyer.WriteObject(ar, expr.Key.PropertyType.SystemType, value);

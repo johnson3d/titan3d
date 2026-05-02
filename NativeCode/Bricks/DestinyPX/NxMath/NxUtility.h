@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <math.h>
 #include <atomic>
 #include <algorithm>
@@ -996,5 +996,5 @@ namespace NxMath
 #endif
 }
 
-//ºóĞøÍ¨¹ı¹¤¾ßÉú³É´úÂë£¬²»Í¬µÄValueType, FracBit²úÉú²»Í¬µÄÕûĞÎÁ¢¼´Êı
+//åç»­é€šè¿‡å·¥å…·ç”Ÿæˆä»£ç ï¼Œä¸åŒçš„ValueType, FracBitäº§ç”Ÿä¸åŒçš„æ•´å½¢ç«‹å³æ•°
 #include "NxFixedConstValue.inl"

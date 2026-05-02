@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -27,7 +27,7 @@ namespace EngineNS
         {
             unsafe
             {
-                return Rtti.TtNativeCoreProvider.MarshalPtrAnsi(mNativeString.GetText());
+                return Rtti.TtNativeCoreProvider.MarshalPtrUtf8(mNativeString.GetText());
             }
         }
         public unsafe sbyte* GetTextPointer()

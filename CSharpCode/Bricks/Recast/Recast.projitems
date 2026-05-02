@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -10,11 +10,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)RecastSceneNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UInputGeom.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UNavCrowd.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UNavMesh.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UNavQuery.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)URecastBuilder.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UTileMeshBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)InputGeom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NavCrowd.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NavMesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NavQuery.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RecastBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TileMeshBuilder.cs" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -16,29 +16,29 @@
     <Compile Include="$(MSBuildThisFileDirectory)IO\ConfigSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\IStreaming.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\JsonOptions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IO\UAssetOperator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\AssetOperator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\IAssemblyLoader.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Macross\UMacrossAttribute.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Macross\UMacrossDebugger.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Macross\UMacrossModule.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Macross\UMacrossStackTracer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\MacrossAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\MacrossDebugger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\MacrossModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\MacrossStackTracer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Profiler\Trace\Channel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Profiler\Trace\Tracer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Profiler\UNativeMemory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Profiler\NativeMemory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RName.Cloud.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Statistic.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\CBlobObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\RemapCurve.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Support\UNativeArray.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Support\NativeArray.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\CPerlin.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Support\UBitset.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Support\UNativeDictionary.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Support\USdfGrid.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Support\Bitset.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Support\NativeDictionary.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Support\SdfGrid.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Thread\Async\Task.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Thread\Atomic.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UException.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UNativeWindow.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UPooledObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exception.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NativeWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PooledObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Profiler\TimeScope.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Thread\Async\AsyncObjManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Thread\Async\ContextThreadManager.cs" />
@@ -52,8 +52,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Thread\ThreadPool.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Thread\ThreadRender.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Thread\ThreadRHI.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Thread\UEngine.Thread.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UEngine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Thread\Engine.Thread.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Engine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FTransform.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Hash160.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\FileManager.cs" />
@@ -75,7 +75,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)TCoreSDK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TName.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IModule.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)USlateApplication.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SlateApplication.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UTest\UnitTester.cs" />
   </ItemGroup>
   <ItemGroup>

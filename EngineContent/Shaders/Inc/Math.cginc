@@ -391,38 +391,42 @@ half3 FromRGBM(half4 rgbm)
     return rgbm.xyz * rgbm.w * (half)kRGBMRange;
 }
 
-float3 RGBToYCoCg(float3 RGB)
+half3 RGBToYCoCg(half3 RGB)
 {
-	float Y = dot(RGB, float3(1, 2, 1));
-	float Co = dot(RGB, float3(2, 0, -2));
-	float Cg = dot(RGB, float3(-1, 2, -1));
+    half Y = dot(RGB, half3(1, 2, 1));
+    half Co = dot(RGB, half3(2, 0, -2));
+    half Cg = dot(RGB, half3(-1, 2, -1));
 
-	float3 YCoCg = float3(Y, Co, Cg);
+    half3 YCoCg = half3(Y, Co, Cg);
 	return YCoCg;
 }
 
-float3 YCoCgToRGB(float3 YCoCg)
+half3 YCoCgToRGB(half3 YCoCg)
 {
-	float Y = YCoCg.x * 0.25;
-	float Co = YCoCg.y * 0.25;
-	float Cg = YCoCg.z * 0.25;
+    half Y = YCoCg.x * 0.25;
+    half Co = YCoCg.y * 0.25;
+    half Cg = YCoCg.z * 0.25;
 
-	float R = Y + Co - Cg;
-	float G = Y + Cg;
-	float B = Y - Co - Cg;
+    half R = Y + Co - Cg;
+    half G = Y + Cg;
+    half B = Y - Co - Cg;
 
-	float3 RGB = float3(R, G, B);
+    half3 RGB = half3(R, G, B);
 	return RGB;
 }
 
-#define MOTIONVECTOR_SCALAR 64
+#define MOTIONVECTOR_SCALAR 0
 
+// 写入端把 NDC 约定（y 向上）转换为纹理 UV 约定（y 向下），
+// 这样所有消费端 (TAA / MotionBlur / SSR ...) 直接用 screenUV - MV 即可，
+// 无需各自再做 Y 翻转。
 static float2 EncodeMotionVector(float2 v)
 {
+	float2 uvSpace = float2(v.x, -v.y);
 #if MOTIONVECTOR_SCALAR == 0
-	return v.xy;
+	return uvSpace;
 #else
-	return v.xy * MOTIONVECTOR_SCALAR + 0.5f;
+	return uvSpace * MOTIONVECTOR_SCALAR + 0.5f;
 #endif
 }
 

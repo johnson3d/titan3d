@@ -1,4 +1,4 @@
-/*
+﻿/*
 A C++ program for Random-start randomly permuted Halton sequence.
 Coded by Dr. Linlin Xu and Prof. Giray Okten.
 

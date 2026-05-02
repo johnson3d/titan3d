@@ -1,0 +1,672 @@
+﻿using EngineNS.IO;
+using EngineNS.Macross;
+using EngineNS.Rtti;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.Loader;
+using System.Text;
+
+namespace EngineNS.Bricks.AssemblyLoader
+{
+    public class TtLoadContext : AssemblyLoadContext
+    {
+        //https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability
+        // Resolver of the locations of the assemblies that are dependencies of the
+        // main plugin assembly.
+        private AssemblyDependencyResolver _resolver;
+
+        public TtLoadContext(string pluginPath) : base(isCollectible: true)
+        {
+            _resolver = new AssemblyDependencyResolver(pluginPath);
+        }
+        ~TtLoadContext()
+        {
+
+        }
+
+        public List<string> IncludeAssemblies;
+        // The Load method override causes all the dependencies present in the plugin's binary directory to get loaded
+        // into the HostAssemblyLoadContext together with the plugin assembly itself.
+        // NOTE: The Interface assembly must not be present in the plugin's binary directory, otherwise we would
+        // end up with the assembly being loaded twice. Once in the default context and once in the HostAssemblyLoadContext.
+        // The types present on the host and plugin side would then not match even though they would have the same names.
+        protected override Assembly Load(AssemblyName name)
+        {
+            var ass = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (var assembly in ass)
+            {
+                if (assembly.GetName().Name == name.Name)
+                    return assembly;
+            }
+            if (IncludeAssemblies != null)
+            {
+                foreach (var j in IncludeAssemblies)
+                {
+                    if (name.Name.Contains(j))
+                    {
+                        string assemblyPath = _resolver.ResolveAssemblyToPath(name);
+                        if (assemblyPath != null)
+                        {
+                            Console.WriteLine($"Loading assembly {assemblyPath} into the HostAssemblyLoadContext");
+                            //return LoadFromAssemblyPath(assemblyPath);
+                            return LoadOnMemory(assemblyPath);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                string assemblyPath = _resolver.ResolveAssemblyToPath(name);
+                if (assemblyPath != null)
+                {
+                    Console.WriteLine($"Loading assembly {assemblyPath} into the HostAssemblyLoadContext");
+                    //return LoadFromAssemblyPath(assemblyPath);
+                    return LoadOnMemory(assemblyPath);
+                }
+            }
+
+            return null;
+        }
+        public Assembly LoadOnMemory(string assemblyPath)
+        {
+            string pdbPath = assemblyPath.Replace(".dll", ".pdb");
+            string tdbPath = assemblyPath.Replace(".dll", ".tpdb");
+            using (FileStream sr = new FileStream(assemblyPath, FileMode.OpenOrCreate, FileAccess.Read))
+            {
+                byte[] buffer = new byte[sr.Length];
+                sr.Read(buffer, 0, buffer.Length);
+                var mrs = new System.IO.MemoryStream(buffer);
+                try
+                {
+                    if (IO.TtFileManager.FileExists(tdbPath))
+                    {
+                        using (FileStream pdbStream = new FileStream(tdbPath, FileMode.Open, FileAccess.Read))
+                        {
+                            var pdbBuffer = new byte[pdbStream.Length];
+                            pdbStream.Read(pdbBuffer, 0, pdbBuffer.Length);
+                            var pdbmrs = new System.IO.MemoryStream(pdbBuffer);
+                            return this.LoadFromStream(mrs, pdbmrs);
+                        }
+                    }
+                    else if (!IO.TtFileManager.FileExists(tdbPath) && IO.TtFileManager.FileExists(pdbPath))
+                    {
+                        TtFileManager.MoveFile(pdbPath, tdbPath);
+                        using (FileStream pdbStream = new FileStream(tdbPath, FileMode.Open, FileAccess.Read))
+                        {
+                            var pdbBuffer = new byte[pdbStream.Length];
+                            pdbStream.Read(pdbBuffer, 0, pdbBuffer.Length);
+                            var pdbmrs = new System.IO.MemoryStream(pdbBuffer);
+                            return this.LoadFromStream(mrs, pdbmrs);
+                        }
+                    }
+                    else
+                    {
+                        return this.LoadFromStream(mrs);
+                    }
+                }
+                catch (Exception)
+                {
+                    return this.LoadFromStream(mrs);
+                }
+            }
+        }
+
+        static void ExecuteAndUnload(string assemblyPath, out WeakReference alcWeakRef)
+        {
+            // Create the unloadable HostAssemblyLoadContext
+            var alc = new TtLoadContext(assemblyPath);
+
+            // Create a weak reference to the AssemblyLoadContext that will allow us to detect
+            // when the unload completes.
+            alcWeakRef = new WeakReference(alc);
+
+            // Load the plugin assembly into the HostAssemblyLoadContext.
+            // NOTE: the assemblyPath must be an absolute path.
+            Assembly a = alc.LoadFromAssemblyPath(assemblyPath);
+
+            //// Get the plugin interface by calling the PluginClass.GetInterface method via reflection.
+            //Type pluginType = a.GetType("Plugin.PluginClass");
+            //MethodInfo getInterface = pluginType.GetMethod("GetInterface", BindingFlags.Static | BindingFlags.Public);
+            //Plugin.Interface plugin = (Plugin.Interface)getInterface.Invoke(null, null);
+
+            //// Now we can call methods of the plugin using the interface
+            //string result = plugin.GetMessage();
+            //Plugin.Version version = plugin.GetVersion();
+
+            //Console.WriteLine($"Response from the plugin: GetVersion(): {version}, GetMessage(): {result}");
+
+            // This initiates the unload of the HostAssemblyLoadContext. The actual unloading doesn't happen
+            // right away, GC has to kick in later to collect all the stuff.
+            alc.Unload();
+        }
+
+        static void TestUnload()
+        {
+            WeakReference hostAlcWeakRef;
+            string currentAssemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string pluginFullPath = Path.Combine(currentAssemblyDirectory, $"..\\..\\..\\..\\Plugin\\bin\\netcoreapp3.1\\Plugin.dll");
+            ExecuteAndUnload(pluginFullPath, out hostAlcWeakRef);
+
+            // Poll and run GC until the AssemblyLoadContext is unloaded.
+            // You don't need to do that unless you want to know when the context
+            // got unloaded. You can just leave it to the regular GC.
+            for (int i = 0; hostAlcWeakRef.IsAlive && (i < 10); i++)
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+
+            Console.WriteLine($"Unload success: {!hostAlcWeakRef.IsAlive}");
+        }
+    }
+
+    public enum EPluginModuleState
+    {
+        Unloaded,
+        Loaded,
+        ReloadReady,
+    }
+    public interface IPlugin
+    {
+        void OnLoadedPlugin();
+        void OnUnloadPlugin();
+    }
+
+    [Rtti.Meta("")]
+    public class TtPluginDescriptor
+    {
+        public string Name { get; set; }
+        public string FilePath { get; set; }
+        [Rtti.Meta("")]
+        public bool Enable { get; set; } = true;
+        [Rtti.Meta("")]
+        public bool LoadOnInit { get; set; } = true;
+        [Rtti.Meta("")]
+        public List<EPlatformType> Platforms { get; set; } = new List<EPlatformType>() { EPlatformType.PLTF_Windows };
+        [Rtti.Meta("")]
+        public List<string> Dependencies { get; set; } = new List<string>();
+        public void SaveDescriptor()
+        {
+            var jsCode = IO.TtFileManager.SaveObjectToJson(this);
+            IO.TtFileManager.WriteAllText(FilePath, jsCode);
+        }
+    }
+    public class TtPluginAttribute : Attribute
+    {
+
+    }
+    public class TtPluginModule
+    {
+        public TtPluginModuleManager Manager;
+        public string Name { get; set; }
+        public TtPluginDescriptor PluginDescriptor = null;
+        public EPluginModuleState ModuleSate { get; set; } = EPluginModuleState.Unloaded;
+        public string AssemblyPath { get; set; }
+        WeakReference mLoader = null;
+        public WeakReference<Assembly> ModuleAssembly { get; private set; }
+        public Assembly UnsafeGetAssembly()
+        {
+            if (ModuleAssembly == null)
+                return null;
+            Assembly result;
+            if (ModuleAssembly.TryGetTarget(out result))
+                return result;
+            return null;
+        }
+        public bool SureLoad()
+        {
+            if (PluginDescriptor.Enable == false)
+            {
+                if (ModuleSate != EPluginModuleState.Unloaded)
+                {
+                    UnloadPlugin(true);
+                    ModuleSate = EPluginModuleState.Unloaded;
+                }
+                return false;
+            }
+            switch (ModuleSate)
+            {
+                case EPluginModuleState.Unloaded:
+                    {
+                        try
+                        {
+                            if (LoadPlugin() == false)
+                                return false;
+                            ModuleSate = EPluginModuleState.Loaded;
+                            return true;
+                        }
+                        catch(Exception ex)
+                        {
+                            Profiler.Log.WriteException(ex);
+                            ModuleSate = EPluginModuleState.Unloaded;
+                            return false;
+                        }
+                    }
+                case EPluginModuleState.Loaded:
+                    {
+                        return true;
+                    }
+                case EPluginModuleState.ReloadReady:
+                    {
+                        return ForceReload();
+                    }
+                default:
+                    return false;
+            }
+        }
+        public static bool BuildProject(string projectPath)
+        {
+            var slnPath = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
+            slnPath = IO.TtFileManager.SureAsDirectory(slnPath);
+            slnPath = slnPath.Replace('/', '\\');
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = "dotnet",
+                //Arguments = $"build \"{projectPath}\" /p:TitanRoot={slnPath} --no-dependencies",
+                Arguments = $"build \"{projectPath}\" /p:TitanRoot={slnPath} /p:HotReloadEnabled=false",// /p:GenerateAssemblyInfo=false /p:GenerateTargetFrameworkAttribute=false /p:GenerateAssemblyAttributes=false
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                StandardOutputEncoding = Encoding.UTF8,  // 关键设置
+                StandardErrorEncoding = Encoding.UTF8   // 关键设置
+            };
+
+            using var process = new Process { StartInfo = processStartInfo };
+            process.Start();
+
+            // 输出构建信息
+            string output = process.StandardOutput.ReadToEnd();
+            string errors = process.StandardError.ReadToEnd();
+
+            process.WaitForExit();
+
+            Console.WriteLine(output);
+            if (!string.IsNullOrEmpty(errors))
+            {
+                Console.Error.WriteLine(errors);
+            }
+
+            return process.ExitCode == 0;
+        }
+        public bool ForceReload()
+        {
+            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): will be reloaded");
+            if (UnloadPlugin(false) == false)
+            {
+                ModuleSate = EPluginModuleState.Loaded;
+                return true;
+            }
+
+            try
+            {
+                if (LoadPlugin() == false)
+                    return false;
+                ModuleSate = EPluginModuleState.Loaded;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+                ModuleSate = EPluginModuleState.Unloaded;
+                return false;
+            }
+        }
+        private bool LoadPlugin()
+        {
+            foreach (var i in PluginDescriptor.Dependencies)
+            {
+                var dModule = Manager.GetPluginModule(i);
+                if (dModule == null)
+                {
+                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): load failed because the {i} is not found");
+                    return false;
+                }
+                dModule.PluginDescriptor.Enable = true;
+                if (false == dModule.SureLoad())
+                    return false;
+            }
+
+            var context = new TtLoadContext(AssemblyPath);// Manager.CoreBinDirectory);
+            //var assembly = context.LoadFromAssemblyPath(AssemblyPath);
+            var assembly = context.LoadOnMemory(AssemblyPath);
+            Rtti.TtAssemblyDesc.UpdateRtti(this.Name, assembly, UnsafeGetAssembly());
+            ModuleAssembly = new WeakReference<Assembly>(assembly);
+            if (GetPluginObjectImpl() == false)
+                return false;
+
+            mLoader = new WeakReference(context, true);
+            return true;
+        }
+        private bool GetPluginObjectImpl()
+        {
+            Assembly assembly;
+            if (ModuleAssembly.TryGetTarget(out assembly) == false)
+            {
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): ModuleAssembly is not alive");
+                return false;
+            }
+            Type type = null;
+            foreach (var i in assembly.GetTypes())
+            {
+                var attr = i.GetCustomAttribute<TtPluginAttribute>();
+                if (attr != null)
+                {
+                    type = i;
+                    break;
+                }
+            }
+            if (type == null)
+            {
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): EngineNS.Plugin.TtPluginLoader is not found");
+                return false;
+            }
+            var method = type.GetMethod("GetPluginObject", BindingFlags.Static | BindingFlags.Public);
+            if (method == null)
+            {
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): EngineNS.Plugin.TtPluginLoader.GetPluginObject is not found");
+                return false;
+            }
+            var obj = method.Invoke(null, null);
+            PluginObject = obj as IPlugin;
+            if (PluginObject == null)
+            {
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): EngineNS.Plugin.TtPluginLoader.GetPluginObject return null");
+                return false;
+            }
+            PluginObject.OnLoadedPlugin();
+            return true;
+        }
+        private void UnloadImpl(bool bUnregAssembly)
+        {
+            if (bUnregAssembly)
+            {
+                Rtti.TtTypeDescManager.Instance.UnregAssembly(this.UnsafeGetAssembly());
+            }
+
+            try
+            {
+                PluginObject?.OnUnloadPlugin();
+
+                //Rtti.UTypeDescManager.Instance.UnregAssembly();
+            }
+            catch(Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+            }
+            PluginObject = null;
+
+            TtLoadContext context = mLoader.Target as TtLoadContext;
+            if (context != null)
+            {
+                context.Unload();
+            }
+        }
+        public bool UnloadPlugin(bool bUnregAssembly)
+        {
+            if (ModuleSate == EPluginModuleState.Unloaded)
+                return true;
+
+            UnloadImpl(bUnregAssembly);
+
+            for (int i = 0; mLoader.IsAlive; i++)
+            {
+                if (i > 10)
+                {
+                    GetPluginObjectImpl();
+                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}) is alive still after unload");
+                    return false;
+                }
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+
+            mLoader = null;
+            ModuleAssembly = null;
+            ModuleSate = EPluginModuleState.Unloaded;
+            return true;
+        }
+        private IPlugin PluginObject;//do not store this object any where
+        public T GetPluginObject<T>() where T : class, IPlugin
+        {
+            if (SureLoad() == false)
+                return default(T);
+            return PluginObject as T;
+        }
+    }
+    public class TtPluginModuleManager
+    {
+        public string CoreBinDirectory;
+        private FileSystemWatcher mWatcher;
+        public Dictionary<string, TtPluginModule> PluginModules { get; } = new Dictionary<string, TtPluginModule>();
+        public TtPluginModule GetPluginModule(string type)
+        {
+            TtPluginModule module;
+            if (PluginModules.TryGetValue(type, out module))
+                return module;
+            return null;
+        }
+        void OnPluginChanged(string path)
+        {
+            if (path.EndsWith(PlatformSuffix))
+            {
+                path = path.Substring(0, path.Length - PlatformSuffix.Length);
+                path += ".plugin";
+                var name = IO.TtFileManager.GetPureName(path);
+                var module = GetPluginModule(name);
+                if (module != null && module.PluginDescriptor.Enable)
+                {
+                    if (module.ModuleSate == EPluginModuleState.Loaded)
+                        module.ModuleSate = EPluginModuleState.ReloadReady;
+                }
+            }
+        }
+        private string PlatformSuffix;
+        internal void InitPlugins(TtEngine engine, bool bTryLoad)
+        {
+            CoreBinDirectory = engine.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute);
+            var path = engine.FileManager.GetRoot(IO.TtFileManager.ERootDir.Plugin);
+
+            mWatcher = new FileSystemWatcher();
+            mWatcher.Path = path;
+            mWatcher.IncludeSubdirectories = true;
+            mWatcher.Filter = "*.dll";
+            mWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
+            mWatcher.Changed += (sender, e) => OnPluginChanged(e.FullPath);
+            //mWatcher.Created += (sender, e) => OnPluginChanged(e.FullPath);
+            //mWatcher.Deleted += (sender, e) => OnPluginChanged(e.FullPath);
+            //mWatcher.Renamed += (sender, e) => { OnPluginChanged(e.FullPath); OnPluginChanged(e.OldFullPath); };
+            mWatcher.EnableRaisingEvents = true;
+
+            var files = IO.TtFileManager.GetFiles(path, "*.plugin", false);
+#if PWindow
+            bool bTest = false;
+            if (bTest)
+            {
+                var template = new TtPluginDescriptor();
+                template.FilePath = path + "template.json";
+                template.SaveDescriptor();
+            }
+#elif PAndroid
+#endif
+            PluginModules.Clear();
+            PlatformSuffix = "Window.dll";
+            switch (engine.CurrentPlatform)
+            {
+                case EPlatformType.PLTF_Windows:
+                    PlatformSuffix = ".Window.dll";
+                    break;
+                case EPlatformType.PLTF_Android:
+                    PlatformSuffix = ".Android.dll";
+                    break;
+            }
+
+            List<TtPluginDescriptor> descriptors = new List<TtPluginDescriptor>();
+            foreach (var i in files)
+            {
+                var jsCode = IO.TtFileManager.ReadAllText(i);
+                var descriptor = IO.TtFileManager.LoadObjectFromJson<TtPluginDescriptor>(jsCode);
+                if (descriptor == null)
+                    continue;
+                descriptor.FilePath = i;
+                descriptor.Name = IO.TtFileManager.GetPureName(descriptor.FilePath);
+                descriptors.Add(descriptor);
+            }
+            
+            List<TtPluginDescriptor> validDescriptors = new();
+            
+            foreach (var i in TtEngine.Instance.Config.Plugins)
+            {
+                var p = FindDescriptor(descriptors, i);
+                if (p == null)
+                {
+                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Plugin {i} not found!");
+                    continue;
+                }
+                AddTree(p, descriptors, validDescriptors);
+            }
+
+            foreach (var descriptor in validDescriptors)
+            {
+                bool bUsePlatformSuffix = true;
+                if (!descriptor.Platforms.Contains(EPlatformType.PLTF_ALL))
+                {
+                    if (descriptor.Platforms.Contains(engine.CurrentPlatform) == false)
+                        continue;
+                }
+                else
+                {
+                    bUsePlatformSuffix = false;
+                }
+
+                var name = descriptor.Name;
+
+                var module = new TtPluginModule();
+                module.PluginDescriptor = descriptor;
+                module.Manager = this;
+                module.Name = name;
+                var dir = IO.TtFileManager.GetBaseDirectory(descriptor.FilePath);
+                module.AssemblyPath = dir + name + "/" + name + (bUsePlatformSuffix ? PlatformSuffix : ".All.dll");
+                PluginModules.Add(name, module);
+            }
+
+            if (bTryLoad)
+            {
+                foreach (var i in PluginModules)
+                {
+                    if (i.Value.PluginDescriptor.LoadOnInit == false)
+                        continue;
+                    i.Value.SureLoad();
+                }
+            }
+
+            //var taskModule = this.GetPluginModule("GameTasks");
+            //if (taskModule != null)
+            //{
+            //    //test code
+            //    //taskModule.UnloadPlugin(true);
+            //}
+        }
+        private static TtPluginDescriptor FindDescriptor(List<TtPluginDescriptor> descriptors, string n)
+        {
+            foreach (var i in descriptors)
+            {
+                if (i.Name == n)
+                    return i;
+            }
+            return null;
+        }
+        private static void AddTree(TtPluginDescriptor p, List<TtPluginDescriptor> descriptors, List<TtPluginDescriptor> validDescriptors)
+        {
+            if (validDescriptors.Contains(p)==false)
+            {
+                validDescriptors.Add(p);
+            }
+            foreach (var d in p.Dependencies)
+            {
+                var dp = FindDescriptor(descriptors, d);
+                if (dp != null)
+                {
+                    AddTree(dp, descriptors, validDescriptors);
+                }
+            }
+        }
+    }
+}
+
+namespace EngineNS
+{
+    partial class TtEngine
+    {
+        public Bricks.AssemblyLoader.TtPluginModuleManager PluginModuleManager { get; } = new Bricks.AssemblyLoader.TtPluginModuleManager();
+    }
+}
+
+namespace EngineNS.Macross
+{
+    public class TtMacrosAssemblyLoader //: IAssemblyLoader
+    {
+        Bricks.AssemblyLoader.TtLoadContext Loader = null;
+        public List<string> IncludeAssemblies { get; } = new List<string>();
+        public System.Reflection.Assembly LoadAssembly(string assemblyPath, string pdbPath = null)
+        {
+            TryUnload();
+
+            Loader = new Bricks.AssemblyLoader.TtLoadContext(assemblyPath);
+            Loader.IncludeAssemblies = IncludeAssemblies;
+
+            using (FileStream sr = new FileStream(assemblyPath, FileMode.OpenOrCreate, FileAccess.Read))
+            {
+                byte[] buffer = new byte[sr.Length];
+                sr.Read(buffer, 0, buffer.Length);
+                var mrs = new System.IO.MemoryStream(buffer);
+                try
+                {
+                    if (pdbPath != null && IO.TtFileManager.FileExists(pdbPath))
+                    {
+                        using (FileStream pdbStream = new FileStream(pdbPath, FileMode.Open, FileAccess.Read))
+                        {
+                            var pdbBuffer = new byte[pdbStream.Length];
+                            pdbStream.Read(pdbBuffer, 0, pdbBuffer.Length);
+                            var pdbmrs = new System.IO.MemoryStream(pdbBuffer);
+                            return Loader.LoadFromStream(mrs, pdbmrs);
+                        }
+                    }
+                    else
+                    {
+                        return Loader.LoadFromStream(mrs);
+                    }
+                }
+                catch (Exception)
+                {
+                    return Loader.LoadFromStream(mrs);
+                }
+            }
+            //return Loader.LoadFromAssemblyPath(assemblyPath);
+        }
+        public void TryUnload()
+        {
+            IncludeAssemblies.Clear();
+            if (Loader != null)
+            {
+                Loader.Unload();
+                Loader = null;
+            }
+        }
+        public object GetInnerObject()
+        {
+            return Loader;
+        }
+    }
+    public partial class TtMacrossModule
+    {
+        public void CreateAssemblyLoader(ref TtMacrosAssemblyLoader loader)
+        {
+            loader = new TtMacrosAssemblyLoader();
+        }
+    }
+}

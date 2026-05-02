@@ -44,7 +44,7 @@ namespace EngineNS.Editor.Forms
             if (result)
             {
                 var cmdlst = ImGuiAPI.GetWindowDrawList();
-                var stats = TtEngine.Instance.GfxDevice.RenderSwapQueue.GetStat();
+                var stats = TtEngine.Instance.GfxDevice.RenderQueue.QueueStats;
                 ImGuiAPI.Text($"CmdList = {stats.NumOfCmdlist};Drawcall = {stats.NumOfDrawcall};Primitive = {stats.NumOfPrimitive};");
                 EGui.UIProxy.SearchBarProxy.OnDraw(ref mFilterFocusd, cmdlst, "filter", ref mFilter, ImGuiAPI.GetWindowContentRegionWidth());
                 DockId = ImGuiAPI.GetWindowDockID();

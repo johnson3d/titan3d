@@ -181,7 +181,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     var tAtt = att as TtPGCustomValueEditorAttribute;
                     if (!tAtt.Initialized)
                     {
-                        _ = tAtt.Initialize();
+                        tAtt.Initialize().AddWaitTask();
                     }
                     IsBrowsable = IsBrowsable && !tAtt.HideInPG;
                     mIsReadonly = mIsReadonly || tAtt.ReadOnly;

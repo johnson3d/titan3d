@@ -3,7 +3,8 @@
   "ImGuiIniPath": "imgui.ini",
   "CookAssetType": "Scene\u002BMesh\u002BMaterial\u002BMaterialInst\u002BAnimClip\u002BMeshPrimitive\u002BUI\u002BPrefab\u002BMacross\u002BUVAnim\u002BRPolicy\u002BAnimationClip\u002BBlendSpace\u002BMaterialFunction",
   "IsReverseZ": true,
-  "MultiRenderMode": "QueueNextFrame",
+  "MultiRenderMode": "Queue",
+  "UseRenderThread": true,
   "UsePhysxMT": true,
   "UseRenderDoc": true,
   "Feature_UseRVT": true,
@@ -41,8 +42,7 @@
   "IsAftermath": false,
   "IsScopeWithSource": true,
   "MainWindowType": "EngineNS.Editor.TtMainEditorApplication@EngineCore",
-  "MainRPolicyName": "utest/deferred.rpolicy:Game",
-  "SimpleRPolicyName": "graphics/deferred_simple.rpolicy:Engine",
+  "MainRPolicyName": "graphics/deferred_simple.rpolicy:Engine",
   "RpcRootType": "EngineNS.UnitTest.UTest_Rpc@EngineCore",
   "CookDXBC": true,
   "CookDXIL": true,
@@ -70,7 +70,8 @@
     "DataCopyer",
     "Survivor",
     "TencentAIGC",
-    "VisualStudioPlugin"
+    "VisualStudioPlugin",
+    "MCPServer"
   ],
   "TypeAssemblies": []
 }
