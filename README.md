@@ -6,7 +6,7 @@
 >
 > **一句话定位：业界第一档 RDG 能力 (拓扑剪枝 / 引用计数 / Transient 池化 / 自动 barrier 全部具备) + 业界少见的"主渲染管线可视化编辑器" + Permutation / RenderPolicy 资产化 — 三者同时具备的引擎全球不超过 5 个。** UE5 / Unity 的 RDG 都是纯 API，主管线无可视化。
 >
-> 完整对照表 / 演进路线图 / 设计哲学对比见 → **[documents/engine/RenderGraph.Industry.Compare.md](documents/engine/RenderGraph.Industry.Compare.md)**
+> 完整对照表 / 演进路线图 / 设计哲学对比见 → **[Documents/engine/RenderGraph.Industry.Compare.md](Documents/engine/RenderGraph.Industry.Compare.md)**
 
 # 编译运行环境
 - Titan3D 启动！

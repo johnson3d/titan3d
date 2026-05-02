@@ -4,7 +4,7 @@
 >
 > **One-line positioning: Tier-1 RDG capabilities (topology pruning / refcount / transient pooling / auto barrier all in place) + a rare visual editor for the *main* rendering pipeline + Permutation / RenderPolicy as first-class editable assets — fewer than 5 engines worldwide combine all three.** Both UE5 and Unity expose their RDG as pure C++/C# API; the main pipeline is *not* visually editable.
 >
-> Full feature matrix, roadmap, and design-philosophy comparison: → **[documents/engine/RenderGraph.Industry.Compare.md](documents/engine/RenderGraph.Industry.Compare.md)**
+> Full feature matrix, roadmap, and design-philosophy comparison: → **[Documents/engine/RenderGraph.Industry.Compare.md](Documents/engine/RenderGraph.Industry.Compare.md)**
 
 # Compilation and Runtime Environment
 - Titan3D Launches!
