@@ -26,6 +26,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Forms\MeshEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\MeshPrimitiveEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\SceneEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\TtSceneEditorInteractiveMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\TextureViewer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\WorldOutliner.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IAssetEditor.cs" />

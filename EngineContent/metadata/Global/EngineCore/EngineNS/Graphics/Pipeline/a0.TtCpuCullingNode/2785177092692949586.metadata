@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2785177092692949586 Type="EngineNS.Graphics.Pipeline.TtCpuCullingNode@EngineCore">
+  <CullCameraName Type="System.String@Unknown" Order="0" />
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_2785177092692949586>

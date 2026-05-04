@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_5707313886687965864 Type="EngineNS.Graphics.Pipeline.GI.ReSTIR.TtReSTIRGINode@EngineCore">
+  <DepthThreshold Type="System.Single@Unknown" Order="0" />
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <EnableEnvMap Type="System.Boolean@Unknown" Order="0" />
+  <EnableHardwareRT Type="System.Boolean@Unknown" Order="0" />
+  <EnableSpatial Type="System.Boolean@Unknown" Order="0" />
+  <EnableTemporal Type="System.Boolean@Unknown" Order="0" />
+  <InitialSampleCount Type="System.UInt32@Unknown" Order="0" />
+  <Intensity Type="System.Single@Unknown" Order="0" />
+  <MaxRadiance Type="System.Single@Unknown" Order="0" />
+  <MaxRayDistance Type="System.Single@Unknown" Order="0" />
+  <MaxRayMarchSteps Type="System.UInt32@Unknown" Order="0" />
+  <NormalThreshold Type="System.Single@Unknown" Order="0" />
+  <SkyColor Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <SkyIntensity Type="System.Single@Unknown" Order="0" />
+  <SpatialRadius Type="System.Single@Unknown" Order="0" />
+  <SpatialSampleCount Type="System.UInt32@Unknown" Order="0" />
+  <TemporalMaxM Type="System.Single@Unknown" Order="0" />
+  <ThicknessBias Type="System.Single@Unknown" Order="0" />
+</Hash_5707313886687965864>

@@ -31,8 +31,26 @@ namespace EngineNS.Editor.Forms
         }
         public class TtSceneEditorViewport : EGui.Slate.TtWorldViewportSlate
         {
+            static TtSceneEditorViewport()
+            {
+                // 注册 SceneEditor 专用的交互模式。
+                // TtWorldViewportSlate.Initialize 末尾会调用 ReCreateInteractiveModes(),
+                // QueryModeInfo 沿类型继承链收集所有注册的 mode, 这里注册的 mode
+                // 会自动被实例化并设为 CurrentIntercativeMode。
+                TtEngine.Instance.InteractiveModeManager
+                    .RegisterMode<TtSceneEditorViewport, TtSceneEditorInteractiveMode>();
+            }
+
             public TtSceneEditor HostEditor;
-            
+
+            public TtSceneEditorViewport()
+            {
+                // SceneEditor 把 InteractiveMode 切换 Combo 画在自己的工具栏上
+                // (TtSceneEditor.DrawInteractiveModeCombo), 所以禁用基类
+                // 在视口 UI 区自动画的同款 Combo, 避免出现两个重复的下拉框。
+                ShowInteractiveModeCombo = false;
+            }
+
             public override void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
             {
                 if(TtEngine.Instance.InputSystem.IsCtrlKeyDown())
@@ -481,8 +499,18 @@ namespace EngineNS.Editor.Forms
             //PreviewViewport.PreviewAsset = name;
             PreviewViewport.Title = $"Scene:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewScene;
-            PreviewViewport.CameralWheelMoveWithLookAt = false;
+            // SceneEditor 走飞行式滚轮: 相机和 LookAt 同步推进,
+            // 避免相机逼近 LookAt 点后滚轮被 EditorCameraController 卡住推不动。
+            PreviewViewport.CameralWheelMoveWithLookAt = true;
             await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, rpolicy, 0, 1);
+
+            // ReCreateInteractiveModes 沿继承链收集 mode, 因为 TtWorldViewportSlate 自己
+            // 也注册了 TtWorldViewportInteractiveMode, 所以列表里同时有它和我们注册的
+            // TtSceneEditorInteractiveMode; 而基类 ReCreateInteractiveModes 默认把列表
+            // 最后一个设为 CurrentIntercativeMode (顺序不可控)。这里显式把缺省 mode
+            // 切回 SceneEditor 专属的 TtSceneEditorInteractiveMode。
+            PreviewViewport.SetDefaultInteractiveMode<TtSceneEditorInteractiveMode>();
+
             var camPos = new DVector3(10, 10, 10);
             PreviewViewport.CameraController.Camera?.mCoreObject.LookAtLH(in camPos, in DVector3.Zero, in Vector3.Up);
 
@@ -602,14 +630,14 @@ namespace EngineNS.Editor.Forms
             ResetDockspace();
             EGui.UIProxy.DockProxy.EndMainForm(IsDrawing);
 
-            DrawEditorSettings();
-            DrawCameraSettings();
+            DrawOutliner();
 
             DrawNodeDetails();
-
-            DrawOutliner();
+            DrawEditorSettings();
             DrawSceneDetails();
             
+            DrawCameraSettings();
+
             DrawPreview();
             DrawContentBrowser();
             DrawPlaceItemPanel();
@@ -685,6 +713,13 @@ namespace EngineNS.Editor.Forms
             //    var task = EngineNS.Editor.UMainEditorApplication.TestCreateScene(PreviewViewport, PreviewViewport.World, Scene);
             //}
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList);
+
+            // InteractiveMode 切换下拉框: 与 TtViewportSlate.OnDrawViewportUI 内置的
+            // ##InteractiveMode Combo 行为一致, 但显示在 SceneEditor 的工具栏上,
+            // 让用户在编辑器主视图就能切换 mode。
+            DrawInteractiveModeCombo();
+
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList);
             //ImGuiAPI.BeginGroup();
 
             if (CpuCullNode != null)
@@ -718,6 +753,43 @@ namespace EngineNS.Editor.Forms
             }
             //ImGuiAPI.EndGroup();
             EGui.UIProxy.Toolbar.EndToolbar();
+        }
+        // 在工具栏画 InteractiveMode 切换下拉框。
+        // 列表内容来自 PreviewViewport.InteractiveModes (由 ReCreateInteractiveModes 填充),
+        // 选中项写回 PreviewViewport.CurrentIntercativeMode, 与 TtViewportSlate 内置的
+        // 视口角 Combo 共享同一份状态, 任意一处切换都立即生效。
+        protected virtual void DrawInteractiveModeCombo()
+        {
+            var modes = PreviewViewport?.InteractiveModes;
+            if (modes == null || modes.Count == 0)
+            {
+                ImGuiAPI.SameLine(0, -1);
+                ImGuiAPI.Text("Mode: -");
+                return;
+            }
+
+            ImGuiAPI.SameLine(0, -1);
+            ImGuiAPI.Text("Mode:");
+            ImGuiAPI.SameLine(0, -1);
+
+            var current = PreviewViewport.CurrentIntercativeMode;
+            var currentName = current != null ? current.GetType().Name : "None";
+            const float comboWidth = 200.0f;
+            ImGuiAPI.SetNextItemWidth(comboWidth);
+            if (ImGuiAPI.BeginCombo("##SceneEditorInteractiveMode", currentName, ImGuiComboFlags_.ImGuiComboFlags_None))
+            {
+                for (int i = 0; i < modes.Count; i++)
+                {
+                    var mode = modes[i];
+                    var modeName = mode.GetType().Name;
+                    var isSelected = (mode == current);
+                    if (ImGuiAPI.Selectable(modeName, isSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                    {
+                        PreviewViewport.CurrentIntercativeMode = mode;
+                    }
+                }
+                ImGuiAPI.EndCombo();
+            }
         }
         EGui.UIProxy.MenuItemProxy mDrawSceneDetailsShow = new EGui.UIProxy.MenuItemProxy()
         {
@@ -1071,7 +1143,9 @@ namespace EngineNS.Editor.Forms
             //PreviewViewport.PreviewAsset = name;
             PreviewViewport.Title = $"Prefab:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewScene;
-            PreviewViewport.CameralWheelMoveWithLookAt = false;
+            // PrefabEditor 同 SceneEditor, 走飞行式滚轮 (同步推进 LookAt),
+            // 避免相机逼近 LookAt 点后滚轮被 EditorCameraController 卡住推不动。
+            PreviewViewport.CameralWheelMoveWithLookAt = true;
             await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
 
             Prefab = await name.GetAsset<TtPrefab>(PreviewViewport.World);// TtEngine.Instance.PrefabManager.CreatePrefab(PreviewViewport.World, name);

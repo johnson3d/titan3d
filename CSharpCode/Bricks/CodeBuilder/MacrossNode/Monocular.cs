@@ -129,7 +129,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //{
         //    TarType = Rtti.UClassMetaManager.Instance.GetMeta(ev.Value as Rtti.TtTypeDesc);
         //}
-        public override void OnLoadLinker(UPinLinker linker)
+        public override void OnLoadLinker(TtPinLinker linker)
         {
             base.OnLoadLinker(linker);
         }

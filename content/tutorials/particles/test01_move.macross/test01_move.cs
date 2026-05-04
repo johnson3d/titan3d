@@ -8,7 +8,7 @@
         public EngineNS.Macross.TtMacrossBreak breaker_CreateVector3f_4100741359 = new EngineNS.Macross.TtMacrossBreak("breaker_CreateVector3f_4100741359");
         EngineNS.Macross.TtMacrossStackFrame mFrame_OnUpdateEmitter_3880941163 = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("tutorials/particles/test01_move.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.MetaAttribute]
-        public override void OnUpdateEmitter(EngineNS.Bricks.Particle.TtNebulaParticle nebula,EngineNS.Bricks.Particle.TtEmitter emitter,EngineNS.Bricks.Particle.UParticleGraphNode particleSystem,System.Single elpased)
+        public override void OnUpdateEmitter(EngineNS.Bricks.Particle.TtNebulaParticle nebula,EngineNS.Bricks.Particle.TtEmitter emitter,EngineNS.Bricks.Particle.TtParticleGraphNode particleSystem,System.Single elpased)
         {
             #if !disable_macross_fea33170_dbce_4809_94ce_fd890ebf6fde
             using(var guard_OnUpdateEmitter = new EngineNS.Macross.TtMacrossStackGuard(mFrame_OnUpdateEmitter_3880941163))
@@ -35,7 +35,7 @@
         }
         EngineNS.Macross.TtMacrossStackFrame mFrame_OnUpdate_3549459165 = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("tutorials/particles/test01_move.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.MetaAttribute]
-        public override void OnUpdate(EngineNS.Bricks.Particle.TtNebulaParticle nebula,EngineNS.Bricks.Particle.UParticleGraphNode particleSystem,System.Single elpased)
+        public override void OnUpdate(EngineNS.Bricks.Particle.TtNebulaParticle nebula,EngineNS.Bricks.Particle.TtParticleGraphNode particleSystem,System.Single elpased)
         {
             #if !disable_macross_fea33170_dbce_4809_94ce_fd890ebf6fde
             using(var guard_OnUpdate = new EngineNS.Macross.TtMacrossStackGuard(mFrame_OnUpdate_3549459165))

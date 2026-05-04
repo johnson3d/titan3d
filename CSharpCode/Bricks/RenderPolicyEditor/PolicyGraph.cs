@@ -67,6 +67,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         public void InitNode(Graphics.Pipeline.TtRenderGraphNode node)
         {
             mGraphNode = node;
+            node.BindingPolicyNode = this;
             TitleColor = node.GetTileColor().ToB8G8R8A8();
 
             Inputs.Clear();
@@ -112,11 +113,22 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             }
         }
 
-
-        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedTo(PinOut oPin, TtNodeBase InNode, PinIn iPin, TtPinLinker linker)
         {
-            base.OnLinkedFrom(iPin, OutNode, oPin);
+            base.OnLinkedTo(oPin, InNode, iPin, linker);
+            mGraphNode.OnUI_LinkedTo(oPin, InNode, iPin, linker);
+        }
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin, TtPinLinker linker)
+        {
+            base.OnLinkedFrom(iPin, OutNode, oPin, linker);
             ParentGraph.RemoveLinkedInExcept(iPin, OutNode, oPin.Name);
+
+            mGraphNode.OnUI_LinkedFrom(iPin, OutNode, oPin, linker);
+        }
+        public override void OnRemoveLinker(TtPinLinker linker)
+        {
+            base.OnRemoveLinker(linker);
+            mGraphNode.OnUI_RemoveLinker(linker);
         }
         //#region PG
         //[Browsable(false)]

@@ -4,7 +4,8 @@ using System.Text;
 
 namespace EngineNS.Bricks.NodeGraph
 {
-    public class UPinLinker : IO.BaseSerializer
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore", "EngineNS.Bricks.NodeGraph.UPinLinker" })]
+    public class TtPinLinker : IO.BaseSerializer
     {
         public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
@@ -16,6 +17,13 @@ namespace EngineNS.Bricks.NodeGraph
         TtNodeGraph mGraph;
         public PinIn InPin { get; set; }
         public PinOut OutPin { get; set; }
+        public enum EShowState
+        {
+            Normal,
+            Hide,
+        }
+        [Rtti.Meta("")]
+        public EShowState ShowState { get; set; } = EShowState.Normal;
         public bool InDebuggerLine = false;
         public TtNodeBase InNode
         {
@@ -31,7 +39,7 @@ namespace EngineNS.Bricks.NodeGraph
                 return OutPin?.HostNode;
             }
         }
-
+        [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore", "EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData" })]
         public class TSaveData : IO.BaseSerializer
         {
             [Rtti.Meta("")]
@@ -90,9 +98,9 @@ namespace EngineNS.Bricks.NodeGraph
         }
     }
 
-    public class ULinkingLine
+    public class TtLinkingLine
     {
-        public ULinkingLine()
+        public TtLinkingLine()
         {
             IsBlocking = false;
         }

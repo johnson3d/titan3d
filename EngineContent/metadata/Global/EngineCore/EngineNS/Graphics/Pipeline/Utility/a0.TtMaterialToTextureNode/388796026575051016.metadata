@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_388796026575051016 Type="EngineNS.Graphics.Pipeline.Utility.TtMaterialToTextureNode@EngineCore">
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <OutputScaleFactor Type="System.Single@Unknown" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_388796026575051016>

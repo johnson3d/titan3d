@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_16889009968182702630 Type="EngineNS.Graphics.Pipeline.Common.Post.TtDenoiseNode@EngineCore">
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <IterationCount Type="System.Int32@Unknown" Order="0" />
+  <PhiColor Type="System.Single@Unknown" Order="0" />
+  <PhiDepth Type="System.Single@Unknown" Order="0" />
+  <PhiNormal Type="System.Single@Unknown" Order="0" />
+</Hash_16889009968182702630>

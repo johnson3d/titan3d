@@ -139,7 +139,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             if (LeftType != null)
                 EGui.Controls.CtrlUtility.DrawHelper(LeftType.FullName);
         }
-        public override void OnRemoveLinker(UPinLinker linker)
+        public override void OnRemoveLinker(TtPinLinker linker)
         {
             if (linker.InPin == Left)
             {
@@ -164,9 +164,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             }
             return true;
         }
-        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin, TtPinLinker linker)
         {
-            base.OnLinkedFrom(iPin, OutNode, oPin);
+            base.OnLinkedFrom(iPin, OutNode, oPin, linker);
 
             if (iPin == Left)
             {//二元运算，左值决定输出类型

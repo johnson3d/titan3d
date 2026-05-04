@@ -180,6 +180,286 @@ namespace EngineNS
                 return false;
             }
         }
+
+        /// <summary>
+        /// PropertyGrid 用来编辑 List&lt;RName&gt; 的自定义编辑器：
+        ///   - 接管整行渲染 (FullRedraw=true)，PG 不会下钻成 IList 元素，所以可以稳定地把 FilterExts
+        ///     传给每行的 ContentBrowser，做到 "选元素时按指定扩展名过滤"。
+        ///   - 每行都用一个 ComboBox + 共享的 ContentBrowser 弹窗选资产，并提供 F (Focus) / &lt;
+        ///     (从全局选中拉取) / - (清空本行) 三个常用按钮，与 PGRNameAttribute 风格保持一致。
+        ///   - 行末的 [+] 添加一行 null，[X] 删除该行；列表末尾还有 [+ Add] 整体新增按钮。
+        /// 用法：
+        ///   [RName.PGRNameList(FilterExts = TtMaterial.AssetExt + "," + TtMaterialInstance.AssetExt)]
+        ///   public List&lt;RName&gt; MaterialNames { get; set; } = new();
+        /// </summary>
+        public class PGRNameListAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
+        {
+            public string FilterExts;
+            public System.Type MacrossType;
+            public string ShaderType;
+
+            /// <summary>
+            /// 是否允许用户在 PG 上"增加"列表元素 (顶部 [+ Add] 与每行末尾的 [+])。
+            /// 对于"长度由外部约束决定"的列表 (例如 MaterialNames 的长度必须等于 mesh atom 数),
+            /// 应在构造时传 false, 防止用户改长度后和外部数据不一致。
+            /// </summary>
+            public bool AllowAdd { get; }
+
+            /// <summary>
+            /// 是否允许用户在 PG 上"删除"列表元素 (顶部 [Clear] 与每行末尾的 [X])。
+            /// 行末的 [-] 是"清空本行 (置 null)", 不算删除, 不受此开关影响。
+            /// </summary>
+            public bool AllowRemove { get; }
+
+            // 一个 attribute 实例 = 一个属性 (例如 MaterialNames)，整列共享一个 ComboBox + ContentBrowser；
+            // 当前正在弹窗的元素下标用 mActiveEditingIndex 记录, 避免不同行互相串选中态。
+            EGui.UIProxy.ComboBox mComboBox;
+            EGui.Controls.TtContentBrowser mContentBrowser;
+            int mActiveEditingIndex = -1;
+
+            /// <summary>
+            /// 默认允许增删 (兼容老用法)。
+            /// </summary>
+            public PGRNameListAttribute() : this(true, true) { }
+
+            /// <summary>
+            /// 显式指定是否允许增 / 删元素。
+            /// 用法示例:
+            ///   [RName.PGRNameList(false, false, FilterExts = "...")]  // 长度固定, 只能改内容
+            ///   [RName.PGRNameList(true,  true,  FilterExts = "...")]  // 完全可编辑 (= 默认构造器)
+            /// </summary>
+            public PGRNameListAttribute(bool allowAdd, bool allowRemove)
+            {
+                FullRedraw = true;
+                AllowAdd = allowAdd;
+                AllowRemove = allowRemove;
+            }
+
+            protected override async Thread.Async.TtTask<bool> Initialize_Override()
+            {
+                mContentBrowser = Editor.TtEditor.NewPopupContentBrowser();
+                mComboBox = new EGui.UIProxy.ComboBox()
+                {
+                    ComboOpenAction = ComboOpenAction,
+                };
+                await mComboBox.Initialize();
+                return await base.Initialize_Override();
+            }
+
+            ~PGRNameListAttribute()
+            {
+                Cleanup();
+            }
+
+            protected override void Cleanup_Override()
+            {
+                mComboBox?.Cleanup();
+                mComboBox = null;
+                base.Cleanup_Override();
+            }
+
+            void ComboOpenAction(in Support.TtAnyPointer data)
+            {
+                mContentBrowser.OnDraw();
+            }
+
+            public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
+            {
+                newValue = info.Value;
+                var list = info.Value as System.Collections.IList;
+                if (list == null)
+                    return false;
+
+                bool changed = false;
+                var drawList = ImGuiAPI.GetWindowDrawList();
+
+                // 先画属性名 + 元素数 + 顶部按钮，再画各元素行；用 TreeNode 保留可折叠效果。
+                ImGuiAPI.TableSetColumnIndex(0);
+                var nodeFlags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow |
+                                ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen;
+                bool open = ImGuiAPI.TreeNodeEx(info.Name, nodeFlags, $"{info.Name}");
+
+                ImGuiAPI.TableSetColumnIndex(1);
+                ImGuiAPI.AlignTextToFramePadding();
+                ImGuiAPI.Text($"{list.Count} elements");
+                if (!info.Readonly)
+                {
+                    var sz = new Vector2(0, 0);
+                    if (AllowAdd)
+                    {
+                        ImGuiAPI.SameLine(0, 8);
+                        if (ImGuiAPI.Button($"+ Add##{info.Name}_AddRoot", in sz))
+                        {
+                            list.Add(null);
+                            changed = true;
+                        }
+                    }
+                    if (AllowRemove)
+                    {
+                        ImGuiAPI.SameLine(0, 8);
+                        if (ImGuiAPI.Button($"Clear##{info.Name}_Clear", in sz))
+                        {
+                            if (list.Count > 0)
+                            {
+                                list.Clear();
+                                changed = true;
+                            }
+                        }
+                    }
+                }
+
+                if (open)
+                {
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        if (DrawElement(in info, list, i, drawList))
+                        {
+                            // DrawElement 内部已经修改 list, 这里只标记并跳出本帧避免下标错位。
+                            changed = true;
+                            break;
+                        }
+                    }
+                    ImGuiAPI.TreePop();
+                }
+
+                if (changed)
+                {
+                    newValue = list;
+                    return true;
+                }
+                return false;
+            }
+
+            /// <summary>
+            /// 画单个元素行：左 snap，中间 ComboBox(弹 ContentBrowser, 用 FilterExts 过滤), 右 F/&lt;/-/+/X 按钮。
+            /// 返回 true 表示本行触发了"会改变 list 长度"的操作（+/X），调用方应该立即 break 重新走下一帧。
+            /// </summary>
+            unsafe bool DrawElement(in EditorInfo info, System.Collections.IList list, int index, ImDrawList drawList)
+            {
+                var name = list[index] as RName;
+
+                // 给本行划一个独立的 ID 作用域, 避免 ComboBox/Button 重名冲突。
+                ImGuiAPI.PushID(index);
+
+                ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0);
+                ImGuiAPI.TableSetColumnIndex(0);
+                ImGuiAPI.AlignTextToFramePadding();
+                ImGuiAPI.Text($"  [{index}]");
+
+                ImGuiAPI.TableSetColumnIndex(1);
+                ImGuiAPI.BeginGroup();
+
+                var cursorPos = ImGuiAPI.GetCursorScreenPos();
+                var snapSize = new Vector2(48, 48);
+                var snapEnd = cursorPos + snapSize;
+                var assetMeta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(name);
+                assetMeta?.OnDrawSnapshot(in drawList, ref cursorPos, ref snapEnd);
+
+                var preViewStr = name == null ? "null" : name.ToString();
+                var comboPos = cursorPos + new Vector2(snapSize.X + 8, 0);
+                ImGuiAPI.SetCursorScreenPos(in comboPos);
+                ImGuiAPI.Dummy(in Vector2.Zero);
+
+                bool listMutated = false;
+
+                if (mComboBox != null)
+                {
+                    var anyPt = new Support.TtAnyPointer();
+                    var colIdx = ImGuiAPI.TableGetColumnIndex();
+                    mComboBox.Flags = ImGuiComboFlags_.ImGuiComboFlags_None
+                                    | ImGuiComboFlags_.ImGuiComboFlags_NoArrowButton
+                                    | ImGuiComboFlags_.ImGuiComboFlags_HeightMask_;
+                    mComboBox.WinFlags = ImGuiWindowFlags_.ImGuiWindowFlags_Popup
+                                       | ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar
+                                       | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings
+                                       | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove;
+                    mComboBox.Width = ImGuiAPI.GetColumnWidth(colIdx) - snapSize.X - 8 - 160;
+                    if (mComboBox.Width < 80)
+                        mComboBox.Width = 80;
+                    mComboBox.Name = $"##{info.Name}_combo_{index}";
+                    mComboBox.PreviewValue = preViewStr;
+
+                    var contentBrowserSize = new Vector2(500, 600);
+                    ImGuiAPI.SetNextWindowSize(in contentBrowserSize, ImGuiCond_.ImGuiCond_Appearing);
+
+                    // 共享的 ContentBrowser 在每次绘制前按"当前正在编辑的元素"刷一次 ext 和清空选中态。
+                    mContentBrowser.ExtNames = FilterExts;
+                    mContentBrowser.MacrossBase = MacrossType != null ? Rtti.TtTypeDesc.TypeOf(MacrossType) : null;
+                    mContentBrowser.ShaderType = ShaderType;
+                    mContentBrowser.SelectedAssets.Clear();
+                    mActiveEditingIndex = index;
+
+                    mComboBox.OnDraw(in drawList, in anyPt);
+
+                    if (mActiveEditingIndex == index &&
+                        mContentBrowser.SelectedAssets.Count > 0 &&
+                        mContentBrowser.SelectedAssets[0].GetAssetName() != name)
+                    {
+                        list[index] = mContentBrowser.SelectedAssets[0].GetAssetName();
+                        listMutated = true;
+                    }
+                }
+
+                // 行末按钮组：F/<//-/+/X
+                ImGuiAPI.SameLine(0, 8);
+                var btnSz = new Vector2(0, 0);
+                if (info.Readonly)
+                {
+                    Vector4 ro = new Vector4(0.5f, 0.5f, 0.5f, 1.0f);
+                    ImGuiAPI.TextColored(in ro, "readonly");
+                }
+                else
+                {
+                    if (ImGuiAPI.Button("F", in btnSz))
+                    {
+                        EGui.Controls.TtContentBrowser.GlobalFocusAsset = list[index] as RName;
+                    }
+                    ImGuiAPI.SameLine(0, 4);
+                    if (ImGuiAPI.Button("<", in btnSz))
+                    {
+                        var picked = EGui.Controls.TtContentBrowser.GlobalSelectedAsset?.GetAssetName();
+                        if (picked != list[index] as RName)
+                        {
+                            list[index] = picked;
+                            listMutated = true;
+                        }
+                    }
+                    ImGuiAPI.SameLine(0, 4);
+                    if (ImGuiAPI.Button("-", in btnSz))
+                    {
+                        if (list[index] != null)
+                        {
+                            list[index] = null;
+                            listMutated = true;
+                        }
+                    }
+                    // 列表长度型操作：返回 true 让 OnDraw break，避免本帧后续元素下标错乱。
+                    if (AllowAdd)
+                    {
+                        ImGuiAPI.SameLine(0, 12);
+                        if (ImGuiAPI.Button("+", in btnSz))
+                        {
+                            list.Insert(index + 1, null);
+                            listMutated = true;
+                        }
+                    }
+                    if (AllowRemove)
+                    {
+                        ImGuiAPI.SameLine(0, 4);
+                        if (ImGuiAPI.Button("X", in btnSz))
+                        {
+                            list.RemoveAt(index);
+                            listMutated = true;
+                        }
+                    }
+                }
+
+                ImGuiAPI.EndGroup();
+                ImGuiAPI.PopID();
+
+                return listMutated;
+            }
+        }
         public class TtRNameStats
         {
             public uint NameUniqueIdAllocator = 0;

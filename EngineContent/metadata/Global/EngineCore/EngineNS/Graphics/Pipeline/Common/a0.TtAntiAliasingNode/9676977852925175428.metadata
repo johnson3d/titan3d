@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_9676977852925175428 Type="EngineNS.Graphics.Pipeline.Common.TtAntiAliasingNode@EngineCore">
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <OutputScaleFactor Type="System.Single@Unknown" Order="0" />
+  <TypeAA Type="EngineNS.Graphics.Pipeline.Common.TtAntiAliasingNode.ETypeAA@EngineCore" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_9676977852925175428>

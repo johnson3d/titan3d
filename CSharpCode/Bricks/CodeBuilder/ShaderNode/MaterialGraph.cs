@@ -280,7 +280,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         {
 
         }
-        private void NodeOnLinkedFrom(TtNodeBase node, PinIn iPin, TtNodeBase OutNode, PinOut oPin)
+        private void NodeOnLinkedFrom(TtNodeBase node, PinIn iPin, TtNodeBase OutNode, PinOut oPin, TtPinLinker linker)
         {
             var funcGraph = ParentGraph as TtMaterialGraphBase;
             if (funcGraph == null || oPin.LinkDesc == null || iPin.LinkDesc == null)

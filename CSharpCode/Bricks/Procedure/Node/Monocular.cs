@@ -30,9 +30,9 @@ namespace EngineNS.Bricks.Procedure.Node
             AddOutput(ResultPin, "Result", GetResultDesc());
         }
 
-        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin, TtPinLinker linker)
         {
-            base.OnLinkedFrom(iPin, OutNode, oPin);
+            base.OnLinkedFrom(iPin, OutNode, oPin, linker);
         }
 
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
@@ -81,9 +81,9 @@ namespace EngineNS.Bricks.Procedure.Node
             //base.IsMatchLinkedPin(input, output);
             return true;
         }
-        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin, TtPinLinker linker)
         {
-            base.OnLinkedFrom(iPin, OutNode, oPin);
+            base.OnLinkedFrom(iPin, OutNode, oPin, linker);
 
             var input = oPin.Tag as UBufferCreator;
             var output = ResultPin.Tag as UBufferCreator;

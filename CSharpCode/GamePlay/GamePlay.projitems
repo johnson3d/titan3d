@@ -36,6 +36,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Scene\BezierSplineNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\GridNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\MeshNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\PrimitiveMeshNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\Node_Editor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\SceneCapture.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\ScenePartitionNode.cs" />

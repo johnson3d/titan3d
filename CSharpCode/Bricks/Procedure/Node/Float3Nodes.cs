@@ -440,7 +440,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return true;
         }
-        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin, TtPinLinker linker)
         {
             if (iPin.LinkDesc.CanLinks.Contains("Value"))
             {

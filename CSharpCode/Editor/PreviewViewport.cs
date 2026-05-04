@@ -100,6 +100,13 @@ namespace EngineNS.Editor
 
             await ReCreateInteractiveModes();
 
+            // ReCreateInteractiveModes 沿继承链收集 mode, 因为基类 TtWorldViewportSlate
+            // 自己也注册了 TtWorldViewportInteractiveMode, 所以 InteractiveModes 列表里
+            // 同时有它和 TtPreviewViewport 自己注册的 TtPreviewViewportInteractiveMode;
+            // 而 ReCreateInteractiveModes 默认把列表最后一个设为 CurrentIntercativeMode
+            // (顺序不可控)。这里显式把缺省切回 PreviewViewport 自己的那个。
+            SetDefaultInteractiveMode<TtPreviewViewportInteractiveMode>();
+
             IsInlitialized = true;
             StartTime = System.DateTime.Now;
             HasAssetSnap = IO.TtFileManager.FileExists(PreviewAsset.Address + ".snap");

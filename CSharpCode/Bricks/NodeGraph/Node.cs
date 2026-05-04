@@ -723,25 +723,25 @@ namespace EngineNS.Bricks.NodeGraph
         {
             OnShowPinMenuAction?.Invoke(this, pin);
         }
-        public Action<TtNodeBase, UPinLinker> OnRemoveLinkerAction;
-        public virtual void OnRemoveLinker(UPinLinker linker)
+        public Action<TtNodeBase, TtPinLinker> OnRemoveLinkerAction;
+        public virtual void OnRemoveLinker(TtPinLinker linker)
         {
             OnRemoveLinkerAction?.Invoke(this, linker);
         }
-        public Action<TtNodeBase, UPinLinker> OnLoadLinkerAction;
-        public virtual void OnLoadLinker(UPinLinker linker)
+        public Action<TtNodeBase, TtPinLinker> OnLoadLinkerAction;
+        public virtual void OnLoadLinker(TtPinLinker linker)
         {
             OnLoadLinkerAction?.Invoke(this, linker);
         }
-        public Action<TtNodeBase, PinOut, TtNodeBase, PinIn> OnLinkedToAction;
-        public virtual void OnLinkedTo(PinOut oPin, TtNodeBase InNode, PinIn iPin)
+        public Action<TtNodeBase, PinOut, TtNodeBase, PinIn, TtPinLinker> OnLinkedToAction;
+        public virtual void OnLinkedTo(PinOut oPin, TtNodeBase InNode, PinIn iPin, TtPinLinker linker)
         {
-            OnLinkedToAction?.Invoke(this, oPin, InNode, iPin);
+            OnLinkedToAction?.Invoke(this, oPin, InNode, iPin, linker);
         }
-        public Action<TtNodeBase, PinIn, TtNodeBase, PinOut> OnLinkedFromAction;
-        public virtual void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
+        public Action<TtNodeBase, PinIn, TtNodeBase, PinOut, TtPinLinker> OnLinkedFromAction;
+        public virtual void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin, TtPinLinker linker)
         {
-            OnLinkedFromAction?.Invoke(this, iPin, OutNode, oPin);
+            OnLinkedFromAction?.Invoke(this, iPin, OutNode, oPin, linker);
         }
         public Action<TtNodeBase> OnDoubleClickAction;
         public virtual void OnDoubleClick() 
@@ -812,7 +812,7 @@ namespace EngineNS.Bricks.NodeGraph
         }
 
         #endregion
-        public delegate bool FOnNodeVisit(NodePin iPin, UPinLinker linker);
+        public delegate bool FOnNodeVisit(NodePin iPin, TtPinLinker linker);
         public bool TourNodeTree(FOnNodeVisit visit)
         {
             foreach (var i in Outputs)

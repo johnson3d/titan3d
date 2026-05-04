@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2327973559499760919 Type="EngineNS.Graphics.Pipeline.Common.TtGetPrevFrameNode@EngineCore">
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <PrevNodeName Type="System.String@Unknown" Order="0" />
+</Hash_2327973559499760919>

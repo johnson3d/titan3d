@@ -597,7 +597,7 @@ namespace EngineNS.Bricks.NodeGraph
             ImGuiAPI.SetWindowFontScale(1.0f);
             style->FramePadding = framePaddingStore;
         }
-        public void DrawLinker(ImDrawList cmdlist, UPinLinker linker)
+        public void DrawLinker(ImDrawList cmdlist, TtPinLinker linker)
         {
             var styles = UNodeGraphStyles.DefaultStyles;
             var p1_v = linker.OutPin.HotPosition + linker.OutPin.HotSize * 0.5f;
@@ -635,6 +635,10 @@ namespace EngineNS.Bricks.NodeGraph
                 }
                 else
                 {
+                    if (linker.ShowState == TtPinLinker.EShowState.Hide)
+                    {
+                        return;
+                    }
                     lineColor = linker.OutPin.LinkDesc.LineColor;
                     thinkness = linker.OutPin.LinkDesc.LineThinkness;
                 }

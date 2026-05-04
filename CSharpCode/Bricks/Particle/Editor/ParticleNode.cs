@@ -12,7 +12,7 @@ namespace EngineNS.Bricks.Particle.Editor
     public partial class TtParticleNode : NodeGraph.TtNodeBase
     {
         internal TtParticleEditor NebulaEditor;
-        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin, TtPinLinker linker)
         {
             var funcGraph = ParentGraph as TtParticleGraph;
             if (funcGraph == null || oPin.LinkDesc == null || iPin.LinkDesc == null)

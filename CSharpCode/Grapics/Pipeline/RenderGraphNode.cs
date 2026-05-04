@@ -1,5 +1,5 @@
+using EngineNS.Bricks.NodeGraph;
 using EngineNS.Graphics.Pipeline.Common;
-using NPOI.Util;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,7 +17,7 @@ namespace EngineNS.Graphics.Pipeline
             Output,
             InputOutput,
         }
-        public string Name { get; private set; }
+        public string Name { get; internal set; }
         public EPinType PinType { get; private set; }
         public string LinkType { get; set; } = "GraphNode";//如果需要特定Type才能链接，那就再PinOut和PinIn上做一个LinkType的匹配
         public bool IsAutoResize { get; set; } = true;
@@ -107,6 +107,7 @@ namespace EngineNS.Graphics.Pipeline
         {
 
         }
+        public Bricks.RenderPolicyEditor.TtPolicyNode BindingPolicyNode { get; internal set; } = null;
         internal int mMaxLeafDistance = 0;
         [Category("Option")]
         public int MaxLeafDistance
@@ -140,7 +141,9 @@ namespace EngineNS.Graphics.Pipeline
                 //}
             }
         }
-        public Guid UniqueId { get; } = Guid.NewGuid();
+        [Category("Option")]
+        [Rtti.Meta("")]
+        public Guid UniqueId { get; set; } = Guid.NewGuid();
         public virtual Color4b GetTileColor()
         {
             return Color4b.FromRgb(255, 0, 255);
@@ -283,6 +286,20 @@ namespace EngineNS.Graphics.Pipeline
         {
 
         }
+        #region UI Action
+        public virtual void OnUI_LinkedTo(PinOut oPin, TtNodeBase InNode, PinIn iPin, TtPinLinker linker)
+        {
+
+        }
+        public virtual void OnUI_LinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin, TtPinLinker linker)
+        {
+
+        }
+        public virtual void OnUI_RemoveLinker(TtPinLinker linker)
+        {
+
+        }
+        #endregion
         public virtual void OnResize(TtRenderPolicy policy, float x, float y)
         {
 

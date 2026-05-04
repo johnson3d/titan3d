@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="08d112e925d67122483985d07ebbfc2e7c24e404abd9e444e6d1bb59b80e5288" />
+      <Path Type="System.String@Unknown" Value="cornell.scene/cornell.scene" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="c607ed7617318d63c5621ff0cceda0b983ba298aa35b106659af717c7a7bd317" />
+      <Path Type="System.String@Unknown" Value="cornell.scene/class_graph.dat" />
+    </e_1>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="7a79697b-5657-4cd5-adb2-83291f549096" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/gi/cornell/cornell.scene,7a79697b-5657-4cd5-adb2-83291f549096" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtScene&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="4">
+    <e_0 Value="Game,tutorials/gi/cornell/red.ums,59280401-e2c4-49c9-9699-a3776984ce7a" />
+    <e_1 Value="Engine,material/gridline.material,fe431749-ed31-45b1-93d8-34462bd00922" />
+    <e_2 Value="Engine,mesh/base/box.vms,5355ee7f-de0b-4e29-bb7d-ed4ca9d6b0cf" />
+    <e_3 Value="Engine,material/pbr.material,95d0c6ba-5ec5-497b-8738-03c2d2965cba" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
+</Root>

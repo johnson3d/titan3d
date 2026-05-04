@@ -1,6 +1,9 @@
 #ifndef _HZB_H_
 #define _HZB_H_
 #include "../../Inc/GlobalDefine.cginc"
+// Hzb 现在存的是 view-space linear z (R = min, G = max), 单调"越远越大",
+// 不再受 USE_INVERSE_Z 影响. linearize 复用 cbPerCamera.LinearFromDepth.
+#include "../../CBuffer/VarBase_PerCamera.cginc"
 
 Texture2D<float> DepthBuffer;
 
@@ -9,6 +12,17 @@ VK_IMAGE(rg16f)
 RWTexture2D<float2> SrcBuffer;
 VK_IMAGE(rg16f)
 RWTexture2D<float2> DstBuffer;
+
+// 把原始 NDC depth 转成 view-space linear z. cbPerCamera.LinearFromDepth 内部
+// 已分别处理 USE_INVERSE_Z 0/1, 这里无需 #if 分支.
+//
+// 远平面 / 天空像素 (USE_INVERSE_Z=1 时 NDC z=0; 标准 z 时 NDC z=1) 经过
+// LinearFromDepth 会得到接近 ZFar 的值, 在 hi-z 比较中等价于"无穷远", 不会污染
+// min/max 语义.
+inline float HzbLinearizeDepth(float ndcZ)
+{
+    return LinearFromDepth(ndcZ);
+}
 
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_Setup(uint3 id : SV_DispatchThreadID,
@@ -20,23 +34,17 @@ void CS_Setup(uint3 id : SV_DispatchThreadID,
 	DstBuffer.GetDimensions(texSize.x, texSize.y);
 	if (any(id.xy >= texSize))
 		return;
-    //uint2 dsSize;
-    //DepthBuffer.GetDimensions(dsSize.x, dsSize.y);
-    //if (any(id.xy * 2 + 1 >= dsSize))
-    //    return;
-	
-    float d1 = DepthBuffer[id.xy * 2].r;
-    float d2 = DepthBuffer[id.xy * 2 + int2(0, 1)].r;
-    float d3 = DepthBuffer[id.xy * 2 + int2(1, 0)].r;
-    float d4 = DepthBuffer[id.xy * 2 + int2(1, 1)].r;
-    //float d1 = DepthBuffer.Load(0, 0).r;
-    //float d2 = d1;
-    //float d3 = d1;
-    //float d4 = d1;
-	float2 value;
-	value.r = min(min(d1, d2), min(d3, d4));
-	value.g = max(max(d1, d2), max(d3, d4));
-	DstBuffer[id.xy] = value;
+
+    // mip0 = depth/2 (整除, 由 C# 端 OnResize 保证), 因此 id*2 + (1,1) 不会越界.
+    float d1 = HzbLinearizeDepth(DepthBuffer[id.xy * 2].r);
+    float d2 = HzbLinearizeDepth(DepthBuffer[id.xy * 2 + int2(0, 1)].r);
+    float d3 = HzbLinearizeDepth(DepthBuffer[id.xy * 2 + int2(1, 0)].r);
+    float d4 = HzbLinearizeDepth(DepthBuffer[id.xy * 2 + int2(1, 1)].r);
+
+    float2 value;
+    value.r = min(min(d1, d2), min(d3, d4));
+    value.g = max(max(d1, d2), max(d3, d4));
+    DstBuffer[id.xy] = value;
 }
 
 [numthreads(DispatchX, DispatchY, DispatchZ)]
@@ -50,20 +58,24 @@ void CS_DownSample(uint3 id : SV_DispatchThreadID,
 	if (any(id.xy >= texSize))
 		return;
 
-	float d1 = SrcBuffer[id.xy * 2].r;
-	float d2 = d1;
-	if (texSize.x > 1)
-		d2 = SrcBuffer[id.xy * 2 + int2(0, 1)].r;
-	float d3 = d1;
-	if (texSize.y > 1)
-		d3 = SrcBuffer[id.xy * 2 + int2(1, 0)].r;
-	float d4 = d1;
-	if (texSize.x > 1 && texSize.y > 1)
-		d4 = SrcBuffer[id.xy * 2 + int2(1, 1)].r;
-	float2 value;
-	value.r = min(min(d1, d2), min(d3, d4));
-	value.g = max(max(d1, d2), max(d3, d4));
-	DstBuffer[id.xy] = value;
+    // src 尺寸 = dst 尺寸 * 2 (mip 链每级减半的物理保证, 由 C# 端 OnResize 控制).
+    // 因此 dst 任一像素的 4 个 src 邻居 (id*2, id*2+(0,1), id*2+(1,0), id*2+(1,1))
+    // 始终在 src 范围内, 无需边界判断. 这里同时修正了旧代码"用 dst 尺寸判 src 边界"
+    // 的 off-by-one bug (旧代码 if (texSize.x > 1) 判的是 dst 尺寸, 当 dst.x>1 时
+    // src.x>=4 必然成立, 但这条 if 在 dst.x==1 时会漏读应有的邻居 -> max 偏小).
+    //
+    // 取 R(min) 的 min 和 G(max) 的 max, 形成 conservative 的更粗 mip.
+    // (注意每个 src 像素的 R/G 已经是 2x2 邻域的 min/max, 不能只读 R 用 min(R) 也
+    // 不能只读 G 用 max(G), 必须 R 走 min 链, G 走 max 链.)
+    float2 s1 = SrcBuffer[id.xy * 2];
+    float2 s2 = SrcBuffer[id.xy * 2 + int2(0, 1)];
+    float2 s3 = SrcBuffer[id.xy * 2 + int2(1, 0)];
+    float2 s4 = SrcBuffer[id.xy * 2 + int2(1, 1)];
+
+    float2 value;
+    value.r = min(min(s1.r, s2.r), min(s3.r, s4.r));
+    value.g = max(max(s1.g, s2.g), max(s3.g, s4.g));
+    DstBuffer[id.xy] = value;
 }
 
 #endif //#ifndef _HZB_H_

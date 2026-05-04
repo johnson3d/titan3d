@@ -67,77 +67,22 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         #endregion
 
-
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-        public UMobileTranslucentNode TranslucentNode = new UMobileTranslucentNode();
-        public UFinalCopyNode FinalCopyNode = new UFinalCopyNode();
-在此之后:
-        public TtMobileTranslucentNode TranslucentNode = new UMobileTranslucentNode();
-        public UFinalCopyNode FinalCopyNode = new UFinalCopyNode();
-*/
         public TtMobileTranslucentNode TranslucentNode = new TtMobileTranslucentNode();
 
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-        public UFinalCopyNode FinalCopyNode = new UFinalCopyNode();
-在此之后:
-        public TtFinalCopyNode FinalCopyNode = new UFinalCopyNode();
-*/
         public TtFinalCopyNode FinalCopyNode = new TtFinalCopyNode();
 
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-        public Common.UHitproxyNode HitproxyNode = new Common.UHitproxyNode();
-        public Common.UPickedNode PickedNode = new Common.UPickedNode();
-在此之后:
-        public Common.TtHitproxyNode HitproxyNode = new Common.UHitproxyNode();
-        public Common.UPickedNode PickedNode = new Common.UPickedNode();
-*/
         public Common.TtHitproxyNode HitproxyNode = new Common.TtHitproxyNode();
-        public Common.UPickedNode PickedNode = new Common.UPickedNode();
-        public Common.UPickBlurNode PickBlurNode = new Common.UPickBlurNode();
-        public Common.UPickHollowNode PickHollowNode = new Common.UPickHollowNode();
 
+        public Common.TtPickedNode PickedNode = new Common.TtPickedNode();
+        public Common.TtPickBlurNode PickBlurNode = new Common.TtPickBlurNode();
+        public Common.TtPickHollowNode PickHollowNode = new Common.TtPickHollowNode();
 
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-        public Common.UGpuSceneNode GpuSceneNode = new Common.UGpuSceneNode();
-        public Common.UScreenTilingNode ScreenTilingNode = new Common.UScreenTilingNode();
-在此之后:
-        public Common.TtGpuSceneNode GpuSceneNode = new Common.UGpuSceneNode();
-        public Common.UScreenTilingNode ScreenTilingNode = new Common.UScreenTilingNode();
-*/
         public Common.TtGpuSceneNode GpuSceneNode = new Common.TtGpuSceneNode();
 
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-        public Common.UScreenTilingNode ScreenTilingNode = new Common.UScreenTilingNode();
-在此之后:
-        public Common.TtScreenTilingNode ScreenTilingNode = new Common.UScreenTilingNode();
-*/
         public Common.TtScreenTilingNode ScreenTilingNode = new Common.TtScreenTilingNode();
 
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-        public Common.UHzbNode HzbNode = new Common.UHzbNode();
-        public Common.UImageAssetNode EnvMapNode { get; set; } = new Common.UImageAssetNode();
-在此之后:
-        public Common.TtHzbNode HzbNode = new Common.UHzbNode();
-        public Common.UImageAssetNode EnvMapNode { get; set; } = new Common.UImageAssetNode();
-*/
         public Common.TtHzbNode HzbNode = new Common.TtHzbNode();
 
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-        public Common.UImageAssetNode EnvMapNode { get; set; } = new Common.UImageAssetNode();
-        public Common.UImageAssetNode VignetteNode { get; set; } = new Common.UImageAssetNode();
-        //for test
-在此之后:
-        public Common.TtImageAssetNode EnvMapNode { get; set; } = new Common.UImageAssetNode();
-        public Common.TtImageAssetNode VignetteNode { get; set; } = new Common.UImageAssetNode();
-        //for test
-*/
         public Common.TtImageAssetNode EnvMapNode { get; set; } = new Common.TtImageAssetNode();
         public Common.TtImageAssetNode VignetteNode { get; set; } = new Common.TtImageAssetNode();
         //for test

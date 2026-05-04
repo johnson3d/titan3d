@@ -47,9 +47,9 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return base.CanLinkFrom(iPin, OutNode, oPin);
         }
-        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin, TtPinLinker linker)
         {
-            base.OnLinkedFrom(iPin, OutNode, oPin);
+            base.OnLinkedFrom(iPin, OutNode, oPin, linker);
 
             if (iPin == LeftPin)
             {

@@ -111,12 +111,24 @@ namespace EngineNS.Editor.Controller
                         }
                         else
                         {
+                            // 原行为: 仅在 step < |pos-lookAt| 时把相机往 lookAt 方向推一段,
+                            // step 超过剩余距离时整段操作静默丢弃 -> 表现为"滚到逼近 lookAt 就再也滚不动"。
+                            // 修复: step 仍小于剩余距离时按原方式只推相机; 一旦达到/超过剩余距离,
+                            // 自动 fallback 成飞行模式 (同步把 lookAt 也往前推), 让滚轮可以
+                            // 越过原 lookAt 点继续前进, 同时保持 |pos-lookAt| 不退化为 0。
                             var len = dir.Length();
+                            dir.Normalize();
                             if (step < len)
                             {
-                                dir.Normalize();
                                 var newPos = pos - dir * step;
                                 Camera.mCoreObject.LookAtLH(in newPos, in lookAt, in EngineNS.Vector3.UnitY);
+                            }
+                            else
+                            {
+                                var temp = dir * step;
+                                var eye = pos - temp;
+                                var at = lookAt - temp;
+                                Camera.mCoreObject.LookAtLH(in eye, in at, in EngineNS.Vector3.UnitY);
                             }
                         }
                     }

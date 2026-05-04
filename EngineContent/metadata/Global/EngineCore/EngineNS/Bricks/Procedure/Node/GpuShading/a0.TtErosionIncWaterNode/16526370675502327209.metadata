@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_16526370675502327209 Type="EngineNS.Bricks.Procedure.Node.GpuShading.TtErosionIncWaterNode@EngineCore">
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <Rain Type="EngineNS.RName@EngineCore" Order="0" />
+  <RainScalar Type="System.Single@Unknown" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_16526370675502327209>

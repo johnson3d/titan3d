@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.RenderPolicyEditor.TtRenderPolicyAssetAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="31fd5322-b299-4ded-a0ce-d7a4b56b298a" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,graphics/material_to_texture.rpolicy,31fd5322-b299-4ded-a0ce-d7a4b56b298a" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.RenderPolicyEditor.TtRenderPolicyAsset&#xA;" />

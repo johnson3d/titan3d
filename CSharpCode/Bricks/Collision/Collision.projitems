@@ -12,6 +12,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)DDA\HierarchicalVoxelSpace3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DDA\VoxelSpace3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Embree\Embree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BVH\TtDynamicBVH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BVH\TtBVHDebugNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Octree\BoundsOctree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Octree\BoundsOctreeNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Octree\PointOctree.cs" />

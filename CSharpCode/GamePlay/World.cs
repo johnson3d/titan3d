@@ -1,7 +1,10 @@
-﻿using EngineNS.Bricks.WorldSimulator;
+﻿using Assimp;
+using EngineNS.Bricks.WorldSimulator;
 using EngineNS.EGui.Slate;
 using EngineNS.GamePlay.Scene;
+using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline;
+using EngineNS.Graphics.Pipeline.Shader;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -211,26 +214,42 @@ namespace EngineNS.GamePlay
             }
             public NxRHI.TtTransientBuffer TransientVB = null;
             public NxRHI.TtTransientBuffer TransientIB = null;
-            public void AddAABB(in Aabb aabb, in Color4f color, in FTransform transform)
+            public TtRenderMesh CreateAABB(in Aabb aabb, in Color4f color, in FTransform transform, TtMaterial material, NxRHI.TtTransientBuffer sharedVB, NxRHI.TtTransientBuffer sharedIB)
             {
                 BoundingBox box = new BoundingBox(-aabb.Extent, aabb.Extent);
                 var meshProvider = Graphics.Mesh.TtMeshDataProvider.MakeBox(in box, color.ToArgb());
-                meshProvider.TransientVB = TransientVB;
-                meshProvider.TransientIB = TransientIB;
-                var mesh = meshProvider.ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
+                meshProvider.TransientVB = sharedVB;
+                meshProvider.TransientIB = sharedIB;
+                if (material == null)
+                {
+                    material = TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria;
+                }
+                var mesh = meshProvider.ToDrawMesh(material);
                 var localTrans = FTransform.CreateTransform(aabb.Minimum, in Vector3.One, in Quaternion.Identity);
                 FTransform trans;
                 FTransform.Multiply(out trans, in transform, in localTrans);
                 mesh.SetWorldTransform(in trans, this.World, true);
-                AddVisibleMesh(mesh);
+                return mesh;
             }
-            public void AddBoundingBox(in BoundingBox box, in Color4f color)
+            public TtRenderMesh AddAABB(in Aabb aabb, in Color4f color, in FTransform transform)
             {
-                var meshProvider = Graphics.Mesh.TtMeshDataProvider.MakeBox(in box, color.ToArgb());
-                var mesh = meshProvider.ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
-                mesh.SetWorldTransform(in FTransform.Identity, this.World, true);
+                var mesh = CreateAABB(in aabb, in color, in transform, null, TransientVB, TransientIB);
                 AddVisibleMesh(mesh);
+                return mesh;
             }
+            public TtRenderMesh AddAABB(in Aabb aabb, in Color4f color, in FTransform transform, TtMaterial material)
+            {
+                var mesh = CreateAABB(in aabb, in color, in transform, material, TransientVB, TransientIB);
+                AddVisibleMesh(mesh);
+                return mesh;
+            }
+            //public void AddBoundingBox(in BoundingBox box, in Color4f color)
+            //{
+            //    var meshProvider = Graphics.Mesh.TtMeshDataProvider.MakeBox(in box, color.ToArgb());
+            //    var mesh = meshProvider.ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
+            //    mesh.SetWorldTransform(in FTransform.Identity, this.World, true);
+            //    AddVisibleMesh(mesh);
+            //}
         }
         [ThreadStatic]
         private static Profiler.TimeScope mScopeGatherVisibleMeshes;

@@ -2039,6 +2039,14 @@ public:
 	}
 
 	static bool CollapsingHeader_SpanAllColumns(const char* label, ImGuiTreeNodeFlags_ flags);
+	// 返回当前是否处于一个活跃的 table 上下文中（即 g.CurrentTable != nullptr）。
+	// 用于调用方在 popup / combo 等"会切换当前窗口/清空 CurrentTable"的场景下做守卫，
+	// 避免在 null table 上调 TableNextRow / TableSetColumnIndex 等 API 导致 crash。
+	static bool IsInTable()
+	{
+		ImGuiContext& g = *GImGui;
+		return g.CurrentTable != nullptr;
+	}
 	static void TableNextRow(const ImGuiTableRowData* rowData);
 	static void TableNextRow_FirstColumn(const ImGuiTableRowData* rowData);
 	//static void TableSetCellPaddingY(float value)

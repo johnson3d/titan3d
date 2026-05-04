@@ -163,18 +163,6 @@ namespace EngineNS.Editor
             public TtSemaphore FinishedSemaphore;
         }
 
-        readonly object mLock = new object();
-        readonly Queue<FPendingItem> mPendingItems = new Queue<FPendingItem>();
-        bool mWorkerRunning = false;
-
-        /// <summary>
-        /// 当前队列中等待处理的请求数 (不含正在处理的那一个)。
-        /// </summary>
-        public int PendingCount
-        {
-            get { lock (mLock) { return mPendingItems.Count; } }
-        }
-
         /// <summary>
         /// 把 AutoGenSnapshot 请求加入串行队列, await 直到该资产真正被处理完成。
         /// 同一时刻全引擎只会有一个 AutoGenSnapshot 在执行, 完成后才会处理下一个。
@@ -185,58 +173,20 @@ namespace EngineNS.Editor
                 return false;
 
             var item = new FPendingItem { Meta = assetMeta, FinishedSemaphore = TtSemaphore.CreateSemaphore(1) };
-            lock (mLock)
+            
+            TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd((TtRCmdQueue queue, ref FRCmdInfo info) =>
             {
-                mPendingItems.Enqueue(item);
-            }
-            EnsureWorker();
-
-            await item.FinishedSemaphore.Await();
-            item.FinishedSemaphore.FreeSemaphore();
-            return item.Result;
-        }
-
-        void EnsureWorker()
-        {
-            lock (mLock)
-            {
-                if (mWorkerRunning)
-                    return;
-                mWorkerRunning = true;
-            }
-
-            // 在 AsyncEditor 上启动 worker 协程。worker 内部会一直处理直到队列清空。
-            // 注意: 返回的 TtTask 必须通过 AddWaitTask 注册到 TaskCollector,
-            //       否则 TtTaskData 无法归还对象池, 见 documents/coding/CodingGuidelines.md §2.2
-            TtEngine.Instance.EventPoster.RunOn((Thread.Async.FPostEvent<bool>)((state) =>
-            {
-                WorkerLoop();
-                return true;
-            }), Thread.Async.EAsyncTarget.AsyncEditor);
-        }
-
-        void WorkerLoop()
-        {
-            while (true)
-            {
-                FPendingItem item;
-                lock (mLock)
-                {
-                    if (mPendingItems.Count == 0)
-                    {
-                        mWorkerRunning = false;
-                        return;
-                    }
-                    item = mPendingItems.Dequeue();
-                }
-
                 item.Meta.AutoGenSnapshot().AddWaitTask((task) =>
                 {
                     var snapshotTask = (TtTask<bool>)task;
                     item.Result = snapshotTask.DirectResult;
                     item.FinishedSemaphore.Release();
                 });
-            }
+            }, "GenSnapshot");
+
+            await item.FinishedSemaphore.Await();
+            item.FinishedSemaphore.FreeSemaphore();
+            return item.Result;
         }
     }
 

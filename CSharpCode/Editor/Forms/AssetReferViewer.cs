@@ -61,7 +61,7 @@ namespace EngineNS.Editor.Forms
             {
                 if (AMeta != null)
                 {
-                    var linkers = new List<UPinLinker>();
+                    var linkers = new List<TtPinLinker>();
                     this.ParentGraph.FindInLinker(InPin, linkers);
                     var pos = Position;
                     pos.X -= 600;
@@ -102,7 +102,7 @@ namespace EngineNS.Editor.Forms
             {
                 if (AMeta != null)
                 {
-                    var linkers = new List<UPinLinker>();
+                    var linkers = new List<TtPinLinker>();
                     this.ParentGraph.FindOutLinker(OutPin, linkers);
                     var pos = Position;
                     pos.X += 600;

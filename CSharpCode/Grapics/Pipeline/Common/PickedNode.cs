@@ -6,9 +6,9 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UPickSetupShading : Shader.TtGraphicsShadingEnv
+    public class TtPickSetupShading : Shader.TtGraphicsShadingEnv
     {
-        public UPickSetupShading()
+        public TtPickSetupShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/pick/pick_setup.cginc", RName.ERNameType.Engine);
         }
@@ -20,11 +20,12 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Picked", "Pick\\Picked", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
-    public class UPickedNode : TAuxRenderGraphNode<UPickedNode>
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UPickedNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UPickedNode" })]
+    public class TtPickedNode : TAuxRenderGraphNode<TtPickedNode>
     {
         public TtRenderGraphPin PickedPinOut = TtRenderGraphPin.CreateOutput("Picked", false, EPixelFormat.PXF_R16G16_FLOAT, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_RTV);
         public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D16_UNORM, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
-        public UPickedNode()
+        public TtPickedNode()
         {
             Name = "PickedNode";
         }
@@ -52,7 +53,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 PickedBuffer.SetSize(x * scaleFactor, y * scaleFactor);
         }
         public TtPickedProxiableManager PickedManager;
-        public UPickSetupShading PickedShading = null;
+        public TtPickSetupShading PickedShading = null;
         public TtGraphicsBuffers PickedBuffer { get; protected set; } = new TtGraphicsBuffers();
         public NxRHI.TtRenderPass RenderPass;
         public override TtGraphicsShadingEnv GetPassShading(TtRenderMesh.TtAtom atom = null)
@@ -62,7 +63,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public async override Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
-            PickedShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<UPickSetupShading>();
+            PickedShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtPickSetupShading>();
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             

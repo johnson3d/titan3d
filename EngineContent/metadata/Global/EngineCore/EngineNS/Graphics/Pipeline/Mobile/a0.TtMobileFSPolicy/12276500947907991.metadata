@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_12276500947907991 Type="EngineNS.Graphics.Pipeline.Mobile.TtMobileFSPolicy@EngineCore">
+  <DisableHDR Type="System.Boolean@Unknown" Order="0" />
+  <ShadowMode Type="EngineNS.Graphics.Pipeline.EShadowMode@EngineCore" Order="0" />
+  <TypeFog Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog@EngineCore" Order="0" />
+</Hash_12276500947907991>

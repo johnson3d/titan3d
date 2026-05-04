@@ -219,7 +219,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
 
-            var links = new List<UPinLinker>();
+            var links = new List<TtPinLinker>();
             data.NodeGraph.FindOutLinker(AfterExec, links);
             foreach (var i in links)
             {
@@ -1735,7 +1735,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //MacrossEditor.NodePropGrid.SingleTarget = null;
         }
         bool PopKlassSelector = false;
-        public override bool OnLinkingUp(ULinkingLine linking, TtNodeBase pressNode)
+        public override bool OnLinkingUp(TtLinkingLine linking, TtNodeBase pressNode)
         {
             if (linking.StartPin == null)
             {
@@ -1875,7 +1875,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //    base.OnBeforeDrawMenu(styles);
             //}
         }
-        private void NodeOnLinkedTo(TtNodeBase node, PinOut oPin, TtNodeBase InNode, PinIn iPin)
+        private void NodeOnLinkedTo(TtNodeBase node, PinOut oPin, TtNodeBase InNode, PinIn iPin, TtPinLinker linker)
         {
             var funcGraph = ParentGraph as UMacrossMethodGraph;
             if (funcGraph == null || oPin.LinkDesc == null || iPin.LinkDesc == null)
@@ -1889,7 +1889,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 //funcGraph.AddLink(this, oPin.Name, InNode, iPin.Name, false);
             }
         }
-        private void NodeOnLinkedFrom(TtNodeBase node, PinIn iPin, TtNodeBase OutNode, PinOut oPin)
+        private void NodeOnLinkedFrom(TtNodeBase node, PinIn iPin, TtNodeBase OutNode, PinOut oPin, TtPinLinker linker)
         {
             var funcGraph = ParentGraph as UMacrossMethodGraph;
             if (funcGraph == null || oPin.LinkDesc == null || iPin.LinkDesc == null)

@@ -158,7 +158,10 @@ namespace EngineNS.Macross
                 mInnerObject = newObj;
                 Version = TtEngine.Instance.MacrossModule.Version;
                 InnerObjectName = Name;
-                mInnerObject.MacrossGetter = this;
+                if (mInnerObject != null)
+                {
+                    mInnerObject.MacrossGetter = this;
+                }
             }
             return mInnerObject;
         }

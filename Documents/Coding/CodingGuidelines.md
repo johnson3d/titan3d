@@ -461,13 +461,13 @@ Texture2D<float4> BindlessAlbedo[64] DX_AUTOBIND; // 限制了 ResourceCount=64
 - `CSharpCode/NxRHI/Drawcall.cs: TtComputeDraw / TtGraphicDraw / TtRayTracingDraw`
   — 三种 drawcall 都提供 `CreateBindless(string name)`.
 
-#### 1.4.8 Bindless 与 ReSTIR Hybrid GI 的前置依赖关系 (重点上下文)
+#### 1.4.8 Bindless 与 GI 双轨制路线决策 (重点上下文)
 
 **这是本仓库当前阶段把 Bindless 列为引擎重点升级方向的根本原因. 任何接手
-ReSTIR / Hybrid GI / RT 反射 / RT AO 类工作的同学必须先理解这个上下文,
+ReSTIR / TtAtlas GI / RT 反射 / RT AO 类工作的同学必须先理解这个上下文,
 否则会重复设计出"绕开 bindless 的临时方案", 浪费迭代成本.**
 
-**问题背景 (当前 ReSTIR GI HW RT 路径的根本缺陷)**:
+##### 1.4.8.1 问题背景: 当前 ReSTIR GI HW RT 路径的根本缺陷
 
 `enginecontent/Shaders/GI/ReSTIR/ReSTIRInitialSampling.compute` 的 HW RT
 分支在拿到 ray hit 之后, **没有真正在 hit 点重做 lighting**, 而是把 hit 的
@@ -476,8 +476,7 @@ ReSTIR / Hybrid GI / RT 反射 / RT AO 类工作的同学必须先理解这个�
 取色"的方案有 4 个无法回避的失败模式:
 
 1. **Hit 点投影出屏**: 摄像机左侧的墙反射应该来自摄像机右侧的物体, hit 点
-   投影到屏幕外, 取不到 PrevColor (当前 §1.4.8 上游 commit 的修法是返回
-   sky, 但这等于丢了反射).
+   投影到屏幕外, 取不到 PrevColor (当前修法是返回 sky, 但这等于丢了反射).
 2. **Hit 点被前景遮挡**: hit 点的屏幕投影位置被另一个更近的物体挡住,
    PrevColor 取到的是遮挡物的颜色, 不是 hit 点真实的颜色 (典型表现: 嘴里的
    红色 emissive 被前牙挡住, ReSTIR 取到牙的白色, 跨帧抖动产生闪烁).
@@ -487,53 +486,103 @@ ReSTIR / Hybrid GI / RT 反射 / RT AO 类工作的同学必须先理解这个�
    光照", 而不是 "在 hit 点重新做一次 direct lighting". 任何屏幕外的间接光
    贡献都丢了.
 
-**正确的解法 (业界标准)**: 在 hit 点直接重建 lighting:
+业界 (NVIDIA RTXDI / UE5 Lumen) 共同的解法是**不再依赖 PrevColor 反投影,
+而是在 hit 点本地直接获取 radiance**. 但具体怎么"在 hit 点本地获取
+radiance", 两家走了完全不同的路, 各有适用场景. TitanEngine 经过评估后
+选择**双轨制**: 两条路线**共享同一份 bindless 基础设施**, 但服务于不同
+硬件档位和不同画质目标.
 
-```
-hit -> 拿到 InstanceID + PrimitiveID + Barycentric
-    -> 查 InstanceData[InstanceID] 拿到该 instance 的 MaterialID +
-       VertexBuffer/IndexBuffer 索引
-    -> 查 IndexBuffer + VertexBuffer 重建 hit 点的 normal / uv / tangent
-    -> 用 MaterialID 索引 BindlessAlbedo[matId] / BindlessNormal[matId] /
-       BindlessRoughness[matId] / BindlessEmissive[matId] 采样材质
-    -> 在 hit 点做 direct lighting (sun shadow ray + analytical light loop)
-    -> 这个真实的 hit 点 radiance 喂给 ReSTIR reservoir
-```
+##### 1.4.8.2 双轨制路线决策 (2026-05 拍板)
 
-**为什么这个方案离开 Bindless 就做不了**:
+**轨道 A: ReSTIR Hybrid GI — 移动 / 低端 fallback 路线**
 
-- 一个场景可能有几百到几千个不同材质 (每个材质 4-8 张纹理). 传统绑定方式
-  一个 drawcall 最多绑十几张 SRV, 完全装不下整场材质表.
-- ray hit 在 wave 内不同 lane 命中不同 instance, 每个 lane 需要采样不同
-  material 的纹理. 这是 §1.4.4 NonUniformResourceIndex 的标准用例 — 没有
-  bindless + NonUniformResourceIndex, GPU 端根本无法表达 "按 ray hit 结果
-  动态选择材质" 的逻辑.
-- 替代方案 (例如 "把所有材质纹理打包成 texture array") 受 array slice 数量
-  / 分辨率必须一致 / 格式必须一致 等硬约束, 实际工程上不可行.
+- **定位**: 高端移动 GPU (Adreno 740+ / Mali-G715+ / Apple A17 Pro 起步) +
+  低端 PC GPU 的 GI 兜底方案.
+- **核心思路 (NVIDIA RTXDI 风格)**: 投 BRDF ray, hit 点直接用**简化 PBR 4
+  字段**(diffuseAlbedo / specularF0 / roughness / emissive) 重建 lighting,
+  结果存进 ReSTIR GI Reservoir, 走时空 reuse + spatial filter 降噪.
+- **硬约束 (这是 RTXDI 设计就锁定的, 不是实现妥协)**:
+  - hit 点的材质模型只支持标准 metallic-roughness PBR 4 字段
+  - 多 ShadingModel (cloth / hair / eye / SSS / clearcoat) 的 lobe 在
+    secondary hit 上**会被退化为标准 PBR**, 用户在 GI 里看不到这些 lobe
+    的特殊响应
+  - 这是该路线的本质限制, 不是 bug, 不要试图"在 ReSTIR 路径里支持
+    cloth/hair", 要支持就走轨道 B
+- **不需要离线烘焙**, 安装包零增长, 适合移动端 "开机即用".
+- **运行时显存占用固定** (主要是 reservoir buffer = 屏幕大小 × 2),
+  对移动端友好.
 
-**所以 Bindless 不是某个 nice-to-have 的优化**, 而是 ReSTIR Hybrid GI 走到
-"真·hit 点 lighting" 这一步的唯一前置基础设施. 引擎升级的优先级是:
+**轨道 B: TtAtlas GI — PC / 高端主机主力路线**
 
-1. **Phase A** (本次已交付): C# 端 `TtBindless` wrapper + 本规范 §1.4
-   完整建立, 让任何后续工作有合规可依.
-2. **Phase B** (待做, ReSTIR HW RT 改造前必须完成):
-   - 场景级 `TtSceneMaterialTable` — 单例的 `TtBindless` 实例池 (按
-     SBT_SRV / SBT_Sampler 拆表), 维护 MaterialID -> bindless slot 的
-     映射, 跨帧复用.
-   - `TtSceneMeshTable` — 同上但管 vertex/index buffer 的 SRV (供
-     ray hit 重建几何属性), 可能合并到 MaterialTable 也可能拆开.
-   - 材质资产加载/卸载 hook 同步维护 bindless 表 (§1.4.3 的 lifetime
-     反向锁约束).
-3. **Phase C** (Phase B 完成后):
-   - 改造 `ReSTIRInitialSampling.compute` 的 HW RT 分支, 用 hit 点真实
-     lighting 替代 PrevColor 屏幕反投影.
-   - 同时受益的: RT 反射 (`reflection ray hit -> shading`)、RT AO
-     (其实只需要 visibility, 不必 bindless, 但顺便走通)、未来的
-     path tracing reference renderer.
+- **定位**: PC + 高端主机的全功能 GI, **完整保留 MaterialGraph 表达力 +
+  支持任意数量的自定义 ShadingModel**.
+- **核心思路 (UE5 Lumen 风格)**: 离线/编辑期把每个 mesh 的表面投影到
+  Card Atlas (texture atlas), 在编辑期或低频更新时跑完整的 MaterialGraph
+  把材质烘焙进 atlas. RT hit 后只需要查 atlas 拿 lighting 结果, **不需要
+  在 hit shader 里重新跑 MaterialGraph**.
+- **优势**:
+  - 完整的 MaterialGraph 表达力 (用户在 graph 里写多复杂都行,
+    cost 在烘焙期付掉, 不在 RT runtime 付)
+  - 支持任意数量的 ShadingModel (cloth / hair / eye / SSS / 未来的
+    任何新 lobe), 因为 atlas 里存的就是各 lobe 已经求过的最终响应
+  - 没有 PSO 爆炸问题 (只有一份 hit shader, 永远是 "查 atlas")
+- **代价**:
+  - Card 生成需要离线/编辑期 pass (类似 Lightmap UV unwrap)
+  - Atlas 显存占用大 (几百 MB 量级), 移动端撑不住, 这是为什么轨道 A
+    必须独立存在
+  - 动态/形变 mesh 的 atlas 更新有延迟 (Lumen 的已知限制)
+- **完整设计文档**: 见 `Documents/Architecture/AtlasGI.md` (TtAtlas GI
+  系统蓝图, 子系统拆分, 与现有 RenderGraphNode / MaterialGraph 的接入点,
+  实施分阶段计划). **接手 Atlas GI 工作前必须先读这份文档**, 本规范
+  §1.4.8 只负责说明它和 Bindless 的依赖关系.
 
-**接手任何上述工作的同学**:
+**两条路线为什么共享 bindless 基础设施**:
 
-- 必须先把 §1.4 全文读完 (§1.4.1 ~ §1.4.8).
+- 轨道 A 需要 bindless 来按 hit instance 索引材质纹理 (重建 PBR 4 字段)
+- 轨道 B 需要 bindless 来按 mesh card ID 索引 Atlas 切片 + 索引
+  per-instance 数据
+- 两边都需要 §1.4.8.3 描述的 `TtSceneMaterialTable` / `TtSceneMeshTable`
+  这套设施, 写一份给两边用
+
+##### 1.4.8.3 共享基础设施: 场景级 Bindless 表
+
+**Phase A** (已交付): C# 端 `TtBindless` wrapper + 本规范 §1.4 完整建立,
+让任何后续工作有合规可依.
+
+**Phase B** (轨道 A 和轨道 B 都依赖, 必须先做):
+
+- 场景级 `TtSceneMaterialTable` — 单例的 `TtBindless` 实例池 (按
+  SBT_SRV / SBT_Sampler 拆表), 维护 MaterialID -> bindless slot 的
+  映射, 跨帧复用.
+- `TtSceneMeshTable` — 同上但管 vertex/index buffer 的 SRV (供
+  ray hit 重建几何属性), 可能合并到 MaterialTable 也可能拆开.
+- 材质资产加载/卸载 hook 同步维护 bindless 表 (§1.4.3 的 lifetime
+  反向锁约束).
+- **设计建议**: 表的接口要做成 ShadingModel-aware (按 ShadingModel
+  分表), 这样轨道 B 之后引入 cloth/hair/eye 时不影响轨道 A 的 PBR 表.
+
+**Phase B 完成后, 两条轨道并行推进**:
+
+- **轨道 A (ReSTIR HW RT 改造)**:
+  - 改造 `ReSTIRInitialSampling.compute` 的 HW RT 分支, 用 hit 点真实
+    lighting 替代 PrevColor 屏幕反投影.
+  - hit 点的材质求值固定走 PBR 4 字段简化模型 (即使 MaterialGraph 配置了
+    cloth/hair, 也按 base PBR 退化求值).
+  - 同时受益: RT 反射、RT AO (其实只需要 visibility, 不必 bindless, 但
+    顺便走通)、移动端 path tracing 参考实现.
+
+- **轨道 B (TtAtlas GI)**:
+  - 严格按 `Documents/Architecture/AtlasGI.md` 的子系统拆分推进.
+  - MaterialGraph codegen 改造: 在生成 `DO_PS_MATERIAL_IMPL` 之外, 增加
+    `DO_CARD_CAPTURE_IMPL` 路径, 用于 Card Atlas 烘焙.
+  - 共享 Phase B 的 bindless 表, 按 Card ID 索引 Atlas 切片.
+
+##### 1.4.8.4 接手任何 GI 工作的同学必读
+
+- 必须先把 §1.4 全文读完 (§1.4.1 ~ §1.4.9).
+- 必须先理解 §1.4.8.2 的双轨制定位, **不要把 ReSTIR 当主力 GI 改造,
+  也不要在 ReSTIR 路径里硬塞多 ShadingModel 支持** —— 那是轨道 B 的活.
+- 接 TtAtlas GI 工作前, 额外必读 `Documents/Architecture/AtlasGI.md`.
 - Phase B 的两个 Table 类设计时, 直接复用 `TtBindless`, 不要自己造轮子.
 - 如果发现现有 RHI / asset pipeline 在 Phase B 落地时有缺口
   (例如材质卸载时没有 hook 通知 bindless table 解锁 slot), 必须在

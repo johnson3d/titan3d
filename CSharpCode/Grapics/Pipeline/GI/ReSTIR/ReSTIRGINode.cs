@@ -46,6 +46,19 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             set { EnableSkyCube.SetValue(value); this.UpdatePermutation().AddWaitTask(); }
         }
 
+        // ENV_USE_HZB: 0 -> 屏幕空间线性 ray march (与原行为一致, 不依赖 hzb 输入)
+        //              1 -> Hi-Z 加速 ray march, 需要 Hzb pin 接入
+        // Hzb / Samp_HzbPoint binder 仅在 1 的编译产物里出现, OnDrawCall 用 FindBinder
+        // + IsValidPointer 双重保护; HzbPinIn 悬空时, C# 端会强制保持 0.
+        // 仅 ENV_USE_HW_RT == 0 的 SS 变体下生效, HW RT 路径不走 hzb.
+        public TtPermutationItem EnableHzbAccel { get; set; }
+        [Category("Option")]
+        public bool IsEnableHzbAccel
+        {
+            get { return EnableHzbAccel.GetValue() == (int)EPermutation_Bool.TrueValue; }
+            set { EnableHzbAccel.SetValue(value); this.UpdatePermutation().AddWaitTask(); }
+        }
+
         public TtReSTIRInitialSamplingShading()
         {
             CodeName = RName.GetRName("Shaders/GI/ReSTIR/ReSTIRInitialSampling.compute", RName.ERNameType.Engine);
@@ -56,6 +69,8 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             EnableHWRT.SetValue((int)EPermutation_Bool.FalseValue);
             EnableSkyCube = this.PushPermutation<EPermutation_Bool>("ENV_USE_SKY_CUBE", (int)EPermutation_Bool.BitWidth);
             EnableSkyCube.SetValue((int)EPermutation_Bool.FalseValue);
+            EnableHzbAccel = this.PushPermutation<EPermutation_Bool>("ENV_USE_HZB", (int)EPermutation_Bool.BitWidth);
+            EnableHzbAccel.SetValue((int)EPermutation_Bool.FalseValue);
 
             UpdatePermutation().AddWaitTask();
         }
@@ -107,6 +122,20 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
                 var envSampBinder = drawcall.FindBinder(EShaderBindType.SBT_Sampler, "Samp_EnvMap");
                 if (envSampBinder.IsValidPointer)
                     drawcall.BindSampler(envSampBinder, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+            }
+
+            // Hzb: 仅在 ENV_USE_HZB=1 编译产物里存在 binder.
+            // HzbPinIn 允许悬空 (FindAttachBuffer 返回 null), 此时 permutation 一定是 0
+            // (由节点的 EnableHzbAccel setter 强制保证), binder 不存在, 与 EnvMap 同一套保护.
+            var hzbBuffer = node.FindAttachBuffer(node.HzbPinIn);
+            if (hzbBuffer != null)
+            {
+                var hzbBinder = drawcall.FindBinder(EShaderBindType.SBT_SRV, "Hzb");
+                if (hzbBinder.IsValidPointer)
+                    drawcall.BindSrv(hzbBinder, hzbBuffer.Srv);
+                var hzbSampBinder = drawcall.FindBinder(EShaderBindType.SBT_Sampler, "Samp_HzbPoint");
+                if (hzbSampBinder.IsValidPointer)
+                    drawcall.BindSampler(hzbSampBinder, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
             }
         }
     }
@@ -261,6 +290,11 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
         //   - 不接 -> EnableEnvMap 强制 false, shader ENV_USE_SKY_CUBE=0, miss 时用 SkyColor 常量
         //   - 接入 -> 用户主动开 EnableEnvMap = true, shader ENV_USE_SKY_CUBE=1, miss 时采 EnvMap
         public TtRenderGraphPin EnvMapPinIn      = TtRenderGraphPin.CreateInput("EnvMap", EBufferType.BFT_SRV);
+        // Hzb (Texture2D<float2>, multi-mip min/max depth) 输入 pin, 允许悬空:
+        //   - 不接 -> EnableHzbAccel 强制 false, shader ENV_USE_HZB=0, 屏幕空间 ray march 走线性步长 fallback
+        //   - 接入 -> 自动开 EnableHzbAccel = true, shader ENV_USE_HZB=1, 走 hi-z 加速 march
+        // 仅 SS 路径 (ENV_USE_HW_RT=0) 下生效, HW RT 路径不消费 hzb.
+        public TtRenderGraphPin HzbPinIn         = TtRenderGraphPin.CreateInput("Hzb", EBufferType.BFT_SRV);
 
         public TtRenderGraphPin IndirectDiffusePinOut = TtRenderGraphPin.CreateOutput(
             "IndirectDiffuse", true, EPixelFormat.PXF_R16G16B16A16_FLOAT,
@@ -356,6 +390,27 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             }
         }
 
+        // ENV_USE_HZB permutation 开关: 配置型切换, 同 EnableEnvMap.
+        // 与 EnvMap 同样的"pin 悬空 -> 强制关"保护: HzbPinIn 没接时, Initialize / Tick
+        // 会把这个值刷成 false, 即使外部尝试 set true 也无效 (setter 会被 Tick 覆盖回去).
+        // 用户主动接入 HzbPinIn -> Initialize 阶段自动设为 true, 后续可以通过 setter
+        // 在质量档之间切换 (off/on), 但不要每帧切换 (会触发 effect 重新编译).
+        bool mEnableHzbAccel = false;
+        [Category("ReSTIR")]
+        [Rtti.Meta("")]
+        public bool EnableHzbAccel
+        {
+            get { return mEnableHzbAccel; }
+            set
+            {
+                if (mEnableHzbAccel == value)
+                    return;
+                mEnableHzbAccel = value;
+                if (mInitial != null)
+                    mInitial.IsEnableHzbAccel = value;
+            }
+        }
+
         // 由外部 (例如全场景 TLAS 管理器或 RayTracingNode) 注入的场景 acceleration structure.
         // 节点本身不负责 TLAS 的 build / refit / instance 维护, 只负责"如果有就用".
         public NxRHI.TtTopAccelerationStructure SceneTLAS;
@@ -405,6 +460,9 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             // EnvMap 允许悬空 (用 FindAttachBuffer 检测), 不接时 fallback 到 SkyColor 常量
             AddInput(EnvMapPinIn);
             EnvMapPinIn.IsAllowInputNull = true;
+            // Hzb 允许悬空 (用 FindAttachBuffer 检测), 不接时 hi-z 加速被强制关闭, march 走线性 fallback
+            AddInput(HzbPinIn);
+            HzbPinIn.IsAllowInputNull = true;
 
             AddOutput(IndirectDiffusePinOut);
         }
@@ -428,6 +486,19 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
                 mEnableEnvMap = false;
             }
             mInitial.IsEnableSkyCube = mEnableEnvMap;
+
+            // Hzb pin 接入则自动开 hi-z 加速; 悬空则强制关 (即便外部曾 set true).
+            // 与 EnvMap 同一套"悬空 -> 强制关"防御.
+            if (HzbPinIn.FindInLinker() != null)
+            {
+                mEnableHzbAccel = true;
+            }
+            else
+            {
+                mEnableHzbAccel = false;
+            }
+            mInitial.IsEnableHzbAccel = mEnableHzbAccel;
+
             await mInitial.UpdatePermutation();
 
             mTemporal = await TtShadingEnv.CreateShadingEnv<TtReSTIRTemporalReuseShading>();

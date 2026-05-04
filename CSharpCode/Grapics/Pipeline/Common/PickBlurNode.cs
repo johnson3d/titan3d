@@ -7,9 +7,9 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UPickBlurShading : Shader.TtGraphicsShadingEnv
+    public class TtPickBlurShading : Shader.TtGraphicsShadingEnv
     {
-        public UPickBlurShading()
+        public TtPickBlurShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/pick/pick_blur.cginc", RName.ERNameType.Engine);
         }
@@ -37,7 +37,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
-            var pickBlurNode = drawcall.TagObject as Common.UPickBlurNode;
+            var pickBlurNode = drawcall.TagObject as Common.TtPickBlurNode;
 
             var index = drawcall.FindBinder("SourceTexture");
             if (index.IsValidPointer)
@@ -48,14 +48,15 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             index = drawcall.FindBinder("Samp_SourceTexture");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
         }
     }
     [Bricks.CodeBuilder.ContextMenu("PickBlur", "Pick\\PickBlur", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
-    public class UPickBlurNode : TAuxSceenSpaceNode<UPickBlurNode>
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UPickBlurNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UPickBlurNode" })]
+    public class TtPickBlurNode : TAuxSceenSpaceNode<TtPickBlurNode>
     {
         public TtRenderGraphPin PickedPinIn = TtRenderGraphPin.CreateInput("Picked", NxRHI.EBufferType.BFT_SRV);
-        public UPickBlurNode()
+        public TtPickBlurNode()
         {
             Name = "PickBlurNode";            
         }
@@ -67,7 +68,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16G16_FLOAT;
             base.InitNodePins();
         }
-        public UPickBlurShading mBasePassShading;
+        public TtPickBlurShading mBasePassShading;
         public override TtGraphicsShadingEnv GetPassShading(TtRenderMesh.TtAtom atom = null)
         {
             return mBasePassShading;
@@ -75,7 +76,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<UPickBlurShading>();
+            mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtPickBlurShading>();
         }
         public override void OnLinkIn(TtRenderGraphLinker linker)
         {

@@ -201,7 +201,7 @@ namespace EngineNS.Bricks.NodeGraph
 
                     linker.InPin.HostNode.OnRemoveLinker(linker);
                     linker.OutPin = pinOut;
-                    linker.InPin.HostNode.OnLinkedFrom(linker.InPin, pinOut.HostNode, pinOut);
+                    linker.InPin.HostNode.OnLinkedFrom(linker.InPin, pinOut.HostNode, pinOut, linker);
                 }
                 else if (hasInNode)
                 {
@@ -224,7 +224,7 @@ namespace EngineNS.Bricks.NodeGraph
 
                     linker.OutPin.HostNode.OnRemoveLinker(linker);
                     linker.InPin = pinIn;
-                    linker.OutPin.HostNode.OnLinkedTo(linker.OutPin, pinIn.HostNode, pinIn);
+                    linker.OutPin.HostNode.OnLinkedTo(linker.OutPin, pinIn.HostNode, pinIn, linker);
                 }
             }
 
@@ -235,7 +235,7 @@ namespace EngineNS.Bricks.NodeGraph
 
             return unionNode;
         }
-        static List<UPinLinker> mTemplinkers = new List<UPinLinker>();
+        static List<TtPinLinker> mTemplinkers = new List<TtPinLinker>();
         public static void ExpandUnionNode(TtNodeGraph graph, IUnionNode unionNode)
         {
             mCreateTempPins.Clear();

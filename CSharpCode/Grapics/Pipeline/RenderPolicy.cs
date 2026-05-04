@@ -565,14 +565,14 @@ namespace EngineNS.Graphics.Pipeline
                 return mHitproxyNode;
             }
         }
-        Common.UPickedNode mPickedNode;
-        Common.UPickedNode PickedNode
+        Common.TtPickedNode mPickedNode;
+        Common.TtPickedNode PickedNode
         {
             get
             {
                 if (mPickedNode == null)
                 {
-                    mPickedNode = FindFirstNode<Common.UPickedNode>();
+                    mPickedNode = FindFirstNode<Common.TtPickedNode>();
                 }
                 return mPickedNode;
             }
@@ -665,14 +665,14 @@ namespace EngineNS.Graphics.Pipeline
                 return mHitproxyNode;
             }
         }
-        Common.UPickedNode mPickedNode;
-        Common.UPickedNode PickedNode
+        Common.TtPickedNode mPickedNode;
+        Common.TtPickedNode PickedNode
         {
             get
             {
                 if (mPickedNode == null)
                 {
-                    mPickedNode = FindFirstNode<Common.UPickedNode>();
+                    mPickedNode = FindFirstNode<Common.TtPickedNode>();
                 }
                 return mPickedNode;
             }

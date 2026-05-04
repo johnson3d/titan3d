@@ -184,6 +184,12 @@ namespace EngineNS.NxRHI
         public void QueueCmdlist(TtCommandList cmd, string name = null, EQueueType qType = EQueueType.QU_Default)
         {
             System.Diagnostics.Debug.Assert(cmd.mCoreObject.IsRecording() == false);
+
+            //GetDrawcallNumber内部调用Recorder的时候，如果ProcCmd先执行完了，就会导致Recorder被销毁了，所以这里先把数据统计了
+            QueueStats.NumOfDrawcall += cmd.mCoreObject.GetDrawcallNumber();
+            QueueStats.NumOfCmdlist++;
+            QueueStats.NumOfPrimitive += cmd.mCoreObject.GetPrimitiveNumber();
+
             var info = new FRCmdInfo();
             info.CmdType = ERCmdType.Cmdlist;
             info.QueueType = qType;
@@ -199,9 +205,6 @@ namespace EngineNS.NxRHI
                 ProcCmd(ref info);
                 TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.mCoreObject.Flush(info.QueueType);
             }
-            QueueStats.NumOfDrawcall += cmd.mCoreObject.GetDrawcallNumber();
-            QueueStats.NumOfCmdlist++;
-            QueueStats.NumOfPrimitive += cmd.mCoreObject.GetPrimitiveNumber();
         }
         private void ProcCmd(ref FRCmdInfo info)
         {

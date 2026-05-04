@@ -97,7 +97,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth", true, EPixelFormat.PXF_D16_UNORM, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         public TtForwordNode()
         {
-            Name = "UForwordNode";
+            Name = "ForwordNode";
         }
         public override void InitNodePins()
         {

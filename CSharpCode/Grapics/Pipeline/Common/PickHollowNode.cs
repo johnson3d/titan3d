@@ -7,9 +7,9 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UPickHollowShading : Shader.TtGraphicsShadingEnv
+    public class TtPickHollowShading : Shader.TtGraphicsShadingEnv
     {
-        public UPickHollowShading()
+        public TtPickHollowShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/pick/pick_hollow.cginc", RName.ERNameType.Engine);
         }
@@ -25,7 +25,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
-            var pickHollowNode = drawcall.TagObject as Common.UPickHollowNode;
+            var pickHollowNode = drawcall.TagObject as Common.TtPickHollowNode;
             
             var index = drawcall.FindBinder("gPickedSetUpTex");
             if (index.IsValidPointer)
@@ -35,7 +35,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             index = drawcall.FindBinder("Samp_gPickedSetUpTex");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
             index = drawcall.FindBinder("gPickedBlurTex");
             if (index.IsValidPointer)
@@ -45,15 +45,16 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             index = drawcall.FindBinder("Samp_gPickedBlurTex");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
         }
     }
     [Bricks.CodeBuilder.ContextMenu("PickHollow", "Pick\\PickHollow", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
-    public class UPickHollowNode : TAuxSceenSpaceNode<UPickHollowNode>
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UPickHollowNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UPickHollowNode" })]
+    public class TtPickHollowNode : TAuxSceenSpaceNode<TtPickHollowNode>
     {
         public TtRenderGraphPin PickedPinIn = TtRenderGraphPin.CreateInput("Picked", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin BlurPinIn = TtRenderGraphPin.CreateInput("Blur", NxRHI.EBufferType.BFT_SRV);
-        public UPickHollowNode()
+        public TtPickHollowNode()
         {
             Name = "PickHollowNode";
         }
@@ -66,7 +67,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16G16_FLOAT;
             base.InitNodePins();
         }
-        public UPickHollowShading mBasePassShading;
+        public TtPickHollowShading mBasePassShading;
         public override TtGraphicsShadingEnv GetPassShading(TtRenderMesh.TtAtom atom = null)
         {
             return mBasePassShading;
@@ -74,7 +75,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<UPickHollowShading>();
+            mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtPickHollowShading>();
         }
         public override void OnLinkIn(TtRenderGraphLinker linker)
         {
@@ -154,7 +155,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             index = drawcall.FindBinder("Samp_GPickedTex");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
         }
     }
 

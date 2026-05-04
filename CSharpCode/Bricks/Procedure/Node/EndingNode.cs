@@ -122,7 +122,7 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             return true;
         }
-        public override void OnLoadLinker(UPinLinker linker)
+        public override void OnLoadLinker(TtPinLinker linker)
         {
             base.OnLoadLinker(linker);
 
@@ -130,9 +130,9 @@ namespace EngineNS.Bricks.Procedure.Node
             if(input != null)
                 (linker.InPin.Tag as UBufferCreator).BufferType = input.BufferType;
         }
-        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin, TtPinLinker linker)
         {
-            base.OnLinkedFrom(iPin, OutNode, oPin);
+            base.OnLinkedFrom(iPin, OutNode, oPin, linker);
 
             var oPT = oPin.Tag as UBufferCreator;
             if(oPT != null)

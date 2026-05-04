@@ -120,10 +120,14 @@ namespace EngineNS.Graphics.Pipeline
         public EViewportType ViewportType { get; set; } = EViewportType.Window;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public bool IsViewportSlateFocused { get; private set; }
+        // 控制是否在视口内置 UI 区画 InteractiveMode 切换 Combo。
+        // 默认 true 保持原有行为; 当宿主 (例如 SceneEditor) 已经把切换 UI
+        // 自己画到工具栏上时, 把它设为 false 可避免视口内出现重复的下拉框。
+        public bool ShowInteractiveModeCombo { get; set; } = true;
         public virtual Vector2 OnDrawViewportUI(in Vector2 startDrawPos) 
         {
             var usedSize = Vector2.Zero;
-            if (InteractiveModes != null && InteractiveModes.Count > 1)
+            if (ShowInteractiveModeCombo && InteractiveModes != null && InteractiveModes.Count > 1)
             {
                 var currentModeName = CurrentIntercativeMode != null ? CurrentIntercativeMode.GetType().Name : "None";
                 var comboWidth = 150.0f;
@@ -691,6 +695,29 @@ namespace EngineNS.Graphics.Pipeline
         {
             return TtEngine.Instance.InteractiveModeManager.QueryModeInfo(Rtti.TtTypeDesc.TypeOf(this.GetType()));
         }
+        // 在已经初始化好的 InteractiveModes 列表里, 把 CurrentIntercativeMode 切换为
+        // 指定类型的 mode 实例。常见用法是在 viewport.Initialize 末尾 (await
+        // ReCreateInteractiveModes 之后) 由 viewport 自己调用; 也允许宿主编辑器
+        // (例如 TtSceneEditor) 在 OpenEditor 末尾从外部调用, 用于覆盖
+        // ReCreateInteractiveModes 默认"取列表最后一个"的不可控行为, 让每个
+        // viewport / 宿主编辑器自己决定缺省 mode。
+        //
+        // 如果列表里没有该类型 (例如未注册), 保持当前默认值不变并返回 false,
+        // 避免误把 CurrentIntercativeMode 置 null 导致输入无响应。
+        public bool SetDefaultInteractiveMode<TMode>() where TMode : TtInteractiveMode
+        {
+            if (InteractiveModes == null)
+                return false;
+            for (int i = 0; i < InteractiveModes.Count; i++)
+            {
+                if (InteractiveModes[i] is TMode)
+                {
+                    CurrentIntercativeMode = InteractiveModes[i];
+                    return true;
+                }
+            }
+            return false;
+        }
         protected virtual void TickOnFocus()
         {
             if (CurrentIntercativeMode != null)
@@ -952,7 +979,8 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual async Thread.Async.TtTask Initialize(RName policyName)
         {
-            RenderPolicy = policyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted().CreateRenderPolicy(policyName,  null);
+            var policyAsset = await policyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>();
+            RenderPolicy = policyAsset.CreateRenderPolicy(policyName,  null);
             await RenderPolicy.Initialize(null);
 
             World = new GamePlay.TtWorld(null);

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_6244661406203355949 Type="EngineNS.Graphics.Pipeline.Common.TtImageAssetNode@EngineCore">
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <ImageName Type="EngineNS.RName@EngineCore" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_6244661406203355949>

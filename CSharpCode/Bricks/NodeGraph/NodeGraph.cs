@@ -1,5 +1,6 @@
 using EngineNS.EGui.Controls;
 using EngineNS.EGui.Controls.PropertyGrid;
+using Microsoft.Build.Framework;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -90,10 +91,10 @@ namespace EngineNS.Bricks.NodeGraph
         public List<TtNodeBase> Nodes { get; } = new List<TtNodeBase>();
         [Rtti.Meta("",Order = 1)]
         [Browsable(false)]
-        public List<UPinLinker> Linkers { get; } = new List<UPinLinker>();
+        public List<TtPinLinker> Linkers { get; } = new List<TtPinLinker>();
         
         [Browsable(false)]
-        public ULinkingLine LinkingOp { get; } = new ULinkingLine();
+        public TtLinkingLine LinkingOp { get; } = new TtLinkingLine();
         public class FSelNodeState : EGui.Controls.PropertyGrid.IPropertyCustomization
         {
             public TtNodeBase Node;
@@ -273,7 +274,7 @@ namespace EngineNS.Bricks.NodeGraph
                     RemoveLink(iPin);
                 if (!oPin.MultiLinks)
                     RemoveLink(oPin);
-                var result = new UPinLinker();
+                var result = new TtPinLinker();
                 if (iPin != null)
                 {
                     result.InPin = iPin;
@@ -285,8 +286,8 @@ namespace EngineNS.Bricks.NodeGraph
                 Linkers.Add(result);
                 if (bCallLinked)
                 {
-                    oPin.HostNode.OnLinkedTo(oPin, iPin.HostNode, iPin);
-                    iPin.HostNode.OnLinkedFrom(iPin, oPin.HostNode, oPin);
+                    oPin.HostNode.OnLinkedTo(oPin, iPin.HostNode, iPin, result);
+                    iPin.HostNode.OnLinkedFrom(iPin, oPin.HostNode, oPin, result);
                 }
             }
         }
@@ -400,7 +401,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return num;
         }
-        public void FindOutLinker(PinOut pin, List<UPinLinker> linkers)
+        public void FindOutLinker(PinOut pin, List<TtPinLinker> linkers)
         {
             linkers.Clear();
             foreach (var i in Linkers)
@@ -411,7 +412,7 @@ namespace EngineNS.Bricks.NodeGraph
                 }
             }
         }
-        public UPinLinker GetFirstLinker(PinOut pin)
+        public TtPinLinker GetFirstLinker(PinOut pin)
         {
             foreach (var i in Linkers)
             {
@@ -433,7 +434,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return false;
         }
-        public UPinLinker FindInLinkerSingle(PinIn pin)
+        public TtPinLinker FindInLinkerSingle(PinIn pin)
         {
             foreach (var i in Linkers)
             {
@@ -444,7 +445,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return null;
         }
-        public UPinLinker FindOutLinkerSingle(PinOut pin)
+        public TtPinLinker FindOutLinkerSingle(PinOut pin)
         {
             foreach (var i in Linkers)
             {
@@ -455,7 +456,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return null;
         }
-        public void FindInLinker(PinIn pin, List<UPinLinker> linkers)
+        public void FindInLinker(PinIn pin, List<TtPinLinker> linkers)
         {
             linkers.Clear();
             foreach (var i in Linkers)
@@ -466,7 +467,7 @@ namespace EngineNS.Bricks.NodeGraph
                 }
             }
         }
-        public UPinLinker GetFirstLinker(PinIn pin)
+        public TtPinLinker GetFirstLinker(PinIn pin)
         {
             foreach (var i in Linkers)
             {
@@ -1427,7 +1428,7 @@ namespace EngineNS.Bricks.NodeGraph
                         if(SelectedNodes.Count == 1)
                         {
                             var node = SelectedNodes[0].Node;
-                            var inLinkers = new List<UPinLinker>(node.Inputs.Count);
+                            var inLinkers = new List<TtPinLinker>(node.Inputs.Count);
                             for (int pI = 0; pI < node.Inputs.Count; pI++)
                             {
                                 var inPin = node.Inputs[pI];
@@ -1439,7 +1440,7 @@ namespace EngineNS.Bricks.NodeGraph
                                     }
                                 }
                             }
-                            var outLinkers = new List<UPinLinker>(node.Outputs.Count);
+                            var outLinkers = new List<TtPinLinker>(node.Outputs.Count);
                             for(int pI = 0; pI < node.Outputs.Count; pI++)
                             {
                                 var outPin = node.Outputs[pI];
@@ -1531,7 +1532,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
 
-        public UPinLinker PreOrderLinker;
+        public TtPinLinker PreOrderLinker;
         public PinIn PreOrderPinIn;
         public PinOut PreOrderPinOut;
         void CheckNodeIntersectLink(in Vector2 dragPosition)
@@ -1654,7 +1655,7 @@ namespace EngineNS.Bricks.NodeGraph
         {
 
         }
-        public virtual bool OnLinkingUp(ULinkingLine linking, TtNodeBase pressNode)
+        public virtual bool OnLinkingUp(TtLinkingLine linking, TtNodeBase pressNode)
         {
             return true;
         }

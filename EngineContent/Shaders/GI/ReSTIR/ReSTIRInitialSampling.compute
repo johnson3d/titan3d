@@ -22,12 +22,27 @@
 #define ENV_USE_SKY_CUBE 0
 #endif
 
+// 由 C# 端 UPermutationItem "ENV_USE_HZB" 自动注入
+// 0 = 走线性 ray march (CastIndirectRay 内的 fallback 实现)
+// 1 = 走 Hi-Z 加速 ray march (HiZTraceScreenSpace, 在 ReSTIRCommon.cginc 内)
+// HzbPinIn 悬空时, C# 端会强制保持为 0
+#ifndef ENV_USE_HZB
+#define ENV_USE_HZB 0
+#endif
+
 // 注意: SampleSkyRadiance 写在 ReSTIRCommon.cginc 内, 该函数会在
 // ENV_USE_SKY_CUBE == 1 分支引用 EnvMap / Samp_EnvMap 这两个全局符号,
 // 因此必须先声明这两个资源, 再 include common 头.
 #if ENV_USE_SKY_CUBE
 TextureCube<float4> EnvMap;
 SamplerState        Samp_EnvMap;
+#endif
+
+// 同上规则: HiZTraceScreenSpace 引用 Hzb / Samp_HzbPoint, 必须在 #include 前声明.
+// Hzb 是 TtHzbNode 输出的 R16G16 multi-mip 纹理, R = min depth, G = max depth.
+#if ENV_USE_HZB
+Texture2D<float2>  Hzb;
+SamplerState       Samp_HzbPoint;
 #endif
 
 #include "ReSTIRCommon.cginc"
@@ -77,7 +92,11 @@ RayHitInfo MakeSkyHit(float3 originWS, float3 dirWS)
 
 #if ENV_USE_HW_RT == 0
 // -----------------------------------------------------------------------------
-// SS 路径: 屏幕空间线性 ray march, 命中后从当前 GBuffer/PrevColor 还原命中点
+// SS 路径: 屏幕空间 ray march, 命中后从当前 GBuffer/PrevColor 还原命中点
+//   ENV_USE_HZB == 0: 等步长线性 march (跨平台 fallback, 不依赖 hzb 输入)
+//   ENV_USE_HZB == 1: Hi-Z 加速 march (HiZTraceScreenSpace, 自适应步长跳过空区域)
+// 命中信息回填路径完全一致 (ReconstructWorldPos + GBufferRT1 + PrevColor),
+// 因为 hi-z 与线性 march 都用相同的 NDC z 比较空间.
 // -----------------------------------------------------------------------------
 RayHitInfo CastIndirectRay(float3 originWS, float3 dirWS, inout uint rng)
 {
@@ -88,17 +107,35 @@ RayHitInfo CastIndirectRay(float3 originWS, float3 dirWS, inout uint rng)
     info.HitNormalWS = 0;
     info.HitRadiance = 0;
 
-    float linearDepth0;
-    float3 startSS = WorldToScreen(originWS, linearDepth0);
-    float endDepth;
-    float3 endSS   = WorldToScreen(originWS + dirWS * MaxRayDistance, endDepth);
-
-    float3 stepSS = (endSS - startSS) / float(MaxRayMarchSteps);
-    float3 curSS = startSS + stepSS;
+    // WorldToScreen 顺手返回 linearDepth = clip.w (view-space z, 即 hi-z 比较口径).
+    // 拿到的 startLinearZ / endLinearZ 不需要任何额外 linearize, 直接传给 hi-z trace.
+    float startLinearZ;
+    float3 startSS = WorldToScreen(originWS, startLinearZ);
+    float endLinearZ;
+    float3 endSS   = WorldToScreen(originWS + dirWS * MaxRayDistance, endLinearZ);
 
     float2 hitUV = 0;
     float  hitSceneZ = 0;
     bool   hit = false;
+
+#if ENV_USE_HZB
+    // Hi-Z 加速路径: 自适应 mip 步长, 空区域一次跳过整个 tile.
+    // hi-z 用 view-space linear z 比较 (HzbNode 已重构为 linear-z 输出),
+    // 所以 startSS.z / endSS.z 仍是 NDC (仅供出屏判定), linear z 单独传.
+    // hzb mip0 = screen/2 (HzbNode 的 OnResize 保证整除).
+    float2 hzbMip0Size = max(float2(1.0f, 1.0f), float2(ScreenSize) * 0.5f);
+    hit = HiZTraceScreenSpace(Hzb, Samp_HzbPoint, hzbMip0Size,
+                              startSS, endSS, startLinearZ, endLinearZ,
+                              MaxRayMarchSteps, ThicknessBias, hitUV);
+    // 命中后用 hitUV 重采 DepthBuffer 拿 NDC z, 与线性 march fallback 保持一致的
+    // ReconstructWorldPos 通路 (已封装在 if (!hit) 之后的 fallback 里).
+    if (hit)
+        hitSceneZ = DepthBuffer.SampleLevel(Samp_PointClamp, hitUV, 0).r;
+#else
+    // 线性 march fallback: 等步长沿 startSS->endSS, 每步 SampleLevel DepthBuffer.
+    // 用 NDC z 比较, 不依赖 hzb 输入, 跨平台兜底路径.
+    float3 stepSS = (endSS - startSS) / float(MaxRayMarchSteps);
+    float3 curSS = startSS + stepSS;
 
     [loop]
     for (uint i = 0; i < MaxRayMarchSteps; ++i)
@@ -121,9 +158,10 @@ RayHitInfo CastIndirectRay(float3 originWS, float3 dirWS, inout uint rng)
         }
         curSS += stepSS;
     }
+#endif // ENV_USE_HZB
 
     // 真 miss: ray 走完全程都没撞到屏幕上的几何 -> 视作天光命中
-    // 注意: ray 半路出屏 (curSS.xy 越界) 也会走到这里, 在 SS GI 里
+    // 注意: ray 半路出屏 / 步数耗尽也会走到这里, 在 SS GI 里
     // 出屏方向通常意味着"指向场景外/天空", 当作 sky hit 是合理的近似
     if (!hit)
         return MakeSkyHit(originWS, dirWS);

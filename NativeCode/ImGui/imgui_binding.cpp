@@ -358,6 +358,15 @@ void ImGuiAPI::TableNextRow(const ImGuiTableRowData* rowData)
 {
 	ImGuiContext& g = *GImGui;
 	ImGuiTable* table = g.CurrentTable;
+	// 防御性 null 检查：与下面的 TableNextRow_FirstColumn 保持一致。
+	// 当调用方没有正确配对 BeginTable/EndTable，或在 popup/combo 弹出的独立窗口里
+	// 误调了 TableNextRow（g.CurrentTable 此时为 null）时，静默返回而不是 crash。
+	// Debug 下用 assert 把真正的调用方暴露出来，便于定位。
+	if (table == nullptr)
+	{
+		IM_ASSERT(false && "ImGuiAPI::TableNextRow called without an active table (missing BeginTable or called inside popup/combo)");
+		return;
+	}
 	auto cellPaddingY = table->RowCellPaddingY;
 	if (!table->IsLayoutLocked)
 		ImGui::TableUpdateLayout(table);
@@ -482,6 +491,8 @@ static float CalcMaxPopupHeightFromItemCount(int items_count)
 		return FLT_MAX;
 	return (g.FontSize + g.Style.ItemSpacing.y) * items_count - g.Style.ItemSpacing.y + (g.Style.WindowPadding.y * 2);
 }
+// 由 ImGui::BeginComboPopup 改写而来，区别仅在于多接受一个 window_flags 参数，
+// 其余流程已对齐官方新版 (>=1.90)：窗口名使用 g.BeginComboDepth、Begin 成功后再 ++ 等。
 static bool BeginComboPopup(ImGuiID popup_id, const ImRect& bb, ImGuiComboFlags flags, ImGuiWindowFlags window_flags)
 {
 	ImGuiContext& g = *GImGui;
@@ -510,8 +521,12 @@ static bool BeginComboPopup(ImGuiID popup_id, const ImRect& bb, ImGuiComboFlags 
 	}
 
 	// This is essentially a specialized version of BeginPopupEx()
+	// NOTE: 新版 ImGui (>=1.90) 已改用 g.BeginComboDepth 来命名 Combo 弹出窗口，
+	// 且 BeginComboDepth++ 移到了 ImGui::Begin() 成功之后。EndCombo 也是按
+	// g.BeginComboDepth (递减后的值) 反查窗口名做校验，因此这里必须使用
+	// g.BeginComboDepth，否则 EndCombo 会触发 "Calling EndCombo() in wrong window!"。
 	char name[16];
-	ImFormatString(name, IM_ARRAYSIZE(name), "##Combo_%02d", g.BeginPopupStack.Size); // Recycle windows based on depth
+	ImFormatString(name, IM_ARRAYSIZE(name), "##Combo_%02d", g.BeginComboDepth); // Recycle windows based on depth
 
 	// Set position given a custom constraint (peak into expected window size so we can position it)
 	// FIXME: This might be easier to express with an hypothetical SetNextWindowPosConstraints() function?
@@ -529,15 +544,17 @@ static bool BeginComboPopup(ImGuiID popup_id, const ImRect& bb, ImGuiComboFlags 
 
 	// We don't use BeginPopupEx() solely because we have a custom name string, which we could make an argument to BeginPopupEx()
 	//ImGuiWindowFlags window_flags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_Popup | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove;
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(g.Style.FramePadding.x, g.Style.WindowPadding.y)); // Horizontally align ourselves with the framed text
+	ImGui::PushStyleVarX(ImGuiStyleVar_WindowPadding, g.Style.FramePadding.x); // Horizontally align ourselves with the framed text
 	bool ret = ImGui::Begin(name, NULL, window_flags);
 	ImGui::PopStyleVar();
 	if (!ret)
 	{
 		ImGui::EndPopup();
-		IM_ASSERT(0);   // This should never happen as we tested for IsPopupOpen() above
+		if (!g.IO.ConfigDebugBeginReturnValueOnce && !g.IO.ConfigDebugBeginReturnValueLoop) // Begin 在这两个调试开关下允许返回 false
+			IM_ASSERT(0);   // This should never happen as we tested for IsPopupOpen() above
 		return false;
 	}
+	g.BeginComboDepth++;
 	return true;
 }
 bool ImGuiAPI::BeginCombo(const char* label, const char* preview_value, ImGuiComboFlags_ flags, ImGuiWindowFlags_ winFlags)
@@ -553,10 +570,13 @@ bool ImGuiAPI::BeginCombo(const char* label, const char* preview_value, ImGuiCom
 	const ImGuiStyle& style = g.Style;
 	const ImGuiID id = window->GetID(label);
 	IM_ASSERT((flags & (ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_NoPreview)) != (ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_NoPreview)); // Can't use both flags together
+	if (flags & ImGuiComboFlags_WidthFitPreview)
+		IM_ASSERT((flags & (ImGuiComboFlags_NoPreview | (ImGuiComboFlags)ImGuiComboFlags_CustomPreview)) == 0);
 
 	const float arrow_size = (flags & ImGuiComboFlags_NoArrowButton) ? 0.0f : GetFrameHeight();
 	const ImVec2 label_size = ImGui::CalcTextSize(label, NULL, true);
-	const float w = (flags & ImGuiComboFlags_NoPreview) ? arrow_size : CalcItemWidth();
+	const float preview_width = ((flags & ImGuiComboFlags_WidthFitPreview) && (preview_value != NULL)) ? ImGui::CalcTextSize(preview_value, NULL, true).x : 0.0f;
+	const float w = (flags & ImGuiComboFlags_NoPreview) ? arrow_size : ((flags & ImGuiComboFlags_WidthFitPreview) ? (arrow_size + preview_width + style.FramePadding.x * 2.0f) : CalcItemWidth());
 	const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
 	const ImRect total_bb(bb.Min, bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
 	ImGui::ItemSize(total_bb, style.FramePadding.y);
@@ -577,7 +597,7 @@ bool ImGuiAPI::BeginCombo(const char* label, const char* preview_value, ImGuiCom
 	// Render shape
 	const ImU32 frame_col = GetColorU32(hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
 	const float value_x2 = ImMax(bb.Min.x, bb.Max.x - arrow_size);
-	ImGui::RenderNavHighlight(bb, id);
+	ImGui::RenderNavCursor(bb, id);
 	if (!(flags & ImGuiComboFlags_NoPreview))
 		window->DrawList->AddRectFilled(bb.Min, ImVec2(value_x2, bb.Max.y), frame_col, style.FrameRounding, (flags & ImGuiComboFlags_NoArrowButton) ? ImDrawFlags_RoundCornersAll : ImDrawFlags_RoundCornersLeft);
 	if (!(flags & ImGuiComboFlags_NoArrowButton))

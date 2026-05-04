@@ -164,6 +164,7 @@ namespace NxRHI
 		//we must allocate a new heap for every frame
 		//When gpu execute commandlist, CopyDescriptorHeap will parrallel set view to heap
 		auto pPool = (DX12DescriptorPool*)device->GetDescriptorPoolManager()->GetCurrentFramePool();
+		ASSERT(pPool != nullptr);
 		bool created = false;
 		if (mCbvSrvUavNumber > 0)
 		{

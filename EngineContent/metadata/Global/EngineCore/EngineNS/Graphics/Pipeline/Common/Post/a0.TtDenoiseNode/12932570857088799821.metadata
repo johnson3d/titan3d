@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_12932570857088799821 Type="EngineNS.Graphics.Pipeline.Common.Post.TtDenoiseNode@EngineCore">
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <EnableTemporal Type="System.Boolean@Unknown" Order="0" />
+  <IterationCount Type="System.Int32@Unknown" Order="0" />
+  <MaxLuminance Type="System.Single@Unknown" Order="0" />
+  <PhiColor Type="System.Single@Unknown" Order="0" />
+  <PhiDepth Type="System.Single@Unknown" Order="0" />
+  <PhiNormal Type="System.Single@Unknown" Order="0" />
+  <TemporalAlpha Type="System.Single@Unknown" Order="0" />
+  <TemporalDepthThreshold Type="System.Single@Unknown" Order="0" />
+  <TemporalNormalThreshold Type="System.Single@Unknown" Order="0" />
+</Hash_12932570857088799821>
