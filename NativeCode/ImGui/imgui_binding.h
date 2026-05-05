@@ -1,12 +1,13 @@
 #pragma once
 
+#include "../Base/CoreRtti.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 
 NS_BEGIN
 
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
-typedef bool(*items_getter)(void* data, int idx, const char** out_text);
+typedef const char* (*items_getter)(void* data, int idx);
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef float(*values_getter)(void* data, int idx);
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
@@ -119,6 +120,134 @@ public:
 	static ImDrawData* GetDrawData()
 	{
 		return ImGui::GetDrawData();
+	}
+	static int DrawData_Textures_Size(ImDrawData* draw_data)
+	{
+		if (draw_data == nullptr || draw_data->Textures == nullptr)
+			return 0;
+		return draw_data->Textures->Size;
+	}
+	static void* DrawData_Textures_Get(ImDrawData* draw_data, int index)
+	{
+		if (draw_data == nullptr || draw_data->Textures == nullptr)
+			return nullptr;
+		if (index < 0 || index >= draw_data->Textures->Size)
+			return nullptr;
+		return (*(draw_data->Textures))[index];
+	}
+	static int PlatformIO_Textures_Size(ImGuiPlatformIO* io)
+	{
+		if (io == nullptr)
+			return 0;
+		return io->Textures.Size;
+	}
+	static void* PlatformIO_Textures_Get(ImGuiPlatformIO* io, int index)
+	{
+		if (io == nullptr)
+			return nullptr;
+		if (index < 0 || index >= io->Textures.Size)
+			return nullptr;
+		return io->Textures[index];
+	}
+	static int ImTextureData_GetStatus(void* texture_ptr)
+	{
+		ImTextureData* texture = (ImTextureData*)texture_ptr;
+		return texture == nullptr ? (int)ImTextureStatus_Destroyed : (int)texture->Status;
+	}
+	static void ImTextureData_SetStatus(void* texture_ptr, int status)
+	{
+		ImTextureData* texture = (ImTextureData*)texture_ptr;
+		if (texture != nullptr)
+			texture->SetStatus((ImTextureStatus)status);
+	}
+	static void* ImTextureData_GetBackendUserData(void* texture_ptr)
+	{
+		ImTextureData* texture = (ImTextureData*)texture_ptr;
+		return texture == nullptr ? nullptr : texture->BackendUserData;
+	}
+	static void ImTextureData_SetBackendUserData(void* texture_ptr, void* backend_user_data)
+	{
+		ImTextureData* texture = (ImTextureData*)texture_ptr;
+		if (texture != nullptr)
+			texture->BackendUserData = backend_user_data;
+	}
+	static ImTextureID ImTextureData_GetTexID(void* texture_ptr)
+	{
+		ImTextureData* texture = (ImTextureData*)texture_ptr;
+		return texture == nullptr ? ImTextureID_Invalid : texture->GetTexID();
+	}
+	static void ImTextureData_SetTexID(void* texture_ptr, ImTextureID tex_id)
+	{
+		ImTextureData* texture = (ImTextureData*)texture_ptr;
+		if (texture != nullptr)
+			texture->SetTexID(tex_id);
+	}
+	static int ImTextureData_GetFormat(void* texture_ptr)
+	{
+		ImTextureData* texture = (ImTextureData*)texture_ptr;
+		return texture == nullptr ? (int)ImTextureFormat_RGBA32 : (int)texture->Format;
+	}
+	static int ImTextureData_GetWidth(void* texture_ptr)
+	{
+		ImTextureData* texture = (ImTextureData*)texture_ptr;
+		return texture == nullptr ? 0 : texture->Width;
+	}
+	static int ImTextureData_GetHeight(void* texture_ptr)
+	{
+		ImTextureData* texture = (ImTextureData*)texture_ptr;
+		return texture == nullptr ? 0 : texture->Height;
+	}
+	static int ImTextureData_GetBytesPerPixel(void* texture_ptr)
+	{
+		ImTextureData* texture = (ImTextureData*)texture_ptr;
+		return texture == nullptr ? 0 : texture->BytesPerPixel;
+	}
+	static int ImTextureData_GetPitch(void* texture_ptr)
+	{
+		ImTextureData* texture = (ImTextureData*)texture_ptr;
+		return texture == nullptr ? 0 : texture->GetPitch();
+	}
+	static int ImTextureData_GetSizeInBytes(void* texture_ptr)
+	{
+		ImTextureData* texture = (ImTextureData*)texture_ptr;
+		return texture == nullptr ? 0 : texture->GetSizeInBytes();
+	}
+	static void* ImTextureData_GetPixels(void* texture_ptr)
+	{
+		ImTextureData* texture = (ImTextureData*)texture_ptr;
+		return texture == nullptr || texture->Pixels == nullptr ? nullptr : texture->GetPixels();
+	}
+	static void* ImTextureData_GetPixelsAt(void* texture_ptr, int x, int y)
+	{
+		ImTextureData* texture = (ImTextureData*)texture_ptr;
+		if (texture == nullptr || texture->Pixels == nullptr)
+			return nullptr;
+		if (x < 0 || y < 0 || x >= texture->Width || y >= texture->Height)
+			return nullptr;
+		return texture->GetPixelsAt(x, y);
+	}
+	static int ImTextureData_GetUpdatesSize(void* texture_ptr)
+	{
+		ImTextureData* texture = (ImTextureData*)texture_ptr;
+		return texture == nullptr ? 0 : texture->Updates.Size;
+	}
+	static int ImTextureData_GetUnusedFrames(void* texture_ptr)
+	{
+		ImTextureData* texture = (ImTextureData*)texture_ptr;
+		return texture == nullptr ? 0 : texture->UnusedFrames;
+	}
+	static bool ImTextureData_GetWantDestroyNextFrame(void* texture_ptr)
+	{
+		ImTextureData* texture = (ImTextureData*)texture_ptr;
+		return texture != nullptr && texture->WantDestroyNextFrame;
+	}
+	static const char* ImTextureData_GetStatusName(int status)
+	{
+		return ImTextureDataGetStatusName((ImTextureStatus)status);
+	}
+	static const char* ImTextureData_GetFormatName(int format)
+	{
+		return ImTextureDataGetFormatName((ImTextureFormat)format);
 	}
 	// Demo, Debug, Information
 	static void          ShowDemoWindow(bool* p_open = NULL)
@@ -377,7 +506,11 @@ public:
 	// Parameters stacks (shared)
 	static void          PushFont(ImFont* font)
 	{
-		return ImGui::PushFont(font);
+		return ImGui::PushFont(font, font ? font->LegacySize : 0.0f);
+	}
+	static void          PushFontWithSize(ImFont* font, float font_size_base_unscaled)
+	{
+		return ImGui::PushFont(font, font_size_base_unscaled);
 	}
 	static void          PopFont()
 	{

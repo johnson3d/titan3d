@@ -626,3 +626,8 @@ public unsafe partial struct ImDrawList
         }
     }
 }
+
+public unsafe partial struct ImFont
+{
+    public float FontSize => LegacySize;
+}

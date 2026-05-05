@@ -75,7 +75,51 @@ namespace MainEditor
                 return System.IO.Path.GetFullPath(System.IO.Path.Combine(binDir, "..", cfg));
             }
 
-            return System.IO.Path.GetFullPath(System.IO.Path.Combine(binDir, "..", "content", "engineconfigdx12.jscfg"));
+            var candidates = new[]
+            {
+                System.IO.Path.Combine(binDir, "..", "content", "engineconfigdx12.jscfg"),
+                System.IO.Path.Combine(binDir, "..", "..", "content", "engineconfigdx12.jscfg"),
+            };
+            foreach (var i in candidates)
+            {
+                var fullPath = System.IO.Path.GetFullPath(i);
+                if (System.IO.File.Exists(fullPath))
+                    return fullPath;
+            }
+
+            return System.IO.Path.GetFullPath(candidates[candidates.Length - 1]);
+        }
+
+        static string ResolveNativeDllDirectory(string nativeDll, string binDir)
+        {
+            if (string.IsNullOrWhiteSpace(nativeDll))
+                nativeDll = "release";
+
+#if DEBUG
+            if (!System.IO.Path.IsPathRooted(nativeDll))
+            {
+                var debugCandidate = System.IO.Path.GetFullPath(System.IO.Path.Combine(binDir, "..", "debug"));
+                if (System.IO.File.Exists(System.IO.Path.Combine(debugCandidate, "Core.Window.dll")))
+                    return debugCandidate;
+            }
+#endif
+
+            var candidates = System.IO.Path.IsPathRooted(nativeDll)
+                ? new[] { nativeDll }
+                : new[]
+                {
+                    System.IO.Path.Combine(binDir, nativeDll),
+                    System.IO.Path.Combine(binDir, "..", nativeDll),
+                    System.IO.Path.Combine(binDir, "..", "..", "binaries", nativeDll),
+                };
+            foreach (var i in candidates)
+            {
+                var fullPath = System.IO.Path.GetFullPath(i);
+                if (System.IO.File.Exists(System.IO.Path.Combine(fullPath, "Core.Window.dll")))
+                    return fullPath;
+            }
+
+            return System.IO.Path.GetFullPath(candidates[0]);
         }
 
         static bool WaitRedgate = false;
@@ -106,10 +150,10 @@ namespace MainEditor
             }
             if (string.IsNullOrWhiteSpace(bootstrapNativeDll))
                 bootstrapNativeDll = "release";
-            EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/{bootstrapNativeDll}");
+            var dllDir = ResolveNativeDllDirectory(bootstrapNativeDll, mBin);
+            EngineNS.TtNativeWindow.SetDllDirectoryA(dllDir);
 
-            Console.WriteLine($"NativeDLL={bootstrapNativeDll}");
-            var dllDir = $"{mBin}/{bootstrapNativeDll}";
+            Console.WriteLine($"NativeDLL={dllDir}");
 
             if (!TtFileManager.FileExists(dllDir + "/Core.Window.dll"))
             {

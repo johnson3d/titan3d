@@ -156,7 +156,6 @@ namespace EngineNS
 
                 mImGuiContext = (IntPtr)ImGuiAPI.CreateContext(new ImFontAtlas((void*)0));
                 ImGuiAPI.SetCurrentContext(mImGuiContext.ToPointer());
-                TtEngine.Instance.GfxDevice.SlateRenderer.RecreateFontDeviceTexture();
 
                 var io = ImGuiAPI.GetIO();
                 var cachePath = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache);
@@ -171,13 +170,16 @@ namespace EngineNS
                 configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
                 //configFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
                 configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_DockingEnable;           // Enable Docking
-                if (TtEngine.Instance.Config.SupportMultWindows)
+                if (TtEngine.Instance.Config.UseImGuiMultiViewports())
                     configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
                 //io.ConfigViewportsNoAutoMerge = true;
                 //io.ConfigViewportsNoTaskBarIcon = true;
                 io.ConfigFlags = configFlags;
 
                 ImGuiAPI.StyleColorsDark((ImGuiStyle*)0);
+                EGui.UIProxy.StyleConfig.Instance.ResetStyle();
+
+                ImGui_Init_SDL(io, NativeWindow.Window);
 
                 var style = ImGuiAPI.GetStyle();
                 if ((io.ConfigFlags & ImGuiConfigFlags_.ImGuiConfigFlags_ViewportsEnable) != 0)
@@ -186,7 +188,7 @@ namespace EngineNS
                     style->Colors[(int)ImGuiCol_.ImGuiCol_WindowBg].W = 1.0f;
                 }
 
-                ImGui_Init_SDL(ImGuiAPI.GetIO(), NativeWindow.Window);
+                TtEngine.Instance.GfxDevice.SlateRenderer.RecreateFontDeviceTexture();
 
                 SetPerFrameImGuiData(1f / 60f);
             }
@@ -305,7 +307,9 @@ namespace EngineNS
 
             using (new Profiler.TimeScopeHelper(ScopeImGuiRender))
             {
-                if (TtEngine.Instance.Config.SupportMultWindows == false)
+                var io = ImGuiAPI.GetIO();
+                var viewportsEnabled = (io.ConfigFlags & ImGuiConfigFlags_.ImGuiConfigFlags_ViewportsEnable) != 0;
+                if (viewportsEnabled == false)
                 {
                     var draw_data = ImGuiAPI.GetDrawData();
                     EGui.TtImDrawDataRHI.RenderImDrawData(ref *draw_data, NativeWindow, mDrawData);
@@ -313,8 +317,7 @@ namespace EngineNS
                 }
 
                 // Update and Render additional Platform Windows
-                var io = ImGuiAPI.GetIO();
-                if ((io.ConfigFlags & ImGuiConfigFlags_.ImGuiConfigFlags_ViewportsEnable) != 0)
+                if (viewportsEnabled)
                 {
                     ImGuiAPI.UpdatePlatformWindows();
                     ImGuiAPI.RenderPlatformWindowsDefault((void*)0, (void*)0);

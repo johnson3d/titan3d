@@ -48,20 +48,21 @@ namespace EngineNS.EGui.Slate
         public void Cleanup()
         {
             SamplerState = null;
-            FontSRV?.Dispose();
-            FontSRV = null;
-            FontTexture?.Dispose();
-            FontTexture = null;
+            ReleaseFontTexture();
 
             for(int i=0; i< mFontDataList.Count; ++i)
             {
                 mFontDataList[i].Dispose();
-                mFontDataList[i].FontSRV?.Dispose();
                 mFontDataList[i].FontSRV = null;
-                mFontDataList[i].FontTexture?.Dispose();
                 mFontDataList[i].FontTexture = null;
             }
             mFontDataList.Clear();
+
+            mFontGlyphRanges.Dispose();
+            mFontGlyphRanges = default;
+            mIconGlyphRanges.Dispose();
+            mIconGlyphRanges = default;
+            TtImDrawDataRHI.DisposeAllImGuiTextureBindings();
         }
 
         public enum enFont
@@ -111,95 +112,60 @@ namespace EngineNS.EGui.Slate
             }
         }
         List<FontDatas> mFontDataList = new List<FontDatas>();
+        Support.TtNativeArray<Wchar16> mFontGlyphRanges;
+        Support.TtNativeArray<Wchar16> mIconGlyphRanges;
+
         public unsafe void RecreateFontDeviceTexture()
         {
-            //var io = ImGuiAPI.GetIO();
-            //ImFontConfig fontConfig = new ImFontConfig();
-            //fontConfig.UnsafeCallConstructor();
-            //fontConfig.MergeMode = true;
-            ////io.FontsWrapper.AddFontDefault(ref mFontConfig);
-            //Font_15px = io.Fonts.AddFontFromFileTTF(TtEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", 15.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
-            //Font_Bold_13px = io.Fonts.AddFontFromFileTTF(TtEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Bold.ttf", 13.0f, &fontConfig, io.Fonts.GetGlyphRangesDefault());
-            //Font_13px = io.Fonts.AddFontFromFileTTF(TtEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", 13.0f, &fontConfig, io.Fonts.GetGlyphRangesDefault());
-            //// Build
-            //byte* pixels;
-            //int width = 0, height = 0, bytesPerPixel = 0;
-            //io.Fonts.GetTexDataAsRGBA32(&pixels, ref width, ref height, ref bytesPerPixel);
-            //// Store our identifier
-            //io.Fonts.SetTexID((void*)0);
-
-            //ImageInitData initData;
-            //initData.pSysMem = pixels;
-            //initData.SysMemPitch = (uint)(width * bytesPerPixel);
-
-            //var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            //var txDesc = new NxRHI.FTextureDesc();
-            //txDesc.SetDefault();
-            //txDesc.Width = (uint)width;
-            //txDesc.Height = (uint)height;
-            //txDesc.MipLevels = 1;
-            //txDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
-            //txDesc.InitData = &initData;
-            //FontTexture = rc.CreateTexture2D(ref txDesc);
-
-            //var srvDesc = new IShaderResourceViewDesc();
-            //srvDesc.mFormat = txDesc.Format;
-            //srvDesc.m_pTexture2D = FontTexture.mCoreObject.Ptr;
-            //FontSRV = rc.CreateShaderResourceView(ref srvDesc);
-
-            //io.Fonts.ClearTexData();
             var ModuleStart = Support.TtTime.HighPrecision_GetTickCount();
-            using (var ranges = TtNativeArray<Wchar16>.CreateInstance())
+
+            ReleaseFontTexture();
+            for (int i = 0; i < mFontDataList.Count; ++i)
             {
-                // Basic Latin + Latin Supplement
-                ranges.Add(new Wchar16(0x0020));
-                ranges.Add(new Wchar16(0x00FF));
-                // General Punctuation
-                ranges.Add(new Wchar16(0x2000));
-                ranges.Add(new Wchar16(0x206F));
-                // CJK Symbols and Punctuations, Hiragana, Katakana
-                ranges.Add(new Wchar16(0x3000));
-                ranges.Add(new Wchar16(0x30FF));
-                // Katakana Phonetic Extensions
-                ranges.Add(new Wchar16(0x31F0));
-                ranges.Add(new Wchar16(0x31FF));
-                // Half-width characters
-                ranges.Add(new Wchar16(0xFF00));
-                ranges.Add(new Wchar16(0xFFEF));
-                // CJK Ideograms
-                //switch (TtEngine.Instance.Config.EditorLanguage)
-                //{
-                //    case "Chinese":
-                        {
-                            ranges.Add(new Wchar16(0x4e00));
-                            ranges.Add(new Wchar16(0x9FAF));
-                        }
-                //        break;
-                //}
-                //push end
-                ranges.Add(new Wchar16(0));
+                mFontDataList[i].Dispose();
+            }
+            mFontDataList.Clear();
 
-                var io = ImGuiAPI.GetIO();
-                CreateFont(TtEngine.Instance.Config.EditorFont, 20.0f, (ImFontConfig*)0, ranges.UnsafeGetElementAddress(0));
+            var io = ImGuiAPI.GetIO();
+            var rendererHasTextures = (io.BackendFlags & ImGuiBackendFlags_.ImGuiBackendFlags_RendererHasTextures) != 0;
+            var fontAtlas = io.Fonts;
+            fontAtlas.Clear();
+            fontAtlas.RendererHasTextures = rendererHasTextures;
 
-                CreateFont(TtEngine.Instance.Config.EditorSmallFont, 15.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
+            var style = ImGuiAPI.GetStyle();
+            style->FontSizeBase = 15.0f;
+            style->FontScaleMain = 1.0f;
+            if (style->FontScaleDpi <= 0.0f)
+                style->FontScaleDpi = 1.0f;
 
-                CreateFont(TtEngine.Instance.Config.EditorFont, 15.0f, (ImFontConfig*)0, ranges.UnsafeGetElementAddress(0));
+            var textRanges = RebuildTextGlyphRanges();
+            var iconRanges = RebuildIconGlyphRanges();
+            var editorFont = ResolveFont(TtEngine.Instance.Config.EditorFont, "fonts/NotoSansSC-Regular.otf");
+            var smallFont = ResolveFont(TtEngine.Instance.Config.EditorSmallFont, "fonts/Roboto-Regular.ttf");
+            var boldFont = ResolveFont(null, "fonts/Roboto-Bold.ttf");
+            var iconFont = ResolveFont(TtEngine.Instance.Config.EditorEffectFont, "fonts/fa-solid-900.ttf");
 
-                var iconRange = stackalloc Wchar16[3];
-                iconRange[0] = new Wchar16(0xe005);
-                iconRange[1] = new Wchar16(0xf8ff);
-                iconRange[2] = new Wchar16(0);
-                CreateFont(TtEngine.Instance.Config.EditorEffectFont, 20.0f, (ImFontConfig*)0, iconRange);
+            var defaultFont = AddDefaultVectorFont(fontAtlas, 15.0f);
+            MergeFontInto(fontAtlas, defaultFont, editorFont, 15.0f, textRanges);
+            MergeFontInto(fontAtlas, defaultFont, iconFont, 15.0f, iconRanges, true);
+            mFontDataList.Add(new FontDatas() { Font = defaultFont });
 
-                NxRHI.TtSrView srv;
-                NxRHI.TtTexture tex;
-                CreateFontTexture(out srv, out tex);
-                foreach(var i in mFontDataList)
+            var boldFontSlot = CreateFontSlot(fontAtlas, boldFont, 13.0f, textRanges);
+            MergeFontInto(fontAtlas, boldFontSlot, editorFont, 13.0f, textRanges);
+
+            var smallFontSlot = CreateFontSlot(fontAtlas, smallFont, 13.0f, textRanges);
+            MergeFontInto(fontAtlas, smallFontSlot, editorFont, 13.0f, textRanges);
+
+            CreateFontSlot(fontAtlas, iconFont, 18.0f, iconRanges);
+
+            if (rendererHasTextures == false)
+            {
+                CreateFontTexture(out FontSRV, out FontTexture);
+                if (mFontDataList.Count > 0)
                 {
-                    i.FontTexture = tex;
-                    i.FontSRV = srv;
-                    io.Fonts.SetTexID((ulong)i.SRCGCHandle);
+                    mFontDataList[0].FontTexture = FontTexture;
+                    mFontDataList[0].FontSRV = FontSRV;
+                    fontAtlas.SetTexID((ulong)mFontDataList[0].SRCGCHandle);
                 }
             }
 
@@ -207,32 +173,117 @@ namespace EngineNS.EGui.Slate
             Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"RecreateFontDeviceTexture:{(ModuleEnd - ModuleStart) / 1000} ms");
         }
 
-        unsafe void CreateFont(RName rn, float size_pixels, ImFontConfig* fontConfig, Wchar16* glyph_ranges)
+        private unsafe Wchar16* RebuildTextGlyphRanges()
         {
-            var io = ImGuiAPI.GetIO();
+            mFontGlyphRanges.Dispose();
+            mFontGlyphRanges = TtNativeArray<Wchar16>.CreateInstance();
 
+            mFontGlyphRanges.Add(new Wchar16(0x0020));
+            mFontGlyphRanges.Add(new Wchar16(0x00FF));
+            mFontGlyphRanges.Add(new Wchar16(0x2000));
+            mFontGlyphRanges.Add(new Wchar16(0x206F));
+            mFontGlyphRanges.Add(new Wchar16(0x3000));
+            mFontGlyphRanges.Add(new Wchar16(0x30FF));
+            mFontGlyphRanges.Add(new Wchar16(0x31F0));
+            mFontGlyphRanges.Add(new Wchar16(0x31FF));
+            mFontGlyphRanges.Add(new Wchar16(0xFF00));
+            mFontGlyphRanges.Add(new Wchar16(0xFFEF));
+            mFontGlyphRanges.Add(new Wchar16(0x4e00));
+            mFontGlyphRanges.Add(new Wchar16(0x9FAF));
+            mFontGlyphRanges.Add(new Wchar16(0));
+            return mFontGlyphRanges.UnsafeGetElementAddress(0);
+        }
+
+        private unsafe Wchar16* RebuildIconGlyphRanges()
+        {
+            mIconGlyphRanges.Dispose();
+            mIconGlyphRanges = TtNativeArray<Wchar16>.CreateInstance();
+            mIconGlyphRanges.Add(new Wchar16(0xe005));
+            mIconGlyphRanges.Add(new Wchar16(0xf8ff));
+            mIconGlyphRanges.Add(new Wchar16(0));
+            return mIconGlyphRanges.UnsafeGetElementAddress(0);
+        }
+
+        private RName ResolveFont(RName preferred, string fallback)
+        {
+            if (preferred != null && string.IsNullOrWhiteSpace(preferred.Address) == false && IO.TtFileManager.FileExists(preferred.Address))
+                return preferred;
+            return RName.GetRName(fallback, RName.ERNameType.Engine);
+        }
+
+        private unsafe ImFont AddDefaultVectorFont(ImFontAtlas fontAtlas, float sizePixels)
+        {
+            var fontConfig = new ImFontConfig();
+            fontConfig.UnsafeCallConstructor();
+            fontConfig.SizePixels = sizePixels;
+            fontConfig.RasterizerMultiply = 1.05f;
+            var font = fontAtlas.AddFontDefaultVector(&fontConfig);
+            if (font.IsValidPointer == false)
+                font = fontAtlas.AddFontDefault(&fontConfig);
+            return font;
+        }
+
+        private unsafe ImFont CreateFontSlot(ImFontAtlas fontAtlas, RName rn, float sizePixels, Wchar16* glyphRanges)
+        {
             var fontData = new FontDatas();
+            fontData.Font = AddFontFromFileOrDefault(fontAtlas, rn, sizePixels, glyphRanges);
+
+            mFontDataList.Add(fontData);
+            return fontData.Font;
+        }
+
+        private unsafe ImFont AddFontFromFileOrDefault(ImFontAtlas fontAtlas, RName rn, float sizePixels, Wchar16* glyphRanges)
+        {
             var fontFile = rn?.Address;
             if (string.IsNullOrWhiteSpace(fontFile) || IO.TtFileManager.FileExists(fontFile) == false)
             {
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(
                     Profiler.ELogTag.Warning,
                     $"ImGui font asset is missing: {rn}");
-                fontData.Font = io.Fonts.AddFontDefault(fontConfig);
-            }
-            else
-            {
-                fontData.Font = io.Fonts.AddFontFromFileTTF(fontFile, size_pixels, fontConfig, glyph_ranges);
-                if (fontData.Font.IsValidPointer == false)
-                {
-                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(
-                        Profiler.ELogTag.Warning,
-                        $"ImGui failed to load font: {fontFile}");
-                    fontData.Font = io.Fonts.AddFontDefault(fontConfig);
-                }
+                return AddDefaultVectorFont(fontAtlas, sizePixels);
             }
 
-            mFontDataList.Add(fontData);
+            var fontConfig = new ImFontConfig();
+            fontConfig.UnsafeCallConstructor();
+            fontConfig.SizePixels = sizePixels;
+            fontConfig.RasterizerMultiply = 1.05f;
+            var font = fontAtlas.AddFontFromFileTTF(fontFile, sizePixels, &fontConfig, glyphRanges);
+            if (font.IsValidPointer)
+                return font;
+
+            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(
+                Profiler.ELogTag.Warning,
+                $"ImGui failed to load font: {fontFile}");
+            return AddDefaultVectorFont(fontAtlas, sizePixels);
+        }
+
+        private unsafe void MergeFontInto(ImFontAtlas fontAtlas, ImFont dstFont, RName rn, float sizePixels, Wchar16* glyphRanges, bool iconFont = false)
+        {
+            if (dstFont.IsValidPointer == false)
+                return;
+
+            var fontFile = rn?.Address;
+            if (string.IsNullOrWhiteSpace(fontFile) || IO.TtFileManager.FileExists(fontFile) == false)
+                return;
+
+            var fontConfig = new ImFontConfig();
+            fontConfig.UnsafeCallConstructor();
+            fontConfig.MergeMode = true;
+            fontConfig.DstFont = dstFont;
+            fontConfig.SizePixels = sizePixels;
+            fontConfig.RasterizerMultiply = iconFont ? 1.0f : 1.05f;
+            if (iconFont)
+            {
+                fontConfig.GlyphMinAdvanceX = sizePixels;
+                fontConfig.GlyphMaxAdvanceX = sizePixels;
+            }
+            fontAtlas.AddFontFromFileTTF(fontFile, sizePixels, &fontConfig, glyphRanges);
+        }
+
+        private void ReleaseFontTexture()
+        {
+            CoreSDK.DisposeObject(ref FontSRV);
+            CoreSDK.DisposeObject(ref FontTexture);
         }
 
         unsafe void CreateFontTexture(out NxRHI.TtSrView srv, out NxRHI.TtTexture tex)

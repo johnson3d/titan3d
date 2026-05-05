@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <map>
 #include <regex>
+#include "../../Base/CoreRtti.h"
 #include "../imgui.h"
 
 class TextEditor

@@ -38,7 +38,7 @@ namespace EngineNS.Graphics.Pipeline
             SlateApplication = Rtti.TtTypeDescManager.CreateInstance(wtType) as TtSlateApplication;
             var winRect = engine.Config.MainWindow;
 
-            if(engine.Config.SupportMultWindows)
+            if(engine.Config.UseImGuiMultiViewports())
             {
                 if (false == SlateApplication.CreateNativeWindow(engine, "T3D", (int)winRect.X, (int)winRect.Y, (int)10, (int)10))
                 {

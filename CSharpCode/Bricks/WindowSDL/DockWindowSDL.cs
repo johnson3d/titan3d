@@ -1,4 +1,4 @@
-﻿using EngineNS.Graphics.Pipeline;
+using EngineNS.Graphics.Pipeline;
 using MathNet.Numerics;
 using SDL;
 using System;
@@ -352,9 +352,9 @@ namespace EngineNS
                                     if (window_event == SDL.SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED)
                                     {
                                         viewport->PlatformRequestClose = true;
-                                        if ((IntPtr)viewport->PlatformUserData != IntPtr.Zero)
+                                        if ((IntPtr)viewport->m_PlatformUserData != IntPtr.Zero)
                                         {
-                                            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
+                                            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->m_PlatformUserData);
                                             var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
                                             myWindow.IsClosed = true;
                                         }
@@ -497,6 +497,32 @@ namespace EngineNS
         {
             SDL.SDL3.SDL_SetClipboardText(System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)text));
         }
+        static unsafe Graphics.Pipeline.TtPresentWindow GetViewportWindow(ImGuiViewport* viewport)
+        {
+            const uint imguiMainViewportId = 0x11111111;
+            if (viewport->m_ID == imguiMainViewportId)
+            {
+                return TtEngine.Instance?.GfxDevice?.SlateApplication?.NativeWindow;
+            }
+
+            if ((IntPtr)viewport->m_PlatformUserData == IntPtr.Zero)
+                return null;
+
+            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->m_PlatformUserData);
+            return gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
+        }
+        static unsafe SDL.SDL_Window* GetViewportSdlWindow(ImGuiViewport* viewport)
+        {
+            var windowId = (SDL.SDL_WindowID)(uint)(nint)viewport->m_PlatformHandle;
+            if (windowId != 0)
+            {
+                var window = SDL.SDL3.SDL_GetWindowFromID(windowId);
+                if (window != null)
+                    return window;
+            }
+
+            return (SDL.SDL_Window*)0;
+        }
         unsafe static ImGuiPlatformIO.FDelegate_Platform_CreateWindow ImGui_ImplSDL2_CreateWindow = ImGui_ImplSDL2_CreateWindow_Impl;
         static unsafe void ImGui_ImplSDL2_CreateWindow_Impl(ImGuiViewport* viewport)
         {
@@ -510,16 +536,16 @@ namespace EngineNS
             var myWindow = new Graphics.Pipeline.TtPresentWindow();
             myWindow.IsCreatedByImGui = true;
             myWindow.CreateNativeWindow("No Title Yet", (int)viewport->Pos.X, (int)viewport->Pos.Y, (int)viewport->Size.X, (int)viewport->Size.Y, (uint)sdl_flags).ToPointer();
-            viewport->PlatformUserData = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(myWindow)).ToPointer();
-            viewport->PlatformHandle = myWindow.Window.ToPointer();
-            viewport->PlatformHandleRaw = myWindow.HWindow.ToPointer();
+            viewport->m_PlatformUserData = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(myWindow)).ToPointer();
+            viewport->m_PlatformHandle = (void*)(nint)myWindow.WindowID;
+            viewport->m_PlatformHandleRaw = myWindow.HWindow.ToPointer();
         }
         unsafe static ImGuiPlatformIO.FDelegate_Platform_DestroyWindow ImGui_ImplSDL2_DestroyWindow = ImGui_ImplSDL2_DestroyWindow_Impl;
         static unsafe void ImGui_ImplSDL2_DestroyWindow_Impl(ImGuiViewport* viewport)
         {
-            if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
+            if ((IntPtr)viewport->m_PlatformUserData == IntPtr.Zero)
                 return;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
+            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->m_PlatformUserData);
             var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
             if (myWindow.IsCreatedByImGui == false)
             {
@@ -529,21 +555,20 @@ namespace EngineNS
                 return;
             }
             myWindow.Cleanup();
-            viewport->PlatformUserData = IntPtr.Zero.ToPointer();
-            viewport->PlatformHandle = null;
+            viewport->m_PlatformUserData = IntPtr.Zero.ToPointer();
+            viewport->m_PlatformHandle = null;
 
             gcHandle.Free();
         }
         unsafe static ImGuiPlatformIO.FDelegate_Platform_ShowWindow ImGui_ImplSDL2_ShowWindow = ImGui_ImplSDL2_ShowWindow_Impl;
         unsafe static void ImGui_ImplSDL2_ShowWindow_Impl(ImGuiViewport* viewport)
         {
-            if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
+            var window = GetViewportSdlWindow(viewport);
+            if (window == null)
                 return;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
-            var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
 
 #if PWindow
-            var hwnd = viewport->PlatformHandleRaw;
+            var hwnd = viewport->m_PlatformHandleRaw;
 
             // SDL hack: Hide icon from task bar
             // Note: SDL 2.0.6+ has a SDL_WINDOW_SKIP_TASKBAR flag which is supported under Windows but the way it create the window breaks our seamless transition.
@@ -559,109 +584,106 @@ namespace EngineNS
             if ((viewport->Flags & ImGuiViewportFlags_.ImGuiViewportFlags_NoFocusOnAppearing) != 0)
             {
                 //::ShowWindow(hwnd, SW_SHOWNA);
-                myWindow.ShowNativeWindow();
+                SDL.SDL3.SDL_ShowWindow(window);
                 return;
             }
 #endif
 
-            myWindow.ShowNativeWindow();
+            SDL.SDL3.SDL_ShowWindow(window);
         }
         unsafe static ImGuiPlatformIO.FDelegate_Platform_SetWindowPos ImGui_ImplSDL2_SetWindowPos = ImGui_ImplSDL2_SetWindowPos_Impl;
         unsafe static void ImGui_ImplSDL2_SetWindowPos_Impl(ImGuiViewport* viewport, Vector2 pos)
         {
-            if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
+            var window = GetViewportSdlWindow(viewport);
+            if (window == null)
                 return;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
-            var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
-            myWindow.SetWindowPosition((int)pos.X, (int)pos.Y);
+            SDL.SDL3.SDL_SetWindowPosition(window, (int)pos.X, (int)pos.Y);
         }
         static unsafe ImGuiPlatformIO.FDelegate_Platform_GetWindowPos ImGui_ImplSDL2_GetWindowPos = ImGui_ImplSDL2_GetWindowPos_Impl;
         unsafe static Vector2 ImGui_ImplSDL2_GetWindowPos_Impl(ImGuiViewport* viewport)
         {
-            if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
+            var window = GetViewportSdlWindow(viewport);
+            if (window == null)
                 return new Vector2(0);
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
-            var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
-            return myWindow.GetWindowPosition();
+            int x = 0;
+            int y = 0;
+            SDL.SDL3.SDL_GetWindowPosition(window, &x, &y);
+            return new Vector2(x, y);
         }
         unsafe static ImGuiPlatformIO.FDelegate_Platform_SetWindowSize ImGui_ImplSDL2_SetWindowSize = ImGui_ImplSDL2_SetWindowSize_Impl;
         unsafe static void ImGui_ImplSDL2_SetWindowSize_Impl(ImGuiViewport* viewport, Vector2 size)
         {
-            if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
+            var window = GetViewportSdlWindow(viewport);
+            if (window == null)
                 return;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
-            var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
-            myWindow.SetWindowSize((int)size.X, (int)size.Y);
+            SDL.SDL3.SDL_SetWindowSize(window, (int)size.X, (int)size.Y);
         }
         unsafe static ImGuiPlatformIO.FDelegate_Platform_GetWindowSize ImGui_ImplSDL2_GetWindowSize = ImGui_ImplSDL2_GetWindowSize_Impl;
         unsafe static Vector2 ImGui_ImplSDL2_GetWindowSize_Impl(ImGuiViewport* viewport)
         {
-            if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
+            var window = GetViewportSdlWindow(viewport);
+            if (window == null)
                 return new Vector2(0);
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
-            var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
-            return myWindow.GetWindowSize();
+            int x = 0;
+            int y = 0;
+            SDL.SDL3.SDL_GetWindowSize(window, &x, &y);
+            return new Vector2(x, y);
         }
         unsafe static ImGuiPlatformIO.FDelegate_Platform_SetWindowFocus ImGui_ImplSDL2_SetWindowFocus = ImGui_ImplSDL2_SetWindowFocus_Impl;
         unsafe static void ImGui_ImplSDL2_SetWindowFocus_Impl(ImGuiViewport* viewport)
         {
-            if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
+            var window = GetViewportSdlWindow(viewport);
+            if (window == null)
                 return;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
-            var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
-            myWindow.SetWindowFocus();
+            SDL.SDL3.SDL_RaiseWindow(window);
         }
         unsafe static ImGuiPlatformIO.FDelegate_Platform_GetWindowFocus ImGui_ImplSDL2_GetWindowFocus = ImGui_ImplSDL2_GetWindowFocus_Impl;
         unsafe static bool ImGui_ImplSDL2_GetWindowFocus_Impl(ImGuiViewport* viewport)
         {
-            if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
+            var window = GetViewportSdlWindow(viewport);
+            if (window == null)
                 return false;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
-            var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
-            return myWindow.GetWindowFocus();
+            return (SDL.SDL3.SDL_GetWindowFlags(window) & SDL.SDL_WindowFlags.SDL_WINDOW_INPUT_FOCUS) != 0;
         }
         unsafe static ImGuiPlatformIO.FDelegate_Platform_GetWindowMinimized ImGui_ImplSDL2_GetWindowMinimized = ImGui_ImplSDL2_GetWindowMinimized_Impl;
         unsafe static bool ImGui_ImplSDL2_GetWindowMinimized_Impl(ImGuiViewport* viewport)
         {
-            if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
+            var window = GetViewportSdlWindow(viewport);
+            if (window == null)
                 return false;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
-            var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
-            return myWindow.GetWindowMinimized();
+            return (SDL.SDL3.SDL_GetWindowFlags(window) & SDL.SDL_WindowFlags.SDL_WINDOW_MINIMIZED) != 0;
         }
         unsafe static ImGuiPlatformIO.FDelegate_Platform_SetWindowTitle ImGui_ImplSDL2_SetWindowTitle = ImGui_ImplSDL2_SetWindowTitle_Impl;
         unsafe static void ImGui_ImplSDL2_SetWindowTitle_Impl(ImGuiViewport* viewport, sbyte* title)
         {
-            if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
+            var window = GetViewportSdlWindow(viewport);
+            if (window == null)
                 return;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
-            var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
-            myWindow.SetWindowTitle(System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)title));
+            SDL.SDL3.SDL_SetWindowTitle(window, System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)title));
         }
         unsafe static ImGuiPlatformIO.FDelegate_Platform_RenderWindow ImGui_ImplSDL2_RenderWindow = ImGui_ImplSDL2_RenderWindow_Impl;
         unsafe static void ImGui_ImplSDL2_RenderWindow_Impl(ImGuiViewport* viewport, void* dummy)
         {
-            if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
+            if ((IntPtr)viewport->m_PlatformUserData == IntPtr.Zero)
                 return;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
+            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->m_PlatformUserData);
             var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
         }
         unsafe static ImGuiPlatformIO.FDelegate_Platform_SwapBuffers ImGui_ImplSDL2_SwapBuffers = ImGui_ImplSDL2_SwapBuffers_Impl;
         unsafe static void ImGui_ImplSDL2_SwapBuffers_Impl(ImGuiViewport* viewport, void* dummy)
         {
-            if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
+            if ((IntPtr)viewport->m_PlatformUserData == IntPtr.Zero)
                 return;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
+            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->m_PlatformUserData);
             var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
         }
         unsafe static ImGuiPlatformIO.FDelegate_Platform_SetWindowAlpha ImGui_ImplSDL2_SetWindowAlpha = ImGui_ImplSDL2_SetWindowAlpha_Impl;
         unsafe static void ImGui_ImplSDL2_SetWindowAlpha_Impl(ImGuiViewport* viewport, float alpha)
         {
-            if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
+            var window = GetViewportSdlWindow(viewport);
+            if (window == null)
                 return;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
-            var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
-            myWindow.SetWindowOpacity(alpha);
+            SDL.SDL3.SDL_SetWindowOpacity(window, alpha);
         }
         #endregion
         #region Renderer
@@ -682,15 +704,15 @@ namespace EngineNS
         unsafe static ImGuiPlatformIO.FDelegate_Renderer_CreateWindow ImGui_Renderer_CreateWindow = ImGui_Renderer_CreateWindow_Impl;
         unsafe static void ImGui_Renderer_CreateWindow_Impl(ImGuiViewport* viewport)
         {
-            if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
+            if ((IntPtr)viewport->m_PlatformUserData == IntPtr.Zero)
                 return;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
+            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->m_PlatformUserData);
             var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
 
             //Create SwapChain
             var vpData = new ViewportData();
             vpData.PresentWindow = myWindow;
-            viewport->RendererUserData = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(vpData)).ToPointer();
+            viewport->m_RendererUserData = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(vpData)).ToPointer();
 
 
             vpData.PresentWindow.InitSwapChain(TtEngine.Instance.GfxDevice.RenderContext);
@@ -699,41 +721,41 @@ namespace EngineNS
         unsafe static ImGuiPlatformIO.FDelegate_Renderer_DestroyWindow ImGui_Renderer_DestroyWindow = ImGui_Renderer_DestroyWindow_Impl;
         unsafe static void ImGui_Renderer_DestroyWindow_Impl(ImGuiViewport* viewport)
         {
-            if ((IntPtr)viewport->RendererUserData == IntPtr.Zero)
+            if ((IntPtr)viewport->m_RendererUserData == IntPtr.Zero)
                 return;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->RendererUserData);
+            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->m_RendererUserData);
             var vpData = gcHandle.Target as ViewportData;
             vpData.Dispose();
             gcHandle.Free();
-            viewport->RendererUserData = IntPtr.Zero.ToPointer();
+            viewport->m_RendererUserData = IntPtr.Zero.ToPointer();
         }
         unsafe static ImGuiPlatformIO.FDelegate_Renderer_SetWindowSize ImGui_Renderer_SetWindowSize = ImGui_Renderer_SetWindowSize_Impl;
         unsafe static void ImGui_Renderer_SetWindowSize_Impl(ImGuiViewport* viewport, Vector2 size)
         {
-            if ((IntPtr)viewport->RendererUserData == IntPtr.Zero)
+            if ((IntPtr)viewport->m_RendererUserData == IntPtr.Zero)
                 return;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->RendererUserData);
+            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->m_RendererUserData);
             var vpData = gcHandle.Target as ViewportData;
             vpData.PresentWindow.OnResize(size.X, size.Y);
         }
         unsafe static ImGuiPlatformIO.FDelegate_Renderer_RenderWindow ImGui_Renderer_RenderWindow = ImGui_Renderer_RenderWindow_Impl;
         unsafe static void ImGui_Renderer_RenderWindow_Impl(ImGuiViewport* viewport, void* dummy)
         {
-            if ((IntPtr)viewport->RendererUserData == IntPtr.Zero)
+            if ((IntPtr)viewport->m_RendererUserData == IntPtr.Zero)
                 return;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->RendererUserData);
+            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->m_RendererUserData);
             var vpData = gcHandle.Target as ViewportData;
 
-            //ImGui_ImplOpenGL3_RenderDrawData(viewport->DrawData);
-            var draw_data = viewport->DrawData;
+            //ImGui_ImplOpenGL3_RenderDrawData(viewport->m_DrawData);
+            var draw_data = viewport->m_DrawData;
             EGui.TtImDrawDataRHI.RenderImDrawData(ref *draw_data, vpData.PresentWindow, vpData.DrawData);
         }
         unsafe static ImGuiPlatformIO.FDelegate_Renderer_SwapBuffers ImGui_Renderer_SwapBuffers = ImGui_Renderer_SwapBuffers_Impl;
         unsafe static void ImGui_Renderer_SwapBuffers_Impl(ImGuiViewport* viewport, void* dummy)
         {
-            if ((IntPtr)viewport->RendererUserData == IntPtr.Zero)
+            if ((IntPtr)viewport->m_RendererUserData == IntPtr.Zero)
                 return;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->RendererUserData);
+            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->m_RendererUserData);
             var vpData = gcHandle.Target as ViewportData;
 
             vpData.PresentWindow.SwapChain.Present(0, 0);
@@ -754,6 +776,7 @@ namespace EngineNS
             public IntPtr ClipboardTextData;
             public SDL_Cursor*[] MouseCursors = new SDL_Cursor*[(int)ImGuiMouseCursor_.ImGuiMouseCursor_COUNT];
             public SDL_Cursor* MouseLastCursor;
+            public IntPtr MainViewportGCHandle;
 
             public void Dispose()
             {
@@ -762,6 +785,11 @@ namespace EngineNS
                 {
                     SDL.SDL3.SDL_free(ClipboardTextData);
                     ClipboardTextData = IntPtr.Zero;
+                }
+                if (MainViewportGCHandle != IntPtr.Zero)
+                {
+                    System.Runtime.InteropServices.GCHandle.FromIntPtr(MainViewportGCHandle).Free();
+                    MainViewportGCHandle = IntPtr.Zero;
                 }
             }
             public void LoadMouseCursors()
@@ -809,7 +837,7 @@ namespace EngineNS
             NativeWindow = new TtPresentWindow();
             SDL.SDL_WindowFlags sdl_flags = 0;
             sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_HIGH_PIXEL_DENSITY;
-            if (engine.Config.SupportMultWindows)
+            if (engine.Config.UseImGuiMultiViewports())
             {
                 sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN;
                 sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
@@ -820,12 +848,16 @@ namespace EngineNS
         public unsafe void ImGui_Init_SDL(ImGuiIO io, IntPtr window)
         {
             // Setup backend capabilities flags
+            var useViewports = TtEngine.Instance.Config.UseImGuiMultiViewports();
             io.UnsafeAsLayout->BackendFlags |= ImGuiBackendFlags_.ImGuiBackendFlags_HasMouseCursors;       // We can honor GetMouseCursor() values (optional)
             io.UnsafeAsLayout->BackendFlags |= ImGuiBackendFlags_.ImGuiBackendFlags_HasSetMousePos;        // We can honor io.WantSetMousePos requests (optional, rarely used)
-            io.UnsafeAsLayout->BackendFlags |= ImGuiBackendFlags_.ImGuiBackendFlags_PlatformHasViewports;  // We can create multi-viewports on the Platform side (optional)
+            if (useViewports)
+                io.UnsafeAsLayout->BackendFlags |= ImGuiBackendFlags_.ImGuiBackendFlags_PlatformHasViewports;  // We can create multi-viewports on the Platform side (optional)
 
             io.UnsafeAsLayout->BackendFlags |= ImGuiBackendFlags_.ImGuiBackendFlags_RendererHasVtxOffset;
-            io.UnsafeAsLayout->BackendFlags |= ImGuiBackendFlags_.ImGuiBackendFlags_RendererHasViewports;
+            io.UnsafeAsLayout->BackendFlags |= ImGuiBackendFlags_.ImGuiBackendFlags_RendererHasTextures;
+            if (useViewports)
+                io.UnsafeAsLayout->BackendFlags |= ImGuiBackendFlags_.ImGuiBackendFlags_RendererHasViewports;
 
             io.BackendPlatformName = "imgui_impl_sdl";
 
@@ -834,28 +866,37 @@ namespace EngineNS
             io.ClipboardUserData = (void*)0;
 
             io.MouseDoubleClickTime = 0.5f;
-            io.ConfigViewportsNoDecoration = false;
+            if (useViewports)
+                io.ConfigViewportsNoDecoration = false;
 
             //// Load mouse cursors
             ImGuiData.LoadMouseCursors();
 
             ImGuiViewport* main_viewport = ImGuiAPI.GetMainViewport();
-            main_viewport->PlatformHandle = (void*)window;
 
             ImGuiData.ImGuiMainWindow = (SDL.SDL_Window*)window.ToPointer();
+            if (ImGuiData.MainViewportGCHandle != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.GCHandle.FromIntPtr(ImGuiData.MainViewportGCHandle).Free();
+            }
+            ImGuiData.MainViewportGCHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(
+                System.Runtime.InteropServices.GCHandle.Alloc(this.NativeWindow));
+            main_viewport->m_PlatformUserData = ImGuiData.MainViewportGCHandle.ToPointer();
 
-            main_viewport->PlatformHandleRaw = TtNativeWindow.GetWindowHandle((SDL.SDL_Window*)window.ToPointer()).ToPointer();
+            main_viewport->m_PlatformHandle = (void*)(nint)this.NativeWindow.WindowID;
+            main_viewport->m_PlatformHandleRaw = TtNativeWindow.GetWindowHandle((SDL.SDL_Window*)window.ToPointer()).ToPointer();
 
             // Update monitors
             TtDockWindowSDL.ImGui_ImplSDL3_UpdateMonitors();
 
-            if (((io.ConfigFlags & ImGuiConfigFlags_.ImGuiConfigFlags_ViewportsEnable) != 0)
+            if (useViewports
+                && ((io.ConfigFlags & ImGuiConfigFlags_.ImGuiConfigFlags_ViewportsEnable) != 0)
                 && ((io.BackendFlags & ImGuiBackendFlags_.ImGuiBackendFlags_PlatformHasViewports) != 0))
             {
                 TtDockWindowSDL.ImGui_ImplSDL3_InitPlatformInterface();
             }
 
-            //main_viewport->PlatformUserData = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(this.NativeWindow)).ToPointer();
+            //main_viewport->m_PlatformUserData = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(this.NativeWindow)).ToPointer();
         }
     }
 }

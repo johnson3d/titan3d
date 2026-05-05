@@ -31,7 +31,7 @@
     "B": 1280,
     "A": 720
   },
-  "SupportMultWindows": true,
+  "SupportMultWindows": false,
   "DoUnitTest": true,
   "AutoSyncPropertyData": true,
   "RHIType": "RHI_D3D12",

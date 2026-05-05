@@ -118,6 +118,12 @@ namespace EngineNS
         [Rtti.Meta("")]
         [Category("Option")]
         public bool SupportMultWindows { get; set; } = true;
+        public const bool EnableImGuiMultiViewports = false;
+        public bool UseImGuiMultiViewports()
+        {
+            // Temporarily keep the editor on the stable single-window path while the 1.92 viewport callbacks are reworked.
+            return EnableImGuiMultiViewports && SupportMultWindows;
+        }
         [Rtti.Meta("")]
         [Category("Option")]
         public bool DoUnitTest { get; set; } = true;
@@ -736,6 +742,7 @@ namespace EngineNS
         }
     }
 }
+
 
 
 

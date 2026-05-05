@@ -12,6 +12,13 @@ namespace EngineNS.IO
             if (root==null)
             {
                 root = GetBaseDirectory(mBin, 1);
+                var repoRoot = GetBaseDirectory(mBin, 2);
+                if (repoRoot != null &&
+                    System.IO.Directory.Exists(System.IO.Path.Combine(repoRoot, "content")) &&
+                    System.IO.Directory.Exists(System.IO.Path.Combine(repoRoot, "enginecontent")))
+                {
+                    root = repoRoot;
+                }
             }
             BinariesDir = mBin;
 
