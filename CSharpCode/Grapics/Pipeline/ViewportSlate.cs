@@ -276,8 +276,8 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     IsViewportSlateFocused = ImGuiAPI.IsHoverCurrentWindow() && ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows);
                     var viewportUISize = OnDrawViewportUI(in curPos);                    
-                    ImGuiAPI.EndChild();
                 }
+                ImGuiAPI.EndChild();
 
                 ImGuiAPI.PopID();
             }

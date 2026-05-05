@@ -158,6 +158,11 @@ namespace EngineNS
                 ImGuiAPI.SetCurrentContext(mImGuiContext.ToPointer());
 
                 var io = ImGuiAPI.GetIO();
+                io.ConfigErrorRecovery = true;
+                io.ConfigErrorRecoveryEnableAssert = false;
+                io.ConfigErrorRecoveryEnableDebugLog = true;
+                io.ConfigErrorRecoveryEnableTooltip = true;
+
                 var cachePath = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache);
                 var imgui = TtEngine.Instance.Config.ImGuiIniPath;
                 var imguiIniFile = IO.TtFileManager.CombinePath(cachePath, imgui);
