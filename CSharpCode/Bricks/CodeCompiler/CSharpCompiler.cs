@@ -104,25 +104,22 @@ namespace EngineNS.CodeCompiler
                 //var optionsProvider = new CustomAnalyzerConfigOptionsProvider(analyzerConfigOptions);
                 var name = IO.TtFileManager.GetPureName(outputFile);
                 var compilation = CSharpCompilation.Create(name, syntaxTrees, metaRefs, option);
-                GeneratorDriver generatorDriver = CSharpGeneratorDriver.Create(new[] { new CompilingGenerator.BindingCodeIncrementalGenerator() });
+                var bindingGenerator = new CompilingGenerator.BindingCodeIncrementalGenerator();
+                GeneratorDriver generatorDriver = CSharpGeneratorDriver.Create(new[] { bindingGenerator });
                 //generatorDriver.WithUpdatedAnalyzerConfigOptions(optionsProvider)
                 //               .RunGeneratorsAndUpdateCompilation(compilation, out var updateCompilation, out var diagnostics);
                 generatorDriver = generatorDriver.RunGeneratorsAndUpdateCompilation(compilation, out var updateCompilation, out var diagnostics);
                 var genResult = generatorDriver.GetRunResult();
-                if(genResult.Results.Length > 0)
+                if(bindingGenerator.GeneratedCodes.Count > 0)
                 {
-                    var insGen = (genResult.Results[0].Generator).AsIncrementalGenerator() as CompilingGenerator.BindingCodeIncrementalGenerator;
-                    if(insGen != null)
+                    foreach(var genCodeData in bindingGenerator.GeneratedCodes)
                     {
-                        foreach(var genCodeData in insGen.GeneratedCodes)
+                        var tempGenFilePath = System.IO.Path.Combine(genFilePath, genCodeData.Key);
+                        if (IO.TtFileManager.FileExists(tempGenFilePath))
+                            IO.TtFileManager.DeleteFile(tempGenFilePath);
+                        using (var fs = new StreamWriter(tempGenFilePath, false, Encoding.UTF8))
                         {
-                            var tempGenFilePath = System.IO.Path.Combine(genFilePath, genCodeData.Key);
-                            if (IO.TtFileManager.FileExists(tempGenFilePath))
-                                IO.TtFileManager.DeleteFile(tempGenFilePath);
-                            using (var fs = new StreamWriter(tempGenFilePath, false, Encoding.UTF8))
-                            {
-                                fs.Write(genCodeData.Value);
-                            }
+                            fs.Write(genCodeData.Value);
                         }
                     }
                 }

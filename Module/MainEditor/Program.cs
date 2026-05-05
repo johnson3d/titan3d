@@ -1,5 +1,3 @@
-﻿using Assimp;
-using Assimp.Unmanaged;
 using EngineNS;
 using EngineNS.EGui.UIProxy;
 using EngineNS.Graphics.Pipeline;
@@ -42,6 +40,44 @@ namespace MainEditor
             }
         }
 
+        static string TryReadNativeDllName(string configPath)
+        {
+            if (string.IsNullOrWhiteSpace(configPath) || !System.IO.File.Exists(configPath))
+                return null;
+
+            try
+            {
+                using var doc = System.Text.Json.JsonDocument.Parse(System.IO.File.ReadAllText(configPath));
+                if (doc.RootElement.TryGetProperty("NativeDll", out var value) &&
+                    value.ValueKind == System.Text.Json.JsonValueKind.String)
+                {
+                    return value.GetString();
+                }
+            }
+            catch
+            {
+            }
+
+            return null;
+        }
+
+        static string ResolveConfigPath(string cfg, string binDir)
+        {
+            if (!string.IsNullOrWhiteSpace(cfg))
+            {
+                if (System.IO.Path.IsPathRooted(cfg))
+                    return cfg;
+
+                var directPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(binDir, cfg));
+                if (System.IO.File.Exists(directPath))
+                    return directPath;
+
+                return System.IO.Path.GetFullPath(System.IO.Path.Combine(binDir, "..", cfg));
+            }
+
+            return System.IO.Path.GetFullPath(System.IO.Path.Combine(binDir, "..", "content", "engineconfigdx12.jscfg"));
+        }
+
         static bool WaitRedgate = false;
         [STAThreadAttribute]
         static void Main(string[] args)
@@ -58,70 +94,22 @@ namespace MainEditor
             //}
 
             var mBin = System.IO.Directory.GetCurrentDirectory();
-            
-            EngineNS.TtEngineConfig Config = null;
-            
-            var jsCode = EngineNS.IO.TtFileManager.ReadAllText(mBin + "/../cache/config/engine.jscfg");
-            if (jsCode != null)
+            var nativeDllArg = FindArgument(args, "NativeDLL=");
+            var configArg = ResolveConfigPath(FindArgument(args, "config="), mBin);
+            var bootstrapNativeDll = nativeDllArg;
+            if (string.IsNullOrWhiteSpace(bootstrapNativeDll))
             {
-                if (Config==null)
-                {
-                    Config = EngineNS.IO.TtFileManager.LoadObjectFromJson<TtEngineConfig>(jsCode);
-                }
-                else
-                {
-                    EngineNS.IO.TtAdvancedJsonPartialUpdater.PartialUpdate<TtEngineConfig>(jsCode, Config, null);
-                }
+                var cacheConfig = mBin + "/../cache/config/engine.jscfg";
+                bootstrapNativeDll = TryReadNativeDllName(cacheConfig);
+                if (string.IsNullOrWhiteSpace(bootstrapNativeDll))
+                    bootstrapNativeDll = TryReadNativeDllName(configArg);
             }
-            else
-            {
-                EngineNS.IO.TtJsonOptions options = new EngineNS.IO.TtJsonOptions();
-                options.SaveProperties = new List<string>() { "NativeDll",
-                            "UseRenderDoc",
-                            "HasDebugLayer",
-                            "IsGpuBaseValidation",
-                            "IsDebugShader",
-                            "IsGpuDred",
-                            "IsAftermath"
-                };
-                
-                Config = new TtEngineConfig();
-                Config.SaveConfig(mBin + "/../cache/config/engine.jscfg", options);
-                //EngineNS.IO.TtFileManager.WriteAllText(mBin + "/../cache/config/engine.jscfg", "{\"NativeDll\": \"release\"}");
-                
-                var cfg = FindArgument(args, "config=");
-                if (cfg == null)
-                {
-                    TtNativeWindow.MessageBoxA(0, "config is null", "Titan3D", 0);
-                }
-                jsCode = EngineNS.IO.TtFileManager.ReadAllText(cfg);
-                if (jsCode!=null)
-                {
-                    Config = EngineNS.IO.TtFileManager.LoadObjectFromJson<TtEngineConfig>(jsCode);
-                }
-            }
+            if (string.IsNullOrWhiteSpace(bootstrapNativeDll))
+                bootstrapNativeDll = "release";
+            EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/{bootstrapNativeDll}");
 
-            string dllDir = "";
-            if (Config != null)
-            {
-                Console.WriteLine($"NativeDLL={Config.NativeDll}");
-                dllDir = $"{mBin}/{Config.NativeDll}";
-            }
-            else
-            {
-                var cfg = FindArgument(args, "NativeDLL=");
-                if (cfg != null && cfg == "debug")
-                {
-                    Console.WriteLine($"NativeDLL=debug");
-                    dllDir = $"{mBin}/debug";
-                    
-                }
-                else
-                {
-                    Console.WriteLine($"NativeDLL=release");
-                    dllDir = $"{mBin}/release";
-                }
-            }
+            Console.WriteLine($"NativeDLL={bootstrapNativeDll}");
+            var dllDir = $"{mBin}/{bootstrapNativeDll}";
 
             if (!TtFileManager.FileExists(dllDir + "/Core.Window.dll"))
             {
@@ -196,11 +184,7 @@ namespace MainEditor
         }
         static WeakReference Main_Impl(string[] args, out EngineNS.NxRHI.TtGpuSystem gpuSystem, out EngineNS.NxRHI.TtGpuDevice gpuDevice)
         {
-            var cfg = FindArgument(args, "config=");
-            if (cfg == null)
-            {
-                TtNativeWindow.MessageBoxA(0, "config is null", "Titan3D", 0);
-            }
+            var cfg = ResolveConfigPath(FindArgument(args, "config="), System.IO.Directory.GetCurrentDirectory());
             Console.WriteLine($"Config={cfg}");
 
             bool bNativeMem = true;

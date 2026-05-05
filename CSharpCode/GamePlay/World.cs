@@ -1,4 +1,4 @@
-﻿using Assimp;
+using Assimp;
 using EngineNS.Bricks.WorldSimulator;
 using EngineNS.EGui.Slate;
 using EngineNS.GamePlay.Scene;
@@ -621,6 +621,7 @@ namespace EngineNS.GamePlay
         #endregion
     }
 }
+
 #if TitanEngine_AutoGen_Macross
 #region TitanEngine_AutoGen_Macross
 

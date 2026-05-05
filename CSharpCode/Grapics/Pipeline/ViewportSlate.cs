@@ -1,4 +1,4 @@
-﻿using EngineNS.Editor;
+using EngineNS.Editor;
 using EngineNS.GamePlay.Scene;
 using EngineNS.UI;
 using System;
@@ -1025,6 +1025,7 @@ namespace EngineNS
         public Graphics.Pipeline.TtInteractiveModeManager InteractiveModeManager { get; } = new Graphics.Pipeline.TtInteractiveModeManager();
     }
 }
+
 
 
 #if TitanEngine_AutoGen_Macross

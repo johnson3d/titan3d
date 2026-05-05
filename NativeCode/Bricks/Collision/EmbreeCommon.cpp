@@ -2,11 +2,7 @@
 #include "perlin/perlin.h"
 
 #if defined(PLATFORM_WIN)
-	#if defined(_DEBUG)
-		#pragma comment(lib,"embree4_d.lib")
-	#else
-		#pragma comment(lib,"embree4.lib")
-	#endif
+	#pragma comment(lib,"embree4.lib")
 	//#pragma comment(lib,"tbb.lib")
 #endif
 

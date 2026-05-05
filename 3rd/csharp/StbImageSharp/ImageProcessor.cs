@@ -206,9 +206,9 @@ namespace StbImageSharp
                     for (int j = 0; j < hW; j++)
                     {
                         uint color = GetSamplerStride(pSrc, src.Width, src.Height, (int)((float)j * scaleX), (int)((float)i * scaleY), 4);
-                        var c = Color4b.FromArgb((int)color);
+                        var c = Color4b.FromB8G8R8A8((int)color);
                         c.A = 255;
-                        ((uint*)curTar)[j] = c.ToArgb();
+                        ((uint*)curTar)[j] = c.ToB8G8R8A8();
                     }
                     curTar += result.Width * 4;
                 }
@@ -277,6 +277,87 @@ namespace StbImageSharp
                 }
             }
             return result;
+        }
+
+        public static ImageResultFloat[] GetBoxDownSampler3D(ImageResultFloat[] srcSlices, int srcWidth, int srcHeight,
+            int srcDepth, int targetWidth, int targetHeight, int targetDepth)
+        {
+            if (srcSlices == null)
+                throw new ArgumentNullException(nameof(srcSlices));
+            if (srcDepth <= 0 || targetDepth <= 0 || targetWidth <= 0 || targetHeight <= 0)
+                throw new ArgumentOutOfRangeException(nameof(targetDepth));
+            if (srcSlices.Length < srcDepth)
+                throw new ArgumentException("Source slice count is smaller than srcDepth.", nameof(srcSlices));
+
+            var resizedSlices = new ImageResultFloat[srcDepth];
+            for (int z = 0; z < srcDepth; z++)
+            {
+                var slice = srcSlices[z];
+                if (slice == null)
+                    throw new ArgumentException("Source slices cannot contain null entries.", nameof(srcSlices));
+
+                resizedSlices[z] = (slice.Width == targetWidth && slice.Height == targetHeight)
+                    ? CloneFloatImage(slice)
+                    : GetBoxDownSampler(slice, targetWidth, targetHeight);
+            }
+
+            var result = new ImageResultFloat[targetDepth];
+            var scaleZ = (float)srcDepth / (float)targetDepth;
+            var pixelCount = targetWidth * targetHeight;
+            const int channels = 4;
+
+            for (int z = 0; z < targetDepth; z++)
+            {
+                var zStart = (int)Math.Floor(z * scaleZ);
+                var zEnd = (int)Math.Ceiling((z + 1) * scaleZ);
+                if (zStart < 0)
+                    zStart = 0;
+                if (zStart >= srcDepth)
+                    zStart = srcDepth - 1;
+                if (zEnd <= zStart)
+                    zEnd = zStart + 1;
+                if (zEnd > srcDepth)
+                    zEnd = srcDepth;
+
+                var data = new float[pixelCount * channels];
+                for (int srcZ = zStart; srcZ < zEnd; srcZ++)
+                {
+                    var srcData = resizedSlices[srcZ].Data;
+                    for (int i = 0; i < data.Length; i++)
+                    {
+                        data[i] += srcData[i];
+                    }
+                }
+
+                var invCount = 1.0f / (float)(zEnd - zStart);
+                for (int i = 0; i < data.Length; i++)
+                {
+                    data[i] *= invCount;
+                }
+
+                result[z] = new ImageResultFloat
+                {
+                    Width = targetWidth,
+                    Height = targetHeight,
+                    SourceComp = resizedSlices[zStart].SourceComp,
+                    Comp = resizedSlices[zStart].Comp,
+                    Data = data
+                };
+            }
+
+            return result;
+        }
+
+        private static ImageResultFloat CloneFloatImage(ImageResultFloat src)
+        {
+            return new ImageResultFloat
+            {
+                Width = src.Width,
+                Height = src.Height,
+                SourceComp = src.SourceComp,
+                Comp = src.Comp,
+                Data = (float[])src.Data.Clone()
+            };
         }
 
         public static unsafe TtMemImage StretchBlt(uint targetWidth, uint targetHeight, TtMemImage src, uint SrcX, uint SrcY, uint SrcW, uint SrcH)

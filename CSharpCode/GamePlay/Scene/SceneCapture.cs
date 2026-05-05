@@ -1,4 +1,4 @@
-﻿using EngineNS.Graphics.Pipeline;
+using EngineNS.Graphics.Pipeline;
 using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
@@ -333,6 +333,7 @@ namespace EngineNS.GamePlay.Scene
         #endregion
     }
 }
+
 #if TitanEngine_AutoGen_Macross
 #region TitanEngine_AutoGen_Macross
 

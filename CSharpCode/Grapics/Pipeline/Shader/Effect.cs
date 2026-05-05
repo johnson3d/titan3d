@@ -27,6 +27,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             mBindIndexer = null;
             ShaderEffect = null;
         }
+        [Rtti.Meta("", NameAlias = new string[]
+        {
+            "EngineNS.Graphics.Pipeline.Shader.TtEffect.TtEffectDesc@EngineCore",
+            "EngineNS.Graphics.Pipeline.Shader.TtEffect.TtEffectDesc",
+        })]
         public class TtEffectDesc : IO.BaseSerializer
         {
             public const uint CurrentEffectVersion = 6;
@@ -180,9 +185,19 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 {
                     var effect = new TtGraphicsEffect();
                     IO.ISerializer desc;
-                    using (var ar = descAttr.GetReader(effect))
+                    try
                     {
-                        IO.SerializerHelper.Read(ar, out desc, effect);
+                        using (var ar = descAttr.GetReader(effect))
+                        {
+                            IO.SerializerHelper.Read(ar, out desc, effect);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(
+                            Profiler.ELogTag.Warning,
+                            $"Skip stale graphics effect cache {file}: {ex.Message}");
+                        return null;
                     }
                     var effectDesc = desc as TtEffectDesc;
                     if (effectDesc == null)

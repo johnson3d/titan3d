@@ -161,7 +161,9 @@ namespace EngineNS
                 var io = ImGuiAPI.GetIO();
                 var cachePath = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache);
                 var imgui = TtEngine.Instance.Config.ImGuiIniPath;
-                ImGuiAPI.SetIniFilename(IO.TtFileManager.CombinePath(cachePath, imgui));
+                var imguiIniFile = IO.TtFileManager.CombinePath(cachePath, imgui);
+                PrepareImGuiIniFile(imguiIniFile);
+                ImGuiAPI.SetIniFilename(imguiIniFile);
 
                 ImGuiConfigFlags_ configFlags = ImGuiConfigFlags_.ImGuiConfigFlags_None;
                 //configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_DpiEnableScaleViewports;
@@ -189,6 +191,9 @@ namespace EngineNS
                 SetPerFrameImGuiData(1f / 60f);
             }
             return true;
+        }
+        protected virtual void PrepareImGuiIniFile(string imguiIniFile)
+        {
         }
         public virtual void Cleanup()
         {

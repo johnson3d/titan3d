@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.IO;
 using EngineNS.Macross;
@@ -1044,6 +1044,7 @@ namespace EngineNS
         public GamePlay.Scene.TtSceneManager SceneManager { get; } = new GamePlay.Scene.TtSceneManager();
     }
 }
+
 #if TitanEngine_AutoGen_Macross
 #region TitanEngine_AutoGen_Macross
 

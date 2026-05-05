@@ -86,22 +86,8 @@
   ],
   "nativeDependencyGroups": [
     {
-      "id": "PhysX 4 legacy headers/libs",
-      "version": "4.1.2",
-      "references": [
-        "Core.Window/Core.Window.vcxproj",
-        "NativeCode/Bricks/PhysicsCore/NvPhysX"
-      ],
-      "requiredPaths": [
-        "3rd/native/PhysX-4.1/physx/include/PxPhysicsAPI.h",
-        "3rd/native/PhysX-4.1/PxShared/include/foundation/Px.h",
-        "3rd/native/PhysX-4.1/physx/lib/windows/debug/PhysX_64.lib",
-        "3rd/native/PhysX-4.1/physx/lib/windows/release/PhysX_64.lib"
-      ]
-    },
-    {
       "id": "PhysX 5 Windows SDK",
-      "version": "5.6.1 headers, vc143 mt libs",
+      "version": "5.6.1 CPU-only, vc143 mt Debug/Release",
       "references": [
         "Core.Window/Core.Window.vcxproj",
         "NativeCode/Bricks/PhysicsCore/NvPhysX5"
@@ -109,14 +95,46 @@
       "requiredPaths": [
         "3rd/native/PhysX5/include/PxPhysicsAPI.h",
         "3rd/native/PhysX5/include/foundation/PxPhysicsVersion.h",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/LowLevel_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/LowLevelAABB_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/LowLevelDynamics_static_64.lib",
         "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysX_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysX_64.dll",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXCharacterKinematic_static_64.lib",
         "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXFoundation_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXFoundation_64.dll",
         "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXCommon_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXCommon_64.dll",
         "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXCooking_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXCooking_64.dll",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXExtensions_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXPvdSDK_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXTask_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXVehicle2_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PVDRuntime_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PVDRuntime_64.dll",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/SceneQuery_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/SimulationController_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/LowLevel_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/LowLevelAABB_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/LowLevelDynamics_static_64.lib",
         "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysX_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysX_64.dll",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXCharacterKinematic_static_64.lib",
         "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXFoundation_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXFoundation_64.dll",
         "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXCommon_64.lib",
-        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXCooking_64.lib"
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXCommon_64.dll",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXCooking_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXCooking_64.dll",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXExtensions_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXPvdSDK_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXTask_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXVehicle2_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PVDRuntime_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PVDRuntime_64.dll",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/SceneQuery_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/SimulationController_static_64.lib"
       ]
     },
     {
@@ -156,15 +174,33 @@
     },
     {
       "id": "Embree",
-      "version": "4.x Windows",
+      "version": "4.4.1 x64 Windows",
       "references": [
         "Core.Window/Core.Window.vcxproj",
         "NativeCode/Bricks/DistanceField/DistanceField.vcxitems"
       ],
       "requiredPaths": [
-        "3rd/native/embree/embree4/include/embree4/rtcore.h",
-        "3rd/native/embree/embree4/lib/embree4.lib",
-        "3rd/native/embree/embree4/lib/tbb12.lib"
+        "3rd/native/embree/embree441/include/embree4/rtcore.h",
+        "3rd/native/embree/embree441/include/embree4/rtcore_ray.h",
+        "3rd/native/embree/embree441/include/embree4/rtcore_config.h",
+        "3rd/native/embree/embree441/lib/embree4.lib",
+        "3rd/native/embree/embree441/lib/tbb.lib"
+      ],
+      "requiredAnyOf": [
+        {
+          "description": "Embree 4 release runtime DLL",
+          "paths": [
+            "3rd/native/embree/embree441/lib/embree4.dll",
+            "3rd/native/embree/embree441/bin/embree4.dll"
+          ]
+        },
+        {
+          "description": "Embree TBB runtime DLL",
+          "paths": [
+            "3rd/native/embree/embree441/lib/tbb12.dll",
+            "3rd/native/embree/embree441/bin/tbb12.dll"
+          ]
+        }
       ]
     },
     {
@@ -280,7 +316,8 @@
       "requiredPaths": [
         "3rd/native/CGAL/Include/CGAL/version.h",
         "3rd/native/CGAL/auxiliary/gmp/include/gmp.h",
-        "3rd/native/CGAL/auxiliary/gmp/lib/libgmp-10.lib",
+        "3rd/native/CGAL/auxiliary/gmp/lib/gmp.lib",
+        "3rd/native/CGAL/auxiliary/gmp/lib/mpfr.lib",
         "3rd/native/boost-1.89.0/boost/version.hpp"
       ]
     },
@@ -291,9 +328,15 @@
         "Core.Window/Core.Window.vcxproj",
         "NativeCode/NextRHI/Vulkan/Vulkan.vcxitems"
       ],
-      "requiredDirs": [
-        "3rd/native/SpirvTools/lib/win64",
-        "3rd/native/glslang/lib"
+      "requiredPaths": [
+        "3rd/native/Vulkan/Include/spirv-tools/libspirv.h",
+        "3rd/native/Vulkan/Include/spirv-tools/optimizer.hpp",
+        "3rd/native/Vulkan/Include/glslang/Public/ShaderLang.h",
+        "3rd/native/Vulkan/Include/glslang/SPIRV/GlslangToSpv.h",
+        "3rd/native/Vulkan/Lib/SPIRV.lib",
+        "3rd/native/Vulkan/Lib/glslang.lib",
+        "3rd/native/Vulkan/Lib/SPIRV-Tools.lib",
+        "3rd/native/Vulkan/Lib/SPIRV-Tools-opt.lib"
       ]
     }
   ],

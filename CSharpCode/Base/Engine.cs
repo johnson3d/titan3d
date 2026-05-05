@@ -351,6 +351,13 @@ namespace EngineNS
         #endregion
 
         public bool IsCLRProfiling = false;
+        private void MigrateLegacyConfig()
+        {
+            if (Config?.DefaultTexture?.ToString().Equals("texture/checkboard.txpic:Engine", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                Config.DefaultTexture = RName.GetRName("texture/checkboard.srv", RName.ERNameType.Engine);
+            }
+        }
         public void InitConfigs(string cfgFile)
         {
             if (cfgFile == null)
@@ -389,6 +396,8 @@ namespace EngineNS
                 Config.MainRPolicyName = RName.GetRName("graphics/deferred_simple.rpolicy", RName.ERNameType.Engine);
                 Config.SaveConfig(cfgFile, null);
             }
+
+            MigrateLegacyConfig();
         }
         public void InitTypes(string cfgFile, bool bNatvieMemory, bool bLoadPluginModuel)
         {
@@ -727,6 +736,10 @@ namespace EngineNS
         }
     }
 }
+
+
+
+
 
 
 #if TitanEngine_AutoGen_Macross

@@ -1,0 +1,2 @@
+GameProject
+NS_survivor.ui.splash_screen@GameProject

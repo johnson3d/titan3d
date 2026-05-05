@@ -139,6 +139,51 @@ function Invoke-CodeGeneration {
     ) $repoRoot
 }
 
+function Copy-NativeRuntimeDependencies {
+    param([Parameter(Mandatory = $true)][string]$BuildConfiguration)
+
+    $nativeOut = Join-Path $repoRoot ('binaries\' + $BuildConfiguration.ToLowerInvariant())
+    if (-not (Test-Path -LiteralPath $nativeOut)) {
+        New-Item -ItemType Directory -Force -Path $nativeOut | Out-Null
+    }
+
+    $physxConfig = $BuildConfiguration.ToLowerInvariant()
+    $gmpBin = if ($BuildConfiguration -eq 'Debug') { 'debug\bin' } else { 'bin' }
+    $runtimeFiles = @(
+        '3rd\native\embree\embree441\bin\embree4.dll',
+        '3rd\native\embree\embree441\bin\tbb12.dll',
+        '3rd\native\embree\embree441\bin\tbbmalloc.dll',
+        "3rd\native\CGAL\auxiliary\gmp\$gmpBin\gmp-10.dll",
+        "3rd\native\CGAL\auxiliary\gmp\$gmpBin\gmpxx-4.dll",
+        "3rd\native\CGAL\auxiliary\gmp\$gmpBin\mpfr-6.dll",
+        "3rd\native\PhysX5\bin\win.x86_64.vc143.mt\$physxConfig\PhysX_64.dll",
+        "3rd\native\PhysX5\bin\win.x86_64.vc143.mt\$physxConfig\PhysXCommon_64.dll",
+        "3rd\native\PhysX5\bin\win.x86_64.vc143.mt\$physxConfig\PhysXCooking_64.dll",
+        "3rd\native\PhysX5\bin\win.x86_64.vc143.mt\$physxConfig\PhysXFoundation_64.dll",
+        "3rd\native\PhysX5\bin\win.x86_64.vc143.mt\$physxConfig\PVDRuntime_64.dll"
+    )
+
+    foreach ($runtimeFile in $runtimeFiles) {
+        Copy-Item -LiteralPath (Test-RepoFile $runtimeFile) -Destination $nativeOut -Force
+    }
+
+    $openMpDll = if ($BuildConfiguration -eq 'Debug') { 'VCOMP140D.DLL' } else { 'VCOMP140.DLL' }
+    $vsRoot = Split-Path (Split-Path (Split-Path (Split-Path $msbuild -Parent) -Parent) -Parent) -Parent
+    $redistRoot = Join-Path $vsRoot 'VC\Redist\MSVC'
+    $openMpRuntime = Get-ChildItem -Path $redistRoot -Recurse -Filter $openMpDll -ErrorAction SilentlyContinue |
+        Where-Object {
+            $_.FullName -match '\\x64\\' -and
+            $_.FullName -notmatch '\\onecore\\' -and
+            (($_.FullName -match '\\debug_nonredist\\') -eq ($BuildConfiguration -eq 'Debug'))
+        } |
+        Sort-Object FullName -Descending |
+        Select-Object -First 1
+    if ($null -eq $openMpRuntime) {
+        throw "Could not find Visual C++ OpenMP runtime '$openMpDll' under '$redistRoot'."
+    }
+    Copy-Item -LiteralPath $openMpRuntime.FullName -Destination $nativeOut -Force
+}
+
 Write-Host "Titan Windows build"
 Write-Host "  Repo:          $repoRoot"
 Write-Host "  MSBuild:       $msbuild"
@@ -197,6 +242,7 @@ if (-not $SkipNative) {
             ('/p:SolutionDir=' + $repoRoot + '\'),
             '/p:Platform=x64'
         ) $repoRoot
+        Copy-NativeRuntimeDependencies $config
     }
 }
 

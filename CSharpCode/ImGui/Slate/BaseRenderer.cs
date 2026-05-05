@@ -212,7 +212,25 @@ namespace EngineNS.EGui.Slate
             var io = ImGuiAPI.GetIO();
 
             var fontData = new FontDatas();
-            fontData.Font = io.Fonts.AddFontFromFileTTF(rn.Address, size_pixels, fontConfig, glyph_ranges);
+            var fontFile = rn?.Address;
+            if (string.IsNullOrWhiteSpace(fontFile) || IO.TtFileManager.FileExists(fontFile) == false)
+            {
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(
+                    Profiler.ELogTag.Warning,
+                    $"ImGui font asset is missing: {rn}");
+                fontData.Font = io.Fonts.AddFontDefault(fontConfig);
+            }
+            else
+            {
+                fontData.Font = io.Fonts.AddFontFromFileTTF(fontFile, size_pixels, fontConfig, glyph_ranges);
+                if (fontData.Font.IsValidPointer == false)
+                {
+                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(
+                        Profiler.ELogTag.Warning,
+                        $"ImGui failed to load font: {fontFile}");
+                    fontData.Font = io.Fonts.AddFontDefault(fontConfig);
+                }
+            }
 
             mFontDataList.Add(fontData);
         }
