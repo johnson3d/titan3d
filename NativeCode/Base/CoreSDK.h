@@ -30,6 +30,26 @@ TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention
 typedef void (*FFreeManagedObjectGCHandle)(void* handle);
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void* (*FGetManagedObjectFromGCHandle)(void* handle);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef int (*FNativeCoreListGetCount)(void* listHandle);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void (*FNativeCoreListAdd)(void* listHandle, TtAnyValue* value);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void (*FNativeCoreListClear)(void* listHandle);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void (*FNativeCoreListRemoveAt)(void* listHandle, int index);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void (*FNativeCoreListGetValue)(void* listHandle, int index, TtAnyValue* outValue);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void* (*FNativeCoreArrayPinElementAddress)(void* arrayHandle, int index);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void* (*FNativeCorePinGCHandle)(void* objectHandle);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void (*FNativeCoreFreeGCHandle)(void* pinnedHandle);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void (*FNativeCoreGetPropertyValue)(void* hostHandle, const char* propName, TtAnyValue* outValue);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void (*FNativeCoreSetPropertyValue)(void* hostHandle, const char* propName, TtAnyValue* value);
 
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void (*FOnShaderTranslated)(EngineNS::NxRHI::FShaderDesc* shaderDesc);
@@ -118,6 +138,46 @@ public:
 	static void SetGetManagedObjectFromGCHandle(FGetManagedObjectFromGCHandle fn) {
 		GetManagedObjectFromGCHandle = fn;
 	}
+	static FNativeCoreListGetCount NativeCoreListGetCount;
+	static void SetNativeCoreListGetCountCallback(FNativeCoreListGetCount fn) {
+		NativeCoreListGetCount = fn;
+	}
+	static FNativeCoreListAdd NativeCoreListAdd;
+	static void SetNativeCoreListAddCallback(FNativeCoreListAdd fn) {
+		NativeCoreListAdd = fn;
+	}
+	static FNativeCoreListClear NativeCoreListClear;
+	static void SetNativeCoreListClearCallback(FNativeCoreListClear fn) {
+		NativeCoreListClear = fn;
+	}
+	static FNativeCoreListRemoveAt NativeCoreListRemoveAt;
+	static void SetNativeCoreListRemoveAtCallback(FNativeCoreListRemoveAt fn) {
+		NativeCoreListRemoveAt = fn;
+	}
+	static FNativeCoreListGetValue NativeCoreListGetValue;
+	static void SetNativeCoreListGetValueCallback(FNativeCoreListGetValue fn) {
+		NativeCoreListGetValue = fn;
+	}
+	static FNativeCoreArrayPinElementAddress NativeCoreArrayPinElementAddress;
+	static void SetNativeCoreArrayPinElementAddressCallback(FNativeCoreArrayPinElementAddress fn) {
+		NativeCoreArrayPinElementAddress = fn;
+	}
+	static FNativeCorePinGCHandle NativeCorePinGCHandle;
+	static void SetNativeCorePinGCHandleCallback(FNativeCorePinGCHandle fn) {
+		NativeCorePinGCHandle = fn;
+	}
+	static FNativeCoreFreeGCHandle NativeCoreFreeGCHandle;
+	static void SetNativeCoreFreeGCHandleCallback(FNativeCoreFreeGCHandle fn) {
+		NativeCoreFreeGCHandle = fn;
+	}
+	static FNativeCoreGetPropertyValue NativeCoreGetPropertyValue;
+	static void SetNativeCoreGetPropertyValueCallback(FNativeCoreGetPropertyValue fn) {
+		NativeCoreGetPropertyValue = fn;
+	}
+	static FNativeCoreSetPropertyValue NativeCoreSetPropertyValue;
+	static void SetNativeCoreSetPropertyValueCallback(FNativeCoreSetPropertyValue fn) {
+		NativeCoreSetPropertyValue = fn;
+	}
 
 	static FOnShaderTranslated OnShaderTranslated;
 	static void SetOnShaderTranslated(FOnShaderTranslated fn)
@@ -201,4 +261,3 @@ public:
 };
 
 NS_END
-

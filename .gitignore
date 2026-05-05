@@ -9,11 +9,16 @@
 /Module/MainEditor/obj
 /Module/ProjectCooker/obj
 /binaries/net5.0
+/binaries/debug/
+/binaries/release/
+/binaries/temp/
 /binaries/Core.Window.lib
 /binaries/Core.Window.pdb
 /binaries/imgui.ini
 /binaries/Core.Window.dll
 /binaries/Core.Window.exp
+/Core.Window/binaries/
+/artifacts/
 /cache
 /codegen/**/*.h
 /codegen/**/*.cpp
@@ -26,6 +31,8 @@ Module/GameBuilder/obj
 Module/Engine.Android/obj
 Module/CompilingGenerator/obj
 Module/CompilingGenerator/bin
+Module/TtEngineLints/obj
+Module/TtEngineLints/bin
 packages
 binaries/net7.0
 binaries/net8.0
@@ -34,3 +41,4 @@ binaries/Tools/net8.0
 binaries/Plugins
 *.user
 *.pdb
+content/Sheng

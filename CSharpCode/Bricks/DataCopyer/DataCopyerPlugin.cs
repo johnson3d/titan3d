@@ -572,24 +572,16 @@ namespace EngineNS.Bricks.DataCopyer
             creator.AddLine($"namespace EngineNS.Plugins.DataCopyer", ref code);
             creator.PushSegment(ref code);
             {
-                var klsCodes = new string[metas.Count];
-                TtEngine.Instance.EventPoster.ParallelFor(metas.Count, (index, state) =>
+                foreach (var met in metas)
                 {
-                    var met = metas[index];
                     if (met.ClassType.IsValueType)
-                        return;
+                        continue;
 
                     string klsCode = "";
                     var klsCreator = new TtCodeWriter();
                     klsCreator.IntentCount = creator.IntentCount;
                     GenCode(met, klsCreator, ref klsCode);
-                    klsCodes[index] = klsCode;
-                }, -1, null);
-                foreach(var c in klsCodes)
-                {
-                    if (c == null)
-                        continue;
-                    code += c;
+                    code += klsCode;
                 }
                 //foreach (var met in metas)
                 //{
@@ -951,11 +943,6 @@ namespace EngineNS.Bricks.DataCopyer
                 creator.AddLine($"var srcObj = obj as {meta.ClassType.FullName.Replace('+', '.')};", ref code);
                 foreach (var j in i.Propertys)
                 {
-                    if (j.FieldType==null)
-                    {
-                        System.Diagnostics.Debug.Assert(false);
-                        continue;
-                    }
                     if (j.PropInfo != null)
                     {
                         var attr = j.PropInfo.GetCustomAttribute<Rtti.MetaAttribute>();
@@ -970,6 +957,11 @@ namespace EngineNS.Bricks.DataCopyer
                     }
                     else
                     {
+                        if (j.FieldType == null)
+                        {
+                            creator.AddLine($"throw new System.InvalidOperationException(\"DataCopyer reader cannot read missing field type: {meta.ClassMetaName}.{j.PropertyName} ({j.FieldTypeStr})\");", ref code);
+                            continue;
+                        }
                         var type = j.FieldType.FullName.Replace('+', '.');
                         if (IsPrimitiveType(j.FieldType.SystemType))
                         {

@@ -315,28 +315,6 @@ namespace CSharpCodeTools
 
         protected virtual bool GetClassAttribute(ClassDeclarationSyntax decl)
         {
-            foreach (var i in decl.AttributeLists)
-            {
-                foreach (var j in i.Attributes)
-                {
-                    var attributeName = j.Name.NormalizeWhitespace().ToFullString();
-                    if (attributeName.EndsWith("UCs2CppAttribute") || attributeName.EndsWith("UCs2Cpp"))
-                    {
-                        if (j.ArgumentList != null)
-                        {
-                            foreach (var m in j.ArgumentList.Arguments)
-                            {
-                                var argName = m.NormalizeWhitespace().ToFullString();
-                                if (m.NameEquals != null && m.Expression != null)
-                                {
-                                    var name = m.NameEquals.Name.Identifier.ValueText;
-                                }
-                            }
-                        }
-                        return true;
-                    }
-                }
-            }
             return false;
         }
 

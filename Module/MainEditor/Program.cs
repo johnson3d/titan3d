@@ -212,6 +212,21 @@ namespace MainEditor
             Console.WriteLine($"Native Memory Profiler={bNativeMem}");
 
             var task = EngineNS.TtEngine.StartEngine(new EngineNS.TtEngine(args), cfg, bNativeMem);
+            while (task.IsCompleted == false)
+            {
+                if (EngineNS.TtEngine.Instance.Tick() == false)
+                {
+                    break;
+                }
+            }
+            if (task.IsCompleted == false)
+            {
+                throw new InvalidOperationException("Engine startup did not complete before the main loop exited.");
+            }
+            if (task.GetAwaiter().GetResult() == false)
+            {
+                throw new InvalidOperationException("Engine startup failed.");
+            }
             
             while (true)
             {

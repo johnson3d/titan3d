@@ -1,2 +1,5 @@
-cd %~dp0
-%~dp0binaries\Tools\net7.0\CSharpCodeTools.exe %~dp0Rpc_Engine.txt mode=Rpc+AutoSync
+@echo off
+setlocal
+cd /d "%~dp0"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0eng\build.ps1" -CodeGenOnly %*
+exit /b %ERRORLEVEL%

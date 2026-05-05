@@ -27,39 +27,19 @@ namespace CSharpCodeTools
         }
         static void Main(string[] args)
         {
-            string DefNewLine = "\r\n";
-            switch (System.Environment.OSVersion.Platform)
-            {
-                case PlatformID.Xbox:
-                case PlatformID.Win32NT:
-                case PlatformID.Win32Windows:
-                case PlatformID.Win32S:
-                    DefNewLine = "\r\n";
-                    break;
-                case PlatformID.Unix:
-                    DefNewLine = "\n";
-                    break;
-                case PlatformID.MacOSX:
-                    DefNewLine = "\r";
-                    break;
-                case PlatformID.Other:
-                    DefNewLine = "\n";
-                    break;
-            }
             var file = args[0].Replace('\\', '/');
             var idx = file.LastIndexOf('/');
             var dir = file.Substring(0, idx);
-            var cfg = System.IO.File.ReadAllText(file);
-            var segs = cfg.Split(DefNewLine);
+            var segs = System.IO.File.ReadAllLines(file);
 
             bool workRpc = true;
-            bool workCs2Cpp = true;
+            bool workAutoSync = true;
             bool workMacross = true;
             var modes = GetArguments(args, "mode=");
             if (modes != null)
             {
                 workRpc = false;
-                workCs2Cpp = false;
+                workAutoSync = false;
                 workMacross = false;
                 foreach(var i in modes)
                 {
@@ -68,8 +48,8 @@ namespace CSharpCodeTools
                         case "Rpc":
                             workRpc = true;
                             break;
-                        case "Cs2Cpp":
-                            workCs2Cpp = true;
+                        case "AutoSync":
+                            workAutoSync = true;
                             break;
                         case "Macross":
                             workMacross = true;
@@ -102,14 +82,14 @@ namespace CSharpCodeTools
                 }
             }
 
-            text = FindArgument(segs, "Target=");
-            if (text == null)
-            {
-                return;
-            }
-            
             if (workRpc)
             {
+                text = FindArgument(segs, "Target=");
+                if (text == null)
+                {
+                    return;
+                }
+
                 Console.WriteLine("CSharp build event: Rpc");
                 string target = dir + "/" + text;
                 Console.WriteLine($"Target={target}");
@@ -125,36 +105,19 @@ namespace CSharpCodeTools
                 Console.WriteLine("Rpc:Finished");
             }
 
-            text = FindArgument(segs, "Property_Target=");
-            if (text==null)
+            if (workAutoSync)
             {
-                return;
-            }
-
-            if (workCs2Cpp)
-            {
-                Console.WriteLine("CSharp build event: Cs2Cpp");
-
-                text = FindArgument(segs, "Pch=");
-                if (text!=null)
-                {
-                    Cs2Cpp.UCs2CppManager.Instance.Pch = dir + "/" + text;
-                }
-                text = FindArgument(segs, "Cs2Cpp_Target=");
-                if (text==null)
+                text = FindArgument(segs, "Property_Target=");
+                if (text == null)
                 {
                     return;
                 }
-                string cs2cpp_target = dir + "/" + text;
 
-                Cs2Cpp.UCs2CppManager.Instance.GatherCodeFiles(includes, excludes);
-                Console.WriteLine("Cs2Cpp:GatherClass");
-                Cs2Cpp.UCs2CppManager.Instance.GatherClass();
-                Console.WriteLine("Cs2Cpp:WriteCode");
-                Cs2Cpp.UCs2CppManager.Instance.WriteCode(cs2cpp_target);
-                Cs2Cpp.UCs2CppManager.Instance.MakeSharedProjectCSharp(cs2cpp_target + "/cs/", "Cs2Cpp.projitems");
-                Cs2Cpp.UCs2CppManager.Instance.MakeSharedProjectCpp(cs2cpp_target + "/cpp/", "Cs2Cpp.vcxitems");
-                Console.WriteLine("Cs2Cpp:Finished");
+                Console.WriteLine("CSharp build event: AutoSync");
+                string property_target = dir + "/" + text;
+
+                PropertyGen.UPropertyCodeManager.Instance.GatherCodeFiles(includes, excludes);
+                PropertyGen.UPropertyCodeManager.Instance.GatherAutoSyncClass(property_target);
             }
 
             if (workMacross)

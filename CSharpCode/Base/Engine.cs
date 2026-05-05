@@ -467,7 +467,7 @@ namespace EngineNS
             InitTypes(cfgFile, bNatvieMemory, true);
             //this.ConfigManager.Initialize();
 
-            EngineNS.UCs2CppBase.InitializeNativeCoreProvider();
+            EngineNS.Rtti.TtNativeCoreProvider.InitializeNativeCoreBridge();
 
             #region DynConfigData
             this.DynConfigData.LoadConfigData(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "DynConfigData.dcd");
@@ -696,7 +696,7 @@ namespace EngineNS
             EngineNS.IO.TtMemReader.FinalNativeCallback();
             VParallelTaskManager.SetFunction(null);
 
-            EngineNS.UCs2CppBase.FinalCleanupNativeCoreProvider();
+            EngineNS.Rtti.TtNativeCoreProvider.FinalCleanupNativeCoreBridge();
             CoreSDK.FinalF2MManager();
             RootFormManager.ClearRootForms();
 

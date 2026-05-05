@@ -26,8 +26,4 @@
 
   <Import Project="..\..\ClientCommon\ClientCommon.projitems" Label="Shared" />
 
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="$(SolutionDir)CS_Rpc_AutoSync.bat" />
-  </Target>
-
 </Project>

@@ -6,11 +6,6 @@
 #include "../../Math/v3dxVector3.h"
 #include "../../Math/v3dxQuaternion.h"
 
-namespace EngineNS::Rtti
-{
-	struct TtNativeCoreProvider;
-}
-
 #pragma pack(push)
 #pragma pack(1)
 template <class Type>
@@ -24,6 +19,10 @@ NS_BEGIN
 
 struct FDNObjectHandle
 {
+	FDNObjectHandle()
+	: Handle(nullptr) {
+
+	}
 	FDNObjectHandle(void* p) 
 	: Handle(p){
 
@@ -33,11 +32,25 @@ struct FDNObjectHandle
 
 struct TtAnyValue;
 
-struct TR_CLASS(SV_LayoutStruct = 8)
-UCs2CppBase
+struct FNativeCoreProvider
 {
-	UCs2CppBase();
-	~UCs2CppBase();
+	int List_GetCount(FDNObjectHandle listHandle);
+	void List_Add(FDNObjectHandle listHandle, TtAnyValue* value);
+	void List_Clear(FDNObjectHandle listHandle);
+	void List_RemoveAt(FDNObjectHandle listHandle, int index);
+	void List_GetValue(FDNObjectHandle listHandle, int index, TtAnyValue* outValue);
+	void* Array_PinElementAddress(FDNObjectHandle arrayHandle, int index);
+	FDNObjectHandle PinGCHandle(FDNObjectHandle objectHandle);
+	void FreeGCHandle(FDNObjectHandle pinnedHandle);
+	void GetPropertyValue(FDNObjectHandle hostHandle, const char* propName, TtAnyValue* outValue);
+	void SetPropertyValue(FDNObjectHandle hostHandle, const char* propName, TtAnyValue* value);
+};
+
+struct TR_CLASS(SV_LayoutStruct = 8)
+TtManagedObjectBridge
+{
+	TtManagedObjectBridge();
+	~TtManagedObjectBridge();
 	void* mCSharpHandle;
 	inline FDNObjectHandle GetHandle() {
 		return FDNObjectHandle(mCSharpHandle);
@@ -51,7 +64,7 @@ UCs2CppBase
 
 	static void InitializeNativeCoreProvider();
 	static void FinalCleanupNativeCoreProvider();
-	static EngineNS::Rtti::TtNativeCoreProvider* GetNativeCoreProvider();
+	static FNativeCoreProvider* GetNativeCoreProvider();
 };
 
 template<class _Type>
@@ -84,6 +97,7 @@ struct TtAnyValue
 		V2,
 		V3,
 		V4,
+		Bool,
 	};
 	struct FStructDesc
 	{
@@ -135,6 +149,7 @@ struct TtAnyValue
 		v3dVector2_t mV2;
 		v3dVector3_t mV3;
 		v3dVector4_t mV4;
+		bool mBoolValue;
 	};
 	void Dispose()
 	{
@@ -252,6 +267,12 @@ struct TtAnyValue
 		mValueType = EValueType::V4;
 		mV4 = v;
 	}
+	void SetBool(bool v)
+	{
+		Dispose();
+		mValueType = EValueType::Bool;
+		mBoolValue = v;
+	}
 
 	template<class _Type>
 	void GetValue(_Type& v)
@@ -319,6 +340,11 @@ struct TtAnyValue
 	{
 		ASSERT(mValueType == EValueType::Ptr);
 		v = mPointer;
+	}
+	void GetValue(bool& v)
+	{
+		ASSERT(mValueType == EValueType::Bool);
+		v = mBoolValue;
 	}
 	void GetValue(FDNObjectHandle& v)
 	{
@@ -394,6 +420,10 @@ struct TtAnyValue
 	{
 		SetManagedHandle(v);
 	}
+	void SetValue(const bool v)
+	{
+		SetBool(v);
+	}
 	friend constexpr bool operator ==(const TtAnyValue& lh, const TtAnyValue& rh)
 	{
 		if (lh.mValueType != rh.mValueType)
@@ -422,6 +452,8 @@ struct TtAnyValue
 				return lh.mF32Value == rh.mF32Value;
 			case F64:
 				return lh.mF64Value == rh.mF64Value;
+			case Bool:
+				return lh.mBoolValue == rh.mBoolValue;
 			case Name:
 				return lh.mNameIndex == rh.mNameIndex;
 			case Struct:
@@ -525,6 +557,8 @@ struct TtAnyValue
 			return sizeof(float);
 		case F64:
 			return sizeof(double);
+		case Bool:
+			return sizeof(bool);
 		case Name:
 			return sizeof(int);
 		case Struct:

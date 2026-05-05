@@ -1,37 +1,81 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EngineNS.Rtti
 {
-    [Editor.UCs2Cpp]
     public partial class TtNativeCoreProvider
     {
+        unsafe static readonly CoreSDK.FDelegate_FNativeCoreListGetCount NativeCoreListGetCount = NativeCoreListGetCountImpl;
+        unsafe static readonly CoreSDK.FDelegate_FNativeCoreListAdd NativeCoreListAdd = NativeCoreListAddImpl;
+        unsafe static readonly CoreSDK.FDelegate_FFreeManagedObjectGCHandle NativeCoreListClear = NativeCoreListClearImpl;
+        unsafe static readonly CoreSDK.FDelegate_FNativeCoreListRemoveAt NativeCoreListRemoveAt = NativeCoreListRemoveAtImpl;
+        unsafe static readonly CoreSDK.FDelegate_FNativeCoreListGetValue NativeCoreListGetValue = NativeCoreListGetValueImpl;
+        unsafe static readonly CoreSDK.FDelegate_FNativeCoreArrayPinElementAddress NativeCoreArrayPinElementAddress = NativeCoreArrayPinElementAddressImpl;
+        unsafe static readonly CoreSDK.FDelegate_FGetManagedObjectFromGCHandle NativeCorePinGCHandle = NativeCorePinGCHandleImpl;
+        unsafe static readonly CoreSDK.FDelegate_FFreeManagedObjectGCHandle NativeCoreFreeGCHandle = NativeCoreFreeGCHandleImpl;
+        unsafe static readonly CoreSDK.FDelegate_FNativeCoreGetPropertyValue NativeCoreGetPropertyValue = NativeCoreGetPropertyValueImpl;
+        unsafe static readonly CoreSDK.FDelegate_FNativeCoreGetPropertyValue NativeCoreSetPropertyValue = NativeCoreSetPropertyValueImpl;
+
         static TtNativeCoreProvider()
         {
-            InitCallbacks();
+            InitializeNativeCoreBridge();
         }
+
+        public static void InitializeNativeCoreBridge()
+        {
+            CoreSDK.SetNativeCoreListGetCountCallback(NativeCoreListGetCount);
+            CoreSDK.SetNativeCoreListAddCallback(NativeCoreListAdd);
+            CoreSDK.SetNativeCoreListClearCallback(NativeCoreListClear);
+            CoreSDK.SetNativeCoreListRemoveAtCallback(NativeCoreListRemoveAt);
+            CoreSDK.SetNativeCoreListGetValueCallback(NativeCoreListGetValue);
+            CoreSDK.SetNativeCoreArrayPinElementAddressCallback(NativeCoreArrayPinElementAddress);
+            CoreSDK.SetNativeCorePinGCHandleCallback(NativeCorePinGCHandle);
+            CoreSDK.SetNativeCoreFreeGCHandleCallback(NativeCoreFreeGCHandle);
+            CoreSDK.SetNativeCoreGetPropertyValueCallback(NativeCoreGetPropertyValue);
+            CoreSDK.SetNativeCoreSetPropertyValueCallback(NativeCoreSetPropertyValue);
+        }
+
+        public static void FinalCleanupNativeCoreBridge()
+        {
+            CoreSDK.SetNativeCoreListGetCountCallback(null);
+            CoreSDK.SetNativeCoreListAddCallback(null);
+            CoreSDK.SetNativeCoreListClearCallback(null);
+            CoreSDK.SetNativeCoreListRemoveAtCallback(null);
+            CoreSDK.SetNativeCoreListGetValueCallback(null);
+            CoreSDK.SetNativeCoreArrayPinElementAddressCallback(null);
+            CoreSDK.SetNativeCorePinGCHandleCallback(null);
+            CoreSDK.SetNativeCoreFreeGCHandleCallback(null);
+            CoreSDK.SetNativeCoreGetPropertyValueCallback(null);
+            CoreSDK.SetNativeCoreSetPropertyValueCallback(null);
+        }
+
         public static T ObjectFromGCHandle<T>(IntPtr ptr) where T : class
         {
+            if (ptr == IntPtr.Zero)
+                return null;
             return System.Runtime.InteropServices.GCHandle.FromIntPtr(ptr).Target as T;
         }
+
         public unsafe static string MarshalPtrAnsi(void* ptr)
         {
             return System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)ptr);
         }
+
         public unsafe static string MarshalPtrAnsi(IntPtr ptr)
         {
             return System.Runtime.InteropServices.Marshal.PtrToStringAnsi(ptr);
         }
+
         public unsafe static string MarshalPtrUtf8(void* ptr)
         {
             return System.Runtime.InteropServices.Marshal.PtrToStringUTF8((IntPtr)ptr);
         }
+
         public unsafe static string MarshalPtrUtf8(IntPtr ptr)
         {
             return System.Runtime.InteropServices.Marshal.PtrToStringUTF8(ptr);
         }
+
         public static object BoxValue(ref Support.TtAnyValue v)
         {
             switch (v.ValueType)
@@ -75,12 +119,18 @@ namespace EngineNS.Rtti
                     return v.V3;
                 case Support.TtAnyValue.EValueType.V4:
                     return v.V4;
+                case Support.TtAnyValue.EValueType.Bool:
+                    return v.BoolValue;
                 default:
                     return null;
             }
         }
+
         public static unsafe void UnboxObject(object obj, Support.TtAnyValue* v)
         {
+            if (obj == null || v == null)
+                return;
+
             var t = obj.GetType();
             if (t == typeof(sbyte))
             {
@@ -122,6 +172,10 @@ namespace EngineNS.Rtti
             {
                 v->SetF64((double)obj);
             }
+            else if (t == typeof(bool))
+            {
+                v->SetBool((bool)obj);
+            }
             else if (t == typeof(Vector2))
             {
                 v->SetVector2((Vector2)obj);
@@ -147,56 +201,77 @@ namespace EngineNS.Rtti
                 v->SetManagedHandle(System.Runtime.InteropServices.GCHandle.Alloc(obj));
             }
         }
-        [Editor.UCs2Cpp]
-        public int List_GetCount(IList lst)
+
+        unsafe static int NativeCoreListGetCountImpl(void* listHandle)
         {
-            return lst.Count;
+            var lst = ObjectFromGCHandle<IList>((IntPtr)listHandle);
+            return lst?.Count ?? 0;
         }
-        [Editor.UCs2Cpp]
-        public unsafe void List_Add(IList lst, Support.TtAnyValue* v)
+
+        unsafe static void NativeCoreListAddImpl(void* listHandle, Support.TtAnyValue* v)
         {
+            var lst = ObjectFromGCHandle<IList>((IntPtr)listHandle);
+            if (lst == null || v == null)
+                return;
             lst.Add(BoxValue(ref *v));
         }
-        [Editor.UCs2Cpp]
-        public void List_Clear(IList lst)
+
+        unsafe static void NativeCoreListClearImpl(void* listHandle)
         {
-            lst.Clear();
+            var lst = ObjectFromGCHandle<IList>((IntPtr)listHandle);
+            lst?.Clear();
         }
-        [Editor.UCs2Cpp]
-        public void List_RemoveAt(IList lst, int index)
+
+        unsafe static void NativeCoreListRemoveAtImpl(void* listHandle, int index)
         {
+            var lst = ObjectFromGCHandle<IList>((IntPtr)listHandle);
+            if (lst == null || index < 0 || index >= lst.Count)
+                return;
             lst.RemoveAt(index);
         }
-        [Editor.UCs2Cpp]
-        public unsafe void List_GetValue(IList lst, int index, Support.TtAnyValue* v)
+
+        unsafe static void NativeCoreListGetValueImpl(void* listHandle, int index, Support.TtAnyValue* v)
         {
+            var lst = ObjectFromGCHandle<IList>((IntPtr)listHandle);
+            if (lst == null || v == null || index < 0 || index >= lst.Count)
+                return;
             UnboxObject(lst[index], v);
         }
-        [Editor.UCs2Cpp]
-        public unsafe void* Array_PinElementAddress(Array array, int index)
+
+        unsafe static void* NativeCoreArrayPinElementAddressImpl(void* arrayHandle, int index)
         {
+            var array = ObjectFromGCHandle<Array>((IntPtr)arrayHandle);
+            if (array == null || index < 0 || index >= array.Length)
+                return null;
             return System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(array, index).ToPointer();
         }
-        [Editor.UCs2Cpp]
-        public IntPtr PinGCHandle(IntPtr argHandle)
+
+        unsafe static void* NativeCorePinGCHandleImpl(void* objectHandle)
         {
-            var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(argHandle);
+            if (objectHandle == null)
+                return null;
+            var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)objectHandle);
             var pinHandle = System.Runtime.InteropServices.GCHandle.Alloc(handle.Target, System.Runtime.InteropServices.GCHandleType.Pinned);
-            return System.Runtime.InteropServices.GCHandle.ToIntPtr(pinHandle);
+            return System.Runtime.InteropServices.GCHandle.ToIntPtr(pinHandle).ToPointer();
         }
-        [Editor.UCs2Cpp]
-        public void FreeGCHandle(IntPtr argHandle)
+
+        unsafe static void NativeCoreFreeGCHandleImpl(void* pinnedHandle)
         {
-            var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(argHandle);
+            if (pinnedHandle == null)
+                return;
+            var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)pinnedHandle);
             handle.Free();
         }
-        [Editor.UCs2Cpp]
-        public unsafe void GetPropertyValue(IntPtr hostHandle, string propName, Support.TtAnyValue* outValue)
+
+        unsafe static void NativeCoreGetPropertyValueImpl(void* hostHandle, sbyte* propName, Support.TtAnyValue* outValue)
         {
-            var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(hostHandle);
+            if (hostHandle == null || propName == null || outValue == null)
+                return;
+            var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)hostHandle);
             if (handle.Target == null)
                 return;
-            var prop = handle.Target.GetType().GetProperty(propName);
+            var name = MarshalPtrAnsi(propName);
+            var prop = handle.Target.GetType().GetProperty(name);
             if (prop == null)
                 return;
             var propValue = prop.GetValue(handle.Target);
@@ -205,13 +280,16 @@ namespace EngineNS.Rtti
 
             UnboxObject(propValue, outValue);
         }
-        [Editor.UCs2Cpp]
-        public unsafe void SetPropertyValue(IntPtr hostHandle, string propName, Support.TtAnyValue* v)
+
+        unsafe static void NativeCoreSetPropertyValueImpl(void* hostHandle, sbyte* propName, Support.TtAnyValue* v)
         {
-            var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(hostHandle);
+            if (hostHandle == null || propName == null || v == null)
+                return;
+            var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)hostHandle);
             if (handle.Target == null)
                 return;
-            var prop = handle.Target.GetType().GetProperty(propName);
+            var name = MarshalPtrAnsi(propName);
+            var prop = handle.Target.GetType().GetProperty(name);
             if (prop == null)
                 return;
             var value = BoxValue(ref *v);

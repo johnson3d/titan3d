@@ -104,10 +104,10 @@ namespace EngineNS.CodeCompiler
                 //var optionsProvider = new CustomAnalyzerConfigOptionsProvider(analyzerConfigOptions);
                 var name = IO.TtFileManager.GetPureName(outputFile);
                 var compilation = CSharpCompilation.Create(name, syntaxTrees, metaRefs, option);
-                var generatorDriver = CSharpGeneratorDriver.Create(new[] { new CompilingGenerator.BindingCodeIncrementalGenerator() });
+                GeneratorDriver generatorDriver = CSharpGeneratorDriver.Create(new[] { new CompilingGenerator.BindingCodeIncrementalGenerator() });
                 //generatorDriver.WithUpdatedAnalyzerConfigOptions(optionsProvider)
                 //               .RunGeneratorsAndUpdateCompilation(compilation, out var updateCompilation, out var diagnostics);
-                generatorDriver.RunGeneratorsAndUpdateCompilation(compilation, out var updateCompilation, out var diagnostics);
+                generatorDriver = generatorDriver.RunGeneratorsAndUpdateCompilation(compilation, out var updateCompilation, out var diagnostics);
                 var genResult = generatorDriver.GetRunResult();
                 if(genResult.Results.Length > 0)
                 {

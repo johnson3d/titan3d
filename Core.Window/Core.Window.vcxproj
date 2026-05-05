@@ -64,7 +64,6 @@
     <Import Project="..\NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\Image.Shared\Image.Shared.vcxitems" Label="Shared" />
     <Import Project="..\codegen\NativeBinder\CodeGen.vcxitems" Label="Shared" />
-    <Import Project="..\codegen\Cs2Cpp\cpp\Cs2Cpp.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Graphics\Pipeline\Pipeline.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Graphics\Mesh\Mesh.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\FBX\FBX.vcxitems" Label="Shared" />
@@ -167,9 +166,6 @@
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/eigen;../3rd/native/ShaderConductor/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
-    <PreBuildEvent>
-      <Command>$(SolutionDir)CallTHT.bat</Command>
-    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -196,9 +192,6 @@
       <AdditionalLibraryDirectories>../3rd/native/Python3/Win64/libs;../3rd/native/pthread/lib/x64;../3rd/native/NVAftermath/lib/x64;../3rd/native/crunch/lib/$(Configuration);../3rd/native/atlmfc/lib/x64;../3rd/native/SpirvTools/lib/win64;../3rd/native/CGAL/auxiliary/gmp/lib;../3rd/native/embree/embree4/lib;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;../3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug;../3rd/native/ShaderConductor/Lib/Debug;..\3rd\native\metis\5.1.0\libmetis\Debug;%(AdditionalLibraryDirectories);../3rd/native/glslang/lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk.lib;metis.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PreBuildEvent>
-      <Command>$(SolutionDir)CallTHT.bat</Command>
-    </PreBuildEvent>
     <Bscmake>
       <PreserveSbr>true</PreserveSbr>
     </Bscmake>
@@ -229,9 +222,6 @@
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/eigen;../3rd/native/ShaderConductor/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
-    <PreBuildEvent>
-      <Command>$(SolutionDir)CallTHT.bat</Command>
-    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -261,9 +251,6 @@
       <AdditionalLibraryDirectories>../3rd/native/Python3/Win64/libs;../3rd/native/pthread/lib/x64;../3rd/native/NVAftermath/lib/x64;../3rd/native/crunch/lib/$(Configuration);../3rd/native/atlmfc/lib/x64;../3rd/native/SpirvTools/lib/win64;../3rd/native/CGAL/auxiliary/gmp/lib;../3rd/native/embree/embree4/lib;../3rd/native/eigen;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;../3rd/native/eigen-3.4.0;../3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\metis\5.1.0\libmetis\Release;%(AdditionalLibraryDirectories);../3rd/native/glslang/lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk.lib;metis.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PreBuildEvent>
-      <Command>$(SolutionDir)CallTHT.bat</Command>
-    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
@@ -293,13 +280,14 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="..\eng\NativePackages.props" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\WinPixEventRuntime.1.0.220124001\build\WinPixEventRuntime.targets" Condition="Exists('..\packages\WinPixEventRuntime.1.0.220124001\build\WinPixEventRuntime.targets')" />
+    <Import Project="$(TitanPackagesDir)WinPixEventRuntime.$(WinPixEventRuntimeVersion)\build\WinPixEventRuntime.targets" Condition="Exists('$(TitanPackagesDir)WinPixEventRuntime.$(WinPixEventRuntimeVersion)\build\WinPixEventRuntime.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。使用“NuGet 程序包还原”可下载这些程序包。有关更多信息，请参见 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\WinPixEventRuntime.1.0.220124001\build\WinPixEventRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WinPixEventRuntime.1.0.220124001\build\WinPixEventRuntime.targets'))" />
+    <Error Condition="!Exists('$(TitanPackagesDir)WinPixEventRuntime.$(WinPixEventRuntimeVersion)\build\WinPixEventRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(TitanPackagesDir)WinPixEventRuntime.$(WinPixEventRuntimeVersion)\build\WinPixEventRuntime.targets'))" />
   </Target>
 </Project>

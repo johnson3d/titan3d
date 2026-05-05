@@ -26,46 +26,6 @@ extern "C" VFX_API void* SDK_Core_GetObjectFromPointer(void* ptr)
 	return ptr;
 }
 
-//extern "C" VFX_API void TestObjectParameter(void* o, int a)
-//{
-//	if (o == nullptr)
-//	{
-//		return;
-//	}
-//}
-
-//struct UCs2CppBase
-//{
-//	void* mCSharpHandle;
-//	//VNameString mCSFullName;
-//};
-//
-//namespace EngineNS::UTest
-//{
-//	struct UTestCs2CppBuilder : public UCs2CppBase
-//	{
-//		struct FCsMethods
-//		{
-//			FCsMethods()
-//			{
-//				memset(this, 0 ,sizeof(FCsMethods));
-//			}
-//			typedef int (*Func0)(void* self, float a, int b);
-//			Func0 fn_Func0;
-//		};
-//		static FCsMethods CsMethods;
-//		int Func0(float a, int b)
-//		{
-//			return CsMethods.fn_Func0(mCSharpHandle, a, b);
-//		}
-//	};
-//}
-//
-//extern "C" VFX_API void UTestCs2CppBuilder_FCsMethods_SetFunc0(EngineNS::UTest::UTestCs2CppBuilder::FCsMethods::Func0 fn)
-//{
-//	EngineNS::UTest::UTestCs2CppBuilder::CsMethods.fn_Func0 = fn;
-//}
-
 NS_BEGIN
 
 FAssertEvent CoreSDK::mAssertEvent = nullptr;
@@ -73,6 +33,16 @@ FWriteLogString CoreSDK::mWriteLogString = nullptr;
 FCreateManagedObject CoreSDK::CreateManagedObject = nullptr;
 FFreeManagedObjectGCHandle CoreSDK::FreeManagedObjectGCHandle = nullptr;
 FGetManagedObjectFromGCHandle CoreSDK::GetManagedObjectFromGCHandle = nullptr;
+FNativeCoreListGetCount CoreSDK::NativeCoreListGetCount = nullptr;
+FNativeCoreListAdd CoreSDK::NativeCoreListAdd = nullptr;
+FNativeCoreListClear CoreSDK::NativeCoreListClear = nullptr;
+FNativeCoreListRemoveAt CoreSDK::NativeCoreListRemoveAt = nullptr;
+FNativeCoreListGetValue CoreSDK::NativeCoreListGetValue = nullptr;
+FNativeCoreArrayPinElementAddress CoreSDK::NativeCoreArrayPinElementAddress = nullptr;
+FNativeCorePinGCHandle CoreSDK::NativeCorePinGCHandle = nullptr;
+FNativeCoreFreeGCHandle CoreSDK::NativeCoreFreeGCHandle = nullptr;
+FNativeCoreGetPropertyValue CoreSDK::NativeCoreGetPropertyValue = nullptr;
+FNativeCoreSetPropertyValue CoreSDK::NativeCoreSetPropertyValue = nullptr;
 FOnShaderTranslated CoreSDK::OnShaderTranslated = nullptr;
 FOnGpuDeviceRemoved CoreSDK::OnGpuDeviceRemoved = nullptr;
 FSaveMemStream CoreSDK::mSaveMemStream = nullptr;
