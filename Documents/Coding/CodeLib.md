@@ -228,9 +228,224 @@ var texture1 = textureName.GetAsset<NxRHI.TtSrView>().GetResultUntilCompleted();
         [Rtti.Meta("")]
         public string WebApiUrlBase { get; set; } = "http://localhost:7000";
     }
-    //调用
-    TtEngine.Instance.ConfigManager.GetConfig<TtCloudConfig>().CloudAssetUrlBase;
 ```
+
+## 11.让 C# struct / enum 自动生成对应的 HLSL 定义
+- 给 C# `struct` 或 `enum` 加 `[EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FXxx")]`,
+  引擎在编译 shader 时会反射这个类型, 自动产生同名的 HLSL `struct FXxx { ... }` /
+  `static const uint EXxx_Value = N;` 注入到对应 .cginc 的 define 段
+- 这样 C# 端和 HLSL 端**只有一份字段声明**, 改 C# 字段时 HLSL 自动同步, 杜绝
+  "字段对不齐 → cbuffer 偏移错位 → GPU 读垃圾" 这一类问题
+- `TtShaderDefineAttribute` 可配置字段 (定义在 `CSharpCode/Editor/ShaderCompiler/ShaderCode.cs:15`):
+  - `ShaderName`: 生成到 HLSL 的 struct/enum 名。**强制规约**: C# 端 struct 名
+    必须以 `F` 开头、enum 名必须以 `E` 开头, `ShaderName` **保持和 C# 端完全
+    一致** (例如 `FGpuBvhNode` / `EParticleFlags`); 不允许出现裸名 `GpuBvhNode`
+    这种, 否则一眼分不清是 class 还是 struct, 而且和引擎现有 `FShaderBinder` /
+    `FFenceDesc` / `FMeshlet` / `FAdvShadowNodeData` / `FSubResourceFootPrint`
+    等命名风格不统一。详见 CodingGuidelines.md §3.1
+  - `Flags`: `EShaderDefine.HasGet | HasSet`, 控制是否生成 getter/setter
+  - `Condition`: 条件宏 (例如某个 permutation 关闭时不生成)
+  - `Semantic` / `Binder`: VS input / cbuffer binder 时用
+  - `Order`: 字段排序优先级
+- HLSL 端**不要再手写**同名 struct, 直接 `#include` 对应 cginc 后用即可
+- 如果要让 C# struct 的内存布局 (size / alignment / 字段 offset) 严格对齐 GPU,
+  可叠加 `[System.Runtime.InteropServices.StructLayout(LayoutKind.Sequential, Pack = N)]`:
+  - cbuffer 用的 struct 必须 `Pack = 16` (HLSL cbuffer 16 字节边界对齐)
+  - structured buffer 一般 `Pack = 4` 即可, 大多数情况下不写也没问题, 引擎按字段
+    自然对齐生成
+
+```C#
+// 示例 1: structured buffer 的 struct (无 [StructLayout] 也可以工作)
+// 范例: CSharpCode/Bricks/AdvanceShadow/QNode.cs:11
+[EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FAdvShadowNodeData")]
+public struct FAdvShadowNodeData
+{
+    public Matrix mShadowMatrix;
+    public int mChildIndex00;
+    public int mChildIndex01;
+    public int mChildIndex10;
+    public int mChildIndex11;
+    public int mNodeType;
+    public int mPageIndex;
+    public float mZNear;
+    public float mZFar;
+}
+
+// 示例 2: cbuffer 用的 struct, 必须 Pack = 16
+// 范例: CSharpCode/Bricks/AdvanceShadow/AdvanceShadowShading.cs:15
+[EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FAdvShadowLayerData")]
+[System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)] // align 16 for cbv
+public struct FAdvShadowLayerData
+{
+    public Vector2i mLayerStartAndSide;
+    public Vector2 mLayerGridSize;
+}
+
+// 示例 3: enum 同样适用, HLSL 端会得到一组对应的 static const 常量
+// 实证范例: CSharpCode/Bricks/Particle/Emitter.cs:10 (EParticleFlags)
+//          CSharpCode/Bricks/Particle/Emitter.cs:93 (EParticleEmitterStyles)
+[EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "EParticleFlags")]
+public enum EParticleFlags : uint
+{
+    Alive = 0,
+    Dead = 1,
+}
+
+// 示例 4: 字段级 [TtShaderDefine] 可以为 HLSL 端字段单独命名
+// 实证范例: CSharpCode/Bricks/GpuDriven/Cluster.cs:282 (FMeshlet)
+[EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FMeshlet")]
+[System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
+public struct FMeshlet
+{
+    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "VertexOffset")]
+    public uint VertexOffset;
+    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "TriangleOffset")]
+    public uint TriangleOffset;
+}
+```
+
+#### 配套规约 (硬性约束)
+- **C# 端命名必须 `F` 前缀 (struct) / `E` 前缀 (enum)**, `ShaderName` 与 C# 端
+  名字保持完全一致。详见 CodingGuidelines.md §3.1。反例:
+  `[TtShaderDefine(ShaderName = "GpuBvhNode")] public struct GpuBvhNode` —— 没
+  前缀, 不允许; 正例: `[TtShaderDefine(ShaderName = "FGpuBvhNode")] public
+  struct FGpuBvhNode`
+- **`[TtShaderDefine]` struct 内的字段名必须以 `m` 开头** (例如 `mBoxMin` /
+  `mHitProxyId`), 引擎在 `CSharpCode/Editor/ShaderCompiler/ShaderCode.cs:384`
+  里 `Debug.Assert(i.Name[0] == 'm')`, 编译期会**剥掉首字母 `m`** 生成 HLSL 端
+  字段名 (`mBoxMin` -> `BoxMin`); 不带 `m` 前缀会触发断言、Debug 构建直接挂掉。
+  例外: 字段自带 `[TtShaderDefine(ShaderName = "...")]` 标注时, C# 字段名可
+  任意 (引擎用 attribute 里的 `ShaderName` 而不是字段名), 例如 `FMeshlet` 的
+  `VertexOffset` / `TriangleOffset`。详见 CodingGuidelines.md §3.2
+- **任何引用 `[TtShaderDefine]` 自动生成 struct / enum 的 shader, 都必须在
+  顶部 `#include "../../Inc/GlobalDefine.cginc"`** (相对路径按文件深度调整)。
+  这是引擎反射注入 ENGINE_PREPROCESSORTS_INC 块的唯一入口, 不 include 等于
+  这些 struct 在 shader 编译单元里**完全不存在**, 报错形式是 `error X3000:
+  syntax error: unexpected token 'FXxx'` + 一连串看似无关的下游 X3004
+  (`undeclared identifier`)。即使**不用任何 cbuffer / 内置全局**, 只要 shader
+  里出现了 `[TtShaderDefine]` 标注的类型 (无论作为变量类型、StructuredBuffer
+  模板参数还是函数参数), 就必须 include。`.compute` 和 `.cginc` **两端都要
+  include** (即使 .cginc 已 include, .compute 入口文件偶尔会被反射 pass 单独
+  预处理, 双重 include 由 `#ifndef` 守卫去重)。详见 CodingGuidelines.md §3.3
+- HLSL 端**不要再写**和 C# 同名的 `struct` / `enum` / `static const` 定义,
+  否则会和引擎自动生成的版本产生重复定义错误
+- 改 C# 字段顺序 / 类型时, **必须** 重新触发 shader 编译 (改一下对应 .compute /
+  .cginc 文件保存触发, 或重启编辑器), 让自动生成的 HLSL 同步更新; 仅改 C# 不
+  动 shader 文件, 引擎可能复用旧的编译缓存
+- HLSL 内置类型映射: `Vector2/3/4 → float2/3/4`, `Vector2i/3i/4i → int2/3/4`,
+  `Vector2ui → uint2`, `Matrix → float4x4`, `int → int`, `uint → uint`,
+  `float → float`. 不在这个清单里的类型 (例如 `DVector3` / `Color4f`) 不要直接放
+  进 `[TtShaderDefine]` 标注的 struct, 引擎不一定能识别
+- 引擎的 HLSL 反射在 `CSharpCode/Editor/ShaderCompiler/ShaderCode.cs:260+` 和
+  `CSharpCode/Bricks/CodeBuilder/Backends/HLSLBackend.cs:465+`, 排查问题时直接
+  跳到这两处看反射逻辑
+
+## 12.提交 GPU 命令的两条路径: `TtRenderPolicy.QueueCmd` vs `TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd`
+
+引擎对外暴露两个 `QueueCmd` 入口, **签名完全一致**, 但执行时机和归属队列不同。
+选错会出现 "命令晚一帧执行" / "命令脱离 RenderGraph 时序" / "Profiler 抓不到归属
+pass" 这一类现象。
+
+### 12.1 `TtRenderPolicy.QueueCmd` —— RenderGraph 内的"按 policy 归并"路径
+
+签名 (定义见 `CSharpCode/Grapics/Pipeline/RenderPolicy.cs:458`):
+
+```csharp
+public void QueueCmd(NxRHI.FRenderCmd cmd, string name, object tag = null,
+                     NxRHI.EQueueType qType = NxRHI.EQueueType.QU_Default)
+{
+    if (CmdQueue != null)
+    {
+        CmdQueue.QueueCmd(cmd, name, tag, qType);     // ← 入 policy 自己的子队列
+    }
+    else
+    {
+        TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd(cmd, name, tag, qType);  // 透传
+    }
+}
+```
+
+行为分两支:
+
+- **`CmdQueue != null`** (常见情况, RenderGraph 正在 tick): 命令进入 **policy 私有的
+  子 CmdQueue**, **不会立刻** 提交到 GPU; 而是在该 policy `OnRenderGraphCompleted`
+  后由 `CmdQueue.FlushExecute(tsCmd.CmdList)` 一次性 record 到一条 `FTransientCmd`
+  上批量提交。这意味着:
+  - 该命令和当前帧的所有 RenderGraph drawcall **共享同一条 commandlist** (节省
+    submit 开销, 也便于 RenderDoc 抓帧时归属到本帧)
+  - 该命令的 GPU 端时序 = **当前帧 RenderGraph 之后**, 不会插队到 RenderGraph 中间
+  - `tag` 会随命令一起被 CmdQueue 持有, 用于 GPU 完成后的回调 (`OnExecuted` 等)
+- **`CmdQueue == null`** (policy 还没初始化 / 或显式不开子队列): 等价于直接调
+  `RenderQueue.QueueCmd`, 见下条。
+
+适用场景:
+
+- 在 **RenderGraph 节点** 内或在 policy 内部需要追加一条 GPU 命令, 想让它跟随本帧
+  的渲染时序一起提交 (例如 readback copy 在所有 drawcall 写完之后才执行 / RT 拷
+  贝到 system memory / GPU buffer 之间的 dispatch-time copy)。
+- 命令需要绑定到具体的 policy / 视口 (因为不同视口可能用不同的 CmdQueue, 命令
+  混在一起会乱)。
+
+### 12.2 `TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd` —— 全局渲染线程立即执行路径
+
+签名一致 (`name`/`tag`/`qType` 参数同上), 实现是 native 端的 `IGpuQueue`, 入口在
+`CSharpCode/NxRHI/CmdQueue.cs`。
+
+行为: 命令进入 **引擎全局 `RenderQueue`** (单一队列, 跨所有 policy / 视口), 在
+**渲染线程的下一个 tick 立刻被消费**, record 到一条全局 transient cmdlist 后
+submit 到 GPU。**不依赖任何 policy 的生命周期**。
+
+适用场景:
+
+- 命令和具体 policy 没关系 —— 比如全局资源上传 / 全局 readback / shader cache
+  warm-up / TTextureManager 的资源流式调度。
+- 调用方根本不在 RenderGraph 上下文内 —— 比如 `Tools` / `Editor` 命令、worker
+  thread 临时投递、热重载触发的资源刷新。
+- 当前没有任何 `TtRenderPolicy` 实例可用 (例如启动期, RenderGraph 还没建)。
+
+### 12.3 选型决策表
+
+| 你的场景 | 用哪条 |
+|---|---|
+| 在某个 `RenderGraph` 节点的 `Tick` 里追加一条 readback / copy / dispatch | `policy.QueueCmd` |
+| 在 `TtRenderPolicy` 子类的回调里追加命令 | `policy.QueueCmd` |
+| 引擎启动期 / 编辑器 Tools / 热重载时的全局资源更新 | `RenderQueue.QueueCmd` |
+| worker thread / async 任务里临时要扔一条 GPU 命令, 跟视口无关 | `RenderQueue.QueueCmd` |
+| 已经在渲染线程上 (例如 `ITickable.TickRender`), 就是想立刻执行 | `RenderQueue.QueueCmd` |
+| 不确定 —— 但你能拿到 `policy` 引用 | `policy.QueueCmd` (它内部会在 `CmdQueue == null` 时自动降级到全局路径, 兼容性更好) |
+| **❌ 永远不要用** `TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList` | 它绕开引擎的 `RenderQueue`, 失去 CmdQueue 归并 / Profiler hook / policy flush 时序保证, 详见 §12.4 |
+
+> 提交 `TtCommandList` (cmdlist 级) 用 `RenderQueue.QueueCmdlist(cmd, name, qType)`,
+> 提交 `FRenderCmd` (单条 cmd 级) 用 `RenderQueue.QueueCmd(cmd, name, tag, qType)`。
+> 两者都是引擎管理的"正道"入口。
+
+### 12.4 反直觉点 (容易踩的坑)
+
+- **`policy.QueueCmd` 不等于 "立即执行"**: 命令要等 policy 当前帧 RenderGraph
+  完整跑完后才 flush。如果你在 `policy.QueueCmd` 之后**同步** `FetchGpuData` /
+  `fence.Wait`, 大概率拿不到数据 (本仓库已踩过, 见 `NxRHI/Buffer.cs::TtBuffer::
+  AsyncFetchGpuData` 的演化注释 + `CodingGuidelines.md §1.5.3.1`)。
+- **绝不要直接调 `RenderContext.GpuQueue.ExecuteCommandList` / `GpuQueue.QueueCmdlist`
+  之外的任何底层 GpuQueue 提交 API**。`GpuQueue` 是 native 层 `IGpuQueue` 的直接
+  暴露, 走它绕开了引擎的:
+  ① `CmdQueue` 归并机制 (CmdQueue 会把多个 policy / 节点产生的 cmdlist 合到一条
+  transient cmdlist 里减少 submit 开销);
+  ② Profiler / RenderDoc 标签链 (`name` / `tag` 参数走 RenderQueue 才会被 hook);
+  ③ policy `OnRenderGraphCompleted` 时序保证 (走 GpuQueue 直接立即提交, 顺序和
+  RenderGraph 主流交错混乱)。
+  正确做法: cmdlist 级走 `TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist
+  (cmd, name, qType)`, 单条 cmd 级走 `RenderQueue.QueueCmd(cmd, name, tag,
+  qType)` 或对应的 `policy.QueueCmd` / `policy.CommitCommandList`。
+  历史已知违规残留 (待修): `Bricks/Procedure/Node/GpuShading/GpuFetch.cs:51`。
+  详见 CodingGuidelines.md §1.7。
+- **`RenderQueue.QueueCmd` 跨 policy 共享单队列**: 高频投递会和 RenderGraph 主流
+  抢 submit 带宽, 大批量命令优先走 policy 路径让其归并到一条 cmdlist。
+- **`CmdQueue == null` 时 `policy.QueueCmd` 行为 = `RenderQueue.QueueCmd`**: 不要
+  以为 "我用了 policy 路径就一定走子队列", 这取决于 policy 的初始化阶段。需要
+  确定时机时直接看 `policy.CmdQueue` 是不是 null。
+- **`tag` 参数语义不同**: 子 CmdQueue 路径的 `tag` 会被 CmdQueue 强引用直到
+  flush 完成 (用于 `OnExecuted` 回调匹配); 全局 RenderQueue 路径的 `tag` 仅作
+  RenderDoc / Profiler 标签, 不持有引用。
 
 ## 这是没用的LaTex测试，请忽略
 $$\sum_{i=0}^{^9}{\left(\frac{a_i}{b_i}\right)}$$

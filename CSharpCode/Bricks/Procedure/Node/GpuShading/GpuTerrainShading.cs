@@ -121,7 +121,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
                 mCmdList.FlushDraws();
             }
 
-            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);
+            TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(mCmdList, "PCG.ErosionIncWater.Execute", NxRHI.EQueueType.QU_Compute);
         }
     }
 
@@ -214,7 +214,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
                 mCmdList.FlushDraws();
             }
 
-            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);
+            TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(mCmdList, "PCG.Height2Flow.Execute", NxRHI.EQueueType.QU_Compute);
         }
     }
 
@@ -335,7 +335,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
                 mCmdList.FlushDraws();
             }
 
-            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);
+            TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(mCmdList, "PCG.WaterBasin.Execute", NxRHI.EQueueType.QU_Compute);
         }
     }
 }

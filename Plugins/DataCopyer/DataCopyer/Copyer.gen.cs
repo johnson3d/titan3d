@@ -40337,13 +40337,17 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Bricks.Collision.BVH.TtBVHDebugNode.TtBVHDebugNodeData;
 			ar.Write(srcObj.BehaviorName);
 			ar.Write(srcObj.BuildMode);
+			ar.Write(srcObj.ColorByDepth);
 			ar.Write(srcObj.LeafMaxSize);
 			ar.Write(srcObj.LeafMinSize);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxDisplayDepth);
 			ar.Write(srcObj.Name);
 			ar.Write(srcObj.NodeStyles);
 			ar.Write(srcObj.NumLeaves);
 			ar.Write(srcObj.OptimizeIterations);
+			ar.Write(srcObj.RayCount);
+			ar.Write(srcObj.RaySeed);
 			ar.Write(srcObj.Seed);
 			ar.Write(srcObj.SpaceExtent);
 			if (srcObj.BoundVolume != null)
@@ -40395,13 +40399,17 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = src as EngineNS.Bricks.Collision.BVH.TtBVHDebugNode.TtBVHDebugNodeData;
 			tarObj.BehaviorName = srcObj.BehaviorName;
 			tarObj.BuildMode = srcObj.BuildMode;
+			tarObj.ColorByDepth = srcObj.ColorByDepth;
 			tarObj.LeafMaxSize = srcObj.LeafMaxSize;
 			tarObj.LeafMinSize = srcObj.LeafMinSize;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxDisplayDepth = srcObj.MaxDisplayDepth;
 			tarObj.Name = srcObj.Name;
 			tarObj.NodeStyles = srcObj.NodeStyles;
 			tarObj.NumLeaves = srcObj.NumLeaves;
 			tarObj.OptimizeIterations = srcObj.OptimizeIterations;
+			tarObj.RayCount = srcObj.RayCount;
+			tarObj.RaySeed = srcObj.RaySeed;
 			tarObj.Seed = srcObj.Seed;
 			tarObj.SpaceExtent = srcObj.SpaceExtent;
 			if (srcObj.BoundVolume != null)
@@ -40441,6 +40449,370 @@ namespace EngineNS.Plugins.DataCopyer
 			else if (srcObj.Placement == null)
 			{
 				tarObj.Placement = null;
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_551598179085952297 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.Collision.BVH.TtBVHDebugNode.TtBVHDebugNodeData;
+			EngineNS.RName t_BehaviorName;
+			ar.Read(out t_BehaviorName);
+			srcObj.BehaviorName = t_BehaviorName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
+				}
+			}
+			EngineNS.Bricks.Collision.BVH.TtBVHDebugNode.EBuildMode t_BuildMode;
+			ar.Read(out t_BuildMode);
+			srcObj.BuildMode = t_BuildMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BuildMode", false);
+				}
+			}
+			System.Boolean t_ColorByDepth;
+			ar.Read(out t_ColorByDepth);
+			srcObj.ColorByDepth = t_ColorByDepth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ColorByDepth", false);
+				}
+			}
+			EngineNS.Vector3 t_LeafMaxSize;
+			ar.Read(out t_LeafMaxSize);
+			srcObj.LeafMaxSize = t_LeafMaxSize;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "LeafMaxSize", false);
+				}
+			}
+			EngineNS.Vector3 t_LeafMinSize;
+			ar.Read(out t_LeafMinSize);
+			srcObj.LeafMinSize = t_LeafMinSize;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "LeafMinSize", false);
+				}
+			}
+			System.Single t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Int32 t_MaxDisplayDepth;
+			ar.Read(out t_MaxDisplayDepth);
+			srcObj.MaxDisplayDepth = t_MaxDisplayDepth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxDisplayDepth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			EngineNS.GamePlay.Scene.TtNode.ENodeStyles t_NodeStyles;
+			ar.Read(out t_NodeStyles);
+			srcObj.NodeStyles = t_NodeStyles;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeStyles", false);
+				}
+			}
+			System.Int32 t_NumLeaves;
+			ar.Read(out t_NumLeaves);
+			srcObj.NumLeaves = t_NumLeaves;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NumLeaves", false);
+				}
+			}
+			System.Int32 t_OptimizeIterations;
+			ar.Read(out t_OptimizeIterations);
+			srcObj.OptimizeIterations = t_OptimizeIterations;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "OptimizeIterations", false);
+				}
+			}
+			System.Int32 t_Seed;
+			ar.Read(out t_Seed);
+			srcObj.Seed = t_Seed;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Seed", false);
+				}
+			}
+			EngineNS.Vector3 t_SpaceExtent;
+			ar.Read(out t_SpaceExtent);
+			srcObj.SpaceExtent = t_SpaceExtent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SpaceExtent", false);
+				}
+			}
+			EngineNS.Hash64 type_BoundVolume;
+			ar.Read(out type_BoundVolume);
+			var meta_BoundVolume = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BoundVolume);
+			if(meta_BoundVolume != null)
+			{
+				EngineNS.Hash64 ver_BoundVolume;
+				ar.Read(out ver_BoundVolume);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BoundVolume.ClassType.TypeString, ver_BoundVolume );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtBoundVolume t_BoundVolume = null;
+					t_BoundVolume = srcObj.BoundVolume;
+					if (t_BoundVolume == null)
+					{
+						t_BoundVolume = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BoundVolume.ClassType) as EngineNS.GamePlay.Scene.TtBoundVolume;
+					}
+					fn(ar, t_BoundVolume);
+					srcObj.BoundVolume = t_BoundVolume;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BoundVolume", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_Placement;
+			ar.Read(out type_Placement);
+			var meta_Placement = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Placement);
+			if(meta_Placement != null)
+			{
+				EngineNS.Hash64 ver_Placement;
+				ar.Read(out ver_Placement);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Placement.ClassType.TypeString, ver_Placement );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.TtPlacementBase t_Placement = null;
+					t_Placement = srcObj.Placement;
+					if (t_Placement == null)
+					{
+						t_Placement = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Placement.ClassType) as EngineNS.GamePlay.TtPlacementBase;
+					}
+					fn(ar, t_Placement);
+					srcObj.Placement = t_Placement;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Placement", false);
+						}
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3058237123671284569 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.Collision.BVH.TtBVHDebugNode.TtBVHDebugNodeData;
+			EngineNS.RName t_BehaviorName;
+			ar.Read(out t_BehaviorName);
+			srcObj.BehaviorName = t_BehaviorName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
+				}
+			}
+			EngineNS.Bricks.Collision.BVH.TtBVHDebugNode.EBuildMode t_BuildMode;
+			ar.Read(out t_BuildMode);
+			srcObj.BuildMode = t_BuildMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BuildMode", false);
+				}
+			}
+			System.Boolean t_ColorByDepth;
+			ar.Read(out t_ColorByDepth);
+			srcObj.ColorByDepth = t_ColorByDepth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ColorByDepth", false);
+				}
+			}
+			EngineNS.Vector3 t_LeafMaxSize;
+			ar.Read(out t_LeafMaxSize);
+			srcObj.LeafMaxSize = t_LeafMaxSize;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "LeafMaxSize", false);
+				}
+			}
+			EngineNS.Vector3 t_LeafMinSize;
+			ar.Read(out t_LeafMinSize);
+			srcObj.LeafMinSize = t_LeafMinSize;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "LeafMinSize", false);
+				}
+			}
+			System.Single t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Int32 t_MaxDisplayDepth;
+			ar.Read(out t_MaxDisplayDepth);
+			srcObj.MaxDisplayDepth = t_MaxDisplayDepth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxDisplayDepth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			EngineNS.GamePlay.Scene.TtNode.ENodeStyles t_NodeStyles;
+			ar.Read(out t_NodeStyles);
+			srcObj.NodeStyles = t_NodeStyles;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeStyles", false);
+				}
+			}
+			System.Int32 t_NumLeaves;
+			ar.Read(out t_NumLeaves);
+			srcObj.NumLeaves = t_NumLeaves;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NumLeaves", false);
+				}
+			}
+			System.Int32 t_OptimizeIterations;
+			ar.Read(out t_OptimizeIterations);
+			srcObj.OptimizeIterations = t_OptimizeIterations;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "OptimizeIterations", false);
+				}
+			}
+			System.Int32 t_RayCount;
+			ar.Read(out t_RayCount);
+			srcObj.RayCount = t_RayCount;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RayCount", false);
+				}
+			}
+			System.Int32 t_RaySeed;
+			ar.Read(out t_RaySeed);
+			srcObj.RaySeed = t_RaySeed;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RaySeed", false);
+				}
+			}
+			System.Int32 t_Seed;
+			ar.Read(out t_Seed);
+			srcObj.Seed = t_Seed;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Seed", false);
+				}
+			}
+			EngineNS.Vector3 t_SpaceExtent;
+			ar.Read(out t_SpaceExtent);
+			srcObj.SpaceExtent = t_SpaceExtent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SpaceExtent", false);
+				}
+			}
+			EngineNS.Hash64 type_BoundVolume;
+			ar.Read(out type_BoundVolume);
+			var meta_BoundVolume = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BoundVolume);
+			if(meta_BoundVolume != null)
+			{
+				EngineNS.Hash64 ver_BoundVolume;
+				ar.Read(out ver_BoundVolume);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BoundVolume.ClassType.TypeString, ver_BoundVolume );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtBoundVolume t_BoundVolume = null;
+					t_BoundVolume = srcObj.BoundVolume;
+					if (t_BoundVolume == null)
+					{
+						t_BoundVolume = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BoundVolume.ClassType) as EngineNS.GamePlay.Scene.TtBoundVolume;
+					}
+					fn(ar, t_BoundVolume);
+					srcObj.BoundVolume = t_BoundVolume;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BoundVolume", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_Placement;
+			ar.Read(out type_Placement);
+			var meta_Placement = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Placement);
+			if(meta_Placement != null)
+			{
+				EngineNS.Hash64 ver_Placement;
+				ar.Read(out ver_Placement);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Placement.ClassType.TypeString, ver_Placement );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.TtPlacementBase t_Placement = null;
+					t_Placement = srcObj.Placement;
+					if (t_Placement == null)
+					{
+						t_Placement = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Placement.ClassType) as EngineNS.GamePlay.TtPlacementBase;
+					}
+					fn(ar, t_Placement);
+					srcObj.Placement = t_Placement;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Placement", false);
+						}
+					}
+				}
 			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_10198180330706583653 = (EngineNS.IO.IReader ar, object obj)=>
@@ -40605,7 +40977,6 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var srcObj = obj as EngineNS.Bricks.Collision.BVH.TtBVHDebugNode;
 			ar.Write(srcObj.BehaviorName);
-			ar.Write(srcObj.NodeId);
 			if (srcObj.Parent != null)
 			{
 				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.Parent.GetType());
@@ -40675,7 +41046,6 @@ namespace EngineNS.Plugins.DataCopyer
 			var tarObj = tar as EngineNS.Bricks.Collision.BVH.TtBVHDebugNode;
 			var srcObj = src as EngineNS.Bricks.Collision.BVH.TtBVHDebugNode;
 			tarObj.BehaviorName = srcObj.BehaviorName;
-			tarObj.NodeId = srcObj.NodeId;
 			if (srcObj.Parent != null)
 			{
 				if (tarObj.Parent == null || tarObj.Parent.GetType() != srcObj.Parent.GetType())
@@ -40715,6 +41085,83 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Hash64 type_Parent;
+			ar.Read(out type_Parent);
+			var meta_Parent = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Parent);
+			if(meta_Parent != null)
+			{
+				EngineNS.Hash64 ver_Parent;
+				ar.Read(out ver_Parent);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Parent.ClassType.TypeString, ver_Parent );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtNode t_Parent = null;
+					t_Parent = srcObj.Parent;
+					if (t_Parent == null)
+					{
+						t_Parent = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Parent.ClassType) as EngineNS.GamePlay.Scene.TtNode;
+					}
+					fn(ar, t_Parent);
+					srcObj.Parent = t_Parent;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Parent", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_ParentScene;
+			ar.Read(out type_ParentScene);
+			var meta_ParentScene = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_ParentScene);
+			if(meta_ParentScene != null)
+			{
+				EngineNS.Hash64 ver_ParentScene;
+				ar.Read(out ver_ParentScene);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_ParentScene.ClassType.TypeString, ver_ParentScene );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtScene t_ParentScene = null;
+					t_ParentScene = srcObj.ParentScene;
+					if (t_ParentScene == null)
+					{
+						t_ParentScene = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_ParentScene.ClassType) as EngineNS.GamePlay.Scene.TtScene;
+					}
+					fn(ar, t_ParentScene);
+				}
+			}
+			EngineNS.Hash64 type_RootNode;
+			ar.Read(out type_RootNode);
+			var meta_RootNode = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_RootNode);
+			if(meta_RootNode != null)
+			{
+				EngineNS.Hash64 ver_RootNode;
+				ar.Read(out ver_RootNode);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_RootNode.ClassType.TypeString, ver_RootNode );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtNode t_RootNode = null;
+					t_RootNode = srcObj.RootNode;
+					if (t_RootNode == null)
+					{
+						t_RootNode = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_RootNode.ClassType) as EngineNS.GamePlay.Scene.TtNode;
+					}
+					fn(ar, t_RootNode);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_17543872329442000835 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.Collision.BVH.TtBVHDebugNode;
+			EngineNS.RName t_BehaviorName;
+			ar.Read(out t_BehaviorName);
+			srcObj.BehaviorName = t_BehaviorName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
 				}
 			}
 			EngineNS.Hash64 type_Parent;
@@ -163296,11 +163743,14 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Bricks_Collision_BVH_TtBVHDebugNode_TtBVHDebugNodeData.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_Collision_BVH_TtBVHDebugNode_TtBVHDebugNodeData.CopyCurrentVersion;
 				kls.RegVersion(10198180330706583653, EngineNS_Bricks_Collision_BVH_TtBVHDebugNode_TtBVHDebugNodeData.Read_10198180330706583653);
+				kls.RegVersion(551598179085952297, EngineNS_Bricks_Collision_BVH_TtBVHDebugNode_TtBVHDebugNodeData.Read_551598179085952297);
+				kls.RegVersion(3058237123671284569, EngineNS_Bricks_Collision_BVH_TtBVHDebugNode_TtBVHDebugNodeData.Read_3058237123671284569);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.Collision.BVH.TtBVHDebugNode@EngineCore");
 				kls.Writer = EngineNS_Bricks_Collision_BVH_TtBVHDebugNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_Collision_BVH_TtBVHDebugNode.CopyCurrentVersion;
+				kls.RegVersion(17543872329442000835, EngineNS_Bricks_Collision_BVH_TtBVHDebugNode.Read_17543872329442000835);
 				kls.RegVersion(8632070254408373664, EngineNS_Bricks_Collision_BVH_TtBVHDebugNode.Read_8632070254408373664);
 			}
 			{
@@ -166987,7 +167437,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = Survivor_TtWeaponProxyNode.CopyCurrentVersion;
 				kls.RegVersion(10759720178659608122, Survivor_TtWeaponProxyNode.Read_10759720178659608122);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("40_F8_9C_79_D9_48_66_5F_31_07_D3_21_0A_5A_6B_20_0B_C1_B3_24");
+			this.VersionHash = EngineNS.Hash160.Parse("78_C1_39_DA_7A_7D_D8_22_09_AC_F4_F6_AF_BB_95_2C_2F_0C_19_46");
 		}
 	}
 }

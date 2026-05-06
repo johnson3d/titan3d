@@ -1,0 +1,80 @@
+#ifndef _GPU_BVH_TRAVERSAL_H_
+#define _GPU_BVH_TRAVERSAL_H_
+
+// MUST be the first include — even though GpuBvhCommon.cginc below also
+// includes GlobalDefine, .compute entry files are sometimes pre-processed
+// independently by the engine reflection pass; safest to put it explicitly
+// at the top so [TtShaderDefine] structs (FGpuBvhNode/FGpuRay/FGpuHit) are
+// always in scope. See CodingGuidelines.md §3.4.
+#include "../../../Inc/GlobalDefine.cginc"
+
+// =============================================================================
+// GpuBvhTraversal.compute
+//
+// One thread per ray ray-vs-BVH-AABB closest-hit demo. Used by
+// CSharpCode/Bricks/Collision/BVH/TtBVHDebugNode.cs's [Cmd] FGpuRayCast to
+// validate that the on-GPU BVH layout written by TtGpuBvh matches the
+// CPU-side TtDynamicBVH.RayCast results.
+//
+// Resource declaration order matters: the global resources used by the
+// traversal helper inside GpuBvhCommon.cginc are passed in as parameters,
+// so the include order is just helper-after-resources by convention.
+// (See CodingGuidelines.md §3.4 — when helpers reach for globals directly
+// the .compute must declare those globals BEFORE the include; here they
+// don't, so the include can sit at the top.)
+// =============================================================================
+
+#include "GpuBvhCommon.cginc"
+
+// BVH input (uploaded by TtGpuBvh.BuildFromCpuBvh).
+StructuredBuffer<FGpuBvhNode> BvhNodes;
+
+// Per-frame ray batch generated CPU-side by TtBVHDebugNode and uploaded
+// in lock-step with the dispatch.
+StructuredBuffer<FGpuRay> Rays;
+
+// Per-ray closest-hit output. Read back by the CPU and diffed against
+// TtDynamicBVH.RayCast.
+RWStructuredBuffer<FGpuHit> Hits;
+
+cbuffer cbGpuBvhTraversal
+{
+    uint NodeCount;
+    uint RayCount;
+    uint RootIndex;
+    uint Pad0;
+};
+
+/**Meta Begin:(CS_Main)
+HLSL=none
+Meta End:(CS_Main)**/
+[numthreads(64, 1, 1)]
+void CS_Main(uint3 DispatchThreadId : SV_DispatchThreadID)
+{
+    uint rayIdx = DispatchThreadId.x;
+    if (rayIdx >= RayCount)
+        return;
+
+    FGpuRay ray = Rays[rayIdx];
+
+    // HLSL 'out' parameters must bind to plain locals — passing struct fields
+    // (hit.HitT, etc.) directly as out args triggers the X3004 cascade
+    // ("undeclared identifier 'outHitT'") because the function signature
+    // fails to resolve. Use scratch locals then assemble the FGpuHit.
+    float closestT;
+    uint  closestPayload;
+    uint  closestNodeId;
+    TraverseBvhClosest(BvhNodes, NodeCount, RootIndex,
+                       ray,
+                       closestT, closestPayload, closestNodeId);
+
+    FGpuHit hit;
+    hit.HitT       = closestT;
+    hit.HitProxyId = closestPayload;
+    hit.HitNodeId  = closestNodeId;
+    hit.Pad        = 0;
+
+    Hits[rayIdx] = hit;
+}
+
+#endif // _GPU_BVH_TRAVERSAL_H_

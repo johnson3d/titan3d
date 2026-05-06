@@ -151,6 +151,26 @@ namespace EngineNS.NxRHI
         {
             return mCoreObject.FetchGpuData(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, index, blob);
         }
+        /// <summary>
+        /// 异步版 <see cref="FetchGpuData(uint, EngineNS.IBlobObject)"/>。
+        ///
+        /// 实现委托给 <see cref="TtAsyncReadback.RunReadbackAsync"/>, 走低层 readback 路径,
+        /// 不阻塞调用线程也不阻塞渲染线程: <c>CreateReadable</c> 在调用线程做 (纯 CPU record),
+        /// fence wait + FetchGpuData 在 EventPoster TPools 工作线程做, 完成后通过 semaphore
+        /// 唤醒调用线程。详细说明见 <c>Documents/Coding/CodingGuidelines.md §1.5.3.1</c> 和
+        /// <c>§1.6 (EventPoster)</c>。
+        /// </summary>
+        /// <param name="subRes">subresource 索引, 同步版同名参数。</param>
+        /// <param name="blob">调用方分配的 blob, await 返回 true 时数据已就绪。</param>
+        /// <returns>readback 是否成功。</returns>
+        public Thread.Async.TtTask<bool> AsyncFetchGpuData(uint subRes, EngineNS.IBlobObject blob)
+        {
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            return TtAsyncReadback.RunReadbackAsync(
+                cpDraw => mCoreObject.CreateReadable(rc.mCoreObject, (int)subRes, cpDraw),
+                blob,
+                "TtBuffer.AsyncFetch");
+        }
         public NxRHI.IBuffer CreateReadable(int subRes, EngineNS.NxRHI.ICopyDraw cpDraw)
         {
             return mCoreObject.CreateReadable(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, subRes, cpDraw);
@@ -241,6 +261,26 @@ namespace EngineNS.NxRHI
         public bool FetchGpuData(uint index, EngineNS.IBlobObject blob)
         {
             return mCoreObject.FetchGpuData(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, index, blob);
+        }
+        /// <summary>
+        /// 异步版 <see cref="FetchGpuData(uint, EngineNS.IBlobObject)"/>。
+        ///
+        /// 与 <see cref="TtBuffer.AsyncFetchGpuData(uint, EngineNS.IBlobObject)"/> 完全对称,
+        /// 实现委托给 <see cref="TtAsyncReadback.RunReadbackAsync"/>, 走同一条低层 readback 路径:
+        /// <c>CreateReadable</c> 在调用线程做, fence wait + FetchGpuData 在 EventPoster TPools
+        /// 工作线程做, 完成后通过 semaphore 唤醒调用线程, 不阻塞调用线程也不阻塞渲染线程。
+        /// 详细说明见 <c>Documents/Coding/CodingGuidelines.md §1.5.3.1</c> 和 <c>§1.6 (EventPoster)</c>。
+        /// </summary>
+        /// <param name="subRes">subresource 索引, 同步版同名参数 (mip × array slice 平铺索引)。</param>
+        /// <param name="blob">调用方分配的 blob, await 返回 true 时数据已就绪。</param>
+        /// <returns>readback 是否成功。</returns>
+        public Thread.Async.TtTask<bool> AsyncFetchGpuData(uint subRes, EngineNS.IBlobObject blob)
+        {
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            return TtAsyncReadback.RunReadbackAsync(
+                cpDraw => mCoreObject.CreateReadable(rc.mCoreObject, (int)subRes, cpDraw),
+                blob,
+                "TtTexture.AsyncFetch");
         }
         public NxRHI.IBuffer CreateReadable(int subRes, EngineNS.NxRHI.ICopyDraw cpDraw)
         {

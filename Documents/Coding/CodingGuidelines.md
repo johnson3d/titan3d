@@ -600,6 +600,775 @@ radiance", 两家走了完全不同的路, 各有适用场景. TitanEngine 经�
 - **Decal / Light atlas**: decal projector 数量动态变化, 用 bindless 数组
   按 decal ID 索引贴图, 配合 cluster culling.
 
+### 1.5 GPU Buffer 创建/上传/回读规范
+
+**适用场景**: 任何 compute / graphics drawcall 需要的 structured buffer / raw buffer
+(传 SRV / UAV / CBV) 的创建、上传 CPU 数据、回读 GPU 数据.
+
+**强制规则**:
+
+1. **不要手写 `FBufferDesc + CreateBuffer + CreateUAV + CreateSRV` 这一长串**, 引擎已经
+   提供了两个高级封装, 优先使用; 自己手写很容易漏掉 `StructureStride` / `isRaw` /
+   `Usage` / `CpuAccess` 之一, 导致 GPU 报 `DXGI_ERROR_INVALID_CALL` 或 binder 类型
+   不匹配.
+2. **CPU 数据需要持续累积/部分修改后上传** (典型: 每帧增删的对象列表, GPU-driven
+   场景的 instance buffer): 用 `Graphics.Pipeline.TtCpu2GpuBuffer<T>`.
+3. **GPU 端持有, 偶尔重建** (典型: 一次性烘焙好的 BVH/SDF/voxel grid, 无需保留
+   CPU 镜像): 用 `Graphics.Pipeline.TtGpuBuffer<T>`.
+4. **GPU→CPU 回读**: 用 `TtBuffer.FetchGpuData(uint subRes, IBlobObject blob)`,
+   不要自己写 staging buffer + CopyResource + Map/Unmap.
+
+#### 1.5.1 TtCpu2GpuBuffer<T> —— CPU 累积型
+
+`Graphics/Pipeline/GpuBuffer.cs:1-160` 完整实现. 核心特性:
+
+- 内部维护 `Support.TtNativeArray<T> DataArray` 作为 CPU 镜像, 公开
+  `PushData / UpdateData / SetSize / Clear` 接口
+- 第一次 `Flush2GPU` 时按容量创建 `GpuBuffer + Uav + Srv + Cbv` (按
+  `Initialize(BufferTypes)` 传入的 `EBufferType` 决定要创建哪几个 view)
+- **容量自动 1.5x 增长**: 当 `DataArray.Count >= GpuCapacity` 时整体 dispose 重建,
+  否则走 `UpdateGpuData` 增量更新, 不重建 buffer
+- **Usage 自动选择**: 含 `BFT_UAV` 时用 `USAGE_DEFAULT`; 否则用
+  `USAGE_DYNAMIC + CAS_WRITE` (CPU 频繁更新的优化路径)
+- **isRaw 自动判定**: `T` 是 `int/uint/float` 时按 raw buffer 创建, 其他按
+  structured buffer
+
+**标准模板**:
+
+```csharp
+TtCpu2GpuBuffer<MyStruct> mBuffer = new TtCpu2GpuBuffer<MyStruct>();
+mBuffer.Initialize(NxRHI.EBufferType.BFT_SRV);              // ① 一次性
+mBuffer.SetSize(initialCount);                              // ② 预分配
+
+// 累积/更新数据 (任何线程, 不触发 GPU 操作)
+for (int i = 0; i < n; i++) mBuffer.UpdateData(i, in items[i]);
+
+// 在合适的 cmd list 上 flush (典型: Tick 开头, 渲染前)
+mBuffer.Flush2GPU(cmd);                                     // ③ 增量更新或重建
+
+// drawcall 用 mBuffer.Srv / Uav / Cbv 绑定 (在 OnDrawCall 里, §1.2)
+drawcall.BindSrv("MyBuffer", mBuffer.Srv);
+```
+
+**反例**:
+
+```csharp
+// ❌ 自己 new TtBuffer + new SRV/UAV, 容量管理/usage 选择/isRaw 判定全部要自己写
+var bfDesc = new FBufferDesc();
+bfDesc.SetDefault(false, EBufferType.BFT_SRV);
+bfDesc.Size = ...; bfDesc.StructureStride = ...; bfDesc.InitData = ...;
+var buf = rc.CreateBuffer(in bfDesc);
+var srv = rc.CreateSRV(buf, in srvDesc);
+// ↑ 一旦数据 size 变了又得整体重写, 用 TtCpu2GpuBuffer<T> 一行 SetSize 搞定
+```
+
+**实战参考**: `Bricks/AdvanceShadow/QTileTree.cs:101-218` —— `FAdvShadowNodeData`
+配合 `TtCpu2GpuBuffer<T>` 的端到端用法 (`Initialize → SetSize → UpdateData →
+Flush2GPU`).
+
+#### 1.5.2 TtGpuBuffer<T> —— GPU 常驻型
+
+`Graphics/Pipeline/GpuBuffer.cs:206+` 完整实现. 核心特性:
+
+- 没有 CPU 镜像, 只有 `GpuResource + Uav + Srv + Cbv + Rtv + Dsv`
+- `SetSize(count, pInitData, bufferType)` 一把全部创建; `pInitData` 传 null 表示
+  GPU-only (典型: ping-pong 的 reservoir buffer)
+- 没有 `Flush2GPU` —— 重新 `SetSize` 等于整体重建
+- 同样支持 `SetTexture2D` 一行创建 2D 纹理 (含 UAV/SRV)
+
+**适用场景**: 一次烘焙好就长期持有的 GPU 数据 (BVH 节点表 / SDF 体素 / voxel
+grid), 或 ping-pong 的 GPU-only reservoir.
+
+**反例**:
+
+```csharp
+// ❌ 不要拿 TtGpuBuffer<T> 当 "每帧追加" buffer 用 —— 它没有 Append/Resize 概念,
+//    每次 SetSize 都整体重建. 这种场景换 TtCpu2GpuBuffer<T>.
+gpuBuf.SetSize(newCount, ...);  // 每帧都做这个 = 每帧整体重建 GPU 资源
+```
+
+**实战参考**: `Grapics/Pipeline/GI/ReSTIR/ReSTIRGINode.cs` —— `mReservoirBuffers`
+是 GPU-only ping-pong, 用 `TtGpuBuffer<FReSTIRPackedReservoir>` + `SetSize(count,
+IntPtr.Zero.ToPointer(), ...)` 创建; `Bricks/Collision/BVH/TtGpuBvh.cs` ——
+BVH 节点表一次烘焙长期持有.
+
+#### 1.5.3 TtBuffer.FetchGpuData —— GPU→CPU 回读
+
+`NxRHI/Buffer.cs:150` (`TtBuffer`), `:241` (`TtTexture`) 完整实现. 签名:
+
+```csharp
+public bool FetchGpuData(uint index, EngineNS.IBlobObject blob);
+```
+
+**强制规则**:
+
+1. **不要自己创建 staging buffer + CopyResource + Map/Unmap**. `FetchGpuData`
+   内部自动判断目标 buffer 的 `GpuAccess` 状态, 必要时 copy 到 cpu-readable
+   staging buffer 并 flush queue, 调用方拿到的 `IBlobObject` 已是 cpu 可读.
+2. **同步阻塞**: 调用返回时 GPU 写入已完成, 数据已经在 `blob.DataPointer` 里.
+   不需要 fence wait.
+3. 调用方负责用 `using (var blob = new Support.TtBlobObject())` 管理 blob 生命
+   周期, 用 `blob.Size` / `blob.DataPointer` 读出原始字节, 自己 cast 成目标
+   struct 数组.
+4. **代价不低**: 内部可能涉及 staging copy + queue flush, **不要在主渲染循环里
+   每帧调用**. 用于 debug / 离线对照 / 烘焙 readback.
+5. **⚠️ blob 头部有 8 字节 pitch 头, 必须跳过才是真数据**. `IBuffer::FetchGpuData`
+   (native, NxRHI/Buffer.cpp) 实现里固定先 PushData 两个 `UINT` 再 push buffer
+   raw bytes:
+
+   ```cpp
+   // native 实现, 字面照搬
+   blob->PushData(&subRes.RowPitch,   sizeof(UINT));   // [0..4)
+   blob->PushData(&subRes.DepthPitch, sizeof(UINT));   // [4..8)
+   blob->PushData(subRes.pData, this->Desc.Size);      // [8..)  ← 真正的 buffer 数据
+   ```
+
+   所以 `blob.Size == 8 + Desc.Size`, **真数据从 offset 8 开始**, C# 端读取必须:
+
+   ```csharp
+   const uint kBufferReadbackHeader = sizeof(uint) * 2;  // 8
+   var pSrc = (byte*)blob.DataPointer + kBufferReadbackHeader;
+   ```
+
+   反例: 直接 `MemoryCopy(blob.DataPointer, pDst, count*sizeof(T), ...)` —— 前
+   8 字节 pitch 当 `T[0]` 的前 8 字节读, 整个数组错位 8B, 最后一个元素缺尾巴
+   8B 没读到。本仓库 `TtGpuBvh.ReadbackHits` 踩过这个坑 (FGpuHit 16B → 错位
+   半个 hit, 表现是"hit 列表整体平移、最后一个 hit 全是垃圾值")。
+
+   **`ITexture::FetchGpuData` 头部布局相同** (也是 `RowPitch + DepthPitch + raw
+   bytes`), 但 texture 路径**必须用 `RowPitch` 做按行 stride 走指针**, 不能假设
+   `RowPitch == width * sizeof(pixel)` —— GPU 端为 cache line 对齐 (常见 256B)
+   通常会把 RowPitch padding 到比 `width * sizeof(pixel)` 大。下面是
+   `Bricks/Procedure/Node/Algorithm/GpuErosionNode.cs:46-65` 的真实代码 (R32_FLOAT
+   单通道纹理 → CPU `Output` buffer):
+
+   ```csharp
+   readTexture.FetchGpuData(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject,
+                            0, blob.mCoreObject);
+   using (var reader = IO.TtMemReader.CreateInstance(
+                           (byte*)blob.DataPointer, blob.Size))
+   {
+       uint rowPitch, depthPitch;
+       reader.Read(out rowPitch);                            // [0..4)
+       reader.Read(out depthPitch);                          // [4..8)
+       // 注意: 原版 GpuErosionNode.cs:53 在这两行之后又写了一行
+       //   rowPitch = (uint)(sizeof(float) * Output.Width);
+       // 把 native 返回的 rowPitch 直接覆盖掉。该行没有注释说明意图, 不清楚是
+       // 历史遗留、特定 staging texture 的优化, 还是潜在 bug。**新代码请直接信任
+       // native 返回的 rowPitch (它代表真实 stride, 含 GPU cache line padding),
+       // 不要照抄这一行覆盖**。
+       var pImage = (byte*)blob.DataPointer + reader.GetPosition();   // [8..)
+       for (int y = 0; y < Output.Height; y++)
+       {
+           for (int x = 0; x < Output.Width; x++)
+           {
+               Output.SetFloat1(x, y, 0, ((float*)pImage)[x]);   // 一行内连续读
+           }
+           pImage += rowPitch;                               // ← 关键: 跨行用 rowPitch
+       }
+   }
+   ```
+
+   buffer 路径就简单 —— 用户原贴的 native 实现:
+   `blob->PushData(subRes.pData, this->Desc.Size);` 写的是 buffer 的逻辑大小
+   `Desc.Size`, **不是** `RowPitch * something`, 所以 buffer 没有"按行跨指针"的
+   概念, 直接 `(byte*)blob.DataPointer + 8` 开始连续读 `Desc.Size` 字节即可。
+   头部那 8 字节的 `RowPitch` / `DepthPitch` 对 buffer 没意义 (native 端塞进去
+   是为了让 buffer / texture 两条路径的 blob 头格式保持一致, 方便复用同一套
+   `IO.TtMemReader` 解析逻辑)。
+
+**标准模板**:
+
+```csharp
+using (var blob = new Support.TtBlobObject())
+{
+    bool ok = mBuffer.GpuBuffer.FetchGpuData(0, blob.mCoreObject);
+    if (!ok) return;
+
+    // 跳过 IBuffer::FetchGpuData 写在 blob 头部的 8 字节 (RowPitch + DepthPitch)
+    const uint kBufferReadbackHeader = sizeof(uint) * 2;
+
+    uint expected = (uint)sizeof(MyStruct) * elementCount;
+    if (blob.Size < kBufferReadbackHeader + expected) { /* 报错 */ return; }
+
+    var hits = new MyStruct[elementCount];
+    fixed (MyStruct* pDst = hits)
+    {
+        var pSrc = (byte*)blob.DataPointer + kBufferReadbackHeader;
+        System.Buffer.MemoryCopy(pSrc, pDst, expected, expected);
+    }
+    // 用 hits ...
+}
+```
+
+> **Texture readback 标准模板**: 直接复用上面规则 5 内嵌的 `GpuErosionNode.cs`
+> 完整代码 (用 `IO.TtMemReader` 解析 8B 头 + 用返回的 `rowPitch` 走行 stride)。
+> 这里不重复贴, 因为 buffer / texture 两条路径只在"如何使用读出来的字节"这一步
+> 不同, blob 头部 + skip 8B 的部分完全相同。
+
+**实战参考**:
+- `Bricks/GpuDriven/Cluster.cs:509` —— Buffer 路径: 烘焙后 readback triangles
+- `Bricks/Procedure/Node/GpuNode/Height2FlowMap.cs:47` —— Texture 路径的同款用法
+- `Bricks/Procedure/Node/Algorithm/GpuErosionNode.cs:46-65` —— Texture 路径完整范例
+  (含 `IO.TtMemReader` 解析 8B 头 + 按 `rowPitch` 走 stride 的真实代码)
+- `Bricks/Collision/BVH/TtGpuBvh.cs` —— `ReadbackHits` 把 BVH dispatch 结果拉回
+  CPU 与 `TtDynamicBVH.RayCast` 对照 (debug-only)
+
+##### 1.5.3.1 AsyncFetchGpuData —— 非阻塞回读 (推荐用于非 debug 场景)
+
+`NxRHI/Buffer.cs` 给 `TtBuffer` / `TtTexture` 都提供了对称的异步版本:
+
+```csharp
+public async Thread.Async.TtTask<bool> AsyncFetchGpuData(uint subRes, IBlobObject blob);
+```
+
+**何时用异步版**:
+
+- **生产路径上的 readback** (例如 GPU pick / culling 结果反馈 / 烘焙流水线)
+  必须用 async, 否则会阻塞调用线程 (UI 线程 / 编辑器主循环) 等几毫秒~几十毫秒,
+  造成卡顿。
+- **debug 一次性回读** (例如 BVH GpuRayCast 按钮对照 CPU 结果) 可以继续用同步版,
+  反正调用方就是要等结果, await 链反而把代码搞复杂。
+
+**强制规则**:
+
+1. **绝对不能写"`RenderQueue.QueueCmd` 里同步 `FetchGpuData` + `Release`"**。`FetchGpuData`
+   内部含 `fence.Wait`, 把它丢进 `QueueCmd` 等于让渲染线程同步等 GPU, 会**吞一帧渲染**。
+   本仓库历史踩过这个坑, 引擎层封装的标准做法是 fence wait 必须在引擎 TPools 工作线程跑
+   (见 §1.6 关于 `EventPoster.RunOn` 与 `EAsyncTarget.TPools` 的说明)。
+2. **路径**: 调用线程 `CreateReadable` (record copy 到 staging) →
+   `EventPoster.RunOn(callback, EAsyncTarget.TPools)` 投递到 TPools 工作线程:
+   `FTransientCmd` 提交 cpDraw + `IncreaseSignal(fence)` + `fence.Wait(1)` (阻塞
+   该 TPools 工作线程而非渲染/调用线程) + 从 staging buffer `FetchGpuData` 到 blob +
+   `semaphore.Release()` → 调用线程 `await sem.Await()` 非阻塞挂起后唤醒。
+3. **必须用 `EAsyncTarget.TPools`**, 不能用 `AsyncIO`/`Logic`/`Render` 这些**单专线**目标。
+   单专线上的 fence wait 会阻塞该专线后排队的其他任务; TPools 是真正的多线程池,
+   任务之间无依赖、可并行 (见 §1.6 选型表)。
+4. **资源生命周期**: cpDraw / fence 是 C# `AuxPtrType`, 用 `Dispose`; `readable` 是
+   native `IBuffer`, 用 `Release()` 不是 `Dispose`。`semaphore.FreeSemaphore()` 也
+   要在 await 之后调一次。引擎封装的 `AsyncFetchGpuData` 已经把这些处理好, 调用方
+   只管 `using` 自己的 blob。
+5. **异常安全**: `EventPoster.RunOn` 回调里**任何异常**都必须走 `finally { sem.Release(); }`,
+   否则 `await` 端永远挂起 (引擎封装已实现)。
+
+**标准模板** (调用方视角, 参考 `Bricks/Collision/BVH/TtGpuBvh.cs::ReadbackHitsAsync`):
+
+```csharp
+public async Thread.Async.TtTask<(bool ok, MyStruct[] data)> ReadbackAsync()
+{
+    using (var blob = new Support.TtBlobObject())
+    {
+        bool ok = await mBuffer.GpuBuffer.AsyncFetchGpuData(0, blob.mCoreObject);
+        if (!ok) return (false, null);
+
+        unsafe
+        {
+            // 同同步版: 跳过 IBuffer::FetchGpuData 写在 blob 头部的 8 字节 (RowPitch + DepthPitch)
+            const uint kBufferReadbackHeader = sizeof(uint) * 2;
+
+            uint expected = (uint)sizeof(MyStruct) * elementCount;
+            if (blob.Size < kBufferReadbackHeader + expected) return (false, null);
+
+            var data = new MyStruct[elementCount];
+            fixed (MyStruct* pDst = data)
+            {
+                var pSrc = (byte*)blob.DataPointer + kBufferReadbackHeader;
+                System.Buffer.MemoryCopy(pSrc, pDst, expected, expected);
+            }
+            return (true, data);
+        }
+    }
+}
+```
+
+> **Texture async readback**: 框架完全相同 —— 把上面 buffer 模板里的
+> `mBuffer.GpuBuffer.AsyncFetchGpuData(...)` 换成 `mTexture.GpuTexture.AsyncFetchGpuData(...)`,
+> 然后**读出来的字节按 §1.5.3 规则 5 的 texture 路径处理**(用 `IO.TtMemReader`
+> 解析 8B 头 + 按返回的 rowPitch 走行 stride, 不要假设 RowPitch == width *
+> sizeof(pixel))。这里不再重复贴 texture 完整代码, 见规则 5 的 `GpuErosionNode.cs`
+> 范例。
+
+**实战参考**:
+- `Bricks/Collision/BVH/TtGpuBvh.cs::ReadbackHitsAsync` —— 完整 async readback 范例
+- `Editor/Snapshot.cs:284 Texture2MemImage` —— 异步版底层路径的"原型", 异步封装即把
+  这套 fence + transient cmd 模式从渲染线程挪到 ThreadPool 的产物
+- `Editor/Snapshot.cs:175 EnqueueAutoGen` —— `TtSemaphore.Await` 在 async 链路上的范例
+
+#### 1.5.4 选型决策表
+
+| 场景 | 推荐封装 | 理由 |
+|---|---|---|
+| 每帧 CPU 累积 → 上传 GPU (instance/灯光列表/物体属性表) | `TtCpu2GpuBuffer<T>` | DataArray 镜像 + 增量 UpdateGpuData + 自动扩容 |
+| 一次烘焙长期持有 (BVH/SDF/voxel) | `TtGpuBuffer<T>` | GPU-only, 无 CPU 镜像浪费 |
+| GPU-only ping-pong (reservoir/history) | `TtGpuBuffer<T>` 配 `pInitData=null` | 同上 |
+| 临时 vertex/index buffer (debug 线条/aabb) | `TtTransientBuffer` | 跨帧不持有, 帧末释放 |
+| GPU→CPU 回读 (debug/烘焙) | `TtBuffer.FetchGpuData` | 自动 staging+flush |
+| Constant buffer (per-pass 参数) | `rc.CreateCBV(binder)` + 见 §1.1 | 走 CBV 专用路径, 不用上面四个 |
+
+### 1.6 异步任务投递 —— 必须使用 EventPoster, 禁止直接用 .NET ThreadPool
+
+**适用场景**: 任何需要把工作丢到非调用线程上跑的场景 —— 资产加载、IO、烘焙、物理仿真、
+GPU readback 的 fence wait、并行 culling、长耗时计算等。
+
+**强制规则**:
+
+1. **所有异步投递必须走 `TtEngine.Instance.EventPoster`**, 不要直接用
+   `System.Threading.ThreadPool.QueueUserWorkItem` / `Task.Run` / 自建 `Thread`。
+   引擎线程模型由 `TtContextThreadManager` 统一管理 (`CSharpCode/Base/Thread/Async/
+   ContextThreadManager.cs`), 每个 `EAsyncTarget` 都有专属上下文 + stack size 配置 +
+   profiler hook + frame end 回流, 绕开它会丢失这些设施而且容易死锁。
+2. **必须显式选 `EAsyncTarget`**, 默认值 `AsyncIO` 只适合 IO 类任务, 不要图省事全用
+   默认。选错 target (例如把 fence wait 放 `AsyncIO`) 会阻塞专线上排队的真正 IO 任务。
+3. **`TPools` 上跑的任务之间不能有依赖**, 因为线程池有多条线程并行取任务, 顺序不保证。
+   有依赖关系的串行链应该用 `Logic` / `AsyncIO` 单专线。
+4. **`RunOn` 是 fire-and-forget**, 不返回 awaitable; 需要等结果用 `Post` (返回
+   `FTaskAwaiter<T>` 可 `await`) 或配 `TtSemaphore.Await()` (见 §1.5.3.1 范例)。
+5. **传参用 `userArgs` + `static lambda`**, 不要用 closure。closure 会捕获外层变量
+   分配额外对象; `static lambda + userArgs` 让回调零分配。
+
+#### 1.6.1 核心 API 速查
+
+| API | 签名 / 用途 | 何时用 |
+|---|---|---|
+| `RunOn<T>(evt, target=AsyncIO, userArgs=null, completedEvent=null)` | fire-and-forget, 不返回 awaitable | 投递不需要 await 结果的任务; 配 `TtSemaphore.Await()` 实现 await 语义 |
+| `Post<T>(evt, target=AsyncIO)` → `FTaskAwaiter<T>` | 可 `await`, 完成后**自动调度回调用线程** | 需要拿返回值且后续代码要回到原线程 |
+| `PostTask(target, TtAsyncTaskState<bool>)` | 投递已构造好的 task 实例 | 复杂场景, 自己控制 task lifecycle |
+| `AwaitSemaphore(smp)` | 内部由 `TtSemaphore.Await()` 调用 | 不要直接调, 用 `await sem.Await()` |
+
+#### 1.6.2 EAsyncTarget 选型表
+
+定义见 `Base/Thread/Async/ContextThreadManager.cs:29`。每个 target 都有独立 stack size
+配置 (`TtThreadConfig`)。
+
+### 1.7 GPU 命令提交必须走 RenderQueue, 禁用 `RenderContext.GpuQueue` 直接 submit
+
+**适用场景**: 所有需要把 `TtCommandList` / `FRenderCmd` 交给 GPU 执行的位置 ——
+RenderGraph 节点 Tick、editor cmd 按钮、async readback 投递、热重载 / Tools / 烘焙
+脚本里的 GPU 操作等等。
+
+**强制规则**:
+
+1. **`TtCommandList` 级别提交必须走** `TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(cmd, name, qType)`
+   或 `policy.CommitCommandList(cmd, name, qType)`。
+2. **`FRenderCmd` 单条 cmd 提交必须走** `TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd(cmd, name, tag, qType)`
+   或 `policy.QueueCmd(cmd, name, tag, qType)`。
+3. **绝对禁止** 直接调用 `TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(...)`
+   / `RenderContext.GpuQueue.QueueCmdlist(...)` 等任何**底层 `IGpuQueue`** 上的提交 API。
+   `RenderContext.GpuQueue` 是 native 层 `IGpuQueue` 的直接暴露, 仅供引擎内部 (CmdQueue
+   / RenderQueue) 调用, 业务代码不该直接接触。
+4. `IncreaseSignal` / `WaitToSignal` 等 fence 操作仍然在 `RenderContext.GpuQueue` 上, 这些
+   不是 cmdlist 提交, 不在禁用范围 (例如 `NxRHI/Buffer.cs` 的 `AsyncFetchGpuData` 仍然
+   显式调 `rc.GpuQueue.IncreaseSignal(fence)`, 这是合规的)。
+
+**为什么必须遵守**:
+
+直接调 `GpuQueue.ExecuteCommandList` 看起来"更直接、少一层", 实际绕开了引擎的三套关键设施:
+
+- **CmdQueue 归并**: 引擎的 `RenderQueue` 内部维护 transient cmdlist 池, 把同一 tick
+  里所有 `QueueCmdlist` 进来的 cmdlist 合到一条 (或少数几条) cmdlist 后再 submit, 大幅
+  降低 native submit 调用频率 (尤其在 D3D12 / Vulkan 这种 submit 开销显著的 RHI 上)。
+  绕开后每条 cmd 走自己的 submit, 同等帧 native API 调用数能涨 5-10x。
+- **Profiler / RenderDoc 标签链**: `name` / `tag` 参数走 `RenderQueue` 才会被引擎的
+  cpu profiler 接 + 注入到 RenderDoc 抓帧的 event marker。直接走 `GpuQueue` 时这两个
+  参数即使传了也只是被 native 层忽略, RenderDoc 抓帧后 event 树里完全找不到归属。
+- **policy 时序保证**: `RenderQueue` 的 flush 由引擎在合适的时机 (帧末 / RenderGraph
+  完成回调) 触发, 保证和 RenderGraph 主流的提交顺序一致。直接走 `GpuQueue` 是同步立即
+  submit, 顺序和 RenderGraph 任意交错 —— 表现是 "有时正常、有时画面缺一块" 这类难复现
+  bug, 抓帧才能看出来 cmd 顺序乱。
+
+**正例**:
+
+```csharp
+// cmdlist 级 (例如 compute dispatch)
+mShading.SetDrawcallDispatch(this, null, mDrawcall, gx, 1, 1, true);
+mCmdList.PushGpuDraw(mDrawcall);
+mCmdList.FlushDraws();
+TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(
+    mCmdList, "GpuBvh.RayCast", EQueueType.QU_Compute);   // ✓ 走 RenderQueue
+
+// 单条 cmd 级 (例如 readback copy)
+TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd(
+    cpDraw, "MyReadback.Copy", null, EQueueType.QU_Default);  // ✓ 走 RenderQueue
+
+// 在 RenderGraph 节点里更优先用 policy 路径
+policy.CommitCommandList(mCmdList, "MyNode.Dispatch");  // ✓ 走 policy (CmdQueue 归并)
+
+// fence signal/wait 仍在 GpuQueue, 这是合规的 (不是 cmdlist 提交)
+rc.GpuQueue.IncreaseSignal(fence);                        // ✓ fence 操作不在禁用范围
+fence.Wait(1);
+```
+
+**反例 (本仓库已知违规, 摘自 `Bricks/Procedure/Node/GpuShading/GpuFetch.cs:51-52`)**:
+
+```csharp
+// ❌ 绕开 RenderQueue 直接 submit, 失去 CmdQueue 归并 + Profiler hook + 时序保证
+//    mCmdList / mFinishFence 是 GpuFetch 节点的成员字段, 此处片段保留原文件名引用便于追溯
+TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(
+    mCmdList, NxRHI.EQueueType.QU_Compute);
+TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(
+    mFinishFence, NxRHI.EQueueType.QU_Compute);
+```
+
+`IncreaseSignal` 本身合规 (fence 操作允许走 GpuQueue), 真正违规的是上面那条
+`ExecuteCommandList` —— 应改写为 `TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(
+mCmdList, "GpuFetch.Submit", NxRHI.EQueueType.QU_Compute);` 让引擎做归并和时序管理。
+新写代码不许跟随这个反例。
+
+**自检清单**:
+
+- [ ] 本次新写的代码里有没有出现 `RenderContext.GpuQueue.ExecuteCommandList` /
+      `RenderContext.GpuQueue.QueueCmdlist` 字样? 有的话改成
+      `RenderQueue.QueueCmdlist` 或 `policy.CommitCommandList`。
+- [ ] 在 RenderGraph 节点上下文里, 有没有可以拿到 `policy` 的位置? 有的话优先用
+      `policy.QueueCmd` / `policy.CommitCommandList` 让 CmdQueue 帮你做归并。
+- [ ] grep 全仓 `RenderContext\.GpuQueue\.(Execute|Queue)` 看有没有新增违规点 (注意
+      正则要包含 `Execute` —— 真实方法名是 `ExecuteCommandList` 全词, 不是
+      `ExecuteCmdlist`; 写成 `Cmdlist?` 会漏掉这个最常被误用的 API)。本任务后
+      剩余应该只有 `GpuFetch.cs:51` 一处历史残留 (调用 `ExecuteCommandList`)。
+
+---
+
+## 3. 命名规范
+
+### 3.1 C# 端 struct 必须 `F` 前缀, enum 必须 `E` 前缀
+
+**适用场景**: 所有在 `CSharpCode/` 下新建的 `struct` / `enum`, 尤其是用作 GPU buffer
+元素 / cbuffer 布局 / shader 端类型对照的 POD 结构。
+
+**强制规则**:
+
+1. **`struct` 类型名必须以 `F` 开头** (取自 "Field-only struct" 的 F, 也对应引擎
+   现有所有 native struct 的命名风格)。
+2. **`enum` 类型名必须以 `E` 开头**。
+3. **`class` 类型名仍用 `Tt` 开头** (TitanEngine 类前缀, 现状不变, 例如
+   `TtBuffer` / `TtRenderPolicy`)。
+4. **C# 端名字与 `[TtShaderDefine(ShaderName = "...")]` 中的 `ShaderName` 必须
+   完全一致**, 不允许出现 "C# 叫 `GpuBvhNode`, ShaderName 写 `FGpuBvhNode`" 这种
+   两边对不上的情况。让 grep / 跳转能一次找全所有引用。
+
+**为什么必须遵守**:
+
+- **可读性**: 在阅读代码时一眼能看出是值类型还是引用类型, 避免误用
+  `default(T)` / `null` 检查 / 装箱拆箱等差异化语义。
+- **风格一致性**: 引擎里 native 端 (`NxBuffer.h` 等) + 已有的托管 struct
+  (`FShaderBinder` / `FFenceDesc` / `FMeshlet` / `FAdvShadowNodeData` /
+  `FSubResourceFootPrint` / `FBuffer_SRV` / `FTextureDesc` / `FSubResourceFootPrint`)
+  全部是 `F` 前缀, 新写代码不跟随会显得格格不入, 长期累积导致代码风格分裂。
+- **HLSL 联动**: shader 端历史代码也都是 `FXxx` (`FCameraData` / `FMeshlet` 等);
+  C# 端 ShaderName 不带前缀会让 HLSL 端引用突兀。
+
+**正例**:
+
+```csharp
+// struct: F 前缀, [TtShaderDefine] 与之一致
+[EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FGpuBvhNode")]
+public struct FGpuBvhNode { ... }
+
+[EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FAdvShadowLayerData")]
+[StructLayout(LayoutKind.Sequential, Pack = 16)]
+public struct FAdvShadowLayerData { ... }
+
+// enum: E 前缀
+[EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "EParticleFlags")]
+public enum EParticleFlags : uint { ... }
+```
+
+**反例 (本仓库踩过)**:
+
+```csharp
+// ❌ 没有 F 前缀, 看代码以为是 class, 实际是 32 byte 的 POD struct
+[EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "GpuBvhNode")]
+public struct GpuBvhNode { ... }
+
+// ❌ ShaderName 和 C# 端不一致, grep "FGpuHit" 找不到 C# 定义, grep
+// "GpuHit" 又会一并匹到 HLSL 端的 RWStructuredBuffer<FGpuHit> Hits
+[EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FGpuHit")]
+public struct GpuHit { ... }
+```
+
+**自检清单**:
+
+- [ ] 新建 / 改名 struct 时, 名字以 `F` 开头?
+- [ ] 新建 / 改名 enum 时, 名字以 `E` 开头?
+- [ ] 标 `[TtShaderDefine]` 时, `ShaderName` 与 C# 端**完全一致** (不只是大小写
+      一致, 是字符级一致)?
+- [ ] 改名后, `Get-ChildItem -Recurse | Select-String -Pattern "\b旧名\b"` 在
+      整个仓库 (含 `enginecontent/Shaders/`) 内已无残留?
+
+### 3.2 `[TtShaderDefine]` struct 内的字段必须以 `m` 开头
+
+**适用场景**: 所有标了 `[EngineNS.Editor.ShaderCompiler.TtShaderDefine]` 的 C# `struct`
+里**没有字段级 attribute** 的 `public` field。
+
+**强制规则**:
+
+1. **字段名必须以小写 `m` 开头** (例如 `mBoxMin` / `mHitProxyId` / `mShadowMatrix`)。
+   引擎在 `CSharpCode/Editor/ShaderCompiler/ShaderCode.cs:384` 处:
+   ```csharp
+   System.Diagnostics.Debug.Assert(i.Name[0] == 'm');
+   codeBuilder.AddLine($"{typeStr} {i.Name.Substring(1)};", ref sourceCode);
+   ```
+   会断言并**剥掉首字母 `m`** 作为 HLSL 端字段名 (`mBoxMin` → HLSL `BoxMin`)。
+   不带 `m` 前缀会触发断言, Debug 构建直接挂; Release 构建虽然不挂, 但 HLSL
+   端字段名会变成把首字母也吃掉的形态 (`BoxMin` → `oxMin`), 静默错乱。
+2. **HLSL 端字段名仍写"剥 m 后的裸名"** (`BoxMin` / `Origin` / `HitT`), **不要**
+   写 `mBoxMin`。这是引擎自动生成的形式, 也是 HLSL 端历史代码的命名风格。
+3. **例外: 字段自带 `[TtShaderDefine(ShaderName = "...")]` 时, C# 字段名可任意**。
+   引擎走 attribute 分支 (`ShaderCode.cs:323-376`) 用 `attr.ShaderName` 而不
+   是字段名, 此时 `m` 前缀检查不生效 —— 适合需要 "C# 端起 property 风格名字、
+   HLSL 端用另一个名字" 的场景。范例: `FMeshlet.VertexOffset` /
+   `TriangleOffset` (`Bricks/GpuDriven/Cluster.cs:282`)。
+
+**为什么必须遵守**:
+
+- **避免静默错乱**: 不带 `m` 前缀, Release 构建下 `i.Name.Substring(1)` 会把
+  字段名第一个字符也削掉 (`Origin` → `rigin`), HLSL 端拿到错位的字段名, 反射
+  布局对不上, GPU 读到垃圾数据 —— 而且不会有任何编译/运行时报错, 极难排查。
+- **风格统一**: 引擎现有 `[TtShaderDefine]` 标注的 struct 全部用 `m` 前缀
+  (`FAdvShadowNodeData.mShadowMatrix` / `mChildIndex00` / `mNodeType` /
+  `mZNear`, `FAdvShadowLayerData.mLayerStartAndSide` / `mLayerGridSize` 等),
+  新写代码不跟随会显得格格不入。
+- **C# vs HLSL 命名风格一致**: C# 端 `m` 前缀符合"private/instance field"风格,
+  HLSL 端剥 `m` 后是裸名符合 HLSL 字段命名风格, 两边各自看着都自然。
+
+**正例**:
+
+```csharp
+[EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FGpuBvhNode")]
+public struct FGpuBvhNode
+{
+    public Vector3 mBoxMin;          // -> HLSL: BoxMin
+    public uint    mChild1;          // -> HLSL: Child1
+    public Vector3 mBoxMax;          // -> HLSL: BoxMax
+    public uint    mChild2OrPayload; // -> HLSL: Child2OrPayload
+}
+
+// 例外: 字段级 attribute 让字段名可任意 (走 ShaderName 路径, 不走 m-strip)
+[EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FMeshlet")]
+[StructLayout(LayoutKind.Sequential, Pack = 16)]
+public struct FMeshlet
+{
+    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "VertexOffset")]
+    public uint VertexOffset;     // 没 m 前缀 OK, 因为有字段级 ShaderName
+    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "TriangleOffset")]
+    public uint TriangleOffset;
+}
+```
+
+**反例 (本仓库踩过)**:
+
+```csharp
+// ❌ 没字段级 attribute 又没 m 前缀: Debug 构建在 ShaderCode.cs:384 直接断言挂掉,
+//    Release 构建会把首字母吃掉变成 oxMin / hild1 / oxMax, 静默错乱
+[EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FGpuBvhNode")]
+public struct FGpuBvhNode
+{
+    public Vector3 BoxMin;          // ❌
+    public uint    Child1;          // ❌
+    public Vector3 BoxMax;          // ❌
+    public uint    Child2OrPayload; // ❌
+}
+```
+
+**自检清单**:
+
+- [ ] 新写的 `[TtShaderDefine]` struct 里, **每一个**没字段级 attribute 的
+      `public` field 都以小写 `m` 开头?
+- [ ] HLSL 端写的 `bvh.BoxMin` / `ray.Origin` 这种引用是否用的是**剥 m 后的裸
+      名**? (HLSL 端**不要写** `mBoxMin`)
+- [ ] 把 C# 字段从 `BoxMin` 改名为 `mBoxMin` 之后, 仓库里所有 C# 端调用
+      (`node.BoxMin = ...`, `rays[i].Origin = ...`) 都同步改了? 用
+      `Get-ChildItem -Recurse -Filter *.cs | Select-String -Pattern "\.旧名\b"`
+      验证残留。
+
+### 3.3 任何 shader (`.compute` / `.cginc`) 必须 `#include "Inc/GlobalDefine.cginc"`
+
+**适用场景**: 所有新写的 `.compute` / `.cginc`, **即使**该 shader 不使用任何
+内置 cbuffer (`CameraData` / `LightData` / `Time` 等) 或全局函数。
+
+**强制规则**:
+
+1. **`.compute` 入口文件第一行 `#include "<相对路径>/Inc/GlobalDefine.cginc"`**,
+   相对路径根据文件深度调整:
+   - `enginecontent/Shaders/Bricks/Foo/Bar.compute` → `../../Inc/GlobalDefine.cginc`
+   - `enginecontent/Shaders/Bricks/Foo/Sub/Bar.compute` → `../../../Inc/GlobalDefine.cginc`
+2. **`.cginc` 内部如果引用了 `[TtShaderDefine]` 自动生成的 struct (作为变量类
+   型 / `StructuredBuffer<T>` 模板参数 / 函数参数), 同样必须在第一行
+   `#include`**, 不能依赖调用方 include。
+3. `.compute` 入口和它 include 的所有 `.cginc` **两端都 include**, 重复
+   include 由 `#ifndef _GLOBAL_DEFINE_H_` 守卫去重 (GlobalDefine.cginc 自身有
+   头文件守卫)。**不要为了"省一行"只在某一端写**。
+
+**为什么必须遵守**:
+
+- `[TtShaderDefine]` struct (`FGpuBvhNode` / `FGpuRay` / `FAdvShadowNodeData`
+  等) **不在任何 .cginc / .compute 里手写**, 而是引擎反射 C# 端定义后, 在
+  shader 编译期把它们注入到 `ENGINE_PREPROCESSORTS_INC` 块里。这个块的入口
+  就是 `Inc/GlobalDefine.cginc`。
+- 不 include GlobalDefine 等于这些 struct 在 shader 编译单元里**完全不存在**,
+  报错形式极具迷惑性: 第一处 `error X3000: syntax error: unexpected token
+  'FXxx'` (因为 HLSL 解析器把它当作未声明 identifier), 然后**整个函数体的
+  形参全部失去声明**, 在远处报一连串 `error X3004: undeclared identifier
+  'outFoo'` (实际是函数签名整体绑定失败的下游错误)。看着像 cginc 内部错乱,
+  实际是 include 缺失。
+- `.compute` 入口和 `.cginc` 都 include 是因为引擎的反射 / 预处理 pass 偶尔会
+  把 `.compute` 单独拎出来跑, 此时只在 `.cginc` 里 include 拿不到注入。
+
+**正例**:
+
+```hlsl
+// GpuBvhTraversal.compute 第一行
+#include "../../../Inc/GlobalDefine.cginc"
+#include "GpuBvhCommon.cginc"
+
+StructuredBuffer<FGpuBvhNode> BvhNodes;     // FGpuBvhNode 通过 GlobalDefine 注入
+```
+
+```hlsl
+// GpuBvhCommon.cginc 顶部 (即使被 .compute include 时已经间接拿到, 也要写)
+#ifndef _GPU_BVH_COMMON_H_
+#define _GPU_BVH_COMMON_H_
+
+#include "../../../Inc/GlobalDefine.cginc"
+
+void TraverseBvhClosest(StructuredBuffer<FGpuBvhNode> nodes, ...) { ... }
+```
+
+**反例 (本仓库踩过)**:
+
+```hlsl
+// ❌ GpuBvhCommon.cginc 顶部直接进入 helper 定义, 没 include GlobalDefine
+#ifndef _GPU_BVH_COMMON_H_
+#define _GPU_BVH_COMMON_H_
+
+void TraverseBvhClosest(StructuredBuffer<FGpuBvhNode> nodes, ...)  // ← X3000: unexpected token 'FGpuBvhNode'
+{
+    outHitT = ray.MaxT;                                            // ← X3004: undeclared identifier 'outHitT' (下游错位错误)
+    ...
+}
+```
+
+**自检清单**:
+
+- [ ] 新写的每个 `.compute` 文件, 第一行是不是 `#include
+      "<相对路径>/Inc/GlobalDefine.cginc"`?
+- [ ] 新写的每个 `.cginc` 文件, 头文件守卫 `#ifndef ... #define` 之后第一行是
+      不是 `#include "<相对路径>/Inc/GlobalDefine.cginc"`? (即使该 cginc 当前
+      只用引擎内置 cbuffer, 也建议 include —— 0 成本, 防未来加 `[TtShaderDefine]`
+      引用时漏 include)
+- [ ] 相对路径回退层数对不对? `Bricks/X/Y/Z.compute` → 三级回退
+      `../../../Inc/GlobalDefine.cginc`。算错时 HLSL 编译器会报 include 路径
+      解析失败, 检查报错信息里的相对路径段是否对应到 `enginecontent/Shaders/Inc/`
+      就能定位。
+
+
+
+| target | 性质 | 典型用途 | 反例 |
+|---|---|---|---|
+| `AsyncIO` (默认) | 单专线 | 资产加载、磁盘读写、网络 IO | 长 CPU 计算 (会阻塞 IO 队列) |
+| `Logic` | 单专线 | 游戏逻辑相关串行任务、物理 task 投递目标 | 高耗时 GPU readback (会阻塞 logic 队列) |
+| `Physics` | 单专线 | PhysX 仿真 (`PhyScene.cs:379`) | 与物理无关的任务 |
+| `Render` | 单专线 | RHI/渲染线程上需要的副作用 | 阻塞调用 (会吞渲染帧) |
+| `Main` | 主线程 | 必须在主线程做的 UI 操作 | 长耗时任务 |
+| `AsyncEditor` | 单专线 | 编辑器后台任务 | 运行时任务 |
+| `TPools` | **多线程池** (并行) | fence wait、并行 culling、独立小任务批 | 有依赖关系的任务 (顺序不保证) |
+
+#### 1.6.3 标准模板
+
+**模板 A: fire-and-forget (RunOn)** —— 适合不关心结果或自己用 `completedEvent` 等。
+参考 `Bricks/PhysicsCore/PhyScene.cs:379`:
+
+```csharp
+TtEngine.Instance.EventPoster.RunOn(static (state) =>
+{
+    var scene = state.UserArguments.Obj0 as TtPhySceneMember;
+    scene.TickPxScene(scene.TickLogic_ellapse);
+    return true;
+}, Thread.Async.EAsyncTarget.Physics, this /*userArgs*/, PxSceneTickEndEvent /*completedEvent*/);
+```
+
+**模板 B: 拿返回值 (Post + await)** —— 完成后自动回到调用线程。
+参考 `Bricks/PhysicsCore/PhyMaterial.cs:227`:
+
+```csharp
+var result = await TtEngine.Instance.EventPoster.Post((state) =>
+{
+    return DoHeavyAsyncWork();           // 在 AsyncIO 线程跑
+}, Thread.Async.EAsyncTarget.AsyncIO);
+// 这里已经回到原调用线程, 可以安全地访问主线程资源
+```
+
+**模板 C: RunOn + TtSemaphore.Await (低层异步原语)** —— 适合需要在 fire-and-forget
+回调里做完特定动作后唤醒调用线程的场景, 例如 GPU readback (见 §1.5.3.1)。
+参考 `NxRHI/Buffer.cs::TtBuffer.AsyncFetchGpuData`:
+
+```csharp
+var sem = Thread.TtSemaphore.CreateSemaphore(1);
+bool result = false;
+TtEngine.Instance.EventPoster.RunOn((state) =>
+{
+    try
+    {
+        ...同步阻塞工作 (fence.Wait / 长 CPU 计算 / blocking IO)...
+        result = true;
+        return true;
+    }
+    catch (Exception e) { Profiler.Log.WriteLineSingle(e.ToString()); return false; }
+    finally { sem.Release(); }    // ← 任何路径都必须 Release, 否则 await 端永远挂起
+}, Thread.Async.EAsyncTarget.TPools);
+
+await sem.Await();
+sem.FreeSemaphore();
+```
+
+#### 1.6.4 反例
+
+```csharp
+// ❌ 反例 1: 直接用 .NET ThreadPool, 绕过 EventPoster
+System.Threading.ThreadPool.QueueUserWorkItem(_ =>
+{
+    fence.Wait(1);
+    // ... 没有 stack size 配置, 没有 profiler hook, 异常无人接管
+});
+
+// ❌ 反例 2: 把同步阻塞任务放到 AsyncIO 单专线上, 卡住 IO 队列
+TtEngine.Instance.EventPoster.RunOn((state) =>
+{
+    fence.Wait(1);                       // 几十毫秒同步阻塞 → 后续 IO 全卡住
+    return true;
+}, Thread.Async.EAsyncTarget.AsyncIO);   // 应该用 TPools
+
+// ❌ 反例 3: TPools 上跑有依赖关系的任务
+for (int i = 0; i < N; i++)
+{
+    TtEngine.Instance.EventPoster.RunOn((state) =>
+    {
+        DoStep(i);                       // step i 依赖 step i-1 完成, 但 TPools 并行跑, 顺序乱
+        return true;
+    }, Thread.Async.EAsyncTarget.TPools);
+}
+// 应该用 Logic / AsyncIO 单专线保序
+
+// ❌ 反例 4: 用 closure 捕获外层变量
+var heavyObj = ComputeBigThing();
+TtEngine.Instance.EventPoster.RunOn((state) =>     // ← 隐式分配 closure 持有 heavyObj 引用
+{
+    heavyObj.Do();
+    return true;
+});
+// 应该改成: RunOn(static (state) => { (state.UserArguments.Obj0 as MyType).Do(); return true; }, target, heavyObj);
+```
+
+#### 1.6.5 实战参考
+
+- `Bricks/PhysicsCore/PhyScene.cs:379` —— `RunOn(static, Physics, this, completedEvent)`
+  四参完整范例
+- `Bricks/PhysicsCore/PhyScene.cs:221+` —— `PostTask(EAsyncTarget.Logic, task)` 多处
+- `Bricks/PhysicsCore/PhyMaterial.cs:227` —— `await EventPoster.Post(...)` 拿返回值
+- `Bricks/Procedure/PgcNodeBase.cs:397/415/432` —— PGC 节点烘焙 RunOn
+- `NxRHI/Buffer.cs::TtBuffer/TtTexture::AsyncFetchGpuData` —— `RunOn(TPools)` + `TtSemaphore`
+  组合实现非阻塞 GPU readback
+
 ---
 
 ## 2. 调试相关

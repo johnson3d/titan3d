@@ -203,7 +203,6 @@ namespace EngineNS.NxRHI
             lock (Cmds)
             {
                 ProcCmd(ref info);
-                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.mCoreObject.Flush(info.QueueType);
             }
         }
         private void ProcCmd(ref FRCmdInfo info)

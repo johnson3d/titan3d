@@ -249,7 +249,7 @@ namespace EngineNS.Bricks.VirtualTexture
                     TextureSlotBuffer.UpdateData(i, slot.GetGpuDesc());
             }
             TextureSlotBuffer.Flush2GPU(cmd);
-            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(cmd, NxRHI.EQueueType.QU_Transfer);
+            TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(cmd, "RVT.UpdateData", NxRHI.EQueueType.QU_Transfer);
         }
         public void UpLoadRVT(NxRHI.TtCommandList cmd, TtRVT rvt)
         {

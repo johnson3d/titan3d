@@ -120,7 +120,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
                 mCmdList.FlushDraws();
             }
 
-            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);
+            TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(mCmdList, "PCG.kinLUT3SGen", NxRHI.EQueueType.QU_Compute);
         }
     }
 }

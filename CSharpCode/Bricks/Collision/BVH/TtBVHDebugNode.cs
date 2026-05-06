@@ -37,7 +37,7 @@ namespace EngineNS.Bricks.Collision.BVH
     [Bricks.CodeBuilder.ContextMenu("BVHDebugNode", "Graphics\\BVHDebugNode", GamePlay.Scene.TtNode.EditorKeyword)]
     [GamePlay.Scene.TtNode(NodeDataType = typeof(TtBVHDebugNode.TtBVHDebugNodeData), DefaultNamePrefix = "BVHDebug")]
     [Rtti.Meta]
-    public partial class TtBVHDebugNode : GamePlay.Scene.TtNode
+    public partial class TtBVHDebugNode : GamePlay.Scene.TtVisual
     {
         public enum EBuildMode
         {
@@ -84,6 +84,33 @@ namespace EngineNS.Bricks.Collision.BVH
             [Rtti.Meta]
             [Category("BVH")]
             public int OptimizeIterations { get; set; } = 0;
+
+            // -1 = unlimited (show every internal level). N >= 0 = only show
+            // internal nodes whose depth lies in [0, N]. Leaves always honor
+            // mDrawLeafNodes regardless of this value.
+            [Rtti.Meta]
+            [Category("BVH/Display")]
+            public int MaxDisplayDepth { get; set; } = -1;
+
+            // When true, internal-node AABBs use a per-depth color ramp so the
+            // tree's level structure is visually obvious. When false, every
+            // internal node uses the legacy single color (ColorInternal).
+            [Rtti.Meta]
+            [Category("BVH/Display")]
+            public bool ColorByDepth { get; set; } = true;
+
+            // ----------------------------------------------------------------
+            // GPU BVH dispatch demo parameters.
+            // RayCount drives the [Cmd] FGpuRayCast dispatch size; RaySeed lets
+            // users reproduce the same ray batch across runs.
+            // ----------------------------------------------------------------
+            [Rtti.Meta]
+            [Category("BVH/GPU")]
+            public int RayCount { get; set; } = 64;
+
+            [Rtti.Meta]
+            [Category("BVH/GPU")]
+            public int RaySeed { get; set; } = 5678;
         }
 
         // ------------------------------------------------------------------
@@ -103,6 +130,16 @@ namespace EngineNS.Bricks.Collision.BVH
         bool mDrawInternalNodes = true;
         bool mDrawLeafNodes = true;
 
+        // ------------------------------------------------------------------
+        // GPU mirror state. Lives across the whole node lifetime so the
+        // shading env / drawcall / cmdlist set up by InitializeShadingAsync
+        // can be reused across [Cmd] UploadToGpu / [Cmd] FGpuRayCast clicks.
+        // Disposed in this node's Dispose override.
+        // ------------------------------------------------------------------
+        readonly TtGpuBvh mGpuBvh = new TtGpuBvh();
+        bool mGpuShadingReady = false;
+        string mStatGpuStatus = "(not uploaded)";
+
         // Last build / query stats — exposed read-only on the property grid so
         // users can see what the tree looks like without opening a debugger.
         int mStatProxyCount;
@@ -112,9 +149,49 @@ namespace EngineNS.Bricks.Collision.BVH
         string mStatBuildSummary = "(not built)";
 
         // Wireframe colors (mirrored from TtBoundsOctreeNode.DrawAllBounds style).
+        // ColorInternal is the fallback when ColorByDepth is disabled. The
+        // per-depth ramp (GetDepthColor) lives in the cool blue→green band so
+        // it never collides with ColorLeaf (magenta) or ColorHighlight (yellow).
         static readonly Color4f ColorInternal  = new Color4f(1.0f, 0.95f, 0.85f, 0.10f);
         static readonly Color4f ColorLeaf      = new Color4f(1.0f, 0.10f, 0.90f, 0.20f);
         static readonly Color4f ColorHighlight = new Color4f(1.0f, 1.00f, 0.10f, 0.10f);
+
+        // Generate a deterministic color for an internal node at the given
+        // tree depth. Hue sweeps from blue (root) through cyan to green
+        // (deeper) and wraps every 8 levels — this entire band is far from
+        // magenta/red/yellow so leaves and highlights stay readable.
+        static Color4f GetDepthColor(int depth)
+        {
+            const int kCycle = 8;
+            int d = depth % kCycle;
+            if (d < 0) d += kCycle;
+            // Hue: 0.55 (blue) → 0.30 (yellow-green) over kCycle steps.
+            float hue = 0.55f - d * (0.25f / (kCycle - 1));
+            HsvToRgb(hue, 0.85f, 0.95f, out float r, out float g, out float b);
+            // Alpha must follow the same encoding as the legacy ColorInternal
+            // (the W channel doubles as the wireframe line opacity hint).
+            return new Color4f(r, g, b, 0.15f);
+        }
+
+        // Standard HSV → RGB; H/S/V all in [0,1].
+        static void HsvToRgb(float h, float s, float v, out float r, out float g, out float b)
+        {
+            float hh = (h - (float)Math.Floor(h)) * 6.0f;
+            int i = (int)hh;
+            float f = hh - i;
+            float p = v * (1.0f - s);
+            float q = v * (1.0f - s * f);
+            float t = v * (1.0f - s * (1.0f - f));
+            switch (i)
+            {
+                case 0: r = v; g = t; b = p; break;
+                case 1: r = q; g = v; b = p; break;
+                case 2: r = p; g = v; b = t; break;
+                case 3: r = p; g = q; b = v; break;
+                case 4: r = t; g = p; b = v; break;
+                default: r = v; g = p; b = q; break;
+            }
+        }
 
         // ------------------------------------------------------------------
         // Wireframe-mesh cache
@@ -204,6 +281,48 @@ namespace EngineNS.Bricks.Collision.BVH
             set { var d = NodeData as TtBVHDebugNodeData; if (d != null) d.OptimizeIterations = Math.Max(0, value); }
         }
 
+        // -1 = show every internal level. >= 0 = clip the visible tree at this
+        // depth (root = 0). Pure filter; cache stays valid because nodeId →
+        // depth and depth → color are both deterministic for a given tree, so
+        // changing this value never invalidates a cached mesh.
+        [Category("BVH/Display")]
+        public int MaxDisplayDepth
+        {
+            get => (NodeData as TtBVHDebugNodeData)?.MaxDisplayDepth ?? -1;
+            set { var d = NodeData as TtBVHDebugNodeData; if (d != null) d.MaxDisplayDepth = Math.Max(-1, value); }
+        }
+
+        // When true, internal nodes use the per-depth color ramp; when false,
+        // they all use ColorInternal. Toggling this DOES invalidate cached
+        // mesh colors, so we tear the cache down on change.
+        [Category("BVH/Display")]
+        public bool ColorByDepth
+        {
+            get => (NodeData as TtBVHDebugNodeData)?.ColorByDepth ?? true;
+            set
+            {
+                var d = NodeData as TtBVHDebugNodeData;
+                if (d == null || d.ColorByDepth == value) return;
+                d.ColorByDepth = value;
+                DisposeMeshCache();
+            }
+        }
+
+        // GPU dispatch demo parameters (mirrored to NodeData for serialization).
+        [Category("BVH/GPU")]
+        public int RayCount
+        {
+            get => (NodeData as TtBVHDebugNodeData)?.RayCount ?? 64;
+            set { var d = NodeData as TtBVHDebugNodeData; if (d != null) d.RayCount = Math.Max(1, value); }
+        }
+
+        [Category("BVH/GPU")]
+        public int RaySeed
+        {
+            get => (NodeData as TtBVHDebugNodeData)?.RaySeed ?? 5678;
+            set { var d = NodeData as TtBVHDebugNodeData; if (d != null) d.RaySeed = value; }
+        }
+
         // Read-only stats.
         [Category("BVH/Stats")]
         [ReadOnly(true)]
@@ -224,6 +343,18 @@ namespace EngineNS.Bricks.Collision.BVH
         [Category("BVH/Stats")]
         [ReadOnly(true)]
         public string Stat_BuildSummary { get => mStatBuildSummary; set { } }
+
+        [Category("BVH/Stats")]
+        [ReadOnly(true)]
+        public int Stat_GpuNodeCount { get => mGpuBvh != null ? mGpuBvh.NodeCount : 0; set { } }
+
+        [Category("BVH/Stats")]
+        [ReadOnly(true)]
+        public int Stat_GpuLeafCount { get => mGpuBvh != null ? mGpuBvh.LeafCount : 0; set { } }
+
+        [Category("BVH/Stats")]
+        [ReadOnly(true)]
+        public string Stat_GpuStatus { get => mStatGpuStatus; set { } }
 
         // ------------------------------------------------------------------
         // PG action buttons. The PG renders bool properties as toggle buttons;
@@ -313,6 +444,60 @@ namespace EngineNS.Bricks.Collision.BVH
             }
         }
 
+        // ------------------------------------------------------------------
+        // GPU BVH commands (deferred-execution research workflow):
+        //   1) UploadToGpu — flatten current BVH + create SRV; await shading
+        //                    init on first use so the effect's binder table
+        //                    is valid by the time FGpuRayCast fires.
+        //   2) FGpuRayCast — generate a deterministic ray batch, run CPU
+        //                   closest-hit RayCast for reference, dispatch the
+        //                   GPU traversal kernel, then readback the hit
+        //                   buffer via TtBuffer.FetchGpuData (engine handles
+        //                   GpuAccess→CpuAccess staging copy + queue flush
+        //                   automatically, see CodingGuidelines.md §1.5.3)
+        //                   and compare per-ray any-hit existence against the
+        //                   CPU reference, dumping the first few mismatches
+        //                   to the log.
+        //   3) ClearGpu  — drop GPU buffers without touching the CPU tree.
+        // ------------------------------------------------------------------
+        [Category("BVH/GPU")]
+        [DisplayName("[Cmd] UploadToGpu")]
+        public bool CmdUploadToGpu
+        {
+            get => false;
+            set
+            {
+                if (!value) return;
+                UploadBvhToGpu().AddWaitTask();
+            }
+        }
+
+        [Category("BVH/GPU")]
+        [DisplayName("[Cmd] FGpuRayCast")]
+        public bool CmdFGpuRayCast
+        {
+            get => false;
+            set
+            {
+                if (!value) return;
+                FGpuRayCast();
+            }
+        }
+
+        [Category("BVH/GPU")]
+        [DisplayName("[Cmd] ClearGpu")]
+        public bool CmdClearGpu
+        {
+            get => false;
+            set
+            {
+                if (!value) return;
+                mGpuBvh.Clear();
+                mStatGpuStatus = "(cleared)";
+                Profiler.Log.WriteLineSingle("[BVHDebug.GPU] cleared GPU resources.");
+            }
+        }
+
         // Toggles for what to draw in OnGatherVisibleMeshes.
         [Category("BVH/Display")]
         public bool DrawInternalNodes
@@ -356,6 +541,10 @@ namespace EngineNS.Bricks.Collision.BVH
             // immediately after dragging the node into the world.
             DoRebuild();
         }
+
+        // ==================================================================
+        // Lifecycle
+        // ==================================================================
 
         // ==================================================================
         // Build pipeline (synchronous — no scene-actor spawning anymore)
@@ -442,26 +631,34 @@ namespace EngineNS.Bricks.Collision.BVH
         public override void OnGatherVisibleMeshes(GamePlay.TtWorld.TtVisParameter rp)
         {
             base.OnGatherVisibleMeshes(rp);
-            if (mBvh == null || mBvh.ProxyCount == 0) 
+            if (mBvh == null || mBvh.ProxyCount == 0)
                 return;
 
-            var world = rp.World;
             var trans = FTransform.Identity;
             bool drawInner = mDrawInternalNodes;
             bool drawLeaf  = mDrawLeafNodes;
             var hl = mHighlightedProxies;
+            int maxDepth = MaxDisplayDepth;          // -1 means unlimited
+            bool colorByDepth = ColorByDepth;
 
             mBvh.DebugTraverse((int nodeId, int depth, in Aabb box, bool isLeaf) =>
             {
+                // Depth filter: clip both internal nodes and the leaves that
+                // sit beyond the requested level. We still keep traversing so
+                // that the iterator visits every node — DebugTraverse decides
+                // recursion on its own.
+                if (maxDepth >= 0 && depth > maxDepth)
+                    return true;
+
                 if (isLeaf)
                 {
-                    if (!drawLeaf) 
+                    if (!drawLeaf)
                         return true;
                     if (hl.Contains(nodeId))
                     {
                         // Highlighted leaves: per-frame transient mesh so the
-                        // red color shows up immediately without invalidating
-                        // the persistent cache.
+                        // highlight color shows up immediately without
+                        // invalidating the persistent cache.
                         rp.AddAABB(in box, in ColorHighlight, in trans);
                     }
                     else
@@ -473,7 +670,8 @@ namespace EngineNS.Bricks.Collision.BVH
                 {
                     if (!drawInner)
                         return true;
-                    EmitCachedAabb(rp, nodeId, in box, in ColorInternal);
+                    var color = colorByDepth ? GetDepthColor(depth) : ColorInternal;
+                    EmitCachedAabb(rp, nodeId, in box, in color);
                 }
                 return true;
             });
@@ -522,6 +720,160 @@ namespace EngineNS.Bricks.Collision.BVH
         // Hierarchy dump (replaces the old "spawn child nodes for outliner"
         // approach — now we just print an indented tree to Profiler.Log).
         // ==================================================================
+
+        // ==================================================================
+        // GPU BVH workflow
+        // ==================================================================
+
+        async Thread.Async.TtTask UploadBvhToGpu()
+        {
+            if (mBvh == null || mBvh.ProxyCount == 0)
+            {
+                Profiler.Log.WriteLineSingle("[BVHDebug.GPU] UploadToGpu skipped: CPU tree is empty.");
+                mStatGpuStatus = "(empty CPU tree)";
+                return;
+            }
+
+            // Lazy-init the shading env on first upload so we don't pay the
+            // effect-compile cost until the user actually wants GPU traversal.
+            // Subsequent calls are no-ops inside InitializeShadingAsync.
+            if (!mGpuShadingReady)
+            {
+                await mGpuBvh.InitializeShadingAsync();
+                mGpuShadingReady = true;
+            }
+
+            // Discard the leafIndex callback — the demo only diffs against the
+            // CPU tree which already maps proxyId<->leafIndex via FlattenToGpu's
+            // BFS order. Real consumers would write into their payload buffer
+            // here.
+            bool ok = mGpuBvh.BuildFromCpuBvh<int>(mBvh, null);
+            if (ok)
+            {
+                mStatGpuStatus = $"uploaded: nodes={mGpuBvh.NodeCount}, leaves={mGpuBvh.LeafCount}";
+                Profiler.Log.WriteLineSingle("[BVHDebug.GPU] " + mStatGpuStatus);
+            }
+            else
+            {
+                mStatGpuStatus = "upload failed (see log)";
+            }
+        }
+
+        void FGpuRayCast()
+        {
+            if (!mGpuBvh.IsReady)
+            {
+                Profiler.Log.WriteLineSingle("[BVHDebug.GPU] FGpuRayCast skipped: click [Cmd] UploadToGpu first.");
+                return;
+            }
+            if (!mGpuShadingReady)
+            {
+                Profiler.Log.WriteLineSingle("[BVHDebug.GPU] FGpuRayCast skipped: shading not ready (re-click UploadToGpu).");
+                return;
+            }
+
+            int n = Math.Max(1, RayCount);
+            var rays = GenerateFGpuRays(n);
+
+            // ----- CPU reference pass (closest-hit) -----
+            //
+            // TtDynamicBVH.RayCast is a closest-hit walker: the FOnRayHit
+            // callback returns the new effective max fraction (return 0 to
+            // stop completely; return the candidate t to keep walking but
+            // narrow the search). Returning the candidate t mirrors what
+            // GpuBvhCommon.cginc::TraverseBvhClosest does on the GPU side.
+            //
+            // We record per-ray closest leaf id + closest t so we can diff
+            // against the GPU readback below.
+            var cpuLeafId = new int[n];
+            var cpuT      = new float[n];
+            int cpuAnyHitCount = 0;
+            for (int i = 0; i < n; i++)
+            {
+                ref readonly var r = ref rays[i];
+                var origin = new DVector3(r.mOrigin.X, r.mOrigin.Y, r.mOrigin.Z);
+                var dir = new DVector3(r.mDir.X, r.mDir.Y, r.mDir.Z);
+                int closestLeafProxy = -1;
+                double closestFraction = r.mMaxT;
+                mBvh.RayCast(in origin, in dir, r.mMaxT,
+                    (int proxyId, int payload, in DVector3 _o, in DVector3 _d, double currentMax) =>
+                    {
+                        // Closest-hit narrowing. The slab test inside RayCast
+                        // already culled this leaf against currentMax; we
+                        // simply remember it and keep walking with the same
+                        // currentMax (returning < currentMax would shrink the
+                        // window further, but we don't have a per-leaf t at
+                        // this granularity yet — leaf AABB precision only).
+                        closestLeafProxy = proxyId;
+                        closestFraction = currentMax;
+                        return currentMax;
+                    });
+                cpuLeafId[i] = closestLeafProxy;
+                cpuT[i] = closestLeafProxy >= 0 ? (float)closestFraction : r.mMaxT;
+                if (closestLeafProxy >= 0) cpuAnyHitCount++;
+            }
+
+            // ----- GPU dispatch + readback -----
+            bool dispatched = mGpuBvh.RayCastDispatch(rays);
+            if (!dispatched)
+            {
+                mStatGpuStatus = "dispatch failed (see log)";
+                return;
+            }
+            if (mGpuBvh.ReadbackHits(out var hitRays))
+            {
+                foreach (var hitRay in hitRays)
+                {
+                }
+            }
+        }
+
+        // Deterministic ray batch generator. Origin sits well outside the
+        // SpaceExtent box so most rays start in empty space and have to walk
+        // through the BVH to find a leaf. Direction is uniformly sampled on
+        // the unit sphere (rejection-sampled from a unit cube).
+        FGpuRay[] GenerateFGpuRays(int count)
+        {
+            var rays = new FGpuRay[count];
+            var rng = new System.Random(RaySeed);
+            var ext = SpaceExtent;
+            float spawnRadius = (Math.Max(ext.X, Math.Max(ext.Y, ext.Z))) * 1.5f + 1.0f;
+            float maxT = spawnRadius * 4.0f;
+
+            for (int i = 0; i < count; i++)
+            {
+                // Origin: random direction on the spawn sphere of radius
+                // spawnRadius, then scaled negative so we shoot back towards
+                // the box center.
+                Vector3 onSphere;
+                do
+                {
+                    onSphere = new Vector3(
+                        (float)(rng.NextDouble() * 2.0 - 1.0),
+                        (float)(rng.NextDouble() * 2.0 - 1.0),
+                        (float)(rng.NextDouble() * 2.0 - 1.0));
+                } while (onSphere.LengthSquared() < 1e-4f);
+                onSphere.Normalize();
+                var origin = onSphere * spawnRadius;
+
+                // Direction: aim at a random jittered point inside the
+                // SpaceExtent box, so a healthy fraction of rays will hit
+                // something.
+                var target = new Vector3(
+                    (float)((rng.NextDouble() * 2.0 - 1.0) * ext.X),
+                    (float)((rng.NextDouble() * 2.0 - 1.0) * ext.Y),
+                    (float)((rng.NextDouble() * 2.0 - 1.0) * ext.Z));
+                var dir = target - origin;
+                if (dir.LengthSquared() < 1e-6f) dir = new Vector3(1, 0, 0);
+                dir.Normalize();
+
+                rays[i].mOrigin = origin;
+                rays[i].mMaxT = maxT;
+                rays[i].mDir = dir;
+                rays[i].mRayId = (uint)i;
+            }
+            return rays;
+        }
 
         void DumpHierarchyToLog()
         {
@@ -620,11 +972,19 @@ namespace EngineNS.Bricks.Collision.BVH
             Profiler.Log.WriteLineSingle("[BVHDebug] " + mStatBuildSummary);
         }
 
+        // Release everything we own that holds GPU resources or persistent CPU
+        // caches. Mirrors TtPrimitiveMeshNode.Dispose's pattern (release this
+        // node's own state, then base.Dispose for the inherited graph). The
+        // mesh cache (via ClearAll → DisposeMeshCache), shared transient
+        // buffers, and the GPU BVH (which itself owns NodeBuffer/SRV +
+        // RayBuffer/HitBuffer + cbuffer + drawcall + cmdlist + shading env)
+        // all need to go before the engine tears the RHI device down.
         public override void Dispose()
         {
             ClearAll();
             CoreSDK.DisposeObject(ref mSharedVB);
             CoreSDK.DisposeObject(ref mSharedIB);
+            mGpuBvh?.Dispose();
             base.Dispose();
         }
     }

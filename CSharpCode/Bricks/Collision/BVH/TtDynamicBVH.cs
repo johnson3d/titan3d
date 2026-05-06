@@ -1269,5 +1269,159 @@ namespace EngineNS.Bricks.Collision.BVH
             mNodes[idx].Box = Combine(mNodes[c1].Box, mNodes[c2].Box);
             mNodes[idx].Height = 1 + Math.Max(mNodes[c1].Height, mNodes[c2].Height);
         }
+
+        // ==================================================================
+        // GPU flattening
+        //
+        // Linearize the tree into a contiguous, GPU-friendly array in BFS
+        // order so that:
+        //   - The root always lives at index 0 (the GPU traversal kernel
+        //     hard-codes "start from 0").
+        //   - Sibling nodes are adjacent in memory, which gives a compute-shader
+        //     stack-traversal kernel decent locality across a wave when many
+        //     rays follow similar paths.
+        //
+        // Node payload kept on the GPU side is intentionally minimal:
+        //   - Aabb (BoxMin / BoxMax, single precision — GPU doesn't have
+        //     cheap fp64 and the BVH always lives in scene-local meters).
+        //   - Two child indices for internal nodes; for leaves we collapse
+        //     Child1 into a NullChild sentinel and reuse Child2 as a
+        //     PAYLOAD INDEX into a parallel buffer the caller maintains.
+        //
+        // We don't ship the payload itself (T) here: it can be anything —
+        // a scene-node id, a triangle list pointer, a material descriptor.
+        // The caller knows its layout and writes its own buffer indexed by
+        // the leafIndex parameter handed to onLeafFlattened.
+        //
+        // Caller contract:
+        //   - boxMins / boxMaxs / child1 / child2OrPayload must each be
+        //     pre-sized to NodeCountForFlatten() (= 2*ProxyCount - 1 when
+        //     the tree is non-degenerate, but we just return the exact
+        //     count we'll write).
+        //   - onLeafFlattened(proxyId, payload, leafIndex) is called for
+        //     every leaf in flatten order; leafIndex is a dense [0..L-1]
+        //     value the caller can use as the slot in its own payload buffer.
+        //   - LeafChildSentinel marks "this is a leaf" in the GPU layout
+        //     (Child1 == LeafChildSentinel  =>  Child2 holds payload index).
+        // ==================================================================
+        public const uint LeafChildSentinel = 0xFFFFFFFFu;
+
+        /// <summary>
+        /// Number of GPU nodes that will be written by <see cref="FlattenToGpu"/>
+        /// for the current tree. 0 when the tree is empty.
+        /// </summary>
+        public int FlattenedNodeCount
+        {
+            get
+            {
+                if (mRoot == NullNode) return 0;
+                // 1 node + (n-1) internal nodes for a binary tree with n leaves.
+                // Equivalent to "count of in-use, non-free nodes reachable from
+                // root" which for a well-formed BVH is exactly 2 * mProxyCount - 1.
+                return 2 * mProxyCount - 1;
+            }
+        }
+
+        /// <summary>
+        /// Number of leaves currently in the tree. Same as <see cref="ProxyCount"/>;
+        /// exposed under a different name so flattening callers don't have to
+        /// reason about whether internal proxies are leaves.
+        /// </summary>
+        public int FlattenedLeafCount { get { return mProxyCount; } }
+
+        /// <summary>
+        /// Walk the tree in breadth-first order, writing one packed GPU node
+        /// per visited tree node into the four parallel arrays. Leaves are
+        /// emitted in BFS order with monotonically increasing <c>leafIndex</c>
+        /// (0, 1, 2, ...) so the caller can append to its payload buffer
+        /// in lock-step.
+        ///
+        /// The root is written at index 0 in every output array.
+        /// Returns the number of nodes written (== <see cref="FlattenedNodeCount"/>).
+        /// </summary>
+        /// <param name="boxMins">Output: per-node AABB lower bound (single).</param>
+        /// <param name="boxMaxs">Output: per-node AABB upper bound (single).</param>
+        /// <param name="child1">Output: first child index, or <see cref="LeafChildSentinel"/> for leaves.</param>
+        /// <param name="child2OrPayload">Output: second child index for internal nodes,
+        ///   or the leaf's payload index (== leafIndex passed to onLeafFlattened) for leaves.</param>
+        /// <param name="onLeafFlattened">
+        /// Callback invoked for each leaf in flatten order. Arguments:
+        ///   proxyId  — the original CPU-side proxy id (same value returned by InsertProxy).
+        ///   payload  — the leaf's user data of type T.
+        ///   leafIndex — dense 0-based index identifying this leaf's slot in any
+        ///               parallel payload buffer the caller maintains.
+        /// May be null if the caller doesn't need a payload buffer.
+        /// </param>
+        /// <returns>Number of GPU nodes written.</returns>
+        public int FlattenToGpu(
+            Vector3[] boxMins,
+            Vector3[] boxMaxs,
+            uint[] child1,
+            uint[] child2OrPayload,
+            Action<int /*proxyId*/, T /*payload*/, int /*leafIndex*/> onLeafFlattened)
+        {
+            if (mRoot == NullNode) return 0;
+
+            int nodeCount = FlattenedNodeCount;
+            if (boxMins == null || boxMaxs == null || child1 == null || child2OrPayload == null)
+                throw new ArgumentNullException("output arrays");
+            if (boxMins.Length < nodeCount || boxMaxs.Length < nodeCount
+                || child1.Length < nodeCount || child2OrPayload.Length < nodeCount)
+                throw new ArgumentException("output arrays too small; use FlattenedNodeCount to size them");
+
+            // Two parallel scratch arrays: traversal queue + remap from
+            // CPU node id -> GPU output slot. We don't reuse mQueryStack
+            // because that's a Stack, and we want stable BFS ordering.
+            var queue = new int[nodeCount];
+            var cpuToGpu = new Dictionary<int, int>(nodeCount);
+            int qHead = 0;
+            int qTail = 0;
+            int leafCounter = 0;
+
+            // Root goes to slot 0.
+            queue[qTail++] = mRoot;
+            cpuToGpu[mRoot] = 0;
+            int writeCursor = 1;
+
+            while (qHead < qTail)
+            {
+                int cpuId = queue[qHead++];
+                int gpuSlot = cpuToGpu[cpuId];
+
+                ref Node n = ref mNodes[cpuId];
+                var min = n.Box.Minimum;
+                var max = n.Box.Maximum;
+                boxMins[gpuSlot] = new Vector3((float)min.X, (float)min.Y, (float)min.Z);
+                boxMaxs[gpuSlot] = new Vector3((float)max.X, (float)max.Y, (float)max.Z);
+
+                if (n.IsLeaf)
+                {
+                    int leafIdx = leafCounter++;
+                    child1[gpuSlot] = LeafChildSentinel;
+                    child2OrPayload[gpuSlot] = (uint)leafIdx;
+                    if (onLeafFlattened != null)
+                        onLeafFlattened(cpuId, n.UserData, leafIdx);
+                }
+                else
+                {
+                    // Reserve GPU slots for children before descending so
+                    // siblings end up adjacent.
+                    int g1 = writeCursor++;
+                    int g2 = writeCursor++;
+                    cpuToGpu[n.Child1] = g1;
+                    cpuToGpu[n.Child2] = g2;
+                    child1[gpuSlot] = (uint)g1;
+                    child2OrPayload[gpuSlot] = (uint)g2;
+                    queue[qTail++] = n.Child1;
+                    queue[qTail++] = n.Child2;
+                }
+            }
+
+            // Sanity: writeCursor must equal nodeCount and qTail == nodeCount.
+            // If they don't, the tree is malformed (e.g. ProxyCount stale).
+            // We don't throw because debug visualizers can call this on a tree
+            // that's mid-edit, but we return the actual count.
+            return writeCursor;
+        }
     }
 }

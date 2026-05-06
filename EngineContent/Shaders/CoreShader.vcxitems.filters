@@ -124,6 +124,12 @@
     <Filter Include="GI\ReSTIR">
       <UniqueIdentifier>{c4f3a8e1-7b2d-4f56-9c01-1d3a5e7b9f24}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Bricks\Collision">
+      <UniqueIdentifier>{a1851c4a-1175-4f77-bd77-9a1bf3f25214}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Bricks\Collision\BVH">
+      <UniqueIdentifier>{959747ad-2a0e-46e4-9024-c7e640e2f0c6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -487,6 +493,9 @@
     <None Include="$(MSBuildThisFileDirectory)slate\Slate_TextureCubeViewer.cginc">
       <Filter>Slate</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Collision\BVH\GpuBvhCommon.cginc">
+      <Filter>Bricks\Collision\BVH</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">
@@ -578,6 +587,9 @@
     </FxCompile>
     <FxCompile Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\TemporalDenoise.compute">
       <Filter>ShadingEnv\Post</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Collision\BVH\GpuBvhTraversal.compute">
+      <Filter>Bricks\Collision\BVH</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

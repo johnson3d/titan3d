@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using EngineNS.GamePlay;
+﻿using EngineNS.GamePlay;
 using EngineNS.Graphics.Pipeline;
+using EngineNS.NxRHI;
+using System;
+using System.Collections.Generic;
 
 namespace EngineNS.Bricks.Procedure.Node.GpuShading
 {
@@ -48,8 +49,11 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
                 mCmdList.FlushDraws();
                 CoreSDK.DisposeObject(ref cpDraw);
             }
-            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);
-            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(mFinishFence, NxRHI.EQueueType.QU_Compute);
+            TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(mCmdList, "PCG.GpuFetch", NxRHI.EQueueType.QU_Compute);
+            TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd((TtRCmdQueue queue, ref FRCmdInfo info) =>
+            {
+                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(mFinishFence, info.QueueType);
+            }, "PCG.GpuFetch.FenceSignal", NxRHI.EQueueType.QU_Compute);
         }
     }
 }
