@@ -202,8 +202,46 @@ namespace EngineNS
         protected virtual void PrepareImGuiIniFile(string imguiIniFile)
         {
         }
+        public virtual bool CheckMainWindowLifetime()
+        {
+            if (NativeWindow == null)
+                return false;
+
+            using (var currentProcess = System.Diagnostics.Process.GetCurrentProcess())
+            {
+                currentProcess.Refresh();
+                if (currentProcess.MainWindowHandle != IntPtr.Zero)
+                    ImGuiData.MainWindowWasVisible = true;
+                else if (ImGuiData.MainWindowWasVisible)
+                    return true;
+            }
+
+            if (NativeWindow.IsPlatformWindowDestroyed)
+                return true;
+
+            var isVisible = NativeWindow.IsPlatformWindowVisible;
+            if (ImGuiData.MainWindowWasVisible && isVisible == false)
+                return true;
+
+            if (isVisible)
+                ImGuiData.MainWindowWasVisible = true;
+
+            return false;
+        }
         public virtual void Cleanup()
         {
+            unsafe
+            {
+                if (mImGuiContext != IntPtr.Zero)
+                {
+                    ImGuiAPI.SetCurrentContext(mImGuiContext.ToPointer());
+                    TtDockWindowSDL.ImGui_ImplSDL3_ShutdownPlatformInterface();
+                    ImGuiAPI.DestroyPlatformWindows();
+                    ImGuiAPI.DestroyContext(mImGuiContext.ToPointer());
+                    mImGuiContext = IntPtr.Zero;
+                }
+            }
+
             mDrawData.Dispose();
 
             ImGuiData.Dispose();
@@ -230,6 +268,9 @@ namespace EngineNS
 
         public virtual void OnResize(float x, float y)
         {
+            if (x <= 0 || y <= 0)
+                return;
+
             NativeWindow.OnResize(x, y);
         }
         private void SetPerFrameImGuiData(float deltaSeconds)
@@ -296,6 +337,32 @@ namespace EngineNS
         public unsafe virtual void OnDrawSlate()
         {
             if (mImGuiContext == IntPtr.Zero)
+                return;
+            if (NativeWindow == null)
+                return;
+            if (NativeWindow.IsPlatformWindowDestroyed)
+            {
+                TtEngine.Instance.PostQuitMessage();
+                return;
+            }
+            if (ImGuiData.MainWindowWasVisible && NativeWindow.IsPlatformWindowVisible == false)
+            {
+                TtEngine.Instance.PostQuitMessage();
+                return;
+            }
+            if (NativeWindow.IsHidden)
+            {
+                if (ImGuiData.MainWindowWasVisible)
+                    TtEngine.Instance.PostQuitMessage();
+                return;
+            }
+            if (NativeWindow.IsPlatformWindowVisible)
+                ImGuiData.MainWindowWasVisible = true;
+
+            if (NativeWindow.IsMinimized)
+                return;
+            var windowSize = NativeWindow.GetWindowSize();
+            if (windowSize.X <= 0 || windowSize.Y <= 0)
                 return;
 
             using (new Profiler.TimeScopeHelper(ScopeOnDrawUI))

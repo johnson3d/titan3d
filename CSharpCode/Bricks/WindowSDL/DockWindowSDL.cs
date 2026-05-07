@@ -69,6 +69,25 @@ namespace EngineNS
             // SDL2 by default doesn't pass mouse clicks to the application when the click focused a window. This is getting in the way of our interactions and we disable that behavior.
             SDL.SDL3.SDL_SetHint(SDL.SDL3.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
         }
+        public static unsafe void ImGui_ImplSDL3_ShutdownPlatformInterface()
+        {
+            var platformIo = ImGuiAPI.GetPlatformIO();
+            var viewportCount = ImGuiAPI.PlatformIO_Viewports_Size(platformIo);
+
+            for (int i = 0; i < viewportCount; i++)
+            {
+                var viewport = ImGuiAPI.PlatformIO_Viewports_Get(platformIo, i);
+                ReleaseViewportRendererData(viewport);
+            }
+
+            for (int i = 0; i < viewportCount; i++)
+            {
+                var viewport = ImGuiAPI.PlatformIO_Viewports_Get(platformIo, i);
+                ReleaseViewportPlatformData(viewport);
+            }
+
+            platformIo.ClearPlatformHandlers();
+        }
         public static ImGuiKey ImGui_ImplSDL3_KeyEventToImGuiKey(SDL_Keycode keycode, SDL_Scancode scancode)
         {
             // Keypad doesn't have individual key values in SDL3
@@ -342,6 +361,11 @@ namespace EngineNS
                         if (ev.type >= (uint)SDL.SDL_EventType.SDL_EVENT_WINDOW_FIRST && ev.type <= (uint)SDL.SDL_EventType.SDL_EVENT_WINDOW_LAST)
                         {
                             var window_event = ev.window.type;
+                            if (RequestQuitForMainWindowClose(in ev, window_event))
+                                return true;
+
+                            TrackWindowMinimizeRestoreEvent(in ev, window_event);
+
                             if (window_event == SDL.SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED ||
                                 window_event == SDL.SDL_EventType.SDL_EVENT_WINDOW_MOVED ||
                                 window_event == SDL.SDL_EventType.SDL_EVENT_WINDOW_RESIZED)
@@ -377,7 +401,7 @@ namespace EngineNS
         }
         public static unsafe ImGuiViewport* ImGui_ImplSDL3_GetViewportForWindowID(SDL_WindowID window_id)
         {
-            return ImGuiAPI.FindViewportByPlatformHandle((void*)(uint)window_id);
+            return ImGuiAPI.FindViewportByPlatformHandle((void*)SDL.SDL3.SDL_GetWindowFromID(window_id));
         }
         public static unsafe void ImGui_ImplSDL3_UpdateMouseData(ImGuiIO io)
         {
@@ -511,17 +535,125 @@ namespace EngineNS
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->m_PlatformUserData);
             return gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
         }
-        static unsafe SDL.SDL_Window* GetViewportSdlWindow(ImGuiViewport* viewport)
+        static unsafe bool RequestQuitForMainWindowClose(in SDL.SDL_Event ev, SDL.SDL_EventType windowEvent)
         {
-            var windowId = (SDL.SDL_WindowID)(uint)(nint)viewport->m_PlatformHandle;
-            if (windowId != 0)
+            if (windowEvent != SDL.SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED &&
+                windowEvent != SDL.SDL_EventType.SDL_EVENT_WINDOW_DESTROYED)
+                return false;
+
+            var nativeWindow = TtEngine.Instance?.GfxDevice?.SlateApplication?.NativeWindow;
+            if (nativeWindow == null || ev.window.windowID != nativeWindow.WindowID)
+                return false;
+
+            if (windowEvent == SDL.SDL_EventType.SDL_EVENT_WINDOW_DESTROYED)
+                nativeWindow.MarkNativeWindowDestroyed();
+
+            TtEngine.Instance.PostQuitMessage();
+            return true;
+        }
+        static unsafe void TrackWindowMinimizeRestoreEvent(in SDL.SDL_Event ev, SDL.SDL_EventType windowEvent)
+        {
+            var slateApp = TtEngine.Instance?.GfxDevice?.SlateApplication;
+            var nativeWindow = slateApp?.NativeWindow;
+            if (nativeWindow == null)
+                return;
+
+            var bd = slateApp.ImGuiData;
+            if (ev.window.windowID == nativeWindow.WindowID)
             {
-                var window = SDL.SDL3.SDL_GetWindowFromID(windowId);
-                if (window != null)
-                    return window;
+                if (windowEvent == SDL.SDL_EventType.SDL_EVENT_WINDOW_MINIMIZED)
+                {
+                    bd.MainWindowMinimized = true;
+                    bd.ViewportsMinimizedWithMainWindow.Clear();
+                    CollectRestorablePlatformWindows(bd);
+                }
+                else if (windowEvent == SDL.SDL_EventType.SDL_EVENT_WINDOW_RESTORED ||
+                         windowEvent == SDL.SDL_EventType.SDL_EVENT_WINDOW_SHOWN ||
+                         windowEvent == SDL.SDL_EventType.SDL_EVENT_WINDOW_MAXIMIZED)
+                {
+                    if (bd.MainWindowMinimized || bd.ViewportsMinimizedWithMainWindow.Count > 0)
+                        RestorePlatformWindowsMinimizedWithMainWindow(bd);
+                    bd.MainWindowMinimized = false;
+                    bd.ViewportsMinimizedWithMainWindow.Clear();
+                }
+                return;
             }
 
-            return (SDL.SDL_Window*)0;
+            if (windowEvent == SDL.SDL_EventType.SDL_EVENT_WINDOW_MINIMIZED &&
+                (bd.MainWindowMinimized || nativeWindow.IsMinimized))
+            {
+                var viewport = ImGui_ImplSDL3_GetViewportForWindowID(ev.window.windowID);
+                if (viewport != null)
+                    bd.ViewportsMinimizedWithMainWindow.Add(viewport->m_ID);
+            }
+        }
+        static unsafe void CollectRestorablePlatformWindows(TtSlateApplication.TtImGuiData bd)
+        {
+            var platformIo = ImGuiAPI.GetPlatformIO();
+            var count = ImGuiAPI.PlatformIO_Viewports_Size(platformIo);
+            for (int i = 1; i < count; i++)
+            {
+                var viewport = ImGuiAPI.PlatformIO_Viewports_Get(platformIo, i);
+                var window = GetViewportSdlWindow(viewport);
+                if (window == null)
+                    continue;
+
+                var flags = SDL.SDL3.SDL_GetWindowFlags(window);
+                if ((flags & SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN) == 0)
+                    bd.ViewportsMinimizedWithMainWindow.Add(viewport->m_ID);
+            }
+        }
+        static unsafe void RestorePlatformWindowsMinimizedWithMainWindow(TtSlateApplication.TtImGuiData bd)
+        {
+            var platformIo = ImGuiAPI.GetPlatformIO();
+            var count = ImGuiAPI.PlatformIO_Viewports_Size(platformIo);
+            for (int i = 1; i < count; i++)
+            {
+                var viewport = ImGuiAPI.PlatformIO_Viewports_Get(platformIo, i);
+                if (!bd.ViewportsMinimizedWithMainWindow.Contains(viewport->m_ID))
+                    continue;
+
+                var window = GetViewportSdlWindow(viewport);
+                if (window == null)
+                    continue;
+
+                if ((SDL.SDL3.SDL_GetWindowFlags(window) & SDL.SDL_WindowFlags.SDL_WINDOW_MINIMIZED) != 0)
+                    SDL.SDL3.SDL_RestoreWindow(window);
+
+                SDL.SDL3.SDL_ShowWindow(window);
+                viewport->m_Flags &= ~ImGuiViewportFlags_.ImGuiViewportFlags_IsMinimized;
+                viewport->m_PlatformRequestMove = false;
+                viewport->m_PlatformRequestResize = false;
+            }
+        }
+        static unsafe SDL.SDL_Window* GetViewportSdlWindow(ImGuiViewport* viewport)
+        {
+            return (SDL.SDL_Window*)viewport->m_PlatformHandle;
+        }
+        static unsafe void ReleaseViewportPlatformData(ImGuiViewport* viewport)
+        {
+            var platformUserData = (IntPtr)viewport->m_PlatformUserData;
+            if (platformUserData == IntPtr.Zero)
+            {
+                viewport->m_PlatformHandle = null;
+                viewport->m_PlatformHandleRaw = null;
+                return;
+            }
+
+            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr(platformUserData);
+            var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
+            if (myWindow?.IsCreatedByImGui == true)
+                myWindow.Cleanup();
+
+            viewport->m_PlatformUserData = IntPtr.Zero.ToPointer();
+            viewport->m_PlatformHandle = null;
+            viewport->m_PlatformHandleRaw = null;
+
+            var slateApp = TtEngine.Instance?.GfxDevice?.SlateApplication;
+            if (slateApp?.ImGuiData.MainViewportGCHandle == platformUserData)
+                slateApp.ImGuiData.MainViewportGCHandle = IntPtr.Zero;
+
+            gcHandle.Free();
         }
         unsafe static ImGuiPlatformIO.FDelegate_Platform_CreateWindow ImGui_ImplSDL2_CreateWindow = ImGui_ImplSDL2_CreateWindow_Impl;
         static unsafe void ImGui_ImplSDL2_CreateWindow_Impl(ImGuiViewport* viewport)
@@ -537,28 +669,13 @@ namespace EngineNS
             myWindow.IsCreatedByImGui = true;
             myWindow.CreateNativeWindow("No Title Yet", (int)viewport->Pos.X, (int)viewport->Pos.Y, (int)viewport->Size.X, (int)viewport->Size.Y, (uint)sdl_flags).ToPointer();
             viewport->m_PlatformUserData = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(myWindow)).ToPointer();
-            viewport->m_PlatformHandle = (void*)(nint)myWindow.WindowID;
+            viewport->m_PlatformHandle = myWindow.Window.ToPointer();
             viewport->m_PlatformHandleRaw = myWindow.HWindow.ToPointer();
         }
         unsafe static ImGuiPlatformIO.FDelegate_Platform_DestroyWindow ImGui_ImplSDL2_DestroyWindow = ImGui_ImplSDL2_DestroyWindow_Impl;
         static unsafe void ImGui_ImplSDL2_DestroyWindow_Impl(ImGuiViewport* viewport)
         {
-            if ((IntPtr)viewport->m_PlatformUserData == IntPtr.Zero)
-                return;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->m_PlatformUserData);
-            var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
-            if (myWindow.IsCreatedByImGui == false)
-            {
-                var closeEvent = new SDL.SDL_Event();
-                closeEvent.type = (uint)SDL.SDL_EventType.SDL_EVENT_QUIT;
-                SDL.SDL3.SDL_PushEvent(&closeEvent);
-                return;
-            }
-            myWindow.Cleanup();
-            viewport->m_PlatformUserData = IntPtr.Zero.ToPointer();
-            viewport->m_PlatformHandle = null;
-
-            gcHandle.Free();
+            ReleaseViewportPlatformData(viewport);
         }
         unsafe static ImGuiPlatformIO.FDelegate_Platform_ShowWindow ImGui_ImplSDL2_ShowWindow = ImGui_ImplSDL2_ShowWindow_Impl;
         unsafe static void ImGui_ImplSDL2_ShowWindow_Impl(ImGuiViewport* viewport)
@@ -721,11 +838,17 @@ namespace EngineNS
         unsafe static ImGuiPlatformIO.FDelegate_Renderer_DestroyWindow ImGui_Renderer_DestroyWindow = ImGui_Renderer_DestroyWindow_Impl;
         unsafe static void ImGui_Renderer_DestroyWindow_Impl(ImGuiViewport* viewport)
         {
-            if ((IntPtr)viewport->m_RendererUserData == IntPtr.Zero)
+            ReleaseViewportRendererData(viewport);
+        }
+        unsafe static void ReleaseViewportRendererData(ImGuiViewport* viewport)
+        {
+            var rendererUserData = (IntPtr)viewport->m_RendererUserData;
+            if (rendererUserData == IntPtr.Zero)
                 return;
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->m_RendererUserData);
+
+            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr(rendererUserData);
             var vpData = gcHandle.Target as ViewportData;
-            vpData.Dispose();
+            vpData?.Dispose();
             gcHandle.Free();
             viewport->m_RendererUserData = IntPtr.Zero.ToPointer();
         }
@@ -774,6 +897,9 @@ namespace EngineNS
             public bool MouseCanUseGlobalState = true;
             public bool MouseCanUseCapture = true;
             public IntPtr ClipboardTextData;
+            public bool MainWindowMinimized;
+            public bool MainWindowWasVisible;
+            public HashSet<uint> ViewportsMinimizedWithMainWindow = new HashSet<uint>();
             public SDL_Cursor*[] MouseCursors = new SDL_Cursor*[(int)ImGuiMouseCursor_.ImGuiMouseCursor_COUNT];
             public SDL_Cursor* MouseLastCursor;
             public IntPtr MainViewportGCHandle;
@@ -786,6 +912,8 @@ namespace EngineNS
                     SDL.SDL3.SDL_free(ClipboardTextData);
                     ClipboardTextData = IntPtr.Zero;
                 }
+                ViewportsMinimizedWithMainWindow.Clear();
+                MainWindowWasVisible = false;
                 if (MainViewportGCHandle != IntPtr.Zero)
                 {
                     System.Runtime.InteropServices.GCHandle.FromIntPtr(MainViewportGCHandle).Free();
@@ -883,7 +1011,7 @@ namespace EngineNS
                 System.Runtime.InteropServices.GCHandle.Alloc(this.NativeWindow));
             main_viewport->m_PlatformUserData = ImGuiData.MainViewportGCHandle.ToPointer();
 
-            main_viewport->m_PlatformHandle = (void*)(nint)this.NativeWindow.WindowID;
+            main_viewport->m_PlatformHandle = window.ToPointer();
             main_viewport->m_PlatformHandleRaw = TtNativeWindow.GetWindowHandle((SDL.SDL_Window*)window.ToPointer()).ToPointer();
 
             // Update monitors

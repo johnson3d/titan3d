@@ -14,12 +14,15 @@ namespace EngineNS
         public string WindowName { get; set; }
 
         unsafe partial void ApplyDefaultWindowIcon();
+        partial void InstallWindowCloseHook();
 
         ~TtNativeWindow()
         {
             Cleanup();
         }
         public IntPtr Window;
+        private SDL.SDL_WindowID mWindowID;
+        private IntPtr mHWindow;
         public unsafe SDL.SDL_Window* WindowSDL
         {
             get
@@ -31,7 +34,14 @@ namespace EngineNS
         {
             get
             {
-                return SDL.SDL3.SDL_GetWindowID(WindowSDL);
+                if (mWindowID != 0)
+                    return mWindowID;
+
+                if (Window == IntPtr.Zero)
+                    return 0;
+
+                mWindowID = SDL.SDL3.SDL_GetWindowID(WindowSDL);
+                return mWindowID;
             }
         }
         public unsafe static IntPtr GetWindowHandle(SDL.SDL_Window* WinSDL)
@@ -42,7 +52,9 @@ namespace EngineNS
         {
             get
             {
-                return GetWindowHandle(WindowSDL);
+                if (mHWindow == IntPtr.Zero && Window != IntPtr.Zero)
+                    mHWindow = GetWindowHandle(WindowSDL);
+                return mHWindow;
             }
         }
         public unsafe bool IsMinimized
@@ -50,6 +62,16 @@ namespace EngineNS
             get
             {
                 return (SDL.SDL3.SDL_GetWindowFlags(WindowSDL) & SDL.SDL_WindowFlags.SDL_WINDOW_MINIMIZED) != 0;
+            }
+        }
+        public unsafe bool IsHidden
+        {
+            get
+            {
+                if (Window == IntPtr.Zero)
+                    return true;
+
+                return (SDL.SDL3.SDL_GetWindowFlags(WindowSDL) & SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN) != 0;
             }
         }
         public unsafe static bool IsInputFocus(IntPtr handle)
@@ -93,11 +115,19 @@ namespace EngineNS
                 handle.Free();
                 ThisHandle = IntPtr.Zero;
             }
+            if (IsPlatformWindowDestroyed)
+            {
+                Window = IntPtr.Zero;
+                mWindowID = 0;
+                mHWindow = IntPtr.Zero;
+            }
             if (Window != IntPtr.Zero)
             {
                 SDL.SDL3.SDL_StopTextInput(WindowSDL);
                 SDL.SDL3.SDL_DestroyWindow(WindowSDL);
                 Window = IntPtr.Zero;
+                mWindowID = 0;
+                mHWindow = IntPtr.Zero;
             }
         }
 
@@ -117,7 +147,12 @@ namespace EngineNS
             {
                 Window = (IntPtr)SDL.SDL3.SDL_CreateWindow(title, w, h, sdl_flags);
                 if (Window != IntPtr.Zero)
+                {
+                    mWindowID = SDL.SDL3.SDL_GetWindowID(WindowSDL);
+                    mHWindow = GetWindowHandle(WindowSDL);
                     ApplyDefaultWindowIcon();
+                    InstallWindowCloseHook();
+                }
                 WindowName = $"NativeWindow_{WindowID}";
                 //Window = SDL.SDL_CreateWindow(title, x, y, w, h, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE);
                 ThisHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(this));
@@ -132,7 +167,12 @@ namespace EngineNS
         {
             Window = (IntPtr)SDL.SDL3.SDL_CreateWindow(title, w, h, (SDL.SDL_WindowFlags)sdl_flags);
             if (Window != IntPtr.Zero)
+            {
+                mWindowID = SDL.SDL3.SDL_GetWindowID(WindowSDL);
+                mHWindow = GetWindowHandle(WindowSDL);
                 ApplyDefaultWindowIcon();
+                InstallWindowCloseHook();
+            }
             SDL.SDL3.SDL_SetWindowPosition(WindowSDL, x, y);
             ThisHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(this));
             //SDL.SDL3.SDL_SetWindowData(Window, "UNativeWindow", ThisHandle);
@@ -148,6 +188,12 @@ namespace EngineNS
         public unsafe void ShowNativeWindow()
         {
             SDL.SDL3.SDL_ShowWindow(WindowSDL);
+        }
+        public void MarkNativeWindowDestroyed()
+        {
+            Window = IntPtr.Zero;
+            mWindowID = 0;
+            mHWindow = IntPtr.Zero;
         }
         public unsafe void SetWindowPosition(int x, int y)
         {
@@ -200,7 +246,8 @@ namespace EngineNS
                     break;
                 case Bricks.Input.WindowEventID.WINDOWEVENT_CLOSE:
                     {
-
+                        if (TtEngine.Instance?.GfxDevice?.SlateApplication?.NativeWindow == this)
+                            TtEngine.Instance.PostQuitMessage();
                     }
                     break;
             }

@@ -620,6 +620,12 @@ namespace EngineNS
                         }
                     }
 
+                    if (GfxDevice?.SlateApplication?.CheckMainWindowLifetime() == true)
+                    {
+                        QuitFrame = 0;
+                        return false;
+                    }
+
                     var bCapturing = GfxDevice.RenderQueue.BeginFrameCapture();
                     //Do engine frame tick
                     {
@@ -693,6 +699,7 @@ namespace EngineNS
         }
         public void PostQuitMessage()
         {
+            QuitFrame = 0;
             Bricks.Input.TtInputSystem.PostQuitMessage();
         }
         public void FinalCleanup()
