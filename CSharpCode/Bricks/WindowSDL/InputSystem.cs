@@ -248,10 +248,11 @@ namespace EngineNS.Bricks.Input
             #region Window
             if (source.key.type >= SDL.SDL_EventType.SDL_EVENT_WINDOW_FIRST && source.key.type <= SDL.SDL_EventType.SDL_EVENT_WINDOW_LAST)
             {
-                target.Window.Type = (EventType)source.window.type;
+                target.Type = EventType.WINDOWEVENT;
+                target.Window.Type = EventType.WINDOWEVENT;
                 target.Window.Timestamp = (uint)source.window.timestamp;
                 target.Window.WindowID = (uint)source.window.windowID;
-                target.Window.WindowEventID = (WindowEventID)source.window.type;
+                target.Window.WindowEventID = MapWindowEventID(source.window.type);
                 target.Window.Data1 = source.window.data1;
                 target.Window.Data2 = source.window.data2;
             }
@@ -278,6 +279,44 @@ namespace EngineNS.Bricks.Input
                 target.Drop.WindowID = (uint)source.drop.windowID;
             }
             #endregion Drop
+        }
+        private static WindowEventID MapWindowEventID(SDL.SDL_EventType type)
+        {
+            switch (type)
+            {
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_SHOWN:
+                    return WindowEventID.WINDOWEVENT_SHOWN;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_HIDDEN:
+                    return WindowEventID.WINDOWEVENT_HIDDEN;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_EXPOSED:
+                    return WindowEventID.WINDOWEVENT_EXPOSED;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_MOVED:
+                    return WindowEventID.WINDOWEVENT_MOVED;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_RESIZED:
+                    return WindowEventID.WINDOWEVENT_RESIZED;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+                    return WindowEventID.WINDOWEVENT_SIZE_CHANGED;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_MINIMIZED:
+                    return WindowEventID.WINDOWEVENT_MINIMIZED;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_MAXIMIZED:
+                    return WindowEventID.WINDOWEVENT_MAXIMIZED;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_RESTORED:
+                    return WindowEventID.WINDOWEVENT_RESTORED;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_MOUSE_ENTER:
+                    return WindowEventID.WINDOWEVENT_ENTER;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_MOUSE_LEAVE:
+                    return WindowEventID.WINDOWEVENT_LEAVE;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_FOCUS_GAINED:
+                    return WindowEventID.WINDOWEVENT_FOCUS_GAINED;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_FOCUS_LOST:
+                    return WindowEventID.WINDOWEVENT_FOCUS_LOST;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+                    return WindowEventID.WINDOWEVENT_CLOSE;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_DESTROYED:
+                    return WindowEventID.WINDOWEVENT_CLOSE;
+                default:
+                    return WindowEventID.WINDOWEVENT_NONE;
+            }
         }
         public unsafe Scancode GetScancodeFromKey(Keycode keyCode)
         {
