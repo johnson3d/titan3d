@@ -23,6 +23,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_filedialog.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_binding.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)TitanImGuiBridge.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)misc\freetype\imgui_freetype.h" />
   </ItemGroup>
   <ItemGroup>
@@ -35,6 +36,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_tables.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_widgets.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_binding.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)TitanImGuiBridge.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NativeBridge\*.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)misc\freetype\imgui_freetype.cpp" />
   </ItemGroup>
   <ItemGroup>

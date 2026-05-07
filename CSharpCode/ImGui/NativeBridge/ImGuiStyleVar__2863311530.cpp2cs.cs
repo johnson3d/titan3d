@@ -1,0 +1,52 @@
+//generated from legacy CppWeaving ImGui surface; native entrypoints routed through TitanImGuiBridge
+using System;
+using System.Runtime.InteropServices;
+
+
+[System.Flags]
+public enum ImGuiStyleVar_
+{
+	ImGuiStyleVar_Alpha = 0,
+	ImGuiStyleVar_DisabledAlpha = 1,
+	ImGuiStyleVar_WindowPadding = 2,
+	ImGuiStyleVar_WindowRounding = 3,
+	ImGuiStyleVar_WindowBorderSize = 4,
+	ImGuiStyleVar_WindowMinSize = 5,
+	ImGuiStyleVar_WindowTitleAlign = 6,
+	ImGuiStyleVar_ChildRounding = 7,
+	ImGuiStyleVar_ChildBorderSize = 8,
+	ImGuiStyleVar_PopupRounding = 9,
+	ImGuiStyleVar_PopupBorderSize = 10,
+	ImGuiStyleVar_FramePadding = 11,
+	ImGuiStyleVar_FrameRounding = 12,
+	ImGuiStyleVar_FrameBorderSize = 13,
+	ImGuiStyleVar_ItemSpacing = 14,
+	ImGuiStyleVar_ItemInnerSpacing = 15,
+	ImGuiStyleVar_IndentSpacing = 16,
+	ImGuiStyleVar_CellPadding = 17,
+	ImGuiStyleVar_ScrollbarSize = 18,
+	ImGuiStyleVar_ScrollbarRounding = 19,
+	ImGuiStyleVar_ScrollbarPadding = 20,
+	ImGuiStyleVar_GrabMinSize = 21,
+	ImGuiStyleVar_GrabRounding = 22,
+	ImGuiStyleVar_ImageRounding = 23,
+	ImGuiStyleVar_ImageBorderSize = 24,
+	ImGuiStyleVar_TabRounding = 25,
+	ImGuiStyleVar_TabBorderSize = 26,
+	ImGuiStyleVar_TabMinWidthBase = 27,
+	ImGuiStyleVar_TabMinWidthShrink = 28,
+	ImGuiStyleVar_TabBarBorderSize = 29,
+	ImGuiStyleVar_TabBarOverlineSize = 30,
+	ImGuiStyleVar_TableAngledHeadersAngle = 31,
+	ImGuiStyleVar_TableAngledHeadersTextAlign = 32,
+	ImGuiStyleVar_TreeLinesSize = 33,
+	ImGuiStyleVar_TreeLinesRounding = 34,
+	ImGuiStyleVar_ButtonTextAlign = 35,
+	ImGuiStyleVar_SelectableTextAlign = 36,
+	ImGuiStyleVar_SeparatorSize = 37,
+	ImGuiStyleVar_SeparatorTextBorderSize = 38,
+	ImGuiStyleVar_SeparatorTextAlign = 39,
+	ImGuiStyleVar_SeparatorTextPadding = 40,
+	ImGuiStyleVar_DockingSeparatorSize = 41,
+	ImGuiStyleVar_COUNT = 42,
+}

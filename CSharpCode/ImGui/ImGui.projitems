@@ -25,6 +25,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controls\TypeSelector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\AssetSelector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\LogWatcher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NativeBridge\*.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiAPI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Slate\TtWorldViewportInteractiveMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Slate\BaseRenderer.cs" />

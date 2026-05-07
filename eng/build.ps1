@@ -129,6 +129,7 @@ function Invoke-CodeGeneration {
         ('CppOut=' + $nativeBinderDir),
         ('CsOut=' + $nativeBinderDir),
         'ModuleNC=EngineNS.CoreSDK.CoreModule',
+        ('ExcludePath=' + (Join-Path $repoRoot 'NativeCode\ImGui')),
         ('Pch=' + (Test-RepoFile 'Core.Window\pch.h')),
         ('TargetCppPOD=' + (Join-Path $nativeBinderDir 'PODStructDefine.h'))
     ) $repoRoot

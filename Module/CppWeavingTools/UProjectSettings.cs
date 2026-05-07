@@ -11,6 +11,7 @@ namespace CppWeaving
 		public List<string> Includes = new List<string>();
 		public List<string> MacroDefines = new List<string>();
 		public List<HppCollector.HppUnit> ParseSources = new List<HppCollector.HppUnit>();
+		public List<string> ExcludePaths = new List<string>();
 
 		public static string Pch;
 		public static string CppPODStruct;

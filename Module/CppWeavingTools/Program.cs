@@ -21,6 +21,18 @@ namespace CppWeaving
             settings.CppOutputDir = FindArgument(args, "CppOut=");
             settings.CsOutputDir = FindArgument(args, "CsOut=");
             settings.ExtInclude = FindArgument(args, "ExtInclude=");
+            var excludePath = FindArgument(args, "ExcludePath=");
+            if (!string.IsNullOrEmpty(excludePath))
+            {
+                foreach (var i in excludePath.Split(';', '+'))
+                {
+                    var normalized = NormalizePath(i);
+                    if (!string.IsNullOrEmpty(normalized))
+                    {
+                        settings.ExcludePaths.Add(normalized);
+                    }
+                }
+            }
             //settings.ExtInclude = "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.22000.0\\um;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.22000.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.22000.0\\winrt;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.22000.0\\cppwinrt;C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.8\\Include\\um;E:\\titanengine\\binaries\\";
             if (settings.ExtInclude != null)
             {
@@ -43,6 +55,9 @@ namespace CppWeaving
 
             foreach(var i in HppCollector.Instance.Headers)
             {
+                if (IsExcluded(i.Value.File, settings.ExcludePaths))
+                    continue;
+
                 settings.ParseSources.Add(i.Value);
             }
             foreach (var i in HppCollector.Instance.IncludePath)
@@ -77,6 +92,33 @@ namespace CppWeaving
                 return types.Split(split);
             }
             return null;
+        }
+
+        static string NormalizePath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return null;
+
+            path = path.Replace('\\', '/').TrimEnd('/');
+            return path.ToLowerInvariant();
+        }
+
+        static bool IsExcluded(string file, System.Collections.Generic.List<string> excludePaths)
+        {
+            if (excludePaths == null || excludePaths.Count == 0)
+                return false;
+
+            var normalized = NormalizePath(file);
+            if (normalized == null)
+                return false;
+
+            foreach (var i in excludePaths)
+            {
+                if (normalized == i || normalized.StartsWith(i + "/", StringComparison.Ordinal))
+                    return true;
+            }
+
+            return false;
         }
     }
 }
