@@ -13,6 +13,8 @@ namespace EngineNS
 
         public string WindowName { get; set; }
 
+        unsafe partial void ApplyDefaultWindowIcon();
+
         ~TtNativeWindow()
         {
             Cleanup();
@@ -114,6 +116,8 @@ namespace EngineNS
             unsafe
             {
                 Window = (IntPtr)SDL.SDL3.SDL_CreateWindow(title, w, h, sdl_flags);
+                if (Window != IntPtr.Zero)
+                    ApplyDefaultWindowIcon();
                 WindowName = $"NativeWindow_{WindowID}";
                 //Window = SDL.SDL_CreateWindow(title, x, y, w, h, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE);
                 ThisHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(this));
@@ -127,6 +131,8 @@ namespace EngineNS
         public unsafe IntPtr CreateNativeWindow(string title, int x, int y, int w, int h, uint sdl_flags)
         {
             Window = (IntPtr)SDL.SDL3.SDL_CreateWindow(title, w, h, (SDL.SDL_WindowFlags)sdl_flags);
+            if (Window != IntPtr.Zero)
+                ApplyDefaultWindowIcon();
             SDL.SDL3.SDL_SetWindowPosition(WindowSDL, x, y);
             ThisHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(this));
             //SDL.SDL3.SDL_SetWindowData(Window, "UNativeWindow", ThisHandle);
