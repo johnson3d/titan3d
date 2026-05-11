@@ -37,8 +37,6 @@
 
   <Import Project="..\..\codegen\NativeBinder\CodeGenCSharp.projitems" Label="Shared" />
 
-  <Import Project="..\..\codegen\Cs2Cpp\cs\Cs2Cpp.projitems" Label="Shared" />
-
   <Import Project="..\..\codegen\Macross\Engine\EngineMacross.projitems" Label="Shared" />
 
   <Import Project="..\..\codegen\Serializer\Engine\EngineSerializer.projitems" Label="Shared" />
@@ -177,21 +175,21 @@
     <Content Remove="C:\Users\johnsonsong\.nuget\packages\microsoft.codeanalysis.workspaces.msbuild\4.11.0\contentFiles\any\any\BuildHost-netcore\zh-Hant\System.CommandLine.resources.dll" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AssimpNetter" Version="6.0.2.1" />
-    <PackageReference Include="BCnEncoder.Net" Version="2.2.1" />
-    <PackageReference Include="MemoryInterop.ILPatcher" Version="2.2.1">
+    <PackageReference Include="AssimpNetter" />
+    <PackageReference Include="BCnEncoder.Net" />
+    <PackageReference Include="MemoryInterop.ILPatcher">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.13.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.13.0" />
-    <PackageReference Include="Mono.Cecil" Version="0.11.6" />
-    <PackageReference Include="NLua" Version="1.7.6" />
-    <PackageReference Include="NPOI" Version="2.7.2" />
-    <PackageReference Include="ppy.SDL3-CS" Version="2025.703.0" />
-    <PackageReference Include="RIPEMD160" Version="1.0.1" />
-    <PackageReference Include="System.CodeDom" Version="9.0.0" />
-    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" />
+    <PackageReference Include="Mono.Cecil" />
+    <PackageReference Include="NLua" />
+    <PackageReference Include="NPOI" />
+    <PackageReference Include="ppy.SDL3-CS" />
+    <PackageReference Include="RIPEMD160" />
+    <PackageReference Include="System.CodeDom" />
+    <PackageReference Include="System.Runtime.Loader" />
   </ItemGroup>
 
     <PropertyGroup Label="UserMacros">
@@ -199,10 +197,6 @@
 	    <TtTitanRoot Condition="'$(TitanRoot)' != ''">$(TitanRoot)</TtTitanRoot>
     </PropertyGroup>
 	
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="$(TtTitanRoot)CS_Engine.bat" />
-  </Target>
-  
   <ItemGroup>
     <ProjectReference Include="..\CompilingGenerator\CompilingGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\TtEngineLints\TtEngineLints.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
@@ -211,5 +205,7 @@
   <PropertyGroup>
 	<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup>
+
+  <Import Project="..\..\BuildScript\TitanCodeGen.targets" />
 
 </Project>

@@ -1,9 +1,11 @@
+using Assimp;
 using EngineNS.GamePlay;
 using EngineNS.Graphics.Pipeline.Common;
 using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
 using System;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
 {
@@ -573,6 +575,17 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
         public TtUaView GetTempReservoirUav() => mReservoirBuffers[kTempSlot].Uav;
         public TtSrView GetTempReservoirSrv() => mReservoirBuffers[kTempSlot].Srv;
 
+        // HZB mip0 = screenSize/2, 最大 mip = floor(log2(max(mip0W, mip0H))).
+        // 使用整数位运算避免浮点精度问题 (如 512.0 经 Math.Log2 得到 8.999… 被截断为 8).
+        uint CalcHzbMaxMip()
+        {
+            uint hzbMip0Max = Math.Max(mWidth / 2, mHeight / 2);
+            if (hzbMip0Max < 2)
+                return 0;
+            // BitOperations.Log2 等价于 31 - LeadingZeroCount, 即 floor(log2(n))
+            return (uint)System.Numerics.BitOperations.Log2(hzbMip0Max);
+        }
+
         // 4 个 pass 共享同一份 CBV. 首次调用时按任一 pass 的 binder 字段反射创建,
         // 之后所有 pass 复用; 每帧只写一次, 同帧多次调用直接返回缓存值.
         // 因为 4 个 shader 的 cbReSTIR layout 完全一致, 共享是安全的.
@@ -597,6 +610,7 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
                 var skyColor = SkyColor;
                 mSharedCBuffer.SetValue("SkyColor", in skyColor);
                 mSharedCBuffer.SetValue("SkyIntensity", SkyIntensity);
+                mSharedCBuffer.SetValue("HzbMaxMip", CalcHzbMaxMip() - 2);
                 mSharedCBuffer.MarkDirty();
                 mSharedCBuffer.FlushDirty();
             }
@@ -623,6 +637,12 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             var skyColorVal = SkyColor;
             mSharedCBuffer.SetValue("SkyColor", in skyColorVal);
             mSharedCBuffer.SetValue("SkyIntensity", SkyIntensity);
+
+            var hzbBuffer = FindAttachBuffer(HzbPinIn);
+            if (hzbBuffer != null)
+            {
+                mSharedCBuffer.SetValue("HzbMaxMip", hzbBuffer.Texture.mCoreObject.Desc.MipLevels - 1);
+            }
             
             return mSharedCBuffer;
         }

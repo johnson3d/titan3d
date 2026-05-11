@@ -168,23 +168,23 @@ namespace NxRHI
 		auto cmd = (VKCommandList*)tsCmd.GetCmdList();
 		if (Desc.Type & EBufferType::BFT_SRV)
 		{
-			FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_GenericRead, false);
+			FTransitionScope::TryAutoTransition(cmd, this, EGpuResourceState::GRS_GenericRead, false);
 		}
 		else if (Desc.Type & EBufferType::BFT_UAV)
 		{
-			FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_Uav, false);
+			FTransitionScope::TryAutoTransition(cmd, this, EGpuResourceState::GRS_Uav, false);
 		}
 		else if (Desc.Type & EBufferType::BFT_RTV)
 		{
-			FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_RenderTarget, false);
+			FTransitionScope::TryAutoTransition(cmd, this, EGpuResourceState::GRS_RenderTarget, false);
 		}
 		else if (Desc.Type & EBufferType::BFT_DSV)
 		{
-			FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_DepthStencil, false);
+			FTransitionScope::TryAutoTransition(cmd, this, EGpuResourceState::GRS_DepthStencil, false);
 		}
 		else
 		{
-			FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_GenericRead, false);
+			FTransitionScope::TryAutoTransition(cmd, this, EGpuResourceState::GRS_GenericRead, false);
 		}
 		//GpuState = VKImageLayoutToGpuState(imageInfo.initialLayout);
 		if (desc.InitData != nullptr)
@@ -558,19 +558,19 @@ namespace NxRHI
 			auto cmd = (VKCommandList*)tsCmd.GetCmdList();
 			if (Desc.BindFlags & EBufferType::BFT_SRV)
 			{
-				FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_GenericRead, false);
+				FTransitionScope::TryAutoTransition(cmd, this, EGpuResourceState::GRS_GenericRead, false);
 			}
 			else if (Desc.BindFlags & EBufferType::BFT_UAV)
 			{
-				FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_Uav, false);
+				FTransitionScope::TryAutoTransition(cmd, this, EGpuResourceState::GRS_Uav, false);
 			}
 			else if (Desc.BindFlags & EBufferType::BFT_RTV)
 			{
-				FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_RenderTarget, false);
+				FTransitionScope::TryAutoTransition(cmd, this, EGpuResourceState::GRS_RenderTarget, false);
 			}
 			else if (Desc.BindFlags & EBufferType::BFT_DSV)
 			{
-				FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_DepthStencil, false);
+				FTransitionScope::TryAutoTransition(cmd, this, EGpuResourceState::GRS_DepthStencil, false);
 			}
 			else
 			{
@@ -599,7 +599,7 @@ namespace NxRHI
 					copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
 					auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
-					FTransitionScope::Transition(cmd, bf, EGpuResourceState::GRS_CopySrc, false);
+					FTransitionScope::TryAutoTransition(cmd, bf, EGpuResourceState::GRS_CopySrc, false);
 
 					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
 					cpDraw->BindTextureDest(this);
@@ -635,19 +635,19 @@ namespace NxRHI
 				auto cmd = (VKCommandList*)tsCmd.GetCmdList();
 				if (Desc.BindFlags & EBufferType::BFT_SRV)
 				{
-					FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_GenericRead, false);
+					FTransitionScope::TryAutoTransition(cmd, this, EGpuResourceState::GRS_GenericRead, false);
 				}
 				else if (Desc.BindFlags & EBufferType::BFT_UAV)
 				{
-					FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_Uav, false);
+					FTransitionScope::TryAutoTransition(cmd, this, EGpuResourceState::GRS_Uav, false);
 				}
 				else if (Desc.BindFlags & EBufferType::BFT_RTV)
 				{
-					FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_RenderTarget, false);
+					FTransitionScope::TryAutoTransition(cmd, this, EGpuResourceState::GRS_RenderTarget, false);
 				}
 				else if (Desc.BindFlags & EBufferType::BFT_DSV)
 				{
-					FTransitionScope::Transition(cmd, this, EGpuResourceState::GRS_DepthStencil, false);
+					FTransitionScope::TryAutoTransition(cmd, this, EGpuResourceState::GRS_DepthStencil, false);
 				}
 				else
 				{
@@ -850,7 +850,7 @@ namespace NxRHI
 		if (state == GpuState)
 			return;
 
-		cmd->SetTextureBarrier(this, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, GpuState, state);
+		cmd->SetTextureBarrier(this, 0, Desc.MipLevels, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, GpuState, state);
 		//VkImageMemoryBarrier barrier{};
 		//barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 		//barrier.oldLayout = GpuStateToVKImageLayout(GpuState);

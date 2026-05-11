@@ -238,6 +238,7 @@ namespace NxRHI
 		virtual void Unmap(UINT index) = 0;
 	public:
 		EGpuResourceState	GpuState = EGpuResourceState::GRS_Undefine;
+		bool IsAutoTransition = true;
 	};
 	class TR_CLASS(SV_Dispose = self->Release())
 		IBuffer : public IGpuBufferData

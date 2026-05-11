@@ -517,12 +517,12 @@ namespace EngineNS.Graphics.Pipeline
                 return mPerViewportCBuffer;
             }
         }
-        public void SetViewportCBuffer(GamePlay.TtWorld world, TtRenderPolicy mobilePolicy)
+        public void SetViewportCBuffer(GamePlay.TtWorld world, TtRenderPolicy rPolicy)
         {
             NxRHI.TtCbView cBuffer = PerViewportCBuffer;
             if (cBuffer == null)
                 return;
-            var shadowNode = mobilePolicy.FindFirstNode<Shadow.TtShadowMapNode>();
+            var shadowNode = rPolicy.FindFirstNode<Shadow.TtShadowMapNode>();
             if (shadowNode != null)
             {
                 cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.FadeParam, in shadowNode.mFadeParam);
@@ -549,6 +549,11 @@ namespace EngineNS.Graphics.Pipeline
             float EnvMapMaxMipLevel = 10.0f;
             cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.EnvMapMaxMipLevel, in EnvMapMaxMipLevel);
             cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.EyeEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
+
+            if (rPolicy.IsImmediateFlushCBuffer)
+            {
+                cBuffer.FlushDirty();
+            }
         }
         public unsafe void SureRenderPassFormats(TtRenderGraph policy)
         {

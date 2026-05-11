@@ -90,9 +90,8 @@ namespace EngineNS.Editor.Forms
                         }
                         ImGuiAPI.EndTable();
                     }
-
-                    ImGuiAPI.EndChild();
                 }
+                ImGuiAPI.EndChild();
 
                 if (OnDrawMenu != null)
                     OnDrawMenu();

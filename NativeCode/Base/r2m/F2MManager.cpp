@@ -13,6 +13,10 @@ VRes2Memory* VRes2Memory::CreateFromFile(LPCSTR pszFile)
 	return result;
 }
 
+void VRes2Memory::OnBeforeWriteFile(LPCSTR pszFile)
+{
+	F2MManager::Instance->OnBeforeWriteFile(pszFile);
+}
 void VRes2Memory::OnAfterWriteFile(LPCSTR pszFile)
 {
 	F2MManager::Instance->OnAfterWriteFile(pszFile);
@@ -32,6 +36,18 @@ VFile2Memory* F2MManager::CreateFile2Memory(LPCSTR psz, vBOOL bShareWrite/* = FA
 		return NULL;
 	}
 	return pFM;
+}
+void F2MManager::OnBeforeWriteFile(LPCSTR file)
+{
+	if (file == nullptr)
+		return;
+	auto it = mF2Mems.find(file);
+	if (it == mF2Mems.end())
+	{
+		return;
+	}
+	auto f2m = it->second;
+	f2m->OnBeforeWriteFile();
 }
 void F2MManager::OnAfterWriteFile(LPCSTR file)
 {

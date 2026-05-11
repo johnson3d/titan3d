@@ -415,7 +415,7 @@ namespace EngineNS.Bricks.Collision.BVH
             // queue), NOT through RenderContext.GpuQueue.ExecuteCommandList — the
             // latter bypasses the engine's CmdQueue grouping / Profiler hooks /
             // policy-bound flush logic. See CodingGuidelines.md §1.7 + CodeLib.md §12.
-            TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(mCmdList, "GpuBvh.RayCast", EQueueType.QU_Compute);
+            TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(mCmdList, "GpuBvh.RayCast", EQueueType.QU_Compute, true);
             return true;
         }
 

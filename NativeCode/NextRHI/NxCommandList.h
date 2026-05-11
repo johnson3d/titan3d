@@ -193,7 +193,7 @@ namespace NxRHI
 		virtual void IndirectDispatchMesh (IBuffer* indirectArg, UINT indirectArgOffset = 0) = 0;
 		virtual void SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess) = 0;
 		virtual void SetBufferBarrier(IBuffer* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess) = 0;
-		virtual void SetTextureBarrier(ITexture* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess) = 0;
+		virtual void SetTextureBarrier(ITexture* pResource, UINT subResource, UINT levelCount, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess) = 0;
 
 		/*virtual UINT64 SignalFence(IFence * fence, UINT64 value, IEvent* evt = nullptr) = 0;
 		virtual void WaitGpuFence(IFence * fence, UINT64 value) = 0;*/
@@ -332,7 +332,7 @@ namespace NxRHI
 	public:
 		FTransitionScope(ICommandList* cmd, IGpuBufferData* resource, EGpuResourceState toState);
 		~FTransitionScope();
-		static EGpuResourceState Transition(ICommandList* cmd, IGpuBufferData* resource, EGpuResourceState toState, bool bTryRenderPass);
+		static EGpuResourceState TryAutoTransition(ICommandList* cmd, IGpuBufferData* resource, EGpuResourceState toState, bool bTryRenderPass);
 	};
 }
 

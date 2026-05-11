@@ -558,6 +558,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Architecture", "Architectur
 		Documents\Architecture\AtlasGI.md = Documents\Architecture\AtlasGI.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildScript", "BuildScript", "{655071C1-7C02-45CB-ABF9-B291A4A153F2}"
+	ProjectSection(SolutionItems) = preProject
+		BuildScript\build.ps1 = BuildScript\build.ps1
+		BuildScript\common.ps1 = BuildScript\common.ps1
+		BuildScript\dependencies.json = BuildScript\dependencies.json
+		BuildScript\deps.ps1 = BuildScript\deps.ps1
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1399,7 +1407,6 @@ Global
 		3rd\csharp\StbImageSharp\StbImageSharp.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		3rd\csharp\StbImageWriteSharp\StbImageWriteSharp.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		3rd\csharp\xxHash\xxHash.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
-		codegen\Cs2Cpp\cs\Cs2Cpp.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		codegen\Macross\Engine\EngineMacross.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		codegen\NativeBinder\CodeGenCSharp.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		codegen\Serializer\Engine\EngineSerializer.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -1480,7 +1487,6 @@ Global
 		3rd\csharp\StbImageSharp\StbImageSharp.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		3rd\csharp\StbImageWriteSharp\StbImageWriteSharp.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		3rd\csharp\xxHash\xxHash.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
-		codegen\Cs2Cpp\cs\Cs2Cpp.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		codegen\Macross\Engine\EngineMacross.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		codegen\NativeBinder\CodeGenCSharp.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		codegen\Serializer\Engine\EngineSerializer.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
@@ -1669,7 +1675,6 @@ Global
 		3rd\native\xatlas\xatlas.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		3rd\native\zlib\zlib.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		3rd\native\zstd\zstd.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
-		codegen\Cs2Cpp\cpp\Cs2Cpp.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		codegen\NativeBinder\CodeGen.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Base\Base.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\Animation\Animation.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4

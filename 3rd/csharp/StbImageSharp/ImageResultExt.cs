@@ -171,6 +171,15 @@ namespace StbImageSharp
             }
             return true;
         }
+        public unsafe System.IO.MemoryStream SaveToMem()
+        {
+            var memStream = new System.IO.MemoryStream();
+            {
+                var writer = new StbImageWriteSharp.ImageWriter();
+                writer.WritePng(Data, Width, Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
+            }
+            return memStream;
+        }
         public void Clear(EngineNS.Color4b color)
         {
             switch (Comp)

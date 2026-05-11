@@ -43,7 +43,7 @@ namespace EngineNS.GamePlay.Scene
         public override void TickLogic(float ellapse)
         {
             base.TickLogic(ellapse);
-            RenderPolicy.CmdQueue.FlushExecute(new NxRHI.ICommandList());
+            RenderPolicy.CmdQueue.FlushExecute();
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Capture", "Graphics\\SceneCapture", TtNode.EditorKeyword)]
@@ -259,7 +259,15 @@ namespace EngineNS.GamePlay.Scene
             }
             IsCaptureVisible = true;
 
-            WorldRenderer.TickLogic(ellapse);
+            TtEngine.Instance.ThreadRender.QueueRenderAction("CubeRenderer.CaptureCubeFaces", static (in Thread.TtThreadRender.FRenderAction RAct) =>
+            {
+                var This = (RAct.Arg as TtSceneCapture);
+                This.WorldRenderer.TickLogic(TtEngine.Instance.ElapsedSecond);
+            }, this);
+
+            //System.Threading.AutoResetEvent mRenderFinishedEvent = new System.Threading.AutoResetEvent(false);
+            //TtEngine.Instance.ThreadRender.WaitFinishRenderAction(mRenderFinishedEvent);
+            
         }
         public void TickRender(float ellapse)
         {

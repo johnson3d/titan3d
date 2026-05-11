@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using static EngineNS.Graphics.Pipeline.Shader.TtShadingEnv;
 
 namespace EngineNS.Editor.ShaderCompiler
 {
@@ -301,7 +302,7 @@ namespace EngineNS.Editor.ShaderCompiler
             return null;
         }
         public unsafe NxRHI.TtShaderDesc CompileShader(string shader, string entry, NxRHI.EShaderType type,
-            Graphics.Pipeline.Shader.TtShadingEnv shadingEnvshadingEnv, Graphics.Pipeline.Shader.TtMaterial mtl, Type mdfType,
+            Graphics.Pipeline.Shader.TtShadingEnv shadingEnvshadingEnv, FPermutationId permutationId, Graphics.Pipeline.Shader.TtMaterial mtl, Type mdfType,
             NxRHI.TtShaderDefinitions defines, TtHLSLInclude incProvider, string sm = null, bool bDebugShader = true, string extHlslVersion = null, bool asModule = false)
         {
             bool ignoreDXBC = false;
@@ -367,9 +368,8 @@ namespace EngineNS.Editor.ShaderCompiler
             var mdfName = "";
             if (mdfType != null)
                 mdfName = mdfType.FullName;
-            desc.DebugName = $"{shader}:{entry}[id,{shadingEnvshadingEnv?.CurrentPermutationId}][mtl,{mtlName}][mdf,{mdfName}]";
-            if (shadingEnvshadingEnv != null)
-                desc.PermutationId = shadingEnvshadingEnv.CurrentPermutationId;
+            desc.DebugName = $"{shader}:{entry}[id,{permutationId}][mtl,{mtlName}][mdf,{mdfName}]";
+            desc.PermutationId = permutationId;
             UserInclude = incProvider;
             Material = mtl;
             MdfQueueType = Rtti.TtTypeDesc.TypeOf(mdfType);

@@ -982,10 +982,12 @@ namespace EngineNS.Rtti
                 }
             }
             
-            public void Build(TtMetaVersion metaVersion, TtTypeDesc propType, string name, bool bUpdateOrder, string fieldTypeStr)
+            string mFieldTypeStr;
+            public void Build(TtMetaVersion metaVersion, TtTypeDesc propType, string name, bool bUpdateOrder, string fieldTypeStr = null)
             {
                 mHostType = metaVersion.HostClass.ClassType;
                 mPropertyName = name;
+                mFieldTypeStr = fieldTypeStr ?? propType?.TypeString;
                 var info = metaVersion.FindPropertyByName(propType?.SystemType, name);
                 if (info == null)
                 {
@@ -1004,7 +1006,8 @@ namespace EngineNS.Rtti
                 }
                 //mPropInfoRef = info; dont set it this time
                 mHostType = metaVersion.HostClass.ClassType;
-                mFieldType = propType;// TtTypeDesc.TypeOf(info.PropertyType);// propType;
+                mFieldType = TtTypeDesc.TypeOf(info.PropertyType);
+                mFieldTypeStr = mFieldType?.TypeString ?? mFieldTypeStr;
 
                 System.Diagnostics.Debug.Assert(info.DeclaringType == metaVersion.HostClass.ClassType.SystemType || metaVersion.HostClass.ClassType.SystemType.IsSubclassOf(info.DeclaringType));
                 //System.Diagnostics.Debug.Assert(info.PropertyType == propType.SystemType);
@@ -1034,7 +1037,7 @@ namespace EngineNS.Rtti
             public int Order { get; set; } = 0;
             public string FieldTypeStr
             {
-                get => mFieldType.TypeString;
+                get => mFieldType?.TypeString ?? mFieldTypeStr;
             }
             public int CompareTo(TtPropertyMeta other)
             {

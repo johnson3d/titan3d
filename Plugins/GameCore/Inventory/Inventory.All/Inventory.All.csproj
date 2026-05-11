@@ -18,10 +18,6 @@
 
   <Import Project="..\Inventory.projitems" Label="Shared" />
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="$(SolutionDir)CS_Engine.bat" />
-  </Target>
-
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Module\Engine.Window\Engine.Window.csproj" />
   </ItemGroup>

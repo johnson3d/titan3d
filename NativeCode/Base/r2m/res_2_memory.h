@@ -37,6 +37,7 @@ protected:
 	friend class XndAttribute;
 public:
 	static VRes2Memory* CreateFromFile(LPCSTR pszFile);
+	static void OnBeforeWriteFile(LPCSTR pszFile);
 	static void OnAfterWriteFile(LPCSTR pszFile);
 	virtual VResPtr		Ptr(UINT64 offset = 0, UINT64 size = 0) = 0;
 	virtual vBOOL		Free(bool bTryClearCache = true) = 0;
@@ -52,6 +53,7 @@ public:
 	{
 		return 0;
 	}
+	virtual void OnBeforeWriteFile() {}
 	virtual void OnAfterWriteFile() {}
 };
 

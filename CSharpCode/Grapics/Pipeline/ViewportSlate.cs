@@ -276,8 +276,8 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     IsViewportSlateFocused = ImGuiAPI.IsHoverCurrentWindow() && ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows);
                     var viewportUISize = OnDrawViewportUI(in curPos);                    
-                    ImGuiAPI.EndChild();
                 }
+                ImGuiAPI.EndChild();
 
                 ImGuiAPI.PopID();
             }
@@ -564,6 +564,7 @@ namespace EngineNS.Graphics.Pipeline
                 return mScopeTick;
             }
         }
+        System.Threading.AutoResetEvent mRenderFinishedEvent = new System.Threading.AutoResetEvent(false);
         public unsafe void TickLogic(float ellapse)
         {
             if (IsInlitialized == false)
@@ -588,26 +589,17 @@ namespace EngineNS.Graphics.Pipeline
                         TickOnFocus();
                     }
 
-                    RenderPolicy?.BeginTick(World);
-
-                    if (TtEngine.Instance.Config.UseRenderThread)
+                    TtEngine.Instance.ThreadRender.QueueRenderAction("RenderPolicy.Tick", static (in Thread.TtThreadRender.FRenderAction RAct) =>
                     {
-                        //这里可以让World的TickLogic和RenderPolicy的Tick并行执行，等两者都执行完了再继续后续的操作
-                        TtEngine.Instance.ThreadRender.PostRenderAction("RenderPolicy.Tick", () =>
-                        {
-                            RenderPolicy?.Tick(World, null);
-                            TtEngine.Instance.ThreadRender.FinishRenderAction();
-                        });
-                        World.TickLogic(this.RenderPolicy, ellapse);
-                        TtEngine.Instance.ThreadRender.WaitRender();
-                    }
-                    else
-                    {
-                        RenderPolicy?.Tick(World, null);
-                        World.TickLogic(this.RenderPolicy, ellapse);
-                    }
+                        var This = (RAct.Arg as TtViewportSlate);
+                        This.RenderPolicy?.BeginTick(This.World);
+                        This.RenderPolicy?.Tick(This.World, null);
+                        This.RenderPolicy?.EndTick(This.World);
+                    }, this);
+                    World.TickLogic(this.RenderPolicy, ellapse);
 
-                    RenderPolicy?.EndTick(World);
+                    TtEngine.Instance.ThreadRender.WaitFinishRenderAction(mRenderFinishedEvent);
+
                     RenderPolicy?.AfterPolicyFinished();
 
                     IsDrawing = false;

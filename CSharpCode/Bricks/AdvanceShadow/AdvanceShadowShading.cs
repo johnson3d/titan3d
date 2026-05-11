@@ -315,7 +315,6 @@ namespace EngineNS.Bricks.AdvanceShadow
             attachment.GpuResource = DepthTextureArray;
 
             mVisParameter.CullType = GamePlay.TtWorld.TtVisParameter.EVisCull.Shadow;
-            mVisParameter.IsBuildAABB = true;
             mVisParameter.World = world;
             mVisParameter.IsGatherVisibleNodes = false;
 

@@ -191,12 +191,14 @@ namespace NxRHI
 	bool DX12CommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
 	{
 		ASSERT(mCmdListState == ECmdListState::Recording);
+		ASSERT(mCurrentFrameBuffers == nullptr);
 		//mDebugName = name;
 		BeginEvent((mDebugName + ":" + name).c_str());
 		mCurrentFrameBuffers = fb;
 		GetCmdRecorder()->UseResource(fb);
 		GetCmdRecorder()->mDirectDrawNum++;
 		auto pass = GetCurrentRenderPass();
+		ASSERT(pass->BeginCopyDraws->Step == 0);
 		
 		for (UINT i = 0; i < fb->mRenderPass->Desc.NumOfMRT; i++)
 		{
@@ -205,7 +207,7 @@ namespace NxRHI
 			{
 				//cry! ClearRenderTargetView & ClearDepthStencilView will change layout automatic!!!!
 				//pass->PushBeginBarrier(rtv->GpuResource, EGpuResourceState::GRS_RenderTarget);
-				FTransitionScope::Transition(this, rtv->GpuResource, EGpuResourceState::GRS_RenderTarget, false);
+				FTransitionScope::TryAutoTransition(this, rtv->GpuResource, EGpuResourceState::GRS_RenderTarget, false);
 			}
 		}
 		if (fb->mDepthStencilView != nullptr)
@@ -213,7 +215,7 @@ namespace NxRHI
 			auto dsv = fb->mDepthStencilView.UnsafeConvertTo<DX12DepthStencilView>();
 			if (dsv != nullptr)
 			{
-				FTransitionScope::Transition(this, dsv->GpuResource, EGpuResourceState::GRS_DepthStencil, false);
+				FTransitionScope::TryAutoTransition(this, dsv->GpuResource, EGpuResourceState::GRS_DepthStencil, false);
 			}
 		}
 		pass->BeginCopyDraws->OnBeginPass(this);
@@ -385,7 +387,7 @@ namespace NxRHI
 		view->GetResourceState()->SetAccessFrame(IWeakRefObject::EngineCurrentFrame);
 		this->GetCmdRecorder()->UseResource(view->Buffer);
 
-		FTransitionScope::Transition(this, view->Buffer, EGpuResourceState::GRS_GenericRead, true);
+		FTransitionScope::TryAutoTransition(this, view->Buffer, EGpuResourceState::GRS_GenericRead, true);
 	}
 	void DX12CommandList::SetUav(EShaderType type, const FShaderBinder* binder, IUaView* view)
 	{
@@ -396,7 +398,7 @@ namespace NxRHI
 		mContext->SetGraphicsRootUnorderedAccessView(binder->DescriptorIndex, pAddr);*/
 		this->GetCmdRecorder()->UseResource(view->Buffer);
 
-		FTransitionScope::Transition(this, view->Buffer, EGpuResourceState::GRS_Uav, true);
+		FTransitionScope::TryAutoTransition(this, view->Buffer, EGpuResourceState::GRS_Uav, true);
 	}
 	void DX12CommandList::SetSampler(EShaderType type, const FShaderBinder* binder, ISampler* sampler)
 	{
@@ -752,27 +754,58 @@ namespace NxRHI
 		tmp.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 		mContext->ResourceBarrier(1, &tmp);
 	}
-	void DX12CommandList::SetTextureBarrier(ITexture* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
+	void DX12CommandList::SetTextureBarrier(ITexture* pResource, UINT subResource, UINT levelCount, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
 	{
-		D3D12_RESOURCE_BARRIER tmp{};
-		tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		tmp.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		auto pTarGpuResource = (ID3D12Resource*)pResource->GetHWBuffer();
-		tmp.Transition.pResource = pTarGpuResource;
-		tmp.Transition.StateBefore = GpuStateToDX12(srcAccess);
-		tmp.Transition.StateAfter = GpuStateToDX12(dstAccess);
-		if (tmp.Transition.StateBefore == tmp.Transition.StateAfter)
+		if (subResource == 0 && levelCount == pResource->Desc.MipLevels)
 		{
-			if (dstAccess == GRS_Uav)
-			{
-				tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
-				tmp.UAV.pResource = pTarGpuResource;
-				mContext->ResourceBarrier(1, &tmp);
-			}
-			return;
+			D3D12_RESOURCE_BARRIER tmp{};
+			tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			tmp.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			auto pTarGpuResource = (ID3D12Resource*)pResource->GetHWBuffer();
+			tmp.Transition.pResource = pTarGpuResource;
+			tmp.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+			tmp.Transition.StateBefore = GpuStateToDX12(srcAccess);
+			tmp.Transition.StateAfter = GpuStateToDX12(dstAccess);
+			mContext->ResourceBarrier(1, &tmp);
 		}
-		tmp.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		mContext->ResourceBarrier(1, &tmp);
+		else
+		{
+			std::vector<D3D12_RESOURCE_BARRIER> barriers;
+			barriers.reserve(levelCount);
+			for (UINT i = 0; i < levelCount; i++)
+			{
+				D3D12_RESOURCE_BARRIER tmp{};
+				tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+				tmp.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+				auto pTarGpuResource = (ID3D12Resource*)pResource->GetHWBuffer();
+				tmp.Transition.pResource = pTarGpuResource;
+				tmp.Transition.Subresource = subResource + i;
+				tmp.Transition.StateBefore = GpuStateToDX12(srcAccess);
+				tmp.Transition.StateAfter = GpuStateToDX12(dstAccess);
+				barriers.push_back(tmp);
+			}
+			mContext->ResourceBarrier((UINT)barriers.size(), barriers.data());
+		}
+		//D3D12_RESOURCE_BARRIER tmp{};
+		//tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		//tmp.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		//auto pTarGpuResource = (ID3D12Resource*)pResource->GetHWBuffer();
+		//tmp.Transition.pResource = pTarGpuResource;
+		//tmp.Transition.Subresource = subResource;//D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES
+		//tmp.Transition.StateBefore = GpuStateToDX12(srcAccess);
+		//tmp.Transition.StateAfter = GpuStateToDX12(dstAccess);
+		//if (tmp.Transition.StateBefore == tmp.Transition.StateAfter)
+		//{
+		//	if (dstAccess == GRS_Uav)
+		//	{
+		//		tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+		//		tmp.UAV.pResource = pTarGpuResource;
+		//		mContext->ResourceBarrier(1, &tmp);
+		//	}
+		//	return;
+		//}
+		//tmp.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		//mContext->ResourceBarrier(1, &tmp);
 	}
 	//UINT64 DX12CommandList::SignalFence(IFence* fence, UINT64 value, IEvent* evt)
 	//{
@@ -912,7 +945,7 @@ namespace NxRHI
 		
 		for (UINT i = 0; i < Count; i++)
 		{
-			saveStates[i] = FTransitionScope::Transition(this, BufferWriters[i].Buffer, EGpuResourceState::GRS_CopyDst, false);
+			saveStates[i] = FTransitionScope::TryAutoTransition(this, BufferWriters[i].Buffer, EGpuResourceState::GRS_CopyDst, false);
 			writers[i].Dest = ((DX12Buffer*)BufferWriters[i].Buffer)->GetGPUVirtualAddress() + BufferWriters[i].Offset;
 			writers[i].Value = BufferWriters[i].Value;
 			modes[i] = D3D12_WRITEBUFFERIMMEDIATE_MODE::D3D12_WRITEBUFFERIMMEDIATE_MODE_DEFAULT;
@@ -920,7 +953,7 @@ namespace NxRHI
 		mLastContext->WriteBufferImmediate(Count, writers, modes);
 		for (UINT i = 0; i < Count; i++)
 		{
-			FTransitionScope::Transition(this, BufferWriters[i].Buffer, saveStates[i], false);
+			FTransitionScope::TryAutoTransition(this, BufferWriters[i].Buffer, saveStates[i], false);
 		}
 	}
 	

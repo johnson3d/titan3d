@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.NxRHI
 {
-    public class TtGraphicsEffect : AuxPtrType<NxRHI.IGraphicsEffect>
+    public class TtNativeGraphicsEffect : AuxPtrType<NxRHI.IGraphicsEffect>
     {
         public void BindInputLayout(TtInputLayout layout)
         {

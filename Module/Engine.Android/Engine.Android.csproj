@@ -31,8 +31,6 @@
 
   <Import Project="..\..\codegen\NativeBinder\CodeGenCSharp.projitems" Label="Shared" />
 
-  <Import Project="..\..\codegen\Cs2Cpp\cs\Cs2Cpp.projitems" Label="Shared" />
-
   <Import Project="..\..\codegen\Macross\Engine\EngineMacross.projitems" Label="Shared" />
 
   <Import Project="..\..\codegen\Serializer\Engine\EngineSerializer.projitems" Label="Shared" />
@@ -101,23 +99,19 @@
   <Import Project="..\..\CSharpCode\Bricks\DataCopyer\DataCopyer.projitems" Label="Shared" />
 
   <ItemGroup>
-    <PackageReference Include="BCnEncoder.Net" Version="2.1.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.11.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.11.0" />
-    <PackageReference Include="Mono.Cecil" Version="0.11.6" />
-    <PackageReference Include="RIPEMD160" Version="1.0.1" />
-    <PackageReference Include="System.CodeDom" Version="9.0.0" />
-    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+    <PackageReference Include="BCnEncoder.Net" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" />
+    <PackageReference Include="Mono.Cecil" />
+    <PackageReference Include="RIPEMD160" />
+    <PackageReference Include="System.CodeDom" />
+    <PackageReference Include="System.Runtime.Loader" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CompilingGenerator\CompilingGenerator.csproj" />
   </ItemGroup>
 
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="$(SolutionDir)CS_Engine.bat" />
-  </Target>
-  
   <ItemGroup>
     <ProjectReference Include="..\CompilingGenerator\CompilingGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\CppWeavingTools\CppWeavingTools.csproj" />

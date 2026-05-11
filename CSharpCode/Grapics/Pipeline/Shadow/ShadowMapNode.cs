@@ -1,9 +1,11 @@
-﻿using EngineNS.Bricks.VXGI;
+﻿using Assimp;
+using EngineNS.Bricks.VXGI;
+using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
-using EngineNS.Graphics.Pipeline.Shader;
-using EngineNS.Graphics.Mesh;
+using static EngineNS.GamePlay.TtWorld;
 //using Microsoft.Toolkit.HighPerformance.Buffers;
 
 namespace EngineNS.Graphics.Pipeline.Shadow
@@ -374,13 +376,14 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 }
                 //先得到阴影裁剪摄像机，确保CSM区段内看得到的对象都产生投影 
                 var aabb = new DBoundingBox();
+                aabb.InitEmptyBox();
                 using (new Profiler.TimeScopeHelper(ScopeCull))
                 {
                     CullCamera.PerspectiveFovLH(ViewerCamera.Fov, ViewerCamera.Width, ViewerCamera.Height, ViewerCamera.ZNear, mSumDistanceFarArray[CsmIdx]);
                     CullCamera.LookAtLH(ViewerCamera.GetPosition(), ViewerCamera.GetLookAt(), in Vector3.UnitY);
                     //收集本csm阶段可投影Mesh
                     mVisParameter.CullType = GamePlay.TtWorld.TtVisParameter.EVisCull.Shadow;
-                    mVisParameter.IsBuildAABB = true;
+                    mVisParameter.IsUseECS = true;
                     mVisParameter.World = world;
                     mVisParameter.CullCamera = CullCamera;
                     mVisParameter.IsGatherVisibleNodes = false;
@@ -390,7 +393,10 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                     };
                     world.GatherVisibleMeshes(mVisParameter);
 
-                    aabb = mVisParameter.AABB;
+                    foreach(var i in mVisParameter.VisibleMeshes)
+                    {
+                        aabb = DBoundingBox.Merge(in aabb, i.Mesh.WorldAABB);
+                    }
                 }
 
                 //先按照方向光构建一个阴影摄像机坐标系 
@@ -466,7 +472,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 mFadeParam.X = 1.0f / (ShadowDistance - FadeStartDistance + 0.0001f);
                 mFadeParam.Y = -FadeStartDistance * mFadeParam.X;
 
-                mShadowCameraArray[CsmIdx].UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext);
+                mShadowCameraArray[CsmIdx].UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext, TtCbView.EUpdateMode.Immediately);
                 
                 var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
                 using (new NxRHI.TtCmdListScope(cmdlist, "ShadowMap"))

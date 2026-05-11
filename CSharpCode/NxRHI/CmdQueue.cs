@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Macross;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -98,10 +99,7 @@ namespace EngineNS.NxRHI
         {
             lock (Cmds)
             {
-                using (var tsCmd = new NxRHI.FTransientCmd(NxRHI.EQueueType.QU_Default, "TtRCmdQueue.Reset"))
-                {
-                    FlushExecute(tsCmd.CmdList);
-                }
+                FlushExecute();
                 TickSync(0);
 
                 TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
@@ -138,10 +136,11 @@ namespace EngineNS.NxRHI
         }
         private void TickRenderImpl()
         {
+            var spinWait = new System.Threading.SpinWait();
             while (true)
             {
-                //todo:这里可以考虑，多个cmdlist合并一起，一次执行TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandLists
-                if (Cmds.Count > 0)
+                int nFrameEnd = 0;
+                while (Cmds.Count > 0)
                 {
                     try
                     {
@@ -154,7 +153,7 @@ namespace EngineNS.NxRHI
                         cmd.Cmd(this, ref cmd);
                         if (cmd.CmdType == ERCmdType.FrameEnd)
                         {
-                            break;
+                            nFrameEnd++;
                         }
                     }
                     catch (Exception ex)
@@ -162,13 +161,14 @@ namespace EngineNS.NxRHI
                         Profiler.Log.WriteException(ex);
                     }
                 }
+                if (nFrameEnd > 0 || TtMacrossDebugger.Instance.CurrrentBreak != null)
+                {
+                    break;
+                }
+                spinWait.SpinOnce();
             }
-            //if (TtEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.Queue)
-            //{
-                
-            //}
         }
-        public void QueueCmd(FRenderCmd cmd, string name, object tag = null, NxRHI.EQueueType qType = EQueueType.QU_Default, ERCmdType type = ERCmdType.Cmd)
+        public void QueueCmd(FRenderCmd cmd, string name, object tag = null, NxRHI.EQueueType qType = EQueueType.QU_Default, ERCmdType type = ERCmdType.Cmd, bool bImm = false)
         {
             var info = new FRCmdInfo();
             info.CmdType = type;
@@ -178,10 +178,10 @@ namespace EngineNS.NxRHI
             info.Tag = tag;
             lock (Cmds)
             {
-                ProcCmd(ref info);
+                ProcCmd(ref info, bImm);
             }
         }
-        public void QueueCmdlist(TtCommandList cmd, string name = null, EQueueType qType = EQueueType.QU_Default)
+        public void QueueCmdlist(TtCommandList cmd, string name = null, EQueueType qType = EQueueType.QU_Default, bool bImm = false)
         {
             System.Diagnostics.Debug.Assert(cmd.mCoreObject.IsRecording() == false);
 
@@ -202,12 +202,35 @@ namespace EngineNS.NxRHI
             };
             lock (Cmds)
             {
-                ProcCmd(ref info);
+                ProcCmd(ref info, bImm);
             }
         }
-        private void ProcCmd(ref FRCmdInfo info)
+        public TtFence QueueFence(TtFence fence = null, string name = null, EQueueType qType = EQueueType.QU_Default, bool bImm = false)
         {
-            if (TtEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.Queue)
+            if (fence == null)
+            {
+                var fcDesc = new FFenceDesc();
+                fcDesc.InitValue = 0;
+                fence = TtEngine.Instance.GfxDevice.RenderContext.CreateFence(in fcDesc, "QueueFence." + name);
+            }
+            var info = new FRCmdInfo();
+            info.CmdType = ERCmdType.Cmdlist;
+            info.QueueType = qType;
+            info.Name = name;
+            info.Tag = fence;
+            info.Cmd = static (TtRCmdQueue queue, ref FRCmdInfo info) =>
+            {
+                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(info.Tag as TtFence, info.QueueType);
+            };
+            lock (Cmds)
+            {
+                ProcCmd(ref info, bImm);
+            }
+            return fence;
+        }
+        private void ProcCmd(ref FRCmdInfo info, bool bImm)
+        {
+            if (bImm == false && TtEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.Queue)
             {
                 Cmds.Enqueue(info);
             }
@@ -223,7 +246,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        public void FlushExecute(ICommandList ImCmdlist)
+        public void FlushExecute()
         {
             bool bFindFrameEnd = false;
             NxRHI.FRCmdInfo endCmd = new();

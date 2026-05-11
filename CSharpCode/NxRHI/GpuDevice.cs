@@ -400,9 +400,9 @@ namespace EngineNS.NxRHI
                 return null;
             return result;
         }
-        public TtGraphicsEffect CreateShaderEffect(TtShader ams, TtShader ms, TtShader vs, TtShader ps, string identifier)
+        public TtNativeGraphicsEffect CreateShaderEffect(TtShader ams, TtShader ms, TtShader vs, TtShader ps, string identifier)
         {
-            var result = new TtGraphicsEffect();
+            var result = new TtNativeGraphicsEffect();
             if(TtEngine.Instance.GfxDevice.RenderContext.DeviceCaps.IsSupportMeshShader == false &&
                 ms!=null)
             {

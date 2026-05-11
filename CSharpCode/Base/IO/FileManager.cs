@@ -45,6 +45,10 @@ namespace EngineNS.IO
                 return null;
             return new TtRes2Memory(ptr);
         }
+        public static void OnBeforeWriteFile(string file)
+        {
+            VRes2Memory.OnBeforeWriteFile(file);
+        }
         public static void OnAfterWriteFile(string file)
         {
             VRes2Memory.OnAfterWriteFile(file);
@@ -572,6 +576,7 @@ namespace EngineNS.IO
             // 获取文件的字节数据
             byte[] data = Encoding.UTF8.GetBytes(contents);
 
+            TtRes2Memory.OnBeforeWriteFile(path);
             // 关键点：使用 FileOptions.WriteThrough
             using (var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 4096, FileOptions.WriteThrough))
             {
@@ -579,6 +584,7 @@ namespace EngineNS.IO
                 // 注意：对于 WriteThrough，调用 Flush 并不是严格必需的，
                 // 但调用 Flush(true) 可以进一步确保数据已到达磁盘。
                 fs.Flush(true);
+                fs.Close();
             }
             TtRes2Memory.OnAfterWriteFile(path);
         }

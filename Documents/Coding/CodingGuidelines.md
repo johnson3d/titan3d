@@ -950,8 +950,11 @@ RenderGraph 节点 Tick、editor cmd 按钮、async readback 投递、热重载 
 
 1. **`TtCommandList` 级别提交必须走** `TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(cmd, name, qType)`
    或 `policy.CommitCommandList(cmd, name, qType)`。
-2. **`FRenderCmd` 单条 cmd 提交必须走** `TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd(cmd, name, tag, qType)`
-   或 `policy.QueueCmd(cmd, name, tag, qType)`。
+2. **`FRenderCmd` 单条 cmd 提交必须走** `TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd(cmd, name, tag, qType, type, bImm)`
+   或 `policy.QueueCmd(cmd, name, tag, qType, type, bImm)`。其中 `type` (`ERCmdType`,
+   默认 `Cmd`) 与 `bImm` (默认 `false`) 是可选参, 绝大多数场景保持默认即可; 仅在
+   "逻辑线程帧末哨兵 (`FrameEnd`)" 或 "启动期 / shutdown flush 等需要立即同步执行
+   (`bImm: true`)" 的少数场景才显式传入, 详见 `CodeLib.md §12.2 / §12.4`。
 3. **绝对禁止** 直接调用 `TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(...)`
    / `RenderContext.GpuQueue.QueueCmdlist(...)` 等任何**底层 `IGpuQueue`** 上的提交 API。
    `RenderContext.GpuQueue` 是 native 层 `IGpuQueue` 的直接暴露, 仅供引擎内部 (CmdQueue
@@ -986,9 +989,19 @@ mCmdList.FlushDraws();
 TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(
     mCmdList, "GpuBvh.RayCast", EQueueType.QU_Compute);   // ✓ 走 RenderQueue
 
-// 单条 cmd 级 (例如 readback copy)
+// 单条 cmd 级 (例如 readback copy), type/bImm 使用默认值即可
 TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd(
     cpDraw, "MyReadback.Copy", null, EQueueType.QU_Default);  // ✓ 走 RenderQueue
+
+// 少数场景: 逻辑线程帧末哨兵, 让渲染线程 TickRender 消费到 FrameEnd 后 break
+TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd(
+    static (queue, ref info) => { }, "#TickLogicEnd#", null,
+    EQueueType.QU_Default, ERCmdType.FrameEnd);               // ✓ 仅用于帧末哨兵
+
+// 少数场景: 启动期 / fence signal 之后需要立即同步执行, 不能等下一帧
+TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd(
+    cmd, "GpuFetch.FenceSignal", null,
+    EQueueType.QU_Compute, ERCmdType.Cmd, bImm: true);        // ✓ 当前线程立即执行
 
 // 在 RenderGraph 节点里更优先用 policy 路径
 policy.CommitCommandList(mCmdList, "MyNode.Dispatch");  // ✓ 走 policy (CmdQueue 归并)
@@ -1025,6 +1038,38 @@ mCmdList, "GpuFetch.Submit", NxRHI.EQueueType.QU_Compute);` 让引擎做归并�
       正则要包含 `Execute` —— 真实方法名是 `ExecuteCommandList` 全词, 不是
       `ExecuteCmdlist`; 写成 `Cmdlist?` 会漏掉这个最常被误用的 API)。本任务后
       剩余应该只有 `GpuFetch.cs:51` 一处历史残留 (调用 `ExecuteCommandList`)。
+
+**配套 API: `RenderQueue.QueueFence` —— 合规的"在 cmdlist 提交点插 fence"方式**
+
+如果业务确实需要在 `RenderQueue.QueueCmdlist` 提交点之后插入一个**显式 fence
+屏障** (例如同步 readback 想确保 GPU 已完成、跨队列同步等), **正确做法是调
+`TtEngine.Instance.GfxDevice.RenderQueue.QueueFence(...)`**, 它走 RenderQueue
+路径、返回一个可 `Wait` 的 fence 句柄, 时序和归并都被引擎正确管理。
+
+```csharp
+// dispatch 走 RenderQueue
+TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(
+    mCmdList, "GpuBvh.RayCast", EQueueType.QU_Compute);
+
+// 在同一 RenderQueue 末尾插 fence (走合规路径, 不要手写 rc.GpuQueue.IncreaseSignal)
+var fence = TtEngine.Instance.GfxDevice.RenderQueue.QueueFence(
+    null, "GpuBvh.RayCast", EQueueType.QU_Compute, true);
+fence.Wait(1);   // 同步阻塞调用线程; 异步场景请放到 EventPoster.RunOn(TPools) 里 wait
+
+// 现在可以安全 readback (其实 FetchGpuData 自身也带 flush+wait, 这里 fence 只是
+// 让"GPU 已完成"这个屏障在代码里显式可见, 便于调试和阅读)
+mHitBuffer.GpuBuffer.FetchGpuData(0, blob.mCoreObject);
+```
+
+**反例**: 别再写 `rc.GpuQueue.IncreaseSignal(fence) + fence.Wait(1)` —— `IncreaseSignal`
+本身合规, 但跟 `RenderQueue.QueueCmdlist` 配对时**它和 cmdlist 不在同一个 submit
+点**, fence signal 时机比 cmdlist 实际跑完更早或更晚都有可能, wait 出来的语义
+是含糊的。`QueueFence` 是引擎专门为这个场景提供的"绑在 RenderQueue 提交序列上
+的 fence"。
+
+**实战参考**: `Bricks/Collision/BVH/TtBVHDebugNode.cs::FGpuRayCast` 在 dispatch
+之后用 `RenderQueue.QueueFence + fence.Wait(1)` 同步等 GPU 完成, 然后调
+`mGpuBvh.ReadbackHits` 与 CPU 端 BVH 结果做断言对照 (debug-only 场景)。
 
 ---
 

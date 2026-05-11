@@ -8,7 +8,7 @@
   "IsParrallelWorldGather": true,
   "Interval": 15,
   "TargetFps": 66,
-  "DefaultTexture": "texture/checkboard.txpic:Engine",
+  "DefaultTexture": "texture/checkboard.srv:Engine",
   "AdaperId": 0,
   "MainWindow": {
     "Left": 100,

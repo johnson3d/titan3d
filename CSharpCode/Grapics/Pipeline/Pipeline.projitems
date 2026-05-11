@@ -76,7 +76,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Shader\CommanShading\Draw2DShading.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shader\CommanShading\Draw2DPolicy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shader\IShaderCodeProvider.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Shader\Effect.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shader\EffectManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shader\Material.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shader\MaterialInstance.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shader\ShadingEnv.cs" />

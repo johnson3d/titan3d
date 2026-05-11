@@ -49,11 +49,11 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
                 mCmdList.FlushDraws();
                 CoreSDK.DisposeObject(ref cpDraw);
             }
-            TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(mCmdList, "PCG.GpuFetch", NxRHI.EQueueType.QU_Compute);
+            TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(mCmdList, "PCG.GpuFetch", NxRHI.EQueueType.QU_Compute, true);
             TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd((TtRCmdQueue queue, ref FRCmdInfo info) =>
             {
                 TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(mFinishFence, info.QueueType);
-            }, "PCG.GpuFetch.FenceSignal", NxRHI.EQueueType.QU_Compute);
+            }, "PCG.GpuFetch.FenceSignal", null, NxRHI.EQueueType.QU_Compute, ERCmdType.Cmd, true); ;
         }
     }
 }

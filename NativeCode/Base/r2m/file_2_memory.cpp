@@ -174,6 +174,16 @@ void VFile2Memory::Close()
 	}
 }
 
+void VFile2Memory::OnBeforeWriteFile()
+{
+	if (mPtrRef != 0)
+	{
+		ASSERT(false);
+	}
+	Close();
+	//mFile.UpdateFileLength();
+}
+
 void VFile2Memory::OnAfterWriteFile()
 {
 	if (mPtrRef != 0)

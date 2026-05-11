@@ -125,6 +125,7 @@ namespace EngineNS.IO
         }
         public void Dispose()
         {
+            FileStream.Flush();
             FileStream.Dispose();
         }
     }

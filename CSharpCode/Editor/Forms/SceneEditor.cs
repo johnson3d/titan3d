@@ -53,6 +53,23 @@ namespace EngineNS.Editor.Forms
 
             public override void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
             {
+                // 点击视口空白处 (proxy == null) 时, 拾取没命中任何对象。
+                // 通行编辑器约定 (Unity / Unreal / Godot) 是: 空白处单击属于易误触操作,
+                // 不应清空 outliner 里的当前选择, 否则用户在 outliner 里选了一个 node、
+                // 不小心在视口空白点一下, 选中和 NodeDetail (NodeInspector.Target) 都会
+                // 跟着丢失, 体验很差。
+                //
+                // 历史 bug: 这里直接把 null 传给后续的 OnHitproxySelectedMulti(clearPre=true, null)
+                // 时, proxies 是 [null] 而不是空数组, 长度判 == 0 不成立 -> 走 else 分支
+                // -> clearPre 把 mWorldOutliner.SelectedNodes 全部清掉 -> NodeInspector.Target
+                // 也被赋成空列表, 这就是用户看到的 "点空白选中丢失" 的现象。
+                //
+                // 另外 Ctrl 路径下原代码会直接访问 proxy.Selected, proxy 为 null 时 NRE。
+                // 在这里统一早返回, 保持当前选择不变。如果后续要加 "空白点击取消选择"
+                // 的语义, 应另走显式路径 (Esc / 右键菜单), 不要再绑回易误触的左键空白点。
+                if (proxy == null)
+                    return;
+
                 if(TtEngine.Instance.InputSystem.IsCtrlKeyDown())
                 {
                     if (proxy.Selected)
@@ -219,6 +236,58 @@ namespace EngineNS.Editor.Forms
                 }
                 HostEditor.NodeInspector.Target = HostEditor.mWorldOutliner.SelectedNodes; //proxies;
             }
+
+            // 视口里按 Esc 清空选择 (Unity / Godot / Blender 通行约定)。
+            // 同时清渲染层 PickedProxiableManager 让高亮也跟着去掉。
+            // 走 HostEditor.DeselectAll 统一入口, 避免和 outliner 那侧的清空逻辑漂移。
+            public override bool OnEvent(in Bricks.Input.Event e)
+            {
+                if (e.Type == Bricks.Input.EventType.KEYDOWN &&
+                    e.Keyboard.Keysym.Sym == Bricks.Input.Keycode.KEY_ESCAPE &&
+                    e.Keyboard.Repeat == 0 &&
+                    IsViewportSlateFocused)
+                {
+                    HostEditor?.DeselectAll();
+                    return true;
+                }
+                return base.OnEvent(in e);
+            }
+        }
+
+        // 统一的"清空所有选择"入口: 同时清理
+        //   1) outliner 选中列表 (mWorldOutliner.SelectedNodes) + 节点的 Selected 标记
+        //   2) 渲染层高亮 (PickedProxiableManager.ClearSelected, 这样视口里的描边/Bound 也消失)
+        //   3) 节点详情面板 (NodeInspector.Target = null, 否则面板还指着已经"逻辑取消选中"的旧列表)
+        // 触发入口目前有两个: Esc 键 (TtSceneEditorViewport.OnEvent) 与 Outliner 树空白处单击
+        // (TtWorldOutliner.DrawAsChildWindow / OnDraw)。
+        public void DeselectAll()
+        {
+            if (mWorldOutliner != null)
+            {
+                var selected = mWorldOutliner.SelectedNodes;
+                if (selected != null)
+                {
+                    for (int i = 0; i < selected.Count; i++)
+                    {
+                        if (selected[i] != null)
+                            selected[i].Selected = false;
+                    }
+                    selected.Clear();
+                }
+            }
+
+            var policy = PreviewViewport?.RenderPolicy as Graphics.Pipeline.TtRenderPolicy;
+            if (policy != null && policy.PickedProxiableManager != null)
+            {
+                policy.PickedProxiableManager.ClearSelected();
+            }
+
+            // ShowBoundVolumes(true, false, null) 把所有节点上的 Bound 高亮关掉。
+            // PreviewViewport 自身有这个方法 (基类 TtViewportSlate 提供)。
+            PreviewViewport?.ShowBoundVolumes(true, false, null);
+
+            if (NodeInspector != null)
+                NodeInspector.Target = null;
         }
         [Category("Option")]
         [ReadOnly(true)]

@@ -14,6 +14,7 @@
 #include "../../Base/thread/vfxthread.h"
 #include "../../Base/thread/vfxThreadDispatcher.h"
 #include <dxgi1_3.h>
+#define USE_PIX
 #include <pix3.h>
 
 #if defined(HasModule_GpuDump)
@@ -1362,8 +1363,7 @@ namespace NxRHI
 	}
 	void DX12CmdQueue::BeginEvent(const char* info, DWORD color)
 	{
-		auto infoW = StringHelper::strtowstr(info);
-		PIXBeginEvent(mCmdQueue.GetPtr(), (UINT64)color, infoW.c_str());
+		PIXBeginEvent(mCmdQueue.GetPtr(), (UINT64)color, info);
 	}
 	
 	void DX12CmdQueue::EndEvent(const char* info)

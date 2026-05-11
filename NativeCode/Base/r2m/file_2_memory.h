@@ -44,6 +44,7 @@ public:
 	virtual long GetRefCount() override{
 		return mPtrRef;
 	}
+	virtual void OnBeforeWriteFile() override;
 	virtual void OnAfterWriteFile() override;
 private:
 	VStringA	mName;

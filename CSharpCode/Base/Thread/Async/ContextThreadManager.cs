@@ -412,16 +412,19 @@ namespace EngineNS.Thread.Async
                         var action = (Delegate_ParrallelForAction)state.UserArguments.Obj0;
                         var stride = state.UserArguments.StrideOfParallelFor;
                         var start = (int)(state.UserArguments.TaskIndexOfParallelFor * stride);
-                        int count = 0;
-                        for (int j = 0; j < stride; j++)
+                        var workCount = Math.Max(0, Math.Min((int)stride, (int)state.UserArguments.NumOfParallelFor - start));
+                        try
                         {
-                            var index = start + j;
-                            if (index >= state.UserArguments.NumOfParallelFor)
-                                break;
-                            action(index, state);
-                            count++;
+                            for (int j = 0; j < workCount; j++)
+                            {
+                                var index = start + j;
+                                action(index, state);
+                            }
                         }
-                        ((TtPooledSemaphore)state.UserArguments.Obj1).Semaphore.AddNum(-count);
+                        finally
+                        {
+                            ((TtPooledSemaphore)state.UserArguments.Obj1).Semaphore.AddNum(-workCount);
+                        }
                         return true;
                     }, in userArgs/*, smp.WaitEvent*/);
                 }

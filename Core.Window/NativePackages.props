@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <TitanPackagesDir>$(MSBuildThisFileDirectory)..\packages\</TitanPackagesDir>
+    <WinPixEventRuntimeVersion>1.0.220124001</WinPixEventRuntimeVersion>
+  </PropertyGroup>
+</Project>

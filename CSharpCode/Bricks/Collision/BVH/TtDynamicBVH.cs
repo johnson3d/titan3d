@@ -100,7 +100,8 @@ namespace EngineNS.Bricks.Collision.BVH
         /// <param name="displacementMultiplier">Multiplier applied to predicted displacement during MoveProxy (>= 0).</param>
         public TtDynamicBVH(int initialCapacity = 16, float margin = 0.1f, float displacementMultiplier = 2.0f)
         {
-            if (initialCapacity < 4) initialCapacity = 4;
+            if (initialCapacity < 4) 
+                initialCapacity = 4;
             mNodeCapacity = initialCapacity;
             mNodes = new Node[mNodeCapacity];
             mNodeCount = 0;

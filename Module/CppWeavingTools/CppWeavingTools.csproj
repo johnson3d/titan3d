@@ -15,7 +15,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ClangSharp" Version="20.1.2.1" />
+    <PackageReference Include="ClangSharp" />
+    <PackageReference Include="libclang.runtime.win-x64" />
   </ItemGroup>
 
 </Project>

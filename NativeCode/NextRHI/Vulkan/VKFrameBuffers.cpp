@@ -581,7 +581,7 @@ namespace NxRHI
 			pDx12Texture->Desc.Height = Desc.Height;
 			pDx12Texture->mImage = swapChainImages[i];
 			pDx12Texture->GpuState = EGpuResourceState::GRS_Undefine;
-			FTransitionScope::Transition(cmd, pDx12Texture, EGpuResourceState::GRS_Present, false);
+			FTransitionScope::TryAutoTransition(cmd, pDx12Texture, EGpuResourceState::GRS_Present, false);
 
 			BackBuffers[i].CreateRtvAndSrv(device, i);
 		}

@@ -30,7 +30,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Forms\TextureViewer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\WorldOutliner.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IAssetEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EditorAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TtPreviewViewportInteractiveMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIWindowsTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MainEditorApplication.cs" />

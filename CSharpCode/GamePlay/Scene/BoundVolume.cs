@@ -120,7 +120,6 @@ namespace EngineNS.GamePlay.Scene
             if (IsParallel == false)
             {
                 var t1 = Support.TtTime.HighPrecision_GetTickCount();
-                VisParameter.ClearVisibles();
                 {
                     int Count = 0;
                     for (int i = 0; i<manager.Entities.Count; i++)
@@ -179,7 +178,6 @@ namespace EngineNS.GamePlay.Scene
             {
                 var t3 = Support.TtTime.HighPrecision_GetTickCount();
                 //var taskGroupNum = Math.Min(TtEngine.Instance.EventPoster.PooledThreadNum, 16);
-                VisParameter.ClearVisibles();
                 TtEngine.Instance.EventPoster.ParallelFor(manager.Entities.Count, static (i, state) =>
                 {
                     var pThis = state.GetForArgument0<TtCullingSystem>();

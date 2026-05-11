@@ -39,6 +39,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Scene\PrimitiveMeshNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\Node_Editor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\SceneCapture.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\SceneCubeCapture.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\CubeWorldRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\ScenePartitionNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\PointLightNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\SkyNode.cs" />

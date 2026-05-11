@@ -21,8 +21,15 @@ namespace EngineNS.Graphics.Pipeline.Common
         public const uint DispatchSizeZ = 1;
 
         public NxRHI.TtTexture HzbTexture;
+        // 全 mip 的 SRV, 给下游 (ReSTIR HiZ ray-march) 用 SampleLevel(LOD) 跨 mip 采样.
         public NxRHI.TtSrView HzbSRV;
+        // 每个 mip 一份独立 UAV (MipSlice = i, 单 subresource). 用于 CS_Setup 写 mip0
+        // 与 CS_DownSample 写 mip i.
         public NxRHI.TtUaView[] HzbMipsUAVs;
+        // 每个 mip 一份独立 SRV (MostDetailedMip = i, MipLevels = 1, 单 subresource).
+        // 用于 CS_DownSample 把"上一级 mip"作为 SRV 读 (与 DstBuffer UAV 解耦, 避免
+        // RWTexture2D 同槽位冲突, 详见 hzb.compute SrcBuffer 注释).
+        public NxRHI.TtSrView[] HzbMipsSRVs;
 
         TtAttachBuffer HzbAttachement = new TtAttachBuffer();
 
@@ -118,7 +125,12 @@ namespace EngineNS.Graphics.Pipeline.Common
                 int srcMip = dstMip - 1;
                 if (srcMip < 0 || dstMip >= node.HzbMipsUAVs.Length) return;
 
-                drawcall.BindUav("SrcBuffer", node.HzbMipsUAVs[srcMip]);
+                if (node.HzbMipsSRVs == null || srcMip >= node.HzbMipsSRVs.Length) return;
+
+                // SrcBuffer 是 Texture2D<float2> (SRV), DstBuffer 是 RWTexture2D<float2> (UAV).
+                // 必须分别走 SBT_SRV / SBT_UAV 才能避免两个 RWTexture2D 互相覆盖到同一份默认
+                // 视图的历史 BUG (详见 hzb.compute 顶部 SrcBuffer 注释).
+                drawcall.BindSrv("SrcBuffer", node.HzbMipsSRVs[srcMip]);
                 drawcall.BindUav("DstBuffer", node.HzbMipsUAVs[dstMip]);
             }
         }
@@ -152,6 +164,12 @@ namespace EngineNS.Graphics.Pipeline.Common
                     CoreSDK.DisposeObject(ref HzbMipsUAVs[i]);
                 HzbMipsUAVs = null;
             }
+            if (HzbMipsSRVs != null)
+            {
+                for (int i = 0; i < HzbMipsSRVs.Length; i++)
+                    CoreSDK.DisposeObject(ref HzbMipsSRVs[i]);
+                HzbMipsSRVs = null;
+            }
             CoreSDK.DisposeObject(ref HzbSRV);
             CoreSDK.DisposeObject(ref HzbTexture);
 
@@ -177,14 +195,21 @@ namespace EngineNS.Graphics.Pipeline.Common
             if (mMip0Width == 0 || mMip0Height == 0)
                 return;
 
-            // 释放旧的 mip UAV.
+            // 释放旧的 per-mip UAV / SRV. 注意: 这两个数组的元素顺序与 mip index 一一对应.
             if (HzbMipsUAVs != null)
             {
                 for (int i = 0; i < HzbMipsUAVs.Length; i++)
                     CoreSDK.DisposeObject(ref HzbMipsUAVs[i]);
             }
+            if (HzbMipsSRVs != null)
+            {
+                for (int i = 0; i < HzbMipsSRVs.Length; i++)
+                    CoreSDK.DisposeObject(ref HzbMipsSRVs[i]);
+            }
 
-            HzbMipsUAVs = new NxRHI.TtUaView[NxRHI.TtSrView.CalcMipLevel((int)mMip0Width, (int)mMip0Height, true, 1)];
+            int mipCount = NxRHI.TtSrView.CalcMipLevel((int)mMip0Width, (int)mMip0Height, true, 1);
+            HzbMipsUAVs = new NxRHI.TtUaView[mipCount];
+            HzbMipsSRVs = new NxRHI.TtSrView[mipCount];
 
             var dsTexDesc = new NxRHI.FTextureDesc();
             dsTexDesc.SetDefault();
@@ -198,13 +223,19 @@ namespace EngineNS.Graphics.Pipeline.Common
             CoreSDK.DisposeObject(ref HzbTexture);
             HzbTexture = rc.CreateTexture(in dsTexDesc);
 
+            // 全 mip SRV: 下游 (ReSTIR HiZ) 用 SampleLevel(LOD = mipClamped) 跨 mip 采样,
+            // 必须覆盖 [0, MipLevels). SetTexture2D() 后必须显式填 MipLevels / MostDetailedMip,
+            // 否则 D3D12 报 DXGI_ERROR_INVALID_CALL (踩过坑, 见 DenoiseNode 同位置注释).
             var srvDesc = new NxRHI.FSrvDesc();
             srvDesc.SetTexture2D();
             srvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
             srvDesc.Format = EPixelFormat.PXF_R16G16_FLOAT;
+            srvDesc.Texture2D.MostDetailedMip = 0;
             srvDesc.Texture2D.MipLevels = dsTexDesc.MipLevels;
             HzbSRV = rc.CreateSRV(HzbTexture, in srvDesc);
 
+            // Per-mip UAV: 每张 UAV 只看一个 mip subresource (MipSlice = i), 用作 DownSample
+            // pass 的 DstBuffer 与 Setup pass 的 mip0 写入目标.
             for (int i = 0; i < HzbMipsUAVs.Length; i++)
             {
                 var uavDesc = new NxRHI.FUavDesc();
@@ -212,6 +243,20 @@ namespace EngineNS.Graphics.Pipeline.Common
                 uavDesc.Format = EPixelFormat.PXF_R16G16_FLOAT;
                 uavDesc.Texture2D.MipSlice = (uint)i;
                 HzbMipsUAVs[i] = rc.CreateUAV(HzbTexture, in uavDesc);
+            }
+
+            // Per-mip SRV: 每张 SRV 只看一个 mip subresource (MostDetailedMip = i, MipLevels = 1),
+            // 用作 DownSample pass 的 SrcBuffer (= 上一级 mip). 必须用 SRV 而不是再用 UAV,
+            // 否则两个 RWTexture2D binder 会被引擎绑到同一份默认视图, 覆盖全 mip, mip 链全断.
+            for (int i = 0; i < HzbMipsSRVs.Length; i++)
+            {
+                var mipSrvDesc = new NxRHI.FSrvDesc();
+                mipSrvDesc.SetTexture2D();
+                mipSrvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
+                mipSrvDesc.Format = EPixelFormat.PXF_R16G16_FLOAT;
+                mipSrvDesc.Texture2D.MostDetailedMip = (uint)i;
+                mipSrvDesc.Texture2D.MipLevels = 1;
+                HzbMipsSRVs[i] = rc.CreateSRV(HzbTexture, in mipSrvDesc);
             }
 
             // 同步给 RenderGraph 中 import 的 attach buffer, 避免下游拿到的 Srv 指向已 dispose 的旧资源.
@@ -283,11 +328,25 @@ namespace EngineNS.Graphics.Pipeline.Common
             using (new NxRHI.TtCmdListScope(cmd, "Hzb"))
             {
                 // ---------- Setup pass: depth -> mip0 ----------
-                // dispatch 覆盖 mip0 的全部像素, 按 thread group 尺寸 ceil 取整.
-                uint setupGx = MathHelper.Roundup(mMip0Width, DispatchSizeX);
-                uint setupGy = MathHelper.Roundup(mMip0Height, DispatchSizeY);
-                mSetup.SetDrawcallDispatch(this, policy, mSetupDrawcall, setupGx, setupGy, 1, false);
+                // SetDrawcallDispatch(..., bRoundupXYZ=true) 内部会自动按 DispatchArg
+                // (= shader 的 [numthreads(DispatchX, DispatchY, DispatchZ)]) ceil 取整,
+                // 所以这里直接传"线程总数" (= mip 像素数), 不能在外面再 Roundup, 否则
+                // 双重除法会把 dispatch 退化成 (1,1,1) (踩过坑, RenderDoc 实证: mip 链
+                // 每级只有左上角 32x32 像素被处理, 其余全是 0).
+                // 参考: DenoiseNode.cs L515, ReSTIRGINode.cs L653 都是直接传 w,h,1,true.
+                mSetup.SetDrawcallDispatch(this, policy, mSetupDrawcall, mMip0Width, mMip0Height, 1, true);
                 cmd.PushGpuDraw(mSetupDrawcall);
+
+                //cmd.PushAction((EngineNS.NxRHI.ICommandList cmd, void* arg1) =>
+                //{
+                //    HzbTexture.IsAutoTransition = false;
+                //    for (int i = 0; i < mMipsDrawcalls.Length; i++)
+                //    {
+                //        cmd.SetTextureBarrier(HzbTexture.mCoreObject, (uint)i, 1,
+                //            NxRHI.EPipelineStage.PPLS_ALL_COMMANDS, NxRHI.EPipelineStage.PPLS_ALL_COMMANDS,
+                //            NxRHI.EGpuResourceState.GRS_Uav, NxRHI.EGpuResourceState.GRS_Uav);
+                //    }
+                //}, (void*)IntPtr.Zero);
 
                 // ---------- DownSample chain: mip[i-1] -> mip[i] ----------
                 if (mMipsDrawcalls != null && mDownSample != null)
@@ -302,12 +361,28 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                         mCurrentMipIndex = i + 1;
 
-                        uint gx = MathHelper.Roundup(mipW, DispatchSizeX);
-                        uint gy = MathHelper.Roundup(mipH, DispatchSizeY);
-                        mDownSample.SetDrawcallDispatch(this, policy, mMipsDrawcalls[i], gx, gy, 1, true);
+                        // 同 Setup pass: 传线程总数, 由引擎按 DispatchArg ceil 取整.
+                        mDownSample.SetDrawcallDispatch(this, policy, mMipsDrawcalls[i], mipW, mipH, 1, true);
+                        //cmd.PushAction((EngineNS.NxRHI.ICommandList cmd, void* arg1) =>
+                        //{
+                        //    cmd.SetTextureBarrier(HzbTexture.mCoreObject, (uint)i, 1,
+                        //        NxRHI.EPipelineStage.PPLS_ALL_COMMANDS, NxRHI.EPipelineStage.PPLS_ALL_COMMANDS,
+                        //        NxRHI.EGpuResourceState.GRS_Uav, NxRHI.EGpuResourceState.GRS_GenericRead);
+                        //}, (void*)IntPtr.Zero);
                         cmd.PushGpuDraw(mMipsDrawcalls[i]);
                     }
                 }
+
+                //cmd.PushAction((EngineNS.NxRHI.ICommandList cmd, void* arg1) =>
+                //{
+                //    HzbTexture.IsAutoTransition = true;
+                //    for (int i = 0; i < mMipsDrawcalls.Length; i++)
+                //    {
+                //        cmd.SetTextureBarrier(HzbTexture.mCoreObject, (uint)i, 1,
+                //            NxRHI.EPipelineStage.PPLS_ALL_COMMANDS, NxRHI.EPipelineStage.PPLS_ALL_COMMANDS,
+                //            NxRHI.EGpuResourceState.GRS_GenericRead, NxRHI.EGpuResourceState.GRS_Uav);
+                //    }
+                //}, (void*)IntPtr.Zero);
 
                 cmd.FlushDraws();
             }

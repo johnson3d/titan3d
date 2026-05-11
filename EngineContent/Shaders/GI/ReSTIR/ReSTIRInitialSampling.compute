@@ -106,13 +106,74 @@ RayHitInfo CastIndirectRay(float3 originWS, float3 dirWS, inout uint rng)
     info.HitPosWS = 0;
     info.HitNormalWS = 0;
     info.HitRadiance = 0;
+    
+    // 起点防自相交: 沿 dirWS 推一小步, 让 startSS 不再落在原表面上, 否则
+    // ray march 第一次循环会把起点像素自己判为命中 (红墙映红 / 绿墙映绿).
+    // 注意: 调用方已经沿法线推了 0.01m (防止起点在表面内部), 这里再沿射线方向推
+    // 一小步 (防止起点像素的深度被误判为命中).
+    float startBias = max(ThicknessBias, 0.01f);
+    float3 originBiased = originWS + dirWS * startBias;
 
-    // WorldToScreen 顺手返回 linearDepth = clip.w (view-space z, 即 hi-z 比较口径).
-    // 拿到的 startLinearZ / endLinearZ 不需要任何额外 linearize, 直接传给 hi-z trace.
+    // ---- 世界空间射线截断 ----
+    // 截断必须在 WorldToScreen 之前完成, 因为:
+    //   1. 射线终点在摄像机后面 (view-space z < 0) 时, clip.w < 0, 透视除法会翻转
+    //      endSS.xy, 在翻转的 UV 上做任何截断都是错的
+    //   2. linearZ 在屏幕空间 UV 参数下不是线性的 (透视非线性), lerp 不可靠
+    // 所以: 在世界空间沿射线缩短 rayDist, 使终点落在近平面前方且屏幕内, 再投影.
+    float rayDist = MaxRayDistance;
+
+    // 步骤 1: 近平面截断 — 保证终点 view-space z >= ZNear
+    // view-space z 在世界空间射线上是线性的: z(t) = startViewZ + dirViewZ * t
+    // 用 CameraDirection (单位向量, 指向摄像机前方) dot 来快速得到 view-space z 分量
+    float startViewZ = dot(CameraDirection, originBiased - CameraPosition);
+    float dirViewZ   = dot(CameraDirection, dirWS);
+    float endViewZ   = startViewZ + dirViewZ * rayDist;
+    if (endViewZ < ZNear)
+    {
+        // 射线终点跑到近平面后面, 把距离截断到 z = ZNear 处
+        // z(t) = startViewZ + dirViewZ * t = ZNear  =>  t = (ZNear - startViewZ) / dirViewZ
+        if (abs(dirViewZ) > 1e-8f)
+        {
+            float tNear = (ZNear - startViewZ) / dirViewZ;
+            rayDist = max(tNear, 0.0f);
+        }
+        else
+        {
+            // 射线与视线方向几乎平行且已在近平面后面, 无有效段
+            return MakeSkyHit(originWS, dirWS);
+        }
+    }
+
+    float3 endWS = originBiased + dirWS * rayDist;
+
     float startLinearZ;
-    float3 startSS = WorldToScreen(originWS, startLinearZ);
+    float3 startSS = WorldToScreen(originBiased, startLinearZ);
     float endLinearZ;
-    float3 endSS   = WorldToScreen(originWS + dirWS * MaxRayDistance, endLinearZ);
+    float3 endSS   = WorldToScreen(endWS, endLinearZ);
+
+    // 步骤 2: 屏幕 UV 截断 — endSS 此时可信 (clip.w > 0), 但可能落在屏幕外.
+    // 在世界空间缩短 rayDist, 再重新投影, 避免 lerp linearZ 的非线性误差.
+    {
+        float2 rayDirUV = endSS.xy - startSS.xy;
+        float tClip = 1.0f;
+        [unroll] for (int axis = 0; axis < 2; ++axis)
+        {
+            if (abs(rayDirUV[axis]) > 1e-8f)
+            {
+                float boundary = (rayDirUV[axis] > 0.0f) ? 1.0f : 0.0f;
+                float t = (boundary - startSS[axis]) / rayDirUV[axis];
+                if (t > 0.0f)
+                    tClip = min(tClip, t);
+            }
+        }
+        if (tClip < 1.0f)
+        {
+            // 在世界空间截断, 然后重新投影得到精确的 endSS / endLinearZ
+            rayDist *= tClip;
+            endWS = originBiased + dirWS * rayDist;
+            endSS = WorldToScreen(endWS, endLinearZ);
+        }
+    }
 
     float2 hitUV = 0;
     float  hitSceneZ = 0;
@@ -170,7 +231,7 @@ RayHitInfo CastIndirectRay(float3 originWS, float3 dirWS, inout uint rng)
     info.IsSky = false;
     info.HitPosWS = ReconstructWorldPos(hitUV, hitSceneZ);
     info.HitNormalWS = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, hitUV, 0).xyz * 2.0f - 1.0f);
-    info.HitRadiance = PrevColor.SampleLevel(Samp_PointClamp, hitUV, 0).rgb;
+    info.HitRadiance = GBufferRT0.SampleLevel(Samp_PointClamp, hitUV, 0).rgb;
     return info;
 }
 #else
@@ -329,7 +390,9 @@ void CS_Main(uint3 id : SV_DispatchThreadID)
     {
         float2 u2 = float2(Rand01(rng), Rand01(rng));
         float3 dirWS = SampleCosineHemisphere(u2, visibleN);
-
+        dirWS.xyz += 0.1f;
+        dirWS = normalize(dirWS);
+        
         RayHitInfo hit = CastIndirectRay(visiblePos + visibleN * 0.01f, dirWS, rng);
 
         // miss 已在 CastIndirectRay 内统一包装成 sky hit (Valid=true, IsSky=true)

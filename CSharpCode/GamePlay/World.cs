@@ -154,11 +154,10 @@ namespace EngineNS.GamePlay
 
             public EVisCull CullType = EVisCull.Normal;
             public EVisCullFilter CullFilters = EVisCullFilter.None;// EVisCullFilter.All;
-            public bool IsBuildAABB = false;
+            public bool IsUseECS = true;
             public DBoundingBox CullBox;
             public TtWorld World;
 
-            public DBoundingBox AABB;
             public List<Graphics.Pipeline.FVisibleMesh> VisibleMeshes = new List<Graphics.Pipeline.FVisibleMesh>();
             public List<GamePlay.Scene.TtNode> VisibleNodes { get; } = new List<TtNode>();
             public bool IsGatherVisibleNodes { get; set; } = false;
@@ -168,7 +167,6 @@ namespace EngineNS.GamePlay
             public FOnVisitNode IsGatherVisibleMeshes = null;
             public void ClearVisibles()
             {
-                AABB.InitEmptyBox();
                 VisibleMeshes?.Clear();
                 VisibleNodes?.Clear();
             }
@@ -181,22 +179,11 @@ namespace EngineNS.GamePlay
                 TransientVB = null;
                 TransientIB = null;
             }
-            public void MergeAABB(in DBoundingBox aabb)
-            {
-                if (IsBuildAABB)
-                {
-                    AABB = DBoundingBox.Merge(in AABB, in aabb);
-                }
-            }
             public void AddVisibleMesh(Graphics.Mesh.TtRenderMesh mesh, bool bAABB = true)
             {
                 if (CullType == EVisCull.Shadow && mesh.IsCastShadow == false)
                 {
                     return;
-                }
-                if (IsBuildAABB && bAABB)
-                {
-                    AABB = DBoundingBox.Merge(in AABB, mesh.WorldAABB);
                 }
                 lock (VisibleMeshes)
                 {
@@ -297,7 +284,8 @@ namespace EngineNS.GamePlay
         }
         public virtual void GatherVisibleMeshes(TtVisParameter rp)
         {
-            if (TtEngine.Instance.Config.UseECS)
+            rp.ClearVisibles();
+            if (rp.IsUseECS && TtEngine.Instance.Config.UseECS)
             {
                 this.EntityManager.CullingSystem.World = this;
                 this.EntityManager.CullingSystem.VisParameter = rp;
@@ -307,7 +295,6 @@ namespace EngineNS.GamePlay
             {
                 using (new Profiler.TimeScopeHelper(ScopeGatherVisibleMeshes))
                 {
-                    rp.ClearVisibles();
                     GatherVisibleMeshes(rp, Root);
                 }
             }

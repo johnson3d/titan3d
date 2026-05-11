@@ -1081,7 +1081,7 @@ namespace NxRHI
 		}*/
 		cmd->GetCmdRecorder()->UseResource(this);
 
-		cmd->SetTextureBarrier(this, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, GpuState, state);
+		cmd->SetTextureBarrier(this, 0, Desc.MipLevels, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, GpuState, state);
 
 		GpuState = state;
 	}

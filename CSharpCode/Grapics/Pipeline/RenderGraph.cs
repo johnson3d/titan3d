@@ -324,6 +324,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual void BeginTick(GamePlay.TtWorld world)
         {
+            System.Diagnostics.Debug.Assert(TtEngine.Instance.Config.UseRenderThread == false || TtEngine.Instance.ThreadRender.IsThisThread());
             using (new Profiler.TimeScopeHelper(ScopeBeginTick))
             {
                 FrameBuild(this as TtRenderPolicy);
@@ -355,6 +356,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual void EndTick(GamePlay.TtWorld world)
         {
+            System.Diagnostics.Debug.Assert(TtEngine.Instance.Config.UseRenderThread == false || TtEngine.Instance.ThreadRender.IsThisThread());
             using (new Profiler.TimeScopeHelper(ScopeEndTick))
             {
                 if (NodeLayers != null)
@@ -385,6 +387,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual unsafe void Tick(GamePlay.TtWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
         {
+            System.Diagnostics.Debug.Assert(TtEngine.Instance.Config.UseRenderThread == false || TtEngine.Instance.ThreadRender.IsThisThread());
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new Profiler.TimeScopeHelper(ScopeTick))
             using (new NxRHI.TtCmdListScope(cmdlist, "RenderGraphFrame"))

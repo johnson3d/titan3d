@@ -7,9 +7,16 @@
 
 Texture2D<float> DepthBuffer;
 
+// SrcBuffer 必须是 SRV (Texture2D), 不能与 DstBuffer 共用 RWTexture2D 通道.
+// 历史 BUG: 当 SrcBuffer / DstBuffer 都声明为 RWTexture2D<float2> 时, effect 编译期
+// 反射出来的两个 UAV binder 走同一个资源类型 / 同一个 root descriptor table 槽位,
+// C# 端 BindUav("SrcBuffer", srcMipUav) + BindUav("DstBuffer", dstMipUav) 实际会被
+// 引擎绑成"两个 binder 指向同一份默认 UAV 视图 (覆盖全 mip)", 而不是分别指到
+// src mip 和 dst mip. 表现是: id*2 越界采到自己, mip 链全断, ReSTIR HiZ ray-march
+// 在第一次采到 (0,0) 时立即判定命中 -> 射线只命中自身 (RenderDoc 实证).
+// 改成 SRV 之后 SrcBuffer 落在 SBT_SRV 槽位, 与 SBT_UAV 物理隔离, 不再冲突.
+Texture2D<float2> SrcBuffer;
 //d24_unorm_s8_uint,d16_unorm,d32_sfloat
-VK_IMAGE(rg16f)
-RWTexture2D<float2> SrcBuffer;
 VK_IMAGE(rg16f)
 RWTexture2D<float2> DstBuffer;
 

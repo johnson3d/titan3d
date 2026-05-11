@@ -1,3 +1,4 @@
+using EngineNS.GamePlay.Scene;
 using EngineNS.IO;
 using EngineNS.NxRHI;
 using EngineNS.Thread;
@@ -348,27 +349,35 @@ namespace EngineNS.Editor
 
             try
             {
-                //warm up
-                Renderer.ExecuteRender(true);
-                Renderer.TickSync();
-                //flush assets
-                Thread.TtContextThread.CurrentContext.FlushAllThreadEvents();
-
-                if (captureRenderDoc)
+                TtEngine.Instance.ThreadRender.QueueRenderAction("CubeRenderer.CaptureCubeFaces", static (in Thread.TtThreadRender.FRenderAction RAct) =>
                 {
-                    TtEngine.Instance.GfxDevice.RenderQueue.CaptureRenderDocFrame = true;
-                    TtEngine.Instance.GfxDevice.RenderQueue.BeginFrameCapture();
-                }
-                
-                //real render
-                Renderer.ExecuteRender(false);
-                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
-                if (captureRenderDoc)
-                {
-                    TtEngine.Instance.GfxDevice.RenderQueue.EndFrameCapture("Snapshot");
-                }
+                    //warm up
+                    var This = (RAct.Arg as TtSnapshotCreator);
+                    This.Renderer.ExecuteRender(true);
+                    This.Renderer.TickSync();
+                    //flush assets
+                    Thread.TtContextThread.CurrentContext.FlushAllThreadEvents();
 
-                Renderer.TickSync();
+                    //if (captureRenderDoc)
+                    //{
+                    //    TtEngine.Instance.GfxDevice.RenderQueue.CaptureRenderDocFrame = true;
+                    //    TtEngine.Instance.GfxDevice.RenderQueue.BeginFrameCapture();
+                    //}
+
+                    //real render
+                    This.Renderer.ExecuteRender(false);
+                    TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
+                    //if (captureRenderDoc)
+                    //{
+                    //    TtEngine.Instance.GfxDevice.RenderQueue.EndFrameCapture("Snapshot");
+                    //}
+
+                    This.Renderer.TickSync();
+                }, this);
+
+                System.Threading.AutoResetEvent mRenderFinishedEvent = new System.Threading.AutoResetEvent(false);
+                TtEngine.Instance.ThreadRender.WaitFinishRenderAction(mRenderFinishedEvent);
+
                 return Renderer.RenderPolicy.GetFinalShowRSV();
             }
             finally

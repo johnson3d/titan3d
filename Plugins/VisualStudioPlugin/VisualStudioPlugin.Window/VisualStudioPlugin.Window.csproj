@@ -14,7 +14,7 @@
   <Import Project="..\VisualStudioPlugin\VisualStudioPlugin.projitems" Label="Shared" />
 
   <ItemGroup>
-    <PackageReference Include="envdte100" Version="17.14.40260" />
+    <PackageReference Include="envdte100" />
   </ItemGroup>
 
   <ItemGroup>

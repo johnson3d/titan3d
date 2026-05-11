@@ -76,6 +76,8 @@ namespace EngineNS.Graphics.Pipeline
         }
         [Category("Option")]
         public bool IsSyncBuildDrawcall { get; set; } = false;
+        [Category("Option")]
+        public bool IsImmediateFlushCBuffer { get; set; } = false;
         public class TtNodeListDefine
         {
             internal TtRenderPolicy Host;
@@ -378,7 +380,7 @@ namespace EngineNS.Graphics.Pipeline
             if (DefaultCamera != null)
             {
                 if (DefaultCamera.IsOrtho == false)
-                    DefaultCamera.mCoreObject.PerspectiveFovLH(3.14f / 4f, x, y, DefaultCamera.ZNear, DefaultCamera.ZFar);
+                    DefaultCamera.PerspectiveFovLH(3.14f / 4f, x, y, DefaultCamera.ZNear, DefaultCamera.ZFar);
             }
 
             base.OnResize(x, y);
@@ -450,20 +452,20 @@ namespace EngineNS.Graphics.Pipeline
             if (CmdQueue == null)
                 return;
 
-            using (var tsCmd = new NxRHI.FTransientCmd(NxRHI.EQueueType.QU_Default, "CmdQueue"))
-            {
-                CmdQueue.FlushExecute(tsCmd.CmdList);
-            }
+            CmdQueue.FlushExecute();
         }
-        public void QueueCmd(NxRHI.FRenderCmd cmd, string name, object tag = null, NxRHI.EQueueType qType = NxRHI.EQueueType.QU_Default)
+        public void QueueCmd(NxRHI.FRenderCmd cmd, string name, object tag = null,
+            NxRHI.EQueueType qType = NxRHI.EQueueType.QU_Default,
+            NxRHI.ERCmdType type = NxRHI.ERCmdType.Cmd,
+            bool bImm = false)
         {
             if (CmdQueue != null)
             {
-                CmdQueue.QueueCmd(cmd, name, tag, qType);
+                CmdQueue.QueueCmd(cmd, name, tag, qType, type, bImm);
             }
             else
             {
-                TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd(cmd, name, tag, qType);
+                TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd(cmd, name, tag, qType, type, bImm);
             }
         }
         public void CommitCommandList(NxRHI.TtCommandList cmd, string name = null, NxRHI.EQueueType qType = NxRHI.EQueueType.QU_Default)

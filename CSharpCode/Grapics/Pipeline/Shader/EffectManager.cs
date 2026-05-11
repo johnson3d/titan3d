@@ -1,4 +1,3 @@
-using Assimp;
 using EngineNS.IO;
 using EngineNS.NxRHI;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -7,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using static EngineNS.Graphics.Pipeline.Shader.TtShadingEnv;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
@@ -54,7 +54,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             public Hash160 EffectHash;
         }
         public TtEffectDesc Desc { get; set; } = new TtEffectDesc();
-        public NxRHI.TtGraphicsEffect ShaderEffect { get; private set; }
+        public NxRHI.TtNativeGraphicsEffect ShaderEffect { get; private set; }
         public NxRHI.TtShaderDesc DescAS { get; private set; }
         public NxRHI.TtShaderDesc DescMS { get; private set; }
         public NxRHI.TtShaderDesc DescVS { get; private set; }
@@ -333,7 +333,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 var compilier = new Editor.ShaderCompiler.TtHLSLCompiler();
                 compilier.MdfQueue = mdf;
                 return compilier.CompileShader(shading.CodeName.Address, "AS_Main", NxRHI.EShaderType.SDT_AmplificationShader,
-                    shading, material, mdf.GetType(), defines, null, null, TtEngine.Instance.Config.IsDebugShader);
+                    shading, permutationId, material, mdf.GetType(), defines, null, null, TtEngine.Instance.Config.IsDebugShader);
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
             result.DescMS = await TtEngine.Instance.EventPoster.Post((state) =>
@@ -341,17 +341,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 var compilier = new Editor.ShaderCompiler.TtHLSLCompiler();
                 compilier.MdfQueue = mdf;
                 return compilier.CompileShader(shading.CodeName.Address, "MS_Main", NxRHI.EShaderType.SDT_MeshShader,
-                    shading, material, mdf.GetType(), defines, null, null, TtEngine.Instance.Config.IsDebugShader);
+                    shading, permutationId, material, mdf.GetType(), defines, null, null, TtEngine.Instance.Config.IsDebugShader);
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
-            if (result.DescMS == null)
+            if (result.DescMS == null)  
             {
                 result.DescVS = await TtEngine.Instance.EventPoster.Post((state) =>
                 {
                     var compilier = new Editor.ShaderCompiler.TtHLSLCompiler();
                     compilier.MdfQueue = mdf;
                     return compilier.CompileShader(shading.CodeName.Address, "VS_Main", NxRHI.EShaderType.SDT_VertexShader,
-                        shading, material, mdf.GetType(), defines, null, null, TtEngine.Instance.Config.IsDebugShader);
+                        shading, permutationId, material, mdf.GetType(), defines, null, null, TtEngine.Instance.Config.IsDebugShader);
                 }, Thread.Async.EAsyncTarget.AsyncIO);
                 if (result.DescVS == null)
                     return null;
@@ -362,7 +362,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 var compilier = new Editor.ShaderCompiler.TtHLSLCompiler();
                 compilier.MdfQueue = mdf;
                 return compilier.CompileShader(shading.CodeName.Address, "PS_Main", NxRHI.EShaderType.SDT_PixelShader, 
-                    shading, material, mdf.GetType(), defines, null, null, TtEngine.Instance.Config.IsDebugShader);
+                    shading, permutationId, material, mdf.GetType(), defines, null, null, TtEngine.Instance.Config.IsDebugShader);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (result.DescPS == null)
                 return null;
@@ -446,10 +446,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             var defines = new NxRHI.TtShaderDefinitions();
-            var type = Rtti.TtTypeDescManager.Instance.GetTypeFromString(Desc.ShadingType);
-            if (type == null)
-                return false;
-            var shading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv(type);
+            //var type = Rtti.TtTypeDescManager.Instance.GetTypeFromString(Desc.ShadingType);
+            //if (type == null)
+            //    return false;
+            //var shading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv(type);
+            var shading = this.ShadingEnv;
             if (shading == null)
                 return false;
             shading.GetShaderDefines(Desc.PermutationId, defines);
@@ -471,7 +472,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 var compilier = new Editor.ShaderCompiler.TtHLSLCompiler();
                 compilier.MdfQueue = mdf;
                 return compilier.CompileShader(shading.CodeName.Address, "AS_Main", NxRHI.EShaderType.SDT_AmplificationShader,
-                    shading, material, mdfType.SystemType, defines, null, null, TtEngine.Instance.Config.IsDebugShader);
+                    shading, shading.CurrentPermutationId, material, mdfType.SystemType, defines, null, null, TtEngine.Instance.Config.IsDebugShader);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (descAS == null)
             {
@@ -483,7 +484,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 var compilier = new Editor.ShaderCompiler.TtHLSLCompiler();
                 compilier.MdfQueue = mdf;
                 return compilier.CompileShader(shading.CodeName.Address, "MS_Main", NxRHI.EShaderType.SDT_MeshShader,
-                    shading, material, mdfType.SystemType, defines, null, null, TtEngine.Instance.Config.IsDebugShader);
+                    shading, shading.CurrentPermutationId, material, mdfType.SystemType, defines, null, null, TtEngine.Instance.Config.IsDebugShader);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (descMS == null)
             {
@@ -492,7 +493,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     var compilier = new Editor.ShaderCompiler.TtHLSLCompiler();
                     compilier.MdfQueue = mdf;
                     return compilier.CompileShader(shading.CodeName.Address, "VS_Main", NxRHI.EShaderType.SDT_VertexShader,
-                        shading, material, mdfType.SystemType, defines, null, null, TtEngine.Instance.Config.IsDebugShader);
+                        shading, shading.CurrentPermutationId, material, mdfType.SystemType, defines, null, null, TtEngine.Instance.Config.IsDebugShader);
                 }, Thread.Async.EAsyncTarget.AsyncIO);
                 if (descVS == null)
                     return false;
@@ -508,7 +509,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 var compilier = new Editor.ShaderCompiler.TtHLSLCompiler();
                 compilier.MdfQueue = mdf;
                 return compilier.CompileShader(shading.CodeName.Address, "PS_Main", NxRHI.EShaderType.SDT_PixelShader, 
-                    shading, material, mdfType.SystemType, defines, null, null, TtEngine.Instance.Config.IsDebugShader);
+                    shading, shading.CurrentPermutationId, material, mdfType.SystemType, defines, null, null, TtEngine.Instance.Config.IsDebugShader);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (descPS == null)
                 return false;
@@ -594,7 +595,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     public class TtEffectManager : IDisposable
     {
         public TtGraphicsEffect DummyEffect;
-        public async System.Threading.Tasks.Task<bool> Initialize(TtGfxDevice device)
+        public async Thread.Async.TtTask<bool> Initialize(TtGfxDevice device)
         {
             var shading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtDummyShading>();
             DummyEffect = await this.GetGraphicEffect(shading, device.MaterialManager.ScreenMaterial, new Mesh.TtMdfStaticMesh());
@@ -616,11 +617,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public void Dispose()
         {
             //System.Diagnostics.Debug.Assert(mCreatingSession.mSessions.Count == 0);
-            foreach (var i in Effects)
+            foreach (var i in GraphicsEffects)
             {
                 i.Value.Dispose();
             }
-            Effects.Clear();
+            GraphicsEffects.Clear();
             foreach (var i in ComputeEffects)
             {
                 i.Value.Dispose();
@@ -637,7 +638,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         private Thread.TtAwaitSessionManager<Hash160, TtGraphicsEffect> mGraphicsCreatingSession = new Thread.TtAwaitSessionManager<Hash160, TtGraphicsEffect>();
         private Thread.TtAwaitSessionManager<Hash160, TtComputeEffect> mComputeCreatingSession = new Thread.TtAwaitSessionManager<Hash160, TtComputeEffect>();
         private Thread.TtAwaitSessionManager<Hash160, TtRayTracingEffect> mRayTracingCreatingSession = new Thread.TtAwaitSessionManager<Hash160, TtRayTracingEffect>();
-        public Dictionary<Hash160, TtGraphicsEffect> Effects { get; } = new Dictionary<Hash160, TtGraphicsEffect>();
+        public Dictionary<Hash160, TtGraphicsEffect> GraphicsEffects { get; } = new Dictionary<Hash160, TtGraphicsEffect>();
         public Dictionary<Hash160, NxRHI.TtComputeEffect> ComputeEffects { get; } = new Dictionary<Hash160, NxRHI.TtComputeEffect>();
         public Dictionary<Hash160, NxRHI.TtRayTracingEffect> RayTracingEffects { get; } = new Dictionary<Hash160, NxRHI.TtRayTracingEffect>();
         public NxRHI.TtComputeEffect TryGetComputeEffect(Hash160 hash)
@@ -653,10 +654,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public TtGraphicsEffect TryGetGraiphicEffect(Hash160 hash)
         {
-            lock (Effects)
+            lock (GraphicsEffects)
             {
                 TtGraphicsEffect result;
-                if (Effects.TryGetValue(hash, out result))
+                if (GraphicsEffects.TryGetValue(hash, out result))
                     return result;
 
                 return null;
@@ -745,7 +746,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 }
                 return result;
             }
-
+            
             Thread.TtSemaphore smp;
             var session = mGraphicsCreatingSession.GetOrNewSession(hash, out smp);
             if (smp != null)
@@ -754,6 +755,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return session.Result;
             }
 
+            //尚未发生异步，这时候克隆出来shading，确保后续异步过程中shading的状态不会被外部修改
+            shading = shading.Clone();
             try
             {
                 result = await TtGraphicsEffect.LoadEffect(hash, shading, material, mdf);
@@ -763,17 +766,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     {
                         return null;
                     }
-                    if (Effects.ContainsKey(hash) == false)
+                    if (GraphicsEffects.ContainsKey(hash) == false)
                     {
-                        lock (Effects)
+                        lock (GraphicsEffects)
                         {
-                            Effects[hash] = result;
+                            GraphicsEffects[hash] = result;
                         }
                         return result;
                     }
                     else
                     {
-                        result = Effects[hash];
+                        result = GraphicsEffects[hash];
                         return result;
                     }
                 }
@@ -797,17 +800,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
                         return null;
                     }
 
-                    if (Effects.ContainsKey(hash) == false)
+                    if (GraphicsEffects.ContainsKey(hash) == false)
                     {
-                        lock (Effects)
+                        lock (GraphicsEffects)
                         {
-                            Effects[hash] = result;
+                            GraphicsEffects[hash] = result;
                         }
                         return result;
                     }
                     else
                     {
-                        result = Effects[hash];
+                        result = GraphicsEffects[hash];
                         return result;
                     }
                 }
@@ -849,6 +852,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 await smp.Await();
                 return session.Result;
             }
+            //尚未发生异步，这时候克隆出来shading，确保后续异步过程中shading的状态不会被外部修改
+            shadingEnv = shadingEnv.Clone();
             try
             {
                 result = await TtEngine.Instance.EventPoster.Post((state) =>
@@ -882,7 +887,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     shadingEnv.GetShaderDefines(shadingEnv.CurrentPermutationId, defines);
                 var shaderDesc = await TtEngine.Instance.EventPoster.Post((state) =>
                 {
-                    return compiler.CompileShader(shader, entry, type, shadingEnv, null, null, defines, incProvider, sm, bDebugShader);
+                    return compiler.CompileShader(shader, entry, type, shadingEnv, shadingEnv.CurrentPermutationId, null, null, defines, incProvider, sm, bDebugShader);
                 }, Thread.Async.EAsyncTarget.AsyncIO);
                 if (shaderDesc == null)
                     return null;
@@ -950,6 +955,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 await smp.Await();
                 return session.Result;
             }
+            //尚未发生异步，这时候克隆出来shading，确保后续异步过程中shading的状态不会被外部修改
+            shadingEnv = shadingEnv.Clone() as Graphics.Pipeline.Shader.TtRayTracingShadingEnv;
             try
             {
                 result = await TtEngine.Instance.EventPoster.Post((state) =>
@@ -984,7 +991,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     shadingEnv.GetShaderDefines(shadingEnv.CurrentPermutationId, defines);
                 var shaderDesc = await TtEngine.Instance.EventPoster.Post((state) =>
                 {
-                    return compiler.CompileShader(shader, entry, NxRHI.EShaderType.SDT_RayTracing, shadingEnv, null, null, defines, incProvider, sm, bDebugShader, "2021", true);
+                    return compiler.CompileShader(shader, entry, NxRHI.EShaderType.SDT_RayTracing, shadingEnv, shadingEnv.CurrentPermutationId, null, null, defines, incProvider, sm, bDebugShader, "2021", true);
                 }, Thread.Async.EAsyncTarget.AsyncIO);
                 if (shaderDesc == null)
                     return null;

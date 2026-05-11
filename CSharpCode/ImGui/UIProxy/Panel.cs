@@ -12,13 +12,21 @@ namespace EngineNS.EGui.UIProxy
         {
             m_ClassId = ImGuiAPI.GetID("MainEditorApplication"),
         };
+        static uint GetMainFormDockId(IRootForm form, uint dockId)
+        {
+            if (dockId != 0 && dockId != uint.MaxValue)
+                return dockId;
+            if (form.DockId != 0 && form.DockId != uint.MaxValue)
+                return form.DockId;
+            return MainFormDockClass.m_ClassId;
+        }
 
         // 只能dock到Main window中
         public static bool BeginMainForm(string name, IRootForm form, ImGuiWindowFlags_ flags, uint dockId = 0)
         {
             ImGuiAPI.SetNextWindowClass(MainFormDockClass);
-            //ImGuiAPI.SetNextWindowDockID(MainFormDockClass.m_ClassId, ImGuiCond_.ImGuiCond_FirstUseEver);
-            ImGuiAPI.SetNextWindowDockID(dockId, ImGuiCond_.ImGuiCond_FirstUseEver);
+            var targetDockId = GetMainFormDockId(form, dockId);
+            ImGuiAPI.SetNextWindowDockID(targetDockId, form.DockCond);
             if (ImGuiAPI.IsLastFrame(name))
             {
                 ImGuiAPI.SetNextWindowFocus();

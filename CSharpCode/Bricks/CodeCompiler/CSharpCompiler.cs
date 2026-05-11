@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.MSBuild;
-using Org.BouncyCastle.Operators;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -104,15 +103,19 @@ namespace EngineNS.CodeCompiler
                 //var optionsProvider = new CustomAnalyzerConfigOptionsProvider(analyzerConfigOptions);
                 var name = IO.TtFileManager.GetPureName(outputFile);
                 var compilation = CSharpCompilation.Create(name, syntaxTrees, metaRefs, option);
-                var generatorDriver = CSharpGeneratorDriver.Create(new[] { new CompilingGenerator.BindingCodeIncrementalGenerator() });
+                var generator = new CompilingGenerator.BindingCodeIncrementalGenerator();
+                GeneratorDriver generatorDriver = CSharpGeneratorDriver.Create(new[] { generator });
                 //generatorDriver.WithUpdatedAnalyzerConfigOptions(optionsProvider)
                 //               .RunGeneratorsAndUpdateCompilation(compilation, out var updateCompilation, out var diagnostics);
-                generatorDriver.RunGeneratorsAndUpdateCompilation(compilation, out var updateCompilation, out var diagnostics);
+                generatorDriver = generatorDriver.RunGeneratorsAndUpdateCompilation(compilation, out var updateCompilation, out var diagnostics);
                 var genResult = generatorDriver.GetRunResult();
                 if(genResult.Results.Length > 0)
                 {
-                    var insGen = (genResult.Results[0].Generator).AsIncrementalGenerator() as CompilingGenerator.BindingCodeIncrementalGenerator;
-                    if(insGen != null)
+                    var incremental = genResult.Results[0].Generator as IIncrementalGenerator;
+                    var insGen = incremental as CompilingGenerator.BindingCodeIncrementalGenerator;
+                    //var insGen = (genResult.Results[0].Generator).AsIncrementalGenerator() as CompilingGenerator.BindingCodeIncrementalGenerator;
+                    //var insGen = generator;
+                    if (insGen != null)
                     {
                         foreach(var genCodeData in insGen.GeneratedCodes)
                         {

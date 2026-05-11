@@ -193,9 +193,6 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
                     i.InstanceMdf.InstanceModifier.PushInstance(in instance);
                     //j.InstanceIndex = i.InstanceMdf.InstanceModifier.PushInstance(in instance);
-
-                    
-                    rp.MergeAABB(in result);
                 }
 
                 rp.AddVisibleMesh(i.Mesh, false);

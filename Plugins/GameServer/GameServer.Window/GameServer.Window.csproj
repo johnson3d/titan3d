@@ -25,8 +25,4 @@
     <ProjectReference Include="..\..\RpcCaller\RpcCaller.Window\RpcCaller.Window.csproj" />
   </ItemGroup>
 
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="$(SolutionDir)CS_Rpc_AutoSync.bat" />
-  </Target>
-
 </Project>

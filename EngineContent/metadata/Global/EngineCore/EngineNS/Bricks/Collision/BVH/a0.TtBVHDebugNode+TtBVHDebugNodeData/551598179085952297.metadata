@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_551598179085952297 Type="EngineNS.Bricks.Collision.BVH.TtBVHDebugNode.TtBVHDebugNodeData@EngineCore">
+  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <BuildMode Type="EngineNS.Bricks.Collision.BVH.TtBVHDebugNode.EBuildMode@EngineCore" Order="0" />
+  <ColorByDepth Type="System.Boolean@Unknown" Order="0" />
+  <LeafMaxSize Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <LeafMinSize Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <Margin Type="System.Single@Unknown" Order="0" />
+  <MaxDisplayDepth Type="System.Int32@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.TtNode.ENodeStyles@EngineCore" Order="0" />
+  <NumLeaves Type="System.Int32@Unknown" Order="0" />
+  <OptimizeIterations Type="System.Int32@Unknown" Order="0" />
+  <Seed Type="System.Int32@Unknown" Order="0" />
+  <SpaceExtent Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.TtBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.TtPlacementBase@EngineCore" Order="2" />
+</Hash_551598179085952297>

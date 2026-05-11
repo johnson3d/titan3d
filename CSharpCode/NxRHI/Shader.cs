@@ -57,8 +57,8 @@ namespace EngineNS.NxRHI
                 }
                 mEffect = null;
             }
-            NxRHI.TtGraphicsEffect mEffect;
-            public unsafe void UpdateBindResouce(NxRHI.TtGraphicsEffect effect)
+            NxRHI.TtNativeGraphicsEffect mEffect;
+            public unsafe void UpdateBindResouce(NxRHI.TtNativeGraphicsEffect effect)
             {
                 if (mEffect != null)
                     return;
@@ -328,7 +328,7 @@ namespace EngineNS.NxRHI
         }
         public static unsafe bool SaveDesc(IO.TtXndHolder xnd, RName shader, in Hash160 hash, TtShaderDesc desc, Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId permutationId)
         {
-            permutationId = new Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId();
+            //permutationId = new Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId();
             var descAttr = xnd.RootNode.mCoreObject.GetOrAddAttribute("Desc", 0, 0, true);
             using (var ar = descAttr.GetWriter(256))
             {

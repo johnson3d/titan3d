@@ -434,6 +434,7 @@ namespace EngineNS.GamePlay.Scene
                                 {
                                     mem.WriteToFile(fileWriter);
                                 }
+                                TtRes2Memory.OnAfterWriteFile(file);
                             }
                         }
                     }
@@ -488,6 +489,7 @@ namespace EngineNS.GamePlay.Scene
                                 {
                                     mem.WriteToFile(fileWriter);
                                 }
+                                TtRes2Memory.OnAfterWriteFile(file);
                             }
                         }
                     }

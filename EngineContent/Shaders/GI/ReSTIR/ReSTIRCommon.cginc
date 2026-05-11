@@ -180,6 +180,9 @@ float3 ReconstructWorldPos(float2 uv, float depth)
 // 返回 (uv, ndc.z), linearDepth = clip.w (即 view 空间 z, 透视除法前)
 float3 WorldToScreen(float3 worldPos, out float linearDepth)
 {
+    //float4 H = float4(uv.x * 2.0f - 1.0f, 1.0f - uv.y * 2.0f, depthNdc, 1.0f);
+    //float4 D = mul(H, GetViewPrjMtxInverse());
+    //return D / D.w;
     float4 clip = mul(float4(worldPos, 1.0f), GetViewPrjMtx());
     linearDepth = clip.w;
     float3 ndc = clip.xyz / max(abs(clip.w), 1e-6f) * sign(clip.w);
@@ -211,6 +214,7 @@ cbuffer cbReSTIR
     uint   InitialSampleCount;
     float3 SkyColor;            // 天光 fallback 颜色 (linear, 未乘 intensity)
     float  SkyIntensity;        // 天光强度倍率, 0 表示禁用 miss 时的天光贡献
+    uint   HzbMaxMip;           // HZB 纹理的最大 mip 层级, 由 C# 端传入
 };
 
 // -----------------------------------------------------------------------------
@@ -231,61 +235,58 @@ float3 SampleSkyRadiance(float3 dirWS)
 }
 
 // -----------------------------------------------------------------------------
-// Hi-Z 屏幕空间 ray march (linear view-space z 版本):
-//   通用工具函数, 不依赖任何全局资源 -> 函数定义无 #if 宏门.
-//   调用方按需把 hzb 纹理 / 采样器作为参数传入, 由 entry point 决定是否调用.
+// Hi-Z 屏幕空间 ray march (linear view-space z)
 //
-// Hzb 数据约定 (来自 TtHzbNode, linear-z 版):
-//   - Texture2D<float2>, multi-mip
-//   - mip0 尺寸 = 屏幕分辨率 / 2 (整除)
-//   - 每 texel: R = min(2x2 邻域 view-space linear z), G = max
-//   - 单调"越远值越大", 与 USE_INVERSE_Z 完全无关
+// 算法: 从最粗 mip 起步, 纯粹"由粗到细"的层级遍历.
+//   - 不相交 → 推进当前 mip cell 边界 (mip 不变, 步长 = 当前 mip cell 大小)
+//   - 相交且 mip > 0 → mip-- 细化, ray 不动
+//   - 相交且 mip == 0 → 精确命中判定; miss 则推进 mip 0 cell 边界, mip 重置回 startMip
+// mip 只有"向下细化"和"重置回起始"两种变化, 永远不会出现 k ↔ k-1 振荡.
 //
-// 接口:
-//   - hzbTex / hzbSamp: 调用方传入的 hi-z 纹理和 point clamp 采样器
-//   - hzbMip0Size: hzb mip0 在 uv 坐标系下的像素数 (= 屏幕分辨率 / 2),
-//     由调用方传入避免函数内 GetDimensions (DXC 在某些 mip 下会取不到正确值)
-//   - startSS / endSS: ray 端点的屏幕坐标 (xy = uv [0,1], z = NDC depth, 仅供 [0,1] 出屏判定)
-//   - startLinearZ / endLinearZ: 端点的 view-space linear z (来自 WorldToScreen 的 clip.w),
-//     hi-z 比较的真正口径
-//   - thicknessBias: view-space 距离 (世界单位/米), 表示"ray 在表面前方多近视为命中"
-//   - 输出 hitUV: 命中像素的屏幕 uv. 调用方拿到后用它重采 DepthBuffer 拿原 NDC z 做
-//     ReconstructWorldPos, 与原线性 march 路径一致, 不再返回 hitSceneZ.
+// Hzb 约定 (TtHzbNode):
+//   Texture2D<float2>, mip0 = screen/2, R = tile minZ, G = tile maxZ (linear view-space z)
 //
-// 算法 (Wronski / Frostbite SSR 简化版):
-//   1. 当前 mip k 上, 找到 ray 当前位置所在 tile
-//   2. 求 ray 在该 tile 内沿屏幕方向到 tile 边界的归一化 t 推进
-//   3. 段在 linear-z 上的 [segMinZ, segMaxZ] 与 tile 的 [minZ, maxZ] 求相交:
-//      - 整段更近或整段更远 -> 整 tile 不可能命中, 推进到 tile 边界, mip++
-//      - 否则 -> 相交, mip-- 细化, mip 0 上找具体命中
-//   4. 命中条件 (mip 0): ray.linearZ 落在 [tile.minZ, tile.minZ + thicknessBias] 内
-//   5. 出屏 / 超 maxSteps -> 返回 false (调用方按 miss 处理)
-//
-// 设计取舍:
-//   - linear-z 单调"越远越大", 比较逻辑无 USE_INVERSE_Z 分支, shader 简单且数值稳定
-//   - thicknessBias 在 linear-z 下的物理含义 = 米 (e.g. 0.05 = 5cm), 用户预期能对齐
-//   - tile 边界推进用 ray-AABB slab 法的 2D 简化版
+// 调用方约定:
+//   起点防自相交由调用方负责 (originWS 沿 dirWS 推一小步再算 startSS).
 // -----------------------------------------------------------------------------
 
-// 求 ray (rayUV, rayDirUV) 在以 cellMin/cellMax 为边界的 tile 内, 走到任一边界
-// 所需的最小正向 t. dirUV 任一分量为 0 时该轴 t = +inf.
-float HiZ_DistToCellBoundary(float2 rayUV, float2 dirUV, float2 cellMin, float2 cellMax)
-{
-    // 相对于当前 ray 位置, 朝着 dir 方向的 tile 边界 (x/y 各取一条)
-    float2 boundary;
-    boundary.x = (dirUV.x >= 0.0f) ? cellMax.x : cellMin.x;
-    boundary.y = (dirUV.y >= 0.0f) ? cellMax.y : cellMin.y;
+// 2^mip 查表, 替代循环内 exp2(float(mip)) 的浮点运算. 支持 mip 0~12.
+static const float kMipScale[13] = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096 };
 
-    float2 t2 = (boundary - rayUV);
-    // dir 接近 0 的轴, 给一个极大值, 让 min 选另一轴
-    t2.x = (abs(dirUV.x) > 1e-6f) ? (t2.x / dirUV.x) : 1e10f;
-    t2.y = (abs(dirUV.y) > 1e-6f) ? (t2.y / dirUV.y) : 1e10f;
-    // 让推进略微越过边界, 避免下一次迭代仍然停在同一个 tile (浮点抖动)
-    return min(t2.x, t2.y) + 1e-5f;
+// 推进 ray 到当前 mip 网格下的下一个 cell 内部. 返回新 uv, 通过 dT 返回 t 步进量.
+float2 HiZ_StepToNextCell(float2 curUV, float2 dirUV, float invDirLen,
+                          float2 mipSize, out float dT)
+{
+    float2 cellSize = 1.0f / mipSize;
+    float2 cellIdx  = floor(curUV * mipSize);
+
+    // 目标边: dir >= 0 取 cell 右/上边, dir < 0 取左/下边
+    float2 sideSel  = step(0.0f, dirUV); // 0 or 1
+    float2 boundary = (cellIdx + sideSel) * cellSize;
+
+    // 偏置 1/16 cell, 保证严格落入下一 cell 内部 (避开边界浮点歧义)
+    float2 crossDir = sign(dirUV);
+    // sign(0) = 0, 这种轴不参与推进, 对应 t = +inf
+    boundary += crossDir * (cellSize * 0.0625f);
+
+    float2 dist = boundary - curUV;
+    float2 t2;
+    t2.x = (abs(dirUV.x) > 1e-6f) ? (dist.x / dirUV.x) : 1e10f;
+    t2.y = (abs(dirUV.y) > 1e-6f) ? (dist.y / dirUV.y) : 1e10f;
+    float tStep = max(min(t2.x, t2.y), 0.0f); // max(,0) 防负值
+
+    dT = tStep * invDirLen;
+    return curUV + dirUV * tStep;
 }
 
-// hi-z trace. 命中返回 true + hitUV; 未命中 (出屏 / 步数耗尽) 返回 false.
-// hzbTex / hzbSamp / hzbMip0Size 由调用方传入, 函数本身不依赖任何全局资源.
+// 计算 hzb 有意义的最大 mip 层级 (mip0 Size 逐级除 2 直到 1x1)
+// 使用 firstbithigh 做整数 floor(log2), 避免浮点精度问题 (如 512.0 经 log2 得到 8.999… 被截断为 8)
+uint HiZ_CalcMaxMip(float2 hzbMip0Size)
+{
+    uint maxDim = (uint)max(hzbMip0Size.x, hzbMip0Size.y);
+    return (maxDim >= 2u) ? firstbithigh(maxDim) : 0u;
+}
+
 bool HiZTraceScreenSpace(Texture2D<float2> hzbTex, SamplerState hzbSamp,
                          float2 hzbMip0Size,
                          float3 startSS, float3 endSS,
@@ -295,105 +296,78 @@ bool HiZTraceScreenSpace(Texture2D<float2> hzbTex, SamplerState hzbSamp,
 {
     hitUV = 0;
 
-    // ---------- 屏幕方向 ----------
-    float2 dirUV = endSS.xy - startSS.xy;
-    float dirLen2 = dot(dirUV, dirUV);
+    // ---- ray 参数 ----
+    float2 dirUV   = endSS.xy - startSS.xy;
+    float  dirLen2 = dot(dirUV, dirUV);
     if (dirLen2 < 1e-12f)
         return false;
-    float invDirLen = rsqrt(dirLen2);
-
-    // ---------- linear-z 段方向 ----------
-    // ray 沿 [start->end] 走到 t∈[0,1], cur.linearZ = lerp(startLinearZ, endLinearZ, t).
-    // 所以"段在 linear z 方向"的方向 = (endLinearZ - startLinearZ) (沿整段 t 的导数).
+    float invDirLen  = rsqrt(dirLen2);
     float linearZDir = endLinearZ - startLinearZ;
 
-    // hzb 总 mip 数保守上限. SampleLevel 越界自动 clamp 到最高 mip, 不会 OOB.
-    const uint kMaxMip = 12u;  // 4096x4096 / 2 = 2048 -> 11 mip, 12 安全
+    // ---- mip 范围: 由 C# 端通过 cbReSTIR.HzbMaxMip 传入 ----
+    uint startMip = min(HzbMaxMip, 12u);
 
-    // 当前 ray 状态: uv 位置, 沿整段 [start->end] 的归一化进度 t∈[0,1], 当前 mip
+    // ---- ray 状态: uv 位置, t∈[0,1] 沿整段进度, 当前 mip ----
     float2 curUV = startSS.xy;
     float  curT  = 0.0f;
-    uint   mip   = 0u;
+    uint   mip   = startMip;
 
     [loop]
     for (uint i = 0u; i < maxSteps; ++i)
     {
-        // 出屏 / 段已走完 -> 失败
-        if (any(curUV < 0.0f) || any(curUV > 1.0f) || curT > 1.0f)
+        // ---- 终止判定 ----
+        // UV xy 出界由调用方 (CastIndirectRay) 预截断保证不发生.
+        // 深度出界用 linear z 判定 (NDC z 经过 1/w 透视除法是非线性的, 线性插值不准确).
+        // linearZ <= 0 意味着射线跑到了摄像机后面.
+        if (curT >= 1.0f)
             return false;
-        // 当前 ray 在 NDC z 上的位置, 仅用于"NDC 出 [0,1] 范围"的廉价兜底
-        // (例如 view 矩阵把端点投到相机后方, ndc.z 会出界).
-        float curNdcZ = lerp(startSS.z, endSS.z, curT);
-        if (curNdcZ < 0.0f || curNdcZ > 1.0f)
+        float curLinearZ = startLinearZ + linearZDir * curT;
+        if (curLinearZ <= 0.0f)
             return false;
 
-        // 当前 mip 的 tile 网格尺寸 (uv 单位)
-        float2 mipSize = max(float2(1.0f, 1.0f), hzbMip0Size / exp2(float(mip)));
-        float2 cellSize = 1.0f / mipSize;
+        // ---- 取当前 mip tile 的 [minZ, maxZ] ----
+        float2 mipSize    = max(float2(1.0f, 1.0f), hzbMip0Size / kMipScale[mip]);
+        float2 cellSize   = 1.0f / mipSize;
+        float2 cellIdx    = floor(curUV * mipSize);
+        float2 tileCenter = (cellIdx + 0.5f) * cellSize;
+        float2 tileMinMax = hzbTex.SampleLevel(hzbSamp, tileCenter, (float)mip).rg;
+        float  tileMinZ   = tileMinMax.x;
+        float  tileMaxZ   = tileMinMax.y;
 
-        // 当前 ray 所在 tile 的 [cellMin, cellMax] (uv)
-        float2 cellIdx = floor(curUV * mipSize);
-        float2 cellMin = cellIdx * cellSize;
-        float2 cellMax = cellMin + cellSize;
+        // ---- ray 段 z 范围 (当前 cell 内) ----
+        float dT_step;
+        float2 nextUV = HiZ_StepToNextCell(curUV, dirUV, invDirLen, mipSize, dT_step);
+        float  nextT  = min(curT + dT_step, 1.0f);
+        float  curZ   = startLinearZ + linearZDir * curT;
+        float  nextZ  = startLinearZ + linearZDir * nextT;
+        float  segMinZ = min(curZ, nextZ);
+        float  segMaxZ = max(curZ, nextZ);
 
-        // 取 tile 的 min/max linear z
-        float2 tileCenter = cellMin + cellSize * 0.5f;
-        float mipClamped = (float)min(mip, kMaxMip);
-        float2 tileMinMaxZ = hzbTex.SampleLevel(hzbSamp, tileCenter, mipClamped).rg;
-        float tileMinZ = tileMinMaxZ.x;
-        float tileMaxZ = tileMinMaxZ.y;
+        bool intersect = !(segMaxZ < tileMinZ || segMinZ > tileMaxZ);
 
-        // 推进到当前 tile 在 ray 方向上的边界, 算出对应的 t (整段 [0,1] 上的归一化)
-        float tCell_uv = HiZ_DistToCellBoundary(curUV, dirUV, cellMin, cellMax);
-        // tCell_uv 是 dirUV 单位的推进, dirUV 长度 = sqrt(dirLen2), 所以归一化到整段 [0,1] 上要除以长度
-        float dT = tCell_uv * invDirLen;
-        float nextT = min(curT + dT, 1.0f);
-        float2 nextUV = curUV + dirUV * dT;
-        // ray 段 [curT, nextT] 在 linear z 上的范围
-        float curLinearZ  = startLinearZ + linearZDir * curT;
-        float nextLinearZ = startLinearZ + linearZDir * nextT;
-        float segMinZ = min(curLinearZ, nextLinearZ);
-        float segMaxZ = max(curLinearZ, nextLinearZ);
-
-        // 段与 tile linear-z 范围 [tileMinZ, tileMaxZ] 不相交 -> 整 tile 不可能命中,
-        // 推进到 tile 边界后用更粗 mip 继续跳
-        if (segMaxZ < tileMinZ || segMinZ > tileMaxZ)
+        if (!intersect)
         {
-            curUV = nextUV;
-            curT  = nextT;
-            mip = min(mip + 1u, kMaxMip);
-            continue;
-        }
-
-        if (mip == 0u)
-        {
-            // mip 0 + 相交 -> 该 tile 内有命中
-            // 用 tileMinZ 作为表面参考深度: ray.z 必须 >= tileMinZ (即在表面后方或表面上),
-            // 且 ray.z <= tileMinZ + thicknessBias (在表面厚度范围内).
-            float thickFar = tileMinZ + thicknessBias;
-            if (segMaxZ >= tileMinZ && segMinZ <= thickFar)
-            {
-                // 取段内 ray 第一次进入 [tileMinZ, thickFar] 的 t 作为命中位置.
-                // ray 沿 t 方向 linear z 单调 (lerp), 用 cross over 解析求 t.
-                float tHit = curT;
-                if (abs(linearZDir) > 1e-6f)
-                {
-                    // ray 进表面厚度区间的 t (取 ray 接近表面那一侧的 z 边界)
-                    float zEnter = (linearZDir > 0.0f) ? tileMinZ : thickFar;
-                    float tEnter = (zEnter - startLinearZ) / linearZDir;
-                    tHit = clamp(tEnter, curT, nextT);
-                }
-                hitUV = startSS.xy + dirUV * tHit;
-                return true;
-            }
-            // 厚度不满足 -> 越过本 tile 继续找下一个
+            // 整 tile 不可能命中 → 推进到当前 mip cell 边界, mip 不变.
+            // 因为 mip 不变, ray 下次循环判的是同 mip 的下一个 cell, 不存在
+            // "跨子 cell 但仍在父 cell 内 → 立刻被父 cell 拉回"的振荡.
             curUV = nextUV;
             curT  = nextT;
             continue;
         }
 
-        // 非 mip 0 但有相交 -> 细化 mip, ray 位置不前进, 用更细 tile 重新判
-        mip = mip - 1u;
+        // ---- 相交: 需要细化或精确判定 ----
+
+        if (mip > 0u)
+        {
+            // 细化: ray 不动, 用更细 mip 的更小 tile 重新判
+            mip = mip - 1u;
+            continue;
+        }
+        else
+        {
+            hitUV = startSS.xy + dirUV * curT;
+            return true;
+        }
     }
 
     return false;

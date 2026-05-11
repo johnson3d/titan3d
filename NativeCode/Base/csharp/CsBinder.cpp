@@ -1,48 +1,99 @@
 #include "CsBinder.h"
-#include "../../../codegen/Cs2Cpp/cpp/EngineNS.UnitTest.UTestCs2CppBuilder.cs2cpp.h"
-#include "../../../codegen/Cs2Cpp/cpp/EngineNS.Rtti.TtNativeCoreProvider.cs2cpp.h"
 
 #define new VNEW
 
 NS_BEGIN
 
-EngineNS::Rtti::TtNativeCoreProvider GNativeCoreProvider;
-void UCs2CppBase::InitializeNativeCoreProvider()
+FNativeCoreProvider GNativeCoreProvider;
+
+int FNativeCoreProvider::List_GetCount(FDNObjectHandle listHandle)
 {
-	GNativeCoreProvider.mCSFullName = "EngineNS.Rtti.TtNativeCoreProvider@EngineCore";
-	GNativeCoreProvider.CreateManagedObject();
+	return CoreSDK::NativeCoreListGetCount != nullptr ? CoreSDK::NativeCoreListGetCount(listHandle.Handle) : 0;
 }
 
-void UCs2CppBase::FinalCleanupNativeCoreProvider()
+void FNativeCoreProvider::List_Add(FDNObjectHandle listHandle, TtAnyValue* value)
 {
-	GNativeCoreProvider.FreeManagedObjectGCHandle();
+	if (CoreSDK::NativeCoreListAdd != nullptr)
+		CoreSDK::NativeCoreListAdd(listHandle.Handle, value);
 }
 
-EngineNS::Rtti::TtNativeCoreProvider* UCs2CppBase::GetNativeCoreProvider()
+void FNativeCoreProvider::List_Clear(FDNObjectHandle listHandle)
 {
-	if (GNativeCoreProvider.mCSharpHandle == nullptr)
-		return nullptr;
+	if (CoreSDK::NativeCoreListClear != nullptr)
+		CoreSDK::NativeCoreListClear(listHandle.Handle);
+}
+
+void FNativeCoreProvider::List_RemoveAt(FDNObjectHandle listHandle, int index)
+{
+	if (CoreSDK::NativeCoreListRemoveAt != nullptr)
+		CoreSDK::NativeCoreListRemoveAt(listHandle.Handle, index);
+}
+
+void FNativeCoreProvider::List_GetValue(FDNObjectHandle listHandle, int index, TtAnyValue* outValue)
+{
+	if (CoreSDK::NativeCoreListGetValue != nullptr)
+		CoreSDK::NativeCoreListGetValue(listHandle.Handle, index, outValue);
+}
+
+void* FNativeCoreProvider::Array_PinElementAddress(FDNObjectHandle arrayHandle, int index)
+{
+	return CoreSDK::NativeCoreArrayPinElementAddress != nullptr ? CoreSDK::NativeCoreArrayPinElementAddress(arrayHandle.Handle, index) : nullptr;
+}
+
+FDNObjectHandle FNativeCoreProvider::PinGCHandle(FDNObjectHandle objectHandle)
+{
+	return FDNObjectHandle(CoreSDK::NativeCorePinGCHandle != nullptr ? CoreSDK::NativeCorePinGCHandle(objectHandle.Handle) : nullptr);
+}
+
+void FNativeCoreProvider::FreeGCHandle(FDNObjectHandle pinnedHandle)
+{
+	if (CoreSDK::NativeCoreFreeGCHandle != nullptr)
+		CoreSDK::NativeCoreFreeGCHandle(pinnedHandle.Handle);
+}
+
+void FNativeCoreProvider::GetPropertyValue(FDNObjectHandle hostHandle, const char* propName, TtAnyValue* outValue)
+{
+	if (CoreSDK::NativeCoreGetPropertyValue != nullptr)
+		CoreSDK::NativeCoreGetPropertyValue(hostHandle.Handle, propName, outValue);
+}
+
+void FNativeCoreProvider::SetPropertyValue(FDNObjectHandle hostHandle, const char* propName, TtAnyValue* value)
+{
+	if (CoreSDK::NativeCoreSetPropertyValue != nullptr)
+		CoreSDK::NativeCoreSetPropertyValue(hostHandle.Handle, propName, value);
+}
+
+void TtManagedObjectBridge::InitializeNativeCoreProvider()
+{
+}
+
+void TtManagedObjectBridge::FinalCleanupNativeCoreProvider()
+{
+}
+
+FNativeCoreProvider* TtManagedObjectBridge::GetNativeCoreProvider()
+{
 	return &GNativeCoreProvider;
 }
 
-UCs2CppBase::UCs2CppBase()
+TtManagedObjectBridge::TtManagedObjectBridge()
 {
 	mCSharpHandle = nullptr;
 }
 
-UCs2CppBase::~UCs2CppBase()
+TtManagedObjectBridge::~TtManagedObjectBridge()
 {
 	FreeManagedObjectGCHandle();
 }
 
-void UCs2CppBase::CreateManagedObject(TtAnyValue* args, int NumOfArg, int retType)
+void TtManagedObjectBridge::CreateManagedObject(TtAnyValue* args, int NumOfArg, int retType)
 {
 	FreeManagedObjectGCHandle();
 
 	mCSharpHandle = CoreSDK::CreateManagedObject(mCSFullName.c_str(), args, NumOfArg, retType);
 }
 
-void UCs2CppBase::FreeManagedObjectGCHandle()
+void TtManagedObjectBridge::FreeManagedObjectGCHandle()
 {
 	if (mCSharpHandle != nullptr)
 	{
@@ -51,7 +102,7 @@ void UCs2CppBase::FreeManagedObjectGCHandle()
 	}
 }
 
-void* UCs2CppBase::GetManagedObject()
+void* TtManagedObjectBridge::GetManagedObject()
 {
 	return CoreSDK::GetManagedObjectFromGCHandle(mCSharpHandle);
 }
@@ -172,57 +223,41 @@ float FGlobalConfig::GetConfigValueF32(UINT handle)
 	return (pConfig != nullptr) ? pConfig->F32 : 0;
 }
 
-void UCs2CppBase::UnitTest()
+void TtManagedObjectBridge::UnitTest()
 {
-	///test code
-	EngineNS::UnitTest::UTestCs2CppBuilder mCs2CppBuilder;
-	//EngineNS::Rtti::TtNativeCoreProvider mNativeCoreProvider;
+	if (CoreSDK::CreateManagedObject == nullptr || CoreSDK::NativeCoreListAdd == nullptr)
+		return;
 
-	mCs2CppBuilder.mCSFullName = "EngineNS.UnitTest.UTestCs2CppBuilder@EngineCore";
-	mCs2CppBuilder.CreateManagedObject();
-	if (mCs2CppBuilder.mCSharpHandle != nullptr)
+	TtManagedObjectBridge list_int;
+	list_int.mCSFullName = "System.Collections.Generic.List<EngineNS.Matrix@EngineCore,>@Unknown";
+	list_int.CreateManagedObject();
+	if (list_int.mCSharpHandle != nullptr)
 	{
-		//[[maybe_unused]] auto pObject = mCs2CppBuilder.GetManagedObject();
-		int b = 2;
-		[[maybe_unused]] auto r = mCs2CppBuilder.Func0(1.0, &b);
-		[[maybe_unused]] auto r2 = mCs2CppBuilder.Func1(5);
+		EngineNS::TtAnyValue v;
+		v.SetStruct(v3dxMatrix4::IDENTITY, "EngineNS.Matrix@EngineCore");
+		TtManagedObjectBridge::GetNativeCoreProvider()->List_Add(list_int.GetHandle(), &v);
+		[[maybe_unused]] auto count = TtManagedObjectBridge::GetNativeCoreProvider()->List_GetCount(list_int.GetHandle());
+
+		v.Dispose();
 	}
 
-	/*mNativeCoreProvider.mCSFullName = "EngineNS.Rtti.TtNativeCoreProvider@EngineCore";
-	mNativeCoreProvider.CreateManagedObject();
-	if (mNativeCoreProvider.mCSharpHandle != nullptr)*/
+	TtManagedObjectBridge list_matrix;
+	list_matrix.mCSFullName = "EngineNS.Matrix[]@EngineCore";
+	EngineNS::TtAnyValue elemNum;
+	elemNum.SetI32(8);
+	list_matrix.CreateManagedObject(&elemNum, 1);
+	if (list_matrix.mCSharpHandle != nullptr)
 	{
-		UCs2CppBase list_int;
-		//list_int.mCSFullName = "System.Collections.Generic.List<System.Int32@Unknown,>@Unknown";
-		list_int.mCSFullName = "System.Collections.Generic.List<EngineNS.Matrix@EngineCore,>@Unknown";
-		list_int.CreateManagedObject();
-		if (list_int.mCSharpHandle != nullptr)
+		auto pined = TtManagedObjectBridge::GetNativeCoreProvider()->PinGCHandle(list_matrix.GetHandle());
+		auto pMatrix = (v3dxMatrix4*)TtManagedObjectBridge::GetNativeCoreProvider()->Array_PinElementAddress(list_matrix.GetHandle(), 0);
+		if (pMatrix != nullptr)
 		{
-			EngineNS::TtAnyValue v;
-			//v.SetI32(8);
-
-			v.SetStruct(v3dxMatrix4::IDENTITY, "EngineNS.Matrix@EngineCore");
-			UCs2CppBase::GetNativeCoreProvider()->List_Add(list_int.GetHandle(), &v);
-			[[maybe_unused]] auto count = UCs2CppBase::GetNativeCoreProvider()->List_GetCount(list_int.GetHandle());
-
-			v.Dispose();
-		}
-
-		UCs2CppBase list_matrix;
-		list_matrix.mCSFullName = "EngineNS.Matrix[]@EngineCore";
-		EngineNS::TtAnyValue elemNum;
-		elemNum.SetI32(8);
-		list_matrix.CreateManagedObject(&elemNum, 1);
-		if (list_int.mCSharpHandle != nullptr)
-		{
-			auto pined = UCs2CppBase::GetNativeCoreProvider()->PinGCHandle(list_matrix.mCSharpHandle);
-			auto pMatrix = (v3dxMatrix4*)UCs2CppBase::GetNativeCoreProvider()->Array_PinElementAddress(list_matrix.GetHandle(), 0);
 			pMatrix[2] = v3dxMatrix4::ZERO;
 			pMatrix[2].m41 = 10;
-			UCs2CppBase::GetNativeCoreProvider()->FreeGCHandle(pined);
 		}
-		elemNum.Dispose();
+		TtManagedObjectBridge::GetNativeCoreProvider()->FreeGCHandle(pined);
 	}
+	elemNum.Dispose();
 }
 
 NS_END

@@ -99,6 +99,52 @@ namespace EngineNS.Editor
             await AssetEditorManager.Initialize();
             return true;
         }
+        protected override void PrepareImGuiIniFile(string imguiIniFile)
+        {
+            var stampFile = imguiIniFile + ".main-dock-layout-v1";
+            if (System.IO.File.Exists(stampFile))
+                return;
+
+            try
+            {
+                if (System.IO.File.Exists(imguiIniFile))
+                {
+                    var text = System.IO.File.ReadAllText(imguiIniFile);
+                    if (IsLegacyScatteredMainEditorLayout(text))
+                    {
+                        var backupFile = imguiIniFile + ".legacy-scattered.bak";
+                        System.IO.File.Copy(imguiIniFile, backupFile, true);
+                        System.IO.File.Delete(imguiIniFile);
+                        Console.WriteLine($"Reset legacy ImGui layout cache: {imguiIniFile}");
+                    }
+                }
+                System.IO.File.WriteAllText(stampFile, "main-dock-layout-v1");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Prepare ImGui layout cache failed: {ex.Message}");
+            }
+        }
+        static bool IsLegacyScatteredMainEditorLayout(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return false;
+            if (text.Contains("[Window][ContentBrowser]") == false)
+                return false;
+            if (text.Contains("[Docking][Data]") == false)
+                return false;
+            if (text.Contains("DockId="))
+                return false;
+
+            var count = 0;
+            var index = 0;
+            while ((index = text.IndexOf("ViewportId=", index, StringComparison.Ordinal)) >= 0)
+            {
+                count++;
+                index += "ViewportId=".Length;
+            }
+            return count >= 3;
+        }
 #if PWindow
         [DllImport("kernel32.dll")]
         static extern IntPtr GetConsoleWindow();

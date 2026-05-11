@@ -2,11 +2,11 @@
 <Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="08d112e925d67122483985d07ebbfc2e7c24e404abd9e444e6d1bb59b80e5288" />
+      <Hash Type="System.String@Unknown" Value="cac3d0fed15583638c5453ec1baed381f72fa6f311097c347ce9d4d823fe72fb" />
       <Path Type="System.String@Unknown" Value="cornell.scene/cornell.scene" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="c607ed7617318d63c5621ff0cceda0b983ba298aa35b106659af717c7a7bd317" />
+      <Hash Type="System.String@Unknown" Value="2b4ae3b200233349bbc58b5d5f27773bcb42864c8ad455ee875e63ad994be443" />
       <Path Type="System.String@Unknown" Value="cornell.scene/class_graph.dat" />
     </e_1>
   </AssetFiles>
@@ -21,11 +21,13 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="4">
-    <e_0 Value="Game,tutorials/gi/cornell/red.ums,59280401-e2c4-49c9-9699-a3776984ce7a" />
-    <e_1 Value="Engine,material/gridline.material,fe431749-ed31-45b1-93d8-34462bd00922" />
-    <e_2 Value="Engine,mesh/base/box.vms,5355ee7f-de0b-4e29-bb7d-ed4ca9d6b0cf" />
-    <e_3 Value="Engine,material/pbr.material,95d0c6ba-5ec5-497b-8738-03c2d2965cba" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="6">
+    <e_0 Value="Engine,mesh/base/box.vms,5355ee7f-de0b-4e29-bb7d-ed4ca9d6b0cf" />
+    <e_1 Value="Game,tutorials/gi/cornell/whitecolor.uminst,e26b345b-bd3f-464f-9bca-f8c05155fd02" />
+    <e_2 Value="Game,tutorials/gi/cornell/redcolor.uminst,3fd4ce0d-d39c-41b3-82dd-56e68c09af8a" />
+    <e_3 Value="Game,tutorials/gi/cornell/greencolor.uminst,db1806dc-3b07-4451-8871-33ab8d9040b7" />
+    <e_4 Value="Engine,mesh/base/sphere.vms,7a5a0469-7899-40d9-aa67-7be6e33824d1" />
+    <e_5 Value="Engine,material/gridline.material,fe431749-ed31-45b1-93d8-34462bd00922" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
 </Root>

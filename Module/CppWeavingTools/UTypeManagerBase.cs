@@ -107,6 +107,7 @@ namespace CppWeaving
             var compile = myXmlDoc.CreateElement("ItemGroup", root.NamespaceURI);
             root.AppendChild(compile);
             var allFiles = System.IO.Directory.GetFiles(genDir, "*.cs", System.IO.SearchOption.AllDirectories);
+            Array.Sort(allFiles, StringComparer.OrdinalIgnoreCase);
             foreach (var i in allFiles)
             {
                 if (!WroteFiles.ContainsKey(i.Replace("\\", "/").ToLower()))
@@ -115,6 +116,7 @@ namespace CppWeaving
                 }
             }
             allFiles = System.IO.Directory.GetFiles(genDir, "*.cs", System.IO.SearchOption.AllDirectories);
+            Array.Sort(allFiles, StringComparer.OrdinalIgnoreCase);
             foreach (var i in allFiles)
             {
                 var cs = myXmlDoc.CreateElement("Compile", root.NamespaceURI);
@@ -124,24 +126,23 @@ namespace CppWeaving
                 compile.AppendChild(cs);
             }
 
+            var encoding = new System.Text.UTF8Encoding(false);
             var streamXml = new System.IO.MemoryStream();
-            var writer = new System.Xml.XmlTextWriter(streamXml, Encoding.UTF8);
+            var writer = new System.Xml.XmlTextWriter(streamXml, encoding);
             writer.Formatting = System.Xml.Formatting.Indented;
             myXmlDoc.Save(writer);
-            var reader = new System.IO.StreamReader(streamXml, Encoding.UTF8);
-            streamXml.Position = 0;
-            var content = reader.ReadToEnd();
-            reader.Close();
+            writer.Flush();
+            var newBytes = streamXml.ToArray();
             streamXml.Close();
 
             var projFile = genDir + fileName;
             if (System.IO.File.Exists(projFile))
             {
-                string old_code = System.IO.File.ReadAllText(projFile);
-                if (content == old_code)
+                var oldBytes = System.IO.File.ReadAllBytes(projFile);
+                if (oldBytes.AsSpan().SequenceEqual(newBytes))
                     return;
             }
-            System.IO.File.WriteAllText(projFile, content);
+            System.IO.File.WriteAllBytes(projFile, newBytes);
         }
 
         public void MakeSharedProjectCpp(string genDir, string fileName)
@@ -152,6 +153,7 @@ namespace CppWeaving
             var compile = myXmlDoc.CreateElement("ItemGroup", root.NamespaceURI);
             root.AppendChild(compile);
             var allFiles = System.IO.Directory.GetFiles(genDir, "*.cpp", System.IO.SearchOption.AllDirectories);
+            Array.Sort(allFiles, StringComparer.OrdinalIgnoreCase);
             foreach (var i in allFiles)
             {
                 if (!WroteFiles.ContainsKey(i.Replace("\\", "/").ToLower()))
@@ -160,6 +162,7 @@ namespace CppWeaving
                 }
             }
             allFiles = System.IO.Directory.GetFiles(genDir, "*.cpp", System.IO.SearchOption.AllDirectories);
+            Array.Sort(allFiles, StringComparer.OrdinalIgnoreCase);
             foreach (var i in allFiles)
             {
                 var cpp = myXmlDoc.CreateElement("ClCompile", root.NamespaceURI);
@@ -169,24 +172,23 @@ namespace CppWeaving
                 compile.AppendChild(cpp);
             }
 
+            var encoding = new System.Text.UTF8Encoding(false);
             var streamXml = new System.IO.MemoryStream();
-            var writer = new System.Xml.XmlTextWriter(streamXml, Encoding.UTF8);
+            var writer = new System.Xml.XmlTextWriter(streamXml, encoding);
             writer.Formatting = System.Xml.Formatting.Indented;
             myXmlDoc.Save(writer);
-            var reader = new System.IO.StreamReader(streamXml, Encoding.UTF8);
-            streamXml.Position = 0;
-            var content = reader.ReadToEnd();
-            reader.Close();
+            writer.Flush();
+            var newBytes = streamXml.ToArray();
             streamXml.Close();
 
             var projFile = genDir + fileName;
             if (System.IO.File.Exists(projFile))
             {
-                string old_code = System.IO.File.ReadAllText(projFile);
-                if (content == old_code)
+                var oldBytes = System.IO.File.ReadAllBytes(projFile);
+                if (oldBytes.AsSpan().SequenceEqual(newBytes))
                     return;
             }
-            System.IO.File.WriteAllText(projFile, content);
+            System.IO.File.WriteAllBytes(projFile, newBytes);
         }
     }
 }

@@ -18,6 +18,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using static EngineNS.EGui.Controls.PropertyGrid.PGPropertyOrderAttribute;
+using static EngineNS.NxRHI.TtTextureUtility;
 using static EngineNS.RName;
 
 
@@ -737,7 +738,7 @@ namespace EngineNS.NxRHI
                 desc.Width = image.Width;
                 desc.Height = image.Height;
 
-                var xnd = new IO.TtXndHolder("USrView", 0, 0);
+                var xnd = new IO.TtXndHolder("TtSrView", 0, 0);
                 TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, image, desc);
                 xnd.SaveXnd(rn.Address);
 

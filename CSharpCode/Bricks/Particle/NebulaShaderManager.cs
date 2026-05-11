@@ -1,15 +1,38 @@
-﻿using System;
+﻿using EngineNS.Graphics.Pipeline;
+using EngineNS.Graphics.Pipeline.Shader;
+using EngineNS.NxRHI;
+using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using static EngineNS.Graphics.Pipeline.Shader.TtShadingEnv;
 
 namespace EngineNS.Bricks.Particle
 {
+    public class TtNabulaUpdateShading : TtComputeShadingEnv
+    {
+        public override Vector3ui DispatchArg => new Vector3ui(32, 1, 1);
+        public TtNabulaUpdateShading()
+        {
+            CodeName = RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine);
+            MainName = "CS_Particle_Update";
+
+            this.BeginPermutaion();
+            UpdatePermutation().AddWaitTask();
+        }
+        public override void OnDrawCall(TtComputeDraw drawcall, TtRenderPolicy policy)
+        {
+            base.OnDrawCall(drawcall, policy);
+        }
+    }
+
     public class TtNebulaShader
     {
-        public static readonly Vector3ui Dispatch_SetupDimArray1 = new Vector3ui(32, 1, 1);
-        public NxRHI.TtComputeEffect Particle_Update;
-
+        public NxRHI.TtComputeEffect Particle_Update
+        {
+            get => UpdateShading.CurrentEffect;
+        }
+        public TtNabulaUpdateShading UpdateShading;
         public TtEmitter Emitter;
         public RName NebulaName;
         public NxRHI.TtShaderCode CBufferVar;
@@ -45,11 +68,9 @@ namespace EngineNS.Bricks.Particle
 
         public async Thread.Async.TtTask<bool> Init(Hash160 codeHash, RName nebula, TtEmitter emitter, string cbVar, string define, string code)
         {
-            var defines = new NxRHI.TtShaderDefinitions();
-            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray1.X}");
-            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray1.Y}");
-            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray1.Z}");
-            defines.mCoreObject.AddDefine("NebulaCodeHash", $"{codeHash}");
+            UpdateShading = new TtNabulaUpdateShading();
+            UpdateShading.ShaderDefinitions = new NxRHI.TtShaderDefinitions();
+            UpdateShading.ShaderDefinitions.AddDefine("NebulaCodeHash", $"{codeHash}");
 
             HLSLDefine = new NxRHI.TtShaderCode();
             HLSLDefine.TextCode = define;
@@ -61,24 +82,26 @@ namespace EngineNS.Bricks.Particle
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var incProvider = new UNebulaInclude();
             incProvider.Host = this;
-            Particle_Update = await TtEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine),
-                "CS_Particle_Update", NxRHI.EShaderType.SDT_ComputeShader, null, defines, incProvider);
+
+            UpdateShading.ShaderIncludeProvider = incProvider;
+
+            await UpdateShading.UpdatePermutation();
 
             return true;
         }
     }
-    public class UNebulaShaderManager
+    public class TtNebulaShaderManager
     {
         public Dictionary<Hash160, TtNebulaShader> Shaders { get; } = new Dictionary<Hash160, TtNebulaShader>();
     }
-    public class UNebulaTemplateManager : TtModule<TtEngine>
+    public class TtNebulaTemplateManager : TtModule<TtEngine>
     {
         public uint ShaderRandomPoolSize = 65535;
         public NxRHI.TtBuffer RandomPoolBuffer;
         public Random mRandom = new Random((int)Support.TtTime.GetTickCount());
 
         public NxRHI.TtSrView RandomPoolSrv;
-        public UNebulaShaderManager NebulaShaderManager { get; } = new UNebulaShaderManager();
+        public TtNebulaShaderManager NebulaShaderManager { get; } = new TtNebulaShaderManager();
         public Dictionary<RName, TtNebulaParticle> Particles { get; } = new Dictionary<RName, TtNebulaParticle>();
         public float RandomSignedUnit()//[-1,1]
         {
@@ -181,9 +204,9 @@ namespace EngineNS
 {
     partial class TtEngine
     {
-        public Bricks.Particle.UNebulaTemplateManager NebulaTemplateManager
+        public Bricks.Particle.TtNebulaTemplateManager NebulaTemplateManager
         {
             get;
-        } = new Bricks.Particle.UNebulaTemplateManager();
+        } = new Bricks.Particle.TtNebulaTemplateManager();
     }
 }

@@ -159,9 +159,16 @@ namespace EngineNS
                 TtEngine.Instance.GfxDevice.SlateRenderer.RecreateFontDeviceTexture();
 
                 var io = ImGuiAPI.GetIO();
+                io.ConfigErrorRecovery = true;
+                io.ConfigErrorRecoveryEnableAssert = false;
+                io.ConfigErrorRecoveryEnableDebugLog = true;
+                io.ConfigErrorRecoveryEnableTooltip = true;
+
                 var cachePath = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache);
                 var imgui = TtEngine.Instance.Config.ImGuiIniPath;
-                ImGuiAPI.SetIniFilename(IO.TtFileManager.CombinePath(cachePath, imgui));
+                var imguiIniFile = IO.TtFileManager.CombinePath(cachePath, imgui);
+                PrepareImGuiIniFile(imguiIniFile);
+                ImGuiAPI.SetIniFilename(imguiIniFile);
 
                 ImGuiConfigFlags_ configFlags = ImGuiConfigFlags_.ImGuiConfigFlags_None;
                 //configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_DpiEnableScaleViewports;
@@ -189,6 +196,9 @@ namespace EngineNS
                 SetPerFrameImGuiData(1f / 60f);
             }
             return true;
+        }
+        protected virtual void PrepareImGuiIniFile(string imguiIniFile)
+        {
         }
         public virtual void Cleanup()
         {

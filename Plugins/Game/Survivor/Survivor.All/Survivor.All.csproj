@@ -23,8 +23,4 @@
     <ProjectReference Include="..\..\..\GameCore\Inventory\Inventory.All\Inventory.All.csproj" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="$(SolutionDir)CS_Engine.bat" />
-  </Target>
-
 </Project>

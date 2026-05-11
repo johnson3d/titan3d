@@ -1,0 +1,358 @@
+{
+  "dotnetSdk": {
+    "version": "8.0.300",
+    "rollForward": "latestFeature"
+  },
+  "visualStudio": {
+    "version": "2022",
+    "msbuildVersionRange": "[17.0,18.0)",
+    "requires": [
+      "Microsoft.Component.MSBuild",
+      "Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+    ]
+  },
+  "windowsSdk": {
+    "minimumVersion": "10.0.19041.0",
+    "requiredIncludeFiles": [
+      "um/d3d11.h",
+      "um/d3d12.h",
+      "um/d3dcompiler.h",
+      "shared/dxgi1_4.h"
+    ],
+    "requiredLibFiles": [
+      "um/x64/d3d11.lib",
+      "um/x64/d3d12.lib",
+      "um/x64/d3dcompiler.lib",
+      "um/x64/dxgi.lib",
+      "um/x64/dxguid.lib"
+    ]
+  },
+  "nativeNuGetPackages": [
+    {
+      "id": "WinPixEventRuntime",
+      "version": "1.0.220124001",
+      "packagesConfig": "Core.Window/packages.config",
+      "requiredPaths": [
+        "packages/WinPixEventRuntime.1.0.220124001/build/WinPixEventRuntime.targets",
+        "packages/WinPixEventRuntime.1.0.220124001/Include/WinPixEventRuntime/pix3.h",
+        "packages/WinPixEventRuntime.1.0.220124001/bin/x64/WinPixEventRuntime.lib",
+        "packages/WinPixEventRuntime.1.0.220124001/bin/x64/WinPixEventRuntime.dll"
+      ]
+    }
+  ],
+  "managedNuGetPackages": [
+    {
+      "id": "ppy.SDL3-CS",
+      "version": "2025.703.0",
+      "restoreProjects": [
+        "Module/Engine.Window/Engine.Window.csproj"
+      ],
+      "requiredPaths": [
+        "lib/net8.0/SDL3-CS.dll",
+        "runtimes/win-x64/native/SDL3.dll"
+      ]
+    },
+    {
+      "id": "Microsoft.CodeAnalysis.CSharp",
+      "version": "4.10.0",
+      "restoreProjects": [
+        "Module/CSharpCodeTools/CSharpCodeTools.csproj",
+        "Module/Engine.Window/Engine.Window.csproj"
+      ],
+      "requiredPaths": [
+        "lib/netstandard2.0/Microsoft.CodeAnalysis.CSharp.dll"
+      ]
+    },
+    {
+      "id": "ClangSharp",
+      "version": "20.1.2.1",
+      "restoreProjects": [
+        "Module/CppWeavingTools/CppWeavingTools.csproj"
+      ],
+      "requiredPaths": [
+        "lib/net8.0/ClangSharp.dll"
+      ]
+    },
+    {
+      "id": "libclang.runtime.win-x64",
+      "version": "20.1.2",
+      "restoreProjects": [
+        "Module/CppWeavingTools/CppWeavingTools.csproj"
+      ]
+    }
+  ],
+  "nativeDependencyGroups": [
+    {
+      "id": "PhysX 5 Windows SDK",
+      "version": "5.6.1 CPU-only, vc143 mt Debug/Release",
+      "references": [
+        "Core.Window/Core.Window.vcxproj",
+        "NativeCode/Bricks/PhysicsCore/NvPhysX5"
+      ],
+      "requiredPaths": [
+        "3rd/native/PhysX5/include/PxPhysicsAPI.h",
+        "3rd/native/PhysX5/include/foundation/PxPhysicsVersion.h",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysX_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysX_64.dll",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXCharacterKinematic_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXFoundation_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXFoundation_64.dll",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXCommon_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXCommon_64.dll",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXCooking_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXCooking_64.dll",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXExtensions_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXPvdSDK_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXTask_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PhysXVehicle2_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PVDRuntime_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/debug/PVDRuntime_64.dll",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysX_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysX_64.dll",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXCharacterKinematic_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXFoundation_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXFoundation_64.dll",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXCommon_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXCommon_64.dll",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXCooking_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXCooking_64.dll",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXExtensions_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXPvdSDK_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXTask_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PhysXVehicle2_static_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PVDRuntime_64.lib",
+        "3rd/native/PhysX5/bin/win.x86_64.vc143.mt/release/PVDRuntime_64.dll"
+      ]
+    },
+    {
+      "id": "Autodesk FBX SDK",
+      "version": "2019.2",
+      "references": [
+        "Core.Window/Core.Window.vcxproj",
+        "NativeCode/Bricks/FBX/FBX.vcxitems"
+      ],
+      "requiredPaths": [
+        "3rd/native/FBXSDK/2019.2/include/fbxsdk.h",
+        "3rd/native/FBXSDK/2019.2/lib/x64/release/libfbxsdk.lib"
+      ]
+    },
+    {
+      "id": "Vulkan SDK vendored headers/libs",
+      "version": "vendored",
+      "references": [
+        "Core.Window/Core.Window.vcxproj",
+        "NativeCode/NextRHI/Vulkan/Vulkan.vcxitems"
+      ],
+      "requiredPaths": [
+        "3rd/native/Vulkan/Include/vulkan/vulkan.h",
+        "3rd/native/Vulkan/Include/vma/vk_mem_alloc.h",
+        "3rd/native/Vulkan/Lib/vulkan-1.lib"
+      ],
+      "requiredAnyOf": [
+        {
+          "description": "Vulkan runtime loader DLL",
+          "paths": [
+            "3rd/native/Vulkan/Lib/vulkan-1.lib"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Embree",
+      "version": "4.x Windows",
+      "references": [
+        "Core.Window/Core.Window.vcxproj",
+        "NativeCode/Bricks/DistanceField/DistanceField.vcxitems"
+      ],
+      "requiredPaths": [
+        "3rd/native/embree/embree4/include/embree4/rtcore.h",
+        "3rd/native/embree/embree4/include/embree4/rtcore_ray.h",
+        "3rd/native/embree/embree4/include/embree4/rtcore_config.h",
+        "3rd/native/embree/embree4/lib/embree4.lib",
+        "3rd/native/embree/embree4/lib/embree4_d.lib"
+      ],
+      "requiredAnyOf": [
+        {
+          "description": "Embree 4 debug runtime DLL",
+          "paths": [
+            "binaries/debug/embree4.dll"
+          ]
+        },
+        {
+          "description": "Embree 4 release runtime DLL",
+          "paths": [
+            "binaries/release/embree4.dll"
+          ]
+        },
+        {
+          "description": "Embree TBB runtime DLL",
+          "paths": [
+            "binaries/debug/tbb12_debug.dll",
+            "binaries/release/tbb12.dll"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "NVIDIA Nsight Aftermath",
+      "version": "vendored",
+      "references": [
+        "Core.Window/Core.Window.vcxproj",
+        "NativeCode/Bricks/GpuDump/GpuDump.vcxitems"
+      ],
+      "requiredPaths": [
+        "3rd/native/NVAftermath/include/GFSDK_Aftermath.h",
+        "3rd/native/NVAftermath/lib/x64/GFSDK_Aftermath_Lib.x64.lib",
+        "3rd/native/NVAftermath/lib/x64/GFSDK_Aftermath_Lib.x64.dll"
+      ]
+    },
+    {
+      "id": "ShaderConductor",
+      "version": "vendored",
+      "references": [
+        "Core.Window/Core.Window.vcxproj",
+        "NativeCode/Bricks/CrossShaderCompiler/CrossShaderCompiler.vcxitems"
+      ],
+      "requiredPaths": [
+        "3rd/native/ShaderConductor/Include/ShaderConductor/ShaderConductor.hpp",
+        "3rd/native/ShaderConductor/Lib/Debug/ShaderConductor.lib",
+        "3rd/native/ShaderConductor/Lib/Release/ShaderConductor.lib"
+      ]
+    },
+    {
+      "id": "Python Windows runtime",
+      "version": "3.10",
+      "references": [
+        "Core.Window/Core.Window.vcxproj",
+        "NativeCode/Bricks/PythonRuntime/PythonRuntime.vcxitems"
+      ],
+      "requiredPaths": [
+        "3rd/native/Python3/Win64/include/Python.h",
+        "3rd/native/Python3/Win64/libs/python3.lib",
+        "3rd/native/Python3/Win64/libs/python310.lib"
+      ]
+    },
+    {
+      "id": "HPSocket",
+      "version": "vendored Windows",
+      "references": [
+        "Core.Window/Core.Window.vcxproj",
+        "NativeCode/Bricks/TcpServer/TcpServer.vcxitems"
+      ],
+      "requiredPaths": [
+        "3rd/native/HPSocket/Windows/include/HPSocket4C.h",
+        "3rd/native/HPSocket/Windows/lib/HPSocket4C_D.lib",
+        "3rd/native/HPSocket/Windows/lib/HPSocket4C.lib"
+      ]
+    },
+    {
+      "id": "RenderDoc",
+      "version": "vendored API/runtime",
+      "references": [
+        "Core.Window/Core.Window.vcxproj",
+        "NativeCode/Bricks/RenderDoc/RenderDoc.vcxitems"
+      ],
+      "requiredPaths": [
+        "3rd/native/renderdoc/renderdoc_app.h",
+        "3rd/native/renderdoc/bin/renderdoc.dll"
+      ]
+    },
+    {
+      "id": "pthread-win32",
+      "version": "vendored x64",
+      "references": [
+        "Core.Window/Core.Window.vcxproj",
+        "NativeCode/Base/thread/vfxthread.cpp"
+      ],
+      "requiredPaths": [
+        "3rd/native/pthread/include/pthread.h",
+        "3rd/native/pthread/lib/x64/pthreadVC2.lib",
+        "3rd/native/pthread/dll/x64/pthreadVC2.dll"
+      ]
+    },
+    {
+      "id": "METIS",
+      "version": "5.1.0",
+      "references": [
+        "Core.Window/Core.Window.vcxproj"
+      ],
+      "requiredPaths": [
+        "3rd/native/metis/5.1.0/include/metis.h",
+        "3rd/native/metis/5.1.0/libmetis/Debug/metis.lib",
+        "3rd/native/metis/5.1.0/libmetis/Release/metis.lib"
+      ]
+    },
+    {
+      "id": "Crunch texture compression",
+      "version": "vendored VC9 x64 libs",
+      "references": [
+        "Core.Window/Core.Window.vcxproj",
+        "NativeCode/Bricks/TextureCompress/CrunchWrap.cpp"
+      ],
+      "requiredPaths": [
+        "3rd/native/crunch/inc/crnlib.h",
+        "3rd/native/crunch/inc/crn_decomp.h",
+        "3rd/native/crunch/lib/Debug/crnlibD_x64_VC9.lib",
+        "3rd/native/crunch/lib/Release/crnlib_x64_VC9.lib"
+      ]
+    },
+    {
+      "id": "CGAL and Boost",
+      "version": "vendored",
+      "references": [
+        "Core.Window/Core.Window.vcxproj"
+      ],
+      "requiredPaths": [
+        "3rd/native/CGAL/Include/CGAL/version.h",
+        "3rd/native/CGAL/auxiliary/gmp/include/gmp.h",
+        "3rd/native/CGAL/auxiliary/gmp/lib/gmp.lib",
+        "3rd/native/CGAL/auxiliary/gmp/lib/mpfr.lib",
+        "3rd/native/boost-1.89.0/boost/version.hpp"
+      ]
+    },
+    {
+      "id": "SPIR-V toolchain",
+      "version": "vendored",
+      "references": [
+        "Core.Window/Core.Window.vcxproj",
+        "NativeCode/NextRHI/Vulkan/Vulkan.vcxitems"
+      ],
+      "requiredPaths": [
+        "3rd/native/Vulkan/Include/spirv-tools/libspirv.h",
+        "3rd/native/Vulkan/Include/spirv-tools/optimizer.hpp",
+        "3rd/native/Vulkan/Include/glslang/Public/ShaderLang.h",
+        "3rd/native/Vulkan/Include/glslang/SPIRV/GlslangToSpv.h",
+        "3rd/native/Vulkan/Lib/SPIRV.lib",
+        "3rd/native/Vulkan/Lib/glslang.lib",
+        "3rd/native/Vulkan/Lib/SPIRV-Tools.lib",
+        "3rd/native/Vulkan/Lib/SPIRV-Tools-opt.lib"
+      ]
+    }
+  ],
+  "vendoredNativePaths": [
+    "3rd/native/eigen-3.4.0/Eigen/Core",
+    "3rd/native/FreeType/include/ft2build.h",
+    "3rd/native/Recast/Recast/Include/Recast.h",
+    "3rd/native/Recast/Detour/Include/DetourNavMesh.h",
+    "3rd/native/zlib/zlib.h",
+    "3rd/native/zstd/lib/zstd.h",
+    "3rd/native/SpirvCross/spirv_cross.hpp",
+    "3rd/native/xatlas/xatlas.h",
+    "3rd/native/MeshOptimizer/meshoptimizer.h",
+    "3rd/native/EtcLib/Etc.h",
+    "3rd/native/Image.Shared/Image.Shared.vcxitems",
+    "3rd/native/iconv/iconv.h",
+    "3rd/native/atlmfc/lib/x64/atls.lib"
+  ],
+  "vendoredCSharpPaths": [
+    "3rd/csharp/System.Windows.Forms.dll",
+    "3rd/csharp/StbImageSharp/StbImageSharp.projitems",
+    "3rd/csharp/StbImageWriteSharp/StbImageWriteSharp.projitems",
+    "3rd/csharp/NvTriStrip/NvTriStrip.projitems",
+    "3rd/csharp/xxHash/xxHash.projitems",
+    "3rd/csharp/AstcDecoder/AstcDecoder.projitems",
+    "3rd/csharp/JitherOpenEXR/JitherOpenEXR.projitems",
+    "3rd/csharp/AssimpNet/AssimpNet.projitems",
+    "3rd/csharp/Sprache/Sprache.projitems"
+  ]
+}

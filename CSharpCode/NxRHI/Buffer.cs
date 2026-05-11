@@ -86,6 +86,11 @@ namespace EngineNS.NxRHI
         {
             get;
         }
+        bool IsAutoTransition
+        {
+            get;
+            set;
+        }
         NxRHI.IBuffer CreateReadable(int subRes, EngineNS.NxRHI.ICopyDraw cpDraw);
     }
     public class TtBuffer : AuxPtrType<NxRHI.IBuffer>, TtGpuResource
@@ -186,6 +191,15 @@ namespace EngineNS.NxRHI
         public EGpuResourceState GpuState
         {
             get => mCoreObject.NativeSuper.GpuState;
+        }
+        public bool IsAutoTransition
+        {
+            get => mCoreObject.NativeSuper.IsAutoTransition;
+            set
+            {
+                var super = mCoreObject.NativeSuper;
+                super.IsAutoTransition = value;
+            }
         }
     }
     public class TtTransientBuffer : AuxPtrType<NxRHI.FTransientBuffer>
@@ -320,6 +334,15 @@ namespace EngineNS.NxRHI
         public EGpuResourceState GpuState
         {
             get => mCoreObject.NativeSuper.GpuState;
+        }
+        public bool IsAutoTransition
+        {
+            get => mCoreObject.NativeSuper.IsAutoTransition;
+            set
+            {
+                var super = mCoreObject.NativeSuper;
+                super.IsAutoTransition = value;
+            }
         }
         public bool GetFootprint(ref EngineNS.NxRHI.FSubResourceFootPrint fp, ref ulong rowSize, ref ulong totalSize, uint subRes = 0, ulong offset = 0)
         {

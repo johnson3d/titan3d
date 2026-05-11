@@ -1,4 +1,7 @@
 ﻿using EngineNS.EGui.Controls;
+using EngineNS.GamePlay.Scene;
+using EngineNS.IO;
+using NPOI.POIFS.Properties;
 using SDL;
 using System;
 using System.Collections.Generic;
@@ -90,6 +93,8 @@ namespace EngineNS.Editor.Forms
                     ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.TVHeaderHovered);
                     DrawTree(null, World.Root, 0);
                     ImGuiAPI.PopStyleColor(3);
+
+                    DrawDeselectAllSpacer();
                 }
             }
             if (OnDrawMenu != null)
@@ -117,11 +122,52 @@ namespace EngineNS.Editor.Forms
                     ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.TVHeaderHovered);
                     DrawTree(null, World.Root, 0);
                     ImGuiAPI.PopStyleColor(3);
+
+                    DrawDeselectAllSpacer();
                 }
             }
             if (OnDrawMenu != null)
                 OnDrawMenu();
             EGui.UIProxy.DockProxy.EndMainForm(result);
+        }
+
+        // 在 Outliner 树渲染完之后, 把树到窗口底部之间的空白区域铺一个 invisible button,
+        // 用户在这块"树之外的空白处"单击即视为"清空选择"。
+        // 设计动机:
+        //   - 视口里的左键空白点击容易误触, 已经禁用清空语义 (TtSceneEditorViewport.OnHitproxySelected
+        //     对 proxy == null 早返回); 但完全不给清空入口体验也不完整。
+        //   - Esc 键作为通行约定已经接上 (TtSceneEditorInteractiveMode.OnEvent)。
+        //   - Outliner 树空白处单击是另一个明确语义入口: 用户已经在这块面板里操作选择了,
+        //     就近给一个不歧义的取消操作位置, 不需要把手离开切到视口去按 Esc。
+        //   - 不歧义: 这块区域本身没有 tree node, 不会和 OnNodeUI_LClick 冲突。
+        // 仅当宿主是 TtSceneEditor (有 DeselectAll 实现) 时生效, 其他子类编辑器
+        // (例如 prefab 编辑器) 走自己的逻辑。
+        unsafe void DrawDeselectAllSpacer()
+        {
+            // 把窗口剩余高度全部占满, 给 invisible button 一个最小的兜底高度,
+            // 防止树占满整个 child 时 spacer 高度为 0 / 负数被 ImGui 当 invalid 跳过。
+            var avail = ImGuiAPI.GetContentRegionAvail();
+            const float minSpacerHeight = 24.0f;
+            float h = avail.Y > minSpacerHeight ? avail.Y : minSpacerHeight;
+            var size = new Vector2(avail.X > 1.0f ? avail.X : 1.0f, h);
+
+            ImGuiAPI.InvisibleButton("##OutlinerDeselectAllSpacer", in size, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+            if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+            {
+                var sceneEditor = WorldViewportState is EGui.Slate.TtWorldViewportSlate vp
+                    ? GetHostSceneEditor(vp)
+                    : null;
+                sceneEditor?.DeselectAll();
+            }
+        }
+
+        // 取宿主 SceneEditor: 通过 viewport 反推。WorldOutliner 自身只持有 viewport,
+        // 不直接持有编辑器引用, 这里做一次反查。其他派生 viewport (如非 SceneEditorViewport)
+        // 没有 HostEditor 字段, 返回 null, DeselectAll 自然不会被调用。
+        static TtSceneEditor GetHostSceneEditor(EGui.Slate.TtWorldViewportSlate viewport)
+        {
+            var seVp = viewport as TtSceneEditor.TtSceneEditorViewport;
+            return seVp?.HostEditor;
         }
         protected override bool OnDrawNode(INodeUIProvider parent, INodeUIProvider provider, int index, int NumOfChild)
         {
@@ -293,7 +339,17 @@ namespace EngineNS.Editor.Forms
             {
                 if (World.Root != node)
                 {
+                    var scene = node.GetNearestParentScene();
                     node.Parent = null;
+                    if (scene != null)
+                    {
+                        var file = node.NodeId.ToString() + TtNode.NodeExt;
+                        var nodefiles = TtFileManager.GetFiles(scene.AssetName.Address + "/nodes", file, true);
+                        foreach (var nodefile in nodefiles)
+                        {
+                            TtFileManager.DeleteFile(nodefile);
+                        }
+                    }
                 }
             }
         }

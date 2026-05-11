@@ -11,7 +11,7 @@
   <Import Project="..\TencentAIGC\TencentAIGC.projitems" Label="Shared" />
 
   <ItemGroup>
-    <PackageReference Include="TencentCloudSDK" Version="3.0.1268" />
+    <PackageReference Include="TencentCloudSDK" />
   </ItemGroup>
 
   <ItemGroup>

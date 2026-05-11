@@ -1350,7 +1350,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 }
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
-            var effects = TtEngine.Instance.GfxDevice.EffectManager.Effects;
+            var effects = TtEngine.Instance.GfxDevice.EffectManager.GraphicsEffects;
             foreach (var i in effects)
             {
                 if (i.Value.Desc.MaterialName == rn)

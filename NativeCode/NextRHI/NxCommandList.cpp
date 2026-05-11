@@ -260,9 +260,11 @@ namespace NxRHI
 			this->PushGpuDraw(cpDraw.GetPtr());
 		}
 	}
-	EGpuResourceState FTransitionScope::Transition(ICommandList* cmd, IGpuBufferData* resource, EGpuResourceState toState, bool bTryRenderPass)
+	EGpuResourceState FTransitionScope::TryAutoTransition(ICommandList* cmd, IGpuBufferData* resource, EGpuResourceState toState, bool bTryRenderPass)
 	{
 		auto save = resource->GpuState;
+		if (resource->IsAutoTransition == false)
+			return save;
 		auto bNeedTransition = resource->GpuState != toState;
 		if (bNeedTransition)
 		{

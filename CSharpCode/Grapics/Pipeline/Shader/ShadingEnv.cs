@@ -73,6 +73,28 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //    System.Diagnostics.Debug.Assert(false);
             //}
         }
+
+        public TtShadingEnv Clone()
+        {
+            var result = Activator.CreateInstance(this.GetType()) as TtShadingEnv;
+            result.ShaderDefinitions = this.ShaderDefinitions;
+            result.ShaderIncludeProvider = this.ShaderIncludeProvider;
+            result.CodeName = this.CodeName;
+            result.mCurrentPermutationId = this.mCurrentPermutationId;
+            result.PermutationBitWidth = this.PermutationBitWidth;
+            foreach (var i in this.PermutationValues)
+            {
+                var newItem = new TtPermutationItem();
+                newItem.Name = i.Name;
+                newItem.TypeDesc = i.TypeDesc;
+                newItem.Start = i.Start;
+                newItem.Width = i.Width;
+                newItem.Mask = i.Mask;
+                newItem.Value = i.Value;
+                result.PermutationValues.Add(newItem);
+            }
+            return result;
+        }
         protected virtual async Thread.Async.TtTask<bool> OnUpdatePermutation(FPermutationId targetPermutationId)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -255,14 +277,19 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //}
             return result;
         }
-        
+
+        #region ShadingEnv Instance Data
         public FPermutationId mCurrentPermutationId;
         public FPermutationId CurrentPermutationId
         {
             get => mCurrentPermutationId;
         }
+        public TtShaderDefinitions ShaderDefinitions = null;
+        public Editor.ShaderCompiler.TtHLSLInclude ShaderIncludeProvider = null;
         public virtual RName CodeName { get; set; }
-        public NxRHI.TtCbView PerShadingCBuffer;                
+        public NxRHI.TtCbView PerShadingCBuffer;
+        #endregion
+
         public bool GetShaderDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
             for (int i = 0; i < PermutationValues.Count; i++)
@@ -337,12 +364,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
         protected override async Thread.Async.TtTask<bool> OnUpdatePermutation(FPermutationId targetPermutationId)
         {
             var tmp = await TtEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(CodeName,
-                MainName, NxRHI.EShaderType.SDT_ComputeShader, this, null, null);
+                MainName, NxRHI.EShaderType.SDT_ComputeShader, this, this.ShaderDefinitions, this.ShaderIncludeProvider);
             if (targetPermutationId != tmp.PermutationId)
             {//为什么会出现这种情况呢，因为多次调用OnUpdatePermutation，因为时机不一样，根据this->PermutaitionId查询出来的tmp可能是之前请求的
                 Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, $"ShadingEnv {CodeName} MainName={MainName} 请求的PermutationId={targetPermutationId} 与实际得到的PermutationId={tmp.PermutationId} 不匹配，可能是多次调用UpdatePermutation导致的时序问题");
             }
-            if (mCurrentPermutationId == tmp.PermutationId)
+            if (mCurrentEffect == null || mCurrentPermutationId == tmp.PermutationId)
                 mCurrentEffect = tmp;
             return true;
         }

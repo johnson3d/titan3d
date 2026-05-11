@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.NxRHI;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -810,7 +811,8 @@ namespace EngineNS.Bricks.Collision.BVH
                     });
                 cpuLeafId[i] = closestLeafProxy;
                 cpuT[i] = closestLeafProxy >= 0 ? (float)closestFraction : r.mMaxT;
-                if (closestLeafProxy >= 0) cpuAnyHitCount++;
+                if (closestLeafProxy >= 0) 
+                    cpuAnyHitCount++;
             }
 
             // ----- GPU dispatch + readback -----
@@ -820,12 +822,20 @@ namespace EngineNS.Bricks.Collision.BVH
                 mStatGpuStatus = "dispatch failed (see log)";
                 return;
             }
+            var fence = TtEngine.Instance.GfxDevice.RenderQueue.QueueFence(null, "GpuBvh.RayCast", EQueueType.QU_Compute, true);
+            fence.Wait(1);
+            int gpuAnyHitCount = 0;
             if (mGpuBvh.ReadbackHits(out var hitRays))
             {
                 foreach (var hitRay in hitRays)
                 {
+                    if (hitRay.mHitProxyId != 0xFFFFFFFFu)
+                    {
+                        gpuAnyHitCount++;
+                    }
                 }
             }
+            System.Diagnostics.Debug.Assert(gpuAnyHitCount == cpuAnyHitCount);
         }
 
         // Deterministic ray batch generator. Origin sits well outside the

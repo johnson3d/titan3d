@@ -6,7 +6,7 @@ namespace EngineNS.Graphics.Pipeline
 {
     public partial class TtCoreShaderBinder
     {
-        public unsafe static void InitializeCoreBinder(NxRHI.TtGraphicsEffect effect)
+        public unsafe static void InitializeCoreBinder(NxRHI.TtNativeGraphicsEffect effect)
         {
             NxRHI.TtShader.TtCommonShaderResourceIndexer.Instance.UpdateBindResouce(effect);
             TtPerFrameCBufferVarIndexer.Instance.UpdateFieldVar(effect.mCoreObject, "cbPerFrame");

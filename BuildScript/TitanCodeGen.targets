@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TitanCodeGen.targets
+  =====================
+  Automatically runs C++ → C# glue-code generation (CppWeavingTools + CSharpCodeTools)
+  before building Core.Window or Engine.Window.
+
+  Usage:
+    Core.Window.vcxproj  → <Import Project="..\BuildScript\TitanCodeGen.targets" />
+    Engine.Window.csproj → <Import Project="..\..\BuildScript\TitanCodeGen.targets" />
+
+  Incremental behaviour:
+    The target compares the timestamps of input C++ headers against the sentinel
+    output file (PODStructDefine.h). If the sentinel is newer than all inputs,
+    generation is skipped.
+
+  Skipping:
+    Pass /p:SkipTitanCodeGen=true on the command line to skip entirely.
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- ============================================================ -->
+  <!-- Resolve TitanRoot: prefer the explicit property, fall back    -->
+  <!-- to SolutionDir, then to walking up from ProjectDir.           -->
+  <!-- ============================================================ -->
+  <PropertyGroup>
+    <TitanRoot Condition="'$(TitanRoot)' == '' AND '$(SolutionDir)' != '' AND '$(SolutionDir)' != '*Undefined*'">$(SolutionDir)</TitanRoot>
+    <TitanRoot Condition="'$(TitanRoot)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'BuildEngine.bat'))\</TitanRoot>
+    <SkipTitanCodeGen Condition="'$(SkipTitanCodeGen)' == ''">false</SkipTitanCodeGen>
+  </PropertyGroup>
+
+  <!-- ============================================================ -->
+  <!-- Tool paths                                                    -->
+  <!-- ============================================================ -->
+  <PropertyGroup>
+    <_TitanToolsDir>$(TitanRoot)binaries\Tools\net8.0\</_TitanToolsDir>
+    <_CppWeavingExe>$(_TitanToolsDir)CppWeavingTools.exe</_CppWeavingExe>
+    <_CSharpCodeToolsExe>$(_TitanToolsDir)CSharpCodeTools.exe</_CSharpCodeToolsExe>
+    <_CodeGenSentinel>$(TitanRoot)codegen\NativeBinder\.codegen.stamp</_CodeGenSentinel>
+    <_CppWeavingProject>$(TitanRoot)Module\CppWeavingTools\CppWeavingTools.csproj</_CppWeavingProject>
+    <_CSharpCodeToolsProject>$(TitanRoot)Module\CSharpCodeTools\CSharpCodeTools.csproj</_CSharpCodeToolsProject>
+  </PropertyGroup>
+
+  <!-- ============================================================ -->
+  <!-- Collect C++ header inputs for incremental check               -->
+  <!-- We watch all .h files under Core.Window/ and NativeCode/      -->
+  <!-- ============================================================ -->
+  <ItemGroup>
+    <_CppHeaderInputs Include="$(TitanRoot)Core.Window\**\*.h" />
+    <_CppHeaderInputs Include="$(TitanRoot)NativeCode\**\*.h" />
+  </ItemGroup>
+
+  <!-- ============================================================ -->
+  <!-- Target: _EnsureCodeGenToolsBuilt                              -->
+  <!-- Build the generator tools if they don't exist yet.            -->
+  <!-- ============================================================ -->
+  <Target Name="_EnsureCodeGenToolsBuilt"
+          Condition="'$(SkipTitanCodeGen)' != 'true' AND (!Exists('$(_CppWeavingExe)') OR !Exists('$(_CSharpCodeToolsExe)'))">
+    <Message Importance="high" Text="[TitanCodeGen] Building code-generation tools..." />
+    <Exec Command="dotnet build &quot;$(_CppWeavingProject)&quot; -c Debug --nologo -v q"
+          WorkingDirectory="$(TitanRoot)" />
+    <Exec Command="dotnet build &quot;$(_CSharpCodeToolsProject)&quot; -c Debug --nologo -v q"
+          WorkingDirectory="$(TitanRoot)" />
+  </Target>
+
+  <!-- ============================================================ -->
+  <!-- Target: TitanGenerateGlueCode                                 -->
+  <!-- Runs CppWeavingTools and CSharpCodeTools.                     -->
+  <!--                                                               -->
+  <!-- Inputs / Outputs give MSBuild incremental build support:      -->
+  <!-- if the sentinel is newer than every header, the target is     -->
+  <!-- skipped automatically.                                        -->
+  <!-- ============================================================ -->
+  <Target Name="TitanGenerateGlueCode"
+          BeforeTargets="Build;ClCompile;CoreCompile"
+          DependsOnTargets="_EnsureCodeGenToolsBuilt"
+          Condition="'$(SkipTitanCodeGen)' != 'true'"
+          Inputs="@(_CppHeaderInputs)"
+          Outputs="$(_CodeGenSentinel)">
+
+    <Message Importance="high" Text="[TitanCodeGen] Generating C++ ↔ C# glue code..." />
+
+    <!-- Step 1: CppWeavingTools – parse Core.Window headers, emit NativeBinder -->
+    <Exec Command="&quot;$(_CppWeavingExe)&quot; vcxproj=&quot;$(TitanRoot)Core.Window\Core.Window.vcxproj&quot; CppOut=&quot;$(TitanRoot)codegen\NativeBinder&quot; CsOut=&quot;$(TitanRoot)codegen\NativeBinder&quot; ModuleNC=EngineNS.CoreSDK.CoreModule Pch=&quot;$(TitanRoot)Core.Window\pch.h&quot; TargetCppPOD=&quot;$(TitanRoot)codegen\NativeBinder\PODStructDefine.h&quot;"
+          WorkingDirectory="$(TitanRoot)" />
+
+    <!-- Step 2: CSharpCodeTools – generate RPC / AutoSync / Macross code -->
+    <Exec Command="&quot;$(_CSharpCodeToolsExe)&quot; &quot;$(TitanRoot)Rpc_Engine.txt&quot; mode=Rpc+AutoSync+Macross"
+          WorkingDirectory="$(TitanRoot)" />
+
+    <!-- Touch the stamp file so MSBuild knows generation is up-to-date -->
+    <Touch Files="$(_CodeGenSentinel)" AlwaysCreate="true" />
+
+    <Message Importance="high" Text="[TitanCodeGen] Code generation completed." />
+  </Target>
+
+</Project>

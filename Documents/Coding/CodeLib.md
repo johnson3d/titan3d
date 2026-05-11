@@ -342,7 +342,7 @@ public struct FMeshlet
 
 ## 12.提交 GPU 命令的两条路径: `TtRenderPolicy.QueueCmd` vs `TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd`
 
-引擎对外暴露两个 `QueueCmd` 入口, **签名完全一致**, 但执行时机和归属队列不同。
+引擎对外暴露两个 `QueueCmd` 入口, **签名一致 (6 参)**, 但执行时机和归属队列不同。
 选错会出现 "命令晚一帧执行" / "命令脱离 RenderGraph 时序" / "Profiler 抓不到归属
 pass" 这一类现象。
 
@@ -352,18 +352,28 @@ pass" 这一类现象。
 
 ```csharp
 public void QueueCmd(NxRHI.FRenderCmd cmd, string name, object tag = null,
-                     NxRHI.EQueueType qType = NxRHI.EQueueType.QU_Default)
+                     NxRHI.EQueueType qType = NxRHI.EQueueType.QU_Default,
+                     NxRHI.ERCmdType type = NxRHI.ERCmdType.Cmd,
+                     bool bImm = false)
 {
     if (CmdQueue != null)
     {
-        CmdQueue.QueueCmd(cmd, name, tag, qType);     // ← 入 policy 自己的子队列
+        // ← 入 policy 自己的子队列, type / bImm 透传到底层 TtRCmdQueue
+        CmdQueue.QueueCmd(cmd, name, tag, qType, type, bImm);
     }
     else
     {
-        TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd(cmd, name, tag, qType);  // 透传
+        // 透传到全局 RenderQueue
+        TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd(cmd, name, tag, qType, type, bImm);
     }
 }
 ```
+
+> 新增的两个可选参 `type` / `bImm` 语义和底层 `TtRCmdQueue.QueueCmd` 完全一致,
+> 见 §12.2 与 §12.4 的说明。绝大多数业务场景保持默认即可 (`type = Cmd`,
+> `bImm = false`), 只有"帧末哨兵 / 启动期阻塞执行"等少数场景才需要显式传入,
+> 典型用例见 `CSharpCode/Base/Thread/ThreadLogic.cs:59` (`ERCmdType.FrameEnd`)
+> 和 `CSharpCode/Bricks/Procedure/Node/GpuShading/GpuFetch.cs:56` (`bImm: true`)。
 
 行为分两支:
 
@@ -388,8 +398,32 @@ public void QueueCmd(NxRHI.FRenderCmd cmd, string name, object tag = null,
 
 ### 12.2 `TtEngine.Instance.GfxDevice.RenderQueue.QueueCmd` —— 全局渲染线程立即执行路径
 
-签名一致 (`name`/`tag`/`qType` 参数同上), 实现是 native 端的 `IGpuQueue`, 入口在
-`CSharpCode/NxRHI/CmdQueue.cs`。
+签名 (定义见 `CSharpCode/NxRHI/CmdQueue.cs` `TtRCmdQueue.QueueCmd`):
+
+```csharp
+public void QueueCmd(FRenderCmd cmd, string name, object tag = null,
+                     NxRHI.EQueueType qType = EQueueType.QU_Default,
+                     ERCmdType type = ERCmdType.Cmd,
+                     bool bImm = false);
+```
+
+各参数含义:
+
+- `cmd` / `name` / `tag` / `qType`: 同 `policy.QueueCmd`, 见 §12.1。
+- `type`: 命令在 `RenderQueue.Cmds` 队列里的**分类标签**, 取值见 `ERCmdType` 枚举:
+  - `Cmd` (默认): 普通单条命令, 被 `TickRender` 循环消费后继续处理下一条。
+  - `Cmdlist`: `QueueCmdlist` / `QueueFence` 内部使用, 业务代码不要手动传。
+  - `FrameEnd`: **帧末哨兵**, `TickRenderImpl` 消费到这一条会 `break` 跳出本帧消费循环。
+    典型用例: `CSharpCode/Base/Thread/ThreadLogic.cs:59` 在逻辑线程 `Tick` 末尾投递一条
+    `#TickLogicEnd#` FrameEnd 命令, 让渲染线程能识别"本帧逻辑侧已结束"。
+- `bImm`: 是否**绕过 `EMultiRenderMode.Queue` 异步队列模式, 立即在当前线程执行**。
+  - `false` (默认): 走 `ProcCmd` 的常规路径, 在 `Queue` 多线程渲染模式下 enqueue 到
+    `Cmds`, 由渲染线程的 `TickRender` 消费; 其他模式下立即同步执行。
+  - `true`: 无论当前是什么 `MultiRenderMode`, 都**立即在调用线程同步执行** (`FrameEnd`
+    类型除外, 它永远 enqueue 作为帧末哨兵)。用于启动期资源上传 / 引擎关闭前 flush
+    等"不能等下一帧"的场景。典型用例: `CSharpCode/Bricks/Procedure/Node/GpuShading/
+    GpuFetch.cs:56` 在 fence signal 后用 `bImm: true` 立即执行, 保证 readback
+    数据在函数返回前拿到。
 
 行为: 命令进入 **引擎全局 `RenderQueue`** (单一队列, 跨所有 policy / 视口), 在
 **渲染线程的下一个 tick 立刻被消费**, record 到一条全局 transient cmdlist 后
@@ -446,6 +480,37 @@ submit 到 GPU。**不依赖任何 policy 的生命周期**。
 - **`tag` 参数语义不同**: 子 CmdQueue 路径的 `tag` 会被 CmdQueue 强引用直到
   flush 完成 (用于 `OnExecuted` 回调匹配); 全局 RenderQueue 路径的 `tag` 仅作
   RenderDoc / Profiler 标签, 不持有引用。
+- **`type` / `bImm` 默认值不要轻易改**: 这两个新增可选参看起来"通用", 但实际业务
+  含义很窄:
+  - `type = ERCmdType.Cmd` 是业务代码**唯一**应该使用的取值。`Cmdlist` 是
+    `QueueCmdlist` / `QueueFence` 内部专用 (带 `ExecuteCommandList` / `IncreaseSignal`
+    的特殊 `Cmd` lambda), 手动传会把一条裸 `FRenderCmd` 伪装成 cmdlist, 统计和
+    `Flush` 分支都会错乱。`FrameEnd` 仅用于**逻辑线程每帧投一次的帧末哨兵**
+    (参考 `ThreadLogic.cs:59` 的 `#TickLogicEnd#`), 任何其他位置投 `FrameEnd`
+    都会让 `TickRenderImpl` 提前 break, 丢弃队列里本帧剩余命令。
+  - `bImm = true` 会绕过 `EMultiRenderMode.Queue` 的异步排队, 直接在**调用线程**
+    同步执行 cmd lambda。调用线程不是渲染线程时, lambda 里任何 `TtCommandList` /
+    `GpuQueue` 操作都会踩多线程雷; 即使调用线程是渲染线程, 也会打乱 `Cmds` 的
+    FIFO 顺序, 让后面已排队但还未消费的命令相对于当前命令"晚执行"。只有在
+    "启动期单线程 / 引擎 shutdown flush / 外层已持有 fence 保证时序" 这类场景
+    才考虑用, 参考 `GpuFetch.cs:56` (fence signal 之后立即 `bImm: true` 收尾)。
+- **同步 readback 想要"显式 GPU 完成屏障"用 `RenderQueue.QueueFence`,
+  不要手写 `rc.GpuQueue.IncreaseSignal`**。前者是引擎为"绑在 RenderQueue 提交序列
+  上"专门提供的 fence 入口, 时序与 `RenderQueue.QueueCmdlist` 强一致; 后者是底层
+  `IGpuQueue` API, signal 时机和 cmdlist 实际 submit 时机不一定对齐, wait 出来
+  语义含糊。注: `FetchGpuData` 内部已经含 flush+wait, 一般情况下 `QueueCmdlist
+  + 立刻 FetchGpuData` 就能正常工作 (见 `Bricks/GpuDriven/Cluster.cs:489+509`
+  范例); 但当业务需要"先 fence wait 再走自己的同步 / 跨队列同步逻辑"时, 就必须
+  用 `QueueFence`。详见 CodingGuidelines.md §1.7 末尾。
+
+  ```csharp
+  TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(
+      mCmdList, "GpuBvh.RayCast", EQueueType.QU_Compute);
+  var fence = TtEngine.Instance.GfxDevice.RenderQueue.QueueFence(
+      null, "GpuBvh.RayCast", EQueueType.QU_Compute, true);
+  fence.Wait(1);                                          // ✓ 显式屏障, 走 RenderQueue
+  mHitBuffer.GpuBuffer.FetchGpuData(0, blob.mCoreObject); // 现在 GPU 一定写完了
+  ```
 
 ## 这是没用的LaTex测试，请忽略
 $$\sum_{i=0}^{^9}{\left(\frac{a_i}{b_i}\right)}$$

@@ -401,7 +401,7 @@ namespace NxRHI
 			mCurRtvs[i] = std::make_pair(rtv->GpuResource->GpuState, rtv);
 			if (rtv != nullptr)
 			{
-				FTransitionScope::Transition(this, rtv->GpuResource, EGpuResourceState::GRS_RenderTarget, false);
+				FTransitionScope::TryAutoTransition(this, rtv->GpuResource, EGpuResourceState::GRS_RenderTarget, false);
 				colorAttachment.imageView = rtv->mView->mImageView;
 			}
 			else
@@ -433,7 +433,7 @@ namespace NxRHI
 			auto dsv = fb->mDepthStencilView.UnsafeConvertTo<VKDepthStencilView>();
 			if (dsv != nullptr)
 			{
-				FTransitionScope::Transition(this, dsv->GpuResource, EGpuResourceState::GRS_DepthStencil, false);
+				FTransitionScope::TryAutoTransition(this, dsv->GpuResource, EGpuResourceState::GRS_DepthStencil, false);
 				depthAttachment.imageView = dsv->mView->mImageView;
 			}
 			depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -538,7 +538,7 @@ namespace NxRHI
 				mCurRtvs[i] = std::make_pair(rtv->GpuResource->GpuState, rtv);
 				if (rtv != nullptr)
 				{
-					FTransitionScope::Transition(this, rtv->GpuResource, EGpuResourceState::GRS_RenderTarget, false);
+					FTransitionScope::TryAutoTransition(this, rtv->GpuResource, EGpuResourceState::GRS_RenderTarget, false);
 				}
 			}
 			if (fb->mDepthStencilView != nullptr)
@@ -546,7 +546,7 @@ namespace NxRHI
 				auto dsv = fb->mDepthStencilView.UnsafeConvertTo<VKDepthStencilView>();
 				if (dsv != nullptr)
 				{
-					FTransitionScope::Transition(this, dsv->GpuResource, EGpuResourceState::GRS_DepthStencil, false);
+					FTransitionScope::TryAutoTransition(this, dsv->GpuResource, EGpuResourceState::GRS_DepthStencil, false);
 				}
 			}
 			
@@ -783,7 +783,7 @@ namespace NxRHI
 		GetCmdRecorder()->UseResource(view->Buffer);
 		view->GetResourceState()->SetAccessFrame(IWeakRefObject::EngineCurrentFrame);
 
-		FTransitionScope::Transition(this, view->Buffer, EGpuResourceState::GRS_GenericRead, true);
+		FTransitionScope::TryAutoTransition(this, view->Buffer, EGpuResourceState::GRS_GenericRead, true);
 	}
 	void VKCommandList::SetUav(EShaderType type, const FShaderBinder* binder, IUaView* view)
 	{
@@ -792,7 +792,7 @@ namespace NxRHI
 			return;
 
 		GetCmdRecorder()->UseResource(view->Buffer);
-		FTransitionScope::Transition(this, view->Buffer, EGpuResourceState::GRS_Uav, true);
+		FTransitionScope::TryAutoTransition(this, view->Buffer, EGpuResourceState::GRS_Uav, true);
 	}
 	void VKCommandList::SetSampler(EShaderType type, const FShaderBinder* binder, ISampler* sampler)
 	{
@@ -1184,7 +1184,7 @@ namespace NxRHI
 			0, nullptr
 		);
 	}
-	void VKCommandList::SetTextureBarrier(ITexture* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
+	void VKCommandList::SetTextureBarrier(ITexture* pResource, UINT subResource, UINT levelCount, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
 	{
 		auto oldLayout = GpuStateToVKImageLayout(srcAccess);
 		auto newLayout = GpuStateToVKImageLayout(dstAccess);
@@ -1202,8 +1202,8 @@ namespace NxRHI
 				barrier.image = (VkImage)pResource->GetHWBuffer();
 				barrier.subresourceRange.baseArrayLayer = 0;
 				barrier.subresourceRange.layerCount = pResource->Desc.ArraySize;
-				barrier.subresourceRange.baseMipLevel = 0;//All
-				barrier.subresourceRange.levelCount = pResource->Desc.MipLevels;
+				barrier.subresourceRange.baseMipLevel = subResource;//All
+				barrier.subresourceRange.levelCount = levelCount;//pResource->Desc.MipLevels;
 				
 				if (pResource->Desc.BindFlags & EBufferType::BFT_SRV)
 					barrier.subresourceRange.aspectMask = FormatToVKImageAspectFlags(pResource->Desc.Format, true, false);
