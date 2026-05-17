@@ -19,6 +19,7 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\AdvanceShadow\ESM.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Collision\BVH\GpuBvhCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\FX\Hair.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\FX\SWEWater.compute" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\FX\VolumeCloud.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\ClusterCulling.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\FRaster.cginc" />
@@ -115,6 +116,8 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FsrShading.compute" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\GaussShading.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\GaussAdditiveShading.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\HemisphereMapping\HemisphereMapping.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\HemisphereMapping\HemisphereSkyFallback.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\LuminanceThresholeShading.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\SunShaft\DepthThresholeShading.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\SunShaft\RadialBlurShading.cginc" />
@@ -168,6 +171,7 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\AvgBrightness.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\Tiling.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box3.cginc" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\HemisphereCaptureGen.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\SpatialDenoise.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\TemporalDenoise.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)ShadingEnv\RayTracing\Raytracing.hlsl" />

@@ -1,0 +1,157 @@
+// Shallow Water Equations (SWE) Compute Shader
+// GPU 浅水方程模拟: 高度场 h + 速度场 (u, v) 的显式时间步进
+// 支持开放边界 / 反射边界, 以及交互式扰动注入
+//
+// 状态存储 (RGBA32F ping-pong, 两张纹理交替读写):
+//   R = h  (水面高度, 相对静水面的偏移)
+//   G = u  (x 方向速度)
+//   B = v  (z 方向速度)
+//   A = reserved
+//
+// 每帧 dispatch 一次, C# 端交替 PrevState/CurrState 实现 ping-pong
+
+cbuffer cbSWE
+{
+    uint2  Resolution;       // 高度图分辨率 (e.g. 128x128)
+    float  DomainSize;       // 物理域大小 (米), 默认 128.0
+    float  Dt;               // 时间步长 (秒)
+    float  Gravity;          // 重力加速度, 默认 9.81
+    float  Damping;          // 阻尼系数, 防止能量无限累积, 默认 0.995
+    uint   BoundaryMode;     // 0 = 开放 (absorbing), 1 = 反射 (reflecting)
+    float  BaseWaterHeight;  // 静水面高度, 默认 0
+
+    // 扰动参数
+    float  DisturbPosX;      // 扰动中心 X (像素坐标)
+    float  DisturbPosZ;      // 扰动中心 Z (像素坐标)
+    float  DisturbRadius;    // 扰动半径 (像素)
+    float  DisturbStrength;  // 扰动强度
+    uint   EnableDisturb;    // 是否启用本帧扰动
+    float3 _Padding;
+};
+
+Texture2D<float4>   PrevState;      // 上一帧状态 (h, u, v, 0)
+RWTexture2D<float4> CurrState;      // 当前帧输出
+
+SamplerState Samp_PointClamp;
+
+// 安全采样: 边界外根据模式返回不同值
+float4 SampleState(int2 coord)
+{
+    int2 res = (int2)Resolution;
+
+    if (coord.x < 0 || coord.x >= res.x || coord.y < 0 || coord.y >= res.y)
+    {
+        if (BoundaryMode == 0)
+        {
+            // 开放边界: 边界外高度 = 0, 速度 = 0, 波自然消散
+            return float4(0, 0, 0, 0);
+        }
+        else
+        {
+            // 反射边界: clamp 到边界, 波在边缘反弹
+            coord = clamp(coord, int2(0, 0), res - int2(1, 1));
+            return PrevState[coord];
+        }
+    }
+
+    return PrevState[coord];
+}
+
+/**Meta Begin:(CS_Main)
+HLSL=none
+Meta End:(CS_Main)**/
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_Main(uint3 dtid : SV_DispatchThreadID)
+{
+    if (dtid.x >= Resolution.x || dtid.y >= Resolution.y)
+        return;
+
+    int2 id = (int2)dtid.xy;
+    float dx = DomainSize / (float)Resolution.x;  // 网格间距
+
+    // 读取当前及邻域状态
+    float4 center = SampleState(id);
+    float4 left   = SampleState(id + int2(-1,  0));
+    float4 right  = SampleState(id + int2( 1,  0));
+    float4 down   = SampleState(id + int2( 0, -1));
+    float4 up     = SampleState(id + int2( 0,  1));
+
+    float h  = center.r;
+    float u  = center.g;
+    float v  = center.b;
+
+    float hL = left.r;
+    float hR = right.r;
+    float hD = down.r;
+    float hU = up.r;
+
+    float uL = left.g;
+    float uR = right.g;
+    float vD = down.b;
+    float vU = up.b;
+
+    // --- Shallow Water Equations (显式有限差分) ---
+    // dh/dt = -H * (du/dx + dv/dz)
+    // du/dt = -g * dh/dx
+    // dv/dt = -g * dh/dz
+    // H = 水深 (这里用 BaseWaterHeight + h 近似, 简化为常数水深)
+
+    float waterDepth = max(BaseWaterHeight + h, 0.01f);
+
+    // 高度更新: 连续性方程
+    float dudx = (uR - uL) / (2.0f * dx);
+    float dvdz = (vU - vD) / (2.0f * dx);
+    float newH = h - waterDepth * (dudx + dvdz) * Dt;
+
+    // 速度更新: 动量方程
+    float dhdx = (hR - hL) / (2.0f * dx);
+    float dhdz = (hU - hD) / (2.0f * dx);
+    float newU = u - Gravity * dhdx * Dt;
+    float newV = v - Gravity * dhdz * Dt;
+
+    // 阻尼
+    newU *= Damping;
+    newV *= Damping;
+    newH *= Damping;
+
+    // 反射边界: 边界处速度归零
+    if (BoundaryMode == 1)
+    {
+        if (id.x == 0 || id.x == (int)Resolution.x - 1)
+            newU = 0;
+        if (id.y == 0 || id.y == (int)Resolution.y - 1)
+            newV = 0;
+    }
+
+    // 开放边界: 边界处应用吸收层 (sponge layer)
+    if (BoundaryMode == 0)
+    {
+        float spongeWidth = 10.0f; // 吸收层宽度 (像素)
+        float sponge = 1.0f;
+        float distToEdge = min(min((float)id.x, (float)((int)Resolution.x - 1 - id.x)),
+                               min((float)id.y, (float)((int)Resolution.y - 1 - id.y)));
+        if (distToEdge < spongeWidth)
+        {
+            sponge = distToEdge / spongeWidth;
+            sponge = sponge * sponge; // 二次衰减
+        }
+        newH *= sponge;
+        newU *= sponge;
+        newV *= sponge;
+    }
+
+    // 扰动注入
+    if (EnableDisturb != 0)
+    {
+        float2 distVec = float2((float)id.x - DisturbPosX, (float)id.y - DisturbPosZ);
+        float distSq = dot(distVec, distVec);
+        float radiusSq = DisturbRadius * DisturbRadius;
+        if (distSq < radiusSq)
+        {
+            float falloff = exp(-distSq / (radiusSq * 0.5f));
+            newH += DisturbStrength * falloff;
+        }
+    }
+
+    CurrState[id] = float4(newH, newU, newV, 0);
+}

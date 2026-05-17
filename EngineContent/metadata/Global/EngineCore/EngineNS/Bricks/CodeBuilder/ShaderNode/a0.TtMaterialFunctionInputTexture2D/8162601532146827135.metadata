@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_8162601532146827135 Type="EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionInputTexture2D@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <DefaultValue Type="System.Single@Unknown" Order="0" />
+  <DynamicSrvName Type="System.String@Unknown" Order="0" />
+  <IsDynamic Type="System.Boolean@Unknown" Order="0" />
+  <IsHalfPrecision Type="System.Boolean@Unknown" Order="0" />
+  <IsUniform Type="System.Boolean@Unknown" Order="0" />
+  <Label Type="System.String@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeId Type="System.Guid@Unknown" Order="0" />
+  <Position Type="EngineNS.Vector2@EngineCore" Order="0" />
+  <Sampler Type="EngineNS.NxRHI.FSamplerDesc@EngineCore" Order="0" />
+  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Order="1" />
+</Hash_8162601532146827135>

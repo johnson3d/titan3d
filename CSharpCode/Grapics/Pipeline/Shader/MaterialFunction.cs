@@ -9,6 +9,12 @@ using EngineNS.IO;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
+    public enum EMaterialFunctionEditMode
+    {
+        Graph,
+        RawHLSL,
+    }
+
     public partial class TtMaterialFunctionAMeta : IO.IAssetMeta
     {
         public override string TypeExt
@@ -97,21 +103,41 @@ namespace EngineNS.Graphics.Pipeline.Shader
         [Rtti.Meta("")]
         public virtual void SaveAssetTo(RName name)
         {
-            var MaterialGraph = new Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionGraph();
-            var xml = IO.TtFileManager.LoadXmlFromString(this.GraphXMLString);
-            if (xml != null)
-            {
-                object pThis = MaterialGraph;
-                IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
-            }
             var ameta = this.GetAMeta();
-            if (ameta != null)
-            {
-                UpdateAMetaReferences(ameta, MaterialGraph);
-                ameta.SaveAMeta(this);
-            }
 
-            HLSLCode = GenMateralFunctionGraphCode(new UHLSLCodeGenerator(), MaterialGraph, new TtMaterial());
+            if (EditMode == EMaterialFunctionEditMode.Graph)
+            {
+                var MaterialGraph = new Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionGraph();
+                var xml = IO.TtFileManager.LoadXmlFromString(this.GraphXMLString);
+                if (xml != null)
+                {
+                    object pThis = MaterialGraph;
+                    IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
+                }
+                if (ameta != null)
+                {
+                    UpdateAMetaReferences(ameta, MaterialGraph);
+                    ameta.SaveAMeta(this);
+                }
+
+                HLSLCode = GenMateralFunctionGraphCode(new UHLSLCodeGenerator(), MaterialGraph, new TtMaterial());
+            }
+            else
+            {
+                // RawHLSL mode: parse MethodMeta from HLSLCode and update references from RefMaterialFunctions
+                ParseMethodMetaFromHLSL();
+
+                if (ameta != null)
+                {
+                    ameta.RefAssetRNames.Clear();
+                    foreach (var refFunc in RefMaterialFunctions)
+                    {
+                        if (refFunc != null)
+                            ameta.RefAssetRNames.Add(refFunc);
+                    }
+                    ameta.SaveAMeta(this);
+                }
+            }
 
             var typeStr = Rtti.TtTypeDesc.TypeOf(this.GetType()).TypeString;
             using (var xnd = new IO.TtXndHolder(typeStr, 0, 0))
@@ -133,7 +159,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             TtEngine.Instance.GfxDevice.MaterialFunctionManager.RegMaterialFunctionName(AssetName);
 
-            TtEngine.Instance.TaskCollector.AddWaitTask(ameta.SaveRefAssets());
+            if (ameta != null)
+                ameta.SaveRefAssets().AddWaitTask();
         }
         public string GenMateralFunctionGraphCode(UHLSLCodeGenerator mHLSLCodeGen,
             Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionGraph MaterialGraph, TtMaterial material)
@@ -321,13 +348,20 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #endregion
 
         [Rtti.Meta("")]
+        [Category("Option")]
+        public EMaterialFunctionEditMode EditMode { get; set; } = EMaterialFunctionEditMode.Graph;
+
+        [Rtti.Meta("")]
         [ReadOnly(true)]
         public string GraphXMLString { get; set; }
         [Rtti.Meta("")]
-        [ReadOnly(true)]
         public string HLSLCode { get; set; }
         [Rtti.Meta("")]
         public Rtti.TtClassMeta.TtMethodMeta MethodMeta { get; set; } = new Rtti.TtClassMeta.TtMethodMeta();
+
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public List<RName> RefMaterialFunctions { get; set; } = new List<RName>();
         private string mCallNodeName = null;
         [Rtti.Meta("")]
         [Category("Option")]
@@ -345,6 +379,238 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
 
+        private static readonly Dictionary<string, (Rtti.TtTypeDesc Type, object Default)> HLSLTypeMap = new Dictionary<string, (Rtti.TtTypeDesc, object)>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "float", (Rtti.TtTypeDescGetter<float>.TypeDesc, 0.0f) },
+            { "float2", (Rtti.TtTypeDescGetter<Vector2>.TypeDesc, Vector2.Zero) },
+            { "float3", (Rtti.TtTypeDescGetter<Vector3>.TypeDesc, Vector3.Zero) },
+            { "float4", (Rtti.TtTypeDescGetter<Vector4>.TypeDesc, Vector4.Zero) },
+            { "int", (Rtti.TtTypeDescGetter<int>.TypeDesc, 0) },
+            { "uint", (Rtti.TtTypeDescGetter<uint>.TypeDesc, 0u) },
+            { "PS_INPUT", (Rtti.TtTypeDescGetter<PS_INPUT>.TypeDesc, new PS_INPUT()) },
+            { "SamplerState", (Rtti.TtTypeDescGetter<Bricks.CodeBuilder.ShaderNode.Var.SamplerState>.TypeDesc, null) },
+            { "Texture2D", (Rtti.TtTypeDescGetter<Bricks.CodeBuilder.ShaderNode.Var.Texture2D>.TypeDesc, null) },
+        };
+
+        /// <summary>
+        /// Parse the first function signature in HLSLCode and fill MethodMeta accordingly.
+        /// Supports: void FuncName(in/out/inout Type paramName, ...)
+        /// </summary>
+        public string GetExpectedFunctionName()
+        {
+            if (AssetName == null)
+                return null;
+            return AssetName.PureName + "_" + UniHash32.APHash(AssetName.ToString());
+        }
+        /// <summary>
+        /// Extract @default(...) annotations from comment lines in the original HLSL.
+        /// Maps parameter name to the raw default value string.
+        /// Supported syntax: "in float Foo, // @default(1.5)" or "in float3 Bar, // @default(0.1, 0.2, 0.3)"
+        /// </summary>
+        private static Dictionary<string, string> ExtractDefaultAnnotations(string hlslCode)
+        {
+            var defaults = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            // Match lines like: "in float3 ParamName,   // @default(0.1, 0.2, 0.3)"
+            // or the last param without trailing comma: "out float ParamName)  // @default(0.0)"
+            var pattern = @"(?:in|out|inout)\s+\w+\s+(\w+)\s*[,)]\s*//\s*@default\(([^)]*)\)";
+            var matches = System.Text.RegularExpressions.Regex.Matches(hlslCode, pattern);
+            foreach (System.Text.RegularExpressions.Match m in matches)
+            {
+                var paramName = m.Groups[1].Value;
+                var defaultVal = m.Groups[2].Value.Trim();
+                defaults[paramName] = defaultVal;
+            }
+            return defaults;
+        }
+
+        /// <summary>
+        /// Parse a @default(...) string value into a typed object based on the HLSL type.
+        /// </summary>
+        private static object ParseDefaultValueString(string defaultStr, string typeName)
+        {
+            if (string.IsNullOrWhiteSpace(defaultStr))
+                return null;
+
+            var parts = defaultStr.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            switch (typeName.ToLowerInvariant())
+            {
+                case "float":
+                    if (float.TryParse(parts[0].Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var f))
+                        return f;
+                    break;
+                case "float2":
+                    if (parts.Length >= 2 &&
+                        float.TryParse(parts[0].Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var x2) &&
+                        float.TryParse(parts[1].Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var y2))
+                        return new Vector2(x2, y2);
+                    break;
+                case "float3":
+                    if (parts.Length >= 3 &&
+                        float.TryParse(parts[0].Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var x3) &&
+                        float.TryParse(parts[1].Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var y3) &&
+                        float.TryParse(parts[2].Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var z3))
+                        return new Vector3(x3, y3, z3);
+                    break;
+                case "float4":
+                    if (parts.Length >= 4 &&
+                        float.TryParse(parts[0].Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var x4) &&
+                        float.TryParse(parts[1].Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var y4) &&
+                        float.TryParse(parts[2].Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var z4) &&
+                        float.TryParse(parts[3].Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var w4))
+                        return new Vector4(x4, y4, z4, w4);
+                    break;
+                case "int":
+                    if (int.TryParse(parts[0].Trim(), out var i))
+                        return i;
+                    break;
+                case "uint":
+                    if (uint.TryParse(parts[0].Trim(), out var u))
+                        return u;
+                    break;
+            }
+            return null;
+        }
+
+        public void ParseMethodMetaFromHLSL()
+        {
+            if (string.IsNullOrEmpty(HLSLCode))
+                return;
+
+            // Extract @default(...) annotations from comments BEFORE stripping them
+            var defaultAnnotations = ExtractDefaultAnnotations(HLSLCode);
+
+            // Strip all comments BEFORE regex matching, so that parentheses
+            // inside comments (e.g. "// range (0.02 ~ 0.1)") don't break
+            // the function signature extraction regex.
+            var strippedCode = System.Text.RegularExpressions.Regex.Replace(HLSLCode, @"//[^\n]*", "");
+            strippedCode = System.Text.RegularExpressions.Regex.Replace(strippedCode, @"/\*.*?\*/", "", System.Text.RegularExpressions.RegexOptions.Singleline);
+
+            // Match pattern: void FuncName ( params )
+            var funcMatch = System.Text.RegularExpressions.Regex.Match(strippedCode,
+                @"void\s+(\w+)\s*\(([^)]*)\)");
+            if (!funcMatch.Success)
+                return;
+
+            var functionName = funcMatch.Groups[1].Value;
+            var paramsStr = funcMatch.Groups[2].Value.Trim();
+
+            // Auto-correct function name to include asset hash for uniqueness
+            var expectedName = GetExpectedFunctionName();
+            if (expectedName != null && functionName != expectedName)
+            {
+                HLSLCode = HLSLCode.Replace(functionName, expectedName);
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info,
+                    $"MaterialFunction.ParseMethodMetaFromHLSL: Renamed '{functionName}' -> '{expectedName}'");
+                functionName = expectedName;
+            }
+
+            MethodMeta.MethodName = functionName;
+            MethodMeta.ReturnType = Rtti.TtTypeDesc.TypeOf(typeof(void));
+            MethodMeta.Parameters = new List<Rtti.TtClassMeta.TtMethodMeta.TtParamMeta>();
+
+            if (string.IsNullOrWhiteSpace(paramsStr))
+                return;
+
+            var paramParts = SplitHLSLParameters(paramsStr);
+            foreach (var paramStr in paramParts)
+            {
+                var trimmed = paramStr.Trim();
+                if (string.IsNullOrEmpty(trimmed))
+                    continue;
+
+                var paramMeta = ParseSingleParameter(trimmed);
+                if (paramMeta != null)
+                {
+                    // Override default value from @default(...) annotation if present
+                    if (defaultAnnotations.TryGetValue(paramMeta.Name, out var defaultStr))
+                    {
+                        // Determine HLSL type name from the trimmed parameter string
+                        var tokens = trimmed.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                        var typeIdx = (tokens[0].ToLowerInvariant() == "in" || tokens[0].ToLowerInvariant() == "out" || tokens[0].ToLowerInvariant() == "inout") ? 1 : 0;
+                        var hlslTypeName = tokens[typeIdx];
+                        var parsedDefault = ParseDefaultValueString(defaultStr, hlslTypeName);
+                        if (parsedDefault != null)
+                        {
+                            paramMeta.DefaultValue = parsedDefault;
+                        }
+                    }
+                    MethodMeta.Parameters.Add(paramMeta);
+                }
+                else
+                {
+                    Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Error, $"MaterialFunction.ParseMethodMetaFromHLSL: Unrecognized parameter '{trimmed}', skipped.");
+                }
+            }
+        }
+
+        private static List<string> SplitHLSLParameters(string paramsStr)
+        {
+            var result = new List<string>();
+            int depth = 0;
+            int start = 0;
+            for (int i = 0; i < paramsStr.Length; i++)
+            {
+                var ch = paramsStr[i];
+                if (ch == '(' || ch == '<') depth++;
+                else if (ch == ')' || ch == '>') depth--;
+                else if (ch == ',' && depth == 0)
+                {
+                    result.Add(paramsStr.Substring(start, i - start));
+                    start = i + 1;
+                }
+            }
+            result.Add(paramsStr.Substring(start));
+            return result;
+        }
+
+        private static Rtti.TtClassMeta.TtMethodMeta.TtParamMeta ParseSingleParameter(string paramStr)
+        {
+            // Possible formats:
+            //   in PS_INPUT input
+            //   out float3 result
+            //   inout float4 color
+            //   float3 normal  (default is "in")
+            var tokens = paramStr.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            if (tokens.Length < 2)
+                return null;
+
+            var direction = Bricks.CodeBuilder.EMethodArgumentAttribute.In;
+            int typeIndex = 0;
+
+            var firstToken = tokens[0].ToLowerInvariant();
+            if (firstToken == "in")
+            {
+                direction = Bricks.CodeBuilder.EMethodArgumentAttribute.In;
+                typeIndex = 1;
+            }
+            else if (firstToken == "out")
+            {
+                direction = Bricks.CodeBuilder.EMethodArgumentAttribute.Out;
+                typeIndex = 1;
+            }
+            else if (firstToken == "inout")
+            {
+                direction = Bricks.CodeBuilder.EMethodArgumentAttribute.Ref;
+                typeIndex = 1;
+            }
+
+            if (typeIndex + 1 >= tokens.Length)
+                return null;
+
+            var typeName = tokens[typeIndex];
+            var paramName = tokens[typeIndex + 1];
+
+            if (!HLSLTypeMap.TryGetValue(typeName, out var typeInfo))
+                return null;
+
+            var meta = new Rtti.TtClassMeta.TtMethodMeta.TtParamMeta();
+            meta.Name = paramName;
+            meta.ParameterType = typeInfo.Type;
+            meta.ArgumentAttribute = direction;
+            meta.DefaultValue = typeInfo.Default;
+            return meta;
+        }
+
         private Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionGraph LoadGraph()
         {
             var MaterialGraph = new Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionGraph();
@@ -358,18 +624,37 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public void WriteRefHLSLCode(ref string code)
         {
-            var MaterialGraph = LoadGraph();
-            foreach (var i in MaterialGraph.Nodes)
+            if (EditMode == EMaterialFunctionEditMode.Graph)
             {
-                var f = i as Bricks.CodeBuilder.ShaderNode.Control.TtCallMaterialFunctionNode;
-                if (f == null)
-                    continue;
-                var refFunc = f.FunctionName.GetAsset<Graphics.Pipeline.Shader.TtMaterialFunction>().GetResultUntilCompleted();
-                if (refFunc != null)
+                var MaterialGraph = LoadGraph();
+                foreach (var i in MaterialGraph.Nodes)
                 {
-                    refFunc.WriteRefHLSLCode(ref code);
+                    var f = i as Bricks.CodeBuilder.ShaderNode.Control.TtCallMaterialFunctionNode;
+                    if (f == null)
+                        continue;
+                    var refFunc = f.FunctionName.GetAsset<Graphics.Pipeline.Shader.TtMaterialFunction>().GetResultUntilCompleted();
+                    if (refFunc != null)
+                    {
+                        refFunc.WriteRefHLSLCode(ref code);
+                    }
                 }
             }
+            else
+            {
+                foreach (var refName in RefMaterialFunctions)
+                {
+                    if (refName == null)
+                        continue;
+                    var refFunc = refName.GetAsset<Graphics.Pipeline.Shader.TtMaterialFunction>().GetResultUntilCompleted();
+                    if (refFunc != null)
+                    {
+                        refFunc.WriteRefHLSLCode(ref code);
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(HLSLCode))
+                return;
             if (code.Contains(HLSLCode))
                 return;
             code += HLSLCode;

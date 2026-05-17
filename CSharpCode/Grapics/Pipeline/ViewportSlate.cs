@@ -1000,7 +1000,7 @@ namespace EngineNS.Graphics.Pipeline
             RenderPolicy.EndTick(World);
 
             TtEngine.Instance.GfxDevice.CbvUpdater.UpdateCBVs();
-            RenderPolicy.ExecuteCmdQueue();
+            RenderPolicy.ExecuteCmdQueue(true);
         }
         public void TickSync()
         {

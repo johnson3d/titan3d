@@ -38,7 +38,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Exception.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\IBaseNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\MaterialFunctionEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Operator\Binocular.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Operator\Operator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\MaterialOutput.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\MaterialEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\MaterialGraph.cs" />

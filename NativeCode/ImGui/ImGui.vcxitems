@@ -23,6 +23,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_filedialog.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_binding.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)imgui_markdown.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)misc\freetype\imgui_freetype.h" />
   </ItemGroup>
   <ItemGroup>

@@ -47,10 +47,17 @@ namespace EngineNS.Graphics.Pipeline
             GraphNodes.Add(id, node);
             return true;
         }
-        public void RegRenderNode2(string name, TtRenderGraphNode node)
+        public bool RegRenderNode2(string name, TtRenderGraphNode node)
         {
             node.Name = name;
-            GraphNodes.Add(Guid.NewGuid(), node);
+            if (node.BindingPolicyNode != null)
+            {
+                return RegRenderNode(node.BindingPolicyNode.NodeId, node);
+            }
+            else
+            {
+                return RegRenderNode(Guid.NewGuid(), node);
+            }
         }
         public TtRenderGraphNode FindNode(in Guid id)
         {

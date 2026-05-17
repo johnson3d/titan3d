@@ -83,7 +83,9 @@ namespace EngineNS.IO
         {
             var path = IO.TtFileManager.GetParentPathName(file);
             IO.TtFileManager.SureDirectory(path);
+            TtRes2Memory.OnBeforeWriteFile(path);
             mCoreObject.SaveXnd(file);
+            TtRes2Memory.OnAfterWriteFile(file);
         }
         public void SaveXndWithoutHead(TtMemWriter writer)
         {

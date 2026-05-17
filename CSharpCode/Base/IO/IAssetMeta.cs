@@ -579,6 +579,9 @@ namespace EngineNS.IO
         protected EGui.UIProxy.MenuItemProxy.MenuState mCopyToMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         protected EGui.UIProxy.MenuItemProxy.MenuState mPackToMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         internal Thread.Async.TtTask<Editor.TtSnapshot>? Task;
+        [ThreadStatic]
+        static bool? mSnapshotAutoGenOverride;
+        static bool AllowSnapshotAutoGen => mSnapshotAutoGenOverride ?? true;
         public virtual Color4b GetBorderColor()
         {
             return EGui.UCoreStyles.Instance.SnapBorderColor;
@@ -632,7 +635,7 @@ namespace EngineNS.IO
 
             var snapStart = new Vector2(start.X + delta, tpos.Y + 18 * scale);
             var snapEnd = snapStart + new Vector2(snapSize, snapSize);
-            OnDrawSnapshot(in cmdlist, ref snapStart, ref snapEnd);
+            OnDrawSnapshotForContentBrowser(in cmdlist, ref snapStart, ref snapEnd, ContentBrowser?.AutoGenerateSnapshots ?? true);
 
             //var titleImg = TtEngine.Instance.UIManager.GetUIProxy("uestyle/graph/regularnode_shadow_selected.srv", new Thickness(18.0f / 64.0f)) as EGui.UIProxy.ImageProxy;
             //if (titleImg != null)
@@ -736,6 +739,19 @@ namespace EngineNS.IO
                 Task = null;
             }
         }
+        public unsafe void OnDrawSnapshotForContentBrowser(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end, bool autoGenerate)
+        {
+            var oldValue = mSnapshotAutoGenOverride;
+            mSnapshotAutoGenOverride = autoGenerate;
+            try
+            {
+                OnDrawSnapshot(in cmdlist, ref start, ref end);
+            }
+            finally
+            {
+                mSnapshotAutoGenOverride = oldValue;
+            }
+        }
         public unsafe virtual void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
             if (HasSnapshot == false)
@@ -743,7 +759,7 @@ namespace EngineNS.IO
             
             if (Task == null)
             {
-                Task = Editor.TtSnapshot.Load(this);
+                Task = Editor.TtSnapshot.Load(this, AllowSnapshotAutoGen);
                 return;
             }
             else if (Task.Value.IsCompleted == true)

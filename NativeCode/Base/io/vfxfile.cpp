@@ -11,6 +11,31 @@
 #include "vfxfile_Android.h"
 #include "../r2m/F2MManager.h"
 
+#ifdef PLATFORM_WIN
+#include <io.h>      // _commit, _fileno
+#else
+#include <unistd.h>  // fsync, fileno
+#endif
+
+int FlushFileToDisk(FILE* fp) 
+{
+	if (!fp) 
+		return -1;
+
+	// 1. 刷新 C 库缓冲区到操作系统
+	if (fflush(fp) != 0) 
+	{
+		return -1;
+	}
+
+//	// 2. 强制操作系统缓冲区落盘（同一进程内的访问，其实不需要这一步，目前用来保证正确性）
+//#ifdef PLATFORM_WIN
+//	return _commit(_fileno(fp));   // 关键：_fileno 获取文件描述符
+//#else
+//	return fsync(fileno(fp));       // fileno 获取文件描述符
+//#endif
+}
+
 #define new VNEW
 
 using namespace EngineNS;
@@ -306,6 +331,7 @@ void  VFile::Close()
 		if (EngineNS::F2MManager::Instance)
 			EngineNS::F2MManager::Instance->FileOpenNumber--;
 		fclose(m_hFile);
+		FlushFileToDisk(m_hFile);
 		m_hFile = NULL;
 	}
 	m_bCloseOnDelete = FALSE;

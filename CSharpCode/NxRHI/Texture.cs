@@ -1459,6 +1459,7 @@ namespace EngineNS.NxRHI
                     {
                         var pngMipsNode = node.GetOrAddNode("PngMips", 0, 0, true);
                         mipLevel = SavePngMips(pngMipsNode, curImage, desc);
+                        desc.MipLevel = mipLevel;
                         switch (curImage.Comp)
                         {
                             case StbImageSharp.ColorComponents.RedGreenBlueAlpha:

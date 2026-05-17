@@ -1,11 +1,14 @@
 ﻿using EngineNS.IO;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EngineNS.EGui.Controls
@@ -24,6 +27,7 @@ namespace EngineNS.EGui.Controls
 
         public string Name = "";
         public bool CreateNewAssets = true;
+        public bool AutoGenerateSnapshots = false;
         //bool mViewDirty = true;
         string mExtNames = null;
         public string ExtNames 
@@ -36,7 +40,8 @@ namespace EngineNS.EGui.Controls
                 mExtNames = value;
                 mExtNameArray = mExtNames.Split(',');
                 mFolderView.ExtNameArray = mExtNameArray;
-                mFolderView.DirectoryShowFlags.Clear();
+                mFolderView.ClearDirectoryShowCache();
+                InvalidateAssetScan();
             }
         }
         string[] mExtNameArray;
@@ -49,6 +54,7 @@ namespace EngineNS.EGui.Controls
             {
                 mMacrossBase = value;
                 mFolderView.MacrossBase = mMacrossBase;
+                InvalidateAssetScan();
             }
         }
         string mShaderType = null;
@@ -59,6 +65,7 @@ namespace EngineNS.EGui.Controls
             {
                 mShaderType = value;
                 mFolderView.ShaderType = mShaderType;
+                InvalidateAssetScan();
             }
         }
         public string FilterText = "";
@@ -86,6 +93,7 @@ namespace EngineNS.EGui.Controls
 
         public void Dispose()
         {
+            CancelAssetScan(true);
             GlobalSelectedAsset = null;
             SelectedAssets.Clear();
             mSearchBar?.Cleanup();
@@ -184,7 +192,7 @@ namespace EngineNS.EGui.Controls
                 }
             }
         }
-        bool CheckExtValid(in string name, RName dir)
+        bool CheckExtNameValid(in string name)
         {
             if (mExtNameArray != null && mExtNameArray.Length > 0)
             {
@@ -200,10 +208,18 @@ namespace EngineNS.EGui.Controls
                 }
                 if (!find)
                     return false;
+            }
+            return true;
+        }
 
+        bool CheckAssetMetaConstraint(in string name, IO.IAssetMeta ameta)
+        {
+            if (mExtNameArray != null && mExtNameArray.Length > 0)
+            {
+                var ext = IO.TtFileManager.GetExtName(name);
                 if (MacrossBase != null && ext == Bricks.CodeBuilder.TtMacross.AssetExt)
                 {
-                    var ameta1 = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType)) as Bricks.CodeBuilder.TtMacrossAMeta;
+                    var ameta1 = ameta as Bricks.CodeBuilder.TtMacrossAMeta;
                     if (ameta1 == null || ameta1.BaseType == null)
                         return false;
                     if (!ameta1.BaseType.IsSubclassOf(MacrossBase) && ameta1.BaseType != MacrossBase)
@@ -213,7 +229,7 @@ namespace EngineNS.EGui.Controls
                 }
                 else if (ShaderType != null && ext == Graphics.Pipeline.Shader.TtShaderAsset.AssetExt)
                 {
-                    var ameta1 = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType)) as Graphics.Pipeline.Shader.TtShaderAssetAMeta;
+                    var ameta1 = ameta as Graphics.Pipeline.Shader.TtShaderAssetAMeta;
                     if (ameta1 == null)
                         return false;
 
@@ -224,6 +240,15 @@ namespace EngineNS.EGui.Controls
                 }
             }
             return true;
+        }
+
+        bool CheckExtValid(in string name, RName dir)
+        {
+            if (!CheckExtNameValid(in name))
+                return false;
+
+            var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType));
+            return CheckAssetMetaConstraint(in name, ameta);
         }
 
         int mSortedAssetsColumn = 0;
@@ -252,47 +277,448 @@ namespace EngineNS.EGui.Controls
             }
         }
         List<ViewAssetsData> mViewAssetsDatas = new List<ViewAssetsData>();
-        void InitViewAssetsDatasWithDir(RName dir)
+        List<ViewAssetsData> mViewMetadataDatas = new List<ViewAssetsData>();
+
+        const int AssetPageSize = 256;
+        const int AssetScanProcessMaxItemsPerFrame = 24;
+        const double AssetScanProcessBudgetMilliseconds = 2.0;
+        int mAssetPageIndex = 0;
+
+        class AssetScanResult
         {
-            var files = IO.TtFileManager.GetFiles(dir.Address, "*" + IO.IAssetMeta.MetaExt, mWithChildFolders);
+            public string Error;
+        }
 
-            for(int i=0; i<files.Length; i++)
+        class AssetScanState
+        {
+            public RName Dir;
+            public string DirName;
+            public string DirAddress;
+            public RName.ERNameType DirType;
+            public bool WithChildFolders;
+            public int Version;
+            public Task<AssetScanResult> ScanTask;
+            public bool ScanResultApplied;
+            public ConcurrentQueue<ViewAssetsData> PendingAssets = new ConcurrentQueue<ViewAssetsData>();
+            public ConcurrentQueue<string> PendingMetadataFiles = new ConcurrentQueue<string>();
+            public int EnumeratedAssetCount;
+            public int EnumeratedMetadataCount;
+            public int ProcessedAssetCount;
+            public int ProcessedMetadataCount;
+            public bool IsComplete;
+            public string Error;
+        }
+
+        AssetScanState mAssetScanState;
+        CancellationTokenSource mAssetScanCancellation;
+        int mAssetScanVersion = 0;
+        volatile bool mAssetScanDirty = false;
+
+        void InvalidateAssetScan()
+        {
+            mAssetScanDirty = true;
+        }
+
+        void CancelAssetScan(bool dispose)
+        {
+            var cancellation = mAssetScanCancellation;
+            mAssetScanCancellation = null;
+            if (cancellation != null)
             {
-                var file = files[i];
-                file = file.Substring(0, file.Length - IO.IAssetMeta.MetaExt.Length);
-
-                var name = IO.TtFileManager.GetRelativePath(dir.Address, file);
-                if (!CheckExtValid(in name, dir))
-                    continue;
-
-                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType));
-                if (ameta == null)
-                    continue;
-                var assetTypeName = ameta.GetAssetTypeName();
-                if ((mActiveFiltersCount > 0) && !((UIProxy.MenuItemProxy)mFilterMenus[assetTypeName]).Selected)
-                    continue;
-
-                var data = new ViewAssetsData()
-                {
-                    Meta = ameta,
-                    File = file,
-                    PathName = name,
-                };
-                mViewAssetsDatas.Add(data);
+                cancellation.Cancel();
+                if (dispose)
+                    cancellation.Dispose();
             }
         }
+
+        void ResetAssetScan()
+        {
+            CancelAssetScan(false);
+            mAssetScanState = null;
+            mViewAssetsDatas.Clear();
+            mViewMetadataDatas.Clear();
+            mAssetScanDirty = false;
+            mAssetPageIndex = 0;
+        }
+
+        bool IsSameAssetScan(AssetScanState state, RName dir)
+        {
+            if (state == null || dir == null)
+                return false;
+
+            return state.DirName == dir.Name &&
+                   state.DirAddress == dir.Address &&
+                   state.DirType == dir.RNameType &&
+                   state.WithChildFolders == mWithChildFolders;
+        }
+
+        AssetScanState EnsureAssetScan(RName dir)
+        {
+            if (dir == null)
+                return null;
+
+            if (!mAssetScanDirty && IsSameAssetScan(mAssetScanState, dir))
+                return mAssetScanState;
+
+            CancelAssetScan(false);
+            mViewAssetsDatas.Clear();
+            mViewMetadataDatas.Clear();
+            mAssetScanDirty = false;
+
+            var cancellation = new CancellationTokenSource();
+            mAssetScanCancellation = cancellation;
+            var token = cancellation.Token;
+            var version = ++mAssetScanVersion;
+            var dirAddress = dir.Address;
+            var withChildFolders = mWithChildFolders;
+
+            var state = new AssetScanState()
+            {
+                Dir = dir,
+                DirName = dir.Name,
+                DirAddress = dirAddress,
+                DirType = dir.RNameType,
+                WithChildFolders = withChildFolders,
+                Version = version,
+            };
+            state.ScanTask = Task.Run(() => EnumerateAssetFiles(state, token), token);
+            QueueIndexedAssets(state);
+            mAssetScanState = state;
+            return state;
+        }
+
+        void QueueIndexedAssets(AssetScanState state)
+        {
+            foreach (var assetMeta in TtEngine.Instance.AssetMetaManager.RNameAssets)
+            {
+                var assetName = assetMeta.Key;
+                var ameta = assetMeta.Value;
+                if (assetName == null || ameta == null)
+                    continue;
+                if (!IsAssetInDirectory(state, assetName, out var relativeName))
+                    continue;
+                if (!CheckExtNameValid(in relativeName))
+                    continue;
+                if (!CheckAssetMetaConstraint(in relativeName, ameta))
+                    continue;
+
+                state.PendingAssets.Enqueue(new ViewAssetsData()
+                {
+                    Meta = ameta,
+                    File = assetName.Address,
+                    PathName = relativeName,
+                });
+                state.EnumeratedAssetCount++;
+            }
+        }
+
+        static bool IsAssetInDirectory(AssetScanState state, RName assetName, out string relativeName)
+        {
+            relativeName = null;
+            if (assetName.RNameType != state.DirType)
+                return false;
+
+            var name = assetName.Name;
+            var dirName = state.DirName ?? string.Empty;
+            if (string.IsNullOrEmpty(name) ||
+                !name.StartsWith(dirName, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            relativeName = name.Substring(dirName.Length);
+            if (string.IsNullOrEmpty(relativeName))
+                return false;
+
+            if (!state.WithChildFolders && relativeName.IndexOfAny(new[] { '/', '\\' }) >= 0)
+                return false;
+
+            return true;
+        }
+
+        static AssetScanResult EnumerateAssetFiles(AssetScanState state, CancellationToken token)
+        {
+            var result = new AssetScanResult();
+            var dirAddress = state.DirAddress;
+            if (string.IsNullOrEmpty(dirAddress) || !System.IO.Directory.Exists(dirAddress))
+                return result;
+
+            try
+            {
+                foreach (var file in System.IO.Directory.EnumerateFiles(dirAddress, "*.metadata", System.IO.SearchOption.TopDirectoryOnly))
+                {
+                    token.ThrowIfCancellationRequested();
+                    state.PendingMetadataFiles.Enqueue(file);
+                    Interlocked.Increment(ref state.EnumeratedMetadataCount);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                result.Error = string.IsNullOrEmpty(result.Error) ? ex.Message : result.Error + "; " + ex.Message;
+            }
+
+            return result;
+        }
+
+        void UpdateAssetScanState(RName dir)
+        {
+            var state = EnsureAssetScan(dir);
+            if (state == null || state.Version != mAssetScanVersion)
+                return;
+
+            if (!state.ScanResultApplied && state.ScanTask.IsCompleted)
+            {
+                state.ScanResultApplied = true;
+                if (state.ScanTask.IsCanceled)
+                {
+                    state.IsComplete = true;
+                    return;
+                }
+                if (state.ScanTask.IsFaulted)
+                {
+                    state.Error = state.ScanTask.Exception?.GetBaseException().Message;
+                    state.IsComplete = true;
+                    return;
+                }
+
+                var result = state.ScanTask.Result;
+                state.Error = result.Error;
+            }
+
+            if (state.IsComplete)
+                return;
+
+            var budget = AssetScanProcessMaxItemsPerFrame;
+            var startTime = Stopwatch.GetTimestamp();
+            while (budget > 0 && state.PendingAssets.TryDequeue(out var assetData))
+            {
+                mViewAssetsDatas.Add(assetData);
+                state.ProcessedAssetCount++;
+                budget--;
+                if (IsAssetScanTimeBudgetExceeded(startTime))
+                    break;
+            }
+            while (budget > 0 && state.PendingMetadataFiles.TryDequeue(out var metadataFile))
+            {
+                ProcessMetadataScanFile(metadataFile);
+                state.ProcessedMetadataCount++;
+                budget--;
+                if (IsAssetScanTimeBudgetExceeded(startTime))
+                    break;
+            }
+
+            if (state.ScanResultApplied &&
+                state.PendingAssets.IsEmpty &&
+                state.PendingMetadataFiles.IsEmpty)
+            {
+                state.IsComplete = true;
+                ApplyAssetSort();
+            }
+        }
+
+        static bool IsAssetScanTimeBudgetExceeded(long startTime)
+        {
+            return (Stopwatch.GetTimestamp() - startTime) * 1000.0 / Stopwatch.Frequency >= AssetScanProcessBudgetMilliseconds;
+        }
+
+        void ProcessAssetScanFile(AssetScanState state, string metaFile)
+        {
+            if (string.IsNullOrEmpty(metaFile) || metaFile.Length <= IO.IAssetMeta.MetaExt.Length)
+                return;
+
+            var file = metaFile.Substring(0, metaFile.Length - IO.IAssetMeta.MetaExt.Length);
+            var name = IO.TtFileManager.GetRelativePath(state.DirAddress, file);
+            if (!CheckExtNameValid(in name))
+                return;
+
+            var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(state.DirName + name, state.DirType));
+            if (ameta == null)
+                return;
+            if (!CheckAssetMetaConstraint(in name, ameta))
+                return;
+
+            var data = new ViewAssetsData()
+            {
+                Meta = ameta,
+                File = file,
+                PathName = name,
+            };
+            mViewAssetsDatas.Add(data);
+        }
+
+        void ProcessMetadataScanFile(string metaFile)
+        {
+            if (string.IsNullOrEmpty(metaFile))
+                return;
+
+            var rootType = TtEngine.Instance.FileManager.GetRootDirType(metaFile);
+            var root = TtEngine.Instance.FileManager.GetRoot(rootType);
+            if (string.IsNullOrEmpty(root))
+                return;
+
+            var rPath = IO.TtFileManager.GetRelativePath(root, metaFile);
+            RName assetName = null;
+            if (rootType == IO.TtFileManager.ERootDir.Game)
+                assetName = RName.GetRName(rPath, RName.ERNameType.Game);
+            else if (rootType == IO.TtFileManager.ERootDir.Engine)
+                assetName = RName.GetRName(rPath, RName.ERNameType.Engine);
+            else if (rootType == IO.TtFileManager.ERootDir.Cloud)
+                assetName = RName.GetRName(rPath, RName.ERNameType.Cloud);
+            else
+                return;
+
+            var ameta = new Rtti.TtMetaVersionMeta();
+            ameta.TypeStr = Rtti.TtTypeDescGetter<Rtti.TtMetaVersion>.TypeDesc.TypeString;
+            ameta.SetAssetName(assetName);
+            mViewMetadataDatas.Add(new ViewAssetsData()
+            {
+                Meta = ameta,
+                File = metaFile,
+                PathName = rPath,
+            });
+        }
+
+        bool IsAssetVisible(in ViewAssetsData data)
+        {
+            if (data.Meta == null)
+                return false;
+
+            var filterName = IO.TtFileManager.GetPureName(data.PathName);
+            if (!string.IsNullOrEmpty(FilterText) &&
+                filterName.Contains(FilterText, StringComparison.OrdinalIgnoreCase) == false)
+            {
+                return false;
+            }
+
+            if (mActiveFiltersCount > 0)
+            {
+                var assetTypeName = data.Meta.GetAssetTypeName();
+                if (!mFilterMenus.TryGetValue(assetTypeName, out var filterProxy))
+                    return false;
+
+                var filterMenu = filterProxy as UIProxy.MenuItemProxy;
+                if (filterMenu == null || !filterMenu.Selected)
+                    return false;
+            }
+            return true;
+        }
+
+        bool IsMetadataVisible(in ViewAssetsData data)
+        {
+            if (data.Meta == null)
+                return false;
+
+            var filterName = IO.TtFileManager.GetPureName(data.PathName);
+            if (!string.IsNullOrEmpty(FilterText) &&
+                filterName.Contains(FilterText, StringComparison.OrdinalIgnoreCase) == false)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        void ApplyAssetSort()
+        {
+            if (mSortedAssetsColumn == 1)
+            {
+                mViewAssetsDatas.Sort((a, b) => string.Compare(a.Type, b.Type, StringComparison.OrdinalIgnoreCase));
+            }
+            else if (mSortedAssetsColumn == 2)
+            {
+                mViewAssetsDatas.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
+        void DrawAssetScanStatus()
+        {
+            var state = mAssetScanState;
+            if (state == null)
+                return;
+
+            if (!string.IsNullOrEmpty(state.Error))
+            {
+                ImGuiAPI.Text("Asset scan warning: " + state.Error);
+            }
+            else if (!state.ScanResultApplied)
+            {
+                var processed = state.ProcessedAssetCount + state.ProcessedMetadataCount;
+                var enumerated = state.EnumeratedAssetCount + state.EnumeratedMetadataCount;
+                ImGuiAPI.Text($"Scanning assets {processed}/{enumerated}+");
+            }
+            else if (!state.IsComplete)
+            {
+                var current = state.ProcessedAssetCount + state.ProcessedMetadataCount;
+                var total = state.EnumeratedAssetCount + state.EnumeratedMetadataCount;
+                ImGuiAPI.Text($"Loading assets {current}/{total}");
+            }
+        }
+
+        void DrawAssetPager(int shownCount, bool hasNext)
+        {
+            if (mAssetPageIndex <= 0 && !hasNext)
+                return;
+
+            if (mAssetPageIndex > 0)
+            {
+                if (ImGuiAPI.Button("Prev##ContentBrowserAssetPage", in Vector2.Zero))
+                    mAssetPageIndex--;
+            }
+            else
+            {
+                ImGuiAPI.Text("Prev");
+            }
+            ImGuiAPI.SameLine(0, -1);
+            ImGuiAPI.Text($"Page {mAssetPageIndex + 1}  {shownCount}/{AssetPageSize}");
+            ImGuiAPI.SameLine(0, -1);
+            if (hasNext)
+            {
+                if (ImGuiAPI.Button("Next##ContentBrowserAssetPage", in Vector2.Zero))
+                    mAssetPageIndex++;
+            }
+            else
+            {
+                ImGuiAPI.Text("Next");
+            }
+        }
+
+        bool ShouldDrawPagedAsset(bool isVisible, ref int visibleIndex, ref int shownCount, ref bool hasNext)
+        {
+            if (!isVisible)
+                return false;
+
+            var pageStart = mAssetPageIndex * AssetPageSize;
+            if (visibleIndex < pageStart)
+            {
+                visibleIndex++;
+                return false;
+            }
+
+            if (shownCount >= AssetPageSize)
+            {
+                hasNext = true;
+                return false;
+            }
+
+            visibleIndex++;
+            shownCount++;
+            return true;
+        }
+
         public unsafe void DrawFileWithColumn(RName dir, in Vector2 size)
         {
             if(ImGuiAPI.BeginChild("ColumnTT", Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
+                UpdateAssetScanState(dir);
+                DrawAssetScanStatus();
+                int pagedVisibleIndex = 0;
+                int pagedShownCount = 0;
+                bool pagedHasNext = false;
+
                 Vector2 tableSize = Vector2.Zero;
                 if(ImGuiAPI.BeginTable("AssetColumns", 3, ImGuiTableFlags_.ImGuiTableFlags_Borders | ImGuiTableFlags_.ImGuiTableFlags_RowBg | ImGuiTableFlags_.ImGuiTableFlags_Resizable, in tableSize, 0.0f))
                 {
-                    if (mViewAssetsDatas.Count == 0)
-                    {
-                        InitViewAssetsDatasWithDir(dir);
-                    }
-
                     ImGuiAPI.TableSetupScrollFreeze(0, 1);
                     ImGuiAPI.TableSetupColumn("Icon", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed, 28, 0);
                     ImGuiAPI.TableSetupColumn("Type", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_None, 0, 0);
@@ -302,46 +728,31 @@ namespace EngineNS.EGui.Controls
                     ImGuiAPI.TableSetColumnIndex(0);
                     ImGuiAPI.Selectable("Icon", mSortedAssetsColumn == 0, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, Vector2.Zero);
                     ImGuiAPI.TableSetColumnIndex(1);
-                    if(ImGuiAPI.Selectable("Type", mSortedAssetsColumn == 0, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, Vector2.Zero))
+                    if(ImGuiAPI.Selectable("Type", mSortedAssetsColumn == 1, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, Vector2.Zero))
                     {
-                        mViewAssetsDatas.Sort((a, b) =>
-                        {
-                            return a.Type.CompareTo(b.Type);
-                        });
+                        mSortedAssetsColumn = 1;
+                        ApplyAssetSort();
                     }
                     ImGuiAPI.TableSetColumnIndex(2);
-                    if (ImGuiAPI.Selectable("Name", mSortedAssetsColumn == 0, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, Vector2.Zero))
+                    if (ImGuiAPI.Selectable("Name", mSortedAssetsColumn == 2, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, Vector2.Zero))
                     {
-                        mViewAssetsDatas.Sort((a, b) =>
-                        {
-                            return a.Name.CompareTo(b.Name);
-                        });
+                        mSortedAssetsColumn = 2;
+                        ApplyAssetSort();
                     }
 
                     Vector2 tableMin = Vector2.Zero; 
                     Vector2 tableMax = Vector2.Zero;
                     ImGuiAPI.GetTableWorkRect(ref tableMin, ref tableMax);
                     var cmdList = ImGuiAPI.GetWindowDrawList();
+                    int visibleIndex = 0;
                     for(int i=0; i<mViewAssetsDatas.Count; i++)
                     {
-                        var ameta = mViewAssetsDatas[i].Meta;
-                        using (var idHolder = new ImguiIDHolder(mViewAssetsDatas[i].File))
+                        var data = mViewAssetsDatas[i];
+                        var ameta = data.Meta;
+                        using (var idHolder = new ImguiIDHolder(data.File))
                         {
-
-                            var filterName = IO.TtFileManager.GetPureName(mViewAssetsDatas[i].PathName);
-                            if (!string.IsNullOrEmpty(FilterText))
-                            {
-                                if (filterName.Contains(FilterText, StringComparison.OrdinalIgnoreCase) == false)
-                                {
-                                    continue;
-                                }
-                            }
-
-                            var assetTypeName = ameta.GetAssetTypeName();
-                            if ((mActiveFiltersCount > 0) && !((UIProxy.MenuItemProxy)mFilterMenus[assetTypeName]).Selected)
-                            {
+                            if (!ShouldDrawPagedAsset(IsAssetVisible(in data), ref pagedVisibleIndex, ref pagedShownCount, ref pagedHasNext))
                                 continue;
-                            }
 
                             GlobalFocusAssetProcess(ameta);
 
@@ -354,9 +765,9 @@ namespace EngineNS.EGui.Controls
                             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.TVHeaderActive);
                             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.TVHeaderHovered);
                             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, ameta.GetBorderColor().ToR8G8B8A8());
-                            var selectItemResult = ImGuiAPI.Selectable(mViewAssetsDatas[i].Type, ameta.IsSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_SpanAllColumns, Vector2.Zero);
+                            var selectItemResult = ImGuiAPI.Selectable(data.Type, ameta.IsSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_SpanAllColumns, Vector2.Zero);
                             ImGuiAPI.PopStyleColor(4);
-                            AssetItemOperation(ameta, i);
+                            AssetItemOperation(ameta, visibleIndex++);
                             if (ImGuiAPI.IsItemVisible())
                             {
                                 DragDropOperation(ameta, ImGuiAPI.GetItemRectSize(), 1.0f);
@@ -365,7 +776,7 @@ namespace EngineNS.EGui.Controls
                                 //}
                             }
                             ImGuiAPI.TableNextColumn();
-                            ImGuiAPI.Text(mViewAssetsDatas[i].Name);
+                            ImGuiAPI.Text(data.Name);
 
                             ImGuiAPI.TableSetColumnIndex(0);
                             float startY = 0.0f, endY = 0.0f;
@@ -373,12 +784,13 @@ namespace EngineNS.EGui.Controls
                             ImGuiAPI.GetTableRowEndY(ref endY);
                             var snapStart = new Vector2(tableMin.X, startY);
                             var snapEnd = new Vector2(tableMin.X + (endY - startY), startY + (endY - startY));
-                            ameta.OnDrawSnapshot(cmdList, ref snapStart, ref snapEnd);
+                            ameta.OnDrawSnapshotForContentBrowser(cmdList, ref snapStart, ref snapEnd, AutoGenerateSnapshots);
                         }
                     }
 
                     ImGuiAPI.EndTable();
                 }
+                DrawAssetPager(pagedShownCount, pagedHasNext);
             }
             ImGuiAPI.EndChild();
         }
@@ -402,36 +814,26 @@ namespace EngineNS.EGui.Controls
             //cmdlist.PushClipRect(in cldMin, in cldMax, true);
             var style = ImGuiAPI.GetStyle();
             var width = ImGuiAPI.GetWindowContentRegionWidth();
+            UpdateAssetScanState(dir);
+
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, new Vector2(8, 8));
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, 0x00000000);
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, 0x00000000);
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, 0x00000000);
-            var files = IO.TtFileManager.GetFiles(dir.Address, "*" + IO.IAssetMeta.MetaExt, mWithChildFolders);
+            DrawAssetScanStatus();
+
             float curPos = 0;
             int drawIndex = 0;
-            for (int i = 0; i < files.Length; i++)
+            int pagedVisibleIndex = 0;
+            int pagedShownCount = 0;
+            bool pagedHasNext = false;
+            for (int i = 0; i < mViewAssetsDatas.Count; i++)
             {
-                var file = files[i];
-                file = file.Substring(0, file.Length - IO.IAssetMeta.MetaExt.Length);
-                var name = IO.TtFileManager.GetRelativePath(dir.Address, file);
-                if (!CheckExtValid(in name, dir))
-                    continue;                
-
-                var filterName = IO.TtFileManager.GetPureName(name);
-                if (!string.IsNullOrEmpty(FilterText))
-                {
-                    if (filterName.Contains(FilterText, StringComparison.OrdinalIgnoreCase) == false)
-                        continue;
-                }
-
-                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType));
-                if (ameta == null)
-                    continue;
-                var assetTypeName = ameta.GetAssetTypeName();
-                if ((mActiveFiltersCount > 0) && !((UIProxy.MenuItemProxy)mFilterMenus[assetTypeName]).Selected)
+                var data = mViewAssetsDatas[i];
+                if (!ShouldDrawPagedAsset(IsAssetVisible(in data), ref pagedVisibleIndex, ref pagedShownCount, ref pagedHasNext))
                     continue;
 
-                DrawItem(in cmdlist, ameta.Icon, ameta, in itemSize, drawIndex++, ItemScale);
+                DrawItem(in cmdlist, data.Meta.Icon, data.Meta, in itemSize, drawIndex++, ItemScale);
                 curPos += itemSize.X + style->ItemSpacing.X;
                 if (curPos + itemSize.X < width)
                 {
@@ -443,38 +845,24 @@ namespace EngineNS.EGui.Controls
                 }
             }
 
-            var metafiles = IO.TtFileManager.GetFiles(dir.Address, "*.metadata", false);
-            if (metafiles.Length > 0)
+            for (int i = 0; i < mViewMetadataDatas.Count; i++)
             {
-                var ameta = new Rtti.TtMetaVersionMeta();
-                ameta.TypeStr = Rtti.TtTypeDescGetter<Rtti.TtMetaVersion>.TypeDesc.TypeString;
-                foreach (var i in metafiles)
+                var data = mViewMetadataDatas[i];
+                if (!ShouldDrawPagedAsset(IsMetadataVisible(in data), ref pagedVisibleIndex, ref pagedShownCount, ref pagedHasNext))
+                    continue;
+
+                DrawItem(in cmdlist, data.Meta.Icon, data.Meta, in itemSize, drawIndex++, ItemScale);
+                curPos += itemSize.X + style->ItemSpacing.X;
+                if (curPos + itemSize.X < width)
                 {
-                    var name = IO.TtFileManager.GetPureName(i);
-
-                    var rootType = TtEngine.Instance.FileManager.GetRootDirType(i);
-                    var rPath = IO.TtFileManager.GetRelativePath(TtEngine.Instance.FileManager.GetRoot(rootType), i);
-                    if (rootType == IO.TtFileManager.ERootDir.Game)
-                        ameta.SetAssetName(RName.GetRName(rPath, RName.ERNameType.Game));
-                    else if (rootType == IO.TtFileManager.ERootDir.Engine)
-                        ameta.SetAssetName(RName.GetRName(rPath, RName.ERNameType.Engine));
-                    else if (rootType == IO.TtFileManager.ERootDir.Cloud)
-                        ameta.SetAssetName(RName.GetRName(rPath, RName.ERNameType.Cloud));
-                    else
-                        continue;
-
-                    DrawItem(in cmdlist, ameta.Icon, ameta, in itemSize, drawIndex++, ItemScale);
-                    curPos += itemSize.X + style->ItemSpacing.X;
-                    if (curPos + itemSize.X < width)
-                    {
-                        ImGuiAPI.SameLine(0, 2);
-                    }
-                    else
-                    {
-                        curPos = 0;
-                    }
+                    ImGuiAPI.SameLine(0, style->ItemSpacing.X);
+                }
+                else
+                {
+                    curPos = 0;
                 }
             }
+            DrawAssetPager(pagedShownCount, pagedHasNext);
             ImGuiAPI.PopStyleVar(1);
             ImGuiAPI.PopStyleColor(3);
             //cmdlist.PopClipRect();
@@ -785,6 +1173,7 @@ namespace EngineNS.EGui.Controls
                             menu.Selected = false;
                     }
                     mActiveFiltersCount = 0;
+                    mAssetPageIndex = 0;
                 }
             };
             mFilterMenus["##show child"] = new UIProxy.MenuItemProxy()
@@ -794,6 +1183,7 @@ namespace EngineNS.EGui.Controls
                 {
                     mWithChildFolders = !mWithChildFolders;
                     item.Selected = mWithChildFolders;
+                    InvalidateAssetScan();
                 }
             };
             mFilterMenus["##sep0"] = new UIProxy.NamedMenuSeparator()
@@ -818,6 +1208,7 @@ namespace EngineNS.EGui.Controls
                                     mActiveFiltersCount++;
                                 else
                                     mActiveFiltersCount--;
+                                mAssetPageIndex = 0;
                             },
                         };
                         mFilterMenus[name] = menu;
@@ -981,7 +1372,7 @@ namespace EngineNS.EGui.Controls
             {
                 if(mCurrentDir != mFolderView.CurrentDir)
                 {
-                    mViewAssetsDatas.Clear();
+                    ResetAssetScan();
                     mCurrentDir = mFolderView.CurrentDir;
                 }
 
@@ -1016,7 +1407,11 @@ namespace EngineNS.EGui.Controls
                     {
                         mSearchBar.Width = ImGuiAPI.GetColumnWidth(1) - (style->WindowPadding.X) * 2 - 24;
                         if (mSearchBar.OnDraw(in cmd, in Support.TtAnyPointer.Default))
+                        {
+                            if (FilterText != mSearchBar.SearchText)
+                                mAssetPageIndex = 0;
                             FilterText = mSearchBar.SearchText;
+                        }
                     }
                     else
                     {
@@ -1139,6 +1534,7 @@ namespace EngineNS.EGui.Controls
             {
                 if(mAssetImporter.OnDraw(this))
                 {
+                    ResetAssetScan();
                     mAssetImporter = null;
                     CurrentImporterFile = "";
                 }
@@ -1233,6 +1629,7 @@ namespace EngineNS.EGui.Controls
                                             mOperationAsset.MoveTo(name, mSelectFolderView.CurrentDir.RNameType).AddWaitTask((task)=>
                                             {
                                                 IsAssetOprating = false;
+                                                InvalidateAssetScan();
                                             });
                                         }
                                         break;
@@ -1243,6 +1640,7 @@ namespace EngineNS.EGui.Controls
                                             mOperationAsset.CopyTo(name, mSelectFolderView.CurrentDir.RNameType).AddWaitTask((task) =>
                                             {
                                                 IsAssetOprating = false;
+                                                InvalidateAssetScan();
                                             });
                                         }
                                         break;
@@ -1253,6 +1651,7 @@ namespace EngineNS.EGui.Controls
                                             mOperationAsset.PackRefAssetsTo(RName.GetRName(name, mSelectFolderView.CurrentDir.RNameType)).AddWaitTask((task) =>
                                             {
                                                 IsAssetOprating = false;
+                                                InvalidateAssetScan();
                                             });
                                         }
                                         break;
@@ -1264,6 +1663,7 @@ namespace EngineNS.EGui.Controls
                                             mOperationAsset.RenameTo(name, mSelectFolderView.CurrentDir.RNameType).AddWaitTask((task) =>
                                             {
                                                 IsAssetOprating = false;
+                                                InvalidateAssetScan();
                                             });
                                         }
                                         break;

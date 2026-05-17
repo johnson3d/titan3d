@@ -156,7 +156,7 @@ namespace EngineNS.GamePlay.Scene
                 //    模式: 每面提交后立即 flush, 避免后续 CopyDraw 读到上一帧的
                 //    final RT (RP 自己的内部 RT 是单 buffer 的, 不 flush 会被
                 //    下一面渲染覆盖).
-                mImmCmdQueue?.FlushExecute();
+                mImmCmdQueue?.FlushExecute(true);
 
                 // 4) 拿 RP 根节点的 ColorAttachement.GpuResource 作为拷贝源.
                 //    走这个路径而不是 GetFinalShowRSV().StreamingTexture, 是因为后者
@@ -197,12 +197,12 @@ namespace EngineNS.GamePlay.Scene
                     TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.EndEvent($"EndFace:{f}");
                 }, "EndFace");
 
-                mImmCmdQueue?.FlushExecute();
+                mImmCmdQueue?.FlushExecute(true);
                 RenderPolicy.TickSync();
             }
 
             // 拷贝完 6 面后再 flush 一次, 保证 cube 6 面对下游消费者立即可见.
-            mImmCmdQueue?.FlushExecute();
+            mImmCmdQueue?.FlushExecute(true);
 
             // 收尾 RenderDoc 抓帧 — 在最后一次 FlushExecute 之后, 确保所有
             // GPU 命令都被记录进 .rdc. EndFrameCapture 的 name 参数会成为

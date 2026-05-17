@@ -8,6 +8,8 @@ F2MManager* F2MManager::Instance = nullptr;
 
 VRes2Memory* VRes2Memory::CreateFromFile(LPCSTR pszFile)
 {
+	if (F2MManager::Instance == nullptr)
+		return nullptr;
 	auto result = F2MManager::Instance->GetFile2Memory(pszFile);
 	//result->AddRef();
 	return result;
@@ -15,10 +17,14 @@ VRes2Memory* VRes2Memory::CreateFromFile(LPCSTR pszFile)
 
 void VRes2Memory::OnBeforeWriteFile(LPCSTR pszFile)
 {
+	if (F2MManager::Instance == nullptr)
+		return;
 	F2MManager::Instance->OnBeforeWriteFile(pszFile);
 }
 void VRes2Memory::OnAfterWriteFile(LPCSTR pszFile)
 {
+	if (F2MManager::Instance == nullptr)
+		return;
 	F2MManager::Instance->OnAfterWriteFile(pszFile);
 }
 

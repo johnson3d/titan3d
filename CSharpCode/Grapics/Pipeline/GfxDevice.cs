@@ -151,6 +151,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             TtEngine.Instance.EventPoster.TickPostTickSyncEvents(long.MaxValue);
 
+            DynamicSrvRegistry?.Cleanup();
             AttachBufferManager?.Dispose();
             TextureManager?.Cleanup();
             MaterialManager?.Dispose();
@@ -318,6 +319,7 @@ namespace EngineNS.Graphics.Pipeline
         }
 
         #region Manager
+        public Shader.TtDynamicSrvRegistry DynamicSrvRegistry { get; } = new Shader.TtDynamicSrvRegistry();
         public NxRHI.TtTextureManager TextureManager { get; } = new NxRHI.TtTextureManager();
         [Rtti.Meta("")]
         public Shader.TtMaterialManager MaterialManager { get; private set; } = new Shader.TtMaterialManager();

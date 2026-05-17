@@ -67,6 +67,49 @@ namespace EngineNS.EGui
 
     public class TtImDrawDataRHI : IDisposable
     {
+        const int ImTextureStatus_OK = 0;
+        const int ImTextureStatus_Destroyed = 1;
+        const int ImTextureStatus_WantCreate = 2;
+        const int ImTextureStatus_WantUpdates = 3;
+        const int ImTextureStatus_WantDestroy = 4;
+        const int ImTextureFormat_RGBA32 = 0;
+        const int ImTextureFormat_Alpha8 = 1;
+
+        sealed class ImGuiTextureBinding : IDisposable
+        {
+            public NxRHI.TtTexture Texture;
+            public NxRHI.TtSrView SRV;
+
+            private System.Runtime.InteropServices.GCHandle mHandle;
+            public IntPtr HandlePtr { get; private set; }
+
+            public ImGuiTextureBinding()
+            {
+                mHandle = System.Runtime.InteropServices.GCHandle.Alloc(this);
+                HandlePtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(mHandle);
+            }
+
+            public void SetResources(NxRHI.TtTexture texture, NxRHI.TtSrView srv)
+            {
+                CoreSDK.DisposeObject(ref SRV);
+                CoreSDK.DisposeObject(ref Texture);
+                Texture = texture;
+                SRV = srv;
+            }
+
+            public void Dispose()
+            {
+                SetResources(null, null);
+                if (mHandle.IsAllocated)
+                {
+                    mHandle.Free();
+                    HandlePtr = IntPtr.Zero;
+                }
+            }
+        }
+
+        static readonly List<ImGuiTextureBinding> mImGuiTextureBindings = new List<ImGuiTextureBinding>();
+
         public NxRHI.TtEffectBinder SlateCBufferBindInfo;
         public NxRHI.TtEffectBinder SlateTextureBindInfo;
         public NxRHI.TtEffectBinder SlateSamplerBindInfo;
@@ -172,6 +215,15 @@ namespace EngineNS.EGui
             CoreSDK.DisposeObject(ref PrimitiveMesh);
         }
 
+        public static void DisposeAllImGuiTextureBindings()
+        {
+            for (int i = 0; i < mImGuiTextureBindings.Count; i++)
+            {
+                mImGuiTextureBindings[i].Dispose();
+            }
+            mImGuiTextureBindings.Clear();
+        }
+
         [ThreadStatic]
         private static Profiler.TimeScope mScopeRenderImDrawData;
         private static Profiler.TimeScope ScopeRenderImDrawData
@@ -218,6 +270,8 @@ namespace EngineNS.EGui
             var drawCmd = rc.CmdListManager.GetCmdList();
             uint vertexOffsetInVertices = 0;
             uint indexOffsetInElements = 0;
+
+            ProcessImGuiTextureRequests(ref draw_data);
 
             if (draw_data.CmdListsCount == 0)
             {
@@ -340,30 +394,44 @@ namespace EngineNS.EGui
                                 }
                                 else
                                 {
-                                    var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)pcmd->TexRef.GetTexID());
-                                    if (handle.IsAllocated)
+                                    var texId = pcmd->GetTexID();
+                                    if (texId != 0)
                                     {
-                                        var rsv = handle.Target as NxRHI.TtSrView;
-                                        if (rsv != null)
+                                        var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)texId);
+                                        if (handle.IsAllocated)
                                         {
-                                            drawcall = rhiData.CreateGraphicDraw();
-                                            drawcall.BindSRV(rhiData.SlateTextureBindInfo.mCoreObject, rsv);
-                                        }
-                                        else
-                                        {
-                                            parameters = handle.Target as TtImDrawCmdParameters;
-                                            if (parameters != null)
+                                            var rsv = handle.Target as NxRHI.TtSrView;
+                                            if (rsv != null)
                                             {
-                                                drawcall = parameters.Drawcall;
-                                                drawcall.BindGeomMesh(rhiData.GeomMesh);
-                                                parameters.OnDraw(in mvp);
+                                                drawcall = rhiData.CreateGraphicDraw();
+                                                drawcall.BindSRV(rhiData.SlateTextureBindInfo.mCoreObject, rsv);
                                             }
                                             else
                                             {
-                                                drawcall = rhiData.CreateGraphicDraw();
-                                                drawcall.BindSRV(rhiData.SlateTextureBindInfo.mCoreObject, null);
+                                                var textureBinding = handle.Target as ImGuiTextureBinding;
+                                                if (textureBinding != null)
+                                                {
+                                                    drawcall = rhiData.CreateGraphicDraw();
+                                                    drawcall.BindSRV(rhiData.SlateTextureBindInfo.mCoreObject, textureBinding.SRV);
+                                                }
+                                                else
+                                                {
+                                                    parameters = handle.Target as TtImDrawCmdParameters;
+                                                    if (parameters != null)
+                                                    {
+                                                        drawcall = parameters.Drawcall;
+                                                        drawcall.BindGeomMesh(rhiData.GeomMesh);
+                                                        parameters.OnDraw(in mvp);
+                                                    }
+                                                }
                                             }
                                         }
+                                    }
+
+                                    if (drawcall == null)
+                                    {
+                                        drawcall = rhiData.CreateGraphicDraw();
+                                        drawcall.BindSRV(rhiData.SlateTextureBindInfo.mCoreObject, null);
                                     }
                                 }
 
@@ -417,6 +485,163 @@ namespace EngineNS.EGui
             }
             
             presentWindow.EndFrame();
+        }
+
+        private unsafe static void ProcessImGuiTextureRequests(ref ImDrawData drawData)
+        {
+            var drawDataPtr = (ImDrawData*)Unsafe.AsPointer(ref drawData);
+            int textureCount = ImGuiAPI.DrawData_Textures_Size(drawDataPtr);
+            for (int i = 0; i < textureCount; i++)
+            {
+                void* texture = ImGuiAPI.DrawData_Textures_Get(drawDataPtr, i);
+                ProcessImGuiTextureRequest(texture);
+            }
+        }
+
+        private unsafe static void ProcessImGuiTextureRequest(void* texture)
+        {
+            if (texture == null)
+                return;
+
+            var status = ImGuiAPI.ImTextureData_GetStatus(texture);
+            switch (status)
+            {
+                case ImTextureStatus_WantCreate:
+                case ImTextureStatus_WantUpdates:
+                    UploadImGuiTexture(texture);
+                    break;
+                case ImTextureStatus_WantDestroy:
+                    DestroyImGuiTexture(texture);
+                    break;
+                case ImTextureStatus_Destroyed:
+                    if ((IntPtr)ImGuiAPI.ImTextureData_GetBackendUserData(texture) != IntPtr.Zero)
+                        DestroyImGuiTexture(texture);
+                    break;
+            }
+        }
+
+        private unsafe static ImGuiTextureBinding GetImGuiTextureBinding(void* texture)
+        {
+            var backendData = (IntPtr)ImGuiAPI.ImTextureData_GetBackendUserData(texture);
+            if (backendData == IntPtr.Zero)
+                return null;
+
+            var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(backendData);
+            return handle.IsAllocated ? handle.Target as ImGuiTextureBinding : null;
+        }
+
+        private unsafe static void UploadImGuiTexture(void* texture)
+        {
+            NxRHI.TtTexture newTexture;
+            NxRHI.TtSrView newSrv;
+            if (CreateImGuiTextureResources(texture, out newTexture, out newSrv) == false)
+                return;
+
+            var binding = GetImGuiTextureBinding(texture);
+            if (binding == null)
+            {
+                binding = new ImGuiTextureBinding();
+                mImGuiTextureBindings.Add(binding);
+                ImGuiAPI.ImTextureData_SetBackendUserData(texture, binding.HandlePtr.ToPointer());
+                ImGuiAPI.ImTextureData_SetTexID(texture, (ulong)binding.HandlePtr);
+            }
+
+            binding.SetResources(newTexture, newSrv);
+            ImGuiAPI.ImTextureData_SetStatus(texture, ImTextureStatus_OK);
+        }
+
+        private unsafe static bool CreateImGuiTextureResources(void* texture, out NxRHI.TtTexture resultTexture, out NxRHI.TtSrView resultSrv)
+        {
+            resultTexture = null;
+            resultSrv = null;
+
+            int width = ImGuiAPI.ImTextureData_GetWidth(texture);
+            int height = ImGuiAPI.ImTextureData_GetHeight(texture);
+            int format = ImGuiAPI.ImTextureData_GetFormat(texture);
+            int pitch = ImGuiAPI.ImTextureData_GetPitch(texture);
+            byte* pixels = (byte*)ImGuiAPI.ImTextureData_GetPixels(texture);
+            if (width <= 0 || height <= 0 || pixels == null)
+                return false;
+
+            if (format == ImTextureFormat_RGBA32)
+            {
+                CreateImGuiRgbaTextureResources(pixels, (uint)pitch, width, height, out resultTexture, out resultSrv);
+                return resultTexture != null && resultSrv != null;
+            }
+
+            if (format == ImTextureFormat_Alpha8)
+            {
+                var rgba = new byte[width * height * 4];
+                for (int y = 0; y < height; y++)
+                {
+                    byte* src = pixels + y * pitch;
+                    int dstOffset = y * width * 4;
+                    for (int x = 0; x < width; x++)
+                    {
+                        byte alpha = src[x];
+                        rgba[dstOffset + 0] = 255;
+                        rgba[dstOffset + 1] = 255;
+                        rgba[dstOffset + 2] = 255;
+                        rgba[dstOffset + 3] = alpha;
+                        dstOffset += 4;
+                    }
+                }
+
+                fixed (byte* rgbaPtr = rgba)
+                {
+                    CreateImGuiRgbaTextureResources(rgbaPtr, (uint)(width * 4), width, height, out resultTexture, out resultSrv);
+                }
+                return resultTexture != null && resultSrv != null;
+            }
+
+            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(
+                Profiler.ELogTag.Warning,
+                $"Unsupported ImGui texture format: {format}");
+            return false;
+        }
+
+        private unsafe static void CreateImGuiRgbaTextureResources(void* pixels, uint rowPitch, int width, int height, out NxRHI.TtTexture texture, out NxRHI.TtSrView srv)
+        {
+            var initData = new NxRHI.FMappedSubResource();
+            initData.pData = pixels;
+            initData.RowPitch = rowPitch;
+            initData.DepthPitch = rowPitch * (uint)height;
+
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            var txDesc = new NxRHI.FTextureDesc();
+            txDesc.SetDefault();
+            txDesc.Width = (uint)width;
+            txDesc.Height = (uint)height;
+            txDesc.MipLevels = 1;
+            txDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+            txDesc.InitData = &initData;
+            texture = rc.CreateTexture(in txDesc);
+            if (texture == null)
+            {
+                srv = null;
+                return;
+            }
+
+            var srvDesc = new NxRHI.FSrvDesc();
+            srvDesc.SetTexture2D();
+            srvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
+            srvDesc.Format = txDesc.Format;
+            srvDesc.Texture2D.MipLevels = 1;
+            srv = rc.CreateSRV(texture, in srvDesc);
+        }
+
+        private unsafe static void DestroyImGuiTexture(void* texture)
+        {
+            var binding = GetImGuiTextureBinding(texture);
+            if (binding != null)
+            {
+                mImGuiTextureBindings.Remove(binding);
+                binding.Dispose();
+            }
+
+            ImGuiAPI.ImTextureData_SetTexID(texture, 0);
+            ImGuiAPI.ImTextureData_SetBackendUserData(texture, null);
+            ImGuiAPI.ImTextureData_SetStatus(texture, ImTextureStatus_Destroyed);
         }
     }
 }

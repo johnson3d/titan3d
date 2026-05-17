@@ -235,11 +235,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             {
                 var arg = Method.FindParameter(pin.Name);
                 var type = pin.Tag as Rtti.TtTypeDesc;
+                bool isPrimitive = type.IsPrimitive;
+                if (type.SystemType == typeof(Vector3) ||
+                    type.SystemType == typeof(Vector4) ||
+                    type.SystemType == typeof(Vector2))
+                {
+                    isPrimitive = true;
+                }
                 var varDec = new TtVariableDeclaration()
                 {
                     VariableType = new TtTypeReference(type),
                     VariableName = paramName,
-                    InitValue = (type.IsPrimitive && arg.DefaultValue != null && arg.DefaultValue.GetType()!=typeof(System.DBNull)) ? new TtPrimitiveExpression(type, arg.DefaultValue) : new TtDefaultValueExpression(type),
+                    InitValue = (isPrimitive && arg.DefaultValue != null && arg.DefaultValue.GetType()!=typeof(System.DBNull)) ? new TtPrimitiveExpression(type, arg.DefaultValue) : new TtDefaultValueExpression(type),
                 };
                 data.MethodDec.AddLocalVar(varDec);
             }

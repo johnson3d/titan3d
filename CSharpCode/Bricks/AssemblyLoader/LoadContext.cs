@@ -176,6 +176,26 @@ namespace EngineNS.Bricks.AssemblyLoader
         void OnUnloadPlugin();
     }
 
+    /// <summary>
+    /// Optional interface for plugins that want to contribute menu items
+    /// to the global "Plugins" main menu. Implement this on your IPlugin class
+    /// and draw your ImGui sub-menu content in OnDrawPluginMenu().
+    /// </summary>
+    public interface IPluginMenu
+    {
+        /// <summary>
+        /// Display name shown as the sub-menu title under the Plugins menu.
+        /// </summary>
+        string PluginMenuName { get; }
+
+        /// <summary>
+        /// Draw the ImGui content inside your sub-menu.
+        /// Called between BeginMenu / EndMenu by the framework.
+        /// Use ImGuiAPI.MenuItem, BeginMenu, etc. freely here.
+        /// </summary>
+        void OnDrawPluginMenu();
+    }
+
     [Rtti.Meta("")]
     public class TtPluginDescriptor
     {
@@ -199,8 +219,12 @@ namespace EngineNS.Bricks.AssemblyLoader
     {
 
     }
-    public class TtPluginModule
+    public class TtPluginModule : IDisposable
     {
+        public void Dispose()
+        {
+            UnloadPlugin(true);
+        }
         public TtPluginModuleManager Manager;
         public string Name { get; set; }
         public TtPluginDescriptor PluginDescriptor = null;
@@ -438,8 +462,21 @@ namespace EngineNS.Bricks.AssemblyLoader
             return PluginObject as T;
         }
     }
-    public class TtPluginModuleManager
+    public class TtPluginModuleManager : IDisposable
     {
+        public void Dispose()
+        {
+            foreach (var i in PluginModules)
+            {
+                i.Value.Dispose();
+            }
+            PluginModules.Clear();
+            if (mWatcher != null)
+            {
+                mWatcher.Dispose();
+                mWatcher = null;
+            }
+        }
         public string CoreBinDirectory;
         private FileSystemWatcher mWatcher;
         public Dictionary<string, TtPluginModule> PluginModules { get; } = new Dictionary<string, TtPluginModule>();

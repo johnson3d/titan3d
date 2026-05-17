@@ -25924,6 +25924,8 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.Sample2DBiasNode;
 			ar.Write(srcObj.AssetName);
+			ar.Write(srcObj.DynamicSrvName);
+			ar.Write(srcObj.IsDynamic);
 			ar.Write(srcObj.Label);
 			ar.Write(srcObj.MethodDeclString);
 			ar.Write(srcObj.Name);
@@ -25969,6 +25971,8 @@ namespace EngineNS.Plugins.DataCopyer
 			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.Sample2DBiasNode;
 			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.Sample2DBiasNode;
 			tarObj.AssetName = srcObj.AssetName;
+			tarObj.DynamicSrvName = srcObj.DynamicSrvName;
+			tarObj.IsDynamic = srcObj.IsDynamic;
 			tarObj.Label = srcObj.Label;
 			tarObj.MethodDeclString = srcObj.MethodDeclString;
 			tarObj.Name = srcObj.Name;
@@ -26105,6 +26109,134 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7864368946795392856 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.Sample2DBiasNode;
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			srcObj.AssetName = t_AssetName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			System.String t_DynamicSrvName;
+			ar.Read(out t_DynamicSrvName);
+			srcObj.DynamicSrvName = t_DynamicSrvName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DynamicSrvName", false);
+				}
+			}
+			System.Boolean t_IsDynamic;
+			ar.Read(out t_IsDynamic);
+			srcObj.IsDynamic = t_IsDynamic;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsDynamic", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_MethodDeclString;
+			ar.Read(out t_MethodDeclString);
+			srcObj.MethodDeclString = t_MethodDeclString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MethodDeclString", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			EngineNS.NxRHI.FSamplerDesc t_Sampler;
+			ar.Read(out t_Sampler);
+			srcObj.Sampler = t_Sampler;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Sampler", false);
+				}
+			}
+			System.String t_TextureVarName;
+			ar.Read(out t_TextureVarName);
+			srcObj.TextureVarName = t_TextureVarName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TextureVarName", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
 	}
 	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Control_Sample2DNode
 	{
@@ -26112,6 +26244,8 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.Sample2DNode;
 			ar.Write(srcObj.AssetName);
+			ar.Write(srcObj.DynamicSrvName);
+			ar.Write(srcObj.IsDynamic);
 			ar.Write(srcObj.Label);
 			ar.Write(srcObj.MethodDeclString);
 			ar.Write(srcObj.Name);
@@ -26157,6 +26291,8 @@ namespace EngineNS.Plugins.DataCopyer
 			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.Sample2DNode;
 			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.Sample2DNode;
 			tarObj.AssetName = srcObj.AssetName;
+			tarObj.DynamicSrvName = srcObj.DynamicSrvName;
+			tarObj.IsDynamic = srcObj.IsDynamic;
 			tarObj.Label = srcObj.Label;
 			tarObj.MethodDeclString = srcObj.MethodDeclString;
 			tarObj.Name = srcObj.Name;
@@ -26193,6 +26329,134 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_MethodDeclString;
+			ar.Read(out t_MethodDeclString);
+			srcObj.MethodDeclString = t_MethodDeclString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MethodDeclString", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			EngineNS.NxRHI.FSamplerDesc t_Sampler;
+			ar.Read(out t_Sampler);
+			srcObj.Sampler = t_Sampler;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Sampler", false);
+				}
+			}
+			System.String t_TextureVarName;
+			ar.Read(out t_TextureVarName);
+			srcObj.TextureVarName = t_TextureVarName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TextureVarName", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7864368946795392856 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.Sample2DNode;
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			srcObj.AssetName = t_AssetName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			System.String t_DynamicSrvName;
+			ar.Read(out t_DynamicSrvName);
+			srcObj.DynamicSrvName = t_DynamicSrvName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DynamicSrvName", false);
+				}
+			}
+			System.Boolean t_IsDynamic;
+			ar.Read(out t_IsDynamic);
+			srcObj.IsDynamic = t_IsDynamic;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsDynamic", false);
 				}
 			}
 			System.String t_Label;
@@ -26300,6 +26564,8 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.SampleArray2DNode;
 			ar.Write(srcObj.AssetName);
+			ar.Write(srcObj.DynamicSrvName);
+			ar.Write(srcObj.IsDynamic);
 			ar.Write(srcObj.Label);
 			ar.Write(srcObj.MethodDeclString);
 			ar.Write(srcObj.Name);
@@ -26345,6 +26611,8 @@ namespace EngineNS.Plugins.DataCopyer
 			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.SampleArray2DNode;
 			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.SampleArray2DNode;
 			tarObj.AssetName = srcObj.AssetName;
+			tarObj.DynamicSrvName = srcObj.DynamicSrvName;
+			tarObj.IsDynamic = srcObj.IsDynamic;
 			tarObj.Label = srcObj.Label;
 			tarObj.MethodDeclString = srcObj.MethodDeclString;
 			tarObj.Name = srcObj.Name;
@@ -26481,6 +26749,134 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7864368946795392856 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.SampleArray2DNode;
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			srcObj.AssetName = t_AssetName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			System.String t_DynamicSrvName;
+			ar.Read(out t_DynamicSrvName);
+			srcObj.DynamicSrvName = t_DynamicSrvName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DynamicSrvName", false);
+				}
+			}
+			System.Boolean t_IsDynamic;
+			ar.Read(out t_IsDynamic);
+			srcObj.IsDynamic = t_IsDynamic;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsDynamic", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_MethodDeclString;
+			ar.Read(out t_MethodDeclString);
+			srcObj.MethodDeclString = t_MethodDeclString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MethodDeclString", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			EngineNS.NxRHI.FSamplerDesc t_Sampler;
+			ar.Read(out t_Sampler);
+			srcObj.Sampler = t_Sampler;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Sampler", false);
+				}
+			}
+			System.String t_TextureVarName;
+			ar.Read(out t_TextureVarName);
+			srcObj.TextureVarName = t_TextureVarName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TextureVarName", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
 	}
 	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Control_SampleArrayLevel2DNode
 	{
@@ -26488,6 +26884,8 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.SampleArrayLevel2DNode;
 			ar.Write(srcObj.AssetName);
+			ar.Write(srcObj.DynamicSrvName);
+			ar.Write(srcObj.IsDynamic);
 			ar.Write(srcObj.Label);
 			ar.Write(srcObj.MethodDeclString);
 			ar.Write(srcObj.Name);
@@ -26533,6 +26931,8 @@ namespace EngineNS.Plugins.DataCopyer
 			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.SampleArrayLevel2DNode;
 			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.SampleArrayLevel2DNode;
 			tarObj.AssetName = srcObj.AssetName;
+			tarObj.DynamicSrvName = srcObj.DynamicSrvName;
+			tarObj.IsDynamic = srcObj.IsDynamic;
 			tarObj.Label = srcObj.Label;
 			tarObj.MethodDeclString = srcObj.MethodDeclString;
 			tarObj.Name = srcObj.Name;
@@ -26669,6 +27069,134 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7864368946795392856 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.SampleArrayLevel2DNode;
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			srcObj.AssetName = t_AssetName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			System.String t_DynamicSrvName;
+			ar.Read(out t_DynamicSrvName);
+			srcObj.DynamicSrvName = t_DynamicSrvName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DynamicSrvName", false);
+				}
+			}
+			System.Boolean t_IsDynamic;
+			ar.Read(out t_IsDynamic);
+			srcObj.IsDynamic = t_IsDynamic;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsDynamic", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_MethodDeclString;
+			ar.Read(out t_MethodDeclString);
+			srcObj.MethodDeclString = t_MethodDeclString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MethodDeclString", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			EngineNS.NxRHI.FSamplerDesc t_Sampler;
+			ar.Read(out t_Sampler);
+			srcObj.Sampler = t_Sampler;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Sampler", false);
+				}
+			}
+			System.String t_TextureVarName;
+			ar.Read(out t_TextureVarName);
+			srcObj.TextureVarName = t_TextureVarName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TextureVarName", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
 	}
 	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Control_SampleLevel2DNode
 	{
@@ -26676,6 +27204,8 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.SampleLevel2DNode;
 			ar.Write(srcObj.AssetName);
+			ar.Write(srcObj.DynamicSrvName);
+			ar.Write(srcObj.IsDynamic);
 			ar.Write(srcObj.Label);
 			ar.Write(srcObj.MethodDeclString);
 			ar.Write(srcObj.Name);
@@ -26721,6 +27251,8 @@ namespace EngineNS.Plugins.DataCopyer
 			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.SampleLevel2DNode;
 			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.SampleLevel2DNode;
 			tarObj.AssetName = srcObj.AssetName;
+			tarObj.DynamicSrvName = srcObj.DynamicSrvName;
+			tarObj.IsDynamic = srcObj.IsDynamic;
 			tarObj.Label = srcObj.Label;
 			tarObj.MethodDeclString = srcObj.MethodDeclString;
 			tarObj.Name = srcObj.Name;
@@ -26757,6 +27289,134 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_MethodDeclString;
+			ar.Read(out t_MethodDeclString);
+			srcObj.MethodDeclString = t_MethodDeclString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MethodDeclString", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			EngineNS.NxRHI.FSamplerDesc t_Sampler;
+			ar.Read(out t_Sampler);
+			srcObj.Sampler = t_Sampler;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Sampler", false);
+				}
+			}
+			System.String t_TextureVarName;
+			ar.Read(out t_TextureVarName);
+			srcObj.TextureVarName = t_TextureVarName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TextureVarName", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7864368946795392856 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.SampleLevel2DNode;
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			srcObj.AssetName = t_AssetName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			System.String t_DynamicSrvName;
+			ar.Read(out t_DynamicSrvName);
+			srcObj.DynamicSrvName = t_DynamicSrvName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DynamicSrvName", false);
+				}
+			}
+			System.Boolean t_IsDynamic;
+			ar.Read(out t_IsDynamic);
+			srcObj.IsDynamic = t_IsDynamic;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsDynamic", false);
 				}
 			}
 			System.String t_Label;
@@ -27040,6 +27700,338 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader;
 		};
 	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AbsNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AbsNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AbsNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AbsNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AbsNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AcosNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AcosNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AcosNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AcosNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AcosNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
 	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AddNode
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -27130,6 +28122,338 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "LeftTypeString", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AsinNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AsinNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AsinNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AsinNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AsinNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AtanNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AtanNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AtanNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AtanNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AtanNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
 				}
 			}
 			System.String t_Name;
@@ -27660,6 +28984,670 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_CeilNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.CeilNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.CeilNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.CeilNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.CeilNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_CosNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.CosNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.CosNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.CosNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.CosNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_DdxNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.DdxNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.DdxNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.DdxNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.DdxNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_DdyNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.DdyNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.DdyNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.DdyNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.DdyNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
 	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_DivNode
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -27750,6 +29738,1500 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "LeftTypeString", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_Exp2Node
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.Exp2Node;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.Exp2Node;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.Exp2Node;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.Exp2Node;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_ExpNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.ExpNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.ExpNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.ExpNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.ExpNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_FloorNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FloorNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FloorNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FloorNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FloorNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_FracNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FracNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FracNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FracNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FracNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_FunctionOpNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FunctionOpNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FunctionOpNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FunctionOpNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FunctionOpNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_FwidthNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FwidthNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FwidthNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FwidthNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FwidthNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_LengthNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.LengthNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.LengthNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.LengthNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.LengthNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_Log2Node
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.Log2Node;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.Log2Node;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.Log2Node;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.Log2Node;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_LogNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.LogNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.LogNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.LogNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.LogNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
 				}
 			}
 			System.String t_Name;
@@ -27970,6 +31452,172 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_Monocular
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.Monocular;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.Monocular;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.Monocular;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.Monocular;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
 	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_MulNode
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -28125,6 +31773,1334 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_NormalizeNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.NormalizeNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.NormalizeNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.NormalizeNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.NormalizeNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_RcpNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.RcpNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.RcpNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.RcpNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.RcpNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_RoundNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.RoundNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.RoundNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.RoundNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.RoundNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_RsqrtNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.RsqrtNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.RsqrtNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.RsqrtNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.RsqrtNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SaturateNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SaturateNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SaturateNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SaturateNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SaturateNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SignNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SignNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SignNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SignNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SignNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SinNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SinNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SinNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SinNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SinNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SqrtNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SqrtNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SqrtNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SqrtNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SqrtNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
 	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SubNode
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -28215,6 +33191,338 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "LeftTypeString", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_TanNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.TanNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.TanNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.TanNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.TanNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_TruncNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.TruncNode;
+			ar.Write(srcObj.FunctionName);
+			ar.Write(srcObj.InputTypeString);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.TruncNode;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.TruncNode;
+			tarObj.FunctionName = srcObj.FunctionName;
+			tarObj.InputTypeString = srcObj.InputTypeString;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15398001070275193001 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.TruncNode;
+			System.String t_FunctionName;
+			ar.Read(out t_FunctionName);
+			srcObj.FunctionName = t_FunctionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FunctionName", false);
+				}
+			}
+			System.String t_InputTypeString;
+			ar.Read(out t_InputTypeString);
+			srcObj.InputTypeString = t_InputTypeString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InputTypeString", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
 				}
 			}
 			System.String t_Name;
@@ -29486,6 +34794,194 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
+	static class EngineNS_Bricks_CodeBuilder_ShaderNode_TtMaterialFunctionInputSamplerState
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionInputSamplerState;
+			ar.Write(srcObj.DefaultValue);
+			ar.Write(srcObj.Desc);
+			ar.Write(srcObj.IsHalfPrecision);
+			ar.Write(srcObj.IsUniform);
+			ar.Write(srcObj.Label);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeId);
+			ar.Write(srcObj.Position);
+			if (srcObj.InputEditableValues != null)
+			{
+				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionInputSamplerState;
+			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionInputSamplerState;
+			tarObj.DefaultValue = srcObj.DefaultValue;
+			tarObj.Desc = srcObj.Desc;
+			tarObj.IsHalfPrecision = srcObj.IsHalfPrecision;
+			tarObj.IsUniform = srcObj.IsUniform;
+			tarObj.Label = srcObj.Label;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeId = srcObj.NodeId;
+			tarObj.Position = srcObj.Position;
+			if (srcObj.InputEditableValues != null)
+			{
+				if (tarObj.InputEditableValues == null)
+				{
+					tarObj.InputEditableValues = new();
+				}
+				if (tarObj.InputEditableValues != null)
+				{
+					var Tarlst = tarObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3792876557029719706 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionInputSamplerState;
+			System.Single t_DefaultValue;
+			ar.Read(out t_DefaultValue);
+			srcObj.DefaultValue = t_DefaultValue;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DefaultValue", false);
+				}
+			}
+			EngineNS.NxRHI.FSamplerDesc t_Desc;
+			ar.Read(out t_Desc);
+			srcObj.Desc = t_Desc;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Desc", false);
+				}
+			}
+			System.Boolean t_IsHalfPrecision;
+			ar.Read(out t_IsHalfPrecision);
+			srcObj.IsHalfPrecision = t_IsHalfPrecision;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsHalfPrecision", false);
+				}
+			}
+			System.Boolean t_IsUniform;
+			ar.Read(out t_IsUniform);
+			srcObj.IsUniform = t_IsUniform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsUniform", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+	}
 	static class EngineNS_Bricks_CodeBuilder_ShaderNode_TtMaterialFunctionInputTexture2D
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -29493,6 +34989,8 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionInputTexture2D;
 			ar.Write(srcObj.AssetName);
 			ar.Write(srcObj.DefaultValue);
+			ar.Write(srcObj.DynamicSrvName);
+			ar.Write(srcObj.IsDynamic);
 			ar.Write(srcObj.IsHalfPrecision);
 			ar.Write(srcObj.IsUniform);
 			ar.Write(srcObj.Label);
@@ -29539,6 +35037,8 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionInputTexture2D;
 			tarObj.AssetName = srcObj.AssetName;
 			tarObj.DefaultValue = srcObj.DefaultValue;
+			tarObj.DynamicSrvName = srcObj.DynamicSrvName;
+			tarObj.IsDynamic = srcObj.IsDynamic;
 			tarObj.IsHalfPrecision = srcObj.IsHalfPrecision;
 			tarObj.IsUniform = srcObj.IsUniform;
 			tarObj.Label = srcObj.Label;
@@ -29561,6 +35061,143 @@ namespace EngineNS.Plugins.DataCopyer
 					{
 						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
 						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8162601532146827135 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionInputTexture2D;
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			srcObj.AssetName = t_AssetName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			System.Single t_DefaultValue;
+			ar.Read(out t_DefaultValue);
+			srcObj.DefaultValue = t_DefaultValue;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DefaultValue", false);
+				}
+			}
+			System.String t_DynamicSrvName;
+			ar.Read(out t_DynamicSrvName);
+			srcObj.DynamicSrvName = t_DynamicSrvName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DynamicSrvName", false);
+				}
+			}
+			System.Boolean t_IsDynamic;
+			ar.Read(out t_IsDynamic);
+			srcObj.IsDynamic = t_IsDynamic;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsDynamic", false);
+				}
+			}
+			System.Boolean t_IsHalfPrecision;
+			ar.Read(out t_IsHalfPrecision);
+			srcObj.IsHalfPrecision = t_IsHalfPrecision;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsHalfPrecision", false);
+				}
+			}
+			System.Boolean t_IsUniform;
+			ar.Read(out t_IsUniform);
+			srcObj.IsUniform = t_IsUniform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsUniform", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			EngineNS.NxRHI.FSamplerDesc t_Sampler;
+			ar.Read(out t_Sampler);
+			srcObj.Sampler = t_Sampler;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Sampler", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
 					}
 				}
 			}
@@ -31383,6 +37020,8 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Var.Texture2D;
 			ar.Write(srcObj.AssetName);
+			ar.Write(srcObj.DynamicSrvName);
+			ar.Write(srcObj.IsDynamic);
 			ar.Write(srcObj.IsHalfPrecision);
 			ar.Write(srcObj.IsUniform);
 			ar.Write(srcObj.Label);
@@ -31428,6 +37067,8 @@ namespace EngineNS.Plugins.DataCopyer
 			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Var.Texture2D;
 			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Var.Texture2D;
 			tarObj.AssetName = srcObj.AssetName;
+			tarObj.DynamicSrvName = srcObj.DynamicSrvName;
+			tarObj.IsDynamic = srcObj.IsDynamic;
 			tarObj.IsHalfPrecision = srcObj.IsHalfPrecision;
 			tarObj.IsUniform = srcObj.IsUniform;
 			tarObj.Label = srcObj.Label;
@@ -31450,6 +37091,134 @@ namespace EngineNS.Plugins.DataCopyer
 					{
 						EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
 						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7978064082309323771 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Var.Texture2D;
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			srcObj.AssetName = t_AssetName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			System.String t_DynamicSrvName;
+			ar.Read(out t_DynamicSrvName);
+			srcObj.DynamicSrvName = t_DynamicSrvName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DynamicSrvName", false);
+				}
+			}
+			System.Boolean t_IsDynamic;
+			ar.Read(out t_IsDynamic);
+			srcObj.IsDynamic = t_IsDynamic;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsDynamic", false);
+				}
+			}
+			System.Boolean t_IsHalfPrecision;
+			ar.Read(out t_IsHalfPrecision);
+			srcObj.IsHalfPrecision = t_IsHalfPrecision;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsHalfPrecision", false);
+				}
+			}
+			System.Boolean t_IsUniform;
+			ar.Read(out t_IsUniform);
+			srcObj.IsUniform = t_IsUniform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsUniform", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			EngineNS.NxRHI.FSamplerDesc t_Sampler;
+			ar.Read(out t_Sampler);
+			srcObj.Sampler = t_Sampler;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Sampler", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
 					}
 				}
 			}
@@ -42419,6 +48188,632 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_17543872329442000835 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Bricks.FX.Water.TtFftWaterNode;
+			EngineNS.RName t_BehaviorName;
+			ar.Read(out t_BehaviorName);
+			srcObj.BehaviorName = t_BehaviorName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
+				}
+			}
+			EngineNS.Hash64 type_Parent;
+			ar.Read(out type_Parent);
+			var meta_Parent = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Parent);
+			if(meta_Parent != null)
+			{
+				EngineNS.Hash64 ver_Parent;
+				ar.Read(out ver_Parent);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Parent.ClassType.TypeString, ver_Parent );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtNode t_Parent = null;
+					t_Parent = srcObj.Parent;
+					if (t_Parent == null)
+					{
+						t_Parent = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Parent.ClassType) as EngineNS.GamePlay.Scene.TtNode;
+					}
+					fn(ar, t_Parent);
+					srcObj.Parent = t_Parent;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Parent", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_ParentScene;
+			ar.Read(out type_ParentScene);
+			var meta_ParentScene = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_ParentScene);
+			if(meta_ParentScene != null)
+			{
+				EngineNS.Hash64 ver_ParentScene;
+				ar.Read(out ver_ParentScene);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_ParentScene.ClassType.TypeString, ver_ParentScene );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtScene t_ParentScene = null;
+					t_ParentScene = srcObj.ParentScene;
+					if (t_ParentScene == null)
+					{
+						t_ParentScene = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_ParentScene.ClassType) as EngineNS.GamePlay.Scene.TtScene;
+					}
+					fn(ar, t_ParentScene);
+				}
+			}
+			EngineNS.Hash64 type_RootNode;
+			ar.Read(out type_RootNode);
+			var meta_RootNode = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_RootNode);
+			if(meta_RootNode != null)
+			{
+				EngineNS.Hash64 ver_RootNode;
+				ar.Read(out ver_RootNode);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_RootNode.ClassType.TypeString, ver_RootNode );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtNode t_RootNode = null;
+					t_RootNode = srcObj.RootNode;
+					if (t_RootNode == null)
+					{
+						t_RootNode = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_RootNode.ClassType) as EngineNS.GamePlay.Scene.TtNode;
+					}
+					fn(ar, t_RootNode);
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_FX_Water_TtSWEComputeNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Water.TtSWEComputeNode;
+			ar.Write(srcObj.Enable);
+			ar.Write(srcObj.UniqueId);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.FX.Water.TtSWEComputeNode;
+			var srcObj = src as EngineNS.Bricks.FX.Water.TtSWEComputeNode;
+			tarObj.Enable = srcObj.Enable;
+			tarObj.UniqueId = srcObj.UniqueId;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3317649633148904116 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Water.TtSWEComputeNode;
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+			System.Guid t_UniqueId;
+			ar.Read(out t_UniqueId);
+			srcObj.UniqueId = t_UniqueId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "UniqueId", false);
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_FX_Water_TtSWEWaterNode_TtSWEWaterNodeData
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Water.TtSWEWaterNode.TtSWEWaterNodeData;
+			ar.Write(srcObj.BaseWaterHeight);
+			ar.Write(srcObj.BehaviorName);
+			ar.Write(srcObj.BoundaryMode);
+			ar.Write(srcObj.Damping);
+			ar.Write(srcObj.DomainSize);
+			ar.Write(srcObj.Gravity);
+			ar.Write(srcObj.HeightMapSrvName);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeStyles);
+			ar.Write(srcObj.SimResolution);
+			ar.Write(srcObj.WaterMaterialName);
+			if (srcObj.BoundVolume != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.BoundVolume.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.BoundVolume);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
+			if (srcObj.Placement != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.Placement.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.Placement);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.FX.Water.TtSWEWaterNode.TtSWEWaterNodeData;
+			var srcObj = src as EngineNS.Bricks.FX.Water.TtSWEWaterNode.TtSWEWaterNodeData;
+			tarObj.BaseWaterHeight = srcObj.BaseWaterHeight;
+			tarObj.BehaviorName = srcObj.BehaviorName;
+			tarObj.BoundaryMode = srcObj.BoundaryMode;
+			tarObj.Damping = srcObj.Damping;
+			tarObj.DomainSize = srcObj.DomainSize;
+			tarObj.Gravity = srcObj.Gravity;
+			tarObj.HeightMapSrvName = srcObj.HeightMapSrvName;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeStyles = srcObj.NodeStyles;
+			tarObj.SimResolution = srcObj.SimResolution;
+			tarObj.WaterMaterialName = srcObj.WaterMaterialName;
+			if (srcObj.BoundVolume != null)
+			{
+				if (tarObj.BoundVolume == null || tarObj.BoundVolume.GetType() != srcObj.BoundVolume.GetType())
+				{
+					tarObj.BoundVolume = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.BoundVolume.GetType()) as EngineNS.GamePlay.Scene.TtBoundVolume;
+				}
+				if (tarObj.BoundVolume != null)
+				{
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.GamePlay.Scene.TtBoundVolume>.TypeDesc.TypeString);
+					if (fn != null)
+					{
+						fn(tarObj.BoundVolume, srcObj.BoundVolume);
+					}
+				}
+			}
+			else if (srcObj.BoundVolume == null)
+			{
+				tarObj.BoundVolume = null;
+			}
+			if (srcObj.Placement != null)
+			{
+				if (tarObj.Placement == null || tarObj.Placement.GetType() != srcObj.Placement.GetType())
+				{
+					tarObj.Placement = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.Placement.GetType()) as EngineNS.GamePlay.TtPlacementBase;
+				}
+				if (tarObj.Placement != null)
+				{
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.GamePlay.TtPlacementBase>.TypeDesc.TypeString);
+					if (fn != null)
+					{
+						fn(tarObj.Placement, srcObj.Placement);
+					}
+				}
+			}
+			else if (srcObj.Placement == null)
+			{
+				tarObj.Placement = null;
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3053051975361877985 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Water.TtSWEWaterNode.TtSWEWaterNodeData;
+			System.Single t_BaseWaterHeight;
+			ar.Read(out t_BaseWaterHeight);
+			srcObj.BaseWaterHeight = t_BaseWaterHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BaseWaterHeight", false);
+				}
+			}
+			EngineNS.RName t_BehaviorName;
+			ar.Read(out t_BehaviorName);
+			srcObj.BehaviorName = t_BehaviorName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
+				}
+			}
+			EngineNS.Bricks.FX.Water.ESWEBoundaryMode t_BoundaryMode;
+			ar.Read(out t_BoundaryMode);
+			srcObj.BoundaryMode = t_BoundaryMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BoundaryMode", false);
+				}
+			}
+			System.Single t_Damping;
+			ar.Read(out t_Damping);
+			srcObj.Damping = t_Damping;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Damping", false);
+				}
+			}
+			System.Single t_DomainSize;
+			ar.Read(out t_DomainSize);
+			srcObj.DomainSize = t_DomainSize;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DomainSize", false);
+				}
+			}
+			System.Single t_Gravity;
+			ar.Read(out t_Gravity);
+			srcObj.Gravity = t_Gravity;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Gravity", false);
+				}
+			}
+			System.String t_HeightMapSrvName;
+			ar.Read(out t_HeightMapSrvName);
+			srcObj.HeightMapSrvName = t_HeightMapSrvName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightMapSrvName", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			EngineNS.GamePlay.Scene.TtNode.ENodeStyles t_NodeStyles;
+			ar.Read(out t_NodeStyles);
+			srcObj.NodeStyles = t_NodeStyles;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeStyles", false);
+				}
+			}
+			System.UInt32 t_SimResolution;
+			ar.Read(out t_SimResolution);
+			srcObj.SimResolution = t_SimResolution;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SimResolution", false);
+				}
+			}
+			EngineNS.RName t_WaterMaterialName;
+			ar.Read(out t_WaterMaterialName);
+			srcObj.WaterMaterialName = t_WaterMaterialName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WaterMaterialName", false);
+				}
+			}
+			EngineNS.Hash64 type_BoundVolume;
+			ar.Read(out type_BoundVolume);
+			var meta_BoundVolume = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BoundVolume);
+			if(meta_BoundVolume != null)
+			{
+				EngineNS.Hash64 ver_BoundVolume;
+				ar.Read(out ver_BoundVolume);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BoundVolume.ClassType.TypeString, ver_BoundVolume );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtBoundVolume t_BoundVolume = null;
+					t_BoundVolume = srcObj.BoundVolume;
+					if (t_BoundVolume == null)
+					{
+						t_BoundVolume = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BoundVolume.ClassType) as EngineNS.GamePlay.Scene.TtBoundVolume;
+					}
+					fn(ar, t_BoundVolume);
+					srcObj.BoundVolume = t_BoundVolume;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BoundVolume", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_Placement;
+			ar.Read(out type_Placement);
+			var meta_Placement = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Placement);
+			if(meta_Placement != null)
+			{
+				EngineNS.Hash64 ver_Placement;
+				ar.Read(out ver_Placement);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Placement.ClassType.TypeString, ver_Placement );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.TtPlacementBase t_Placement = null;
+					t_Placement = srcObj.Placement;
+					if (t_Placement == null)
+					{
+						t_Placement = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Placement.ClassType) as EngineNS.GamePlay.TtPlacementBase;
+					}
+					fn(ar, t_Placement);
+					srcObj.Placement = t_Placement;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Placement", false);
+						}
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_10018951005713308956 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Water.TtSWEWaterNode.TtSWEWaterNodeData;
+			System.Single t_BaseWaterHeight;
+			ar.Read(out t_BaseWaterHeight);
+			srcObj.BaseWaterHeight = t_BaseWaterHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BaseWaterHeight", false);
+				}
+			}
+			EngineNS.RName t_BehaviorName;
+			ar.Read(out t_BehaviorName);
+			srcObj.BehaviorName = t_BehaviorName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
+				}
+			}
+			EngineNS.Bricks.FX.Water.ESWEBoundaryMode t_BoundaryMode;
+			ar.Read(out t_BoundaryMode);
+			srcObj.BoundaryMode = t_BoundaryMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BoundaryMode", false);
+				}
+			}
+			System.Single t_Damping;
+			ar.Read(out t_Damping);
+			srcObj.Damping = t_Damping;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Damping", false);
+				}
+			}
+			System.Single t_DomainSize;
+			ar.Read(out t_DomainSize);
+			srcObj.DomainSize = t_DomainSize;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DomainSize", false);
+				}
+			}
+			System.Single t_Gravity;
+			ar.Read(out t_Gravity);
+			srcObj.Gravity = t_Gravity;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Gravity", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			EngineNS.GamePlay.Scene.TtNode.ENodeStyles t_NodeStyles;
+			ar.Read(out t_NodeStyles);
+			srcObj.NodeStyles = t_NodeStyles;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeStyles", false);
+				}
+			}
+			System.UInt32 t_SimResolution;
+			ar.Read(out t_SimResolution);
+			srcObj.SimResolution = t_SimResolution;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SimResolution", false);
+				}
+			}
+			EngineNS.RName t_WaterMaterialName;
+			ar.Read(out t_WaterMaterialName);
+			srcObj.WaterMaterialName = t_WaterMaterialName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WaterMaterialName", false);
+				}
+			}
+			EngineNS.Hash64 type_BoundVolume;
+			ar.Read(out type_BoundVolume);
+			var meta_BoundVolume = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BoundVolume);
+			if(meta_BoundVolume != null)
+			{
+				EngineNS.Hash64 ver_BoundVolume;
+				ar.Read(out ver_BoundVolume);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BoundVolume.ClassType.TypeString, ver_BoundVolume );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtBoundVolume t_BoundVolume = null;
+					t_BoundVolume = srcObj.BoundVolume;
+					if (t_BoundVolume == null)
+					{
+						t_BoundVolume = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BoundVolume.ClassType) as EngineNS.GamePlay.Scene.TtBoundVolume;
+					}
+					fn(ar, t_BoundVolume);
+					srcObj.BoundVolume = t_BoundVolume;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BoundVolume", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_Placement;
+			ar.Read(out type_Placement);
+			var meta_Placement = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Placement);
+			if(meta_Placement != null)
+			{
+				EngineNS.Hash64 ver_Placement;
+				ar.Read(out ver_Placement);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Placement.ClassType.TypeString, ver_Placement );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.TtPlacementBase t_Placement = null;
+					t_Placement = srcObj.Placement;
+					if (t_Placement == null)
+					{
+						t_Placement = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Placement.ClassType) as EngineNS.GamePlay.TtPlacementBase;
+					}
+					fn(ar, t_Placement);
+					srcObj.Placement = t_Placement;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Placement", false);
+						}
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Bricks_FX_Water_TtSWEWaterNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Water.TtSWEWaterNode;
+			ar.Write(srcObj.BehaviorName);
+			if (srcObj.Parent != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.Parent.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.Parent);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
+			if (srcObj.ParentScene != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.ParentScene.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.ParentScene);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
+			if (srcObj.RootNode != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.RootNode.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.RootNode);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Bricks.FX.Water.TtSWEWaterNode;
+			var srcObj = src as EngineNS.Bricks.FX.Water.TtSWEWaterNode;
+			tarObj.BehaviorName = srcObj.BehaviorName;
+			if (srcObj.Parent != null)
+			{
+				if (tarObj.Parent == null || tarObj.Parent.GetType() != srcObj.Parent.GetType())
+				{
+					tarObj.Parent = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.Parent.GetType()) as EngineNS.GamePlay.Scene.TtNode;
+				}
+				if (tarObj.Parent != null)
+				{
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.GamePlay.Scene.TtNode>.TypeDesc.TypeString);
+					if (fn != null)
+					{
+						fn(tarObj.Parent, srcObj.Parent);
+					}
+				}
+			}
+			else if (srcObj.Parent == null)
+			{
+				tarObj.Parent = null;
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_17543872329442000835 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.FX.Water.TtSWEWaterNode;
 			EngineNS.RName t_BehaviorName;
 			ar.Read(out t_BehaviorName);
 			srcObj.BehaviorName = t_BehaviorName;
@@ -132147,6 +138542,99 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
+	static class EngineNS_Graphics_Pipeline_Common_Post_TtHemisphereCaptureNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.Post.TtHemisphereCaptureNode;
+			ar.Write(srcObj.CaptureIntensity);
+			ar.Write(srcObj.CaptureRotation);
+			ar.Write(srcObj.Enable);
+			ar.Write(srcObj.MaxMipLevel);
+			ar.Write(srcObj.OutputResolution);
+			ar.Write(srcObj.SkyTintColor);
+			ar.Write(srcObj.UniqueId);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Pipeline.Common.Post.TtHemisphereCaptureNode;
+			var srcObj = src as EngineNS.Graphics.Pipeline.Common.Post.TtHemisphereCaptureNode;
+			tarObj.CaptureIntensity = srcObj.CaptureIntensity;
+			tarObj.CaptureRotation = srcObj.CaptureRotation;
+			tarObj.Enable = srcObj.Enable;
+			tarObj.MaxMipLevel = srcObj.MaxMipLevel;
+			tarObj.OutputResolution = srcObj.OutputResolution;
+			tarObj.SkyTintColor = srcObj.SkyTintColor;
+			tarObj.UniqueId = srcObj.UniqueId;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_10712915720145947164 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.Post.TtHemisphereCaptureNode;
+			System.Single t_CaptureIntensity;
+			ar.Read(out t_CaptureIntensity);
+			srcObj.CaptureIntensity = t_CaptureIntensity;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CaptureIntensity", false);
+				}
+			}
+			EngineNS.Matrix t_CaptureRotation;
+			ar.Read(out t_CaptureRotation);
+			srcObj.CaptureRotation = t_CaptureRotation;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CaptureRotation", false);
+				}
+			}
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+			System.Single t_MaxMipLevel;
+			ar.Read(out t_MaxMipLevel);
+			srcObj.MaxMipLevel = t_MaxMipLevel;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxMipLevel", false);
+				}
+			}
+			System.UInt32 t_OutputResolution;
+			ar.Read(out t_OutputResolution);
+			srcObj.OutputResolution = t_OutputResolution;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "OutputResolution", false);
+				}
+			}
+			EngineNS.Color4f t_SkyTintColor;
+			ar.Read(out t_SkyTintColor);
+			srcObj.SkyTintColor = t_SkyTintColor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SkyTintColor", false);
+				}
+			}
+			System.Guid t_UniqueId;
+			ar.Read(out t_UniqueId);
+			srcObj.UniqueId = t_UniqueId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "UniqueId", false);
+				}
+			}
+		};
+	}
 	static class EngineNS_Graphics_Pipeline_Common_Post_TtLuminanceThresholeNode
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -136997,6 +143485,8 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair;
+			ar.Write(srcObj.DynamicSrvName);
+			ar.Write(srcObj.IsDynamic);
 			ar.Write(srcObj.Name);
 			ar.Write(srcObj.ShaderType);
 			ar.Write(srcObj.Value);
@@ -137005,9 +143495,60 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var tarObj = tar as EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair;
 			var srcObj = src as EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair;
+			tarObj.DynamicSrvName = srcObj.DynamicSrvName;
+			tarObj.IsDynamic = srcObj.IsDynamic;
 			tarObj.Name = srcObj.Name;
 			tarObj.ShaderType = srcObj.ShaderType;
 			tarObj.Value = srcObj.Value;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3042516772500373086 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair;
+			System.String t_DynamicSrvName;
+			ar.Read(out t_DynamicSrvName);
+			srcObj.DynamicSrvName = t_DynamicSrvName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DynamicSrvName", false);
+				}
+			}
+			System.Boolean t_IsDynamic;
+			ar.Read(out t_IsDynamic);
+			srcObj.IsDynamic = t_IsDynamic;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsDynamic", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.String t_ShaderType;
+			ar.Read(out t_ShaderType);
+			srcObj.ShaderType = t_ShaderType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShaderType", false);
+				}
+			}
+			EngineNS.RName t_Value;
+			ar.Read(out t_Value);
+			srcObj.Value = t_Value;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Value", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_6028541220637098383 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -137910,6 +144451,7 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Shader.TtMaterialFunction;
 			ar.Write(srcObj.AssetName);
 			ar.Write(srcObj.CallNodeName);
+			ar.Write(srcObj.EditMode);
 			ar.Write(srcObj.GraphXMLString);
 			ar.Write(srcObj.HLSLCode);
 			if (srcObj.MethodMeta != null)
@@ -137933,6 +144475,19 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				ar.Write(true);
 			}
+			if (srcObj.RefMaterialFunctions != null)
+			{
+				var Srclst = srcObj.RefMaterialFunctions as System.Collections.Generic.List<EngineNS.RName>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					ar.Write(Srclst[i]);
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -137940,6 +144495,7 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = src as EngineNS.Graphics.Pipeline.Shader.TtMaterialFunction;
 			tarObj.AssetName = srcObj.AssetName;
 			tarObj.CallNodeName = srcObj.CallNodeName;
+			tarObj.EditMode = srcObj.EditMode;
 			tarObj.GraphXMLString = srcObj.GraphXMLString;
 			tarObj.HLSLCode = srcObj.HLSLCode;
 			if (srcObj.MethodMeta != null)
@@ -137960,6 +144516,112 @@ namespace EngineNS.Plugins.DataCopyer
 			else if (srcObj.MethodMeta == null)
 			{
 				tarObj.MethodMeta = null;
+			}
+			if (srcObj.RefMaterialFunctions != null)
+			{
+				if (tarObj.RefMaterialFunctions == null)
+				{
+					tarObj.RefMaterialFunctions = new();
+				}
+				if (tarObj.RefMaterialFunctions != null)
+				{
+					var Tarlst = tarObj.RefMaterialFunctions as System.Collections.Generic.List<EngineNS.RName>;
+					var Srclst = srcObj.RefMaterialFunctions as System.Collections.Generic.List<EngineNS.RName>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						Tarlst.Add(Srclst[i]);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8404987753539341804 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Shader.TtMaterialFunction;
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			srcObj.AssetName = t_AssetName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			System.String t_CallNodeName;
+			ar.Read(out t_CallNodeName);
+			srcObj.CallNodeName = t_CallNodeName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CallNodeName", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.Shader.EMaterialFunctionEditMode t_EditMode;
+			ar.Read(out t_EditMode);
+			srcObj.EditMode = t_EditMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EditMode", false);
+				}
+			}
+			System.String t_GraphXMLString;
+			ar.Read(out t_GraphXMLString);
+			srcObj.GraphXMLString = t_GraphXMLString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "GraphXMLString", false);
+				}
+			}
+			System.String t_HLSLCode;
+			ar.Read(out t_HLSLCode);
+			srcObj.HLSLCode = t_HLSLCode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HLSLCode", false);
+				}
+			}
+			EngineNS.Hash64 type_MethodMeta;
+			ar.Read(out type_MethodMeta);
+			var meta_MethodMeta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_MethodMeta);
+			if(meta_MethodMeta != null)
+			{
+				EngineNS.Hash64 ver_MethodMeta;
+				ar.Read(out ver_MethodMeta);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_MethodMeta.ClassType.TypeString, ver_MethodMeta );
+				if (fn != null)
+				{
+					EngineNS.Rtti.TtClassMeta.TtMethodMeta t_MethodMeta = null;
+					t_MethodMeta = srcObj.MethodMeta;
+					if (t_MethodMeta == null)
+					{
+						t_MethodMeta = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_MethodMeta.ClassType) as EngineNS.Rtti.TtClassMeta.TtMethodMeta;
+					}
+					fn(ar, t_MethodMeta);
+					srcObj.MethodMeta = t_MethodMeta;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "MethodMeta", false);
+						}
+					}
+				}
+			}
+			System.Collections.Generic.List<EngineNS.RName> t_RefMaterialFunctions = null;
+			t_RefMaterialFunctions = srcObj.RefMaterialFunctions;
+			if (t_RefMaterialFunctions == null)
+			{
+				t_RefMaterialFunctions = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.RName>)) as System.Collections.Generic.List<EngineNS.RName>;
+			}
+			int count_RefMaterialFunctions;
+			ar.Read(out count_RefMaterialFunctions);
+			for(int i = 0; i<count_RefMaterialFunctions; i++)
+			{
+				EngineNS.RName t;
+				ar.Read(out t);
+				t_RefMaterialFunctions.Add(t);
 			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15972838120909143288 = (EngineNS.IO.IReader ar, object obj)=>
@@ -163958,30 +170620,35 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Control_Sample2DBiasNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Control_Sample2DBiasNode.CopyCurrentVersion;
 				kls.RegVersion(4802313967673358912, EngineNS_Bricks_CodeBuilder_ShaderNode_Control_Sample2DBiasNode.Read_4802313967673358912);
+				kls.RegVersion(7864368946795392856, EngineNS_Bricks_CodeBuilder_ShaderNode_Control_Sample2DBiasNode.Read_7864368946795392856);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.Sample2DNode@EngineCore");
 				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Control_Sample2DNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Control_Sample2DNode.CopyCurrentVersion;
 				kls.RegVersion(4802313967673358912, EngineNS_Bricks_CodeBuilder_ShaderNode_Control_Sample2DNode.Read_4802313967673358912);
+				kls.RegVersion(7864368946795392856, EngineNS_Bricks_CodeBuilder_ShaderNode_Control_Sample2DNode.Read_7864368946795392856);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.SampleArray2DNode@EngineCore");
 				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Control_SampleArray2DNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Control_SampleArray2DNode.CopyCurrentVersion;
 				kls.RegVersion(4802313967673358912, EngineNS_Bricks_CodeBuilder_ShaderNode_Control_SampleArray2DNode.Read_4802313967673358912);
+				kls.RegVersion(7864368946795392856, EngineNS_Bricks_CodeBuilder_ShaderNode_Control_SampleArray2DNode.Read_7864368946795392856);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.SampleArrayLevel2DNode@EngineCore");
 				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Control_SampleArrayLevel2DNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Control_SampleArrayLevel2DNode.CopyCurrentVersion;
 				kls.RegVersion(4802313967673358912, EngineNS_Bricks_CodeBuilder_ShaderNode_Control_SampleArrayLevel2DNode.Read_4802313967673358912);
+				kls.RegVersion(7864368946795392856, EngineNS_Bricks_CodeBuilder_ShaderNode_Control_SampleArrayLevel2DNode.Read_7864368946795392856);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.SampleLevel2DNode@EngineCore");
 				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Control_SampleLevel2DNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Control_SampleLevel2DNode.CopyCurrentVersion;
 				kls.RegVersion(4802313967673358912, EngineNS_Bricks_CodeBuilder_ShaderNode_Control_SampleLevel2DNode.Read_4802313967673358912);
+				kls.RegVersion(7864368946795392856, EngineNS_Bricks_CodeBuilder_ShaderNode_Control_SampleLevel2DNode.Read_7864368946795392856);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCallMaterialFunctionNode@EngineCore");
@@ -163996,10 +170663,34 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(9524687136534877311, EngineNS_Bricks_CodeBuilder_ShaderNode_Control_TtCoreMaterialShader.Read_9524687136534877311);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AbsNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AbsNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AbsNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AbsNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AcosNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AcosNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AcosNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AcosNode.Read_15398001070275193001);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AddNode@EngineCore");
 				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AddNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AddNode.CopyCurrentVersion;
 				kls.RegVersion(11760494978924583563, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AddNode.Read_11760494978924583563);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AsinNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AsinNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AsinNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AsinNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.AtanNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AtanNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AtanNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_AtanNode.Read_15398001070275193001);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.Binocular@EngineCore");
@@ -164020,10 +170711,88 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(11760494978924583563, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_BitOrNode.Read_11760494978924583563);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.CeilNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_CeilNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_CeilNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_CeilNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.CosNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_CosNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_CosNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_CosNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.DdxNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_DdxNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_DdxNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_DdxNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.DdyNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_DdyNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_DdyNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_DdyNode.Read_15398001070275193001);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.DivNode@EngineCore");
 				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_DivNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_DivNode.CopyCurrentVersion;
 				kls.RegVersion(11760494978924583563, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_DivNode.Read_11760494978924583563);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.Exp2Node@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_Exp2Node.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_Exp2Node.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_Exp2Node.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.ExpNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_ExpNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_ExpNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_ExpNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FloorNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_FloorNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_FloorNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_FloorNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FracNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_FracNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_FracNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_FracNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FunctionOpNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_FunctionOpNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_FunctionOpNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_FunctionOpNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.FwidthNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_FwidthNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_FwidthNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_FwidthNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.LengthNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_LengthNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_LengthNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_LengthNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.Log2Node@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_Log2Node.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_Log2Node.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_Log2Node.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.LogNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_LogNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_LogNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_LogNode.Read_15398001070275193001);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.ModNode@EngineCore");
@@ -164032,16 +170801,82 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(11760494978924583563, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_ModNode.Read_11760494978924583563);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.Monocular@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_Monocular.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_Monocular.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_Monocular.Read_15398001070275193001);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.MulNode@EngineCore");
 				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_MulNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_MulNode.CopyCurrentVersion;
 				kls.RegVersion(11760494978924583563, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_MulNode.Read_11760494978924583563);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.NormalizeNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_NormalizeNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_NormalizeNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_NormalizeNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.RcpNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_RcpNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_RcpNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_RcpNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.RoundNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_RoundNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_RoundNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_RoundNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.RsqrtNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_RsqrtNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_RsqrtNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_RsqrtNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SaturateNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SaturateNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SaturateNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SaturateNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SignNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SignNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SignNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SignNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SinNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SinNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SinNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SinNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SqrtNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SqrtNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SqrtNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SqrtNode.Read_15398001070275193001);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.SubNode@EngineCore");
 				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SubNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SubNode.CopyCurrentVersion;
 				kls.RegVersion(11760494978924583563, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_SubNode.Read_11760494978924583563);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.TanNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_TanNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_TanNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_TanNode.Read_15398001070275193001);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.TruncNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_TruncNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_TruncNode.CopyCurrentVersion;
+				kls.RegVersion(15398001070275193001, EngineNS_Bricks_CodeBuilder_ShaderNode_Operator_TruncNode.Read_15398001070275193001);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.ValueOpNode@EngineCore");
@@ -164087,10 +170922,17 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(17525838125994530739, EngineNS_Bricks_CodeBuilder_ShaderNode_TtMaterialFunctionInputF4.Read_17525838125994530739);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionInputSamplerState@EngineCore");
+				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_TtMaterialFunctionInputSamplerState.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_TtMaterialFunctionInputSamplerState.CopyCurrentVersion;
+				kls.RegVersion(3792876557029719706, EngineNS_Bricks_CodeBuilder_ShaderNode_TtMaterialFunctionInputSamplerState.Read_3792876557029719706);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionInputTexture2D@EngineCore");
 				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_TtMaterialFunctionInputTexture2D.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_TtMaterialFunctionInputTexture2D.CopyCurrentVersion;
 				kls.RegVersion(17472275825339978151, EngineNS_Bricks_CodeBuilder_ShaderNode_TtMaterialFunctionInputTexture2D.Read_17472275825339978151);
+				kls.RegVersion(8162601532146827135, EngineNS_Bricks_CodeBuilder_ShaderNode_TtMaterialFunctionInputTexture2D.Read_8162601532146827135);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionOutputF1@EngineCore");
@@ -164153,6 +170995,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Var_Texture2D.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Var_Texture2D.CopyCurrentVersion;
 				kls.RegVersion(15955581125162756716, EngineNS_Bricks_CodeBuilder_ShaderNode_Var_Texture2D.Read_15955581125162756716);
+				kls.RegVersion(7978064082309323771, EngineNS_Bricks_CodeBuilder_ShaderNode_Var_Texture2D.Read_7978064082309323771);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Var.Texture2DArray@EngineCore");
@@ -164644,6 +171487,25 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Bricks_FX_Water_TtFftWaterNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_FX_Water_TtFftWaterNode.CopyCurrentVersion;
 				kls.RegVersion(17543872329442000835, EngineNS_Bricks_FX_Water_TtFftWaterNode.Read_17543872329442000835);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.FX.Water.TtSWEComputeNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_FX_Water_TtSWEComputeNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_FX_Water_TtSWEComputeNode.CopyCurrentVersion;
+				kls.RegVersion(3317649633148904116, EngineNS_Bricks_FX_Water_TtSWEComputeNode.Read_3317649633148904116);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.FX.Water.TtSWEWaterNode.TtSWEWaterNodeData@EngineCore");
+				kls.Writer = EngineNS_Bricks_FX_Water_TtSWEWaterNode_TtSWEWaterNodeData.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_FX_Water_TtSWEWaterNode_TtSWEWaterNodeData.CopyCurrentVersion;
+				kls.RegVersion(10018951005713308956, EngineNS_Bricks_FX_Water_TtSWEWaterNode_TtSWEWaterNodeData.Read_10018951005713308956);
+				kls.RegVersion(3053051975361877985, EngineNS_Bricks_FX_Water_TtSWEWaterNode_TtSWEWaterNodeData.Read_3053051975361877985);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Bricks.FX.Water.TtSWEWaterNode@EngineCore");
+				kls.Writer = EngineNS_Bricks_FX_Water_TtSWEWaterNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Bricks_FX_Water_TtSWEWaterNode.CopyCurrentVersion;
+				kls.RegVersion(17543872329442000835, EngineNS_Bricks_FX_Water_TtSWEWaterNode.Read_17543872329442000835);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings@EngineCore");
@@ -166906,8 +173768,8 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.GamePlay.Scene.TtSceneCubeCapture@EngineCore");
 				kls.Writer = EngineNS_GamePlay_Scene_TtSceneCubeCapture.WriteCurrentVersion;
 				kls.Copy = EngineNS_GamePlay_Scene_TtSceneCubeCapture.CopyCurrentVersion;
-				kls.RegVersion(17543872329442000835, EngineNS_GamePlay_Scene_TtSceneCubeCapture.Read_17543872329442000835);
 				kls.RegVersion(12158301361876409036, EngineNS_GamePlay_Scene_TtSceneCubeCapture.Read_12158301361876409036);
+				kls.RegVersion(17543872329442000835, EngineNS_GamePlay_Scene_TtSceneCubeCapture.Read_17543872329442000835);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.GamePlay.Scene.TtSceneData@EngineCore");
@@ -167145,6 +174007,12 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = EngineNS_Graphics_Pipeline_Common_Post_TtGaussNode.CopyCurrentVersion;
 				kls.RegVersion(13889749344494653976, EngineNS_Graphics_Pipeline_Common_Post_TtGaussNode.Read_13889749344494653976);
 				kls.RegVersion(396073739031974500, EngineNS_Graphics_Pipeline_Common_Post_TtGaussNode.Read_396073739031974500);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.Post.TtHemisphereCaptureNode@EngineCore");
+				kls.Writer = EngineNS_Graphics_Pipeline_Common_Post_TtHemisphereCaptureNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Pipeline_Common_Post_TtHemisphereCaptureNode.CopyCurrentVersion;
+				kls.RegVersion(10712915720145947164, EngineNS_Graphics_Pipeline_Common_Post_TtHemisphereCaptureNode.Read_10712915720145947164);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.Post.TtLuminanceThresholeNode@EngineCore");
@@ -167519,6 +174387,7 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair@EngineCore");
 				kls.Writer = EngineNS_Graphics_Pipeline_Shader_TtMaterial_NameRNamePair.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Shader_TtMaterial_NameRNamePair.CopyCurrentVersion;
+				kls.RegVersion(3042516772500373086, EngineNS_Graphics_Pipeline_Shader_TtMaterial_NameRNamePair.Read_3042516772500373086);
 				kls.RegVersion(6028541220637098383, EngineNS_Graphics_Pipeline_Shader_TtMaterial_NameRNamePair.Read_6028541220637098383);
 			}
 			{
@@ -167550,6 +174419,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Graphics_Pipeline_Shader_TtMaterialFunction.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Shader_TtMaterialFunction.CopyCurrentVersion;
 				kls.RegVersion(15972838120909143288, EngineNS_Graphics_Pipeline_Shader_TtMaterialFunction.Read_15972838120909143288);
+				kls.RegVersion(8404987753539341804, EngineNS_Graphics_Pipeline_Shader_TtMaterialFunction.Read_8404987753539341804);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Shader.TtMaterialFunctionAMeta@EngineCore");
@@ -168265,7 +175135,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = Survivor_TtWeaponProxyNode.CopyCurrentVersion;
 				kls.RegVersion(10759720178659608122, Survivor_TtWeaponProxyNode.Read_10759720178659608122);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("62_9C_15_F4_37_B5_32_CD_F7_1B_A8_B7_B8_9B_1C_2C_37_8B_AE_11");
+			this.VersionHash = EngineNS.Hash160.Parse("35_C7_E1_99_45_F3_AB_5A_BE_8C_27_29_48_BF_A7_17_1C_4A_95_25");
 		}
 	}
 }

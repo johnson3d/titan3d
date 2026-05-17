@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_10018951005713308956 Type="EngineNS.Bricks.FX.Water.TtSWEWaterNode.TtSWEWaterNodeData@EngineCore">
+  <BaseWaterHeight Type="System.Single@Unknown" Order="0" />
+  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <BoundaryMode Type="EngineNS.Bricks.FX.Water.ESWEBoundaryMode@EngineCore" Order="0" />
+  <Damping Type="System.Single@Unknown" Order="0" />
+  <DomainSize Type="System.Single@Unknown" Order="0" />
+  <Gravity Type="System.Single@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.TtNode.ENodeStyles@EngineCore" Order="0" />
+  <SimResolution Type="System.UInt32@Unknown" Order="0" />
+  <WaterMaterialName Type="EngineNS.RName@EngineCore" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.TtBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.TtPlacementBase@EngineCore" Order="2" />
+</Hash_10018951005713308956>

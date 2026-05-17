@@ -335,6 +335,25 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             return DefaultValue;
         }
     }
+    public partial class TtMaterialFunctionInputSamplerState : Var.SamplerState, IMaterialFunctionInput
+    {
+        public Rtti.TtTypeDesc InputType { get => VarType; }
+        public TtMaterialFunctionInputSamplerState()
+        {
+            TitleColor = Color4b.AliceBlue.ToB8G8R8A8();
+            Inputs.Clear();
+        }
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            //do nothing
+        }
+        [Rtti.Meta("")]
+        public float DefaultValue { get; set; } = 0;
+        public object GetDefaultValueObject()
+        {
+            return DefaultValue;
+        }
+    }
     public partial class TtMaterialFunctionInputF1 : Var.VarDimF1, IMaterialFunctionInput
     {
         public Rtti.TtTypeDesc InputType { get => VarType; }
@@ -530,6 +549,16 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 (TtMenuItem item, object sender) =>
                 {
                     var node = new TtMaterialFunctionInputTexture2D ();
+                    node.Name = $"InArg{NameSerialId++}";
+                    node.UserData = this;
+                    node.Position = PopMenuPosition;
+                    SetDefaultActionForNode(node);
+                    this.AddNode(node);
+                });
+            mfuncMenus.AddMenuItem("InSampler", null,
+                (TtMenuItem item, object sender) =>
+                {
+                    var node = new TtMaterialFunctionInputSamplerState();
                     node.Name = $"InArg{NameSerialId++}";
                     node.UserData = this;
                     node.Position = PopMenuPosition;

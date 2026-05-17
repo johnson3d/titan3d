@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3042516772500373086 Type="EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair@EngineCore">
+  <DynamicSrvName Type="System.String@Unknown" Order="0" />
+  <IsDynamic Type="System.Boolean@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <ShaderType Type="System.String@Unknown" Order="0" />
+  <Value Type="EngineNS.RName@EngineCore" Order="0" />
+</Hash_3042516772500373086>

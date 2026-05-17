@@ -95,15 +95,12 @@ namespace EngineNS.NxRHI
             }
         }
         public TtQueueStat QueueStats = new TtQueueStat();
-        public void Flush()
+        public void Flush(bool bFlushGPU)
         {
             lock (Cmds)
             {
-                FlushExecute();
+                FlushExecute(bFlushGPU);
                 TickSync(0);
-
-                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
-                //System.Diagnostics.Debug.Assert(Cmds.Count == 0);
             }
         }
         public void TickSync(float elapsedTime)
@@ -246,7 +243,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        public void FlushExecute()
+        public void FlushExecute(bool bFlushGPU)
         {
             bool bFindFrameEnd = false;
             NxRHI.FRCmdInfo endCmd = new();
@@ -274,7 +271,10 @@ namespace EngineNS.NxRHI
                 }
             }
 
-            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
+            if (bFlushGPU)
+            {
+                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
+            }
             if (bFindFrameEnd)
             {
                 lock (Cmds)

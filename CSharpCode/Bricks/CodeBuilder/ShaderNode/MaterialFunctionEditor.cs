@@ -127,29 +127,38 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 return false;
             }
 
-            //EngineNS.EGui.Controls.NodeGraph.PinLinker
-            //var graphStr = Material.GraphXMLString?.Replace("EngineNS.EGui.Controls.NodeGraph.PinLinker", "EngineNS.Bricks.NodeGraph.UPinLinker");
-            if (string.IsNullOrEmpty(MaterialFunction.GraphXMLString) == false)
+            if (MaterialFunction.EditMode == Graphics.Pipeline.Shader.EMaterialFunctionEditMode.Graph)
             {
-                var xml = IO.TtFileManager.LoadXmlFromString(MaterialFunction.GraphXMLString);
-                if (xml != null)
+                if (string.IsNullOrEmpty(MaterialFunction.GraphXMLString) == false)
                 {
-                    object pThis = this.MaterialGraph;
-                    IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
+                    var xml = IO.TtFileManager.LoadXmlFromString(MaterialFunction.GraphXMLString);
+                    if (xml != null)
+                    {
+                        object pThis = this.MaterialGraph;
+                        IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.Assert(false);
+                        MaterialFunction.GraphXMLString = MaterialFunction.GraphXMLString.Substring(0, MaterialFunction.GraphXMLString.Length - 1);
+                        xml = IO.TtFileManager.LoadXmlFromString(MaterialFunction.GraphXMLString);
+                        object pThis = this.MaterialGraph;
+                        IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
+                    }
                 }
-                else
+
+                for (int i = 0; i < MaterialGraph.Nodes.Count; i++)
                 {
-                    System.Diagnostics.Debug.Assert(false);
-                    MaterialFunction.GraphXMLString = MaterialFunction.GraphXMLString.Substring(0, MaterialFunction.GraphXMLString.Length - 1);
-                    xml = IO.TtFileManager.LoadXmlFromString(MaterialFunction.GraphXMLString);
-                    object pThis = this.MaterialGraph;
-                    IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
+                    MaterialGraph.SetDefaultActionForNode(MaterialGraph.Nodes[i]);
                 }
             }
-
-            for (int i = 0; i < MaterialGraph.Nodes.Count; i++)
+            else
             {
-                MaterialGraph.SetDefaultActionForNode(MaterialGraph.Nodes[i]);
+                // RawHLSL mode: load existing HLSL code into text editor
+                if (!string.IsNullOrEmpty(MaterialFunction.HLSLCode))
+                {
+                    mShaderEditor.mCoreObject.SetText(MaterialFunction.HLSLCode);
+                }
             }
 
             AssetName = name;
@@ -227,9 +236,16 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             ResetDockspace();
             EGui.UIProxy.DockProxy.EndMainForm(IsDrawing);
 
-            DrawShaderGraph();
-            DrawTextEditor();
-            DrawNodeDetails();
+            if (MaterialFunction.EditMode == Graphics.Pipeline.Shader.EMaterialFunctionEditMode.Graph)
+            {
+                DrawShaderGraph();
+                DrawTextEditor();
+                DrawNodeDetails();
+            }
+            else
+            {
+                DrawTextEditor();
+            }
             DrawMaterialDetails();
             DrawEditorDetails();
 
@@ -250,23 +266,42 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             ImGuiAPI.DockBuilderSetNodeSize(id, Vector2.One);
             mDockInitialized = true;
 
-            var rightId = id;
-            uint middleId = 0;
-            uint downId = 0;
-            uint leftId = 0;
-            uint rightUpId = 0;
-            uint rightDownId = 0;
-            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Left, 0.8f, ref middleId, ref rightId);
-            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
-            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
-            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
+            if (MaterialFunction.EditMode == Graphics.Pipeline.Shader.EMaterialFunctionEditMode.RawHLSL)
+            {
+                // RawHLSL mode: TextEditor as main area, no ShaderGraph/NodeDetails
+                var rightId = id;
+                uint middleId = 0;
+                uint rightUpId = 0;
+                uint rightDownId = 0;
+                ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Left, 0.75f, ref middleId, ref rightId);
+                ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
 
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("ShaderGraph", mDockKeyClass), middleId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("TextEditor", mDockKeyClass), middleId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightDownId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MaterialDetails", mDockKeyClass), rightDownId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), rightUpId);
+                ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("TextEditor", mDockKeyClass), middleId);
+                ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MaterialDetails", mDockKeyClass), rightDownId);
+                ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightDownId);
+                ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), rightUpId);
+            }
+            else
+            {
+                // Graph mode: ShaderGraph and TextEditor share middle area
+                var rightId = id;
+                uint middleId = 0;
+                uint downId = 0;
+                uint leftId = 0;
+                uint rightUpId = 0;
+                uint rightDownId = 0;
+                ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Left, 0.8f, ref middleId, ref rightId);
+                ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
+                ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
+                ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
+
+                ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("ShaderGraph", mDockKeyClass), middleId);
+                ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("TextEditor", mDockKeyClass), middleId);
+                ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
+                ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightDownId);
+                ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MaterialDetails", mDockKeyClass), rightDownId);
+                ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), rightUpId);
+            }
 
             ImGuiAPI.DockBuilderFinish(id);
         }
@@ -278,21 +313,51 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 var noused = Save();
             }
             ImGuiAPI.SameLine(0, -1);
+            var isRawHLSL = MaterialFunction.EditMode == Graphics.Pipeline.Shader.EMaterialFunctionEditMode.RawHLSL;
+            var modeLabel = isRawHLSL ? "Mode: RawHLSL" : "Mode: Graph";
+            if (EGui.UIProxy.CustomButton.ToolButton(modeLabel, in btSize))
+            {
+                if (isRawHLSL)
+                {
+                    MaterialFunction.EditMode = Graphics.Pipeline.Shader.EMaterialFunctionEditMode.Graph;
+                }
+                else
+                {
+                    // Switching to RawHLSL: ensure TextEditor has current code
+                    if (!string.IsNullOrEmpty(MaterialFunction.HLSLCode))
+                        mShaderEditor.mCoreObject.SetText(MaterialFunction.HLSLCode);
+                    MaterialFunction.EditMode = Graphics.Pipeline.Shader.EMaterialFunctionEditMode.RawHLSL;
+                }
+                mDockInitialized = false;
+            }
+            ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Compile", in btSize))
             {
-                var code = MaterialFunction.GenMateralFunctionGraphCode(new UHLSLCodeGenerator(), MaterialGraph, new TtMaterial());
-                System.Diagnostics.Trace.WriteLine(MaterialFunction.DefineCode.TextCode);
-                System.Diagnostics.Trace.WriteLine(code);
+                if (MaterialFunction.EditMode == Graphics.Pipeline.Shader.EMaterialFunctionEditMode.Graph)
+                {
+                    var code = MaterialFunction.GenMateralFunctionGraphCode(new UHLSLCodeGenerator(), MaterialGraph, new TtMaterial());
+                    System.Diagnostics.Trace.WriteLine(MaterialFunction.DefineCode.TextCode);
+                    System.Diagnostics.Trace.WriteLine(code);
 
-                var xml = new System.Xml.XmlDocument();
-                var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
-                xml.AppendChild(xmlRoot);
-                IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this);
-                var xmlText = IO.TtFileManager.GetXmlText(xml);
-                MaterialFunction.GraphXMLString = xmlText;
-                MaterialFunction.HLSLCode = code;
+                    var xml = new System.Xml.XmlDocument();
+                    var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
+                    xml.AppendChild(xmlRoot);
+                    IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this);
+                    var xmlText = IO.TtFileManager.GetXmlText(xml);
+                    MaterialFunction.GraphXMLString = xmlText;
+                    MaterialFunction.HLSLCode = code;
 
-                mShaderEditor.mCoreObject.SetText(code);
+                    mShaderEditor.mCoreObject.SetText(code);
+                }
+                else
+                {
+                    // RawHLSL mode: read code from text editor and parse signature
+                    MaterialFunction.HLSLCode = mShaderEditor.Text;
+                    MaterialFunction.ParseMethodMetaFromHLSL();
+                    // Sync corrected code (with hash-suffixed function name) back to editor
+                    mShaderEditor.mCoreObject.SetText(MaterialFunction.HLSLCode);
+                    System.Diagnostics.Trace.WriteLine(MaterialFunction.HLSLCode);
+                }
             }
         }
         bool ShowNodeGraph = true;
@@ -313,9 +378,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "TextEditor", ref ShowTextEditor, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                var winPos = ImGuiAPI.GetWindowPos();
-                var vpMin = ImGuiAPI.GetWindowContentRegionMin();
-                var vpMax = ImGuiAPI.GetWindowContentRegionMax();
+                bool isReadOnly = (MaterialFunction.EditMode == Graphics.Pipeline.Shader.EMaterialFunctionEditMode.Graph);
+                mShaderEditor.mCoreObject.SetReadOnly(isReadOnly);
                 mShaderEditor.mCoreObject.Render(AssetName.Name, in Vector2.Zero, false);
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
@@ -378,16 +442,23 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
         private async System.Threading.Tasks.Task Save()
         {
-            var xml = new System.Xml.XmlDocument();
-            var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
-            xml.AppendChild(xmlRoot);
-            IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, MaterialGraph);
-            var xmlText = IO.TtFileManager.GetXmlText(xml);
-            MaterialFunction.GraphXMLString = xmlText;
-            MaterialFunction.SaveAssetTo(MaterialFunction.AssetName);
-            //Material.SerialId++;
+            if (MaterialFunction.EditMode == Graphics.Pipeline.Shader.EMaterialFunctionEditMode.Graph)
+            {
+                var xml = new System.Xml.XmlDocument();
+                var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
+                xml.AppendChild(xmlRoot);
+                IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, MaterialGraph);
+                var xmlText = IO.TtFileManager.GetXmlText(xml);
+                MaterialFunction.GraphXMLString = xmlText;
+            }
+            else
+            {
+                // RawHLSL mode: save code from text editor directly
+                MaterialFunction.HLSLCode = mShaderEditor.Text;
+                MaterialFunction.ParseMethodMetaFromHLSL();
+            }
 
-            //Editor.USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+            MaterialFunction.SaveAssetTo(MaterialFunction.AssetName);
 
             if (await TtEngine.Instance.GfxDevice.MaterialFunctionManager.ReloadMaterialFuntion(MaterialFunction.AssetName))
             {

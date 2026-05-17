@@ -17,7 +17,7 @@ namespace EngineNS
         uint DockId { get; set; }
         ImGuiWindowClass DockKeyClass { get; }
         ImGuiCond_ DockCond { get; set; }
-        Thread.Async.TtTask<bool> Initialize();
+        
     }
     public class TtRootFormManager
     {
@@ -156,7 +156,6 @@ namespace EngineNS
 
                 mImGuiContext = (IntPtr)ImGuiAPI.CreateContext(new ImFontAtlas((void*)0));
                 ImGuiAPI.SetCurrentContext(mImGuiContext.ToPointer());
-                TtEngine.Instance.GfxDevice.SlateRenderer.RecreateFontDeviceTexture();
 
                 var io = ImGuiAPI.GetIO();
                 io.ConfigErrorRecovery = true;
@@ -192,6 +191,7 @@ namespace EngineNS
                 }
 
                 ImGui_Init_SDL(ImGuiAPI.GetIO(), NativeWindow.Window);
+                TtEngine.Instance.GfxDevice.SlateRenderer.RecreateFontDeviceTexture();
 
                 SetPerFrameImGuiData(1f / 60f);
             }

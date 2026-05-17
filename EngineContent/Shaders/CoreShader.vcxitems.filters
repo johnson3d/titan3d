@@ -496,6 +496,8 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\Collision\BVH\GpuBvhCommon.cginc">
       <Filter>Bricks\Collision\BVH</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\HemisphereMapping\HemisphereMapping.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\HemisphereMapping\HemisphereSkyFallback.cginc" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">
@@ -591,6 +593,7 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Collision\BVH\GpuBvhTraversal.compute">
       <Filter>Bricks\Collision\BVH</Filter>
     </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\HemisphereCaptureGen.compute" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FSR1\ffx_a.h">

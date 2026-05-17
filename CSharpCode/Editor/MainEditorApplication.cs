@@ -15,6 +15,73 @@ using System.Diagnostics;
 
 namespace EngineNS.Editor
 {
+    /// <summary>
+    /// Manages the "Plugins" main menu. Plugins that implement
+    /// <see cref="Bricks.AssemblyLoader.IPluginMenu"/> are automatically
+    /// collected after plugin loading and drawn as sub-menus.
+    /// Owned by <see cref="TtMainEditorApplication"/>.
+    /// </summary>
+    public class TtPluginMenuManager
+    {
+        private readonly List<Bricks.AssemblyLoader.IPluginMenu> mMenuProviders = new();
+        private int mLastPluginCount = -1;
+
+        public void RegisterMenuProvider(Bricks.AssemblyLoader.IPluginMenu provider)
+        {
+            if (!mMenuProviders.Contains(provider))
+                mMenuProviders.Add(provider);
+        }
+
+        public void UnregisterMenuProvider(Bricks.AssemblyLoader.IPluginMenu provider)
+        {
+            mMenuProviders.Remove(provider);
+        }
+
+        /// <summary>
+        /// Re-scan loaded plugin modules when the count changes (new plugin loaded / hot-reload).
+        /// </summary>
+        private void SyncFromPluginModules()
+        {
+            var manager = TtEngine.Instance?.PluginModuleManager;
+            if (manager == null)
+                return;
+
+            int currentCount = manager.PluginModules.Count;
+            if (currentCount == mLastPluginCount)
+                return;
+            mLastPluginCount = currentCount;
+
+            foreach (var kv in manager.PluginModules)
+            {
+                var plugin = kv.Value.GetPluginObject<Bricks.AssemblyLoader.IPlugin>();
+                if (plugin is Bricks.AssemblyLoader.IPluginMenu pluginMenu && !mMenuProviders.Contains(pluginMenu))
+                    mMenuProviders.Add(pluginMenu);
+            }
+        }
+
+        public unsafe void DrawPluginsMenu()
+        {
+            SyncFromPluginModules();
+
+            if (mMenuProviders.Count == 0)
+                return;
+
+            if (ImGuiAPI.BeginMenu("Plugins", true))
+            {
+                for (int i = 0; i < mMenuProviders.Count; i++)
+                {
+                    var provider = mMenuProviders[i];
+                    if (ImGuiAPI.BeginMenu(provider.PluginMenuName, true))
+                    {
+                        provider.OnDrawPluginMenu();
+                        ImGuiAPI.EndMenu();
+                    }
+                }
+                ImGuiAPI.EndMenu();
+            }
+        }
+    }
+
     public partial class TtMainEditorApplication : TtSlateApplication, ITickable
     {
         public int GetTickOrder()
@@ -49,6 +116,7 @@ namespace EngineNS.Editor
         public Bricks.ProjectGen.UBrickManager mBrickManager = null;
         public Editor.Forms.TtEditorSettings mEditorSettings;
         public TtPIEController mPIEController;
+        public TtPluginMenuManager PluginMenuManager { get; } = new TtPluginMenuManager();
 
         //public UEditorWorldViewportSlate WorldViewportSlate = null;
         //public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
@@ -738,6 +806,9 @@ namespace EngineNS.Editor
                 {
                     mMenuItems[i].OnDraw(in drawList, in Support.TtAnyPointer.Default);
                 }
+
+                PluginMenuManager.DrawPluginsMenu();
+
                 ImGuiAPI.EndMenuBar();
             }
             //if (ImGuiAPI.BeginMenuBar())

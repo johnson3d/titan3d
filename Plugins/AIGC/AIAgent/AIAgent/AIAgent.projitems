@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>b8c4f1a2-5d7e-4b9c-ae3f-2d4g6h8j0k1l</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>AIAgent</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Plugin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TtLLMProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TtOpenAIProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TtAIAgent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TtAgentConfig.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TtAIChatPanel.cs" />
+  </ItemGroup>
+</Project>

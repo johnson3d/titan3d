@@ -10,5 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)FFTWaveSimulation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SWEWaterCompute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SWEWaterNode.cs" />
   </ItemGroup>
 </Project>

@@ -58,7 +58,7 @@ namespace EngineNS
         }
         [Rtti.Meta("")]
         [Category("Option")]
-        public string NativeDll { get; set; } = "release";
+        public string NativeDll { get; set; } = "auto";
         [Rtti.Meta("")]
         [Category("Option")]
         public string ImGuiIniPath { get; set; } = "imgui.ini";
@@ -364,22 +364,23 @@ namespace EngineNS
                 cfgFile = FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) + "EngineConfigDX11.jscfg";
             Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Load Application Config:{cfgFile}");
 
-            if (IO.TtFileManager.GetExtName(cfgFile) == ".cfg")
-            {
-                Config = IO.TtFileManager.LoadXmlToObject<TtEngineConfig>(cfgFile);
-                System.Diagnostics.Debug.Assert(false);
-            }
-            else if (IO.TtFileManager.GetExtName(cfgFile) == ".jscfg")
+            if (IO.TtFileManager.GetExtName(cfgFile) == ".jscfg")
             {
                 var jsCode = IO.TtFileManager.ReadAllText(cfgFile);
                 Config = IO.TtFileManager.LoadObjectFromJson<TtEngineConfig>(jsCode);
 
+                //从cache中读取override config
                 var patch_dir = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Config);
                 var patch_file = IO.TtFileManager.CombinePath(patch_dir, "engine.jscfg");
                 jsCode = IO.TtFileManager.ReadAllText(patch_file);
-                if (jsCode!=null)
+                if (jsCode != null)
                     IO.TtAdvancedJsonPartialUpdater.PartialUpdate<TtEngineConfig>(jsCode, Config, null);
             }
+            else if (IO.TtFileManager.GetExtName(cfgFile) == ".cfg")
+            {
+                Config = IO.TtFileManager.LoadXmlToObject<TtEngineConfig>(cfgFile);
+                System.Diagnostics.Debug.Assert(false);
+            } 
             else
             {
                 System.Diagnostics.Debug.Assert(false);
@@ -691,11 +692,13 @@ namespace EngineNS
         }
         public void FinalCleanup()
         {
+            this.PluginModuleManager.Dispose();
+
             Tracer.Dispose();
 
             TaskCollector.Dispose();
 
-            GfxDevice.RenderQueue.Flush();
+            GfxDevice.RenderQueue.Flush(true);
             TickableManager.Cleanup();
             StopSystemThreads();
 

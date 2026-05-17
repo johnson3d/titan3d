@@ -53,24 +53,18 @@ $managedProjects = @(
     'Module\MainEditor\MainEditor.csproj'
 )
 
-$pluginProjects = @(
-    'Plugins\GameCore\Inventory\Inventory.All\Inventory.All.csproj',
-    'Plugins\Game\Survivor\Survivor.All\Survivor.All.csproj',
-    'Plugins\GameItems\GameItems.All\GameItems.All.csproj',
-    'Plugins\GameTasks\GameTasks.All\GameTasks.All.csproj',
-    'Plugins\RpcCaller\RpcCaller.Window\RpcCaller.Window.csproj',
-    'Plugins\GameServer\GameServer.Window\GameServer.Window.csproj',
-    'Plugins\GameServer\Root\RootServer.Window\RootServer.Window.csproj',
-    'Plugins\GameServer\Login\LoginServer.Window\LoginServer.Window.csproj',
-    'Plugins\GameServer\Gate\GateServer.Window\GateServer.Window.csproj',
-    'Plugins\GameServer\Level\LevelServer.Window\LevelServer.Window.csproj',
-    'Plugins\GameServer\ClientRobot\ClientRobot.Window\ClientRobot.Window.csproj',
-    'Plugins\AIGC\MCPServer\MCPServer.All\MCPServer.All.csproj',
-    'Plugins\AIGC\TencentAIGC\TencentAIGC.All\TencentAIGC.All.csproj',
-    'Plugins\SourceGit\SourceGit.Window\SourceGit.Window.csproj',
-    'Plugins\VisualStudioPlugin\VisualStudioPlugin.Window\VisualStudioPlugin.Window.csproj',
-    'Plugins\DataCopyer\DataCopyer.All\DataCopyer.All.csproj'
-)
+$pluginProjects = @()
+$pluginsRoot = Join-Path $repoRoot 'Plugins'
+foreach ($pluginFile in (Get-ChildItem -Path $pluginsRoot -Filter '*.plugin' -Recurse)) {
+    $pluginDir = $pluginFile.DirectoryName
+    $csprojFiles = Get-ChildItem -Path $pluginDir -Filter '*.csproj' -Recurse |
+        Where-Object { $_.FullName -notmatch '\\obj\\' }
+    foreach ($csproj in $csprojFiles) {
+        $relativePath = $csproj.FullName.Substring($repoRoot.Length).TrimStart('\')
+        $pluginProjects += $relativePath
+    }
+}
+$pluginProjects = $pluginProjects | Select-Object -Unique
 
 function Invoke-DotNetRestore {
     param([Parameter(Mandatory = $true)][string]$Project)

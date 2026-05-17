@@ -1,0 +1,137 @@
+#ifndef _HEMISPHERE_CAPTURE_GEN_COMPUTE_
+#define _HEMISPHERE_CAPTURE_GEN_COMPUTE_
+
+// HemisphereCaptureGen.compute
+// Generates a hemisphere-mapped sky texture from a 2D scene capture (cubemap face or equirect).
+// The output texture stores upper-hemisphere radiance using octahedral mapping,
+// intended as sky fallback when screen-space ray tracing misses.
+//
+// Dispatch: (OutputWidth/8, OutputHeight/8, 1)
+
+#include "../../Inc/Math.cginc"
+#include "HemisphereMapping/HemisphereMapping.cginc"
+
+cbuffer cbHemisphereCapture : register(b0)
+{
+    uint OutputWidth;
+    uint OutputHeight;
+    float CaptureIntensity;     // HDR intensity multiplier
+    float MaxMipLevel;          // max mip for pre-filtered roughness levels
+    float4 SkyTintColor;        // tint/exposure control
+    float4x4 CaptureRotation;  // rotation matrix to align capture with world up
+};
+
+// Input: 2D equirectangular capture of the sky dome
+Texture2D<float4> InputSkyCapture : register(t0);
+SamplerState SampLinearClamp : register(s0);
+
+// Output: hemisphere-mapped sky texture (octahedral, upper hemisphere only)
+RWTexture2D<float4> OutputHemisphereMap : register(u0);
+
+// Convert a world-space direction to equirectangular UV
+float2 DirectionToEquirectUV(float3 direction)
+{
+    float phi = atan2(direction.z, direction.x);  // [-PI, PI]
+    float theta = asin(clamp(direction.y, -1.0, 1.0)); // [-PI/2, PI/2]
+
+    float2 uv;
+    uv.x = phi * (1.0 / (2.0 * PI)) + 0.5;  // [0, 1]
+    uv.y = theta * (1.0 / PI) + 0.5;          // [0, 1]
+    return uv;
+}
+
+[numthreads(8, 8, 1)]
+void CS_GenerateHemisphereMap(uint3 dispatchThreadId : SV_DispatchThreadID)
+{
+    if (dispatchThreadId.x >= OutputWidth || dispatchThreadId.y >= OutputHeight)
+        return;
+
+    // Compute UV for this texel in the output hemisphere map
+    float2 uv = (float2(dispatchThreadId.xy) + 0.5) / float2(OutputWidth, OutputHeight);
+
+    // Convert UV to upper hemisphere direction via octahedral inverse mapping
+    float3 hemisphereDir = HemisphereUVToDir(uv);
+
+    // Apply capture rotation (allows aligning the capture orientation with world)
+    float3 worldDir = mul((float3x3)CaptureRotation, hemisphereDir);
+
+    // Sample sky capture using equirectangular mapping
+    float2 captureUV = DirectionToEquirectUV(worldDir);
+    float3 skyRadiance = InputSkyCapture.SampleLevel(SampLinearClamp, captureUV, 0).rgb;
+
+    // Apply intensity and tint
+    skyRadiance *= CaptureIntensity * SkyTintColor.rgb;
+
+    OutputHemisphereMap[dispatchThreadId.xy] = float4(skyRadiance, 1.0);
+}
+
+// Pre-filtered version for rough reflections (importance-sampled cosine lobe)
+// Generates a specific mip level with given roughness
+[numthreads(8, 8, 1)]
+void CS_GenerateHemisphereMapFiltered(uint3 dispatchThreadId : SV_DispatchThreadID)
+{
+    uint mipWidth = OutputWidth >> 1;
+    uint mipHeight = OutputHeight >> 1;
+    if (dispatchThreadId.x >= mipWidth || dispatchThreadId.y >= mipHeight)
+        return;
+
+    float2 uv = (float2(dispatchThreadId.xy) + 0.5) / float2(mipWidth, mipHeight);
+    float3 hemisphereDir = HemisphereUVToDir(uv);
+    float3 normal = hemisphereDir;
+
+    // Approximate roughness from current mip level relative to max
+    float roughness = saturate(MaxMipLevel > 0 ? (float(dispatchThreadId.z + 1) / MaxMipLevel) : 0.5);
+
+    // Pre-filter with cosine-weighted importance sampling
+    const uint numSamples = 64;
+    float3 prefilteredColor = float3(0, 0, 0);
+    float totalWeight = 0.0;
+
+    for (uint i = 0; i < numSamples; ++i)
+    {
+        // Hammersley low-discrepancy sequence
+        uint bits = i;
+        bits = (bits << 16u) | (bits >> 16u);
+        bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+        bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+        bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+        bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+        float2 xi = float2(float(i) / float(numSamples), float(bits) * 2.3283064365386963e-10);
+
+        // GGX importance sampling around the normal direction
+        float a = roughness * roughness;
+        float phi = 2.0 * PI * xi.x;
+        float cosTheta = sqrt((1.0 - xi.y) / (1.0 + (a * a - 1.0) * xi.y));
+        float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+
+        float3 halfVec;
+        halfVec.x = sinTheta * cos(phi);
+        halfVec.y = sinTheta * sin(phi);
+        halfVec.z = cosTheta;
+
+        // Transform to world space around normal
+        float3 up = abs(normal.z) < 0.999 ? float3(0, 0, 1) : float3(1, 0, 0);
+        float3 tangent = normalize(cross(up, normal));
+        float3 bitangent = cross(normal, tangent);
+
+        float3 sampleDir = tangent * halfVec.x + bitangent * halfVec.y + normal * halfVec.z;
+        sampleDir = normalize(sampleDir);
+
+        float NoL = saturate(dot(normal, sampleDir));
+        if (NoL > 0.0)
+        {
+            float3 worldSampleDir = mul((float3x3)CaptureRotation, sampleDir);
+            float2 sampleUV = DirectionToEquirectUV(worldSampleDir);
+            float3 radiance = InputSkyCapture.SampleLevel(SampLinearClamp, sampleUV, 0).rgb;
+            prefilteredColor += radiance * NoL;
+            totalWeight += NoL;
+        }
+    }
+
+    prefilteredColor = totalWeight > 0.0 ? (prefilteredColor / totalWeight) : float3(0, 0, 0);
+    prefilteredColor *= CaptureIntensity * SkyTintColor.rgb;
+
+    OutputHemisphereMap[dispatchThreadId.xy] = float4(prefilteredColor, 1.0);
+}
+
+#endif // _HEMISPHERE_CAPTURE_GEN_COMPUTE_

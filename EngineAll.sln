@@ -10,9 +10,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core.Window", "Core.Window\
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Cpp", "Cpp", "{892AFF4D-69EA-4061-8F59-320A21A0814A}"
-	ProjectSection(SolutionItems) = preProject
-		CallTHT.bat = CallTHT.bat
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Gen", "Gen", "{B1391DAF-2B68-4BD1-9F0B-2A4A15E882E1}"
 EndProject
@@ -81,9 +78,6 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "StbImageWriteSharp", "3rd\csharp\StbImageWriteSharp\StbImageWriteSharp.shproj", "{6EB3104E-609F-4157-9DD5-5E510D939BF2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Module", "Module", "{F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}"
-	ProjectSection(SolutionItems) = preProject
-		CS_Engine.bat = CS_Engine.bat
-	EndProjectSection
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Procedure", "CSharpCode\Bricks\Procedure\Procedure.shproj", "{10AEE1EB-9CE5-4B81-9973-960D39A80141}"
 EndProject
@@ -550,6 +544,15 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPServer.All", "Plugins\AIGC\MCPServer\MCPServer.All\MCPServer.All.csproj", "{4AF63FFB-9631-4F05-A93D-568A40170062}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MCPServer", "Plugins\AIGC\MCPServer\MCPServer\MCPServer.shproj", "{A7B3E2D1-4F6C-4A8B-9D2E-1C3F5A7B9D0E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AIAgent", "AIAgent", "{F1A2B3C4-D5E6-4F78-9A0B-C1D2E3F4A5B6}"
+	ProjectSection(SolutionItems) = preProject
+		Plugins\AIGC\AIAgent\AIAgent.plugin = Plugins\AIGC\AIAgent\AIAgent.plugin
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIAgent.All", "Plugins\AIGC\AIAgent\AIAgent.All\AIAgent.All.csproj", "{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AIAgent", "Plugins\AIGC\AIAgent\AIAgent\AIAgent.shproj", "{B8C4F1A2-5D7E-4B9C-AE3F-2D4A6B8C0D1E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TtEngineLints", "Module\TtEngineLints\TtEngineLints.csproj", "{C139E700-C23E-42FF-9581-DC319D48D550}"
 EndProject
@@ -1148,6 +1151,24 @@ Global
 		{4AF63FFB-9631-4F05-A93D-568A40170062}.Release|x64.Build.0 = Release|Any CPU
 		{4AF63FFB-9631-4F05-A93D-568A40170062}.Release|x86.ActiveCfg = Release|Any CPU
 		{4AF63FFB-9631-4F05-A93D-568A40170062}.Release|x86.Build.0 = Release|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.Debug|x64.Build.0 = Debug|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.Debug|x86.Build.0 = Debug|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.DebugOnlyCS|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.DebugOnlyCS|Any CPU.Build.0 = Debug|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.DebugOnlyCS|x64.ActiveCfg = Debug|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.DebugOnlyCS|x64.Build.0 = Debug|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.DebugOnlyCS|x86.ActiveCfg = Debug|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.DebugOnlyCS|x86.Build.0 = Debug|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.Release|x64.ActiveCfg = Release|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.Release|x64.Build.0 = Release|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.Release|x86.ActiveCfg = Release|Any CPU
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7}.Release|x86.Build.0 = Release|Any CPU
 		{C139E700-C23E-42FF-9581-DC319D48D550}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C139E700-C23E-42FF-9581-DC319D48D550}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C139E700-C23E-42FF-9581-DC319D48D550}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -1378,6 +1399,9 @@ Global
 		{47B88D36-3811-0386-0BB7-F9383A3141C4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{4AF63FFB-9631-4F05-A93D-568A40170062} = {47B88D36-3811-0386-0BB7-F9383A3141C4}
 		{A7B3E2D1-4F6C-4A8B-9D2E-1C3F5A7B9D0E} = {47B88D36-3811-0386-0BB7-F9383A3141C4}
+		{F1A2B3C4-D5E6-4F78-9A0B-C1D2E3F4A5B6} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7} = {F1A2B3C4-D5E6-4F78-9A0B-C1D2E3F4A5B6}
+		{B8C4F1A2-5D7E-4B9C-AE3F-2D4A6B8C0D1E} = {F1A2B3C4-D5E6-4F78-9A0B-C1D2E3F4A5B6}
 		{C139E700-C23E-42FF-9581-DC319D48D550} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
 		{0E150C09-B1D7-4AF3-B402-6F9CC209FBF6} = {9DD1EA3E-A1BD-43B5-9F2A-B1AA3DD5F01A}
 	EndGlobalSection
@@ -1726,6 +1750,7 @@ Global
 		3rd\native\FreeType\FreeType.vcxitems*{b6c92324-224e-420b-8d99-343a9cde08ae}*SharedItemsImports = 9
 		NativeCode\Bricks\PhysicsCore\NvPhysX\NvPhysX.vcxitems*{b6cab0aa-e7d9-4f42-be02-92f6a6ec6e33}*SharedItemsImports = 9
 		3rd\native\zstd\zstd.vcxitems*{b788d96b-fbce-4746-ae5b-e82a6993e5f5}*SharedItemsImports = 9
+		Plugins\AIGC\AIAgent\AIAgent\AIAgent.projitems*{b8c4f1a2-5d7e-4b9c-ae3f-2d4a6b8c0d1e}*SharedItemsImports = 13
 		CSharpCode\Math\Math.projitems*{ba72ed15-3c3c-4a4c-8d57-5a9f181a59d0}*SharedItemsImports = 13
 		CSharpCode\Bricks\Meshly\Meshly.projitems*{bafed495-15b8-4113-bc81-ac9df10d3619}*SharedItemsImports = 13
 		3rd\native\miniz\miniz.vcxitems*{bb5c9f78-44f7-4300-8c3e-0502f529e1cc}*SharedItemsImports = 9
@@ -1744,6 +1769,7 @@ Global
 		CSharpCode\Bricks\Particle\Particle.projitems*{d15c508d-f0bb-4843-8b50-38728b79bba9}*SharedItemsImports = 13
 		CSharpCode\Bricks\FX\Water\Water.projitems*{d1a38c88-04ab-4b5f-963e-0306b901cc2b}*SharedItemsImports = 13
 		NativeCode\Bricks\Quark\Quark.vcxitems*{d21c4a2f-7c4b-4a5c-bd49-d538d741821d}*SharedItemsImports = 9
+		Plugins\AIGC\AIAgent\AIAgent\AIAgent.projitems*{d2e3f4a5-b6c7-4d89-0e1f-a2b3c4d5e6f7}*SharedItemsImports = 5
 		CSharpCode\Bricks\DataSet\DataSet.projitems*{d52d7fe3-c34d-4337-9b82-e917f8d29b4c}*SharedItemsImports = 13
 		Plugins\GameCore\Inventory\Inventory.projitems*{d8ca055a-683b-1525-c7f5-a4f27660e550}*SharedItemsImports = 5
 		CSharpCode\NxRHI\NxRHI.projitems*{d97f536c-7fe8-49bb-b9cb-4ba6ea85488c}*SharedItemsImports = 13

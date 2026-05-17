@@ -488,6 +488,14 @@ public:
 	{
 		TextEditor.SetSelection(TextEditor::Coordinates(), TextEditor::Coordinates(TextEditor.GetTotalLines(), 0));
 	}
+	void SetReadOnly(bool aValue)
+	{
+		TextEditor.SetReadOnly(aValue);
+	}
+	bool IsReadOnly()
+	{
+		return TextEditor.IsReadOnly();
+	}
 	void SetViewStyle(const char* view)
 	{
 		if (strcmp("Dark", view) == 0)

@@ -71,7 +71,8 @@
     "Survivor",
     "TencentAIGC",
     "VisualStudioPlugin",
-    "MCPServer"
+    "MCPServer",
+    "AIAgent"
   ],
   "TypeAssemblies": []
 }

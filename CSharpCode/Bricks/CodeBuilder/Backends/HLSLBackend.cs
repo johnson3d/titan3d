@@ -562,8 +562,10 @@ namespace EngineNS.Bricks.CodeBuilder
                         sourceCode += "(half4)0";
                         break;
                     case "Texture2D":
-                        sourceCode = 
                         sourceCode += "DefaultTexture";
+                        break;
+                    case "SamplerState":
+                        sourceCode += "DefaultSampLinear";
                         break;
                     default:
                         {

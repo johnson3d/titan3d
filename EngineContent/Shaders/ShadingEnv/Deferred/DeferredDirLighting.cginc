@@ -330,8 +330,35 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
 	half FinalShadowValue = min(1.0h, ShadowValue + DirLightLeak);
 
-	BaseShading = DirLightDiffuseShading * FinalShadowValue + DirLightSpecShading * ShadowValue + SkyShading;
-    BaseShading = BaseShading * AOs + EnvSpec;
+	int shadingMode = GBuffer.GetShadingMode();
+	if (shadingMode == EShadingMode_Subsurface)
+	{
+		// Subsurface scattering approximation
+		// Wrap diffuse lighting for softer terminator
+		half wrapNoL = saturate((NoLsigned + 0.5h) / 1.5h);
+		half3 subsurfaceColor = Albedo; // use albedo as subsurface scatter color
+		half scatterPower = 12.0h;
+		
+		// View-dependent back-scattering term
+		half3 scatterDir = L + N * 0.5h;
+		half VdotScatter = saturate(dot(V, -scatterDir));
+		half3 backScatter = pow(VdotScatter, scatterPower) * subsurfaceColor * Idir * Cdir;
+		
+		// Softer diffuse with wrap lighting
+		half3 sssDiffuse = wrapNoL * Idir * Cdir * OptDiffShading;
+		
+		// Reduced specular for subsurface materials
+		half3 sssSpec = DirLightSpecShading * 0.5h;
+		
+		BaseShading = (sssDiffuse + backScatter) * FinalShadowValue + sssSpec * ShadowValue + SkyShading;
+		BaseShading = BaseShading * AOs + EnvSpec * 0.5h;
+	}
+	else
+	{
+		// Default PBR shading
+		BaseShading = DirLightDiffuseShading * FinalShadowValue + DirLightSpecShading * ShadowValue + SkyShading;
+		BaseShading = BaseShading * AOs + EnvSpec;
+	}
 
 #if ENV_DISABLE_POINTLIGHTS == 0
 	if (NoPixel == false)

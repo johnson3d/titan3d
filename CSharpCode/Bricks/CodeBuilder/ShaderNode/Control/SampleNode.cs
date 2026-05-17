@@ -22,6 +22,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta("")]
         [Category("Option")]
         public string TextureVarName { get; set; }
+        /// <summary>
+        /// 是否使用动态 SRV（运行时由 TtDynamicSrvRegistry 提供，而非静态纹理资产）
+        /// </summary>
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public bool IsDynamic { get; set; } = false;
+        /// <summary>
+        /// 动态 SRV 在 TtDynamicSrvRegistry 中的注册名（仅 IsDynamic=true 时有效）
+        /// </summary>
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public string DynamicSrvName { get; set; }
         RName mAssetName;
         [Rtti.Meta("")]
         [Category("Option")]
@@ -108,9 +120,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameRNamePair();
                 tmp.Name = TextureVarName;
                 tmp.ShaderType = "Texture2D";
+                tmp.IsDynamic = IsDynamic;
+                tmp.DynamicSrvName = DynamicSrvName;
                 if (material.FindSRV(tmp.Name) == null)
                 {
-                    tmp.Value = AssetName;
+                    if (!IsDynamic)
+                        tmp.Value = AssetName;
                     material.UsedSrView.Add(tmp);
                 }
             }
@@ -145,6 +160,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta("")]
         [Category("Option")]
         public string TextureVarName { get; set; }
+        /// <summary>
+        /// 是否使用动态 SRV（运行时由 TtDynamicSrvRegistry 提供）
+        /// </summary>
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public bool IsDynamic { get; set; } = false;
+        /// <summary>
+        /// 动态 SRV 在 TtDynamicSrvRegistry 中的注册名
+        /// </summary>
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public string DynamicSrvName { get; set; }
 
         RName mAssetName;
         [Rtti.Meta("")]
@@ -243,9 +270,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameRNamePair();
                 tmp.Name = TextureVarName;
                 tmp.ShaderType = "Texture2D";
+                tmp.IsDynamic = IsDynamic;
+                tmp.DynamicSrvName = DynamicSrvName;
                 if (material.FindSRV(tmp.Name) == null)
                 {
-                    tmp.Value = AssetName;
+                    if (!IsDynamic)
+                        tmp.Value = AssetName;
                     material.UsedSrView.Add(tmp);
                 }
             }
@@ -281,6 +311,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta("")]
         [Category("Option")]
         public string TextureVarName { get; set; }
+        /// <summary>
+        /// 是否使用动态 SRV（运行时由 TtDynamicSrvRegistry 提供）
+        /// </summary>
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public bool IsDynamic { get; set; } = false;
+        /// <summary>
+        /// 动态 SRV 在 TtDynamicSrvRegistry 中的注册名
+        /// </summary>
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public string DynamicSrvName { get; set; }
         RName mAssetName;
         [Rtti.Meta("")]
         [Category("Option")]
@@ -371,9 +413,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameRNamePair();
                 tmp.Name = TextureVarName;
                 tmp.ShaderType = "Texture2D";
+                tmp.IsDynamic = IsDynamic;
+                tmp.DynamicSrvName = DynamicSrvName;
                 if (material.FindSRV(tmp.Name) == null)
                 {
-                    tmp.Value = AssetName;
+                    if (!IsDynamic)
+                        tmp.Value = AssetName;
                     material.UsedSrView.Add(tmp);
                 }
             }
@@ -407,6 +452,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta("")]
         [Category("Option")]
         public string TextureVarName { get; set; }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public bool IsDynamic { get; set; } = false;
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public string DynamicSrvName { get; set; }
         RName mAssetName;
         [Rtti.Meta("")]
         [Category("Option")]
@@ -492,9 +543,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameRNamePair();
                 tmp.Name = TextureVarName;
                 tmp.ShaderType = "Texture2D";
+                tmp.IsDynamic = IsDynamic;
+                tmp.DynamicSrvName = DynamicSrvName;
                 if (material.FindSRV(tmp.Name) == null)
                 {
-                    tmp.Value = AssetName;
+                    if (!IsDynamic)
+                        tmp.Value = AssetName;
                     material.UsedSrView.Add(tmp);
                 }
             }
@@ -528,6 +582,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta("")]
         [Category("Option")]
         public string TextureVarName { get; set; }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public bool IsDynamic { get; set; } = false;
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public string DynamicSrvName { get; set; }
         RName mAssetName;
         [Rtti.Meta("")]
         [Category("Option")]
@@ -612,9 +672,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameRNamePair();
                 tmp.Name = TextureVarName;
                 tmp.ShaderType = "Texture2D";
+                tmp.IsDynamic = IsDynamic;
+                tmp.DynamicSrvName = DynamicSrvName;
                 if (material.FindSRV(tmp.Name) == null)
                 {
-                    tmp.Value = AssetName;
+                    if (!IsDynamic)
+                        tmp.Value = AssetName;
                     material.UsedSrView.Add(tmp);
                 }
             }

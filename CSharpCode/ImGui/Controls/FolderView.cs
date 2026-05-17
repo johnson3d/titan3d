@@ -1,8 +1,11 @@
 ﻿using EngineNS.Thread;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EngineNS.EGui.Controls
 {
@@ -18,6 +21,96 @@ namespace EngineNS.EGui.Controls
         public Dictionary<string, bool> DirectoryShowFlags = new Dictionary<string, bool>();
         public Rtti.TtTypeDesc MacrossBase = null;
         public string ShaderType = null;
+        readonly HashSet<string> mPendingDirectoryShowChecks = new HashSet<string>();
+        readonly ConcurrentQueue<DirectoryShowCheckResult> mDirectoryShowCheckResults = new ConcurrentQueue<DirectoryShowCheckResult>();
+        static readonly SemaphoreSlim DirectoryShowCheckSemaphore = new SemaphoreSlim(1, 1);
+        int mDirectoryShowCheckVersion = 0;
+
+        struct DirectoryShowCheckResult
+        {
+            public string Path;
+            public bool HasTarget;
+            public int Version;
+        }
+
+        public void ClearDirectoryShowCache()
+        {
+            DirectoryShowFlags.Clear();
+            mPendingDirectoryShowChecks.Clear();
+            Interlocked.Increment(ref mDirectoryShowCheckVersion);
+            while (mDirectoryShowCheckResults.TryDequeue(out _))
+            {
+            }
+        }
+
+        void ApplyDirectoryShowCheckResults()
+        {
+            while (mDirectoryShowCheckResults.TryDequeue(out var result))
+            {
+                if (result.Version != mDirectoryShowCheckVersion)
+                    continue;
+
+                mPendingDirectoryShowChecks.Remove(result.Path);
+                DirectoryShowFlags[result.Path] = result.HasTarget;
+            }
+        }
+
+        void RequestDirectoryShowCheck(string path)
+        {
+            if (string.IsNullOrEmpty(path) || mPendingDirectoryShowChecks.Contains(path))
+                return;
+
+            var extNames = ExtNameArray;
+            if (extNames == null || extNames.Length == 0)
+                return;
+
+            var version = mDirectoryShowCheckVersion;
+            var extCopy = new string[extNames.Length];
+            Array.Copy(extNames, extCopy, extNames.Length);
+            mPendingDirectoryShowChecks.Add(path);
+            Task.Run(async () =>
+            {
+                await DirectoryShowCheckSemaphore.WaitAsync();
+                try
+                {
+                    if (version != mDirectoryShowCheckVersion)
+                        return;
+
+                    var hasTarget = DirectoryContainsTargetAsset(path, extCopy);
+                    mDirectoryShowCheckResults.Enqueue(new DirectoryShowCheckResult()
+                    {
+                        Path = path,
+                        HasTarget = hasTarget,
+                        Version = version,
+                    });
+                }
+                finally
+                {
+                    DirectoryShowCheckSemaphore.Release();
+                }
+            });
+        }
+
+        static bool DirectoryContainsTargetAsset(string path, string[] extNames)
+        {
+            try
+            {
+                // Keep folder filtering cheap: subtype checks still happen when the content pane loads asset metadata.
+                foreach (var file in System.IO.Directory.EnumerateFiles(path, "*" + IO.IAssetMeta.MetaExt, System.IO.SearchOption.AllDirectories))
+                {
+                    for (int i = 0; i < extNames.Length; i++)
+                    {
+                        if (file.EndsWith(extNames[i] + IO.IAssetMeta.MetaExt, StringComparison.OrdinalIgnoreCase))
+                            return true;
+                    }
+                }
+            }
+            catch
+            {
+                return true;
+            }
+            return false;
+        }
 
         public static string FolderOpenImgName = "uestyle/content/folderopen.srv";
         public static string FolderClosedImgName = "uestyle/content/folderclosed.srv";
@@ -58,6 +151,7 @@ namespace EngineNS.EGui.Controls
         }
         public void Draw(in Vector2 size)
         {
+            ApplyDirectoryShowCheckResults();
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ChildBg, 0xFF1A1A1A);
             if (ImGuiAPI.BeginChild("LeftWindow", in size, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
             {
@@ -223,61 +317,12 @@ namespace EngineNS.EGui.Controls
 
             if (ExtNameArray != null && ExtNameArray.Length > 0)
             {
-                if (!DirectoryShowFlags.ContainsKey(path))
+                if (!DirectoryShowFlags.TryGetValue(path, out var hasTarget))
                 {
-                    bool hasTarget = false;
-                    for (int i = 0; i < ExtNameArray.Length; i++)
-                    {
-                        var files = IO.TtFileManager.GetFiles(path, "*" + ExtNameArray[i] + IO.IAssetMeta.MetaExt);
-                        if (files.Length == 0)
-                            continue;
-                        if (MacrossBase != null && ExtNameArray[i] == Bricks.CodeBuilder.TtMacross.AssetExt)
-                        {
-                            foreach (var f in files)
-                            {
-                                var ff = f.Substring(0, f.Length - ".ameta".Length);
-                                var ameta1 = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRNameFromAbsPath(ff)) as Bricks.CodeBuilder.TtMacrossAMeta;
-                                if (ameta1 == null)
-                                    continue;
-
-                                if (ameta1.BaseType != MacrossBase && ameta1.BaseType.IsSubclassOf(MacrossBase.SystemType) == false)
-                                {
-                                    continue;
-                                }
-                                hasTarget = true;
-                                break;
-                            }
-                            if (hasTarget)
-                                break;
-                        }
-                        else if (ShaderType != null && ExtNameArray[i] == Graphics.Pipeline.Shader.TtShaderAsset.AssetExt)
-                        {
-                            foreach (var f in files)
-                            {
-                                var ff = f.Substring(0, f.Length - ".ameta".Length);
-                                var ameta1 = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRNameFromAbsPath(ff)) as Graphics.Pipeline.Shader.TtShaderAssetAMeta;
-                                if (ameta1 == null)
-                                    continue;
-
-                                if (ameta1.ShaderType != ShaderType)
-                                {
-                                    continue;
-                                }
-                                hasTarget = true;
-                                break;
-                            }
-                            if (hasTarget)
-                                break;
-                        }
-                        else
-                        {
-                            hasTarget = true;
-                            break;
-                        }
-                    }
-                    DirectoryShowFlags[path] = hasTarget;
+                    RequestDirectoryShowCheck(path);
+                    hasTarget = true;
                 }
-                if (!DirectoryShowFlags[path])
+                if (!hasTarget)
                     return;
 
             }
@@ -403,6 +448,7 @@ namespace EngineNS.EGui.Controls
             {
                 case UIProxy.SingleInputDialog.enResult.OK:
                     IO.TtFileManager.CreateDirectory(mCreateFolderDir + mNewFolderName);
+                    ClearDirectoryShowCache();
                     mNewFolderName = "NewFolder";
                     mCreateFolderDir = null;
                     break;

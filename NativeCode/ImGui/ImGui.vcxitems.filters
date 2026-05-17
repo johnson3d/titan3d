@@ -33,6 +33,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)dirent\dirent.h">
       <Filter>dirent</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)imgui_markdown.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="freetype">

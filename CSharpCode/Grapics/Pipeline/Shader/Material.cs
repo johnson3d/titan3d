@@ -440,7 +440,20 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             None = 0,
             DisableEnvColor = 1,
+            // bit1~5 reserved for future flags
+            // bit6~9: ShadingMode (4 bits, use EShadingMode enum)
+            ShadingModeMask = 0x03C0, // (0xF << 6)
         }
+
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "EShadingMode")]
+        public enum EShadingMode : uint
+        {
+            PBR = 0,
+            Subsurface = 1,
+        }
+
+        private const int ShadingModeBitOffset = 6;
+
         private ERenderFlags mRenderFlags = ERenderFlags.None;
         [Rtti.Meta("")]
         [Category("Option")]
@@ -458,6 +471,20 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     mRenderFlags |= ERenderFlags.DisableEnvColor;
                 else
                     mRenderFlags &= (~ERenderFlags.DisableEnvColor);
+            }
+        }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public virtual EShadingMode ShadingMode
+        {
+            get
+            {
+                return (EShadingMode)(((uint)mRenderFlags & (uint)ERenderFlags.ShadingModeMask) >> ShadingModeBitOffset);
+            }
+            set
+            {
+                mRenderFlags = (ERenderFlags)(((uint)mRenderFlags & ~(uint)ERenderFlags.ShadingModeMask)
+                    | (((uint)value << ShadingModeBitOffset) & (uint)ERenderFlags.ShadingModeMask));
             }
         }
         #endregion
@@ -762,12 +789,26 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             [Rtti.Meta("")]
             public string ShaderType { get; set; } = "Texture2D";
+            /// <summary>
+            /// 是否为动态 SRV（运行时由 TtDynamicSrvRegistry 提供，而非静态纹理资产）
+            /// </summary>
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public bool IsDynamic { get; set; } = false;
+            /// <summary>
+            /// 动态 SRV 在 TtDynamicSrvRegistry 中的注册名（仅 IsDynamic=true 时有效）
+            /// </summary>
+            [Rtti.Meta("")]
+            [Category("Option")]
+            public string DynamicSrvName { get; set; }
             public NameRNamePair Clone(TtMaterial mtl)
             {
                 var result = new NameRNamePair();
                 result.HostMaterial = mtl;
                 result.Name = Name;
                 result.mValue = mValue;
+                result.IsDynamic = IsDynamic;
+                result.DynamicSrvName = DynamicSrvName;
                 return result;
             }
             public object SrvObject { get; set; } = null;
@@ -800,21 +841,29 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public virtual async Thread.Async.TtTask<NxRHI.TtSrView> GetSRV(int index)
         {
-            var srv = UsedSrView[index].SrvObject as NxRHI.TtSrView;
+            var entry = UsedSrView[index];
+            // 动态 SRV: 每帧从注册表实时查找（不缓存，因为 ping-pong 纹理会变）
+            if (entry.IsDynamic)
+                return TtEngine.Instance.GfxDevice.DynamicSrvRegistry.Find(entry.DynamicSrvName);
+            var srv = entry.SrvObject as NxRHI.TtSrView;
             if (srv != null)
                 return srv;
-            if (UsedSrView[index].Value == null)
+            if (entry.Value == null)
                 return null;
-            UsedSrView[index].SrvObject = await UsedSrView[index].Value.GetAsset<NxRHI.TtSrView>();
-            return UsedSrView[index].SrvObject as NxRHI.TtSrView;
+            entry.SrvObject = await entry.Value.GetAsset<NxRHI.TtSrView>();
+            return entry.SrvObject as NxRHI.TtSrView;
         }
         public NxRHI.TtSrView TryGetSRV(int index)
         {
-            var srv = UsedSrView[index].SrvObject as NxRHI.TtSrView;
+            var entry = UsedSrView[index];
+            // 动态 SRV: 每帧从注册表实时查找
+            if (entry.IsDynamic)
+                return TtEngine.Instance.GfxDevice.DynamicSrvRegistry.Find(entry.DynamicSrvName);
+            var srv = entry.SrvObject as NxRHI.TtSrView;
             if (srv != null)
                 return srv;
-            UsedSrView[index].SrvObject = TtEngine.Instance.GfxDevice.TextureManager.TryGetTexture(UsedSrView[index].Value);
-            return UsedSrView[index].SrvObject as NxRHI.TtSrView;
+            entry.SrvObject = TtEngine.Instance.GfxDevice.TextureManager.TryGetTexture(entry.Value);
+            return entry.SrvObject as NxRHI.TtSrView;
         }
         #endregion
         #region Sampler

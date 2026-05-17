@@ -1,4 +1,7 @@
 #include "imgui_binding.h"
+#ifdef IMGUI_ENABLE_FREETYPE
+#include "misc/freetype/imgui_freetype.h"
+#endif
 
 //#if defined(PLATFORM_WIN)
 //#include "backends/imgui_impl_win32.h"
@@ -8,6 +11,100 @@ NS_BEGIN
 
 static const float          DRAG_MOUSE_THRESHOLD_FACTOR = 0.50f;    // Multiplier for the default value of io.MouseDragThreshold to make DragFloat/DragInt react faster to mouse drags.
 std::string ImGuiAPI::mIniFilename;
+
+extern "C" VFX_API int TitanImGui_UseFreeTypeFontLoader(ImFontAtlas* atlas)
+{
+#ifdef IMGUI_ENABLE_FREETYPE
+	if (atlas == nullptr)
+		atlas = ImGui::GetIO().Fonts;
+	if (atlas == nullptr)
+		return 0;
+	atlas->SetFontLoader(ImGuiFreeType::GetFontLoader());
+	return atlas->FontLoaderName != nullptr && strcmp(atlas->FontLoaderName, "FreeType") == 0;
+#else
+	(void)atlas;
+	return 0;
+#endif
+}
+
+extern "C" VFX_API int TitanImGui_DrawData_Textures_Size(ImDrawData* draw_data)
+{
+	if (draw_data == nullptr || draw_data->Textures == nullptr)
+		return 0;
+	return draw_data->Textures->Size;
+}
+
+extern "C" VFX_API void* TitanImGui_DrawData_Textures_Get(ImDrawData* draw_data, int index)
+{
+	if (draw_data == nullptr || draw_data->Textures == nullptr)
+		return nullptr;
+	if (index < 0 || index >= draw_data->Textures->Size)
+		return nullptr;
+	return (*(draw_data->Textures))[index];
+}
+
+extern "C" VFX_API int TitanImGui_ImTextureData_GetStatus(void* texture_ptr)
+{
+	ImTextureData* texture = (ImTextureData*)texture_ptr;
+	return texture == nullptr ? (int)ImTextureStatus_Destroyed : (int)texture->Status;
+}
+
+extern "C" VFX_API void TitanImGui_ImTextureData_SetStatus(void* texture_ptr, int status)
+{
+	ImTextureData* texture = (ImTextureData*)texture_ptr;
+	if (texture != nullptr)
+		texture->SetStatus((ImTextureStatus)status);
+}
+
+extern "C" VFX_API void* TitanImGui_ImTextureData_GetBackendUserData(void* texture_ptr)
+{
+	ImTextureData* texture = (ImTextureData*)texture_ptr;
+	return texture == nullptr ? nullptr : texture->BackendUserData;
+}
+
+extern "C" VFX_API void TitanImGui_ImTextureData_SetBackendUserData(void* texture_ptr, void* backend_user_data)
+{
+	ImTextureData* texture = (ImTextureData*)texture_ptr;
+	if (texture != nullptr)
+		texture->BackendUserData = backend_user_data;
+}
+
+extern "C" VFX_API void TitanImGui_ImTextureData_SetTexID(void* texture_ptr, unsigned long long tex_id)
+{
+	ImTextureData* texture = (ImTextureData*)texture_ptr;
+	if (texture != nullptr)
+		texture->SetTexID((ImTextureID)tex_id);
+}
+
+extern "C" VFX_API int TitanImGui_ImTextureData_GetFormat(void* texture_ptr)
+{
+	ImTextureData* texture = (ImTextureData*)texture_ptr;
+	return texture == nullptr ? (int)ImTextureFormat_RGBA32 : (int)texture->Format;
+}
+
+extern "C" VFX_API int TitanImGui_ImTextureData_GetWidth(void* texture_ptr)
+{
+	ImTextureData* texture = (ImTextureData*)texture_ptr;
+	return texture == nullptr ? 0 : texture->Width;
+}
+
+extern "C" VFX_API int TitanImGui_ImTextureData_GetHeight(void* texture_ptr)
+{
+	ImTextureData* texture = (ImTextureData*)texture_ptr;
+	return texture == nullptr ? 0 : texture->Height;
+}
+
+extern "C" VFX_API int TitanImGui_ImTextureData_GetPitch(void* texture_ptr)
+{
+	ImTextureData* texture = (ImTextureData*)texture_ptr;
+	return texture == nullptr ? 0 : texture->GetPitch();
+}
+
+extern "C" VFX_API void* TitanImGui_ImTextureData_GetPixels(void* texture_ptr)
+{
+	ImTextureData* texture = (ImTextureData*)texture_ptr;
+	return texture == nullptr || texture->Pixels == nullptr ? nullptr : texture->GetPixels();
+}
 
 //void	ImGuiAPI::ImGui_NativeWindow_EnableDpiAwareness()
 //{
@@ -644,4 +741,33 @@ bool ImGuiAPI::BeginCombo(const char* label, const char* preview_value, ImGuiCom
 //}
 
 NS_END
+
+// ---- Markdown Rendering ----
+// Must be included outside EngineNS namespace since imgui_markdown.h
+// uses unqualified ImGui:: calls that must resolve to the global ::ImGui namespace.
+#include "imgui_markdown.h"
+
+static void ImGuiMarkdownDefaultLinkCallback(ImGui::MarkdownLinkCallbackData data)
+{
+	// Default: do nothing. C# layer can handle link clicks via its own logic.
+}
+
+void EngineNS::ImGuiAPI::Markdown(const char* markdownText, int markdownLength, ImFont* headingH1Font, ImFont* headingH2Font, ImFont* headingH3Font, bool h1Separator, bool h2Separator, bool h3Separator)
+{
+	if (markdownText == nullptr || markdownLength <= 0)
+		return;
+
+	ImGui::MarkdownConfig mdConfig;
+	mdConfig.linkCallback = ImGuiMarkdownDefaultLinkCallback;
+	mdConfig.tooltipCallback = ImGui::defaultMarkdownTooltipCallback;
+	mdConfig.imageCallback = nullptr;
+	mdConfig.linkIcon = "";
+	mdConfig.headingFormats[0] = { headingH1Font, h1Separator, 0.0f };
+	mdConfig.headingFormats[1] = { headingH2Font, h2Separator, 0.0f };
+	mdConfig.headingFormats[2] = { headingH3Font, h3Separator, 0.0f };
+	mdConfig.userData = nullptr;
+	mdConfig.formatCallback = ImGui::defaultMarkdownFormatCallback;
+
+	ImGui::Markdown(markdownText, (size_t)markdownLength, mdConfig);
+}
 

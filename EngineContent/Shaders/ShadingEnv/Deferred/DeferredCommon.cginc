@@ -27,6 +27,23 @@ struct GBufferData
     {
         return (RenderFlags_10Bit & ERenderFlags_DisableEnvColor) != 0;
     }
+
+    void SetShadingMode(int mode)
+    {
+        RenderFlags_10Bit = (RenderFlags_10Bit & ~SHADINGMODE_BIT_MASK) | ((mode << SHADINGMODE_BIT_OFFSET) & SHADINGMODE_BIT_MASK);
+    }
+    int GetShadingMode()
+    {
+        return (RenderFlags_10Bit & SHADINGMODE_BIT_MASK) >> SHADINGMODE_BIT_OFFSET;
+    }
+    bool IsPBR()
+    {
+        return GetShadingMode() == EShadingMode_PBR;
+    }
+    bool IsSubsurface()
+    {
+        return GetShadingMode() == EShadingMode_Subsurface;
+    }
 		
     float3 GetViewspaceNormal()
     {

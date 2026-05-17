@@ -7,6 +7,31 @@ namespace EngineNS
 {
     public unsafe partial struct ImGuiAPI
     {
+        [System.Runtime.InteropServices.DllImport(EngineNS.CoreSDK.CoreModule, CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, EntryPoint = "TitanImGui_DrawData_Textures_Size")]
+        public static extern int DrawData_Textures_Size(ImDrawData* drawData);
+        [System.Runtime.InteropServices.DllImport(EngineNS.CoreSDK.CoreModule, CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, EntryPoint = "TitanImGui_DrawData_Textures_Get")]
+        public static extern void* DrawData_Textures_Get(ImDrawData* drawData, int index);
+        [System.Runtime.InteropServices.DllImport(EngineNS.CoreSDK.CoreModule, CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, EntryPoint = "TitanImGui_ImTextureData_GetStatus")]
+        public static extern int ImTextureData_GetStatus(void* texture);
+        [System.Runtime.InteropServices.DllImport(EngineNS.CoreSDK.CoreModule, CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, EntryPoint = "TitanImGui_ImTextureData_SetStatus")]
+        public static extern void ImTextureData_SetStatus(void* texture, int status);
+        [System.Runtime.InteropServices.DllImport(EngineNS.CoreSDK.CoreModule, CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, EntryPoint = "TitanImGui_ImTextureData_GetBackendUserData")]
+        public static extern void* ImTextureData_GetBackendUserData(void* texture);
+        [System.Runtime.InteropServices.DllImport(EngineNS.CoreSDK.CoreModule, CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, EntryPoint = "TitanImGui_ImTextureData_SetBackendUserData")]
+        public static extern void ImTextureData_SetBackendUserData(void* texture, void* backendUserData);
+        [System.Runtime.InteropServices.DllImport(EngineNS.CoreSDK.CoreModule, CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, EntryPoint = "TitanImGui_ImTextureData_SetTexID")]
+        public static extern void ImTextureData_SetTexID(void* texture, ulong texId);
+        [System.Runtime.InteropServices.DllImport(EngineNS.CoreSDK.CoreModule, CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, EntryPoint = "TitanImGui_ImTextureData_GetFormat")]
+        public static extern int ImTextureData_GetFormat(void* texture);
+        [System.Runtime.InteropServices.DllImport(EngineNS.CoreSDK.CoreModule, CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, EntryPoint = "TitanImGui_ImTextureData_GetWidth")]
+        public static extern int ImTextureData_GetWidth(void* texture);
+        [System.Runtime.InteropServices.DllImport(EngineNS.CoreSDK.CoreModule, CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, EntryPoint = "TitanImGui_ImTextureData_GetHeight")]
+        public static extern int ImTextureData_GetHeight(void* texture);
+        [System.Runtime.InteropServices.DllImport(EngineNS.CoreSDK.CoreModule, CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, EntryPoint = "TitanImGui_ImTextureData_GetPitch")]
+        public static extern int ImTextureData_GetPitch(void* texture);
+        [System.Runtime.InteropServices.DllImport(EngineNS.CoreSDK.CoreModule, CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, EntryPoint = "TitanImGui_ImTextureData_GetPixels")]
+        public static extern void* ImTextureData_GetPixels(void* texture);
+
         public static unsafe Graphics.Pipeline.TtPresentWindow GetWindowViewportData()
         {
             var viewport = ImGuiAPI.GetWindowViewport();
@@ -28,6 +53,19 @@ namespace EngineNS
             }
         }
         //这个文件是手撸代码，做一些marshal
+
+        // ---- Markdown Rendering ----
+        // Convenience wrapper for Markdown rendering with sensible defaults.
+        // Call between ImGui Begin/End. Uses imgui_markdown for rendering.
+        public static void RenderMarkdown(string markdownText, bool h1Separator = true, bool h2Separator = true, bool h3Separator = false)
+        {
+            if (string.IsNullOrEmpty(markdownText))
+                return;
+            Markdown(markdownText, System.Text.Encoding.UTF8.GetByteCount(markdownText),
+                new ImFont((void*)null), new ImFont((void*)null), new ImFont((void*)null),
+                h1Separator, h2Separator, h3Separator);
+        }
+
         public static bool Combo(string label, ref int current_item, List<string> items, int items_count, int popup_max_height_in_items)
         {
             var ppStrings = stackalloc SByte*[items.Count];
@@ -74,6 +112,24 @@ namespace EngineNS
                 }
                 return false;
             }   
+        }
+        public unsafe static bool InputTextMultiline(string label, ref string text, Vector2 size,
+            ImGuiInputTextFlags_ flags = ImGuiInputTextFlags_.ImGuiInputTextFlags_None,
+            FDelegate_ImGuiInputTextCallback callback = null)
+        {
+            if (text == null)
+                text = "";
+            using (var buffer = BigStackBuffer.CreateInstance(512))
+            {
+                buffer.SetTextUtf8(text);
+                bool changed = InputTextMultiline(label, (sbyte*)buffer.GetBuffer(), (uint)buffer.GetSize(), &size, flags, callback, (void*)0);
+                if (changed)
+                {
+                    text = buffer.AsTextUtf8();
+                    return true;
+                }
+                return false;
+            }
         }
         public static bool Button(string label)
         {

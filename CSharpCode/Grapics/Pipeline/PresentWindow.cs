@@ -88,7 +88,7 @@ namespace EngineNS.Graphics.Pipeline
 
             if (SwapChain == null)
                 return;
-            TtEngine.Instance.GfxDevice.RenderQueue.Flush();
+            TtEngine.Instance.GfxDevice.RenderQueue.Flush(true);
             SwapChain.OnResize(x, y);
             //TtEngine.Instance.EventPoster.PostTickSyncEvent(() =>
             //{

@@ -2,6 +2,7 @@ using EngineNS;
 using EngineNS.EGui.UIProxy;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.IO;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -61,23 +62,151 @@ namespace MainEditor
             return null;
         }
 
-        static string ResolveConfigPath(string cfg, string binDir)
+        static string EnsureDirectorySeparator(string path)
         {
-            if (!string.IsNullOrWhiteSpace(cfg))
+            if (string.IsNullOrWhiteSpace(path))
+                return path;
+
+            path = System.IO.Path.GetFullPath(path);
+            if (path.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString()) == false &&
+                path.EndsWith(System.IO.Path.AltDirectorySeparatorChar.ToString()) == false)
             {
-                if (System.IO.Path.IsPathRooted(cfg))
-                    return cfg;
-
-                var directPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(binDir, cfg));
-                if (System.IO.File.Exists(directPath))
-                    return directPath;
-
-                return System.IO.Path.GetFullPath(System.IO.Path.Combine(binDir, "..", cfg));
+                path += System.IO.Path.DirectorySeparatorChar;
             }
-
-            return System.IO.Path.GetFullPath(System.IO.Path.Combine(binDir, "..", "content", "engineconfigdx12.jscfg"));
+            return path;
         }
 
+        static string ResolveEngineRoot(string engineRootArg, string binDir)
+        {
+            if (string.IsNullOrWhiteSpace(engineRootArg) == false)
+                return EnsureDirectorySeparator(engineRootArg);
+
+            var dir = new System.IO.DirectoryInfo(System.IO.Path.GetFullPath(binDir));
+            while (dir != null)
+            {
+                var contentConfig = System.IO.Path.Combine(dir.FullName, "content", "engineconfigdx12.jscfg");
+                var pluginDir = System.IO.Path.Combine(dir.FullName, "binaries", "Plugins");
+                if (System.IO.File.Exists(contentConfig) && System.IO.Directory.Exists(pluginDir))
+                    return EnsureDirectorySeparator(dir.FullName);
+
+                dir = dir.Parent;
+            }
+
+            return EnsureDirectorySeparator(System.IO.Path.Combine(binDir, ".."));
+        }
+
+        static string[] SetArgument(string[] args, string startWith, string value)
+        {
+            if (args == null)
+                args = Array.Empty<string>();
+
+            var arg = startWith + value;
+            var result = new string[args.Length];
+            var found = false;
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i].StartsWith(startWith))
+                {
+                    result[i] = arg;
+                    found = true;
+                }
+                else
+                {
+                    result[i] = args[i];
+                }
+            }
+
+            if (found)
+                return result;
+
+            var appended = new string[args.Length + 1];
+            Array.Copy(args, appended, args.Length);
+            appended[args.Length] = arg;
+            return appended;
+        }
+
+        static string ResolveConfigPath(string cfg, string binDir, string engineRoot)
+        {
+            if (string.IsNullOrWhiteSpace(cfg))
+                cfg = System.IO.Path.Combine("content", "engineconfigdx12.jscfg");
+
+            if (System.IO.Path.IsPathRooted(cfg))
+                return cfg;
+
+            var roots = new[]
+            {
+                engineRoot,
+                binDir,
+                System.IO.Path.Combine(binDir, ".."),
+                System.IO.Path.Combine(binDir, "..", ".."),
+            };
+
+            foreach (var root in roots)
+            {
+                var candidate = System.IO.Path.GetFullPath(System.IO.Path.Combine(root, cfg));
+                if (System.IO.File.Exists(candidate))
+                    return candidate;
+            }
+
+            return System.IO.Path.GetFullPath(System.IO.Path.Combine(binDir, cfg));
+        }
+
+        static string ResolveNativeDllDirectory(string binDir, string engineRoot, string nativeDllName)
+        {
+            if (string.IsNullOrWhiteSpace(nativeDllName))
+                nativeDllName = "release";
+
+            var candidates = new List<string>();
+            if (System.IO.Path.IsPathRooted(nativeDllName))
+            {
+                candidates.Add(nativeDllName);
+            }
+            else
+            {
+                candidates.Add(System.IO.Path.Combine(binDir, nativeDllName));
+                candidates.Add(System.IO.Path.Combine(binDir, "..", nativeDllName));
+                candidates.Add(System.IO.Path.Combine(engineRoot, "binaries", nativeDllName));
+                candidates.Add(System.IO.Path.Combine(binDir, "..", "binaries", nativeDllName));
+                candidates.Add(System.IO.Path.Combine(binDir, "..", "..", "binaries", nativeDllName));
+            }
+
+            foreach (var candidate in candidates)
+            {
+                var fullPath = System.IO.Path.GetFullPath(candidate);
+                if (TtFileManager.FileExists(System.IO.Path.Combine(fullPath, "Core.Window.dll")))
+                    return fullPath;
+            }
+
+            return System.IO.Path.GetFullPath(candidates[0]);
+        }
+
+        static EngineNS.TtEngineConfig GetOverrideConfig(string mBin)
+        {
+            EngineNS.TtEngineConfig Config = null;
+
+            var jsCode = EngineNS.IO.TtFileManager.ReadAllText(mBin + "/../cache/config/engine.jscfg");
+            if (jsCode != null)
+            {
+                Config = EngineNS.IO.TtFileManager.LoadObjectFromJson<TtEngineConfig>(jsCode);
+                return Config;
+            }
+            else
+            {
+                EngineNS.IO.TtJsonOptions options = new EngineNS.IO.TtJsonOptions();
+                options.SaveProperties = new List<string>() { "NativeDll",
+                            "UseRenderDoc",
+                            "HasDebugLayer",
+                            "IsGpuBaseValidation",
+                            "IsDebugShader",
+                            "IsGpuDred",
+                            "IsAftermath"
+                };
+
+                Config = new TtEngineConfig();
+                Config.SaveConfig(mBin + "/../cache/config/engine.jscfg", options);
+                return null;
+            }
+        }
         static bool WaitRedgate = false;
         [STAThreadAttribute]
         static void Main(string[] args)
@@ -94,22 +223,34 @@ namespace MainEditor
             //}
 
             var mBin = System.IO.Directory.GetCurrentDirectory();
-            var nativeDllArg = FindArgument(args, "NativeDLL=");
-            var configArg = ResolveConfigPath(FindArgument(args, "config="), mBin);
-            var bootstrapNativeDll = nativeDllArg;
-            if (string.IsNullOrWhiteSpace(bootstrapNativeDll))
+
+            var engineRoot = ResolveEngineRoot(FindArgument(args, "EngineRoot="), mBin);
+            args = SetArgument(args, "EngineRoot=", engineRoot);
+            var configArg = ResolveConfigPath(FindArgument(args, "config="), mBin, engineRoot);
+            string bootstrapNativeDll;
+            EngineNS.TtEngineConfig Config = GetOverrideConfig(mBin);
+            if (Config != null && Config.NativeDll == "auto")
             {
-                var cacheConfig = mBin + "/../cache/config/engine.jscfg";
-                bootstrapNativeDll = TryReadNativeDllName(cacheConfig);
-                if (string.IsNullOrWhiteSpace(bootstrapNativeDll))
-                    bootstrapNativeDll = TryReadNativeDllName(configArg);
+                var nativeDllArg = FindArgument(args, "NativeDLL=");
+                bootstrapNativeDll = nativeDllArg;
+                //if (string.IsNullOrWhiteSpace(bootstrapNativeDll))
+                //{
+                //    var cacheConfig = System.IO.Path.Combine(engineRoot, "cache", "config", "engine.jscfg");
+                //    bootstrapNativeDll = TryReadNativeDllName(cacheConfig);
+                //    if (string.IsNullOrWhiteSpace(bootstrapNativeDll))
+                //        bootstrapNativeDll = TryReadNativeDllName(configArg);
+                //}
+            }
+            else
+            {
+                SetArgument(args, "NativeDLL=", Config.NativeDll);
+                bootstrapNativeDll = Config.NativeDll;
             }
             if (string.IsNullOrWhiteSpace(bootstrapNativeDll))
                 bootstrapNativeDll = "release";
-            EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/{bootstrapNativeDll}");
 
             Console.WriteLine($"NativeDLL={bootstrapNativeDll}");
-            var dllDir = $"{mBin}/{bootstrapNativeDll}";
+            var dllDir = ResolveNativeDllDirectory(mBin, engineRoot, bootstrapNativeDll);
 
             if (!TtFileManager.FileExists(dllDir + "/Core.Window.dll"))
             {
@@ -184,7 +325,12 @@ namespace MainEditor
         }
         static WeakReference Main_Impl(string[] args, out EngineNS.NxRHI.TtGpuSystem gpuSystem, out EngineNS.NxRHI.TtGpuDevice gpuDevice)
         {
-            var cfg = ResolveConfigPath(FindArgument(args, "config="), System.IO.Directory.GetCurrentDirectory());
+            var binDir = System.IO.Directory.GetCurrentDirectory();
+            var engineRoot = ResolveEngineRoot(FindArgument(args, "EngineRoot="), binDir);
+            args = SetArgument(args, "EngineRoot=", engineRoot);
+            Console.WriteLine($"EngineRoot={engineRoot}");
+
+            var cfg = ResolveConfigPath(FindArgument(args, "config="), binDir, engineRoot);
             Console.WriteLine($"Config={cfg}");
 
             bool bNativeMem = true;

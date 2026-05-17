@@ -65,6 +65,16 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         [Rtti.Meta("")]
         [Category("Option")]
         public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
+
+        bool mIsDynamic = false;
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public bool IsDynamic { get => mIsDynamic; set => mIsDynamic = value; }
+
+        string mDynamicSrvName;
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public string DynamicSrvName { get => mDynamicSrvName; set => mDynamicSrvName = value; }
         private NxRHI.TtSrView TextureSRV;
         public static unsafe void PreviewDraw(ref Editor.Forms.TtTextureViewerCmdParams CmdParameters, TtGraphicsEffect mSlateEffect, NxRHI.TtSrView TextureSRV, 
             in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
@@ -144,8 +154,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             {
                 var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameRNamePair();
                 tmp.Name = this.Name;
-                var texNode = this;
-                tmp.Value = texNode.AssetName;
+                tmp.IsDynamic = IsDynamic;
+                tmp.DynamicSrvName = DynamicSrvName;
+                if (!IsDynamic)
+                    tmp.Value = AssetName;
                 material.UsedSrView.Add(tmp);
             }
         }

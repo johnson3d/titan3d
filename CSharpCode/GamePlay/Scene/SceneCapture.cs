@@ -43,7 +43,7 @@ namespace EngineNS.GamePlay.Scene
         public override void TickLogic(float ellapse)
         {
             base.TickLogic(ellapse);
-            RenderPolicy.CmdQueue.FlushExecute();
+            RenderPolicy.CmdQueue.FlushExecute(true);
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Capture", "Graphics\\SceneCapture", TtNode.EditorKeyword)]

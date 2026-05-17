@@ -128,13 +128,17 @@ namespace EngineNS.Editor
             TtEngine.Instance.SourceControlModule.AddFile(file);
             return image;
         }
-        public static async Thread.Async.TtTask<TtSnapshot> Load(IAssetMeta assetMeta)
+        public static async Thread.Async.TtTask<TtSnapshot> Load(IAssetMeta assetMeta, bool autoGenerate = true)
         {
             var file = assetMeta.GetAssetName().Address + ".snap";
             TtSnapshot result = new TtSnapshot();
-            result.mTextureRSV = await TtEngine.Instance.GfxDevice.TextureManager.CreateTexture(file);
+            if (IO.TtFileManager.FileExists(file))
+                result.mTextureRSV = await TtEngine.Instance.GfxDevice.TextureManager.CreateTexture(file);
             if (result.mTextureRSV == null)
             {
+                if (!autoGenerate)
+                    return null;
+
                 // 通过引擎统一的串行队列调度 AutoGen, 防止多个资产并发触发 OffscreenRenderer + RenderPolicy 创建导致显存暴涨
                 if (await TtEngine.Instance.SnapshotGenQueue.EnqueueAutoGen(assetMeta))
                 {

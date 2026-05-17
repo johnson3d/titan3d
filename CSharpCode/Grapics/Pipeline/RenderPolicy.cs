@@ -447,12 +447,12 @@ namespace EngineNS.Graphics.Pipeline
         }
 
         public NxRHI.TtRCmdQueue CmdQueue = null;
-        public void ExecuteCmdQueue()
+        public void ExecuteCmdQueue(bool bFlushGPU)
         {
             if (CmdQueue == null)
                 return;
 
-            CmdQueue.FlushExecute();
+            CmdQueue.FlushExecute(bFlushGPU);
         }
         public void QueueCmd(NxRHI.FRenderCmd cmd, string name, object tag = null,
             NxRHI.EQueueType qType = NxRHI.EQueueType.QU_Default,

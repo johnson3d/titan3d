@@ -1168,7 +1168,7 @@ namespace EngineNS.Rtti
         {
             //var result = HostClass.ClassType.SystemType.GetProperty(name);
             var result = Rtti.TtTypeDesc.GetProperty(HostClass.ClassType.SystemType, name);
-            if (result == null && type != null)
+            if (result == null && type != null && HostClass.ClassType.SystemType != null)
             {//if renamed property,check NameAlias
                 var props = HostClass.ClassType.SystemType.GetProperties();
                 foreach (var i in props)

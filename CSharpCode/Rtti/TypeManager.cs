@@ -362,6 +362,8 @@ namespace EngineNS.Rtti
         }
         public static System.Reflection.PropertyInfo GetProperty(System.Type type, string name)
         {
+            if (type == null)
+                return null;
             var fld = type.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
             if (fld != null)
                 return fld;

@@ -842,7 +842,7 @@ public:
 		labelName += label;
 		return ImGui::InputText(labelName.c_str(), (char*)buf, (UINT)buf_size, flags, callback, user_data);
 	}
-	static bool          InputTextMultiline(const char* label, char* buf, UINT buf_size, const ImVec2* size, ImGuiInputTextFlags_ flags = (ImGuiInputTextFlags_)0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL)
+	static bool          InputTextMultiline(const char* label, TR_META(SV_NoStringConverter) char* buf, UINT buf_size, const ImVec2* size, ImGuiInputTextFlags_ flags = (ImGuiInputTextFlags_)0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL)
 	{
 		return ImGui::InputTextMultiline(label, buf, (UINT)buf_size, *size, flags, callback, user_data);
 	}
@@ -2121,6 +2121,9 @@ public:
 			return 0.0f;
 		return drawList->_Data->FontSize;
 	}
+
+	// ---- Markdown Rendering ----
+	static void Markdown(const char* markdownText, int markdownLength, ImFont* headingH1Font, ImFont* headingH2Font, ImFont* headingH3Font, bool h1Separator, bool h2Separator, bool h3Separator);
 };
 
 NS_END
