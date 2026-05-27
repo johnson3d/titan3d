@@ -50,6 +50,30 @@ namespace EngineNS
         //    Write(v.AssetId);
         //}
         public const ushort CurrentVersion = Version101;
+        private static void TryOpenAssetEditor(RName assetName)
+        {
+            if (assetName == null)
+                return;
+
+            var assetMeta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(assetName);
+            if (assetMeta == null)
+                return;
+
+            var typeDesc = TtTypeDesc.TypeOf(assetMeta.TypeStr);
+            var type = typeDesc?.SystemType;
+            if (type == null)
+                return;
+
+            var attrs = type.GetCustomAttributes(typeof(Editor.UAssetEditorAttribute), false);
+            if (attrs.Length == 0)
+                return;
+
+            var editorAttr = attrs[0] as Editor.UAssetEditorAttribute;
+            if (editorAttr?.EditorType == null)
+                return;
+
+            Editor.TtAssetEditorManager.TryOpenEditor(editorAttr.EditorType, assetName, null).AddWaitTask();
+        }
         public class PGRNameAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
         {
             public string FilterExts;   // "ext1" / "ext1,ext2"
@@ -102,20 +126,36 @@ namespace EngineNS
                 //var newName = EGui.Controls.CtrlUtility.DrawRName(name, info.Name, FilterExts, info.Readonly, mSnap);
 
                 var drawList = ImGuiAPI.GetWindowDrawList();
-                var cursorPos = ImGuiAPI.GetCursorScreenPos();
                 ImGuiAPI.BeginGroup();
+                ImGuiAPI.PushID(info.Name ?? "RName");
 
+                var groupStart = ImGuiAPI.GetCursorScreenPos();
                 var snapSize = new Vector2(64, 64);
-                var snapEnd = cursorPos + snapSize;
+                var snapEnd = groupStart + snapSize;
                 var assetMeta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(name);
-                assetMeta?.OnDrawSnapshot(in drawList, ref cursorPos, ref snapEnd);
+                drawList.AddRectFilled(in groupStart, in snapEnd, 0xff202020, 2.0f, ImDrawFlags_.ImDrawFlags_RoundCornersAll);
+                var snapStart = groupStart;
+                assetMeta?.OnDrawSnapshot(in drawList, ref snapStart, ref snapEnd);
+                drawList.AddRect(in groupStart, in snapEnd, EGui.UIProxy.StyleConfig.Instance.PGItemBorderNormalColor, 2.0f, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 1.0f);
+                ImGuiAPI.InvisibleButton("##AssetPreview", in snapSize, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+                if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                {
+                    if (assetMeta != null)
+                        assetMeta.DrawTooltip();
+                    else if (name != null)
+                        EGui.Controls.CtrlUtility.DrawHelper(name.ToString());
+
+                    if (ImGuiAPI.IsMouseDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                    {
+                        TryOpenAssetEditor(name);
+                    }
+                }
 
                 var preViewStr = "null";
                 if (name != null)
                     preViewStr = name.ToString();
-                var textSize = ImGuiAPI.CalcTextSize(preViewStr, false, 0);
-                var preViewStrDrawPos = cursorPos + new Vector2(snapSize.X + 8, 0);
-                ImGuiAPI.SetCursorScreenPos(in preViewStrDrawPos);
+                var editorStart = groupStart + new Vector2(snapSize.X + 8, 0);
+                ImGuiAPI.SetCursorScreenPos(in editorStart);
                 ImGuiAPI.Dummy(in Vector2.Zero);
                 Support.TtAnyPointer anyPt = new Support.TtAnyPointer()
                 {
@@ -127,8 +167,10 @@ namespace EngineNS
                                      ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar |
                                      ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings |
                                      ImGuiWindowFlags_.ImGuiWindowFlags_NoMove;
-                mComboBox.Width = ImGuiAPI.GetColumnWidth(index) - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X;
-                mComboBox.Name = "##" + info.Name != null ? info.Name : "";
+                mComboBox.Width = ImGuiAPI.GetColumnWidth(index) - snapSize.X - 8 - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X;
+                if (mComboBox.Width < 120)
+                    mComboBox.Width = 120;
+                mComboBox.Name = string.IsNullOrEmpty(info.Name) ? "##RName" : $"##{info.Name}";
                 mComboBox.PreviewValue = preViewStr;
                 var contentBrowserSize = new Vector2(500, 600);
                 ImGuiAPI.SetNextWindowSize(in contentBrowserSize, ImGuiCond_.ImGuiCond_Appearing);
@@ -137,15 +179,18 @@ namespace EngineNS
                 ContentBrowser.ShaderType = ShaderType;
                 ContentBrowser.SelectedAssets.Clear();
                 mComboBox.OnDraw(in drawList, in anyPt);
-                if (ContentBrowser.SelectedAssets.Count > 0 &&
+                if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                {
+                    EGui.Controls.CtrlUtility.DrawHelper(preViewStr);
+                }
+                if (!info.Readonly &&
+                    ContentBrowser.SelectedAssets.Count > 0 &&
                     ContentBrowser.SelectedAssets[0].GetAssetName() != name)
                 {
                     mDrawData.NewValue = ContentBrowser.SelectedAssets[0].GetAssetName();
                 }
-                var pos = ImGuiAPI.GetCursorScreenPos();
-                pos.X += snapSize.X + 8;
+                var pos = editorStart + new Vector2(0, ImGuiAPI.GetFrameHeight() + 4);
                 ImGuiAPI.SetCursorScreenPos(in pos);
-                ImGuiAPI.Dummy(in Vector2.Zero);
                 if (info.Readonly)
                 {
                     Vector4 color = new Vector4(0.5f, 0.5f, 0.5f, 1.0f);
@@ -161,7 +206,7 @@ namespace EngineNS
                     ImGuiAPI.SameLine(0, 8);
                     if (ImGuiAPI.Button("<", in sz))
                     {
-                        mDrawData.NewValue = EGui.Controls.TtContentBrowser.GlobalSelectedAsset.GetAssetName();
+                        mDrawData.NewValue = EGui.Controls.TtContentBrowser.GlobalSelectedAsset?.GetAssetName();
                     }
                     ImGuiAPI.SameLine(0, 8);
                     if (ImGuiAPI.Button("-", in sz))
@@ -170,6 +215,7 @@ namespace EngineNS
                     }
                 }
 
+                ImGuiAPI.PopID();
                 ImGuiAPI.EndGroup();
 
                 if (mDrawData.NewValue != name)
@@ -349,14 +395,30 @@ namespace EngineNS
                 ImGuiAPI.TableSetColumnIndex(1);
                 ImGuiAPI.BeginGroup();
 
-                var cursorPos = ImGuiAPI.GetCursorScreenPos();
+                var groupStart = ImGuiAPI.GetCursorScreenPos();
                 var snapSize = new Vector2(48, 48);
-                var snapEnd = cursorPos + snapSize;
+                var snapEnd = groupStart + snapSize;
                 var assetMeta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(name);
-                assetMeta?.OnDrawSnapshot(in drawList, ref cursorPos, ref snapEnd);
+                drawList.AddRectFilled(in groupStart, in snapEnd, 0xff202020, 2.0f, ImDrawFlags_.ImDrawFlags_RoundCornersAll);
+                var snapStart = groupStart;
+                assetMeta?.OnDrawSnapshot(in drawList, ref snapStart, ref snapEnd);
+                drawList.AddRect(in groupStart, in snapEnd, EGui.UIProxy.StyleConfig.Instance.PGItemBorderNormalColor, 2.0f, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 1.0f);
+                ImGuiAPI.InvisibleButton("##AssetPreview", in snapSize, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+                if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                {
+                    if (assetMeta != null)
+                        assetMeta.DrawTooltip();
+                    else if (name != null)
+                        EGui.Controls.CtrlUtility.DrawHelper(name.ToString());
+
+                    if (ImGuiAPI.IsMouseDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                    {
+                        TryOpenAssetEditor(name);
+                    }
+                }
 
                 var preViewStr = name == null ? "null" : name.ToString();
-                var comboPos = cursorPos + new Vector2(snapSize.X + 8, 0);
+                var comboPos = groupStart + new Vector2(snapSize.X + 8, 0);
                 ImGuiAPI.SetCursorScreenPos(in comboPos);
                 ImGuiAPI.Dummy(in Vector2.Zero);
 
@@ -373,9 +435,9 @@ namespace EngineNS
                                        | ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar
                                        | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings
                                        | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove;
-                    mComboBox.Width = ImGuiAPI.GetColumnWidth(colIdx) - snapSize.X - 8 - 160;
-                    if (mComboBox.Width < 80)
-                        mComboBox.Width = 80;
+                    mComboBox.Width = ImGuiAPI.GetColumnWidth(colIdx) - snapSize.X - 8 - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X;
+                    if (mComboBox.Width < 120)
+                        mComboBox.Width = 120;
                     mComboBox.Name = $"##{info.Name}_combo_{index}";
                     mComboBox.PreviewValue = preViewStr;
 
@@ -390,8 +452,13 @@ namespace EngineNS
                     mActiveEditingIndex = index;
 
                     mComboBox.OnDraw(in drawList, in anyPt);
+                    if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                    {
+                        EGui.Controls.CtrlUtility.DrawHelper(preViewStr);
+                    }
 
-                    if (mActiveEditingIndex == index &&
+                    if (!info.Readonly &&
+                        mActiveEditingIndex == index &&
                         mContentBrowser.SelectedAssets.Count > 0 &&
                         mContentBrowser.SelectedAssets[0].GetAssetName() != name)
                     {
@@ -401,7 +468,8 @@ namespace EngineNS
                 }
 
                 // 行末按钮组：F/<//-/+/X
-                ImGuiAPI.SameLine(0, 8);
+                var buttonPos = comboPos + new Vector2(0, ImGuiAPI.GetFrameHeight() + 4);
+                ImGuiAPI.SetCursorScreenPos(in buttonPos);
                 var btnSz = new Vector2(0, 0);
                 if (info.Readonly)
                 {

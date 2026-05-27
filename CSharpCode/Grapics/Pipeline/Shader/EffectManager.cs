@@ -59,7 +59,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public NxRHI.TtShaderDesc DescMS { get; private set; }
         public NxRHI.TtShaderDesc DescVS { get; private set; }
         public NxRHI.TtShaderDesc DescPS { get; private set; }
-        public TtShadingEnv ShadingEnv { get; internal set; }
+        public TtGraphicsShadingEnv ShadingEnv { get; internal set; }
 
         internal TtGraphicsEffect UnsafeCloneForEditor()
         {
@@ -139,7 +139,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return effectDesc;
             }
         }
-        public static async Thread.Async.TtTask<TtGraphicsEffect> LoadEffect(Hash160 hash, TtShadingEnv shading, TtMaterial material, TtMdfQueueBase mdf)
+        public static async Thread.Async.TtTask<TtGraphicsEffect> LoadEffect(Hash160 hash, TtGraphicsShadingEnv shading, TtMaterial material, TtMdfQueueBase mdf)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.GraphicEffect);
@@ -306,7 +306,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.ShadingEnv = shading;
             return result;
         }
-        public static async Thread.Async.TtTask<TtGraphicsEffect> CreateEffect(TtShadingEnv shading, TtShadingEnv.FPermutationId permutationId, TtMaterial material, TtMdfQueueBase mdf)
+        public static async Thread.Async.TtTask<TtGraphicsEffect> CreateEffect(TtGraphicsShadingEnv shading, TtShadingEnv.FPermutationId permutationId, TtMaterial material, TtMdfQueueBase mdf)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
@@ -681,7 +681,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return Hash160.CreateHash160($"{TtEngine.Instance.GfxDevice.RenderContext.GlobalEnvHash},{shading},{material.AssetName},{mdf}");
         }
         public Dictionary<Hash160, TtGraphicsEffect> MaterialEditingEffects { get; } = new Dictionary<Hash160, TtGraphicsEffect>();
-        public async Thread.Async.TtTask<TtGraphicsEffect> GetGraphicEffect(TtShadingEnv shading, TtMaterial material, TtMdfQueueBase mdf)
+        public async Thread.Async.TtTask<TtGraphicsEffect> GetGraphicEffect(TtGraphicsShadingEnv shading, TtMaterial material, TtMdfQueueBase mdf)
         {
             TtGraphicsEffect result = null;
             Hash160 hash = new Hash160();
@@ -727,7 +727,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 MaterialEditingEffects.Remove(i);
             }
         }
-        private async Thread.Async.TtTask<TtGraphicsEffect> GetGraphicEffectImpl(TtShadingEnv shading, TtMaterial material, TtMdfQueueBase mdf)
+        private async Thread.Async.TtTask<TtGraphicsEffect> GetGraphicEffectImpl(TtGraphicsShadingEnv shading, TtMaterial material, TtMdfQueueBase mdf)
         {
             TtGraphicsEffect result = null;
             //if (material.IsEditingMaterial)
@@ -756,7 +756,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
 
             //尚未发生异步，这时候克隆出来shading，确保后续异步过程中shading的状态不会被外部修改
-            shading = shading.Clone();
+            shading = shading.Clone() as TtGraphicsShadingEnv;
             try
             {
                 result = await TtGraphicsEffect.LoadEffect(hash, shading, material, mdf);

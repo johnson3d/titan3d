@@ -307,21 +307,9 @@ namespace EngineNS.Editor.Forms
                 SkeletonShowNode = await TtSkeletonShowNode.AddNode(viewport.World, viewport.World.Root, nodeDta, typeof(GamePlay.TtPlacement), DVector3.Zero, Vector3.One, Quaternion.Identity);
             }
 
-            {
-                var PlaneMesh = new Graphics.Mesh.TtRenderMesh();
-                var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
-                tMaterials[0] = await TtEngine.Instance.ConfigManager.GetConfig<Editor.Forms.TtMeshPrimitiveEditorConfig>().PlaneMaterialName.GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
-                PlaneMesh.Initialize(Graphics.Mesh.TtMeshDataProvider.MakePlane(10, 10).ToMesh(), tMaterials,
-                    Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
-                PlaneMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), PlaneMesh, new DVector3(0, -0.0001f, 0), Vector3.One, Quaternion.Identity);
-                PlaneMeshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
-                PlaneMeshNode.NodeData.Name = "Plane";
-                PlaneMeshNode.IsAcceptShadow = true;
-                PlaneMeshNode.IsCastShadow = false;
-            }
-
-            var gridNode = await GamePlay.Scene.TtGridNode.AddGridNode(viewport.World, viewport.World.Root);
-            gridNode.ViewportSlate = this.PreviewViewport;
+            var planeMaterialName = TtEngine.Instance.ConfigManager.GetConfig<Editor.Forms.TtMeshPrimitiveEditorConfig>().PlaneMaterialName;
+            var studioContext = await PreviewViewport.CreateStudioEnvironment(new BoundingBox(3, 3, 3), 5.0f, planeMaterialName);
+            PlaneMeshNode = studioContext?.FloorNode;
             return true;
         }
         public float LoadingPercent { get; set; } = 1.0f;

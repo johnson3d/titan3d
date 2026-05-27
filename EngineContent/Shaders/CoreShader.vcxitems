@@ -19,6 +19,7 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\AdvanceShadow\ESM.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Collision\BVH\GpuBvhCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\FX\Hair.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\FX\SubsurfaceLighting.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\FX\SWEWater.compute" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\FX\VolumeCloud.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\ClusterCulling.cginc" />
@@ -53,6 +54,7 @@
     <None Include="$(MSBuildThisFileDirectory)Compute\MacrossComputeShadingEnvImpl.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Font.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)FSBase.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)GI\ProbeVolume\ProbeVolumeCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)GI\SH\SHCoefficients.cginc" />
     <None Include="$(MSBuildThisFileDirectory)GI\TrayTracing\HSDF.cginc" />
@@ -65,6 +67,7 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Ray.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\FogCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\CommonLightFunc.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Inc\FrustumGridCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\FXAAMobile.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\GlobalDefine.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\GpuSceneCommon.cginc" />
@@ -100,6 +103,7 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredOpaque.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredOpaqueMeshlets.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\MultiViewID\BasePass.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\SSSBlur.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\DrawViewportShading.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\DummyShading.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\ExpHeightFog.cginc" />
@@ -162,6 +166,8 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\Cluster.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\Hzb.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\VirtualTexture.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\FrustumGrid3D.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)GI\ProbeVolume\ProbeVolumeUpdate.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRInitialSampling.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRTemporalReuse.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRSpatialReuse.compute" />

@@ -187,7 +187,7 @@ namespace EngineNS.Editor.Forms
             var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<TtTextureViewerCmdParams>();
             var cbBinder = SlateEffect.ShaderEffect.FindBinder("cbShadingEnv");
             cmdParams.CBuffer = rc.CreateCBV(cbBinder);
-            cmdParams.Drawcall.BindShaderEffect(SlateEffect);
+            cmdParams.Drawcall.BindShaderEffect(SlateEffect, SlateEffect.ShadingEnv);
             cmdParams.Drawcall.BindCBV(cbBinder.mCoreObject, cmdParams.CBuffer);
             cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, TextureSRV);
             cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);

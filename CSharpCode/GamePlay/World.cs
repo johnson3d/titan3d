@@ -529,6 +529,7 @@ namespace EngineNS.GamePlay
 
                 NodeTickParameters.World = this;
                 NodeTickParameters.Policy = policy;
+                NodeTickParameters.Viewport = ViewportSlate;
                 NodeTickParameters.IsTickChildren = true;
                 //Root.TickLogic(NodeTickParameters);
 

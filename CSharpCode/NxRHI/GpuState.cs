@@ -8,14 +8,14 @@ namespace EngineNS.NxRHI
     {
         public void SetDefault()
         {
-            SetDefault(TtEngine.Instance.Config.IsReverseZ);
+            SetDefault(TtEngine.Instance.GfxDevice.Config.IsReverseZ);
         }
     }
     public partial struct FGpuPipelineDesc
     {
         public void SetDefault()
         {
-            SetDefault(TtEngine.Instance.Config.IsReverseZ);
+            SetDefault(TtEngine.Instance.GfxDevice.Config.IsReverseZ);
         }
     }
     public partial struct FBlendDesc

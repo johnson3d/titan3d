@@ -94,9 +94,8 @@ namespace EngineNS.Bricks.Particle
         }
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
-            //var particleNode = policy.FindNode("ParticleNode") as UParticleGraphNode;
-            var particleNode = args.Policy.FindFirstNode<TtParticleGraphNode>();
-            if (particleNode == null || particleNode.IsUsed == false || NebulaParticle == null)
+            var particleNode = args.Viewport?.ParticleNode;
+            if (particleNode == null || NebulaParticle == null)
                 return true;
 
             NebulaParticle.Update(args.Policy, particleNode, TtEngine.Instance.ElapsedSecond, new Vector3(this.Placement.AbsTransform.Position));

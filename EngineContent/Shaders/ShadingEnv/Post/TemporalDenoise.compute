@@ -80,7 +80,7 @@ void CS_Main(uint3 id : SV_DispatchThreadID)
         return;
     }
 
-    float3 curNormal = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, uv, 0).xyz * 2.0f - 1.0f);
+    float3 curNormal = DecodeNormalFromGBuffer(GBufferRT1.SampleLevel(Samp_PointClamp, uv, 0));
 
     // -------- 计算重投影 UV --------
     // ReSTIR 与本节点共用同一个 motion 编码; DecodeMotionVector 在 DeferredCommon.cginc 中定义.
@@ -103,7 +103,7 @@ void CS_Main(uint3 id : SV_DispatchThreadID)
     // 历史法线 / 深度: 注意采样的是 *当前帧* 的 GBuffer, 但 UV 是上一帧的 (prevUV).
     // 严格来说应该用上一帧的 GBuffer history, 这里为简化用当前帧 GBuffer 在 prevUV 处的值
     // 做几何近似 (假设静态几何在 1 帧内不会跨大法线/深度断面). 在 SSR 模式下足够稳.
-    float3 prevNormal = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, prevUV, 0).xyz * 2.0f - 1.0f);
+    float3 prevNormal = DecodeNormalFromGBuffer(GBufferRT1.SampleLevel(Samp_PointClamp, prevUV, 0));
     float  prevDepth  = DepthBuffer.SampleLevel(Samp_PointClamp, prevUV, 0).r;
 
     bool consistent = true;

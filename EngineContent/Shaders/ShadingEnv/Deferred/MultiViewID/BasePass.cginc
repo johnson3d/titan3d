@@ -272,6 +272,13 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 				FPointLight light = GpuScene_PointLights[lightIndex];
 				BaseShading += PointLightShading(light, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness);
 			}
+
+			// SpotLight shading
+			for (uint si = 0; si < GpuScene_SpotLightNum; si++)
+			{
+				FSpotLight spotLight = GpuScene_SpotLights[si];
+				BaseShading += SpotLightShading(spotLight, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness);
+			}
 		}
 #endif//#if ENV_DISABLE_POINTLIGHTS == 0
 

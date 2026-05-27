@@ -37,9 +37,12 @@ namespace EngineNS.EGui.UIProxy
             //var mainFlag = ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar;
             //if ((flags & ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar) == ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar)
             //    mainFlag |= ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar;
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, Vector2.Zero);
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, Vector2.Zero);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_WindowBg, StyleConfig.Instance.WindowBackground);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ChildBg, StyleConfig.Instance.PanelBackground);
             var retValue = ImGuiAPI.Begin(name, ref vis, flags);
-                ImGuiAPI.PopStyleVar(1);
+            ImGuiAPI.PopStyleColor(2);
+            ImGuiAPI.PopStyleVar(1);
             form.Visible = vis;
             //var presentWin = ImGuiAPI.GetWindowViewportData();
             //if (presentWin != null)
@@ -48,6 +51,7 @@ namespace EngineNS.EGui.UIProxy
             //}
             if (ImGuiAPI.IsWindowDocked())
                 form.DockId = ImGuiAPI.GetWindowDockID();
+            DrawAssetEditorChrome(form, retValue);
             //if (retValue)
             //{
             //    ImGuiAPI.BeginChild("###name", Vector2.Zero, false, flags | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove);
@@ -105,6 +109,36 @@ namespace EngineNS.EGui.UIProxy
             return retValue;
         }
         static Vector2 offset = new Vector2(10, 50);
+        static void DrawAssetEditorChrome(IRootForm form, bool visible)
+        {
+            if (!visible)
+                return;
+            var editor = form as Editor.IAssetEditor;
+            if (editor == null)
+                return;
+
+            var pos = ImGuiAPI.GetWindowPos();
+            var size = ImGuiAPI.GetWindowSize();
+            var end = pos + size;
+            var focused = ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows | ImGuiFocusedFlags_.ImGuiFocusedFlags_DockHierarchy);
+            var borderColor = focused ? StyleConfig.Instance.AssetEditorActiveBorder : StyleConfig.Instance.AssetEditorInactiveBorder;
+            var drawList = ImGuiAPI.GetWindowDrawList();
+            drawList.AddRect(in pos, in end, borderColor, 0.0f, ImDrawFlags_.ImDrawFlags_None, focused ? 1.5f : 1.0f);
+
+            var percent = editor.LoadingPercent;
+            if (percent < 0.0f)
+                percent = 0.0f;
+            else if (percent > 1.0f)
+                percent = 1.0f;
+            if (percent < 0.999f)
+            {
+                var barMin = pos + new Vector2(1.0f, 1.0f);
+                var barMax = new Vector2(end.X - 1.0f, pos.Y + 4.0f);
+                var fillMax = new Vector2(barMin.X + (barMax.X - barMin.X) * percent, barMax.Y);
+                drawList.AddRectFilled(in barMin, in barMax, StyleConfig.Instance.AssetEditorProgressBg, 0.0f, ImDrawFlags_.ImDrawFlags_None);
+                drawList.AddRectFilled(in barMin, in fillMax, StyleConfig.Instance.AssetEditorProgressFill, 0.0f, ImDrawFlags_.ImDrawFlags_None);
+            }
+        }
         public static void EndMainForm(bool visible)
         {
             if (EngineNS.TtEngine.Instance.IsBlockOperation)

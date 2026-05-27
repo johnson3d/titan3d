@@ -357,7 +357,7 @@ namespace EngineNS.Editor
                 {
                     //warm up
                     var This = (RAct.Arg as TtSnapshotCreator);
-                    This.Renderer.ExecuteRender(true);
+                    This.Renderer.ExecuteRender(true, true);
                     This.Renderer.TickSync();
                     //flush assets
                     Thread.TtContextThread.CurrentContext.FlushAllThreadEvents();
@@ -369,7 +369,7 @@ namespace EngineNS.Editor
                     //}
 
                     //real render
-                    This.Renderer.ExecuteRender(false);
+                    This.Renderer.ExecuteRender(false, false);
                     TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
                     //if (captureRenderDoc)
                     //{

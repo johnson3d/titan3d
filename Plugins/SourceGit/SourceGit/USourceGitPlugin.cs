@@ -1,7 +1,8 @@
-﻿using EngineNS.Profiler;
+using EngineNS.Profiler;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 
 namespace EngineNS.Rtti
 {
@@ -30,7 +31,6 @@ namespace EngineNS.Rtti
     }
 }
 
-
 namespace EngineNS.Plugins.SourceGit
 {
     [EngineNS.Bricks.AssemblyLoader.TtPlugin]
@@ -44,6 +44,8 @@ namespace EngineNS.Plugins.SourceGit
     }
     public class TtSourceGitPlugin : Bricks.SourceControl.TtSource
     {
+        static readonly object GitLocker = new object();
+
         public override void OnLoadedPlugin()
         {
             //AddFile("F:/TitanEngine/TestGit.txt");
@@ -51,214 +53,122 @@ namespace EngineNS.Plugins.SourceGit
         }
         public override void OnUnloadPlugin()
         {
-            
+
         }
         public override Bricks.SourceControl.TtSourceOpResult AddFile(string file)
         {
             if (IO.TtFileManager.FileExists(file) == false)
                 return new Bricks.SourceControl.TtSourceOpResult(-1);
 
-            try
-            {
-                ProcessStartInfo processStartInfo = new ProcessStartInfo();
-                processStartInfo.FileName = @"git.exe";
-                processStartInfo.Arguments = $"add {file}";
-                processStartInfo.RedirectStandardOutput = true;
-                System.Diagnostics.Process result = new System.Diagnostics.Process();
-                result.StartInfo = processStartInfo;
-                result.Start();
-                var timeoutSignal = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                result.WaitForExit();
-                //result.WaitForExitAsync(timeoutSignal.Token).Wait();
-                var q = new System.Text.StringBuilder();
-                while (!result.HasExited)
-                {
-                    q.Append(result.StandardOutput.ReadToEnd());
-                }
-                string r = q.ToString();
-
-                if (r == "")
-                {
-
-                }
-                else
-                {
-                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(ELogTag.Warning, $"git add {file} returned:{r}");
-                }
-
-                //Action action = async () =>
-                //{
-                //    try
-                //    {
-                //        var timeoutSignal = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                //        await result.WaitForExitAsync(timeoutSignal.Token);
-
-                //        var q = new System.Text.StringBuilder();
-                //        while (!result.HasExited)
-                //        {
-                //            q.Append(result.StandardOutput.ReadToEnd());
-                //        }
-                //        string r = q.ToString();
-
-                //        if (r == "")
-                //        {
-
-                //        }
-                //        else
-                //        {
-
-                //        }
-                //    }
-                //    catch (Exception actionEx) 
-                //    {
-                //        Profiler.Log.WriteException(actionEx);
-                //        Profiler.Log.WriteLine<Profiler.TtIOCategory>(ELogTag.Warning, $"git add {file} failed:{actionEx.Message}");
-                //    }
-                //};
-                //action();
-
-                return new Bricks.SourceControl.TtSourceOpResult(0);
-            }
-            catch (Exception ex)
-            {
-                Profiler.Log.WriteException(ex);
-                return new Bricks.SourceControl.TtSourceOpResult(-1);
-            }
+            return RunGit(file, "add", "--", GetGitPathSpec(file));
         }
         public override Bricks.SourceControl.TtSourceOpResult AddDirectory(string dir)
         {
             if (IO.TtFileManager.DirectoryExists(dir) == false)
                 return new Bricks.SourceControl.TtSourceOpResult(-1);
 
-            try
-            {
-                ProcessStartInfo processStartInfo = new ProcessStartInfo();
-                processStartInfo.FileName = @"git.exe";
-                processStartInfo.Arguments = $"add {dir}";
-                processStartInfo.RedirectStandardOutput = true;
-                System.Diagnostics.Process result = new System.Diagnostics.Process();
-                result.StartInfo = processStartInfo;
-                result.Start();
-                Action action = async () =>
-                {
-                    var timeoutSignal = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                    await result.WaitForExitAsync(timeoutSignal.Token);
-
-                    var q = new System.Text.StringBuilder();
-                    while (!result.HasExited)
-                    {
-                        q.Append(result.StandardOutput.ReadToEnd());
-                    }
-                    string r = q.ToString();
-
-                    if (r == "")
-                    {
-
-                    }
-                    else
-                    {
-
-                    }
-                };
-                action();
-                return new Bricks.SourceControl.TtSourceOpResult(0);
-            }
-            catch (Exception ex)
-            {
-                Profiler.Log.WriteException(ex);
-                Profiler.Log.WriteLine<Profiler.TtIOCategory>(ELogTag.Warning, $"git add {dir} failed:{ex.Message}");
-                return new Bricks.SourceControl.TtSourceOpResult(-1);
-            }
+            return RunGit(dir, "add", "--", GetGitPathSpec(dir));
         }
         public override Bricks.SourceControl.TtSourceOpResult RemoveFile(string file, bool delLocal = true)
         {
-            if (IO.TtFileManager.FileExists(file) == false)
-                return new Bricks.SourceControl.TtSourceOpResult(-1);
-
-            try
-            {
-                ProcessStartInfo processStartInfo = new ProcessStartInfo();
-                processStartInfo.FileName = @"git.exe";
-                string arg_delLocal = delLocal ? "" : " --cached";
-                processStartInfo.Arguments = $"rm{arg_delLocal} {file}";
-                processStartInfo.RedirectStandardOutput = true;
-                System.Diagnostics.Process result = new System.Diagnostics.Process();
-                result.StartInfo = processStartInfo;
-                result.Start();
-                Action action = async () =>
-                {
-                    var timeoutSignal = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                    await result.WaitForExitAsync(timeoutSignal.Token);
-
-                    var q = new System.Text.StringBuilder();
-                    while (!result.HasExited)
-                    {
-                        q.Append(result.StandardOutput.ReadToEnd());
-                    }
-                    string r = q.ToString();
-
-                    if (r == "")
-                    {
-
-                    }
-                    else
-                    {
-
-                    }
-                };
-                action();
-                return new Bricks.SourceControl.TtSourceOpResult(0);
-            }
-            catch (Exception ex)
-            {
-                Log.WriteException(ex);
-                return new Bricks.SourceControl.TtSourceOpResult(-1);
-            }
+            return delLocal ?
+                RunGit(file, "rm", "-f", "--ignore-unmatch", "--", GetGitPathSpec(file, true)) :
+                RunGit(file, "rm", "--cached", "-f", "--ignore-unmatch", "--", GetGitPathSpec(file, true));
         }
         public override Bricks.SourceControl.TtSourceOpResult RemoveDirectory(string dir, bool delLocal = true)
         {
-            if (IO.TtFileManager.FileExists(dir) == false)
-                return new Bricks.SourceControl.TtSourceOpResult(-1);
+            return delLocal ?
+                RunGit(dir, "rm", "-r", "-f", "--ignore-unmatch", "--", GetGitPathSpec(dir, true)) :
+                RunGit(dir, "rm", "-r", "--cached", "-f", "--ignore-unmatch", "--", GetGitPathSpec(dir, true));
+        }
 
+        Bricks.SourceControl.TtSourceOpResult RunGit(string path, params string[] args)
+        {
             try
             {
-                ProcessStartInfo processStartInfo = new ProcessStartInfo();
-                processStartInfo.FileName = @"git.exe";
-                string arg_delLocal = delLocal ? "" : " -r --cached";
-                processStartInfo.Arguments = $"rm{arg_delLocal} {dir}";
-                processStartInfo.RedirectStandardOutput = true;
-                System.Diagnostics.Process result = new System.Diagnostics.Process();
-                result.StartInfo = processStartInfo;
-                result.Start();
-                Action action = async () =>
+                var repoRoot = FindRepositoryRoot(path);
+                if (string.IsNullOrEmpty(repoRoot))
+                    return new Bricks.SourceControl.TtSourceOpResult(-1);
+
+                lock (GitLocker)
                 {
-                    var timeoutSignal = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                    await result.WaitForExitAsync(timeoutSignal.Token);
-
-                    var q = new System.Text.StringBuilder();
-                    while (!result.HasExited)
+                    var processStartInfo = new ProcessStartInfo();
+                    processStartInfo.FileName = @"git.exe";
+                    processStartInfo.WorkingDirectory = repoRoot;
+                    processStartInfo.UseShellExecute = false;
+                    processStartInfo.RedirectStandardOutput = true;
+                    processStartInfo.RedirectStandardError = true;
+                    processStartInfo.CreateNoWindow = true;
+                    foreach (var arg in args)
                     {
-                        q.Append(result.StandardOutput.ReadToEnd());
+                        processStartInfo.ArgumentList.Add(arg);
                     }
-                    string r = q.ToString();
 
-                    if (r == "")
+                    using var process = new Process();
+                    process.StartInfo = processStartInfo;
+                    process.Start();
+                    var stdoutTask = process.StandardOutput.ReadToEndAsync();
+                    var stderrTask = process.StandardError.ReadToEndAsync();
+                    if (!process.WaitForExit(30000))
                     {
-
+                        try
+                        {
+                            process.Kill(true);
+                        }
+                        catch
+                        {
+                        }
+                        Profiler.Log.WriteLine<Profiler.TtIOCategory>(ELogTag.Warning, $"git {string.Join(" ", args)} timed out");
+                        return new Bricks.SourceControl.TtSourceOpResult(-1);
                     }
-                    else
+                    var stdout = stdoutTask.GetAwaiter().GetResult();
+                    var stderr = stderrTask.GetAwaiter().GetResult();
+
+                    if (process.ExitCode != 0)
                     {
-
+                        Profiler.Log.WriteLine<Profiler.TtIOCategory>(ELogTag.Warning, $"git {string.Join(" ", args)} failed:{stdout}{stderr}");
+                        return new Bricks.SourceControl.TtSourceOpResult(process.ExitCode);
                     }
-                };
-                action();
-                return new Bricks.SourceControl.TtSourceOpResult(0);
+
+                    if (!string.IsNullOrWhiteSpace(stderr))
+                        Profiler.Log.WriteLine<Profiler.TtIOCategory>(ELogTag.Info, $"git {string.Join(" ", args)} returned:{stdout}{stderr}");
+
+                    return new Bricks.SourceControl.TtSourceOpResult(0);
+                }
             }
             catch (Exception e)
             {
                 Profiler.Log.WriteException(e);
                 return new Bricks.SourceControl.TtSourceOpResult(-1);
             }
+        }
+
+        static string GetGitPathSpec(string path, bool ignoreCase = false)
+        {
+            var repoRoot = FindRepositoryRoot(path);
+            if (string.IsNullOrEmpty(repoRoot))
+                return path;
+
+            var fullPath = Path.GetFullPath(path);
+            var relativePath = Path.GetRelativePath(repoRoot, fullPath);
+            var gitPath = relativePath.Replace('\\', '/');
+            return ignoreCase ? $":(icase){gitPath}" : gitPath;
+        }
+
+        static string FindRepositoryRoot(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return string.Empty;
+
+            var fullPath = Path.GetFullPath(path);
+            var dir = Directory.Exists(fullPath) ? fullPath : Path.GetDirectoryName(fullPath);
+            while (!string.IsNullOrEmpty(dir))
+            {
+                if (Directory.Exists(Path.Combine(dir, ".git")) || File.Exists(Path.Combine(dir, ".git")))
+                    return dir;
+                dir = Path.GetDirectoryName(dir);
+            }
+            return string.Empty;
         }
     }
 }

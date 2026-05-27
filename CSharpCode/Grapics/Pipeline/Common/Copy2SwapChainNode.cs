@@ -110,21 +110,24 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override void BeforeTick(TtRenderPolicy policy)
         {
             var buffer = this.FindAttachBuffer(ColorPinIn);
-            if (buffer != null)
+            if (buffer == null)
             {
-                if(ColorAttachement == null || ColorAttachement.BufferDesc.IsMatch(in buffer.BufferDesc) == false)
-                {
-                    CoreSDK.DisposeObject(ref ColorAttachement);
-                    ColorAttachement = new TtAttachBuffer();
-                    ColorAttachement.CreateBufferViews(in buffer.BufferDesc);
-                }
-
-                var attachement = RenderGraph.AttachmentCache.ImportAttachment(ColorPinOut, ColorOutAttachement);
-
-                attachement.GpuResource = ColorAttachement.GpuResource;
-                attachement.Srv = ColorAttachement.Srv;
-                attachement.Rtv = ColorAttachement.Rtv;
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, $"TtCopy2SwapChainNode can't find attach buffer for pin({policy.RPolicyName}:{ColorPinIn.Name}), RenderPolicy will create one ");
+                buffer = this.GetAttachBuffer(ColorPinIn);
             }
+            if (ColorAttachement == null || ColorAttachement.BufferDesc.IsMatch(in buffer.BufferDesc) == false)
+            {
+                CoreSDK.DisposeObject(ref ColorAttachement);
+                ColorAttachement = new TtAttachBuffer();
+                ColorAttachement.CreateBufferViews(in buffer.BufferDesc);
+            }
+
+            var attachement = RenderGraph.AttachmentCache.ImportAttachment(ColorPinOut, ColorOutAttachement);
+
+            attachement.BufferDesc = ColorAttachement.BufferDesc;
+            attachement.GpuResource = ColorAttachement.GpuResource;
+            attachement.Srv = ColorAttachement.Srv;
+            attachement.Rtv = ColorAttachement.Rtv;
         }
         public override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {

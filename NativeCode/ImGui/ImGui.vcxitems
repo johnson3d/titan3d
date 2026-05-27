@@ -24,6 +24,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_binding.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_markdown.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)implot\implot.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)implot\implot_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)misc\freetype\imgui_freetype.h" />
   </ItemGroup>
   <ItemGroup>
@@ -35,6 +37,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_filedialog.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_tables.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_widgets.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)implot\implot.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)implot\implot_items.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_binding.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)misc\freetype\imgui_freetype.cpp" />
   </ItemGroup>
@@ -47,5 +51,6 @@
     <None Include="$(MSBuildThisFileDirectory)ColorTextEditor\CONTRIBUTING" />
     <None Include="$(MSBuildThisFileDirectory)ColorTextEditor\LICENSE" />
     <None Include="$(MSBuildThisFileDirectory)ColorTextEditor\README.md" />
+    <None Include="$(MSBuildThisFileDirectory)implot\LICENSE" />
   </ItemGroup>
 </Project>

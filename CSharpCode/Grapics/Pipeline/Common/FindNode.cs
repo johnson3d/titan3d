@@ -441,7 +441,13 @@ namespace EngineNS.Graphics.Pipeline.Common
         public TtRenderGraphPin LinePinInOut = TtRenderGraphPin.CreateInputOutput(
             "Line",
             NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_DSV);
-
+        public TtRenderGraphNode GetReferNode()
+        {
+            var linker = this.RenderGraph.FindInLinker(LinePinInOut);
+            if (linker == null)
+                return null;
+            return linker.OutPin.HostNode;
+        }
         [Rtti.Meta("")]
         public string LinkedNodeName { get; set; }
 

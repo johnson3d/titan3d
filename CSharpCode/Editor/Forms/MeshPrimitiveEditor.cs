@@ -262,33 +262,11 @@ namespace EngineNS.Editor.Forms
             sphere.Radius = mCurrentMeshRadius;
             policy.DefaultCamera.AutoZoom(in sphere);
 
-            {
-                var meshCenter = aabb.GetCenter();
-                var meshSize = aabb.GetSize() * PlaneScale;
-                var maxLength = MathHelper.Max(meshSize.X, meshSize.Z);
-                meshSize.X = meshSize.Z = maxLength;
-                meshSize.Y = aabb.GetSize().Y * 0.05f;
-                var boxStart = meshCenter - meshSize * 0.5f;
-                boxStart.Y -= aabb.GetSize().Y * 0.5f + meshSize.Y * 0.5f + 0.001f;
-                //var box = Graphics.Mesh.UMeshDataProvider.MakeBox(boxStart.X, boxStart.Y, boxStart.Z, meshSize.X, meshSize.Y, meshSize.Z).ToMesh();
-                var box = Graphics.Mesh.TtMeshDataProvider.MakePlane(meshSize.X, meshSize.Z).ToMesh();
+            var planeMaterialName = TtEngine.Instance.ConfigManager.GetConfig<Editor.Forms.TtMeshPrimitiveEditorConfig>().PlaneMaterialName;
+            var studioContext = await PreviewViewport.CreateStudioEnvironment(aabb, PlaneScale, planeMaterialName);
+            PlaneMeshNode = studioContext?.FloorNode;
 
-                var PlaneMesh = new Graphics.Mesh.TtRenderMesh();
-                var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
-                tMaterials[0] = await TtEngine.Instance.ConfigManager.GetConfig<Editor.Forms.TtMeshPrimitiveEditorConfig>().PlaneMaterialName.GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
-                PlaneMesh.Initialize(box, tMaterials,
-                    Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
-                PlaneMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), PlaneMesh, new DVector3(0, boxStart.Y, 0), Vector3.One, Quaternion.Identity);
-                PlaneMeshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
-                PlaneMeshNode.NodeData.Name = "Plane";
-                PlaneMeshNode.IsAcceptShadow = true;
-                PlaneMeshNode.IsCastShadow = false;
-            }
-
-            var gridNode = await GamePlay.Scene.TtGridNode.AddGridNode(viewport.World, viewport.World.Root);
-            gridNode.ViewportSlate = this.PreviewViewport;
-
-            await InitializeLightEnv(PreviewViewport, radius);
+            await InitializeLightEnv(PreviewViewport, studioContext?.Radius ?? radius);
 
             return true;
         }

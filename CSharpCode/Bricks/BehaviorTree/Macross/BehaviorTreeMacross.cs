@@ -94,6 +94,7 @@ namespace EngineNS.BehaviorTree.Macross
 
                 var visible = true;
                 var retValue = false;
+                EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
                 if (ImGuiAPI.BeginPopupModal($"New BehaviorTreeMacross", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var drawList = ImGuiAPI.GetWindowDrawList();
@@ -199,6 +200,7 @@ namespace EngineNS.BehaviorTree.Macross
 
                     ImGuiAPI.EndPopup();
                 }// */
+                EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
 
                 return retValue;
             }

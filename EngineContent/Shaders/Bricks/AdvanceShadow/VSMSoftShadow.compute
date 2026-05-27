@@ -1,0 +1,158 @@
+/**
+ * VSM Soft Shadow via Shadow Map Ray Tracing (SMRT)
+ * 
+ * Marches along the light ray in the shadow page pool atlas to compute
+ * penumbra width. Produces a smooth shadow factor per pixel that varies
+ * based on occluder distance (contact-hardening shadows).
+ *
+ * Inputs:
+ *   - GBuffer Depth (reconstruct world position)
+ *   - Physical Page Pool atlas (shadow depth)
+ *   - Page Table (virtual → physical mapping)
+ *   - Clipmap/QTree VP matrices
+ *
+ * Output:
+ *   - RWTexture2D<float> ShadowMask (0 = full shadow, 1 = fully lit)
+ */
+
+#include "../../Inc/SysFunction.cginc"
+
+cbuffer cbVSMSoftShadow DX_AUTOBIND
+{
+    matrix InvViewProjection;      // Camera inverse VP for world pos reconstruction
+    matrix ShadowViewProjection;   // Light's VP for the relevant clipmap level
+    float3 LightDirection;         // Normalized direction toward light
+    float  LightSourceRadius;      // World-space radius of the light source (for penumbra)
+    float2 ScreenSize;             // Render target dimensions
+    float2 ShadowAtlasSize;        // Physical atlas dimensions in texels
+    float  MaxRayDistance;         // Max world-space march distance
+    int    RayStepCount;           // Number of steps along the ray (quality)
+    float  ShadowBias;            // Depth bias to prevent self-shadowing
+    int    PageResolution;         // Texels per page side
+    int    PoolDimPages;           // Pages per atlas dimension
+};
+
+// Shadow page pool atlas (depth values)
+Texture2D<float> ShadowAtlas DX_AUTOBIND;
+SamplerState Samp_ShadowAtlas DX_AUTOBIND;
+
+// GBuffer depth for world position reconstruction
+Texture2D<float> DepthBuffer DX_AUTOBIND;
+SamplerState Samp_DepthBuffer DX_AUTOBIND;
+
+// Page table: maps virtual page index → physical page coordinates
+StructuredBuffer<int4> PageTable DX_AUTOBIND;  // .xy = PhysicalPageCoord, .z = LastFrame, .w = Flags
+
+// Output shadow mask
+RWTexture2D<float> ShadowMask DX_AUTOBIND;
+
+// Reconstruct world position from screen UV and depth
+float3 ReconstructWorldPos(float2 uv, float depth)
+{
+    float4 clipPos = float4(uv * 2.0 - 1.0, depth, 1.0);
+    clipPos.y = -clipPos.y;
+    float4 worldPos = mul(clipPos, InvViewProjection);
+    return worldPos.xyz / worldPos.w;
+}
+
+// Convert world position to shadow atlas UV (returns -1 if unmapped)
+float2 WorldToShadowAtlasUV(float3 worldPos, out float shadowDepth)
+{
+    float4 shadowClip = mul(float4(worldPos, 1.0), ShadowViewProjection);
+    shadowClip.xyz /= shadowClip.w;
+    
+    // NDC to [0,1]
+    float2 shadowUV = shadowClip.xy * 0.5 + 0.5;
+    shadowUV.y = 1.0 - shadowUV.y;
+    shadowDepth = shadowClip.z;
+    
+    // Bounds check
+    if (any(shadowUV < 0.0) || any(shadowUV > 1.0))
+        return float2(-1, -1);
+    
+    return shadowUV;
+}
+
+// Sample the shadow atlas at a given UV (already in atlas space)
+float SampleShadowDepth(float2 atlasUV)
+{
+    return ShadowAtlas.SampleLevel(Samp_ShadowAtlas, atlasUV, 0).r;
+}
+
+[numthreads(8, 8, 1)]
+void CS_SoftShadow(uint3 dispatchId : SV_DispatchThreadID)
+{
+    uint2 pixelCoord = dispatchId.xy;
+    if (pixelCoord.x >= (uint)ScreenSize.x || pixelCoord.y >= (uint)ScreenSize.y)
+        return;
+    
+    float2 uv = (float2(pixelCoord) + 0.5) / ScreenSize;
+    float depth = DepthBuffer.SampleLevel(Samp_DepthBuffer, uv, 0).r;
+    
+    // Sky pixels are fully lit
+    if (depth <= 0.0 || depth >= 1.0)
+    {
+        ShadowMask[pixelCoord] = 1.0;
+        return;
+    }
+    
+    float3 worldPos = ReconstructWorldPos(uv, depth);
+    
+    // Get shadow-space position of the receiver
+    float receiverShadowDepth;
+    float2 shadowUV = WorldToShadowAtlasUV(worldPos, receiverShadowDepth);
+    
+    if (shadowUV.x < 0.0)
+    {
+        // Outside shadow coverage — assume lit
+        ShadowMask[pixelCoord] = 1.0;
+        return;
+    }
+    
+    // SMRT: March along the light ray in shadow map space
+    // The ray starts at the receiver and moves toward the light
+    float3 rayDir = -LightDirection;
+    float stepSize = MaxRayDistance / (float)RayStepCount;
+    
+    float minOccluderDist = MaxRayDistance;
+    bool isOccluded = false;
+    
+    for (int step = 1; step <= RayStepCount; step++)
+    {
+        float marchDist = stepSize * (float)step;
+        float3 sampleWorldPos = worldPos + rayDir * marchDist;
+        
+        float sampleShadowDepth;
+        float2 sampleUV = WorldToShadowAtlasUV(sampleWorldPos, sampleShadowDepth);
+        
+        if (sampleUV.x < 0.0)
+            continue;
+        
+        float storedDepth = SampleShadowDepth(sampleUV);
+        
+        // If stored depth is closer than sample depth, there's an occluder between light and sample
+        if (storedDepth + ShadowBias < sampleShadowDepth)
+        {
+            float occluderDist = marchDist;
+            minOccluderDist = min(minOccluderDist, occluderDist);
+            isOccluded = true;
+        }
+    }
+    
+    // Compute penumbra from occluder distance (contact-hardening)
+    float shadowFactor = 1.0;
+    if (isOccluded)
+    {
+        // Penumbra width based on similar-triangles: wider penumbra for distant occluders
+        float penumbraWidth = LightSourceRadius * minOccluderDist / max(MaxRayDistance, 0.001);
+        
+        // Smooth falloff: fully shadowed at penumbra=0, fully lit at penumbra=1
+        shadowFactor = saturate(penumbraWidth);
+        
+        // Additional sharpening for close occluders (contact shadows)
+        if (minOccluderDist < stepSize * 2.0)
+            shadowFactor = 0.0;
+    }
+    
+    ShadowMask[pixelCoord] = shadowFactor;
+}

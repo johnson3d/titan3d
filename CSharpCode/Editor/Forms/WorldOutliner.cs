@@ -80,26 +80,19 @@ namespace EngineNS.Editor.Forms
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public virtual unsafe void DrawAsChildWindow(in Vector2 size)
         {
+            EGui.UIProxy.StyleConfig.Instance.PushPanelChildStyle(EGui.UIProxy.StyleConfig.Instance.SecondPanelBackground);
             if (ImGuiAPI.BeginChild(Title, in size, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (ImGuiAPI.IsWindowDocked())
                 {
                     DockId = ImGuiAPI.GetWindowDockID();
                 }
-                if (World != null)
-                {
-                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.TVHeader);
-                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.TVHeaderActive);
-                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.TVHeaderHovered);
-                    DrawTree(null, World.Root, 0);
-                    ImGuiAPI.PopStyleColor(3);
-
-                    DrawDeselectAllSpacer();
-                }
+                DrawWorldTreeBody();
             }
             if (OnDrawMenu != null)
                 OnDrawMenu();
             ImGuiAPI.EndChild();
+            EGui.UIProxy.StyleConfig.Instance.PopPanelChildStyle();
 
             
         }
@@ -115,20 +108,25 @@ namespace EngineNS.Editor.Forms
                 {
                     DockId = ImGuiAPI.GetWindowDockID();
                 }
-                if (World != null)
-                {
-                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.TVHeader);
-                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.TVHeaderActive);
-                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.TVHeaderHovered);
-                    DrawTree(null, World.Root, 0);
-                    ImGuiAPI.PopStyleColor(3);
-
-                    DrawDeselectAllSpacer();
-                }
+                DrawWorldTreeBody();
             }
             if (OnDrawMenu != null)
                 OnDrawMenu();
             EGui.UIProxy.DockProxy.EndMainForm(result);
+        }
+
+        unsafe void DrawWorldTreeBody()
+        {
+            if (World == null)
+                return;
+
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.TVHeader);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.TVHeaderActive);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.TVHeaderHovered);
+            DrawTree(null, World.Root, 0);
+            ImGuiAPI.PopStyleColor(3);
+
+            DrawDeselectAllSpacer();
         }
 
         // 在 Outliner 树渲染完之后, 把树到窗口底部之间的空白区域铺一个 invisible button,
@@ -295,6 +293,7 @@ namespace EngineNS.Editor.Forms
             var scene = provider as GamePlay.Scene.TtScene;
             OnDrawMenu = async () =>
             {
+                EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
                 if (ImGuiAPI.BeginPopupContextWindow(null, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
                 {
                     mAddToNode = node;
@@ -311,6 +310,7 @@ namespace EngineNS.Editor.Forms
                     }
                     mNodeMenuShow = false;
                 }
+                EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
             };
         }
 

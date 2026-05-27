@@ -392,14 +392,18 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public Vector3 mSubAlbedo;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "mAO")]
         public float mAO;
-        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "mMask")]
-        public float mMask;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "mSubsurfaceProfile")]
+        public float mSubsurfaceProfile;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "mShadowColor")]
         public Vector3 mShadowColor;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "mDeepShadow")]
         public float mDeepShadow;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "mMoodColor")]
         public Vector3 mMoodColor;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "mOpacity")]
+        public float mOpacity;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "mMask")]
+        public float mMask;
 
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "GetWorldNormal")]
         public Vector3 GetWorldNormal(PS_INPUT input)
@@ -490,6 +494,22 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public Vector4 PositionAndRadius;
         [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "ColorAndIntensity")]
         public Vector4 ColorAndIntensity;
+    }
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
+    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FSpotLight")]
+    public struct FSpotLight
+    {
+        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "PositionAndRadius")]
+        public Vector4 PositionAndRadius;
+        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "DirectionAndInnerCos")]
+        public Vector4 DirectionAndInnerCos;
+        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "ColorAndIntensity")]
+        public Vector4 ColorAndIntensity;
+        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "OuterCosAndPad")]
+        public Vector4 OuterCosAndPad;
+        // CPU precomputed cone bounding sphere for tighter culling
+        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "BoundCenterAndBoundRadius")]
+        public Vector4 BoundCenterAndBoundRadius;
     }
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
     [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FGpuSceneDesc")]

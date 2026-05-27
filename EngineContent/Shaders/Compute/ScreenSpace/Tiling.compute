@@ -87,7 +87,7 @@ void CS_PushLightToTileData(uint3 id : SV_DispatchThreadID,
 	float3 boxmin = DstBuffer[tileIdx].BoxMin;
 	float3 boxmax = DstBuffer[tileIdx].BoxMax;
 	DstBuffer[tileIdx].NumPointLight = 0;
-	for (uint i = 0; i < LightNum; i++)
+	for (uint i = 0; i < GpuScene_PointLightNum; i++)
 	{
 		FPointLight light = GpuScene_PointLights[i];
 		float distSq;

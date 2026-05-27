@@ -33,7 +33,7 @@ MTL_OUTPUT Default_PSInput2Material(PS_INPUT input)
 	mtl.mShadowColor = half3(0.5h, 0.5h, 0.5h);
 	mtl.mDeepShadow = 1.0h;
 	mtl.mMoodColor = half3(1.0h, 0.5h, 0.5h);
-
+    mtl.mOpacity = 1.0h;
 	
 #ifdef MTL_ID_HAIR
 	mtl.mTransmit = 1.0h;

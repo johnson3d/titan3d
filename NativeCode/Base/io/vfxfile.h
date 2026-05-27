@@ -181,6 +181,10 @@ public:
 	}
 
 // Operations
+	void SetFileName(LPCSTR lpszFileName) {
+		m_strFileName = lpszFileName;
+		VStringA_MakeLower(m_strFileName);
+	}
 	virtual vBOOL  Open(LPCSTR lpszFileName, UINT nOpenFlags);
 	virtual vBOOL  DefinitlyOpen(LPCSTR lpszFileName, UINT nOpenFlags);
 	

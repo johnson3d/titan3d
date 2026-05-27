@@ -165,7 +165,7 @@ namespace EngineNS.Editor
                 var max = ImGuiAPI.GetWindowContentRegionMax();
                 min = min + WindowPos;
                 max = max + WindowPos;
-                drawlist.AddImage(showTexture, in min, in max, in uv1, in uv2, 0x01FFFFFF);// 0xFFFFFFFF);abgr
+                drawlist.AddImage(showTexture, in min, in max, in uv1, in uv2, 0xFFFFFFFF);
             }
         }
         public void TickRender(float ellapse)

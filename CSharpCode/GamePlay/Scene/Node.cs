@@ -1719,6 +1719,7 @@ namespace EngineNS.GamePlay.Scene
         {
             public GamePlay.TtWorld World;
             public Graphics.Pipeline.TtRenderPolicy Policy;
+            public Graphics.Pipeline.IRenderViewport Viewport;
             public object Tag;
             public bool IsTickChildren = true;
         }

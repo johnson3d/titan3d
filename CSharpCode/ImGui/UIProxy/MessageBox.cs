@@ -20,9 +20,11 @@ namespace EngineNS.EGui.UIProxy
 
         public static unsafe void Draw(string title, string message, EButtonType buttonType, params Action[] actions)
         {
+            StyleConfig.Instance.PushPopupStyle();
             if(ImGuiAPI.BeginPopupModal(title, (bool*)0, ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize))
             {
                 ImGuiAPI.Text(message);
+                ImGuiAPI.Separator();
 
                 switch(buttonType)
                 {
@@ -92,6 +94,7 @@ namespace EngineNS.EGui.UIProxy
 
                 ImGuiAPI.EndPopup();
             }
+            StyleConfig.Instance.PopPopupStyle();
         }
     }
 }

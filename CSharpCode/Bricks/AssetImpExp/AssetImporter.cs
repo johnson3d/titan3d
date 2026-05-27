@@ -629,7 +629,11 @@ namespace EngineNS.Bricks.AssetImpExp
                 foreach (var bone in mesh.Bones)
                 {
                     var boneNode = AssimpSceneUtil.FindNode(bone.Name, scene);
-                    Debug.Assert(boneNode != null);
+                    if (boneNode == null)
+                    {
+                        EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtIOCategory>(EngineNS.Profiler.ELogTag.Warning, $"Assimp bone node is missing: {bone.Name}");
+                        continue;
+                    }
                     MarkBonesUpSideAndSelfRecursively(boneNode, scene, ref inOutNodesMap, ref inOutSkeletonRootNodes);
                     MarkBonesDownSideRecursively(boneNode, scene, ref inOutNodesMap, ref inOutSkeletonRootNodes);
                 }
@@ -705,7 +709,7 @@ namespace EngineNS.Bricks.AssetImpExp
             }
             else
             {
-                Debug.Assert(false);
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtIOCategory>(EngineNS.Profiler.ELogTag.Warning, $"Skip invalid skeleton node: {node?.Name}");
             }
         }
         static Assimp.Node GetValidParentNode(Assimp.Node node, Assimp.Scene scene)
@@ -726,7 +730,6 @@ namespace EngineNS.Bricks.AssetImpExp
                     return parent;
                 }
             }
-            Debug.Assert(false);
             return null;
         }
         static TtBoneDesc MakeBoneDesc(Assimp.Scene scene, Node boneNode, Node rootBoneNode, TtAssetImportOption_Mesh importOption)
@@ -785,38 +788,68 @@ namespace EngineNS.Bricks.AssetImpExp
             if (skeletonRootNodes.Count == 1)
             {
                 var skeletonRootNode = skeletonRootNodes[0];
-                var preAssimpTransform = Matrix4x4.Identity;
-                if (AssimpSceneUtil.IsZUpLeftHandCoordinate(scene))
-                {
-                    preAssimpTransform = AssimpSceneUtil.GetCoordinateConvertMatrix(scene);
-                }
-                else
-                {
-                    if (AssimpSceneUtil.IsParentIs_AssimpFbxPre_Node(skeletonRootNode))
-                    {
-                        preAssimpTransform = AssimpSceneUtil.AccumulatePreTransform(skeletonRootNode.Parent);
-                        //preAssimpTransform.Inverse();
-                    }
-                }
-
-                TtSkinSkeleton skeleton = new TtSkinSkeleton();
-                foreach (var marked in inOutNodesMap)
-                {
-                    if (marked.Value)
-                    {
-                        TtBoneDesc boneDesc = MakeBoneDesc(scene, marked.Key, skeletonRootNode, importOption);
-                        skeleton.AddLimb(new TtBone(boneDesc));
-                    }
-                }
-                skeleton.ConstructHierarchy();
-                skeletonsGenerate.Add(skeleton);
+                var skeleton = MakeSkeleton(scene, skeletonRootNode, importOption, inOutNodesMap, null);
+                if (skeleton.Limbs.Count > 0)
+                    skeletonsGenerate.Add(skeleton);
             }
             else
             {
-                //TODO: muti skeletons in the scene
-                System.Diagnostics.Debug.Assert(false);
+                foreach (var skeletonRootNode in skeletonRootNodes)
+                {
+                    var skeletonNodes = new HashSet<Assimp.Node>();
+                    foreach (var marked in inOutNodesMap)
+                    {
+                        if (marked.Value && IsNodeUnderSkeletonRoot(marked.Key, skeletonRootNode, scene))
+                        {
+                            skeletonNodes.Add(marked.Key);
+                        }
+                    }
+
+                    if (skeletonNodes.Count == 0)
+                        continue;
+
+                    var skeleton = MakeSkeleton(scene, skeletonRootNode, importOption, inOutNodesMap, skeletonNodes);
+                    if (skeleton.Limbs.Count > 0)
+                        skeletonsGenerate.Add(skeleton);
+                }
             }
             return skeletonsGenerate;
+        }
+        static TtSkinSkeleton MakeSkeleton(Assimp.Scene scene, Assimp.Node skeletonRootNode, TtAssetImportOption_Mesh importOption, Dictionary<Assimp.Node, bool> nodesMap, HashSet<Assimp.Node> skeletonNodes)
+        {
+            TtSkinSkeleton skeleton = new TtSkinSkeleton();
+            foreach (var marked in nodesMap)
+            {
+                if (!marked.Value)
+                    continue;
+                if (skeletonNodes != null && !skeletonNodes.Contains(marked.Key))
+                    continue;
+
+                TtBoneDesc boneDesc = MakeBoneDesc(scene, marked.Key, skeletonRootNode, importOption);
+                if (skeletonNodes != null && !string.IsNullOrEmpty(boneDesc.ParentName))
+                {
+                    var parentNode = GetValidParentNode(marked.Key, scene);
+                    if (parentNode == null || !skeletonNodes.Contains(parentNode))
+                    {
+                        boneDesc.ParentName = null;
+                        boneDesc.ParentHash = 0;
+                    }
+                }
+                skeleton.AddLimb(new TtBone(boneDesc));
+            }
+            skeleton.ConstructHierarchy();
+            return skeleton;
+        }
+        static bool IsNodeUnderSkeletonRoot(Assimp.Node node, Assimp.Node skeletonRootNode, Assimp.Scene scene)
+        {
+            var current = node;
+            while (current != null && !AssimpSceneUtil.IsSceneRootNode(current, scene))
+            {
+                if (current == skeletonRootNode)
+                    return true;
+                current = GetValidParentNode(current, scene);
+            }
+            return current == skeletonRootNode;
         }
         public static List<TtSkinSkeleton> Generate(Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
@@ -861,6 +894,14 @@ namespace EngineNS.Bricks.AssetImpExp
             var meshNodes = AssimpSceneUtil.FindMeshNodes(scene);
             return Generate(meshNodes, meshSkeletons, scene, importOption);
         }
+        public static List<TtExpMeshData> GenerateMerged(string meshName, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
+        {
+            var meshNodes = AssimpSceneUtil.FindMeshNodes(scene);
+            var merged = CreateMergedMeshPrimitives(meshName, meshNodes, scene, importOption, out var meshes);
+            if (merged == null)
+                return new List<TtExpMeshData>();
+            return new List<TtExpMeshData>() { new TtExpMeshData() { Mesh = merged, Materials = meshes } };
+        }
         public static List<NxRHI.TtSrView> GenerateTextures(List<TtSkinSkeleton> meshSkeletons, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
             return null;
@@ -891,7 +932,7 @@ namespace EngineNS.Bricks.AssetImpExp
             }
             return validMeshes;
         }
-        private static TtMeshPrimitives CreateMeshPrimitives(Assimp.Node meshNode, TtSkinSkeleton skeleton, Assimp.Scene scene, TtAssetImportOption_Mesh importOption, out List<Mesh> meshes)
+        private static FTransform GetVertexPreTransform(Assimp.Node meshNode, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
             var preAssimpTransform = Matrix4x4.Identity;
             if (AssimpSceneUtil.IsZUpLeftHandCoordinate(scene))
@@ -906,22 +947,218 @@ namespace EngineNS.Bricks.AssetImpExp
                 }
             }
 
-            Debug.Assert(meshNode.MeshCount > 0);
             var transformTuple = AssimpSceneUtil.AssimpMatrix4x4DecomposeToTransform(preAssimpTransform);
-            var vertexPreTransform = FTransform.Identity;
             if (importOption.ApplyTransformToVertex)
             {
-                var nodeTransform = AssimpSceneUtil.AssimpMatrix4x4DecomposeToTransform(meshNode.Transform);
+                var nodeTransform = AssimpSceneUtil.AssimpMatrix4x4DecomposeToTransform(AssimpSceneUtil.GetAbsNodeMatrix(meshNode, scene));
                 FTransform finalTransform;
                 FTransform.Multiply(out finalTransform, transformTuple, nodeTransform);
-                vertexPreTransform = FTransform.CreateTransform(finalTransform.Position,
-                finalTransform.Scale * importOption.UnitScale, finalTransform.Quat);
+                return FTransform.CreateTransform(finalTransform.Position,
+                    finalTransform.Scale * importOption.UnitScale, finalTransform.Quat);
             }
             else
             {
-                vertexPreTransform = FTransform.CreateTransform(Vector3.Zero.AsDVector(),
-                transformTuple.Scale * importOption.UnitScale, transformTuple.Quat);
+                return FTransform.CreateTransform(Vector3.Zero.AsDVector(),
+                    transformTuple.Scale * importOption.UnitScale, transformTuple.Quat);
             }
+        }
+        private static TtMeshPrimitives CreateMergedMeshPrimitives(string meshName, List<Assimp.Node> meshNodes, Assimp.Scene scene, TtAssetImportOption_Mesh importOption, out List<Mesh> meshes)
+        {
+            meshes = new List<Mesh>();
+            var meshNodeRefs = new List<Assimp.Node>();
+            foreach (var meshNode in meshNodes)
+            {
+                var validMeshes = GetValidMesh(meshNode, scene);
+                foreach (var mesh in validMeshes)
+                {
+                    meshes.Add(mesh);
+                    meshNodeRefs.Add(meshNode);
+                }
+            }
+            if (meshes.Count == 0)
+                return null;
+
+            TtMeshPrimitives meshPrimitives = new TtMeshPrimitives(meshName, (uint)meshes.Count);
+            int vertexCount = 0;
+            int indicesCount = 0;
+            uint nextStartIndex = 0;
+            for (int i = 0; i < meshes.Count; i++)
+            {
+                var subMesh = meshes[i];
+                FMeshAtomDesc atomDesc = new FMeshAtomDesc();
+                atomDesc.PrimitiveType = EPrimitiveType.EPT_TriangleList;
+                atomDesc.BaseVertexIndex = 0;
+                atomDesc.StartIndex = nextStartIndex;
+                atomDesc.NumInstances = 1;
+                atomDesc.NumPrimitives = (uint)subMesh.FaceCount;
+                meshPrimitives.PushAtom((uint)i, atomDesc);
+                vertexCount += subMesh.VertexCount;
+                nextStartIndex += atomDesc.NumPrimitives * 3;
+                indicesCount += subMesh.GetIndices().ToList().Count;
+            }
+
+            bool hasVertexColor = true;
+            for (int i = 0; i < meshes.Count; i++)
+            {
+                if (!meshes[i].HasVertexColors(0))
+                {
+                    hasVertexColor = false;
+                    break;
+                }
+            }
+
+            Vector3[] posStream = new Vector3[vertexCount];
+            Vector3[] normalStream = new Vector3[vertexCount];
+            Vector4[] tangentStream = new Vector4[vertexCount];
+            Vector2[] uvStream = new Vector2[vertexCount];
+            Vector4[] lightMapStream = new Vector4[vertexCount];
+            UInt32[] vertexColorStream = hasVertexColor ? new UInt32[vertexCount] : null;
+            bool isIndex32 = indicesCount > 65535;
+            UInt16[] renderIndex16 = isIndex32 ? null : new UInt16[indicesCount];
+            UInt32[] renderIndex32 = isIndex32 ? new UInt32[indicesCount] : null;
+
+            int indicesIndex = 0;
+            int vertexCounting = 0;
+            for (int i = 0; i < meshes.Count; i++)
+            {
+                var subMesh = meshes[i];
+                var vertexPreTransform = GetVertexPreTransform(meshNodeRefs[i], scene, importOption);
+
+                var meshIndices = subMesh.GetIndices().ToList();
+                for (int j = 0; j < meshIndices.Count; j++)
+                {
+                    if (isIndex32)
+                    {
+                        renderIndex32[indicesIndex] = (UInt32)(vertexCounting + meshIndices[j]);
+                    }
+                    else
+                    {
+                        renderIndex16[indicesIndex] = (UInt16)(vertexCounting + meshIndices[j]);
+                    }
+                    indicesIndex++;
+                }
+
+                for (int j = 0; j < subMesh.VertexCount; j++)
+                {
+                    var vertexIndex = vertexCounting + j;
+                    posStream[vertexIndex] = vertexPreTransform.TransformPosition(AssimpSceneUtil.ConvertVector3(subMesh.Vertices[j]).AsDVector()).ToSingleVector3();
+                    normalStream[vertexIndex] = vertexPreTransform.TransformVector3NoScale(AssimpSceneUtil.ConvertVector3(subMesh.Normals[j]));
+
+                    if (subMesh.HasTangentBasis)
+                    {
+                        var normal = vertexPreTransform.TransformVector3NoScale(AssimpSceneUtil.ConvertVector3(subMesh.Normals[j]));
+                        var tangent = vertexPreTransform.TransformVector3NoScale(AssimpSceneUtil.ConvertVector3(subMesh.Tangents[j]));
+                        var binTan = vertexPreTransform.TransformVector3NoScale(AssimpSceneUtil.ConvertVector3(subMesh.BiTangents[j]));
+                        float dp = Vector3.Dot(Vector3.Cross(normal, tangent), binTan);
+                        float w = dp > 0.0f ? 1.0f : -1.0f;
+                        tangentStream[vertexIndex] = new Vector4(tangent, w);
+                    }
+                    if (hasVertexColor)
+                    {
+                        vertexColorStream[vertexIndex] = AssimpSceneUtil.ConvertColor(subMesh.VertexColorChannels[0][j]).ToAbgr();
+                    }
+                    int uvChannels = subMesh.TextureCoordinateChannelCount;
+                    if (uvChannels > 0)
+                    {
+                        var uvChannel = subMesh.TextureCoordinateChannels[0];
+                        uvStream[vertexIndex] = AssimpSceneUtil.ConvertVector2(uvChannel[j].X, uvChannel[j].Y);
+                        if (uvChannels == 2)
+                        {
+                            var lightMapChannel = subMesh.TextureCoordinateChannels[1];
+                            lightMapStream[vertexIndex] = new Vector4(lightMapChannel[j].X, lightMapChannel[j].Y, 0, 0);
+                        }
+                    }
+                }
+                vertexCounting += subMesh.VertexCount;
+            }
+
+            SetMeshStreams(meshPrimitives, posStream, normalStream, tangentStream, uvStream, lightMapStream, vertexColorStream, null, null, renderIndex16, renderIndex32, isIndex32, indicesCount, vertexCount, false);
+            return meshPrimitives;
+        }
+        private static void SetMeshStreams(TtMeshPrimitives meshPrimitives,
+            Vector3[] posStream,
+            Vector3[] normalStream,
+            Vector4[] tangentStream,
+            Vector2[] uvStream,
+            Vector4[] lightMapStream,
+            UInt32[] vertexColorStream,
+            Byte[] skinIndexsStream,
+            float[] skinWeightsStream,
+            UInt16[] renderIndex16,
+            UInt32[] renderIndex32,
+            bool isIndex32,
+            int indicesCount,
+            int vertexCount,
+            bool bHasSkin)
+        {
+            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CreateCommandList();
+            unsafe
+            {
+                fixed (void* data = posStream)
+                {
+                    meshPrimitives.mCoreObject.SetGeomtryMeshStream(cmd.mCoreObject, EVertexStreamType.VST_Position, data, (uint)(sizeof(Vector3) * vertexCount), (uint)sizeof(Vector3), ECpuAccess.CAS_DEFAULT);
+                }
+                fixed (void* data = vertexColorStream)
+                {
+                    if (vertexColorStream != null)
+                    {
+                        meshPrimitives.mCoreObject.SetGeomtryMeshStream(cmd.mCoreObject, EVertexStreamType.VST_Color, data, (uint)(sizeof(uint) * vertexCount), (uint)sizeof(uint), ECpuAccess.CAS_DEFAULT);
+                    }
+                }
+                fixed (void* data = normalStream)
+                {
+                    meshPrimitives.mCoreObject.SetGeomtryMeshStream(cmd.mCoreObject, EVertexStreamType.VST_Normal, data, (uint)(sizeof(Vector3) * vertexCount), (uint)sizeof(Vector3), ECpuAccess.CAS_DEFAULT);
+                }
+                fixed (void* data = tangentStream)
+                {
+                    meshPrimitives.mCoreObject.SetGeomtryMeshStream(cmd.mCoreObject, EVertexStreamType.VST_Tangent, data, (uint)(sizeof(Vector4) * vertexCount), (uint)sizeof(Vector4), ECpuAccess.CAS_DEFAULT);
+                }
+                fixed (void* data = uvStream)
+                {
+                    meshPrimitives.mCoreObject.SetGeomtryMeshStream(cmd.mCoreObject, EVertexStreamType.VST_UV, data, (uint)(sizeof(Vector2) * vertexCount), (uint)sizeof(Vector2), ECpuAccess.CAS_DEFAULT);
+                }
+                fixed (void* data = lightMapStream)
+                {
+                    meshPrimitives.mCoreObject.SetGeomtryMeshStream(cmd.mCoreObject, EVertexStreamType.VST_LightMap, data, (uint)(sizeof(Vector4) * vertexCount), (uint)sizeof(Vector4), ECpuAccess.CAS_DEFAULT);
+                }
+                if (isIndex32)
+                {
+                    fixed (void* data = renderIndex32)
+                    {
+                        meshPrimitives.mCoreObject.SetGeomtryMeshIndex(cmd.mCoreObject, data, (uint)(sizeof(uint) * indicesCount), isIndex32, ECpuAccess.CAS_DEFAULT);
+                    }
+                }
+                else
+                {
+                    fixed (void* data = renderIndex16)
+                    {
+                        meshPrimitives.mCoreObject.SetGeomtryMeshIndex(cmd.mCoreObject, data, (uint)(sizeof(ushort) * indicesCount), isIndex32, ECpuAccess.CAS_DEFAULT);
+                    }
+                }
+                if (bHasSkin)
+                {
+                    fixed (void* data = skinIndexsStream)
+                    {
+                        meshPrimitives.mCoreObject.SetGeomtryMeshStream(cmd.mCoreObject, EVertexStreamType.VST_SkinIndex, data, (uint)(sizeof(Byte) * vertexCount * 4), 4 * (uint)sizeof(Byte), ECpuAccess.CAS_DEFAULT);
+                    }
+                    fixed (void* data = skinWeightsStream)
+                    {
+                        meshPrimitives.mCoreObject.SetGeomtryMeshStream(cmd.mCoreObject, EVertexStreamType.VST_SkinWeight, data, (uint)(sizeof(float) * vertexCount * 4), 4 * (uint)sizeof(float), ECpuAccess.CAS_DEFAULT);
+                    }
+                }
+            }
+
+            BoundingBox aabb = new BoundingBox();
+            for (int i = 0; i < vertexCount; i++)
+            {
+                aabb.Merge(posStream[i]);
+            }
+            meshPrimitives.mCoreObject.SetAABB(ref aabb);
+        }
+        private static TtMeshPrimitives CreateMeshPrimitives(Assimp.Node meshNode, TtSkinSkeleton skeleton, Assimp.Scene scene, TtAssetImportOption_Mesh importOption, out List<Mesh> meshes)
+        {
+            Debug.Assert(meshNode.MeshCount > 0);
+            var vertexPreTransform = GetVertexPreTransform(meshNode, scene, importOption);
 
             meshes = GetValidMesh(meshNode, scene);
 
@@ -985,9 +1222,15 @@ namespace EngineNS.Bricks.AssetImpExp
             {
                 if (mesh.HasBones && !importOption.AsStaticMesh)
                 {
-                    bHasSkin = true;
-                    Debug.Assert(skeleton != null);
-                    meshPrimitives.PartialSkeleton = skeleton;
+                    if (skeleton != null)
+                    {
+                        bHasSkin = true;
+                        meshPrimitives.PartialSkeleton = skeleton;
+                    }
+                    else
+                    {
+                        EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtIOCategory>(EngineNS.Profiler.ELogTag.Warning, $"Mesh {meshNode.Name} has skin data but no matching skeleton. Import as static mesh for this node.");
+                    }
                     break;
                 }
             }
@@ -1069,13 +1312,17 @@ namespace EngineNS.Bricks.AssetImpExp
                     for (int j = 0; j < subMesh.BoneCount; j++)
                     {
                         var bone = subMesh.Bones[j];
-                        var boneIndex = skeleton.FindLimb(bone.Name).Index;
-                        Debug.Assert(boneIndex.Value != -1);
+                        var limb = skeleton.FindLimb(bone.Name);
+                        if (limb == null || !limb.Index.IsValid())
+                        {
+                            EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtIOCategory>(EngineNS.Profiler.ELogTag.Warning, $"Skip skin weights for missing bone: {bone.Name}");
+                            continue;
+                        }
+                        var boneIndex = limb.Index;
                         for (int k = 0; k < bone.VertexWeightCount; k++)
                         {
                             var weight = bone.VertexWeights[k];
                             var vertexId = weight.VertexID;
-                            Debug.Assert(boneIndex.IsValid());
                             vertexSkinIndex[vertexCounting + vertexId].Add((uint)boneIndex.Value);
                             vertexSkinWeight[vertexCounting + vertexId].Add(weight.Weight);
                         }
@@ -1097,6 +1344,17 @@ namespace EngineNS.Bricks.AssetImpExp
                     for (int j = 0; j < size; ++j)
                     {
                         totalWeight += vertexSkinWeight[i][j];
+                    }
+                    if (totalWeight <= float.Epsilon)
+                    {
+                        skinIndexsStream[i * 4] = 0;
+                        skinWeightsStream[i * 4] = 1.0f;
+                        for (int j = 1; j < 4; ++j)
+                        {
+                            skinIndexsStream[i * 4 + j] = 0;
+                            skinWeightsStream[i * 4 + j] = 0;
+                        }
+                        continue;
                     }
                     for (int j = 0; j < 4; ++j)
                     {

@@ -5,12 +5,11 @@ using System.Linq;
 using System.Reflection;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.Graphics.Pipeline.Shader;
-using NPOI.POIFS.Crypt.Dsig;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialOutput@EngineCore", "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialOutput" })]
-    public partial class TtMaterialOutput : TtNodeBase
+    public partial class TtMaterialOutput : TtShadeBaseNode
     {
         public static TtMaterialOutput NewNode(TtMaterialGraph graph)
         {

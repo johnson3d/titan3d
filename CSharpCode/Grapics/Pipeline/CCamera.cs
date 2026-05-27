@@ -9,7 +9,7 @@ namespace EngineNS.Graphics.Pipeline
         public TtCamera()
         {
             mCoreObject = ICamera.CreateInstance();
-            mCoreObject.SetReverseZ(TtEngine.Instance.Config.IsReverseZ);
+            mCoreObject.SetReverseZ(TtEngine.Instance.GfxDevice.Config.IsReverseZ);
         }
         public string Name { get; set; }
         public TtGraphicsBuffers.TtTargetViewIdentifier TargetViewIdentifier = new TtGraphicsBuffers.TtTargetViewIdentifier();

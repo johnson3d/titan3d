@@ -103,10 +103,16 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         [TtNodeListDefine.TtValueEditor]
+        [Category("Option")]
         public TtNodeListDefine NodeList
         {
             get;
         } = new TtNodeListDefine();
+        [Category("Option")]
+        public List<TtRenderGraphNode> GraphNodeList
+        {
+            get => GraphNodes.Values.ToList();
+        }
         //TagObject通常用来处理ShadingEnv.OnDrawCall的特殊参数设置
         //public TtRenderGraphNode TagObject;
         public object TagObject;
@@ -254,14 +260,6 @@ namespace EngineNS.Graphics.Pipeline
         {
             get => mLookNode;
         }
-        protected EShadowMode mShadowMode = EShadowMode.Csm;
-        [Category("Option")]
-        [Rtti.Meta("")]
-        public virtual EShadowMode ShadowMode
-        {
-            get => mShadowMode;
-            set => mShadowMode = value;
-        }
         protected bool mDisableAO;
         [Category("Option")]
         [Rtti.Meta("")]
@@ -278,10 +276,10 @@ namespace EngineNS.Graphics.Pipeline
         [Rtti.Meta("")]
         public virtual bool DisablePointLight
         {
-            get => mDisableAO;
+            get => mDisablePointLight;
             set
             {
-                mDisableAO = value;
+                mDisablePointLight = value;
             }
         }
         protected bool mDisableHDR;
@@ -495,20 +493,6 @@ namespace EngineNS.Graphics.Pipeline
     public class TtDeferredPolicyBase : TtRenderPolicy
     {
         #region Feature On/Off
-        [Category("Option")]
-        [Rtti.Meta("")]
-        public override EShadowMode ShadowMode
-        {
-            get => mShadowMode;
-            set
-            {
-                mShadowMode = value;
-                var shading = this.FindFirstNode<Deferred.TtDeferredDirLightingNode>()?.GetPassShading() as Deferred.TtDeferredDirLightingShading;
-                shading?.ShadowModePermutation.SetValue((uint)value);
-                if (shading != null)
-                    shading.UpdatePermutation().AddWaitTask();
-            }
-        }
         [Category("Option")]
         [Rtti.Meta("")]
         public override bool DisablePointLight

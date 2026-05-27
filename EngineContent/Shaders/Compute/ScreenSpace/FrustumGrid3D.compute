@@ -1,0 +1,155 @@
+#ifndef _FRUSTUM_GRID_3D_H_
+#define _FRUSTUM_GRID_3D_H_
+
+#include "../../Inc/VertexLayout.cginc"
+#include "../../Inc/GpuSceneCommon.cginc"
+#include "../../Inc/FrustumGridCommon.cginc"
+
+cbuffer cbFrustumGrid DX_AUTOBIND
+{
+    int3    FrustumGridSize;
+    uint    FrustumGridPixelSizeShift;
+    float3  FrustumGridZParams;
+    uint    FrustumGridTotalCells;
+    uint    FrustumGridMaxPerCellPoint;
+    uint    FrustumGridMaxPerCellSpot;
+    float2  FrustumGridViewportSize;    // viewport width, height in pixels
+    uint    FrustumGridPointLightNum;
+    uint    FrustumGridSpotLightNum;
+};
+
+RWStructuredBuffer<FFrustumGridCellHeader> RWPointGridHeaders DX_AUTOBIND;
+RWStructuredBuffer<uint> RWPointGridDataIndices DX_AUTOBIND;
+RWStructuredBuffer<FFrustumGridCellHeader> RWSpotGridHeaders DX_AUTOBIND;
+RWStructuredBuffer<uint> RWSpotGridDataIndices DX_AUTOBIND;
+Texture2D<float2> DepthBuffer DX_AUTOBIND;
+
+/**Meta Begin:(CS_ClearGrid)
+HLSL=2021
+Meta End:(CS_ClearGrid)**/
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_ClearGrid(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= FrustumGridTotalCells)
+        return;
+
+    // Clear PointLight grid
+    RWPointGridHeaders[id.x].Count = 0;
+    RWPointGridHeaders[id.x].DataStartOffset = id.x * FrustumGridMaxPerCellPoint;
+    uint pointBase = id.x * FrustumGridMaxPerCellPoint;
+    for (uint i = 0; i < FrustumGridMaxPerCellPoint; i++)
+        RWPointGridDataIndices[pointBase + i] = 0xFFFFFFFF;
+
+    // Clear SpotLight grid
+    RWSpotGridHeaders[id.x].Count = 0;
+    RWSpotGridHeaders[id.x].DataStartOffset = id.x * FrustumGridMaxPerCellSpot;
+    uint spotBase = id.x * FrustumGridMaxPerCellSpot;
+    for (uint j = 0; j < FrustumGridMaxPerCellSpot; j++)
+        RWSpotGridDataIndices[spotBase + j] = 0xFFFFFFFF;
+}
+
+// Shared helper: test sphere-vs-cell overlap (XY screen-space + Z slice)
+bool TestLightCellOverlap(float3 lightPosVS, float lightRadius, uint x, uint y, uint z,
+    float2 cellPixelMin, float2 cellPixelMax)
+{
+    float lightDepth = lightPosVS.z;
+
+    // Skip lights entirely behind camera
+    if (lightDepth + lightRadius <= 0.0f)
+        return false;
+
+    // Z slice overlap
+    float sphereNearZ = max(lightDepth - lightRadius, ZNear);
+    float sphereFarZ  = lightDepth + lightRadius;
+
+    int lightZMin = (int)max(0.0f, log2(sphereNearZ * FrustumGridZParams.x + FrustumGridZParams.y) * FrustumGridZParams.z);
+    int lightZMax = (int)max(0.0f, log2(sphereFarZ  * FrustumGridZParams.x + FrustumGridZParams.y) * FrustumGridZParams.z);
+    lightZMin = clamp(lightZMin, 0, FrustumGridSize.z - 1);
+    lightZMax = clamp(lightZMax, 0, FrustumGridSize.z - 1);
+
+    if ((int)z < lightZMin || (int)z > lightZMax)
+        return false;
+
+    // XY overlap: project bounding sphere to screen pixels
+    float closestDepth = max(lightDepth - lightRadius, ZNear);
+    float projDepth = max(lightDepth, ZNear);
+
+    float ndcX = lightPosVS.x * PrjMtx[0][0] / projDepth;
+    float ndcY = lightPosVS.y * PrjMtx[1][1] / projDepth;
+    float2 lightPixel = float2((ndcX + 1.0f) * 0.5f * FrustumGridViewportSize.x,
+                                (1.0f - ndcY) * 0.5f * FrustumGridViewportSize.y);
+
+    float screenRadiusX = lightRadius * PrjMtx[0][0] / closestDepth * 0.5f * FrustumGridViewportSize.x;
+    float screenRadiusY = lightRadius * PrjMtx[1][1] / closestDepth * 0.5f * FrustumGridViewportSize.y;
+
+    float2 lightPixelMin = lightPixel - float2(screenRadiusX, screenRadiusY);
+    float2 lightPixelMax = lightPixel + float2(screenRadiusX, screenRadiusY);
+
+    if (lightPixelMax.x < cellPixelMin.x || lightPixelMin.x > cellPixelMax.x)
+        return false;
+    if (lightPixelMax.y < cellPixelMin.y || lightPixelMin.y > cellPixelMax.y)
+        return false;
+
+    return true;
+}
+
+/**Meta Begin:(CS_InjectLights)
+HLSL=2021
+Meta End:(CS_InjectLights)**/
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_InjectLights(uint3 id : SV_DispatchThreadID)
+{
+    uint cellIndex = id.x;
+    if (cellIndex >= FrustumGridTotalCells)
+        return;
+
+    // Decode flat index back to 3D cell coord
+    uint sizeX = (uint)FrustumGridSize.x;
+    uint sizeY = (uint)FrustumGridSize.y;
+    uint z = cellIndex / (sizeX * sizeY);
+    uint rem = cellIndex - z * (sizeX * sizeY);
+    uint y = rem / sizeX;
+    uint x = rem - y * sizeX;
+
+    float cellPixelSize = (float)(1u << FrustumGridPixelSizeShift);
+    float2 cellPixelMin = float2(x, y) * cellPixelSize;
+    float2 cellPixelMax = cellPixelMin + cellPixelSize;
+
+    // --- PointLights ---
+    uint pointCount = 0;
+    uint pointDataStart = RWPointGridHeaders[cellIndex].DataStartOffset;
+
+    for (uint i = 0; i < FrustumGridPointLightNum && pointCount < FrustumGridMaxPerCellPoint; i++)
+    {
+        FPointLight light = GpuScene_PointLights[i];
+        float3 lightPosVS = mul(float4(light.PositionAndRadius.xyz, 1.0f), CameraViewMatrix).xyz;
+
+        if (TestLightCellOverlap(lightPosVS, light.PositionAndRadius.w, x, y, z, cellPixelMin, cellPixelMax))
+        {
+            RWPointGridDataIndices[pointDataStart + pointCount] = i;
+            pointCount++;
+        }
+    }
+    RWPointGridHeaders[cellIndex].Count = pointCount;
+
+    // --- SpotLights ---
+    uint spotCount = 0;
+    uint spotDataStart = RWSpotGridHeaders[cellIndex].DataStartOffset;
+
+    for (uint si = 0; si < FrustumGridSpotLightNum && spotCount < FrustumGridMaxPerCellSpot; si++)
+    {
+        FSpotLight sLight = GpuScene_SpotLights[si];
+        // Use CPU precomputed cone bounding sphere for tighter culling
+        float3 boundCenterVS = mul(float4(sLight.BoundCenterAndBoundRadius.xyz, 1.0f), CameraViewMatrix).xyz;
+        float boundRadius = sLight.BoundCenterAndBoundRadius.w;
+
+        if (TestLightCellOverlap(boundCenterVS, boundRadius, x, y, z, cellPixelMin, cellPixelMax))
+        {
+            RWSpotGridDataIndices[spotDataStart + spotCount] = si;
+            spotCount++;
+        }
+    }
+    RWSpotGridHeaders[cellIndex].Count = spotCount;
+}
+
+#endif // _FRUSTUM_GRID_3D_H_

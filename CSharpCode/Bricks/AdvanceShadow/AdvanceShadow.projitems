@@ -15,5 +15,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)QNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QTileTree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QTreeVisualDebugger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VirtualShadowMapTypes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VirtualShadowMapPagePool.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VirtualShadowMapPageMarking.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VirtualShadowMapClipmap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VirtualShadowMapSoftShadow.cs" />
   </ItemGroup>
 </Project>

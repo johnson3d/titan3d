@@ -467,9 +467,7 @@ namespace EngineNS.Bricks.Particle
             }
             if (IsGpuDriven)
             {
-                //UpdateGPU(particleSystem.CmdList, particleSystem, elapsed);
-                var node = policy.FindFirstNode<TtParticleGraphNode>();
-                node.CurEmitters.Add(this);
+                particleSystem.CurEmitters.Add(this);
             }
             else
             {

@@ -43,6 +43,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Scene\CubeWorldRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\ScenePartitionNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\PointLightNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\SpotLightNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\SkyNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StateMachine\AnimationStateMachine\IAnimationState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StateMachine\AnimationStateMachine\AnimationState.cs" />

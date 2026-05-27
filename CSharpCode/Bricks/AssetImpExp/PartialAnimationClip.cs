@@ -46,6 +46,7 @@ namespace EngineNS.Animation.Asset
                     ImGuiAPI.OpenPopup($"Import Animation", ImGuiPopupFlags_.ImGuiPopupFlags_None);
                 var visible = true;
                 var retValue = false;
+                EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
                 if (ImGuiAPI.BeginPopupModal($"Import Animation", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var sz = new Vector2(-1, 0);
@@ -157,6 +158,7 @@ namespace EngineNS.Animation.Asset
 
                     ImGuiAPI.EndPopup();
                 }
+                EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
 
                 return retValue;
             }

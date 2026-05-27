@@ -47,6 +47,7 @@ void F2MManager::OnBeforeWriteFile(LPCSTR file)
 {
 	if (file == nullptr)
 		return;
+	VAutoLock(mLocker);
 	auto it = mF2Mems.find(file);
 	if (it == mF2Mems.end())
 	{
@@ -59,6 +60,7 @@ void F2MManager::OnAfterWriteFile(LPCSTR file)
 {
 	if (file == nullptr)
 		return;
+	VAutoLock(mLocker);
 	auto it = mF2Mems.find(file);
 	if (it == mF2Mems.end())
 	{
@@ -71,9 +73,11 @@ VRes2Memory* F2MManager::GetFile2Memory(LPCSTR file)
 {
 	if (file == nullptr)
 		return nullptr;
+	mLocker.Lock();
 	auto it = mF2Mems.find(file);
 	if (it == mF2Mems.end())
 	{
+		mLocker.Unlock();
 		//1.read from OS file system 
 		//2.read from apk on android platform
 		//3.read from mounted tpak
@@ -106,14 +110,10 @@ VRes2Memory* F2MManager::GetFile2Memory(LPCSTR file)
 			return it->second;
 		}
 	}
-	/*auto pMem = it->second->Ptr(0, 1);
-
-	if (pMem == NULL)
+	else
 	{
-		it->second->Free();
-		return NULL;
+		mLocker.Unlock();
 	}
-	it->second->Free();*/
 
 	it->second->AddRef();
 	return it->second;

@@ -306,6 +306,11 @@ namespace EngineNS.IO
             DeleteFile(address + MetaExt);
 
             DeleteFile(address + ".snap");
+
+            if (mAssetName != null && mAssetName.Name == name && mAssetName.RNameType == type)
+            {
+                TtEngine.Instance.AssetMetaManager.RemoveAMeta(this);
+            }
         }
         public void DeleteFile(string address, bool rmGit = true)
         {
@@ -317,6 +322,7 @@ namespace EngineNS.IO
         {
             if (rmGit)
             {
+                TtEngine.Instance.SourceControlModule.RemoveDirectory(dir, false);
                 var files = IO.TtFileManager.GetFiles(dir, "*.*", true);
                 foreach (var file in files)
                 {
@@ -694,14 +700,7 @@ namespace EngineNS.IO
             ImGuiAPI.Separator();
             if (EGui.UIProxy.MenuItemProxy.MenuItem("Delete", null, false, null, in drawList, in menuData, ref mDeleteMenuState))
             {
-                try
-                {
-                    DeleteAsset(mAssetName.Name, mAssetName.RNameType);
-                }
-                catch
-                {
-
-                }
+                ContentBrowser.OperationAsset(this, EGui.Controls.TtContentBrowser.EAssetOperationType.Delete);
                 ContentBrowser.CreateNewAssets = createNewAssetValueStore;
             }
             if (EGui.UIProxy.MenuItemProxy.MenuItem("Rename", null, false, null, in drawList, in menuData, ref mRenameMenuState))
@@ -929,8 +928,52 @@ namespace EngineNS.IO
         public Dictionary<RName, IAssetMeta> RNameAssets { get; } = new Dictionary<RName, IAssetMeta>();
         public void RemoveAMeta(IAssetMeta ameta)
         {
+            if (ameta == null)
+                return;
+
             Assets.Remove(ameta.AssetId);
-            RNameAssets.Remove(ameta.GetAssetName());
+            RemoveAMeta(ameta.GetAssetName(), false);
+        }
+        public void RemoveAMeta(RName assetName)
+        {
+            RemoveAMeta(assetName, true);
+        }
+        void RemoveAMeta(RName assetName, bool removeAssetId)
+        {
+            if (assetName == null)
+                return;
+
+            lock (this)
+            {
+                if (RNameAssets.TryGetValue(assetName, out var ameta))
+                {
+                    RNameAssets.Remove(assetName);
+                    if (removeAssetId && ameta != null)
+                        Assets.Remove(ameta.AssetId);
+                    return;
+                }
+
+                RName removeKey = null;
+                IAssetMeta removeMeta = null;
+                foreach (var i in RNameAssets)
+                {
+                    var key = i.Key;
+                    if (key != null &&
+                        key.RNameType == assetName.RNameType &&
+                        string.Equals(key.Name, assetName.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        removeKey = key;
+                        removeMeta = i.Value;
+                        break;
+                    }
+                }
+                if (removeKey != null)
+                {
+                    RNameAssets.Remove(removeKey);
+                    if (removeAssetId && removeMeta != null)
+                        Assets.Remove(removeMeta.AssetId);
+                }
+            }
         }
         public IAssetMeta GetAssetMeta(Guid id)
         {

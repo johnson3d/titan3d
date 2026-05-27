@@ -48,11 +48,21 @@ namespace EngineNS.Editor.Forms
                 ImGuiAPI.Text($"CmdList = {stats.NumOfCmdlist};Drawcall = {stats.NumOfDrawcall};Primitive = {stats.NumOfPrimitive};");
                 EGui.UIProxy.SearchBarProxy.OnDraw(ref mFilterFocusd, cmdlst, "filter", ref mFilter, ImGuiAPI.GetWindowContentRegionWidth());
                 DockId = ImGuiAPI.GetWindowDockID();
+                EGui.UIProxy.StyleConfig.Instance.PushPanelChildStyle(EGui.UIProxy.StyleConfig.Instance.SecondPanelBackground);
                 if (ImGuiAPI.BeginChild("TimeScope", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
-                    if (ImGuiAPI.BeginTable("TimeScope", 2, ImGuiTableFlags_.ImGuiTableFlags_Resizable | ImGuiTableFlags_.ImGuiTableFlags_ScrollY, in Vector2.Zero, 0.0f))
+                    var tableFlags = ImGuiTableFlags_.ImGuiTableFlags_Resizable |
+                        ImGuiTableFlags_.ImGuiTableFlags_ScrollY |
+                        ImGuiTableFlags_.ImGuiTableFlags_RowBg |
+                        ImGuiTableFlags_.ImGuiTableFlags_BordersInnerV |
+                        ImGuiTableFlags_.ImGuiTableFlags_BordersOuterH |
+                        ImGuiTableFlags_.ImGuiTableFlags_SizingStretchProp;
+                    if (ImGuiAPI.BeginTable("TimeScope", 2, tableFlags, in Vector2.Zero, 0.0f))
                     {
                         var startY = ImGuiAPI.GetItemRectMax().Y;
+                        ImGuiAPI.TableSetupScrollFreeze(0, 1);
+                        ImGuiAPI.TableSetupColumn("Name", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthStretch, 0, 0);
+                        ImGuiAPI.TableSetupColumn("AvgTime", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed, 100, 0);
                         ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_Headers, 0);
                         ImGuiAPI.TableSetColumnIndex(0);
                         ImGuiAPI.Text("Name");
@@ -92,6 +102,7 @@ namespace EngineNS.Editor.Forms
                     }
                 }
                 ImGuiAPI.EndChild();
+                EGui.UIProxy.StyleConfig.Instance.PopPanelChildStyle();
 
                 if (OnDrawMenu != null)
                     OnDrawMenu();

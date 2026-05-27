@@ -129,7 +129,7 @@ namespace EngineNS.EGui
                 var renderer = TtEngine.Instance.GfxDevice.SlateRenderer;
                 var shaderProg = renderer.SlateEffect.ShaderEffect;
                 var result = rc.CreateGraphicDraw();
-                result.BindShaderEffect(renderer.SlateEffect);
+                result.BindShaderEffect(renderer.SlateEffect, renderer.SlateEffect.ShadingEnv);
                 result.BindGeomMesh(GeomMesh);
                 result.BindCBV(SlateCBufferBindInfo, SlateCBuffer);
                 result.BindSampler(SlateSamplerBindInfo, renderer.SamplerState);
@@ -148,6 +148,8 @@ namespace EngineNS.EGui
         #region TriangleData
         public NxRHI.TtVbView VertexBuffer;
         public NxRHI.TtIbView IndexBuffer;
+        private NxRHI.TtVbView[] mFrameVertexBuffers;
+        private NxRHI.TtIbView[] mFrameIndexBuffers;
         public Support.TtNativeArray<ImDrawVert> DataVB = Support.TtNativeArray<ImDrawVert>.CreateInstance();
         public Support.TtNativeArray<ushort> DataIB = Support.TtNativeArray<ushort>.CreateInstance();
         #endregion
@@ -207,12 +209,46 @@ namespace EngineNS.EGui
             Drawcalls.Clear();
             DataVB.Dispose();
             DataIB.Dispose();
+            DisposeFrameBuffers();
 
             CoreSDK.DisposeObject(ref SlateCBuffer);
-            CoreSDK.DisposeObject(ref VertexBuffer);
-            CoreSDK.DisposeObject(ref IndexBuffer);
             CoreSDK.DisposeObject(ref GeomMesh);
             CoreSDK.DisposeObject(ref PrimitiveMesh);
+        }
+
+        private void DisposeFrameBuffers()
+        {
+            if (mFrameVertexBuffers != null)
+            {
+                for (int i = 0; i < mFrameVertexBuffers.Length; i++)
+                {
+                    CoreSDK.DisposeObject(ref mFrameVertexBuffers[i]);
+                }
+                mFrameVertexBuffers = null;
+            }
+
+            if (mFrameIndexBuffers != null)
+            {
+                for (int i = 0; i < mFrameIndexBuffers.Length; i++)
+                {
+                    CoreSDK.DisposeObject(ref mFrameIndexBuffers[i]);
+                }
+                mFrameIndexBuffers = null;
+            }
+
+            VertexBuffer = null;
+            IndexBuffer = null;
+        }
+
+        private void EnsureFrameBufferSlots(int frameBufferCount)
+        {
+            frameBufferCount = Math.Max(frameBufferCount, 1);
+            if (mFrameVertexBuffers?.Length == frameBufferCount && mFrameIndexBuffers?.Length == frameBufferCount)
+                return;
+
+            DisposeFrameBuffers();
+            mFrameVertexBuffers = new NxRHI.TtVbView[frameBufferCount];
+            mFrameIndexBuffers = new NxRHI.TtIbView[frameBufferCount];
         }
 
         public static void DisposeAllImGuiTextureBindings()
@@ -266,6 +302,9 @@ namespace EngineNS.EGui
         }
         private unsafe static void RenderImDrawDataImpl(ref ImDrawData draw_data, Graphics.Pipeline.TtPresentWindow presentWindow, TtImDrawDataRHI rhiData)
         {
+            if (presentWindow?.CanRender != true)
+                return;
+
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var drawCmd = rc.CmdListManager.GetCmdList();
             uint vertexOffsetInVertices = 0;
@@ -278,10 +317,19 @@ namespace EngineNS.EGui
                 return;
             }
 
+            presentWindow.BeginFrame();
+
+            var swapChain = presentWindow.SwapChain;
+            var frameBufferCount = Math.Max((int)swapChain.BackBufferCount, 1);
+            rhiData.EnsureFrameBufferSlots(frameBufferCount);
+            var frameBufferIndex = (int)(swapChain.CurrentBackBuffer % (uint)frameBufferCount);
+            rhiData.VertexBuffer = rhiData.mFrameVertexBuffers[frameBufferIndex];
+            rhiData.IndexBuffer = rhiData.mFrameIndexBuffers[frameBufferIndex];
+
             uint totalVBSize = (uint)(draw_data.TotalVtxCount * sizeof(ImDrawVert));
             if (rhiData.VertexBuffer == null || totalVBSize > rhiData.VertexBuffer.mCoreObject.Desc.Size)
             {
-                rhiData.VertexBuffer?.Dispose();
+                CoreSDK.DisposeObject(ref rhiData.mFrameVertexBuffers[frameBufferIndex]);
                 //var vbDesc = new NxRHI.FBufferDesc();
                 //vbDesc.SetDefault();
                 //vbDesc.Type = NxRHI.EBufferType.BFT_Vertex;
@@ -295,20 +343,22 @@ namespace EngineNS.EGui
                 vbDesc.m_Stride = (uint)sizeof(ImDrawVert);
                 vbDesc.m_CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
                 vbDesc.m_Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
-                rhiData.VertexBuffer = rc.CreateVBV(null, in vbDesc);
+                rhiData.mFrameVertexBuffers[frameBufferIndex] = rc.CreateVBV(null, in vbDesc);
+                rhiData.VertexBuffer = rhiData.mFrameVertexBuffers[frameBufferIndex];
                 rhiData.GeomMesh.mCoreObject.GetVertexArray().BindVB(NxRHI.EVertexStreamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
             }
 
             uint totalIBSize = (uint)(draw_data.TotalIdxCount * sizeof(ushort));
             if (rhiData.IndexBuffer == null || totalIBSize > rhiData.IndexBuffer.mCoreObject.Desc.Size)
             {
-                rhiData.IndexBuffer?.Dispose();
+                CoreSDK.DisposeObject(ref rhiData.mFrameIndexBuffers[frameBufferIndex]);
                 var ibDesc = new NxRHI.FIbvDesc();
                 ibDesc.m_Size = (uint)(totalIBSize * 1.5f);
                 ibDesc.m_Stride = (uint)sizeof(ushort);
                 ibDesc.m_CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
                 ibDesc.m_Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
-                rhiData.IndexBuffer = rc.CreateIBV(null, in ibDesc);
+                rhiData.mFrameIndexBuffers[frameBufferIndex] = rc.CreateIBV(null, in ibDesc);
+                rhiData.IndexBuffer = rhiData.mFrameIndexBuffers[frameBufferIndex];
                 rhiData.GeomMesh.mCoreObject.BindIndexBuffer(rhiData.IndexBuffer.mCoreObject);
             }
 
@@ -327,17 +377,15 @@ namespace EngineNS.EGui
                     indexOffsetInElements += (uint)cmd_list.IdxBufferSize;
                 }
 
-                rhiData.VertexBuffer.UpdateGpuData(0,
+                rhiData.VertexBuffer.UpdateGpuData(drawCmd.mCoreObject, 0,
                     rhiData.DataVB.UnsafeAddressAt(0).ToPointer(), (uint)(vertexOffsetInVertices * sizeof(ImDrawVert)));
 
-                rhiData.IndexBuffer.UpdateGpuData(0,
+                rhiData.IndexBuffer.UpdateGpuData(drawCmd.mCoreObject, 0,
                     rhiData.DataIB.UnsafeAddressAt(0).ToPointer(), (uint)(indexOffsetInElements * sizeof(ushort)));
 
                 rhiData.GeomMesh.mCoreObject.GetVertexArray().BindVB(NxRHI.EVertexStreamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
                 rhiData.GeomMesh.mCoreObject.BindIndexBuffer(rhiData.IndexBuffer.mCoreObject);
             }
-
-            presentWindow.BeginFrame();
 
             using (new Profiler.TimeScopeHelper(ScopeDrawPass))
             {
@@ -366,7 +414,6 @@ namespace EngineNS.EGui
                     passClears.SetDefault();
                     passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
 
-                    var swapChain = presentWindow.SwapChain;
                     drawCmd.mCoreObject.mIsDirectGpuDraw = true;
 
                     if (drawCmd.BeginPass(swapChain.BeginFrameBuffers(drawCmd), in passClears, "ImGui"))
@@ -475,7 +522,7 @@ namespace EngineNS.EGui
                     fullRect.m_MinX = 0;
                     fullRect.m_MinY = 0;
                     fullRect.m_MaxX = (int)fwSize.X;
-                    fullRect.m_MaxY = (int)fwSize.X;
+                    fullRect.m_MaxY = (int)fwSize.Y;
                     drawCmd.SetScissor(in fullRect);
                     swapChain.EndFrameBuffers(drawCmd);
                 }

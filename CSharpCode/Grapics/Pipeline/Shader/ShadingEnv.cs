@@ -1,8 +1,9 @@
+using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.ComponentModel;
+using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
@@ -996,16 +997,20 @@ namespace EngineNS
     {
         public partial class TtGraphicDraw
         {
+            //Effect只能当Shader一个模板用，ShadingEnv才是控制当前变体检测用的，因为ShadingEnv不是单例
             public Graphics.Pipeline.Shader.TtGraphicsEffect Effect { get; private set; }
+            public Graphics.Pipeline.Shader.TtGraphicsShadingEnv ShadingEnv { get; private set; }
             internal Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId PermutationId;
             public bool IsPermutationChanged()
             {
-                var shading = Effect.ShadingEnv;
-                return PermutationId != shading.mCurrentPermutationId;
+                if (ShadingEnv == null)
+                    return false;
+                return PermutationId != ShadingEnv.mCurrentPermutationId;
             }
-            public void BindShaderEffect(Graphics.Pipeline.Shader.TtGraphicsEffect effect)
+            public void BindShaderEffect(Graphics.Pipeline.Shader.TtGraphicsEffect effect, Graphics.Pipeline.Shader.TtGraphicsShadingEnv shading)
             {
                 Effect = effect;
+                ShadingEnv = shading;
                 mCoreObject.BindShaderEffect(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, effect.ShaderEffect.mCoreObject);
             }
         }

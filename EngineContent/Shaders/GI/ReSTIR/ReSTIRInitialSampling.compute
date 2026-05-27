@@ -30,6 +30,14 @@
 #define ENV_USE_HZB 0
 #endif
 
+// 由 C# 端 UPermutationItem "ENV_USE_PROBE_FALLBACK" 自动注入
+// 0 = miss 时仅用天光 (SkyColor 或 EnvMap, 由 ENV_USE_SKY_CUBE 控制)
+// 1 = miss 时先查询世界空间 probe volume 的 irradiance, probe 查询失败再 fallback 到天光
+// ProbeVolume pin 悬空时, C# 端会强制保持为 0
+#ifndef ENV_USE_PROBE_FALLBACK
+#define ENV_USE_PROBE_FALLBACK 0
+#endif
+
 // 注意: SampleSkyRadiance 写在 ReSTIRCommon.cginc 内, 该函数会在
 // ENV_USE_SKY_CUBE == 1 分支引用 EnvMap / Samp_EnvMap 这两个全局符号,
 // 因此必须先声明这两个资源, 再 include common 头.
@@ -43,6 +51,17 @@ SamplerState        Samp_EnvMap;
 #if ENV_USE_HZB
 Texture2D<float2>  Hzb;
 SamplerState       Samp_HzbPoint;
+#endif
+
+// 同上规则: ProbeVolume 资源仅在 ENV_USE_PROBE_FALLBACK=1 编译产物里存在.
+// ProbeVolumeCommon.cginc 引用 ProbeInfos / ProbeSH / Tetrahedra / BvhNodes,
+// 必须在 #include 前声明.
+#if ENV_USE_PROBE_FALLBACK
+#include "../ProbeVolume/ProbeVolumeCommon.cginc"
+StructuredBuffer<ProbeInfo>       ProbeInfos;
+StructuredBuffer<PackedProbeSH>   ProbeSH;
+StructuredBuffer<TetrahedronGpu>  ProbeTetrahedra;
+StructuredBuffer<BvhNodeGpu>      ProbeBvhNodes;
 #endif
 
 #include "ReSTIRCommon.cginc"
@@ -79,6 +98,11 @@ struct RayHitInfo
 // 把 miss 包装成"天光伪命中": 远处的 sample 点 + 反向 dir 的法线 + 天光 radiance
 // SamplePosition 设得非常远, 让 spatial reuse 的 length(currWP - prevWP) 判定
 // 自动把 sky sample 与真几何 sample 分到两类, 避免错误复用
+//
+// ENV_USE_PROBE_FALLBACK == 1 时:
+//   先用射线起点 (可见点世界坐标) 查询 probe volume 的 irradiance,
+//   查询成功则用 probe irradiance 替代天光, 提供屏幕外的低频间接光信息;
+//   查询失败 (起点不在任何四面体内) 则回退到天光.
 RayHitInfo MakeSkyHit(float3 originWS, float3 dirWS)
 {
     RayHitInfo info;
@@ -86,6 +110,22 @@ RayHitInfo MakeSkyHit(float3 originWS, float3 dirWS)
     info.IsSky = true;
     info.HitPosWS = originWS + dirWS * 1e6f;
     info.HitNormalWS = -dirWS;
+
+#if ENV_USE_PROBE_FALLBACK
+    float3 probeIrradiance;
+    bool probeHit = QueryProbeIrradiance(
+        originWS, dirWS,
+        ProbeInfos, ProbeSH, ProbeTetrahedra, ProbeBvhNodes,
+        probeIrradiance);
+    if (probeHit)
+    {
+        // probe irradiance 是 SH 在 dirWS 方向的求值结果 (已包含余弦项权重),
+        // 作为 miss 方向的 incoming radiance 使用
+        info.HitRadiance = max(probeIrradiance, float3(0, 0, 0));
+        return info;
+    }
+#endif
+
     info.HitRadiance = SampleSkyRadiance(dirWS);
     return info;
 }
@@ -151,24 +191,49 @@ RayHitInfo CastIndirectRay(float3 originWS, float3 dirWS, inout uint rng)
     float endLinearZ;
     float3 endSS   = WorldToScreen(endWS, endLinearZ);
 
-    // 步骤 2: 屏幕 UV 截断 — endSS 此时可信 (clip.w > 0), 但可能落在屏幕外.
-    // 在世界空间缩短 rayDist, 再重新投影, 避免 lerp linearZ 的非线性误差.
+    // 步骤 2: 屏幕 UV 截断 — 在 clip 空间解析求解.
+    // clip(t) = clipStart + t * clipDir 沿世界空间射线 t 是线性的 (矩阵乘法的线性性),
+    // 屏幕边界等价于 clip 空间的 -w <= x <= w, -w <= y <= w (w > 0),
+    // 即 4 条不等式: x + w >= 0, w - x >= 0, y + w >= 0, w - y >= 0.
+    // 对每条边界解 t, 取最小正值即为精确的世界空间截断参数.
+    // 结果偏保守: 只会略长不会截短 (浮点误差方向安全).
+    if (any(endSS.xy < 0.0f) || any(endSS.xy > 1.0f))
     {
-        float2 rayDirUV = endSS.xy - startSS.xy;
+        float4 clipStart = mul(float4(originBiased, 1.0f), GetViewPrjMtx());
+        float4 clipEnd   = mul(float4(endWS, 1.0f), GetViewPrjMtx());
+        float4 clipDir   = clipEnd - clipStart;
+
+        // 4 条边界: x+w>=0 (-x-w<=0), w-x>=0, y+w>=0, w-y>=0
+        // 边界 i: a_i * t + b_i >= 0, 射线从 inside (b_i >= 0) 穿向 outside
+        // 出屏点: t = -b_i / a_i (当 a_i < 0, 即射线朝外)
+        float4 boundaryB = float4(
+            clipStart.x + clipStart.w,   // x + w  (左边界)
+            clipStart.w - clipStart.x,   // w - x  (右边界)
+            clipStart.y + clipStart.w,   // y + w  (下边界)
+            clipStart.w - clipStart.y    // w - y  (上边界)
+        );
+        float4 boundaryA = float4(
+            clipDir.x + clipDir.w,
+            clipDir.w - clipDir.x,
+            clipDir.y + clipDir.w,
+            clipDir.w - clipDir.y
+        );
+
         float tClip = 1.0f;
-        [unroll] for (int axis = 0; axis < 2; ++axis)
+        [unroll]
+        for (int edge = 0; edge < 4; ++edge)
         {
-            if (abs(rayDirUV[axis]) > 1e-8f)
+            // a < 0 表示射线朝该边界外侧移动, 会出屏
+            if (boundaryA[edge] < -1e-8f)
             {
-                float boundary = (rayDirUV[axis] > 0.0f) ? 1.0f : 0.0f;
-                float t = (boundary - startSS[axis]) / rayDirUV[axis];
-                if (t > 0.0f)
-                    tClip = min(tClip, t);
+                float t = -boundaryB[edge] / boundaryA[edge];
+                if (t > 0.0f && t < tClip)
+                    tClip = t;
             }
         }
+
         if (tClip < 1.0f)
         {
-            // 在世界空间截断, 然后重新投影得到精确的 endSS / endLinearZ
             rayDist *= tClip;
             endWS = originBiased + dirWS * rayDist;
             endSS = WorldToScreen(endWS, endLinearZ);
@@ -230,7 +295,7 @@ RayHitInfo CastIndirectRay(float3 originWS, float3 dirWS, inout uint rng)
     info.Valid = true;
     info.IsSky = false;
     info.HitPosWS = ReconstructWorldPos(hitUV, hitSceneZ);
-    info.HitNormalWS = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, hitUV, 0).xyz * 2.0f - 1.0f);
+    info.HitNormalWS = DecodeNormalFromGBuffer(GBufferRT1.SampleLevel(Samp_PointClamp, hitUV, 0));
     info.HitRadiance = GBufferRT0.SampleLevel(Samp_PointClamp, hitUV, 0).rgb;
     return info;
 }
@@ -329,7 +394,7 @@ RayHitInfo CastIndirectRay(float3 originWS, float3 dirWS, inout uint rng)
     info.Valid = true;
     info.IsSky = false;
     info.HitPosWS = hitPosWS;
-    info.HitNormalWS = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, hitSS.xy, 0).xyz * 2.0f - 1.0f);
+    info.HitNormalWS = DecodeNormalFromGBuffer(GBufferRT1.SampleLevel(Samp_PointClamp, hitSS.xy, 0));
     info.HitRadiance = PrevColor.SampleLevel(Samp_PointClamp, hitSS.xy, 0).rgb;
     return info;
 }
@@ -368,7 +433,7 @@ void CS_Main(uint3 id : SV_DispatchThreadID)
     float4 rt2 = float4(0, 0, 0, 0);
     float4 rt3 = float4(0, 0, 0, 0);
 
-    GBufferData gbuffer = (GBufferData)0;
+    FGBufferData gbuffer = (FGBufferData)0;
     gbuffer.DecodeGBuffer(rt0, rt1, rt2, rt3);
 
     float3 visiblePos = ReconstructWorldPos(uv, depth);

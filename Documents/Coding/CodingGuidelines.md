@@ -600,7 +600,35 @@ radiance", 两家走了完全不同的路, 各有适用场景. TitanEngine 经�
 - **Decal / Light atlas**: decal projector 数量动态变化, 用 bindless 数组
   按 decal ID 索引贴图, 配合 cluster culling.
 
-### 1.5 GPU Buffer 创建/上传/回读规范
+### 1.5 世界坐标传入渲染前必须转换为局域坐标 (ToLocalPosition)
+
+**适用场景**: 任何从 `Placement.AbsTransform.Position` 取出的世界坐标, 在传入 GPU (写入 cbuffer / structured buffer / 任何 shader 可见的数据) 之前.
+
+**强制规则**:
+
+所有从 `Placement` 获取的 `DVector3` 位置, 在传入渲染管线之前, **必须** 通过 `pos.ToLocalPosition(world.CameraOffset)` 转换为局域坐标. 引擎使用相机偏移的局域坐标系 (camera-relative rendering) 来避免大世界场景下 float32 精度不足的问题.
+
+**正确写法**:
+
+```csharp
+var pos = node.Placement.AbsTransform.Position;
+var localPos = pos.ToLocalPosition(world.CameraOffset);
+light.PositionAndRadius = new Vector4(localPos.ToSingleVector3(), radius);
+```
+
+**错误写法** (直接用 AbsTransform.Position 转 float3):
+
+```csharp
+// ❌ 错误！大世界下 float32 精度丢失, 灯光/物体位置偏移
+var pos = node.Placement.AbsTransform.Position;
+light.PositionAndRadius = new Vector4(pos.ToSingleVector3(), radius);
+```
+
+**Why**: 引擎的世界坐标使用 `DVector3` (double 精度), GPU 只支持 float32. 如果不做相机偏移, 当相机远离原点时 (例如坐标 > 10000), float32 的精度不足会导致灯光、阴影、物体位置出现明显的抖动和偏移.
+
+---
+
+### 1.6 GPU Buffer 创建/上传/回读规范
 
 **适用场景**: 任何 compute / graphics drawcall 需要的 structured buffer / raw buffer
 (传 SRV / UAV / CBV) 的创建、上传 CPU 数据、回读 GPU 数据.
@@ -1727,5 +1755,61 @@ return item.Result;  // FinishedSemaphore 没回收, PostEvent / Waiter 引用�
   `GetResultUntilCompleted` / `GetResultAndRelease` / `DirectResult` 的源码定义
 - `CSharpCode/Base/Thread/EventPoster.cs` — `TtSemaphore` (`CreateSemaphore` / `Await` /
   `Release` / `FreeSemaphore`) 的源码定义
+
+---
+
+### 1.7 向 GPU 传递 Matrix 时必须 Matrix.Transpose
+
+**适用场景**：所有通过 `SetValue`（非 `SetMatrix`）、`UpdateData`、`memcpy`、`StructuredBuffer` 上传、
+或直接写 native 内存等方式向 GPU 传递 `Matrix` / `float4x4` 数据的代码。
+
+**强制规则**：
+
+1. 引擎的 C# `Matrix` 在内存中是 **行主序 (row-major)** 布局。
+2. HLSL 的 `float4x4` 默认按 **列主序 (column-major)** 解释内存。
+3. 因此 C# 端的矩阵在写入 GPU 内存前，**必须调用 `Matrix.Transpose()`** 进行转置，
+   使得 HLSL 端 `mul(float4 v, float4x4 m)` 能得到正确的变换结果。
+
+**唯一例外**：`CBuffer.SetMatrix(name, ref matrix, bool transpose = true)` 方法的缺省参数
+`transpose = true` 会在内部自动完成转置，调用方无需手动 Transpose。
+但只要不是走 `SetMatrix` 接口（包括 `SetValue`），就必须手动处理。
+
+**标准模板**：
+
+```csharp
+// ✓ 通过 SetValue 传矩阵 — 必须手动 Transpose
+var vp = camera.GetViewProjection();
+var vpT = Matrix.Transpose(vp);
+mCBuffer.SetValue("ViewProjMtx", in vpT);
+
+// ✓ 通过 StructuredBuffer / UpdateData 传矩阵数组 — 逐个 Transpose
+mPageDataArray[i].mViewProj = Matrix.Transpose(pageCamera.GetViewProjection());
+buffer.UpdateData(0, ptr, totalBytes);
+
+// ✓ 通过 SetMatrix 传矩阵 — 内部自动 Transpose，无需手动处理
+mCBuffer.SetMatrix("WorldMtx", ref worldMatrix);  // transpose 缺省 = true
+```
+
+**反例**（曾经导致阴影投影被挤压/变形）：
+
+```csharp
+// ❌ 通过 StructuredBuffer 传 VP 矩阵但未 Transpose
+mPageDataArray[i].mViewProj = pageCamera.GetViewProjection();  // HLSL 端 mul 结果错误
+buffer.UpdateData(0, ptr, totalBytes);
+
+// ❌ 通过 SetValue 传矩阵但未 Transpose
+mCBuffer.SetValue("LightVP", in lightVP);  // GPU 读到的是转置后的矩阵, mul 结果错误
+```
+
+**为什么 `SetMatrix` 不需要手动 Transpose**：
+
+`SetMatrix` 内部实现会检查 `transpose` 参数（缺省 `true`），在写入 cbuffer 内存前自动对矩阵做转置。
+这是一个便利封装。但 `SetValue` 是通用的 memcpy，不会对数据做任何变换，
+所以矩阵必须在调用前由开发者自行 Transpose。
+
+**已有合规实现的参考位置**：
+
+- `CSharpCode/Bricks/AdvanceShadow/AdvanceShadowShading.cs` — `mClipmapPageDataArray[i].mViewProj = Matrix.Transpose(...)`
+- `CSharpCode/Grapics/Pipeline/CCamera.cs` — `SetMatrix` 用法
 
 ---

@@ -135,10 +135,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             //this.RenderPolicy.GBuffers.GroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             //this.RenderPolicy.GBuffers.UpdateViewportCBuffer();
 
-            var gridNode = await GamePlay.Scene.TtGridNode.AddGridNode(viewport.World, viewport.World.Root);
-            gridNode.ViewportSlate = this.PreviewViewport;
+            var studioContext = await PreviewViewport.CreateStudioEnvironment(aabb);
 
-            await InitializeLightEnv(PreviewViewport, radius);
+            await InitializeLightEnv(PreviewViewport, studioContext?.Radius ?? radius);
 
             return true;
         }

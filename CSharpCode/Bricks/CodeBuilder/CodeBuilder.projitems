@@ -45,6 +45,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\UniformVar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Var\SamplerState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Var\Texture2D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Var\SubsurfaceProfileIdNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Var\VarDim1.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Var\VarDim2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Var\VarDim2x2.cs" />

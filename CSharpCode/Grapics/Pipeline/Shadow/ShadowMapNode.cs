@@ -24,6 +24,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         {
             return new EPixelShaderInput[] {
                 EPixelShaderInput.PST_Position,
+                //EPixelShaderInput.PST_Custom0,//for test
             };
         }
         public override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall)

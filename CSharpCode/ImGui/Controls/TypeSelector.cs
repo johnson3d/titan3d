@@ -189,17 +189,21 @@ namespace EngineNS.EGui.Controls
             ImGuiAPI.SetNextWindowPos(popWinPos, ImGuiCond_.ImGuiCond_None, in pivot);
             ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_None);
             bool popupVisible = PopupVisible;
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, UIProxy.StyleConfig.Instance.PopupWindowsPadding);
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, UIProxy.StyleConfig.Instance.PopupItemSpacing);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_PopupBg, UIProxy.StyleConfig.Instance.PopupColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, UIProxy.StyleConfig.Instance.BorderColor);
             if (ImGuiAPI.BeginPopupModal("combobox" + CtrlId, ref popupVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_Popup))
             {
                 mPopupVisibleDic[CtrlId] = popupVisible;
                 var sz = new Vector2(0, 0);
                 var popDrawList = ImGuiAPI.GetWindowDrawList();
                 UIProxy.SearchBarProxy.OnDraw(ref mSearchBarFocused, popDrawList, "search types", ref mFilterText, ImGuiAPI.GetWindowContentRegionWidth());
-                ImGuiAPI.BeginChild("typesWin" + CtrlId, in sz, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ChildBg, UIProxy.StyleConfig.Instance.PanelBackground);
+                ImGuiAPI.BeginChild("typesWin" + CtrlId, in sz, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_None);
                 {
                     mFilterText = mFilterText.ToLower();
                     ImGuiAPI.Separator();
-                    var bSelected = true;
                     for (int i = 0; i < mShowTypes.Count; i++)
                     {
                         var typeName = mShowTypes[i].CSharpTypeName;
@@ -217,6 +221,7 @@ namespace EngineNS.EGui.Controls
 
                         //if (AllowVoidType == false && mShowTypes[j].SystemType == typeof(void))
                         //    continue;
+                        var bSelected = mSelectedType == mShowTypes[i];
                         if (ImGuiAPI.Selectable(typeName, ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in sz))
                         {
                             bChanged = (mSelectedType != mShowTypes[i]);
@@ -230,9 +235,12 @@ namespace EngineNS.EGui.Controls
                     }
                 }
                 ImGuiAPI.EndChild();
+                ImGuiAPI.PopStyleColor(1);
 
                 ImGuiAPI.EndPopup();
             }
+            ImGuiAPI.PopStyleColor(2);
+            ImGuiAPI.PopStyleVar(2);
             ImGuiAPI.PopID();
             return bChanged;
         }

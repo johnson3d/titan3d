@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
 {
-    public class Binocular : TtNodeBase
+    public class Binocular : TtShadeBaseNode
     {
         public Rtti.TtTypeDesc LeftType;
         [Browsable(false)]
@@ -244,7 +244,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
     #endregion
 
     #region Monocular
-    public class Monocular : TtNodeBase
+    public class Monocular : TtShadeBaseNode
     {
         public Rtti.TtTypeDesc InputType;
         [Rtti.Meta("")]

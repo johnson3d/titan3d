@@ -74,6 +74,7 @@ namespace EngineNS.EGui.Slate
         }
         const uint ImGuiFreeTypeLoaderFlags_LightHinting = 1u << 3;
         const float TextRasterizerMultiply = 1.05f;
+        const string DefaultTextFont = "fonts/NotoSansSC-Regular.otf";
 
         [System.Runtime.InteropServices.DllImport(EngineNS.CoreSDK.CoreModule, CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)]
         static extern int TitanImGui_UseFreeTypeFontLoader(IntPtr fontAtlas);
@@ -175,29 +176,19 @@ namespace EngineNS.EGui.Slate
             var isFreeTypeLoader = TitanImGui_UseFreeTypeFontLoader(fontAtlas.NativePointer) != 0;
             fontAtlas.FontLoaderFlags = ImGuiFreeTypeLoaderFlags_LightHinting;
 
-            var style = ImGuiAPI.GetStyle();
-            style->FontSizeBase = 15.0f;
-            style->FontScaleMain = 1.0f;
-            if (style->FontScaleDpi <= 0.0f)
-                style->FontScaleDpi = 1.0f;
+            ApplyEditorUIFontSize(TtEngine.Instance.Config.EditorUIFontSize);
 
             var textRanges = RebuildTextGlyphRanges();
             var iconRanges = RebuildIconGlyphRanges();
-            var editorFont = ResolveFont(TtEngine.Instance.Config.EditorFont, "fonts/NotoSansSC-Regular.otf");
-            var smallFont = ResolveFont(TtEngine.Instance.Config.EditorSmallFont, "fonts/Roboto-Regular.ttf");
-            var boldFont = ResolveFont(null, "fonts/Roboto-Bold.ttf");
+            var editorFont = ResolveFont(TtEngine.Instance.Config.EditorFont, DefaultTextFont);
+            var smallFont = ResolveFont(TtEngine.Instance.Config.EditorSmallFont, DefaultTextFont);
             var iconFont = ResolveFont(TtEngine.Instance.Config.EditorEffectFont, "fonts/fa-solid-900.ttf");
 
-            var defaultFont = AddDefaultVectorFont(fontAtlas, 15.0f);
-            MergeFontInto(fontAtlas, defaultFont, editorFont, 15.0f, textRanges);
+            var defaultFont = CreateFontSlot(fontAtlas, editorFont, 15.0f, textRanges);
             MergeFontInto(fontAtlas, defaultFont, iconFont, 15.0f, iconRanges, true);
-            mFontDataList.Add(new FontDatas() { Font = defaultFont });
 
-            var boldFontSlot = CreateFontSlot(fontAtlas, boldFont, 13.0f, textRanges);
-            MergeFontInto(fontAtlas, boldFontSlot, editorFont, 13.0f, textRanges);
-
-            var smallFontSlot = CreateFontSlot(fontAtlas, smallFont, 13.0f, textRanges);
-            MergeFontInto(fontAtlas, smallFontSlot, editorFont, 13.0f, textRanges);
+            CreateFontSlot(fontAtlas, editorFont, 13.0f, textRanges);
+            CreateFontSlot(fontAtlas, smallFont, 13.0f, textRanges);
 
             CreateFontSlot(fontAtlas, iconFont, 18.0f, iconRanges);
 
@@ -335,6 +326,19 @@ namespace EngineNS.EGui.Slate
         {
             CoreSDK.DisposeObject(ref FontSRV);
             CoreSDK.DisposeObject(ref FontTexture);
+        }
+
+        public unsafe void ApplyEditorUIFontSize(float fontSize)
+        {
+            var style = ImGuiAPI.GetStyle();
+            if (style == null)
+                return;
+
+            var clampedFontSize = MathHelper.Clamp(fontSize, TtEngineConfig.MinEditorUIFontSize, TtEngineConfig.MaxEditorUIFontSize);
+            style->FontSizeBase = TtEngineConfig.DefaultEditorUIFontSize;
+            style->FontScaleMain = clampedFontSize / TtEngineConfig.DefaultEditorUIFontSize;
+            if (style->FontScaleDpi <= 0.0f)
+                style->FontScaleDpi = 1.0f;
         }
 
         unsafe void CreateFontTexture(out NxRHI.TtSrView srv, out NxRHI.TtTexture tex)

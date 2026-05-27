@@ -70,76 +70,62 @@ namespace EngineNS.Graphics.Mesh
 
         public Pipeline.Shader.TtMdfQueueBase MdfQueue { get; private set; }
         NxRHI.TtCbView mPerMeshCBuffer;
-        protected System.Action OnAfterCBufferCreated;
-
-        [Flags]
-        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "EObjectFlags_2Bit")]
-        public enum EObjectFlags_2Bit : uint
-        {
-            AcceptShadow = 1,
-            UnLight = (1 << 1),
-        }
-        EObjectFlags_2Bit ObjectFlags_2Bit = 0;
+        
+        Graphics.Pipeline.Shader.TtMaterial.ERenderFlags MeshRenderFlags = 0;
         public bool IsAcceptShadow
         {
             get
             {
-                return (ObjectFlags_2Bit & EObjectFlags_2Bit.AcceptShadow) != 0;
+                return (MeshRenderFlags & Graphics.Pipeline.Shader.TtMaterial.ERenderFlags.AcceptShadow) != 0;
             }
             set
             {
                 if (value)
                 {
-                    ObjectFlags_2Bit |= EObjectFlags_2Bit.AcceptShadow;
+                    MeshRenderFlags |= Graphics.Pipeline.Shader.TtMaterial.ERenderFlags.AcceptShadow;
                 }
                 else
                 {
-                    ObjectFlags_2Bit &= (~EObjectFlags_2Bit.AcceptShadow);
+                    MeshRenderFlags &= (~Graphics.Pipeline.Shader.TtMaterial.ERenderFlags.AcceptShadow);
                 }
-                PerMeshCBuffer?.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.ObjectFLags_2Bit, in ObjectFlags_2Bit);
+                PerMeshCBuffer?.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.MeshRenderFlags, in MeshRenderFlags);
             }
         }
         public bool IsUnlit
         {
             get
             {
-                return (ObjectFlags_2Bit & EObjectFlags_2Bit.UnLight) != 0;
+                return (MeshRenderFlags & Graphics.Pipeline.Shader.TtMaterial.ERenderFlags.UnLight) != 0;
             }
             set
             {
                 if (value)
                 {
-                    ObjectFlags_2Bit |= EObjectFlags_2Bit.UnLight;
+                    MeshRenderFlags |= Graphics.Pipeline.Shader.TtMaterial.ERenderFlags.UnLight;
                 }
                 else
                 {
-                    ObjectFlags_2Bit &= (~EObjectFlags_2Bit.UnLight);
+                    MeshRenderFlags &= (~Graphics.Pipeline.Shader.TtMaterial.ERenderFlags.UnLight);
                 }
-                PerMeshCBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.ObjectFLags_2Bit, in ObjectFlags_2Bit);
+                PerMeshCBuffer?.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.MeshRenderFlags, in MeshRenderFlags);
             }
         }
         public NxRHI.TtCbView PerMeshCBuffer 
         {
             get
             {
-                if (mPerMeshCBuffer == null)
-                {
-                    var binder = NxRHI.TtShader.TtCommonShaderResourceIndexer.Instance.cbPerMesh;
-                    mPerMeshCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
-                    if (mPerMeshCBuffer == null)
-                        return null;
-                    if (OnAfterCBufferCreated != null)
-                    {
-                        OnAfterCBufferCreated();
-                        OnAfterCBufferCreated = null;
-                    }
-                    else
-                    {
-                        DirectSetWorldMatrix(in Matrix.Identity);
-                    }
-                }
-                return mPerMeshCBuffer;
+                return GetOrCreatePerMeshCBuffer();
             }
+        }
+        private NxRHI.TtCbView GetOrCreatePerMeshCBuffer()
+        {
+            if (mPerMeshCBuffer == null)
+            {
+                var binder = NxRHI.TtShader.TtCommonShaderResourceIndexer.Instance.cbPerMesh;
+                mPerMeshCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+                SetWorldMatrixToCBuffer(in Matrix.Identity);
+            }
+            return mPerMeshCBuffer;
         }
         public void UnsafeSetPerMeshCBuffer(NxRHI.TtCbView cbv)
         {
@@ -254,7 +240,7 @@ namespace EngineNS.Graphics.Mesh
                         var drawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateGraphicDraw();// (shading, Material.ParentMaterial, mesh.MdfQueue);
                         drawcall.TagObject = node;
                         drawcall.SetSourceAtom(this);
-                        drawcall.BindShaderEffect(effect);
+                        drawcall.BindShaderEffect(effect, shading);
                         drawcall.BindGeomMesh(MeshPrimitives.mCoreObject.GetGeomtryMesh());
                         drawcall.BindPipeline(Material.Pipeline);
                         drawcall.BindGBuffer(policy.DefaultCamera, targetView);
@@ -298,6 +284,13 @@ namespace EngineNS.Graphics.Mesh
                         }
                         #endregion
 
+                        #region ShadingMode
+                        if (Material.ShadingMode == Pipeline.Shader.TtMaterial.EShadingMode.Subsurface)
+                        {
+                            TtEngine.Instance.GfxDevice.SubsurfaceProfileManager.GetProfile(Material.SubsurfaceProfileAsset).AddWaitTask();
+                        }
+                        #endregion
+
                         #region CBuffer
                         unsafe
                         {
@@ -318,6 +311,7 @@ namespace EngineNS.Graphics.Mesh
                                 }
                                 if (Material.PerMaterialCBuffer != null)
                                 {
+                                    Material.UpdateSubsurfaceProfileIndex();
                                     drawcall.BindCBV(effect.BindIndexer.cbPerMaterial, Material.PerMaterialCBuffer);
                                 }
                             }
@@ -435,6 +429,18 @@ namespace EngineNS.Graphics.Mesh
                     drawCalls = GetOrCreateDrawCalls(targetView.TargetViewIdentifier, policy);
                 }
                 var result = drawCalls.DrawCalls;
+                //检查shading切换参数
+                if (result != null && result.IsPermutationChanged())
+                {
+                    Material = this.GetMeshMaterial();
+                    MaterialSerialId = Material.SerialId;
+                    ResetDrawCalls();
+                    if (TargetViews == null)
+                    {
+                        TargetViews = new List<ViewDrawCalls>();
+                    }
+                    drawCalls = GetOrCreateDrawCalls(targetView.TargetViewIdentifier, policy);
+                }
                 if (drawCalls.State == 1 && result == null)
                 {
                     Material = this.GetMeshMaterial();
@@ -480,14 +486,6 @@ namespace EngineNS.Graphics.Mesh
                 {
                     //如果需要这个Pass，那么BuildDrawCall中的policy.GetPassShading就应该能提供shading
                     System.Diagnostics.Debug.Assert(false);
-                    ResetDrawCalls();
-                    return null;
-                }
-                //检查shading切换参数
-                if (result.IsPermutationChanged())
-                {
-                    Material = this.GetMeshMaterial();
-                    MaterialSerialId = Material.SerialId;
                     ResetDrawCalls();
                     return null;
                 }
@@ -854,6 +852,7 @@ namespace EngineNS.Graphics.Mesh
         public void SetWorldTransform(in FTransform transform, GamePlay.TtWorld world, bool isNoScale)
         {
             mTransform = transform;
+            GetOrCreatePerMeshCBuffer();
             if (world != null)
             {
                 if (isNoScale == false)
@@ -871,18 +870,7 @@ namespace EngineNS.Graphics.Mesh
         }
         public void DirectSetWorldMatrix(in Matrix tm)
         {
-            if (PerMeshCBuffer == null)
-            {
-                var saved = OnAfterCBufferCreated;
-                var savedTM = tm;
-                OnAfterCBufferCreated = () =>
-                {
-                    if (saved != null)
-                        saved();
-                    SetWorldMatrixToCBuffer(savedTM);
-                };
-                return;
-            }
+            GetOrCreatePerMeshCBuffer();
             SetWorldMatrixToCBuffer(in tm);
         }
         private ulong mWorldMatrixSetFrame = ulong.MaxValue;
@@ -911,36 +899,10 @@ namespace EngineNS.Graphics.Mesh
         }
         public void SetValue<T>(NxRHI.FShaderVarDesc index, in T value, int elem = 0) where T : unmanaged
         {
-            if (PerMeshCBuffer == null)
-            {
-                var saved = OnAfterCBufferCreated;
-                var savedValue = value;
-                OnAfterCBufferCreated = () =>
-                {
-                    if (saved != null)
-                        saved();
-
-                    PerMeshCBuffer.SetValue(index, elem, in savedValue);
-                };
-                return;
-            }
             PerMeshCBuffer.SetValue(index, elem, in value);
         }
         public void SetHitproxy(in Vector4 value)
         {
-            if (PerMeshCBuffer == null)
-            {
-                var saved = OnAfterCBufferCreated;
-                var savedValue = value;
-                OnAfterCBufferCreated = () =>
-                {
-                    if (saved != null)
-                        saved();
-
-                    PerMeshCBuffer.SetValue(TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.HitProxyId, in savedValue);
-                };
-                return;
-            }
             PerMeshCBuffer.SetValue(TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.HitProxyId, in value);
         }
     }

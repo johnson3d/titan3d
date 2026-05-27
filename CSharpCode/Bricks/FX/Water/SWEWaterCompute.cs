@@ -199,10 +199,6 @@ namespace EngineNS.Bricks.FX.Water
             cb.SetValue("DisturbRadius", DisturbRadius);
             cb.SetValue("DisturbStrength", DisturbStrength);
             uint enableDisturb = PendingDisturb ? 1u : 0u;
-            if(enableDisturb == 1)
-            {
-                int xx = 0;
-            }
             cb.SetValue("EnableDisturb", enableDisturb);
         }
 

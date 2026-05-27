@@ -43,7 +43,7 @@ void CS_Main(uint3 id : SV_DispatchThreadID)
     float4 rt0 = GBufferRT0.SampleLevel(Samp_PointClamp, uv, 0);
     float4 rt1 = GBufferRT1.SampleLevel(Samp_PointClamp, uv, 0);
     float4 rt2 = GBufferRT2.SampleLevel(Samp_PointClamp, uv, 0);
-    GBufferData gbuffer = (GBufferData)0;
+    FGBufferData gbuffer = (FGBufferData)0;
     gbuffer.DecodeGBuffer(rt0, rt1, rt2, float4(0, 0, 0, 0));
 
     float metallic = (float)gbuffer.Metallicity;

@@ -30,6 +30,7 @@ namespace EngineNS.Graphics.Mesh
                 var mFileDialog = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
                 var visible = true;
                 var retValue = false;
+                EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
                 if (ImGuiAPI.BeginPopupModal($"Import MeshPrimitives", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     if (ImGuiAPI.BeginCombo("MeshType", MeshType, ImGuiComboFlags_.ImGuiComboFlags_None))
@@ -281,6 +282,7 @@ namespace EngineNS.Graphics.Mesh
                     
                     ImGuiAPI.EndPopup();
                 }
+                EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
 
                 return retValue;
             }

@@ -673,6 +673,83 @@ namespace EngineNS.Graphics.Mesh
             builder.BuildTangent();
             return meshBuilder;
         }
+        public static unsafe TtMeshDataProvider MakeLatLongSphere(float radius, uint longitudeSegments, uint latitudeSegments, Func<Vector3, uint> colorSampler, bool insideFacing = true)
+        {
+            if (radius < 0.0f || longitudeSegments < 3 || latitudeSegments < 2)
+                return null;
+
+            var vertexCount = (longitudeSegments + 1) * (latitudeSegments + 1);
+            var primitiveCount = longitudeSegments * latitudeSegments * 2;
+
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
+            meshBuilder.AssetName = RName.GetRName("@MakeLatLongSphere", RName.ERNameType.Transient);
+            var builder = meshBuilder.mCoreObject;
+            uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
+                (1 << (int)NxRHI.EVertexStreamType.VST_Normal) |
+                (1 << (int)NxRHI.EVertexStreamType.VST_Color) |
+                (1 << (int)NxRHI.EVertexStreamType.VST_UV));
+
+            builder.Init(streams, vertexCount >= UInt16.MaxValue, 1);
+
+            var aabb = new BoundingBox(-radius, -radius, -radius, radius, radius, radius);
+            builder.SetAABB(ref aabb);
+
+            var dpDesc = new NxRHI.FMeshAtomDesc();
+            dpDesc.SetDefault();
+            dpDesc.NumPrimitives = primitiveCount;
+
+            for (uint lat = 0; lat <= latitudeSegments; lat++)
+            {
+                var v = (float)lat / (float)latitudeSegments;
+                var theta = v * (float)Math.PI;
+                var y = (float)Math.Cos(theta);
+                var ringRadius = (float)Math.Sin(theta);
+
+                for (uint lon = 0; lon <= longitudeSegments; lon++)
+                {
+                    var u = (float)lon / (float)longitudeSegments;
+                    var phi = (u - 0.5f) * 2.0f * (float)Math.PI;
+                    var direction = new Vector3(
+                        (float)Math.Cos(phi) * ringRadius,
+                        y,
+                        (float)Math.Sin(phi) * ringRadius);
+                    var normal = insideFacing
+                        ? new Vector3(-direction.X, -direction.Y, -direction.Z)
+                        : direction;
+                    var position = new Vector3(direction.X * radius, direction.Y * radius, direction.Z * radius);
+                    var uv = new Vector2(u, v);
+                    var color = colorSampler != null ? colorSampler(direction) : 0xffffffff;
+                    builder.AddVertex(in position, in normal, in uv, color);
+                }
+            }
+
+            var stride = longitudeSegments + 1;
+            for (uint lat = 0; lat < latitudeSegments; lat++)
+            {
+                for (uint lon = 0; lon < longitudeSegments; lon++)
+                {
+                    var a = lat * stride + lon;
+                    var b = (lat + 1) * stride + lon;
+                    var c = (lat + 1) * stride + lon + 1;
+                    var d = lat * stride + lon + 1;
+
+                    if (insideFacing)
+                    {
+                        builder.AddTriangle(a, c, b);
+                        builder.AddTriangle(a, d, c);
+                    }
+                    else
+                    {
+                        builder.AddTriangle(a, b, c);
+                        builder.AddTriangle(a, c, d);
+                    }
+                }
+            }
+
+            builder.PushAtomLOD(0, &dpDesc);
+            builder.BuildTangent();
+            return meshBuilder;
+        }
         #endregion
 
         #region Cyliner

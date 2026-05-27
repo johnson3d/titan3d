@@ -171,7 +171,7 @@ namespace EngineNS.Graphics.Pipeline
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(uint))]
             public NxRHI.FShaderVarDesc PointLightNum;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(uint))]
-            public NxRHI.FShaderVarDesc ObjectFLags_2Bit;
+            public NxRHI.FShaderVarDesc MeshRenderFlags;
         }
         public class TtPerGpuSceneCBufferVarIndexer : NxRHI.TtShader.AuxCBufferVarIndexer<TtPerGpuSceneCBufferVarIndexer>
         {

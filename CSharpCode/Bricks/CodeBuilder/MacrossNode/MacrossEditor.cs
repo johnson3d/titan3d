@@ -39,9 +39,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             InitializeManMenu();
             await PGMember.Initialize();
             await mUnionNodeConfigRenderer.Initialize();
-            mCodeEditor.mCoreObject.SetLanguage("C#");
-            mCodeEditor.mCoreObject.ApplyLangDefine();
-            mCodeEditor.mCoreObject.ApplyErrorMarkers();
+            mCodeEditor.SetLanguage("C#");
+            mCodeEditor.SetViewStyle(EGui.ECodeEditorViewStyle.Dark);
+            mCodeEditor.SetErrorMarkers(null);
             return true;
         }
 
@@ -473,7 +473,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     code += "\n";
                     code += $"#define USER_EMITTER\n";
                     SaveHlslFile(code);
-                    mCodeEditor.mCoreObject.SetText(code);
+                    mCodeEditor.SetLanguage("HLSL");
+                    mCodeEditor.SetText(code);
                     TextEditorTitle = AssetName.PureName;
 
                     code = "";
@@ -513,7 +514,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                     mCSCodeGen.GenerateClassCode(DefClass, AssetName, ref code);
                     SaveCSFile(code);
-                    mCodeEditor.mCoreObject.SetText(code);
+                    mCodeEditor.SetLanguage("C#");
+                    mCodeEditor.SetText(code);
                     TextEditorTitle = AssetName.PureName;
                 }
                 DefClass.ResetRuntimeData();
@@ -692,6 +694,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
             mLastCompileResult = TtMacrossModule.LastCompileResult;
+            ApplyCodeEditorDiagnostics();
         }
 
         void SaveCSFile(string code)
@@ -1067,12 +1070,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             if (method.IsUseCustumCode)
             {
-                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xFF0000FF);
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.LinkStringColor);
             }
             bool methodTreeNodeResult = false;
             if (method.MethodHasError())
             {
-                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xFF0000FF);
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.ErrorStringColor);
                 methodTreeNodeResult = ImGuiAPI.TreeNodeEx("(E) " + displayName + "##" + keyName, treeNodeFlags);
                 if(ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
                 {
@@ -1116,7 +1119,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 if (EGui.UIProxy.CustomButton.ToolButton("g", in buttonSize, 0xFF00FF00, "func_G_" + displayName + keyName))
                 {
                     var methodCode = GenerateMethodCode(this.CodeGen, method.MethodDatas[0].MethodDec);
-                    mCodeEditor.mCoreObject.SetText(methodCode);
+                    mCodeEditor.SetLanguage(IsGenShader ? "HLSL" : "C#");
+                    mCodeEditor.SetText(methodCode);
                     TextEditorTitle = "Gen:" + displayName;
                     CurrentTextoutMethod = method;
                     return false;
@@ -1127,10 +1131,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 ImGuiAPI.SameLine(regionSize.X - buttonSize.X * 2 - buttonOffset, -1.0f);
                 if (EGui.UIProxy.CustomButton.ToolButton("c", in buttonSize, 0xFF00FF00, "func_C_" + displayName + keyName))
                 {
+                    mCodeEditor.SetLanguage(IsGenShader ? "HLSL" : "C#");
                     if (method.CustumCode != null)
-                        mCodeEditor.mCoreObject.SetText(method.CustumCode);
+                        mCodeEditor.SetText(method.CustumCode);
                     else
-                        mCodeEditor.mCoreObject.SetText("//No CustumCode");
+                        mCodeEditor.SetText("//No CustumCode");
                     TextEditorTitle = "Custum:" + displayName;
                     CurrentTextoutMethod = method;
                     return false;
@@ -1289,6 +1294,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     ImGuiAPI.OpenPopup("MacrossMethodSelectPopup", ImGuiPopupFlags_.ImGuiPopupFlags_None);
                 }
+                EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
                 if(ImGuiAPI.BeginPopup("MacrossMethodSelectPopup", ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var drawList = ImGuiAPI.GetWindowDrawList();
@@ -1331,6 +1337,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                     ImGuiAPI.EndPopup();
                 }
+                EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
                 if (methodsTreeNodeResult)
                 {
                     var funcRegionSize = ImGuiAPI.GetContentRegionAvail();
@@ -1494,6 +1501,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         bool ShowTextEditor = true;
         string TextEditorTitle = "TextEditor";
         UMacrossMethodGraph CurrentTextoutMethod = null;
+        bool mCodeEditorReadOnly = false;
+        EGui.ECodeEditorViewStyle mCodeEditorViewStyle = EGui.ECodeEditorViewStyle.Dark;
 
         string GetCodeEditorWindowTitle()
         {
@@ -1515,6 +1524,85 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         bool mTextEditorDockInitialized = false;
         bool mReporterShowSelfOnly = true;
         uint mTextEditorDockId;
+        void ApplyCodeEditorDiagnostics()
+        {
+            if (!mLastCompileResult.IsInitialized || mLastCompileResult.Diagnostics == null)
+            {
+                mCodeEditor.SetErrorMarkers(null);
+                return;
+            }
+
+            var markers = new List<(int Line, string Message)>();
+            for (int i = 0; i < mLastCompileResult.Diagnostics.Count; i++)
+            {
+                var diagnostic = mLastCompileResult.Diagnostics[i];
+                if (diagnostic.Severity != CompileDiagnostic.DiagnosticSeverity.Error &&
+                    diagnostic.Severity != CompileDiagnostic.DiagnosticSeverity.Warning)
+                    continue;
+                if (diagnostic.Line < 0)
+                    continue;
+                markers.Add((diagnostic.Line, diagnostic.Message));
+            }
+            mCodeEditor.SetErrorMarkers(markers);
+        }
+
+        void DrawCodeEditorToolbar()
+        {
+            var statusText = "Not compiled";
+            var statusColor = EGui.UIProxy.StyleConfig.Instance.TextDisableColor;
+            if (mLastCompileResult.IsInitialized)
+            {
+                statusText = mLastCompileResult.Success ? "Compile Success" : "Compile Failed";
+                statusColor = mLastCompileResult.Success ? EGui.UIProxy.StyleConfig.Instance.PassStringColor : EGui.UIProxy.StyleConfig.Instance.ErrorStringColor;
+            }
+
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, statusColor);
+            ImGuiAPI.Text(statusText);
+            ImGuiAPI.PopStyleColor(1);
+            ImGuiAPI.SameLine(0, 12);
+            ImGuiAPI.Text(TextEditorTitle);
+            ImGuiAPI.SameLine(0, 16);
+
+            bool readOnly = mCodeEditorReadOnly;
+            if (EGui.UIProxy.CheckBox.DrawCheckBox("Read Only", ref readOnly))
+            {
+                mCodeEditorReadOnly = readOnly;
+                mCodeEditor.SetReadOnly(mCodeEditorReadOnly);
+            }
+
+            ImGuiAPI.SameLine(0, 8);
+            if (ImGuiAPI.SmallButton("Undo"))
+                mCodeEditor.Undo();
+            ImGuiAPI.SameLine(0, 4);
+            if (ImGuiAPI.SmallButton("Redo"))
+                mCodeEditor.Redo();
+            ImGuiAPI.SameLine(0, 4);
+            if (ImGuiAPI.SmallButton("Copy"))
+                mCodeEditor.Copy();
+            ImGuiAPI.SameLine(0, 4);
+            if (ImGuiAPI.SmallButton("Paste"))
+                mCodeEditor.Paste();
+            ImGuiAPI.SameLine(0, 4);
+            if (ImGuiAPI.SmallButton("Select All"))
+                mCodeEditor.SelectAll();
+
+            ImGuiAPI.SameLine(0, 10);
+            if (EGui.UIProxy.ComboBox.BeginCombo("##CodePalette", mCodeEditorViewStyle.ToString(), 100))
+            {
+                foreach (EGui.ECodeEditorViewStyle style in Enum.GetValues(typeof(EGui.ECodeEditorViewStyle)))
+                {
+                    var selected = style == mCodeEditorViewStyle;
+                    if (ImGuiAPI.Selectable(style.ToString(), selected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                    {
+                        mCodeEditorViewStyle = style;
+                        mCodeEditor.SetViewStyle(style);
+                    }
+                }
+                EGui.UIProxy.ComboBox.EndCombo();
+            }
+            ImGuiAPI.Separator();
+        }
+
         protected unsafe void DrawTextEditor()
         {
             var sz = new Vector2(-1);
@@ -1561,8 +1649,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 bool open = true;
                 if (ImGuiAPI.Begin(textWinName, ref open, ImGuiWindowFlags_.ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar))
                 {
-                    ImGuiAPI.TextColored(Color4f.FromColor4b(Color4b.LightGoldenrodYellow), TextEditorTitle);
-                    mCodeEditor.mCoreObject.Render(AssetName.Name, in Vector2.Zero, false);
+                    DrawCodeEditorToolbar();
+                    mCodeEditor.Render(AssetName.Name, in Vector2.Zero, false);
                 }
                 ImGuiAPI.End();
                 // reporter
@@ -1573,28 +1661,77 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     {
                         if (mLastCompileResult.IsInitialized)
                         {
-                            for (int i = 0; i < mLastCompileResult.Diagnostics.Count; i++)
+                            var tableFlags = ImGuiTableFlags_.ImGuiTableFlags_Resizable |
+                                ImGuiTableFlags_.ImGuiTableFlags_RowBg |
+                                ImGuiTableFlags_.ImGuiTableFlags_BordersInnerV |
+                                ImGuiTableFlags_.ImGuiTableFlags_ScrollY;
+                            if (ImGuiAPI.BeginTable("MacrossDiagnostics", 4, tableFlags, in Vector2.Zero, 0.0f))
                             {
-                                if(mReporterShowSelfOnly)
+                                ImGuiAPI.TableSetupScrollFreeze(0, 1);
+                                ImGuiAPI.TableSetupColumn("Type", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed, 76, 0);
+                                ImGuiAPI.TableSetupColumn("Line", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed, 60, 0);
+                                ImGuiAPI.TableSetupColumn("File", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed, 220, 0);
+                                ImGuiAPI.TableSetupColumn("Message", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthStretch, 0, 0);
+                                ImGuiAPI.TableHeadersRow();
+
+                                for (int i = 0; i < mLastCompileResult.Diagnostics.Count; i++)
                                 {
-                                    if (!mLastCompileResult.Diagnostics[i].Message.Contains(AssetName.Address, StringComparison.OrdinalIgnoreCase))
-                                        continue;
+                                    var diagnostic = mLastCompileResult.Diagnostics[i];
+                                    if(mReporterShowSelfOnly)
+                                    {
+                                        var source = string.IsNullOrEmpty(diagnostic.FilePath) ? diagnostic.Message : diagnostic.FilePath;
+                                        if (!source.Contains(AssetName.Address, StringComparison.OrdinalIgnoreCase))
+                                            continue;
+                                    }
+                                    switch (diagnostic.Severity)
+                                    {
+                                        case CompileDiagnostic.DiagnosticSeverity.Warning:
+                                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.WarningStringColor);
+                                            break;
+                                        case CompileDiagnostic.DiagnosticSeverity.Error:
+                                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.ErrorStringColor);
+                                            break;
+                                        default:
+                                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.PassStringColor);
+                                            break;
+                                    }
+
+                                    ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0);
+                                    ImGuiAPI.TableSetColumnIndex(0);
+                                    ImGuiAPI.Text(diagnostic.Severity.ToString());
+                                    ImGuiAPI.TableSetColumnIndex(1);
+                                    ImGuiAPI.Text(diagnostic.Line >= 0 ? (diagnostic.Line + 1).ToString() : "-");
+                                    ImGuiAPI.TableSetColumnIndex(2);
+                                    ImGuiAPI.Text(string.IsNullOrEmpty(diagnostic.FilePath) ? "-" : IO.TtFileManager.GetPureName(diagnostic.FilePath));
+                                    ImGuiAPI.TableSetColumnIndex(3);
+                                    ImGuiAPI.Text(diagnostic.Message);
+                                    ImGuiAPI.PopStyleColor(1);
+
+                                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left) && diagnostic.Line >= 0)
+                                    {
+                                        mCodeEditor.SetCursorPosition(diagnostic.Line, diagnostic.Column);
+                                    }
+                                    EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
+                                    if (ImGuiAPI.BeginPopupContextItem($"DiagContext_{i}", ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
+                                    {
+                                        if (ImGuiAPI.MenuItem("Copy Message", null, false, true))
+                                            ImGuiAPI.SetClipboardText(diagnostic.Message);
+                                        if (!string.IsNullOrEmpty(diagnostic.FilePath) && ImGuiAPI.MenuItem("Copy File Path", null, false, true))
+                                            ImGuiAPI.SetClipboardText(diagnostic.FilePath);
+                                        ImGuiAPI.EndPopup();
+                                    }
+                                    EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
                                 }
-                                switch (mLastCompileResult.Diagnostics[i].Severity)
-                                {
-                                    case CompileDiagnostic.DiagnosticSeverity.Warning:
-                                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.WarningStringColor);
-                                        break;
-                                    case CompileDiagnostic.DiagnosticSeverity.Error:
-                                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.ErrorStringColor);
-                                        break;
-                                    default:
-                                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.PassStringColor);
-                                        break;
-                                }
-                                ImGuiAPI.Text(mLastCompileResult.Diagnostics[i].Message);
-                                ImGuiAPI.PopStyleColor(1);
+                                ImGuiAPI.EndTable();
                             }
+                            else if (mLastCompileResult.Diagnostics.Count == 0)
+                            {
+                                ImGuiAPI.TextDisabled(mLastCompileResult.Success ? "No diagnostics." : "No compiler diagnostics captured.");
+                            }
+                        }
+                        else
+                        {
+                            ImGuiAPI.TextDisabled("Compile the asset to show diagnostics.");
                         }
                     }
                     ImGuiAPI.EndChild();
@@ -1656,7 +1793,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         bool tabItemResult = false;
                         if(func.MethodHasError())
                         {
-                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xFF0000FF);
+                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.ErrorStringColor);
                             tabItemResult = ImGuiAPI.BeginTabItem("(E) " + func.DisplayName + "##" + func.KeyName, ref func.VisibleInClassGraphTables, flag);
                             ImGuiAPI.PopStyleColor(1);
                         }
@@ -1752,6 +1889,9 @@ namespace EngineNS.Macross
         public string Id;
         public bool IsWarningAsError;
         public string Message;
+        public string FilePath;
+        public int Line;
+        public int Column;
         public enum DiagnosticSeverity
         {
             Hidden = 0,
@@ -1794,8 +1934,18 @@ namespace EngineNS.Macross
                     Id = diagnostic.Id,
                     IsWarningAsError = diagnostic.IsWarningAsError,
                     Message = diagnostic.ToString(),
-                    Severity = (CompileDiagnostic.DiagnosticSeverity)diagnostic.Severity
+                    Severity = (CompileDiagnostic.DiagnosticSeverity)diagnostic.Severity,
+                    FilePath = "",
+                    Line = -1,
+                    Column = -1,
                 };
+                var span = diagnostic.Location.GetLineSpan();
+                if (span.IsValid)
+                {
+                    newDiagnostic.FilePath = span.Path;
+                    newDiagnostic.Line = span.StartLinePosition.Line;
+                    newDiagnostic.Column = span.StartLinePosition.Character;
+                }
                 Diagnostics.Add(newDiagnostic);
             }
         }

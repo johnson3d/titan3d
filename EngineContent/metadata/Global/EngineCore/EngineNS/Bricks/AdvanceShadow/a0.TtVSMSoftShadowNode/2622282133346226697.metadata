@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2622282133346226697 Type="EngineNS.Bricks.AdvanceShadow.TtVSMSoftShadowNode@EngineCore">
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <LightSourceRadius Type="System.Single@Unknown" Order="0" />
+  <MaxRayDistance Type="System.Single@Unknown" Order="0" />
+  <RayStepCount Type="System.Int32@Unknown" Order="0" />
+  <ShadowBias Type="System.Single@Unknown" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_2622282133346226697>

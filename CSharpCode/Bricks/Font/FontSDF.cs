@@ -85,6 +85,7 @@ namespace EngineNS.Bricks.Font
                 bool retValue = false;
                 var visible = true;
                 ImGuiAPI.SetNextWindowSize(new Vector2(200, 500), ImGuiCond_.ImGuiCond_FirstUseEver);
+                EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
                 if (ImGuiAPI.BeginPopupModal($"Import font", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     if (string.IsNullOrEmpty(ContentBrowser.CurrentImporterFile))
@@ -161,6 +162,7 @@ namespace EngineNS.Bricks.Font
 
                     ImGuiAPI.EndPopup();
                 }
+                EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
                 if (!visible)
                     retValue = true;
                 return retValue;
@@ -549,6 +551,7 @@ namespace EngineNS
         public Bricks.Font.TtFontModule FontModule { get; } = new Bricks.Font.TtFontModule();
     }
 }
+
 
 
 #if TitanEngine_AutoGen_Macross

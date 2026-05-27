@@ -131,7 +131,7 @@ namespace EngineNS.NxRHI
                 CurrentGpuScope.Begin(this);
 
             var cp = passClears;
-            if (TtEngine.Instance.Config.IsReverseZ)
+            if (TtEngine.Instance.GfxDevice.Config.IsReverseZ)
                 cp.m_DepthClearValue = 0;
             else
                 cp.m_DepthClearValue = 1;

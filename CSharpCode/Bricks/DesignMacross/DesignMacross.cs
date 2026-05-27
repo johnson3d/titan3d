@@ -144,6 +144,7 @@ namespace EngineNS.DesignMacross
 
                 var visible = true;
                 var retValue = false;
+                EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
                 if (ImGuiAPI.BeginPopupModal($"New DesignMacross", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var drawList = ImGuiAPI.GetWindowDrawList();
@@ -249,6 +250,7 @@ namespace EngineNS.DesignMacross
 
                     ImGuiAPI.EndPopup();
                 }// */
+                EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
 
                 return retValue;
             }

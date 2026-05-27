@@ -1,5 +1,4 @@
-﻿using NPOI.OpenXmlFormats.Dml;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,7 +8,7 @@ namespace EngineNS.NxRHI
     {
         public void SetDefault()
         {
-            this.SetDefault(TtEngine.Instance.Config.IsReverseZ);
+            this.SetDefault(TtEngine.Instance.GfxDevice.Config.IsReverseZ);
         }
     }
     public class TtRenderPass : AuxPtrType<NxRHI.IRenderPass>

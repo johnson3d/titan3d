@@ -9,7 +9,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
     {
         public Type CallNodeType;
     }
-    public class CallNode : TtNodeBase
+    public class CallNode : TtShadeBaseNode
     {
         public PinOut Result = null;
         public struct PinData
@@ -420,7 +420,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 this.Name = MaterialFunction.CallNodeName;
             }
         }
-
+        public override void UpdateAMetaReferences(IO.IAssetMeta ameta, Bricks.CodeBuilder.ShaderNode.TtMaterialGraph MaterialGraph)
+        {
+            ameta.AddReferenceAsset(FunctionName);
+        }
         public TtMaterialFunction MaterialFunction { get; private set; }
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {

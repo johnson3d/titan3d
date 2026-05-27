@@ -34,7 +34,7 @@ void CS_Main(uint3 id : SV_DispatchThreadID)
         return;
     }
 
-    float3 currN = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, uv, 0).xyz * 2.0f - 1.0f);
+    float3 currN = DecodeNormalFromGBuffer(GBufferRT1.SampleLevel(Samp_PointClamp, uv, 0));
     float3 currWP = ReconstructWorldPos(uv, depth);
 
     uint rng = PcgHash(pixelIndex ^ (FrameIndex * 0xC2B2AE3Du) ^ 0xABCDEu);
@@ -62,7 +62,7 @@ void CS_Main(uint3 id : SV_DispatchThreadID)
         if (nbDepth >= 1.0f) continue;
 #endif
 
-        float3 nbN = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, nbUV, 0).xyz * 2.0f - 1.0f);
+        float3 nbN = DecodeNormalFromGBuffer(GBufferRT1.SampleLevel(Samp_PointClamp, nbUV, 0));
         if (dot(nbN, currN) < NormalThreshold)
             continue;
 

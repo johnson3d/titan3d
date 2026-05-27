@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1893386398617699465 Type="EngineNS.Bricks.AdvanceShadow.TtAdvanceShadowMapNode@EngineCore">
+  <ClipmapBaseHalfExtent Type="System.Single@Unknown" Order="0" />
+  <ClipmapLevelCount Type="System.Int32@Unknown" Order="0" />
+  <ClipmapPagesPerDim Type="System.Int32@Unknown" Order="0" />
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <IsDepth32 Type="System.Boolean@Unknown" Order="0" />
+  <PageMaxAge Type="System.UInt32@Unknown" Order="0" />
+  <PageResolution Type="System.Int32@Unknown" Order="0" />
+  <PoolDimPages Type="System.Int32@Unknown" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_1893386398617699465>

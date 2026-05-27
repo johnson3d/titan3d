@@ -59,7 +59,7 @@
   "RootServerURL": "127.0.0.1:2333",
   "DefaultAuthority": "Server",
   "EditorFont": "fonts/NotoSansSC-Regular.otf:Engine",
-  "EditorSmallFont": "fonts/Roboto-Bold.ttf:Engine",
+  "EditorSmallFont": "fonts/NotoSansSC-Regular.otf:Engine",
   "EditorEffectFont": "fonts/fa-solid-900.ttf:Engine",
   "UIDefaultTexture": "texture/white.srv:Engine",
   "IsWriteShaderDebugFile": false,
@@ -67,6 +67,7 @@
   "UseECS": true,
   "Plugins": [
     "SourceGit",
+    "BlenderImporter",
     "DataCopyer",
     "Survivor",
     "TencentAIGC",

@@ -27,7 +27,7 @@ int FlushFileToDisk(FILE* fp)
 	{
 		return -1;
 	}
-
+	return 0;
 //	// 2. 强制操作系统缓冲区落盘（同一进程内的访问，其实不需要这一步，目前用来保证正确性）
 //#ifdef PLATFORM_WIN
 //	return _commit(_fileno(fp));   // 关键：_fileno 获取文件描述符
@@ -171,9 +171,10 @@ vBOOL  VFile::Open(LPCSTR lpszFileName, UINT nOpenFlags)
 
 	VAutoVSLLock lk(mLocker);
 	m_bCloseOnDelete = FALSE;
-	m_strFileName = lpszFileName;
-	
-    VStringA_MakeLower(m_strFileName);
+	if (lpszFileName != nullptr)
+	{
+		SetFileName(lpszFileName);
+	}
 	
 	VStringA arg = "";
 	switch (nOpenFlags & 3)
@@ -335,7 +336,6 @@ void  VFile::Close()
 		m_hFile = NULL;
 	}
 	m_bCloseOnDelete = FALSE;
-	m_strFileName = "";
 }
 
 void  VFile::Abort()
@@ -358,7 +358,7 @@ void VFile::UpdateFileLength()
 {
 	if (m_strFileName.length() > 0)
 	{
-		Open(m_strFileName.c_str(), modeRead);
+		Open(nullptr, modeRead);
 		Close();
 	}
 }

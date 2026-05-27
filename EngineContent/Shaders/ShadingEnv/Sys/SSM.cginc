@@ -4,6 +4,7 @@
 #include "../../Inc/VertexLayout.cginc"
 #include "../../Inc/LightCommon.cginc"
 #include "../../Inc/Math.cginc"
+#include "../../Bricks/AdvanceShadow/AdvanceShadow.cginc"
 
 #include "Material"
 #include "MdfQueue"

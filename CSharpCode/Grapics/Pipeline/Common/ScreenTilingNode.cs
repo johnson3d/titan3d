@@ -4,7 +4,8 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    [Bricks.CodeBuilder.ContextMenu("ScreenTiling", "ScreenTiling", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    //Deprecated: FrustumGrid3D is more flexible and can support more features, so ScreenTilingNode is no longer needed. But keep it for reference and potential future use.
+    //[Bricks.CodeBuilder.ContextMenu("ScreenTiling", "ScreenTiling", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UScreenTilingNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UScreenTilingNode" })]
     public class TtScreenTilingNode : TAuxRenderGraphNode<TtScreenTilingNode>
     {

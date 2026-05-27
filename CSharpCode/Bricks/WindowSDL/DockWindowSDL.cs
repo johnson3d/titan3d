@@ -723,6 +723,8 @@ namespace EngineNS
                 return;
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->RendererUserData);
             var vpData = gcHandle.Target as ViewportData;
+            if (vpData?.PresentWindow?.CanRender != true)
+                return;
 
             //ImGui_ImplOpenGL3_RenderDrawData(viewport->DrawData);
             var draw_data = viewport->DrawData;
@@ -735,6 +737,8 @@ namespace EngineNS
                 return;
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->RendererUserData);
             var vpData = gcHandle.Target as ViewportData;
+            if (vpData?.PresentWindow?.CanRender != true)
+                return;
 
             vpData.PresentWindow.SwapChain.Present(0, 0);
         }

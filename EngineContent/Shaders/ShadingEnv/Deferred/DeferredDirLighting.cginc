@@ -10,6 +10,7 @@
 #include "../../Inc/SysFunction.cginc"
 #include "../../Inc/PostEffectCommon.cginc"
 #include "../../Inc/GpuSceneCommon.cginc"
+#include "../../Inc/FrustumGridCommon.cginc"
 #include "DeferredCommon.cginc"
 
 #include "MdfQueue"
@@ -54,7 +55,31 @@ SamplerState Samp_gPreIntegratedGF DX_AUTOBIND;
 Texture2D GVignette DX_AUTOBIND;
 SamplerState Samp_GVignette DX_AUTOBIND;
 
+#if ENV_GRID_LIGHTS == 1
+cbuffer cbFrustumGrid DX_AUTOBIND
+{
+    int3    FrustumGridSize;
+    uint    FrustumGridPixelSizeShift;
+    float3  FrustumGridZParams;
+    uint    FrustumGridTotalCells;
+    uint    FrustumGridMaxPerCellPoint;
+    uint    FrustumGridMaxPerCellSpot;
+    float2  FrustumGridViewportSize;
+};
+#else
 StructuredBuffer<FTileData> TilingBuffer DX_AUTOBIND;
+#endif
+
+struct FSubsurfaceProfile
+{
+    float3 ScatterColor;
+    float ScatterRadius;
+    float3 FalloffColor;
+    float SubsurfaceOpacity;
+};
+StructuredBuffer<FSubsurfaceProfile> SubsurfaceProfiles DX_AUTOBIND;
+
+#include "../../Bricks/FX/SubsurfaceLighting.cginc"
 
 cbuffer cbShadingEnv DX_AUTOBIND
 {
@@ -117,6 +142,9 @@ half GetRoughness(half InRoughness, float3 WorldNormal)
 struct PS_OUTPUT
 {
 	float4 RT0 : SV_Target0;
+#if ENV_ENABLE_SEPARATED_SPECULAR == 1
+	float4 RT1 : SV_Target1;
+#endif
 };
 
 PS_OUTPUT PS_Main(PS_INPUT input)
@@ -131,7 +159,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	half4 rt3 = (half4)GBufferRT3.SampleLevel(Samp_GBufferRT3, uv.xy, 0);
 	float rtDepth = GetDepth(uv.xy);
 
-	GBufferData GBuffer = (GBufferData)0;
+	FGBufferData GBuffer = (FGBufferData)0;
 	GBuffer.DecodeGBuffer(rt0, rt1, rt2, rt3);
 
 	//if (GBuffer.ObjectFlags_2Bit == 0)
@@ -141,10 +169,13 @@ PS_OUTPUT PS_Main(PS_INPUT input)
         return output;
     }
 
-	bool NoPixel = (all(GBuffer.WorldNormal) == 0);
+	//bool NoPixel = (dot(GBuffer.WorldNormal, GBuffer.WorldNormal) < 0.01f);
+    bool NoPixel = false;
 	
 	half3 Albedo = sRGB2Linear((half3)GBuffer.MtlColorRaw);
 	half AbsSpecular = GBuffer.Specular;
+	//ͨ�� 0.04���� 4% �����ʣ���Ӧ�����
+    //AbsSpecular = max(AbsSpecular, 0.04h); //ĳЩ���ʣ���ʯ��ˮ�桢��ʯ�ȣ�F0 ���Դﵽ 0.08~0.17
 
 	half3 N = GBuffer.WorldNormal;
     //N = half3(-0.46236, 0.38808, -0.79864);
@@ -231,39 +262,52 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		ShadowValue = lerp(ShadowValue, 1.0h, FadeValue);
 	}
 #elif ENV_EShadowMode == EShadowMode_Advance
-	int nodeIndex = GetPageNode(WorldPos.xz);
-    if (GBuffer.IsAcceptShadow() == false || nodeIndex < 0)
+    if (GBuffer.IsAcceptShadow() == false)
     {
         ShadowValue = 1.0h;
     }
     else
     {
-        FAdvShadowNodeData node = QTreeNodeBuffer[nodeIndex];
-		if (node.PageIndex < 0)	
-		{
-			ShadowValue = 1.0h;
-		}
-		else
-		{
-			ShadowMapUV = mul(float4(WorldPos, 1.0f), node.ShadowMatrix);
-			ShadowMapUV.z = ShadowMapUV.z / ShadowMapUV.w;
-			//if (ShadowMapUV.x > 1 || ShadowMapUV.x < 0 || ShadowMapUV.z < 0 || ShadowMapUV.z > 1)
-			if (ShadowMapUV.z > 1)
-			{
-				ShadowValue = 1.0h;
-			}
-			else
-			{
-				ShadowMapUV.z = max(ShadowMapUV.z, 0);
-				float occluderDepth = GShadowMapArray.SampleLevel(Samp_GShadowMap, float3(ShadowMapUV.xy, node.PageIndex), 0).r;
-				float esmValue = GetESMValue((ShadowMapUV.z - 0.003), node.ZNear, node.ZFar);//+ 0.0001f
-				ShadowValue = saturate(occluderDepth / esmValue);
-				if (ShadowValue < 1)
-				{
-					//ShadowValue = ShadowValue * 0.1f;
-				}
-			}
-		}
+        // Try Clipmap first (directional light, near camera)
+        float clipmapShadow = GetClipmapShadow(WorldPos);
+        if (clipmapShadow < 1.0f || GetClipmapLevel(WorldPos.xz) >= 0)
+        {
+            // Clipmap handled this pixel
+            ShadowValue = (half)clipmapShadow;
+        }
+        else
+        {
+            // Fallback to QTree (local lights / outside clipmap range)
+            int nodeIndex = GetPageNode(WorldPos.xz);
+            if (nodeIndex < 0)
+            {
+                ShadowValue = 1.0h;
+            }
+            else
+            {
+                FAdvShadowNodeData node = QTreeNodeBuffer[nodeIndex];
+                if (node.PageIndex < 0)
+                {
+                    ShadowValue = 1.0h;
+                }
+                else
+                {
+                    ShadowMapUV = mul(float4(WorldPos, 1.0f), node.ShadowMatrix);
+                    ShadowMapUV.z = ShadowMapUV.z / ShadowMapUV.w;
+                    if (ShadowMapUV.z > 1)
+                    {
+                        ShadowValue = 1.0h;
+                    }
+                    else
+                    {
+                        ShadowMapUV.z = max(ShadowMapUV.z, 0);
+                        float occluderDepth = GShadowMapArray.SampleLevel(Samp_GShadowMap, float3(ShadowMapUV.xy, node.PageIndex), 0).r;
+                        float esmValue = GetESMValue((ShadowMapUV.z - 0.003), node.ZNear, node.ZFar);
+                        ShadowValue = saturate(occluderDepth / esmValue);
+                    }
+                }
+            }
+        }
     }
 #elif ENV_EShadowMode == EShadowMode_None
 	ShadowValue = 1.0h;
@@ -288,6 +332,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	// todo: remove Csky Cground
 	// sky light; 
 	half SkyAtten = min(1.0h, 2.0h - NoL - ShadowValue);
+	//todo:��ǰ��SkyShading��Diffuse,Specularһ���AO���������֣����ǵ��������ױ�AOӰ�죬�������Կ��ǵ�����AO*AO����ʹ�ò�ͬ��AOֵ������SkyShading������
 	half3 SkyShading = lerp(Cground, Csky, 0.5h * N.y + 0.5h) * SkyAtten * SkyAtten * OptDiffShading * Ienv_light;
 	if (NoPixel)
 	{
@@ -330,28 +375,32 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
 	half FinalShadowValue = min(1.0h, ShadowValue + DirLightLeak);
 
+#if ENV_ENABLE_SEPARATED_SPECULAR == 1
+	half3 SeparatedSpecular = half3(0, 0, 0);
 	int shadingMode = GBuffer.GetShadingMode();
 	if (shadingMode == EShadingMode_Subsurface)
 	{
-		// Subsurface scattering approximation
-		// Wrap diffuse lighting for softer terminator
-		half wrapNoL = saturate((NoLsigned + 0.5h) / 1.5h);
-		half3 subsurfaceColor = Albedo; // use albedo as subsurface scatter color
-		half scatterPower = 12.0h;
-		
-		// View-dependent back-scattering term
-		half3 scatterDir = L + N * 0.5h;
-		half VdotScatter = saturate(dot(V, -scatterDir));
-		half3 backScatter = pow(VdotScatter, scatterPower) * subsurfaceColor * Idir * Cdir;
-		
-		// Softer diffuse with wrap lighting
-		half3 sssDiffuse = wrapNoL * Idir * Cdir * OptDiffShading;
-		
-		// Reduced specular for subsurface materials
-		half3 sssSpec = DirLightSpecShading * 0.5h;
-		
-		BaseShading = (sssDiffuse + backScatter) * FinalShadowValue + sssSpec * ShadowValue + SkyShading;
-		BaseShading = BaseShading * AOs + EnvSpec * 0.5h;
+		int profileIdx = GBuffer.GetSubsurfaceProfileIndex();
+		FSubsurfaceProfile sssProfile = SubsurfaceProfiles[profileIdx];
+
+		FSubsurfaceLightingInput sssInput = (FSubsurfaceLightingInput)0;
+		sssInput.Normal         = N;
+		sssInput.ViewDir        = V;
+		sssInput.LightDir       = L;
+		sssInput.NoLsigned      = NoLsigned;
+		sssInput.NoL            = NoL;
+		sssInput.Albedo         = Albedo;
+		sssInput.OptDiffShading = OptDiffShading;
+		sssInput.LightColor     = Cdir;
+		sssInput.LightIntensity = Idir;
+
+		FSubsurfaceLightingResult sssResult = ComputeSubsurfaceDirLight(sssInput, sssProfile);
+
+		ComposeSubsurfaceShading(
+			sssResult.Diffuse, SkyShading,
+			FinalShadowValue, ShadowValue,
+			DirLightSpecShading, EnvSpec, AOs,
+			BaseShading, SeparatedSpecular);
 	}
 	else
 	{
@@ -359,8 +408,64 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		BaseShading = DirLightDiffuseShading * FinalShadowValue + DirLightSpecShading * ShadowValue + SkyShading;
 		BaseShading = BaseShading * AOs + EnvSpec;
 	}
+#else
+	BaseShading = DirLightDiffuseShading * FinalShadowValue + DirLightSpecShading * ShadowValue + SkyShading;
+	BaseShading = BaseShading * AOs + EnvSpec;
+#endif
 
-#if ENV_DISABLE_POINTLIGHTS == 0
+#if ENV_GRID_LIGHTS == 1
+	// FrustumGrid3D path: look up lights from 3D clustered grid
+	if (NoPixel == false)
+	{
+		float linearDepth = LinearFromDepth(rtDepth);
+		uint2 pixelPos = (uint2)(uv * ViewportSizeAndRcp.xy);
+		uint cellIndex = ComputeFrustumGridCellIndexFromPixel(pixelPos, linearDepth,
+			FrustumGridPixelSizeShift, FrustumGridZParams, FrustumGridSize);
+		FFrustumGridCellHeader header = PointGridHeaders[cellIndex];
+		uint numLights = min(header.Count, FrustumGridMaxPerCellPoint);
+		for (uint i = 0; i < numLights; i++)
+		{
+			uint lightIndex = PointGridDataIndices[header.DataStartOffset + i];
+			FPointLight light = GpuScene_PointLights[lightIndex];
+			half3 plShading = PointLightShading(light, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness);
+#if ENV_ENABLE_SEPARATED_SPECULAR == 1
+			if (shadingMode == EShadingMode_Subsurface)
+			{
+				half3 plDiff = PointLightShading(light, WorldPos, V, N, OptDiffShading, half3(0,0,0), Roughness);
+				BaseShading += plDiff;
+				SeparatedSpecular += (plShading - plDiff);
+			}
+			else
+#endif
+			{
+				BaseShading += plShading;
+			}
+		}
+
+		// SpotLight shading (from grid)
+		FFrustumGridCellHeader spotHeader = SpotGridHeaders[cellIndex];
+		uint numSpotLights = min(spotHeader.Count, FrustumGridMaxPerCellSpot);
+		for (uint si = 0; si < numSpotLights; si++)
+		{
+			uint spotIndex = SpotGridDataIndices[spotHeader.DataStartOffset + si];
+			FSpotLight spotLight = GpuScene_SpotLights[spotIndex];
+			half3 slShading = SpotLightShading(spotLight, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness);
+#if ENV_ENABLE_SEPARATED_SPECULAR == 1
+			if (shadingMode == EShadingMode_Subsurface)
+			{
+				half3 slDiff = SpotLightShading(spotLight, WorldPos, V, N, OptDiffShading, half3(0,0,0), Roughness);
+				BaseShading += slDiff;
+				SeparatedSpecular += (slShading - slDiff);
+			}
+			else
+#endif
+			{
+				BaseShading += slShading;
+			}
+		}
+	}
+#else
+	// Legacy TilingBuffer 2D path
 	if (NoPixel == false)
 	{
 		float2 tileIdxF = (uv * ViewportSizeAndRcp.xy) / TileSize;
@@ -371,7 +476,38 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		{
 			uint lightIndex = TilingBuffer[indexOfTile].PointLights[i];
 			FPointLight light = GpuScene_PointLights[lightIndex];
-			BaseShading += PointLightShading(light, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness);
+			half3 plShading = PointLightShading(light, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness);
+#if ENV_ENABLE_SEPARATED_SPECULAR == 1
+			if (shadingMode == EShadingMode_Subsurface)
+			{
+				half3 plDiff = PointLightShading(light, WorldPos, V, N, OptDiffShading, half3(0,0,0), Roughness);
+				BaseShading += plDiff;
+				SeparatedSpecular += (plShading - plDiff);
+			}
+			else
+#endif
+			{
+				BaseShading += plShading;
+			}
+		}
+
+		// SpotLight shading (fallback: iterate all)
+		for (uint si = 0; si < GpuScene_SpotLightNum; si++)
+		{
+			FSpotLight spotLight = GpuScene_SpotLights[si];
+			half3 slShading = SpotLightShading(spotLight, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness);
+#if ENV_ENABLE_SEPARATED_SPECULAR == 1
+			if (shadingMode == EShadingMode_Subsurface)
+			{
+				half3 slDiff = SpotLightShading(spotLight, WorldPos, V, N, OptDiffShading, half3(0,0,0), Roughness);
+				BaseShading += slDiff;
+				SeparatedSpecular += (slShading - slDiff);
+			}
+			else
+#endif
+			{
+				BaseShading += slShading;
+			}
 		}
 	}
 #endif
@@ -400,6 +536,11 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	output.RT0.rgb = NoL;
 #elif ENV_EDebugShowMode == EDebugShowMode_Specular
 	output.RT0.rgb = DirLightSpecShading;
+#endif
+
+#if ENV_ENABLE_SEPARATED_SPECULAR == 1
+	output.RT1.rgb = Linear2sRGB(SeparatedSpecular);
+	output.RT1.a = (shadingMode == EShadingMode_Subsurface) ? 1.0h : 0.0h;
 #endif
 	
 	return output;

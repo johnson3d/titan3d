@@ -1,11 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using EngineNS.Animation.Macross.BlendTree;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.GamePlay;
+using EngineNS.Graphics.Pipeline.Deferred;
 using EngineNS.NxRHI;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
@@ -127,10 +128,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             foreach (var i in MaterialGraph.Nodes)
             {
-                var f = i as Bricks.CodeBuilder.ShaderNode.Control.TtCallMaterialFunctionNode;
+                var f = i as Bricks.CodeBuilder.ShaderNode.TtShadeBaseNode;
                 if (f == null)
                     continue;
-                ameta.RefAssetRNames.Add(f.FunctionName);
+                f.UpdateAMetaReferences(ameta, MaterialGraph);
             }
         }
         [Rtti.Meta("")]
@@ -440,7 +441,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             None = 0,
             DisableEnvColor = 1,
-            // bit1~5 reserved for future flags
+            // bit1~2: per-mesh object flags (merged into GBuffer at encode time)
+            AcceptShadow = (1 << 1),
+            UnLight = (1 << 2),
+            // bit3~5 reserved for future flags
             // bit6~9: ShadingMode (4 bits, use EShadingMode enum)
             ShadingModeMask = 0x03C0, // (0xF << 6)
         }
@@ -1039,6 +1043,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
         [Rtti.Meta("")]
         [Category("Variable")]
         public List<NameValuePair> UsedUniformVars { get => mUsedUniformVars; }
+
+        /// <summary>
+        /// The SubsurfaceProfile asset referenced by this material (if any).
+        /// Set during material compilation from TtSubsurfaceProfileIdNode.
+        /// Used at runtime to resolve the dynamic profile index in CBuffer.
+        /// </summary>
+        [Rtti.Meta("")]
+        [Browsable(false)]
+        public RName SubsurfaceProfileAsset { get; set; }
         public NameValuePair FindVar(string name)
         {
             foreach(var i in mUsedUniformVars)
@@ -1140,6 +1153,33 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (index.IsValidPointer)
             {
                 cBuffer.SetValue(index, (uint)RenderFlags);
+            }
+        }
+
+        /// <summary>
+        /// Updates the SubsurfaceProfileIndex uniform in PerMaterialCBuffer at runtime.
+        /// Because profile indices are assigned dynamically during asset loading,
+        /// we must resolve the RName→index mapping each frame before draw.
+        /// </summary>
+        internal void UpdateSubsurfaceProfileIndex()
+        {
+            if (SubsurfaceProfileAsset == null)
+                return;
+            if (mPerMaterialCBuffer == null)
+                return;
+
+            var profileManager = TtEngine.Instance?.GfxDevice?.SubsurfaceProfileManager;
+            if (profileManager == null)
+                return;
+
+            int profileIndex = profileManager.GetIndexByRName(SubsurfaceProfileAsset);
+
+            var fieldDesc = mPerMaterialCBuffer.ShaderBinder.FindField(
+                Bricks.CodeBuilder.ShaderNode.Var.TtSubsurfaceProfileIdNode.UniformVarName);
+            if (fieldDesc.IsValidPointer)
+            {
+                float indexAsFloat = (float)profileIndex;
+                mPerMaterialCBuffer.SetValue(fieldDesc, in indexAsFloat);
             }
         }
         #endregion

@@ -130,6 +130,12 @@
     <Filter Include="Bricks\Collision\BVH">
       <UniqueIdentifier>{959747ad-2a0e-46e4-9024-c7e640e2f0c6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ShadingEnv\Post\HemisphereMapping">
+      <UniqueIdentifier>{b32e5b4c-310f-4f40-9e9d-8428e8f7527c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GI\ProbeVolume">
+      <UniqueIdentifier>{fdce1409-203d-4bef-8b61-d1a59b7aec78}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -358,7 +364,6 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\AdditiveShading.cginc">
       <Filter>ShadingEnv\Post</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\CommonLighting.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Occlusion\SetupDrawClusterArgs.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box2.cginc">
       <Filter>Inc\BaseStructure</Filter>
@@ -496,8 +501,30 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\Collision\BVH\GpuBvhCommon.cginc">
       <Filter>Bricks\Collision\BVH</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\HemisphereMapping\HemisphereMapping.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\HemisphereMapping\HemisphereSkyFallback.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\FX\SWEWater.compute">
+      <Filter>Bricks\FX</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\HemisphereMapping\HemisphereSkyFallback.cginc">
+      <Filter>ShadingEnv\Post\HemisphereMapping</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\HemisphereMapping\HemisphereMapping.cginc">
+      <Filter>ShadingEnv\Post\HemisphereMapping</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\SSSBlur.cginc">
+      <Filter>ShadingEnv\Deferred</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\CommonLighting.cginc">
+      <Filter>ShadingEnv</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\FX\SubsurfaceLighting.cginc">
+      <Filter>Bricks\FX</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)GI\ProbeVolume\ProbeVolumeCommon.cginc">
+      <Filter>GI\ProbeVolume</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\FrustumGridCommon.cginc">
+      <Filter>Inc</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">
@@ -593,7 +620,15 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Collision\BVH\GpuBvhTraversal.compute">
       <Filter>Bricks\Collision\BVH</Filter>
     </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\HemisphereCaptureGen.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\HemisphereCaptureGen.compute">
+      <Filter>ShadingEnv\Post</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)GI\ProbeVolume\ProbeVolumeUpdate.compute">
+      <Filter>GI\ProbeVolume</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\FrustumGrid3D.compute">
+      <Filter>Compute\ScreenSpace</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FSR1\ffx_a.h">

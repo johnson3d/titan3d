@@ -2,14 +2,99 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using SDL;
+//using SDL;
 
 namespace EngineNS
 {
+    public class TtNativeWindowManager
+    {
+        public SDL.SDL_PropertiesID PropertiesID_WindowData;
+        private readonly object NativeWindowsLocker = new object();
+        private readonly HashSet<TtNativeWindow> NativeWindows = new HashSet<TtNativeWindow>();
+        private bool SeenRenderableNativeWindow;
+
+        public bool HasNativeWindows
+        {
+            get
+            {
+                lock (NativeWindowsLocker)
+                {
+                    return NativeWindows.Count > 0;
+                }
+            }
+        }
+        public bool HasSeenRenderableNativeWindow
+        {
+            get
+            {
+                lock (NativeWindowsLocker)
+                {
+                    return SeenRenderableNativeWindow;
+                }
+            }
+        }
+        public bool HasRenderableNativeWindow()
+        {
+            lock (NativeWindowsLocker)
+            {
+                foreach (var i in NativeWindows)
+                {
+                    if (i.IsRenderable)
+                    {
+                        SeenRenderableNativeWindow = true;
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+        public bool HasVisibleNativeWindowForWorkload()
+        {
+            lock (NativeWindowsLocker)
+            {
+                foreach (var i in NativeWindows)
+                {
+                    if (i.IsVisibleForWorkload)
+                        return true;
+                }
+                return false;
+            }
+        }
+        public void RegisterNativeWindow(TtNativeWindow window)
+        {
+            lock (NativeWindowsLocker)
+            {
+                NativeWindows.Add(window);
+            }
+        }
+        public void UnregisterNativeWindow(TtNativeWindow window)
+        {
+            lock (NativeWindowsLocker)
+            {
+                NativeWindows.Remove(window);
+            }
+        }
+        public bool Initialize()
+        {
+#if PWindow
+            if (SDL.SDL3.SDL_Init(SDL.SDL_InitFlags.SDL_INIT_EVENTS) == false)
+                return false;
+            PropertiesID_WindowData = SDL.SDL3.SDL_CreateProperties();
+#endif
+            return true;
+        }
+        public void Cleanup()
+        {
+            lock (NativeWindowsLocker)
+            {
+                NativeWindows.Clear();
+            }
+        }
+    }
+
     //https://github.com/libsdl-org/SDL/blob/main/docs/README-migration.md
     public partial class TtNativeWindow
     {
-        public static SDL.SDL_PropertiesID PropertiesID_WindowData;
 
         public string WindowName { get; set; }
 
@@ -52,6 +137,36 @@ namespace EngineNS
                 return (SDL.SDL3.SDL_GetWindowFlags(WindowSDL) & SDL.SDL_WindowFlags.SDL_WINDOW_MINIMIZED) != 0;
             }
         }
+        public unsafe bool IsRenderable
+        {
+            get
+            {
+                if (Window == IntPtr.Zero)
+                    return false;
+
+                var flags = SDL.SDL3.SDL_GetWindowFlags(WindowSDL);
+                var invisibleFlags = SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN |
+                    SDL.SDL_WindowFlags.SDL_WINDOW_MINIMIZED;
+                if ((flags & invisibleFlags) != 0)
+                    return false;
+
+                int w, h;
+                SDL.SDL3.SDL_GetWindowSize(WindowSDL, &w, &h);
+                return w > 0 && h > 0;
+            }
+        }
+        public unsafe bool IsVisibleForWorkload
+        {
+            get
+            {
+                if (IsRenderable == false)
+                    return false;
+
+                var flags = SDL.SDL3.SDL_GetWindowFlags(WindowSDL);
+                return (flags & SDL.SDL_WindowFlags.SDL_WINDOW_OCCLUDED) == 0;
+            }
+        }
+
         public unsafe static bool IsInputFocus(IntPtr handle)
         {
             var flags = SDL.SDL3.SDL_GetWindowFlags((SDL.SDL_Window*)handle.ToPointer());
@@ -85,16 +200,19 @@ namespace EngineNS
 
         public unsafe virtual void Cleanup()
         {
+            var windowManager = TtEngine.Instance?.NativeWindowManager;
             if (ThisHandle != IntPtr.Zero)
             {
                 WindowName = $"NativeWindow_{Window}";
                 var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(ThisHandle);
-                SDL.SDL3.SDL_SetPointerProperty(PropertiesID_WindowData, this.WindowID.ToString(), IntPtr.Zero);
+                if (windowManager != null)
+                    SDL.SDL3.SDL_SetPointerProperty(windowManager.PropertiesID_WindowData, this.WindowID.ToString(), IntPtr.Zero);
                 handle.Free();
                 ThisHandle = IntPtr.Zero;
             }
             if (Window != IntPtr.Zero)
             {
+                windowManager?.UnregisterNativeWindow(this);
                 SDL.SDL3.SDL_StopTextInput(WindowSDL);
                 SDL.SDL3.SDL_DestroyWindow(WindowSDL);
                 Window = IntPtr.Zero;
@@ -105,44 +223,49 @@ namespace EngineNS
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
+            var windowManager = TtEngine.Instance.NativeWindowManager;
             SDL.SDL_WindowFlags sdl_flags = 0;
             sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL.SDL_WindowFlags.SDL_WINDOW_HIGH_PIXEL_DENSITY;
             sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
             sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE;
             //sdl_flags |= (viewport->Flags & ImGuiViewportFlags_.ImGuiViewportFlags_TopMost) != 0 ? SDL.SDL_WindowFlags.SDL_WINDOW_ALWAYS_ON_TOP : 0;
 
-            System.Diagnostics.Debug.Assert(PropertiesID_WindowData != 0);
-            PropertiesID_WindowData = SDL.SDL3.SDL_CreateProperties();
+            System.Diagnostics.Debug.Assert(windowManager.PropertiesID_WindowData != 0);
             unsafe
             {
                 Window = (IntPtr)SDL.SDL3.SDL_CreateWindow(title, w, h, sdl_flags);
-                if (Window != IntPtr.Zero)
-                    ApplyDefaultWindowIcon();
+                if (Window == IntPtr.Zero)
+                    return false;
+                ApplyDefaultWindowIcon();
                 WindowName = $"NativeWindow_{WindowID}";
                 //Window = SDL.SDL_CreateWindow(title, x, y, w, h, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE);
                 ThisHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(this));
                 //SDL.SDL3.SDL_SetWindowData(WindowSDL, "UNativeWindow", ThisHandle);
-                SDL.SDL3.SDL_SetPointerProperty(PropertiesID_WindowData, this.WindowID.ToString(), ThisHandle);
+                SDL.SDL3.SDL_SetPointerProperty(windowManager.PropertiesID_WindowData, this.WindowID.ToString(), ThisHandle);
                 SDL.SDL3.SDL_StartTextInput(WindowSDL);
+                windowManager.RegisterNativeWindow(this);
             }
 
             return true;
         }
         public unsafe IntPtr CreateNativeWindow(string title, int x, int y, int w, int h, uint sdl_flags)
         {
+            var windowManager = TtEngine.Instance.NativeWindowManager;
             Window = (IntPtr)SDL.SDL3.SDL_CreateWindow(title, w, h, (SDL.SDL_WindowFlags)sdl_flags);
-            if (Window != IntPtr.Zero)
-                ApplyDefaultWindowIcon();
+            if (Window == IntPtr.Zero)
+                return IntPtr.Zero;
+            ApplyDefaultWindowIcon();
             SDL.SDL3.SDL_SetWindowPosition(WindowSDL, x, y);
             ThisHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(this));
             //SDL.SDL3.SDL_SetWindowData(Window, "UNativeWindow", ThisHandle);
-            System.Diagnostics.Debug.Assert(PropertiesID_WindowData != 0);
+            System.Diagnostics.Debug.Assert(windowManager.PropertiesID_WindowData != 0);
             WindowName = $"NativeWindow_{WindowID}";
-            SDL.SDL3.SDL_SetPointerProperty(PropertiesID_WindowData, this.WindowID.ToString(), ThisHandle);
+            SDL.SDL3.SDL_SetPointerProperty(windowManager.PropertiesID_WindowData, this.WindowID.ToString(), ThisHandle);
             SDL.SDL3.SDL_StartTextInput(WindowSDL);
             var hwnd = GetWindowHandle(WindowSDL);
             int darkMode = 1;
             DwmSetWindowAttribute(hwnd, (DwmWindowAttribute)20, ref darkMode, sizeof(int));
+            windowManager.RegisterNativeWindow(this);
             return Window;
         }
         public unsafe void ShowNativeWindow()
@@ -286,7 +409,7 @@ namespace EngineNS
 
             if (targetWindow != IntPtr.Zero.ToPointer())
             {
-                var pHandle = SDL.SDL3.SDL_GetPointerProperty(TtNativeWindow.PropertiesID_WindowData, evt.Window.WindowID.ToString(), IntPtr.Zero);
+                var pHandle = SDL.SDL3.SDL_GetPointerProperty(TtEngine.Instance.NativeWindowManager.PropertiesID_WindowData, evt.Window.WindowID.ToString(), IntPtr.Zero);
                 //var pHandle = SDL.SDL3.SDL_GetWindowData(targetWindow, "UNativeWindow");
                 if (pHandle != IntPtr.Zero)
                 {

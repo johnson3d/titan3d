@@ -43,6 +43,9 @@ namespace EngineNS
     {
         public const int MajorVersion = 1;
         public const int MiniVersion = 4;
+        public const float DefaultEditorUIFontSize = 20.0f;
+        public const float MinEditorUIFontSize = 10.0f;
+        public const float MaxEditorUIFontSize = 30.0f;
         public void SaveConfig(string sltFile, IO.TtJsonOptions options)
         {
             bool bJson = IO.TtFileManager.GetExtName(sltFile) == ".jscfg";
@@ -65,9 +68,6 @@ namespace EngineNS
         [Rtti.Meta("")]
         [Category("Option")]
         public string CookAssetType { get; set; } = "Scene+Mesh+Material+MaterialInst+AnimClip+MeshPrimitive+UI+Prefab+Macross+UVAnim+RPolicy+AnimationClip+BlendSpace+MaterialFunction";
-        [Rtti.Meta("")]
-        [Category("Option")]
-        public bool IsReverseZ { get; set; } = true;
         [Rtti.Meta("")]
         [Category("Option")]
         public EMultiRenderMode MultiRenderMode { get; set; } = EMultiRenderMode.Queue;
@@ -101,6 +101,12 @@ namespace EngineNS
                 mTargetFps = 1000 / value;
             }
         }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public bool ReduceWorkWhenWindowInvisible { get; set; } = true;
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public int InvisibleWindowInterval { get; set; } = 200;
         private int mTargetFps;
         public int TargetFps
         {
@@ -209,6 +215,26 @@ namespace EngineNS
         [Rtti.Meta("")]
         [Category("Option")]
         public RName EditorEffectFont { get; set; }
+        private float mEditorUIFontSize = DefaultEditorUIFontSize;
+        [Rtti.Meta("")]
+        [Category("Option")]
+        [DisplayName("Editor UI Font Size")]
+        [EGui.Controls.PropertyGrid.TtValueRange(MinEditorUIFontSize, MaxEditorUIFontSize)]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.5f)]
+        [EGui.Controls.PropertyGrid.TtValueFormat("%.1f")]
+        public float EditorUIFontSize
+        {
+            get => mEditorUIFontSize;
+            set
+            {
+                var fontSize = MathHelper.Clamp(value, MinEditorUIFontSize, MaxEditorUIFontSize);
+                if (Math.Abs(mEditorUIFontSize - fontSize) < 0.001f)
+                    return;
+
+                mEditorUIFontSize = fontSize;
+                TtEngine.Instance?.GfxDevice?.SlateRenderer?.ApplyEditorUIFontSize(fontSize);
+            }
+        }
         public string EditorLanguage { get; set; } = "English";
         [Rtti.Meta("")]
         [Category("Option")]
@@ -224,7 +250,7 @@ namespace EngineNS
         public bool UseECS { get; set; } = true;
         [Rtti.Meta("")]
         [Category("Option")]
-        public List<string> Plugins { get; set; } = new List<string>() { "SourceGit", "Survivor" };
+        public List<string> Plugins { get; set; } = new List<string>() { "SourceGit", "BlenderImporter", "Survivor" };
         [Rtti.Meta("")]
         [Category("Option")]
         public List<string> TypeAssemblies { get; set; } = new List<string>();
@@ -283,6 +309,10 @@ namespace EngineNS
         {
             get;
         } = new TtEventProcessorManager();
+        public TtNativeWindowManager NativeWindowManager
+        {
+            get;
+        } = new TtNativeWindowManager();
 
         public ulong CurrentTickFrame { get; set; } = 0;
         public long EngineStartTickCountUS { get; set; }
@@ -509,6 +539,8 @@ namespace EngineNS
 
             this.DataCopyer.FindCopyer(Rtti.TtTypeDesc.TypeStr(typeof(TtEngineConfig)));
 
+            NativeWindowManager.Initialize();
+
             var ModuleStart = Support.TtTime.HighPrecision_GetTickCount();
             GatherModules();
             await base.InitializeModules();
@@ -585,6 +617,7 @@ namespace EngineNS
             }
         }
         int QuitFrame = -1;
+        private long InvisibleWindowBeginTickUS = -1;
         public bool Tick()
         {
             var frame = this.Tracer.BeginFrame();
@@ -615,34 +648,42 @@ namespace EngineNS
                         }
                     }
 
-                    var bCapturing = GfxDevice.RenderQueue.BeginFrameCapture();
-                    //Do engine frame tick
+                    var suspendForInvisibleWindow = ShouldSuspendForInvisibleWindow();
+                    if (suspendForInvisibleWindow)
                     {
-                        GfxDevice?.BeginFrame();
-                        {
-                            TickBeginFrame();
-
-                            using (new Profiler.TimeScopeHelper(ScopeTickModules))
-                            {
-                                base.TickModules();
-                            }
-
-                            this.ThreadMain.Tick();
-
-                            TickSync();
-
-                            using (new Profiler.TimeScopeHelper(ScopeTickModules))
-                            {
-                                FContextTickableManager.GetInstance().ThreadTick();
-                                base.EndFrameModules();
-                            }
-
-                            this.TaskCollector.Tick();
-                        }
-                        GfxDevice?.EndFrame();
+                        TickInvisibleWindowFrame();
                     }
-                    if (bCapturing)
-                        GfxDevice.RenderQueue.EndFrameCapture();
+                    else
+                    {
+                        var bCapturing = GfxDevice.RenderQueue.BeginFrameCapture();
+                        //Do engine frame tick
+                        {
+                            GfxDevice?.BeginFrame();
+                            {
+                                TickBeginFrame();
+
+                                using (new Profiler.TimeScopeHelper(ScopeTickModules))
+                                {
+                                    base.TickModules();
+                                }
+
+                                this.ThreadMain.Tick();
+
+                                TickSync();
+
+                                using (new Profiler.TimeScopeHelper(ScopeTickModules))
+                                {
+                                    FContextTickableManager.GetInstance().ThreadTick();
+                                    base.EndFrameModules();
+                                }
+
+                                this.TaskCollector.Tick();
+                            }
+                            GfxDevice?.EndFrame();
+                        }
+                        if (bCapturing)
+                            GfxDevice.RenderQueue.EndFrameCapture();
+                    }
 
                     using (new Profiler.TimeScopeHelper(ScopeInputSystem))
                     {
@@ -653,7 +694,10 @@ namespace EngineNS
 
                     var t2 = Support.TtTime.HighPrecision_GetTickCount();
                     var delta = (int)((t2 - t1) / 1000);
-                    var idleTime = Config.Interval - delta;
+                    var frameInterval = Config.Interval;
+                    if (suspendForInvisibleWindow)
+                        frameInterval = Math.Max(frameInterval, Config.InvisibleWindowInterval);
+                    var idleTime = frameInterval - delta;
                     if (idleTime > 0)
                     {
                         using (new Profiler.TimeScopeHelper(ScopeSleep))
@@ -686,6 +730,37 @@ namespace EngineNS
                 this.Tracer.EndFrame(frame);
             }
         }
+        private bool ShouldSuspendForInvisibleWindow()
+        {
+            if (Config?.ReduceWorkWhenWindowInvisible != true)
+                return false;
+            if (GfxDevice?.SlateApplication == null)
+                return false;
+            var nativeWindowManager = NativeWindowManager;
+            if (nativeWindowManager.HasNativeWindows == false)
+                return false;
+            var hasRenderableWindow = nativeWindowManager.HasRenderableNativeWindow();
+            if (nativeWindowManager.HasSeenRenderableNativeWindow == false)
+                return false;
+            if (hasRenderableWindow && nativeWindowManager.HasVisibleNativeWindowForWorkload())
+            {
+                InvisibleWindowBeginTickUS = -1;
+                return false;
+            }
+
+            if (InvisibleWindowBeginTickUS < 0)
+            {
+                InvisibleWindowBeginTickUS = CurrentTickCountUS;
+                return false;
+            }
+            return CurrentTickCountUS - InvisibleWindowBeginTickUS >= 500 * 1000;
+        }
+        private void TickInvisibleWindowFrame()
+        {
+            ThreadMain.TickAwaitEvent();
+            EventPoster.TickPostTickSyncEvents(Support.TtTime.GetTickCount());
+            TaskCollector.Tick();
+        }
         public void PostQuitMessage()
         {
             Bricks.Input.TtInputSystem.PostQuitMessage();
@@ -712,6 +787,7 @@ namespace EngineNS
             CoreSDK.FinalF2MManager();
             RootFormManager.ClearRootForms();
 
+            NativeWindowManager.Cleanup();
             TtObjectPoolManager.Instance.Cleanup();
             base.CleanupModules();
 
@@ -739,6 +815,8 @@ namespace EngineNS
         }
     }
 }
+
+
 
 
 

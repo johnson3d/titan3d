@@ -89,6 +89,9 @@ namespace EngineNS.GamePlay.Scene
         float SnapGridSize = 10.0f; //1,10,50... GEditor->GetGridSize();
         float mEditor3DGridFade = 0.5f;
         float mEditor2DGridFade = 0.5f;
+        public double GridHeight { get; set; } = 0;
+        public double GridRadius { get; set; } = 100000;
+        public float GridFade { get; set; } = 0.5f;
         //private static RHI.FNameVarIndex ShaderIdx_SnapTile = new RHI.FNameVarIndex("SnapTile");
         //private static RHI.FNameVarIndex ShaderIdx_GridColor = new RHI.FNameVarIndex("GridColor");
         //private static RHI.FNameVarIndex ShaderIdx_UVMin = new RHI.FNameVarIndex("UVMin");
@@ -117,12 +120,12 @@ namespace EngineNS.GamePlay.Scene
             float Darken = 0.5f;
             if (bIsPerspective)
             {
-                var gridColor = new EngineNS.Vector4(0.6f * Darken, 0.6f * Darken, 0.6f * Darken, mEditor3DGridFade);
+                var gridColor = new EngineNS.Vector4(0.6f * Darken, 0.6f * Darken, 0.6f * Darken, MathHelper.Min(mEditor3DGridFade, GridFade));
                 mGridlineMaterial.PerMaterialCBuffer.SetValue("GridColor", in gridColor);
             }
             else
             {
-                var gridColor = new EngineNS.Vector4(0.6f * Darken, 0.6f * Darken, 0.6f * Darken, mEditor2DGridFade);
+                var gridColor = new EngineNS.Vector4(0.6f * Darken, 0.6f * Darken, 0.6f * Darken, MathHelper.Min(mEditor2DGridFade, GridFade));
                 mGridlineMaterial.PerMaterialCBuffer.SetValue("GridColor", in gridColor);
             }
 
@@ -135,7 +138,7 @@ namespace EngineNS.GamePlay.Scene
             ObjectToWorld.Translation = new DVector3(mPreCameraPos.X, 0, mPreCameraPos.Z);
 
             // good enough to avoid the AMD artifacts, horizon still appears to be a line
-            double Radii = 100000;
+            double Radii = GridRadius;
             if (bIsPerspective)
             {
                 // the higher we get the larger we make the geometry to give the illusion of an infinite grid while maintains the precision nearby
@@ -159,7 +162,7 @@ namespace EngineNS.GamePlay.Scene
             //mGridlineMaterial.PerMaterialCBuffer.SetValue("UVMin", UVMin.AsSingleVector());
             //mGridlineMaterial.PerMaterialCBuffer.SetValue("UVMax", UVMax.AsSingleVector());
 
-            var camPos = new DVector3(mPreCameraPos.X, 0, mPreCameraPos.Z);
+            var camPos = new DVector3(mPreCameraPos.X, GridHeight, mPreCameraPos.Z);
             if (this.Placement.Position != camPos)
             {
                 this.Placement.Position = camPos;

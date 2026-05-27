@@ -9,6 +9,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_tables.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ImGuiFileDialog.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_filedialog.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)implot\implot.cpp">
+      <Filter>implot</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)implot\implot_items.cpp">
+      <Filter>implot</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)misc\freetype\imgui_freetype.cpp">
       <Filter>freetype</Filter>
     </ClCompile>
@@ -34,6 +40,12 @@
       <Filter>dirent</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_markdown.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)implot\implot.h">
+      <Filter>implot</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)implot\implot_internal.h">
+      <Filter>implot</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="freetype">
@@ -44,6 +56,9 @@
     </Filter>
     <Filter Include="dirent">
       <UniqueIdentifier>{abde7f31-35e6-4e82-a3fd-3ddae9a5c4d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="implot">
+      <UniqueIdentifier>{4302b0b5-2a77-4126-b6b1-477d7c3fb2f7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -58,6 +73,9 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)ColorTextEditor\README.md">
       <Filter>ColorTextEditor</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)implot\LICENSE">
+      <Filter>implot</Filter>
     </None>
   </ItemGroup>
 </Project>

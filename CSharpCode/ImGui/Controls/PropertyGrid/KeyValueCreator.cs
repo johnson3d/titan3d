@@ -16,6 +16,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public bool CreateFinished = false;
         public unsafe void OnDraw(string ctrlId)
         {
+            EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
             if (ImGuiAPI.BeginPopup(ctrlId, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
             {
                 if (ImGuiAPI.CollapsingHeader("Key", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
@@ -70,6 +71,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 }
                 ImGuiAPI.EndPopup();
             }
+            EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
         }
     }
 }

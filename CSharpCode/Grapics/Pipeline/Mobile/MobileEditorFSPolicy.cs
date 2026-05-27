@@ -225,8 +225,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             base.Tick(world, onRemove);
 
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-            if (this.ShadowMode == EShadowMode.Csm)
-                mShadowMapNode?.Tick(world, this, cmdlist, true);
+            mShadowMapNode?.Tick(world, this, cmdlist, true);
 
             GpuSceneNode?.Tick(world, this, cmdlist, true);
 
@@ -254,8 +253,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public unsafe override void TickSync()
         {
-            if (this.ShadowMode == EShadowMode.Csm)
-                mShadowMapNode?.TickSync(this);
+            mShadowMapNode?.TickSync(this);
 
             GpuSceneNode?.TickSync(this);
 

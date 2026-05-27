@@ -3,22 +3,19 @@
 #include "../../CBuffer/VarBase_PerCamera.cginc"
 #include "../../Inc/SystemEnumDefine.cginc"
 
-#define GBUFFER_NORMAL_VIEWSPACE 0
-
-struct GBufferData
+struct FGBufferData : FGBufferDataBase
 {
-	half3	MtlColorRaw;
-	float3	WorldNormal;
-	half	Metallicity;
-	// half	Emissive;
-	half	Specular;	
-    half	AO;
-	half	Roughness;	
-	int		ObjectFlags_2Bit;
-    int		RenderFlags_10Bit;
-	half2	MotionVector;
-	half2 	CustomData;	
-	
+    bool HasCustomData_10Bit()
+    {
+        return USE_OCTAHEDRON_NORMAL != 0;
+    }
+    // --- Subsurface Profile accessors ---
+    // For Subsurface pixels, CustomData stores profile index (0~255 normalized to 0~1)
+    int GetSubsurfaceProfileIndex()
+    {
+        return (int)(CustomData * 255.0h + 0.5h);
+    }
+
     void SetDisableEnvColor()
     {
         RenderFlags_10Bit |= ERenderFlags_DisableEnvColor;
@@ -49,51 +46,42 @@ struct GBufferData
     {
         return normalize(mul(float4(WorldNormal.xyz, 0), CameraViewMatrix).xyz);
     }
-
-    static float3 EncodeNormalXYZ(float3 n)
-	{
-        return float3(n.xyz * 0.5f + 0.5f);
-    }
-
-    static float3 DecodeNormalXYZ(float3 enc)
-	{
-		return enc.xyz * 2 - 1;
-	}
+    
 	bool IsAcceptShadow()
 	{
-        return (ObjectFlags_2Bit & EObjectFlags_2Bit_AcceptShadow) != 0;
+        return (RenderFlags_10Bit & ERenderFlags_AcceptShadow) != 0;
     }
 
 	bool IsUnlit()
 	{
-		//return GBuffer.ObjectFlags_2Bit == 1;
-        return (ObjectFlags_2Bit & EObjectFlags_2Bit_UnLight) != 0;
+        return (RenderFlags_10Bit & ERenderFlags_UnLight) != 0;
     }
     void SetUnlit(bool bUnlit)
     {
         if (bUnlit)
         {
-            ObjectFlags_2Bit |= EObjectFlags_2Bit_UnLight;
+            RenderFlags_10Bit |= ERenderFlags_UnLight;
         }
         else
         {
-            ObjectFlags_2Bit &= ~EObjectFlags_2Bit_UnLight;
+            RenderFlags_10Bit &= ~ERenderFlags_UnLight;
         }
     }
 
 	void EncodeGBuffer(out float4 rt0, out float4 rt1, out float4 rt2, out float4 rt3)
 	{
 		rt0.rgb = MtlColorRaw.rgb;
-		rt0.a = CustomData.r;
+		rt0.a = CustomData;
 
-		#if GBUFFER_NORMAL_VIEWSPACE == 1
-        float2 ViewSpaceNorm = GetViewspaceNormal().xy * 0.5f + 0.5f;
-        rt1.rg = ViewSpaceNorm;
-        rt1.b = ((half) RenderFlags_10Bit) / 1023.0h; //asfloat(RenderFlags_10Bit); //
+		#if USE_OCTAHEDRON_NORMAL == 0
+            rt1.rgb = (half3)EncodeNormalXYZ(WorldNormal.xyz);
+            rt3.b = ((half) RenderFlags_10Bit) / 1023.0h;
 		#else
-		rt1.rgb = (half3)EncodeNormalXYZ(WorldNormal.xyz);
-		#endif	
-        rt1.w = ((half) ObjectFlags_2Bit) / 3.0h; //asfloat(ObjectFlags_2Bit); //
+		    rt1.rg = (half2)OctEncode(WorldNormal.xyz);
+            rt1.b = ((half) RenderFlags_10Bit) / 1023.0h;
+            rt3.b = ((half) CustomData_10Bit) / 1023.0h;
+		#endif
+		rt1.w = Mask;
 
 		rt2.r = Metallicity;
 		rt2.g = Specular;
@@ -101,35 +89,32 @@ struct GBufferData
     	rt2.a = AO;
 
 		rt3.rg = EncodeMotionVector(MotionVector.xy);
-		rt3.b = ((half) RenderFlags_10Bit) / 1023.0h; //asfloat(RenderFlags_10Bit); //
-		rt3.a = CustomData.g;
-	}
+        rt3.a = saturate(Opacity);
+    }
 
 	void DecodeGBuffer(half4 rt0, half4 rt1, half4 rt2, half4 rt3)
 	{
 		MtlColorRaw.rgb = rt0.rgb;
-
-//		if (any(rt1.xyz) != 0)
-//      {
-		#if GBUFFER_NORMAL_VIEWSPACE == 1
-            float3 vn;
-            vn.xy = rt1.xy * 2.0f - 1.0f;
-            vn.z = -sqrt(saturate(1.0f - dot(vn.xy, vn.xy)));
-            WorldNormal.xyz = (half3)mul(float4(vn.xyz, 0), CameraViewInverse).xyz;
-            RenderFlags_10Bit = (int) (rt1.z * 1024.0h); //asint(rt1.z); //
+        
+		#if USE_OCTAHEDRON_NORMAL == 0
+            WorldNormal.xyz = (half3) DecodeNormalXYZ(rt1.rgb).xyz;
+            RenderFlags_10Bit = (int) (rt3.b * 1023.0h + 0.5h);
+            CustomData_10Bit = 0;
 		#else
-            WorldNormal.xyz = DecodeNormalXYZ(rt1.xyz);
-			RenderFlags_10Bit = 0;
+            WorldNormal.xyz = OctDecode(rt1.rg);
+            RenderFlags_10Bit = (int) (rt1.b * 1023.0h + 0.5h);
+            CustomData_10Bit = (int) (rt3.b * 1023.0h + 0.5h);
 		#endif
-//      }
-        ObjectFlags_2Bit = (int) (rt1.w * 3.0h); //asint(rt1.w); //
-
+        Mask = rt1.a;
+        
 		Metallicity = rt2.r;
 		Specular = rt2.g;
 		Roughness = rt2.b;
         AO = rt2.a;
 
         MotionVector.xy = (half2)DecodeMotionVector(rt3.rg);
+        CustomData = rt0.a;
+        Opacity = rt3.a;
     }
 };
 

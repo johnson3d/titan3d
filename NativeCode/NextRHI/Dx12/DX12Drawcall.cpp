@@ -224,13 +224,13 @@ namespace NxRHI
 		
 		if (cbvsrvuavDescriptors.Dest.size() > 0)
 		{
-			mCbvSrvUavHeap.CheckCompletion();
+			//mCbvSrvUavHeap.CheckCompletion();
 			device->mDevice->CopyDescriptors((UINT)cbvsrvuavDescriptors.Dest.size(), cbvsrvuavDescriptors.Dest.data(), cbvsrvuavDescriptors.Sizes.data(),
 				(UINT)cbvsrvuavDescriptors.Src.size(), cbvsrvuavDescriptors.Src.data(), cbvsrvuavDescriptors.Sizes.data(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		}
 		if (samplerDescriptors.Dest.size() > 0)
 		{
-			mSamplerHeap.CheckCompletion();
+			//mSamplerHeap.CheckCompletion();
 			device->mDevice->CopyDescriptors((UINT)samplerDescriptors.Dest.size(), samplerDescriptors.Dest.data(), samplerDescriptors.Sizes.data(),
 				(UINT)samplerDescriptors.Src.size(), samplerDescriptors.Src.data(), samplerDescriptors.Sizes.data(), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 		}

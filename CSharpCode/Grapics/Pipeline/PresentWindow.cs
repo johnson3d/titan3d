@@ -16,9 +16,19 @@ namespace EngineNS.Graphics.Pipeline
         public bool IsCreatedByImGui = false;
         public bool IsClosed = false;
         public NxRHI.TtSwapChain SwapChain { get; set; }
+        private bool mHasPendingResize = false;
+        private uint mPendingResizeWidth = 0;
+        private uint mPendingResizeHeight = 0;
+        public bool CanRender
+        {
+            get => SwapChain != null && IsRenderable;
+        }
         
         public void BeginFrame()
         {
+            if (CanRender == false)
+                return;
+            ApplyPendingResize();
             SwapChain.BeginFrame();
         }
         public void EndFrame()
@@ -54,6 +64,9 @@ namespace EngineNS.Graphics.Pipeline
             scDesc.Height = (uint)size.Y;
             scDesc.OutputWindow = HWindow.ToPointer();
             SwapChain = TtEngine.Instance.GfxDevice.RenderContext.CreateSwapChain(in scDesc);
+            mHasPendingResize = false;
+            mPendingResizeWidth = scDesc.Width;
+            mPendingResizeHeight = scDesc.Height;
         }
         public EPixelFormat GetSwapchainFormat()
         {
@@ -88,8 +101,23 @@ namespace EngineNS.Graphics.Pipeline
 
             if (SwapChain == null)
                 return;
-            TtEngine.Instance.GfxDevice.RenderQueue.Flush(true);
-            SwapChain.OnResize(x, y);
+            if (x < 1 || y < 1)
+                return;
+
+            var width = (uint)x;
+            var height = (uint)y;
+            if (width < 1 || height < 1)
+                return;
+
+            if (SwapChain.mCoreObject.Desc.Width == width && SwapChain.mCoreObject.Desc.Height == height)
+            {
+                mHasPendingResize = false;
+                return;
+            }
+
+            mPendingResizeWidth = width;
+            mPendingResizeHeight = height;
+            mHasPendingResize = true;
             //TtEngine.Instance.EventPoster.PostTickSyncEvent(() =>
             //{
             //    if (SwapChain == null)
@@ -98,6 +126,28 @@ namespace EngineNS.Graphics.Pipeline
             //    SwapChain.OnResize(x, y);
             //    return true;
             //});
+        }
+        private void ApplyPendingResize()
+        {
+            if (mHasPendingResize == false || SwapChain == null)
+                return;
+            if (mPendingResizeWidth < 1 || mPendingResizeHeight < 1)
+            {
+                mHasPendingResize = false;
+                return;
+            }
+            if (SwapChain.mCoreObject.Desc.Width == mPendingResizeWidth && SwapChain.mCoreObject.Desc.Height == mPendingResizeHeight)
+            {
+                mHasPendingResize = false;
+                return;
+            }
+
+            var width = mPendingResizeWidth;
+            var height = mPendingResizeHeight;
+            mHasPendingResize = false;
+
+            TtEngine.Instance.GfxDevice.RenderQueue.Flush(true);
+            SwapChain.OnResize(width, height);
         }
     }
 }

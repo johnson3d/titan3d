@@ -109,7 +109,7 @@ namespace EngineNS.GamePlay
                     {
                         min = min + pos;
                         max = max + pos;
-                        drawlist.AddImage(showTexture, in min, in max, in uv1, in uv2, 0x01FFFFFF);// 0xFFFFFFFF);
+                        drawlist.AddImage(showTexture, in min, in max, in uv1, in uv2, 0xFFFFFFFF);
                     }
                 }
             }

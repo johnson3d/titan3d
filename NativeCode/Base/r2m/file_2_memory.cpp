@@ -52,7 +52,7 @@ VResPtr VFile2Memory::Ptr(UINT64 offset , UINT64 size)
 	GPtrRef++;
 	if (mPtrRef >= 1)
     {
-        VFX_LTRACE(ELTT_Error,"%s(%d):F2M(%s) Ptr Refcount is not zero\r\n", __FILE__, __LINE__, mName.c_str());
+        VFX_LTRACE(ELTT_Error,"%s(%d):F2M(%s) Ptr Refcount is not zero\r\n", __FILE__, __LINE__, this->Name());
     }
 	
 	++mPtrRef;
@@ -68,9 +68,9 @@ VResPtr VFile2Memory::Ptr(UINT64 offset , UINT64 size)
 
 		if (mFile.IsFileOpened() == false)
 		{
-			if (false == mFile.Open(mName.c_str(), VFile::modeRead))
+			if (false == mFile.Open(nullptr, VFile::modeRead))
 			{
-				VFX_LTRACE(ELTT_Error, "F2M Ptr [%s] open faile, someone deleted this file in runtime\r\n", mName.c_str());
+				VFX_LTRACE(ELTT_Error, "F2M Ptr [%s] open faile, someone deleted this file in runtime\r\n", this->Name());
 				return NULL;
 			}
 		}
@@ -130,9 +130,9 @@ UINT64 VFile2Memory::Length() const
 {
 	if (mFile.GetLength() == 0 && mFile.IsFileOpened() == false)
 	{
-		if (false == ((ViseFile*)&mFile)->Open(mName.c_str(), VFile::modeRead))
+		if (false == ((ViseFile*)&mFile)->Open(nullptr, VFile::modeRead))
 		{
-			VFX_LTRACE(ELTT_Error, "F2M Ptr [%s] open faile, someone deleted this file in runtime\r\n", mName.c_str());
+			VFX_LTRACE(ELTT_Error, "F2M Ptr [%s] open faile, someone deleted this file in runtime\r\n", this->Name());
 			return 0;
 		}
 		else
@@ -148,16 +148,16 @@ UINT64 VFile2Memory::Length() const
 
 LPCSTR VFile2Memory::Name() const
 {
-	return mName.c_str();
+	return mFile.GetFileName().c_str();
 }
 
 vBOOL VFile2Memory::Create(LPCSTR pszFile,vBOOL bShareFile)
 {
 	Close();
 
-	mName = pszFile;
+	mFile.SetFileName(pszFile);
 
-	return std::filesystem::exists(mName) ? TRUE : FALSE;
+	return std::filesystem::exists(pszFile) ? TRUE : FALSE;
 }
 
 void VFile2Memory::Close()

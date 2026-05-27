@@ -220,33 +220,39 @@ namespace EngineNS.Editor.Forms
                                 //mRpcProfilerData = Profiler.TtRpcProfiler_RpcCaller.GetProfilerData(i, new());
                                 mRpcProfilerData = TtEngine.Instance.RpcModule.RpcManager.RpcProfiler.RPC_GetProfilerData(i);
                             }
+                            EGui.UIProxy.StyleConfig.Instance.PushPanelChildStyle(EGui.UIProxy.StyleConfig.Instance.SecondPanelBackground);
                             if (ImGuiAPI.BeginChild("TimeScope", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                             {
                                 if (ImGuiAPI.BeginTabBar("ShowMode", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
                                 {
                                     if (ImGuiAPI.BeginTabItem("ByList", null, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
                                     {
+                                        EGui.UIProxy.StyleConfig.Instance.PushPanelChildStyle(EGui.UIProxy.StyleConfig.Instance.PanelBackground);
                                         if (ImGuiAPI.BeginChild("ShowList", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                                         {
                                             DrawByList(cmdlst, i);
                                         }
                                         ImGuiAPI.EndChild();
+                                        EGui.UIProxy.StyleConfig.Instance.PopPanelChildStyle();
                                         ImGuiAPI.EndTabItem();
                                     }
 
                                     if (ImGuiAPI.BeginTabItem("ByTree", null, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
                                     {
+                                        EGui.UIProxy.StyleConfig.Instance.PushPanelChildStyle(EGui.UIProxy.StyleConfig.Instance.PanelBackground);
                                         if (ImGuiAPI.BeginChild("ShowTree", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_HorizontalScrollbar))
                                         {
                                             DrawByTree(cmdlst, i);
                                         }
                                         ImGuiAPI.EndChild();
+                                        EGui.UIProxy.StyleConfig.Instance.PopPanelChildStyle();
                                         ImGuiAPI.EndTabItem();
                                     }
                                     ImGuiAPI.EndTabBar();
                                 }
                             }
                             ImGuiAPI.EndChild();
+                            EGui.UIProxy.StyleConfig.Instance.PopPanelChildStyle();
 
                             ImGuiAPI.EndTabItem();
                         }
@@ -261,9 +267,21 @@ namespace EngineNS.Editor.Forms
         }
         private void DrawByList(ImDrawList cmdlst, string i)
         {
-            if (ImGuiAPI.BeginTable("ByList", 5, ImGuiTableFlags_.ImGuiTableFlags_Resizable | ImGuiTableFlags_.ImGuiTableFlags_ScrollY, in Vector2.Zero, 0.0f))
+            var tableFlags = ImGuiTableFlags_.ImGuiTableFlags_Resizable |
+                ImGuiTableFlags_.ImGuiTableFlags_ScrollY |
+                ImGuiTableFlags_.ImGuiTableFlags_RowBg |
+                ImGuiTableFlags_.ImGuiTableFlags_BordersInnerV |
+                ImGuiTableFlags_.ImGuiTableFlags_BordersOuterH |
+                ImGuiTableFlags_.ImGuiTableFlags_SizingStretchProp;
+            if (ImGuiAPI.BeginTable("ByList", 5, tableFlags, in Vector2.Zero, 0.0f))
             {
                 var startY = ImGuiAPI.GetItemRectMax().Y;
+                ImGuiAPI.TableSetupScrollFreeze(0, 1);
+                ImGuiAPI.TableSetupColumn("Name", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthStretch, 0, 0);
+                ImGuiAPI.TableSetupColumn("AvgTime", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed, 92, 0);
+                ImGuiAPI.TableSetupColumn("AvgHit", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed, 82, 0);
+                ImGuiAPI.TableSetupColumn("MaxTime", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed, 92, 0);
+                ImGuiAPI.TableSetupColumn("Parent", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthStretch, 0, 0);
                 ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_Headers, 0);
                 ImGuiAPI.TableSetColumnIndex(0);
                 ImGuiAPI.Text("Name");
@@ -312,7 +330,7 @@ namespace EngineNS.Editor.Forms
                         {
                             var textSize = ImGuiAPI.CalcTextSize(j.ShowName, false, 0);
                             var end = new Vector2(start.X + ImGuiAPI.GetWindowContentRegionWidth(), start.Y + textSize.Y);
-                            cmdlst.AddRectFilled(in start, in end, 0x80808080, 1, ImDrawFlags_.ImDrawFlags_None);
+                            cmdlst.AddRectFilled(in start, in end, EGui.UIProxy.StyleConfig.Instance.TVHeaderActive, 1, ImDrawFlags_.ImDrawFlags_None);
                         }
                     }
 
@@ -335,12 +353,13 @@ namespace EngineNS.Editor.Forms
                         PopItemMenu(i, j, "MaxTime");
                     }
                     ImGuiAPI.TableSetColumnIndex(4);
-                    Vector4 clr = new Vector4(0.5f, 0.69f, 0.93f, 1);
                     if (j.Callers != null)
                     {
                         foreach (var k in j.Callers)
                         {
-                            ImGuiAPI.TextColored(in clr, $"[{k.Value}]" + k.Key);
+                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.LinkStringColor);
+                            ImGuiAPI.Text($"[{k.Value}]" + k.Key);
+                            ImGuiAPI.PopStyleColor(1);
                             if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
                             {
                                 ImGuiAPI.SetTooltip(k.Key);
@@ -358,7 +377,9 @@ namespace EngineNS.Editor.Forms
                     }
                     else
                     {
-                        ImGuiAPI.TextColored(in clr, "null");
+                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextDisableColor);
+                        ImGuiAPI.Text("null");
+                        ImGuiAPI.PopStyleColor(1);
                     }
                     if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
                     {
@@ -435,12 +456,16 @@ namespace EngineNS.Editor.Forms
                         }
                     }
                     var txt = $"[Time={TimeInfo.AvgTime},Hit={TimeInfo.AvgHit},Ratio={ratio}]";
-                    ImGuiAPI.TextColored(Color4b.DarkGoldenrod.ToColor4Float(), txt);
+                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.WarningStringColor);
+                    ImGuiAPI.Text(txt);
+                    ImGuiAPI.PopStyleColor(1);
                     if (this.Children.Count > 0)
                     {
                         txt = $"NC={NotCountedTime}";
                         ImGuiAPI.SameLine(0, -1);
-                        ImGuiAPI.TextColored(Color4b.OrangeRed.ToColor4Float(), txt);
+                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.ErrorStringColor);
+                        ImGuiAPI.Text(txt);
+                        ImGuiAPI.PopStyleColor(1);
                     }
                     
                     return ret;
@@ -596,6 +621,7 @@ namespace EngineNS.Editor.Forms
                     {
                         OnDrawMenu = () =>
                         {
+                            EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
                             if (ImGuiAPI.BeginPopupContextWindow(null, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
                             {
                                 mMenuShow = true;
@@ -615,6 +641,7 @@ namespace EngineNS.Editor.Forms
                                 OnDrawMenu = null;
                                 mMenuShow = false;
                             }
+                            EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
                         };
                     }
                     break;
@@ -628,6 +655,7 @@ namespace EngineNS.Editor.Forms
                         OnDrawMenu = () =>
                         {
                             ImGuiAPI.OpenPopup($"ScopeGotoSource", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                            EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
                             if (ImGuiAPI.BeginPopupContextWindow("ScopeGotoSource", ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
                             {
                                 mMenuShow = true;
@@ -648,6 +676,7 @@ namespace EngineNS.Editor.Forms
                                 OnDrawMenu = null;
                                 mMenuShow = false;
                             }
+                            EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
                             ImGuiAPI.CloseCurrentPopup();
                         };
                     }

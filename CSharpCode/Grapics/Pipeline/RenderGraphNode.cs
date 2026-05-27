@@ -29,6 +29,10 @@ namespace EngineNS.Graphics.Pipeline
             {
                 return (HostNode as TtFindNode).GetReferNode() as T;
             }
+            else if(HostNode is TtPolyLineNode)
+            {
+                return (HostNode as TtPolyLineNode).GetReferNode() as T;
+            }
             else
             {
                 return HostNode as T;
@@ -40,6 +44,10 @@ namespace EngineNS.Graphics.Pipeline
         public TtRenderGraphLinker FindInLinker()
         {
             return HostNode.RenderGraph.FindInLinker(this);
+        }
+        public List<TtRenderGraphLinker> FindOutLinkers()
+        {
+            return HostNode.RenderGraph.FindOutLinkers(this);
         }
         public static TtRenderGraphPin CreateInput(string name, NxRHI.EBufferType types)
         {

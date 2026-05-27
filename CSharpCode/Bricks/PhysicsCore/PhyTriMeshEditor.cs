@@ -87,8 +87,7 @@ namespace EngineNS.Bricks.PhysicsCore
             sphere.Radius = radius;
             policy.DefaultCamera.AutoZoom(in sphere);
 
-            var gridNode = await GamePlay.Scene.TtGridNode.AddGridNode(viewport.World, viewport.World.Root);
-            gridNode.ViewportSlate = this.PreviewViewport;
+            await PreviewViewport.CreateStudioEnvironment(aabb, createFloor: false);
 
             return false;
         }

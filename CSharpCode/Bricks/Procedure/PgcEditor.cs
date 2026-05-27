@@ -84,7 +84,7 @@ namespace EngineNS.Bricks.Procedure
             GpuSystem = NxRHI.TtGpuSystem.CreateGpuSystem(NxRHI.ERhiType.RHI_D3D11, in gpuDesc);
             NxRHI.FGpuDeviceDesc desc = new NxRHI.FGpuDeviceDesc();
             GpuDevice = GpuSystem.CreateGpuDevice(in desc);
-
+            GpuDevice.InitShaderGlobalEnv(TtEngine.Instance);
             return true;
         }
         protected async Thread.Async.TtTask<bool> Initialize_PreviewMaterial(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
@@ -95,8 +95,7 @@ namespace EngineNS.Bricks.Procedure
 
             (viewport as Editor.TtPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
-            var gridNode = await GamePlay.Scene.TtGridNode.AddGridNode(viewport.World, viewport.World.Root);
-            gridNode.ViewportSlate = this.PreviewViewport;
+            await PreviewViewport.CreateStudioEnvironment(new BoundingBox(10, 1, 10), createFloor: false);
 
             PreviewRoot = await viewport.World.Root.SpawnSceneActor<GamePlay.Scene.TtSubTreeRootNode>(viewport.World.Root, null, 
                 new GamePlay.Scene.TtNodeData() { Name = "PreviewRoot" },

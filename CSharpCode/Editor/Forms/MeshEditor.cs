@@ -194,34 +194,11 @@ namespace EngineNS.Editor.Forms
             sphere.Radius = radius;
             policy.DefaultCamera.AutoZoom(in sphere);
 
-            {
-                var meshCenter = aabb.GetCenter();
-                var meshSize = aabb.GetSize() * PlaneScale;
-                var maxLength = MathHelper.Max(meshSize.X, meshSize.Z);
-                meshSize.X = meshSize.Z = maxLength;
-                meshSize.Y = aabb.GetSize().Y * 0.05f;
-                var boxStart = meshCenter - meshSize * 0.5f;
-                boxStart.Y -= aabb.GetSize().Y * 0.5f + meshSize.Y * 0.5f + 0.001f;
-                var box = Graphics.Mesh.TtMeshDataProvider.MakePlane(meshSize.X, meshSize.Z).ToMesh();
+            var studioContext = await PreviewViewport.CreateStudioEnvironment(aabb, PlaneScale);
+            PlaneMeshNode = studioContext?.FloorNode;
+            GridNode = studioContext?.GridNode;
 
-                var PlaneMesh = new Graphics.Mesh.TtRenderMesh();
-                var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
-                tMaterials[0] = await RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine).GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
-                PlaneMesh.Initialize(box, tMaterials,
-                    Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
-                PlaneMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), PlaneMesh, new DVector3(0, boxStart.Y, 0), Vector3.One, Quaternion.Identity);
-                PlaneMeshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
-                PlaneMeshNode.NodeData.Name = "Plane";
-                PlaneMeshNode.IsAcceptShadow = true;
-                PlaneMeshNode.IsCastShadow = false;
-                PlaneMeshNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleAlways);
-            }
-
-            GridNode = await GamePlay.Scene.TtGridNode.AddGridNode(viewport.World, viewport.World.Root);
-            GridNode.ViewportSlate = this.PreviewViewport;
-            this.RenderPolicy.LookNodeName = "DirLightingNode";
-
-            await InitializeLightEnv(PreviewViewport, radius);
+            await InitializeLightEnv(PreviewViewport, studioContext?.Radius ?? radius);
 
             return true;
         }

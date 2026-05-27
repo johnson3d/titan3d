@@ -24,23 +24,25 @@ namespace EngineNS.EGui.UIProxy
         public static unsafe enResult Draw(string title, string inputInfo, ref string inputValue, Func<string, string> inputValueMatch)
         {
             enResult retValue = enResult.None;
+            StyleConfig.Instance.PushPopupStyle();
             if(ImGuiAPI.BeginPopupModal(title, (bool*)0, ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize))
             {
                 ImGuiAPI.AlignTextToFramePadding();
                 ImGuiAPI.Text(inputInfo);
                 ImGuiAPI.SameLine(0, -1);
-                if(string.IsNullOrEmpty(mErrorString))
-                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, 0xFF0000FF);
+                if(!string.IsNullOrEmpty(mErrorString))
+                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, StyleConfig.Instance.ErrorStringColor);
                 ImGuiAPI.InputText("##in_inputValue", ref inputValue);
-                if(string.IsNullOrEmpty(mErrorString))
+                if(!string.IsNullOrEmpty(mErrorString))
                     ImGuiAPI.PopStyleColor(1);
                 mErrorString = inputValueMatch(inputValue);
                 if(!string.IsNullOrEmpty(mErrorString))
                 {
-                    var clr = new Vector4(1, 0, 0, 1);
+                    var clr = StyleConfig.ToColor4(StyleConfig.Instance.ErrorStringColor);
                     ImGuiAPI.TextColored(in clr, mErrorString);
                 }
 
+                ImGuiAPI.Separator();
                 if(ImGuiAPI.Button("OK", in Vector2.Zero) && string.IsNullOrEmpty(mErrorString))
                 {
                     retValue = enResult.OK;
@@ -56,6 +58,7 @@ namespace EngineNS.EGui.UIProxy
 
                 ImGuiAPI.EndPopup();
             }
+            StyleConfig.Instance.PopPopupStyle();
             return retValue;
         }
     }

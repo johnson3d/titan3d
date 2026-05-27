@@ -84,6 +84,13 @@ namespace EngineNS.Graphics.Mesh
             public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
             {
                 mDir = dir;
+                MeshImportSettings.Clear();
+                mImportSourceQueue.Clear();
+                mPendingImportTask = null;
+                mPendingImportSource = "";
+                mPendingImportMessage = "";
+                mImportError = "";
+                MeshType = "FromFile";
                 await PGAsset.Initialize();
                 //mDesc.Desc.SetDefault();
                 //PGAsset.SingleTarget = mDesc;

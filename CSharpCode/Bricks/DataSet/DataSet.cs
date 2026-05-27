@@ -77,6 +77,7 @@ namespace EngineNS.Bricks.DataSet
                 bool retValue = false;
                 var visible = true;
                 ImGuiAPI.SetNextWindowSize(new Vector2(200, 500), ImGuiCond_.ImGuiCond_FirstUseEver);
+                EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
                 if (ImGuiAPI.BeginPopupModal($"Import DataSet", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var saved = TypeSlt.SelectedType;
@@ -147,6 +148,7 @@ namespace EngineNS.Bricks.DataSet
 
                     ImGuiAPI.EndPopup();
                 }
+                EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
                 if (!visible)
                     retValue = true;
                 return retValue;

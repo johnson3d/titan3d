@@ -192,7 +192,7 @@ namespace EngineNS.NxRHI
                 return;
             bool isCubemap = Srv.PicDesc.CubeFaces == 6;
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            TtShadingEnv shading = null;
+            TtGraphicsShadingEnv shading = null;
             if(isCubemap)
                 shading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<EngineNS.Editor.Forms.TtSlateTextureCubeViewerShading>();
             else
@@ -218,7 +218,7 @@ namespace EngineNS.NxRHI
             cmdParams.MipLevel = 0;
             var cbBinder = effect.ShaderEffect.FindBinder("cbShadingEnv");
             cmdParams.CBuffer = rc.CreateCBV(cbBinder);
-            cmdParams.Drawcall.BindShaderEffect(effect);
+            cmdParams.Drawcall.BindShaderEffect(effect, effect.ShadingEnv);
             cmdParams.Drawcall.BindCBV(cbBinder.mCoreObject, cmdParams.CBuffer);
             cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, Srv);
             cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);

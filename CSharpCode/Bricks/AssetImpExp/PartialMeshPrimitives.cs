@@ -17,6 +17,14 @@ namespace EngineNS.Graphics.Mesh
     public class TtMeshImportSetting
     {
         [Category("FileInfo"), ReadOnly(true)]
+        public string SourceFile { get; set; } = "";
+        [Category("FileInfo"), ReadOnly(true)]
+        public string IntermediateFile { get; set; } = "";
+        [Category("FileInfo"), ReadOnly(true)]
+        public string MaterialManifest { get; set; } = "";
+        [Category("FileInfo"), ReadOnly(true)]
+        public string ImportMessage { get; set; } = "";
+        [Category("FileInfo"), ReadOnly(true)]
         public string FileName { get; set; } = "";
         [Category("FileInfo"), ReadOnly(true)]
         public string FileFormat { get; set; } = "";
@@ -43,6 +51,8 @@ namespace EngineNS.Graphics.Mesh
         [Category("ImportSetting")]
         public bool ApplyTransformToVertex { get; set; } = false;
         [Category("ImportSetting")]
+        public bool MergeMeshes { get; set; } = false;
+        [Category("ImportSetting")]
         public bool GenerateUMS { get; set; } = true;
         [Category("ImportSetting")]
         public bool JoinIdenticalVertices { get; set; } = true;
@@ -60,6 +70,17 @@ namespace EngineNS.Graphics.Mesh
         {
             //TtMeshImprotSetting MeshImprotSetting = new TtMeshImprotSetting();
             List<TtMeshImportSetting> MeshImportSettings = new List<TtMeshImportSetting>();
+            Queue<string> mImportSourceQueue = new Queue<string>();
+            System.Threading.Tasks.Task<TtMeshImportPendingResult> mPendingImportTask;
+            string mPendingImportSource = "";
+            string mPendingImportMessage = "";
+            string mImportError = "";
+            class TtMeshImportPendingResult
+            {
+                public string SourceFile;
+                public TtMeshImportSetting Setting;
+                public string Error;
+            }
             public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.TtContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
@@ -67,6 +88,7 @@ namespace EngineNS.Graphics.Mesh
                 var mFileDialog = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
                 var visible = true;
                 var retValue = false;
+                EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
                 if (ImGuiAPI.BeginPopupModal($"Import MeshPrimitives", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     if (ImGuiAPI.BeginCombo("MeshType", MeshType, ImGuiComboFlags_.ImGuiComboFlags_None))
@@ -106,9 +128,18 @@ namespace EngineNS.Graphics.Mesh
                     {
                         case "FromFile":
                             {
+                                UpdatePendingImportSource();
+                                if (!string.IsNullOrEmpty(ContentBrowser.CurrentImporterFile) &&
+                                    MeshImportSettings.Count == 0 &&
+                                    mPendingImportTask == null &&
+                                    mImportSourceQueue.Count == 0 &&
+                                    string.IsNullOrEmpty(mImportError))
+                                {
+                                    QueueImportSource(ContentBrowser.CurrentImporterFile);
+                                }
                                 //PGAsset.Target = null;
                                 var sz = new Vector2(-1, 0);
-                                if (ImGuiAPI.Button("Select File", in sz))
+                                if (string.IsNullOrEmpty(ContentBrowser.CurrentImporterFile) && ImGuiAPI.Button("Select File", in sz))
                                 {
                                     mFileDialog.OpenModalWithMutiSelect("ChooseFileDlgKey", "Choose File", ".*", ".", int.MaxValue - 1);
                                 }
@@ -122,48 +153,7 @@ namespace EngineNS.Graphics.Mesh
                                         for(int i = 0; i < count; ++i)
                                         {
                                             var path = mFileDialog.GetFilePathByIndex(i);
-                                            var meshImprotSetting = TtAssetImporter.CreateMeshImporter(path);
-                                            if (meshImprotSetting == null)
-                                            {
-                                                eErrorType = enErrorType.EmptyName;
-                                            }
-                                            else
-                                            {
-                                                if (i == 0)
-                                                {
-                                                    PGAsset.Target = meshImprotSetting;
-                                                    mName = IO.TtFileManager.GetPureName(path);
-                                                }
-                                                MeshImportSettings.Add(meshImprotSetting);
-                                            }
-                                            //TtMeshImportSetting meshImprotSetting = new TtMeshImportSetting();
-                                            //string filePath = mFileDialog.GetCurrentPath();
-                                            //if (!string.IsNullOrEmpty(path))
-                                            //{
-                                            //    TtAssetImporter AssetImporter = new TtAssetImporter();
-                                            //    var assetDescription = AssetImporter.PreImport(path);
-                                            //    if (assetDescription == null)
-                                            //    {
-                                            //        eErrorType = enErrorType.EmptyName;
-                                            //    }
-                                            //    else
-                                            //    {
-                                            //        meshImprotSetting.FileName = assetDescription.FileName;
-                                            //        meshImprotSetting.MeshesCount = assetDescription.MeshesCount;
-                                            //        meshImprotSetting.MeshesHaveScale = assetDescription.MeshesHaveScale;
-                                            //        meshImprotSetting.MeshesHaveTranslation = assetDescription.MeshesHaveTranslation;
-                                            //        meshImprotSetting.UpAxis = assetDescription.UpAxis;
-                                            //        meshImprotSetting.UnitScaleFactor = assetDescription.UnitScaleFactor;
-                                            //        meshImprotSetting.Generator = assetDescription.Generator;
-                                            //        meshImprotSetting.AssetImporter = AssetImporter;
-                                            //        if ( i == 0)
-                                            //        {
-                                            //            PGAsset.Target = meshImprotSetting;
-                                            //            mName = IO.TtFileManager.GetPureName(path);
-                                            //        }
-                                            //        MeshImprotSettings.Add(meshImprotSetting);
-                                            //    }
-                                            //}
+                                            QueueImportSource(path);
                                             if (eErrorType != enErrorType.None)
                                             {
                                                 var clr = new Vector4(1, 0, 0, 1);
@@ -202,6 +192,19 @@ namespace EngineNS.Graphics.Mesh
                     }
 
                     ImGuiAPI.Separator();
+                    if (!string.IsNullOrEmpty(mPendingImportMessage))
+                    {
+                        var clr = new Vector4(1, 1, 0, 1);
+                        ImGuiAPI.TextColored(in clr, mPendingImportMessage);
+                        ImGuiAPI.Text(mPendingImportSource);
+                        ImGuiAPI.Separator();
+                    }
+                    if (!string.IsNullOrEmpty(mImportError))
+                    {
+                        var clr = new Vector4(1, 0, 0, 1);
+                        ImGuiAPI.TextColored(in clr, mImportError);
+                        ImGuiAPI.Separator();
+                    }
 
                     bool nameChanged = ImGuiAPI.InputText("##in_rname", ref mName);
                     if (nameChanged)
@@ -211,7 +214,15 @@ namespace EngineNS.Graphics.Mesh
                     }
                     ImGuiAPI.Separator();
 
-                    if (eErrorType == enErrorType.None)
+                    var canCreateAsset = eErrorType == enErrorType.None;
+                    if (MeshType == "FromFile")
+                    {
+                        canCreateAsset = canCreateAsset &&
+                            MeshImportSettings.Count > 0 &&
+                            mPendingImportTask == null &&
+                            mImportSourceQueue.Count == 0;
+                    }
+                    if (canCreateAsset)
                     {
                         if (ImGuiAPI.Button("Create Asset", in Vector2.Zero))
                         {
@@ -219,7 +230,26 @@ namespace EngineNS.Graphics.Mesh
                             {
                                 case "FromFile":
                                     {
+                                        var importSummary = GetImportSourceSummary();
+                                        ContentBrowser.SetImportStatusMessage($"Importing {importSummary}...");
                                         var task = DoImport();
+                                        task.AddWaitTask((finishedTask) =>
+                                        {
+                                            try
+                                            {
+                                                var importTask = (Thread.Async.TtTask<bool>)finishedTask;
+                                                var succeeded = importTask.DirectResult;
+                                                if (succeeded)
+                                                    ContentBrowser.SetImportStatusMessage($"Imported {importSummary}.", false, true);
+                                                else
+                                                    ContentBrowser.SetImportStatusMessage($"Import failed: {importSummary}.", true);
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                ContentBrowser.SetImportStatusMessage($"Import failed: {ex.Message}", true);
+                                                EngineNS.Profiler.Log.WriteException(ex);
+                                            }
+                                        });
                                         ImGuiAPI.CloseCurrentPopup();
                                         retValue = true;
                                     }
@@ -344,6 +374,7 @@ namespace EngineNS.Graphics.Mesh
                     }
                     if (ImGuiAPI.Button("Cancel", in Vector2.Zero))
                     {
+                        ContentBrowser.SetImportStatusMessage("Import cancelled.");
                         ImGuiAPI.CloseCurrentPopup();
                         retValue = true;
                     }
@@ -356,8 +387,147 @@ namespace EngineNS.Graphics.Mesh
 
                     ImGuiAPI.EndPopup();
                 }
+                EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
 
                 return retValue;
+            }
+
+            public override bool IsAssetSource(string fileExt)
+            {
+                fileExt = fileExt.TrimStart('.').ToLower();
+                if (TtAssetSourceImportPlugin.HasPluginForSource(fileExt))
+                    return true;
+                switch (fileExt)
+                {
+                    case "fbx":
+                    case "obj":
+                    case "gltf":
+                    case "glb":
+                    case "dae":
+                    case "3ds":
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
+            void QueueImportSource(string path)
+            {
+                if (string.IsNullOrEmpty(path))
+                    return;
+
+                foreach (var pendingPath in mImportSourceQueue)
+                {
+                    if (string.Equals(pendingPath, path, StringComparison.OrdinalIgnoreCase))
+                        return;
+                }
+                if (string.Equals(mPendingImportSource, path, StringComparison.OrdinalIgnoreCase))
+                    return;
+                foreach (var setting in MeshImportSettings)
+                {
+                    if (string.Equals(setting.SourceFile, path, StringComparison.OrdinalIgnoreCase))
+                        return;
+                }
+
+                mImportSourceQueue.Enqueue(path);
+                mImportError = "";
+                eErrorType = enErrorType.None;
+                TryStartPendingImportSource();
+            }
+
+            void TryStartPendingImportSource()
+            {
+                if (mPendingImportTask != null || mImportSourceQueue.Count == 0)
+                    return;
+
+                var path = mImportSourceQueue.Dequeue();
+                mPendingImportSource = path;
+                var plugin = TtAssetSourceImportPlugin.GetPluginForSource(path);
+                mPendingImportMessage = plugin?.GetImportingMessage(path) ?? "Reading source file...";
+                mPendingImportTask = System.Threading.Tasks.Task.Run(() =>
+                {
+                    var setting = CreateMeshImportSetting(path, out var error);
+                    return new TtMeshImportPendingResult()
+                    {
+                        SourceFile = path,
+                        Setting = setting,
+                        Error = error,
+                    };
+                });
+            }
+
+            void UpdatePendingImportSource()
+            {
+                if (mPendingImportTask == null)
+                {
+                    TryStartPendingImportSource();
+                    return;
+                }
+                if (!mPendingImportTask.IsCompleted)
+                    return;
+
+                try
+                {
+                    var result = mPendingImportTask.GetAwaiter().GetResult();
+                    if (result.Setting == null)
+                    {
+                        mImportError = result.Error;
+                        eErrorType = enErrorType.EmptyName;
+                    }
+                    else
+                    {
+                        AppendImportSetting(result.Setting, result.SourceFile);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    mImportError = ex.Message;
+                    eErrorType = enErrorType.EmptyName;
+                    EngineNS.Profiler.Log.WriteException(ex);
+                }
+                finally
+                {
+                    mPendingImportTask = null;
+                    mPendingImportSource = "";
+                    mPendingImportMessage = "";
+                    TryStartPendingImportSource();
+                }
+            }
+
+            void AppendImportSetting(TtMeshImportSetting meshImportSetting, string path)
+            {
+                if (MeshImportSettings.Count == 0)
+                {
+                    PGAsset.Target = meshImportSetting;
+                    mName = IO.TtFileManager.GetPureName(path);
+                }
+                MeshImportSettings.Add(meshImportSetting);
+                mImportError = "";
+                eErrorType = enErrorType.None;
+            }
+
+            static TtMeshImportSetting CreateMeshImportSetting(string path, out string error)
+            {
+                error = null;
+                var plugin = TtAssetSourceImportPlugin.GetPluginForSource(path);
+                if (plugin != null)
+                {
+                    var pluginSetting = plugin.CreateMeshImportSetting(path, out error);
+                    if (pluginSetting != null)
+                        return pluginSetting;
+                    if (string.IsNullOrWhiteSpace(error))
+                        error = $"Asset source import plugin failed to import source file: {path}";
+                    return null;
+                }
+
+                var meshImportSetting = TtAssetImporter.CreateMeshImporter(path);
+                if (meshImportSetting == null)
+                {
+                    error = $"Assimp failed to import source file: {path}";
+                    return null;
+                }
+                meshImportSetting.SourceFile = path;
+                return meshImportSetting;
             }
 
             private async Thread.Async.TtTask<bool> DoImport()
@@ -369,9 +539,26 @@ namespace EngineNS.Graphics.Mesh
                         var sceneFlags = TtAssetImporter.DefaultSceneFlags | PostProcessSteps.JoinIdenticalVertices;
                         importSetting.AssetImporter.ReImport(sceneFlags);
                     }
-                    await importSetting.ImportAndSaveMesh(mDir);
+                    if (!await importSetting.ImportAndSaveMesh(mDir))
+                        return false;
                 }
                 return true;
+            }
+
+            string GetImportSourceSummary()
+            {
+                if (MeshImportSettings.Count <= 0)
+                    return "source file";
+                if (MeshImportSettings.Count > 1)
+                    return $"{MeshImportSettings.Count} files";
+
+                var importSetting = MeshImportSettings[0];
+                var source = importSetting.SourceFile;
+                if (string.IsNullOrWhiteSpace(source))
+                    source = importSetting.FileName;
+
+                var name = IO.TtFileManager.GetPureName(source);
+                return string.IsNullOrWhiteSpace(name) ? "source file" : name;
             }
             public static async Thread.Async.TtTask<bool> ImportAndSaveMesh(RName mDir, TtMeshImportSetting improtSetting)
             {
@@ -380,7 +567,9 @@ namespace EngineNS.Graphics.Mesh
                 AssetImportOption.AsStaticMesh = improtSetting.AsStaticMesh;
                 AssetImportOption.ApplyTransformToVertex = improtSetting.ApplyTransformToVertex;
                 AssetImportOption.GenerateUMS = improtSetting.GenerateUMS;
-                var skeletons = SkeletonGenerater.Generate(improtSetting.AssetImporter.AiScene, AssetImportOption);
+                var skeletons = AssetImportOption.AsStaticMesh ?
+                    new List<TtSkinSkeleton>() :
+                    SkeletonGenerater.Generate(improtSetting.AssetImporter.AiScene, AssetImportOption);
                 if (skeletons.Count == 0)
                 {
 
@@ -403,61 +592,58 @@ namespace EngineNS.Graphics.Mesh
 
                 var scene = improtSetting.AssetImporter.AiScene;
                 Pipeline.Shader.TtMaterialInstance[] materials = new Pipeline.Shader.TtMaterialInstance[scene.Materials.Count];
-                
-                if (AssetImportOption.GenerateTexture && scene.HasMaterials)
+
+                // Let source import plugin resolve materials first (e.g. BlenderImporter handles manifest-based materials)
+                var sourcePlugin = TtAssetSourceImportPlugin.GetPluginForSource(improtSetting.SourceFile);
+                var pluginMaterials = sourcePlugin != null ? await sourcePlugin.ResolveMaterials(improtSetting, mDir) : null;
+                if (pluginMaterials != null)
+                {
+                    for (int i = 0; i < materials.Length && i < pluginMaterials.Length; i++)
+                        materials[i] = pluginMaterials[i];
+                }
+                else if (AssetImportOption.GenerateTexture && scene.HasMaterials)
                 {
                     var baseMtl = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(TtEngine.Instance.ConfigManager.GetConfig<Editor.Forms.TtMeshPrimitiveEditorConfig>().ImportBaseMaterial);
-                    
-                    for (int i = 0; i<scene.Materials.Count; i++)
+
+                    for (int i = 0; i < scene.Materials.Count; i++)
                     {
                         var m = scene.Materials[i];
-                        if (m.IsPBRMaterial == false)
-                            continue;
                         var mtl = Graphics.Pipeline.Shader.TtMaterialInstance.CreateMaterialInstance(baseMtl);
-                        mtl.AssetName = RName.GetRName($"{mDir.Name}{m.Name}_{i}{Pipeline.Shader.TtMaterialInstance.AssetExt}", mDir.RNameType);
+                        var materialName = GetSafeImportAssetName($"{m.Name}_{i}");
+                        mtl.AssetName = RName.GetRName($"{mDir.Name}{materialName}{Pipeline.Shader.TtMaterialInstance.AssetExt}", mDir.RNameType);
 
-                        Action<TextureSlot, string> setSrv = (TextureSlot slot, string shaderName) =>
+                        Func<TextureSlot, string, bool> setSrv = (TextureSlot slot, string shaderName) =>
                         {
-                            if (slot.FilePath==null)
-                                return;
+                            if (slot.FilePath == null)
+                                return false;
                             int textureIndex = -1;
                             if (slot.FilePath.StartsWith("*"))
                             {
                                 textureIndex = int.Parse(slot.FilePath.Substring(1));
                             }
-                            if (textureIndex>=0&&textureIndex<scene.Textures.Count)
+                            if (textureIndex >= 0 && textureIndex < scene.Textures.Count)
                             {
                                 var texture = scene.Textures[textureIndex];
                                 if (texture.HasCompressedData)
                                 {
-                                    if (texture.CompressedFormatHint=="png" || texture.CompressedFormatHint=="jpg")
+                                    if (string.Equals(texture.CompressedFormatHint, "png", StringComparison.OrdinalIgnoreCase) ||
+                                        string.Equals(texture.CompressedFormatHint, "jpg", StringComparison.OrdinalIgnoreCase) ||
+                                        string.Equals(texture.CompressedFormatHint, "jpeg", StringComparison.OrdinalIgnoreCase))
                                     {
                                         try
                                         {
                                             var imageData = texture.CompressedData;
-                                            if (shaderName=="TexNormal")
-                                            {
-                                                //using (var stream = new MemoryStream(imageData))
-                                                //{
-                                                //    StbImageSharp.TtMemImage image = StbImageSharp.TtMemImage.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
-
-                                                //    image = StbImageSharp.ImageProcessor.GetBoxDownSampler(image, image.Width/2, image.Height/2);
-                                                //    imageData = image.SaveToMem().GetBuffer();
-                                                //}
-                                            }
-
                                             using (var stream = new MemoryStream(imageData))
                                             {
-                                                //StbImageSharp.TtMemImage image = StbImageSharp.TtMemImage.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
                                                 var importer = new NxRHI.TtSrView.ImportAttribute();
-                                                importer.mSourceFile = texture.Filename + $"_{shaderName}.png";
+                                                var textureName = GetImportTextureName(texture.Filename, m.Name, i, shaderName);
+                                                importer.mSourceFile = textureName + ".png";
                                                 importer.mDir = mDir;
-                                                importer.mName = texture.Filename + $"_{shaderName}";
-                                                //importer.mDesc.Width = image.Width;
-                                                //importer.mDesc.Height = image.Height;
+                                                importer.mName = textureName;
                                                 stream.Seek(0, SeekOrigin.Begin);
                                                 var rn = importer.ImportImageImpl(stream);
                                                 mtl.SetSrv(shaderName, rn);
+                                                return rn != null;
                                             }
                                         }
                                         catch (Exception ex)
@@ -466,35 +652,67 @@ namespace EngineNS.Graphics.Mesh
                                         }
                                     }
                                 }
-                                else if (texture.HasNonCompressedData)
+                            }
+                            else
+                            {
+                                var texturePath = ResolveImportTexturePath(slot.FilePath, improtSetting);
+                                if (!string.IsNullOrEmpty(texturePath) && IO.TtFileManager.FileExists(texturePath))
                                 {
-
+                                    var textureName = GetImportTextureName(texturePath, m.Name, i, shaderName);
+                                    var rn = ImportTextureFile(texturePath, mDir, textureName);
+                                    if (rn != null)
+                                    {
+                                        mtl.SetSrv(shaderName, rn);
+                                        return true;
+                                    }
                                 }
                             }
+                            return false;
                         };
-                        setSrv(m.PBR.TextureBaseColor, "TexDiffuse");
-                        setSrv(m.TextureNormal, "TexNormal");
-                        setSrv(m.PBR.TextureMetalness, "TexMRA");
 
-                        //setSrv(m.Matal, "TexMRA");
-                        //TextureSlot slot;
-                        //m.GetMaterialTexture(m.TextureAmbient, 0, out slot);
+                        var diffuseSet = false;
+                        var mraSet = false;
+                        if (m.IsPBRMaterial)
+                        {
+                            diffuseSet = setSrv(m.PBR.TextureBaseColor, "TexDiffuse");
+                            mraSet = setSrv(m.PBR.TextureMetalness, "TexMRA");
+                        }
+                        if (!diffuseSet)
+                            diffuseSet = setSrv(m.TextureDiffuse, "TexDiffuse");
+                        if (!diffuseSet)
+                            diffuseSet = setSrv(m.TextureAmbient, "TexDiffuse");
+                        if (!diffuseSet)
+                        {
+                            var colorTextureName = GetSafeImportAssetName($"{m.Name}_{i}_TexDiffuse");
+                            var rn = ImportColorTexture(m.ColorDiffuse, mDir, colorTextureName);
+                            if (rn != null)
+                            {
+                                mtl.SetSrv("TexDiffuse", rn);
+                                diffuseSet = true;
+                            }
+                        }
+                        if (!setSrv(m.TextureNormal, "TexNormal"))
+                            setSrv(m.TextureHeight, "TexNormal");
+                        if (!mraSet)
+                            mraSet = setSrv(m.TextureSpecular, "TexMRA");
 
-                        if (mtl.AssetName.AMeta==null)
+                        if (mtl.AssetName.AMeta == null)
                         {
                             var ameta = mtl.CreateAMeta();
                             ameta.AssetId = Guid.NewGuid();
                             ameta.SetAssetName(mtl.AssetName);
                             ameta.SaveAMeta(mtl);
                             TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
-                        }   
-                        
+                        }
+
                         mtl.SaveAssetTo(mtl.AssetName);
                         materials[i] = mtl;
                     }
                 }
 
-                var meshPrimitives = MeshGenerater.Generate(skeletons, improtSetting.AssetImporter.AiScene, AssetImportOption);
+                var meshPrimitives = improtSetting.MergeMeshes ?
+                    MeshGenerater.GenerateMerged(improtSetting.FileName, improtSetting.AssetImporter.AiScene, AssetImportOption) :
+                    MeshGenerater.Generate(skeletons, improtSetting.AssetImporter.AiScene, AssetImportOption);
                 foreach (var mesh in meshPrimitives)
                 {
                     var rn = RName.GetRName(mDir.Name + mesh.Mesh.mCoreObject.GetName() + TtMeshPrimitives.AssetExt, mDir.RNameType);
@@ -529,6 +747,120 @@ namespace EngineNS.Graphics.Mesh
                     }
                 }
                 return true;
+            }
+
+            static string GetImportTextureName(string textureName, string materialName, int materialIndex, string shaderName)
+            {
+                var name = IO.TtFileManager.GetPureName(textureName);
+                if (string.IsNullOrWhiteSpace(name))
+                    name = $"{materialName}_{materialIndex}";
+                if (string.IsNullOrWhiteSpace(name))
+                    name = $"material_{materialIndex}";
+
+                if (!name.EndsWith(shaderName, StringComparison.OrdinalIgnoreCase))
+                    name = $"{name}_{shaderName}";
+                return GetSafeImportAssetName(name);
+            }
+
+            static string GetSafeImportAssetName(string name)
+            {
+                if (string.IsNullOrWhiteSpace(name))
+                    return "material";
+
+                var invalidChars = Path.GetInvalidFileNameChars();
+                var builder = new StringBuilder(name.Length);
+                for (int i = 0; i < name.Length; i++)
+                {
+                    var c = name[i];
+                    if (char.IsWhiteSpace(c) || c == '/' || c == '\\' || Array.IndexOf(invalidChars, c) >= 0)
+                        builder.Append('_');
+                    else
+                        builder.Append(c);
+                }
+
+                var result = builder.ToString().Trim().Trim('.');
+                return string.IsNullOrWhiteSpace(result) ? "material" : result;
+            }
+
+            static string ResolveImportTexturePath(string texturePath, TtMeshImportSetting importSetting)
+            {
+                if (string.IsNullOrWhiteSpace(texturePath))
+                    return null;
+
+                texturePath = Uri.UnescapeDataString(texturePath).Replace('/', Path.DirectorySeparatorChar);
+                if (Path.IsPathRooted(texturePath) && IO.TtFileManager.FileExists(texturePath))
+                    return texturePath;
+
+                string TryResolveNear(string file)
+                {
+                    if (string.IsNullOrEmpty(file))
+                        return null;
+
+                    var dir = Path.GetDirectoryName(file);
+                    if (string.IsNullOrEmpty(dir))
+                        return null;
+
+                    var candidate = Path.Combine(dir, texturePath);
+                    return IO.TtFileManager.FileExists(candidate) ? candidate : null;
+                }
+
+                return TryResolveNear(importSetting?.SourceFile) ??
+                       TryResolveNear(importSetting?.IntermediateFile);
+            }
+
+            static RName ImportTextureFile(string texturePath, RName dir, string textureName)
+            {
+                if (string.IsNullOrWhiteSpace(texturePath) ||
+                    dir == null ||
+                    string.IsNullOrWhiteSpace(textureName) ||
+                    !IO.TtFileManager.FileExists(texturePath))
+                {
+                    return null;
+                }
+
+                try
+                {
+                    using (var stream = System.IO.File.OpenRead(texturePath))
+                    {
+                        var importer = new NxRHI.TtSrView.ImportAttribute();
+                        importer.mSourceFile = texturePath;
+                        importer.mDir = dir;
+                        importer.mName = textureName;
+                        return importer.ImportImageImpl(stream);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"加载图像失败: {ex.Message}");
+                    return null;
+                }
+            }
+
+            static RName ImportColorTexture(System.Numerics.Vector4 color, RName dir, string textureName)
+            {
+                if (dir == null || string.IsNullOrWhiteSpace(textureName))
+                    return null;
+
+                var image = StbImageSharp.TtMemImage.CreateImage(1, 1, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                image.Clear(new Color4b(ToColorByte(color.X), ToColorByte(color.Y), ToColorByte(color.Z), ToColorByte(color.W)));
+                using (var stream = image.SaveToMem())
+                {
+                    stream.Seek(0, SeekOrigin.Begin);
+                    var importer = new NxRHI.TtSrView.ImportAttribute();
+                    importer.mSourceFile = textureName + ".png";
+                    importer.mDir = dir;
+                    importer.mName = textureName;
+                    return importer.ImportImageImpl(stream);
+                }
+            }
+
+            static byte ToColorByte(float value)
+            {
+                if (float.IsNaN(value) || float.IsInfinity(value))
+                    return 0;
+
+                value = Math.Clamp(value, 0.0f, 1.0f);
+                return (byte)Math.Round(value * 255.0f);
             }
 
             public static async Thread.Async.TtTask SaveSkeleton(RName skeletonAsset, TtSkinSkeleton skeleton, bool bIsNeedMerge = false)

@@ -13,6 +13,9 @@
 //        真特征边缘 (sigma 小, 颜色突变是单步阶跃) -> 保持严格 -> 不糊边.
 //   这是 ReSTIR / Path Tracing 这类高方差输入的标准做法.
 
+#include "../../Inc/GlobalDefine.cginc"
+#include "../../Inc/Math.cginc"
+
 cbuffer cbDenoise
 {
     uint2  ScreenSize;
@@ -93,7 +96,7 @@ void CS_Main(uint3 id : SV_DispatchThreadID)
 
     float4 centerColor = ColorInput.SampleLevel(Samp_PointClamp, uv, 0);
     centerColor.rgb = ClampFirefly(centerColor.rgb);
-    float3 centerNormal = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, uv, 0).xyz * 2.0f - 1.0f);
+    float3 centerNormal = DecodeNormalFromGBuffer(GBufferRT1.SampleLevel(Samp_PointClamp, uv, 0));
     float  centerDepth = DepthBuffer.SampleLevel(Samp_PointClamp, uv, 0).r;
     float  centerLum = LuminanceFromRGB(centerColor.rgb);
 
@@ -135,7 +138,7 @@ void CS_Main(uint3 id : SV_DispatchThreadID)
 
             float4 sampleColor = ColorInput.SampleLevel(Samp_PointClamp, sampleUV, 0);
             sampleColor.rgb = ClampFirefly(sampleColor.rgb);
-            float3 sampleNormal = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, sampleUV, 0).xyz * 2.0f - 1.0f);
+            float3 sampleNormal = DecodeNormalFromGBuffer(GBufferRT1.SampleLevel(Samp_PointClamp, sampleUV, 0));
             float  sampleDepth = DepthBuffer.SampleLevel(Samp_PointClamp, sampleUV, 0).r;
 
             // à-trous kernel 空间权重

@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Bricks.RenderPolicyEditor.TtRenderPolicyAssetAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="7ed5c1ceaa5ba8bb76d8d79c814781581280d8fca661fdc5ee00a91093ba5649" />
+      <Hash Type="System.String@Unknown" Value="bc1a1a97fad8104ac8d3edddeaa4a5d4ffb31271b4da3f682a3dc25e4630e2bc" />
       <Path Type="System.String@Unknown" Value="deferred.rpolicy" />
     </e_0>
   </AssetFiles>

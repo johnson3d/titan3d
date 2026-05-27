@@ -341,6 +341,88 @@ namespace EngineNS.EGui.Controls
             mAssetPageIndex = 0;
         }
 
+        static bool IsSameAssetName(RName left, RName right)
+        {
+            if (left == null || right == null)
+                return false;
+
+            return left.RNameType == right.RNameType &&
+                   string.Equals(left.Name, right.Name, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public void NotifyAssetDeleted(IO.IAssetMeta ameta, RName assetName)
+        {
+            var deletedAssets = new List<IO.IAssetMeta>();
+            var deletedNames = new List<RName>();
+            if (assetName == null && ameta != null)
+                assetName = ameta.GetAssetName();
+            if (ameta != null)
+                deletedAssets.Add(ameta);
+            if (assetName != null)
+                deletedNames.Add(assetName);
+            NotifyAssetsDeleted(deletedAssets, deletedNames);
+        }
+
+        public void NotifyAssetsDeleted(IReadOnlyList<IO.IAssetMeta> deletedAssets, IReadOnlyList<RName> deletedNames)
+        {
+            if (deletedAssets != null)
+            {
+                for (int i = 0; i < deletedAssets.Count; i++)
+                {
+                    if (deletedAssets[i] != null)
+                    {
+                        deletedAssets[i].IsSelected = false;
+                        TtEngine.Instance.AssetMetaManager.RemoveAMeta(deletedAssets[i]);
+                    }
+                }
+            }
+            if (deletedNames != null)
+            {
+                for (int i = 0; i < deletedNames.Count; i++)
+                {
+                    TtEngine.Instance.AssetMetaManager.RemoveAMeta(deletedNames[i]);
+                }
+            }
+
+            SelectedAssets.RemoveAll(i => i == null || IsDeletedAsset(i, deletedAssets, deletedNames));
+            if (IsDeletedAsset(GlobalSelectedAsset, deletedAssets, deletedNames))
+                GlobalSelectedAsset = null;
+            if (IsDeletedAssetName(GlobalFocusAsset, deletedNames))
+                GlobalFocusAsset = null;
+
+            mFolderView.ClearDirectoryShowCache();
+            ResetAssetScan();
+        }
+
+        static bool IsDeletedAsset(IO.IAssetMeta asset, IReadOnlyList<IO.IAssetMeta> deletedAssets, IReadOnlyList<RName> deletedNames)
+        {
+            if (asset == null)
+                return false;
+
+            if (deletedAssets != null)
+            {
+                for (int i = 0; i < deletedAssets.Count; i++)
+                {
+                    if (asset == deletedAssets[i])
+                        return true;
+                }
+            }
+            return IsDeletedAssetName(asset.GetAssetName(), deletedNames);
+        }
+
+        static bool IsDeletedAssetName(RName assetName, IReadOnlyList<RName> deletedNames)
+        {
+            if (assetName == null || deletedNames == null)
+                return false;
+
+            for (int i = 0; i < deletedNames.Count; i++)
+            {
+                if (IsSameAssetName(assetName, deletedNames[i]))
+                    return true;
+            }
+            return false;
+        }
+
         bool IsSameAssetScan(AssetScanState state, RName dir)
         {
             if (state == null || dir == null)
@@ -394,6 +476,8 @@ namespace EngineNS.EGui.Controls
                 var assetName = assetMeta.Key;
                 var ameta = assetMeta.Value;
                 if (assetName == null || ameta == null)
+                    continue;
+                if (!IO.TtFileManager.FileExists(assetName.Address + IO.IAssetMeta.MetaExt))
                     continue;
                 if (!IsAssetInDirectory(state, assetName, out var relativeName))
                     continue;
@@ -639,20 +723,45 @@ namespace EngineNS.EGui.Controls
 
             if (!string.IsNullOrEmpty(state.Error))
             {
-                ImGuiAPI.Text("Asset scan warning: " + state.Error);
+                DrawBlockStatusChip("Asset scan warning: " + state.Error, UIProxy.StyleConfig.Instance.WarningStringColor);
             }
             else if (!state.ScanResultApplied)
             {
                 var processed = state.ProcessedAssetCount + state.ProcessedMetadataCount;
                 var enumerated = state.EnumeratedAssetCount + state.EnumeratedMetadataCount;
-                ImGuiAPI.Text($"Scanning assets {processed}/{enumerated}+");
+                DrawBlockStatusChip($"Scanning assets {processed}/{enumerated}+", UIProxy.StyleConfig.Instance.LinkStringColor);
             }
             else if (!state.IsComplete)
             {
                 var current = state.ProcessedAssetCount + state.ProcessedMetadataCount;
                 var total = state.EnumeratedAssetCount + state.EnumeratedMetadataCount;
-                ImGuiAPI.Text($"Loading assets {current}/{total}");
+                DrawBlockStatusChip($"Loading assets {current}/{total}", UIProxy.StyleConfig.Instance.LinkStringColor);
             }
+        }
+
+        void DrawBlockStatusChip(string text, uint textColor)
+        {
+            var drawList = ImGuiAPI.GetWindowDrawList();
+            DrawInlineChip(drawList, text, textColor, UIProxy.StyleConfig.Instance.ContentBrowserStatusBg);
+            ImGuiAPI.Separator();
+        }
+
+        void DrawInlineChip(in ImDrawList drawList, string text, uint textColor, uint bgColor)
+        {
+            if (string.IsNullOrEmpty(text))
+                return;
+
+            var style = UIProxy.StyleConfig.Instance;
+            var textSize = ImGuiAPI.CalcTextSize(text, false, -1);
+            var padding = style.ContentBrowserChipPadding;
+            var start = ImGuiAPI.GetCursorScreenPos();
+            var size = textSize + padding * 2.0f;
+            var end = start + size;
+            drawList.AddRectFilled(in start, in end, bgColor, 4.0f, ImDrawFlags_.ImDrawFlags_RoundCornersAll);
+            drawList.AddRect(in start, in end, style.ContentBrowserStatusBorder, 4.0f, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 1.0f);
+            var textPos = start + padding;
+            drawList.AddText(in textPos, textColor, text, null);
+            ImGuiAPI.Dummy(in size);
         }
 
         void DrawAssetPager(int shownCount, bool hasNext)
@@ -717,7 +826,14 @@ namespace EngineNS.EGui.Controls
                 bool pagedHasNext = false;
 
                 Vector2 tableSize = Vector2.Zero;
-                if(ImGuiAPI.BeginTable("AssetColumns", 3, ImGuiTableFlags_.ImGuiTableFlags_Borders | ImGuiTableFlags_.ImGuiTableFlags_RowBg | ImGuiTableFlags_.ImGuiTableFlags_Resizable, in tableSize, 0.0f))
+                var tableFlags = ImGuiTableFlags_.ImGuiTableFlags_BordersInner |
+                    ImGuiTableFlags_.ImGuiTableFlags_BordersOuterH |
+                    ImGuiTableFlags_.ImGuiTableFlags_RowBg |
+                    ImGuiTableFlags_.ImGuiTableFlags_Resizable |
+                    ImGuiTableFlags_.ImGuiTableFlags_Reorderable |
+                    ImGuiTableFlags_.ImGuiTableFlags_SizingStretchProp |
+                    ImGuiTableFlags_.ImGuiTableFlags_ScrollY;
+                if(ImGuiAPI.BeginTable("AssetColumns", 3, tableFlags, in tableSize, 0.0f))
                 {
                     ImGuiAPI.TableSetupScrollFreeze(0, 1);
                     ImGuiAPI.TableSetupColumn("Icon", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed, 28, 0);
@@ -872,13 +988,18 @@ namespace EngineNS.EGui.Controls
             //drawList.AddRect(ref min, ref max, 0xFF0000FF, 0, ImDrawFlags_.ImDrawFlags_None, 1);
             ////////////////////////////////////////////////////////////
 
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, UIProxy.StyleConfig.Instance.PopupWindowsPadding);
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, UIProxy.StyleConfig.Instance.PopupItemSpacing);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_PopupBg, UIProxy.StyleConfig.Instance.PopupColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, UIProxy.StyleConfig.Instance.BorderColor);
             if (CreateNewAssets && ImGuiAPI.BeginPopupContextWindow("##ContentFilesMenuWindow", ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
                 var popMenuWidth = ImGuiAPI.GetWindowContentRegionWidth();
                 EGui.UIProxy.SearchBarProxy.OnDraw(ref mContextMenuFilterFocused, in drawList, "search items", ref mContextMenuFilterStr, popMenuWidth);
                 var wsize = new Vector2(200, 400);
-                if (ImGuiAPI.BeginChild("GraphContextMenu", in wsize, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ChildBg, UIProxy.StyleConfig.Instance.PopupColor);
+                if (ImGuiAPI.BeginChild("GraphContextMenu", in wsize, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
                 {
                     for (var childIdx = 0; childIdx < mContextMenu.SubMenuItems.Count; childIdx++)
                     {
@@ -886,6 +1007,7 @@ namespace EngineNS.EGui.Controls
                     }
                 }
                 ImGuiAPI.EndChild();
+                ImGuiAPI.PopStyleColor(1);
                 ImGuiAPI.EndPopup();
 
                 mContextMenuOpenCheck = true;
@@ -894,6 +1016,8 @@ namespace EngineNS.EGui.Controls
             {
                 mContextMenuOpenCheck = false;
             }
+            ImGuiAPI.PopStyleColor(2);
+            ImGuiAPI.PopStyleVar(2);
             if(mContextMenuOpenCheck && !mOldContextMenuOpenCheck)
             {
                 mContextMenuFilterStr = "";
@@ -1104,6 +1228,10 @@ namespace EngineNS.EGui.Controls
             ImGuiAPI.PushID($"##{ameta.GetAssetName().Name}");
             bool isSelected = false;
             ImGuiAPI.Selectable("", ref isSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in sz);
+            var itemMin = ImGuiAPI.GetItemRectMin();
+            var itemMax = ImGuiAPI.GetItemRectMax();
+            var isHovered = ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+            DrawAssetTileBackground(in cmdlist, in itemMin, in itemMax, ameta.IsSelected, isHovered);
             GlobalFocusAssetProcess(ameta);
             AssetItemOperation(ameta, index);
             if (ImGuiAPI.IsItemVisible())
@@ -1114,6 +1242,34 @@ namespace EngineNS.EGui.Controls
                 DragDropOperation(ameta, in sz, scale);
             }
             ImGuiAPI.PopID();
+        }
+
+        void DrawAssetTileBackground(in ImDrawList cmdlist, in Vector2 itemMin, in Vector2 itemMax, bool selected, bool hovered)
+        {
+            var style = UIProxy.StyleConfig.Instance;
+            var bgColor = style.ContentBrowserAssetTileBg;
+            var borderColor = style.ContentBrowserAssetTileBorder;
+            var borderThickness = 1.0f;
+            if (selected)
+            {
+                bgColor = style.ContentBrowserAssetTileSelectedBg;
+                borderColor = style.ContentBrowserAssetTileSelectedBorder;
+                borderThickness = 1.5f;
+            }
+            else if (hovered)
+            {
+                bgColor = style.ContentBrowserAssetTileHoveredBg;
+                borderColor = style.BorderActiveColor;
+            }
+
+            var rounding = style.ContentBrowserTileRounding;
+            cmdlist.AddRectFilled(in itemMin, in itemMax, bgColor, rounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll);
+            cmdlist.AddRect(in itemMin, in itemMax, borderColor, rounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll, borderThickness);
+            if (hovered || selected)
+            {
+                var accentEnd = new Vector2(itemMax.X, itemMin.Y + 2.0f);
+                cmdlist.AddRectFilled(in itemMin, in accentEnd, selected ? style.AccentHoveredColor : style.BorderActiveColor, rounding, ImDrawFlags_.ImDrawFlags_RoundCornersTop);
+            }
         }
 
         enum EViewType
@@ -1218,6 +1374,10 @@ namespace EngineNS.EGui.Controls
         }
         void DrawFilterMenu()
         {
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, UIProxy.StyleConfig.Instance.PopupWindowsPadding);
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, UIProxy.StyleConfig.Instance.PopupItemSpacing);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_PopupBg, UIProxy.StyleConfig.Instance.PopupColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, UIProxy.StyleConfig.Instance.BorderColor);
             if (ImGuiAPI.BeginPopup("AssetFilterMenus", ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
             {
                 if(mFilterMenus != null)
@@ -1231,6 +1391,8 @@ namespace EngineNS.EGui.Controls
                 }
                 ImGuiAPI.EndPopup();
             }
+            ImGuiAPI.PopStyleColor(2);
+            ImGuiAPI.PopStyleVar(2);
         }
         bool mIsPreFolderMouseDown = false;
         bool mIsPreFolderMouseHover = false;
@@ -1320,7 +1482,31 @@ namespace EngineNS.EGui.Controls
                     }
                 }
             }
+            DrawToolbarSummary(cmd);
             EGui.UIProxy.Toolbar.EndToolbar();
+        }
+
+        void DrawToolbarSummary(in ImDrawList cmd)
+        {
+            var loadedCount = mViewAssetsDatas.Count + mViewMetadataDatas.Count;
+            var selectedCount = SelectedAssets.Count;
+            ImGuiAPI.SameLine(0, 12);
+            DrawInlineChip(cmd, $"{loadedCount} assets", UIProxy.StyleConfig.Instance.TextDisableColor, UIProxy.StyleConfig.Instance.ContentBrowserStatusBg);
+            if (selectedCount > 0)
+            {
+                ImGuiAPI.SameLine(0, 6);
+                DrawInlineChip(cmd, $"{selectedCount} selected", UIProxy.StyleConfig.Instance.AccentHoveredColor, UIProxy.StyleConfig.Instance.ContentBrowserAssetTileSelectedBg);
+            }
+            if (mActiveFiltersCount > 0)
+            {
+                ImGuiAPI.SameLine(0, 6);
+                DrawInlineChip(cmd, $"{mActiveFiltersCount} filters", UIProxy.StyleConfig.Instance.WarningStringColor, UIProxy.StyleConfig.Instance.ContentBrowserStatusBg);
+            }
+            if (mWithChildFolders)
+            {
+                ImGuiAPI.SameLine(0, 6);
+                DrawInlineChip(cmd, "recursive", UIProxy.StyleConfig.Instance.LinkStringColor, UIProxy.StyleConfig.Instance.ContentBrowserStatusBg);
+            }
         }
 
         FolderView mFolderView = new FolderView();
@@ -1341,10 +1527,104 @@ namespace EngineNS.EGui.Controls
             };
             mAssetImporterQueue.Enqueue(importer);
         }
+        void TryHandleDroppedSourceFiles()
+        {
+            if (!TtEngine.Instance.InputSystem.IsDropFiles)
+                return;
+            if (mFolderView.CurrentDir == null)
+                return;
+
+            List<Rtti.TtTypeDesc> importers = new List<Rtti.TtTypeDesc>();
+            foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
+            {
+                foreach (var typeDesc in service.Types.Values)
+                {
+                    var attrs = typeDesc.GetCustomAttributes(typeof(IO.IAssetCreateAttribute), true);
+                    if (attrs.Length > 0)
+                    {
+                        //var importer = attrs[0] as IO.IAssetCreateAttribute;
+                        //importers.Add(importer);
+                        importers.Add(typeDesc);
+                    }
+                }
+            }
+
+            var acceptedCount = 0;
+            var rejectedFiles = new List<string>();
+            for (int i = 0; i < TtEngine.Instance.InputSystem.DropFiles.Count; i++)
+            {
+                var file = TtEngine.Instance.InputSystem.DropFiles[i];
+                var fileExt = IO.TtFileManager.GetExtName(file);
+                var matched = false;
+                for (int j = 0; j < importers.Count; j++)
+                {
+                    try
+                    {
+                        var attrs = importers[j].GetCustomAttributes(typeof(IO.IAssetCreateAttribute), true);
+                        if (((IO.IAssetCreateAttribute)(attrs[0])).IsAssetSource(fileExt))
+                        {
+                            var assetExtField = Rtti.TtTypeDesc.GetField(importers[j].SystemType, "AssetExt");
+                            if (assetExtField != null)
+                            {
+                                var creater = TtEngine.Instance.AssetMetaManager.ImportAsset(mFolderView.CurrentDir, importers[j], (string)assetExtField.GetValue(null));
+                                if (creater != null)
+                                {
+                                    EnqueueAssetImporter(creater, file);
+                                    acceptedCount++;
+                                    matched = true;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                    }
+                }
+                if (!matched)
+                {
+                    rejectedFiles.Add(file);
+                }
+            }
+            if (acceptedCount > 0)
+            {
+                SetImportStatusMessage($"Queued {acceptedCount} dropped file(s) for import.");
+            }
+            else if (rejectedFiles.Count > 0)
+            {
+                SetImportStatusMessage($"No importer found for dropped file(s): {string.Join(", ", rejectedFiles)}", true);
+            }
+            TtEngine.Instance.InputSystem.ClearFilesDrop();
+        }
         IO.IAssetCreateAttribute mAssetImporter;
         public string CurrentImporterFile;
+        string mDropImportMessage = "";
+        Vector4 mDropImportMessageColor = new Vector4(1, 1, 0, 1);
         public bool DrawInWindow = true;
         RName mCurrentDir;
+
+        public void SetImportStatusMessage(string message, bool isError = false, bool isSuccess = false)
+        {
+            mDropImportMessage = message ?? "";
+            var style = UIProxy.StyleConfig.Instance;
+            if (isError)
+                mDropImportMessageColor = ToColor4(style.ErrorStringColor);
+            else if (isSuccess)
+                mDropImportMessageColor = ToColor4(style.PassStringColor);
+            else
+                mDropImportMessageColor = ToColor4(style.WarningStringColor);
+        }
+
+        static Vector4 ToColor4(uint abgr)
+        {
+            const float inv = 1.0f / 255.0f;
+            return new Vector4(
+                (abgr & 0xFF) * inv,
+                ((abgr >> 8) & 0xFF) * inv,
+                ((abgr >> 16) & 0xFF) * inv,
+                ((abgr >> 24) & 0xFF) * inv);
+        }
 
         bool IsAssetOprating = false;
         public unsafe void OnDraw()
@@ -1384,6 +1664,7 @@ namespace EngineNS.EGui.Controls
                 //                {
                 //                    DockId = ImGuiAPI.GetWindowDockID();
                 //                }
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Separator, UIProxy.StyleConfig.Instance.BorderColor);
                 ImGuiAPI.Columns(2, null, true);
 
                 if (mFolderView.ContentSize.X <= 0)
@@ -1433,59 +1714,22 @@ namespace EngineNS.EGui.Controls
                     }
                     DrawFilterMenu();
 
-                    if (ImGuiAPI.BeginChild("RightWindow", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                    ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, new Vector2(8, 8));
+                    ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ChildRounding, 3.0f);
+                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ChildBg, UIProxy.StyleConfig.Instance.ContentBrowserAssetPaneBg);
+                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, UIProxy.StyleConfig.Instance.BorderColor);
+                    if (ImGuiAPI.BeginChild("RightWindow", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
                     {
                         var min = ImGuiAPI.GetWindowContentRegionMin();
                         var max = ImGuiAPI.GetWindowContentRegionMax();
                         RightSize = max - min;
 
-                        if(TtEngine.Instance.InputSystem.IsDropFiles)
+                        TryHandleDroppedSourceFiles();
+
+                        if (!string.IsNullOrEmpty(mDropImportMessage))
                         {
-                            var pos = ImGuiAPI.GetWindowPos();
-                            var size = ImGuiAPI.GetWindowSize();
-                            var mousePos = new Vector2(TtEngine.Instance.InputSystem.Mouse.GlobalMouseX, TtEngine.Instance.InputSystem.Mouse.GlobalMouseY);
-                            if(mousePos.X >= pos.X && mousePos.X <= (pos.X + size.X) &&
-                               mousePos.Y >= pos.Y && mousePos.Y <= (pos.Y + size.Y))
-                            {
-                                List<Rtti.TtTypeDesc> importers = new List<Rtti.TtTypeDesc>();
-                                foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
-                                {
-                                    foreach (var typeDesc in service.Types.Values)
-                                    {
-                                        var attrs = typeDesc.GetCustomAttributes(typeof(IO.IAssetCreateAttribute), true);
-                                        if (attrs.Length > 0)
-                                        {
-                                            //var importer = attrs[0] as IO.IAssetCreateAttribute;
-                                            //importers.Add(importer);
-                                            importers.Add(typeDesc);
-                                        }
-                                    }
-                                }
-
-                                for (int i = 0; i < TtEngine.Instance.InputSystem.DropFiles.Count; i++)
-                                {
-                                    var file = TtEngine.Instance.InputSystem.DropFiles[i];
-                                    var fileExt = IO.TtFileManager.GetExtName(file);
-                                    for (int j = 0; j < importers.Count; j++)
-                                    {
-                                        try
-                                        {
-                                            var attrs = importers[j].GetCustomAttributes(typeof(IO.IAssetCreateAttribute), true);
-                                            if (((IO.IAssetCreateAttribute)(attrs[0])).IsAssetSource(fileExt))
-                                            {
-                                                var assetExtField = Rtti.TtTypeDesc.GetField(importers[j].SystemType, "AssetExt");
-                                                EnqueueAssetImporter(TtEngine.Instance.AssetMetaManager.ImportAsset(mFolderView.CurrentDir, importers[j], (string)assetExtField.GetValue(null)), file);
-                                                break;
-                                            }
-                                        }
-                                        catch (Exception)
-                                        {
-
-                                        }
-                                    }
-                                }
-                                TtEngine.Instance.InputSystem.ClearFilesDrop();
-                            }
+                            var clr = ImGuiAPI.ColorConvertFloat4ToU32(in mDropImportMessageColor);
+                            DrawBlockStatusChip(mDropImportMessage, clr);
                         }
 
                         if (FirstClickIndex != LastClickIndex)
@@ -1515,11 +1759,14 @@ namespace EngineNS.EGui.Controls
                         }
                     }
                     ImGuiAPI.EndChild();
+                    ImGuiAPI.PopStyleColor(2);
+                    ImGuiAPI.PopStyleVar(2);
                 }
                     
                 ImGuiAPI.NextColumn();
 
                 ImGuiAPI.Columns(1, null, true);
+                ImGuiAPI.PopStyleColor(1);
                 DrawAssetOperationDialog();
             }
             if (DrawInWindow)
@@ -1544,6 +1791,7 @@ namespace EngineNS.EGui.Controls
                 var importer = mAssetImporterQueue.Dequeue();
                 mAssetImporter = importer.Creater;
                 CurrentImporterFile = importer.FileName;
+                SetImportStatusMessage($"Importing {IO.TtFileManager.GetPureName(importer.FileName)}...");
             }
 
         }
@@ -1551,6 +1799,7 @@ namespace EngineNS.EGui.Controls
         public enum EAssetOperationType
         {
             None,
+            Delete,
             MoveTo,
             CopyTo,
             Rename,
@@ -1558,14 +1807,75 @@ namespace EngineNS.EGui.Controls
         }
         EAssetOperationType mOperationType = EAssetOperationType.None;
         IAssetMeta mOperationAsset = null;
+        readonly List<IAssetMeta> mOperationAssets = new List<IAssetMeta>();
         FolderView mSelectFolderView = new FolderView();
         float mSelectFolderOKButtonHeight = 20;
         public void OperationAsset(IAssetMeta sourceAsset, EAssetOperationType opType)
         {
             mOperationAsset = sourceAsset;
             mOperationType = opType;
+            mOperationAssets.Clear();
+            if (mOperationAsset == null)
+                return;
+
             NewName = mOperationAsset.GetAssetName().PureName;
+            if (mOperationType == EAssetOperationType.Delete)
+            {
+                CollectDeleteOperationAssets(mOperationAsset);
+            }
         }
+
+        void CollectDeleteOperationAssets(IAssetMeta sourceAsset)
+        {
+            if (sourceAsset == null)
+                return;
+
+            var sourceSelected = IsAssetSelected(sourceAsset);
+            if (sourceSelected)
+            {
+                for (int i = 0; i < SelectedAssets.Count; i++)
+                {
+                    AddOperationAsset(SelectedAssets[i]);
+                }
+            }
+            AddOperationAsset(sourceAsset);
+        }
+
+        bool IsAssetSelected(IAssetMeta asset)
+        {
+            if (asset == null)
+                return false;
+            if (asset.IsSelected)
+                return true;
+
+            var assetName = asset.GetAssetName();
+            for (int i = 0; i < SelectedAssets.Count; i++)
+            {
+                var selectedAsset = SelectedAssets[i];
+                if (selectedAsset == asset || IsSameAssetName(selectedAsset?.GetAssetName(), assetName))
+                    return true;
+            }
+            return false;
+        }
+
+        void AddOperationAsset(IAssetMeta asset)
+        {
+            if (asset == null)
+                return;
+
+            var assetName = asset.GetAssetName();
+            if (assetName == null)
+                return;
+
+            for (int i = 0; i < mOperationAssets.Count; i++)
+            {
+                var existAsset = mOperationAssets[i];
+                if (existAsset == asset || IsSameAssetName(existAsset?.GetAssetName(), assetName))
+                    return;
+            }
+            mOperationAssets.Add(asset);
+        }
+
         string NewName;
         unsafe void DrawAssetOperationDialog()
         {
@@ -1573,6 +1883,12 @@ namespace EngineNS.EGui.Controls
                 return;
 
             var sourceName = mOperationAsset.GetAssetName();
+            if (mOperationType == EAssetOperationType.Delete)
+            {
+                DrawDeleteAssetDialog(sourceName);
+                return;
+            }
+
             string keyName = "AssetOperation";
             switch (mOperationType)
             {
@@ -1595,8 +1911,10 @@ namespace EngineNS.EGui.Controls
             var pivot = new Vector2(0.5f, 0.5f);
             ImGuiAPI.SetNextWindowPos((min + max) * 0.5f + pos, ImGuiCond_.ImGuiCond_Appearing, in pivot);
             ImGuiAPI.SetNextWindowSize(new Vector2(300, 500), ImGuiCond_.ImGuiCond_Appearing);
+            UIProxy.StyleConfig.Instance.PushPopupStyle();
             if(ImGuiAPI.BeginPopupModal(keyName, (bool*)0, ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
             {
+                UIProxy.StyleConfig.Instance.PushPanelChildStyle(UIProxy.StyleConfig.Instance.PanelBackground);
                 if(ImGuiAPI.BeginChild(keyName + "CWin", in Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
                 {
                     var winSize = new Vector2(ImGuiAPI.GetWindowWidth(), ImGuiAPI.GetWindowHeight() - mSelectFolderOKButtonHeight);
@@ -1695,9 +2013,103 @@ namespace EngineNS.EGui.Controls
 
                     ImGuiAPI.EndChild();
                 }
+                UIProxy.StyleConfig.Instance.PopPanelChildStyle();
                 ImGuiAPI.EndPopup();
 
             }
+            UIProxy.StyleConfig.Instance.PopPopupStyle();
+        }
+
+        unsafe void DrawDeleteAssetDialog(RName sourceName)
+        {
+            if (sourceName == null || mOperationAsset == null)
+            {
+                mOperationAsset = null;
+                mOperationAssets.Clear();
+                mOperationType = EAssetOperationType.None;
+                return;
+            }
+            if (mOperationAssets.Count == 0)
+                AddOperationAsset(mOperationAsset);
+
+            var deleteCount = mOperationAssets.Count;
+            var keyName = deleteCount > 1 ? $"Delete {deleteCount} assets?" : $"Delete {sourceName.Name}?";
+            ImGuiAPI.OpenPopup(keyName, ImGuiPopupFlags_.ImGuiPopupFlags_None | ImGuiPopupFlags_.ImGuiPopupFlags_NoOpenOverExistingPopup);
+
+            var pos = ImGuiAPI.GetWindowPos();
+            var min = ImGuiAPI.GetWindowContentRegionMin();
+            var max = ImGuiAPI.GetWindowContentRegionMax();
+            var pivot = new Vector2(0.5f, 0.5f);
+            ImGuiAPI.SetNextWindowPos((min + max) * 0.5f + pos, ImGuiCond_.ImGuiCond_Appearing, in pivot);
+            UIProxy.StyleConfig.Instance.PushPopupStyle();
+            if (ImGuiAPI.BeginPopupModal(keyName, (bool*)0, ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                ImGuiAPI.Text(deleteCount > 1 ? $"Delete {deleteCount} selected assets?" : "Delete this asset?");
+                var previewCount = Math.Min(deleteCount, 5);
+                for (int i = 0; i < previewCount; i++)
+                {
+                    var assetName = mOperationAssets[i]?.GetAssetName();
+                    if (assetName != null)
+                        ImGuiAPI.Text(assetName.Name);
+                }
+                if (deleteCount > previewCount)
+                {
+                    ImGuiAPI.Text($"... and {deleteCount - previewCount} more");
+                }
+                ImGuiAPI.Separator();
+
+                if (ImGuiAPI.Button("Delete", in Vector2.Zero))
+                {
+                    var deletedAssets = new List<IO.IAssetMeta>();
+                    var deletedNames = new List<RName>();
+                    var deleteAssets = new List<IAssetMeta>(mOperationAssets);
+                    var deleteNames = new List<RName>();
+                    for (int i = 0; i < deleteAssets.Count; i++)
+                    {
+                        deleteNames.Add(deleteAssets[i]?.GetAssetName());
+                    }
+
+                    for (int i = 0; i < deleteAssets.Count; i++)
+                    {
+                        var deletedAsset = deleteAssets[i];
+                        var deleteName = deleteNames[i];
+                        if (deletedAsset == null || deleteName == null)
+                            continue;
+
+                        try
+                        {
+                            deletedAsset.DeleteAsset(deleteName.Name, deleteName.RNameType);
+                            deletedAssets.Add(deletedAsset);
+                            deletedNames.Add(deleteName);
+                        }
+                        catch (Exception ex)
+                        {
+                            Profiler.Log.WriteException(ex);
+                        }
+                    }
+
+                    if (deletedAssets.Count > 0 || deletedNames.Count > 0)
+                    {
+                        NotifyAssetsDeleted(deletedAssets, deletedNames);
+                    }
+
+                    mOperationAsset = null;
+                    mOperationAssets.Clear();
+                    mOperationType = EAssetOperationType.None;
+                    ImGuiAPI.CloseCurrentPopup();
+                }
+                ImGuiAPI.SameLine(0, -1);
+                if (ImGuiAPI.Button("Cancel", in Vector2.Zero))
+                {
+                    mOperationAsset = null;
+                    mOperationAssets.Clear();
+                    mOperationType = EAssetOperationType.None;
+                    ImGuiAPI.CloseCurrentPopup();
+                }
+
+                ImGuiAPI.EndPopup();
+            }
+            UIProxy.StyleConfig.Instance.PopPopupStyle();
         }
     }
 }

@@ -59,6 +59,8 @@ namespace EngineNS.EGui.Slate
                 return false;
 
             await ReCreateInteractiveModes();
+            await InitParticlePolicy();
+
             IsInlitialized = true;
             return true;
         }

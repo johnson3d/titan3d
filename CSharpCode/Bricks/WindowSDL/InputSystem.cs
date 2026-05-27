@@ -9,6 +9,47 @@ namespace EngineNS.Bricks.Input
 {
     public partial class TtInputSystem
     {
+        private static WindowEventID MapWindowEvent(SDL.SDL_EventType eventType)
+        {
+            switch (eventType)
+            {
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_FIRST:
+                    return WindowEventID.WINDOWEVENT_SHOWN;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_HIDDEN:
+                    return WindowEventID.WINDOWEVENT_HIDDEN;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_EXPOSED:
+                    return WindowEventID.WINDOWEVENT_EXPOSED;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_MOVED:
+                    return WindowEventID.WINDOWEVENT_MOVED;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_RESIZED:
+                    return WindowEventID.WINDOWEVENT_SIZE_CHANGED;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_METAL_VIEW_RESIZED:
+                    return WindowEventID.WINDOWEVENT_SIZE_CHANGED;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_MINIMIZED:
+                    return WindowEventID.WINDOWEVENT_MINIMIZED;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_MAXIMIZED:
+                    return WindowEventID.WINDOWEVENT_MAXIMIZED;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_RESTORED:
+                    return WindowEventID.WINDOWEVENT_RESTORED;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_MOUSE_ENTER:
+                    return WindowEventID.WINDOWEVENT_ENTER;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_MOUSE_LEAVE:
+                    return WindowEventID.WINDOWEVENT_LEAVE;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_FOCUS_GAINED:
+                    return WindowEventID.WINDOWEVENT_FOCUS_GAINED;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_FOCUS_LOST:
+                    return WindowEventID.WINDOWEVENT_FOCUS_LOST;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+                    return WindowEventID.WINDOWEVENT_CLOSE;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_HIT_TEST:
+                    return WindowEventID.WINDOWEVENT_HIT_TEST;
+                case SDL.SDL_EventType.SDL_EVENT_WINDOW_OCCLUDED:
+                    return WindowEventID.WINDOWEVENT_OCCLUDED;
+                default:
+                    return WindowEventID.WINDOWEVENT_NONE;
+            }
+        }
         public static unsafe void MappedEvent(in SDL.SDL_Event source, ref Input.Event target)
         {
             //can't using Event inputEvent = *(Event*)(p); cause of SDL_Event have non-public members
@@ -246,12 +287,12 @@ namespace EngineNS.Bricks.Input
             }
             #endregion Keyboard
             #region Window
-            if (source.key.type >= SDL.SDL_EventType.SDL_EVENT_WINDOW_FIRST && source.key.type <= SDL.SDL_EventType.SDL_EVENT_WINDOW_LAST)
+            if (source.window.type >= SDL.SDL_EventType.SDL_EVENT_WINDOW_FIRST && source.window.type <= SDL.SDL_EventType.SDL_EVENT_WINDOW_LAST)
             {
                 target.Window.Type = (EventType)source.window.type;
                 target.Window.Timestamp = (uint)source.window.timestamp;
                 target.Window.WindowID = (uint)source.window.windowID;
-                target.Window.WindowEventID = (WindowEventID)source.window.type;
+                target.Window.WindowEventID = MapWindowEvent(source.window.type);
                 target.Window.Data1 = source.window.data1;
                 target.Window.Data2 = source.window.data2;
             }

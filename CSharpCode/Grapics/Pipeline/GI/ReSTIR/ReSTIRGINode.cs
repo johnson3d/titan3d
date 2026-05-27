@@ -1,6 +1,6 @@
-using Assimp;
 using EngineNS.GamePlay;
 using EngineNS.Graphics.Pipeline.Common;
+using EngineNS.Graphics.Pipeline.GI.ProbeVolume;
 using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
 using System;
@@ -61,6 +61,18 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             set { EnableHzbAccel.SetValue(value); this.UpdatePermutation().AddWaitTask(); }
         }
 
+        // ENV_USE_PROBE_FALLBACK: 0 -> miss 时仅用天光
+        //                         1 -> miss 时先查 probe volume irradiance, 查询失败再天光
+        // ProbeVolume buffer 仅在 1 的编译产物里存在 binder, OnDrawCall 用 FindBinder
+        // + IsValidPointer 双重保护; ProbeVolumeNode 为 null 时, C# 端会强制保持 0.
+        public TtPermutationItem EnableProbeFallback { get; set; }
+        [Category("Option")]
+        public bool IsEnableProbeFallback
+        {
+            get { return EnableProbeFallback.GetValue() == (int)EPermutation_Bool.TrueValue; }
+            set { EnableProbeFallback.SetValue(value); this.UpdatePermutation().AddWaitTask(); }
+        }
+
         public TtReSTIRInitialSamplingShading()
         {
             CodeName = RName.GetRName("Shaders/GI/ReSTIR/ReSTIRInitialSampling.compute", RName.ERNameType.Engine);
@@ -73,6 +85,8 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             EnableSkyCube.SetValue((int)EPermutation_Bool.FalseValue);
             EnableHzbAccel = this.PushPermutation<EPermutation_Bool>("ENV_USE_HZB", (int)EPermutation_Bool.BitWidth);
             EnableHzbAccel.SetValue((int)EPermutation_Bool.FalseValue);
+            EnableProbeFallback = this.PushPermutation<EPermutation_Bool>("ENV_USE_PROBE_FALLBACK", (int)EPermutation_Bool.BitWidth);
+            EnableProbeFallback.SetValue((int)EPermutation_Bool.FalseValue);
 
             UpdatePermutation().AddWaitTask();
         }
@@ -138,6 +152,26 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
                 var hzbSampBinder = drawcall.FindBinder(EShaderBindType.SBT_Sampler, "Samp_HzbPoint");
                 if (hzbSampBinder.IsValidPointer)
                     drawcall.BindSampler(hzbSampBinder, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+            }
+
+            // ProbeVolume: 仅在 ENV_USE_PROBE_FALLBACK=1 编译产物里存在 binder.
+            // ProbeVolumeNode 为 null 或未 Ready 时, permutation 一定是 0
+            // (由节点的 EnableProbeFallback setter 强制保证), binder 不存在, 与 EnvMap 同一套保护.
+            var probeNode = node.ProbeVolumeSource;
+            if (probeNode != null && probeNode.IsReady)
+            {
+                var probeInfoBinder = drawcall.FindBinder(EShaderBindType.SBT_SRV, "ProbeInfos");
+                if (probeInfoBinder.IsValidPointer)
+                    drawcall.BindSrv(probeInfoBinder, probeNode.ProbeInfoBuffer.Srv);
+                var probeSHBinder = drawcall.FindBinder(EShaderBindType.SBT_SRV, "ProbeSH");
+                if (probeSHBinder.IsValidPointer)
+                    drawcall.BindSrv(probeSHBinder, probeNode.ProbeSHBuffer.Srv);
+                var tetraBinder = drawcall.FindBinder(EShaderBindType.SBT_SRV, "ProbeTetrahedra");
+                if (tetraBinder.IsValidPointer)
+                    drawcall.BindSrv(tetraBinder, probeNode.TetraBuffer.Srv);
+                var bvhBinder = drawcall.FindBinder(EShaderBindType.SBT_SRV, "ProbeBvhNodes");
+                if (bvhBinder.IsValidPointer)
+                    drawcall.BindSrv(bvhBinder, probeNode.BvhBuffer.Srv);
             }
         }
     }
@@ -413,6 +447,30 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             }
         }
 
+        // ENV_USE_PROBE_FALLBACK permutation 开关: 配置型切换, 同 EnableEnvMap.
+        // ProbeVolumeSource 为 null 或未 Ready 时, setter 会被 Tick 覆盖回 false.
+        // 用户主动注入 ProbeVolumeSource -> 自动设为 true.
+        bool mEnableProbeFallback = false;
+        [Category("ReSTIR")]
+        [Rtti.Meta("")]
+        public bool EnableProbeFallback
+        {
+            get { return mEnableProbeFallback; }
+            set
+            {
+                if (mEnableProbeFallback == value)
+                    return;
+                mEnableProbeFallback = value;
+                if (mInitial != null)
+                    mInitial.IsEnableProbeFallback = value;
+            }
+        }
+
+        // 由外部注入的 ProbeVolume 节点引用, 提供 probe SH / 四面体 / BVH 的 GPU buffer.
+        // 节点本身不负责 probe 的生成和刷新, 只负责"如果有就用".
+        // 注入后会自动开启 ENV_USE_PROBE_FALLBACK permutation.
+        public TtProbeVolumeNode ProbeVolumeSource;
+
         // 由外部 (例如全场景 TLAS 管理器或 RayTracingNode) 注入的场景 acceleration structure.
         // 节点本身不负责 TLAS 的 build / refit / instance 维护, 只负责"如果有就用".
         public NxRHI.TtTopAccelerationStructure SceneTLAS;
@@ -443,6 +501,8 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
         uint mWidth = 0;
         uint mHeight = 0;
         uint mFrameIndex = 0;
+        const int ResizeSuppressFrameCount = 4;
+        int mSuppressAfterResizeFrameCount = 0;
 
         public TtReSTIRGINode()
         {
@@ -501,6 +561,10 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             }
             mInitial.IsEnableHzbAccel = mEnableHzbAccel;
 
+            // ProbeVolume: 外部注入 ProbeVolumeSource 后自动开启; 未注入时强制关.
+            mInitial.IsEnableProbeFallback = (ProbeVolumeSource != null && ProbeVolumeSource.IsReady);
+            mEnableProbeFallback = mInitial.IsEnableProbeFallback;
+
             await mInitial.UpdatePermutation();
 
             mTemporal = await TtShadingEnv.CreateShadingEnv<TtReSTIRTemporalReuseShading>();
@@ -557,6 +621,9 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             IndirectDiffusePinOut.Attachement.Height = h;
 
             ReleaseReservoirBuffers();
+            // 屏幕空间 GI 在 viewport resize 拖动中会短暂拿到不稳定的屏幕空间命中,
+            // 容易把模型轮廓当成间接光投到背景上。尺寸稳定后再恢复 ReSTIR 输出。
+            mSuppressAfterResizeFrameCount = ResizeSuppressFrameCount;
 
             uint elementCount = w * h;
             for (int i = 0; i < mReservoirBuffers.Length; i++)
@@ -574,6 +641,10 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
         public TtSrView GetHistoryReservoirSrv() => mReservoirBuffers[mHistorySlot].Srv;
         public TtUaView GetTempReservoirUav() => mReservoirBuffers[kTempSlot].Uav;
         public TtSrView GetTempReservoirSrv() => mReservoirBuffers[kTempSlot].Srv;
+        float GetEffectiveIntensity()
+        {
+            return mSuppressAfterResizeFrameCount > 0 ? 0.0f : Intensity;
+        }
 
         // HZB mip0 = screenSize/2, 最大 mip = floor(log2(max(mip0W, mip0H))).
         // 使用整数位运算避免浮点精度问题 (如 512.0 经 Math.Log2 得到 8.999… 被截断为 8).
@@ -604,7 +675,7 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
                 mSharedCBuffer.SetValue("DepthThreshold", DepthThreshold);
                 mSharedCBuffer.SetValue("SpatialSampleCount", SpatialSampleCount);
                 mSharedCBuffer.SetValue("SpatialRadius", SpatialRadius);
-                mSharedCBuffer.SetValue("Intensity", Intensity);
+                mSharedCBuffer.SetValue("Intensity", GetEffectiveIntensity());
                 mSharedCBuffer.SetValue("MaxRadiance", MaxRadiance);
                 mSharedCBuffer.SetValue("InitialSampleCount", InitialSampleCount);
                 var skyColor = SkyColor;
@@ -631,7 +702,7 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             mSharedCBuffer.SetValue("DepthThreshold", DepthThreshold);
             mSharedCBuffer.SetValue("SpatialSampleCount", SpatialSampleCount);
             mSharedCBuffer.SetValue("SpatialRadius", SpatialRadius);
-            mSharedCBuffer.SetValue("Intensity", Intensity);
+            mSharedCBuffer.SetValue("Intensity", GetEffectiveIntensity());
             mSharedCBuffer.SetValue("MaxRadiance", MaxRadiance);
             mSharedCBuffer.SetValue("InitialSampleCount", InitialSampleCount);
             var skyColorVal = SkyColor;
@@ -692,6 +763,8 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
                 cmd.FlushDraws();
             }
             policy.CommitCommandList(cmd, "ReSTIRGI");
+            if (mSuppressAfterResizeFrameCount > 0)
+                mSuppressAfterResizeFrameCount--;
         }
     }
 }

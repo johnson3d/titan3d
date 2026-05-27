@@ -1,13 +1,34 @@
-﻿using System;
+﻿using EngineNS.NxRHI;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
-using EngineNS.NxRHI;
-using Org.BouncyCastle.Asn1.Mozilla;
 
 namespace EngineNS.Graphics.Pipeline
 {
+    [IO.TtConfig(Path = "graphics.jscfg")]
+    public class TtGfxDeviceConfig : IO.IConfig
+    {
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public bool IsReverseZ { get; set; } = true;
+        [Rtti.Meta("")]
+        public bool UseOctahedronNormal { get; set; } = false;
+    }
     public partial class TtGfxDevice : TtModule<TtEngine>
     {
+        TtGfxDeviceConfig mConfig;
+        public TtGfxDeviceConfig Config
+        {
+            get
+            {
+                if (mConfig == null)
+                {
+                    mConfig = TtEngine.Instance.ConfigManager.GetConfig<TtGfxDeviceConfig>();
+                }
+                return mConfig;
+            }
+        }
         public override int GetOrder()
         {
             return 0;
@@ -23,12 +44,6 @@ namespace EngineNS.Graphics.Pipeline
                 }
                 return true;
             }
-
-#if PWindow
-            if (SDL.SDL3.SDL_Init(SDL.SDL_InitFlags.SDL_INIT_EVENTS) == false)
-                return false;
-            TtNativeWindow.PropertiesID_WindowData = SDL.SDL3.SDL_CreateProperties();
-#endif
 
             var wtType = Rtti.TtTypeDesc.TypeOf(engine.Config.MainWindowType).SystemType;
             if (wtType == null)
@@ -256,6 +271,7 @@ namespace EngineNS.Graphics.Pipeline
                 RenderContext = RenderSystem.CreateGpuDevice(in rcDesc);
                 if (RenderContext == null)
                     return false;
+                RenderContext.InitShaderGlobalEnv(engine);
 
                 RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE, false);
                 RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.DRAW_EMPTY_SCISSOR_RECTANGLE, false);

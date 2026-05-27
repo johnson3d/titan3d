@@ -4,6 +4,13 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
+    public class TtShadeBaseNode : TtNodeBase
+    {
+        public virtual void UpdateAMetaReferences(IO.IAssetMeta ameta, Bricks.CodeBuilder.ShaderNode.TtMaterialGraph MaterialGraph)
+        {
+
+        }
+    }
     //public partial class IBaseNode : UNodeBase
     //{
         //internal UMaterialGraph Graph;

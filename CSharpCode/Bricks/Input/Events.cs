@@ -810,7 +810,8 @@ namespace EngineNS.Bricks.Input
         WINDOWEVENT_FOCUS_LOST = 13,
         WINDOWEVENT_CLOSE = 14,
         WINDOWEVENT_TAKE_FOCUS = 15,
-        WINDOWEVENT_HIT_TEST = 16
+        WINDOWEVENT_HIT_TEST = 16,
+        WINDOWEVENT_OCCLUDED = 17
     }
     public struct WindowEvent
     {

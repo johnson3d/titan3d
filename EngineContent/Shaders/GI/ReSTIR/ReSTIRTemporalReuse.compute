@@ -37,7 +37,7 @@ void CS_Main(uint3 id : SV_DispatchThreadID)
         return;
     }
 
-    float3 currN = normalize(GBufferRT1.SampleLevel(Samp_PointClamp, uv, 0).xyz * 2.0f - 1.0f);
+    float3 currN = DecodeNormalFromGBuffer(GBufferRT1.SampleLevel(Samp_PointClamp, uv, 0));
 
     // motion vector: 当前 uv -> 上一帧 uv 的位移
     float2 motionRaw = MotionVector.SampleLevel(Samp_PointClamp, uv, 0).rg;

@@ -1,6 +1,8 @@
-﻿using EngineNS.Graphics.Mesh;
+﻿using EngineNS.Bricks.AdvanceShadow;
+using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline.Common;
 using EngineNS.Graphics.Pipeline.Shader;
+using EngineNS.Graphics.Pipeline.Shadow;
 using EngineNS.NxRHI;
 using Microsoft.CodeAnalysis.Host;
 using System;
@@ -39,6 +41,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             set;
         }
         public TtPermutationItem EnableRimLight
+        {
+            get;
+            set;
+        }
+        public TtPermutationItem EnableSeparatedSpecular
         {
             get;
             set;
@@ -113,18 +120,20 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             this.BeginPermutaion();
 
             DisableAO = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_AO", (int)Shader.EPermutation_Bool.BitWidth);
-            DisablePointLights = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_POINTLIGHTS", (int)Shader.EPermutation_Bool.BitWidth);
+            DisablePointLights = this.PushPermutation<Shader.EPermutation_Bool>("ENV_GRID_LIGHTS", (int)Shader.EPermutation_Bool.BitWidth);
             DisableSunshaft = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_SUNSHAFT", (int)Shader.EPermutation_Bool.BitWidth);
             DisableBloom = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_BLOOM", (int)Shader.EPermutation_Bool.BitWidth);
             DisableHdr = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_HDR", (int)Shader.EPermutation_Bool.BitWidth);
             EnableRimLight = this.PushPermutation<Shader.EPermutation_Bool>("ENV_ENABLE_RIMLIGHT", (int)Shader.EPermutation_Bool.BitWidth);
+            EnableSeparatedSpecular = this.PushPermutation<Shader.EPermutation_Bool>("ENV_ENABLE_SEPARATED_SPECULAR", (int)Shader.EPermutation_Bool.BitWidth);
 
             DisableAO.SetValue((int)Shader.EPermutation_Bool.FalseValue);
-            DisablePointLights.SetValue((int)Shader.EPermutation_Bool.FalseValue);
+            DisablePointLights.SetValue((int)Shader.EPermutation_Bool.TrueValue);
             DisableSunshaft.SetValue((int)Shader.EPermutation_Bool.TrueValue);
             DisableBloom.SetValue((int)Shader.EPermutation_Bool.TrueValue);
             DisableHdr.SetValue((int)Shader.EPermutation_Bool.TrueValue);
             EnableRimLight.SetValue((int)Shader.EPermutation_Bool.FalseValue);
+            EnableSeparatedSpecular.SetValue((int)Shader.EPermutation_Bool.FalseValue);
 
             DebugShowModePermutation = this.PushPermutation<EDebugShowMode>("ENV_EDebugShowMode", GetBitWidth((int)EDebugShowMode.Num));
             DebugShowModePermutation.SetValue((int)EDebugShowMode.None);
@@ -219,29 +228,25 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             #endregion
 
             #region shadow
-            if (dirLightingNode.mBasePassShading.ShadowMode != EShadowMode.None)
+            if (dirLightingNode.mBasePassShading.ShadowMode == EShadowMode.Advance)
             {
                 var advShadowNode = dirLightingNode.AdvanceShadowMapNode;
                 if (advShadowNode != null && advShadowNode.Enable)
                 {
-                    if (dirLightingNode.mBasePassShading.ShadowMode != EShadowMode.Advance)
-                        dirLightingNode.mBasePassShading.ShadowMode = EShadowMode.Advance;
                     dirLightingNode.AdvanceShadowMapNode.OnDirLightingDrawCall(cmd, drawcall, policy, atom);
                 }
-                else
+            }
+            else if (dirLightingNode.mBasePassShading.ShadowMode == EShadowMode.Csm)
+            {
+                index = drawcall.FindBinder("GShadowMap");
+                if (index.IsValidPointer)
                 {
-                    if (dirLightingNode.mBasePassShading.ShadowMode != EShadowMode.Csm)
-                        dirLightingNode.mBasePassShading.ShadowMode = EShadowMode.Csm;
-                    index = drawcall.FindBinder("GShadowMap");
-                    if (index.IsValidPointer)
-                    {
-                        var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.ShadowMapPinIn);
-                        drawcall.BindSRV(index, attachBuffer.Srv);
-                    }
-                    index = drawcall.FindBinder("Samp_GShadowMap");
-                    if (index.IsValidPointer)
-                        drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                    var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.ShadowMapPinIn);
+                    drawcall.BindSRV(index, attachBuffer.Srv);
                 }
+                index = drawcall.FindBinder("Samp_GShadowMap");
+                if (index.IsValidPointer)
+                    drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
             }
             #endregion
 
@@ -279,19 +284,70 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             #endregion
 
             #region MultiLights
-            index = drawcall.FindBinder("TilingBuffer");
-            if (index.IsValidPointer)
-            {
-                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.TileScreenPinIn);
-                drawcall.BindSRV(index, attachBuffer.Srv);
-            }
-
             index = drawcall.FindBinder("GpuScene_PointLights");
             if (index.IsValidPointer)
             {
                 var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.PointLightsPinIn);
-                if (attachBuffer.Srv != null)
+                if (attachBuffer?.Srv != null)
                     drawcall.BindSRV(index, attachBuffer.Srv);
+            }
+
+            index = drawcall.FindBinder("GpuScene_SpotLights");
+            if (index.IsValidPointer)
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.SpotLightsPinIn);
+                if (attachBuffer?.Srv != null)
+                    drawcall.BindSRV(index, attachBuffer.Srv);
+            }
+
+            index = drawcall.FindBinder("PointGridHeaders");
+            if (index.IsValidPointer)
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.PointGridHeadersPinIn);
+                if (attachBuffer?.Srv != null)
+                    drawcall.BindSRV(index, attachBuffer.Srv);
+            }
+
+            index = drawcall.FindBinder("PointGridDataIndices");
+            if (index.IsValidPointer)
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.PointGridDataIndicesPinIn);
+                if (attachBuffer?.Srv != null)
+                    drawcall.BindSRV(index, attachBuffer.Srv);
+            }
+
+            index = drawcall.FindBinder("SpotGridHeaders");
+            if (index.IsValidPointer)
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.SpotGridHeadersPinIn);
+                if (attachBuffer?.Srv != null)
+                    drawcall.BindSRV(index, attachBuffer.Srv);
+            }
+
+            index = drawcall.FindBinder("SpotGridDataIndices");
+            if (index.IsValidPointer)
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.SpotGridDataIndicesPinIn);
+                if (attachBuffer?.Srv != null)
+                    drawcall.BindSRV(index, attachBuffer.Srv);
+            }
+
+            index = drawcall.FindBinder("cbFrustumGrid");
+            if (index.IsValidPointer)
+            {
+                var gridNode = policy.FindFirstNode<Common.TtFrustumGrid3DNode>();
+                if (gridNode?.PerFrustumGridCbv != null)
+                    drawcall.BindCBV(index, gridNode.PerFrustumGridCbv);
+            }
+            #endregion
+
+            #region SubsurfaceProfiles
+            index = drawcall.FindBinder("SubsurfaceProfiles");
+            if (index.IsValidPointer)
+            {
+                var profileMgr = TtEngine.Instance.GfxDevice.SubsurfaceProfileManager;
+                if (profileMgr?.ProfileSRV != null)
+                    drawcall.BindSRV(index, profileMgr.ProfileSRV);
             }
             #endregion
 
@@ -337,6 +393,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             DisablePointLights.SetValue(value);
             UpdatePermutation().AddWaitTask();
         }
+        public void SetEnableSeparatedSpecular(bool value)
+        {
+            EnableSeparatedSpecular.SetValue(value);
+            UpdatePermutation().AddWaitTask();
+        }
     }
     [Bricks.CodeBuilder.ContextMenu("DirLighting", "Deferred\\DirLighting", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.UDeferredDirLightingNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.UDeferredDirLightingNode" })]
@@ -351,17 +412,26 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public TtRenderGraphPin ShadowMapPinIn = TtRenderGraphPin.CreateInput("ShadowMap", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin EnvMapPinIn = TtRenderGraphPin.CreateInput("EnvMap", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin VignettePinIn = TtRenderGraphPin.CreateInput("Vignette", NxRHI.EBufferType.BFT_SRV);
-        public TtRenderGraphPin TileScreenPinIn = TtRenderGraphPin.CreateInput("TileScreen", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin GpuScenePinIn = TtRenderGraphPin.CreateInput("GpuScene", NxRHI.EBufferType.BFT_SRV);
+        
         public TtRenderGraphPin PointLightsPinIn = TtRenderGraphPin.CreateInput("PointLights", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+        public TtRenderGraphPin PointGridHeadersPinIn = TtRenderGraphPin.CreateInput("PointGridHeaders", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin PointGridDataIndicesPinIn = TtRenderGraphPin.CreateInput("PointGridDataIndices", NxRHI.EBufferType.BFT_SRV);
+        
+        public TtRenderGraphPin SpotLightsPinIn = TtRenderGraphPin.CreateInput("SpotLights", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+        public TtRenderGraphPin SpotGridHeadersPinIn = TtRenderGraphPin.CreateInput("SpotGridHeaders", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin SpotGridDataIndicesPinIn = TtRenderGraphPin.CreateInput("SpotGridDataIndices", NxRHI.EBufferType.BFT_SRV);
 
         public TtRenderGraphPin RtAdvShadowIn = TtRenderGraphPin.CreateInput("AdvShadow", NxRHI.EBufferType.BFT_NONE);
+
+        public TtRenderGraphPin SpecularPinOut = TtRenderGraphPin.CreateOutput("Specular", true, EPixelFormat.PXF_R16G16B16A16_FLOAT, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
 
         public NxRHI.TtCbView CBShadingEnv;
         [Category("Shading")]
         public float RimPower { get; set; } = 5.0f;
         [Category("Shading")]
         public float RimIntensity { get; set; } = 0.5f;
+
         public TtDeferredDirLightingNode()
         {
             Name = "DeferredDirLightingNode";
@@ -374,23 +444,90 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public override void InitNodePins()
         {
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16G16B16A16_FLOAT;
+            SpecularPinOut.Attachement.Format = EPixelFormat.PXF_R16G16B16A16_FLOAT;
             base.InitNodePins();
 
+            AddOutput(SpecularPinOut);
+            //SpecularPinOut.IsAllowInputNull = true;
             AddInput(Rt0PinIn);
             AddInput(Rt1PinIn);
             AddInput(Rt2PinIn);
             AddInputOutput(Rt3PinIn);
             //Rt3PinIn.IsAllowInputNull = true;
             AddInputOutput(DepthStencilPinIn);
-            AddInput(ShadowMapPinIn);
             AddInput(EnvMapPinIn);
             AddInput(VignettePinIn);
-            AddInput(TileScreenPinIn);
-            AddInput(PointLightsPinIn);
             AddInput(GpuScenePinIn);
+
+            AddInput(PointLightsPinIn);
+            AddInput(PointGridHeadersPinIn);
+            AddInput(PointGridDataIndicesPinIn);
+
+            AddInput(SpotLightsPinIn);
+            AddInput(SpotGridHeadersPinIn);
+            AddInput(SpotGridDataIndicesPinIn);
+
+            //2选1，优先使用AdvShadow
+            AddInput(ShadowMapPinIn);
+            ShadowMapPinIn.IsAllowInputNull = true;
             AddInput(RtAdvShadowIn);
             RtAdvShadowIn.IsAllowInputNull = true;
             RtAdvShadowIn.LinkType = "AdvShadow";
+        }
+        public bool IsSeparatedSpecularEnabled => SpecularPinOut.FindOutLinkers().Count > 0;
+        public override unsafe TtGraphicsBuffers CreateGBuffers(TtRenderPolicy policy, EPixelFormat format)
+        {
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            var PassDesc = new NxRHI.FRenderPassDesc();
+
+            if (IsSeparatedSpecularEnabled)
+            {
+                PassDesc.NumOfMRT = 2;
+                PassDesc.AttachmentMRTs[0].Format = format;
+                PassDesc.AttachmentMRTs[0].Samples = 1;
+                PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                PassDesc.AttachmentMRTs[1].Format = SpecularPinOut.Attachement.Format;
+                PassDesc.AttachmentMRTs[1].Samples = 1;
+                PassDesc.AttachmentMRTs[1].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                PassDesc.AttachmentMRTs[1].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+
+                RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
+                GBuffers.Initialize(policy, RenderPass);
+                GBuffers.SetRenderTarget(policy, 0, ResultPinOut);
+                GBuffers.SetRenderTarget(policy, 1, SpecularPinOut);
+            }
+            else
+            {
+                //base.CreateGBuffers(policy, format);
+                PassDesc.NumOfMRT = 1;
+                PassDesc.AttachmentMRTs[0].Format = format;
+                PassDesc.AttachmentMRTs[0].Samples = 1;
+                PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+
+                RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
+
+                GBuffers.Initialize(policy, RenderPass);
+                GBuffers.SetRenderTarget(policy, 0, ResultPinOut);
+            }
+
+            GBuffers.TargetViewIdentifier = TargetViewId;
+            return GBuffers;
+        }
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
+        {
+            if (GBuffers != null && RenderPass != null)
+            {
+                GBuffers.SetSize(x * OutputScaleFactor, y * OutputScaleFactor);
+                ResultPinOut.Attachement.Width = (uint)(x * OutputScaleFactor);
+                ResultPinOut.Attachement.Height = (uint)(y * OutputScaleFactor);
+                if (IsSeparatedSpecularEnabled)
+                {
+                    SpecularPinOut.Attachement.Width = (uint)(x * OutputScaleFactor);
+                    SpecularPinOut.Attachement.Height = (uint)(y * OutputScaleFactor);
+                }
+            }
         }
         public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
@@ -409,21 +546,80 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             return mBasePassShading;
         }
+        public TtShadowMapNode ShadowMapNode;
         public Bricks.AdvanceShadow.TtAdvanceShadowMapNode AdvanceShadowMapNode;
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
-            await base.Initialize(policy, debugName);
             mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtDeferredDirLightingShading>();
 
-            var linker = RtAdvShadowIn.FindInLinker();
-            if (linker != null)
+            if (SpecularPinOut.FindOutLinkers().Count > 0)
+            {
+                mBasePassShading.SetEnableSeparatedSpecular(true);
+            }
+            await base.Initialize(policy, debugName);
+
+            if (RtAdvShadowIn.FindInLinker() is var linker && linker != null)
             {
                 AdvanceShadowMapNode = linker.OutPin.HostNode as Bricks.AdvanceShadow.TtAdvanceShadowMapNode;
-
-                if (AdvanceShadowMapNode.Enable)
-                    mBasePassShading.ShadowMode = EShadowMode.Advance;
             }
-        } 
+            if (ShadowMapPinIn.FindInLinker() is var linker2 && linker2 != null)
+            {
+                ShadowMapNode = linker2.OutPin.HostNode as TtShadowMapNode;
+            }
+
+            if (AdvanceShadowMapNode != null)
+            {
+                AdvanceShadowMapNode.Enable = true;
+                mBasePassShading.ShadowMode = EShadowMode.Advance;
+                if (ShadowMapNode != null)
+                    ShadowMapNode.Enable = false;
+            }
+            else if (ShadowMapNode != null)
+            {
+                mBasePassShading.ShadowMode = EShadowMode.Csm;
+                ShadowMapNode.Enable = true;
+                if (AdvanceShadowMapNode != null)
+                    AdvanceShadowMapNode.Enable = false;
+            }
+            else
+            {
+                mBasePassShading.ShadowMode = EShadowMode.None;
+            }
+        }
+        [Category("Option")]
+        public EShadowMode ShadowMode
+        {
+            get => mBasePassShading.ShadowMode;
+            set
+            {
+                if (value == EShadowMode.Advance)
+                {
+                    if (AdvanceShadowMapNode != null)
+                        AdvanceShadowMapNode.Enable = true;
+                    else
+                        return;
+                    if (ShadowMapNode != null)
+                        ShadowMapNode.Enable = false;
+                }
+                else if (value == EShadowMode.Csm)
+                {
+                    if (ShadowMapNode != null)
+                        ShadowMapNode.Enable = true;
+                    else
+                        return;
+                    if (AdvanceShadowMapNode != null)
+                        AdvanceShadowMapNode.Enable = false;
+                }
+                else
+                {
+                    if (AdvanceShadowMapNode != null)
+                        AdvanceShadowMapNode.Enable = false;
+                    if (ShadowMapNode != null)
+                        ShadowMapNode.Enable = false;
+                }
+                mBasePassShading.ShadowMode = value;
+            }
+        }
         public override void Tick(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             GBuffers?.SetViewportCBuffer(world, policy);

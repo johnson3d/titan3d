@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
-    public class VarNode : TtNodeBase
+    public class VarNode : TtShadeBaseNode
     {
         public VarNode()
         {

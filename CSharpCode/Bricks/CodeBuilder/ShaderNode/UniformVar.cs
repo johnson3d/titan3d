@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
-    public partial class UUniformVar : TtNodeBase
+    public partial class UUniformVar : TtShadeBaseNode
     {
         Rtti.TtTypeDesc mVarType;
         [Rtti.Meta("")]

@@ -1,4 +1,6 @@
 #include "imgui_binding.h"
+#include "ColorTextEditor/TextEditor.h"
+#include "implot/implot.h"
 #ifdef IMGUI_ENABLE_FREETYPE
 #include "misc/freetype/imgui_freetype.h"
 #endif
@@ -104,6 +106,86 @@ extern "C" VFX_API void* TitanImGui_ImTextureData_GetPixels(void* texture_ptr)
 {
 	ImTextureData* texture = (ImTextureData*)texture_ptr;
 	return texture == nullptr || texture->Pixels == nullptr ? nullptr : texture->GetPixels();
+}
+
+static bool TitanImPlot_EnsureContextInternal()
+{
+	if (ImGui::GetCurrentContext() == nullptr)
+		return false;
+	if (ImPlot::GetCurrentContext() == nullptr)
+		ImPlot::CreateContext();
+	return ImPlot::GetCurrentContext() != nullptr;
+}
+
+extern "C" VFX_API int TitanImPlot_EnsureContext()
+{
+	return TitanImPlot_EnsureContextInternal() ? 1 : 0;
+}
+
+extern "C" VFX_API void TitanImPlot_DestroyContext()
+{
+	if (ImPlot::GetCurrentContext() != nullptr)
+		ImPlot::DestroyContext();
+}
+
+extern "C" VFX_API int TitanImPlot_BeginPlot(const char* title_id, const ImVec2* size, int flags)
+{
+	if (!TitanImPlot_EnsureContextInternal())
+		return 0;
+	const ImVec2 plot_size = size == nullptr ? ImVec2(-1, 0) : *size;
+	return ImPlot::BeginPlot(title_id, plot_size, (ImPlotFlags)flags) ? 1 : 0;
+}
+
+extern "C" VFX_API void TitanImPlot_EndPlot()
+{
+	if (ImPlot::GetCurrentContext() != nullptr)
+		ImPlot::EndPlot();
+}
+
+extern "C" VFX_API void TitanImPlot_SetupAxes(const char* x_label, const char* y_label, int x_flags, int y_flags)
+{
+	if (ImPlot::GetCurrentContext() == nullptr)
+		return;
+	ImPlot::SetupAxes(x_label, y_label, (ImPlotAxisFlags)x_flags, (ImPlotAxisFlags)y_flags);
+}
+
+extern "C" VFX_API void TitanImPlot_SetupAxesLimits(double x_min, double x_max, double y_min, double y_max, int cond)
+{
+	if (ImPlot::GetCurrentContext() == nullptr)
+		return;
+	ImPlot::SetupAxesLimits(x_min, x_max, y_min, y_max, (ImPlotCond)cond);
+}
+
+extern "C" VFX_API void TitanImPlot_SetNextAxesToFit()
+{
+	if (TitanImPlot_EnsureContextInternal())
+		ImPlot::SetNextAxesToFit();
+}
+
+extern "C" VFX_API void TitanImPlot_PlotLineFloat(const char* label_id, const float* xs, const float* ys, int count, int flags)
+{
+	if (ImPlot::GetCurrentContext() == nullptr || xs == nullptr || ys == nullptr || count <= 0)
+		return;
+	ImPlot::PlotLine(label_id, xs, ys, count, (ImPlotLineFlags)flags);
+}
+
+extern "C" VFX_API void TitanImPlot_PlotBarsFloat(const char* label_id, const float* xs, const float* ys, int count, double bar_size, int flags)
+{
+	if (ImPlot::GetCurrentContext() == nullptr || xs == nullptr || ys == nullptr || count <= 0)
+		return;
+	ImPlot::PlotBars(label_id, xs, ys, count, bar_size, (ImPlotBarsFlags)flags);
+}
+
+extern "C" VFX_API void TitanCodeEditor_ClearErrorMarkers(EngineNS::FCodeEditor* editor)
+{
+	if (editor != nullptr)
+		editor->ClearErrorMarkers();
+}
+
+extern "C" VFX_API void TitanCodeEditor_SetCursorPosition(EngineNS::FCodeEditor* editor, int line, int column)
+{
+	if (editor != nullptr)
+		editor->SetCursorPosition(line, column);
 }
 
 //void	ImGuiAPI::ImGui_NativeWindow_EnableDpiAwareness()
@@ -770,4 +852,3 @@ void EngineNS::ImGuiAPI::Markdown(const char* markdownText, int markdownLength, 
 
 	ImGui::Markdown(markdownText, (size_t)markdownLength, mdConfig);
 }
-

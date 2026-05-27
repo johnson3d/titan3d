@@ -9,6 +9,7 @@
     <Import_RootNamespace>EngineNS.Bricks.AssetImpExp</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AssetSourceImportPlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetImporter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PartialAnimationClip.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PartialMeshPrimitives.cs" />

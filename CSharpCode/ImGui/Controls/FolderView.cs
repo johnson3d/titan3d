@@ -152,7 +152,11 @@ namespace EngineNS.EGui.Controls
         public void Draw(in Vector2 size)
         {
             ApplyDirectoryShowCheckResults();
-            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ChildBg, 0xFF1A1A1A);
+            var styleConfig = UIProxy.StyleConfig.Instance;
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ChildRounding, 3.0f);
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, new Vector2(4, 3));
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ChildBg, styleConfig.ContentBrowserFolderBg);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, styleConfig.BorderColor);
             if (ImGuiAPI.BeginChild("LeftWindow", in size, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
             {
                 //var winMin = ImGuiAPI.GetWindowPos();
@@ -171,7 +175,8 @@ namespace EngineNS.EGui.Controls
                 ImGuiAPI.PopStyleColor(3);
             }
             ImGuiAPI.EndChild();
-            ImGuiAPI.PopStyleColor(1);
+            ImGuiAPI.PopStyleColor(2);
+            ImGuiAPI.PopStyleVar(2);
 
             if (!string.IsNullOrEmpty(mCreateFolderDir))
             {
@@ -294,6 +299,7 @@ namespace EngineNS.EGui.Controls
         }
         void DrawDirContextMenu(string path)
         {
+            UIProxy.StyleConfig.Instance.PushPopupStyle();
             if (ImGuiAPI.BeginPopupContextItem(path, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
             {
                 if (mDirContextMenu != null)
@@ -309,6 +315,7 @@ namespace EngineNS.EGui.Controls
                 }
                 ImGuiAPI.EndPopup();
             }
+            UIProxy.StyleConfig.Instance.PopPopupStyle();
         }
         private unsafe void DrawTree(RName.ERNameType type, string parentDir, string dirName)
         {
@@ -337,7 +344,7 @@ namespace EngineNS.EGui.Controls
                 //ImGuiAPI.SetScrollHereY(0.5f);
                 textColor = 0xffffffff;
             }
-            else if (CurrentDir.Address.Contains(path))
+            else if (CurrentDir != null && CurrentDir.Address.Contains(path))
             {
                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen;
             }
@@ -366,14 +373,14 @@ namespace EngineNS.EGui.Controls
             {
                 var shadowImg = TtEngine.Instance.UIProxyManager[FolderOpenImgName] as EGui.UIProxy.ImageProxy;
                 if (shadowImg != null)
-                    shadowImg.OnDraw(cmdList, start, start + new Vector2(imgSize, imgSize), 0xff558fb6);
+                    shadowImg.OnDraw(cmdList, start, start + new Vector2(imgSize, imgSize), UIProxy.StyleConfig.Instance.LinkStringColor);
             }
             else
             {
                 start.X += style->IndentSpacing * dpiScale;
                 var shadowImg = TtEngine.Instance.UIProxyManager[FolderClosedImgName] as EGui.UIProxy.ImageProxy;
                 if (shadowImg != null)
-                    shadowImg.OnDraw(cmdList, start, start + new Vector2(imgSize, imgSize), 0xff558fb6);
+                    shadowImg.OnDraw(cmdList, start, start + new Vector2(imgSize, imgSize), UIProxy.StyleConfig.Instance.TextDisableColor);
             }
             rectSize.X = imgSize + style->ItemSpacing.X;
             rectSize.Y = imgSize;

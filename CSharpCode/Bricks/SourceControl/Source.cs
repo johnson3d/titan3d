@@ -132,6 +132,13 @@ namespace EngineNS.Bricks.SourceControl
                 Source.RemoveFile(file, delLocal);
             }
         }
+        public void RemoveDirectory(string dir, bool delLocal = true)
+        {
+            if (Source != null)
+            {
+                Source.RemoveDirectory(dir, delLocal);
+            }
+        }
         public void AddDirectory(string path)
         {
             if (Source != null)
@@ -149,4 +156,3 @@ namespace EngineNS
         public Bricks.SourceControl.TtSourceControlModule SourceControlModule { get; } = new Bricks.SourceControl.TtSourceControlModule();
     }
 }
-

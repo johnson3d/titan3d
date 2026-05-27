@@ -100,14 +100,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 mSlateEffect.ShaderEffect.DebugName = "ShaderNode.Var.Texture2D";
 
                 var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<EngineNS.Editor.Forms.TtTextureViewerCmdParams>();
-                var cbBinder = mSlateEffect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");
+                var cbBinder = mSlateEffect.ShaderEffect.FindBinder("cbShadingEnv");
                 if (cbBinder == null)
                 {
-                    Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, "Texture2D", $"Find binder ProjectionMatrixBuffer");
+                    Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, "Texture2D", $"Find binder cbShadingEnv");
                     return;
                 }
                 cmdParams.CBuffer = rc.CreateCBV(cbBinder);
-                cmdParams.Drawcall.BindShaderEffect(mSlateEffect);
+                cmdParams.Drawcall.BindShaderEffect(mSlateEffect, mSlateEffect.ShadingEnv);
                 cmdParams.Drawcall.BindCBV(cbBinder.mCoreObject, cmdParams.CBuffer);
                 cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, TextureSRV);
                 cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);

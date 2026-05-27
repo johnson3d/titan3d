@@ -26,12 +26,12 @@
 
 #if defined(HLSL_VERSION)
 	#if HLSL_VERSION == 2021
-		#define V_Select(cond, a, b) select(cond, a, b);
+		#define V_Select(cond, a, b) select(cond, a, b)
 	#else
-		#define V_Select(cond, a, b) (cond) ? a : b;
+		#define V_Select(cond, a, b) (cond) ? a : b
 	#endif
 #else
-	#define V_Select(cond, a, b) (cond) ? a : b;
+	#define V_Select(cond, a, b) (cond) ? a : b
 #endif
 
 static float2 CreateVector2f(float x, float y)
@@ -415,7 +415,7 @@ half3 YCoCgToRGB(half3 YCoCg)
 	return RGB;
 }
 
-#define MOTIONVECTOR_SCALAR 0
+#define MOTIONVECTOR_SCALAR 0.5f
 
 // 写入端把 NDC 约定（y 向上）转换为纹理 UV 约定（y 向下），
 // 这样所有消费端 (TAA / MotionBlur / SSR ...) 直接用 screenUV - MV 即可，
@@ -423,16 +423,18 @@ half3 YCoCgToRGB(half3 YCoCg)
 static float2 EncodeMotionVector(float2 v)
 {
 	float2 uvSpace = float2(v.x, -v.y);
-#if MOTIONVECTOR_SCALAR == 0
+#if !defined(MOTIONVECTOR_SCALAR)
 	return uvSpace;
 #else
+    uvSpace = clamp(uvSpace, -1.0f, 1.0f);
+	//uv[-1,1] -> uv[0,1]
 	return uvSpace * MOTIONVECTOR_SCALAR + 0.5f;
 #endif
 }
 
 static float2 DecodeMotionVector(float2 v)
 {
-#if MOTIONVECTOR_SCALAR == 0
+#if !defined(MOTIONVECTOR_SCALAR)
 	return v.xy;
 #else
 	return (v.xy - 0.5) / MOTIONVECTOR_SCALAR;
@@ -495,37 +497,47 @@ float3 SphericalDecode(float2 v)
 	return v3;
 }
 
-float2 OctEncode(float3 v3)
+float3 EncodeNormalXYZ(float3 n)
 {
-	float dxyz = abs(v3.x) + abs(v3.y) + abs(v3.z);
-	v3 = v3 / dxyz;
-
-	float2 n = float2(v3.x, v3.y);
-
-	if (v3.z < 0)
-	{
-		float nx = n.x;
-		float ny = n.y;
-
-		n.x = (1.0 - abs(nx)) * (nx >= 0.0 ? 1.0 : -1.0);
-		n.y = (1.0 - abs(ny)) * (ny >= 0.0 ? 1.0 : -1.0);
-	}
-
-	n.x = n.x * 0.5 + 0.5;
-	n.y = n.y * 0.5 + 0.5;
-	return n;
+    return float3(n.xyz * 0.5f + 0.5f);
 }
 
-float3 OctDecode(float2 v)
+float3 DecodeNormalXYZ(float3 enc)
 {
-	v = v * 2.0 - 1.0;
+    return enc.xyz * 2 - 1;
+}
 
-	float3 n = float3(v.x, v.y, 1.0 - abs(v.x) - abs(v.y));
-	float t = clamp(-n.z, 0.0, 1.0);
-	n.x = n.x + (n.x > 0.0 ? -t : t);
-	n.y = n.y + (n.y > 0.0 ? -t : t);
-	
-	return normalize(n);
+// Octahedron normal encoding (3D unit vector → 2 floats in [0,1])
+    // Reference: "Survey of Efficient Representations for Independent Unit Vectors" (Cigolle et al. 2014)
+float2 OctEncode(float3 n)
+{
+    float3 an = abs(n);
+    float2 o = n.xy * (1.0f / (an.x + an.y + an.z));
+        // Reflect lower hemisphere
+    if (n.z < 0.0f)
+    {
+        o = (1.0f - abs(o.yx)) * float2(o.x >= 0.0f ? 1.0f : -1.0f, o.y >= 0.0f ? 1.0f : -1.0f);
+    }
+    return o * 0.5f + 0.5f;
+}
+
+float3 OctDecode(float2 enc)
+{
+    float2 f = enc * 2.0f - 1.0f;
+    float3 n = float3(f.x, f.y, 1.0f - abs(f.x) - abs(f.y));
+        // Branchless lower-hemisphere reflection (avoids precision issues at z≈0 boundary)
+    float t = saturate(-n.z);
+    n.xy += float2(n.x >= 0.0f ? -t : t, n.y >= 0.0f ? -t : t);
+    return normalize(n);
+}
+
+half3 DecodeNormalFromGBuffer(half4 rt1)
+{
+#if USE_OCTAHEDRON_NORMAL == 1
+    return OctDecode(rt1.rg);
+#else
+    return DecodeNormalXYZ(rt1.xyz);
+#endif
 }
 
 //Approximation TaylorExpansion

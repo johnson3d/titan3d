@@ -42,12 +42,16 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\PickedNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\PickHollowNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\SceenSpaceNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\FrustumGrid3D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\FrustumGrid3DNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\ScreenTilingNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CpuCullingNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\MultiViewID\BasePassNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\SdfForwordNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GI\BLAS.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GI\DelaunayTetrahedralization.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GI\ProbeVolume\TtProbeVolumeData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GI\ProbeVolume\TtProbeVolumeNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRGINode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GI\SHCoefficient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GI\Tetrahedron.cs" />
@@ -55,6 +59,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)GpuCullingNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\DeferredBasePassNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\DeferredDirLightingNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Deferred\SSSBlurNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Deferred\TtSubsurfaceProfile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\DeferredPolicy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\ForwordNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GpuBuffer.cs" />

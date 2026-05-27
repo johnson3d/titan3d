@@ -59,12 +59,15 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     PS_OUTPUT output = (PS_OUTPUT)0;
 
     float2 uv = input.vUV;
-    
-    //float depth = DepthBuffer.SampleLevel(Samp_DepthBuffer, uv, 0);
-    
-    //output.RT0.r = GetESMValue(depth, ZNear, ZFar);
-    
+
+#if DISABLE_ESM == 1
+    // Direct depth copy (traditional depth comparison mode)
+    output.RT0.r = DepthBuffer.SampleLevel(Samp_DepthBuffer, uv, 0).r;
+#else
+    // ESM: Gauss-filtered exponential depth
     output.RT0.r = ESM_GaussNxN(DepthBuffer, Samp_DepthBuffer, uv, 5, float2(1 / 128.0f, 1 / 128.0f), GaussSigma);
+#endif
+
     return output;
 }
 

@@ -327,11 +327,128 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public void DrawImage(ImDrawList cmdlist, EGui.TtUVAnim icon, in Vector2 rcMin, in Vector2 rcMax)
         {
-            icon.OnDraw(cmdlist, rcMin, rcMax, 0);
+            var min = PixelSnap(rcMin);
+            var max = PixelSnap(rcMax);
+            icon.OnDraw(cmdlist, min, max, 0);
         }
         public Vector2 CanvasToDraw(in Vector2 pos)
         {
             return mGraph.CanvasToViewport(in pos) + DrawOffset;
+        }
+
+        private static float PixelSnap(float value)
+        {
+            return (float)Math.Floor(value) + 0.5f;
+        }
+
+        private static Vector2 PixelSnap(in Vector2 value)
+        {
+            return new Vector2(PixelSnap(value.X), PixelSnap(value.Y));
+        }
+
+        private static bool IsPinTexture(EGui.TtUVAnim icon, out bool isExec)
+        {
+            isExec = false;
+            var textureName = icon?.TextureName?.Name;
+            if (string.IsNullOrEmpty(textureName))
+                return false;
+
+            var styles = UNodeGraphStyles.DefaultStyles;
+            if (string.Equals(textureName, styles.PinConnectedVarImg, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(textureName, styles.PinDisconnectedVarImg, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (string.Equals(textureName, styles.PinConnectedExecImg, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(textureName, styles.PinDisconnectedExecImg, StringComparison.OrdinalIgnoreCase))
+            {
+                isExec = true;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static float ClampPositive(float value, float min)
+        {
+            return value < min ? min : value;
+        }
+
+        private void DrawPinIcon(ImDrawList cmdlist, EGui.TtUVAnim icon, in Vector2 rcMin, in Vector2 rcMax, bool connected)
+        {
+            if (IsPinTexture(icon, out var isExec))
+            {
+                var min = PixelSnap(rcMin);
+                var max = PixelSnap(rcMax);
+                if (isExec)
+                    DrawExecPinIcon(cmdlist, min, max, icon.Color, connected);
+                else
+                    DrawVarPinIcon(cmdlist, min, max, icon.Color, connected);
+                return;
+            }
+
+            DrawImage(cmdlist, icon, in rcMin, in rcMax);
+        }
+
+        private void DrawVarPinIcon(ImDrawList cmdlist, in Vector2 min, in Vector2 max, uint color, bool connected)
+        {
+            var size = max - min;
+            var height = ClampPositive(size.Y, 1.0f);
+            var center = new Vector2(min.X + height * 0.5f, min.Y + height * 0.5f);
+            var radius = Math.Max(2.0f, height * 0.42f);
+            var tailStart = new Vector2(center.X + radius * 0.45f, center.Y);
+            var tailEnd = new Vector2(max.X - 1.0f, center.Y);
+            var borderColor = 0xFF000000;
+            var segments = 24;
+
+            if (connected)
+            {
+                cmdlist.AddLine(tailStart, tailEnd, borderColor, ClampPositive(height * 0.28f, 2.0f));
+                cmdlist.AddLine(tailStart, tailEnd, color, ClampPositive(height * 0.18f, 1.0f));
+                cmdlist.AddCircleFilled(in center, radius, color, segments);
+                cmdlist.AddCircle(in center, radius, borderColor, segments, 1.0f);
+            }
+            else
+            {
+                var thickness = ClampPositive(height * 0.18f, 1.5f);
+                cmdlist.AddLine(tailStart, tailEnd, borderColor, thickness + 1.0f);
+                cmdlist.AddLine(tailStart, tailEnd, color, thickness);
+                cmdlist.AddCircle(in center, radius, borderColor, segments, thickness + 1.0f);
+                cmdlist.AddCircle(in center, radius, color, segments, thickness);
+            }
+        }
+
+        private void DrawExecPinIcon(ImDrawList cmdlist, in Vector2 min, in Vector2 max, uint color, bool connected)
+        {
+            var size = max - min;
+            var midY = PixelSnap(min.Y + size.Y * 0.5f);
+            var left = new Vector2(min.X + 1.0f, midY);
+            var top = new Vector2(min.X + size.X * 0.36f, min.Y + 1.0f);
+            var right = new Vector2(max.X - 1.0f, midY);
+            var bottom = new Vector2(min.X + size.X * 0.36f, max.Y - 1.0f);
+            var borderColor = 0xFF000000;
+
+            if (connected)
+            {
+                cmdlist.AddTriangleFilled(in left, in top, in right, borderColor);
+                cmdlist.AddTriangleFilled(in left, in bottom, in right, borderColor);
+
+                var innerLeft = new Vector2(left.X + 1.0f, left.Y);
+                var innerTop = new Vector2(top.X + 0.5f, top.Y + 1.0f);
+                var innerRight = new Vector2(right.X - 1.0f, right.Y);
+                var innerBottom = new Vector2(bottom.X + 0.5f, bottom.Y - 1.0f);
+                cmdlist.AddTriangleFilled(in innerLeft, in innerTop, in innerRight, color);
+                cmdlist.AddTriangleFilled(in innerLeft, in innerBottom, in innerRight, color);
+            }
+            else
+            {
+                var thickness = 1.5f;
+                cmdlist.AddTriangle(in left, in top, in right, borderColor, thickness + 1.0f);
+                cmdlist.AddTriangle(in left, in bottom, in right, borderColor, thickness + 1.0f);
+                cmdlist.AddTriangle(in left, in top, in right, color, thickness);
+                cmdlist.AddTriangle(in left, in bottom, in right, color, thickness);
+            }
         }
 
         public string BreakerName = "";
@@ -467,16 +584,16 @@ namespace EngineNS.Bricks.NodeGraph
                     if(mGraph.PinHasLinker(inPin))
                     {
                         if (inPin.LinkDesc != null && inPin.LinkDesc.Icon != null)
-                            DrawImage(cmdlist, inPin.LinkDesc.Icon, start, end);
+                            DrawPinIcon(cmdlist, inPin.LinkDesc.Icon, start, end, true);
                         else
-                            DrawImage(cmdlist, styles.PinInStyle.Image, start, end);
+                            DrawPinIcon(cmdlist, styles.PinInStyle.Image, start, end, true);
                     }
                     else
                     {
                         if (inPin.LinkDesc != null && inPin.LinkDesc.DisconnectIcon != null)
-                            DrawImage(cmdlist, inPin.LinkDesc.DisconnectIcon, start, end);
+                            DrawPinIcon(cmdlist, inPin.LinkDesc.DisconnectIcon, start, end, false);
                         else
-                            DrawImage(cmdlist, styles.PinInStyle.DisconnectImage, start, end);
+                            DrawPinIcon(cmdlist, styles.PinInStyle.DisconnectImage, start, end, false);
                     }
                 }
                 if(!string.IsNullOrEmpty(inPin.Name) && inPin.ShowName)
@@ -507,16 +624,16 @@ namespace EngineNS.Bricks.NodeGraph
                     if (mGraph.PinHasLinker(i))
                     {
                         if (i.LinkDesc != null && i.LinkDesc.Icon != null)
-                            DrawImage(cmdlist, i.LinkDesc.Icon, start, end);
+                            DrawPinIcon(cmdlist, i.LinkDesc.Icon, start, end, true);
                         else
-                            DrawImage(cmdlist, styles.PinInStyle.Image, start, end);
+                            DrawPinIcon(cmdlist, styles.PinInStyle.Image, start, end, true);
                     }
                     else
                     {
                         if (i.LinkDesc != null && i.LinkDesc.DisconnectIcon != null)
-                            DrawImage(cmdlist, i.LinkDesc.DisconnectIcon, start, end);
+                            DrawPinIcon(cmdlist, i.LinkDesc.DisconnectIcon, start, end, false);
                         else
-                            DrawImage(cmdlist, styles.PinInStyle.DisconnectImage, start, end);
+                            DrawPinIcon(cmdlist, styles.PinInStyle.DisconnectImage, start, end, false);
                     }
                 }
                 if (!string.IsNullOrEmpty(i.Name) && i.ShowName)

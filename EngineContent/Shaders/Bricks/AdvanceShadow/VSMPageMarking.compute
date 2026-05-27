@@ -1,0 +1,125 @@
+#include "../../Inc/VertexLayout.cginc"
+#include "../../Inc/Math.cginc"
+
+// Virtual Shadow Map Page Marking Compute Shader
+// Reads screen depth buffer and marks which QTree pages are needed for shadow rendering.
+// This implements screen-space demand-driven page allocation similar to UE5's VSM MarkPages pass.
+
+cbuffer cbVSMPageMarking DX_AUTOBIND
+{
+    float4x4 InvViewProjection;  // Screen → World
+    float4x4 ShadowProjection;  // World → Shadow space (top-down projection)
+    float2 BoxMin;               // QTree AABB min (XZ plane)
+    float2 BoxMax;               // QTree AABB max (XZ plane)
+    float2 ScreenSize;           // Depth buffer dimensions
+    float MaxShadowDistance;     // Maximum shadow distance from camera
+    int MaxDeepLevel;            // QTree maximum depth level
+    float3 CameraPosition;      // World-space camera position
+    int NodeCount;               // Total QTree nodes
+};
+
+// Input: depth buffer from GBuffer pass
+Texture2D<float> DepthBuffer DX_AUTOBIND;
+SamplerState Samp_DepthBuffer DX_AUTOBIND;
+
+// Output: page request flags buffer (one uint per virtual page)
+// Bit 0 = Requested this frame
+RWStructuredBuffer<uint> PageRequestFlags DX_AUTOBIND;
+
+// QTree layer info for determining which page a world position maps to
+struct FLayerInfo
+{
+    int2 LayerStartAndSide;  // x = start index, y = side count
+    float2 GridSize;         // Grid cell size for this layer
+};
+StructuredBuffer<FLayerInfo> LayerInfoBuffer DX_AUTOBIND;
+
+// Reconstruct world position from screen UV + depth
+float3 ReconstructWorldPosition(float2 screenUV, float depth)
+{
+    float4 clipPos;
+    clipPos.x = screenUV.x * 2.0 - 1.0;
+    clipPos.y = 1.0 - screenUV.y * 2.0;
+    clipPos.z = depth;
+    clipPos.w = 1.0;
+
+    float4 worldPos = mul(clipPos, InvViewProjection);
+    return worldPos.xyz / worldPos.w;
+}
+
+// Determine which QTree layer (level) a world position belongs to based on distance
+int GetLayerForDistance(float distance)
+{
+    if (distance > MaxShadowDistance)
+        return -1;
+
+    int level = (int)(distance * MaxDeepLevel / MaxShadowDistance);
+    return clamp(level, 0, MaxDeepLevel - 1);
+}
+
+// Map a world XZ position to a virtual page index in the QTree
+int GetVirtualPageIndex(float2 worldXZ, int level)
+{
+    // Check bounds
+    if (worldXZ.x < BoxMin.x || worldXZ.x > BoxMax.x ||
+        worldXZ.y < BoxMin.y || worldXZ.y > BoxMax.y)
+        return -1;
+
+    float2 normalizedPos = (worldXZ - BoxMin) / (BoxMax - BoxMin);
+    
+    int side = LayerInfoBuffer[level].LayerStartAndSide.y;
+    int startIndex = LayerInfoBuffer[level].LayerStartAndSide.x;
+    float2 gridSize = LayerInfoBuffer[level].GridSize;
+
+    float2 segment = (worldXZ - BoxMin) / gridSize;
+    int x = clamp((int)segment.x, 0, side - 1);
+    int y = clamp((int)segment.y, 0, side - 1);
+
+    int index = startIndex + (y * side + x);
+    if (index >= NodeCount)
+        return -1;
+
+    return index;
+}
+
+[numthreads(8, 8, 1)]
+void CS_MarkPages(uint3 dispatchThreadId : SV_DispatchThreadID)
+{
+    uint2 pixelCoord = dispatchThreadId.xy;
+    if (pixelCoord.x >= (uint)ScreenSize.x || pixelCoord.y >= (uint)ScreenSize.y)
+        return;
+
+    // Sample depth
+    float2 uv = (float2(pixelCoord) + 0.5) / ScreenSize;
+    float depth = DepthBuffer.SampleLevel(Samp_DepthBuffer, uv, 0).r;
+
+    // Skip sky pixels (depth = 1.0 or 0.0 depending on reverse-Z)
+    if (depth <= 0.0001 || depth >= 0.9999)
+        return;
+
+    // Reconstruct world position
+    float3 worldPos = ReconstructWorldPosition(uv, depth);
+
+    // Calculate distance from camera (XZ plane for QTree which is top-down)
+    float2 worldXZ = float2(worldPos.x, worldPos.z);
+    float2 cameraXZ = float2(CameraPosition.x, CameraPosition.z);
+    float distance = length(worldXZ - cameraXZ);
+
+    // Beyond shadow range
+    if (distance > MaxShadowDistance)
+        return;
+
+    // Determine QTree level based on distance
+    int level = GetLayerForDistance(distance);
+    if (level < 0)
+        return;
+
+    // Get the virtual page index for this world position
+    int virtualPageIndex = GetVirtualPageIndex(worldXZ, level);
+    if (virtualPageIndex < 0)
+        return;
+
+    // Mark this page as requested (atomic OR to handle concurrent writes)
+    uint originalValue;
+    InterlockedOr(PageRequestFlags[virtualPageIndex], 1u, originalValue);
+}

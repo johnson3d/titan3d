@@ -65,10 +65,41 @@ half3 PointLightShading(FPointLight light, float3 WorldPos, half3 V, half3 N, ha
 	return BaseShading;
 }
 
+half3 SpotLightShading(FSpotLight light, float3 WorldPos, half3 V, half3 N, half3 OptDiffShading, half3 OptSpecShading, half Roughness)
+{
+	half3 Lp = (half3)(light.PositionAndRadius.xyz - WorldPos);
+	half DistSqr = dot(Lp, Lp);
+
+	half AttenPL = rcp(DistSqr + 1.0h);
+	half radiusSq = (half)light.PositionAndRadius.w * (half)light.PositionAndRadius.w;
+	AttenPL = AttenPL * (half)Pow2(saturate(1.0h - (half)Pow2(DistSqr / radiusSq)));
+
+	Lp = normalize(Lp);
+
+	// Cone attenuation
+	half3 spotDir = (half3)light.DirectionAndInnerCos.xyz;
+	half cosAngle = dot(-Lp, spotDir);
+	half innerCos = (half)light.DirectionAndInnerCos.w;
+	half outerCos = (half)light.OuterCosAndPad.x;
+	half coneAtten = saturate((cosAngle - outerCos) / max(innerCos - outerCos, 0.001h));
+	coneAtten = coneAtten * coneAtten;
+
+	half NoLp = max(0.0h, dot(N, Lp));
+	half3 Hp = normalize(Lp + V);
+	half NoHp = max(0.0h, dot(N, Hp));
+	half LoHp = max(0.0h, dot(Lp, Hp));
+
+	half3 BaseShading = (OptDiffShading * pow(NoLp, -1.5h * Roughness + 2.0h) + BRDFPointLight(Roughness, N, Hp, NoHp, LoHp, OptSpecShading) * (half)sqrt(NoLp))
+		* (half3)light.ColorAndIntensity.rgb * (half)light.ColorAndIntensity.a * AttenPL * coneAtten;
+	return BaseShading;
+}
+
 #define TileSize 32
 #define MaxNumOfPointLight 32
+#define MaxNumOfSpotLight 32
 
 StructuredBuffer<FPointLight> GpuScene_PointLights DX_AUTOBIND;
+StructuredBuffer<FSpotLight> GpuScene_SpotLights DX_AUTOBIND;
 
 struct FTileData
 {
@@ -83,14 +114,15 @@ struct FTileData
 cbuffer cbPerGpuScene DX_AUTOBIND
 {
 	uint2		TileNum;
-	uint		LightNum;
-	uint		PixelNum;
+	uint		GpuScene_PointLightNum;
+	uint		GpuScene_SpotLightNum;
 	
+	uint		PixelNum;
 	float		HdrMiddleGrey;//0.6
 	float		HdrMinLuminance;//0.01
 	float		HdrMaxLuminance;//16
-	float		Exposure;//1.0f
 
+	float		Exposure;//1.0f
 	float		EyeAdapterTimeRange;
 }
 

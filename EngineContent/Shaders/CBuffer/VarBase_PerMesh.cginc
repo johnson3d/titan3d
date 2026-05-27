@@ -1,6 +1,7 @@
 #ifndef __VARBASE_PERMESH_SHADERINC__
 #define __VARBASE_PERMESH_SHADERINC__
 #include "../Inc/GlobalDefine.cginc"
+#include "../Inc/SystemEnumDefine.cginc"
 
 cbuffer cbPerMesh DX_BIND_B(5)
 {
@@ -18,16 +19,16 @@ cbuffer cbPerMesh DX_BIND_B(5)
 	float4 PointLightIndices;
 	int PointLightNum;
 
-    int ObjectFLags_2Bit;
+    int MeshRenderFlags;
 	
 	bool IsAcceptShadow()
 	{
-		return (ObjectFLags_2Bit & 1) != 0;
+		return (MeshRenderFlags & ERenderFlags_AcceptShadow) != 0;
 	}
 
 	bool IsUnlit()
 	{
-		return (ObjectFLags_2Bit & (2)) != 0;
+		return (MeshRenderFlags & ERenderFlags_UnLight) != 0;
 	}
 };
 

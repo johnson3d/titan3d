@@ -28,7 +28,7 @@ PS_INPUT VS_Main(VS_INPUT input1)
 
 #if defined(VS_NO_WorldTransform)
 	output.PointLightIndices = PointLightIndices;
-	output.SpecialData.x = PointLightNum;
+	output.SpecialData.x = GpuScene_PointLightNum;
 #endif
 
 	MTL_OUTPUT mtl = (MTL_OUTPUT)0;

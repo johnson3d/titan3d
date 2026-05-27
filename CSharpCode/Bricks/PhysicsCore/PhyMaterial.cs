@@ -34,14 +34,14 @@ namespace EngineNS.Bricks.PhysicsCore
             return "PhyMtl";
         }
     }
-    [TtPhyMaterial.UPhyMaterialImport]
+    [TtPhyMaterial.TtPhyMaterialImport]
     [IO.AssetCreateMenu(MenuName = "Physics/PhysicsMaterial")]
     [Editor.UAssetEditor(EditorType = typeof(TtPhyMaterialEditor))]
     public class TtPhyMaterial : AuxPtrType<PhyMaterial>, IO.IAsset, IO.ISerializer
     {
         public const string AssetExt = ".pxmtl";
         public string TypeExt { get => AssetExt; }
-        public class UPhyMaterialImportAttribute : IO.CommonCreateAttribute
+        public class TtPhyMaterialImportAttribute : IO.CommonCreateAttribute
         {
             public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
             {

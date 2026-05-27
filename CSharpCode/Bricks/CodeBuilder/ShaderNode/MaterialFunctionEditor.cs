@@ -107,8 +107,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             sphere.Radius = radius;
             policy.DefaultCamera.AutoZoom(in sphere);
 
-            var gridNode = await GamePlay.Scene.TtGridNode.AddGridNode(viewport.World, viewport.World.Root);
-            gridNode.ViewportSlate = this.PreviewViewport;
+            await PreviewViewport.CreateStudioEnvironment(aabb);
             return true;
         }
         public async Thread.Async.TtTask<bool> OpenEditor(Editor.TtMainEditorApplication mainEditor, RName name, object arg)

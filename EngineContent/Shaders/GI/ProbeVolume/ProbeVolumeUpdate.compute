@@ -1,0 +1,220 @@
+// ProbeVolume Update - 低频刷新世界空间 Irradiance Probe 的 SH 系数
+//
+// 每帧处理一批 probe (由 C# 端 cbProbeUpdate.ProbeStartIndex / ProbeCount 指定),
+// 对每个 probe 从其世界位置出发射 N 条均匀球面方向 ray:
+//   - 射线终点投影落在屏幕内且有几何: 取 PrevColor 作为 incoming radiance (近似采样)
+//   - 投影出屏 / 天空像素:
+//       1. 先尝试从邻近 probe 查询 SH irradiance (probe-to-probe 传播, multi-bounce 近似)
+//       2. probe 查询失败则采样天光:
+//            ENV_USE_SKY_CUBE=0: 用 cbProbeUpdate.SkyColor 常量天光
+//            ENV_USE_SKY_CUBE=1: 采 EnvMap (TextureCube)
+// 这是一个近似方案: 不做真正的射线-场景相交, 而是直接将射线终点投影到屏幕取色.
+// 对于低频渐进刷新的 irradiance probe 来说精度足够, 且避免依赖 TLAS 等重型基础设施.
+// 按蒙特卡洛积分累积到 SH2 (L0-L2) x RGB, 与历史值做指数滑动平均后写回.
+//
+// Dispatch: (ProbeCount, 1, 1), 每个线程处理一个 probe
+
+// 由 C# 端 UPermutationItem "ENV_USE_SKY_CUBE" 自动注入
+// 0 = miss 时用 cbProbeUpdate.SkyColor 常量天光
+// 1 = 采样 EnvMap (TextureCube), 需要 EnvMap pin 接入
+#ifndef ENV_USE_SKY_CUBE
+#define ENV_USE_SKY_CUBE 0
+#endif
+
+// EnvMap 资源声明 (仅 ENV_USE_SKY_CUBE=1 编译产物里存在)
+// 必须在 #include ProbeVolumeCommon.cginc 之前声明
+#if ENV_USE_SKY_CUBE
+TextureCube<float4> EnvMap;
+SamplerState        Samp_EnvMap;
+#endif
+
+#include "../../Inc/GlobalDefine.cginc"
+#include "../../Inc/Math.cginc"
+#include "../../CBuffer/VarBase_PerCamera.cginc"
+#include "../../Inc/SysFunction.cginc"
+#include "ProbeVolumeCommon.cginc"
+
+// 与 ReSTIRCommon.cginc 中相同的 PCG hash / Rand01
+uint ProbeVolume_PcgHash(uint seed)
+{
+    uint state = seed * 747796405u + 2891336453u;
+    uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+    return (word >> 22u) ^ word;
+}
+
+float ProbeVolume_Rand01(inout uint rngState)
+{
+    rngState = ProbeVolume_PcgHash(rngState);
+    return float(rngState) * (1.0f / 4294967296.0f);
+}
+
+float3 ProbeVolume_UniformSampleSphere(float2 u)
+{
+    float theta = 2.0f * 3.14159265f * u.x;
+    float phi = acos(2.0f * u.y - 1.0f);
+    float sinPhi = sin(phi);
+    return float3(sinPhi * cos(theta), sinPhi * sin(theta), cos(phi));
+}
+
+// 与 ReSTIRCommon.cginc 中 WorldToScreen / ReconstructWorldPos 相同的逻辑
+float3 ProbeVolume_WorldToScreen(float3 worldPos, out float linearDepth)
+{
+    float4 clip = mul(float4(worldPos, 1.0f), GetViewPrjMtx());
+    linearDepth = clip.w;
+    float3 ndc = clip.xyz / max(abs(clip.w), 1e-6f) * sign(clip.w);
+    float2 uv;
+    uv.x = ndc.x * 0.5f + 0.5f;
+    uv.y = 0.5f - ndc.y * 0.5f;
+    return float3(uv, ndc.z);
+}
+
+// ---------- 资源绑定 ----------
+Texture2D<float4> PrevColor;
+Texture2D<float>  DepthBuffer;
+SamplerState      Samp_PointClamp;
+
+StructuredBuffer<ProbeInfo>       InProbeInfos;
+RWStructuredBuffer<PackedProbeSH> InOutProbeSH;
+
+// Probe-to-Probe 传播所需的只读 buffer (四面体 + BVH)
+// 由 C# 端 TtProbeVolumeNode 绑定, 与 ReSTIR 消费的是同一组 buffer
+StructuredBuffer<TetrahedronGpu>  ProbeTetrahedra;
+StructuredBuffer<BvhNodeGpu>      ProbeBvhNodes;
+
+cbuffer cbProbeUpdate
+{
+    uint   ProbeStartIndex;     // 本帧处理的 probe 起始索引
+    uint   ProbeCount;          // 本帧处理的 probe 数量
+    uint   RaysPerProbe;        // 每个 probe 射的 ray 数 (C# 端可调, 默认 64)
+    uint   FrameIndex;          // 全局帧计数, 用于 RNG seed
+    float  HistoryBlendAlpha;   // 指数滑动平均系数: newSH = lerp(oldSH, sampleSH, alpha)
+    float3 SkyColor;            // 天光 fallback 颜色 (linear)
+    float  SkyIntensity;        // 天光强度倍率
+    float  MaxRayDistance;      // 射线最大距离
+    uint   BvhNodeCount;        // BVH 节点总数 (probe-to-probe 查询需要)
+};
+
+/**Meta Begin:(CS_Main)
+HLSL=2021
+Meta End:(CS_Main)**/
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_Main(uint3 id : SV_DispatchThreadID)
+{
+    uint probeLocalIndex = id.x;
+    if (probeLocalIndex >= ProbeCount)
+        return;
+
+    uint probeGlobalIndex = ProbeStartIndex + probeLocalIndex;
+    ProbeInfo probeInfo = InProbeInfos[probeGlobalIndex];
+    float3 probePos = probeInfo.Position;
+
+    // RNG seed: 每帧每 probe 不同
+    uint rng = ProbeVolume_PcgHash(probeGlobalIndex ^ (FrameIndex * 0x9E3779B1u) ^ 0xA5A5A5A5u);
+
+    // 累积 SH 系数 (RGB x 9 basis)
+    float3 accumulatedSH[9];
+    [unroll]
+    for (int c = 0; c < 9; c++)
+        accumulatedSH[c] = float3(0, 0, 0);
+
+    uint rayCount = clamp(RaysPerProbe, 1u, 256u);
+
+    [loop]
+    for (uint r = 0; r < rayCount; r++)
+    {
+        // 均匀球面采样 (probe 需要全方向 irradiance, 不是半球)
+        float2 u2 = float2(ProbeVolume_Rand01(rng), ProbeVolume_Rand01(rng));
+        float3 dirWS = ProbeVolume_UniformSampleSphere(u2);
+
+        // 近似采样: 将射线终点投影到屏幕空间, 若落在可见几何上则取 PrevColor
+        float3 endWS = probePos + dirWS * MaxRayDistance;
+        float endLinearZ;
+        float3 endSS = ProbeVolume_WorldToScreen(endWS, endLinearZ);
+
+        float3 radiance = float3(0, 0, 0);
+        bool radianceResolved = false;
+
+        // 优先级 1: 屏幕空间采样 (射线终点在屏幕内且有几何)
+        if (all(endSS.xy >= 0.0f) && all(endSS.xy <= 1.0f) && endLinearZ > 0.0f)
+        {
+            float sceneZ = DepthBuffer.SampleLevel(Samp_PointClamp, endSS.xy, 0).r;
+#if USE_INVERSE_Z == 1
+            bool hasGeometry = sceneZ > 0.0f;
+#else
+            bool hasGeometry = sceneZ < 1.0f;
+#endif
+            if (hasGeometry)
+            {
+                radiance = max(PrevColor.SampleLevel(Samp_PointClamp, endSS.xy, 0).rgb, float3(0, 0, 0));
+                radianceResolved = true;
+            }
+        }
+
+        // 优先级 2: Probe-to-Probe 传播 (从邻近 probe 查询 SH irradiance)
+        // 射线终点出屏或无几何时, 用射线终点的世界坐标去查询 probe volume,
+        // 实现光能在 probe 之间的多跳传播 (multi-bounce GI 近似)
+        if (!radianceResolved)
+        {
+            float3 probeIrradiance;
+            bool probeHit = QueryProbeIrradiance(
+                InOutProbeSH, ProbeTetrahedra, ProbeBvhNodes, BvhNodeCount,
+                endWS, dirWS, probeIrradiance);
+            if (probeHit)
+            {
+                radiance = max(probeIrradiance, float3(0, 0, 0));
+                radianceResolved = true;
+            }
+        }
+
+        // 优先级 3: 天光 fallback (probe 查询也失败, 说明该方向完全在 volume 外)
+        if (!radianceResolved)
+        {
+#if ENV_USE_SKY_CUBE
+            radiance = EnvMap.SampleLevel(Samp_EnvMap, dirWS, 0).rgb * SkyIntensity;
+#else
+            radiance = SkyColor * SkyIntensity;
+#endif
+        }
+
+        // 计算 SH basis 并累积
+        float basis[9];
+        EvaluateSHBasis9(dirWS, basis);
+
+        [unroll]
+        for (int c2 = 0; c2 < 9; c2++)
+        {
+            accumulatedSH[c2] += radiance * basis[c2];
+        }
+    }
+
+    // 蒙特卡洛积分权重: 4π / sampleCount (均匀球面采样)
+    {
+        float weight = 4.0f * 3.14159265f / float(rayCount);
+        [unroll]
+        for (int c3 = 0; c3 < 9; c3++)
+        {
+            accumulatedSH[c3] *= weight;
+        }
+    }
+
+    // 与历史值做指数滑动平均, 实现低频渐进式刷新
+    // HistoryBlendAlpha 控制新旧比例: 0 = 完全保留历史, 1 = 完全用新采样
+    PackedProbeSH oldPacked = InOutProbeSH[probeGlobalIndex];
+    float3 oldSH[9];
+    UnpackProbeSH(oldPacked, oldSH);
+
+    // 检查历史是否为全零 (首次更新), 如果是则直接用新值
+    float historyMagnitude = dot(abs(oldSH[0]), float3(1, 1, 1));
+    float blendAlpha = (historyMagnitude < 1e-6f) ? 1.0f : HistoryBlendAlpha;
+
+    float3 blendedSH[9];
+    [unroll]
+    for (int c4 = 0; c4 < 9; c4++)
+    {
+        blendedSH[c4] = lerp(oldSH[c4], accumulatedSH[c4], blendAlpha);
+    }
+
+    PackedProbeSH newPacked;
+    PackProbeSH(blendedSH, newPacked);
+    InOutProbeSH[probeGlobalIndex] = newPacked;
+}

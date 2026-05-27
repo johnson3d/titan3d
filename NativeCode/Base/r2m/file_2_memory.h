@@ -39,7 +39,7 @@ public:
 	 vBOOL Create(LPCSTR pszFile,vBOOL bShareFile = FALSE);
 	 void Close();
 	inline  void SetName(const VStringA & str){
-		mName = str;
+		mFile.SetFileName(str.c_str());
 	}
 	virtual long GetRefCount() override{
 		return mPtrRef;
@@ -47,8 +47,6 @@ public:
 	virtual void OnBeforeWriteFile() override;
 	virtual void OnAfterWriteFile() override;
 private:
-	VStringA	mName;
-	
 	ViseFile	mFile;
 	UINT64		mCachedStarter;
 	std::vector<BYTE>	mCachedBuffer;

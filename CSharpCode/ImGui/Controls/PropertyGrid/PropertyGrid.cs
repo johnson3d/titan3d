@@ -420,6 +420,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ImGuiAPI.SetNextWindowPos(in pos, ImGuiCond_.ImGuiCond_Always, in pivot);
                 ImGuiAPI.OpenPopup("colorPopup", ImGuiPopupFlags_.ImGuiPopupFlags_None);
             }
+            EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
             if (ImGuiAPI.BeginPopup("colorPopup", ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 ImGuiColorEditFlags_ misc_flags = (mHDR ? ImGuiColorEditFlags_.ImGuiColorEditFlags_HDR : 0) | (mDragAndDrop ? 0 : ImGuiColorEditFlags_.ImGuiColorEditFlags_NoDragDrop) | (mAlphaHalfPreview ? ImGuiColorEditFlags_.ImGuiColorEditFlags_AlphaPreviewHalf : (mAlphaPreview ? ImGuiColorEditFlags_.ImGuiColorEditFlags_AlphaPreview : 0)) | (mOptionMenu ? 0 : ImGuiColorEditFlags_.ImGuiColorEditFlags_NoOptions);
@@ -451,6 +452,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             else
                 mPopupOn = false;
+            EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
             return valueChanged;
         }
     }
@@ -495,6 +497,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ImGuiAPI.SetNextWindowPos(in pos, ImGuiCond_.ImGuiCond_Always, in pivot);
                 ImGuiAPI.OpenPopup("colorPopup", ImGuiPopupFlags_.ImGuiPopupFlags_None);
             }
+            EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
             if (ImGuiAPI.BeginPopup("colorPopup", ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 ImGuiColorEditFlags_ misc_flags = (mHDR ? ImGuiColorEditFlags_.ImGuiColorEditFlags_HDR : 0) | (mDragAndDrop ? 0 : ImGuiColorEditFlags_.ImGuiColorEditFlags_NoDragDrop) | (mAlphaHalfPreview ? ImGuiColorEditFlags_.ImGuiColorEditFlags_AlphaPreviewHalf : (mAlphaPreview ? ImGuiColorEditFlags_.ImGuiColorEditFlags_AlphaPreview : 0)) | (mOptionMenu ? 0 : ImGuiColorEditFlags_.ImGuiColorEditFlags_NoOptions);
@@ -528,6 +531,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             else
                 mPopupOn = false;
+            EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
             return valueChanged;
         }
     }
@@ -570,6 +574,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ImGuiAPI.SetNextWindowPos(in pos, ImGuiCond_.ImGuiCond_Always, in pivot);
                 ImGuiAPI.OpenPopup("colorPopup", ImGuiPopupFlags_.ImGuiPopupFlags_None);
             }
+            EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
             if (ImGuiAPI.BeginPopup("colorPopup", ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 mPopupOn = true;
@@ -604,6 +609,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             else
                 mPopupOn = false;
+            EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
             return valueChanged;
         }
     }

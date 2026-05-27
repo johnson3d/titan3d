@@ -154,6 +154,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
                 var visible = true;
                 var retValue = false;
+                EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
                 if (ImGuiAPI.BeginPopupModal($"New Macross", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var drawList = ImGuiAPI.GetWindowDrawList();
@@ -259,6 +260,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
                     ImGuiAPI.EndPopup();
                 }// */
+                EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
 
                 return retValue;
             }

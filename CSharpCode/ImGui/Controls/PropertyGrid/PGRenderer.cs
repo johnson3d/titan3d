@@ -352,7 +352,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         //Vector2 mHightlightRowMin = Vector2.Zero;
         //Vector2 mHightlightRowMax = Vector2.Zero;
         public bool UseProvider = true;
-        static readonly ImGuiTableFlags_ mTabFlags = ImGuiTableFlags_.ImGuiTableFlags_BordersInner | ImGuiTableFlags_.ImGuiTableFlags_Resizable;// | ImGuiTableFlags_.ImGuiTableFlags_SizingFixedFit;
+        static readonly ImGuiTableFlags_ mTabFlags = ImGuiTableFlags_.ImGuiTableFlags_BordersInner | ImGuiTableFlags_.ImGuiTableFlags_Resizable | ImGuiTableFlags_.ImGuiTableFlags_SizingStretchSame;// | ImGuiTableFlags_.ImGuiTableFlags_SizingFixedFit;
         public Rtti.TtTypeDesc HideInheritDeclareType = null;
         struct TargetKey
         {
@@ -528,9 +528,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     tableBegin = ImGuiAPI.BeginTable("PGTable", 3, mTabFlags, in outerSize, 0.0f);
                     if(tableBegin)
                     {
-                        ImGuiAPI.TableSetupColumn("Name", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_None, 0, 0);
-                        ImGuiAPI.TableSetupColumn("Value", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_None, 0, 0);
-                        ImGuiAPI.TableSetupColumn("Ext", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed, 20, 0);
+                        ImGuiAPI.TableSetupColumn("Name", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthStretch, 0.45f, 0);
+                        ImGuiAPI.TableSetupColumn("Value", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthStretch, 1.0f, 0);
+                        ImGuiAPI.TableSetupColumn("Ext", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_.ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_.ImGuiTableColumnFlags_NoHeaderWidth, 24, 0);
                     }
                 }
                 if (tableBegin || isSubPropertyGrid)

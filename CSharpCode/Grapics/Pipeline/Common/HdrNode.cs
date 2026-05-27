@@ -1,5 +1,7 @@
+using EngineNS.GamePlay;
 using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline.Shader;
+using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -72,6 +74,10 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             await base.Initialize(policy, debugName);
             mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtHdrShading>();
+        }
+        public override void Tick(TtWorld world, TtRenderPolicy policy, TtCommandList frameCmdList, bool bClear)
+        {
+            base.Tick(world, policy, frameCmdList, bClear);
         }
     }
 }

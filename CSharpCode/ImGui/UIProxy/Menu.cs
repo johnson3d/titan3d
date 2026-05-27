@@ -92,15 +92,18 @@ namespace EngineNS.EGui.UIProxy
                 return false;
 
             bool retValue = false;
-            //ImGuiAPI.BeginGroup();
-            bool colorPushed = false;
-            if (State.Opened)
+            bool hasTextColor = false;
+            if (State.Opened || Selected)
             {
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextSelectedColor);
-                colorPushed = true;
+                hasTextColor = true;
             }
-            if (State.Hovered)
+            else if (State.Hovered)
+            {
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextHoveredColor);
+                hasTextColor = true;
+            }
+
             if (IsTopMenuItem)
             {
                 ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in StyleConfig.Instance.TopMenuFramePadding);
@@ -112,22 +115,26 @@ namespace EngineNS.EGui.UIProxy
                 if(State.HasIndent)
                     ImGuiAPI.Indent(StyleConfig.Instance.MenuItemIndent);
             }
+
             if (Icon != null)
             {
                 Icon.OnDraw(in drawList, in drawData);
                 var posX = ImGuiAPI.GetCursorPosX();
                 posX += Icon.ImageSize.X + StyleConfig.Instance.ItemSpacing.X;
                 ImGuiAPI.SetCursorPosX(posX);
-
             }
-                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, StyleConfig.Instance.MenuHeaderColor);
-            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, UIProxy.StyleConfig.Instance.MenuHeaderColor);
+
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, StyleConfig.Instance.MenuHeaderColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, StyleConfig.Instance.MenuHeaderHoveredColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, StyleConfig.Instance.MenuHeaderActiveColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_PopupBg, StyleConfig.Instance.MenuBG);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, StyleConfig.Instance.BorderColor);
             if (this.SubMenus != null && this.SubMenus.Count > 0)
                 State.Opened = ImGuiAPI.BeginMenu(MenuName, State.Enable);
             else
                 State.Opened = ImGuiAPI.MenuItem(MenuName, Shortcut, Selected, State.Enable);
-            ImGuiAPI.PopStyleColor(2);
-            //ImGuiAPI.EndGroup();
+            ImGuiAPI.PopStyleColor(5);
+
             if(IsTopMenuItem)
             {
                 ImGuiAPI.PopStyleVar(1);
@@ -138,20 +145,17 @@ namespace EngineNS.EGui.UIProxy
                 if(State.HasIndent)
                     ImGuiAPI.Unindent(StyleConfig.Instance.MenuItemIndent);
             }
-            if (State.Hovered)
+
+            if (hasTextColor)
                 ImGuiAPI.PopStyleColor(1);
             State.Hovered = ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+
             if (State.Opened)
             {
                 if(!(this.SubMenus != null && this.SubMenus.Count > 0))
                 {
                     Action?.Invoke(this, drawData);
                     retValue = true;
-                }
-                if (colorPushed)
-                {
-                    ImGuiAPI.PopStyleColor(1);
-                    colorPushed = false;
                 }
 
                 if (this.SubMenus != null)
@@ -166,14 +170,6 @@ namespace EngineNS.EGui.UIProxy
                 if(this.SubMenus != null && this.SubMenus.Count > 0)
                     ImGuiAPI.EndMenu();
             }
-            else
-            {
-                if (colorPushed)
-                {
-                    ImGuiAPI.PopStyleColor(1);
-                    colorPushed = false;
-                }
-            }
 
             return retValue;
         }
@@ -187,14 +183,17 @@ namespace EngineNS.EGui.UIProxy
             in Support.TtAnyPointer drawData,
             ref MenuState state)
         {
-            bool colorPushed = false;
-            if (state.Opened)
+            bool hasTextColor = false;
+            if (state.Opened || selected)
             {
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextSelectedColor);
-                colorPushed = true;
+                hasTextColor = true;
             }
-            if(state.Hovered)
+            else if (state.Hovered)
+            {
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextHoveredColor);
+                hasTextColor = true;
+            }
 
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in StyleConfig.Instance.MenuItemFramePadding);
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, in StyleConfig.Instance.MenuItemSpacing);
@@ -209,14 +208,18 @@ namespace EngineNS.EGui.UIProxy
                 ImGuiAPI.SetCursorPosX(posX);
             }
 
-            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, UIProxy.StyleConfig.Instance.TVHeaderActive);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, StyleConfig.Instance.MenuHeaderColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, StyleConfig.Instance.MenuHeaderHoveredColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, StyleConfig.Instance.MenuHeaderActiveColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_PopupBg, StyleConfig.Instance.MenuBG);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, StyleConfig.Instance.BorderColor);
             state.Opened = ImGuiAPI.MenuItem(menuName, shortcut, selected, state.Enable);
-            ImGuiAPI.PopStyleColor(1);
+            ImGuiAPI.PopStyleColor(5);
             ImGuiAPI.PopStyleVar(2);
             if(state.HasIndent)
                 ImGuiAPI.Unindent(StyleConfig.Instance.MenuItemIndent);
 
-            if (state.Hovered)
+            if (hasTextColor)
                 ImGuiAPI.PopStyleColor(1);
             state.Hovered = ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
 
@@ -224,32 +227,6 @@ namespace EngineNS.EGui.UIProxy
             if (state.Opened)
             {
                 retValue = true;
-
-                if (colorPushed)
-                {
-                    ImGuiAPI.PopStyleColor(1);
-                    colorPushed = false;
-                }
-
-                //if (this.SubMenus != null)
-                //{
-                //    var subMenuDraweList = ImGuiAPI.GetWindowDrawList();
-                //    for (int i = 0; i < this.SubMenus.Count; i++)
-                //    {
-                //        this.SubMenus[i].OnDraw(ref subMenuDraweList, ref drawData);
-                //    }
-                //}
-
-                //if (this.SubMenus != null && this.SubMenus.Count > 0)
-                //    ImGuiAPI.EndMenu();
-            }
-            else
-            {
-                if (colorPushed)
-                {
-                    ImGuiAPI.PopStyleColor(1);
-                    colorPushed = false;
-                }
             }
 
             return retValue;
@@ -265,17 +242,19 @@ namespace EngineNS.EGui.UIProxy
             bool isTopMenuItem = false
             )
         {
-            bool colorPushed = false;
+            bool hasTextColor = false;
             if (state.Opened)
             {
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextSelectedColor);
-                colorPushed = true;
+                hasTextColor = true;
             }
-            if(state.Hovered)
+            else if (state.Hovered)
+            {
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextHoveredColor);
+                hasTextColor = true;
+            }
             if (isTopMenuItem)
             {
-                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, StyleConfig.Instance.MenuHeaderColor);
                 ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in StyleConfig.Instance.TopMenuFramePadding);
             }
             else
@@ -292,12 +271,15 @@ namespace EngineNS.EGui.UIProxy
                 posX += icon.ImageSize.X + StyleConfig.Instance.ItemSpacing.X;
                 ImGuiAPI.SetCursorPosX(posX);
             }
-            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, UIProxy.StyleConfig.Instance.TVHeaderActive);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, StyleConfig.Instance.MenuHeaderColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, StyleConfig.Instance.MenuHeaderHoveredColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, StyleConfig.Instance.MenuHeaderActiveColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_PopupBg, StyleConfig.Instance.MenuBG);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, StyleConfig.Instance.BorderColor);
             state.Opened = ImGuiAPI.BeginMenu(menuName, state.Enable);
-            ImGuiAPI.PopStyleColor(1);
+            ImGuiAPI.PopStyleColor(5);
             if(isTopMenuItem)
             {
-                ImGuiAPI.PopStyleColor(1);
                 ImGuiAPI.PopStyleVar(1);
             }
             else
@@ -306,15 +288,9 @@ namespace EngineNS.EGui.UIProxy
                 if(state.HasIndent)
                     ImGuiAPI.Unindent(StyleConfig.Instance.MenuItemIndent);
             }
-            if (state.Hovered)
+            if (hasTextColor)
                 ImGuiAPI.PopStyleColor(1);
             state.Hovered = ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
-
-            if(colorPushed)
-            {
-                ImGuiAPI.PopStyleColor(1);
-                colorPushed = false;
-            }
 
             return state.Opened;
         }

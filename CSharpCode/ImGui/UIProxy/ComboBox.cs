@@ -18,6 +18,7 @@ namespace EngineNS.EGui.UIProxy
             ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings |
             ImGuiWindowFlags_.ImGuiWindowFlags_NoMove;
         public float Width = -1;
+        public float MaxPopupHeight = 320;
 
         public delegate void Delegate_ComboOpenAction(in Support.TtAnyPointer data);
         public Delegate_ComboOpenAction ComboOpenAction;
@@ -48,12 +49,6 @@ namespace EngineNS.EGui.UIProxy
             var style = ImGuiAPI.GetStyle();
             ImGuiAPI.SetNextItemWidth(Width);
 
-            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.PopupColor);
-            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_PopupBg, EGui.UIProxy.StyleConfig.Instance.PopupColor);
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, in EGui.UIProxy.StyleConfig.Instance.PopupWindowsPadding);
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, in EGui.UIProxy.StyleConfig.Instance.PopupItemSpacing);
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_PopupBorderSize, EGui.UIProxy.StyleConfig.Instance.PopupBordersize);
-
             var cursorPos = ImGuiAPI.GetCursorScreenPos();
             var endPos = cursorPos;
             if(!string.IsNullOrEmpty(Name))
@@ -62,12 +57,9 @@ namespace EngineNS.EGui.UIProxy
                 endPos = cursorPos + new Vector2((Width < 0 ? 0 : Width) + ((nameSize.X > 0.0f) ? (style->ItemInnerSpacing.X + nameSize.X) : 0.0f), nameSize.Y + style->FramePadding.Y * 2.0f);
             }
             var hovered = ImGuiAPI.IsMouseHoveringRectInCurrentWindow(in cursorPos, in endPos, true);
-            if (hovered)
-                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, EGui.UIProxy.StyleConfig.Instance.PGItemBorderHoveredColor);
-            var comboOpen = ImGuiAPI.BeginCombo(Name, PreviewValue, Flags, WinFlags);
+            PushComboStyle(hovered);
+            var comboOpen = ImGuiAPI.BeginCombo(Name, PreviewValue, NormalizeFlags(Flags), WinFlags);
             //var comboOpen = ImGuiAPI.BeginCombo(Name, PreviewValue, Flags);
-            if(hovered)
-                ImGuiAPI.PopStyleColor(1);
             //var itemSize = ImGuiAPI.GetItemRectSize();
             //var pos = cursorPos + new Vector2(itemSize.X - mImage.ImageSize.X - style->FramePadding.X, style->FramePadding.Y * 0.5f);// cursorPos + new Vector2(0, fontSize * 0.134f * 0.5f);// + new Vector2(itemRectMax.X - mImage.ImageSize.X, fontSize * 0.134f * 0.5f);
             //mImage.OnDraw(ref drawList, ref pos);
@@ -78,8 +70,7 @@ namespace EngineNS.EGui.UIProxy
                 ImGuiAPI.EndCombo();
             }
 
-            ImGuiAPI.PopStyleColor(2);
-            ImGuiAPI.PopStyleVar(3);
+            PopComboStyle(hovered);
 
             return true;
         }
@@ -96,12 +87,6 @@ namespace EngineNS.EGui.UIProxy
             var style = ImGuiAPI.GetStyle();
             ImGuiAPI.SetNextItemWidth(width);
 
-            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.PopupColor);
-            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_PopupBg, EGui.UIProxy.StyleConfig.Instance.PopupColor);
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, in EGui.UIProxy.StyleConfig.Instance.PopupWindowsPadding);
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, in EGui.UIProxy.StyleConfig.Instance.PopupItemSpacing);
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_PopupBorderSize, EGui.UIProxy.StyleConfig.Instance.PopupBordersize);
-
             var cursorPos = ImGuiAPI.GetCursorScreenPos();
             var endPos = cursorPos;
             if (!string.IsNullOrEmpty(name))
@@ -110,21 +95,47 @@ namespace EngineNS.EGui.UIProxy
                 endPos = cursorPos + new Vector2((width < 0 ? 0 : width) + ((nameSize.X > 0.0f) ? (style->ItemInnerSpacing.X + nameSize.X) : 0.0f), nameSize.Y + style->FramePadding.Y * 2.0f);
             }
             var hovered = ImGuiAPI.IsMouseHoveringRectInCurrentWindow(in cursorPos, in endPos, true);
-            if (hovered)
-                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, EGui.UIProxy.StyleConfig.Instance.PGItemBorderHoveredColor);
-            //var comboOpen = ImGuiAPI.BeginCombo(name, previewValue, flags, winFlags);
-            var comboOpen = ImGuiAPI.BeginCombo(name, previewValue, flags);
-            if (hovered)
-                ImGuiAPI.PopStyleColor(1);
+            PushComboStyle(hovered);
+            var normalizedFlags = NormalizeFlags(flags);
+            var comboOpen = ImGuiAPI.BeginCombo(name, previewValue, normalizedFlags, winFlags);
+            if (!comboOpen)
+                PopComboStyle(hovered);
 
-            ImGuiAPI.PopStyleColor(2);
-            ImGuiAPI.PopStyleVar(3);
 
             return comboOpen;
         }
         public static unsafe void EndCombo()
         {
             ImGuiAPI.EndCombo();
+            PopComboStyle(false);
+        }
+        static ImGuiComboFlags_ NormalizeFlags(ImGuiComboFlags_ flags)
+        {
+            if ((flags & ImGuiComboFlags_.ImGuiComboFlags_HeightMask_) == 0)
+                flags |= ImGuiComboFlags_.ImGuiComboFlags_HeightLarge;
+            return flags;
+        }
+        static void PushComboStyle(bool hovered)
+        {
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_FrameBg, StyleConfig.Instance.FrameBackground);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_FrameBgHovered, StyleConfig.Instance.FrameBackgroundHovered);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_FrameBgActive, StyleConfig.Instance.FrameBackgroundActive);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Button, StyleConfig.Instance.FrameBackground);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonHovered, StyleConfig.Instance.FrameBackgroundHovered);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, StyleConfig.Instance.MenuHeaderColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, StyleConfig.Instance.MenuHeaderHoveredColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, StyleConfig.Instance.MenuHeaderActiveColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_PopupBg, StyleConfig.Instance.PopupColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, hovered ? StyleConfig.Instance.BorderActiveColor : StyleConfig.Instance.BorderColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_TextSelectedBg, StyleConfig.Instance.AccentActiveColor);
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, in StyleConfig.Instance.PopupWindowsPadding);
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, in StyleConfig.Instance.PopupItemSpacing);
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_PopupBorderSize, StyleConfig.Instance.PopupBordersize);
+        }
+        static void PopComboStyle(bool hovered)
+        {
+            ImGuiAPI.PopStyleVar(3);
+            ImGuiAPI.PopStyleColor(11);
         }
     }
 }

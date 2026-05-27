@@ -317,6 +317,16 @@ namespace EngineNS.Editor.Forms
         public EGui.Controls.PropertyGrid.TtPropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         [Category("Option")]
         public Graphics.Pipeline.TtRenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
+        [Category("Option")]
+        [DisplayName("Editor UI Font Size")]
+        [EGui.Controls.PropertyGrid.TtValueRange(TtEngineConfig.MinEditorUIFontSize, TtEngineConfig.MaxEditorUIFontSize)]
+        [EGui.Controls.PropertyGrid.TtValueChangeStep(0.5f)]
+        [EGui.Controls.PropertyGrid.TtValueFormat("%.1f")]
+        public float EditorUIFontSize
+        {
+            get => TtEngine.Instance.Config.EditorUIFontSize;
+            set => TtEngine.Instance.Config.EditorUIFontSize = value;
+        }
 
         bool mIsDrawing = false;
         bool IsDrawing
@@ -348,23 +358,6 @@ namespace EngineNS.Editor.Forms
                 IsTopMenuItem = true,
                 SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
                     {
-                        new EGui.UIProxy.MenuItemProxy()
-                        {
-                            MenuName = "DisableShadow",
-                            Selected = false,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
-                            {
-                                if(PreviewViewport.RenderPolicy.ShadowMode == EShadowMode.Csm)
-                                {
-                                    PreviewViewport.RenderPolicy.ShadowMode = EShadowMode.None;
-                                }
-                                else
-                                {
-                                    PreviewViewport.RenderPolicy.ShadowMode = EShadowMode.Csm;
-                                }
-                                item.Selected = PreviewViewport.RenderPolicy.ShadowMode == EShadowMode.None;
-                            },
-                        },
                         new EGui.UIProxy.MenuItemProxy()
                         {
                             MenuName = "DisableAO",

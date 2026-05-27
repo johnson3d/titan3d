@@ -33,6 +33,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             AddOutput(GpuScenePinOut);
             PointLightsPinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(PointLightsPinOut);
+            SpotLightsPinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
+            AddOutput(SpotLightsPinOut);
             InstancePinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(InstancePinOut);
         }

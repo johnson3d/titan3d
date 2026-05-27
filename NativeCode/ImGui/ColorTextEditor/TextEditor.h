@@ -446,6 +446,12 @@ public:
 		auto k = std::make_pair(index, std::string(info));
 		ErrorMarkers.insert(k);
 	}
+	TR_FUNCTION(SV_NoBind)
+	void ClearErrorMarkers()
+	{
+		ErrorMarkers.clear();
+		TextEditor.SetErrorMarkers(ErrorMarkers);
+	}
 	void ApplyErrorMarkers()
 	{
 		TextEditor.SetErrorMarkers(ErrorMarkers);
@@ -457,6 +463,11 @@ public:
 	void SetText(const char* aText)
 	{
 		TextEditor.SetText(aText);
+	}
+	TR_FUNCTION(SV_NoBind)
+	void SetCursorPosition(int line, int column)
+	{
+		TextEditor.SetCursorPosition(TextEditor::Coordinates(line < 0 ? 0 : line, column < 0 ? 0 : column));
 	}
 	void GetText(IBlobObject* blob);
 	const char* GetTextPointer();

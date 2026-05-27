@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_5720550322118825960 Type="EngineNS.Bricks.AdvanceShadow.TtAdvanceShadowMapNode@EngineCore">
+  <BoxCenter Type="EngineNS.DVector2@EngineCore" Order="0" />
+  <BoxExtent Type="System.Double@Unknown" Order="0" />
+  <ClipmapBaseHalfExtent Type="System.Single@Unknown" Order="0" />
+  <ClipmapLevelCount Type="System.Int32@Unknown" Order="0" />
+  <ClipmapPagesPerDim Type="System.Int32@Unknown" Order="0" />
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <EnableDirLightShadow Type="System.Boolean@Unknown" Order="0" />
+  <EnableESM Type="System.Boolean@Unknown" Order="0" />
+  <EnableLocalLightShadow Type="System.Boolean@Unknown" Order="0" />
+  <IsDepth32 Type="System.Boolean@Unknown" Order="0" />
+  <MaxDeepLevel Type="System.Int32@Unknown" Order="0" />
+  <MaxDirtyPagePerFrame Type="System.Int32@Unknown" Order="0" />
+  <MaxShadowDistance Type="System.Single@Unknown" Order="0" />
+  <PageMaxAge Type="System.UInt32@Unknown" Order="0" />
+  <PageResolution Type="System.Int32@Unknown" Order="0" />
+  <PcfDepthBias Type="System.Single@Unknown" Order="0" />
+  <PcfRadius Type="System.Int32@Unknown" Order="0" />
+  <PoolDimPages Type="System.Int32@Unknown" Order="0" />
+  <ShadowMapPage Type="System.Int32@Unknown" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_5720550322118825960>

@@ -1,10 +1,12 @@
-﻿using EngineNS.Bricks.VXGI;
+﻿using BCnEncoder.Shared;
+using EngineNS.Bricks.VXGI;
+using EngineNS.GamePlay;
+using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.Graphics.Pipeline.Shadow;
 using System;
 using System.Collections.Generic;
-using EngineNS.Graphics.Pipeline.Shader;
 using System.ComponentModel;
-using EngineNS.GamePlay;
+using System.Runtime.InteropServices;
 
 namespace EngineNS.Graphics.Pipeline.Deferred
 {
@@ -60,12 +62,40 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.UDeferredBasePassNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.UDeferredBasePassNode" })]
     public class TtDeferredBasePassNode : Common.TtBasePassNode
     {
+        //MRT中存储的数据格式设计，共128bits
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FGBufferDataBase")]
+        public struct FGBufferDataBase
+        {
+            //rt0:rgba8
+            public Vector3 mMtlColorRaw; //8bits:rt0.rgb
+            //8bits CustomData: padding to MtlColorRaw.w
+            public float mCustomData;	//8bits:rt0.a .r = SubsurfaceProfileIndex/255 (SSS) or SpecOcclusion (PBR)
+
+            //rt1:rgb10a2
+            public Vector3 mWorldNormal; //10bits Oct-encoded world space normal to rt1.rg
+            public int mRenderFlags_10Bit;//if (TtEngine.Instance.GfxDevice.Config.UseOctahedronNormal == 1) {padding to rt1.b} else {padding to rt3.b}
+            public float mMask;//padding to rg1.a
+
+            //rt2:rgba8
+            public float mMetallicity; //8bits:rt2.r
+            //非金属（Metallic=0）：F0 = AbsSpecular（通常 0.04，即 4% 反射率，对应电介质）
+            //金属（Metallic=1）：F0 = Albedo（金属的反射色就是它的"固有色"）
+            public float mSpecular; //8bits:rt2.g,这个用在float3 OptSpecShading = AbsSpecular - AbsSpecular * Metallic + Metallic * Albedo;感觉可以优化为固定AbsSpecular=0.04
+            public float mAO; //8bits:rt2.b
+            public float mRoughness;//8bits:rt.a
+
+            //rt3:rgb10a2
+            public Vector2 mMotionVector;//10bits:rt3.rg
+            public uint mCustomData_10Bit;//if (TtEngine.Instance.GfxDevice.Config.UseOctahedronNormal == 1){10bits:rt3.b} else {HasCustomData_10Bit()==false}
+            //2bits Opacity: padding to MotionVector.w
+            public float mOpacity;	//2bits:rt3.a 4-level mask (0/0.33/0.67/1.0)
+        }
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
         public TtRenderGraphPin GpuCullPinIn = TtRenderGraphPin.CreateInput("GpuCull", NxRHI.EBufferType.BFT_NONE);
         public TtRenderGraphPin Rt0PinOut = TtRenderGraphPin.CreateInputOutput("MRT0", true, EPixelFormat.PXF_R16G16B16A16_FLOAT, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//rgb - metallicty
-        public TtRenderGraphPin Rt1PinOut = TtRenderGraphPin.CreateInputOutput("MRT1", true, EPixelFormat.PXF_R10G10B10A2_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//normal - Flags
+        public TtRenderGraphPin Rt1PinOut = TtRenderGraphPin.CreateInputOutput("MRT1", true, EPixelFormat.PXF_R11G11B10_FLOAT, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//normal - Flags
         public TtRenderGraphPin Rt2PinOut = TtRenderGraphPin.CreateInputOutput("MRT2", true, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//Roughness,Emissive,Specular,unused
-        public TtRenderGraphPin Rt3PinOut = TtRenderGraphPin.CreateInputOutput("MRT3", true, EPixelFormat.PXF_R16G16_FLOAT, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//EPixelFormat.PXF_R10G10B10A2_UNORM//motionXY
+        public TtRenderGraphPin Rt3PinOut = TtRenderGraphPin.CreateInputOutput("MRT3", true, EPixelFormat.PXF_R10G10B10A2_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//motionXY,RenderFlag10Bits,custom.g
         public TtRenderGraphPin DepthStencilPinOut = TtRenderGraphPin.CreateInputOutput("DepthStencil", true, EPixelFormat.PXF_D32_FLOAT, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);//EPixelFormat.PXF_D24_UNORM_S8_UINT Stencil is not necessity
 
         public TtCpuCullingNode CpuCullNode = null;

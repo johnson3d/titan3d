@@ -1,4 +1,4 @@
-﻿using EngineNS.Editor;
+using EngineNS.Editor;
 using EngineNS.GamePlay.Scene;
 using EngineNS.UI;
 using System;
@@ -15,6 +15,7 @@ namespace EngineNS.Graphics.Pipeline
         public UI.TtUIHost HUD { get; }
         void PushHUD(UI.Controls.TtUIElement hud);
         void PopHUD();
+        public Bricks.Particle.TtParticleGraphNode ParticleNode { get; }
     }
     [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtViewportSlate : IRenderViewport, IEventProcessor, IDisposable
@@ -33,6 +34,7 @@ namespace EngineNS.Graphics.Pipeline
         public virtual void Dispose()
         {
             DisposeInteractiveModes();
+            DisposeParticlePolicy();
             ClearHUDs();
             CoreSDK.DisposeObject(ref mWorld);
             if (RenderPolicy != null)
@@ -101,9 +103,32 @@ namespace EngineNS.Graphics.Pipeline
         }
         protected bool mClientChanged = false;
         protected bool mSizeChanged = false;
+        protected bool mHasPendingRenderPolicyResize = false;
+        protected float mPendingRenderPolicyWidth = 0;
+        protected float mPendingRenderPolicyHeight = 0;
         public bool IsValidClientArea()
         {
             return (ClientSize.X >= 1 && ClientSize.Y >= 1);
+        }
+        protected void RequestRenderPolicyResize(float width, float height)
+        {
+            if (width < 1 || height < 1)
+                return;
+
+            mPendingRenderPolicyWidth = width;
+            mPendingRenderPolicyHeight = height;
+            mHasPendingRenderPolicyResize = true;
+        }
+        protected void ApplyPendingRenderPolicyResize()
+        {
+            if (mHasPendingRenderPolicyResize == false)
+                return;
+
+            var width = mPendingRenderPolicyWidth;
+            var height = mPendingRenderPolicyHeight;
+            mHasPendingRenderPolicyResize = false;
+
+            RenderPolicy?.OnResize(width, height);
         }
         public bool IsFocused { get; protected set; }
         public bool IsDrawing { get; protected set; }
@@ -169,7 +194,7 @@ namespace EngineNS.Graphics.Pipeline
                     var max = ImGuiAPI.GetWindowContentRegionMax();
                     min = min + WindowPos;
                     max = max + WindowPos;
-                    drawlist.AddImage(showTexture, in min, in max, in uv1, in uv2, 0x01FFFFFF);// 0xFFFFFFFF);abgr
+                    drawlist.AddImage(showTexture, in min, in max, in uv1, in uv2, 0xFFFFFFFF);
                 }
             }
         }
@@ -266,7 +291,7 @@ namespace EngineNS.Graphics.Pipeline
                 //    {
                 //        min = min + pos;
                 //        max = max + pos;
-                //        drawlist.AddImage(showTexture.ToPointer(), in min, in max, in uv1, in uv2, 0x01FFFFFF);// 0xFFFFFFFF);abgr
+                //        drawlist.AddImage(showTexture.ToPointer(), in min, in max, in uv1, in uv2, 0xFFFFFFFF);
                 //    }
                 //}
 
@@ -373,11 +398,11 @@ namespace EngineNS.Graphics.Pipeline
             mScissorRect.MinX = (int)mViewport.TopLeftX;
             mScissorRect.MinY = (int)mViewport.TopLeftY;
             mScissorRect.MaxX = (int)(mViewport.TopLeftX + mViewport.Width);
-            mScissorRect.MinX = (int)(mViewport.TopLeftY + mViewport.Height);
+            mScissorRect.MaxY = (int)(mViewport.TopLeftY + mViewport.Height);
 
             if (bSizeChanged)
             {
-                RenderPolicy?.OnResize(vpSize.X, vpSize.Y);
+                RequestRenderPolicyResize(vpSize.X, vpSize.Y);
             }
 
             //if (mDefaultHUD != null)
@@ -488,6 +513,8 @@ namespace EngineNS.Graphics.Pipeline
 
             await ReCreateInteractiveModes();
 
+            await InitParticlePolicy();
+
             IsInlitialized = true;
             return true;
         }
@@ -584,6 +611,11 @@ namespace EngineNS.Graphics.Pipeline
             {
                 if (IsDrawing)
                 {
+                    if (mPresentWindow != null && mPresentWindow.CanRender == false)
+                    {
+                        IsDrawing = false;
+                        return;
+                    }
                     if (this.IsFocused)
                     {
                         TickOnFocus();
@@ -592,10 +624,13 @@ namespace EngineNS.Graphics.Pipeline
                     TtEngine.Instance.ThreadRender.QueueRenderAction("RenderPolicy.Tick", static (in Thread.TtThreadRender.FRenderAction RAct) =>
                     {
                         var This = (RAct.Arg as TtViewportSlate);
+                        This.ApplyPendingRenderPolicyResize();
                         This.RenderPolicy?.BeginTick(This.World);
                         This.RenderPolicy?.Tick(This.World, null);
                         This.RenderPolicy?.EndTick(This.World);
                     }, this);
+                    TickParticleUpdate();
+
                     World.TickLogic(this.RenderPolicy, ellapse);
 
                     TtEngine.Instance.ThreadRender.WaitFinishRenderAction(mRenderFinishedEvent);
@@ -898,9 +933,71 @@ namespace EngineNS.Graphics.Pipeline
     }
     public partial class TtOffscreenRenderer : IRenderViewport, IDisposable
     {
+        TtRenderPolicy mParticlePolicy;
+        Bricks.Particle.TtParticleGraphNode mParticleNode;
+        NxRHI.TtRCmdQueue mParticleCmdQueue;
+        public Bricks.Particle.TtParticleGraphNode ParticleNode => mParticleNode;
+
+        public async Thread.Async.TtTask InitParticlePolicy()
+        {
+            mParticlePolicy = new TtRenderPolicy();
+            mParticleCmdQueue = new NxRHI.TtRCmdQueue();
+            mParticlePolicy.CmdQueue = mParticleCmdQueue;
+
+            mParticleNode = new Bricks.Particle.TtParticleGraphNode();
+            mParticleNode.InitNodePins();
+
+            var endingNode = new Common.TtAssitRootNode();
+            endingNode.InitNodePins();
+            endingNode.Name = "ParticleEnding";
+
+            mParticlePolicy.RegRenderNode2("ParticleCompute", mParticleNode);
+            mParticlePolicy.RegRenderNode2("ParticleEnding", endingNode);
+
+            mParticlePolicy.AddLinker(mParticleNode.ResultPinOut, endingNode.SrcPinIn);
+            mParticlePolicy.RootNode = endingNode;
+
+            bool hasInputError = false;
+            mParticlePolicy.BuildGraph(ref hasInputError);
+
+            foreach (var kvp in mParticlePolicy.GraphNodes)
+            {
+                await kvp.Value.Initialize(mParticlePolicy, kvp.Value.Name);
+            }
+        }
+
+        void TickParticleUpdate()
+        {
+            if (mParticlePolicy == null || mParticleNode == null)
+                return;
+            if (mParticleNode.CurEmitters.Count == 0 && mParticleNode.PrevEmitters.Count == 0)
+                return;
+
+            //mParticlePolicy.DefaultCamera = RenderPolicy?.DefaultCamera;
+
+            mParticlePolicy.BeginTick(World);
+            mParticlePolicy.Tick(World, null);
+            mParticlePolicy.EndTick(World);
+            mParticlePolicy.ExecuteCmdQueue(true);
+
+            CoreSDK.Swap(ref mParticleNode.CurEmitters, ref mParticleNode.PrevEmitters);
+        }
+
+        void DisposeParticlePolicy()
+        {
+            if (mParticlePolicy != null)
+            {
+                mParticlePolicy.Dispose();
+                mParticlePolicy = null;
+            }
+            mParticleNode = null;
+            mParticleCmdQueue = null;
+        }
+
         public bool DisposeRenderPolicy { get; set; } = false;
         public virtual void Dispose()
         {
+            DisposeParticlePolicy();
             ClearHUDs();
             CoreSDK.DisposeObject(ref mWorld);
 
@@ -981,12 +1078,14 @@ namespace EngineNS.Graphics.Pipeline
             SetCameraOffset(in DVector3.Zero);
 
             RenderPolicy.CmdQueue = new NxRHI.TtRCmdQueue();
+
+            await InitParticlePolicy();
         }
         public void SetSize(float w, float h)
         {
             RenderPolicy.OnResize(w, h);
         }
-        public void ExecuteRender(bool gatherVisibleMeshes)
+        public void ExecuteRender(bool gatherVisibleMeshes, bool bUpdateGpuParticle)
         {
             VisParameter.World = World;
             VisParameter.CullCamera = RenderPolicy.DefaultCamera;
@@ -998,6 +1097,9 @@ namespace EngineNS.Graphics.Pipeline
             RenderPolicy.BeginTick(World);
             RenderPolicy.Tick(World, null);
             RenderPolicy.EndTick(World);
+
+            if (bUpdateGpuParticle)
+                TickParticleUpdate();
 
             TtEngine.Instance.GfxDevice.CbvUpdater.UpdateCBVs();
             RenderPolicy.ExecuteCmdQueue(true);
@@ -1017,6 +1119,8 @@ namespace EngineNS
         public Graphics.Pipeline.TtInteractiveModeManager InteractiveModeManager { get; } = new Graphics.Pipeline.TtInteractiveModeManager();
     }
 }
+
+
 
 
 #if TitanEngine_AutoGen_Macross

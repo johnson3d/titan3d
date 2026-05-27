@@ -23,7 +23,6 @@ namespace EngineNS.NxRHI
             var result = new TtGpuDevice();
             result.mCoreObject = mCoreObject.CreateDevice(in desc);
             result.mGpuQueue = new TtGpuQueue(result, result.mCoreObject.GetCmdQueue());
-            result.InitShaderGlobalEnv();
             var ptr = result.mCoreObject.GetDescriptorPoolManager();
             if (ptr.IsValidPointer)
             {
@@ -119,15 +118,16 @@ namespace EngineNS.NxRHI
         {
             get => mGlobalEnvHash;
         }
-        internal void InitShaderGlobalEnv()
+        internal void InitShaderGlobalEnv(TtEngine engine)
         {
-            GlobalEnvDefines.AddDefine("USE_INVERSE_Z", TtEngine.Instance.Config.IsReverseZ ? "1" : "0");
+            var graphicsConfig = engine.ConfigManager.GetConfig<Graphics.Pipeline.TtGfxDeviceConfig>();
+            GlobalEnvDefines.AddDefine("USE_INVERSE_Z", graphicsConfig.IsReverseZ ? "1" : "0");
             
             var caps = DeviceCaps;
             if (caps.IsSupportSSBO_VS)
             {
                 GlobalEnvDefines.AddDefine("HW_VS_STRUCTUREBUFFER", "1");
-                if (TtEngine.Instance.Config.Feature_UseRVT)
+                if (engine.Config.Feature_UseRVT)
                 {
                     GlobalEnvDefines.AddDefine("FEATURE_USE_RVT", "1");
                 }
@@ -135,6 +135,14 @@ namespace EngineNS.NxRHI
             if (RhiType == ERhiType.RHI_VK)
             {
                 GlobalEnvDefines.AddDefine("USE_VS_DrawIndex", "1");
+            }
+            if (graphicsConfig.UseOctahedronNormal)
+            {
+                GlobalEnvDefines.AddDefine("USE_OCTAHEDRON_NORMAL", "1");
+            }
+            else
+            {
+                GlobalEnvDefines.AddDefine("USE_OCTAHEDRON_NORMAL", "0");
             }
             mGlobalEnvHash = Hash160.CreateHash160(GlobalEnvDefines.ToString());
         }
@@ -476,7 +484,7 @@ namespace EngineNS.NxRHI
         {
             var result = new TtGpuPipeline();
             var cp = desc;
-            if (TtEngine.Instance.Config.IsReverseZ)
+            if (TtEngine.Instance.GfxDevice.Config.IsReverseZ)
                 cp.m_DepthStencil.m_DepthFunc = EComparisionMode.CMP_GREATER_EQUAL;
             else
                 cp.m_DepthStencil.m_DepthFunc = EComparisionMode.CMP_LESS_EQUAL;

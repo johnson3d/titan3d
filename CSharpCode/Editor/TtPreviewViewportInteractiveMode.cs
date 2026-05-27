@@ -75,6 +75,10 @@ namespace EngineNS.Editor
             }
             else if (e.Type == Bricks.Input.EventType.MOUSEWHEEL)
             {
+                if (previewViewport.IsViewportSlateFocused == false)
+                {
+                    return true;
+                }
                 if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                 {
                     previewViewport.CameraMoveSpeed += (float)(e.MouseWheel.Y * 0.01f);
@@ -106,6 +110,21 @@ namespace EngineNS.Editor
 
             float step = (TtEngine.Instance.ElapseTickCountMS * 0.001f) * previewViewport.CameraMoveSpeed;
             var keyboards = TtEngine.Instance.InputSystem;
+
+            // F11: trigger RenderDoc capture
+            if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_F11))
+            {
+                if (!mF11WasDown)
+                {
+                    mF11WasDown = true;
+                    TriggerRenderDocCapture();
+                }
+            }
+            else
+            {
+                mF11WasDown = false;
+            }
+
             if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_w))
             {
                 previewViewport.CameraController.Move(ECameraAxis.Forward, step, true);
@@ -123,6 +142,14 @@ namespace EngineNS.Editor
             {
                 previewViewport.CameraController.Move(ECameraAxis.Right, -step, true);
             }
+        }
+
+        private bool mF11WasDown = false;
+
+        private unsafe void TriggerRenderDocCapture()
+        {
+            IRenderDocTool.GetInstance().SetGpuDevice(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject);
+            TtEngine.Instance.GfxDevice.RenderQueue.CaptureRenderDocFrame = true;
         }
     }
 }

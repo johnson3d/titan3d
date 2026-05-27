@@ -38,7 +38,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 #endif
     }
 
-	GBufferData GBuffer = (GBufferData)0;
+	FGBufferData GBuffer = (FGBufferData)0;
 
 	half Alpha = (half)mtl.mAlpha;
 	half AlphaTestThreshold = (half)mtl.mAlphaTest;
@@ -58,14 +58,25 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 	float SpecOcclusion = mtl.mAO;
 	// TODO: ApplyBentNormal
 	// float3 BentNormal = GBuffer.WorldNormal;
-	GBuffer.CustomData.r = (half)SpecOcclusion;
 	GBuffer.AO = (half)(AOMultiBounce( CalcLuminance( SpecularColor ), SpecOcclusion ).g);
 
-	GBuffer.ObjectFlags_2Bit = ObjectFLags_2Bit;
+	// Subsurface Profile Index: mtl.mMask stores the profile index (0~255 integer)
+	int baseShadingMode = (MaterialRenderFlags & SHADINGMODE_BIT_MASK) >> SHADINGMODE_BIT_OFFSET;
+	if (baseShadingMode == EShadingMode_Subsurface)
+	{
+		GBuffer.CustomData = saturate((half)mtl.mSubsurfaceProfile / 255.0h);  // ProfileIndex normalized
+	}
+	else
+	{
+		GBuffer.CustomData = (half)SpecOcclusion;
+	}
+	GBuffer.Opacity = (half)mtl.mOpacity;
+    GBuffer.Mask = (half) mtl.mMask;
+
+    GBuffer.RenderFlags_10Bit = MaterialRenderFlags | MeshRenderFlags;
 #if MTL_LightingMode == ELightingMode_Unlight
 	GBuffer.SetUnlit(true);
 #endif
-    GBuffer.RenderFlags_10Bit = MaterialRenderFlags;
 	//GBuffer.MotionVector.xy = input.psCustomUV0.xy;
 	
     float2 previousScreenPos = (input.psCustomUV1.xy / input.psCustomUV1.w) * 0.5 + 0.5;

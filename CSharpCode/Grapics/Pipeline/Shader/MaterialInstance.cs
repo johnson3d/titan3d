@@ -198,7 +198,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.AssetName = AssetName;
             result.ParentMaterial = ParentMaterial;
             result.MaterialHash = MaterialHash;
-            result.RenderLayer = RenderLayer;
+            result.mHasRenderLayerOverride = mHasRenderLayerOverride;
+            result.mRenderLayerOverride = mRenderLayerOverride;
 
             foreach (var i in this.UsedSrView)
             {
@@ -469,17 +470,43 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
 
-        public override ERenderLayer RenderLayer
+        bool mHasRenderLayerOverride = false;
+        ERenderLayer mRenderLayerOverride = ERenderLayer.RL_Opaque;
+        [Browsable(false)]
+        public bool HasRenderLayerOverride
+        {
+            get => mHasRenderLayerOverride;
+            set
+            {
+                mHasRenderLayerOverride = value;
+                SerialId++;
+            }
+        }
+        public override unsafe ERenderLayer RenderLayer
         {
             get
             {
+                if (mHasRenderLayerOverride)
+                    return mRenderLayerOverride;
                 if (mParentMaterial == null)
                     return ERenderLayer.RL_Opaque;
                 return mParentMaterial.RenderLayer;
             }
             set
             {
-                
+                mHasRenderLayerOverride = true;
+                mRenderLayerOverride = value;
+                if (mRenderLayerOverride == ERenderLayer.RL_Translucent ||
+                    mRenderLayerOverride == ERenderLayer.RL_PostTranslucent ||
+                    mRenderLayerOverride == ERenderLayer.RL_TranslucentGizmos)
+                {
+                    mPipelineDesc.m_Blend.RenderTarget[0].BlendEnable = 1;
+                }
+                else
+                {
+                    mPipelineDesc.m_Blend.RenderTarget[0].BlendEnable = 0;
+                }
+                SerialId++;
             }
         }
         public override bool AlphaTest
@@ -715,6 +742,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
     }
 }
+
 
 
 #if TitanEngine_AutoGen_Macross

@@ -312,9 +312,12 @@ namespace EngineNS
             {
                 if (TtEngine.Instance.Config.SupportMultWindows == false)
                 {
-                    var draw_data = ImGuiAPI.GetDrawData();
-                    EGui.TtImDrawDataRHI.RenderImDrawData(ref *draw_data, NativeWindow, mDrawData);
-                    NativeWindow.SwapChain.Present(0, 0);
+                    if (NativeWindow.CanRender)
+                    {
+                        var draw_data = ImGuiAPI.GetDrawData();
+                        EGui.TtImDrawDataRHI.RenderImDrawData(ref *draw_data, NativeWindow, mDrawData);
+                        NativeWindow.SwapChain.Present(0, 0);
+                    }
                 }
 
                 // Update and Render additional Platform Windows
