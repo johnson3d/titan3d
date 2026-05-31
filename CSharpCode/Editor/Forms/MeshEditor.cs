@@ -204,7 +204,7 @@ namespace EngineNS.Editor.Forms
         }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
-        public async Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg, bool saveLayout)
         {
             AssetName = name;
             Mesh = arg as Graphics.Mesh.TtMaterialMesh;
@@ -238,7 +238,6 @@ namespace EngineNS.Editor.Forms
                 meshNode.NodeData.Name = "PreviewObject";
                 meshNode.IsAcceptShadow = false;
                 meshNode.IsCastShadow = false;
-                meshNode.IsSceneManaged = false;
             }
             #endregion
 

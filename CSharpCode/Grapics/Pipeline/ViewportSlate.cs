@@ -1,5 +1,6 @@
 using EngineNS.Editor;
 using EngineNS.GamePlay.Scene;
+using EngineNS.Thread.Async;
 using EngineNS.UI;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace EngineNS.Graphics.Pipeline
     {
         public TtViewportSlate()
         {
-            World = new GamePlay.TtWorld(this);
+            //World = new GamePlay.TtWorld(this);
             TtEngine.Instance.ViewportSlateManager.AddViewport(this);
         }
         ~TtViewportSlate()
@@ -47,10 +48,18 @@ namespace EngineNS.Graphics.Pipeline
         public NxRHI.FViewPort Viewport { get => mViewport; }
         NxRHI.FScissorRect mScissorRect = new NxRHI.FScissorRect();
         public NxRHI.FScissorRect ScissorRect { get => mScissorRect; }
-        GamePlay.TtWorld mWorld;
+        GamePlay.TtWorld mWorld = null;
         [Rtti.Meta("")]
         [Category("Option")]
         public GamePlay.TtWorld World { get => mWorld; protected set => mWorld = value; }
+        public async TtTask InitWorld()
+        {
+            if (World == null)
+            {
+                World = new GamePlay.TtWorld(this);
+                await World.InitWorld();
+            }
+        }
         public void SetCameraOffset(in DVector3 offset)
         {
             World.CameraOffset = offset;
@@ -500,7 +509,7 @@ namespace EngineNS.Graphics.Pipeline
         [Rtti.Meta("")]
         public virtual async Thread.Async.TtTask<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
         {
-            var policy = policyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted().CreateRenderPolicy(policyName, this);
+            var policy = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.CreateRenderPolicy(policyName, this);
             if (OnInitialize != null)
             {
                 await OnInitialize(this, application, policy, zMin, zMax);
@@ -1068,8 +1077,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual async Thread.Async.TtTask Initialize(RName policyName)
         {
-            var policyAsset = await policyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>();
-            RenderPolicy = policyAsset.CreateRenderPolicy(policyName,  null);
+            RenderPolicy = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.CreateRenderPolicy(policyName, null);
             await RenderPolicy.Initialize(null);
 
             World = new GamePlay.TtWorld(null);

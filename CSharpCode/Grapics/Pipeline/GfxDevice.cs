@@ -14,6 +14,19 @@ namespace EngineNS.Graphics.Pipeline
         public bool IsReverseZ { get; set; } = true;
         [Rtti.Meta("")]
         public bool UseOctahedronNormal { get; set; } = false;
+        [Flags]
+        public enum ETextureAssetCompressType
+        {
+            None = 1,//不压缩，保存png的mip格式
+            DXT = 1 << 1,//dxt压缩mip格式
+            ASTC = 1 << 2,//astc压缩mip格式
+            ETC2 = 1 << 3,//etc压缩mip格式
+        }
+        [Rtti.Meta("")]
+        public ETextureAssetCompressType TextureAssetCompressType
+        {
+            get; set;
+        } = ETextureAssetCompressType.DXT;
     }
     public partial class TtGfxDevice : TtModule<TtEngine>
     {

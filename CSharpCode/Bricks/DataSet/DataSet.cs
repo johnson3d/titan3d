@@ -487,7 +487,7 @@ namespace EngineNS.Bricks.DataSet
             return AssetName.Name;
         }
         public TtDataSet DataSet;
-        public async Thread.Async.TtTask<bool> OpenEditor(Editor.TtMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(Editor.TtMainEditorApplication mainEditor, RName name, object arg, bool saveLayout)
         {
             AssetName = name;
             var ameta = name.AMeta as TtDataSetAMeta;

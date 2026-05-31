@@ -108,12 +108,12 @@ namespace EngineNS.Bricks.Collision.Octree
         public bool Remove(in T obj)
         {
             bool removed = false;
+            obj.OctreeOwner = null;
 
             for (int i = 0; i < OctObjects.Count; i++)
             {
                 if (OctObjects[i].Obj.Equals(obj))
                 {
-                    OctObjects[i].Obj.OctreeOwner = null;
                     removed = OctObjects.Remove(OctObjects[i]);
                     break;
                 }
@@ -122,8 +122,7 @@ namespace EngineNS.Bricks.Collision.Octree
             if (!removed && Children != null)
             {
                 for (int i = 0; i < 8; i++)
-                {
-                    obj.OctreeOwner = null;
+                {   
                     removed = Children[i].Remove(in obj);
                     if (removed) break;
                 }
@@ -154,6 +153,38 @@ namespace EngineNS.Bricks.Collision.Octree
                 return false;
             }
             return SubRemove(obj, in objBounds);
+        }
+
+        /// <summary>
+        /// Try to update the stored bounding box of an object in-place.
+        /// If the new bounds still fit within this node's Bounds, only the
+        /// stored BoundingBox is patched (O(n) where n ≤ NUM_OBJECTS_ALLOWED).
+        /// Returns true if the update was handled; false means the object has
+        /// moved outside this node and the caller must fall back to Remove+Add.
+        /// </summary>
+        public bool TryUpdateBounds(T obj, in Aabb newBounds)
+        {
+            if (!Encapsulates(in Bounds, in newBounds))
+                return false;
+
+            for (int i = 0; i < OctObjects.Count; i++)
+            {
+                if (OctObjects[i].Obj.Equals(obj))
+                {
+                    var entry = OctObjects[i];
+                    entry.BoundingBox = newBounds;
+                    OctObjects[i] = entry;
+                    return true;
+                }
+            }
+
+            // Object is not directly in this node (it may be in a child).
+            // We know the new bounds still fit in our Bounds, but we can't
+            // patch children's lists from here — return false to let the
+            // caller do the full Remove+Add (which is still cheaper than
+            // a blind root-level Remove since the caller can use the
+            // bounds-aware Remove overload).
+            return false;
         }
 
         /// <summary>

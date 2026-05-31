@@ -49,12 +49,7 @@ namespace EngineNS.EGui.Slate
         }
         public override async Thread.Async.TtTask<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
         {
-            TtRenderPolicy policy = null;
-            var rpAsset = policyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted();
-            if (rpAsset != null)
-            {
-                policy = rpAsset.CreateRenderPolicy(policyName, this);
-            }
+            var policy = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.CreateRenderPolicy(policyName, this);
             if (false == await InitializeImpl(application, policy, zMin, zMax))
                 return false;
 
@@ -66,13 +61,14 @@ namespace EngineNS.EGui.Slate
         }
         private async Thread.Async.TtTask<bool> InitializeImpl(TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
+            await InitWorld();
+
             await Initialize();
 
             await policy.Initialize(null);
             if (Viewport.Width > 1 && Viewport.Height > 1)
                 policy.OnResize(Viewport.Width, Viewport.Height);
 
-            await this.World.InitWorld();
             if (OnInitialize == null)
             {
                 OnInitialize = this.Initialize_Default;

@@ -395,7 +395,7 @@ namespace EngineNS.Editor.Forms
         }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
-        public async Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg, bool saveLayout)
         {
             AssetName = name;
             Mesh = arg as Graphics.Mesh.TtMeshPrimitives;
@@ -561,6 +561,88 @@ namespace EngineNS.Editor.Forms
                 mdp.mCoreObject.BuildLightMap(ref aspect);
                 mdp.ToMesh(Mesh);
             }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("ApplyTransform", in btSize))
+            {
+                ApplyNodeTransformToMesh();
+            }
+        }
+
+        /// <summary>
+        /// 将当前 meshNode 的 Placement 变换（位移/旋转/缩放）烘焙到顶点数据中，
+        /// 重置节点变换为 Identity，然后保存 vms。
+        /// </summary>
+        unsafe void ApplyNodeTransformToMesh()
+        {
+            if (mCurrentMeshNode == null || Mesh == null)
+                return;
+
+            var placement = mCurrentMeshNode.Placement;
+            var position = placement.Position;
+            var rotation = placement.Quat;
+            var scale = placement.Scale;
+
+            var translationF = new Vector3((float)position.X, (float)position.Y, (float)position.Z);
+            var transformMatrix = Matrix.Transformation(scale, rotation, translationF);
+
+            // 法线/切线需要用逆转置矩阵来保证非均匀缩放时方向正确
+            var noTranslation = Matrix.Transformation(scale, rotation, Vector3.Zero);
+            Matrix.Invert(in noTranslation, out var invMat);
+            Matrix.Transpose(in invMat, out var inverseTranspose);
+
+            var meshProvider = new TtMeshDataProvider();
+            if (!meshProvider.InitFrom(Mesh))
+                return;
+
+            var builder = meshProvider.mCoreObject;
+            int vertexCount = (int)builder.VertexNumber;
+
+            // Position
+            var pPos = (Vector3*)builder.GetStream(NxRHI.EVertexStreamType.VST_Position).GetData();
+            if (pPos != null)
+            {
+                for (int i = 0; i < vertexCount; i++)
+                {
+                    pPos[i] = Vector3.TransformCoordinate(in pPos[i], in transformMatrix);
+                }
+            }
+
+            // Normal
+            var pNor = (Vector3*)builder.GetStream(NxRHI.EVertexStreamType.VST_Normal).GetData();
+            if (pNor != null)
+            {
+                for (int i = 0; i < vertexCount; i++)
+                {
+                    pNor[i] = Vector3.TransformNormal(in pNor[i], in inverseTranspose);
+                    pNor[i].Normalize();
+                }
+            }
+
+            // Tangent (Vector4 — w 分量保留手性符号)
+            var pTan = (Vector4*)builder.GetStream(NxRHI.EVertexStreamType.VST_Tangent).GetData();
+            if (pTan != null)
+            {
+                for (int i = 0; i < vertexCount; i++)
+                {
+                    var tangentDir = new Vector3(pTan[i].X, pTan[i].Y, pTan[i].Z);
+                    tangentDir = Vector3.TransformNormal(in tangentDir, in inverseTranspose);
+                    tangentDir.Normalize();
+                    pTan[i] = new Vector4(tangentDir.X, tangentDir.Y, tangentDir.Z, pTan[i].W);
+                }
+            }
+
+            meshProvider.ToMesh(Mesh);
+
+            // 重置节点变换为 Identity
+            placement.Position = DVector3.Zero;
+            placement.Quat = Quaternion.Identity;
+            placement.Scale = Vector3.One;
+
+            // 重新对齐 Axis
+            PreviewViewport.Axis?.SetSelectedNodes(mCurrentMeshNode);
+
+            // 保存 vms
+            Mesh.SaveAssetTo(Mesh.AssetName);
         }
 
         bool ShowEditorPropGrid = true;

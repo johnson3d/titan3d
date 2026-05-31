@@ -339,17 +339,7 @@ namespace EngineNS.Editor.Forms
             {
                 if (World.Root != node)
                 {
-                    var scene = node.GetNearestParentScene();
-                    node.Parent = null;
-                    if (scene != null)
-                    {
-                        var file = node.NodeId.ToString() + TtNode.NodeExt;
-                        var nodefiles = TtFileManager.GetFiles(scene.AssetName.Address + "/nodes", file, true);
-                        foreach (var nodefile in nodefiles)
-                        {
-                            TtFileManager.DeleteFile(nodefile);
-                        }
-                    }
+                    node.DeleteFromScene();
                 }
             }
         }

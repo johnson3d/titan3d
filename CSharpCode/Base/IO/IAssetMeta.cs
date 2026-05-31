@@ -691,7 +691,7 @@ namespace EngineNS.IO
             if (EGui.UIProxy.MenuItemProxy.MenuItem("RefGraph", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
             {
                 var rn = RName.GetRName(mAssetName.Name + IAssetMeta.MetaExt, mAssetName.RNameType);
-                Editor.TtAssetEditorManager.TryOpenEditor(typeof(Editor.Forms.TtAssetReferViewer), rn, this).AddWaitTask();
+                Editor.TtAssetEditorManager.TryOpenEditor(typeof(Editor.Forms.TtAssetReferViewer), rn, this, true).AddWaitTask();
             }
             if (EGui.UIProxy.MenuItemProxy.MenuItem("CopyRName", null, false, null, in drawList, in menuData, ref mCopyRNameMenuState))
             {

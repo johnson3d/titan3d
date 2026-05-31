@@ -141,7 +141,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             return true;
         }
-        public async Thread.Async.TtTask<bool> OpenEditor(Editor.TtMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(Editor.TtMainEditorApplication mainEditor, RName name, object arg, bool saveLayout)
         {
             if (IsStarting)
                 return false;

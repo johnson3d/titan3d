@@ -82,12 +82,7 @@ namespace EngineNS.Editor
         {
             Graphics.Pipeline.TtRenderPolicy policy = await TtEngine.Instance.EventPoster.Post((state) =>
             {
-                var rpAsset = policyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted();
-                if (rpAsset == null)
-                {
-                    return null;
-                }
-                return rpAsset.CreateRenderPolicy(policyName, this);
+                return Bricks.RenderPolicyEditor.TtRenderPolicyAsset.CreateRenderPolicy(policyName, this);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             
             await policy.Initialize(null);

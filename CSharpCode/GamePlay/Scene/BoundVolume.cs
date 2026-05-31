@@ -1,6 +1,10 @@
-﻿using System;
+﻿using EngineNS.Bricks.Collision.Octree;
+using EngineNS.GamePlay.Scene;
+using EngineNS.Profiler;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using static EngineNS.GamePlay.TtWorld;
 
 namespace EngineNS.GamePlay.Scene
 {
@@ -50,7 +54,7 @@ namespace EngineNS.GamePlay.Scene
                 {
                     return ref mAbsAABB;
                 }
-                return ref (HostNode.EntityManager as TtEntityManager).BoundingValues.GetValue(HostNode.Id);
+                return ref (HostNode.EntityManager as TtWorldEntityManager).BoundingValues.GetValue(HostNode.Id);
             }
         }
         protected virtual void OnVolumeChanged()
@@ -115,7 +119,7 @@ namespace EngineNS.GamePlay.Scene
         public bool IsParallel { get; set; } = true;
         public void Process(ECS.TtEntityManager manager, float deltaTime)
         {
-            var values = (manager as TtEntityManager).BoundingValues;
+            var values = (manager as TtWorldEntityManager).BoundingValues;
 
             if (IsParallel == false)
             {
@@ -146,9 +150,12 @@ namespace EngineNS.GamePlay.Scene
                         {
                             if (VisParameter.CullCamera != null)
                             {
-                                var type = VisParameter.CullCamera.WhichContainTypeFast(World, in aabb, true);
-                                if (type == CONTAIN_TYPE.CONTAIN_TEST_OUTER)
-                                    continue;
+                                if (VisParameter.DontFrustumCull == false)
+                                {
+                                    var type = VisParameter.CullCamera.WhichContainTypeFast(World, in aabb, true);
+                                    if (type == CONTAIN_TYPE.CONTAIN_TEST_OUTER)
+                                        continue;
+                                }
                             }
                             else
                             {
@@ -207,9 +214,12 @@ namespace EngineNS.GamePlay.Scene
                     {
                         if (VisParameter.CullCamera != null)
                         {
-                            var type = VisParameter.CullCamera.WhichContainTypeFast(World, in aabb, true);
-                            if (type == CONTAIN_TYPE.CONTAIN_TEST_OUTER)
-                                return;
+                            if (VisParameter.DontFrustumCull == false)
+                            {
+                                var type = VisParameter.CullCamera.WhichContainTypeFast(World, in aabb, true);
+                                if (type == CONTAIN_TYPE.CONTAIN_TEST_OUTER)
+                                    return;
+                            }   
                         }
                         else
                         {
@@ -236,11 +246,11 @@ namespace EngineNS.GamePlay.Scene
             }
         }
     }
-    public class TtEntityManager : ECS.TtEntityManager
+    public class TtWorldEntityManager : ECS.TtEntityManager
     {
         internal ECS.TtComponentValues<DBoundingBox> BoundingValues = new ECS.TtComponentValues<DBoundingBox>();
         internal TtCullingSystem CullingSystem = new TtCullingSystem();
-        public TtEntityManager()
+        public TtWorldEntityManager()
         {
             this.RegisterComponent(BoundingValues);
             this.Systems.Add(CullingSystem);
@@ -250,9 +260,162 @@ namespace EngineNS.GamePlay.Scene
 
 namespace EngineNS.GamePlay
 {
-    partial class TtWorld
+    partial class TtWorld : INotifyHost
     {
-        public Scene.TtEntityManager EntityManager { get; private set; }
+        public Scene.TtWorldEntityManager EntityManager { get; private set; }
+        #region Octree
+        private TtCollideOctree mCollideOctree = new TtCollideOctree();
+        public TtCollideOctree CollideOctree
+        {
+            get => mCollideOctree;
+        }
+        #endregion
+        #region Volume BVH
+        /// <summary>
+        /// Wrapper that sits inside the volume BVH and weakly references a TtVolumeBaseNode.
+        /// Prevents the BVH from holding strong references to scene nodes.
+        /// </summary>
+        public class TtBvhVolumeEntry
+        {
+            public WeakReference<Scene.TtVolumeBaseNode> WeakVolume;
+            public int ProxyId = Bricks.Collision.BVH.TtDynamicBVH<TtBvhVolumeEntry>.NullNode;
+
+            public TtBvhVolumeEntry(Scene.TtVolumeBaseNode volume)
+            {
+                WeakVolume = new WeakReference<Scene.TtVolumeBaseNode>(volume);
+            }
+
+            public bool TryGetVolume(out Scene.TtVolumeBaseNode volume)
+            {
+                return WeakVolume.TryGetTarget(out volume);
+            }
+        }
+
+        // ── Volume spatial index ──
+        Bricks.Collision.BVH.TtDynamicBVH<TtBvhVolumeEntry> mVolumeBvh
+            = new Bricks.Collision.BVH.TtDynamicBVH<TtBvhVolumeEntry>(16, 0.5f, 2.0f);
+        public Bricks.Collision.BVH.TtDynamicBVH<TtBvhVolumeEntry> VolumeBvh { get => mVolumeBvh; }
+
+        // Parallel lists: mAllVolumes[i] weakly references the node, mAllVolumeEntries[i] is the BVH wrapper.
+        // When a WeakRef dies, we use the corresponding entry's ProxyId to clean up the BVH leaf.
+        readonly List<WeakReference<Scene.TtVolumeBaseNode>> mAllVolumes = new List<WeakReference<Scene.TtVolumeBaseNode>>();
+        readonly List<TtBvhVolumeEntry> mAllVolumeEntries = new List<TtBvhVolumeEntry>();
+
+        internal void RegisterVolume(Scene.TtVolumeBaseNode volume)
+        {
+            if (volume.BvhProxyId != Bricks.Collision.BVH.TtDynamicBVH<TtBvhVolumeEntry>.NullNode)
+                return;
+            var entry = new TtBvhVolumeEntry(volume);
+            volume.VolumeEntry = entry;
+            var volData = volume.GetNodeData<Scene.TtVolumeBaseNode.TtVolumeBaseData>();
+            if (volData != null && volData.IsUnbound)
+            {
+                var hugeBox = new Aabb(DVector3.Zero, new Vector3(1e6f));
+                volume.BvhProxyId = mVolumeBvh.InsertProxy(in hugeBox, entry);
+            }
+            else
+            {
+                var aabb = new Aabb(in volume.BoundVolume.AbsAABB);
+                volume.BvhProxyId = mVolumeBvh.InsertProxy(in aabb, entry);
+            }
+            entry.ProxyId = volume.BvhProxyId;
+            mAllVolumes.Add(new WeakReference<Scene.TtVolumeBaseNode>(volume));
+            mAllVolumeEntries.Add(entry);
+        }
+
+        internal void UnregisterVolume(Scene.TtVolumeBaseNode volume)
+        {
+            if (volume.BvhProxyId == Bricks.Collision.BVH.TtDynamicBVH<TtBvhVolumeEntry>.NullNode)
+                return;
+            mVolumeBvh.RemoveProxy(volume.BvhProxyId);
+            volume.BvhProxyId = Bricks.Collision.BVH.TtDynamicBVH<TtBvhVolumeEntry>.NullNode;
+            volume.VolumeEntry = null;
+            for (int i = mAllVolumes.Count - 1; i >= 0; i--)
+            {
+                if (!mAllVolumes[i].TryGetTarget(out var target) || target == volume)
+                {
+                    mAllVolumes.RemoveAt(i);
+                    mAllVolumeEntries.RemoveAt(i);
+                }
+            }
+        }
+
+        internal void UpdateVolumeProxy(Scene.TtVolumeBaseNode volume)
+        {
+            if (volume.BvhProxyId == Bricks.Collision.BVH.TtDynamicBVH<TtBvhVolumeEntry>.NullNode)
+                return;
+            var aabb = new Aabb(in volume.BoundVolume.AbsAABB);
+            mVolumeBvh.UpdateProxy(volume.BvhProxyId, in aabb, DVector3.Zero);
+        }
+
+        /// <summary>
+        /// Query all volumes that overlap a world-space point (typically the camera position).
+        /// Results are appended to <paramref name="results"/>.
+        /// </summary>
+        public void QueryVolumes(in DVector3 point, List<Scene.TtVolumeBaseNode> results)
+        {
+            mVolumeBvh.QueryPoint(in point, (int proxyId, TtBvhVolumeEntry entry) =>
+            {
+                if (entry.TryGetVolume(out var vol))
+                    results.Add(vol);
+                return true;
+            });
+        }
+
+        /// <summary>
+        /// Query all volumes of a specific subtype that overlap a world-space point.
+        /// </summary>
+        public void QueryVolumes<T>(in DVector3 point, List<T> results) where T : Scene.TtVolumeBaseNode
+        {
+            mVolumeBvh.QueryPoint(in point, (int proxyId, TtBvhVolumeEntry entry) =>
+            {
+                if (entry.TryGetVolume(out var vol) && vol is T typed)
+                    results.Add(typed);
+                return true;
+            });
+        }
+
+        /// <summary>
+        /// Release LUT textures on PostProcessVolumes that haven't been used recently.
+        /// Called once per frame from HdrNode to reclaim VRAM for idle volumes.
+        /// </summary>
+        public void TickVolumeLutCleanup()
+        {
+            for (int i = mAllVolumes.Count - 1; i >= 0; i--)
+            {
+                if (!mAllVolumes[i].TryGetTarget(out var volume))
+                {
+                    // Volume was GC'd — purge its BVH leaf via the entry's cached ProxyId
+                    var entry = mAllVolumeEntries[i];
+                    if (entry.ProxyId != Bricks.Collision.BVH.TtDynamicBVH<TtBvhVolumeEntry>.NullNode)
+                    {
+                        mVolumeBvh.RemoveProxy(entry.ProxyId);
+                        entry.ProxyId = Bricks.Collision.BVH.TtDynamicBVH<TtBvhVolumeEntry>.NullNode;
+                    }
+                    mAllVolumes.RemoveAt(i);
+                    mAllVolumeEntries.RemoveAt(i);
+                    continue;
+                }
+                if (volume is Scene.TtPostProcessVolumeNode ppVol)
+                    ppVol.ReleaseLutIfStale();
+            }
+        }
+        #endregion
+        public void OnHostNotify(object host, in FHostNotify notify)
+        {
+            switch (notify.Info)
+            {
+                case "OnSceneLoaded":
+                    {
+                        
+                    }
+                    break;
+                case "OnNodeMove":
+                    {
+                    }
+                    break;
+            }
+        }
     }
 }
 

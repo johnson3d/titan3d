@@ -387,6 +387,103 @@ namespace EngineNS.Graphics.Mesh
             builder.PushAtomLOD(0, &dpDesc);
             return meshBuilder;
         }
+        /// <summary>
+        /// 生成经纬线球体线框（LineList），包含纬线圈和经线圈。
+        /// </summary>
+        /// <param name="center">球心位置</param>
+        /// <param name="radius">球体半径</param>
+        /// <param name="longitudeSegments">经线圈数量（垂直切面）</param>
+        /// <param name="latitudeSegments">纬线分段数（水平切面，不含两极）</param>
+        /// <param name="color">线框颜色</param>
+        public static unsafe TtMeshDataProvider MakeSphereWireframe(in Vector3 center, float radius, int longitudeSegments = 16, int latitudeSegments = 12, UInt32 color = 0xFFFFFFFF)
+        {
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
+            meshBuilder.AssetName = RName.GetRName("@MakeSphereWireframe", RName.ERNameType.Transient);
+            var builder = meshBuilder.mCoreObject;
+            uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
+                (1 << (int)NxRHI.EVertexStreamType.VST_Color));
+            builder.Init(streams, false, 1);
+
+            var aabb = new BoundingBox(center - new Vector3(radius), center + new Vector3(radius));
+            builder.SetAABB(ref aabb);
+
+            int pointsPerRing = longitudeSegments;
+            // 纬线圈数 = latitudeSegments - 1（不含两极），经线圈数 = longitudeSegments / 2
+            int latitudeRings = latitudeSegments - 1;
+            int longitudeRings = longitudeSegments / 2;
+
+            int latLineCount = latitudeRings * pointsPerRing;
+            int lonLineCount = longitudeRings * (latitudeSegments * 2);
+            int totalLines = latLineCount + lonLineCount;
+
+            UInt16 vertexIndex = 0;
+
+            // 生成纬线圈顶点和线段
+            for (int lat = 1; lat < latitudeSegments; lat++)
+            {
+                float phi = MathHelper.PI * lat / latitudeSegments;
+                float sinPhi = (float)Math.Sin(phi);
+                float cosPhi = (float)Math.Cos(phi);
+                float ringRadius = radius * sinPhi;
+                float ringY = radius * cosPhi;
+
+                UInt16 ringStart = vertexIndex;
+                for (int lon = 0; lon < pointsPerRing; lon++)
+                {
+                    float theta = 2.0f * MathHelper.PI * lon / pointsPerRing;
+                    var pos = new Vector3(
+                        center.X + ringRadius * (float)Math.Cos(theta),
+                        center.Y + ringY,
+                        center.Z + ringRadius * (float)Math.Sin(theta));
+                    builder.AddVertex(in pos, in Vector3.UnitY, in Vector2.One, color);
+                    vertexIndex++;
+                }
+                // 连接纬线圈线段
+                for (int lon = 0; lon < pointsPerRing; lon++)
+                {
+                    UInt16 a = (UInt16)(ringStart + lon);
+                    UInt16 b = (UInt16)(ringStart + (lon + 1) % pointsPerRing);
+                    builder.AddLine(a, b);
+                }
+            }
+
+            // 生成经线圈顶点和线段（每条经线是完整大圆：北极→南极→北极）
+            int pointsPerLonRing = latitudeSegments * 2;
+            for (int ring = 0; ring < longitudeRings; ring++)
+            {
+                float theta = MathHelper.PI * ring / longitudeRings;
+                float cosTheta = (float)Math.Cos(theta);
+                float sinTheta = (float)Math.Sin(theta);
+                UInt16 ringStart = vertexIndex;
+                for (int seg = 0; seg < pointsPerLonRing; seg++)
+                {
+                    float phi = 2.0f * MathHelper.PI * seg / pointsPerLonRing;
+                    float sinPhi = (float)Math.Sin(phi);
+                    float cosPhi = (float)Math.Cos(phi);
+                    var pos = new Vector3(
+                        center.X + radius * sinPhi * cosTheta,
+                        center.Y + radius * cosPhi,
+                        center.Z + radius * sinPhi * sinTheta);
+                    builder.AddVertex(in pos, in Vector3.UnitY, in Vector2.One, color);
+                    vertexIndex++;
+                }
+                // 连接经线圈线段（闭合环）
+                for (int seg = 0; seg < pointsPerLonRing; seg++)
+                {
+                    UInt16 a = (UInt16)(ringStart + seg);
+                    UInt16 b = (UInt16)(ringStart + (seg + 1) % pointsPerLonRing);
+                    builder.AddLine(a, b);
+                }
+            }
+
+            var dpDesc = new NxRHI.FMeshAtomDesc();
+            dpDesc.SetDefault();
+            dpDesc.PrimitiveType = NxRHI.EPrimitiveType.EPT_LineList;
+            dpDesc.NumPrimitives = (uint)totalLines;
+
+            builder.PushAtomLOD(0, &dpDesc);
+            return meshBuilder;
+        }
         #endregion
 
         #region Rect2D
@@ -470,6 +567,62 @@ namespace EngineNS.Graphics.Mesh
             }
 
             return meshBuilder;
+        }
+        #endregion
+
+        #region Frustum
+        /// <summary>
+        /// 用 LineList 创建一个平截头体线框 Mesh。
+        /// 8 个角点按 near(左下、右下、右上、左上) + far(左下、右下、右上、左上) 排列，
+        /// 共 12 条边: near 四边 + far 四边 + 连接 near-far 的四条棱。
+        /// </summary>
+        public static unsafe TtMeshDataProvider MakeFrustum(float fovY, float aspect, float nearDist, float farDist, uint color = 0xFFFFFFFF)
+        {
+            float halfFovY = fovY * 0.5f;
+            float tanHalfFov = (float)Math.Tan(halfFovY);
+
+            float nearHalfH = nearDist * tanHalfFov;
+            float nearHalfW = nearHalfH * aspect;
+            float farHalfH = farDist * tanHalfFov;
+            float farHalfW = farHalfH * aspect;
+
+            // near plane corners (looking along +Z in local space)
+            var n0 = new Vector3(-nearHalfW, -nearHalfH, nearDist); // left-bottom
+            var n1 = new Vector3( nearHalfW, -nearHalfH, nearDist); // right-bottom
+            var n2 = new Vector3( nearHalfW,  nearHalfH, nearDist); // right-top
+            var n3 = new Vector3(-nearHalfW,  nearHalfH, nearDist); // left-top
+
+            // far plane corners
+            var f0 = new Vector3(-farHalfW, -farHalfH, farDist);
+            var f1 = new Vector3( farHalfW, -farHalfH, farDist);
+            var f2 = new Vector3( farHalfW,  farHalfH, farDist);
+            var f3 = new Vector3(-farHalfW,  farHalfH, farDist);
+
+            // near/far 边中点
+            var nBot = (n0 + n1) * 0.5f;
+            var nRight = (n1 + n2) * 0.5f;
+            var nTop = (n2 + n3) * 0.5f;
+            var nLeft = (n3 + n0) * 0.5f;
+
+            var fBot = (f0 + f1) * 0.5f;
+            var fRight = (f1 + f2) * 0.5f;
+            var fTop = (f2 + f3) * 0.5f;
+            var fLeft = (f3 + f0) * 0.5f;
+
+            // 12 edges + 4 side midlines = 32 vertices
+            var lines = new List<Vector3>(32)
+            {
+                // near rect
+                n0, n1,  n1, n2,  n2, n3,  n3, n0,
+                // far rect
+                f0, f1,  f1, f2,  f2, f3,  f3, f0,
+                // connecting edges
+                n0, f0,  n1, f1,  n2, f2,  n3, f3,
+                // side midlines (bottom, right, top, left)
+                nBot, fBot,  nRight, fRight,  nTop, fTop,  nLeft, fLeft,
+            };
+
+            return MakeLines(in lines, color);
         }
         #endregion
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assimp;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -181,20 +182,14 @@ namespace EngineNS.GamePlay
             {
                 HostNode.UpdateAbsTransform();
                 HostNode.UpdateAABB();
-                if (HostNode.Parent != null)
-                    HostNode.Parent.UpdateAABB();
+                
+                //if (HostNode.Parent != null)
+                //    HostNode.Parent.UpdateAABB();
 
-                if (HostNode.IsCollide)
-                {
-                    var scene = HostNode.ParentScene;
-                    if (scene != null)
-                    {
-                        var notify = new FHostNotify();
-                        notify.Info = "OnActorMove";
-                        notify.Parameter = HostNode;
-                        scene.SceneOctree.OnHostNotify(scene, notify);
-                    }
-                }
+                //var notify = new FHostNotify();
+                //notify.Info = "OnNodeMove";
+                //notify.Parameter = HostNode;
+                //HostNode.GetWorld()?.OnHostNotify(this, notify);
             }
         }
 

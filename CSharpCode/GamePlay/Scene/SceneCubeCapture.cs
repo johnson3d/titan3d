@@ -1,9 +1,12 @@
 using EngineNS.Bricks.WorldSimulator;
+using EngineNS.Editor.Forms;
+using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using static EngineNS.GamePlay.TtAxis;
 
 namespace EngineNS.GamePlay.Scene
 {
@@ -127,7 +130,6 @@ namespace EngineNS.GamePlay.Scene
 
         // 立即在下一次 TickLogic 触发一次 cube 拍摄 (忽略 interval).
         // 暴露给 Macross / 编辑器 / 任意 C# 调用方手动触发.
-        [Rtti.Meta("")]
         [Category("Capture")]
         public bool CaptureNow
         {
@@ -145,7 +147,6 @@ namespace EngineNS.GamePlay.Scene
         // 抓帧 (一次性, 抓完自动关). 用于 detail 面板里"我现在要 debug 这次
         // cube 拍摄的 GPU 行为" 场景 — 点一下按钮就在 RenderDoc UI 拿到
         // 包含 6 面渲染 + 6 次 face copy 的完整 capture.
-        [Rtti.Meta("")]
         [Category("Capture")]
         public bool CaptureWithRenderDoc
         {
@@ -160,6 +161,103 @@ namespace EngineNS.GamePlay.Scene
                     CubeRenderer.CaptureRenderDocNextFrame = true;
             }
         }
+
+        Editor.Forms.TtTextureViewer mTextureViewer = null;
+        [Category("Capture")]
+        public bool OpenInTextureViewer
+        {
+            get
+            {
+                if (mTextureViewer != null && mTextureViewer.Visible == false)
+                    mTextureViewer = null;
+                return mTextureViewer != null;
+            }
+            set
+            {
+                if (CubeSrv == null)
+                    return;
+                if (mTextureViewer == null)
+                {
+                    mTextureViewer = new Editor.Forms.TtTextureViewer();
+                }
+                CubeSrv.AssetName = RName.GetRName($"@SceneCubeCapture:{this.NodeId}@", RName.ERNameType.Transient);
+                Editor.TtAssetEditorManager.TryOpenEditor(mTextureViewer,
+                    CubeSrv.AssetName, 
+                    CubeSrv, false).AddWaitTask();
+            }
+        }
+        #region DebugMesh
+        Graphics.Mesh.TtRenderMesh mDebugMesh;
+        public Graphics.Mesh.TtRenderMesh DebugMesh
+        {
+            get
+            {
+                if (mDebugMesh == null)
+                {
+                    var cookedMesh = TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(
+                        RName.GetRName("mesh/utility/sm_cinecam.ums", RName.ERNameType.Engine)).GetResultUntilCompleted();
+                    if (cookedMesh == null)
+                        return null;
+                    var mesh2 = new Graphics.Mesh.TtRenderMesh();
+                    var ok1 = mesh2.Initialize(cookedMesh, 
+                        Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
+                    if (ok1)
+                    {
+                        mesh2.IsAcceptShadow = false;
+                        mDebugMesh = mesh2;
+
+                        mDebugMesh.HostNode = this;
+
+                        BoundVolume.LocalAABB = mDebugMesh.MaterialMesh.AABB;
+
+                        this.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
+
+                        UpdateAbsTransform();
+                        UpdateAABB();
+                        Parent?.UpdateAABB();
+                    }
+                }
+                return mDebugMesh;
+            }
+        }
+        public override bool HashVisual => true;
+        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        {
+            if ((rp.CullFilters & TtWorld.TtVisParameter.EVisCullFilter.UtilityEditor) == 0)
+            {
+                return;
+            }
+            if (DebugMesh != null)
+                rp.AddVisibleMesh(DebugMesh);
+        }
+        public override void GetHitProxyDrawMesh(List<TtRenderMesh> meshes)
+        {
+            base.GetHitProxyDrawMesh(meshes);
+            if (DebugMesh != null)
+                meshes.Add(DebugMesh);
+        }
+        public override void OnHitProxyChanged()
+        {
+            if (mDebugMesh == null)
+                return;
+            if (this.HitProxy == null)
+            {
+                mDebugMesh.IsDrawHitproxy = false;
+                return;
+            }
+
+            if (HitproxyType != Graphics.Pipeline.TtHitProxy.EHitproxyType.None)
+            {
+                mDebugMesh.IsDrawHitproxy = true;
+                var value = HitProxy.ConvertHitProxyIdToVector4();
+                mDebugMesh.SetHitproxy(in value);
+            }
+            else
+            {
+                mDebugMesh.IsDrawHitproxy = false;
+            }
+        }
+        #endregion
         // ---------- 初始化 ----------
         protected override async Thread.Async.TtTask<bool> InitializeNode(
             TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
@@ -170,19 +268,22 @@ namespace EngineNS.GamePlay.Scene
             if (nd.RPolicyName == null)
                 nd.RPolicyName = TtEngine.Instance.Config.MainRPolicyName;
 
-            // RP 资产加载: 走 await (Scene.cs:142 同款写法). InitializeNode
-            // 本来就是 async TtTask<bool>, 没有任何理由 GetResultUntilCompleted
-            // 同步阻塞当前线程 — 那等于把 async 退化成同步, 还埋下死锁风险.
-            TtRenderPolicy policy = null;
-            var rpAsset = await nd.RPolicyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>();
-            if (rpAsset != null)
+            // 每个 face 必须从独立加载的 asset 创建 RenderPolicy.
+            // CreateRenderPolicy 内部 RegRenderNode 会把 PolicyGraph 里的节点实例
+            // 的 RenderGraph 引用设为当前 RP; 如果 6 个 RP 共用同一个 rpAsset,
+            // 它们共享同一批节点对象, 最后一个 RP 会覆盖前面所有 RP 的节点引用,
+            // 导致 Tick 时 this != j.RenderGraph 断言失败.
+            var policies = new TtRenderPolicy[TtCubeWorldRenderer.kFaceCount];
+            for (int f = 0; f < TtCubeWorldRenderer.kFaceCount; f++)
             {
-                policy = rpAsset.CreateRenderPolicy(nd.RPolicyName, null);
+                var policy = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.CreateRenderPolicy(nd.RPolicyName, null);
+                if (policy == null)
+                    continue;
                 await policy.Initialize(null);
-                policy.OnResize(nd.CubeFaceSize, nd.CubeFaceSize);
+                policies[f] = policy;
             }
 
-            CubeRenderer.Initialize(world, policy, nd.CubeFaceSize);
+            CubeRenderer.Initialize(world, policies, nd.CubeFaceSize);
 
             // 解析 ShowActors -> OnlyShowNodes (运行期节点引用)
             this.OnlyShowNodes.Clear();
@@ -198,23 +299,25 @@ namespace EngineNS.GamePlay.Scene
 
             UpdateCubeCameras();
 
-            // 注入 culling 钩子: 把 visit 节点的过滤逻辑接到 RP 的 CpuCullingNode 上.
-            // 与 TtSceneCapture 同款做法.
-            var cullNode = CubeRenderer.RenderPolicy?.FindFirstNode<TtCpuCullingNode>();
-            if (cullNode != null)
+            // 为每个 face RP 的 CpuCullingNode 注入 culling 钩子.
+            for (int fi = 0; fi < TtCubeWorldRenderer.kFaceCount; fi++)
             {
+                var faceRP = CubeRenderer.RenderPolicies?[fi];
+                if (faceRP == null)
+                    continue;
+                var cullNode = faceRP.FindFirstNode<TtCpuCullingNode>();
+                if (cullNode == null)
+                    continue;
                 var visParam = cullNode.VisParameter;
                 visParam.IsGatherVisibleMeshes = this.OnVisitNode;
+                int capturedFaceIndex = fi; // lambda 捕获
                 cullNode.UserTickLogic = (TtWorld w, TtRenderPolicy p, TtCommandList cmd, bool clear) =>
                 {
                     visParam.World = CubeRenderer.CaptureWorld;
-                    visParam.CullCamera = CubeRenderer.RenderPolicy.DefaultCamera;
+                    visParam.CullCamera = p.DefaultCamera;
+                    //visParam.DontFrustumCull = true;
                     if (CaptureMode == ECaptureMode.OnlyShowNodes)
                     {
-                        // 只采集 OnlyShowNodes 列表里的节点 (跳过整 world 遍历).
-                        // world.GatherVisibleMeshes 没有"指定 root"的重载, 直接对每个
-                        // 节点调用它自己的 OnGatherVisibleMeshes (与 AdvanceShadowShading.cs:345
-                        // 同款做法 - 那里 j.SceneNode.OnGatherVisibleMeshes(mVisParameter)).
                         visParam.ClearVisibles();
                         foreach (var n in OnlyShowNodes)
                         {
@@ -224,8 +327,19 @@ namespace EngineNS.GamePlay.Scene
                     }
                     else
                     {
-                        // Normal / ExcludeNodes 模式: 走整个 world 遍历, 由 OnVisitNode
-                        // 在每个 node 上做 Volume / Exclude 过滤.
+                        visParam.OnVisitNode = (node, parameter) =>
+                        {
+                            if (node is TtAxisNode)
+                                return false;
+                            if (node.Parent is TtAxisNode)
+                                return false;
+                            if (node is TtMeshNode meshNode)
+                            {
+                                if (meshNode.Tag is TtAxis.TtAxisData)
+                                    return false;
+                            }
+                            return true;
+                        };
                         CubeRenderer.CaptureWorld.GatherVisibleMeshes(visParam);
                     }
                 };
@@ -250,7 +364,17 @@ namespace EngineNS.GamePlay.Scene
 
         public override void Dispose()
         {
+            // 先释放 CubeRenderer (它只解引用 RP, 不 dispose).
+            var policies = mCubeRenderer?.RenderPolicies;
             CoreSDK.DisposeObject(ref mCubeRenderer);
+
+            // 再释放 6 个 RP (上层创建, 上层负责释放).
+            if (policies != null)
+            {
+                for (int i = 0; i < policies.Length; i++)
+                    policies[i]?.Dispose();
+            }
+
             base.Dispose();
         }
 
@@ -328,56 +452,21 @@ namespace EngineNS.GamePlay.Scene
         }
 
         // ---------- 6 面相机 ----------
-        // 标准 cube face 顺序 (与 D3D / Vulkan 一致):
-        //   0: +X    1: -X    2: +Y    3: -Y    4: +Z    5: -Z
-        // up 选择保证每面 LookAt 不退化 (forward 与 up 不平行).
-        static readonly Vector3[] kFaceForward =
-        {
-            Vector3.Right,    // +X
-            Vector3.Left,     // -X
-            Vector3.Up,       // +Y
-            Vector3.Down,     // -Y
-            Vector3.Forward,  // +Z
-            Vector3.Backward, // -Z
-        };
-        static readonly Vector3[] kFaceUp =
-        {
-            Vector3.Up,       // +X face: up = +Y
-            Vector3.Up,       // -X face: up = +Y
-            Vector3.Backward, // +Y face: up = -Z (相机朝上, "顶"向后)
-            Vector3.Forward,  // -Y face: up = +Z
-            Vector3.Up,       // +Z face: up = +Y
-            Vector3.Up,       // -Z face: up = +Y
-        };
-
         void UpdateCubeCameras()
         {
-            if (CubeRenderer == null || CubeRenderer.FaceCameras == null)
+            if (CubeRenderer == null)
                 return;
-
             var nd = GetNodeData<TtSceneCubeCaptureData>();
-            ref var eyePos = ref this.Placement.AbsTransform.mPosition;
-
-            for (int f = 0; f < 6; f++)
-            {
-                var fwd = kFaceForward[f];
-                var up = kFaceUp[f];
-                var lookAt = new DVector3(
-                    eyePos.X + fwd.X * 100.0,
-                    eyePos.Y + fwd.Y * 100.0,
-                    eyePos.Z + fwd.Z * 100.0);
-                var cam = CubeRenderer.FaceCameras[f];
-                cam.LookAtLH(in eyePos, in lookAt, in up);
-                // FOV 90°, aspect 1:1 — cube 渲染的硬性要求, 不允许配置.
-                // PerspectiveFovLH 在 TtCamera 上没有实例方法, 必须走 mCoreObject (与
-                // RenderPolicy.cs:336 / RenderPolicy.cs:341 同款调用形式).
-                cam.mCoreObject.PerspectiveFovLH(MathHelper.PI * 0.5f, nd.CubeFaceSize, nd.CubeFaceSize, nd.NearPlane, nd.FarPlane);
-            }
+            CubeRenderer.UpdateFaceCameras(
+                in this.Placement.AbsTransform.mPosition,
+                nd.CubeFaceSize, nd.NearPlane, nd.FarPlane);
         }
 
         protected override void OnAbsTransformChanged()
         {
             UpdateCubeCameras();
+            if (mDebugMesh != null)
+                mDebugMesh.DirectSetWorldMatrix(Placement.AbsTransform.ToMatrixNoScale(this.GetWorld().CameraOffset));
         }
 
         // ---------- Tick: 间隔节流 + 触发 6 面拍摄 ----------
@@ -389,7 +478,7 @@ namespace EngineNS.GamePlay.Scene
         //   - 返回 true 表示继续 tick 子节点
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
-            if (CubeRenderer == null || CubeRenderer.RenderPolicy == null)
+            if (CubeRenderer == null || CubeRenderer.RenderPolicies == null)
                 return true;
 
             var nd = GetNodeData<TtSceneCubeCaptureData>();
@@ -429,6 +518,7 @@ namespace EngineNS.GamePlay.Scene
             TtEngine.Instance.ThreadRender.QueueRenderAction("CubeRenderer.CaptureCubeFaces", static (in Thread.TtThreadRender.FRenderAction RAct) =>
             {
                 var This = (RAct.Arg as TtSceneCubeCapture);
+                This.UpdateCubeCameras();
                 This.CubeRenderer.CaptureCubeFaces(TtEngine.Instance.ElapsedSecond);
             }, this);
 

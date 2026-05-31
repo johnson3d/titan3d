@@ -120,8 +120,9 @@ namespace EngineNS.Editor.Forms
         public TtGraphicsShadingEnv ShadingEnv;
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
-        public async Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg, bool saveLayout)
         {
+            mSaveLayout = saveLayout;
             AssetName = name;
             TextureSRV = arg as TtSrView;
             if (TextureSRV == null)
@@ -233,6 +234,7 @@ namespace EngineNS.Editor.Forms
         public Vector2 ImageSize = new Vector2(512, 512);
         public float ScaleFactor = 1.0f;
         public float ScaleSpeed = 0.1f;
+        public bool mSaveLayout = true;
         public unsafe void OnDraw()
         {
             if (Visible == false || TextureSRV == null)
@@ -240,7 +242,7 @@ namespace EngineNS.Editor.Forms
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_None, 0, mSaveLayout);
             if (result)
             {
                 DrawToolBar();
@@ -257,6 +259,17 @@ namespace EngineNS.Editor.Forms
             var btSize = Vector2.Zero;
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
+                this.TextureSRV.SaveAssetTo(AssetName);
+                
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("SaveOriginFile", in btSize))
+            {
+                TtSrView.SaveOriginImage(AssetName);
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("OldSave", in btSize))
+            {
                 var imgType = NxRHI.TtSrView.GetOriginImageType(AssetName);
 
                 switch (imgType)
@@ -264,7 +277,7 @@ namespace EngineNS.Editor.Forms
                     case EngineNS.Bricks.ImageDecoder.UImageType.PNG:
                         {
                             StbImageSharp.TtMemImage image = NxRHI.TtSrView.LoadOriginPng(AssetName);
-                            using (var xnd = new IO.TtXndHolder("USrView", 0, 0))
+                            using (var xnd = new IO.TtXndHolder("TtSrView", 0, 0))
                             {
                                 NxRHI.TtSrView.SaveTexture(AssetName, xnd.RootNode.mCoreObject, image, this.TextureSRV.PicDesc);
                                 xnd.SaveXnd(AssetName.Address);
@@ -275,7 +288,7 @@ namespace EngineNS.Editor.Forms
                         {
                             StbImageSharp.ImageResultFloat imageFloat = new StbImageSharp.ImageResultFloat();
                             NxRHI.TtSrView.LoadOriginHdr(AssetName, ref imageFloat);
-                            using (var xnd = new IO.TtXndHolder("USrView", 0, 0))
+                            using (var xnd = new IO.TtXndHolder("TtSrView", 0, 0))
                             {
                                 NxRHI.TtSrView.SaveTexture(AssetName, xnd.RootNode.mCoreObject, imageFloat, this.TextureSRV.PicDesc);
                                 xnd.SaveXnd(AssetName.Address);
@@ -286,7 +299,7 @@ namespace EngineNS.Editor.Forms
                         {
                             System.IO.Stream outStream = null;
                             var file = NxRHI.TtSrView.LoadOriginExr(AssetName, ref outStream);
-                            using (var xnd = new IO.TtXndHolder("USrView", 0, 0))
+                            using (var xnd = new IO.TtXndHolder("TtSrView", 0, 0))
                             {
                                 NxRHI.TtSrView.SaveTexture(AssetName, xnd.RootNode.mCoreObject, file, this.TextureSRV.PicDesc);
                                 xnd.SaveXnd(AssetName.Address);
@@ -294,11 +307,6 @@ namespace EngineNS.Editor.Forms
                         }
                         break;
                 }
-            }
-            ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("SaveOriginFile", in btSize))
-            {
-                TtSrView.SaveOriginImage(AssetName);
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.ToggleButton("R", ref mShowR, in btSize, 0))
@@ -463,7 +471,7 @@ namespace EngineNS.NxRHI
                         var node = i as TtSrView;
                         if (node!=null)
                         {
-                            Editor.TtAssetEditorManager.TryOpenEditor(typeof(TtTextureViewer), node.AssetName, node).AddWaitTask();
+                            Editor.TtAssetEditorManager.TryOpenEditor(typeof(TtTextureViewer), node.AssetName, node, true).AddWaitTask();
                         }
                     }
                 }
@@ -472,7 +480,7 @@ namespace EngineNS.NxRHI
                     var node = info.ObjectInstance as TtSrView;
                     if (node!=null)
                     {
-                        Editor.TtAssetEditorManager.TryOpenEditor(typeof(TtTextureViewer), node.AssetName, node).AddWaitTask();
+                        Editor.TtAssetEditorManager.TryOpenEditor(typeof(TtTextureViewer), node.AssetName, node, true).AddWaitTask();
                     }
                 }
             }

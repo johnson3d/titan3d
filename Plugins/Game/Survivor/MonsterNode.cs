@@ -58,10 +58,7 @@ namespace Survivor
 
             MonsterPrefab.Parent = null;
             MonsterPrefab.IsCollide = false;
-            if (MonsterPrefab.OctreeNode != null)
-            {
-                MonsterPrefab.OctreeNode.Remove(MonsterPrefab);
-            }
+
             //EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(MonsterPrefab);
             MonsterPrefab = null;
             Controller.MonsterNode = null;

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="629c6b7d0f668411fed6d0500397259c07440ba3a0492cc92e85783cf337c740" />
+      <Path Type="System.String@Unknown" Value="point_light.uminst" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="edbaca0b6b8a36eec89d74405b516b4f2fd891b923dd1d78481e3e57ac3b9b3d" />
+      <Path Type="System.String@Unknown" Value="point_light.uminst.snap" />
+    </e_1>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="07b7f6a0-0071-4559-bcd4-74a472514041" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,material/utility/point_light.uminst,07b7f6a0-0071-4559-bcd4-74a472514041" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Engine,material/dft_unlit.material,186277e8-1070-4c99-ae81-1ac1d1ea7624" />
+    <e_1 Value="Engine,texture/utility/s_lightpoint.srv,b6e46eb6-688f-423d-8e00-293a14b7bcf1" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
+</Root>

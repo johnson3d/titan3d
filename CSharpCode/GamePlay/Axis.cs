@@ -1,5 +1,6 @@
 ﻿using EngineNS.GamePlay.Action;
 using EngineNS.GamePlay.Scene;
+using EngineNS.Thread.Async;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -200,7 +201,7 @@ namespace EngineNS.GamePlay
             }
         }
 
-        class AxisData
+        public class TtAxisData
         {
             public Scene.TtMeshNode MeshNode;
             public enAxisType AxisType;
@@ -232,7 +233,7 @@ namespace EngineNS.GamePlay
                 }
             }
 
-            async System.Threading.Tasks.Task<Graphics.Mesh.TtRenderMesh> GetAxisMesh(RName meshName, params RName[] materialNames)
+            async TtTask<Graphics.Mesh.TtRenderMesh> GetAxisMesh(RName meshName, params RName[] materialNames)
             {
                 var materials = new List<Graphics.Pipeline.Shader.TtMaterial>(materialNames.Length);
                 for (int i = 0; i < materialNames.Length; i++)
@@ -249,7 +250,7 @@ namespace EngineNS.GamePlay
                 mesh.IsAcceptShadow = false;
                 return ok ? mesh : null;
             }
-            public async System.Threading.Tasks.Task Initialize(enAxisType type, GamePlay.TtWorld world)
+            public async Thread.Async.TtTask Initialize(enAxisType type, GamePlay.TtWorld world)
             {
                 Graphics.Mesh.TtRenderMesh axisMesh = null;
                 var meshNodeData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
@@ -674,9 +675,10 @@ namespace EngineNS.GamePlay
                     //case enAxisType.Edge_Z_MaxPlane:  break;
                 }
 
-                MeshNode = (Scene.TtMeshNode) await world.Root.SpawnSceneActor<Scene.TtMeshNode>(null, null, meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement), world);
+                MeshNode = (Scene.TtMeshNode) await TtNode.SpawnNode<Scene.TtMeshNode>(world.Root, null, meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement), world);
                 MeshNode.SetStyle(Scene.TtNode.ENodeStyles.HideBoundShape | Scene.TtNode.ENodeStyles.NoPickedDraw);
-                if(axisMesh != null)
+                MeshNode.Tag = this;
+                if (axisMesh != null)
                 {
                     MeshNode.RenderMesh = axisMesh;
                     MeshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
@@ -688,7 +690,7 @@ namespace EngineNS.GamePlay
                 placement.Scale = scale;
             }
         }
-        List<AxisData> mAxisMeshDatas;
+        List<TtAxisData> mAxisMeshDatas;
 
         #region CenterAxis
         DBoundingBox mEdgeAxisBB = DBoundingBox.EmptyBox();
@@ -962,16 +964,16 @@ namespace EngineNS.GamePlay
                 Size = new Vector2(24, 24),
             };
 
-            var tmpAxis = new List<AxisData>();
+            var tmpAxis = new List<TtAxisData>();
             for (var i=enAxisType.AxisStart; i<=enAxisType.AxisEnd; i++)
             {
-                var axisData = new AxisData();
+                var axisData = new TtAxisData();
                 await axisData.Initialize(i, mHostWorld);
                 tmpAxis.Add(axisData);
             }
             mAxisMeshDatas = tmpAxis;
 
-            mRootNode = (TtAxisNode)await world.Root.SpawnSceneActor<TtAxisNode>(world.Root, null,
+            mRootNode = (TtAxisNode)await TtNode.SpawnNode<TtAxisNode>(world.Root, null,
                 new GamePlay.Scene.TtNodeData()
                 {
                     Name = "AxisRootNode"
@@ -994,7 +996,7 @@ namespace EngineNS.GamePlay
                 var meshNodeData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
                 meshNodeData.MeshName = mAxisMeshMoveX;
                 meshNodeData.Name = "RotArrowAsset";
-                mRotArrowAssetNode = (Scene.TtMeshNode)await world.Root.SpawnSceneActor<Scene.TtMeshNode>(mHostWorld.Root, null, meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
+                mRotArrowAssetNode = (Scene.TtMeshNode)await TtNode.SpawnNode<Scene.TtMeshNode>(mHostWorld.Root, null, meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
                 mRotArrowAssetNode.SetStyle(Scene.TtNode.ENodeStyles.HideBoundShape | Scene.TtNode.ENodeStyles.NoPickedDraw);
                 mRotArrowAssetNode.RenderMesh = rotArrowAssetMesh;
                 mRotArrowAssetNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
@@ -1210,6 +1212,7 @@ namespace EngineNS.GamePlay
                         for (int i = (int)enAxisType.Move_Start; i <= (int)enAxisType.Move_End; i++)
                         {
                             mAxisMeshDatas[i].MeshNode.Parent = mRootNode;
+                            System.Diagnostics.Debug.Assert(mAxisMeshDatas[i].MeshNode.Tag == mAxisMeshDatas[i]);
                         }
                     }
                     break;
@@ -1218,6 +1221,7 @@ namespace EngineNS.GamePlay
                         for(int i=(int)enAxisType.Rot_Start; i <= (int)enAxisType.Rot_End; i++)
                         {
                             mAxisMeshDatas[i].MeshNode.Parent = mRootNode;
+                            System.Diagnostics.Debug.Assert(mAxisMeshDatas[i].MeshNode.Tag == mAxisMeshDatas[i]);
                         }
                     }
                     break;
@@ -1226,6 +1230,7 @@ namespace EngineNS.GamePlay
                         for(int i=(int)enAxisType.Scale_Start; i <= (int)enAxisType.Scale_End; i++)
                         {
                             mAxisMeshDatas[i].MeshNode.Parent = mRootNode;
+                            System.Diagnostics.Debug.Assert(mAxisMeshDatas[i].MeshNode.Tag == mAxisMeshDatas[i]);
                         }
                         mOldAxisSpace = mAxisSpace;
                         mAxisSpace = enAxisSpace.Local;

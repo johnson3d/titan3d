@@ -16,7 +16,11 @@ namespace EngineNS.EGui.Controls
     public partial class TtContentBrowser : IRootForm, EGui.IPanel
     {
         bool mVisible = true;
-        public bool Visible { get => mVisible; set => mVisible = value; }
+        public bool Visible 
+        { 
+            get => mVisible; 
+            set => mVisible = value; 
+        }
         uint mDockId = uint.MaxValue;
         public uint DockId { get => mDockId; set => mDockId = value; }
         protected ImGuiWindowClass mDockKeyClass;
@@ -1083,7 +1087,7 @@ namespace EngineNS.EGui.Controls
                             if (attrs.Length > 0)
                             {
                                 var editorAttr = attrs[0] as Editor.UAssetEditorAttribute;
-                                Editor.TtAssetEditorManager.TryOpenEditor(editorAttr.EditorType, ameta.GetAssetName(), null).AddWaitTask();
+                                Editor.TtAssetEditorManager.TryOpenEditor(editorAttr.EditorType, ameta.GetAssetName(), null, true).AddWaitTask();
                             }
                         }
 

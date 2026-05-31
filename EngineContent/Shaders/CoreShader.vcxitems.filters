@@ -629,6 +629,9 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\FrustumGrid3D.compute">
       <Filter>Compute\ScreenSpace</Filter>
     </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\ColorGradingLUT.compute">
+      <Filter>Compute\ScreenSpace</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FSR1\ffx_a.h">

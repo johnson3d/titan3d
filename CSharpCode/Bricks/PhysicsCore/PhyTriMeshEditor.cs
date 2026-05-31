@@ -93,7 +93,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
-        public async Thread.Async.TtTask<bool> OpenEditor(Editor.TtMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(Editor.TtMainEditorApplication mainEditor, RName name, object arg, bool saveLayout)
         {
             AssetName = name;
             TriMesh = await name.GetAsset<Bricks.PhysicsCore.TtPhyTriMesh>();

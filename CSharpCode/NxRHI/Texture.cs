@@ -838,8 +838,10 @@ namespace EngineNS.NxRHI
         {
             mOriginImageObject = null;
         }
-        public void SaveAssetTo(RName name)
+        public void SaveAssetTo_Deprecated(RName name)
         {
+            //if (SaveAssetTo2(name) == true)
+            //    return;
             var ameta = this.GetAMeta() as TtSrViewAMeta;
             if (mOriginImageObject != null)
             {
@@ -3138,7 +3140,7 @@ namespace EngineNS.NxRHI
                     break;
             }
         }
-        public static async System.Threading.Tasks.Task<TtSrView> LoadSrvMipmap(RName rn, int mipLevel, TtTexture oldTexture)
+        public static async Thread.Async.TtTask<TtSrView> LoadSrvMipmap(RName rn, int mipLevel, TtTexture oldTexture)
         {
             TtPicDesc desc = null;
             var tex2d = await TtEngine.Instance.EventPoster.Post((state) =>

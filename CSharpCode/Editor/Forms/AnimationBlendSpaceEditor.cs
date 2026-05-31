@@ -192,7 +192,7 @@ namespace EngineNS.Editor.Forms
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
         TtAnimationBlendSpacePreview AnimationPreview = null;
-        public async Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg, bool saveLayout)
         {
             AssetName = name;
             BlendSpace = await name.GetAsset<Animation.Asset.BlendSpace.TtBlendSpace2D>();// TtEngine.Instance.AnimationModule.BlendSpaceClipManager.GetAnimation(name);

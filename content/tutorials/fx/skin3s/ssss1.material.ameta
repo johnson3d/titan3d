@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="8b79bd2d6e9047ac06368bfec4d10651cbfe9980d3d16ece68341ee51b73372a" />
+      <Path Type="System.String@Unknown" Value="ssss1.material" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="ab459efe1b5ebcfff45e2250a86b1587f17ae35899728fca460539f3ef4ac867" />
+      <Path Type="System.String@Unknown" Value="ssss1.material.snap" />
+    </e_1>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="22e85299-8677-4e5e-a835-6e15992a5270" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/fx/skin3s/ssss1.material,22e85299-8677-4e5e-a835-6e15992a5270" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.TtMaterial&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="4">
+    <e_0 Value="Game,project_factory/belica/textures_new/belica_gun01_m_belica_new_head_basecolor.srv,84ee7caa-228c-4ae1-81e7-5eca294e7cb2" />
+    <e_1 Value="Game,project_factory/belica/textures_new/belica_gun01_m_belica_new_head_normal.srv,1b4f35a7-4149-4c23-a8fb-d0a46caa5e4a" />
+    <e_2 Value="Game,project_factory/belica/textures_new/belica_gun01_m_belica_new_head_occlusionroughnessmetallic.srv,87994c2f-8e48-473d-be27-158f64cb10e0" />
+    <e_3 Value="Game,tutorials/fx/skin3s/man_skin0.sssprofile,ed32b522-df4b-4e5d-b921-8003df5546f3" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
+</Root>

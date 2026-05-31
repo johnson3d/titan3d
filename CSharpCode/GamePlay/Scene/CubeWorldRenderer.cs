@@ -40,7 +40,11 @@ namespace EngineNS.GamePlay.Scene
         public const string kFaceCameraName = "CubeCaptureFace_";
 
         public TtWorld CaptureWorld { get; private set; }
-        public TtRenderPolicy RenderPolicy { get; private set; }
+
+        // 每个 face 独立的 RenderPolicy. 共用一个 RP 会导致 GetDrawCall 按
+        // TargetViewIdentifier 复用 drawcall, 6 面只有第一面的 camera cbuffer
+        // 真正生效, 其余 5 面渲染方向全错.
+        public TtRenderPolicy[] RenderPolicies { get; private set; }
 
         // 6 个相机, 每面一个. 由 TtSceneCubeCapture.UpdateCubeCameras 负责 LookAt/PerspectiveFov.
         public TtCamera[] FaceCameras { get; private set; }
@@ -54,7 +58,7 @@ namespace EngineNS.GamePlay.Scene
         TtTexture mCubeTexture;
         TtSrView mCubeSrv;
         TtCopyDraw mCopyDraw;                     // 复用一份, 每面切 DestSubResource 后 push
-        TtRCmdQueue mImmCmdQueue;                 // ImmRenderer 风格: 每次 CaptureCubeFaces 同步刷 GPU
+        TtRCmdQueue[] mImmCmdQueues;              // 每个 face RP 独立的 cmd queue
         uint mFaceSize;
         EPixelFormat mCubeFormat = EPixelFormat.PXF_UNKNOWN;  // cube 实际创建时用的 format
         bool mCapturedAtLeastOnce;
@@ -66,35 +70,40 @@ namespace EngineNS.GamePlay.Scene
         // 模板见 GpuNodeBase.cs:32-43.
         public bool CaptureRenderDocNextFrame;
 
-        // 注意签名变化: 去掉了 captureHDR 参数. cube format 必须等于 RP final RT
-        // 的真实格式 — D3D12 CopyTextureRegion 是物理字节拷贝, 要求源/目的 bpp
-        // 完全一致, 用户随便选 HDR/LDR 而不管 RP 真实输出格式 = 必崩.
-        // 真实格式从 RenderPolicy.RootNode.ColorAttachement.Format 在第一次拍摄时
-        // 反查 (那时 RP 已经跑过一次 Tick, attachment 才被建出来), 因此 cube
-        // 资源不在 Initialize 创建, 而是延迟到 CaptureCubeFaces 第一面拷贝前.
-        public bool Initialize(TtWorld world, TtRenderPolicy policy, uint faceSize)
+        // 签名变化: 接收 6 个独立的 RenderPolicy (每 face 一个).
+        // cube format 必须等于 RP final RT 的真实格式 — D3D12 CopyTextureRegion
+        // 是物理字节拷贝, bpp 不一致直接崩. 真实格式在第一次拍摄时从
+        // RP.RootNode.ColorAttachement.Format 反查, cube 资源延迟创建.
+        public bool Initialize(TtWorld world, TtRenderPolicy[] policies, uint faceSize)
         {
+            if (policies == null || policies.Length != kFaceCount)
+                return false;
+
             CaptureWorld = world;
-            RenderPolicy = policy;
-            RenderPolicy.IsImmediateFlushCBuffer = true;
-            //mFaceSize = faceSize;
-            OnResize(faceSize);
+            RenderPolicies = policies;
 
             FaceCameras = new TtCamera[kFaceCount];
+            mImmCmdQueues = new TtRCmdQueue[kFaceCount];
+
             for (int f = 0; f < kFaceCount; f++)
             {
+                var rp = RenderPolicies[f];
+                if (rp == null)
+                    continue;
+
+                rp.IsImmediateFlushCBuffer = true;
+
+                // 每个 RP 只注册自己那一面的 camera, 直接作为 DefaultCamera.
                 FaceCameras[f] = new TtCamera();
-                // 把 6 面相机登记到 RP.CameraAttachments. RP.DefaultCamera 是只读
-                // property, 必须用 SetDefaultCamera(name) 走 CameraAttachments 切换.
-                RenderPolicy?.AddCamera(kFaceCameraName + f, FaceCameras[f]);
+                rp.AddCamera(kFaceCameraName + f, FaceCameras[f]);
+                rp.SetDefaultCamera(kFaceCameraName + f);
+
+                // 每个 RP 独立的 ImmRenderer cmd queue.
+                rp.CmdQueue = new TtRCmdQueue();
+                mImmCmdQueues[f] = rp.CmdQueue;
             }
 
-            // 用 ImmRenderer 风格的 RCmdQueue: CaptureCubeFaces 一次性提交 6 面 +
-            // 同步 FlushExecute, 这样 cube SRV 在 TickLogic 返回时已经填好,
-            // 下游同帧就能消费. 与 TtWorldImmRenderer.Initialize (SceneCapture.cs:46) 同款做法.
-            if (RenderPolicy != null)
-                RenderPolicy.CmdQueue = new TtRCmdQueue();
-            mImmCmdQueue = RenderPolicy?.CmdQueue;
+            OnResize(faceSize);
 
             mCopyDraw = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
             mCopyDraw.SetDebugName("CubeCapture.FaceCopy");
@@ -109,10 +118,73 @@ namespace EngineNS.GamePlay.Scene
                 return;
             mFaceSize = faceSize;
 
-            // 只释放 cube 资源, 不重建 — 等下次 CaptureCubeFaces 跑完 RP 后,
-            // 再用真实的 RP final RT format 重建 cube (避免格式漂移).
             ReleaseCubeResources();
-            RenderPolicy?.OnResize(faceSize, faceSize);
+            if (RenderPolicies != null)
+            {
+                for (int f = 0; f < kFaceCount; f++)
+                    RenderPolicies[f]?.OnResize(faceSize, faceSize);
+            }
+        }
+
+        // 标准 cube face 顺序 (与 D3D cubemap subresource 一致):
+        //   0: +X    1: -X    2: +Y    3: -Y    4: +Z    5: -Z
+        //
+        // up_hint 传给 LookAtLH, 通过 cross(up_hint, forward) 推导出 right 轴.
+        // ±X/±Z 四个面用标准 (0,1,0) 即可; ±Y 两个面的 up_hint 需要精确匹配
+        // cubemap 采样 shader 中 texel UV 布局的 right/up 方向.
+        //
+        // 推导 (以 shader Slate_TextureCubeViewer.cginc 中的采样公式为准):
+        //   +Y face: float3(uv.x*2-1, 1, uv.y*2-1)
+        //     → 画面右(+U)=+X, 画面上(-V)=-Z
+        //     → 需要 right=(1,0,0), yaxis=(0,0,-1)
+        //     → cross(up_hint, (0,1,0))=(1,0,0) → up_hint=(0,0,1) = Forward
+        //
+        //   -Y face: float3(uv.x*2-1, -1, 1-uv.y*2)
+        //     → 画面右(+U)=+X, 画面上(-V)=+Z
+        //     → 需要 right=(1,0,0), yaxis=(0,0,1)
+        //     → cross(up_hint, (0,-1,0))=(1,0,0) → up_hint=(0,0,1) = Forward
+        static readonly Vector3[] kFaceForward =
+        {
+            Vector3.Right,    // +X
+            Vector3.Left,     // -X
+            Vector3.Up,       // +Y
+            Vector3.Down,     // -Y
+            Vector3.Forward,  // +Z
+            Vector3.Backward, // -Z
+        };
+        static readonly Vector3[] kFaceUp =
+        {
+            Vector3.Up,       // +X face: up = +Y
+            Vector3.Up,       // -X face: up = +Y
+            Vector3.Backward, // +Y face: up = -Z  (cross((-Z),(+Y))=(+X,0,0) → right=+X)
+            Vector3.Forward,  // -Y face: up = +Z  (cross((+Z),(-Y))=(+X,0,0) → right=+X)
+            Vector3.Up,       // +Z face: up = +Y
+            Vector3.Up,       // -Z face: up = +Y
+        };
+
+        /// <summary>
+        /// 根据 capture 节点的世界位置更新 6 个 face camera 的 LookAt 和透视投影.
+        /// up_hint 经过精确推导, 保证 LookAtLH 的 cross 运算对所有 6 面
+        /// 都产生与 D3D cubemap 采样约定一致的 right/yaxis 方向.
+        /// </summary>
+        public void UpdateFaceCameras(in DVector3 eyePos, uint cubeFaceSize, float nearPlane, float farPlane)
+        {
+            if (FaceCameras == null)
+                return;
+
+            for (int f = 0; f < kFaceCount; f++)
+            {
+                var fwd = kFaceForward[f];
+                var up = kFaceUp[f];
+                var lookAt = new DVector3(
+                    eyePos.X + fwd.X * 100.0,
+                    eyePos.Y + fwd.Y * 100.0,
+                    eyePos.Z + fwd.Z * 100.0);
+                var cam = FaceCameras[f];
+                cam.LookAtLH(in eyePos, in lookAt, in up);
+                // FOV 90°, aspect 1:1 — cube 渲染的硬性要求, 不允许配置.
+                cam.mCoreObject.PerspectiveFovLH(MathHelper.PI * 0.5f, cubeFaceSize, cubeFaceSize, nearPlane, farPlane);
+            }
         }
 
         // 一次性渲染全部 6 面 + 同步刷 GPU. 调用方 (TtSceneCubeCapture.TickLogic)
@@ -120,97 +192,80 @@ namespace EngineNS.GamePlay.Scene
         // copy final RT 到 cube 第 f 面" 这个内循环.
         public void CaptureCubeFaces(float ellapse)
         {
-            if (RenderPolicy == null || FaceCameras == null)
+            if (RenderPolicies == null || FaceCameras == null)
                 return;
 
-            // cube 资源在这里延迟创建, 因为要等 RP 跑过一次拿到 final RT 真实
-            // format. 第一面循环里 RP.Tick 完成后会触发 EnsureCubeResources(format).
-
-            // 一次性 RenderDoc 抓帧: 包住整个 6 面循环 (含每面的 FlushExecute
-            // 和拷贝 + 末尾的 final flush). 抓帧目标必须是真正提交 GPU 的那条
-            // cmd queue, 也就是本 renderer 自己的 mImmCmdQueue (ImmRenderer 模式
-            // 下就是 RenderPolicy.CmdQueue). 模板: GpuNodeBase.cs:32-43.
-            bool docCapture = CaptureRenderDocNextFrame && mImmCmdQueue != null;
+            // RenderDoc 抓帧: 用第一个 RP 的 cmd queue 来 begin/end.
+            bool docCapture = CaptureRenderDocNextFrame && mImmCmdQueues?[0] != null;
             if (docCapture)
             {
-                mImmCmdQueue.CaptureRenderDocFrame = true;
-                mImmCmdQueue.BeginFrameCapture();
+                mImmCmdQueues[0].CaptureRenderDocFrame = true;
+                mImmCmdQueues[0].BeginFrameCapture();
             }
 
             for (int f = 0; f < kFaceCount; f++)
             {
-                RenderPolicy.QueueCmd((TtRCmdQueue queue, ref FRCmdInfo info) =>
+                var faceRP = RenderPolicies[f];
+                var faceQueue = mImmCmdQueues?[f];
+                if (faceRP == null)
+                    continue;
+
+                faceRP.QueueCmd((TtRCmdQueue queue, ref FRCmdInfo info) =>
                 {
                     TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.BeginEvent($"BeginFace:{f}");
                 }, "BeginFace");
-                // 1) 切到第 f 面的相机 (PerspectiveFov / LookAt 已由 TtSceneCubeCapture
-                //    在 Tick 之前刷新过). 走 RP.SetDefaultCamera(name).
-                RenderPolicy.SetDefaultCamera(kFaceCameraName + f);
 
-                // 2) 跑一次 RP. 与 TtWorldRenderer.TickLogic (SceneCapture.cs:30-32) 一致.
-                RenderPolicy.BeginTick(CaptureWorld);
-                RenderPolicy.Tick(CaptureWorld, null);
-                RenderPolicy.EndTick(CaptureWorld);
+                // 每个 RP 的 DefaultCamera 在 Initialize 时就固定为该面的 camera,
+                // 不需要 SetDefaultCamera 切换. 只需刷新 cbPerCamera 到 GPU.
+                faceRP.DefaultCamera.UpdateConstBufferData(
+                    TtEngine.Instance.GfxDevice.RenderContext,
+                    NxRHI.TtCbView.EUpdateMode.Immediately);
 
-                // 3) 同步 flush GPU, 让 RP 的 final RT 到达可读状态. ImmRenderer
-                //    模式: 每面提交后立即 flush, 避免后续 CopyDraw 读到上一帧的
-                //    final RT (RP 自己的内部 RT 是单 buffer 的, 不 flush 会被
-                //    下一面渲染覆盖).
-                mImmCmdQueue?.FlushExecute(true);
+                faceRP.BeginTick(CaptureWorld);
+                faceRP.Tick(CaptureWorld, null);
+                faceRP.EndTick(CaptureWorld);
 
-                // 4) 拿 RP 根节点的 ColorAttachement.GpuResource 作为拷贝源.
-                //    走这个路径而不是 GetFinalShowRSV().StreamingTexture, 是因为后者
-                //    只对 TtTextureManager 流式加载的纹理有效, RP 的 final SRV 上为 null.
-                //    Copy2SwapChainNode.cs:140-143 也是直接拿 attachBuffer.GpuResource.
-                if (RenderPolicy.RootNode == null || RenderPolicy.RootNode.ColorAttachement == null)
+                faceQueue?.FlushExecute(true);
+
+                if (faceRP.RootNode == null || faceRP.RootNode.ColorAttachement == null)
                 {
-                    RenderPolicy.TickSync();
+                    faceRP.TickSync();
                     continue;
                 }
-                var srcAttach = RenderPolicy.RootNode.ColorAttachement;
+                var srcAttach = faceRP.RootNode.ColorAttachement;
                 var srcResource = srcAttach.GpuResource;
                 if (srcResource == null)
                 {
-                    RenderPolicy.TickSync();
+                    faceRP.TickSync();
                     continue;
                 }
 
-                // 5) 用 RP final RT 的真实 format 创建 cube. 必须在拷贝前确保 cube
-                //    存在且 format 一致 — D3D12 CopyTextureRegion 是物理字节拷贝,
-                //    源/目的 bpp 不一致会硬报错 #874 COPYTEXTUREREGION_FORMATMISMATCH.
-                //    例如 RP final = R8G8B8A8 (32bpp), cube 若按用户随手勾的 HDR
-                //    建成 R16G16B16A16 (64bpp), 拷贝直接崩.
-                // TtAttachBuffer 自身没有 Format 字段, 真实定义在 GraphicsBuffers.cs:86
-                // 只暴露 BufferDesc / GpuResource / Texture / Rtv/Srv. format 在
-                // BufferDesc.Format (FAttachBufferDesc.Format, EPixelFormat).
                 EnsureCubeResources(srcAttach.BufferDesc.Format);
                 if (mCubeTexture == null)
                 {
-                    RenderPolicy.TickSync();
+                    faceRP.TickSync();
                     continue;
                 }
 
-                CopyFinalRTToCubeFace(srcResource, f);
+                CopyFinalRTToCubeFace(faceRP, faceQueue, srcResource, f);
 
-                RenderPolicy.QueueCmd((TtRCmdQueue queue, ref FRCmdInfo info) =>
+                faceRP.QueueCmd((TtRCmdQueue queue, ref FRCmdInfo info) =>
                 {
                     TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.EndEvent($"EndFace:{f}");
                 }, "EndFace");
 
-                mImmCmdQueue?.FlushExecute(true);
-                RenderPolicy.TickSync();
+                faceQueue?.FlushExecute(true);
+                faceRP.TickSync();
             }
 
-            // 拷贝完 6 面后再 flush 一次, 保证 cube 6 面对下游消费者立即可见.
-            mImmCmdQueue?.FlushExecute(true);
+            // 最终 flush, 保证 cube 6 面对下游立即可见.
+            for (int f = 0; f < kFaceCount; f++)
+                mImmCmdQueues?[f]?.FlushExecute(true);
 
-            // 收尾 RenderDoc 抓帧 — 在最后一次 FlushExecute 之后, 确保所有
-            // GPU 命令都被记录进 .rdc. EndFrameCapture 的 name 参数会成为
-            // RenderDoc UI 里 capture 列表的标题, 用节点 debug 名方便区分.
             if (docCapture)
             {
-                mImmCmdQueue.EndFrameCapture("CubeCapture");
-                CaptureRenderDocNextFrame = false;   // 一次性, 不持续抓
+                mImmCmdQueues[0].EndFrameCapture("CubeCapture");
+                CaptureRenderDocNextFrame = false;
             }
 
             mCapturedAtLeastOnce = true;
@@ -295,7 +350,7 @@ namespace EngineNS.GamePlay.Scene
         // ColorAttachement.GpuResource 真实类型就是接口 TtGpuResource —
         // TtTexture / TtBuffer 等具体类都实现该接口. TtCopyDraw.BindSrc/BindDest
         // 也接同一接口, 不需要向下转型.
-        void CopyFinalRTToCubeFace(TtGpuResource srcTex, int face)
+        void CopyFinalRTToCubeFace(TtRenderPolicy faceRP, TtRCmdQueue faceQueue, TtGpuResource srcTex, int face)
         {
             if (mCopyDraw == null || mCubeTexture == null)
                 return;
@@ -307,8 +362,8 @@ namespace EngineNS.GamePlay.Scene
                 mCopyDraw.Mode = ECopyDrawMode.CDM_Texture2Texture;
                 mCopyDraw.BindSrc(srcTex);
                 mCopyDraw.BindDest(mCubeTexture);
-                mCopyDraw.SrcSubResource = 0;                  // RP final RT: 单 mip / 单 array slice
-                mCopyDraw.DestSubResource = (uint)face;        // cube: mip=0, faceSlice=face -> sub = face
+                mCopyDraw.SrcSubResource = 0;
+                mCopyDraw.DestSubResource = (uint)face;
                 mCopyDraw.DstX = 0;
                 mCopyDraw.DstY = 0;
                 mCopyDraw.DstZ = 0;
@@ -316,7 +371,7 @@ namespace EngineNS.GamePlay.Scene
                 cmdlist.PushGpuDraw(mCopyDraw);
                 cmdlist.FlushDraws();
             }
-            RenderPolicy?.CommitCommandList(cmdlist, "CubeCapture.CopyFace");
+            faceRP?.CommitCommandList(cmdlist, "CubeCapture.CopyFace");
         }
 
         public void Dispose()
@@ -332,9 +387,9 @@ namespace EngineNS.GamePlay.Scene
             }
 
             // RP 是上层 (TtSceneCubeCapture) 持有 + 释放的, 这里只解引用.
-            // mImmCmdQueue 也指向 RP.CmdQueue, RP 内部会 Dispose 它.
-            mImmCmdQueue = null;
-            RenderPolicy = null;
+            // mImmCmdQueues 也指向各 RP.CmdQueue, RP 内部会 Dispose 它们.
+            mImmCmdQueues = null;
+            RenderPolicies = null;
             CaptureWorld = null;
         }
     }

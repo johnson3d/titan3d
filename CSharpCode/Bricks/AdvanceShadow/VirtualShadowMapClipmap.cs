@@ -698,6 +698,22 @@ namespace EngineNS.Bricks.AdvanceShadow
         }
 
         /// <summary>
+        /// Given a world-space position, return the virtual page index (with VirtualPageOffset applied)
+        /// for the finest clipmap level that covers the point.
+        /// Returns -1 if the position is outside all clipmap levels.
+        /// </summary>
+        /// <param name="worldPos">World-space position to query.</param>
+        /// <returns>Virtual page index in the page table, or -1 if not covered.</returns>
+        public int GetVirtualPageIndexAtWorldPosition(in Vector3 worldPos)
+        {
+            if (!WorldToPage(in worldPos, out int level, out int pageX, out int pageY))
+                return -1;
+
+            int localIndex = mLevels[level].PageTableOffset + pageY * mConfig.PagesPerDim + pageX;
+            return localIndex + VirtualPageOffset;
+        }
+
+        /// <summary>
         /// Given a world-space position, determine which clipmap level and page it maps to.
         /// Returns the finest level that contains the point.
         /// </summary>

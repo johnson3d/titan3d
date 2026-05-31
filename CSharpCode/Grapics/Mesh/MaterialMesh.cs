@@ -1,8 +1,10 @@
+using EngineNS.Bricks.WorldSimulator;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.Profiler;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using NPOI.POIFS.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -48,7 +50,6 @@ namespace EngineNS.Graphics.Mesh
                 meshNode.NodeData.Name = "PreviewObject";
                 meshNode.IsAcceptShadow = false;
                 meshNode.IsCastShadow = false;
-                meshNode.IsSceneManaged = false;
                 nodes.Add(meshNode);
             }
             return nodes;
@@ -69,7 +70,7 @@ namespace EngineNS.Graphics.Mesh
             {
                 var start = worldViewport.CameraController.Camera.GetPosition();
                 Vector3 dir = Vector3.Zero;
-                var msPt = new Vector2(TtEngine.Instance.InputSystem.Mouse.GlobalMouseX, TtEngine.Instance.InputSystem.Mouse.GlobalMouseY) - vpSlate.ViewportPos;
+                var msPt = new Vector2(TtEngine.Instance.InputSystem.Mouse.EventMouseX, TtEngine.Instance.InputSystem.Mouse.EventMouseY) - vpSlate.ViewportPos;
                 msPt = worldViewport.Window2Viewport(msPt);
                 worldViewport.CameraController.Camera.GetPickRay(ref dir, msPt.X, msPt.Y, worldViewport.ClientSize.X, worldViewport.ClientSize.Y);
                 var end = start + dir.AsDVector() * 1000.0f;
@@ -119,7 +120,7 @@ namespace EngineNS.Graphics.Mesh
                 var meshNodeData = new TtMeshNode.TtMeshNodeData();
                 meshNodeData.Name = mAssetName.PureName;
                 meshNodeData.MeshName = mAssetName;
-                var node = await worldViewport.World.Root.ParentScene.SpawnSceneActor<TtMeshNode>(worldViewport.World.Root, async (nd)=>
+                var node = await TtNode.SpawnNode<TtMeshNode>(worldViewport.World.Root, async (nd)=>
                 {
                     nd.Parent = worldViewport.World.Root;
                     nd.Placement.Position = hitPos;
@@ -144,7 +145,7 @@ namespace EngineNS.Graphics.Mesh
                 var meshNodeData = new TtMeshNode.TtMeshNodeData();
                 meshNodeData.Name = mAssetName.PureName;
                 meshNodeData.MeshName = mAssetName;
-                var task = worldViewport.World.Root.ParentScene.SpawnSceneActor<TtMeshNode>(worldViewport.World.Root, async (nd)=>
+                var task = TtNode.SpawnNode<TtMeshNode>(worldViewport.World.Root, async (nd)=>
                 {
 
                 }, meshNodeData, EBoundVolumeType.Box, typeof(TtPlacement));
@@ -468,7 +469,9 @@ namespace EngineNS.Graphics.Mesh
                         mRNameEditor.FilterExts = Pipeline.Shader.TtMaterial.AssetExt + "," + Pipeline.Shader.TtMaterialInstance.AssetExt;
                         object newValue;
                         info.Value = materials[i]?.AssetName;
-                        mRNameEditor.OnDraw(in info, out newValue);
+                        EditorInfo elemInfo = info;
+                        elemInfo.Readonly = false;
+                        mRNameEditor.OnDraw(in elemInfo, out newValue);
                         RName rn = (RName)newValue;
                         //rn = EGui.Controls.CtrlUtility.DrawRName(old, name, Pipeline.Shader.UMaterial.AssetExt, info.Readonly, null);
 

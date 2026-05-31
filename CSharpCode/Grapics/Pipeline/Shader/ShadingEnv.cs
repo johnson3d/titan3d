@@ -753,7 +753,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         bool IsStarting = false;
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
-        public async Thread.Async.TtTask<bool> OpenEditor(EngineNS.Editor.TtMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(EngineNS.Editor.TtMainEditorApplication mainEditor, RName name, object arg, bool saveLayout)
         {
             if (IsStarting)
                 return false;

@@ -221,7 +221,7 @@ namespace EngineNS.GamePlay.Scene
         public static async System.Threading.Tasks.Task<TtMeshNode> AddMeshNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, Graphics.Mesh.TtRenderMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
-            var meshNode = await scene.SpawnSceneActor<TtMeshNode>(parent, null, data, EBoundVolumeType.Box, placementType);
+            var meshNode = await GamePlay.Scene.TtNode.SpawnNode<TtMeshNode>(parent, null, data, EBoundVolumeType.Box, placementType);
             if (mesh.MaterialMesh.AssetName != null)
                 meshNode.NodeData.Name = mesh.MaterialMesh.AssetName.Name;
             else

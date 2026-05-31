@@ -55,6 +55,7 @@ namespace EngineNS.ECS
     }
     public class TtEntityManager : IDisposable
     {
+        public INotifyHost NotifyHost { get; set; }
         public List<WeakReference<IEntity>> Entities { get; private set; } = new List<WeakReference<IEntity>>();
         private int EntityCount = 0;
         private int PrevAddId = 0;
@@ -72,8 +73,6 @@ namespace EngineNS.ECS
         }
         public bool AddEntity(IEntity entity)
         {
-            if (TtEngine.Instance.Config.UseECS == false)
-                return false;
             lock(this)
             {
                 if(entity.EntityManager!=null)
@@ -106,25 +105,35 @@ namespace EngineNS.ECS
         }
         private bool AddToManager(IEntity entity)
         {
-            for (; PrevAddId < Entities.Count; PrevAddId++)
+            try
             {
-                if (Entities[PrevAddId]==null)
+                lock (this)
                 {
-                    entity.EntityManager = this;
-                    entity.Id = PrevAddId;
-                    Entities[PrevAddId] = new WeakReference<IEntity>(entity);
-                    entity.OnAddToManager(); // Notify the entity that it has been added
-                    EntityCount++;
-                    return true;
-                }
-                else if (Entities[PrevAddId].TryGetTarget(out var save) == false)
-                {
-                    entity.EntityManager = this;
-                    entity.Id = PrevAddId;
-                    Entities[PrevAddId].SetTarget(entity);
-                    entity.OnAddToManager(); // Notify the entity that it has been added
-                    return true;
-                }
+                    for (; PrevAddId < Entities.Count; PrevAddId++)
+                    {
+                        if (Entities[PrevAddId] == null)
+                        {
+                            entity.EntityManager = this;
+                            entity.Id = PrevAddId;
+                            Entities[PrevAddId] = new WeakReference<IEntity>(entity);
+                            entity.OnAddToManager(); // Notify the entity that it has been added
+                            EntityCount++;
+                            return true;
+                        }
+                        else if (Entities[PrevAddId].TryGetTarget(out var save) == false)
+                        {
+                            entity.EntityManager = this;
+                            entity.Id = PrevAddId;
+                            Entities[PrevAddId].SetTarget(entity);
+                            entity.OnAddToManager(); // Notify the entity that it has been added
+                            return true;
+                        }
+                    }
+                }   
+            }
+            finally
+            {
+                
             }
             return false;
         }
@@ -138,7 +147,7 @@ namespace EngineNS.ECS
                 }
                 if (Entities[id] != null)
                 {
-                    if(Entities[id].TryGetTarget(out var entity))
+                    if (Entities[id].TryGetTarget(out var entity))
                     {
                         entity.OnRemoveFromManager(); // Notify the entity that it is being removed
                         entity.EntityManager = null; // Clear the entity manager reference

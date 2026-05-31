@@ -9,7 +9,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core.Window", "Core.Window\
 		{9536C797-8D72-4B0D-BE38-BD1EA4A2FC97} = {9536C797-8D72-4B0D-BE38-BD1EA4A2FC97}
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Cpp", "Cpp", "{892AFF4D-69EA-4061-8F59-320A21A0814A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Native", "Native", "{892AFF4D-69EA-4061-8F59-320A21A0814A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Gen", "Gen", "{B1391DAF-2B68-4BD1-9F0B-2A4A15E882E1}"
 EndProject
@@ -77,7 +77,7 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "StbImageSharp", "3rd\csharp
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "StbImageWriteSharp", "3rd\csharp\StbImageWriteSharp\StbImageWriteSharp.shproj", "{6EB3104E-609F-4157-9DD5-5E510D939BF2}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Module", "Module", "{F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "App", "App", "{F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Procedure", "CSharpCode\Bricks\Procedure\Procedure.shproj", "{10AEE1EB-9CE5-4B81-9973-960D39A80141}"
 EndProject
@@ -586,6 +586,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EngineConfig", "EngineConfi
 		content\engineconfigvk.jscfg = content\engineconfigvk.jscfg
 		content\slateapp.jscfg = content\slateapp.jscfg
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{248F27CD-7D18-4E2F-BB3C-890DE6F4942C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CodeGen", "codegen\NativeBinder\CodeGen.vcxitems", "{7B7B0D28-CD9D-4E61-8B18-7D5D0EDCF0AD}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CodeGenCSharp", "codegen\NativeBinder\CodeGenCSharp.shproj", "{CBEC1EAE-ECA1-4442-935F-0D923ABA94B9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1229,6 +1235,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{AD0E23E3-ECA5-4E52-B69D-BB6E669C48C6} = {892AFF4D-69EA-4061-8F59-320A21A0814A}
+		{892AFF4D-69EA-4061-8F59-320A21A0814A} = {248F27CD-7D18-4E2F-BB3C-890DE6F4942C}
+		{424B9266-46E0-4F38-BFE3-9F1338152F96} = {248F27CD-7D18-4E2F-BB3C-890DE6F4942C}
 		{C0F05488-22EC-4212-8FC4-4873D8360C52} = {424B9266-46E0-4F38-BFE3-9F1338152F96}
 		{4D32EA41-561F-43F2-A2BB-D57B217FEC2A} = {424B9266-46E0-4F38-BFE3-9F1338152F96}
 		{99A85112-A63D-4B30-A610-B17025E3BB64} = {892AFF4D-69EA-4061-8F59-320A21A0814A}
@@ -1246,6 +1254,7 @@ Global
 		{DF4345B3-0C74-43E1-890C-190395767FCE} = {424B9266-46E0-4F38-BFE3-9F1338152F96}
 		{0B90FED7-A3E5-4169-9532-6AA4E9F89001} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{EBB45312-F4AF-4999-8C7F-B73B2A4B09BB} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
+		{428F4840-12AC-4E37-AD56-FD3A8EA83BDE} = {248F27CD-7D18-4E2F-BB3C-890DE6F4942C}
 		{4A69F69C-6D09-4798-838A-BCE0C8C785F9} = {428F4840-12AC-4E37-AD56-FD3A8EA83BDE}
 		{F5BFBFC3-132B-48F3-85E5-63A88A7FC5D0} = {4A69F69C-6D09-4798-838A-BCE0C8C785F9}
 		{B5361FF2-8412-484C-BA35-7A2C6099A964} = {041F2057-6090-446E-8CEF-D524C973477F}
@@ -1443,6 +1452,8 @@ Global
 		{A75388A8-6F39-45BB-8038-8CB07E0CE585} = {E5CE3791-9C8E-4476-8528-B81DFB5FDDF5}
 		{8B1F305F-9E3D-B764-EB64-B746105EA798} = {A75388A8-6F39-45BB-8038-8CB07E0CE585}
 		{7B9584F6-DF19-4534-8F85-1EF3F782E876} = {655071C1-7C02-45CB-ABF9-B291A4A153F2}
+		{7B7B0D28-CD9D-4E61-8B18-7D5D0EDCF0AD} = {B1391DAF-2B68-4BD1-9F0B-2A4A15E882E1}
+		{CBEC1EAE-ECA1-4442-935F-0D923ABA94B9} = {B1391DAF-2B68-4BD1-9F0B-2A4A15E882E1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
@@ -1645,6 +1656,7 @@ Global
 		NativeCode\Bricks\Canvas\Canvas.vcxitems*{7728662f-e281-4e3b-af11-c2ee3d68bea1}*SharedItemsImports = 9
 		Plugins\RpcCaller\RpcCaller\RpcCaller.projitems*{783d5fc1-27af-45fe-9041-d7c621e49223}*SharedItemsImports = 13
 		CSharpCode\Bricks\Network\Network.projitems*{78931d6f-319b-4176-9e0d-c4057910315b}*SharedItemsImports = 13
+		codegen\NativeBinder\CodeGen.vcxitems*{7b7b0d28-cd9d-4e61-8b18-7d5d0edcf0ad}*SharedItemsImports = 9
 		CSharpCode\Bricks\Terrain\Terrain.projitems*{7b80263d-fa2f-477c-9b3b-0aa4dac27aae}*SharedItemsImports = 13
 		enginecontent\shaders\CoreShader.vcxitems*{7edc3425-c745-477d-906a-69d82cda1283}*SharedItemsImports = 9
 		Plugins\GameServer\Login\LoginServer\LoginServer.projitems*{7f28becc-80b5-41e7-bff7-e10a9f5de596}*SharedItemsImports = 5
@@ -1802,6 +1814,7 @@ Global
 		Plugins\GameCore\Inventory\Inventory.projitems*{c5a6cd32-252a-4f89-b45a-39fe2ae04ce2}*SharedItemsImports = 13
 		Plugins\GameServer\CSCommon\CSCommon.projitems*{cb0d3b5c-182b-4fab-8ddb-6c9e201e55fd}*SharedItemsImports = 5
 		Plugins\GameServer\ServerCommon\ServerCommon.projitems*{cb0d3b5c-182b-4fab-8ddb-6c9e201e55fd}*SharedItemsImports = 5
+		codegen\NativeBinder\CodeGenCSharp.projitems*{cbec1eae-eca1-4442-935f-0d923aba94b9}*SharedItemsImports = 13
 		CSharpCode\Bricks\AIGC\AIGC.projitems*{cc2b85ff-9c07-4808-8fbb-5b14f47b30f6}*SharedItemsImports = 13
 		CSharpCode\Bricks\DevIDE\DevIDE.projitems*{d0c12daf-ba2a-46e8-b93a-831d4efdd59d}*SharedItemsImports = 13
 		CSharpCode\Bricks\Particle\Particle.projitems*{d15c508d-f0bb-4843-8b50-38728b79bba9}*SharedItemsImports = 13

@@ -449,8 +449,7 @@ namespace EngineNS.Bricks.Particle
             if (Mesh == null)
                 return;
             EmitterData.Location = Location;
-            var quat = Quaternion.RotationMatrix(policy.DefaultCamera.GetViewMatrix());
-            EmitterData.CameralEuler = quat.ToEuler();
+            EmitterData.CameralEuler = policy.DefaultCamera.Euler;
             var coreBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerParticleCBufferVarIndexer.Instance;
             var timeSecond = TtEngine.Instance.TickCountSecond - mParticleStartSecond;
             CurrentQueue?.CBuffer?.SetValue(coreBinder.ParticleStartSecond, timeSecond);

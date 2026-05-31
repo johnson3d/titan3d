@@ -8,6 +8,7 @@ namespace EngineNS.Editor
         protected TtPreviewViewport PreviewViewport => Viewport as TtPreviewViewport;
 
         Vector2 mPreMousePt;
+        Vector2 mStartMousePt;
 
         public override bool OnEvent(in Bricks.Input.Event e)
         {
@@ -20,6 +21,8 @@ namespace EngineNS.Editor
 
             if (e.Type == Bricks.Input.EventType.MOUSEBUTTONDOWN)
             {
+                mStartMousePt.X = e.MouseButton.X;
+                mStartMousePt.Y = e.MouseButton.Y;
                 mPreMousePt.X = e.MouseButton.X;
                 mPreMousePt.Y = e.MouseButton.Y;
             }
@@ -93,12 +96,28 @@ namespace EngineNS.Editor
             else if (e.Type == Bricks.Input.EventType.MOUSEBUTTONUP)
             {
                 previewViewport.ViewportMotion = TtPreviewViewport.EViewportMotion.None;
+
+                // 左键点击且未拖动轴时，执行 hitproxy 选中
+                if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT &&
+                    previewViewport.Axis != null &&
+                    previewViewport.Axis.CurrentAxisType == GamePlay.TtAxis.enAxisType.Null &&
+                    ((new Vector2(e.MouseMotion.X, e.MouseMotion.Y) - mStartMousePt).Length() < 1.0f) &&
+                    !previewViewport.UIOperated &&
+                    previewViewport.IsMouseIn)
+                {
+                    previewViewport.ProcessHitproxySelected(e.MouseMotion.X, e.MouseMotion.Y);
+                }
+
                 OnMouseUp(in e);
             }
             else if (e.Type == Bricks.Input.EventType.MOUSEBUTTONDOWN)
             {
                 OnMouseDown(in e);
             }
+
+            // 驱动坐标轴交互（高亮、拖拽平移/旋转/缩放）
+            previewViewport.Axis?.OnEvent(previewViewport, in e);
+
             return true;
         }
 

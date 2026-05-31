@@ -535,6 +535,173 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return valueChanged;
         }
     }
+    /// <summary>
+    /// UE-style Color Grading Wheel editor for Vector4(R, G, B, Y/Intensity).
+    /// Features: Hue/Saturation color wheel + R/G/B/Y HDR sliders (values can exceed 1.0).
+    /// Y maps to Vector4.W (overall intensity multiplier).
+    /// </summary>
+    public class TtColorGradingWheelEditorAttribute : TtPGCustomValueEditorAttribute
+    {
+        bool mPopupOn = false;
+
+        public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
+        {
+            bool valueChanged = false;
+            newValue = info.Value;
+
+            var v = Vector4.FromObject(info.Value);
+
+            var id = ImGuiAPI.GetID("#CGWheel_" + info.Name);
+            var drawList = ImGuiAPI.GetWindowDrawList();
+            var startPos = ImGuiAPI.GetCursorScreenPos();
+            var height = ImGuiAPI.GetFrameHeight();
+            var boxSize = EGui.UIProxy.StyleConfig.Instance.PGColorBoxSize;
+            startPos.Y += (height - boxSize.Y - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.Y * 2) * 0.5f;
+            var endPos = startPos + boxSize;
+
+            // Preview: show saturated color (RGB normalized by Y)
+            var previewR = Math.Clamp(v.X, 0f, 1f);
+            var previewG = Math.Clamp(v.Y, 0f, 1f);
+            var previewB = Math.Clamp(v.Z, 0f, 1f);
+            uint previewCol = (uint)(255) << 24 | (uint)(previewB * 255) << 16 | (uint)(previewG * 255) << 8 | (uint)(previewR * 255);
+            drawList.AddRectFilled(in startPos, in endPos, previewCol, EGui.UIProxy.StyleConfig.Instance.PGColorBoxRound, ImDrawFlags_.ImDrawFlags_None);
+            drawList.AddRect(in startPos, in endPos, EGui.UIProxy.StyleConfig.Instance.PGItemBorderNormalColor, EGui.UIProxy.StyleConfig.Instance.PGColorBoxRound, ImDrawFlags_.ImDrawFlags_None, 1);
+
+            bool hovered = false;
+            bool held = false;
+            var click = ImGuiAPI.ButtonBehavior(in startPos, in endPos, id, ref hovered, ref held, true, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+            if (mPopupOn == false && click && !info.Readonly)
+            {
+                var pos = startPos + new Vector2(0, boxSize.Y);
+                var pivot = Vector2.Zero;
+                ImGuiAPI.SetNextWindowPos(in pos, ImGuiCond_.ImGuiCond_Always, in pivot);
+                ImGuiAPI.OpenPopup("cgWheelPopup_" + info.Name, ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                mPopupOn = true;
+            }
+
+            EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
+            if (ImGuiAPI.BeginPopup("cgWheelPopup_" + info.Name, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
+                float popupWidth = 320f;
+                float wheelSize = 140f;
+                float sliderWidth = popupWidth - wheelSize - 20f;
+
+                // ── Left side: Color Wheel (Hue/Sat only, using ImGui picker in wheel mode) ──
+                ImGuiAPI.BeginGroup();
+                {
+                    // Convert RGB to HSV for the wheel (clamp to [0,1] for wheel display)
+                    float maxComp = Math.Max(Math.Max(Math.Abs(v.X), Math.Abs(v.Y)), Math.Max(Math.Abs(v.Z), 0.001f));
+                    Vector3 normalizedRgb = new Vector3(
+                        Math.Clamp(v.X / maxComp, 0f, 1f),
+                        Math.Clamp(v.Y / maxComp, 0f, 1f),
+                        Math.Clamp(v.Z / maxComp, 0f, 1f));
+
+                    Vector3 hsv = RgbToHsv(normalizedRgb);
+                    var savedHsv = hsv;
+
+                    ImGuiAPI.SetNextItemWidth(wheelSize);
+                    ImGuiColorEditFlags_ wheelFlags =
+                        ImGuiColorEditFlags_.ImGuiColorEditFlags_NoInputs |
+                        ImGuiColorEditFlags_.ImGuiColorEditFlags_NoAlpha |
+                        ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSidePreview |
+                        ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSmallPreview |
+                        ImGuiColorEditFlags_.ImGuiColorEditFlags_PickerHueWheel |
+                        ImGuiColorEditFlags_.ImGuiColorEditFlags_InputRGB |
+                        ImGuiColorEditFlags_.ImGuiColorEditFlags_DisplayHSV;
+
+                    // Use HSV input for the wheel
+                    Vector3 wheelCol = normalizedRgb;
+                    if (ImGuiAPI.ColorPicker3("##cgwheel_" + info.Name, (float*)&wheelCol, wheelFlags))
+                    {
+                        // User changed hue/sat via wheel — apply back preserving magnitude
+                        float newMax = Math.Max(Math.Max(wheelCol.X, wheelCol.Y), Math.Max(wheelCol.Z, 0.001f));
+                        v.X = (wheelCol.X / newMax) * maxComp;
+                        v.Y = (wheelCol.Y / newMax) * maxComp;
+                        v.Z = (wheelCol.Z / newMax) * maxComp;
+                        valueChanged = true;
+                    }
+                }
+                ImGuiAPI.EndGroup();
+
+                ImGuiAPI.SameLine(0, 10);
+
+                // ── Right side: R/G/B/Y sliders (HDR, no clamp) ──
+                ImGuiAPI.BeginGroup();
+                {
+                    ImGuiAPI.SetNextItemWidth(sliderWidth);
+                    ImGuiAPI.Text("R");
+                    ImGuiAPI.SameLine(20, 0);
+                    ImGuiAPI.SetNextItemWidth(sliderWidth - 20);
+                    float r = v.X;
+                    if (ImGuiAPI.DragFloat("##cg_R_" + info.Name, ref r, 0.01f, 0f, 0f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_None))
+                    {
+                        v.X = r;
+                        valueChanged = true;
+                    }
+
+                    ImGuiAPI.Text("G");
+                    ImGuiAPI.SameLine(20, 0);
+                    ImGuiAPI.SetNextItemWidth(sliderWidth - 20);
+                    float g = v.Y;
+                    if (ImGuiAPI.DragFloat("##cg_G_" + info.Name, ref g, 0.01f, 0f, 0f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_None))
+                    {
+                        v.Y = g;
+                        valueChanged = true;
+                    }
+
+                    ImGuiAPI.Text("B");
+                    ImGuiAPI.SameLine(20, 0);
+                    ImGuiAPI.SetNextItemWidth(sliderWidth - 20);
+                    float b = v.Z;
+                    if (ImGuiAPI.DragFloat("##cg_B_" + info.Name, ref b, 0.01f, 0f, 0f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_None))
+                    {
+                        v.Z = b;
+                        valueChanged = true;
+                    }
+
+                    ImGuiAPI.Text("Y");
+                    ImGuiAPI.SameLine(20, 0);
+                    ImGuiAPI.SetNextItemWidth(sliderWidth - 20);
+                    float y = v.W;
+                    if (ImGuiAPI.DragFloat("##cg_Y_" + info.Name, ref y, 0.01f, 0f, 0f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_None))
+                    {
+                        v.W = y;
+                        valueChanged = true;
+                    }
+                }
+                ImGuiAPI.EndGroup();
+
+                if (valueChanged)
+                    newValue = v;
+
+                ImGuiAPI.EndPopup();
+            }
+            else
+                mPopupOn = false;
+            EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
+            return valueChanged;
+        }
+
+        static Vector3 RgbToHsv(Vector3 rgb)
+        {
+            float r = rgb.X, g = rgb.Y, b = rgb.Z;
+            float max = Math.Max(r, Math.Max(g, b));
+            float min = Math.Min(r, Math.Min(g, b));
+            float delta = max - min;
+
+            float h = 0f, s = 0f, val = max;
+            if (max > 0f) s = delta / max;
+            if (delta > 0.0001f)
+            {
+                if (max == r) h = (g - b) / delta + (g < b ? 6f : 0f);
+                else if (max == g) h = (b - r) / delta + 2f;
+                else h = (r - g) / delta + 4f;
+                h /= 6f;
+            }
+            return new Vector3(h, s, val);
+        }
+    }
+
     public class TtByte4ToColor4PickerEditorAttribute : TtColorEditorBaseAttribute
     {
         public bool IsABGR = false;

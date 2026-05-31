@@ -1,0 +1,185 @@
+#ifndef _COLOR_GRADING_LUT_H_
+#define _COLOR_GRADING_LUT_H_
+
+#include "../../Inc/VertexLayout.cginc"
+#include "../../Inc/GpuSceneCommon.cginc"
+#include "../../Inc/PostEffectCommon.cginc"
+
+// ── cbuffer: all color grading parameters ──
+cbuffer cbColorGrading DX_AUTOBIND
+{
+    float  WhiteTemp;
+    float  WhiteTint;
+    float  ShadowsMax;
+    float  HighlightsMin;
+
+    float  HighlightsMax;
+    float  LUTSize;
+    float2 Padding0;
+
+    float4 ColorSaturation;
+    float4 ColorContrast;
+    float4 ColorGamma;
+    float4 ColorGain;
+    float4 ColorOffset;
+
+    float4 ColorSaturationShadows;
+    float4 ColorContrastShadows;
+    float4 ColorGammaShadows;
+    float4 ColorGainShadows;
+    float4 ColorOffsetShadows;
+
+    float4 ColorSaturationMidtones;
+    float4 ColorContrastMidtones;
+    float4 ColorGammaMidtones;
+    float4 ColorGainMidtones;
+    float4 ColorOffsetMidtones;
+
+    float4 ColorSaturationHighlights;
+    float4 ColorContrastHighlights;
+    float4 ColorGammaHighlights;
+    float4 ColorGainHighlights;
+    float4 ColorOffsetHighlights;
+};
+
+RWTexture3D<float4> OutputLUT DX_AUTOBIND;
+
+// ── sRGB <-> Linear ──
+float3 sRGBToLinear(float3 srgb)
+{
+    return V_Select(srgb <= 0.04045, srgb / 12.92, pow((srgb + 0.055) / 1.055, 2.4));
+}
+
+float3 LinearTosRGB(float3 lin)
+{
+    return V_Select(lin <= 0.0031308, lin * 12.92, 1.055 * pow(lin, 1.0 / 2.4) - 0.055);
+}
+
+// ── Luminance (BT.709) ──
+float CalcLuminance(float3 color)
+{
+    return dot(color, float3(0.2126, 0.7152, 0.0722));
+}
+
+// ── White Balance (simplified Planckian locus) ──
+// Maps color temperature deviation from D65 (6500K) into a tint offset.
+float3 WhiteBalanceColor(float3 linearColor, float temp, float tint)
+{
+    // Approximate white point shift based on temperature deviation from 6500K
+    float tempOffset = (temp - 6500.0) / 6500.0;
+    // Warm (higher temp) shifts toward blue, cool shifts toward orange
+    float3 warmShift = float3(1.0 + tempOffset * 0.2, 1.0, 1.0 - tempOffset * 0.2);
+
+    // Tint shifts green-magenta axis
+    float3 tintShift = float3(1.0 + tint * 0.1, 1.0 - abs(tint) * 0.05, 1.0 - tint * 0.1);
+
+    return linearColor * warmShift * tintShift;
+}
+
+// ── Per-zone color correction (UE-style Nuke CC) ──
+// saturation/contrast/gamma/gain/offset each have .xyz = per-channel, .w = overall intensity
+float3 ColorCorrect(float3 workingColor, float4 saturation, float4 contrast,
+                    float4 gamma, float4 gain, float4 offset)
+{
+    float luma = CalcLuminance(workingColor);
+    workingColor = max(0, lerp(luma.xxx, workingColor, saturation.xyz * saturation.w));
+    workingColor = pow(workingColor * (1.0 / 0.18), contrast.xyz * contrast.w) * 0.18;
+    workingColor = pow(workingColor, 1.0 / (gamma.xyz * gamma.w));
+    workingColor = workingColor * (gain.xyz * gain.w) + (offset.xyz + offset.w);
+    return workingColor;
+}
+
+// ── Full shadow/mid/highlight color correction ──
+float3 ColorCorrectAll(float3 workingColor)
+{
+    float luma = CalcLuminance(workingColor);
+
+    // Shadow
+    float3 ccShadows = ColorCorrect(workingColor,
+        ColorSaturationShadows * ColorSaturation,
+        ColorContrastShadows * ColorContrast,
+        ColorGammaShadows * ColorGamma,
+        ColorGainShadows * ColorGain,
+        ColorOffsetShadows + ColorOffset);
+    float wShadows = 1.0 - smoothstep(0, ShadowsMax, luma);
+
+    // Highlight
+    float3 ccHighlights = ColorCorrect(workingColor,
+        ColorSaturationHighlights * ColorSaturation,
+        ColorContrastHighlights * ColorContrast,
+        ColorGammaHighlights * ColorGamma,
+        ColorGainHighlights * ColorGain,
+        ColorOffsetHighlights + ColorOffset);
+    float wHighlights = smoothstep(HighlightsMin, HighlightsMax, luma);
+
+    // Midtone
+    float3 ccMidtones = ColorCorrect(workingColor,
+        ColorSaturationMidtones * ColorSaturation,
+        ColorContrastMidtones * ColorContrast,
+        ColorGammaMidtones * ColorGamma,
+        ColorGainMidtones * ColorGain,
+        ColorOffsetMidtones + ColorOffset);
+    float wMidtones = 1.0 - wShadows - wHighlights;
+
+    return ccShadows * wShadows + ccMidtones * wMidtones + ccHighlights * wHighlights;
+}
+
+// ── ACES Tone Mapping (same as hdr.cginc ToneMap2 path) ──
+float3 ACESToneMapping(float3 color)
+{
+    const float A = 2.51;
+    const float B = 0.03;
+    const float C = 2.43;
+    const float D = 0.59;
+    const float E = 0.14;
+    return (color * (A * color + B)) / (color * (C * color + D) + E);
+}
+
+float EyeAdaptionValue()
+{
+    return GpuSceneDescSRV[0].EyeAdapter;
+}
+
+float3 ApplyExposureAndTonemap(float3 color)
+{
+    float fLum = GpuSceneDescSRV[0].ScreenAverageBrightness;
+    float adaptedLumDest = 3.0 / (max(0.1, 1.0 + 10.0 * EyeAdaptionValue()));
+    float exposureBias = adaptedLumDest * Exposure;
+
+    color *= exposureBias;
+    color = ACESToneMapping(color);
+    return color;
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_GenerateLUT(uint3 id : SV_DispatchThreadID)
+{
+    // Skip out-of-bounds threads when LUTSize is not a multiple of thread group size
+    if (any(id >= (uint3)LUTSize))
+        return;
+
+    float size = LUTSize;
+
+    // Construct neutral color in [0,1] linear space from 3D position
+    float3 neutralColor = float3(id) / (size - 1.0);
+
+    // Interpret as linear-space HDR input (the LUT encodes the full pipeline)
+    float3 linearColor = neutralColor;
+
+    // 1. White balance
+    linearColor = WhiteBalanceColor(linearColor, WhiteTemp, WhiteTint);
+
+    // 2. Color correction (shadow / midtone / highlight)
+    linearColor = max(0, linearColor);
+    linearColor = ColorCorrectAll(linearColor);
+
+    // 3. Linear -> sRGB (tonemapping is done in the pixel shader before LUT lookup)
+    // No saturate: F16 LUT preserves values >1 from aggressive gain/offset.
+    // Final clamp happens in the pixel shader after LUT apply.
+    linearColor = max(0, linearColor);
+    linearColor = LinearTosRGB(linearColor);
+
+    OutputLUT[id] = float4(linearColor, 1.0);
+}
+
+#endif

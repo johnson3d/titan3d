@@ -42,6 +42,38 @@ namespace EngineNS.Editor.Forms
             return base.OnEvent(in e);
         }
 
+        public override void TickOnFocus()
+        {
+            base.TickOnFocus();
+
+            var keyboards = TtEngine.Instance.InputSystem;
+            if (keyboards.IsKeyPressed(Bricks.Input.Keycode.KEY_DELETE))
+            {
+                DeleteSelectedNodes();
+            }
+        }
+
+        void DeleteSelectedNodes()
+        {
+            var host = SceneEditorViewport?.HostEditor;
+            if (host?.mWorldOutliner == null)
+                return;
+            var selected = host.mWorldOutliner.SelectedNodes;
+            if (selected == null || selected.Count == 0)
+                return;
+
+            var world = SceneEditorViewport?.World;
+            foreach (var node in selected)
+            {
+                if (node == null || node == world?.Root)
+                    continue;
+                node.DeleteFromScene();
+            }
+            selected.Clear();
+            host.NodeInspector.Target = null;
+            SceneEditorViewport?.Axis?.SetSelectedNodes(selected);
+        }
+
         // 检查是否符合 Ctrl+左键按 Move 轴的复制条件; 符合则同步克隆所有选中节点,
         // 并把宿主编辑器的 outliner 选择列表替换为克隆出的新节点。
         // 不符合条件 / 克隆失败时静默返回, 不改变任何状态, 让 base.OnEvent 走原有逻辑。

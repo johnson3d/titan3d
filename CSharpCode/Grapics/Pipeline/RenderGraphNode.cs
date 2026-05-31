@@ -156,7 +156,11 @@ namespace EngineNS.Graphics.Pipeline
         {
             return Color4b.FromRgb(255, 0, 255);
         }
-        public TtRenderGraph RenderGraph { get; internal set; }
+        public TtRenderGraph RenderGraph 
+        {
+            get; 
+            internal set; 
+        }
         protected List<TtRenderGraphPin> InputGraphPins { get; } = new List<TtRenderGraphPin>();
         protected List<TtRenderGraphPin> OutputGraphPins { get; } = new List<TtRenderGraphPin>();
         public virtual int NumOfInput

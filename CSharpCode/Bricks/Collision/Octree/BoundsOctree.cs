@@ -1,6 +1,6 @@
-﻿using EngineNS.GamePlay.Scene;
+﻿using System;
+using EngineNS.GamePlay.Scene;
 using EngineNS.Profiler;
-using NPOI.SS.Formula.Functions;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -138,6 +138,23 @@ namespace EngineNS.Bricks.Collision.Octree
         }
 
         /// <summary>
+        /// Move an object to a new bounding box. Uses a fast path when the object
+        /// stays within its current OctreeNode, avoiding a full Remove+Add cycle.
+        /// </summary>
+        /// <param name="obj">Object to move.</param>
+        /// <param name="newBounds">New 3D bounding box.</param>
+        public void Move(T obj, in Aabb newBounds)
+        {
+            var ownerNode = obj.OctreeOwner as TtBoundsOctreeNode<T>;
+            if (ownerNode != null && ownerNode.TryUpdateBounds(obj, in newBounds))
+                return;
+
+            // Slow path: object left its current node — full Remove + Add
+            Remove(in obj);
+            Add(obj, in newBounds);
+        }
+
+        /// <summary>
         /// Check if the specified bounds intersect with anything in the tree. See also: GetColliding.
         /// </summary>
         /// <param name="checkBounds">bounds to check.</param>
@@ -165,7 +182,8 @@ namespace EngineNS.Bricks.Collision.Octree
         /// <param name="checkBounds">bounds to check.</param>
         /// <returns>Objects that intersect with the specified bounds.</returns>
         public void GetColliding(List<T> collidingWith, in Aabb checkBounds)
-        {            RootNode.GetColliding(in checkBounds, collidingWith);
+        {            
+            RootNode.GetColliding(in checkBounds, collidingWith);
         }
 
         /// <summary>
@@ -266,17 +284,39 @@ namespace EngineNS.Bricks.Collision.Octree
         }
     }
 
-    public class TtSceneOctree : IMemberTickable, IDisposable
+    /// <summary>
+    /// Wrapper class that sits inside the Octree and weakly references a TtNode.
+    /// The Octree strongly references this wrapper (cheap, ~32 bytes), while the
+    /// actual TtNode is only weakly held, so it can be GC'd independently.
+    /// </summary>
+    public class TtOctreeEntry : IBoundsOctreeObject
     {
-        Bricks.Collision.Octree.TtBoundsOctree<GamePlay.Scene.TtNode> mOctree;
+        public object OctreeOwner { get; set; }
+        public WeakReference<GamePlay.Scene.TtNode> WeakNode;
+
+        public TtOctreeEntry(GamePlay.Scene.TtNode node)
+        {
+            WeakNode = new WeakReference<GamePlay.Scene.TtNode>(node);
+        }
+
+        public bool TryGetNode(out GamePlay.Scene.TtNode node)
+        {
+            return WeakNode.TryGetTarget(out node);
+        }
+
+        public bool IsAlive => WeakNode.TryGetTarget(out _);
+    }
+
+    public class TtCollideOctree : IDisposable
+    {
+        public Bricks.Collision.Octree.TtBoundsOctree<TtOctreeEntry> mOctree = null;
         public NxRHI.TtTransientBuffer TransientVB = new();
         public NxRHI.TtTransientBuffer TransientIB = new();
         [Category("Option")]
         public bool IsDrawBounds { get; set; } = false;
-        public async Thread.Async.TtTask<bool> Initialize(object host)
+        public async Thread.Async.TtTask<bool> Initialize(DVector3 position)
         {
-            var scene = host as GamePlay.Scene.TtScene;
-            mOctree = new Bricks.Collision.Octree.TtBoundsOctree<GamePlay.Scene.TtNode>(0.5f, scene.Placement.AbsTransform.Position, 1, 1.25f);
+            mOctree = new Bricks.Collision.Octree.TtBoundsOctree<TtOctreeEntry>(0.5f, position, 1, 1.25f);
             return true;
         }
         public void Dispose()
@@ -286,84 +326,57 @@ namespace EngineNS.Bricks.Collision.Octree
             mOctree.GetRoot().IterateObject(static (obj, arg) =>
             {
                 obj.Obj.OctreeOwner = null;
+                if (obj.Obj.TryGetNode(out var node))
+                    node.OctreeEntry = null;
                 return true;
             }, null);
         }
-        public void Cleanup(object host)
-        {
-            Dispose();
-        }
-        public void TickLogic(object host, float ellapse)
+        public void TickLogic()
         {
             TransientVB.Reset();
             TransientIB.Reset();
+            PurgeDeadEntries();
         }
-        private struct FnOnActorMove { }
-        public void OnHostNotify(object host, in FHostNotify notify)
+        public void Add(GamePlay.Scene.TtNode node, in Aabb bounds)
         {
-            switch (notify.Info)
+            if (node.IsCollide == false)
+                return;
+            var entry = node.OctreeEntry;
+            if (entry == null)
             {
-                case "OnSceneLoaded":
-                    {
-                        var scene = host as GamePlay.Scene.TtScene;
-                        var nodes = scene.GetManagedNodes();
-                        foreach (var i in nodes)
-                        {
-
-                        }
-                    }
-                    break;
-                case "OnSceneAllocId":
-                    {
-                        var scene = host as GamePlay.Scene.TtScene;
-                        var node = notify.Parameter as GamePlay.Scene.TtNode;
-                        var aabb = new Aabb(node.RefAbsAABB);
-                        mOctree.Add(node, aabb);
-                    }
-                    break;
-                case "OnSceneFreeId":
-                    {
-                        var scene = host as GamePlay.Scene.TtScene;
-                        var node = notify.Parameter as GamePlay.Scene.TtNode;
-                        mOctree.Remove(node);
-                    }
-                    break;
-                case "OnGatherVisibleMeshes":
-                    {
-                        if (IsDrawBounds)
-                        {
-                            var scene = host as GamePlay.Scene.TtScene;
-                            var vp = notify.Parameter as GamePlay.TtWorld.TtVisParameter;
-                            vp.TransientVB = TransientVB;
-                            vp.TransientIB = TransientIB;
-
-                            mOctree.DrawAllBounds(scene.Placement, vp);
-                        }
-                    }
-                    break;
-                case "OnActorMove":
-                    {
-                        using (new Profiler.TimeScopeHelper(TtTypeScope<TtSceneOctree, FnOnActorMove>.Scope))
-                        {
-                            var scene = host as GamePlay.Scene.TtScene;
-                            var node = notify.Parameter as GamePlay.Scene.TtNode;
-                            if (node.OctreeNode != null)
-                            {
-                                node.OctreeNode.Remove(node);
-                            }
-                            var aabb = new Aabb(node.RefAbsAABB);
-                            if (mOctree != null)
-                            {
-                                mOctree.Add(node, aabb);
-                            }
-                        }
-                    }
-                    break;
+                entry = new TtOctreeEntry(node);
+                node.OctreeEntry = entry;
             }
+            mOctree.Add(entry, in bounds);
+        }
+        public void Remove(GamePlay.Scene.TtNode node)
+        {
+            var entry = node.OctreeEntry;
+            if (entry == null)
+                return;
+            mOctree.Remove(in entry);
+            entry.OctreeOwner = null;
+            node.OctreeEntry = null;
+
+            foreach (var c in node.Children)
+            {
+                this.Remove(c);
+            }
+        }
+        public void Move(GamePlay.Scene.TtNode node, in Aabb newBounds)
+        {
+            if (node.IsCollide == false)
+                return;
+            var entry = node.OctreeEntry;
+            if (entry == null)
+                return;
+            mOctree.Move(entry, in newBounds);
         }
         public void GetColliding(List<GamePlay.Scene.TtNode> nodes, in Aabb bound)
         {
-            mOctree.GetColliding(nodes, in bound);
+            mEntryBuffer.Clear();
+            mOctree.GetColliding(mEntryBuffer, in bound);
+            ResolveEntries(mEntryBuffer, nodes);
         }
         public bool IsColliding(in DRay checkRay, double maxDistance)
         {
@@ -371,26 +384,113 @@ namespace EngineNS.Bricks.Collision.Octree
         }
         public void GetColliding(List<GamePlay.Scene.TtNode> collidingWith, in DRay checkRay, double maxDistance = double.PositiveInfinity)
         {
-            mOctree.GetColliding(collidingWith, in checkRay, maxDistance);
+            mEntryBuffer.Clear();
+            mOctree.GetColliding(mEntryBuffer, in checkRay, maxDistance);
+            ResolveEntries(mEntryBuffer, collidingWith);
+        }
+        public unsafe bool OctreeHitTest(in DVector3 start, in DVector3 end, ref List<GamePlay.Scene.TtNode> candidates, VHitResult* hitResult)
+        {
+            if (mOctree == null)
+                return false;
+
+            var dir = end - start;
+            var maxDistance = dir.Length();
+            if (maxDistance < 1e-6)
+                return false;
+
+            var normalizedDir = dir / maxDistance;
+            var ray = new DRay()
+            {
+                Position = start,
+                Direction = new Vector3((float)normalizedDir.X, (float)normalizedDir.Y, (float)normalizedDir.Z),
+            };
+
+            if (candidates == null)
+                candidates = new List<GamePlay.Scene.TtNode>();
+
+            mEntryBuffer.Clear();
+            mOctree.GetColliding(mEntryBuffer, in ray, maxDistance);
+            ResolveEntries(mEntryBuffer, candidates);
+
+            if (candidates.Count == 0)
+                return false;
+
+            if (hitResult == (VHitResult*)IntPtr.Zero.ToPointer())
+                return true;
+
+            bool hasHit = false;
+            double closestDistSq = double.MaxValue;
+            ref VHitResult tempResult = ref *hitResult;
+
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                var node = candidates[i];
+                if (node.LineCheck(in start, in end, ref tempResult))
+                {
+                    var hitDist = (tempResult.Position - start).LengthSquared();
+                    if (hitDist < closestDistSq)
+                    {
+                        closestDistSq = hitDist;
+                        *hitResult = tempResult;
+                        hasHit = true;
+                    }
+                }
+            }
+
+            return hasHit;
+        }
+
+        private readonly List<TtOctreeEntry> mEntryBuffer = new();
+        private readonly List<TtOctreeEntry> mDeadEntries = new();
+
+        /// <summary>
+        /// Resolve WeakReference entries to live TtNode instances.
+        /// Dead entries (GC'd nodes) are collected for deferred cleanup in TickLogic.
+        /// </summary>
+        private void ResolveEntries(List<TtOctreeEntry> entries, List<GamePlay.Scene.TtNode> outNodes)
+        {
+            for (int i = 0; i < entries.Count; i++)
+            {
+                if (entries[i].TryGetNode(out var node))
+                    outNodes.Add(node);
+                else
+                    mDeadEntries.Add(entries[i]);
+            }
+        }
+
+        /// <summary>
+        /// Remove dead (GC'd) entries from the Octree. Called once per frame in TickLogic.
+        /// </summary>
+        private void PurgeDeadEntries()
+        {
+            if (mDeadEntries.Count == 0)
+                return;
+            for (int i = 0; i < mDeadEntries.Count; i++)
+            {
+                var dead = mDeadEntries[i];
+                mOctree.Remove(in dead);
+            }
+            mDeadEntries.Clear();
         }
     }
 }
 
 namespace EngineNS.GamePlay.Scene
 {
-    public partial class TtNode : Bricks.Collision.Octree.IBoundsOctreeObject
+    public partial class TtNode
     {
-        public object OctreeOwner { get; set; }
-        public Bricks.Collision.Octree.TtBoundsOctreeNode<TtNode> OctreeNode { get => OctreeOwner as Bricks.Collision.Octree.TtBoundsOctreeNode<TtNode>; }
-    }
-    public partial class TtScene
-    {
-        Bricks.Collision.Octree.TtSceneOctree mSceneOctree = new Bricks.Collision.Octree.TtSceneOctree();
-        [Category("Option")]
-        public Bricks.Collision.Octree.TtSceneOctree SceneOctree { get => mSceneOctree; }
-        public void Dispose_SceneOctree()
+        /// <summary>
+        /// The Octree wrapper entry that weakly references this node.
+        /// Null if this node is not in the world Octree.
+        /// </summary>
+        public Bricks.Collision.Octree.TtOctreeEntry OctreeEntry { get; set; }
+
+        /// <summary>
+        /// The OctreeNode this node currently resides in (via its entry wrapper).
+        /// </summary>
+        public Bricks.Collision.Octree.TtBoundsOctreeNode<Bricks.Collision.Octree.TtOctreeEntry> OctreeNode
         {
-            CoreSDK.DisposeObject(ref mSceneOctree);
+            get => OctreeEntry?.OctreeOwner as Bricks.Collision.Octree.TtBoundsOctreeNode<Bricks.Collision.Octree.TtOctreeEntry>;
         }
     }
 }

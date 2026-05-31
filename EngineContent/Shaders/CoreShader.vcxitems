@@ -166,6 +166,7 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\Cluster.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\Hzb.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\VirtualTexture.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\ColorGradingLUT.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\FrustumGrid3D.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)GI\ProbeVolume\ProbeVolumeUpdate.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRInitialSampling.compute" />

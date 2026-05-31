@@ -347,7 +347,7 @@ namespace EngineNS.UI.Editor
                     continue;
                 if (mOperatorNodes[i].Parent == null)
                     continue;
-                var scale = mEditor.PreviewViewport.CameraController.Camera.GetScaleWithFixSizeInScreen(mOperatorNodes[i].Placement.Position, 8);
+                var scale = mEditor.PreviewViewport.CameraController.Camera.GetScaleWithFixSizeInScreen(mOperatorNodes[i].Placement.Position, 8, 400);
                 mOperatorNodes[i].Placement.Scale = new Vector3(scale);
             }
             for (var i = EDecoratorType.Anchor_Start; i < EDecoratorType.Anchor_End; i++)
@@ -357,7 +357,7 @@ namespace EngineNS.UI.Editor
                     continue;
                 if (node.Parent == null)
                     continue;
-                var scale = mEditor.PreviewViewport.CameraController.Camera.GetScaleWithFixSizeInScreen(node.Placement.Position, 8);
+                var scale = mEditor.PreviewViewport.CameraController.Camera.GetScaleWithFixSizeInScreen(node.Placement.Position, 8, 400);
                 node.Placement.Scale = new Vector3(scale);
             }
 

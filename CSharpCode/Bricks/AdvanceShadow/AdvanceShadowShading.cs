@@ -1,4 +1,3 @@
-using Assimp;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Mesh;
@@ -6,7 +5,6 @@ using EngineNS.Graphics.Pipeline;
 using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
 using EngineNS.Thread.Async;
-using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -836,6 +834,21 @@ namespace EngineNS.Bricks.AdvanceShadow
                 caster.OnGatherVisibleMeshes(mVisParameter);
                 mergedAABB.Merge(in aabb);
             }
+        }
+
+        /// <summary>
+        /// Given a world-space position, find which clipmap page it belongs to and return its virtual page index.
+        /// Searches from the finest (level 0) to coarsest level, returning the first hit.
+        /// Returns -1 if the position is outside all clipmap levels or Clipmap is not initialized.
+        /// </summary>
+        /// <param name="worldPosition">World-space position to query.</param>
+        /// <returns>Virtual page index in the page table, or -1 if not covered.</returns>
+        public int GetVirtualPageIndexAtWorldPosition(in Vector3 worldPosition)
+        {
+            if (Clipmap == null)
+                return -1;
+
+            return Clipmap.GetVirtualPageIndexAtWorldPosition(in worldPosition);
         }
 
         /// <summary>

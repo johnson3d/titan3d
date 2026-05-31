@@ -31,7 +31,7 @@ namespace EngineNS.GamePlay
                 Pools.Clear();
             }
         }
-        public TtPrefabNode CreatePrefab(RName prefabName, bool bPooled)
+        public TtPrefabNode CreatePrefab(TtWorld world, RName prefabName, bool bPooled)
         {
             if (IsDisposed)
                 return null;
@@ -47,7 +47,7 @@ namespace EngineNS.GamePlay
             }
             else
             {
-                var task = pool.CloneNode();
+                var task = pool.CloneNode(world);
                 return task.GetResultUntilCompleted();
             }
         }
@@ -79,7 +79,7 @@ namespace EngineNS.GamePlay
         public TtPrefabPoolManager PoolManager { get; set; }
         private RName mPrefabName;
         private TtPrefabNode mOriginPrefab = null;
-        public async Thread.Async.TtTask<TtPrefabNode> CloneNode()
+        public async Thread.Async.TtTask<TtPrefabNode> CloneNode(TtWorld world)
         {
             if (mOriginPrefab == null)
             {
@@ -93,7 +93,7 @@ namespace EngineNS.GamePlay
                     System.Diagnostics.Debug.Assert(false);
                 }
             }
-            var ret = await mOriginPrefab.CloneNode(PoolManager.World, null) as TtPrefabNode;
+            var ret = await mOriginPrefab.CloneNode(world, null) as TtPrefabNode;
             return ret;
         }
         public TtPrefabPool(RName prefabName)
@@ -116,7 +116,7 @@ namespace EngineNS.GamePlay
                     System.Diagnostics.Debug.Assert(false);
                 }
             }
-            return await CloneNode();
+            return await CloneNode(PoolManager.World);
         }
         protected override bool OnObjectRelease(TtPrefabNode obj)
         {
@@ -137,7 +137,7 @@ namespace EngineNS.GamePlay
             TtScene scene)
         {
             EngineNS.GamePlay.Scene.TtNode root = scene;
-            var newPrefab = TtEngine.Instance.GameInstance?.PrefabPoolManager.CreatePrefab(prefab, false);
+            var newPrefab = TtEngine.Instance.GameInstance?.PrefabPoolManager.CreatePrefab(scene.World, prefab, false);
             newPrefab.Parent = root;
             return newPrefab;
         }

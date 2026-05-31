@@ -34,6 +34,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\CopyNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\FindNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\HdrNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\ColorGrading\TtColorGradingSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\ColorGrading\TtColorGradingLUTGenerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\HitproxyNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\HzbNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\ImageAssetNode.cs" />

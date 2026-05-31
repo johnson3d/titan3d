@@ -202,7 +202,7 @@ namespace EngineNS.Bricks.Procedure.Node
             {
                 if (ProgramName != null)
                 {
-                    Editor.TtAssetEditorManager.TryOpenEditor(typeof(CodeBuilder.MacrossNode.TtMacrossEditor), ProgramName, null).AddWaitTask();
+                    Editor.TtAssetEditorManager.TryOpenEditor(typeof(CodeBuilder.MacrossNode.TtMacrossEditor), ProgramName, null, false).AddWaitTask();
                 }
             }
             if (ProgramName != null)

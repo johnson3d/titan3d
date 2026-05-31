@@ -16,6 +16,7 @@ namespace EngineNS.GamePlay.Scene
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.UMeshNode@EngineCore", "EngineNS.GamePlay.Scene.UMeshNode" })]
     public partial class TtMeshNode : TtGpuSceneNode
     {
+        public object Tag { get; set; } = null;
         public override void Dispose()
         {
             CoreSDK.DisposeObject(ref mMesh);
@@ -171,7 +172,7 @@ namespace EngineNS.GamePlay.Scene
         public static async Thread.Async.TtTask<TtMeshNode> AddMeshNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, Graphics.Mesh.TtRenderMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
-            var meshNode = await scene.SpawnSceneActor<TtMeshNode>(parent, async (nd)=>
+            var meshNode = await GamePlay.Scene.TtNode.SpawnNode<TtMeshNode>(parent, async (nd)=>
             {
 
             }, data, EBoundVolumeType.Box, placementType) as TtMeshNode;

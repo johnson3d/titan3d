@@ -161,7 +161,7 @@ namespace Survivor
             var weaponPrefabName = RName.ParseFrom(WeaponData.Shape);
             if (weaponPrefabName != null)
             {
-                var WeaponPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape), false);
+                var WeaponPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(WeaponNode.GetWorld(), RName.ParseFrom(WeaponData.Shape), false);
                 if (WeaponPrefab != null)
                 {
                     WeaponPrefab.Parent = WeaponNode.Parent.Parent;
@@ -249,7 +249,7 @@ namespace Survivor
             var bulletPrefabName = RName.ParseFrom(WeaponData.Shape);
             if(bulletPrefabName != null)
             {
-                var bulletPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape), false);
+                var bulletPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(WeaponNode.GetWorld(), RName.ParseFrom(WeaponData.Shape), false);
                 if (bulletPrefab != null)
                 {
                     bulletPrefab.Parent = WeaponNode.Parent.Parent;
@@ -286,7 +286,7 @@ namespace Survivor
             aabb.Center = WeaponNode.Parent.Placement.AbsTransform.Position;
             aabb.Extent = Vector3.One * WeaponData.AttackRange;
             
-            WeaponNode.ParentScene.SceneOctree.GetColliding(nearNodes, aabb);
+            WeaponNode.GetWorld().CollideOctree.GetColliding(nearNodes, aabb);
             List<TtMonsterNode> monsters = new List<TtMonsterNode>();
             foreach(var nd in nearNodes)
             {

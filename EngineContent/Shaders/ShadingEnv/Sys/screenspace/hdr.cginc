@@ -79,6 +79,36 @@ float3 ToneMap3(float3 color)
 Texture2D GSourceTarget DX_AUTOBIND;
 SamplerState Samp_GSourceTarget DX_AUTOBIND;
 
+// Color Grading dual-LUT blend (each Volume owns its LUT, GPU blends by weight)
+Texture3D   ColorGradingLUT0 DX_AUTOBIND;       // Primary volume LUT
+Texture3D   ColorGradingLUT1 DX_AUTOBIND;       // Secondary volume LUT (may be unbound)
+SamplerState Samp_ColorGradingLUT0 DX_AUTOBIND;
+
+cbuffer cbColorGradingBlend DX_AUTOBIND
+{
+	float LutBlendWeight;   // 0 = 100% LUT0, 1 = 100% LUT1
+	float HasSecondLut;     // 0 = single LUT, 1 = dual LUT blend
+	float2 _cgPad;
+};
+
+float3 ApplyColorGradingLUT3D(float3 ldrColor)
+{
+	float3 lutUV = saturate(ldrColor);
+	float3 color0 = ColorGradingLUT0.SampleLevel(Samp_ColorGradingLUT0, lutUV, 0).rgb;
+
+	// Fallback: if LUT is unbound or empty (samples black), skip color grading
+	if (dot(color0, 1) < 0.0001)
+		return ldrColor;
+
+	if (HasSecondLut > 0.5)
+	{
+		float3 color1 = ColorGradingLUT1.SampleLevel(Samp_ColorGradingLUT0, lutUV, 0).rgb;
+		color0 = lerp(color0, color1, LutBlendWeight);
+	}
+	// F16 LUT may store values >1 from aggressive gain; final clamp to LDR output
+	return saturate(color0);
+}
+
 PS_INPUT VS_Main(VS_INPUT input1)
 {
 	VS_MODIFIER input = VS_INPUT_TO_VS_MODIFIER(input1);
@@ -102,15 +132,17 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	float2 uv = input.vUV;
 	float4 BaseData = GSourceTarget.Sample(Samp_GSourceTarget, uv).rgba;
 	BaseData.rgb = sRGB2Linear((half3)BaseData.rgb);
+
+#if ENABLE_COLOR_GRADING_LUT
+	// 1. Exposure + ACES tonemapping: HDR → LDR [0,1]
+	BaseData.rgb = ToneMap2((half3)BaseData.rgb);
+	// 2. LUT contains color grading only (white balance + shadow/mid/highlight CC + sRGB)
+	BaseData.rgb = ApplyColorGradingLUT3D(BaseData.rgb);
+#else
+	// Legacy path: direct tonemapping without color grading
 	BaseData.rgb = ToneMap2((half3)BaseData.rgb);
 	BaseData.rgb = Linear2sRGB((half3)BaseData.rgb);
-
-	//half LumHdr = CalcLuminanceYCbCr(BaseData);
-	//half VignetteWeight = max(1.0h - LumHdr, 0.0h);
-	//half VignetteMask =1.0h - CalcVignettePS(input.vLightMap.xy, 0.5h);
-	//half VignetteMask = 1.0h - GVignette.Sample(Samp_GVignette, input.vUV.xy).r;
-	//BaseData = (1.0h - VignetteMask * VignetteWeight) * BaseData;	
-	//BaseData.rgb = ACESMobile_HQ(BaseData.rgb);
+#endif
 
 	output.RT0 = BaseData;
 

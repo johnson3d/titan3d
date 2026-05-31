@@ -8,6 +8,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using static EngineNS.GamePlay.TtWorld;
+using static EngineNS.GamePlay.TtAxis;
+using EngineNS.Graphics.Mesh;
 
 namespace EngineNS.GamePlay.Scene
 {
@@ -49,16 +51,18 @@ namespace EngineNS.GamePlay.Scene
     [Bricks.CodeBuilder.ContextMenu("Capture", "Graphics\\SceneCapture", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtSceneCapture.TtSceneCaptureData), DefaultNamePrefix = "Capture")]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.USceneCapture@EngineCore", "EngineNS.GamePlay.Scene.USceneCapture" })]
-    public partial class TtSceneCapture : TtSceneActorNode, ITickable, IRootForm
+    public partial class TtSceneCapture : TtSceneActorNode
     {
         public override void Dispose()
         {
-            Visible = false;
+            CoreSDK.DisposeObject(ref mFrustumMesh);
+            var rp = WorldRenderer?.RenderPolicy;
+            if (rp != null)
+            {
+                WorldRenderer.RenderPolicy = null;
+                rp.Dispose();
+            }
             base.Dispose();
-        }
-        public int GetTickOrder()
-        {
-            return 0;
         }
         public enum ECaptureMode
         {
@@ -80,6 +84,8 @@ namespace EngineNS.GamePlay.Scene
             public List<Guid> ShowActors { get; set; }
             [Rtti.Meta("")]
             public List<Guid> ExcludeActors { get; set; }
+            [Rtti.Meta("")]
+            public float CaptureInterval { get; set; } = float.MaxValue;
         }
 
         #region OnlyShowNodes
@@ -106,7 +112,7 @@ namespace EngineNS.GamePlay.Scene
             OnlyShowNodes.Clear();
         }
         #endregion
-        public TtWorldRenderer WorldRenderer { get; } = new TtWorldRenderer();
+        public TtWorldImmRenderer WorldRenderer { get; } = new TtWorldImmRenderer();
         protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
@@ -116,12 +122,9 @@ namespace EngineNS.GamePlay.Scene
             {
                 nd.RPolicyName = TtEngine.Instance.Config.MainRPolicyName;
             }
-            Graphics.Pipeline.TtRenderPolicy policy = null;
-            var rpAsset = nd.RPolicyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>().GetResultUntilCompleted();
-            if (rpAsset != null)
-            {
-                policy = rpAsset.CreateRenderPolicy(nd.RPolicyName, null);
-            }
+            var policy = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.CreateRenderPolicy(nd.RPolicyName, null);
+            if (policy == null)
+                return false;
             await policy.Initialize(null);
             policy.OnResize(nd.TargetSize.X, nd.TargetSize.Y);
 
@@ -141,8 +144,7 @@ namespace EngineNS.GamePlay.Scene
             }
 
             UpdateCamera();
-
-            TtEngine.Instance.TickableManager.AddTickable(this);
+            RebuildFrustumMesh();
 
             var cullNode = WorldRenderer.RenderPolicy.FindFirstNode<TtCpuCullingNode>();
             GamePlay.TtWorld.TtVisParameter mVisParameter = cullNode.VisParameter;
@@ -161,6 +163,19 @@ namespace EngineNS.GamePlay.Scene
                 }
                 else
                 {
+                    mVisParameter.OnVisitNode = (node, parameter) =>
+                    {
+                        if (node is TtAxisNode)
+                            return false;
+                        if (node.Parent is TtAxisNode)
+                            return false;
+                        if (node is TtMeshNode meshNode)
+                        {
+                            if (meshNode.Tag is TtAxis.TtAxisData)
+                                return false;
+                        }
+                        return true;
+                    };
                     WorldRenderer.CaptureWorld.GatherVisibleMeshes(mVisParameter);
                 }
             };
@@ -240,105 +255,219 @@ namespace EngineNS.GamePlay.Scene
             var dir = this.Placement.AbsTransform.TransformVector3NoScale(in Vector3.Forward);
             dir.Normalize();
             var lookAt = eyePos + dir * 100.0f;
-            WorldRenderer.RenderPolicy.DefaultCamera.mCoreObject.LookAtLH(in eyePos, in lookAt, in Vector3.Up);
+            WorldRenderer.RenderPolicy.DefaultCamera.LookAtLH(in eyePos, in lookAt, in Vector3.Up);
         }
         protected override void OnAbsTransformChanged()
         {
             UpdateCamera();
-        }
-        bool IsCaptureVisible = false;
-        public void TickLogic(float ellapse)
-        {
-            var absAABB = DBoundingBox.TransformNoScale(in RefAABB, in Placement.AbsTransform);
-            var type = WorldRenderer.CameraController.Camera.WhichContainTypeFast(WorldRenderer.CaptureWorld, in absAABB, false);
-
-            if (type == CONTAIN_TYPE.CONTAIN_TEST_OUTER)
+            var world = this.GetWorld();
+            if (world != null)
             {
-                IsCaptureVisible = false;
+                var mat = Placement.AbsTransform.ToMatrixNoScale(world.CameraOffset);
+                if (mDebugMesh != null)
+                    mDebugMesh.DirectSetWorldMatrix(mat);
+                if (mFrustumMesh != null)
+                    mFrustumMesh.DirectSetWorldMatrix(mat);
+            }
+        }
+        // ---------- 间隔节流 ----------
+        float mAccumulatedTime = 0;
+        bool mManualTriggerPending = false;
+
+        [Category("Capture")]
+        public bool CaptureNow
+        {
+            get => false;
+            set => mManualTriggerPending = true;
+        }
+
+        [Category("Capture")]
+        public bool CaptureWithRenderDoc
+        {
+            get => false;
+            set
+            {
+                mManualTriggerPending = true;
+                // SceneCapture 使用单 RP, 直接在 CmdQueue 上抓帧.
+                var queue = WorldRenderer?.RenderPolicy?.CmdQueue;
+                if (queue != null)
+                    queue.CaptureRenderDocFrame = true;
+            }
+        }
+
+        Editor.Forms.TtTextureViewer mTextureViewer = null;
+        [Category("Capture")]
+        public bool OpenInTextureViewer
+        {
+            get
+            {
+                if (mTextureViewer != null && mTextureViewer.Visible == false)
+                    mTextureViewer = null;
+                return mTextureViewer != null;
+            }
+            set
+            {
+                var srv = WorldRenderer?.RenderPolicy?.GetFinalShowRSV();
+                if (srv == null)
+                    return;
+                if (mTextureViewer == null)
+                    mTextureViewer = new Editor.Forms.TtTextureViewer();
+                srv.AssetName = RName.GetRName($"@SceneCapture:{this.NodeId}@", RName.ERNameType.Transient);
+                Editor.TtAssetEditorManager.TryOpenEditor(mTextureViewer,
+                    srv.AssetName,
+                    srv, false).AddWaitTask();
+            }
+        }
+
+        [Category("Capture")]
+        public float CaptureInterval
+        {
+            get => GetNodeData<TtSceneCaptureData>().CaptureInterval;
+            set => GetNodeData<TtSceneCaptureData>().CaptureInterval = value;
+        }
+
+        // ---------- DebugMesh (摄像机图标) ----------
+        Graphics.Mesh.TtRenderMesh mDebugMesh;
+        public Graphics.Mesh.TtRenderMesh DebugMesh
+        {
+            get
+            {
+                if (mDebugMesh == null)
+                {
+                    var cookedMesh = TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(
+                        RName.GetRName("mesh/utility/sm_cinecam.ums", RName.ERNameType.Engine)).GetResultUntilCompleted();
+                    if (cookedMesh == null)
+                        return null;
+                    var mesh = new Graphics.Mesh.TtRenderMesh();
+                    if (mesh.Initialize(cookedMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc))
+                    {
+                        mesh.IsAcceptShadow = false;
+                        mDebugMesh = mesh;
+                        mDebugMesh.HostNode = this;
+                        BoundVolume.LocalAABB = mDebugMesh.MaterialMesh.AABB;
+                        this.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
+                        UpdateAbsTransform();
+                        UpdateAABB();
+                        Parent?.UpdateAABB();
+                    }
+                }
+                return mDebugMesh;
+            }
+        }
+
+        // ---------- FrustumMesh (平截头体线框) ----------
+        Graphics.Mesh.TtRenderMesh mFrustumMesh;
+        void RebuildFrustumMesh()
+        {
+            var camera = WorldRenderer?.RenderPolicy?.DefaultCamera;
+            if (camera == null)
+                return;
+
+            var frustumProvider = Graphics.Mesh.TtMeshDataProvider.MakeFrustum(
+                camera.Fov, camera.Aspect, camera.ZNear, camera.ZFar, 0xFFFFFF00);
+            var frustumPrimitive = frustumProvider.ToMesh();
+
+            var mtl = TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria.CloneMaterialInstance();
+            var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
+            materials[0] = mtl;
+
+            var mesh = new Graphics.Mesh.TtRenderMesh();
+            if (mesh.Initialize(frustumPrimitive, materials,
+                Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc))
+            {
+                mesh.IsAcceptShadow = false;
+                mesh.IsDrawHitproxy = false;
+                CoreSDK.DisposeObject(ref mFrustumMesh);
+                mFrustumMesh = mesh;
+
+                if (this.GetWorld() != null)
+                    mFrustumMesh.DirectSetWorldMatrix(Placement.AbsTransform.ToMatrixNoScale(this.GetWorld().CameraOffset));
+            }
+        }
+
+        public override bool HashVisual => true;
+        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        {
+            if ((rp.CullFilters & TtWorld.TtVisParameter.EVisCullFilter.UtilityEditor) == 0)
+                return;
+            if (DebugMesh != null)
+                rp.AddVisibleMesh(DebugMesh);
+            if (mFrustumMesh != null)
+                rp.AddVisibleMesh(mFrustumMesh);
+        }
+        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtRenderMesh> meshes)
+        {
+            base.GetHitProxyDrawMesh(meshes);
+            if (mDebugMesh != null)
+                meshes.Add(mDebugMesh);
+        }
+        public override void OnHitProxyChanged()
+        {
+            if (mDebugMesh == null)
+                return;
+            if (this.HitProxy == null)
+            {
+                mDebugMesh.IsDrawHitproxy = false;
                 return;
             }
-            IsCaptureVisible = true;
 
-            TtEngine.Instance.ThreadRender.QueueRenderAction("CubeRenderer.CaptureCubeFaces", static (in Thread.TtThreadRender.FRenderAction RAct) =>
+            if (HitproxyType != Graphics.Pipeline.TtHitProxy.EHitproxyType.None)
+            {
+                mDebugMesh.IsDrawHitproxy = true;
+                var value = HitProxy.ConvertHitProxyIdToVector4();
+                mDebugMesh.SetHitproxy(in value);
+            }
+            else
+            {
+                mDebugMesh.IsDrawHitproxy = false;
+            }
+        }
+        // ---------- Tick ----------
+        public override bool OnTickLogic(TtNodeTickParameters args)
+        {
+            if (WorldRenderer == null || WorldRenderer.RenderPolicy == null)
+                return true;
+
+            var nd = GetNodeData<TtSceneCaptureData>();
+            var ellapse = TtEngine.Instance.ElapsedSecond;
+
+            bool shouldCapture = false;
+            if (mManualTriggerPending)
+            {
+                shouldCapture = true;
+                mManualTriggerPending = false;
+            }
+            else if (nd.CaptureInterval == 0)
+            {
+                shouldCapture = true;
+            }
+            else if (nd.CaptureInterval > 0)
+            {
+                mAccumulatedTime += ellapse;
+                if (mAccumulatedTime >= nd.CaptureInterval)
+                {
+                    shouldCapture = true;
+                    mAccumulatedTime = 0;
+                }
+            }
+
+            if (!shouldCapture)
+                return true;
+
+            UpdateCamera();
+
+            TtEngine.Instance.ThreadRender.QueueRenderAction("SceneCapture.Render", static (in Thread.TtThreadRender.FRenderAction RAct) =>
             {
                 var This = (RAct.Arg as TtSceneCapture);
                 This.WorldRenderer.TickLogic(TtEngine.Instance.ElapsedSecond);
             }, this);
 
-            //System.Threading.AutoResetEvent mRenderFinishedEvent = new System.Threading.AutoResetEvent(false);
-            //TtEngine.Instance.ThreadRender.WaitFinishRenderAction(mRenderFinishedEvent);
-            
-        }
-        public void TickRender(float ellapse)
-        {
-            
-        }
-        public void TickBeginFrame(float ellapse)
-        {
+            var renderFinished = new System.Threading.AutoResetEvent(false);
+            TtEngine.Instance.ThreadRender.WaitFinishRenderAction(renderFinished);
 
-        }
-        public void TickSync(float ellapse)
-        {
-            if (IsCaptureVisible)
-                WorldRenderer.RenderPolicy?.TickSync();
-        }
-
-        #region DebugUI
-        bool mShowDebugger;
-        [Category("Option")]
-        public bool Visible 
-        {
-            get => mShowDebugger;
-            set
-            {
-                mShowDebugger = value;
-                if (value)
-                    TtEngine.RootFormManager.RegRootForm(this);
-                else
-                    TtEngine.RootFormManager.UnregRootForm(this);
-            }
-        }
-        public uint DockId { get; set; }
-        public ImGuiWindowClass DockKeyClass { get; }
-        public ImGuiCond_ DockCond { get; set; }
-        public async Thread.Async.TtTask<bool> Initialize()
-        {
-            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
+            WorldRenderer.RenderPolicy?.TickSync();
             return true;
         }
-        public void Cleanup()
-        {
-
-        }
-        public unsafe void OnDraw()
-        {
-            if (Visible == false || WorldRenderer.RenderPolicy == null)
-                return;
-
-            ImGuiAPI.SetNextWindowSize(GetNodeData<TtSceneCaptureData>().TargetSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm($"Capture:{this.NodeName}", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
-            if (result)
-            {
-                if (ImGuiAPI.BeginChild("FinalTexture", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-                {
-                    var pos = ImGuiAPI.GetWindowPos();
-                    var drawlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());
-                    var uv1 = new Vector2(0, 0);
-                    var uv2 = new Vector2(1, 1);
-                    var min1 = ImGuiAPI.GetWindowContentRegionMin();
-                    var max1 = ImGuiAPI.GetWindowContentRegionMax();
-
-                    min1 = min1 + pos;
-                    max1 = max1 + pos;
-                    ImTextureRef imTextureRef = new ImTextureRef();
-                    imTextureRef.m__TexID = (ulong)WorldRenderer.RenderPolicy.GetFinalShowRSV().GetTextureHandle();
-                    drawlist.AddImage(imTextureRef, in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
-                }
-                ImGuiAPI.EndChild();
-            }
-            EGui.UIProxy.DockProxy.EndMainForm(result);
-        }
-        #endregion
     }
 }
 #if TitanEngine_AutoGen_Macross

@@ -1,3 +1,4 @@
+using EngineNS.BehaviorTree.Composite;
 using EngineNS.Graphics.Pipeline.Common;
 using System;
 using System.Collections.Generic;
@@ -411,6 +412,8 @@ namespace EngineNS.Graphics.Pipeline
                             var scope = j.RDGTickScope;
                             using (new Profiler.TimeScopeHelper(scope))
                             {
+                                System.Diagnostics.Debug.Assert(this == j.RenderGraph);
+
                                 j.BeforeTick((TtRenderPolicy)this);
 
                                 j.Tick(world, (TtRenderPolicy)this, cmdlist, true);

@@ -253,7 +253,7 @@ namespace EngineNS.GamePlay.Scene
             //if (TtEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.UtilityDebug) == false)
             //    return;
 
-            if ((rp.CullFilters & GamePlay.TtWorld.TtVisParameter.EVisCullFilter.UtilityDebug) == 0)
+            if ((rp.CullFilters & GamePlay.TtWorld.TtVisParameter.EVisCullFilter.UtilityEditor) == 0)
                 return;
 
             if (DebugSplineMesh != null)

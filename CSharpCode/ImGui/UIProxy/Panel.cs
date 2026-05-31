@@ -22,7 +22,7 @@ namespace EngineNS.EGui.UIProxy
         }
 
         // 只能dock到Main window中
-        public static bool BeginMainForm(string name, IRootForm form, ImGuiWindowFlags_ flags, uint dockId = 0)
+        public static bool BeginMainForm(string name, IRootForm form, ImGuiWindowFlags_ flags, uint dockId = 0, bool saveLayout = true)
         {
             ImGuiAPI.SetNextWindowClass(MainFormDockClass);
             var targetDockId = GetMainFormDockId(form, dockId);
@@ -33,6 +33,8 @@ namespace EngineNS.EGui.UIProxy
             }
             if (EngineNS.TtEngine.Instance.IsBlockOperation)
                 flags |= ImGuiWindowFlags_.ImGuiWindowFlags_NoInputs;
+            if (!saveLayout)
+                flags |= ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings;
             var vis = form.Visible;
             //var mainFlag = ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar;
             //if ((flags & ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar) == ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar)
@@ -58,12 +60,14 @@ namespace EngineNS.EGui.UIProxy
             //}
             return retValue;
         }
-        public static bool BeginMainForm(string name, ref bool open, ref uint dockId, ImGuiWindowFlags_ flags)
+        public static bool BeginMainForm(string name, ref bool open, ref uint dockId, ImGuiWindowFlags_ flags, bool saveLayout = true)
         {
             ImGuiAPI.SetNextWindowClass(MainFormDockClass);
             ImGuiAPI.SetNextWindowDockID(MainFormDockClass.m_ClassId, ImGuiCond_.ImGuiCond_FirstUseEver);
             if (EngineNS.TtEngine.Instance.IsBlockOperation)
                 flags |= ImGuiWindowFlags_.ImGuiWindowFlags_NoInputs;
+            if (!saveLayout)
+                flags |= ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings;
             //var mainFlag = ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar;
             //if ((flags & ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar) == ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar)
             //    mainFlag |= ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar;
@@ -83,12 +87,14 @@ namespace EngineNS.EGui.UIProxy
             //}
             return retValue;
         }
-        public static unsafe bool BeginMainForm(string name, bool* open, ref uint dockId, ImGuiWindowFlags_ flags)
+        public static unsafe bool BeginMainForm(string name, bool* open, ref uint dockId, ImGuiWindowFlags_ flags, bool saveLayout = true)
         {
             ImGuiAPI.SetNextWindowClass(MainFormDockClass);
             ImGuiAPI.SetNextWindowDockID(MainFormDockClass.m_ClassId, ImGuiCond_.ImGuiCond_FirstUseEver);
             if (EngineNS.TtEngine.Instance.IsBlockOperation)
                 flags |= ImGuiWindowFlags_.ImGuiWindowFlags_NoInputs;
+            if (!saveLayout)
+                flags |= ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings;
             //var mainFlag = ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar;
             //if ((flags & ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar) == ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar)
             //    mainFlag |= ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar;

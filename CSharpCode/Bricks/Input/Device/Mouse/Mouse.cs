@@ -19,8 +19,6 @@ namespace EngineNS.Bricks.Input.Device.Mouse
         }
         partial void OnSetShowCursor();
 
-        public int GlobalMouseX;
-        public int GlobalMouseY;
         public int EventMouseX;
         public int EventMouseY;
         byte mOldMouseButtons = 0;

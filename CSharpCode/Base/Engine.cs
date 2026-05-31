@@ -247,9 +247,6 @@ namespace EngineNS
         public bool IsTryUnloadMacrossAssembly { get; set; } = true;
         [Rtti.Meta("")]
         [Category("Option")]
-        public bool UseECS { get; set; } = true;
-        [Rtti.Meta("")]
-        [Category("Option")]
         public List<string> Plugins { get; set; } = new List<string>() { "SourceGit", "BlenderImporter", "Survivor" };
         [Rtti.Meta("")]
         [Category("Option")]

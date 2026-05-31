@@ -122,9 +122,11 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
                 return;
 
             rp.AddVisibleNode(this);
-            PhyShape.DebugMesh.SetWorldTransform(in this.Placement.AbsTransform, rp.World, true);
-            rp.AddVisibleMesh(PhyShape.DebugMesh);
-            
+            if (PhyShape.DebugMesh != null)
+            {
+                PhyShape.DebugMesh.SetWorldTransform(in this.Placement.AbsTransform, rp.World, true);
+                rp.AddVisibleMesh(PhyShape.DebugMesh);
+            }
         }
     }
 

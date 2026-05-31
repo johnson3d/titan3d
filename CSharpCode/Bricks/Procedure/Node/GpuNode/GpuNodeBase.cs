@@ -18,7 +18,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
             }
             set
             {
-                var policy = value.GetAsset<TtRenderPolicyAsset>().GetResultUntilCompleted().CreateRenderPolicy(null, null);
+                var policy = TtRenderPolicyAsset.CreateRenderPolicy(value, null);
                 policy.Initialize(null).WaitCompletedAndDispose();
                 Policy = policy;
                 mPolicyName = value;

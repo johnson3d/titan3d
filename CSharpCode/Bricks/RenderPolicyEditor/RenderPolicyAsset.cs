@@ -145,10 +145,32 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         }
         [Rtti.Meta("")]
         public TtPolicyGraph PolicyGraph { get; } = new TtPolicyGraph();
-        public Graphics.Pipeline.TtRenderPolicy CreateRenderPolicy(RName rPolicyName, IRenderViewport viewport, string endingName = "Copy2SwapChainNode")
+        /// <summary>
+        /// 从指定 rpolicy 资源创建一个完全独立的 RenderPolicy 实例.
+        /// 内部每次重新 LoadAsset, 保证 RenderGraph 节点实例不会被多个 RP 共享
+        /// (共享会导致 node.RenderGraph 引用被最后一个 RP 覆盖, Tick 时断言失败).
+        /// </summary>
+        public static Graphics.Pipeline.TtRenderPolicy CreateRenderPolicy(RName rPolicyName, IRenderViewport viewport, string endingName = "Copy2SwapChainNode")
+        {
+            var rpAsset = LoadAsset(rPolicyName);
+            if (rpAsset == null)
+            {
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Error, $"CreateRenderPolicy: LoadAsset failed for {rPolicyName}");
+                return null;
+            }
+            return rpAsset.CreateRenderPolicyFromSelf(rPolicyName, viewport, endingName);
+        }
+
+        /// <summary>
+        /// 从当前 asset 实例创建 RenderPolicy. 注意: 多次调用会共享 PolicyGraph
+        /// 中的节点实例, 导致 node.RenderGraph 被最后一个 RP 覆盖.
+        /// 除非你明确知道只会创建一个 RP (例如编辑器预览), 否则请使用静态方法
+        /// CreateRenderPolicy(RName, IRenderViewport, string).
+        /// </summary>
+        private Graphics.Pipeline.TtRenderPolicy CreateRenderPolicyFromSelf(RName rPolicyName, IRenderViewport viewport, string endingName = "Copy2SwapChainNode")
         {
             var typeDesc = PolicyGraph.PolicyType;
-            var policy = Rtti.TtTypeDescManager.CreateInstance(typeDesc) as Graphics.Pipeline.TtRenderPolicy; // new Graphics.Pipeline.URenderPolicy();
+            var policy = Rtti.TtTypeDescManager.CreateInstance(typeDesc) as Graphics.Pipeline.TtRenderPolicy;
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
             meta.CopyObjectMetaField(policy, this.PolicyGraph.RenderPolicy);
             policy.RenderViewport = viewport;

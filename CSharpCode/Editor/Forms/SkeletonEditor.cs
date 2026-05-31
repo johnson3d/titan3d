@@ -52,7 +52,7 @@ namespace EngineNS.Editor.Forms
         public static async Thread.Async.TtTask<TtSkeletonShowNode> AddNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
-            var node = await scene.SpawnSceneActor<TtSkeletonShowNode>(parent, null, data, EBoundVolumeType.Box, placementType);
+            var node = await GamePlay.Scene.TtNode.SpawnNode<TtSkeletonShowNode>(parent, null, data, EBoundVolumeType.Box, placementType);
             node.NodeData.Name = node.SceneId.ToString();
 
             node.Placement.SetTransform(in pos, in scale, in quat);
@@ -315,7 +315,7 @@ namespace EngineNS.Editor.Forms
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
         TtAnimationClipPreview AnimationClipPreview = null;
-        public async Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg, bool saveLayout)
         {
             AssetName = name;
             SkeletonAsset = await TtEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(name);

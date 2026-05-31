@@ -31,11 +31,7 @@ namespace EngineNS.Editor.Controller
                         var up = Camera.mCoreObject.GetUp();
                         var mat = EngineNS.Matrix.RotationAxis(forward, angle);
                         up = EngineNS.Vector3.TransformCoordinate(up, mat);
-                        unsafe
-                        {
-                            Camera.mCoreObject.LookAtLH(&pos, &lookAt, &up);
-                        }
-
+                        Camera.LookAtLH(pos, lookAt, up);
                     }
                     break;
                 case Graphics.Pipeline.ECameraAxis.Up:
@@ -47,18 +43,12 @@ namespace EngineNS.Editor.Controller
                         if (rotLookAt)
                         {
                             var newLookAt = pos - dir;
-                            unsafe
-                            {
-                                Camera.mCoreObject.LookAtLH(&pos, &newLookAt, &up);
-                            }
+                            Camera.LookAtLH(pos, newLookAt, up);
                         }
                         else
                         {
                             var newPos = lookAt + dir;
-                            unsafe
-                            {
-                                Camera.mCoreObject.LookAtLH(&newPos, &lookAt, &up);
-                            }
+                            Camera.LookAtLH(newPos, lookAt, up);
                         }
                     }
                     break;
@@ -72,18 +62,12 @@ namespace EngineNS.Editor.Controller
                         if (rotLookAt)
                         {
                             var newLookAt = pos - dir;
-                            unsafe
-                            {
-                                Camera.mCoreObject.LookAtLH(&pos, &newLookAt, &up);
-                            }
+                            Camera.LookAtLH(pos, newLookAt, up);
                         }
                         else
                         {
                             var newPos = lookAt + dir;
-                            unsafe
-                            {
-                                Camera.mCoreObject.LookAtLH(&newPos, &lookAt, &up);
-                            }
+                            Camera.LookAtLH(newPos, lookAt, up);
                         }
                     }
                     break;
@@ -107,7 +91,7 @@ namespace EngineNS.Editor.Controller
                             var temp = dir * step;
                             var eye = pos - temp;
                             var at = lookAt - temp;
-                            Camera.mCoreObject.LookAtLH(in eye, in at, in EngineNS.Vector3.UnitY);
+                            Camera.LookAtLH(in eye, in at, in EngineNS.Vector3.UnitY);
                         }
                         else
                         {
@@ -121,14 +105,14 @@ namespace EngineNS.Editor.Controller
                             if (step < len)
                             {
                                 var newPos = pos - dir * step;
-                                Camera.mCoreObject.LookAtLH(in newPos, in lookAt, in EngineNS.Vector3.UnitY);
+                                Camera.LookAtLH(in newPos, in lookAt, in EngineNS.Vector3.UnitY);
                             }
                             else
                             {
                                 var temp = dir * step;
                                 var eye = pos - temp;
                                 var at = lookAt - temp;
-                                Camera.mCoreObject.LookAtLH(in eye, in at, in EngineNS.Vector3.UnitY);
+                                Camera.LookAtLH(in eye, in at, in EngineNS.Vector3.UnitY);
                             }
                         }
                     }
@@ -142,14 +126,14 @@ namespace EngineNS.Editor.Controller
                             var temp = up * step;
                             var eye = pos - temp;
                             var at = lookAt - temp;
-                            Camera.mCoreObject.LookAtLH(in eye, in at, in up);
+                            Camera.LookAtLH(in eye, in at, in up);
                         }
                         else
                         {
                             var delta = up * step;
                             var newPos = pos + delta;
                             var newLookAt = lookAt + delta;
-                            Camera.mCoreObject.LookAtLH(in newPos, in newLookAt, in up);
+                            Camera.LookAtLH(in newPos, in newLookAt, in up);
                         }
                     }
                     break;
@@ -163,14 +147,14 @@ namespace EngineNS.Editor.Controller
                             var eye = pos - delta;
                             var at = lookAt - delta;
                             var up = Camera.mCoreObject.GetUp();
-                            Camera.mCoreObject.LookAtLH(in eye, in at, in up);
+                            Camera.LookAtLH(in eye, in at, in up);
                         }
                         else
                         {
                             var newPos = pos - delta;
                             var newLookAt = lookAt - delta;
                             var up = Camera.mCoreObject.GetUp();
-                            Camera.mCoreObject.LookAtLH(in newPos, in newLookAt, in up);
+                            Camera.LookAtLH(in newPos, in newLookAt, in up);
                         }
                     }
                     break;

@@ -63,7 +63,10 @@ namespace EngineNS.GamePlay.Scene
         }
         public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
-            base.OnGatherVisibleMeshes(rp);
+            if ((rp.CullFilters & TtWorld.TtVisParameter.EVisCullFilter.UtilityEditor) == 0)
+            {
+                return;
+            }
 
             if (DebugMesh != null)
                 rp.AddVisibleMesh(DebugMesh);

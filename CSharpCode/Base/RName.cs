@@ -72,7 +72,7 @@ namespace EngineNS
             if (editorAttr?.EditorType == null)
                 return;
 
-            Editor.TtAssetEditorManager.TryOpenEditor(editorAttr.EditorType, assetName, null).AddWaitTask();
+            Editor.TtAssetEditorManager.TryOpenEditor(editorAttr.EditorType, assetName, null, true).AddWaitTask();
         }
         public class PGRNameAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
         {
@@ -183,11 +183,13 @@ namespace EngineNS
                 {
                     EGui.Controls.CtrlUtility.DrawHelper(preViewStr);
                 }
-                if (!info.Readonly &&
-                    ContentBrowser.SelectedAssets.Count > 0 &&
+                if (ContentBrowser.SelectedAssets.Count > 0 &&
                     ContentBrowser.SelectedAssets[0].GetAssetName() != name)
                 {
-                    mDrawData.NewValue = ContentBrowser.SelectedAssets[0].GetAssetName();
+                    if (!info.Readonly)
+                        mDrawData.NewValue = ContentBrowser.SelectedAssets[0].GetAssetName();
+                    else
+                        Profiler.Log.WriteLine<Profiler.TtAssetGategory>(Profiler.ELogTag.Info, $"RName {info.Name}: is readonly");
                 }
                 var pos = editorStart + new Vector2(0, ImGuiAPI.GetFrameHeight() + 4);
                 ImGuiAPI.SetCursorScreenPos(in pos);

@@ -97,8 +97,21 @@ namespace NxRHI
 		cpDesc.Type = NxRHI::EBufferType::BFT_NONE;
 		cpDesc.Usage = USAGE_STAGING;
 		cpDesc.CpuAccess = CAS_READ;
-		cpDesc.RowPitch = device->GetGpuResourceAlignment()->RoundupTexturePitch(Desc.Width * GetPixelByteWidth(Desc.Format));
-		cpDesc.Size = cpDesc.RowPitch * Desc.Height;
+		auto blockSize = GetCompressBlockByteSize(Desc.Format);
+		if (blockSize == 0)
+		{
+			cpDesc.RowPitch = device->GetGpuResourceAlignment()->RoundupTexturePitch(Desc.Width * GetPixelByteWidth(Desc.Format));
+			cpDesc.Size = cpDesc.RowPitch * Desc.Height;
+		}
+		else
+		{
+			unsigned int blockW, blockH;
+			GetCompressBlockDimensions(Desc.Format, blockW, blockH);
+			auto numBlocksWide = (Desc.Width + blockW - 1) / blockW;
+			auto numBlocksHigh = (Desc.Height + blockH - 1) / blockH;
+			cpDesc.RowPitch = device->GetGpuResourceAlignment()->RoundupTexturePitch(numBlocksWide * blockSize);
+			cpDesc.Size = cpDesc.RowPitch * numBlocksHigh;
+		}
 		auto cpBuffer = device->CreateBuffer(&cpDesc);
 		if (cpDraw != nullptr)
 		{

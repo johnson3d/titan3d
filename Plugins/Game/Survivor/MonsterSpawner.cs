@@ -59,7 +59,7 @@ namespace Survivor
                 monsterNode.StateNode = stateNode;
 
                 RName monsterName = RName.ParseFrom(monsterData.Prefab);
-                var monsterPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(monsterName, false);
+                var monsterPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(spawner.GetWorld(), monsterName, false);
                 monsterPrefab.IsCollide = true;
                 var node = monsterPrefab.Placement.HostNode;
                 monsterPrefab.Placement.SetTransform(transform);

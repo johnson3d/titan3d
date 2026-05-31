@@ -97,9 +97,13 @@ namespace EngineNS.Bricks.Procedure
 
             await PreviewViewport.CreateStudioEnvironment(new BoundingBox(10, 1, 10), createFloor: false);
 
-            PreviewRoot = await viewport.World.Root.SpawnSceneActor<GamePlay.Scene.TtSubTreeRootNode>(viewport.World.Root, null, 
-                new GamePlay.Scene.TtNodeData() { Name = "PreviewRoot" },
-                GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
+            PreviewRoot = await GamePlay.Scene.TtNode.SpawnNode<GamePlay.Scene.TtSubTreeRootNode>(viewport.World.Root, async (nd)=>
+            {
+                nd.Parent = viewport.World.Root;
+                nd.Placement.Position = DVector3.Zero;
+                nd.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
+            }, new GamePlay.Scene.TtNodeData() { Name = "PreviewRoot" },
+            GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
             PreviewRoot.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleAlways);
             return true;
         }
@@ -128,7 +132,7 @@ namespace EngineNS.Bricks.Procedure
         bool IsStarting = false;
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
-        public async Thread.Async.TtTask<bool> OpenEditor(Editor.TtMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(Editor.TtMainEditorApplication mainEditor, RName name, object arg, bool saveLayout)
         {
             if (IsStarting)
                 return false;
@@ -338,7 +342,7 @@ namespace EngineNS.Bricks.Procedure
                 {
                     var lookAt = PreviewViewport.CameraController.Camera.mCoreObject.GetLookAt();
                     var up = PreviewViewport.CameraController.Camera.mCoreObject.GetUp();
-                    PreviewViewport.CameraController.Camera.mCoreObject.LookAtLH(in camPos, lookAt - saved + camPos, up);
+                    PreviewViewport.CameraController.Camera.LookAtLH(in camPos, lookAt - saved + camPos, up);
                 }
             }
             EGui.UIProxy.DockProxy.EndPanel(show);

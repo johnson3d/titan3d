@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_10540586624429571352 Type="EngineNS.GamePlay.Scene.TtPostProcessVolumeNode.TtPostProcessVolumeData@EngineCore">
+  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <BlendRadius Type="System.Single@Unknown" Order="0" />
+  <BlendWeight Type="System.Single@Unknown" Order="0" />
+  <ColorGradingSettings Type="EngineNS.Graphics.Pipeline.Common.ColorGrading.TtColorGradingSettings@EngineCore" Order="0" />
+  <EnableColorGrading Type="System.Boolean@Unknown" Order="0" />
+  <IsUnbound Type="System.Boolean@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.TtNode.ENodeStyles@EngineCore" Order="0" />
+  <Priority Type="System.Int32@Unknown" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.TtBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.TtPlacementBase@EngineCore" Order="2" />
+</Hash_10540586624429571352>

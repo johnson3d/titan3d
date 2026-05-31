@@ -156,7 +156,7 @@ namespace EngineNS.UI
         public static async TtTask<TtUINode> AddUINode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, TtUIHost uiHost, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
-            var uiNode = await scene.SpawnSceneActor<TtUINode>(parent, null, data, EBoundVolumeType.Box, placementType);
+            var uiNode = await GamePlay.Scene.TtNode.SpawnNode<TtUINode>(parent, null, data, EBoundVolumeType.Box, placementType);
             if (uiHost.AssetName != null)
                 uiNode.NodeData.Name = uiHost.AssetName.Name;
             else

@@ -98,7 +98,7 @@ namespace EngineNS.UI.Editor
             (viewport as EngineNS.Editor.TtPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
             var scene = PreviewViewport.World.Root.GetNearestParentScene();
-            mUINode = await scene.SpawnSceneActor<TtUINode>(PreviewViewport.World.Root, null, new TtUINode.TtUINodeData(),
+            mUINode = await GamePlay.Scene.TtNode.SpawnNode<TtUINode>(PreviewViewport.World.Root, null, new TtUINode.TtUINodeData(),
                 EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
             mUINode.NodeData.Name = "UI";
             mUINode.Placement.SetTransform(DVector3.Zero, Vector3.One, Quaternion.Identity);
@@ -1647,7 +1647,7 @@ namespace EngineNS.UI.Editor
         }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
-        public async Thread.Async.TtTask<bool> OpenEditor(EngineNS.Editor.TtMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(EngineNS.Editor.TtMainEditorApplication mainEditor, RName name, object arg, bool saveLayout)
         {
             AssetName = name;
             mUIHost.Children.Add(TtEngine.Instance.UIManager.LoadWithSimulateMode(AssetName));

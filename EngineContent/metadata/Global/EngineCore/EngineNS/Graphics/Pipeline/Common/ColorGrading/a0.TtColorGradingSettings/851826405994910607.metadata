@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_851826405994910607 Type="EngineNS.Graphics.Pipeline.Common.ColorGrading.TtColorGradingSettings@EngineCore">
+  <ColorContrast Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorContrastHighlights Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorContrastMidtones Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorContrastShadows Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorGain Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorGainHighlights Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorGainMidtones Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorGainShadows Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorGamma Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorGammaHighlights Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorGammaMidtones Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorGammaShadows Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorOffset Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorOffsetHighlights Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorOffsetMidtones Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorOffsetShadows Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorSaturation Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorSaturationHighlights Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorSaturationMidtones Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <ColorSaturationShadows Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <HighlightsMax Type="System.Single@Unknown" Order="0" />
+  <HighlightsMin Type="System.Single@Unknown" Order="0" />
+  <LutSize Type="System.Int32@Unknown" Order="0" />
+  <ShadowsMax Type="System.Single@Unknown" Order="0" />
+  <WhiteTemp Type="System.Single@Unknown" Order="0" />
+  <WhiteTint Type="System.Single@Unknown" Order="0" />
+</Hash_851826405994910607>

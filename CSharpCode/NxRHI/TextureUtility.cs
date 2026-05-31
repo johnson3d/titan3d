@@ -2,7 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using BCnEncoder.Decoder;
+using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
+using BCnEncoder.Shared.ImageFiles;
+using CommunityToolkit.HighPerformance;
+using EngineNS.Bricks.ImageDecoder;
 using StbImageWriteSharp;
 
 namespace EngineNS.NxRHI
@@ -539,13 +543,27 @@ namespace EngineNS.NxRHI
 
             var compactData = CopyCompactBlockData(srcData, rowPitch, width, height, format);
             var decoder = new BcDecoder();
-            var decoded = decoder.DecodeRaw(compactData, width, height, bcnFormat.Value);
 
-            // ColorRgba32 → Color4f
-            for (int i = 0; i < decoded.Length && i < layer.Pixels.Length; i++)
+            bool isBc6 = (bcnFormat.Value == CompressionFormat.Bc6U || bcnFormat.Value == CompressionFormat.Bc6S);
+            if (isBc6)
             {
-                var c = decoded[i];
-                layer.Pixels[i] = new Color4f(c.r / 255f, c.g / 255f, c.b / 255f, c.a / 255f);
+                // BC6H is HDR — must use DecodeRawHdr which returns ColorRgbFloat[]
+                var decoded = decoder.DecodeRawHdr(compactData, width, height, bcnFormat.Value);
+                for (int i = 0; i < decoded.Length && i < layer.Pixels.Length; i++)
+                {
+                    var c = decoded[i];
+                    layer.Pixels[i] = new Color4f(c.r, c.g, c.b, 1.0f);
+                }
+            }
+            else
+            {
+                // BC1–BC5, BC7: LDR decode returns ColorRgba32[]
+                var decoded = decoder.DecodeRaw(compactData, width, height, bcnFormat.Value);
+                for (int i = 0; i < decoded.Length && i < layer.Pixels.Length; i++)
+                {
+                    var c = decoded[i];
+                    layer.Pixels[i] = new Color4f(c.r / 255f, c.g / 255f, c.b / 255f, c.a / 255f);
+                }
             }
         }
 
@@ -554,17 +572,49 @@ namespace EngineNS.NxRHI
         #region Readback Methods
 
         /// <summary>
+        /// Synchronously copy a GPU texture subresource to a CPU-readable staging buffer
+        /// and fetch its data into a blob. This is the standard readback pattern:
+        /// CreateReadable → submit cpDraw → flush → FetchGpuData.
+        /// The returned FSubResourceFootPrint contains RowPitch, Width, Height, Depth, Format
+        /// as reported by the GPU driver, which should be used for correct stride-aware reading.
+        /// </summary>
+        /// <param name="texture">Source GPU texture.</param>
+        /// <param name="subResource">Subresource index to read back.</param>
+        /// <param name="blob">Output blob that will contain the raw pixel data
+        /// (prefixed with RowPitch + DepthPitch as two uint32).</param>
+        /// <param name="footPrint">Output footprint filled by CreateReadable, contains
+        /// RowPitch / Width / Height / Depth / Format / TotalSize.</param>
+        /// <returns>True if readback succeeded.</returns>
+        public static bool FetchTextureSubresource(ITexture texture, int subResource,
+            Support.TtBlobObject blob, out FSubResourceFootPrint footPrint)
+        {
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+
+            var cpDraw = rc.CreateCopyDraw();
+            var readable = texture.CreateReadable(rc.mCoreObject, subResource, cpDraw.mCoreObject);
+            footPrint = cpDraw.FootPrint;
+
+            using (var cmd = new FTransientCmd(EQueueType.QU_Default, "FetchTexSub"))
+            {
+                cmd.CmdList.PushGpuDraw(cpDraw.mCoreObject);
+            }
+            rc.GpuQueue.Flush(EQueueType.QU_Default);
+            cpDraw.Dispose();
+
+            bool ok = readable.FetchGpuData(rc.mCoreObject, 0, blob.mCoreObject);
+            readable.Dispose();
+            return ok;
+        }
+
+        /// <summary>
         /// Read back a single 2D subresource from GPU and return it as a TtTex2dLayer.
         /// Handles both uncompressed and BC block-compressed formats.
-        /// ASTC formats are not yet supported and will return null.
         /// </summary>
         private unsafe TtTextureUtility.TtTex2dLayer ReadbackSubresource2D(
             ITexture texture, uint subResource, int width, int height, EPixelFormat format)
         {
-            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var blob = new Support.TtBlobObject();
-            bool ok = texture.FetchGpuData(rc.mCoreObject, subResource, blob.mCoreObject);
-            if (!ok)
+            if (!FetchTextureSubresource(texture, (int)subResource, blob, out var footPrint))
                 return null;
 
             var layer = new TtTextureUtility.TtTex2dLayer();
@@ -573,8 +623,9 @@ namespace EngineNS.NxRHI
             layer.Pixels = new Color4f[width * height];
 
             var pData = (byte*)blob.DataPointer;
-            uint rowPitch = *(uint*)pData;
-            pData += sizeof(uint) + sizeof(uint); // skip RowPitch + DepthPitch header
+            uint rowPitch = footPrint.RowPitch;
+            // blob data starts after RowPitch + DepthPitch header (2 x uint32)
+            pData += sizeof(uint) + sizeof(uint);
 
             if (IsBlockCompressedFormat(format))
             {
@@ -650,10 +701,8 @@ namespace EngineNS.NxRHI
             var format = desc.Format;
 
             uint subResource = (uint)mipLevel;
-            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var blob = new Support.TtBlobObject();
-            bool ok = texture.FetchGpuData(rc.mCoreObject, subResource, blob.mCoreObject);
-            if (!ok)
+            if (!FetchTextureSubresource(texture, (int)subResource, blob, out var footPrint))
                 return null;
 
             var layer = new TtTextureUtility.TtTex3dLayer();
@@ -663,8 +712,9 @@ namespace EngineNS.NxRHI
             layer.Pixels = new Color4f[mipWidth * mipHeight * mipDepth];
 
             var pData = (byte*)blob.DataPointer;
-            uint rowPitch = *(uint*)pData;
-            uint depthPitch = *(uint*)(pData + sizeof(uint));
+            uint rowPitch = footPrint.RowPitch;
+            uint depthPitch = rowPitch * footPrint.Height;
+            // blob data starts after RowPitch + DepthPitch header (2 x uint32)
             pData += sizeof(uint) + sizeof(uint);
 
             if (IsBlockCompressedFormat(format))
@@ -750,6 +800,1007 @@ namespace EngineNS.NxRHI
                 result.Add(cubeLayer);
             }
             return result;
+        }
+
+        #endregion
+
+        #region SaveAssetTo2 — Readback-based texture asset saving
+
+        /// <summary>
+        /// Whether the given pixel format stores floating-point (HDR) data.
+        /// </summary>
+        private static bool IsHdrPixelFormat(EPixelFormat format)
+        {
+            switch (format)
+            {
+                case EPixelFormat.PXF_R16_FLOAT:
+                case EPixelFormat.PXF_R16G16_FLOAT:
+                case EPixelFormat.PXF_R16G16B16A16_FLOAT:
+                case EPixelFormat.PXF_R32_FLOAT:
+                case EPixelFormat.PXF_R32G32_FLOAT:
+                case EPixelFormat.PXF_R32G32B32_FLOAT:
+                case EPixelFormat.PXF_R32G32B32A32_FLOAT:
+                case EPixelFormat.PXF_BC6H_UF16:
+                case EPixelFormat.PXF_BC6H_SF16:
+                case EPixelFormat.PXF_BC6H_TYPELESS:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Convert a Color4f pixel array into a LDR TtMemImage (RGBA8, byte[]).
+        /// </summary>
+        private static StbImageSharp.TtMemImage Color4fLayerToMemImage(Color4f[] pixels, int width, int height)
+        {
+            var image = new StbImageSharp.TtMemImage();
+            image.Width = width;
+            image.Height = height;
+            image.Comp = StbImageSharp.ColorComponents.RedGreenBlueAlpha;
+            image.SourceComp = StbImageSharp.ColorComponents.RedGreenBlueAlpha;
+            image.Data = new byte[width * height * 4];
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                int idx = i * 4;
+                image.Data[idx] = (byte)MathHelper.Clamp(pixels[i].Red * 255f, 0f, 255f);
+                image.Data[idx + 1] = (byte)MathHelper.Clamp(pixels[i].Green * 255f, 0f, 255f);
+                image.Data[idx + 2] = (byte)MathHelper.Clamp(pixels[i].Blue * 255f, 0f, 255f);
+                image.Data[idx + 3] = (byte)MathHelper.Clamp(pixels[i].Alpha * 255f, 0f, 255f);
+            }
+            return image;
+        }
+
+        /// <summary>
+        /// Convert a Color4f pixel array into a HDR ImageResultFloat (RGBA float[]).
+        /// </summary>
+        private static StbImageSharp.ImageResultFloat Color4fLayerToImageFloat(Color4f[] pixels, int width, int height)
+        {
+            var image = new StbImageSharp.ImageResultFloat();
+            image.Width = width;
+            image.Height = height;
+            image.Comp = StbImageSharp.ColorComponents.RedGreenBlueAlpha;
+            image.SourceComp = StbImageSharp.ColorComponents.RedGreenBlueAlpha;
+            image.Data = new float[width * height * 4];
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                int idx = i * 4;
+                image.Data[idx] = pixels[i].Red;
+                image.Data[idx + 1] = pixels[i].Green;
+                image.Data[idx + 2] = pixels[i].Blue;
+                image.Data[idx + 3] = pixels[i].Alpha;
+            }
+            return image;
+        }
+
+        /// <summary>
+        /// Flatten a CubeArray readback (6 faces) into a single horizontal-strip image
+        /// suitable for SaveTexture (width = faceWidth * 6, height = faceHeight).
+        /// Each face is placed side by side: +X -X +Y -Y +Z -Z.
+        /// </summary>
+        private static void FlattenCubeFacesToStrip(
+            TtTextureUtility.TtTex3dLayer cubeLayer, bool isHdr,
+            out StbImageSharp.TtMemImage ldrImage,
+            out StbImageSharp.ImageResultFloat hdrImage)
+        {
+            ldrImage = null;
+            hdrImage = null;
+            int faceWidth = cubeLayer.Width;
+            int faceHeight = cubeLayer.Height;
+            int facePixelCount = faceWidth * faceHeight;
+
+            if (isHdr)
+            {
+                // Each face side by side: total width = faceWidth, height = faceHeight
+                // CubeFaces = 6, SaveTexture(HDR) handles CubeFaces via desc.CubeFaces
+                // We save each face as a separate image and let the existing pipeline handle it
+                // Actually, the existing SaveTexture uses desc.CubeFaces to iterate faces
+                // and expects the image to be a square (faceWidth x faceHeight) per face.
+                // So we flatten to faceWidth x (faceHeight * 6) vertical strip approach is wrong.
+                // Instead, we save the first face as the image and iterate faces in the save loop.
+                // However, SaveTexture doesn't accept per-face data...
+                // Best approach: create a faceWidth x faceHeight image and desc.CubeFaces = 6
+                // The existing SaveHdrMips/SaveDxtMips iterate by CubeFaces but always use the same image.
+                // For readback, we already have per-face data; we need to serialize each face individually.
+                // We'll handle this in SaveAssetTo2 directly rather than using SaveTexture.
+                hdrImage = Color4fLayerToImageFloat(cubeLayer.Pixels, faceWidth, faceHeight * 6);
+                hdrImage.Width = faceWidth;
+                hdrImage.Height = faceHeight;
+            }
+            else
+            {
+                ldrImage = Color4fLayerToMemImage(cubeLayer.Pixels, faceWidth, faceHeight * 6);
+                ldrImage.Width = faceWidth;
+                ldrImage.Height = faceHeight;
+            }
+        }
+
+        /// <summary>
+        /// Setup PicDesc based on the current SRV's texture properties and engine compress configuration.
+        /// </summary>
+        private TtPicDesc BuildPicDescFromTexture(EPixelFormat format, int width, int height, int depth, uint cubeFaces)
+        {
+            var desc = new TtPicDesc();
+            desc.Width = width;
+            desc.Height = height;
+            desc.Depth = depth;
+            desc.CubeFaces = cubeFaces;
+            desc.Format = format;
+            desc.BitNumAlpha = 8;
+            desc.BitNumRed = 8;
+            desc.BitNumGreen = 8;
+            desc.BitNumBlue = 8;
+
+            // Determine compression based on engine config
+            var compressType = TtEngine.Instance.GfxDevice.Config.TextureAssetCompressType;
+            switch (compressType)
+            {
+                case Graphics.Pipeline.TtGfxDeviceConfig.ETextureAssetCompressType.None:
+                    desc.DontCompress = true;
+                    break;
+                case Graphics.Pipeline.TtGfxDeviceConfig.ETextureAssetCompressType.DXT:
+                    desc.DontCompress = false;
+                    break;
+                case Graphics.Pipeline.TtGfxDeviceConfig.ETextureAssetCompressType.ASTC:
+                    desc.DontCompress = false;
+                    break;
+                case Graphics.Pipeline.TtGfxDeviceConfig.ETextureAssetCompressType.ETC2:
+                    desc.DontCompress = false;
+                    break;
+            }
+
+            // Non-4-aligned dimensions cannot be block-compressed
+            if (width % 4 != 0 || height % 4 != 0)
+                desc.DontCompress = true;
+
+            return desc;
+        }
+        /// <summary>
+        /// 选择 DXT 压缩格式
+        /// </summary>
+        /// <param name="desc">纹理描述符</param>
+        /// <returns>DXT 压缩格式</returns>
+        public static ETextureCompressFormat SelectDxtFormat(TtPicDesc desc)
+        {
+            // 法线贴图使用 BC5
+            if (desc.IsNormal)
+            {
+                return ETextureCompressFormat.TCF_BC5;
+            }
+
+            // 根据 Alpha 位数选择格式
+            if (desc.BitNumAlpha == 8 || desc.BitNumAlpha == 4)
+            {
+                return ETextureCompressFormat.TCF_Dxt3;
+            }
+            else if (desc.BitNumAlpha == 1)
+            {
+                return ETextureCompressFormat.TCF_Dxt1a;
+            }
+            else
+            {
+                return ETextureCompressFormat.TCF_Dxt1;
+            }
+        }
+
+        /// <summary>
+        /// 选择 ETC2 压缩格式
+        /// </summary>
+        /// <param name="desc">纹理描述符</param>
+        /// <returns>ETC2 压缩格式</returns>
+        public static ETextureCompressFormat SelectEtc2Format(TtPicDesc desc)
+        {
+            // 根据 Alpha 位数选择格式
+            if (desc.BitNumAlpha == 8 || desc.BitNumAlpha == 4)
+            {
+                return ETextureCompressFormat.TCF_Etc2_RGBA8;
+            }
+            else if (desc.BitNumAlpha == 1)
+            {
+                return ETextureCompressFormat.TCF_Etc2_RGBA1;
+            }
+            else
+            {
+                return ETextureCompressFormat.TCF_Etc2_RGB8;
+            }
+        }
+
+        /// <summary>
+        /// 选择 ASTC 压缩格式
+        /// </summary>
+        /// <param name="desc">纹理描述符</param>
+        /// <returns>ASTC 压缩格式</returns>
+        public static ETextureCompressFormat SelectAstcFormat(TtPicDesc desc)
+        {
+            // 注意：ASTC 格式需要更多配置参数
+            // 当前实现返回默认格式
+            System.Diagnostics.Debug.Assert(false, "ASTC compression needs more parameters");
+
+            // 根据 Alpha 位数选择基础格式
+            if (desc.BitNumAlpha == 8 || desc.BitNumAlpha == 4)
+            {
+                return ETextureCompressFormat.TCF_Etc2_RGBA8;  // 临时回退到 ETC2
+            }
+            else if (desc.BitNumAlpha == 1)
+            {
+                return ETextureCompressFormat.TCF_Etc2_RGBA1;
+            }
+            else
+            {
+                return ETextureCompressFormat.TCF_Etc2_RGB8;
+            }
+        }
+        public static List<ETextureCompressFormat> SelectLdrCompressFormats(TtPicDesc desc)
+        {
+            List<ETextureCompressFormat> result = new List<ETextureCompressFormat>();
+            // 如果不压缩，返回 None
+            if (desc.DontCompress)
+                return result;
+
+            // 检查引擎配置
+            var config = TtEngine.Instance?.GfxDevice.Config;
+            if (config == null)
+                return result;
+
+            if (config.TextureAssetCompressType.HasFlag(Graphics.Pipeline.TtGfxDeviceConfig.ETextureAssetCompressType.DXT))
+            {
+                result.Add(SelectDxtFormat(desc));
+            }
+            if (config.TextureAssetCompressType.HasFlag(Graphics.Pipeline.TtGfxDeviceConfig.ETextureAssetCompressType.ASTC))
+            {
+                result.Add(SelectAstcFormat(desc));
+            }
+            if (config.TextureAssetCompressType.HasFlag(Graphics.Pipeline.TtGfxDeviceConfig.ETextureAssetCompressType.ETC2))
+            {
+                result.Add(SelectEtc2Format(desc));
+            }
+            return result;
+        }
+        /// <summary>
+        /// Save a 2D layer array (including single 2D texture) into XND with mip + compression.
+        /// Each layer becomes a face node; compression follows engine config.
+        /// </summary>
+        private void SaveLayersToXnd(
+            XndNode node,
+            List<TtTextureUtility.TtTex2dLayer> layers,
+            TtPicDesc desc,
+            bool isHdr,
+            RName assetName)
+        {
+            desc.CubeFaces = (uint)layers.Count;
+            desc.MipSizes.Clear();
+            desc.BlockDimenstions.Clear();
+
+            if (isHdr)
+            {
+                desc.CompressFormat = TtTextureHelper.SelectCompressFormat(desc);
+                switch (desc.CompressFormat)
+                {
+                    case ETextureCompressFormat.TCF_None:
+                        {
+                            var hdrMipsNode = node.GetOrAddNode("HdrMips", 0, 0, true);
+                            SaveHdrMipsFromLayers(hdrMipsNode, layers, desc);
+                        }
+                        break;
+                    case ETextureCompressFormat.TCF_BC6:
+                        {
+                            var dxtMipsNode = node.GetOrAddNode("DxtMips", 0, 0, true);
+                            SaveDxtMipsFromLayers(dxtMipsNode, layers, desc, isHdr: true);
+                        }
+                        break;
+                    default:
+                        {
+                            // Fallback to uncompressed HDR
+                            desc.CompressFormat = ETextureCompressFormat.TCF_None;
+                            var hdrMipsNode = node.GetOrAddNode("HdrMips", 0, 0, true);
+                            SaveHdrMipsFromLayers(hdrMipsNode, layers, desc);
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                desc.CompressFormat = TtTextureHelper.SelectLdrCompressFormat(desc);
+                switch (desc.CompressFormat)
+                {
+                    case ETextureCompressFormat.TCF_None:
+                        {
+                            var pngMipsNode = node.GetOrAddNode("PngMips", 0, 0, true);
+                            SavePngMipsFromLayers(pngMipsNode, layers, desc);
+                        }
+                        break;
+                    default:
+                        {
+                            // DXT / ETC2 compressed
+                            var dxtMipsNode = node.GetOrAddNode("DxtMips", 0, 0, true);
+                            SaveDxtMipsFromLayers(dxtMipsNode, layers, desc, isHdr: false);
+                        }
+                        break;
+                }
+            }
+
+            TtTextureHelper.SaveDescToNode(node, desc);
+        }
+
+        /// <summary>
+        /// Save PNG mip chain from readback layers (LDR, uncompressed).
+        /// </summary>
+        private void SavePngMipsFromLayers(
+            XndNode mipsNode,
+            List<TtTextureUtility.TtTex2dLayer> layers,
+            TtPicDesc desc)
+        {
+            desc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+            if (desc.MipLevel == 0)
+                desc.MipLevel = CalcMipLevel(layers[0].Width, layers[0].Height, true, 4);
+
+            for (int faceIdx = 0; faceIdx < layers.Count; faceIdx++)
+            {
+                var faceNode = mipsNode.GetOrAddNode($"Face{faceIdx}", 0, 0, true);
+                var curImage = Color4fLayerToMemImage(layers[faceIdx].Pixels, layers[faceIdx].Width, layers[faceIdx].Height);
+
+                for (int mip = 0; mip < desc.MipLevel; mip++)
+                {
+                    using (var memStream = new System.IO.MemoryStream(curImage.Data.Length))
+                    {
+                        var writer = new StbImageWriteSharp.ImageWriter();
+                        writer.WritePng(curImage.Data, curImage.Width, curImage.Height,
+                            StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
+                        var pngData = memStream.ToArray();
+                        var attr = faceNode.GetOrAddAttribute($"PngMip{mip}", 0, 0, true);
+                        using (var ar = attr.GetWriter((ulong)memStream.Position))
+                        {
+                            ar.WriteNoSize(pngData, (int)memStream.Position);
+                        }
+                    }
+
+                    if (faceIdx == 0)
+                    {
+                        desc.MipSizes.Add(new Vector3i()
+                        {
+                            X = curImage.Width,
+                            Y = curImage.Height,
+                            Z = curImage.Width * 4
+                        });
+                    }
+
+                    int nextWidth = Math.Max(1, curImage.Width / 2);
+                    int nextHeight = Math.Max(1, curImage.Height / 2);
+                    if (nextWidth == curImage.Width && nextHeight == curImage.Height)
+                        break;
+                    curImage = StbImageSharp.ImageProcessor.GetBoxDownSampler(curImage, nextWidth, nextHeight);
+                    if (curImage == null)
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Save HDR mip chain from readback layers (uncompressed float).
+        /// </summary>
+        private unsafe void SaveHdrMipsFromLayers(
+            XndNode mipsNode,
+            List<TtTextureUtility.TtTex2dLayer> layers,
+            TtPicDesc desc)
+        {
+            desc.Format = EPixelFormat.PXF_R32G32B32A32_FLOAT;
+            if (desc.MipLevel == 0)
+                desc.MipLevel = CalcMipLevel(layers[0].Width, layers[0].Height, true, 4);
+            desc.MipLevel = Math.Max(desc.MipLevel, 1);
+
+            for (int faceIdx = 0; faceIdx < layers.Count; faceIdx++)
+            {
+                var faceNode = mipsNode.GetOrAddNode($"Face{faceIdx}", 0, 0, true);
+                var curImage = Color4fLayerToImageFloat(layers[faceIdx].Pixels, layers[faceIdx].Width, layers[faceIdx].Height);
+
+                for (int mip = 0; mip < desc.MipLevel; mip++)
+                {
+                    using (var memStream = new System.IO.MemoryStream())
+                    {
+                        var writer = new StbImageWriteSharp.ImageWriter();
+                        var writeComp = UStbImageUtility.ConvertColorComponent(curImage.Comp);
+                        fixed (void* ptr = curImage.Data)
+                        {
+                            writer.WriteHdr(ptr, curImage.Width, curImage.Height, writeComp, memStream);
+                        }
+
+                        var hdrData = memStream.ToArray();
+                        var attr = faceNode.GetOrAddAttribute($"HdrMip{mip}", 0, 0, true);
+                        using (var ar = attr.GetWriter((ulong)memStream.Position))
+                        {
+                            ar.WriteNoSize(hdrData, (int)memStream.Position);
+                        }
+                    }
+
+                    if (faceIdx == 0)
+                    {
+                        desc.MipSizes.Add(new Vector3i()
+                        {
+                            X = curImage.Width,
+                            Y = curImage.Height,
+                            Z = curImage.Width * (int)curImage.Comp * sizeof(float)
+                        });
+                    }
+
+                    int nextWidth = Math.Max(1, curImage.Width / 2);
+                    int nextHeight = Math.Max(1, curImage.Height / 2);
+                    if (nextWidth == curImage.Width && nextHeight == curImage.Height)
+                        break;
+                    curImage = StbImageSharp.ImageProcessor.GetBoxDownSampler(curImage, nextWidth, nextHeight);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Save DXT/ETC2 compressed mip chain from readback layers (BC-encoded).
+        /// </summary>
+        private void SaveDxtMipsFromLayers(
+            XndNode mipsNode,
+            List<TtTextureUtility.TtTex2dLayer> layers,
+            TtPicDesc desc,
+            bool isHdr)
+        {
+            if (isHdr)
+            {
+                // HDR BC6 compression using EncodeToRawBytesHdr (ColorRgbFloat[])
+                desc.Format = EPixelFormat.PXF_BC6H_UF16;
+                if (desc.MipLevel == 0)
+                    desc.MipLevel = CalcMipLevel(layers[0].Width, layers[0].Height, true, 4);
+
+                var encoder = new BcEncoder();
+                encoder.OutputOptions.GenerateMipMaps = true;
+                encoder.OutputOptions.Quality = CompressionQuality.BestQuality;
+                encoder.OutputOptions.Format = CompressionFormat.Bc6U;
+                encoder.OutputOptions.FileFormat = OutputFileFormat.Dds;
+
+                for (int faceIdx = 0; faceIdx < layers.Count; faceIdx++)
+                {
+                    var layer = layers[faceIdx];
+                    int sliceSize = layer.Width * layer.Height;
+                    var colorData = new ColorRgbFloat[sliceSize];
+                    for (int i = 0; i < sliceSize; i++)
+                    {
+                        colorData[i].r = layer.Pixels[i].Red;
+                        colorData[i].g = layer.Pixels[i].Green;
+                        colorData[i].b = layer.Pixels[i].Blue;
+                    }
+                    var memory2D = colorData.AsMemory().AsMemory2D(layer.Height, layer.Width);
+                    var pixelsBcnMips = encoder.EncodeToRawBytesHdr(memory2D);
+
+                    var faceNode = mipsNode.GetOrAddNode($"Face{faceIdx}", 0, 0, true);
+                    for (int mip = 0; mip < desc.MipLevel && mip < pixelsBcnMips.Length; mip++)
+                    {
+                        var pixelsBcn = pixelsBcnMips[mip];
+                        var mipSize = new Vector3i();
+                        var blockDimension = new Vector2i();
+                        encoder.CalculateMipMapSize(layer.Width, layer.Height, mip, out mipSize.X, out mipSize.Y);
+                        encoder.GetBlockCount(mipSize.X, mipSize.Y, out blockDimension.X, out blockDimension.Y);
+
+                        if (faceIdx == 0)
+                        {
+                            desc.BlockSize = encoder.GetBlockSize();
+                            desc.MipSizes.Add(mipSize);
+                            desc.BlockDimenstions.Add(blockDimension);
+                        }
+
+                        var attr = faceNode.GetOrAddAttribute($"DxtMip{mip}", 0, 0, true);
+                        using (var ar = attr.GetWriter((ulong)pixelsBcn.Length))
+                        {
+                            ar.WriteNoSize(pixelsBcn, pixelsBcn.Length);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // LDR DXT/ETC2 compression
+                var encoder = new BCnEncoder.Encoder.BcEncoder();
+                encoder.OutputOptions.GenerateMipMaps = true;
+                encoder.OutputOptions.Quality = CompressionQuality.Balanced;
+                encoder.OutputOptions.FileFormat = OutputFileFormat.Dds;
+
+                bool isKtx = false;
+                switch (desc.CompressFormat)
+                {
+                    case ETextureCompressFormat.TCF_Dxt1:
+                        desc.Format = desc.sRGB ? EPixelFormat.PXF_BC1_UNORM_SRGB : EPixelFormat.PXF_BC1_UNORM;
+                        encoder.OutputOptions.Format = CompressionFormat.Bc1;
+                        break;
+                    case ETextureCompressFormat.TCF_Dxt1a:
+                        desc.Format = desc.sRGB ? EPixelFormat.PXF_BC1_UNORM_SRGB : EPixelFormat.PXF_BC1_UNORM;
+                        encoder.OutputOptions.Format = CompressionFormat.Bc1WithAlpha;
+                        break;
+                    case ETextureCompressFormat.TCF_Dxt3:
+                        desc.Format = desc.sRGB ? EPixelFormat.PXF_BC2_UNORM_SRGB : EPixelFormat.PXF_BC2_UNORM;
+                        encoder.OutputOptions.Format = CompressionFormat.Bc2;
+                        break;
+                    case ETextureCompressFormat.TCF_Dxt5:
+                        desc.Format = desc.sRGB ? EPixelFormat.PXF_BC3_UNORM_SRGB : EPixelFormat.PXF_BC3_UNORM;
+                        encoder.OutputOptions.Format = CompressionFormat.Bc3;
+                        break;
+                    case ETextureCompressFormat.TCF_BC5:
+                        desc.Format = EPixelFormat.PXF_BC5_UNORM;
+                        encoder.OutputOptions.Format = CompressionFormat.Bc5;
+                        break;
+                    case ETextureCompressFormat.TCF_Etc2_RGB8:
+                        desc.Format = desc.sRGB ? EPixelFormat.PXF_ETC2_SRGB8 : EPixelFormat.PXF_ETC2_RGB8;
+                        encoder.OutputOptions.Format = CompressionFormat.Atc;
+                        isKtx = false;
+                        break;
+                    case ETextureCompressFormat.TCF_Etc2_RGBA1:
+                        desc.Format = desc.sRGB ? EPixelFormat.PXF_ETC2_SRGBA1 : EPixelFormat.PXF_ETC2_RGBA1;
+                        encoder.OutputOptions.Format = CompressionFormat.AtcExplicitAlpha;
+                        isKtx = false;
+                        break;
+                    case ETextureCompressFormat.TCF_Etc2_RGBA8:
+                        desc.Format = desc.sRGB ? EPixelFormat.PXF_ETC2_SRGBA8 : EPixelFormat.PXF_ETC2_RGBA8;
+                        encoder.OutputOptions.Format = CompressionFormat.AtcInterpolatedAlpha;
+                        isKtx = false;
+                        break;
+                    default:
+                        desc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+                        encoder.OutputOptions.Format = CompressionFormat.Bc1;
+                        break;
+                }
+
+                if (desc.MipLevel == 0)
+                    desc.MipLevel = CalcMipLevel(layers[0].Width, layers[0].Height, true, 4);
+
+                for (int faceIdx = 0; faceIdx < layers.Count; faceIdx++)
+                {
+                    var curImage = Color4fLayerToMemImage(layers[faceIdx].Pixels, layers[faceIdx].Width, layers[faceIdx].Height);
+                    var faceNode = mipsNode.GetOrAddNode($"Face{faceIdx}", 0, 0, true);
+
+                    var pixelFormat = PixelFormat.Rgba32;
+                    var taskArray = new System.Threading.Tasks.Task<byte[]>[desc.MipLevel];
+                    for (int mip = 0; mip < desc.MipLevel; mip++)
+                    {
+                        taskArray[mip] = encoder.EncodeToRawBytesAsync(
+                            curImage.Data, curImage.Width, curImage.Height, pixelFormat, mip);
+                    }
+                    System.Threading.Tasks.Task.WaitAll(taskArray);
+
+                    for (int mip = 0; mip < desc.MipLevel; mip++)
+                    {
+                        var pixelsBcn = taskArray[mip].Result;
+                        var mipSize = new Vector3i();
+                        var blockDimension = new Vector2i();
+                        encoder.CalculateMipMapSize(curImage.Width, curImage.Height, mip, out mipSize.X, out mipSize.Y);
+                        encoder.GetBlockCount(mipSize.X, mipSize.Y, out blockDimension.X, out blockDimension.Y);
+
+                        if (faceIdx == 0)
+                        {
+                            desc.BlockSize = encoder.GetBlockSize();
+                            desc.MipSizes.Add(mipSize);
+                            desc.BlockDimenstions.Add(blockDimension);
+                        }
+
+                        string attrName = isKtx ? $"EtcMip{mip}" : $"DxtMip{mip}";
+                        var attr = faceNode.GetOrAddAttribute(attrName, 0, 0, true);
+                        using (var ar = attr.GetWriter((ulong)pixelsBcn.Length))
+                        {
+                            ar.WriteNoSize(pixelsBcn, pixelsBcn.Length);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Save 3D texture layers into XND with per-slice mip chains.
+        /// </summary>
+        private unsafe void Save3DLayerToXnd(
+            XndNode node,
+            TtTextureUtility.TtTex3dLayer layer3d,
+            TtPicDesc desc,
+            bool isHdr)
+        {
+            desc.MipSizes.Clear();
+            desc.BlockDimenstions.Clear();
+
+            if (desc.MipLevel == 0)
+                desc.MipLevel = CalcMipLevel(
+                    Math.Min(layer3d.Width, Math.Min(layer3d.Height, layer3d.Depth)),
+                    Math.Min(layer3d.Width, Math.Min(layer3d.Height, layer3d.Depth)),
+                    true, 4);
+            desc.MipLevel = Math.Max(desc.MipLevel, 1);
+
+            if (isHdr)
+            {
+                desc.CompressFormat = TtTextureHelper.SelectCompressFormat(desc);
+                if (desc.CompressFormat == ETextureCompressFormat.TCF_None)
+                {
+                    desc.Format = EPixelFormat.PXF_R32G32B32A32_FLOAT;
+                    var hdrMipsNode = node.GetOrAddNode("HdrMips", 0, 0, true);
+                    var faceNode = hdrMipsNode.GetOrAddNode("Face0", 0, 0, true);
+                    var depthSlicesNode = faceNode.GetOrAddNode("DepthSlices", 0, 0, true);
+
+                    // Generate mip chains: Mip0 from original, subsequent mips from downsampled 3D
+                    var sourceMip = layer3d;
+                    for (int mip = 0; mip < desc.MipLevel; mip++)
+                    {
+                        int mipDepth = sourceMip.Depth;
+                        var mipNode = depthSlicesNode.GetOrAddNode($"Mip{mip}", 0, 0, true);
+
+                        for (int d = 0; d < mipDepth; d++)
+                        {
+                            int slicePixelCount = sourceMip.Width * sourceMip.Height;
+                            var slicePixels = new Color4f[slicePixelCount];
+                            Array.Copy(sourceMip.Pixels, d * slicePixelCount, slicePixels, 0, slicePixelCount);
+                            var sliceImage = Color4fLayerToImageFloat(slicePixels, sourceMip.Width, sourceMip.Height);
+
+                            using (var memStream = new System.IO.MemoryStream())
+                            {
+                                var writer = new StbImageWriteSharp.ImageWriter();
+                                var writeComp = UStbImageUtility.ConvertColorComponent(sliceImage.Comp);
+                                fixed (void* ptr = sliceImage.Data)
+                                {
+                                    writer.WriteHdr(ptr, sliceImage.Width, sliceImage.Height, writeComp, memStream);
+                                }
+                                var hdrData = memStream.ToArray();
+                                var attr = mipNode.GetOrAddAttribute($"HdrMipSlice{d}", 0, 0, true);
+                                using (var ar = attr.GetWriter((ulong)memStream.Position))
+                                {
+                                    ar.WriteNoSize(hdrData, (int)memStream.Position);
+                                }
+                            }
+
+                            if (d == 0)
+                            {
+                                desc.MipSizes.Add(new Vector3i()
+                                {
+                                    X = sourceMip.Width,
+                                    Y = sourceMip.Height,
+                                    Z = mipDepth
+                                });
+                            }
+                        }
+
+                        // Generate next mip level
+                        int nextW = Math.Max(1, sourceMip.Width / 2);
+                        int nextH = Math.Max(1, sourceMip.Height / 2);
+                        int nextD = Math.Max(1, sourceMip.Depth / 2);
+                        if (nextW == sourceMip.Width && nextH == sourceMip.Height && nextD == sourceMip.Depth)
+                            break;
+                        sourceMip = TtTextureUtility.GenerateMipLayer3D(sourceMip, nextW, nextH, nextD);
+                    }
+                }
+                else
+                {
+                    // BC6 compressed 3D texture: save per-slice as DXT using EncodeToRawBytesHdr
+                    desc.Format = EPixelFormat.PXF_BC6H_UF16;
+                    var dxtMipsNode = node.GetOrAddNode("DxtMips", 0, 0, true);
+                    var faceNode = dxtMipsNode.GetOrAddNode("Face0", 0, 0, true);
+                    var depthSlicesNode = faceNode.GetOrAddNode("DepthSlices", 0, 0, true);
+
+                    var encoder = new BcEncoder();
+                    encoder.OutputOptions.GenerateMipMaps = false;
+                    encoder.OutputOptions.Quality = CompressionQuality.BestQuality;
+                    encoder.OutputOptions.Format = CompressionFormat.Bc6U;
+                    encoder.OutputOptions.FileFormat = OutputFileFormat.Dds;
+
+                    var sourceMip = layer3d;
+                    for (int mip = 0; mip < desc.MipLevel; mip++)
+                    {
+                        int mipDepth = sourceMip.Depth;
+                        var mipNode = depthSlicesNode.GetOrAddNode($"Mip{mip}", 0, 0, true);
+
+                        for (int d = 0; d < mipDepth; d++)
+                        {
+                            int slicePixelCount = sourceMip.Width * sourceMip.Height;
+                            var colorData = new ColorRgbFloat[slicePixelCount];
+                            int baseOffset = d * slicePixelCount;
+                            for (int i = 0; i < slicePixelCount; i++)
+                            {
+                                colorData[i].r = sourceMip.Pixels[baseOffset + i].Red;
+                                colorData[i].g = sourceMip.Pixels[baseOffset + i].Green;
+                                colorData[i].b = sourceMip.Pixels[baseOffset + i].Blue;
+                            }
+                            var memory2D = colorData.AsMemory().AsMemory2D(sourceMip.Height, sourceMip.Width);
+                            var pixelsBcn = encoder.EncodeToRawBytesHdr(memory2D, 0,
+                                out int mipW, out int mipH);
+
+                            var attr = mipNode.GetOrAddAttribute($"DxtMipSlice{d}", 0, 0, true);
+                            using (var ar = attr.GetWriter((ulong)pixelsBcn.Length))
+                            {
+                                ar.WriteNoSize(pixelsBcn, pixelsBcn.Length);
+                            }
+
+                            if (d == 0)
+                            {
+                                var blockDimension = new Vector2i();
+                                encoder.GetBlockCount(mipW, mipH,
+                                    out blockDimension.X, out blockDimension.Y);
+                                desc.BlockSize = encoder.GetBlockSize();
+                                desc.MipSizes.Add(new Vector3i()
+                                {
+                                    X = sourceMip.Width,
+                                    Y = sourceMip.Height,
+                                    Z = mipDepth
+                                });
+                                desc.BlockDimenstions.Add(blockDimension);
+                            }
+                        }
+
+                        int nextW = Math.Max(1, sourceMip.Width / 2);
+                        int nextH = Math.Max(1, sourceMip.Height / 2);
+                        int nextD = Math.Max(1, sourceMip.Depth / 2);
+                        if (nextW == sourceMip.Width && nextH == sourceMip.Height && nextD == sourceMip.Depth)
+                            break;
+                        sourceMip = TtTextureUtility.GenerateMipLayer3D(sourceMip, nextW, nextH, nextD);
+                    }
+                }
+            }
+            else
+            {
+                // LDR 3D texture
+                desc.CompressFormat = TtTextureHelper.SelectLdrCompressFormat(desc);
+                if (desc.CompressFormat == ETextureCompressFormat.TCF_None)
+                {
+                    desc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+                    var pngMipsNode = node.GetOrAddNode("PngMips", 0, 0, true);
+                    var faceNode = pngMipsNode.GetOrAddNode("Face0", 0, 0, true);
+                    var depthSlicesNode = faceNode.GetOrAddNode("DepthSlices", 0, 0, true);
+
+                    var sourceMip = layer3d;
+                    for (int mip = 0; mip < desc.MipLevel; mip++)
+                    {
+                        int mipDepth = sourceMip.Depth;
+                        var mipNode = depthSlicesNode.GetOrAddNode($"Mip{mip}", 0, 0, true);
+
+                        for (int d = 0; d < mipDepth; d++)
+                        {
+                            int slicePixelCount = sourceMip.Width * sourceMip.Height;
+                            var slicePixels = new Color4f[slicePixelCount];
+                            Array.Copy(sourceMip.Pixels, d * slicePixelCount, slicePixels, 0, slicePixelCount);
+                            var sliceImage = Color4fLayerToMemImage(slicePixels, sourceMip.Width, sourceMip.Height);
+
+                            using (var memStream = new System.IO.MemoryStream(sliceImage.Data.Length))
+                            {
+                                var writer = new StbImageWriteSharp.ImageWriter();
+                                writer.WritePng(sliceImage.Data, sliceImage.Width, sliceImage.Height,
+                                    StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
+                                var pngData = memStream.ToArray();
+                                var attr = mipNode.GetOrAddAttribute($"PngMipSlice{d}", 0, 0, true);
+                                using (var ar = attr.GetWriter((ulong)memStream.Position))
+                                {
+                                    ar.WriteNoSize(pngData, (int)memStream.Position);
+                                }
+                            }
+
+                            if (d == 0)
+                            {
+                                desc.MipSizes.Add(new Vector3i()
+                                {
+                                    X = sourceMip.Width,
+                                    Y = sourceMip.Height,
+                                    Z = mipDepth
+                                });
+                            }
+                        }
+
+                        int nextW = Math.Max(1, sourceMip.Width / 2);
+                        int nextH = Math.Max(1, sourceMip.Height / 2);
+                        int nextD = Math.Max(1, sourceMip.Depth / 2);
+                        if (nextW == sourceMip.Width && nextH == sourceMip.Height && nextD == sourceMip.Depth)
+                            break;
+                        sourceMip = TtTextureUtility.GenerateMipLayer3D(sourceMip, nextW, nextH, nextD);
+                    }
+                }
+                else
+                {
+                    // Block-compressed LDR 3D: save per-slice with DXT
+                    var dxtMipsNode = node.GetOrAddNode("DxtMips", 0, 0, true);
+                    var faceNode = dxtMipsNode.GetOrAddNode("Face0", 0, 0, true);
+                    var depthSlicesNode = faceNode.GetOrAddNode("DepthSlices", 0, 0, true);
+
+                    // Set pixel format based on compress format
+                    switch (desc.CompressFormat)
+                    {
+                        case ETextureCompressFormat.TCF_Dxt1:
+                            desc.Format = desc.sRGB ? EPixelFormat.PXF_BC1_UNORM_SRGB : EPixelFormat.PXF_BC1_UNORM;
+                            break;
+                        case ETextureCompressFormat.TCF_Dxt3:
+                            desc.Format = desc.sRGB ? EPixelFormat.PXF_BC2_UNORM_SRGB : EPixelFormat.PXF_BC2_UNORM;
+                            break;
+                        case ETextureCompressFormat.TCF_Dxt5:
+                            desc.Format = desc.sRGB ? EPixelFormat.PXF_BC3_UNORM_SRGB : EPixelFormat.PXF_BC3_UNORM;
+                            break;
+                        case ETextureCompressFormat.TCF_BC5:
+                            desc.Format = EPixelFormat.PXF_BC5_UNORM;
+                            break;
+                        default:
+                            desc.Format = desc.sRGB ? EPixelFormat.PXF_BC1_UNORM_SRGB : EPixelFormat.PXF_BC1_UNORM;
+                            break;
+                    }
+
+                    var encoder = new BCnEncoder.Encoder.BcEncoder();
+                    encoder.OutputOptions.GenerateMipMaps = false;
+                    encoder.OutputOptions.Quality = CompressionQuality.Balanced;
+                    switch (desc.CompressFormat)
+                    {
+                        case ETextureCompressFormat.TCF_Dxt1:
+                            encoder.OutputOptions.Format = CompressionFormat.Bc1;
+                            break;
+                        case ETextureCompressFormat.TCF_Dxt3:
+                            encoder.OutputOptions.Format = CompressionFormat.Bc2;
+                            break;
+                        case ETextureCompressFormat.TCF_Dxt5:
+                            encoder.OutputOptions.Format = CompressionFormat.Bc3;
+                            break;
+                        case ETextureCompressFormat.TCF_BC5:
+                            encoder.OutputOptions.Format = CompressionFormat.Bc5;
+                            break;
+                        default:
+                            encoder.OutputOptions.Format = CompressionFormat.Bc1;
+                            break;
+                    }
+
+                    var sourceMip = layer3d;
+                    for (int mip = 0; mip < desc.MipLevel; mip++)
+                    {
+                        int mipDepth = sourceMip.Depth;
+                        var mipNode = depthSlicesNode.GetOrAddNode($"Mip{mip}", 0, 0, true);
+
+                        for (int d = 0; d < mipDepth; d++)
+                        {
+                            int slicePixelCount = sourceMip.Width * sourceMip.Height;
+                            var slicePixels = new Color4f[slicePixelCount];
+                            Array.Copy(sourceMip.Pixels, d * slicePixelCount, slicePixels, 0, slicePixelCount);
+                            var sliceImage = Color4fLayerToMemImage(slicePixels, sourceMip.Width, sourceMip.Height);
+
+                            var pixelsBcn = encoder.EncodeToRawBytes(
+                                sliceImage.Data.AsSpan(), sliceImage.Width, sliceImage.Height,
+                                PixelFormat.Rgba32, 0,
+                                out int mipW, out int mipH);
+
+                            var attr = mipNode.GetOrAddAttribute($"DxtMipSlice{d}", 0, 0, true);
+                            using (var ar = attr.GetWriter((ulong)pixelsBcn.Length))
+                            {
+                                ar.WriteNoSize(pixelsBcn, pixelsBcn.Length);
+                            }
+
+                            if (d == 0)
+                            {
+                                var blockDimension = new Vector2i();
+                                encoder.GetBlockCount(sourceMip.Width, sourceMip.Height,
+                                    out blockDimension.X, out blockDimension.Y);
+                                desc.BlockSize = encoder.GetBlockSize();
+                                desc.MipSizes.Add(new Vector3i()
+                                {
+                                    X = sourceMip.Width,
+                                    Y = sourceMip.Height,
+                                    Z = mipDepth
+                                });
+                                desc.BlockDimenstions.Add(blockDimension);
+                            }
+                        }
+
+                        int nextW = Math.Max(1, sourceMip.Width / 2);
+                        int nextH = Math.Max(1, sourceMip.Height / 2);
+                        int nextD = Math.Max(1, sourceMip.Depth / 2);
+                        if (nextW == sourceMip.Width && nextH == sourceMip.Height && nextD == sourceMip.Depth)
+                            break;
+                        sourceMip = TtTextureUtility.GenerateMipLayer3D(sourceMip, nextW, nextH, nextD);
+                    }
+                }
+            }
+
+            TtTextureHelper.SaveDescToNode(node, desc);
+        }
+
+        /// <summary>
+        /// Save this SRV's texture data as a texture asset by reading back from GPU.
+        /// Supports 2D, 2DArray, 3D, and CubeMap textures.
+        /// Compression is determined by TtEngine.Instance.GfxDevice.Config.TextureAssetCompressType.
+        /// Intended to replace the old SaveAssetTo that requires original source images.
+        /// </summary>
+        /// <param name="name">The RName for the asset to save.</param>
+        /// <returns>True if save succeeded.</returns>
+        public void SaveAssetTo(RName name)
+        {
+            var ameta = this.GetAMeta() as TtSrViewAMeta;
+            if (ameta != null)
+            {
+                UpdateAMetaReferences(ameta);
+                ameta.SaveAMeta(this);
+            }
+
+            var texture = GetTexture();
+            if (!texture.IsValidPointer)
+            {
+                Profiler.Log.WriteLine<Profiler.TtAssetGategory>(Profiler.ELogTag.Error, $"Failed to save asset{name}: texture is null or invalid.");
+                return;
+            }
+
+            var texDesc = texture.Desc;
+            var format = texDesc.Format;
+            int width = (int)texDesc.Width;
+            int height = (int)texDesc.Height;
+            int depth = (int)texDesc.Depth;
+            bool isHdr = IsHdrPixelFormat(format);
+
+            var srvType = mCoreObject.Desc.Type;
+
+            using (var xnd = new IO.TtXndHolder("TtSrView", 0, 0))
+            {
+                bool saveResult = false;
+
+                switch (srvType)
+                {
+                    case ESrvType.ST_TextureCube:
+                        saveResult = SaveCubeAsset(xnd.RootNode.mCoreObject, format, width, height, isHdr, name);
+                        break;
+
+                    case ESrvType.ST_Texture3D:
+                        saveResult = Save3DAsset(xnd.RootNode.mCoreObject, format, width, height, depth, isHdr, name);
+                        break;
+
+                    default: // ST_Texture2D — may be single 2D or 2DArray
+                        saveResult = Save2DAsset(xnd.RootNode.mCoreObject, format, width, height, texDesc.ArraySize, isHdr, name);
+                        break;
+                }
+
+                if (!saveResult)
+                {
+                    Profiler.Log.WriteLine<Profiler.TtAssetGategory>(Profiler.ELogTag.Error, $"Failed to save asset{name}: saveResult is false.");
+                    return;
+                }
+
+                xnd.SaveXnd(name.Address);
+                TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                TtEngine.Instance.SourceControlModule.AddFile(name.Address);
+            }
+        }
+
+        private bool SaveCubeAsset(XndNode node, EPixelFormat format, int width, int height, bool isHdr, RName assetName)
+        {
+            var cubeList = ReadbackTexCubeArray(0);
+            if (cubeList == null || cubeList.Count == 0)
+                return false;
+
+            // Take first cube (most common case; CubeArray with multiple cubes is rare for asset saving)
+            var cubeLayer = cubeList[0];
+
+            // Convert 6-face cube into a list of 6 TtTex2dLayer (one per face)
+            int facePixelCount = cubeLayer.Width * cubeLayer.Height;
+            var faceLayers = new List<TtTextureUtility.TtTex2dLayer>(6);
+            for (int face = 0; face < 6; face++)
+            {
+                var faceLayer = new TtTextureUtility.TtTex2dLayer();
+                faceLayer.Width = cubeLayer.Width;
+                faceLayer.Height = cubeLayer.Height;
+                faceLayer.Pixels = new Color4f[facePixelCount];
+                Array.Copy(cubeLayer.Pixels, face * facePixelCount, faceLayer.Pixels, 0, facePixelCount);
+                faceLayers.Add(faceLayer);
+            }
+
+            var desc = BuildPicDescFromTexture(format, width, height, 0, 6);
+            SaveLayersToXnd(node, faceLayers, desc, isHdr, assetName);
+            return true;
+        }
+
+        private bool Save3DAsset(XndNode node, EPixelFormat format, int width, int height, int depth, bool isHdr, RName assetName)
+        {
+            var layer3d = ReadbackTex3D(0);
+            if (layer3d == null)
+                return false;
+
+            var desc = BuildPicDescFromTexture(format, width, height, depth, 1);
+            Save3DLayerToXnd(node, layer3d, desc, isHdr);
+            return true;
+        }
+
+        private bool Save2DAsset(XndNode node, EPixelFormat format, int width, int height, uint arraySize, bool isHdr, RName assetName)
+        {
+            var layers = ReadbackTex2DArray(0);
+            if (layers == null || layers.Count == 0)
+                return false;
+
+            int cubeFaces = (int)arraySize;
+            var desc = BuildPicDescFromTexture(format, width, height, 0, (uint)cubeFaces);
+            SaveLayersToXnd(node, layers, desc, isHdr, assetName);
+            return true;
         }
 
         #endregion

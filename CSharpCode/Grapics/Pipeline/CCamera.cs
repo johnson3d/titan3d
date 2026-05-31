@@ -1,3 +1,5 @@
+using EngineNS.BehaviorTree.Composite;
+using EngineNS.GamePlay;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -33,6 +35,48 @@ namespace EngineNS.Graphics.Pipeline
             var sphere = new DBoundingSphere(ct, (float)aabb.GetMaxSide());
             AutoZoom(in sphere, zoomTimeInSecond, bOptZRange);
         }
+        FRotator mEuler;
+        public FRotator Euler
+        {
+            get => mEuler;
+        }
+        public Quaternion YawFaceToCameraDirection
+        {
+            get
+            {
+                return Quaternion.RotationAxis(Vector3.Up, Euler.Yaw);
+            }
+        }
+        public Quaternion FreeFaceToCameraDirection
+        {
+            get
+            {
+                var euler = Euler;
+                euler.Roll = 0;
+                return Quaternion.FromEuler(euler);
+            }
+        }
+        public Quaternion GetYawFaceToCamera(DVector3 objPos)
+        {
+            var camPos = GetPosition();
+            var dir = new Vector3((float)(camPos.X - objPos.X), 0, (float)(camPos.Z - objPos.Z));
+            var yawAngle = (float)Math.Atan2(dir.X, dir.Z);
+            return Quaternion.RotationAxis(Vector3.Up, yawAngle);
+        }
+        public Quaternion GetFreeFaceToCamera(DVector3 objPos)
+        {
+            var camPos = GetPosition();
+            var dir = new Vector3((float)(camPos.X - objPos.X), (float)(camPos.Y - objPos.Y), (float)(camPos.Z - objPos.Z));
+            var length = dir.Length();
+            if (length < MathHelper.Epsilon)
+                return Quaternion.Identity;
+            dir /= length;
+            var euler = new FRotator();
+            euler.Yaw = (float)Math.Atan2(dir.X, dir.Z);
+            euler.Pitch = -(float)Math.Asin(dir.Y);
+            euler.Roll = 0;
+            return Quaternion.FromEuler(in euler);
+        }
         DVector3 TargetEye;
         DVector3 TargetLookAt;
         Vector3 TargetUp;
@@ -51,7 +95,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             if (MathHelper.Abs(zoomTimeInSecond) <= MathHelper.Epsilon)
             {
-                mCoreObject.LookAtLH(eye, sphere.Center, in up);
+                LookAtLH(eye, sphere.Center, in up);
                 TtEngine.Instance.TickableManager.RemoveTickable(this);
             }
             else
@@ -66,12 +110,16 @@ namespace EngineNS.Graphics.Pipeline
                 TtEngine.Instance.TickableManager.AddTickable(this);
             }
         }
-        public float GetScaleWithFixSizeInScreen(in DVector3 position, float screenSize)
+        public float GetScaleWithFixSizeInScreen(in DVector3 position, float screenSize, float divValue = -1)
         {
             Vector3 dir = new Vector3(position - mCoreObject.GetPosition());
             var distance = Vector3.Dot(in dir, mCoreObject.GetDirection());
             var sizeInScreen = 0.5f * MathF.Tan(0.5f * mCoreObject.mFov) * distance;
-            return sizeInScreen * screenSize / 400;
+            if (divValue < 0)
+            {
+                divValue = mCoreObject.mWidth;
+            }
+            return sizeInScreen * screenSize / divValue;
         }
         public void SetZRange(float zNear = 0.3f, float zFar = 1000.0f)
         {
@@ -201,6 +249,8 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     mCoreObject.LookAtLH(pinned_eye, pinned_lookAt, pinned_up);
                 }
+                var quat = Quaternion.RotationMatrix(GetViewMatrix());
+                mEuler = quat.ToEuler();
             }
         }
         public bool GetPickRay(ref EngineNS.Vector3 pvPickRay, float x, float y, float sw, float sh)
@@ -347,7 +397,7 @@ namespace EngineNS.Graphics.Pipeline
                     eyeUp = TargetUp;
                 }
 
-                mCoreObject.LookAtLH(in eyePos, in eyeLookAt, in eyeUp);
+                LookAtLH(eyePos, eyeLookAt, in eyeUp);
                 mZoomTime -= ellapseSecond;
                 if ((deltaE.X <= 0 && deltaE.Y <= 0 && deltaE.Z <= 0 &&
                      deltaL.X <= 0 && deltaL.Y <= 0 && deltaL.Z <= 0 &&
@@ -355,7 +405,7 @@ namespace EngineNS.Graphics.Pipeline
                      mZoomTime <= 0)
                 {
                     mZoomTime = 0;
-                    mCoreObject.LookAtLH(in TargetEye, in TargetLookAt, in TargetUp);
+                    LookAtLH(TargetEye, TargetLookAt, in TargetUp);
                     TtEngine.Instance.TickableManager.RemoveTickable(this);
                 }
             }

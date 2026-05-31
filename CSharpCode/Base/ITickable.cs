@@ -20,12 +20,16 @@ namespace EngineNS
         public object Parameter;
     }
 
-    public interface IMemberTickable
+    public interface INotifyHost
+    {
+        void OnHostNotify(object host, in FHostNotify notify);
+    }
+
+    public interface IMemberTickable : INotifyHost
     {
         Thread.Async.TtTask<bool> Initialize(object host);
         void Cleanup(object host);
         void TickLogic(object host, float ellapse);
-        void OnHostNotify(object host, in FHostNotify notify);
     }
     public class TtMemberTickables
     {

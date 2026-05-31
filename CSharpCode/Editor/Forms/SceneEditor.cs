@@ -126,6 +126,7 @@ namespace EngineNS.Editor.Forms
                     uNode.Selected = false;
                     HostEditor.mWorldOutliner.SelectedNodes.Remove(uNode);
                 }
+                Axis?.SetSelectedNodes(HostEditor.mWorldOutliner.SelectedNodes);
             }
             public override void OnHitproxySelectedMulti(bool clearPre, params IProxiable[] proxies)
             {
@@ -235,6 +236,7 @@ namespace EngineNS.Editor.Forms
                     //}
                 }
                 HostEditor.NodeInspector.Target = HostEditor.mWorldOutliner.SelectedNodes; //proxies;
+                Axis?.SetSelectedNodes(HostEditor.mWorldOutliner.SelectedNodes);
             }
 
             // 视口里按 Esc 清空选择 (Unity / Godot / Blender 通行约定)。
@@ -288,6 +290,8 @@ namespace EngineNS.Editor.Forms
 
             if (NodeInspector != null)
                 NodeInspector.Target = null;
+
+            PreviewViewport?.Axis?.SetSelectedNodes(mWorldOutliner?.SelectedNodes);
         }
         [Category("Option")]
         [ReadOnly(true)]
@@ -453,40 +457,87 @@ namespace EngineNS.Editor.Forms
             //mainEditor.AppendToMainMenu(mMenuItems.ToArray());
         }
 
+        protected void DrawMainMenuBar()
+        {
+            if (ImGuiAPI.BeginMenuBar())
+            {
+                var drawList = ImGuiAPI.GetWindowDrawList();
+                for (int i = 0; i < mMenuItems.Count; i++)
+                    mMenuItems[i].OnDraw(in drawList, in Support.TtAnyPointer.Default);
+                ImGuiAPI.EndMenuBar();
+            }
+        }
+
         protected class PlaceItemData
         {
             public string Name;
-            public string Description;
-            public string Icon;
-            public Action<PlaceItemData> DropAction;
+            public string FilterStrings;
+            public Rtti.TtClassMeta NodeClassMeta;
 
-            public PlaceItemData Parent;
             public List<PlaceItemData> Children = new List<PlaceItemData>();
+
+            public bool MatchFilter(string filter)
+            {
+                if (string.IsNullOrEmpty(filter))
+                    return true;
+                if (Name != null && Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
+                    return true;
+                if (FilterStrings != null && FilterStrings.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
+                    return true;
+                // 分类节点：只要有任一子节点匹配就显示
+                for (int i = 0; i < Children.Count; i++)
+                {
+                    if (Children[i].MatchFilter(filter))
+                        return true;
+                }
+                return false;
+            }
         }
-        List<PlaceItemData> mPlaceItems = new List<PlaceItemData>();
+
+        // 按第一级菜单路径分类，key = 分类名, value = 该分类下所有可放置节点
+        List<PlaceItemData> mPlaceCategories = new List<PlaceItemData>();
+        // 扁平列表，搜索时使用
+        List<PlaceItemData> mAllPlaceItems = new List<PlaceItemData>();
+
         void InitPlaceItems()
         {
-            mPlaceItems.Clear();
-            var shapesItem = new PlaceItemData()
+            mPlaceCategories.Clear();
+            mAllPlaceItems.Clear();
+
+            var categoryMap = new Dictionary<string, PlaceItemData>();
+
+            var typeDesc = Rtti.TtTypeDescGetter<TtNode>.TypeDesc;
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
+            var subClasses = meta.SubClasses;
+            foreach (var classMeta in subClasses)
             {
-                Name = "Shapes",
-            };
-            mPlaceItems.Add(shapesItem);
-            var planeItem = new PlaceItemData()
-            {
-                Name = "Plane",
-                Parent = shapesItem,
-                DropAction = async (data)=>
+                var atts = classMeta.ClassType.SystemType.GetCustomAttributes(typeof(Bricks.CodeBuilder.ContextMenuAttribute), inherit: false);
+                if (atts.Length == 0)
+                    continue;
+                var att = atts[0] as Bricks.CodeBuilder.ContextMenuAttribute;
+                if (!att.HasKeyString(TtNode.EditorKeyword))
+                    continue;
+
+                // MenuPaths[0] 是分类（如 "Graphics"），最后一个是节点显示名
+                string categoryName = att.MenuPaths.Length > 1 ? att.MenuPaths[0] : "General";
+                string nodeName = att.MenuPaths[att.MenuPaths.Length - 1];
+
+                if (!categoryMap.TryGetValue(categoryName, out var category))
                 {
-                    var gridNode = TtMeshDataProvider.MakeGridPlane(TtEngine.Instance.GfxDevice.RenderContext, new Vector2(-50, -50), new Vector2(50, 50), 1).ToMesh();
+                    category = new PlaceItemData() { Name = categoryName };
+                    categoryMap[categoryName] = category;
+                    mPlaceCategories.Add(category);
+                }
 
-                    var meshNodeData = new TtMeshNode.TtMeshNodeData();
-                    var meshNode = await Scene.SpawnSceneActor<TtMeshNode>(null, null, meshNodeData, EBoundVolumeType.Box, typeof(TtPlacement), Scene.World);
-
-                },
-            };
-            shapesItem.Children.Add(planeItem);
-
+                var item = new PlaceItemData()
+                {
+                    Name = nodeName,
+                    FilterStrings = att.FilterStrings,
+                    NodeClassMeta = classMeta,
+                };
+                category.Children.Add(item);
+                mAllPlaceItems.Add(item);
+            }
         }
         public TtSceneEditor()
         {
@@ -549,8 +600,10 @@ namespace EngineNS.Editor.Forms
                 CpuCullNode.VisParameter.CullFilters = value;
             }
         }
-        public async virtual Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg)
+        public async virtual Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg, bool saveLayout)
         {
+            await PreviewViewport.InitWorld();
+
             AssetName = name;
             Scene = await name.GetAsset<TtScene>(PreviewViewport.World);// TtEngine.Instance.SceneManager.CreateScene(PreviewViewport.World, name);
             if (Scene == null)
@@ -565,7 +618,7 @@ namespace EngineNS.Editor.Forms
             // 避免相机逼近 LookAt 点后滚轮被 EditorCameraController 卡住推不动。
             PreviewViewport.CameralWheelMoveWithLookAt = true;
             await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, rpolicy, 0, 1);
-
+            
             // ReCreateInteractiveModes 沿继承链收集 mode, 因为 TtWorldViewportSlate 自己
             // 也注册了 TtWorldViewportInteractiveMode, 所以列表里同时有它和我们注册的
             // TtSceneEditorInteractiveMode; 而基类 ReCreateInteractiveModes 默认把列表
@@ -574,7 +627,7 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.SetDefaultInteractiveMode<TtSceneEditorInteractiveMode>();
 
             var camPos = new DVector3(10, 10, 10);
-            PreviewViewport.CameraController.Camera?.mCoreObject.LookAtLH(in camPos, in DVector3.Zero, in Vector3.Up);
+            PreviewViewport.CameraController.Camera?.LookAtLH(in camPos, in DVector3.Zero, in Vector3.Up);
 
             PreviewViewport.Axis.RootNode.Parent = Scene;
             PreviewViewport.World.Root = Scene;
@@ -592,6 +645,8 @@ namespace EngineNS.Editor.Forms
             InitializeMacrossEditor();
 
             CpuCullNode = PreviewViewport.RenderPolicy.FindNode<Graphics.Pipeline.TtCpuCullingNode>("CpuCulling");
+
+            CullFilters = TtWorld.TtVisParameter.EVisCullFilter.UtilityEditor | TtWorld.TtVisParameter.EVisCullFilter.LightDebug;
             //System.Diagnostics.Debug.Assert(CpuCullNode != null);
             return true;
         }
@@ -650,7 +705,7 @@ namespace EngineNS.Editor.Forms
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar);
             if (IsDrawing)
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
@@ -661,6 +716,7 @@ namespace EngineNS.Editor.Forms
                 }
                 WindowPos = ImGuiAPI.GetWindowPos();
                 WindowSize = ImGuiAPI.GetWindowSize();
+                DrawMainMenuBar();
                 DrawToolBar();
                 //var sz = new Vector2(-1);
                 //ImGuiAPI.BeginChild("Client", ref sz, false, ImGuiWindowFlags_.)
@@ -741,7 +797,7 @@ namespace EngineNS.Editor.Forms
                 EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGHoverColor
                 ))
             {
-                Editor.TtAssetEditorManager.TryOpenEditor(Scene.MacrossEditor, AssetName, null).AddWaitTask();
+                Editor.TtAssetEditorManager.TryOpenEditor(Scene.MacrossEditor, AssetName, null, true).AddWaitTask();
             }
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
@@ -997,16 +1053,16 @@ namespace EngineNS.Editor.Forms
                     PreviewViewport.CameraController.Camera.SetZRange(zN, zF);
                 }
 
-                var camPos = PreviewViewport.CameraController.Camera.mCoreObject.GetPosition();
+                var camPos = PreviewViewport.CameraController.Camera.GetPosition();
                 var saved = camPos;
                 ImGuiAPI.InputDouble($"X", ref camPos.X, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
                 ImGuiAPI.InputDouble($"Y", ref camPos.Y, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
                 ImGuiAPI.InputDouble($"Z", ref camPos.Z, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
                 if (saved != camPos)
                 {
-                    var lookAt = PreviewViewport.CameraController.Camera.mCoreObject.GetLookAt();
-                    var up = PreviewViewport.CameraController.Camera.mCoreObject.GetUp();
-                    PreviewViewport.CameraController.Camera.mCoreObject.LookAtLH(in camPos, lookAt - saved + camPos, up);
+                    var lookAt = PreviewViewport.CameraController.Camera.GetLookAt();
+                    var up = PreviewViewport.CameraController.Camera.GetUp();
+                    PreviewViewport.CameraController.Camera.LookAtLH(in camPos, lookAt - saved + camPos, up);
                 }
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
@@ -1044,7 +1100,7 @@ namespace EngineNS.Editor.Forms
                     dragData.Metas[i].DraggingInViewport = draggingInViewport;
                     if (draggingInViewport)
                     {
-                        TtEngine.Instance.TaskCollector.AddWaitTask(dragData.Metas[i].OnDragging(PreviewViewport));
+                        dragData.Metas[i].OnDragging(PreviewViewport).AddWaitTask();
                     }
                 }
             }
@@ -1059,30 +1115,31 @@ namespace EngineNS.Editor.Forms
                 PreviewViewport.ViewportType = Graphics.Pipeline.TtViewportSlate.EViewportType.ChildWindow;
                 PreviewViewport.OnDraw();
 
-
                 ContentBrowserDragDropPreview();
 
                 // dragdrop
                 if (ImGuiAPI.BeginDragDropTarget())
                 {
-                    var payload = ImGuiAPI.AcceptDragDropPayload("ScenePlaneItemDragDrop", ImGuiDragDropFlags_.ImGuiDragDropFlags_None);
+                    // Place Items 面板拖入
+                    var payload = ImGuiAPI.AcceptDragDropPayload("PlaceItemNodeDragDrop", ImGuiDragDropFlags_.ImGuiDragDropFlags_None);
                     if (payload != null)
                     {
                         var handle = GCHandle.FromIntPtr((IntPtr)(payload->Data));
-                        var dragData = (PlaceItemData)handle.Target;
-                        if(dragData != null)
+                        var dragData = handle.Target as PlaceItemData;
+                        if (dragData != null)
                         {
-                            dragData.DropAction?.Invoke(dragData);
+                            PlaceNodeFromItem(dragData).AddWaitTask();
                         }
                     }
+                    // Content Browser 拖入
                     payload = ImGuiAPI.AcceptDragDropPayload("ContentBrowserAssetDragDrop", ImGuiDragDropFlags_.ImGuiDragDropFlags_None);
-                    if(payload != null)
+                    if (payload != null)
                     {
                         var handle = GCHandle.FromIntPtr((IntPtr)(payload->Data));
                         var dragData = (TtContentBrowser.DragDropData)handle.Target;
-                        for(int i=0; i<dragData.Metas.Length; i++)
+                        for (int i = 0; i < dragData.Metas.Length; i++)
                         {
-                            TtEngine.Instance.TaskCollector.AddWaitTask(dragData.Metas[i].OnDragTo(PreviewViewport));
+                            dragData.Metas[i].OnDragTo(PreviewViewport).AddWaitTask();
                         }
                     }
                     ImGuiAPI.EndDragDropTarget();
@@ -1102,30 +1159,172 @@ namespace EngineNS.Editor.Forms
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }
-        internal string mSelectedPlaceItemName = null;
-        protected void DrawPlaceItemPanel()
+        string mPlaceItemFilterStr = "";
+        bool mPlaceItemFilterFocused = false;
+        GCHandle mPlaceItemDragHandle;
+
+        protected unsafe void DrawPlaceItemPanel()
         {
             if (!mPlaceItemPanelShow.Selected)
                 return;
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Place Items", ref mPlaceItemPanelShow.Selected, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                //if(ImGuiAPI.TreeNodeEx("Shapes", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
-                //{
-                //    var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
-                //    if (mSelectedPlaceItemName == "Plane")
-                //        flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
-                //    if(ImGuiAPI.TreeNodeEx("Plane", flags))
-                //    {
-                //        if(ImGuiAPI.IsItemActivated())
-                //        {
-                //            mSelectedPlaceItemName = "Plane";
-                //        }
-                //    }
-                //    ImGuiAPI.BeginDragDropSource
-                //}
+                // 搜索栏
+                var drawList = ImGuiAPI.GetWindowDrawList();
+                EGui.UIProxy.SearchBarProxy.OnDraw(ref mPlaceItemFilterFocused, in drawList, "Search...", ref mPlaceItemFilterStr, -1);
+
+                var filterLower = mPlaceItemFilterStr.ToLower();
+                bool hasFilter = !string.IsNullOrEmpty(filterLower);
+
+                if (hasFilter)
+                {
+                    // 搜索模式：显示所有匹配的扁平列表
+                    for (int i = 0; i < mAllPlaceItems.Count; i++)
+                    {
+                        var item = mAllPlaceItems[i];
+                        if (!item.MatchFilter(filterLower))
+                            continue;
+                        DrawPlaceItemLeaf(item);
+                    }
+                }
+                else
+                {
+                    // Tab 分类模式
+                    if (ImGuiAPI.BeginTabBar("##PlaceItemTabs", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
+                    {
+                        // "All" 标签页
+                        if (ImGuiAPI.BeginTabItem("All", null, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
+                        {
+                            for (int catIdx = 0; catIdx < mPlaceCategories.Count; catIdx++)
+                            {
+                                var category = mPlaceCategories[catIdx];
+                                if (ImGuiAPI.CollapsingHeader(category.Name, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
+                                {
+                                    for (int j = 0; j < category.Children.Count; j++)
+                                        DrawPlaceItemLeaf(category.Children[j]);
+                                }
+                            }
+                            ImGuiAPI.EndTabItem();
+                        }
+                        // 每个分类一个 Tab
+                        for (int catIdx = 0; catIdx < mPlaceCategories.Count; catIdx++)
+                        {
+                            var category = mPlaceCategories[catIdx];
+                            if (ImGuiAPI.BeginTabItem(category.Name, null, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
+                            {
+                                for (int j = 0; j < category.Children.Count; j++)
+                                    DrawPlaceItemLeaf(category.Children[j]);
+                                ImGuiAPI.EndTabItem();
+                            }
+                        }
+                        ImGuiAPI.EndTabBar();
+                    }
+                }
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+
+        unsafe void DrawPlaceItemLeaf(PlaceItemData item)
+        {
+            var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf
+                      | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen
+                      | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
+
+            ImGuiAPI.TreeNodeEx(item.Name, flags);
+
+            // 拖拽源
+            if (ImGuiAPI.BeginDragDropSource(ImGuiDragDropFlags_.ImGuiDragDropFlags_None))
+            {
+                if (mPlaceItemDragHandle.IsAllocated)
+                    mPlaceItemDragHandle.Free();
+                mPlaceItemDragHandle = GCHandle.Alloc(item);
+                ImGuiAPI.SetDragDropPayload("PlaceItemNodeDragDrop", GCHandle.ToIntPtr(mPlaceItemDragHandle).ToPointer(), (uint)sizeof(IntPtr), ImGuiCond_.ImGuiCond_None);
+                ImGuiAPI.Text(item.Name);
+                ImGuiAPI.EndDragDropSource();
+            }
+        }
+
+        /// <summary>
+        /// 获取放置节点时的 parent:
+        /// 如果 Outliner 中选中了 TtHubNode 则作为 parent，否则使用 Scene
+        /// </summary>
+        TtNode GetPlaceNodeParent()
+        {
+            if (mWorldOutliner.SelectedNodes.Count > 0)
+            {
+                // 取最后选中的那个节点，如果它是 HubNode 就用它
+                for (int i = mWorldOutliner.SelectedNodes.Count - 1; i >= 0; i--)
+                {
+                    if (mWorldOutliner.SelectedNodes[i] is TtHubNode hub)
+                        return hub;
+                }
+            }
+            return Scene;
+        }
+
+        /// <summary>
+        /// 根据鼠标拖放位置做射线检测，计算放置坐标。
+        /// 优先 LineCheck 场景几何体，fallback 到 Y=0 地面平面，最后 fallback 到相机前方。
+        /// </summary>
+        unsafe DVector3 CalcPlacePosition()
+        {
+            var camera = PreviewViewport.CameraController.Camera;
+            if (camera == null)
+                return DVector3.Zero;
+
+            var start = camera.GetPosition();
+            Vector3 dir = Vector3.Zero;
+
+            // 屏幕鼠标坐标 → 视口局部坐标
+            var mouseScreen = new Vector2(
+                TtEngine.Instance.InputSystem.Mouse.EventMouseX,
+                TtEngine.Instance.InputSystem.Mouse.EventMouseY) - PreviewViewport.ViewportPos;
+            var mouseLocal = PreviewViewport.Window2Viewport(mouseScreen);
+
+            camera.GetPickRay(ref dir, mouseLocal.X, mouseLocal.Y,
+                PreviewViewport.ClientSize.X, PreviewViewport.ClientSize.Y);
+
+            var end = start + dir.AsDVector() * 1000.0;
+
+            // 1) 射线 vs 场景几何
+            VHitResult hitResult = new VHitResult();
+            List<TtNode> candidates = null;
+            if (PreviewViewport.World.CollideOctree.OctreeHitTest(in start, in end, ref candidates, &hitResult))
+                return hitResult.Position;
+
+            // 2) 射线 vs Y=0 地面平面
+            var ray = new DRay() { Position = start, Direction = dir };
+            var groundPlane = new DPlane(DVector3.Zero, DVector3.Up);
+            if (DRay.Intersects(in ray, in groundPlane, out double distance))
+                return start + dir.AsDVector() * distance;
+
+            // 3) fallback: 相机前方固定距离
+            return start + dir.AsDVector() * 10.0;
+        }
+
+        /// <summary>
+        /// 从 PlaceItemData 创建节点并放置到场景中
+        /// </summary>
+        async TtTask PlaceNodeFromItem(PlaceItemData item)
+        {
+            if (item?.NodeClassMeta == null || Scene == null)
+                return;
+
+            var parent = GetPlaceNodeParent();
+            var nodeType = item.NodeClassMeta.ClassType.SystemType;
+            var newNode = await TtNode.SpawnNode(parent, nodeType, null, null, EBoundVolumeType.Box, typeof(TtPlacement));
+            if (newNode == null)
+                return;
+
+            string prefix = "Node";
+            var attr = TtNode.GetNodeAttribute(nodeType);
+            if (attr != null)
+                prefix = attr.DefaultNamePrefix;
+            newNode.NodeData.Name = $"{prefix}_{newNode.SceneId}";
+
+            // 放置在相机前方
+            newNode.Placement.Position = CalcPlacePosition();
         }
 
         public void OnEvent(in Bricks.Input.Event e)
@@ -1199,7 +1398,7 @@ namespace EngineNS.Editor.Forms
             mWorldOutliner = new TtPrefabEditorOutliner(PreviewViewport, false);
         }
         public override bool IsAssetLoaed { get => Prefab != null; }
-        public async override Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg)
+        public async override Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg, bool saveLayout)
         {
             AssetName = name;
             //PreviewViewport.PreviewAsset = name;

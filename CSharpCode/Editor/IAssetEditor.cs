@@ -15,7 +15,7 @@ namespace EngineNS.Editor
     }
     public interface IAssetEditor : IProgressBar
     {
-        Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg);
+        Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg, bool saveLayout);
         void OnCloseEditor();
         RName AssetName { get; set; }
         bool Visible { get; set; }
@@ -34,18 +34,18 @@ namespace EngineNS.Editor
         public List<IAssetEditor> OpenedEditors { get; } = new List<IAssetEditor>();
         public IAssetEditor CurrentActiveEditor = null;
 
-        public static async Thread.Async.TtTask<bool> TryOpenEditor(Type editorType, RName name, object arg)
+        public static async Thread.Async.TtTask<bool> TryOpenEditor(Type editorType, RName name, object arg, bool saveLayout)
         {
             var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
             if (mainEditor == null)
             {
                 return false;
             }
-            await mainEditor.AssetEditorManager.OpenEditor(mainEditor, editorType, name, arg);
+            await mainEditor.AssetEditorManager.OpenEditor(mainEditor, editorType, name, arg, saveLayout);
             return true;
         }
 
-        protected async Thread.Async.TtTask OpenEditor(TtMainEditorApplication mainEditor, Type editorType, RName name, object arg)
+        protected async Thread.Async.TtTask OpenEditor(TtMainEditorApplication mainEditor, Type editorType, RName name, object arg, bool saveLayout)
         {
             IAssetEditor editor = null;
             foreach(var i in OpenedEditors)
@@ -60,19 +60,19 @@ namespace EngineNS.Editor
             {
                 editor = Rtti.TtTypeDescManager.CreateInstance(editorType) as IAssetEditor;
             }
-            await OpenEditor(mainEditor, editor, name, arg);
+            await OpenEditor(mainEditor, editor, name, arg, saveLayout);
         }
-        public static async Thread.Async.TtTask<bool> TryOpenEditor(IAssetEditor editor, RName name, object arg)
+        public static async Thread.Async.TtTask<bool> TryOpenEditor(IAssetEditor editor, RName name, object arg, bool saveLayout)
         {
             var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
             if (mainEditor == null)
             {
                 return false;
             }
-            await mainEditor.AssetEditorManager.OpenEditor(mainEditor, editor, name, arg);
+            await mainEditor.AssetEditorManager.OpenEditor(mainEditor, editor, name, arg, saveLayout);
             return true;
         }
-        protected async Thread.Async.TtTask OpenEditor(TtMainEditorApplication mainEditor, IAssetEditor editor, RName name, object arg)
+        protected async Thread.Async.TtTask OpenEditor(TtMainEditorApplication mainEditor, IAssetEditor editor, RName name, object arg, bool saveLayout)
         {
             editor.AssetName = name;
             editor.Visible = true;
@@ -83,7 +83,7 @@ namespace EngineNS.Editor
             {
                 if (await editor.Initialize() == false)
                     return;
-                ok = await editor.OpenEditor(mainEditor, name, arg);
+                ok = await editor.OpenEditor(mainEditor, name, arg, saveLayout);
                 TtMainEditorApplication.NeedFocusWindowName = editor.GetWindowsName();
             }
             catch (Exception exp)

@@ -60,6 +60,10 @@ namespace EngineNS.GamePlay.Scene
     {
         public const string AssetExt = ".scene";
         public string TypeExt { get => AssetExt; }
+
+        // 编辑器删除节点时, 只记录待删除的 .node 文件路径, 等 SaveAssetTo 时
+        // 再真正删除. 这样"删了不保存关闭"不会丢失节点文件.
+        internal List<string> PendingDeleteNodeFiles { get; } = new List<string>();
         public override string ToString()
         {
             return this.AssetName.ToString();
@@ -110,7 +114,6 @@ namespace EngineNS.GamePlay.Scene
         {
             ClearChildren();
             mMemberTickables.CleanupMembers(this);
-            Dispose_SceneOctree();
             TtEngine.Instance?.SceneManager.UnloadScene(this.AssetName);
         }
         public TtSceneData SceneData
@@ -138,11 +141,9 @@ namespace EngineNS.GamePlay.Scene
         {
             if (slate.RenderPolicy==null || slate.RenderPolicy.RPolicyName != RPolicyName)
             {
-                TtRenderPolicy policy = null;
-                var rpAsset = await RPolicyName.GetAsset<Bricks.RenderPolicyEditor.TtRenderPolicyAsset>();
-                if (rpAsset != null)
+                var policy = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.CreateRenderPolicy(RPolicyName, slate);
+                if (policy != null)
                 {
-                    policy = rpAsset.CreateRenderPolicy(RPolicyName, slate);
                     await policy.Initialize(null);
                     if (slate.Viewport.Width > 1 && slate.Viewport.Height > 1)
                         policy.OnResize(slate.Viewport.Width, slate.Viewport.Height);
@@ -177,87 +178,6 @@ namespace EngineNS.GamePlay.Scene
                 return null;
             }
         }
-        #region Allocator
-        int PrevAllocId = 0;
-        private TtNode[] ManagedNodes = new TtNode[UInt16.MaxValue];
-        public TtNode[] GetManagedNodes()
-        {
-            return ManagedNodes;
-        }
-        public bool AllocId(TtNode node)
-        {
-            lock (ManagedNodes)
-            {
-                if (node is TtLightWeightNodeBase)
-                    return false;
-                for (int i = PrevAllocId; i < ManagedNodes.Length; i++)
-                {
-                    if (ManagedNodes[i] == null)
-                    {
-                        ManagedNodes[i] = node;
-                        node.SceneId = (UInt32)i;
-                        PrevAllocId = i;
-
-                        var notify = new FHostNotify();
-                        notify.Info = "OnSceneAllocId";
-                        notify.Parameter = node;
-                        mMemberTickables.SendNotify(this, in notify);
-                        return true;
-                    }
-                }
-                for (int i = 0; i < ManagedNodes.Length; i++)
-                {
-                    if (ManagedNodes[i] == null)
-                    {
-                        ManagedNodes[i] = node;
-                        node.SceneId = (UInt32)i;
-                        PrevAllocId = i;
-
-                        var notify = new FHostNotify();
-                        notify.Info = "OnSceneAllocId";
-                        notify.Parameter = node;
-                        mMemberTickables.SendNotify(this, in notify);
-                        return true;
-                    }
-                }
-                System.Diagnostics.Debug.Assert(false);
-                return false;
-            }
-        }
-        public void FreeId(TtNode node)
-        {
-            if (node is TtLightWeightNodeBase)
-                return;
-            lock (ManagedNodes)
-            {
-                if (node.SceneId >= UInt16.MaxValue)
-                    return;
-
-                var notify = new FHostNotify();
-                notify.Info = "OnSceneFreeId";
-                notify.Parameter = node;
-                mMemberTickables.SendNotify(this, in notify);
-
-                System.Diagnostics.Debug.Assert(ManagedNodes[node.SceneId] == node);
-                ManagedNodes[node.SceneId] = null;
-                node.SceneId = UInt32.MaxValue;
-            }
-        }
-        public async Thread.Async.TtTask<T> SpawnSceneActor<T>(TtNode parent, TtNode.FPostSpawnNode postAction, TtNodeData data = null, EBoundVolumeType bvType = EBoundVolumeType.Box, Type placementType = null, TtWorld world = null, bool isSceneManaged = false)
-            where T : TtSceneActorNode
-        {
-            return await SpawnSceneActor(parent, typeof(T), postAction, data, bvType, placementType, world, isSceneManaged) as T;
-        }
-        public async Thread.Async.TtTask<TtSceneActorNode> SpawnSceneActor(TtNode parent, Type nodeType, TtNode.FPostSpawnNode postAction, TtNodeData data = null, EBoundVolumeType bvType = EBoundVolumeType.Box, Type placementType = null, TtWorld world = null, bool isSceneManaged = false)
-        {
-            var node = await TtNode.SpawnNode(parent, nodeType, postAction, data, bvType, placementType, world) as TtSceneActorNode;
-            if (node != null)
-            {
-                node.IsSceneManaged = isSceneManaged;
-            }
-            return node;
-        }
-        #endregion
 
         #region Macross
         Bricks.CodeBuilder.MacrossNode.TtMacrossEditor mMacrossEditor = null;
@@ -343,6 +263,16 @@ namespace EngineNS.GamePlay.Scene
             {
                 UpdateAMetaReferences(ameta);
                 ameta.SaveAMeta(this);
+            }
+
+            // 保存完成后, 真正删除编辑器中标记删除的节点文件.
+            if (PendingDeleteNodeFiles.Count > 0)
+            {
+                foreach (var pendingFile in PendingDeleteNodeFiles)
+                {
+                    TtFileManager.DeleteFile(pendingFile);
+                }
+                PendingDeleteNodeFiles.Clear();
             }
         }
         public void SaveRootNodes()
@@ -794,7 +724,7 @@ namespace EngineNS.GamePlay.Scene
                 }, null);
                 var notify = new FHostNotify();
                 notify.Info = "OnSceneLoaded";
-                scene.mMemberTickables.SendNotify(scene, in notify);
+                scene.GetWorld()?.OnHostNotify(scene, in notify);
                 if(scene.MacrossGetter != null)
                 {
                     scene.MacrossGetter.Name = name;
@@ -884,77 +814,6 @@ namespace EngineNS.GamePlay.Scene
             notify.Parameter = rp;
             mMemberTickables.SendNotify(this, in notify);
             base.OnGatherVisibleMeshes(rp);
-        }
-        [Category("Option")]
-        public bool IsGatherVisibleByManagedNodes { get; set; } = false;
-        public override bool TryTreeGatherVisibleMeshes(TtWorld.TtVisParameter rp)
-        {
-            if (IsGatherVisibleByManagedNodes == false)
-                return true;
-            if (!this.HasStyle(Scene.TtNode.ENodeStyles.SelfInvisible))
-            {
-                this.OnGatherVisibleMeshes(rp);
-            }
-            if (!this.HasStyle(Scene.TtNode.ENodeStyles.ChildrenInvisible))
-            {
-                if (TtEngine.Instance.Config.IsParrallelWorldGather)
-                {
-                    TtEngine.Instance.EventPoster.ParallelFor(ManagedNodes.Length, static (nn, state) =>
-                    {
-                        var node = state.GetForArgument0<TtScene>();
-                        var rp = state.GetForArgument1<TtWorld.TtVisParameter>();
-
-                        var i = node.ManagedNodes[nn];
-                        if (i == null)
-                            return;
-                        if (rp.OnVisitNode != null)
-                        {
-                            if (rp.OnVisitNode(i, rp) == false)
-                                return;
-                        }
-                        var type = rp.CullCamera.WhichContainTypeFast(rp.World, in i.RefAbsAABB, false);
-                        switch (type)
-                        {
-                            case CONTAIN_TYPE.CONTAIN_TEST_OUTER:
-                                return;
-                            case CONTAIN_TYPE.CONTAIN_TEST_INNER:
-                            case CONTAIN_TYPE.CONTAIN_TEST_REFER:
-                                {
-                                    i.OnGatherVisibleMeshes(rp);
-                                    //World.OnVisitNode_GatherVisibleMeshes(i, rp);
-                                }
-                                break;
-                        }
-                    }, -1, this, rp);
-                }
-                else
-                {
-                    foreach (var i in ManagedNodes)
-                    {
-                        if (i == null)
-                            continue;
-                        if (rp.OnVisitNode != null)
-                        {
-                            if (rp.OnVisitNode(i, rp) == false)
-                                continue;
-                        }
-                        var type = rp.CullCamera.WhichContainTypeFast(World, in i.RefAbsAABB, false);
-                        switch (type)
-                        {
-                            case CONTAIN_TYPE.CONTAIN_TEST_OUTER:
-                                continue;
-                            case CONTAIN_TYPE.CONTAIN_TEST_INNER:
-                            case CONTAIN_TYPE.CONTAIN_TEST_REFER:
-                                {
-                                    i.OnGatherVisibleMeshes(rp);
-                                    //World.OnVisitNode_GatherVisibleMeshes(i, rp);
-                                }
-                                break;
-                        }
-                    }
-                }
-            }
-            return false;
         }
     }
 

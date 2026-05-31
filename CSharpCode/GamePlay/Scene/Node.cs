@@ -1,5 +1,7 @@
+using Assimp;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.GpuDriven;
+using EngineNS.Bricks.WorldSimulator;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.Profiler;
 using EngineNS.Thread.Async;
@@ -89,14 +91,14 @@ namespace EngineNS.GamePlay.Scene
         {
             if (BoundVolume!=null)
             {
-                (EntityManager as TtEntityManager).BoundingValues.SetValue(Id, in BoundVolume.AbsAABB);
+                (EntityManager as TtWorldEntityManager).BoundingValues.SetValue(Id, in BoundVolume.AbsAABB);
             }
         }
         public void OnRemoveFromManager()
         {
             if (BoundVolume!=null)
             {
-                BoundVolume.AbsAABB = (EntityManager as TtEntityManager).BoundingValues.GetValue(Id);
+                BoundVolume.AbsAABB = (EntityManager as TtWorldEntityManager).BoundingValues.GetValue(Id);
             }
         }
         #endregion
@@ -165,10 +167,9 @@ namespace EngineNS.GamePlay.Scene
                 EntityManager.RemoveEntity(Id);
                 EntityManager = null;
             }
-            if (OctreeNode != null)
+            if (mWorld != null && mWorld.CollideOctree != null)
             {
-                OctreeNode.Remove(this);
-                OctreeOwner = null;
+                mWorld.CollideOctree.Remove(this);
             }
             this.Behavior?.DestroyNode(this);
             this.BoundVolume?.Dispose();
@@ -410,7 +411,7 @@ namespace EngineNS.GamePlay.Scene
             NoPickedDraw = (1 << 8),
             SelfInvisible = (1 << 9),
             ChildrenInvisible = (1 << 10),
-            SceneManaged = (1 << 11),
+            Reserved_0 = (1 << 11), //SceneManaged = (1 << 11),
             Transient = (1 << 12),
             NoTick = (1 << 13),
             ParallelTick = (1 << 14),
@@ -677,35 +678,6 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         [Category("Option")]
-        public virtual bool IsSceneManaged
-        {
-            get
-            {
-                return HasStyle(ENodeStyles.SceneManaged);
-            }
-            set
-            {
-                if (value)
-                {
-                    if (ParentScene != null && this.SceneId == UInt32.MaxValue)
-                    {
-                        if (ParentScene.AllocId(this))
-                        {
-                            SetStyle(ENodeStyles.SceneManaged);
-                        }
-                    }
-                }
-                else
-                {
-                    if (this.SceneId != UInt32.MaxValue)
-                    {
-                        ParentScene?.FreeId(this);
-                    }
-                    UnsetStyle(ENodeStyles.SceneManaged);
-                }
-            }
-        }
-        [Category("Option")]
         public virtual bool IsBuildNavMesh
         {
             get
@@ -874,11 +846,6 @@ namespace EngineNS.GamePlay.Scene
                     var newScene = GetNearestParentScene();
                     if (oldScene != newScene)
                     {
-                        if (IsSceneManagedType() && IsSceneManaged)
-                        {
-                            oldScene?.FreeId(this);
-                            newScene?.AllocId(this);
-                        }
                         ParentSceneChanged(oldScene, newScene);
                     }
 
@@ -1160,6 +1127,29 @@ namespace EngineNS.GamePlay.Scene
             }
             return null;
         }
+        /// <summary>
+        /// 从场景树中移除本节点. 对应的 .node 磁盘文件不会立即删除,
+        /// 而是记录到所属 TtScene 的 PendingDeleteNodeFiles 列表,
+        /// 等 TtScene.SaveAssetTo 时才真正删除. 这样"删了不保存关闭"
+        /// 不会丢失节点文件.
+        /// Outliner 右键菜单 Delete 和键盘 Delete 键统一走此入口.
+        /// </summary>
+        public void DeleteFromScene()
+        {
+            var scene = GetNearestParentScene();
+            Parent = null;
+            if (scene?.AssetName != null)
+            {
+                var file = NodeId.ToString() + NodeExt;
+                var nodefiles = IO.TtFileManager.GetFiles(scene.AssetName.Address + "/nodes", file, true);
+                foreach (var nodefile in nodefiles)
+                {
+                    scene.PendingDeleteNodeFiles.Add(nodefile);
+                }
+            }
+            Dispose();
+        }
+
         public TtScene GetNearestParentScene()
         {
             if (GetType() == typeof(TtScene) || GetType().IsSubclassOf(typeof(TtScene)))
@@ -1524,7 +1514,6 @@ namespace EngineNS.GamePlay.Scene
         public virtual void OnSceneLoaded()
         {
             this.HitproxyType = this.HitproxyType;
-            this.IsSceneManaged = this.IsSceneManaged;
         }
         #endregion
 
@@ -1532,6 +1521,21 @@ namespace EngineNS.GamePlay.Scene
         protected virtual void OnAbsTransformChanged()
         {
 
+        }
+        protected virtual void OnAbsAABBChanged()
+        {
+            var world = GetWorld();
+            if (world == null || world.CollideOctree == null || world.CollideOctree.mOctree == null)
+                return;
+            var aabb = new Aabb(RefAbsAABB);
+            if (OctreeEntry != null)
+            {
+                world.CollideOctree.Move(this, in aabb);
+            }
+            else
+            {
+                world.CollideOctree.Add(this, aabb);
+            }
         }
         public void UpdateAbsTransform()
         {
@@ -1647,6 +1651,8 @@ namespace EngineNS.GamePlay.Scene
             {
                 Parent.UpdateAABB();
             }
+
+            OnAbsAABBChanged();
         }
         public bool LineCheck(in DVector3 start, in DVector3 end, ref VHitResult result)
         {
@@ -1681,18 +1687,19 @@ namespace EngineNS.GamePlay.Scene
                         //result.Position = Vector3.TransformCoordinate(result.Position, Placement.AbsTransform);
                         //result.Normal = Vector3.TransformNormal(result.Normal, Placement.AbsTransform);
                         return true;
-                    }
-                    else
-                    {
-                        foreach (var i in Children)
-                        {
-                            if (i.LineCheck(in start, in end, ref result) == true)
-                            {
-                                return true;
-                            }
-                        }
-                        return false;
-                    }
+                    }//管好自己就好，children也会拍平进入TtWorld.Octree的
+                    //else
+                    //{
+                    //    foreach (var i in Children)
+                    //    {
+                    //        if (i.LineCheck(in start, in end, ref result) == true)
+                    //        {
+                    //            return true;
+                    //        }
+                    //    }
+                    //    return false;
+                    //}
+                    return false;
                 }
             }
         }
@@ -1870,12 +1877,13 @@ namespace EngineNS.GamePlay.Scene
         public void RemoveFromWorld()
         {
             Parent = null;
-            this.IsCollide = false;
-            if(this.OctreeNode != null)
-            {
-                OctreeNode.Remove(this);
-            }
+            mWorld?.CollideOctree.Remove(this);
+            OnRemoveFromWorld();
             mWorld = null;
+        }
+        protected virtual void OnRemoveFromWorld()
+        {
+
         }
         #endregion
 
@@ -1955,7 +1963,7 @@ namespace EngineNS.GamePlay.Scene
     {
         public TtGpuSceneNode()
         {
-            IsSceneManaged = true;
+            
         }
         public int GpuSceneIndex = -1;
         

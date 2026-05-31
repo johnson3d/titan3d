@@ -14,8 +14,16 @@ namespace EngineNS.GamePlay
 {
     public partial class TtGameModeBase : IDisposable
     {
+        Scene.TtScene mCurrentScene;
         [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
-        public Scene.TtScene CurrentScene { get; set; }
+        public Scene.TtScene CurrentScene
+        {
+            get => mCurrentScene;
+            set
+            {
+                mCurrentScene = value;
+            }
+        }
         [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public Controller.TtCharacterController CharacterController { get; set; } = null;
         public virtual void OnSetGameMode(TtGameModeBase prev)

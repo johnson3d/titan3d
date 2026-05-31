@@ -549,27 +549,32 @@ namespace EngineNS.NxRHI
                 return ETextureCompressFormat.TCF_None;
 
             // 检查引擎配置
-            var config = TtEngine.Instance?.Config;
+            var config = TtEngine.Instance?.GfxDevice.Config;
             if (config == null)
                 return ETextureCompressFormat.TCF_None;
 
-            // 根据配置选择压缩格式
-            if (config.CompressDxt)
+            //if (config.TextureAssetCompressType.HasFlag(Graphics.Pipeline.TtGfxDeviceConfig.ETextureAssetCompressType.DXT))
+            //{
+            //    return SelectDxtFormat(desc);
+            //}
+            //if (config.TextureAssetCompressType.HasFlag(Graphics.Pipeline.TtGfxDeviceConfig.ETextureAssetCompressType.ASTC))
+            //{
+            //    return SelectAstcFormat(desc);
+            //}
+            //if (config.TextureAssetCompressType.HasFlag(Graphics.Pipeline.TtGfxDeviceConfig.ETextureAssetCompressType.ETC2))
+            //{
+            //    return SelectEtc2Format(desc);
+            //}
+            switch (config.TextureAssetCompressType)
             {
-                return SelectDxtFormat(desc);
-            }
-            else if (config.CompressEtc)
-            {
-                return SelectEtc2Format(desc);
-            }
-            else if (config.CompressAstc)
-            {
-                return SelectAstcFormat(desc);
-            }
-            else
-            {
-                // 无压缩配置
-                return ETextureCompressFormat.TCF_None;
+                case Graphics.Pipeline.TtGfxDeviceConfig.ETextureAssetCompressType.DXT:
+                    return SelectDxtFormat(desc);
+                case Graphics.Pipeline.TtGfxDeviceConfig.ETextureAssetCompressType.ETC2:
+                    return SelectEtc2Format(desc);
+                case Graphics.Pipeline.TtGfxDeviceConfig.ETextureAssetCompressType.ASTC:
+                    return SelectAstcFormat(desc);
+                default:
+                    return ETextureCompressFormat.TCF_None;
             }
         }
 

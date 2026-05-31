@@ -1,5 +1,4 @@
-﻿using Assimp;
-using EngineNS.Bricks.WorldSimulator;
+﻿using EngineNS.Bricks.WorldSimulator;
 using EngineNS.EGui.Slate;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Mesh;
@@ -22,6 +21,8 @@ namespace EngineNS.GamePlay
         }
         public void Dispose()
         {
+            CoreSDK.DisposeObject(ref mCollideOctree);
+
             //Root.ClearChildren();
             Root?.DisposeWithChildren();
             mBoundingDebugMaterial = null;
@@ -42,7 +43,10 @@ namespace EngineNS.GamePlay
             System.Threading.Interlocked.Increment(ref mNodeAliveNumber);
 
             if (hasEntityManager)
-                this.EntityManager = new TtEntityManager();
+            {
+                this.EntityManager = new TtWorldEntityManager();
+                this.EntityManager.NotifyHost = this;
+            }
             else
                 this.EntityManager = null;
         }
@@ -63,6 +67,7 @@ namespace EngineNS.GamePlay
 
             mBoundingDebugMaterial = await RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine).GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
 
+            await this.CollideOctree.Initialize(DVector3.Zero);
             await mMemberTickables.InitializeMembers(this);
             return true;
         }
@@ -93,6 +98,7 @@ namespace EngineNS.GamePlay
                 }
             }
         }
+        
         internal List<Scene.TtSunNode> mSuns = new List<Scene.TtSunNode>();
         [Rtti.Meta("")]
         public Scene.TtSunNode GetSun(int index = 0)
@@ -138,18 +144,19 @@ namespace EngineNS.GamePlay
             [Flags]
             public enum EVisCullFilter : uint
             {
-                GameObject = 1,
-                LightDebug = (1 << 1),
-                PhyxDebug = (1 << 2),
-                UtilityDebug = (1 << 3),
-                NavMesh = (1 << 4),
+                GameObject = 1,//游戏内对象可见性过滤
+                LightDebug = (1 << 1),//调试用灯光可见性过滤
+                PhyxDebug = (1 << 2),//调试用物理可见性过滤
+                UtilityEditor = (1 << 3),//编辑器显示
+                NavMesh = (1 << 4),//调试用导航网格可见性过滤
                 FilterTypeCount = 5,
 
-                EditorObject = LightDebug | PhyxDebug | UtilityDebug | NavMesh,
+                EditorObject = LightDebug | PhyxDebug | UtilityEditor | NavMesh,
                 All = 0xFFFFFFFF,
                 None = 0,
             }
             public const string FilterTypeCountAs = "PhyxDebug";
+            public bool DontFrustumCull = false;
             public Graphics.Pipeline.TtCamera CullCamera = null;
 
             public EVisCull CullType = EVisCull.Normal;
@@ -285,7 +292,7 @@ namespace EngineNS.GamePlay
         public virtual void GatherVisibleMeshes(TtVisParameter rp)
         {
             rp.ClearVisibles();
-            if (rp.IsUseECS && TtEngine.Instance.Config.UseECS)
+            if (rp.IsUseECS)
             {
                 this.EntityManager.CullingSystem.World = this;
                 this.EntityManager.CullingSystem.VisParameter = rp;
@@ -599,6 +606,8 @@ namespace EngineNS.GamePlay
                     }
                     mAfterTicks.Clear();
                 }
+
+                mCollideOctree.TickLogic();
             }
         }
         private List<System.Action> mAfterTicks = new List<System.Action>();

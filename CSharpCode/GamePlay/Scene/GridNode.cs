@@ -73,7 +73,7 @@ namespace EngineNS.GamePlay.Scene
                 return null;
 
             var scene = parent.GetNearestParentScene();
-            var meshNode = await scene.SpawnSceneActor<TtGridNode>(parent, null, null, EBoundVolumeType.Box, typeof(TtPlacement)) as TtGridNode;
+            var meshNode = await GamePlay.Scene.TtNode.SpawnNode<TtGridNode>(parent, null, null, EBoundVolumeType.Box, typeof(TtPlacement)) as TtGridNode;
             meshNode.NodeData.Name = "GridLine";
             meshNode.RenderMesh = gridMesh;
             meshNode.Parent = parent;
