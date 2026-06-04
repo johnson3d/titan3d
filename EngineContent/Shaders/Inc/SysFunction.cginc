@@ -617,6 +617,28 @@ void CalcNormalMap(half3 Nt, half4 Tw, half3 Nw, out half3 UnpackedNormal)
     //UnpackedNormal.xyz = UnpackedNormal.xzy;
 }
 
+void CalcNormalMapRGB(half3 Nt, half4 Tw, half3 Nw, out half3 UnpackedNormal)
+{
+    Nt.xyz = Nt.xyz * 2.0h - 1.0h;
+    Nt.xyz = Nt.xzy;
+    
+    half3 Bw = half3(0.0h, 0.0h, 0.0h);
+    if (Tw.w > 0.0h)
+    {
+        Bw = -cross(Tw.xyz, Nw);
+    }
+    else
+    {
+        Bw = cross(Tw.xyz, Nw);
+    }
+	
+	//half3x3 TBN = half3x3(Tw.xyz, Bw, Nw);
+    half3x3 TBN = half3x3(Tw.xyz, Nw, Bw);
+	
+    UnpackedNormal = mul(Nt, TBN);
+    //UnpackedNormal.xyz = UnpackedNormal.xzy;
+}
+
 half3 BumpToWorldNormal(float3 normMap, PS_INPUT input)
 {
     half3 worldNorm;
@@ -630,9 +652,7 @@ half3 BumpToWorldNormal(float3 normMap, PS_INPUT input)
 void CalcTangentMap(half3 Tt, half4 Tw, half3 Nw, out half3 UnpackedTangent)
 {
     // Decode [0,1] → [-1,1]
-    Tt.xy = Tt.xy * 2.0h - 1.0h;
-    // Tangent lies on surface: Z component is near zero (vs normal where Z is dominant)
-    Tt.z = 0.0h;
+    Tt.xyz = Tt.xyz * 2.0h - 1.0h;
     // Same swizzle convention as NormalMap: engine uses XZY layout
     Tt.xyz = Tt.xzy;
 

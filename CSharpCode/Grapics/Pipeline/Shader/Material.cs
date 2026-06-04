@@ -446,6 +446,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             Normal,
             NormalMap,
+            NormalMapRGB,
             NormalNone,
         }
         ENormalMode mNormalMode = ENormalMode.NormalMap;
@@ -632,6 +633,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     break;
                 case ENormalMode.NormalMap:
                     codeBuilder.AddLine("#define MTL_NORMAL_MODE MTL_NORMALMAP", ref sourceCode);
+                    break;
+                case ENormalMode.NormalMapRGB:
+                    codeBuilder.AddLine("#define MTL_NORMAL_MODE MTL_NORMALMAP_RGB", ref sourceCode);
                     break;
                 case ENormalMode.NormalNone:
                 default:

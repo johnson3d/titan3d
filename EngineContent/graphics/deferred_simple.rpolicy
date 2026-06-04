@@ -112,7 +112,7 @@
       <Label Type="System.String@Unknown" Value="VignetteNode" />
       <Name Type="System.String@Unknown" Value="VignetteNode" />
       <NodeId Type="System.Guid@Unknown" Value="2195d8e6-4694-47b7-9267-70a25b79b529" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="263.71384,287.578" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="-55.286194,282.07797" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtImageAssetNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <ImageName Type="EngineNS.RName@EngineCore" Value="Engine,texture/hdri_epic_courtyard_daylight.srv,1fbfef87-ba8b-4990-90d0-33d9b0a60e8f" />
@@ -686,7 +686,10 @@
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.Post.TtSSAONode@EngineCore">
         <Bias Type="System.Single@Unknown" Value="0.02" />
         <Enable Type="System.Boolean@Unknown" Value="True" />
+        <EnableTemporalRotation Type="System.Boolean@Unknown" Value="False" />
         <FalloffDistance Type="System.Single@Unknown" Value="10" />
+        <FilterSharpness Type="System.Single@Unknown" Value="100" />
+        <HalfResolution Type="System.Boolean@Unknown" Value="True" />
         <Intensity Type="System.Single@Unknown" Value="1" />
         <NumDirections Type="System.Int32@Unknown" Value="4" />
         <NumSteps Type="System.Int32@Unknown" Value="4" />
@@ -697,6 +700,7 @@
     </e_48>
     <e_49 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.TtPolyLineNode@EngineCore" />
+      <Label Type="System.String@Unknown" Value="Link-&gt;BasePassNode:DepthStencil" />
       <Name Type="System.String@Unknown" Value="Link-&gt;BasePassNode:DepthStencil" />
       <NodeId Type="System.Guid@Unknown" Value="397d2a83-9106-4f40-b094-5b2bd25c58c9" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="-331.50012,1249.0001" />
@@ -709,6 +713,7 @@
     </e_49>
     <e_50 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.TtPolyLineNode@EngineCore" />
+      <Label Type="System.String@Unknown" Value="Link-&gt;BasePassNode:MRT1" />
       <Name Type="System.String@Unknown" Value="Link-&gt;BasePassNode:MRT1" />
       <NodeId Type="System.Guid@Unknown" Value="595be0b9-3622-47a5-826d-9919fb166594" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="-338.00018,941.911" />
@@ -721,6 +726,7 @@
     </e_50>
     <e_51 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.TtPolyLineNode@EngineCore" />
+      <Label Type="System.String@Unknown" Value="Link-&gt;BasePassNode:MRT3" />
       <Name Type="System.String@Unknown" Value="Link-&gt;BasePassNode:MRT3" />
       <NodeId Type="System.Guid@Unknown" Value="5c6e6ed3-401b-4061-b87d-a9226958b1ce" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="-355.29993,1034.7778" />
@@ -733,6 +739,7 @@
     </e_51>
     <e_52 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.TtPolyLineNode@EngineCore" />
+      <Label Type="System.String@Unknown" Value="Link-&gt;Hzb:Hzb" />
       <Name Type="System.String@Unknown" Value="Link-&gt;Hzb:Hzb" />
       <NodeId Type="System.Guid@Unknown" Value="4ce58c99-2a18-4e28-b3b8-0d84513297e7" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="-331.29993,1129.2778" />
@@ -750,6 +757,7 @@
     <EnableContactShadow Type="System.Boolean@Unknown" Value="True" />
     <EnableGI Type="System.Boolean@Unknown" Value="True" />
     <EnableLocalLights Type="System.Boolean@Unknown" Value="True" />
+    <ShadowMode Type="EngineNS.Graphics.Pipeline.EShadowMode@EngineCore" Value="Advance" />
     <TypeFog Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog@EngineCore" Value="None" />
   </RenderPolicy>
   <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore,&gt;@Unknown" Count="96">

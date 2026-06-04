@@ -16,7 +16,8 @@
 //MTL_NORMAL_MODE
 #define MTL_NORMAL 1
 #define MTL_NORMALMAP 2
-#define MTL_NORMALNONE 3
+#define MTL_NORMALMAP_RGB 3
+#define MTL_NORMALNONE 4
 
 #define Combine3(a,b,c) a##b##c
 #define Combine2(a,b) Combine3(a,b,)
