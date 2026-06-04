@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_8048419175116741211 Type="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore">
+  <EnableAO Type="System.Boolean@Unknown" Order="0" />
+  <EnableContactShadow Type="System.Boolean@Unknown" Order="0" />
+  <EnableGI Type="System.Boolean@Unknown" Order="0" />
+  <EnableLocalLights Type="System.Boolean@Unknown" Order="0" />
+  <ShadowMode Type="EngineNS.Graphics.Pipeline.EShadowMode@EngineCore" Order="0" />
+  <TypeFog Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog@EngineCore" Order="0" />
+</Hash_8048419175116741211>

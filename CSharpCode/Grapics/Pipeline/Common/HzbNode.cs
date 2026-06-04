@@ -90,9 +90,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 drawcall.BindSrv("DepthBuffer", node.mCurrentDepthSrv);
                 drawcall.BindUav("DstBuffer", node.HzbMipsUAVs[0]);
-                // shader 的 LinearFromDepth 需要 cbPerCamera.ZNear / ZFar / 投影信息.
-                // (DownSample pass 不需要 cbPerCamera, 已经在 linear z 空间.)
-                drawcall.BindCBV("cbPerCamera", policy.DefaultCamera.PerCameraCBuffer);
+                // HZB 现在直接存 raw NDC-Z, 不再做线性化, 不需要 cbPerCamera.
             }
         }
 
@@ -127,7 +125,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 if (node.HzbMipsSRVs == null || srcMip >= node.HzbMipsSRVs.Length) return;
 
-                // SrcBuffer 是 Texture2D<float2> (SRV), DstBuffer 是 RWTexture2D<float2> (UAV).
+                // SrcBuffer 是 Texture2D<float> (SRV), DstBuffer 是 RWTexture2D<float> (UAV).
                 // 必须分别走 SBT_SRV / SBT_UAV 才能避免两个 RWTexture2D 互相覆盖到同一份默认
                 // 视图的历史 BUG (详见 hzb.compute 顶部 SrcBuffer 注释).
                 drawcall.BindSrv("SrcBuffer", node.HzbMipsSRVs[srcMip]);
@@ -216,7 +214,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             dsTexDesc.Width = mMip0Width;
             dsTexDesc.Height = mMip0Height;
             dsTexDesc.MipLevels = (uint)HzbMipsUAVs.Length;
-            dsTexDesc.Format = EPixelFormat.PXF_R16G16_TYPELESS;
+            dsTexDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
             dsTexDesc.BindFlags = NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV;
 
             CoreSDK.DisposeObject(ref HzbSRV);
@@ -229,7 +227,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             var srvDesc = new NxRHI.FSrvDesc();
             srvDesc.SetTexture2D();
             srvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
-            srvDesc.Format = EPixelFormat.PXF_R16G16_FLOAT;
+            srvDesc.Format = EPixelFormat.PXF_R32_FLOAT;
             srvDesc.Texture2D.MostDetailedMip = 0;
             srvDesc.Texture2D.MipLevels = dsTexDesc.MipLevels;
             HzbSRV = rc.CreateSRV(HzbTexture, in srvDesc);
@@ -240,7 +238,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 var uavDesc = new NxRHI.FUavDesc();
                 uavDesc.SetTexture2D();
-                uavDesc.Format = EPixelFormat.PXF_R16G16_FLOAT;
+                uavDesc.Format = EPixelFormat.PXF_R32_FLOAT;
                 uavDesc.Texture2D.MipSlice = (uint)i;
                 HzbMipsUAVs[i] = rc.CreateUAV(HzbTexture, in uavDesc);
             }
@@ -253,7 +251,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 var mipSrvDesc = new NxRHI.FSrvDesc();
                 mipSrvDesc.SetTexture2D();
                 mipSrvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
-                mipSrvDesc.Format = EPixelFormat.PXF_R16G16_FLOAT;
+                mipSrvDesc.Format = EPixelFormat.PXF_R32_FLOAT;
                 mipSrvDesc.Texture2D.MostDetailedMip = (uint)i;
                 mipSrvDesc.Texture2D.MipLevels = 1;
                 HzbMipsSRVs[i] = rc.CreateSRV(HzbTexture, in mipSrvDesc);

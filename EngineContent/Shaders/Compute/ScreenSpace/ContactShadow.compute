@@ -1,0 +1,200 @@
+#ifndef _CONTACT_SHADOW_COMPUTE_H_
+#define _CONTACT_SHADOW_COMPUTE_H_
+
+#include "../../Inc/SysFunction.cginc"
+#include "../../CBuffer/VarBase_PerCamera.cginc"
+
+// ---------------------------------------------------------------------------
+// Contact Shadow - Screen-Space Ray March
+//
+// For each pixel, marches along the light direction in screen space and
+// compares against the depth buffer to detect close-range occlusion that
+// traditional shadow maps miss (e.g. self-shadowing on small geometry,
+// foliage, character details).
+//
+// ENV_USE_HZB == 1: HZB accelerated hierarchical traversal (HzbRayCast.cginc)
+// ENV_USE_HZB == 0: Linear equal-step march fallback (no HZB dependency)
+//
+// Reference: UE ScreenSpaceShadows.usf / ScreenSpaceShadowRayCast.ush
+// ---------------------------------------------------------------------------
+
+// Permutation: HZB 加速开关, 由 C# 端 UPermutationItem 注入.
+// HzbPinIn 悬空时 C# 端强制保持为 0.
+#ifndef ENV_USE_HZB
+#define ENV_USE_HZB 0
+#endif
+
+cbuffer cbContactShadow DX_AUTOBIND
+{
+    float3 LightDirection;       // Normalized world-space direction TOWARD light
+    int    NumSteps;             // Ray march step count (8~16 typical)
+    float2 ScreenSize;           // Render target dimensions (width, height)
+    float  ContactShadowLength;  // Ray length in world space
+    float  DepthBias;            // Bias to avoid self-intersection
+    float  FadeDistance;         // Distance at which contact shadow starts fading
+    float  FadeLength;           // Length of the fade-out range
+    float  ShadowIntensity;      // 0~1, strength of the contact shadow
+    uint   FrameIndex;           // Incremented each frame for temporal dither
+};
+
+Texture2D<float> DepthBuffer DX_AUTOBIND;
+SamplerState Samp_DepthBuffer DX_AUTOBIND;
+
+#if ENV_USE_HZB
+Texture2D<float> HzbTexture DX_AUTOBIND;
+SamplerState Samp_HzbTexture DX_AUTOBIND;
+#include "../../Inc/HzbRayCast.cginc"
+#endif
+
+#if ENV_USE_NORMAL_BIAS
+Texture2D GBufferRT1 DX_AUTOBIND;
+SamplerState Samp_GBufferRT1 DX_AUTOBIND;
+#endif
+
+Texture2D GBufferRT3 DX_AUTOBIND;
+SamplerState Samp_GBufferRT3 DX_AUTOBIND;
+
+RWTexture2D<float> ContactShadowMask DX_AUTOBIND;
+
+// Cast contact shadow ray. Returns 1 = fully lit, 0 = fully shadowed.
+float CastContactShadowRay(float3 rayOriginWorld, float3 lightDir, float rayLength,
+                           int numSteps, float dither)
+{
+#if ENV_USE_HZB
+    // HZB accelerated path: uniform-step linear march with HZB mip sampling.
+    float3 biasedOrigin = rayOriginWorld + lightDir * DepthBias;
+
+    FHzbRayCastResult r = HzbRayCastFromWorldRay(
+        HzbTexture, Samp_HzbTexture,
+        biasedOrigin, lightDir, rayLength,
+        (uint)numSteps, dither, 0.0);
+
+    return r.bHit ? 0.0 : 1.0;
+#else
+    // Linear equal-step march fallback (no HZB dependency).
+    float4 rayStartClip = mul(float4(rayOriginWorld, 1.0), GetViewPrjMtx());
+    float3 rayEndWorld  = rayOriginWorld + lightDir * rayLength;
+    float4 rayEndClip   = mul(float4(rayEndWorld, 1.0), GetViewPrjMtx());
+
+    float3 rayStartNDC = rayStartClip.xyz / rayStartClip.w;
+    float3 rayEndNDC   = rayEndClip.xyz / rayEndClip.w;
+
+    float2 startUV = float2(rayStartNDC.x * 0.5 + 0.5, 0.5 - rayStartNDC.y * 0.5);
+    float2 endUV   = float2(rayEndNDC.x * 0.5 + 0.5,   0.5 - rayEndNDC.y * 0.5);
+    float  startZ  = rayStartNDC.z;
+    float  endZ    = rayEndNDC.z;
+
+    float2 rayUV = endUV - startUV;
+    float  rayZ  = endZ  - startZ;
+
+    float thicknessWorld = rayLength / (float)numSteps * 2.0;
+    float stepSize = 1.0 / (float)numSteps;
+    float t = stepSize * (dither + 0.5);
+
+    [loop]
+    for (int i = 0; i < numSteps; i++)
+    {
+        float2 sampleUV = startUV + rayUV * t;
+        float  sampleZ  = startZ  + rayZ  * t;
+
+        if (any(sampleUV < 0.0) || any(sampleUV > 1.0))
+            break;
+
+        float sceneDepthNDC = DepthBuffer.SampleLevel(Samp_DepthBuffer, sampleUV, 0).r;
+
+        float sceneLinear = LinearFromDepth(sceneDepthNDC);
+        float rayLinear   = LinearFromDepth(sampleZ);
+        float depthDiff = rayLinear - sceneLinear;
+
+        if (depthDiff > DepthBias && depthDiff < thicknessWorld)
+            return 0.0;
+
+        t += stepSize;
+    }
+
+    return 1.0;
+#endif
+}
+
+// Interleaved gradient noise with temporal jitter (matches UE convention)
+float InterleavedGradientNoise(float2 pixelPos, float frameId)
+{
+    pixelPos += frameId * float2(47.0, 17.0) * 0.695f;
+    float3 magic = float3(0.06711056, 0.00583715, 52.9829189);
+    return frac(magic.z * frac(dot(pixelPos, magic.xy)));
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_ContactShadow(uint3 dispatchThreadId : SV_DispatchThreadID)
+{
+    uint2 pixelCoord = dispatchThreadId.xy;
+
+    // Bounds check
+    if (any(pixelCoord >= (uint2)ScreenSize))
+        return;
+
+    float2 uv = ((float2)pixelCoord + 0.5) / ScreenSize;
+
+    // Sample scene depth
+    float rawDepth = DepthBuffer.SampleLevel(Samp_DepthBuffer, uv, 0).r;
+
+    // Skip sky pixels
+#if USE_INVERSE_Z == 1
+    if (rawDepth <= 0.0)
+#else
+    if (rawDepth >= 1.0)
+#endif
+    {
+        ContactShadowMask[pixelCoord] = 1.0;
+        return;
+    }
+
+    // Skip pixels that don't accept shadow (e.g. certain materials)
+    half4 rt3 = (half4)GBufferRT3.SampleLevel(Samp_GBufferRT3, uv, 0);
+    int renderFlags = (int)(rt3.b * 1023.0h + 0.5h);
+    if ((renderFlags & ERenderFlags_AcceptShadow) == 0)
+    {
+        ContactShadowMask[pixelCoord] = 1.0;
+        return;
+    }
+
+    // Reconstruct world position
+    float4 worldPos = GetWorldPositionFromDepthValue(uv, rawDepth);
+
+#if ENV_USE_NORMAL_BIAS
+    // Bias ray origin along surface normal to prevent self-shadowing
+    // on convex surfaces (spheres, character limbs).
+    half4 rt1 = (half4)GBufferRT1.SampleLevel(Samp_GBufferRT1, uv, 0);
+    half3 worldNormal = OctDecode(rt1.rg);
+    float normalBias = ContactShadowLength * 0.05;
+    float3 rayOrigin = worldPos.xyz + (float3)worldNormal * normalBias;
+#else
+    float3 rayOrigin = worldPos.xyz;
+#endif
+
+    // Distance-based fade
+    float linearDepth = LinearFromDepth(rawDepth);
+    float fadeFactor = saturate((linearDepth - FadeDistance) / max(FadeLength, 0.001));
+
+    // Skip distant pixels (fully faded out)
+    if (fadeFactor >= 1.0)
+    {
+        ContactShadowMask[pixelCoord] = 1.0;
+        return;
+    }
+
+    // Dither for temporal noise
+    float dither = InterleavedGradientNoise(float2(pixelCoord) + 0.5, (float)FrameIndex);
+
+    // Cast shadow ray toward light
+    float shadowFactor = CastContactShadowRay(rayOrigin, LightDirection,
+                                               ContactShadowLength, NumSteps, dither);
+
+    // Apply intensity and distance fade
+    float result = lerp(1.0 - ShadowIntensity, 1.0, shadowFactor);
+    result = lerp(result, 1.0, fadeFactor);
+
+    ContactShadowMask[pixelCoord] = result;
+}
+
+#endif // _CONTACT_SHADOW_COMPUTE_H_

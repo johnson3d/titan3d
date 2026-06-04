@@ -42,19 +42,6 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 }
             }
         }
-        public override bool DisableHDR
-        {
-            get
-            {
-                return mDisableHDR;
-            }
-            set
-            {
-                mDisableHDR = value;
-                var shading = FinalCopyNode.GetPassShading() as TtFinalCopyShading;
-                shading?.SetDisableHDR(value);
-            }
-        }
         #region GetHitproxy
         public override IProxiable GetHitproxy(UInt32 MouseX, UInt32 MouseY)
         {

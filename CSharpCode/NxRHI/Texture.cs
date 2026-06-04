@@ -3244,11 +3244,51 @@ namespace EngineNS.NxRHI
                 srv.Dispose();
             }
             StreamingAssets.Clear();
+            CoreSDK.DisposeObject(ref BlackTextureSRV);
+            CoreSDK.DisposeObject(ref BlackTexture);
+
+            CoreSDK.DisposeObject(ref WhiteTextureSRV);
+            CoreSDK.DisposeObject(ref WhiteTexture);
         }
         public TtSrView DefaultTexture;
+
+        public NxRHI.TtTexture BlackTexture;
+        public TtSrView BlackTextureSRV;
+        public NxRHI.TtTexture WhiteTexture;
+        public TtSrView WhiteTextureSRV;
         public async System.Threading.Tasks.Task Initialize(TtEngine engine)
         {
             DefaultTexture = await GetTexture(engine.Config.DefaultTexture);
+            BlackTextureSRV = CreateSolidColorTexture(0, 0, 0, 0, "BlackTexture");
+            WhiteTextureSRV = CreateSolidColorTexture(255, 255, 255, 255, "WhiteTexture");
+        }
+        private unsafe TtSrView CreateSolidColorTexture(byte r, byte g, byte b, byte a, string debugName)
+        {
+            var texDesc = new FTextureDesc();
+            texDesc.SetDefault();
+            texDesc.Width = 1;
+            texDesc.Height = 1;
+            texDesc.MipLevels = 1;
+            texDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+
+            var pixel = stackalloc byte[4] { r, g, b, a };
+            var data = new FMappedSubResource();
+            data.pData = pixel;
+            data.RowPitch = 4;
+            data.DepthPitch = 4;
+            texDesc.InitData = &data;
+
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            BlackTexture = rc.CreateTexture(in texDesc);
+            CoreSDK.SetMemDebugText(BlackTexture.mCoreObject, debugName);
+            BlackTexture.SetDebugName(debugName);
+
+            var srvDesc = new FSrvDesc();
+            srvDesc.SetTexture2D();
+            srvDesc.Type = ESrvType.ST_Texture2D;
+            srvDesc.Format = texDesc.Format;
+            srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
+            return rc.CreateSRV(BlackTexture, in srvDesc);
         }
         private Thread.TtAwaitSessionManager<RName, TtSrView> mCreatingSession = new Thread.TtAwaitSessionManager<RName, TtSrView>();
         List<RName> mWaitRemoves = new List<RName>();

@@ -1,5 +1,6 @@
 using EngineNS.GamePlay.Camera;
 using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Pipeline;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -160,6 +161,17 @@ namespace EngineNS.Editor.Forms
         float mCurrentMeshRadius = 1.0f;
         public float PlaneScale = 5.0f;
         EngineNS.GamePlay.Scene.TtMeshNode PlaneMeshNode;
+        [Category("Option")]
+        public TtRenderPolicy RenderPolicy
+        {
+            get
+            {
+                if (PreviewViewport == null)
+                    return null;
+                return PreviewViewport.RenderPolicy;
+            }
+        }
+        [Category("Option")]
         public bool IsCastShadow
         {
             get
@@ -175,6 +187,7 @@ namespace EngineNS.Editor.Forms
                 mCurrentMeshNode.IsCastShadow = value;
             }
         }
+        [Category("Option")]
         public bool IsAcceptShadow
         {
             get

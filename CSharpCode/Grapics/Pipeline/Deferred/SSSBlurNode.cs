@@ -39,9 +39,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     }
 
     /// <summary>
-    /// Separable SSS blur node: performs horizontal blur then vertical blur + specular compose.
-    /// Inputs: DirLighting diffuse (Color), DirLighting separated specular (Specular), GBuffer RT3 (for ShadingMode mask).
-    /// Output: final composited color (blur(diffuse) + specular).
+    /// Separable SSS blur node: performs horizontal blur then vertical blur on SSS pixels only.
+    /// Inputs: DirLighting diffuse (Color), GBuffer RT0/RT3 (for profile and ShadingMode mask).
+    /// Output: blurred diffuse for SSS, passthrough for non-SSS. Specular compose is handled by TAA.
     /// </summary>
     [Bricks.CodeBuilder.ContextMenu("SSSBlur", "Deferred\\SSSBlur", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
     [Rtti.Meta("")]
@@ -52,7 +52,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public TtRenderGraphPin GBufferRT0PinIn = TtRenderGraphPin.CreateInput("GBufferRT0", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin GBufferRT3PinIn = TtRenderGraphPin.CreateInput("GBufferRT3", NxRHI.EBufferType.BFT_SRV);
 
-        public NxRHI.TtCbView CBSSSBlur;
+        public NxRHI.TtCbView CBSSSBlurH;
+        public NxRHI.TtCbView CBSSSBlurV;
 
         [Category("SSS")]
         [Rtti.Meta("")]
@@ -73,7 +74,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void Dispose()
         {
-            CoreSDK.DisposeObject(ref CBSSSBlur);
+            CoreSDK.DisposeObject(ref CBSSSBlurH);
+            CoreSDK.DisposeObject(ref CBSSSBlurV);
             mHorizontalGBuffers?.Dispose();
             mHorizontalGBuffers = null;
             base.Dispose();
@@ -85,6 +87,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             AddInput(ColorPinIn);
             AddInput(SpecularPinIn);
+            SpecularPinIn.IsAllowInputNull = true;
             AddInput(GBufferRT0PinIn);
             AddInput(GBufferRT3PinIn);
         }
@@ -157,11 +160,12 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             if (index.IsValidPointer)
             {
                 var attachBuffer = GetAttachBuffer(SpecularPinIn);
-                drawcall.BindSRV(index, attachBuffer.Srv);
+                if (attachBuffer != null)
+                    drawcall.BindSRV(index, attachBuffer.Srv);
             }
             index = drawcall.FindBinder("Samp_SpecularBuffer");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
             index = drawcall.FindBinder("GBufferRT0");
             if (index.IsValidPointer)
@@ -195,11 +199,18 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             index = drawcall.FindBinder("cbSSSBlur");
             if (index.IsValidPointer)
             {
-                if (CBSSSBlur == null)
+                if (mCurrentPassIndex == 0)
                 {
-                    CBSSSBlur = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    if (CBSSSBlurH == null)
+                        CBSSSBlurH = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    drawcall.BindCBV(index, CBSSSBlurH);
                 }
-                drawcall.BindCBV(index, CBSSSBlur);
+                else
+                {
+                    if (CBSSSBlurV == null)
+                        CBSSSBlurV = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    drawcall.BindCBV(index, CBSSSBlurV);
+                }
             }
 
             index = drawcall.FindBinder("cbPerCamera");
@@ -234,11 +245,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                 // Pass 0: Horizontal blur → mHorizontalPinOut
                 mCurrentPassIndex = 0;
-                if (CBSSSBlur != null)
+                if (CBSSSBlurH != null)
                 {
-                    CBSSSBlur.SetValue("BlurDirection", new Vector2(invWidth, 0));
-                    CBSSSBlur.SetValue("SSSWidth", SSSWidth);
-                    CBSSSBlur.SetValue("SSSPassIndex", 0);
+                    CBSSSBlurH.SetValue("BlurDirection", new Vector2(invWidth, 0));
+                    CBSSSBlurH.SetValue("SSSWidth", SSSWidth);
+                    CBSSSBlurH.SetValue("SSSPassIndex", 0);
                 }
 
                 mHorizontalGBuffers.BuildFrameBuffers(policy);
@@ -266,11 +277,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                 // Pass 1: Vertical blur + compose specular → ResultPinOut (GBuffers)
                 mCurrentPassIndex = 1;
-                if (CBSSSBlur != null)
+                if (CBSSSBlurV != null)
                 {
-                    CBSSSBlur.SetValue("BlurDirection", new Vector2(0, invHeight));
-                    CBSSSBlur.SetValue("SSSWidth", SSSWidth);
-                    CBSSSBlur.SetValue("SSSPassIndex", 1);
+                    CBSSSBlurV.SetValue("BlurDirection", new Vector2(0, invHeight));
+                    CBSSSBlurV.SetValue("SSSWidth", SSSWidth);
+                    CBSSSBlurV.SetValue("SSSPassIndex", 1);
                 }
 
                 GBuffers.BuildFrameBuffers(policy);

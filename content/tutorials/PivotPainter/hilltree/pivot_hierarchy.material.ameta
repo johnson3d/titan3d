@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="8c4fca623ad99d384b1785c6bd0bec85eac96407729d8987ba66c3d004da026d" />
+      <Hash Type="System.String@Unknown" Value="4c9217b67d197f4affb5b04956143e27f695b1e8fd45ff2c7e9a3ec9eea4bf8b" />
       <Path Type="System.String@Unknown" Value="pivot_hierarchy.material" />
     </e_0>
   </AssetFiles>

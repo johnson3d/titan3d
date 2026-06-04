@@ -366,6 +366,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public Vector3 mAlbedo;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "mNormal")]
         public Vector3 mNormal;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "mTangent")]
+        public Vector3 mTangent;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "mMetallic")]
         public float mMetallic;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "mRough")]
@@ -407,6 +409,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "GetWorldNormal")]
         public Vector3 GetWorldNormal(PS_INPUT input)
+        {
+            return Vector3.Zero;
+        }
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "GetWorldTangent")]
+        public Vector3 GetWorldTangent(PS_INPUT input)
         {
             return Vector3.Zero;
         }

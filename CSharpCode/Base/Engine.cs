@@ -61,6 +61,9 @@ namespace EngineNS
         }
         [Rtti.Meta("")]
         [Category("Option")]
+        public bool EnableSourceControl { get; set; } = true;
+        [Rtti.Meta("")]
+        [Category("Option")]
         public string NativeDll { get; set; } = "auto";
         [Rtti.Meta("")]
         [Category("Option")]

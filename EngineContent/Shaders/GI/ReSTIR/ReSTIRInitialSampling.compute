@@ -47,9 +47,9 @@ SamplerState        Samp_EnvMap;
 #endif
 
 // 同上规则: HiZTraceScreenSpace 引用 Hzb / Samp_HzbPoint, 必须在 #include 前声明.
-// Hzb 是 TtHzbNode 输出的 R16G16 multi-mip 纹理, R = min depth, G = max depth.
+// Hzb 是 TtHzbNode 输出的 R32F multi-mip 纹理, 单通道 min NDC-Z (inverse-Z: 最远表面).
 #if ENV_USE_HZB
-Texture2D<float2>  Hzb;
+Texture2D<float>   Hzb;
 SamplerState       Samp_HzbPoint;
 #endif
 
@@ -245,9 +245,9 @@ RayHitInfo CastIndirectRay(float3 originWS, float3 dirWS, inout uint rng)
     bool   hit = false;
 
 #if ENV_USE_HZB
-    // Hi-Z 加速路径: 自适应 mip 步长, 空区域一次跳过整个 tile.
-    // hi-z 用 view-space linear z 比较 (HzbNode 已重构为 linear-z 输出),
-    // 所以 startSS.z / endSS.z 仍是 NDC (仅供出屏判定), linear z 单独传.
+    // Hi-Z 加速路径: 层级遍历, 空区域一次跳过整个 tile.
+    // HZB 存单通道 min NDC-Z (inverse-Z), 比较在 NDC-Z 空间做.
+    // startSS.z / endSS.z 是 NDC-Z, startLinearZ/endLinearZ 传但 wrapper 内部不再使用.
     // hzb mip0 = screen/2 (HzbNode 的 OnResize 保证整除).
     float2 hzbMip0Size = max(float2(1.0f, 1.0f), float2(ScreenSize) * 0.5f);
     hit = HiZTraceScreenSpace(Hzb, Samp_HzbPoint, hzbMip0Size,

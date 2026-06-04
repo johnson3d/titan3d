@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Graphics.Pipeline;
+using System;
 using System.ComponentModel;
 using System.Security.Permissions;
 
@@ -95,7 +96,7 @@ namespace EngineNS.Editor
                 policy.OnResize(ClientSize.X, ClientSize.Y);
             }
 
-            await World.InitWorld();
+            await InitWorld();
 
             if (OnInitialize == null)
             {
@@ -134,9 +135,11 @@ namespace EngineNS.Editor
         public RName PreviewAsset { get; set; } = null;
         [Category("Studio")]
         public TtPreviewStudioContext StudioContext { get; private set; }
-        private const string StudioSkyboxImageName = "editor/studio/sakura_prefiltered_env_12_blur.png";
+        private static TtEditorConfig EditorConfig => TtEngine.Instance?.EditorInstance?.Config;
+        private static string StudioSkyboxImageName => EditorConfig?.StudioSkyboxImageName ?? "editor/studio/sakura_prefiltered_env_12_blur.png";
         private static readonly object mStudioSkyImageLocker = new object();
         private static StbImageSharp.TtMemImage mStudioSkyImage;
+        private static string mStudioSkyImageLoadedPath;
         private static bool IsStudioNodeVisible(GamePlay.Scene.TtNode node)
         {
             return node != null && node.HasStyle(GamePlay.Scene.TtNode.ENodeStyles.Invisible) == false;
@@ -200,14 +203,15 @@ namespace EngineNS.Editor
             if (World == null)
                 return;
 
+            var cfg = EditorConfig;
             var dirLight = World.DirectionLight;
-            var lightDir = new Vector3(-0.24f, -0.92f, 0.29f);
+            var lightDir = cfg?.StudioLightDirection ?? new Vector3(-0.24f, -0.92f, 0.29f);
             lightDir.Normalize();
             dirLight.Direction = lightDir;
-            dirLight.SunLightColor = new Vector3(1.0f, 0.95f, 0.92f);
-            dirLight.SunLightIntensity = 3.6f;
-            dirLight.SkyLightColor = new Vector3(0.31f, 0.34f, 0.40f);
-            dirLight.GroundLightColor = new Vector3(0.24f, 0.22f, 0.20f);
+            dirLight.SunLightColor = cfg?.StudioSunLightColor ?? new Vector3(1.0f, 0.95f, 0.92f);
+            dirLight.SunLightIntensity = cfg?.StudioSunLightIntensity ?? 3.6f;
+            dirLight.SkyLightColor = cfg?.StudioSkyLightColor ?? new Vector3(0.31f, 0.34f, 0.40f);
+            dirLight.GroundLightColor = cfg?.StudioGroundLightColor ?? new Vector3(0.24f, 0.22f, 0.20f);
         }
         public void FrameStudioCamera(in BoundingBox assetBounds, float padding = 1.2f)
         {
@@ -255,8 +259,9 @@ namespace EngineNS.Editor
             {
                 var gridNode = await GamePlay.Scene.TtGridNode.AddGridNode(World, World.Root);
                 gridNode.ViewportSlate = this;
-                gridNode.GridHeight = floorY + 0.006f;
-                gridNode.GridFade = 0.24f;
+                var cfg = EditorConfig;
+                gridNode.GridHeight = floorY + (cfg?.StudioGridHeightOffset ?? 0.006f);
+                gridNode.GridFade = cfg?.StudioGridFade ?? 0.24f;
                 gridNode.GridRadius = MathHelper.Max(floorSize * 1.35f, 12.0f);
                 context.GridNode = gridNode;
             }
@@ -282,9 +287,10 @@ namespace EngineNS.Editor
         }
         private bool IsDefaultStudioFloorMaterial(RName floorMaterialName)
         {
+            var defaultMat = EditorConfig?.StudioDefaultFloorMaterial ?? "material/whitecolor.uminst";
             return floorMaterialName == null ||
                 (floorMaterialName.RNameType == RName.ERNameType.Engine &&
-                string.Equals(floorMaterialName.Name, "material/whitecolor.uminst", StringComparison.OrdinalIgnoreCase));
+                string.Equals(floorMaterialName.Name, defaultMat, StringComparison.OrdinalIgnoreCase));
         }
         private async Thread.Async.TtTask<Graphics.Pipeline.Shader.TtMaterialInstance> CreateStudioColorMaterial(
             Vector4 color,
@@ -392,11 +398,14 @@ namespace EngineNS.Editor
             var image = GetStudioSkyImage();
             if (image == null || image.Width <= 0 || image.Height <= 0)
             {
+                var cfg = EditorConfig;
+                var bottom = cfg?.StudioFallbackSkyColorBottom ?? new Vector3(0.58f, 0.62f, 0.70f);
+                var top = cfg?.StudioFallbackSkyColorTop ?? new Vector3(0.26f, 0.43f, 0.68f);
                 var t = (float)Math.Pow(MathHelper.FClamp(direction.Y * 0.5f + 0.5f, 0.0f, 1.0f), 0.72f);
                 return PackStudioColor(
-                    0.58f + (0.26f - 0.58f) * t,
-                    0.62f + (0.43f - 0.62f) * t,
-                    0.70f + (0.68f - 0.70f) * t);
+                    bottom.X + (top.X - bottom.X) * t,
+                    bottom.Y + (top.Y - bottom.Y) * t,
+                    bottom.Z + (top.Z - bottom.Z) * t);
             }
 
             var phi = Math.Atan2(direction.Z, direction.X);
@@ -533,7 +542,8 @@ namespace EngineNS.Editor
             Graphics.Pipeline.Shader.TtMaterial floorMaterial = null;
             if (IsDefaultStudioFloorMaterial(floorMaterialName))
             {
-                floorMaterial = await CreateStudioColorMaterial(new Vector4(0.68f, 0.72f, 0.76f, 1.0f),
+                var floorColor = EditorConfig?.StudioFloorColor ?? new Vector4(0.18f, 0.18f, 0.18f, 1.0f);
+                floorMaterial = await CreateStudioColorMaterial(floorColor,
                     Graphics.Pipeline.ERenderLayer.RL_Opaque, cullNone: true);
             }
             else

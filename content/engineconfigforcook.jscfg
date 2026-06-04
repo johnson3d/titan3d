@@ -1,4 +1,5 @@
 {
+  "EnableSourceControl": false,
   "IsReverseZ": true,
   "MultiRenderMode": "Queue",
   "UsePhysxMT": true,

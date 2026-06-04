@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\FenceNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\FogNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Post\DenoiseNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Post\SSAONode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Post\HemisphereCaptureNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Post\FsrNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\GpuScene_Instance.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Shadow\CascadedShadowMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shadow\ExponentialShadowNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shadow\ShadowMapNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shadow\ContactShadowNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\GpuSceneNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CoreShaderBinder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RenderLayer.cs" />

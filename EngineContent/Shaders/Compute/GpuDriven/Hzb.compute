@@ -1,35 +1,20 @@
 #ifndef _HZB_H_
 #define _HZB_H_
 #include "../../Inc/GlobalDefine.cginc"
-// Hzb 现在存的是 view-space linear z (R = min, G = max), 单调"越远越大",
-// 不再受 USE_INVERSE_Z 影响. linearize 复用 cbPerCamera.LinearFromDepth.
-#include "../../CBuffer/VarBase_PerCamera.cginc"
+
+// HZB 存单通道 NDC-Z (raw device depth), 不做线性化.
+// Inverse-Z 约定: NDC-Z=1 近平面, NDC-Z=0 远平面/天空.
+// Downsample 用 min(): min(NDC-Z) = 最远表面 = conservative for occlusion.
+// 优势: 省一半显存和带宽 (R32F 单通道 vs 旧方案 R16G16), 且避免了线性化的精度损失.
 
 Texture2D<float> DepthBuffer;
 
 // SrcBuffer 必须是 SRV (Texture2D), 不能与 DstBuffer 共用 RWTexture2D 通道.
-// 历史 BUG: 当 SrcBuffer / DstBuffer 都声明为 RWTexture2D<float2> 时, effect 编译期
-// 反射出来的两个 UAV binder 走同一个资源类型 / 同一个 root descriptor table 槽位,
-// C# 端 BindUav("SrcBuffer", srcMipUav) + BindUav("DstBuffer", dstMipUav) 实际会被
-// 引擎绑成"两个 binder 指向同一份默认 UAV 视图 (覆盖全 mip)", 而不是分别指到
-// src mip 和 dst mip. 表现是: id*2 越界采到自己, mip 链全断, ReSTIR HiZ ray-march
-// 在第一次采到 (0,0) 时立即判定命中 -> 射线只命中自身 (RenderDoc 实证).
-// 改成 SRV 之后 SrcBuffer 落在 SBT_SRV 槽位, 与 SBT_UAV 物理隔离, 不再冲突.
-Texture2D<float2> SrcBuffer;
-//d24_unorm_s8_uint,d16_unorm,d32_sfloat
-VK_IMAGE(rg16f)
-RWTexture2D<float2> DstBuffer;
-
-// 把原始 NDC depth 转成 view-space linear z. cbPerCamera.LinearFromDepth 内部
-// 已分别处理 USE_INVERSE_Z 0/1, 这里无需 #if 分支.
-//
-// 远平面 / 天空像素 (USE_INVERSE_Z=1 时 NDC z=0; 标准 z 时 NDC z=1) 经过
-// LinearFromDepth 会得到接近 ZFar 的值, 在 hi-z 比较中等价于"无穷远", 不会污染
-// min/max 语义.
-inline float HzbLinearizeDepth(float ndcZ)
-{
-    return LinearFromDepth(ndcZ);
-}
+// 历史 BUG: 两个 RWTexture2D binder 会被引擎绑到同一份默认 UAV 视图 → mip 链全断.
+// 改成 SRV 后 SrcBuffer 落在 SBT_SRV 槽位, 与 SBT_UAV 物理隔离, 不再冲突.
+Texture2D<float> SrcBuffer;
+VK_IMAGE(r32f)
+RWTexture2D<float> DstBuffer;
 
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_Setup(uint3 id : SV_DispatchThreadID,
@@ -43,15 +28,14 @@ void CS_Setup(uint3 id : SV_DispatchThreadID,
 		return;
 
     // mip0 = depth/2 (整除, 由 C# 端 OnResize 保证), 因此 id*2 + (1,1) 不会越界.
-    float d1 = HzbLinearizeDepth(DepthBuffer[id.xy * 2].r);
-    float d2 = HzbLinearizeDepth(DepthBuffer[id.xy * 2 + int2(0, 1)].r);
-    float d3 = HzbLinearizeDepth(DepthBuffer[id.xy * 2 + int2(1, 0)].r);
-    float d4 = HzbLinearizeDepth(DepthBuffer[id.xy * 2 + int2(1, 1)].r);
+    // 直接存 raw NDC-Z, 不做线性化.
+    float d1 = DepthBuffer[id.xy * 2].r;
+    float d2 = DepthBuffer[id.xy * 2 + int2(0, 1)].r;
+    float d3 = DepthBuffer[id.xy * 2 + int2(1, 0)].r;
+    float d4 = DepthBuffer[id.xy * 2 + int2(1, 1)].r;
 
-    float2 value;
-    value.r = min(min(d1, d2), min(d3, d4));
-    value.g = max(max(d1, d2), max(d3, d4));
-    DstBuffer[id.xy] = value;
+    // Inverse-Z: min(NDC-Z) = 最远表面 = conservative (不漏检)
+    DstBuffer[id.xy] = min(min(d1, d2), min(d3, d4));
 }
 
 [numthreads(DispatchX, DispatchY, DispatchZ)]
@@ -65,24 +49,12 @@ void CS_DownSample(uint3 id : SV_DispatchThreadID,
 	if (any(id.xy >= texSize))
 		return;
 
-    // src 尺寸 = dst 尺寸 * 2 (mip 链每级减半的物理保证, 由 C# 端 OnResize 控制).
-    // 因此 dst 任一像素的 4 个 src 邻居 (id*2, id*2+(0,1), id*2+(1,0), id*2+(1,1))
-    // 始终在 src 范围内, 无需边界判断. 这里同时修正了旧代码"用 dst 尺寸判 src 边界"
-    // 的 off-by-one bug (旧代码 if (texSize.x > 1) 判的是 dst 尺寸, 当 dst.x>1 时
-    // src.x>=4 必然成立, 但这条 if 在 dst.x==1 时会漏读应有的邻居 -> max 偏小).
-    //
-    // 取 R(min) 的 min 和 G(max) 的 max, 形成 conservative 的更粗 mip.
-    // (注意每个 src 像素的 R/G 已经是 2x2 邻域的 min/max, 不能只读 R 用 min(R) 也
-    // 不能只读 G 用 max(G), 必须 R 走 min 链, G 走 max 链.)
-    float2 s1 = SrcBuffer[id.xy * 2];
-    float2 s2 = SrcBuffer[id.xy * 2 + int2(0, 1)];
-    float2 s3 = SrcBuffer[id.xy * 2 + int2(1, 0)];
-    float2 s4 = SrcBuffer[id.xy * 2 + int2(1, 1)];
+    float s1 = SrcBuffer[id.xy * 2];
+    float s2 = SrcBuffer[id.xy * 2 + int2(0, 1)];
+    float s3 = SrcBuffer[id.xy * 2 + int2(1, 0)];
+    float s4 = SrcBuffer[id.xy * 2 + int2(1, 1)];
 
-    float2 value;
-    value.r = min(min(s1.r, s2.r), min(s3.r, s4.r));
-    value.g = max(max(s1.g, s2.g), max(s3.g, s4.g));
-    DstBuffer[id.xy] = value;
+    DstBuffer[id.xy] = min(min(s1, s2), min(s3, s4));
 }
 
 #endif //#ifndef _HZB_H_

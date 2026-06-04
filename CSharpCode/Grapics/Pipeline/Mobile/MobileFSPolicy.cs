@@ -7,7 +7,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
     public class TtMobileFSPolicy : TtRenderPolicy
     {
         #region Feature On/Off
-        public override bool DisableAO
+        protected bool mDisableAO;
+        public virtual bool DisableAO
         {
             get => mDisableAO;
             set
@@ -17,7 +18,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 BasePassNode.mOpaqueShading.UpdatePermutation().AddWaitTask();
             }
         }
-        public override bool DisablePointLight
+        bool mDisablePointLight;
+        public bool DisablePointLight
         {
             get
             {
@@ -34,22 +36,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         #endregion
 
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-        public UMobileOpaqueNode BasePassNode = new UMobileOpaqueNode();
-在此之后:
-        public TtMobileOpaqueNode BasePassNode = new UMobileOpaqueNode();
-*/
         public TtMobileOpaqueNode BasePassNode = new TtMobileOpaqueNode();
-
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-        public Shadow.UShadowMapNode mShadowMapNode = new Shadow.UShadowMapNode();        
-        public override NxRHI.TtSrView GetFinalShowRSV()
-在此之后:
-        public Shadow.TtShadowMapNode mShadowMapNode = new Shadow.UShadowMapNode();        
-        public override NxRHI.TtSrView GetFinalShowRSV()
-*/
         public Shadow.TtShadowMapNode mShadowMapNode = new Shadow.TtShadowMapNode();        
         public override NxRHI.TtSrView GetFinalShowRSV()
         {

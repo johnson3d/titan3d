@@ -22,10 +22,13 @@ namespace EngineNS.Editor.Forms
         public Graphics.Mesh.TtMaterialMesh Mesh;
         public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
         [Category("Option")]
-        public TtRenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
+        public TtRenderPolicy RenderPolicy 
+        { 
+            get => PreviewViewport.RenderPolicy; 
+        }
         public EGui.Controls.PropertyGrid.TtPropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public EGui.Controls.PropertyGrid.TtPropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
-
+        [Category("Option")]
         public bool IsCastShadow
         {
             get
@@ -41,6 +44,7 @@ namespace EngineNS.Editor.Forms
                 mCurrentMeshNode.IsCastShadow = value;
             }
         }
+        [Category("Option")]
         public bool IsAcceptShadow
         {
             get

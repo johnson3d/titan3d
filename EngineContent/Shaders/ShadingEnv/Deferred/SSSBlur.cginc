@@ -10,11 +10,11 @@
 Texture2D ColorBuffer DX_AUTOBIND;
 SamplerState Samp_ColorBuffer DX_AUTOBIND;
 
-Texture2D SpecularBuffer DX_AUTOBIND;
-SamplerState Samp_SpecularBuffer DX_AUTOBIND;
-
 Texture2D DepthBuffer DX_AUTOBIND;
 SamplerState Samp_DepthBuffer DX_AUTOBIND;
+
+Texture2D SpecularBuffer DX_AUTOBIND;
+SamplerState Samp_SpecularBuffer DX_AUTOBIND;
 
 Texture2D GBufferRT0 DX_AUTOBIND;
 SamplerState Samp_GBufferRT0 DX_AUTOBIND;
@@ -48,12 +48,21 @@ static const float SSS_GaussWeights[SSS_NUM_SAMPLES] = {
     0.006, 0.061, 0.242, 0.382, 0.242, 0.061, 0.006
 };
 
-bool IsSSSPixel(float2 uv)
+int GetShadingModeFromUV(float2 uv)
 {
     half4 rt3 = (half4)GBufferRT3.SampleLevel(Samp_GBufferRT3, uv, 0);
-    int renderFlags = (int)(rt3.b * 1023.0h);
-    int shadingMode = (renderFlags & SHADINGMODE_BIT_MASK) >> SHADINGMODE_BIT_OFFSET;
-    return shadingMode == EShadingMode_Subsurface;
+    int renderFlags = (int)(rt3.b * 1023.0h + 0.5h);
+    return (renderFlags & SHADINGMODE_BIT_MASK) >> SHADINGMODE_BIT_OFFSET;
+}
+
+bool IsPBRPixel(float2 uv)
+{
+    return GetShadingModeFromUV(uv) == EShadingMode_PBR;
+}
+
+bool IsSSSPixel(float2 uv)
+{
+    return GetShadingModeFromUV(uv) == EShadingMode_Subsurface;
 }
 
 // Read per-pixel Opacity mask from GBufferRT3.a (2-bit quantized: 0, 0.33, 0.67, 1.0)
@@ -114,19 +123,19 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     float2 uv = input.vUV.xy;
     half4 centerColor = (half4)ColorBuffer.SampleLevel(Samp_ColorBuffer, uv, 0);
 
+    // Only compose specular on the final (vertical) pass to avoid double-add.
+    // Pass 0 = horizontal blur, Pass 1 = vertical blur + compose.
+    half3 specularColor = half3(0, 0, 0);
+    if (SSSPassIndex == 1)
+    {
+        specularColor = (half3)SpecularBuffer.SampleLevel(Samp_SpecularBuffer, uv, 0).rgb;
+    }
+
     if (!IsSSSPixel(uv))
     {
-        // Non-SSS pixel: pass through, compose specular on final pass
-        if (SSSPassIndex == 1)
-        {
-            half4 spec = (half4)SpecularBuffer.SampleLevel(Samp_SpecularBuffer, uv, 0);
-            output.RT0.rgb = centerColor.rgb + spec.rgb;
-        }
-        else
-        {
-            output.RT0.rgb = centerColor.rgb;
-        }
-        output.RT0.a = centerColor.a;
+        // Non-SSS pixels (PBR/Hair): RT0 already has diffuse+specular merged.
+        // Pure passthrough, no compose needed.
+        output.RT0 = centerColor;
         return output;
     }
 
@@ -197,16 +206,9 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     // Opacity=0 (nails/eyebrows): keep original, Opacity=1 (skin): fully blurred.
     blurResult = lerp(centerColor.rgb, blurResult, centerOpacity);
 
-    if (SSSPassIndex == 1)
-    {
-        // Final pass: compose blurred diffuse + un-blurred separated specular
-        half4 spec = (half4)SpecularBuffer.SampleLevel(Samp_SpecularBuffer, uv, 0);
-        output.RT0.rgb = blurResult + spec.rgb;
-    }
-    else
-    {
-        output.RT0.rgb = blurResult;
-    }
+    // Compose: blurred diffuse + unblurred specular.
+    // Specular must not be blurred — it's high-frequency detail (highlights, reflections).
+    output.RT0.rgb = blurResult + specularColor;
     output.RT0.a = centerColor.a;
 
     return output;

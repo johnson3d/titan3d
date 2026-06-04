@@ -98,6 +98,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         protected async Thread.Async.TtTask<bool> Initialize_PreviewMaterial(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
+            policy.EnableGI = false;
 
             await viewport.World.InitWorld();
 

@@ -11,6 +11,7 @@
       <Position Type="EngineNS.Vector2@EngineCore" Value="1899,314.99997" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtCopy2SwapChainNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
+        <UniqueId Type="System.Guid@Unknown" Value="ebb350e4-273e-44ad-bdeb-76394706bcc5" />
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
@@ -22,27 +23,29 @@
       <Position Type="EngineNS.Vector2@EngineCore" Value="1252,296" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.RayTracing.TtRayTracingNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
+        <UniqueId Type="System.Guid@Unknown" Value="12630640-2aab-4554-a5b5-836a86097bbd" />
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_1>
   </Nodes>
   <PolicyType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore" />
   <RenderPolicy Type="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore">
-    <DisableAO Type="System.Boolean@Unknown" Value="False" />
-    <DisableHDR Type="System.Boolean@Unknown" Value="False" />
-    <DisablePointLight Type="System.Boolean@Unknown" Value="False" />
+    <EnableAO Type="System.Boolean@Unknown" Value="True" />
+    <EnableContactShadow Type="System.Boolean@Unknown" Value="True" />
+    <EnableGI Type="System.Boolean@Unknown" Value="True" />
+    <EnableLocalLights Type="System.Boolean@Unknown" Value="True" />
     <ShadowMode Type="EngineNS.Graphics.Pipeline.EShadowMode@EngineCore" Value="Csm" />
-    <TypeAA Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA@EngineCore" Value="Taa" />
     <TypeFog Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog@EngineCore" Value="None" />
   </RenderPolicy>
-  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
-      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="a1cddd31-0556-4825-9ab9-88ba36656ca0" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="4a4b344e-3cdb-4928-8beb-fd7dcc2d877e" />
         <OutPinName Type="System.String@Unknown" Value="Lighting" />
       </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
     </e_0>
   </Linkers>
 </Root>

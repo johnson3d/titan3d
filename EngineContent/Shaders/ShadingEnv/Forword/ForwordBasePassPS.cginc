@@ -15,6 +15,9 @@ StructuredBuffer<FTileData> TilingBuffer DX_AUTOBIND;
 struct PS_OUTPUT
 {
 	float4 RT0 : SV_Target0;
+#if ENABLE_MOTION_VECTOR == 1
+	float4 RT1 : SV_Target1;
+#endif
 };
 
 PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
@@ -414,6 +417,16 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 
 	//output.RT0.rgb = Albedo;
 	//output.RT0.a = Alpha;
+
+#if ENABLE_MOTION_VECTOR == 1
+	{
+		float2 previousScreenPos = (input.psCustomUV1.xy / input.psCustomUV1.w) * 0.5 + 0.5;
+		float2 currentScreenPos = (input.psCustomUV2.xy / input.psCustomUV2.w) * 0.5 + 0.5;
+		float2 motionVector = currentScreenPos - previousScreenPos;
+		output.RT1.rg = EncodeMotionVector(motionVector);
+		output.RT1.ba = float2(0, 0);
+	}
+#endif
 	
 	return output;
 }

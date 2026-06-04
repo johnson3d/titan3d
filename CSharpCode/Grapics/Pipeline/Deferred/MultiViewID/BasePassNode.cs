@@ -206,9 +206,12 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
         {
             return mOpaqueShading;
         }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public bool EnableHDR { get; set; }
         public override void BeforeTick(TtRenderPolicy policy)
         {
-            if (policy.DisableHDR)
+            if (EnableHDR == false)
             {
                 if (Rt0PinOut.Attachement.Format != EPixelFormat.PXF_R8G8B8A8_UNORM)
                 {

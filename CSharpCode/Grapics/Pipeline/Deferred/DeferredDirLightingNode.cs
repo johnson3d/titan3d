@@ -15,32 +15,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     public partial class TtDeferredDirLightingShading : Shader.TtGraphicsShadingEnv
     {
         #region Permutation
-        public TtPermutationItem DisableAO
-        {
-            get;
-            set;
-        }
-        public TtPermutationItem DisablePointLights
-        {
-            get;
-            set;
-        }
-        public TtPermutationItem DisableSunshaft
-        {
-            get;
-            set;
-        }
-        public TtPermutationItem DisableBloom
-        {
-            get;
-            set;
-        }
-        public TtPermutationItem DisableHdr
-        {
-            get;
-            set;
-        }
-        public TtPermutationItem EnableRimLight
+        public TtPermutationItem EnableLocalLights
         {
             get;
             set;
@@ -50,49 +25,15 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get;
             set;
         }
-        [Category("Option")]
-        public bool IsEnableRimLight
-        {
-            get
-            {
-                return EnableRimLight.Value.GetValue(EnableRimLight) == 1;
-            }
-            set
-            {
-                EnableRimLight.SetValue(value);
-                this.UpdatePermutation().AddWaitTask();
-            }
-        }
-        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "EDebugShowMode")]
-        public enum EDebugShowMode : uint
-        {
-            None = 0,
-            N,
-            NoH,
-            LoH,
-            NoV,
-            VoH,
-            NoL,
-            Specular,
-            Num,
-        }
-        public TtPermutationItem DebugShowModePermutation
+        public TtPermutationItem EnableContactShadow
         {
             get;
             set;
         }
-        [Category("Option")]
-        public EDebugShowMode DebugShowMode
+        public TtPermutationItem EnableSSAO
         {
-            get
-            {
-                return (EDebugShowMode)DebugShowModePermutation.Value.GetValue(DebugShowModePermutation);
-            }
-            set
-            {
-                DebugShowModePermutation.SetValue((uint)value);
-                this.UpdatePermutation().AddWaitTask();
-            }
+            get;
+            set;
         }
         public TtPermutationItem ShadowModePermutation
         {
@@ -119,27 +60,20 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             this.BeginPermutaion();
 
-            DisableAO = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_AO", (int)Shader.EPermutation_Bool.BitWidth);
-            DisablePointLights = this.PushPermutation<Shader.EPermutation_Bool>("ENV_GRID_LIGHTS", (int)Shader.EPermutation_Bool.BitWidth);
-            DisableSunshaft = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_SUNSHAFT", (int)Shader.EPermutation_Bool.BitWidth);
-            DisableBloom = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_BLOOM", (int)Shader.EPermutation_Bool.BitWidth);
-            DisableHdr = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_HDR", (int)Shader.EPermutation_Bool.BitWidth);
-            EnableRimLight = this.PushPermutation<Shader.EPermutation_Bool>("ENV_ENABLE_RIMLIGHT", (int)Shader.EPermutation_Bool.BitWidth);
+            EnableLocalLights = this.PushPermutation<Shader.EPermutation_Bool>("ENV_LOCAL_LIGHTS", (int)Shader.EPermutation_Bool.BitWidth);
             EnableSeparatedSpecular = this.PushPermutation<Shader.EPermutation_Bool>("ENV_ENABLE_SEPARATED_SPECULAR", (int)Shader.EPermutation_Bool.BitWidth);
 
-            DisableAO.SetValue((int)Shader.EPermutation_Bool.FalseValue);
-            DisablePointLights.SetValue((int)Shader.EPermutation_Bool.TrueValue);
-            DisableSunshaft.SetValue((int)Shader.EPermutation_Bool.TrueValue);
-            DisableBloom.SetValue((int)Shader.EPermutation_Bool.TrueValue);
-            DisableHdr.SetValue((int)Shader.EPermutation_Bool.TrueValue);
-            EnableRimLight.SetValue((int)Shader.EPermutation_Bool.FalseValue);
+            EnableLocalLights.SetValue((int)Shader.EPermutation_Bool.TrueValue);
             EnableSeparatedSpecular.SetValue((int)Shader.EPermutation_Bool.FalseValue);
-
-            DebugShowModePermutation = this.PushPermutation<EDebugShowMode>("ENV_EDebugShowMode", GetBitWidth((int)EDebugShowMode.Num));
-            DebugShowModePermutation.SetValue((int)EDebugShowMode.None);
 
             ShadowModePermutation = this.PushPermutation<EShadowMode>("ENV_EShadowMode", GetBitWidth((int)EShadowMode.Num));
             ShadowModePermutation.SetValue((int)EShadowMode.Csm);
+
+            EnableContactShadow = this.PushPermutation<Shader.EPermutation_Bool>("ENV_ENABLE_CONTACT_SHADOW", (int)Shader.EPermutation_Bool.BitWidth);
+            EnableContactShadow.SetValue((int)Shader.EPermutation_Bool.FalseValue);
+
+            EnableSSAO = this.PushPermutation<Shader.EPermutation_Bool>("ENV_ENABLE_SSAO", (int)Shader.EPermutation_Bool.BitWidth);
+            EnableSSAO.SetValue((int)Shader.EPermutation_Bool.FalseValue);
 
             this.UpdatePermutation().AddWaitTask();
         }
@@ -225,6 +159,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             index = drawcall.FindBinder("Samp_DepthBuffer");
             if (index.IsValidPointer)
                 drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+
+            index = drawcall.FindBinder("StencilBuffer");
+            if (index.IsValidPointer)
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.DepthStencilPinIn);
+                if (attachBuffer?.StencilSrv != null)
+                    drawcall.BindSRV(index, attachBuffer.StencilSrv);
+            }
             #endregion
 
             #region shadow
@@ -248,6 +190,32 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 if (index.IsValidPointer)
                     drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
             }
+            #endregion
+
+            #region contact shadow
+            index = drawcall.FindBinder("GContactShadow");
+            if (index.IsValidPointer)
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.ContactShadowPinIn);
+                if (attachBuffer?.Srv != null)
+                    drawcall.BindSRV(index, attachBuffer.Srv);
+            }
+            index = drawcall.FindBinder("Samp_GContactShadow");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+            #endregion
+
+            #region SSAO
+            index = drawcall.FindBinder("GSSAOTexture");
+            if (index.IsValidPointer)
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.SSAOPinIn);
+                if (attachBuffer?.Srv != null)
+                    drawcall.BindSRV(index, attachBuffer.Srv);
+            }
+            index = drawcall.FindBinder("Samp_GSSAOTexture");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
             #endregion
 
             #region effect
@@ -356,41 +324,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             {
                 drawcall.BindCBV(index, policy.DefaultCamera.PerCameraCBuffer);
             }
-            index = drawcall.FindBinder("cbShadingEnv");
-            if (index.IsValidPointer)
-            {
-                if (dirLightingNode.CBShadingEnv == null)
-                {
-                    dirLightingNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
-                }
-                dirLightingNode.CBShadingEnv.SetValue("RimPower", dirLightingNode.RimPower);
-                dirLightingNode.CBShadingEnv.SetValue("RimIntensity", dirLightingNode.RimIntensity);
-                drawcall.BindCBV(index, dirLightingNode.CBShadingEnv);
-            }
+
         }
-        public void SetDisableAO(bool value)
+        public void SetEnableLocalLights(bool value)
         {
-            DisableAO.SetValue(value);
-            UpdatePermutation().AddWaitTask();
-        }
-        public void SetDisableSunShaft(bool value)
-        {
-            DisableSunshaft.SetValue(value);
-            UpdatePermutation().AddWaitTask();
-        }
-        public void SetDisableBloom(bool value)
-        {
-            DisableBloom.SetValue(value);
-            UpdatePermutation().AddWaitTask();
-        }
-        public void SetDisableHDR(bool value)
-        {
-            DisableHdr.SetValue(value);
-            UpdatePermutation().AddWaitTask();
-        }
-        public void SetDisablePointLights(bool value)
-        {
-            DisablePointLights.SetValue(value);
+            EnableLocalLights.SetValue(value);
             UpdatePermutation().AddWaitTask();
         }
         public void SetEnableSeparatedSpecular(bool value)
@@ -424,13 +362,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
         public TtRenderGraphPin RtAdvShadowIn = TtRenderGraphPin.CreateInput("AdvShadow", NxRHI.EBufferType.BFT_NONE);
 
-        public TtRenderGraphPin SpecularPinOut = TtRenderGraphPin.CreateOutput("Specular", true, EPixelFormat.PXF_R16G16B16A16_FLOAT, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin ContactShadowPinIn = TtRenderGraphPin.CreateInput("ContactShadow", NxRHI.EBufferType.BFT_SRV);
 
-        public NxRHI.TtCbView CBShadingEnv;
-        [Category("Shading")]
-        public float RimPower { get; set; } = 5.0f;
-        [Category("Shading")]
-        public float RimIntensity { get; set; } = 0.5f;
+        public TtRenderGraphPin SSAOPinIn = TtRenderGraphPin.CreateInput("SSAO", NxRHI.EBufferType.BFT_SRV);
+
+        public TtRenderGraphPin SpecularPinOut = TtRenderGraphPin.CreateOutput("Specular", true, EPixelFormat.PXF_R16G16B16A16_FLOAT, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
 
         public TtDeferredDirLightingNode()
         {
@@ -438,12 +374,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void Dispose()
         {
-            CoreSDK.DisposeObject(ref CBShadingEnv);
             base.Dispose();
         }
         public override void InitNodePins()
         {
-            ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16G16B16A16_FLOAT;
+            ResultPinOut.Attachement.Format = EPixelFormat.PXF_R11G11B10_FLOAT;
             SpecularPinOut.Attachement.Format = EPixelFormat.PXF_R16G16B16A16_FLOAT;
             base.InitNodePins();
 
@@ -473,8 +408,29 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             AddInput(RtAdvShadowIn);
             RtAdvShadowIn.IsAllowInputNull = true;
             RtAdvShadowIn.LinkType = "AdvShadow";
+
+            AddInput(ContactShadowPinIn);
+            ContactShadowPinIn.IsAllowInputNull = true;
+
+            AddInput(SSAOPinIn);
+            SSAOPinIn.IsAllowInputNull = true;
         }
         public bool IsSeparatedSpecularEnabled => SpecularPinOut.FindOutLinkers().Count > 0;
+        bool mIsEnableContactShadow = false;
+        [Category("Shading")]
+        public bool IsEnableContactShadow 
+        {
+            get => mIsEnableContactShadow;
+            set
+            {
+                mIsEnableContactShadow = value;
+                if (ContactShadowNode == null)
+                    mIsEnableContactShadow = false;
+            }
+        }
+        [Category("Shading")]
+        public TtContactShadowNode ContactShadowNode { get; set; }
+        internal bool IsSSAOConnected;
         public override unsafe TtGraphicsBuffers CreateGBuffers(TtRenderPolicy policy, EPixelFormat format)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
@@ -499,7 +455,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             else
             {
-                //base.CreateGBuffers(policy, format);
                 PassDesc.NumOfMRT = 1;
                 PassDesc.AttachmentMRTs[0].Format = format;
                 PassDesc.AttachmentMRTs[0].Samples = 1;
@@ -507,7 +462,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
 
                 RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
-
                 GBuffers.Initialize(policy, RenderPass);
                 GBuffers.SetRenderTarget(policy, 0, ResultPinOut);
             }
@@ -529,10 +483,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 }
             }
         }
-        public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
-        {
-            base.FrameBuild(policy);
-        }
         public TtDeferredDirLightingShading mBasePassShading;
         [Category("Option")]
         public TtDeferredDirLightingShading BasePassShading
@@ -551,11 +501,17 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtDeferredDirLightingShading>();
+            mBasePassShading.EnableLocalLights.SetValue(policy.EnableLocalLights);
 
-            if (SpecularPinOut.FindOutLinkers().Count > 0)
+            // Enable separated specular MRT when SSSBlur is connected to SpecularPinOut.
+            // This lets DirLighting output diffuse(RT0) + specular(RT1) so SSSBlur can
+            // blur only diffuse and compose specular back afterwards.
+            if (IsSeparatedSpecularEnabled)
             {
                 mBasePassShading.SetEnableSeparatedSpecular(true);
             }
+            await mBasePassShading.UpdatePermutation();
+
             await base.Initialize(policy, debugName);
 
             if (RtAdvShadowIn.FindInLinker() is var linker && linker != null)
@@ -585,8 +541,31 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             {
                 mBasePassShading.ShadowMode = EShadowMode.None;
             }
+
+            {
+                var contactlinker = ContactShadowPinIn.FindInLinker();
+                if (contactlinker != null)
+                {
+                    ContactShadowNode = contactlinker.OutPin.HostNode as TtContactShadowNode;
+                    IsEnableContactShadow = true;
+                    
+                }
+                else
+                {
+                    ContactShadowNode = null;
+                    IsEnableContactShadow = false;
+                }
+            }
+
+            // SSAO: enable permutation if pin is connected
+            IsSSAOConnected = (SSAOPinIn.FindInLinker() != null);
+            if (IsSSAOConnected)
+            {
+                mBasePassShading.EnableSSAO.SetValue((int)Shader.EPermutation_Bool.TrueValue);
+                mBasePassShading.UpdatePermutation().AddWaitTask();
+            }
         }
-        [Category("Option")]
+        [Category("Shading")]
         public EShadowMode ShadowMode
         {
             get => mBasePassShading.ShadowMode;
@@ -619,6 +598,39 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 }
                 mBasePassShading.ShadowMode = value;
             }
+        }
+        public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
+        {
+            // Drive contact shadow permutation by pin connection state
+            if (mBasePassShading != null && ContactShadowNode != null)
+            {
+                bool shouldEnableContactShadow = IsEnableContactShadow && policy.EnableContactShadow;
+                var desired = shouldEnableContactShadow
+                    ? (uint)Shader.EPermutation_Bool.TrueValue
+                    : (uint)Shader.EPermutation_Bool.FalseValue;
+                if (mBasePassShading.EnableContactShadow.Value.GetValue(mBasePassShading.EnableContactShadow) != desired)
+                {
+                    mBasePassShading.EnableContactShadow.SetValue(desired);
+                    mBasePassShading.UpdatePermutation().AddWaitTask();
+                }
+                ContactShadowNode.Enable = IsEnableContactShadow;
+            }
+
+            // Drive SSAO permutation by pin connection + policy
+            if (mBasePassShading != null)
+            {
+                bool shouldEnableSSAO = IsSSAOConnected && policy.EnableAO;
+                var desired = shouldEnableSSAO
+                    ? (uint)Shader.EPermutation_Bool.TrueValue
+                    : (uint)Shader.EPermutation_Bool.FalseValue;
+                if (mBasePassShading.EnableSSAO.Value.GetValue(mBasePassShading.EnableSSAO) != desired)
+                {
+                    mBasePassShading.EnableSSAO.SetValue(desired);
+                    mBasePassShading.UpdatePermutation().AddWaitTask();
+                }
+            }
+
+            ShadowMode = policy.ShadowMode;
         }
         public override void Tick(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {

@@ -220,15 +220,48 @@ namespace EngineNS.Bricks.AdvanceShadow
 
         [Rtti.Meta("")]
         [Category("Clipmap")]
-        public int ClipmapLevelCount { get; set; } = 8;
+        public int ClipmapLevelCount
+        {
+            get => mClipmapLevelCount;
+            set
+            {
+                if (mClipmapLevelCount == value)
+                    return;
+                mClipmapLevelCount = value;
+                RebuildClipmap();
+            }
+        }
+        private int mClipmapLevelCount = 8;
 
         [Rtti.Meta("")]
         [Category("Clipmap")]
-        public float ClipmapBaseHalfExtent { get; set; } = 8.0f;
+        public float ClipmapBaseHalfExtent
+        {
+            get => mClipmapBaseHalfExtent;
+            set
+            {
+                if (MathF.Abs(mClipmapBaseHalfExtent - value) < 1e-6f)
+                    return;
+                mClipmapBaseHalfExtent = value;
+                RebuildClipmap();
+            }
+        }
+        private float mClipmapBaseHalfExtent = 8.0f;
 
         [Rtti.Meta("")]
         [Category("Clipmap")]
-        public int ClipmapPagesPerDim { get; set; } = 4;
+        public int ClipmapPagesPerDim
+        {
+            get => mClipmapPagesPerDim;
+            set
+            {
+                if (mClipmapPagesPerDim == value)
+                    return;
+                mClipmapPagesPerDim = value;
+                RebuildClipmap();
+            }
+        }
+        private int mClipmapPagesPerDim = 4;
 
         // ---- Clipmap Debug (read-only, shown in Inspector) ----
         [Category("Clipmap Debug")]
@@ -425,6 +458,35 @@ namespace EngineNS.Bricks.AdvanceShadow
             ClipmapPageDataBuffer = new TtCpu2GpuBuffer<FVSMClipmapPageData>();
             ClipmapPageDataBuffer.Initialize(NxRHI.EBufferType.BFT_SRV);
             ClipmapPageDataBuffer.SetSize(totalClipmapPages);
+        }
+
+        /// <summary>
+        /// Destroy and recreate the Clipmap, PagePool, and related GPU buffers
+        /// so that runtime changes to ClipmapLevelCount / BaseHalfExtent / PagesPerDim take effect.
+        /// Safe to call before first initialization (early-out if QTree not yet available).
+        /// </summary>
+        private void RebuildClipmap()
+        {
+            // Nothing to rebuild if the QTree hasn't been created yet;
+            // InitializePagePool will pick up the latest property values when it runs.
+            if (mShadowQTree == null)
+                return;
+
+            // Tear down Clipmap + its per-page data buffer
+            ClipmapPageDataBuffer?.Dispose();
+            ClipmapPageDataBuffer = null;
+            Clipmap?.Dispose();
+            Clipmap = null;
+
+            // Tear down PagePool (virtual page count depends on clipmap config)
+            PagePool?.Dispose();
+            PagePool = null;
+
+            // Force the CBV to be recreated on next draw so it picks up new pool/clipmap params
+            mDirLightingCBV = null;
+
+            // Re-initialize both (InitializePagePool calls InitializeClipmap internally)
+            InitializePagePool();
         }
 
         /// <summary>

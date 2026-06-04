@@ -78,6 +78,17 @@ namespace EngineNS.Bricks.Collision.Octree
         // #### PUBLIC METHODS ####
 
         /// <summary>
+        /// Remove all objects from the entire octree, resetting it to an empty state.
+        /// The root node structure is preserved at its current position and initial size.
+        /// </summary>
+        public void Clear()
+        {
+            RootNode.Clear();
+            RootNode = new TtBoundsOctreeNode<T>(initialSize, minSize, looseness, RootNode.Center);
+            Count = 0;
+        }
+
+        /// <summary>
         /// Add an object.
         /// </summary>
         /// <param name="obj">Object to add.</param>
@@ -336,6 +347,26 @@ namespace EngineNS.Bricks.Collision.Octree
             TransientVB.Reset();
             TransientIB.Reset();
             PurgeDeadEntries();
+        }
+
+        /// <summary>
+        /// Remove all entries from the octree and clear their back-references on TtNode.
+        /// </summary>
+        public void Clear()
+        {
+            if (mOctree == null)
+                return;
+
+            mOctree.GetRoot().IterateObject(static (obj, arg) =>
+            {
+                obj.Obj.OctreeOwner = null;
+                if (obj.Obj.TryGetNode(out var node))
+                    node.OctreeEntry = null;
+                return true;
+            }, null);
+
+            mOctree.Clear();
+            mDeadEntries.Clear();
         }
         public void Add(GamePlay.Scene.TtNode node, in Aabb bounds)
         {

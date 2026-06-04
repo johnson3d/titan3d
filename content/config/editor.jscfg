@@ -87,5 +87,46 @@
     "B": 140,
     "A": 255,
     "Name": "FFF0E68C"
+  },
+  "StudioFloorColor": {
+    "X": 0.18,
+    "Y": 0.18,
+    "Z": 0.18,
+    "W": 1.0
+  },
+  "StudioLightDirection": {
+    "X": -0.24,
+    "Y": -0.92,
+    "Z": 0.29
+  },
+  "StudioSunLightColor": {
+    "X": 1.0,
+    "Y": 0.95,
+    "Z": 0.92
+  },
+  "StudioSunLightIntensity": 3.6,
+  "StudioSkyLightColor": {
+    "X": 0.31,
+    "Y": 0.34,
+    "Z": 0.40
+  },
+  "StudioGroundLightColor": {
+    "X": 0.24,
+    "Y": 0.22,
+    "Z": 0.20
+  },
+  "StudioGridFade": 0.24,
+  "StudioGridHeightOffset": 0.006,
+  "StudioDefaultFloorMaterial": "material/whitecolor.uminst",
+  "StudioSkyboxImageName": "editor/studio/sakura_prefiltered_env_12_blur.png",
+  "StudioFallbackSkyColorBottom": {
+    "X": 0.58,
+    "Y": 0.62,
+    "Z": 0.70
+  },
+  "StudioFallbackSkyColorTop": {
+    "X": 0.26,
+    "Y": 0.43,
+    "Z": 0.68
   }
 }

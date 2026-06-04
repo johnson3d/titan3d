@@ -48,7 +48,16 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 
 	//half3 Albedo = sRGB2Linear((half3)mtl.mAlbedo);
     GBuffer.MtlColorRaw = (half3)mtl.mAlbedo + (half3)mtl.mEmissive;
-    GBuffer.WorldNormal = mtl.GetWorldNormal(input);
+	int baseShadingModeEarly = (MaterialRenderFlags & SHADINGMODE_BIT_MASK) >> SHADINGMODE_BIT_OFFSET;
+    if (baseShadingModeEarly == EShadingMode_Hair)
+    {
+        GBuffer.WorldTangent = mtl.GetWorldTangent(input);
+        GBuffer.WorldNormal = normalize((half3)input.vNormal);
+    }
+    else
+    {
+        GBuffer.WorldNormal = mtl.GetWorldNormal(input);
+    }
 	GBuffer.Metallicity = (half)mtl.mMetallic;
 	GBuffer.Specular = (half)mtl.mAbsSpecular;
 	GBuffer.Roughness = (half)mtl.mRough;
@@ -60,16 +69,9 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 	// float3 BentNormal = GBuffer.WorldNormal;
 	GBuffer.AO = (half)(AOMultiBounce( CalcLuminance( SpecularColor ), SpecOcclusion ).g);
 
-	// Subsurface Profile Index: mtl.mMask stores the profile index (0~255 integer)
-	int baseShadingMode = (MaterialRenderFlags & SHADINGMODE_BIT_MASK) >> SHADINGMODE_BIT_OFFSET;
-	if (baseShadingMode == EShadingMode_Subsurface)
-	{
-		GBuffer.CustomData = saturate((half)mtl.mSubsurfaceProfile / 255.0h);  // ProfileIndex normalized
-	}
-	else
-	{
-		GBuffer.CustomData = (half)SpecOcclusion;
-	}
+	// Write semantic fields directly — EncodeGBuffer handles MRT packing per ShadingMode
+	GBuffer.SubsurfaceProfileIndex = (half)mtl.mSubsurfaceProfile;
+	GBuffer.SpecOcclusion = (half)SpecOcclusion;
 	GBuffer.Opacity = (half)mtl.mOpacity;
     GBuffer.Mask = (half) mtl.mMask;
 

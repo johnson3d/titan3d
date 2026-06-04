@@ -938,6 +938,9 @@ namespace NxRHI
 
 		switch (tar->Format)
 		{
+		case DXGI_FORMAT_X24_TYPELESS_G8_UINT:
+			tar->Format = DXGI_FORMAT_X24_TYPELESS_G8_UINT;
+			break;
 		case DXGI_FORMAT_D24_UNORM_S8_UINT:
 		case DXGI_FORMAT_R24G8_TYPELESS:
 			tar->Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;

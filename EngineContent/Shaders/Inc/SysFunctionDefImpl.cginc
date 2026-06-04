@@ -7,13 +7,30 @@ float3 MTL_OUTPUT::GetWorldNormal(PS_INPUT input)
 #elif MTL_NORMAL_MODE==MTL_NORMALMAP
 	half3 worldNorm = normalize(mNormal);
 #if USE_PS_Normal == 1 && USE_PS_Tangent == 1
-    NormalMap((float3)mNormal, (float4) input.vTangent, (float3) input.vNormal, worldNorm);
+    CalcNormalMap((float3)mNormal, (float4) input.vTangent, (float3) input.vNormal, worldNorm);
 #endif
     return worldNorm;
 #elif MTL_NORMAL_MODE==MTL_NORMAL	
 	return (float3) normalize(mNormal);
 #else
 	return (float3) normalize(mNormal);
+#endif
+}
+
+float3 MTL_OUTPUT::GetWorldTangent(PS_INPUT input)
+{
+#if MTL_NORMAL_MODE==MTL_NORMALNONE
+    return float3(1, 0, 0);
+#elif MTL_NORMAL_MODE==MTL_NORMALMAP
+	half3 worldTan = normalize(mTangent);
+#if USE_PS_Normal == 1 && USE_PS_Tangent == 1
+    CalcTangentMap((float3)mTangent, (float4) input.vTangent, (float3) input.vNormal, worldTan);
+#endif
+    return worldTan;
+#elif MTL_NORMAL_MODE==MTL_NORMAL
+	return (float3) normalize(mTangent);
+#else
+	return (float3) normalize(mTangent);
 #endif
 }
 

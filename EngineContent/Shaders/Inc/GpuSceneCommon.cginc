@@ -23,7 +23,7 @@ struct FRVTAtlas
 	float VSize;
 };
 
-half3 BRDFPointLight(half Roughness, half3 N, half3 H, half NoH, half LoH, half3 OptSpecShading)
+half3 LocalLightSpecularBRDF(half Roughness, half3 N, half3 H, half NoH, half LoH, half3 OptSpecShading)
 {
 	float3 NxH = cross(N, H);
 	float OneMinusNoHSqr = dot(NxH, NxH);
@@ -45,7 +45,9 @@ half3 BRDFPointLight(half Roughness, half3 N, half3 H, half NoH, half LoH, half3
 	return NDF * Fm;
 }
 
-half3 PointLightShading(FPointLight light, float3 WorldPos, half3 V, half3 N, half3 OptDiffShading, half3 OptSpecShading, half Roughness)
+void PointLightShadingSeparated(FPointLight light, float3 WorldPos, half3 V, half3 N,
+	half3 OptDiffShading, float3 OptSpecShading, half Roughness,
+	out half3 outDiffuse, out half3 outSpecular)
 {
 	half3 Lp = (half3)(light.PositionAndRadius.xyz - WorldPos);
 	half DistSqr = dot(Lp, Lp);
@@ -60,12 +62,21 @@ half3 PointLightShading(FPointLight light, float3 WorldPos, half3 V, half3 N, ha
 	half NoHp = max(0.0h, dot(N, Hp));
 	half LoHp = max(0.0h, dot(Lp, Hp));
 
-	half3 BaseShading = (OptDiffShading * pow(NoLp, -1.5h * Roughness + 2.0h) + BRDFPointLight(Roughness, N, Hp, NoHp, LoHp, OptSpecShading) * (half)sqrt(NoLp))
-		* (half3)light.ColorAndIntensity.rgb * (half)light.ColorAndIntensity.a * AttenPL;
-	return BaseShading;
+	half3 lightColor = (half3)light.ColorAndIntensity.rgb * (half)light.ColorAndIntensity.a * AttenPL;
+	outDiffuse  = OptDiffShading * pow(NoLp, -1.5h * Roughness + 2.0h) * lightColor;
+	outSpecular = LocalLightSpecularBRDF(Roughness, N, Hp, NoHp, LoHp, OptSpecShading) * (half)sqrt(NoLp) * lightColor;
 }
 
-half3 SpotLightShading(FSpotLight light, float3 WorldPos, half3 V, half3 N, half3 OptDiffShading, half3 OptSpecShading, half Roughness)
+half3 PointLightShading(FPointLight light, float3 WorldPos, half3 V, half3 N, half3 OptDiffShading, half3 OptSpecShading, half Roughness)
+{
+	half3 diffuse, specular;
+	PointLightShadingSeparated(light, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness, diffuse, specular);
+	return diffuse + specular;
+}
+
+void SpotLightShadingSeparated(FSpotLight light, float3 WorldPos, half3 V, half3 N,
+	half3 OptDiffShading, float3 OptSpecShading, half Roughness,
+	out half3 outDiffuse, out half3 outSpecular)
 {
 	half3 Lp = (half3)(light.PositionAndRadius.xyz - WorldPos);
 	half DistSqr = dot(Lp, Lp);
@@ -89,9 +100,16 @@ half3 SpotLightShading(FSpotLight light, float3 WorldPos, half3 V, half3 N, half
 	half NoHp = max(0.0h, dot(N, Hp));
 	half LoHp = max(0.0h, dot(Lp, Hp));
 
-	half3 BaseShading = (OptDiffShading * pow(NoLp, -1.5h * Roughness + 2.0h) + BRDFPointLight(Roughness, N, Hp, NoHp, LoHp, OptSpecShading) * (half)sqrt(NoLp))
-		* (half3)light.ColorAndIntensity.rgb * (half)light.ColorAndIntensity.a * AttenPL * coneAtten;
-	return BaseShading;
+	half3 lightColor = (half3)light.ColorAndIntensity.rgb * (half)light.ColorAndIntensity.a * AttenPL * coneAtten;
+	outDiffuse  = OptDiffShading * pow(NoLp, -1.5h * Roughness + 2.0h) * lightColor;
+	outSpecular = LocalLightSpecularBRDF(Roughness, N, Hp, NoHp, LoHp, OptSpecShading) * (half)sqrt(NoLp) * lightColor;
+}
+
+half3 SpotLightShading(FSpotLight light, float3 WorldPos, half3 V, half3 N, half3 OptDiffShading, half3 OptSpecShading, half Roughness)
+{
+	half3 diffuse, specular;
+	SpotLightShadingSeparated(light, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness, diffuse, specular);
+	return diffuse + specular;
 }
 
 #define TileSize 32

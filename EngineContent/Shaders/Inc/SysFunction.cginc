@@ -594,7 +594,7 @@ void VecMulMatrix(half4 vec, half4x4 mat, out half4 outVector)
 	outVector = mul(vec, mat);
 }
 
-void NormalMap(half3 Nt, half4 Tw, half3 Nw, out half3 UnpackedNormal)
+void CalcNormalMap(half3 Nt, half4 Tw, half3 Nw, out half3 UnpackedNormal)
 {
     Nt.xy = Nt.xy * 2.0h - 1.0h;
     Nt.z = sqrt(saturate(1.0h - dot(Nt.xy, Nt.xy)));
@@ -620,8 +620,35 @@ void NormalMap(half3 Nt, half4 Tw, half3 Nw, out half3 UnpackedNormal)
 half3 BumpToWorldNormal(float3 normMap, PS_INPUT input)
 {
     half3 worldNorm;
-    NormalMap(normMap, input.Get_vTangent(), input.Get_vNormal(), worldNorm);
+    CalcNormalMap(normMap, input.Get_vTangent(), input.Get_vNormal(), worldNorm);
     return worldNorm;
+}
+
+// Transform a tangent-space 2D direction (flowmap) to world space.
+// Unlike NormalMap where Z is the dominant component (perpendicular to surface),
+// a flowmap's RG represent a direction lying ON the surface, so Z ≈ 0.
+void CalcTangentMap(half3 Tt, half4 Tw, half3 Nw, out half3 UnpackedTangent)
+{
+    // Decode [0,1] → [-1,1]
+    Tt.xy = Tt.xy * 2.0h - 1.0h;
+    // Tangent lies on surface: Z component is near zero (vs normal where Z is dominant)
+    Tt.z = 0.0h;
+    // Same swizzle convention as NormalMap: engine uses XZY layout
+    Tt.xyz = Tt.xzy;
+
+    half3 Bw = half3(0.0h, 0.0h, 0.0h);
+    if (Tw.w > 0.0h)
+    {
+        Bw = -cross(Tw.xyz, Nw);
+    }
+    else
+    {
+        Bw = cross(Tw.xyz, Nw);
+    }
+
+    half3x3 TBN = half3x3(Tw.xyz, Nw, Bw);
+
+    UnpackedTangent = normalize(mul(Tt, TBN));
 }
 
 void BlingSpec(half4 flo4 , half intensity , half powIn , half4 worldNorm , half4 worldPos , half3 LP ,  out half BlingSpec)

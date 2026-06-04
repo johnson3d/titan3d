@@ -525,6 +525,12 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\FrustumGridCommon.cginc">
       <Filter>Inc</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\HzbRayCast.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\HairBRDF.cginc">
+      <Filter>Inc</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">
@@ -630,6 +636,15 @@
       <Filter>Compute\ScreenSpace</Filter>
     </FxCompile>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\ColorGradingLUT.compute">
+      <Filter>Compute\ScreenSpace</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\ContactShadow.compute">
+      <Filter>Compute\ScreenSpace</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\SSAO.compute">
+      <Filter>Compute\ScreenSpace</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\SSAOFilter.compute">
       <Filter>Compute\ScreenSpace</Filter>
     </FxCompile>
   </ItemGroup>

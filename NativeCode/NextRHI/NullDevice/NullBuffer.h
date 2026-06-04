@@ -20,6 +20,7 @@ namespace NxRHI
 		virtual bool Map(UINT index, FMappedSubResource* res, bool forRead) override;
 		virtual void Unmap(UINT index) override;
 		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
+		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 	public:
 		std::vector<BYTE>		mBuffer;
 	};

@@ -13,7 +13,7 @@ namespace EngineNS.Graphics.Pipeline
         [Category("Option")]
         public bool IsReverseZ { get; set; } = true;
         [Rtti.Meta("")]
-        public bool UseOctahedronNormal { get; set; } = false;
+        public bool UseOctahedronNormal { get; set; } = true;
         [Flags]
         public enum ETextureAssetCompressType
         {

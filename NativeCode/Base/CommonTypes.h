@@ -380,6 +380,7 @@ inline unsigned int GetPixelByteWidth(EPixelFormat fmt)
 	case PXF_R32G32_FLOAT:
 		return 8;
 	case PXF_D24_UNORM_S8_UINT:
+	case PXF_X24_TYPELESS_G8_UINT:
 		return 4;
 	case PXF_D32_FLOAT:
 		return 4;
@@ -432,7 +433,7 @@ inline unsigned int GetPixelChannelCount(EPixelFormat fmt)
 	case PXF_R32G32_FLOAT:
 	case PXF_D24_UNORM_S8_UINT:
 	case PXF_D32_FLOAT_S8X24_UINT:
-	case PXF_R32G8X24_TYPELESS:
+	case PXF_X24_TYPELESS_G8_UINT:
 		return 2;
 	case PXF_R32G32B32_UINT:
 	case PXF_R32G32B32_SINT:
@@ -562,7 +563,9 @@ inline const char* GetPixelFormatString(EPixelFormat fmt)
 	case EngineNS::PXF_R32G32_FLOAT:
 		return "PXF_R32G32_FLOAT";
 	case EngineNS::PXF_D24_UNORM_S8_UINT:
-		return "PXF_UNKNPXF_D24_UNORM_S8_UINTOWN";
+		return "PXF_D24_UNORM_S8_UINT";
+	case EngineNS::PXF_X24_TYPELESS_G8_UINT:
+		return "PXF_X24_TYPELESS_G8_UINT";
 	case EngineNS::PXF_D32_FLOAT:
 		return "PXF_D32_FLOAT";
 	case EngineNS::PXF_D32_FLOAT_S8X24_UINT:
@@ -617,8 +620,6 @@ inline const char* GetPixelFormatString(EPixelFormat fmt)
 		return "PXF_R24G8_TYPELESS";
 	case EngineNS::PXF_R24_UNORM_X8_TYPELESS:
 		return "PXF_R24_UNORM_X8_TYPELESS";
-	case EngineNS::PXF_X24_TYPELESS_G8_UINT:
-		return "PXF_X24_TYPELESS_G8_UINT";
 	case EngineNS::PXF_R8G8_TYPELESS:
 		return "PXF_R8G8_TYPELESS";
 	case EngineNS::PXF_R8G8_UINT:

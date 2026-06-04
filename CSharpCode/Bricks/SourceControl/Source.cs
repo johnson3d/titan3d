@@ -106,6 +106,8 @@ namespace EngineNS.Bricks.SourceControl
         }
         public void AddFile(string file, bool bWaitFile = false)
         {
+            if (TtEngine.Instance.Config.EnableSourceControl == false)
+                return;
             if (bWaitFile)
             {
                 while (IO.TtFileManager.FileExists(file) == false)
@@ -127,6 +129,8 @@ namespace EngineNS.Bricks.SourceControl
         }
         public void RemoveFile(string file, bool delLocal = true)
         {
+            if (TtEngine.Instance.Config.EnableSourceControl == false)
+                return;
             if (Source != null)
             {
                 Source.RemoveFile(file, delLocal);
@@ -134,6 +138,8 @@ namespace EngineNS.Bricks.SourceControl
         }
         public void RemoveDirectory(string dir, bool delLocal = true)
         {
+            if (TtEngine.Instance.Config.EnableSourceControl == false)
+                return;
             if (Source != null)
             {
                 Source.RemoveDirectory(dir, delLocal);
@@ -141,6 +147,8 @@ namespace EngineNS.Bricks.SourceControl
         }
         public void AddDirectory(string path)
         {
+            if (TtEngine.Instance.Config.EnableSourceControl == false)
+                return;
             if (Source != null)
             {
                 Source.AddDirectory(path);

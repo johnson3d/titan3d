@@ -355,6 +355,7 @@ namespace NxRHI
 				}
 			}
 			break;
+			case ERhiType::RHI_VirtualDevice:
 			case ERhiType::RHI_D3D12:
 			{
 				auto pAttr = node->FindFirstAttribute("DXIL");

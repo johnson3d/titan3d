@@ -45,8 +45,24 @@ PS_INPUT VS_Main(VS_INPUT input1)
 #endif
 
     output.Set_vWorldPos(wp4.xyz);
+
+#if ENABLE_MOTION_VECTOR == 1
+	float3 preWorldPos = mul(float4(output.vPosition.xyz, 1), PreWorldMatrix).xyz;
+	float4 prePos = mul(float4(preWorldPos, 1), GetPreFrameViewPrjMtx());
+#endif
 	
 	output.vPosition = mul(wp4, GetViewPrjMtx());
+
+#if ENABLE_MOTION_VECTOR == 1
+#if USE_PS_Custom1 == 1
+	output.psCustomUV1 = prePos;
+#endif
+#if USE_PS_Custom2 == 1
+	output.psCustomUV2 = output.vPosition;
+#endif
+	// Jitter 注入到 SV_Position, 仅影响光栅化采样位置, 不影响 MV 计算
+	output.vPosition.xy += JitterOffset.xy;
+#endif
 
 #if USE_PS_Custom0 == 1
 #if ENV_DISABLE_POINTLIGHTS == 0

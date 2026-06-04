@@ -1,0 +1,198 @@
+#ifndef _SSAO_COMPUTE_H_
+#define _SSAO_COMPUTE_H_
+
+#include "../../Inc/SysFunction.cginc"
+#include "../../CBuffer/VarBase_PerCamera.cginc"
+#include "../../Inc/Math.cginc"
+
+// ---------------------------------------------------------------------------
+// Screen-Space Ambient Occlusion (GTAO-style horizon-based)
+//
+// For each pixel, marches in multiple directions along the screen-space
+// hemisphere and finds the horizon angle. AO is estimated from the
+// solid angle of unoccluded sky above the surface.
+//
+// Input:  Depth buffer + GBuffer normals
+// Output: Single-channel R8_UNORM AO mask (1 = no occlusion, 0 = fully occluded)
+//
+// Reference: "Practical Realtime Strategies for Accurate Indirect Occlusion"
+//            (Jimenez et al., SIGGRAPH 2016)
+// ---------------------------------------------------------------------------
+
+cbuffer cbSSAO DX_AUTOBIND
+{
+    float2 ScreenSize;       // Render target dimensions (width, height)
+    float  AORadius;         // World-space sampling radius
+    float  AOIntensity;      // AO strength multiplier
+    float  AOBias;           // Bias to avoid self-occlusion
+    int    NumDirections;    // Number of azimuthal directions (4~8 typical)
+    int    NumSteps;         // Steps per direction (4~8 typical)
+    float  FalloffDistance;  // Distance at which AO fades out
+    uint   EnableTemporalRotation; // 0=off, 1=on
+    uint   FrameIndex;       // For temporal rotation
+};
+
+Texture2D<float> DepthBuffer DX_AUTOBIND;
+SamplerState Samp_DepthBuffer DX_AUTOBIND;
+
+Texture2D GBufferRT1 DX_AUTOBIND;
+SamplerState Samp_GBufferRT1 DX_AUTOBIND;
+
+RWTexture2D<float> AOOutput DX_AUTOBIND;
+
+// Reconstruct view-space position from screen UV + depth
+float3 ReconstructViewPos(float2 uv, float depth)
+{
+    float linearZ = LinearFromDepth(depth);
+    // NDC → clip → view
+    float2 ndc = uv * 2.0 - 1.0;
+    ndc.y = -ndc.y;
+    float4 clipPos = float4(ndc * linearZ, linearZ, 1.0);
+    float3 viewPos = mul(clipPos, PrjInvMtx).xyz;
+    return float3(viewPos.xy, linearZ);
+}
+
+// Spatial hash for per-pixel direction rotation
+float InterleavedGradientNoise(float2 pixelCoord)
+{
+    float3 magic = float3(0.06711056, 0.00583715, 52.9829189);
+    return frac(magic.z * frac(dot(pixelCoord, magic.xy)));
+}
+
+[numthreads(8, 8, 1)]
+void CS_SSAO(uint3 dispatchThreadId : SV_DispatchThreadID)
+{
+    uint2 pixelCoord = dispatchThreadId.xy;
+    if (pixelCoord.x >= (uint)ScreenSize.x || pixelCoord.y >= (uint)ScreenSize.y)
+    {
+        return;
+    }
+
+    float2 uv = ((float2)pixelCoord + 0.5) / ScreenSize;
+    float2 texelSize = 1.0 / ScreenSize;
+
+    // Sample depth and early-out for sky pixels
+    float centerDepth = DepthBuffer.SampleLevel(Samp_DepthBuffer, uv, 0).r;
+#if USE_INVERSE_Z == 1
+    if (centerDepth <= 0.0001)
+#else
+    if (centerDepth >= 0.9999)
+#endif
+    {
+        AOOutput[pixelCoord] = 1.0;
+        return;
+    }
+
+    // Reconstruct view-space position, biased along normal to avoid self-intersection
+    float centerLinearZ = LinearFromDepth(centerDepth);
+    float3 centerViewPosRaw = ReconstructViewPos(uv, centerDepth);
+
+    // Decode world normal from GBuffer, transform to view space
+    float4 gbufferRT1 = GBufferRT1.SampleLevel(Samp_GBufferRT1, uv, 0);
+#if USE_OCTAHEDRON_NORMAL == 1
+    float3 worldNormal = OctDecode(gbufferRT1.rg);
+#else
+    float3 worldNormal = DecodeNormalXYZ(gbufferRT1.rgb);
+#endif
+    float3 viewNormal = normalize(mul(float4(worldNormal, 0), CameraViewMatrix).xyz);
+
+    // Bias origin along view-space normal to lift off the surface.
+    // Scale bias with depth to compensate for decreasing depth buffer precision at distance.
+    float normalBias = AOBias * (1.0 + centerLinearZ * 0.1);
+    float3 centerViewPos = centerViewPosRaw + viewNormal * normalBias;
+
+    // Distance-based falloff
+    float distanceFade = saturate(1.0 - centerLinearZ / FalloffDistance);
+    if (distanceFade <= 0.001)
+    {
+        AOOutput[pixelCoord] = 1.0;
+        return;
+    }
+
+    // Project world-space radius to screen-space pixel radius
+    // Using the relationship: screenRadius = worldRadius * focalLength / linearDepth
+    float focalLength = PrjMtx[1][1]; // vertical focal length from projection matrix
+    float screenRadius = AORadius * focalLength / centerLinearZ;
+    float radiusPixels = screenRadius * ScreenSize.y * 0.5;
+
+    // Clamp to reasonable range
+    radiusPixels = clamp(radiusPixels, 2.0, 128.0);
+
+    // Per-pixel rotation based on spatial noise + temporal rotation
+    float noiseAngle = InterleavedGradientNoise(pixelCoord) * 2.0 * 3.14159265;
+    float temporalAngle = EnableTemporalRotation ? (FrameIndex & 3u) * (3.14159265 * 0.5) : 0.0;
+    float baseAngle = noiseAngle + temporalAngle;
+
+    float stepSize = radiusPixels / (float)NumSteps;
+    float angleStep = 3.14159265 / (float)NumDirections;
+
+    float occlusion = 0.0;
+
+    for (int dirIdx = 0; dirIdx < NumDirections; dirIdx++)
+    {
+        float angle = baseAngle + dirIdx * angleStep;
+        float2 direction = float2(cos(angle), sin(angle));
+
+        // Screen-space direction scaled by texel size
+        float2 stepDir = direction * texelSize;
+
+        // Track horizon angle for this direction (and its opposite)
+        float horizonCos = -1.0;
+
+        for (int step = 1; step <= NumSteps; step++)
+        {
+            float2 sampleOffset = stepDir * stepSize * (float)step;
+            float2 sampleUV = uv + sampleOffset;
+
+            // Bounds check
+            if (sampleUV.x < 0.0 || sampleUV.x > 1.0 ||
+                sampleUV.y < 0.0 || sampleUV.y > 1.0)
+            {
+                break;
+            }
+
+            float sampleDepth = DepthBuffer.SampleLevel(Samp_DepthBuffer, sampleUV, 0).r;
+            float3 sampleViewPos = ReconstructViewPos(sampleUV, sampleDepth);
+
+            // Direction from center to sample in view space
+            float3 diff = sampleViewPos - centerViewPos;
+            float diffLen = length(diff);
+
+            if (diffLen < 0.0001)
+                continue;
+
+            float3 diffNorm = diff / diffLen;
+
+            // Horizon angle: how much the sample is above the tangent plane
+            float sampleHorizonCos = dot(diffNorm, viewNormal);
+
+            // Apply distance attenuation within the AO radius
+            float rangeAttn = saturate(1.0 - diffLen / AORadius);
+
+            // Adaptive bias: scale with step distance to handle depth precision at range
+            float adaptiveBias = AOBias * (1.0 + diffLen / AORadius);
+            sampleHorizonCos -= adaptiveBias;
+
+            // Track the maximum horizon for this direction
+            if (sampleHorizonCos > horizonCos)
+            {
+                horizonCos = lerp(horizonCos, sampleHorizonCos, rangeAttn);
+            }
+        }
+
+        // Convert horizon cosine to occlusion contribution
+        // horizonCos of -1 means fully unoccluded, +1 means fully occluded
+        occlusion += saturate(horizonCos);
+    }
+
+    // Average over all directions and apply intensity
+    occlusion = occlusion / (float)NumDirections;
+    float ao = saturate(1.0 - occlusion * AOIntensity);
+
+    // Apply distance fade
+    ao = lerp(1.0, ao, distanceFade);
+
+    AOOutput[pixelCoord] = ao;
+}
+
+#endif // _SSAO_COMPUTE_H_

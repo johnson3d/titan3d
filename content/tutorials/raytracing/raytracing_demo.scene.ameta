@@ -2,7 +2,7 @@
 <Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="5e3da39125c4430873d57fc80bd25ae3d08b5ebc5cd604507e96e305aa46e305" />
+      <Hash Type="System.String@Unknown" Value="92312fdb8c350efd23aab3ae033baf69b059833459212db1343b159b2eb99761" />
       <Path Type="System.String@Unknown" Value="raytracing_demo.scene/raytracing_demo.scene" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">

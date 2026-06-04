@@ -9,12 +9,6 @@ struct FGBufferData : FGBufferDataBase
     {
         return USE_OCTAHEDRON_NORMAL != 0;
     }
-    // --- Subsurface Profile accessors ---
-    // For Subsurface pixels, CustomData stores profile index (0~255 normalized to 0~1)
-    int GetSubsurfaceProfileIndex()
-    {
-        return (int)(CustomData * 255.0h + 0.5h);
-    }
 
     void SetDisableEnvColor()
     {
@@ -40,6 +34,10 @@ struct FGBufferData : FGBufferDataBase
     bool IsSubsurface()
     {
         return GetShadingMode() == EShadingMode_Subsurface;
+    }
+    bool IsHair()
+    {
+        return GetShadingMode() == EShadingMode_Hair;
     }
 		
     float3 GetViewspaceNormal()
@@ -68,22 +66,56 @@ struct FGBufferData : FGBufferDataBase
         }
     }
 
+    // All MRT packing logic is centralized here.
+    // Semantic fields (SubsurfaceProfileIndex, SpecOcclusion, etc.) are written
+    // directly by the base pass; EncodeGBuffer decides how to compress them
+    // into 4 render targets based on ShadingMode.
 	void EncodeGBuffer(out float4 rt0, out float4 rt1, out float4 rt2, out float4 rt3)
 	{
 		rt0.rgb = MtlColorRaw.rgb;
-		rt0.a = CustomData;
 
-		#if USE_OCTAHEDRON_NORMAL == 0
-            rt1.rgb = (half3)EncodeNormalXYZ(WorldNormal.xyz);
-            rt3.b = ((half) RenderFlags_10Bit) / 1023.0h;
-		#else
-		    rt1.rg = (half2)OctEncode(WorldNormal.xyz);
-            rt1.b = ((half) RenderFlags_10Bit) / 1023.0h;
-            rt3.b = ((half) CustomData_10Bit) / 1023.0h;
-		#endif
+		// RenderFlags → rt3.b (R10G10B10A2_UNORM, 10-bit integer)
+		rt3.b = ((half) RenderFlags_10Bit) / 1023.0h;
+
+		if (IsHair())
+		{
+			// Hair: rt1 stores tangent, normal oct-encoded into rt0.a + rt2.r
+			half2 normalOct = (half2)OctEncode(WorldNormal.xyz);
+			rt0.a = normalOct.x;
+			rt2.r = normalOct.y;
+
+			#if USE_OCTAHEDRON_NORMAL == 0
+				rt1.rgb = (half3)EncodeNormalXYZ(WorldTangent.xyz);
+			#else
+				rt1.rg = (half2)OctEncode(WorldTangent.xyz);
+				rt1.b = 0;
+			#endif
+		}
+		else
+		{
+			// rt0.a packs a per-ShadingMode scalar:
+			//   Subsurface → SubsurfaceProfileIndex (normalized to 0~1)
+			//   PBR/other  → SpecOcclusion
+			if (IsSubsurface())
+			{
+				rt0.a = saturate((half)SubsurfaceProfileIndex / 255.0h);
+			}
+			else
+			{
+				rt0.a = (half)SpecOcclusion;
+			}
+
+			#if USE_OCTAHEDRON_NORMAL == 0
+				rt1.rgb = (half3)EncodeNormalXYZ(WorldNormal.xyz);
+			#else
+				rt1.rg = (half2)OctEncode(WorldNormal.xyz);
+				rt1.b = 0;
+			#endif
+
+			rt2.r = Metallicity;
+		}
+
 		rt1.w = Mask;
-
-		rt2.r = Metallicity;
 		rt2.g = Specular;
 		rt2.b = Roughness;
     	rt2.a = AO;
@@ -92,30 +124,57 @@ struct FGBufferData : FGBufferDataBase
         rt3.a = saturate(Opacity);
     }
 
+    // Decode MRT back into semantic GBuffer fields.
 	void DecodeGBuffer(half4 rt0, half4 rt1, half4 rt2, half4 rt3)
 	{
 		MtlColorRaw.rgb = rt0.rgb;
         
+		// RenderFlags from rt3.b
+		RenderFlags_10Bit = (int) (rt3.b * 1023.0h + 0.5h);
+
 		#if USE_OCTAHEDRON_NORMAL == 0
-            WorldNormal.xyz = (half3) DecodeNormalXYZ(rt1.rgb).xyz;
-            RenderFlags_10Bit = (int) (rt3.b * 1023.0h + 0.5h);
-            CustomData_10Bit = 0;
+            half3 decodedDir = (half3) DecodeNormalXYZ(rt1.rgb).xyz;
 		#else
-            WorldNormal.xyz = OctDecode(rt1.rg);
-            RenderFlags_10Bit = (int) (rt1.b * 1023.0h + 0.5h);
-            CustomData_10Bit = (int) (rt3.b * 1023.0h + 0.5h);
+            half3 decodedDir = OctDecode(rt1.rg);
 		#endif
+
+        if (IsHair())
+        {
+            WorldTangent = decodedDir;
+            WorldNormal = (half3)OctDecode(half2(rt0.a, rt2.r));
+            Metallicity = 0;
+            SubsurfaceProfileIndex = 0;
+            SpecOcclusion = 0;
+        }
+        else
+        {
+            WorldNormal = decodedDir;
+            WorldTangent = half3(0, 0, 0);
+            Metallicity = rt2.r;
+
+            // Unpack rt0.a back to the correct semantic field
+            if (IsSubsurface())
+            {
+                SubsurfaceProfileIndex = (half)(rt0.a * 255.0h + 0.5h);
+                SpecOcclusion = 0;
+            }
+            else
+            {
+                SubsurfaceProfileIndex = 0;
+                SpecOcclusion = rt0.a;
+            }
+        }
+
         Mask = rt1.a;
-        
-		Metallicity = rt2.r;
 		Specular = rt2.g;
 		Roughness = rt2.b;
         AO = rt2.a;
 
         MotionVector.xy = (half2)DecodeMotionVector(rt3.rg);
-        CustomData = rt0.a;
         Opacity = rt3.a;
     }
+
+
 };
 
 #endif//_MobileBasePassPS_H_

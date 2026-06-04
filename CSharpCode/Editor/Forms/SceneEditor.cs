@@ -364,40 +364,22 @@ namespace EngineNS.Editor.Forms
                     {
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "DisableAO",
+                            MenuName = "EnableAO",
                             Selected = false,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
-                                PreviewViewport.RenderPolicy.DisableAO = !PreviewViewport.RenderPolicy.DisableAO;
-                                item.Selected = PreviewViewport.RenderPolicy.DisableAO;
+                                PreviewViewport.RenderPolicy.EnableAO = !PreviewViewport.RenderPolicy.EnableAO;
+                                item.Selected = PreviewViewport.RenderPolicy.EnableAO;
                             },
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "DisableHDR",
+                            MenuName = "EnableLocalLights",
                             Selected = false,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
-                                PreviewViewport.RenderPolicy.DisableHDR = !this.PreviewViewport.RenderPolicy.DisableHDR;
-                                item.Selected = PreviewViewport.RenderPolicy.DisableHDR;
-                            },
-                        },
-                        new EGui.UIProxy.MenuItemProxy()
-                        {
-                            MenuName = "DisablePointLight",
-                            Selected = false,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
-                            {
-                                //var prop = this.WorldViewportSlate.RenderPolicy.GetType().GetProperty("DisablePointLight");
-                                //if(prop !=null && prop.PropertyType==typeof(bool))
-                                //{
-                                //    bool value = (bool)prop.GetValue(this.WorldViewportSlate.RenderPolicy);
-                                //    value = !value;
-                                //    prop.SetValue(this.WorldViewportSlate.RenderPolicy, value);
-                                //    item.CheckBox = value;
-                                //}
-                                PreviewViewport.RenderPolicy.DisablePointLight = !PreviewViewport.RenderPolicy.DisablePointLight;
-                                item.Selected = PreviewViewport.RenderPolicy.DisablePointLight;
+                                PreviewViewport.RenderPolicy.EnableLocalLights = !PreviewViewport.RenderPolicy.EnableLocalLights;
+                                item.Selected = PreviewViewport.RenderPolicy.EnableLocalLights;
                             },
                         },
                     },

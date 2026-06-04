@@ -1048,6 +1048,13 @@ namespace EngineNS.GamePlay.Scene
             var copy = new List<TtNode>(Children);
             foreach (var i in copy)
             {
+                i.ClearChildren();
+
+                i.OnRemoveFromWorld();
+                if (mWorld != null && mWorld.CollideOctree != null)
+                {
+                    mWorld.CollideOctree.Remove(i);
+                }
                 i.Parent = null;
             }
             Children.Clear();

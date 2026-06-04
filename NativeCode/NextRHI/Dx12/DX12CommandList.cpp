@@ -443,6 +443,7 @@ namespace NxRHI
 	{
 		ASSERT(mCmdListState == ECmdListState::Recording);
 		mContext->SetPipelineState(((DX12GpuDrawState*)drawState)->mDxState);
+		mContext->OMSetStencilRef(drawState->Pipeline->Desc.StencilRef);
 	}
 	void DX12CommandList::SetComputePipeline(const IComputeEffect* drawState)
 	{

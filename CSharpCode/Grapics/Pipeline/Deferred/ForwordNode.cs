@@ -24,6 +24,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get;
             set;
         }
+        public TtPermutationItem EnableMotionVector
+        {
+            get;
+            set;
+        }
         public TtOpaqueShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/forword/ForwordOpaque.cginc", RName.ERNameType.Engine);
@@ -33,11 +38,13 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             DisablePointLights = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_POINTLIGHTS", (int)Shader.EPermutation_Bool.BitWidth);
             DisableShadow = this.PushPermutation<Shader.EPermutation_Bool>("DISABLE_SHADOW_ALL", (int)Shader.EPermutation_Bool.BitWidth);
             var editorMode = this.PushPermutation<Shader.EPermutation_Bool>("MODE_EDITOR", (int)Shader.EPermutation_Bool.BitWidth);
+            EnableMotionVector = this.PushPermutation<Shader.EPermutation_Bool>("ENABLE_MOTION_VECTOR", (int)Shader.EPermutation_Bool.BitWidth);
 
             DisableAO.SetValue((int)Shader.EPermutation_Bool.FalseValue);
             DisableShadow.SetValue((int)Shader.EPermutation_Bool.FalseValue);
             DisablePointLights.SetValue((int)Shader.EPermutation_Bool.FalseValue);
             editorMode.SetValue((int)Shader.EPermutation_Bool.TrueValue);
+            EnableMotionVector.SetValue((int)Shader.EPermutation_Bool.FalseValue);
 
             UpdatePermutation().AddWaitTask();
         }
@@ -66,9 +73,19 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     }
     public class TtTranslucentShading : Shader.TtGraphicsShadingEnv
     {
+        public TtPermutationItem EnableMotionVector
+        {
+            get;
+            set;
+        }
         public TtTranslucentShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Forword/ForwordTranslucent.cginc", RName.ERNameType.Engine);
+
+            this.BeginPermutaion();
+            EnableMotionVector = this.PushPermutation<Shader.EPermutation_Bool>("ENABLE_MOTION_VECTOR", (int)Shader.EPermutation_Bool.BitWidth);
+            EnableMotionVector.SetValue((int)Shader.EPermutation_Bool.FalseValue);
+            UpdatePermutation().AddWaitTask();
         }
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
@@ -85,6 +102,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 EPixelShaderInput.PST_Position,
                 EPixelShaderInput.PST_WorldPos,
                 EPixelShaderInput.PST_UV,
+                EPixelShaderInput.PST_Custom1,
+                EPixelShaderInput.PST_Custom2,
             };
         }
     }
@@ -95,6 +114,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
         public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color", true, EPixelFormat.PXF_R10G10B10A2_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth", true, EPixelFormat.PXF_D16_UNORM, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin MotionVectorPinInOut = TtRenderGraphPin.CreateInputOutput("MotionVector", false, EPixelFormat.PXF_R10G10B10A2_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
         public TtForwordNode()
         {
             Name = "ForwordNode";
@@ -104,6 +124,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             AddInput(VisiblesPinIn);
             AddInputOutput(ColorPinInOut);
             AddInputOutput(DepthPinInOut);
+            AddInputOutput(MotionVectorPinInOut);
+            MotionVectorPinInOut.IsAllowInputNull = true;
         }
         public TtOpaqueShading mOpaqueShading;
         public TtTranslucentShading mTranslucentShading;
@@ -123,6 +145,10 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             mOpaqueShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtOpaqueShading>();
             mTranslucentShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtTranslucentShading>();
 
+            bool hasMotionVector = MotionVectorPinInOut.FindInLinker() != null;
+            mOpaqueShading.EnableMotionVector.SetValue(hasMotionVector);
+            mTranslucentShading.EnableMotionVector.SetValue(hasMotionVector);
+
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
             {
@@ -132,27 +158,36 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public virtual unsafe TtGraphicsBuffers CreateGBuffers(TtRenderPolicy policy, EPixelFormat format)
         {
             var PassDesc = new NxRHI.FRenderPassDesc();
+            bool hasMotionVector = MotionVectorPinInOut.FindInLinker() != null;
 
-            PassDesc.NumOfMRT = 1;
+            PassDesc.NumOfMRT = hasMotionVector ? (uint)2 : (uint)1;
             PassDesc.AttachmentMRTs[0].Format = format;
             PassDesc.AttachmentMRTs[0].Samples = 1;
             PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
             PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-            PassDesc.m_AttachmentDepthStencil.Format = DepthPinInOut.Attachement.Format;// dfPolicy.BasePassNode.GBuffers.DepthStencil.AttachBuffer.Srv.mCoreObject.GetFormat(); //dsFmt;
+            if (hasMotionVector)
+            {
+                PassDesc.AttachmentMRTs[1].Format = MotionVectorPinInOut.Attachement.Format;
+                PassDesc.AttachmentMRTs[1].Samples = 1;
+                PassDesc.AttachmentMRTs[1].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                PassDesc.AttachmentMRTs[1].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+            }
+            PassDesc.m_AttachmentDepthStencil.Format = DepthPinInOut.Attachement.Format;
             PassDesc.m_AttachmentDepthStencil.Samples = 1;
             PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
             PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
             PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-            //PassDesc.mFBClearColorRT0 = new Color4f(1, 0, 0, 0);
-            //PassDesc.mDepthClearValue = 1.0f;
-            //PassDesc.mStencilClearValue = 0u;
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
 
             GBuffers.Initialize(policy, RenderPass);
             GBuffers.SetRenderTarget(policy, 0, ColorPinInOut);
+            if (hasMotionVector)
+            {
+                GBuffers.SetRenderTarget(policy, 1, MotionVectorPinInOut);
+            }
             GBuffers.SetDepthStencil(policy, DepthPinInOut);
             GBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
 
@@ -287,6 +322,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
         public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth", NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin MotionVectorPinInOut = TtRenderGraphPin.CreateInputOutput("MotionVector", false, EPixelFormat.PXF_R10G10B10A2_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin GizmosDepthPinOut = TtRenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D24_UNORM_S8_UINT, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
 
         public TtOpaqueShading mOpaqueShading;
@@ -305,6 +341,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             AddInput(VisiblesPinIn);
             AddInputOutput(ColorPinInOut);
             AddInputOutput(DepthPinInOut);
+            AddInputOutput(MotionVectorPinInOut);
+            MotionVectorPinInOut.IsAllowInputNull = true;
 
             AddOutput(GizmosDepthPinOut);
         }
@@ -321,6 +359,10 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             mOpaqueShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtOpaqueShading>();
             mTranslucentShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtTranslucentShading>();
 
+            bool hasMotionVector = MotionVectorPinInOut.FindInLinker() != null;
+            mOpaqueShading.EnableMotionVector.SetValue(hasMotionVector);
+            mTranslucentShading.EnableMotionVector.SetValue(hasMotionVector);
+
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
             {
@@ -330,52 +372,69 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public virtual unsafe TtGraphicsBuffers CreateGBuffers(TtRenderPolicy policy, EPixelFormat format)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            bool hasMotionVector = MotionVectorPinInOut.FindInLinker() != null;
             {
                 var PassDesc = new NxRHI.FRenderPassDesc();
 
-                PassDesc.NumOfMRT = 1;
+                PassDesc.NumOfMRT = hasMotionVector ? (uint)2 : (uint)1;
                 PassDesc.AttachmentMRTs[0].Format = format;
                 PassDesc.AttachmentMRTs[0].Samples = 1;
                 PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
                 PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                PassDesc.m_AttachmentDepthStencil.Format = DepthPinInOut.Attachement.Format;// dfPolicy.BasePassNode.GBuffers.DepthStencil.AttachBuffer.Srv.mCoreObject.GetFormat(); //dsFmt;
+                if (hasMotionVector)
+                {
+                    PassDesc.AttachmentMRTs[1].Format = MotionVectorPinInOut.Attachement.Format;
+                    PassDesc.AttachmentMRTs[1].Samples = 1;
+                    PassDesc.AttachmentMRTs[1].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                    PassDesc.AttachmentMRTs[1].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                }
+                PassDesc.m_AttachmentDepthStencil.Format = DepthPinInOut.Attachement.Format;
                 PassDesc.m_AttachmentDepthStencil.Samples = 1;
                 PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
                 PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
                 PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                //PassDesc.mFBClearColorRT0 = new Color4f(1, 0, 0, 0);
-                //PassDesc.mDepthClearValue = 1.0f;
-                //PassDesc.mStencilClearValue = 0u;
 
                 WithDepthRenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
 
                 WithDepthGBuffers.Initialize(policy, WithDepthRenderPass);
                 WithDepthGBuffers.SetRenderTarget(policy, 0, ColorPinInOut);
+                if (hasMotionVector)
+                {
+                    WithDepthGBuffers.SetRenderTarget(policy, 1, MotionVectorPinInOut);
+                }
                 WithDepthGBuffers.SetDepthStencil(policy, DepthPinInOut);
                 WithDepthGBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
             }
 
             {
                 var GizmosPassDesc = new NxRHI.FRenderPassDesc();
-                GizmosPassDesc.NumOfMRT = 1;
+                GizmosPassDesc.NumOfMRT = hasMotionVector ? (uint)2 : (uint)1;
                 GizmosPassDesc.AttachmentMRTs[0].Format = format;
                 GizmosPassDesc.AttachmentMRTs[0].Samples = 1;
                 GizmosPassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
                 GizmosPassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                if (hasMotionVector)
+                {
+                    GizmosPassDesc.AttachmentMRTs[1].Format = MotionVectorPinInOut.Attachement.Format;
+                    GizmosPassDesc.AttachmentMRTs[1].Samples = 1;
+                    GizmosPassDesc.AttachmentMRTs[1].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                    GizmosPassDesc.AttachmentMRTs[1].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                }
                 GizmosPassDesc.m_AttachmentDepthStencil.Format = GizmosDepthPinOut.Attachement.Format;
                 GizmosPassDesc.m_AttachmentDepthStencil.Samples = 1;
                 GizmosPassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
                 GizmosPassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 GizmosPassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
                 GizmosPassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                //GizmosPassDesc.mFBClearColorRT0 = new Color4f(1, 0, 0, 0);
-                //GizmosPassDesc.mDepthClearValue = 1.0f;
-                //GizmosPassDesc.mStencilClearValue = 0u;
                 GizmosRenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in GizmosPassDesc);
 
                 GBuffers.Initialize(policy, GizmosRenderPass);
                 GBuffers.SetRenderTarget(policy, 0, ColorPinInOut);
+                if (hasMotionVector)
+                {
+                    GBuffers.SetRenderTarget(policy, 1, MotionVectorPinInOut);
+                }
                 GBuffers.SetDepthStencil(policy, GizmosDepthPinOut);
                 GBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
             }

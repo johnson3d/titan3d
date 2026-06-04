@@ -16,9 +16,12 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/AAShading.cginc", RName.ERNameType.Engine);
 
+            this.BeginPermutaion();
+
             TypeAA = this.PushPermutation<TtAntiAliasingNode.ETypeAA>("ENV_TypeAA", (int)TtAntiAliasingNode.ETypeAA.TypeCount);
 
             TypeAA.SetValue((uint)TtAntiAliasingNode.ETypeAA.Taa);
+
             this.UpdatePermutation().AddWaitTask();
         }
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
@@ -93,7 +96,6 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (index.IsValidPointer)
                     drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
-
                 index = drawcall.FindBinder("cbShadingEnv");
                 if (index.IsValidPointer)
                 {
@@ -151,9 +153,6 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             TypeCount,
         }
-        [Category("Option")]
-        [Rtti.Meta("")]
-        public ETypeAA TypeAA { get; set; } = ETypeAA.Taa;
         public TtAntiAliasingNode()
         {
             Name = "TaaNode";
@@ -189,8 +188,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             // 完整初始化序列里 await 容易导致后续节点的注册顺序错乱 (上一次实测 TaaNode 直接从图里消失).
             // 真正的 effect 重建延迟到首次 TickLogic 时由 mEffectPermutationDirty 触发, 此时 RenderGraph
             // 已经稳定, 重建 effect 不会动节点拓扑.
-            mBasePassShading.TypeAA.SetValue((uint)TypeAA);
-            mBasePassShading.UpdatePermutation().AddWaitTask();
+            mBasePassShading.TypeAA.SetValue((uint)policy.TypeAA);
+            await mBasePassShading.UpdatePermutation();
         }
 
         public NxRHI.TtCbView CBShadingEnv;
@@ -242,7 +241,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             // ICamera::UpdateConstBufferData 一帧一次维护, 不要在这里做.
             CurrentOffsetIndex++;
             CurrentOffsetIndex = CurrentOffsetIndex % OffsetHaltonSequencer.Length;
-            if (TypeAA == ETypeAA.Taa)
+            if (policy.TypeAA == ETypeAA.Taa)
             {
                 // OffsetHaltonSequencer 里存的是 [0,1) 的 Halton 原始值, 直接交给 Camera;
                 // C++ 端 GetJitterUV() 会自己做 (x-0.5)/size 的中心化 + 归一化.
@@ -264,7 +263,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
         public override void BeforeTick(TtRenderPolicy policy)
         {
-            if (TypeAA == ETypeAA.None)
+            if (policy.TypeAA == ETypeAA.None)
             {
                 this.MoveAttachment(ColorPinIn, ResultPinOut);
                 return;
@@ -284,7 +283,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            switch (TypeAA)
+            switch (policy.TypeAA)
             {
                 case ETypeAA.None:
                     break;
@@ -307,7 +306,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             //     已确认是这种状态.
             //   - 真正稳定的判定就是 "节点要跑 TAA 且 effect 已经被构建成 TAA permutation",
             //     这两条满足就一定有 TaaNode draw 提交.
-            bool taaActive = TypeAA == ETypeAA.Taa
+            bool taaActive = policy.TypeAA == ETypeAA.Taa
                 && mBasePassShading != null
                 && mBasePassShading.TypeAA.GetValue() == (uint)ETypeAA.Taa;
             if (!taaActive)

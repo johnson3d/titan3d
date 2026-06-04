@@ -93,8 +93,9 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         protected Graphics.Pipeline.TtRenderPolicy mRenderPolicy;
-        [EGui.Controls.PropertyGrid.TtPGCustomValueEditor(ReadOnly = true, UserDraw = false)]
+        [ReadOnly(true)]
         [Rtti.Meta("")]
+        [Category("Option")]
         public Graphics.Pipeline.TtRenderPolicy RenderPolicy 
         { 
             get => mRenderPolicy; 
@@ -514,7 +515,7 @@ namespace EngineNS.Graphics.Pipeline
             {
                 await OnInitialize(this, application, policy, zMin, zMax);
             }
-            await this.World.InitWorld();
+            await InitWorld();
             SetCameraOffset(in DVector3.Zero);
 
             //mDefaultHUD.RenderCamera = this.RenderPolicy.DefaultCamera;

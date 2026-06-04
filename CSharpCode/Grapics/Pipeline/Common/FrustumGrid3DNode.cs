@@ -324,7 +324,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmd.PushGpuDraw(ClearGridDrawcall);
 
                 // Pass 2: Inject all lights (Point + Spot) in one dispatch
-                if (policy.DisablePointLight == false)
+                if (policy.EnableLocalLights)
                 {
                     var pointCount = gpuScene?.PointLights.DataArray.Count ?? 0;
                     var spotCount = gpuScene?.SpotLights.DataArray.Count ?? 0;

@@ -40,7 +40,12 @@ namespace NxRHI
 			pTar += Desc.RowPitch;
 		}*/
 	}
-
+	void NullBuffer::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
+	{
+		auto pTar = &mBuffer[0];
+		auto pSrc = (BYTE*)pData;
+		memcpy(pTar, pSrc, footPrint->TotalSize);
+	}
 	bool NullBuffer::Map(UINT index, FMappedSubResource* res, bool forRead)
 	{
 		res->RowPitch = Desc.RowPitch;
@@ -89,7 +94,26 @@ namespace NxRHI
 
 	bool NullCbView::Init(NullGpuDevice* device, IBuffer* pBuffer, const FCbvDesc* desc)
 	{
-		Buffer = pBuffer;
+		if (pBuffer != nullptr)
+		{
+			Buffer = pBuffer;
+		}
+		else if (desc->ShaderBinder != nullptr)
+		{
+			FBufferDesc bfDesc{};
+			bfDesc.SetDefault();
+			bfDesc.Size = desc->ShaderBinder->Size;
+
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+		}
+		else
+		{
+			FBufferDesc bfDesc{};
+			bfDesc.SetDefault();
+			bfDesc.Size = desc->BufferSize;
+
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+		}
 		ShaderBinder = desc->ShaderBinder;
 		return true;
 	}

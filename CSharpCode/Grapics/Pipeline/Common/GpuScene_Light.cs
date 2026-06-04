@@ -52,7 +52,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             PointLights.Clear();
             SpotLights.Clear();
 
-            if (policy.DisablePointLight == false)
+            if (policy.EnableLocalLights)
             {
                 foreach (var i in CpuCullNode.VisParameter.VisibleNodes)
                 {

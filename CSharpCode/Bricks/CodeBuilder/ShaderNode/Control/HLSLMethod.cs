@@ -106,9 +106,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             return new Vector3(Vector3.Dot(color, new Vector3(0.3f, 0.6f, 0.1f)));
         }
         [Rtti.Meta("")]
-        [TtMaterialShader(Name = "NormalMap")]
-        [ContextMenu(filterStrings: "NormalMap", "Effect\\NormalMap", TtMaterialGraph.MaterialEditorKeyword)]
-        public static void NormalMap(Vector3 Nt, Vector4 Tw, Vector3 Nw, out Vector3 UnpackedNormal)
+        [TtMaterialShader(Name = "CalcNormalMap")]
+        [ContextMenu(filterStrings: "CalcNormalMap", "Effect\\CalcNormalMap", TtMaterialGraph.MaterialEditorKeyword)]
+        public static void CalcNormalMap(Vector3 Nt, Vector4 Tw, Vector3 Nw, out Vector3 UnpackedNormal)
         {
             //   Vector3 Bw = new Vector3(0.0h, 0.0h, 0.0h);
             //   if (Tw.w > 0.0)
@@ -668,7 +668,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 			var _return_value = GrayColor(color);
 			return _return_value;
 		}
-		public static unsafe void macross_NormalMap (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 Nt, Vector4 Tw, Vector3 Nw, out Vector3 UnpackedNormal) 
+		public static unsafe void macross_CalcNormalMap (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector3 Nt, Vector4 Tw, Vector3 Nw, out Vector3 UnpackedNormal) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
@@ -676,7 +676,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 				{
 				}
 			}
-			NormalMap(Nt, Tw, Nw, out UnpackedNormal);
+			CalcNormalMap(Nt, Tw, Nw, out UnpackedNormal);
 		}
 		public static unsafe void macross_Panner (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Vector2 uv, float time, Vector2 speed, Vector2 scale, out Vector2 outUV) 
 		{

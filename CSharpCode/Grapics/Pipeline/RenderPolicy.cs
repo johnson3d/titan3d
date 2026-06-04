@@ -1,4 +1,5 @@
 using EngineNS.Graphics.Pipeline.Common;
+using EngineNS.Graphics.Pipeline.Deferred;
 using EngineNS.NxRHI;
 using EngineNS.Thread;
 using System;
@@ -43,6 +44,63 @@ namespace EngineNS.Graphics.Pipeline
         public void OnPropertyWrite(string prop, bool fromXml)
         {
 
+        }
+        #endregion
+        #region Feature On/Off
+        [Rtti.Meta("")]
+        [Category("Feature")]
+        public bool EnableLocalLights
+        {
+            get;
+            set;
+        } = true;
+        [Rtti.Meta("")]
+        [Category("Feature")]
+        public bool EnableAO
+        {
+            get;
+            set;
+        } = true;
+        [Rtti.Meta("")]
+        [Category("Feature")]
+        public bool EnableGI
+        {
+            get;
+            set;
+        } = true;
+        [Rtti.Meta("")]
+        [Category("Feature")]
+        public EShadowMode ShadowMode
+        {
+            get;
+            set;
+        } = EShadowMode.Advance;
+        [Rtti.Meta("")]
+        [Category("Feature")]
+        public bool EnableContactShadow
+        {
+            get;
+            set;
+        } = true;
+        [Category("Feature")]
+        public TtAntiAliasingNode.ETypeAA TypeAA
+        {
+            get;
+            set;
+        } = TtAntiAliasingNode.ETypeAA.Taa;
+        [Category("Feature")]
+        [ReadOnly(true)]
+        public bool EnableSeparatedSSS
+        {
+            get
+            {
+                var aa = this.FindNode<TtSSSBlurNode>();
+                if (aa != null)
+                {
+                    return true;
+                }
+                return false;
+            }
         }
         #endregion
         public TtRenderPolicy()
@@ -255,39 +313,6 @@ namespace EngineNS.Graphics.Pipeline
         {
             get => mLookNode;
         }
-        protected bool mDisableAO;
-        [Category("Option")]
-        [Rtti.Meta("")]
-        public virtual bool DisableAO
-        {
-            get => mDisableAO;
-            set
-            {
-                mDisableAO = value;
-            }
-        }
-        protected bool mDisablePointLight;
-        [Category("Option")]
-        [Rtti.Meta("")]
-        public virtual bool DisablePointLight
-        {
-            get => mDisablePointLight;
-            set
-            {
-                mDisablePointLight = value;
-            }
-        }
-        protected bool mDisableHDR;
-        [Category("Option")]
-        [Rtti.Meta("")]
-        public virtual bool DisableHDR
-        {
-            get => mDisableHDR;
-            set
-            {
-                mDisableHDR = value;
-            }
-        }
         //public enum ETypeAA
         //{
         //    None = 0,
@@ -488,38 +513,7 @@ namespace EngineNS.Graphics.Pipeline
     public class TtDeferredPolicyBase : TtRenderPolicy
     {
         #region Feature On/Off
-        [Category("Option")]
-        [Rtti.Meta("")]
-        public override bool DisablePointLight
-        {
-            get
-            {
-                return mDisablePointLight;
-            }
-            set
-            {
-                mDisablePointLight = value;
-                var shading = this.FindFirstNode<Deferred.TtDeferredDirLightingNode>()?.GetPassShading() as Deferred.TtDeferredDirLightingShading;
-                //var shading = DirLightingNode.ScreenDrawPolicy.mBasePassShading as UDeferredDirLightingShading;
-                shading?.SetDisablePointLights(value);
-            }
-        }
-        [Category("Option")]
-        [Rtti.Meta("")]
-        public override bool DisableHDR
-        {
-            get
-            {
-                return mDisableHDR;
-            }
-            set
-            {
-                mDisableHDR = value;
-                var shading = this.FindFirstNode<Deferred.TtDeferredDirLightingNode>()?.GetPassShading() as Deferred.TtDeferredDirLightingShading;
-                //var shading = DirLightingNode.ScreenDrawPolicy.mBasePassShading as UDeferredDirLightingShading;
-                shading?.SetDisableHDR(value);
-            }
-        }
+        
         #endregion
         
         Shadow.TtShadowMapNode mShadowMapNode;
@@ -563,39 +557,7 @@ namespace EngineNS.Graphics.Pipeline
     public class TtForwordPolicyBase : TtRenderPolicy
     {
         #region Feature On/Off
-        [Category("Option")]
-        [Rtti.Meta("")]
-        public override bool DisableAO
-        {
-            get => mDisableAO;
-            set
-            {
-                mDisableAO = value;
-                var finalShading = FindFirstNode<Mobile.TtFinalCopyNode>()?.GetPassShading() as Mobile.TtFinalCopyShading;
-                if (finalShading != null)
-                {
-                    finalShading.SetDisableAO(value);
-                }
-            }
-        }
-        [Category("Option")]
-        [Rtti.Meta("")]
-        public override bool DisableHDR
-        {
-            get
-            {
-                return mDisableHDR;
-            }
-            set
-            {
-                mDisableHDR = value;
-                var node = FindFirstNode<Mobile.TtFinalCopyNode>();
-                if (node == null)
-                    return;
-                var shading = node.GetPassShading() as Mobile.TtFinalCopyShading;
-                shading?.SetDisableHDR(value);
-            }
-        }
+        
         #endregion
 
         Mobile.TtMobileOpaqueNode mBasePassNode;

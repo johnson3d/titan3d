@@ -85,6 +85,27 @@ namespace EngineNS.Bricks.Collision.Octree
         // #### PUBLIC METHODS ####
 
         /// <summary>
+        /// Remove all objects from this node and all its children, resetting it to an empty state.
+        /// </summary>
+        public void Clear()
+        {
+            foreach (var octObj in OctObjects)
+            {
+                octObj.Obj.OctreeOwner = null;
+            }
+            OctObjects.Clear();
+
+            if (Children != null)
+            {
+                for (int i = 0; i < Children.Length; i++)
+                {
+                    Children[i].Clear();
+                }
+                Children = null;
+            }
+        }
+
+        /// <summary>
         /// Add an object.
         /// </summary>
         /// <param name="obj">Object to add.</param>

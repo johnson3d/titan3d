@@ -38709,13 +38709,13 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Var.VarColor3;
+			ar.Write(srcObj.Color);
 			ar.Write(srcObj.IsHalfPrecision);
 			ar.Write(srcObj.IsUniform);
 			ar.Write(srcObj.Label);
 			ar.Write(srcObj.Name);
 			ar.Write(srcObj.NodeId);
 			ar.Write(srcObj.Position);
-			ar.Write(srcObj.Value);
 			if (srcObj.InputEditableValues != null)
 			{
 				var Srclst = srcObj.InputEditableValues as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
@@ -38753,13 +38753,13 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var tarObj = tar as EngineNS.Bricks.CodeBuilder.ShaderNode.Var.VarColor3;
 			var srcObj = src as EngineNS.Bricks.CodeBuilder.ShaderNode.Var.VarColor3;
+			tarObj.Color = srcObj.Color;
 			tarObj.IsHalfPrecision = srcObj.IsHalfPrecision;
 			tarObj.IsUniform = srcObj.IsUniform;
 			tarObj.Label = srcObj.Label;
 			tarObj.Name = srcObj.Name;
 			tarObj.NodeId = srcObj.NodeId;
 			tarObj.Position = srcObj.Position;
-			tarObj.Value = srcObj.Value;
 			if (srcObj.InputEditableValues != null)
 			{
 				if (tarObj.InputEditableValues == null)
@@ -38843,6 +38843,107 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "Value", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_12320289989026182853 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.ShaderNode.Var.VarColor3;
+			EngineNS.Vector3 t_Color;
+			ar.Read(out t_Color);
+			srcObj.Color = t_Color;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Color", false);
+				}
+			}
+			System.Boolean t_IsHalfPrecision;
+			ar.Read(out t_IsHalfPrecision);
+			srcObj.IsHalfPrecision = t_IsHalfPrecision;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsHalfPrecision", false);
+				}
+			}
+			System.Boolean t_IsUniform;
+			ar.Read(out t_IsUniform);
+			srcObj.IsUniform = t_IsUniform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsUniform", false);
+				}
+			}
+			System.String t_Label;
+			ar.Read(out t_Label);
+			srcObj.Label = t_Label;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Label", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
 				}
 			}
 			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
@@ -124706,6 +124807,18 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.PrefabBoderColor);
 			ar.Write(srcObj.RenderPolicyBoderColor);
 			ar.Write(srcObj.SceneBoderColor);
+			ar.Write(srcObj.StudioDefaultFloorMaterial);
+			ar.Write(srcObj.StudioFallbackSkyColorBottom);
+			ar.Write(srcObj.StudioFallbackSkyColorTop);
+			ar.Write(srcObj.StudioFloorColor);
+			ar.Write(srcObj.StudioGridFade);
+			ar.Write(srcObj.StudioGridHeightOffset);
+			ar.Write(srcObj.StudioGroundLightColor);
+			ar.Write(srcObj.StudioLightDirection);
+			ar.Write(srcObj.StudioSkyboxImageName);
+			ar.Write(srcObj.StudioSkyLightColor);
+			ar.Write(srcObj.StudioSunLightColor);
+			ar.Write(srcObj.StudioSunLightIntensity);
 			ar.Write(srcObj.TextureBoderColor);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
@@ -124728,7 +124841,284 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.PrefabBoderColor = srcObj.PrefabBoderColor;
 			tarObj.RenderPolicyBoderColor = srcObj.RenderPolicyBoderColor;
 			tarObj.SceneBoderColor = srcObj.SceneBoderColor;
+			tarObj.StudioDefaultFloorMaterial = srcObj.StudioDefaultFloorMaterial;
+			tarObj.StudioFallbackSkyColorBottom = srcObj.StudioFallbackSkyColorBottom;
+			tarObj.StudioFallbackSkyColorTop = srcObj.StudioFallbackSkyColorTop;
+			tarObj.StudioFloorColor = srcObj.StudioFloorColor;
+			tarObj.StudioGridFade = srcObj.StudioGridFade;
+			tarObj.StudioGridHeightOffset = srcObj.StudioGridHeightOffset;
+			tarObj.StudioGroundLightColor = srcObj.StudioGroundLightColor;
+			tarObj.StudioLightDirection = srcObj.StudioLightDirection;
+			tarObj.StudioSkyboxImageName = srcObj.StudioSkyboxImageName;
+			tarObj.StudioSkyLightColor = srcObj.StudioSkyLightColor;
+			tarObj.StudioSunLightColor = srcObj.StudioSunLightColor;
+			tarObj.StudioSunLightIntensity = srcObj.StudioSunLightIntensity;
 			tarObj.TextureBoderColor = srcObj.TextureBoderColor;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9829039287951372466 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Editor.TtEditorConfig;
+			EngineNS.RName t_FontIconName;
+			ar.Read(out t_FontIconName);
+			srcObj.FontIconName = t_FontIconName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FontIconName", false);
+				}
+			}
+			EngineNS.Color4b t_FontSDFBoderColor;
+			ar.Read(out t_FontSDFBoderColor);
+			srcObj.FontSDFBoderColor = t_FontSDFBoderColor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FontSDFBoderColor", false);
+				}
+			}
+			System.String t_GameModuleName;
+			ar.Read(out t_GameModuleName);
+			srcObj.GameModuleName = t_GameModuleName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "GameModuleName", false);
+				}
+			}
+			System.String t_GameProject;
+			ar.Read(out t_GameProject);
+			srcObj.GameProject = t_GameProject;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "GameProject", false);
+				}
+			}
+			EngineNS.RName t_MacrossIconName;
+			ar.Read(out t_MacrossIconName);
+			srcObj.MacrossIconName = t_MacrossIconName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MacrossIconName", false);
+				}
+			}
+			EngineNS.Color4b t_MaterialBoderColor;
+			ar.Read(out t_MaterialBoderColor);
+			srcObj.MaterialBoderColor = t_MaterialBoderColor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaterialBoderColor", false);
+				}
+			}
+			EngineNS.Color4b t_MaterialFunctionBoderColor;
+			ar.Read(out t_MaterialFunctionBoderColor);
+			srcObj.MaterialFunctionBoderColor = t_MaterialFunctionBoderColor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaterialFunctionBoderColor", false);
+				}
+			}
+			EngineNS.Color4b t_MaterialInstanceBoderColor;
+			ar.Read(out t_MaterialInstanceBoderColor);
+			srcObj.MaterialInstanceBoderColor = t_MaterialInstanceBoderColor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaterialInstanceBoderColor", false);
+				}
+			}
+			EngineNS.Color4b t_MaterialMeshBoderColor;
+			ar.Read(out t_MaterialMeshBoderColor);
+			srcObj.MaterialMeshBoderColor = t_MaterialMeshBoderColor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaterialMeshBoderColor", false);
+				}
+			}
+			EngineNS.Color4b t_MeshPrimitivesBoderColor;
+			ar.Read(out t_MeshPrimitivesBoderColor);
+			srcObj.MeshPrimitivesBoderColor = t_MeshPrimitivesBoderColor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MeshPrimitivesBoderColor", false);
+				}
+			}
+			EngineNS.Color4b t_NebulaBoderColor;
+			ar.Read(out t_NebulaBoderColor);
+			srcObj.NebulaBoderColor = t_NebulaBoderColor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NebulaBoderColor", false);
+				}
+			}
+			EngineNS.Color4b t_PgcBoderColor;
+			ar.Read(out t_PgcBoderColor);
+			srcObj.PgcBoderColor = t_PgcBoderColor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "PgcBoderColor", false);
+				}
+			}
+			EngineNS.RName t_PhyMaterialIconName;
+			ar.Read(out t_PhyMaterialIconName);
+			srcObj.PhyMaterialIconName = t_PhyMaterialIconName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "PhyMaterialIconName", false);
+				}
+			}
+			EngineNS.Color4b t_PrefabBoderColor;
+			ar.Read(out t_PrefabBoderColor);
+			srcObj.PrefabBoderColor = t_PrefabBoderColor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "PrefabBoderColor", false);
+				}
+			}
+			EngineNS.Color4b t_RenderPolicyBoderColor;
+			ar.Read(out t_RenderPolicyBoderColor);
+			srcObj.RenderPolicyBoderColor = t_RenderPolicyBoderColor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderPolicyBoderColor", false);
+				}
+			}
+			EngineNS.Color4b t_SceneBoderColor;
+			ar.Read(out t_SceneBoderColor);
+			srcObj.SceneBoderColor = t_SceneBoderColor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SceneBoderColor", false);
+				}
+			}
+			System.String t_StudioDefaultFloorMaterial;
+			ar.Read(out t_StudioDefaultFloorMaterial);
+			srcObj.StudioDefaultFloorMaterial = t_StudioDefaultFloorMaterial;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "StudioDefaultFloorMaterial", false);
+				}
+			}
+			EngineNS.Vector3 t_StudioFallbackSkyColorBottom;
+			ar.Read(out t_StudioFallbackSkyColorBottom);
+			srcObj.StudioFallbackSkyColorBottom = t_StudioFallbackSkyColorBottom;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "StudioFallbackSkyColorBottom", false);
+				}
+			}
+			EngineNS.Vector3 t_StudioFallbackSkyColorTop;
+			ar.Read(out t_StudioFallbackSkyColorTop);
+			srcObj.StudioFallbackSkyColorTop = t_StudioFallbackSkyColorTop;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "StudioFallbackSkyColorTop", false);
+				}
+			}
+			EngineNS.Vector4 t_StudioFloorColor;
+			ar.Read(out t_StudioFloorColor);
+			srcObj.StudioFloorColor = t_StudioFloorColor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "StudioFloorColor", false);
+				}
+			}
+			System.Single t_StudioGridFade;
+			ar.Read(out t_StudioGridFade);
+			srcObj.StudioGridFade = t_StudioGridFade;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "StudioGridFade", false);
+				}
+			}
+			System.Single t_StudioGridHeightOffset;
+			ar.Read(out t_StudioGridHeightOffset);
+			srcObj.StudioGridHeightOffset = t_StudioGridHeightOffset;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "StudioGridHeightOffset", false);
+				}
+			}
+			EngineNS.Vector3 t_StudioGroundLightColor;
+			ar.Read(out t_StudioGroundLightColor);
+			srcObj.StudioGroundLightColor = t_StudioGroundLightColor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "StudioGroundLightColor", false);
+				}
+			}
+			EngineNS.Vector3 t_StudioLightDirection;
+			ar.Read(out t_StudioLightDirection);
+			srcObj.StudioLightDirection = t_StudioLightDirection;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "StudioLightDirection", false);
+				}
+			}
+			System.String t_StudioSkyboxImageName;
+			ar.Read(out t_StudioSkyboxImageName);
+			srcObj.StudioSkyboxImageName = t_StudioSkyboxImageName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "StudioSkyboxImageName", false);
+				}
+			}
+			EngineNS.Vector3 t_StudioSkyLightColor;
+			ar.Read(out t_StudioSkyLightColor);
+			srcObj.StudioSkyLightColor = t_StudioSkyLightColor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "StudioSkyLightColor", false);
+				}
+			}
+			EngineNS.Vector3 t_StudioSunLightColor;
+			ar.Read(out t_StudioSunLightColor);
+			srcObj.StudioSunLightColor = t_StudioSunLightColor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "StudioSunLightColor", false);
+				}
+			}
+			System.Single t_StudioSunLightIntensity;
+			ar.Read(out t_StudioSunLightIntensity);
+			srcObj.StudioSunLightIntensity = t_StudioSunLightIntensity;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "StudioSunLightIntensity", false);
+				}
+			}
+			EngineNS.Color4b t_TextureBoderColor;
+			ar.Read(out t_TextureBoderColor);
+			srcObj.TextureBoderColor = t_TextureBoderColor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TextureBoderColor", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_14523384837765808760 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -141750,6 +142140,398 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
+	static class EngineNS_Graphics_Pipeline_Common_Post_TtSSAONode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.Post.TtSSAONode;
+			ar.Write(srcObj.Bias);
+			ar.Write(srcObj.Enable);
+			ar.Write(srcObj.EnableTemporalRotation);
+			ar.Write(srcObj.FalloffDistance);
+			ar.Write(srcObj.FilterSharpness);
+			ar.Write(srcObj.HalfResolution);
+			ar.Write(srcObj.Intensity);
+			ar.Write(srcObj.NumDirections);
+			ar.Write(srcObj.NumSteps);
+			ar.Write(srcObj.Radius);
+			ar.Write(srcObj.UniqueId);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Pipeline.Common.Post.TtSSAONode;
+			var srcObj = src as EngineNS.Graphics.Pipeline.Common.Post.TtSSAONode;
+			tarObj.Bias = srcObj.Bias;
+			tarObj.Enable = srcObj.Enable;
+			tarObj.EnableTemporalRotation = srcObj.EnableTemporalRotation;
+			tarObj.FalloffDistance = srcObj.FalloffDistance;
+			tarObj.FilterSharpness = srcObj.FilterSharpness;
+			tarObj.HalfResolution = srcObj.HalfResolution;
+			tarObj.Intensity = srcObj.Intensity;
+			tarObj.NumDirections = srcObj.NumDirections;
+			tarObj.NumSteps = srcObj.NumSteps;
+			tarObj.Radius = srcObj.Radius;
+			tarObj.UniqueId = srcObj.UniqueId;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3352419873968971594 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.Post.TtSSAONode;
+			System.Single t_Bias;
+			ar.Read(out t_Bias);
+			srcObj.Bias = t_Bias;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Bias", false);
+				}
+			}
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+			System.Boolean t_EnableTemporalRotation;
+			ar.Read(out t_EnableTemporalRotation);
+			srcObj.EnableTemporalRotation = t_EnableTemporalRotation;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableTemporalRotation", false);
+				}
+			}
+			System.Single t_FalloffDistance;
+			ar.Read(out t_FalloffDistance);
+			srcObj.FalloffDistance = t_FalloffDistance;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FalloffDistance", false);
+				}
+			}
+			System.Single t_FilterSharpness;
+			ar.Read(out t_FilterSharpness);
+			srcObj.FilterSharpness = t_FilterSharpness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FilterSharpness", false);
+				}
+			}
+			System.Boolean t_HalfResolution;
+			ar.Read(out t_HalfResolution);
+			srcObj.HalfResolution = t_HalfResolution;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HalfResolution", false);
+				}
+			}
+			System.Single t_Intensity;
+			ar.Read(out t_Intensity);
+			srcObj.Intensity = t_Intensity;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Intensity", false);
+				}
+			}
+			System.Int32 t_NumDirections;
+			ar.Read(out t_NumDirections);
+			srcObj.NumDirections = t_NumDirections;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NumDirections", false);
+				}
+			}
+			System.Int32 t_NumSteps;
+			ar.Read(out t_NumSteps);
+			srcObj.NumSteps = t_NumSteps;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NumSteps", false);
+				}
+			}
+			System.Single t_Radius;
+			ar.Read(out t_Radius);
+			srcObj.Radius = t_Radius;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Radius", false);
+				}
+			}
+			System.Guid t_UniqueId;
+			ar.Read(out t_UniqueId);
+			srcObj.UniqueId = t_UniqueId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "UniqueId", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_6152420914188868799 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.Post.TtSSAONode;
+			System.Single t_Bias;
+			ar.Read(out t_Bias);
+			srcObj.Bias = t_Bias;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Bias", false);
+				}
+			}
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+			System.Boolean t_EnableTemporalRotation;
+			ar.Read(out t_EnableTemporalRotation);
+			srcObj.EnableTemporalRotation = t_EnableTemporalRotation;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableTemporalRotation", false);
+				}
+			}
+			System.Single t_FalloffDistance;
+			ar.Read(out t_FalloffDistance);
+			srcObj.FalloffDistance = t_FalloffDistance;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FalloffDistance", false);
+				}
+			}
+			System.Single t_Intensity;
+			ar.Read(out t_Intensity);
+			srcObj.Intensity = t_Intensity;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Intensity", false);
+				}
+			}
+			System.Int32 t_NumDirections;
+			ar.Read(out t_NumDirections);
+			srcObj.NumDirections = t_NumDirections;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NumDirections", false);
+				}
+			}
+			System.Int32 t_NumSteps;
+			ar.Read(out t_NumSteps);
+			srcObj.NumSteps = t_NumSteps;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NumSteps", false);
+				}
+			}
+			System.Single t_Radius;
+			ar.Read(out t_Radius);
+			srcObj.Radius = t_Radius;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Radius", false);
+				}
+			}
+			System.Guid t_UniqueId;
+			ar.Read(out t_UniqueId);
+			srcObj.UniqueId = t_UniqueId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "UniqueId", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_6172874246472953967 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.Post.TtSSAONode;
+			System.Single t_Bias;
+			ar.Read(out t_Bias);
+			srcObj.Bias = t_Bias;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Bias", false);
+				}
+			}
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+			System.Boolean t_EnableTemporalRotation;
+			ar.Read(out t_EnableTemporalRotation);
+			srcObj.EnableTemporalRotation = t_EnableTemporalRotation;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableTemporalRotation", false);
+				}
+			}
+			System.Single t_FalloffDistance;
+			ar.Read(out t_FalloffDistance);
+			srcObj.FalloffDistance = t_FalloffDistance;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FalloffDistance", false);
+				}
+			}
+			System.Boolean t_HalfResolution;
+			ar.Read(out t_HalfResolution);
+			srcObj.HalfResolution = t_HalfResolution;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HalfResolution", false);
+				}
+			}
+			System.Single t_Intensity;
+			ar.Read(out t_Intensity);
+			srcObj.Intensity = t_Intensity;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Intensity", false);
+				}
+			}
+			System.Int32 t_NumDirections;
+			ar.Read(out t_NumDirections);
+			srcObj.NumDirections = t_NumDirections;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NumDirections", false);
+				}
+			}
+			System.Int32 t_NumSteps;
+			ar.Read(out t_NumSteps);
+			srcObj.NumSteps = t_NumSteps;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NumSteps", false);
+				}
+			}
+			System.Single t_Radius;
+			ar.Read(out t_Radius);
+			srcObj.Radius = t_Radius;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Radius", false);
+				}
+			}
+			System.Guid t_UniqueId;
+			ar.Read(out t_UniqueId);
+			srcObj.UniqueId = t_UniqueId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "UniqueId", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9537471600833130186 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.Post.TtSSAONode;
+			System.Single t_Bias;
+			ar.Read(out t_Bias);
+			srcObj.Bias = t_Bias;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Bias", false);
+				}
+			}
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+			System.Single t_FalloffDistance;
+			ar.Read(out t_FalloffDistance);
+			srcObj.FalloffDistance = t_FalloffDistance;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FalloffDistance", false);
+				}
+			}
+			System.Single t_Intensity;
+			ar.Read(out t_Intensity);
+			srcObj.Intensity = t_Intensity;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Intensity", false);
+				}
+			}
+			System.Int32 t_NumDirections;
+			ar.Read(out t_NumDirections);
+			srcObj.NumDirections = t_NumDirections;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NumDirections", false);
+				}
+			}
+			System.Int32 t_NumSteps;
+			ar.Read(out t_NumSteps);
+			srcObj.NumSteps = t_NumSteps;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NumSteps", false);
+				}
+			}
+			System.Single t_Radius;
+			ar.Read(out t_Radius);
+			srcObj.Radius = t_Radius;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Radius", false);
+				}
+			}
+			System.Guid t_UniqueId;
+			ar.Read(out t_UniqueId);
+			srcObj.UniqueId = t_UniqueId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "UniqueId", false);
+				}
+			}
+		};
+	}
 	static class EngineNS_Graphics_Pipeline_Common_Post_TtSunShaftDepthThresholeNode
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -141999,7 +142781,6 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtAntiAliasingNode;
 			ar.Write(srcObj.Enable);
 			ar.Write(srcObj.OutputScaleFactor);
-			ar.Write(srcObj.TypeAA);
 			ar.Write(srcObj.UniqueId);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
@@ -142008,8 +142789,38 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = src as EngineNS.Graphics.Pipeline.Common.TtAntiAliasingNode;
 			tarObj.Enable = srcObj.Enable;
 			tarObj.OutputScaleFactor = srcObj.OutputScaleFactor;
-			tarObj.TypeAA = srcObj.TypeAA;
 			tarObj.UniqueId = srcObj.UniqueId;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_388796026575051016 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtAntiAliasingNode;
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+			System.Single t_OutputScaleFactor;
+			ar.Read(out t_OutputScaleFactor);
+			srcObj.OutputScaleFactor = t_OutputScaleFactor;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "OutputScaleFactor", false);
+				}
+			}
+			System.Guid t_UniqueId;
+			ar.Read(out t_UniqueId);
+			srcObj.UniqueId = t_UniqueId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "UniqueId", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_6960915415435731531 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -142034,13 +142845,6 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			EngineNS.Graphics.Pipeline.Common.TtAntiAliasingNode.ETypeAA t_TypeAA;
 			ar.Read(out t_TypeAA);
-			srcObj.TypeAA = t_TypeAA;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "TypeAA", false);
-				}
-			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7959925610935056749 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -142065,13 +142869,6 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			EngineNS.Graphics.Pipeline.Common.TtAntiAliasingNode.ETypeAA t_TypeAA;
 			ar.Read(out t_TypeAA);
-			srcObj.TypeAA = t_TypeAA;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "TypeAA", false);
-				}
-			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9676977852925175428 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -142096,13 +142893,6 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			EngineNS.Graphics.Pipeline.Common.TtAntiAliasingNode.ETypeAA t_TypeAA;
 			ar.Read(out t_TypeAA);
-			srcObj.TypeAA = t_TypeAA;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "TypeAA", false);
-				}
-			}
 			System.Guid t_UniqueId;
 			ar.Read(out t_UniqueId);
 			srcObj.UniqueId = t_UniqueId;
@@ -144041,6 +144831,7 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Deferred.MultiViewID.TtBasePassNode;
 			ar.Write(srcObj.ClearMRT);
 			ar.Write(srcObj.Enable);
+			ar.Write(srcObj.EnableHDR);
 			if (srcObj.LayerFilters != null)
 			{
 				var Srclst = srcObj.LayerFilters as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.ERenderLayer>;
@@ -144062,6 +144853,7 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = src as EngineNS.Graphics.Pipeline.Deferred.MultiViewID.TtBasePassNode;
 			tarObj.ClearMRT = srcObj.ClearMRT;
 			tarObj.Enable = srcObj.Enable;
+			tarObj.EnableHDR = srcObj.EnableHDR;
 			if (srcObj.LayerFilters != null)
 			{
 				if (tarObj.LayerFilters == null)
@@ -144162,6 +144954,60 @@ namespace EngineNS.Plugins.DataCopyer
 				t_LayerFilters.Add(t);
 			}
 		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15974273577363406509 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Deferred.MultiViewID.TtBasePassNode;
+			System.Boolean t_ClearMRT;
+			ar.Read(out t_ClearMRT);
+			srcObj.ClearMRT = t_ClearMRT;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ClearMRT", false);
+				}
+			}
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+			System.Boolean t_EnableHDR;
+			ar.Read(out t_EnableHDR);
+			srcObj.EnableHDR = t_EnableHDR;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableHDR", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Pipeline.ERenderLayer> t_LayerFilters = null;
+			t_LayerFilters = srcObj.LayerFilters;
+			if (t_LayerFilters == null)
+			{
+				t_LayerFilters = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.ERenderLayer>)) as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.ERenderLayer>;
+			}
+			int count_LayerFilters;
+			ar.Read(out count_LayerFilters);
+			for(int i = 0; i<count_LayerFilters; i++)
+			{
+				EngineNS.Graphics.Pipeline.ERenderLayer t;
+				ar.Read(out t);
+				t_LayerFilters.Add(t);
+			}
+			System.Guid t_UniqueId;
+			ar.Read(out t_UniqueId);
+			srcObj.UniqueId = t_UniqueId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "UniqueId", false);
+				}
+			}
+		};
 	}
 	static class EngineNS_Graphics_Pipeline_Deferred_TtDeferredBasePassNode
 	{
@@ -144170,6 +145016,7 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Deferred.TtDeferredBasePassNode;
 			ar.Write(srcObj.ClearMRT);
 			ar.Write(srcObj.Enable);
+			ar.Write(srcObj.EnableHDR);
 			ar.Write(srcObj.EnableMeshlets);
 			ar.Write(srcObj.UniqueId);
 		};
@@ -144179,8 +145026,58 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = src as EngineNS.Graphics.Pipeline.Deferred.TtDeferredBasePassNode;
 			tarObj.ClearMRT = srcObj.ClearMRT;
 			tarObj.Enable = srcObj.Enable;
+			tarObj.EnableHDR = srcObj.EnableHDR;
 			tarObj.EnableMeshlets = srcObj.EnableMeshlets;
 			tarObj.UniqueId = srcObj.UniqueId;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_4322477947055638671 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Deferred.TtDeferredBasePassNode;
+			System.Boolean t_ClearMRT;
+			ar.Read(out t_ClearMRT);
+			srcObj.ClearMRT = t_ClearMRT;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ClearMRT", false);
+				}
+			}
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+			System.Boolean t_EnableHDR;
+			ar.Read(out t_EnableHDR);
+			srcObj.EnableHDR = t_EnableHDR;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableHDR", false);
+				}
+			}
+			System.Boolean t_EnableMeshlets;
+			ar.Read(out t_EnableMeshlets);
+			srcObj.EnableMeshlets = t_EnableMeshlets;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableMeshlets", false);
+				}
+			}
+			System.Guid t_UniqueId;
+			ar.Read(out t_UniqueId);
+			srcObj.UniqueId = t_UniqueId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "UniqueId", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_14803348231580179961 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -146299,19 +147196,116 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileEditorFSPolicy;
+			ar.Write(srcObj.EnableAO);
+			ar.Write(srcObj.EnableContactShadow);
+			ar.Write(srcObj.EnableGI);
+			ar.Write(srcObj.EnableLocalLights);
+			ar.Write(srcObj.ShadowMode);
 			ar.Write(srcObj.TypeFog);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
 			var tarObj = tar as EngineNS.Graphics.Pipeline.Mobile.TtMobileEditorFSPolicy;
 			var srcObj = src as EngineNS.Graphics.Pipeline.Mobile.TtMobileEditorFSPolicy;
+			tarObj.EnableAO = srcObj.EnableAO;
+			tarObj.EnableContactShadow = srcObj.EnableContactShadow;
+			tarObj.EnableGI = srcObj.EnableGI;
+			tarObj.EnableLocalLights = srcObj.EnableLocalLights;
+			tarObj.ShadowMode = srcObj.ShadowMode;
 			tarObj.TypeFog = srcObj.TypeFog;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5998283359797127 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileEditorFSPolicy;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableContactShadow;
+			ar.Read(out t_EnableContactShadow);
+			srcObj.EnableContactShadow = t_EnableContactShadow;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableContactShadow", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1765725197176727181 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileEditorFSPolicy;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_2209381975495933358 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileEditorFSPolicy;
 			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
 			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
+				}
+			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
 			ar.Read(out t_TypeFog);
 			srcObj.TypeFog = t_TypeFog;
@@ -146335,13 +147329,125 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8048419175116741211 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileEditorFSPolicy;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableContactShadow;
+			ar.Read(out t_EnableContactShadow);
+			srcObj.EnableContactShadow = t_EnableContactShadow;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableContactShadow", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
+			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15567830835772408686 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileEditorFSPolicy;
 			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
 			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
+				}
+			}
 			EngineNS.Graphics.Pipeline.Common.TtAntiAliasingNode.ETypeAA t_TypeAA;
 			ar.Read(out t_TypeAA);
+			srcObj.TypeAA = t_TypeAA;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeAA", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_17965078111118069651 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileEditorFSPolicy;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
+				}
+			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
 			ar.Read(out t_TypeFog);
 			srcObj.TypeFog = t_TypeFog;
@@ -146409,30 +147515,87 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileFSPolicy;
-			ar.Write(srcObj.DisableHDR);
+			ar.Write(srcObj.EnableAO);
+			ar.Write(srcObj.EnableContactShadow);
+			ar.Write(srcObj.EnableGI);
+			ar.Write(srcObj.EnableLocalLights);
+			ar.Write(srcObj.ShadowMode);
 			ar.Write(srcObj.TypeFog);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
 			var tarObj = tar as EngineNS.Graphics.Pipeline.Mobile.TtMobileFSPolicy;
 			var srcObj = src as EngineNS.Graphics.Pipeline.Mobile.TtMobileFSPolicy;
-			tarObj.DisableHDR = srcObj.DisableHDR;
+			tarObj.EnableAO = srcObj.EnableAO;
+			tarObj.EnableContactShadow = srcObj.EnableContactShadow;
+			tarObj.EnableGI = srcObj.EnableGI;
+			tarObj.EnableLocalLights = srcObj.EnableLocalLights;
+			tarObj.ShadowMode = srcObj.ShadowMode;
 			tarObj.TypeFog = srcObj.TypeFog;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5998283359797127 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileFSPolicy;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableContactShadow;
+			ar.Read(out t_EnableContactShadow);
+			srcObj.EnableContactShadow = t_EnableContactShadow;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableContactShadow", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_12276500947907991 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileFSPolicy;
 			System.Boolean t_DisableHDR;
 			ar.Read(out t_DisableHDR);
-			srcObj.DisableHDR = t_DisableHDR;
+			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
+			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
 				}
 			}
-			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
-			ar.Read(out t_ShadowMode);
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
 			ar.Read(out t_TypeFog);
 			srcObj.TypeFog = t_TypeFog;
@@ -146448,11 +147611,35 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileFSPolicy;
 			System.Boolean t_DisableHDR;
 			ar.Read(out t_DisableHDR);
-			srcObj.DisableHDR = t_DisableHDR;
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1765725197176727181 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileFSPolicy;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
 				}
 			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
@@ -146470,17 +147657,122 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileFSPolicy;
 			System.Boolean t_DisableHDR;
 			ar.Read(out t_DisableHDR);
-			srcObj.DisableHDR = t_DisableHDR;
+			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
+			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.Common.TtAntiAliasingNode.ETypeAA t_TypeAA;
+			ar.Read(out t_TypeAA);
+			srcObj.TypeAA = t_TypeAA;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeAA", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8048419175116741211 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileFSPolicy;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableContactShadow;
+			ar.Read(out t_EnableContactShadow);
+			srcObj.EnableContactShadow = t_EnableContactShadow;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableContactShadow", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
 				}
 			}
 			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
 			ar.Read(out t_ShadowMode);
-			EngineNS.Graphics.Pipeline.Common.TtAntiAliasingNode.ETypeAA t_TypeAA;
-			ar.Read(out t_TypeAA);
+			srcObj.ShadowMode = t_ShadowMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_17965078111118069651 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileFSPolicy;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
+				}
+			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
 			ar.Read(out t_TypeFog);
 			srcObj.TypeFog = t_TypeFog;
@@ -146650,52 +147942,180 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Shader.CommanShading.UBasePassPolicy;
-			ar.Write(srcObj.DisableAO);
-			ar.Write(srcObj.DisableHDR);
-			ar.Write(srcObj.DisablePointLight);
+			ar.Write(srcObj.EnableAO);
+			ar.Write(srcObj.EnableContactShadow);
+			ar.Write(srcObj.EnableGI);
+			ar.Write(srcObj.EnableLocalLights);
+			ar.Write(srcObj.ShadowMode);
 			ar.Write(srcObj.TypeFog);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
 			var tarObj = tar as EngineNS.Graphics.Pipeline.Shader.CommanShading.UBasePassPolicy;
 			var srcObj = src as EngineNS.Graphics.Pipeline.Shader.CommanShading.UBasePassPolicy;
-			tarObj.DisableAO = srcObj.DisableAO;
-			tarObj.DisableHDR = srcObj.DisableHDR;
-			tarObj.DisablePointLight = srcObj.DisablePointLight;
+			tarObj.EnableAO = srcObj.EnableAO;
+			tarObj.EnableContactShadow = srcObj.EnableContactShadow;
+			tarObj.EnableGI = srcObj.EnableGI;
+			tarObj.EnableLocalLights = srcObj.EnableLocalLights;
+			tarObj.ShadowMode = srcObj.ShadowMode;
 			tarObj.TypeFog = srcObj.TypeFog;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5998283359797127 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Shader.CommanShading.UBasePassPolicy;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableContactShadow;
+			ar.Read(out t_EnableContactShadow);
+			srcObj.EnableContactShadow = t_EnableContactShadow;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableContactShadow", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1765725197176727181 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Shader.CommanShading.UBasePassPolicy;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_4433640487391870259 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Shader.CommanShading.UBasePassPolicy;
 			System.Boolean t_DisableAO;
 			ar.Read(out t_DisableAO);
-			srcObj.DisableAO = t_DisableAO;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableAO", false);
-				}
-			}
 			System.Boolean t_DisableHDR;
 			ar.Read(out t_DisableHDR);
-			srcObj.DisableHDR = t_DisableHDR;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
-				}
-			}
 			System.Boolean t_DisablePointLight;
 			ar.Read(out t_DisablePointLight);
-			srcObj.DisablePointLight = t_DisablePointLight;
+			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
+			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisablePointLight", false);
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8048419175116741211 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Shader.CommanShading.UBasePassPolicy;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableContactShadow;
+			ar.Read(out t_EnableContactShadow);
+			srcObj.EnableContactShadow = t_EnableContactShadow;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableContactShadow", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
 				}
 			}
 			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
 			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
+				}
+			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
 			ar.Read(out t_TypeFog);
 			srcObj.TypeFog = t_TypeFog;
@@ -146711,35 +148131,28 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Shader.CommanShading.UBasePassPolicy;
 			System.Boolean t_DisableAO;
 			ar.Read(out t_DisableAO);
-			srcObj.DisableAO = t_DisableAO;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableAO", false);
-				}
-			}
 			System.Boolean t_DisableHDR;
 			ar.Read(out t_DisableHDR);
-			srcObj.DisableHDR = t_DisableHDR;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
-				}
-			}
 			System.Boolean t_DisablePointLight;
 			ar.Read(out t_DisablePointLight);
-			srcObj.DisablePointLight = t_DisablePointLight;
+			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
+			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisablePointLight", false);
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
 				}
 			}
-			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
-			ar.Read(out t_ShadowMode);
 			EngineNS.Graphics.Pipeline.Common.TtAntiAliasingNode.ETypeAA t_TypeAA;
 			ar.Read(out t_TypeAA);
+			srcObj.TypeAA = t_TypeAA;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeAA", false);
+				}
+			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
 			ar.Read(out t_TypeFog);
 			srcObj.TypeFog = t_TypeFog;
@@ -146755,29 +148168,48 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Shader.CommanShading.UBasePassPolicy;
 			System.Boolean t_DisableAO;
 			ar.Read(out t_DisableAO);
-			srcObj.DisableAO = t_DisableAO;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableAO", false);
-				}
-			}
 			System.Boolean t_DisableHDR;
 			ar.Read(out t_DisableHDR);
-			srcObj.DisableHDR = t_DisableHDR;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
-				}
-			}
 			System.Boolean t_DisablePointLight;
 			ar.Read(out t_DisablePointLight);
-			srcObj.DisablePointLight = t_DisablePointLight;
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisablePointLight", false);
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_17965078111118069651 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Shader.CommanShading.UBasePassPolicy;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
 				}
 			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
@@ -147618,6 +149050,7 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				ar.Write((int)0);
 			}
+			ar.Write(srcObj.StencilWriteValue);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -147722,6 +149155,292 @@ namespace EngineNS.Plugins.DataCopyer
 						Tarlst.Add(Srclst[i]);
 					}
 				}
+			}
+			tarObj.StencilWriteValue = srcObj.StencilWriteValue;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8448414150197997152 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Shader.TtMaterial;
+			System.Boolean t_AlphaTest;
+			ar.Read(out t_AlphaTest);
+			srcObj.AlphaTest = t_AlphaTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AlphaTest", false);
+				}
+			}
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			srcObj.AssetName = t_AssetName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			EngineNS.NxRHI.FBlendDesc t_Blend;
+			ar.Read(out t_Blend);
+			srcObj.Blend = t_Blend;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Blend", false);
+				}
+			}
+			EngineNS.NxRHI.FDepthStencilDesc t_DepthStencil;
+			ar.Read(out t_DepthStencil);
+			srcObj.DepthStencil = t_DepthStencil;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DepthStencil", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.Shader.TtMaterial.InnerFlags t_Flags;
+			ar.Read(out t_Flags);
+			srcObj.Flags = t_Flags;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Flags", false);
+				}
+			}
+			System.String t_GraphXMLString;
+			ar.Read(out t_GraphXMLString);
+			srcObj.GraphXMLString = t_GraphXMLString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "GraphXMLString", false);
+				}
+			}
+			System.String t_HLSLCode;
+			ar.Read(out t_HLSLCode);
+			srcObj.HLSLCode = t_HLSLCode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HLSLCode", false);
+				}
+			}
+			System.Collections.Generic.List<System.String> t_IncludeFiles = null;
+			t_IncludeFiles = srcObj.IncludeFiles;
+			if (t_IncludeFiles == null)
+			{
+				t_IncludeFiles = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.String>)) as System.Collections.Generic.List<System.String>;
+			}
+			int count_IncludeFiles;
+			ar.Read(out count_IncludeFiles);
+			for(int i = 0; i<count_IncludeFiles; i++)
+			{
+				System.String t;
+				ar.Read(out t);
+				t_IncludeFiles.Add(t);
+			}
+			EngineNS.Graphics.Pipeline.Shader.TtMaterial.ELightingMode t_LightingMode;
+			ar.Read(out t_LightingMode);
+			srcObj.LightingMode = t_LightingMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "LightingMode", false);
+				}
+			}
+			EngineNS.Hash160 t_MaterialHash;
+			ar.Read(out t_MaterialHash);
+			srcObj.MaterialHash = t_MaterialHash;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaterialHash", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.Shader.TtMaterial.ENormalMode t_NormalMode;
+			ar.Read(out t_NormalMode);
+			srcObj.NormalMode = t_NormalMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NormalMode", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput> t_PSNeedInputs = null;
+			t_PSNeedInputs = srcObj.PSNeedInputs;
+			if (t_PSNeedInputs == null)
+			{
+				t_PSNeedInputs = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput>)) as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput>;
+			}
+			int count_PSNeedInputs;
+			ar.Read(out count_PSNeedInputs);
+			for(int i = 0; i<count_PSNeedInputs; i++)
+			{
+				EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput t;
+				ar.Read(out t);
+				t_PSNeedInputs.Add(t);
+			}
+			EngineNS.NxRHI.FRasterizerDesc t_Rasterizer;
+			ar.Read(out t_Rasterizer);
+			srcObj.Rasterizer = t_Rasterizer;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Rasterizer", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.Shader.TtMaterial.ERenderFlags t_RenderFlags;
+			ar.Read(out t_RenderFlags);
+			EngineNS.Graphics.Pipeline.ERenderLayer t_RenderLayer;
+			ar.Read(out t_RenderLayer);
+			srcObj.RenderLayer = t_RenderLayer;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderLayer", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.Shader.TtMaterial.EShadingMode t_ShadingMode;
+			ar.Read(out t_ShadingMode);
+			srcObj.ShadingMode = t_ShadingMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadingMode", false);
+				}
+			}
+			System.UInt32 t_StencilWriteValue;
+			ar.Read(out t_StencilWriteValue);
+			srcObj.StencilWriteValue = t_StencilWriteValue;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "StencilWriteValue", false);
+				}
+			}
+			EngineNS.RName t_SubsurfaceProfileAsset;
+			ar.Read(out t_SubsurfaceProfileAsset);
+			srcObj.SubsurfaceProfileAsset = t_SubsurfaceProfileAsset;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SubsurfaceProfileAsset", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair> t_UsedSamplerStates = null;
+			t_UsedSamplerStates = srcObj.UsedSamplerStates;
+			if (t_UsedSamplerStates == null)
+			{
+				t_UsedSamplerStates = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair>)) as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair>;
+			}
+			int count_UsedSamplerStates;
+			ar.Read(out count_UsedSamplerStates);
+			for(int i = 0; i<count_UsedSamplerStates; i++)
+			{
+				EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair;
+						fn(ar, t);
+					}
+				}
+				t_UsedSamplerStates.Add(t);
+				srcObj.UsedSamplerStates = t_UsedSamplerStates;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair>), false);
+					}
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair> t_UsedSrView = null;
+			t_UsedSrView = srcObj.UsedSrView;
+			if (t_UsedSrView == null)
+			{
+				t_UsedSrView = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair>)) as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair>;
+			}
+			int count_UsedSrView;
+			ar.Read(out count_UsedSrView);
+			for(int i = 0; i<count_UsedSrView; i++)
+			{
+				EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair;
+						fn(ar, t);
+					}
+				}
+				t_UsedSrView.Add(t);
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair> t_UsedUniformVars = null;
+			t_UsedUniformVars = srcObj.UsedUniformVars;
+			if (t_UsedUniformVars == null)
+			{
+				t_UsedUniformVars = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair>)) as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair>;
+			}
+			int count_UsedUniformVars;
+			ar.Read(out count_UsedUniformVars);
+			for(int i = 0; i<count_UsedUniformVars; i++)
+			{
+				EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair;
+						fn(ar, t);
+					}
+				}
+				t_UsedUniformVars.Add(t);
+			}
+			System.Collections.Generic.List<System.String> t_UserDefines = null;
+			t_UserDefines = srcObj.UserDefines;
+			if (t_UserDefines == null)
+			{
+				t_UserDefines = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.String>)) as System.Collections.Generic.List<System.String>;
+			}
+			int count_UserDefines;
+			ar.Read(out count_UserDefines);
+			for(int i = 0; i<count_UserDefines; i++)
+			{
+				System.String t;
+				ar.Read(out t);
+				t_UserDefines.Add(t);
+			}
+			System.Collections.Generic.List<EngineNS.NxRHI.EVertexStreamType> t_VSNeedStreams = null;
+			t_VSNeedStreams = srcObj.VSNeedStreams;
+			if (t_VSNeedStreams == null)
+			{
+				t_VSNeedStreams = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.NxRHI.EVertexStreamType>)) as System.Collections.Generic.List<EngineNS.NxRHI.EVertexStreamType>;
+			}
+			int count_VSNeedStreams;
+			ar.Read(out count_VSNeedStreams);
+			for(int i = 0; i<count_VSNeedStreams; i++)
+			{
+				EngineNS.NxRHI.EVertexStreamType t;
+				ar.Read(out t);
+				t_VSNeedStreams.Add(t);
 			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_10881228277520969699 = (EngineNS.IO.IReader ar, object obj)=>
@@ -148247,6 +149966,291 @@ namespace EngineNS.Plugins.DataCopyer
 				EngineNS.NxRHI.EVertexStreamType t;
 				ar.Read(out t);
 				t_VSNeedStreams.Add(t);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15277554964753224627 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Shader.TtMaterial;
+			System.Boolean t_AlphaTest;
+			ar.Read(out t_AlphaTest);
+			srcObj.AlphaTest = t_AlphaTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AlphaTest", false);
+				}
+			}
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			srcObj.AssetName = t_AssetName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			EngineNS.NxRHI.FBlendDesc t_Blend;
+			ar.Read(out t_Blend);
+			srcObj.Blend = t_Blend;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Blend", false);
+				}
+			}
+			EngineNS.NxRHI.FDepthStencilDesc t_DepthStencil;
+			ar.Read(out t_DepthStencil);
+			srcObj.DepthStencil = t_DepthStencil;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DepthStencil", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.Shader.TtMaterial.InnerFlags t_Flags;
+			ar.Read(out t_Flags);
+			srcObj.Flags = t_Flags;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Flags", false);
+				}
+			}
+			System.String t_GraphXMLString;
+			ar.Read(out t_GraphXMLString);
+			srcObj.GraphXMLString = t_GraphXMLString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "GraphXMLString", false);
+				}
+			}
+			System.String t_HLSLCode;
+			ar.Read(out t_HLSLCode);
+			srcObj.HLSLCode = t_HLSLCode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HLSLCode", false);
+				}
+			}
+			System.Collections.Generic.List<System.String> t_IncludeFiles = null;
+			t_IncludeFiles = srcObj.IncludeFiles;
+			if (t_IncludeFiles == null)
+			{
+				t_IncludeFiles = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.String>)) as System.Collections.Generic.List<System.String>;
+			}
+			int count_IncludeFiles;
+			ar.Read(out count_IncludeFiles);
+			for(int i = 0; i<count_IncludeFiles; i++)
+			{
+				System.String t;
+				ar.Read(out t);
+				t_IncludeFiles.Add(t);
+			}
+			EngineNS.Graphics.Pipeline.Shader.TtMaterial.ELightingMode t_LightingMode;
+			ar.Read(out t_LightingMode);
+			srcObj.LightingMode = t_LightingMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "LightingMode", false);
+				}
+			}
+			EngineNS.Hash160 t_MaterialHash;
+			ar.Read(out t_MaterialHash);
+			srcObj.MaterialHash = t_MaterialHash;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaterialHash", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.Shader.TtMaterial.ENormalMode t_NormalMode;
+			ar.Read(out t_NormalMode);
+			srcObj.NormalMode = t_NormalMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NormalMode", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput> t_PSNeedInputs = null;
+			t_PSNeedInputs = srcObj.PSNeedInputs;
+			if (t_PSNeedInputs == null)
+			{
+				t_PSNeedInputs = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput>)) as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput>;
+			}
+			int count_PSNeedInputs;
+			ar.Read(out count_PSNeedInputs);
+			for(int i = 0; i<count_PSNeedInputs; i++)
+			{
+				EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput t;
+				ar.Read(out t);
+				t_PSNeedInputs.Add(t);
+			}
+			EngineNS.NxRHI.FRasterizerDesc t_Rasterizer;
+			ar.Read(out t_Rasterizer);
+			srcObj.Rasterizer = t_Rasterizer;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Rasterizer", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.Shader.TtMaterial.ERenderFlags t_RenderFlags;
+			ar.Read(out t_RenderFlags);
+			EngineNS.Graphics.Pipeline.ERenderLayer t_RenderLayer;
+			ar.Read(out t_RenderLayer);
+			srcObj.RenderLayer = t_RenderLayer;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderLayer", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.Shader.TtMaterial.EShadingMode t_ShadingMode;
+			ar.Read(out t_ShadingMode);
+			srcObj.ShadingMode = t_ShadingMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadingMode", false);
+				}
+			}
+			EngineNS.RName t_SubsurfaceProfileAsset;
+			ar.Read(out t_SubsurfaceProfileAsset);
+			srcObj.SubsurfaceProfileAsset = t_SubsurfaceProfileAsset;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SubsurfaceProfileAsset", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair> t_UsedSamplerStates = null;
+			t_UsedSamplerStates = srcObj.UsedSamplerStates;
+			if (t_UsedSamplerStates == null)
+			{
+				t_UsedSamplerStates = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair>)) as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair>;
+			}
+			int count_UsedSamplerStates;
+			ar.Read(out count_UsedSamplerStates);
+			for(int i = 0; i<count_UsedSamplerStates; i++)
+			{
+				EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair;
+						fn(ar, t);
+					}
+				}
+				t_UsedSamplerStates.Add(t);
+				srcObj.UsedSamplerStates = t_UsedSamplerStates;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair>), false);
+					}
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair> t_UsedSrView = null;
+			t_UsedSrView = srcObj.UsedSrView;
+			if (t_UsedSrView == null)
+			{
+				t_UsedSrView = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair>)) as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair>;
+			}
+			int count_UsedSrView;
+			ar.Read(out count_UsedSrView);
+			for(int i = 0; i<count_UsedSrView; i++)
+			{
+				EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair;
+						fn(ar, t);
+					}
+				}
+				t_UsedSrView.Add(t);
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair> t_UsedUniformVars = null;
+			t_UsedUniformVars = srcObj.UsedUniformVars;
+			if (t_UsedUniformVars == null)
+			{
+				t_UsedUniformVars = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair>)) as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair>;
+			}
+			int count_UsedUniformVars;
+			ar.Read(out count_UsedUniformVars);
+			for(int i = 0; i<count_UsedUniformVars; i++)
+			{
+				EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair;
+						fn(ar, t);
+					}
+				}
+				t_UsedUniformVars.Add(t);
+			}
+			System.Collections.Generic.List<System.String> t_UserDefines = null;
+			t_UserDefines = srcObj.UserDefines;
+			if (t_UserDefines == null)
+			{
+				t_UserDefines = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.String>)) as System.Collections.Generic.List<System.String>;
+			}
+			int count_UserDefines;
+			ar.Read(out count_UserDefines);
+			for(int i = 0; i<count_UserDefines; i++)
+			{
+				System.String t;
+				ar.Read(out t);
+				t_UserDefines.Add(t);
+			}
+			System.Collections.Generic.List<EngineNS.NxRHI.EVertexStreamType> t_VSNeedStreams = null;
+			t_VSNeedStreams = srcObj.VSNeedStreams;
+			if (t_VSNeedStreams == null)
+			{
+				t_VSNeedStreams = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.NxRHI.EVertexStreamType>)) as System.Collections.Generic.List<EngineNS.NxRHI.EVertexStreamType>;
+			}
+			int count_VSNeedStreams;
+			ar.Read(out count_VSNeedStreams);
+			for(int i = 0; i<count_VSNeedStreams; i++)
+			{
+				EngineNS.NxRHI.EVertexStreamType t;
+				ar.Read(out t);
+				t_VSNeedStreams.Add(t);
+			}
+			System.UInt32 t_StencilWriteValue;
+			ar.Read(out t_StencilWriteValue);
+			srcObj.StencilWriteValue = t_StencilWriteValue;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "StencilWriteValue", false);
+				}
 			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_18054154474047905669 = (EngineNS.IO.IReader ar, object obj)=>
@@ -149475,6 +151479,7 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				ar.Write(true);
 			}
+			ar.Write(srcObj.StencilWriteValue);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -149593,6 +151598,271 @@ namespace EngineNS.Plugins.DataCopyer
 			else if (srcObj.SaveData == null)
 			{
 				tarObj.SaveData = null;
+			}
+			tarObj.StencilWriteValue = srcObj.StencilWriteValue;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1696315720421837764 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance;
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			srcObj.AssetName = t_AssetName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			EngineNS.NxRHI.FBlendDesc t_Blend;
+			ar.Read(out t_Blend);
+			srcObj.Blend = t_Blend;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Blend", false);
+				}
+			}
+			EngineNS.NxRHI.FDepthStencilDesc t_DepthStencil;
+			ar.Read(out t_DepthStencil);
+			srcObj.DepthStencil = t_DepthStencil;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DepthStencil", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.Shader.TtMaterial.InnerFlags t_Flags;
+			ar.Read(out t_Flags);
+			srcObj.Flags = t_Flags;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Flags", false);
+				}
+			}
+			System.String t_GraphXMLString;
+			ar.Read(out t_GraphXMLString);
+			srcObj.GraphXMLString = t_GraphXMLString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "GraphXMLString", false);
+				}
+			}
+			System.String t_HLSLCode;
+			ar.Read(out t_HLSLCode);
+			srcObj.HLSLCode = t_HLSLCode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HLSLCode", false);
+				}
+			}
+			System.Collections.Generic.List<System.String> t_IncludeFiles = null;
+			t_IncludeFiles = srcObj.IncludeFiles;
+			if (t_IncludeFiles == null)
+			{
+				t_IncludeFiles = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.String>)) as System.Collections.Generic.List<System.String>;
+			}
+			int count_IncludeFiles;
+			ar.Read(out count_IncludeFiles);
+			for(int i = 0; i<count_IncludeFiles; i++)
+			{
+				System.String t;
+				ar.Read(out t);
+				t_IncludeFiles.Add(t);
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput> t_PSNeedInputs = null;
+			t_PSNeedInputs = srcObj.PSNeedInputs;
+			if (t_PSNeedInputs == null)
+			{
+				t_PSNeedInputs = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput>)) as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput>;
+			}
+			int count_PSNeedInputs;
+			ar.Read(out count_PSNeedInputs);
+			for(int i = 0; i<count_PSNeedInputs; i++)
+			{
+				EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput t;
+				ar.Read(out t);
+				t_PSNeedInputs.Add(t);
+			}
+			EngineNS.NxRHI.FRasterizerDesc t_Rasterizer;
+			ar.Read(out t_Rasterizer);
+			srcObj.Rasterizer = t_Rasterizer;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Rasterizer", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.Shader.TtMaterial.EShadingMode t_ShadingMode;
+			ar.Read(out t_ShadingMode);
+			srcObj.ShadingMode = t_ShadingMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadingMode", false);
+				}
+			}
+			EngineNS.RName t_SubsurfaceProfileAsset;
+			ar.Read(out t_SubsurfaceProfileAsset);
+			srcObj.SubsurfaceProfileAsset = t_SubsurfaceProfileAsset;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SubsurfaceProfileAsset", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair> t_UsedSamplerStates = null;
+			t_UsedSamplerStates = srcObj.UsedSamplerStates;
+			if (t_UsedSamplerStates == null)
+			{
+				t_UsedSamplerStates = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair>)) as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair>;
+			}
+			int count_UsedSamplerStates;
+			ar.Read(out count_UsedSamplerStates);
+			for(int i = 0; i<count_UsedSamplerStates; i++)
+			{
+				EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair;
+						fn(ar, t);
+					}
+				}
+				t_UsedSamplerStates.Add(t);
+				srcObj.UsedSamplerStates = t_UsedSamplerStates;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair>), false);
+					}
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair> t_UsedSrView = null;
+			t_UsedSrView = srcObj.UsedSrView;
+			if (t_UsedSrView == null)
+			{
+				t_UsedSrView = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair>)) as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair>;
+			}
+			int count_UsedSrView;
+			ar.Read(out count_UsedSrView);
+			for(int i = 0; i<count_UsedSrView; i++)
+			{
+				EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair;
+						fn(ar, t);
+					}
+				}
+				t_UsedSrView.Add(t);
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair> t_UsedUniformVars = null;
+			t_UsedUniformVars = srcObj.UsedUniformVars;
+			if (t_UsedUniformVars == null)
+			{
+				t_UsedUniformVars = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair>)) as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair>;
+			}
+			int count_UsedUniformVars;
+			ar.Read(out count_UsedUniformVars);
+			for(int i = 0; i<count_UsedUniformVars; i++)
+			{
+				EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair;
+						fn(ar, t);
+					}
+				}
+				t_UsedUniformVars.Add(t);
+			}
+			System.Collections.Generic.List<System.String> t_UserDefines = null;
+			t_UserDefines = srcObj.UserDefines;
+			if (t_UserDefines == null)
+			{
+				t_UserDefines = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.String>)) as System.Collections.Generic.List<System.String>;
+			}
+			int count_UserDefines;
+			ar.Read(out count_UserDefines);
+			for(int i = 0; i<count_UserDefines; i++)
+			{
+				System.String t;
+				ar.Read(out t);
+				t_UserDefines.Add(t);
+			}
+			System.Collections.Generic.List<EngineNS.NxRHI.EVertexStreamType> t_VSNeedStreams = null;
+			t_VSNeedStreams = srcObj.VSNeedStreams;
+			if (t_VSNeedStreams == null)
+			{
+				t_VSNeedStreams = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.NxRHI.EVertexStreamType>)) as System.Collections.Generic.List<EngineNS.NxRHI.EVertexStreamType>;
+			}
+			int count_VSNeedStreams;
+			ar.Read(out count_VSNeedStreams);
+			for(int i = 0; i<count_VSNeedStreams; i++)
+			{
+				EngineNS.NxRHI.EVertexStreamType t;
+				ar.Read(out t);
+				t_VSNeedStreams.Add(t);
+			}
+			EngineNS.Hash64 type_SaveData;
+			ar.Read(out type_SaveData);
+			var meta_SaveData = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_SaveData);
+			if(meta_SaveData != null)
+			{
+				EngineNS.Hash64 ver_SaveData;
+				ar.Read(out ver_SaveData);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_SaveData.ClassType.TypeString, ver_SaveData );
+				if (fn != null)
+				{
+					EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance.TSaveData t_SaveData = null;
+					t_SaveData = srcObj.SaveData;
+					if (t_SaveData == null)
+					{
+						t_SaveData = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_SaveData.ClassType) as EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance.TSaveData;
+					}
+					fn(ar, t_SaveData);
+					srcObj.SaveData = t_SaveData;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "SaveData", false);
+						}
+					}
+				}
+			}
+			System.UInt32 t_StencilWriteValue;
+			ar.Read(out t_StencilWriteValue);
+			srcObj.StencilWriteValue = t_StencilWriteValue;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "StencilWriteValue", false);
+				}
 			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3112510472570874177 = (EngineNS.IO.IReader ar, object obj)=>
@@ -150333,6 +152603,270 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_13764099882389733938 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance;
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			srcObj.AssetName = t_AssetName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			EngineNS.NxRHI.FBlendDesc t_Blend;
+			ar.Read(out t_Blend);
+			srcObj.Blend = t_Blend;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Blend", false);
+				}
+			}
+			EngineNS.NxRHI.FDepthStencilDesc t_DepthStencil;
+			ar.Read(out t_DepthStencil);
+			srcObj.DepthStencil = t_DepthStencil;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DepthStencil", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.Shader.TtMaterial.InnerFlags t_Flags;
+			ar.Read(out t_Flags);
+			srcObj.Flags = t_Flags;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Flags", false);
+				}
+			}
+			System.String t_GraphXMLString;
+			ar.Read(out t_GraphXMLString);
+			srcObj.GraphXMLString = t_GraphXMLString;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "GraphXMLString", false);
+				}
+			}
+			System.String t_HLSLCode;
+			ar.Read(out t_HLSLCode);
+			srcObj.HLSLCode = t_HLSLCode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HLSLCode", false);
+				}
+			}
+			System.Collections.Generic.List<System.String> t_IncludeFiles = null;
+			t_IncludeFiles = srcObj.IncludeFiles;
+			if (t_IncludeFiles == null)
+			{
+				t_IncludeFiles = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.String>)) as System.Collections.Generic.List<System.String>;
+			}
+			int count_IncludeFiles;
+			ar.Read(out count_IncludeFiles);
+			for(int i = 0; i<count_IncludeFiles; i++)
+			{
+				System.String t;
+				ar.Read(out t);
+				t_IncludeFiles.Add(t);
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput> t_PSNeedInputs = null;
+			t_PSNeedInputs = srcObj.PSNeedInputs;
+			if (t_PSNeedInputs == null)
+			{
+				t_PSNeedInputs = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput>)) as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput>;
+			}
+			int count_PSNeedInputs;
+			ar.Read(out count_PSNeedInputs);
+			for(int i = 0; i<count_PSNeedInputs; i++)
+			{
+				EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput t;
+				ar.Read(out t);
+				t_PSNeedInputs.Add(t);
+			}
+			EngineNS.NxRHI.FRasterizerDesc t_Rasterizer;
+			ar.Read(out t_Rasterizer);
+			srcObj.Rasterizer = t_Rasterizer;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Rasterizer", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.Shader.TtMaterial.EShadingMode t_ShadingMode;
+			ar.Read(out t_ShadingMode);
+			srcObj.ShadingMode = t_ShadingMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadingMode", false);
+				}
+			}
+			System.UInt32 t_StencilWriteValue;
+			ar.Read(out t_StencilWriteValue);
+			srcObj.StencilWriteValue = t_StencilWriteValue;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "StencilWriteValue", false);
+				}
+			}
+			EngineNS.RName t_SubsurfaceProfileAsset;
+			ar.Read(out t_SubsurfaceProfileAsset);
+			srcObj.SubsurfaceProfileAsset = t_SubsurfaceProfileAsset;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SubsurfaceProfileAsset", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair> t_UsedSamplerStates = null;
+			t_UsedSamplerStates = srcObj.UsedSamplerStates;
+			if (t_UsedSamplerStates == null)
+			{
+				t_UsedSamplerStates = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair>)) as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair>;
+			}
+			int count_UsedSamplerStates;
+			ar.Read(out count_UsedSamplerStates);
+			for(int i = 0; i<count_UsedSamplerStates; i++)
+			{
+				EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair;
+						fn(ar, t);
+					}
+				}
+				t_UsedSamplerStates.Add(t);
+				srcObj.UsedSamplerStates = t_UsedSamplerStates;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair>), false);
+					}
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair> t_UsedSrView = null;
+			t_UsedSrView = srcObj.UsedSrView;
+			if (t_UsedSrView == null)
+			{
+				t_UsedSrView = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair>)) as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair>;
+			}
+			int count_UsedSrView;
+			ar.Read(out count_UsedSrView);
+			for(int i = 0; i<count_UsedSrView; i++)
+			{
+				EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair;
+						fn(ar, t);
+					}
+				}
+				t_UsedSrView.Add(t);
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair> t_UsedUniformVars = null;
+			t_UsedUniformVars = srcObj.UsedUniformVars;
+			if (t_UsedUniformVars == null)
+			{
+				t_UsedUniformVars = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair>)) as System.Collections.Generic.List<EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair>;
+			}
+			int count_UsedUniformVars;
+			ar.Read(out count_UsedUniformVars);
+			for(int i = 0; i<count_UsedUniformVars; i++)
+			{
+				EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair;
+						fn(ar, t);
+					}
+				}
+				t_UsedUniformVars.Add(t);
+			}
+			System.Collections.Generic.List<System.String> t_UserDefines = null;
+			t_UserDefines = srcObj.UserDefines;
+			if (t_UserDefines == null)
+			{
+				t_UserDefines = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.String>)) as System.Collections.Generic.List<System.String>;
+			}
+			int count_UserDefines;
+			ar.Read(out count_UserDefines);
+			for(int i = 0; i<count_UserDefines; i++)
+			{
+				System.String t;
+				ar.Read(out t);
+				t_UserDefines.Add(t);
+			}
+			System.Collections.Generic.List<EngineNS.NxRHI.EVertexStreamType> t_VSNeedStreams = null;
+			t_VSNeedStreams = srcObj.VSNeedStreams;
+			if (t_VSNeedStreams == null)
+			{
+				t_VSNeedStreams = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.NxRHI.EVertexStreamType>)) as System.Collections.Generic.List<EngineNS.NxRHI.EVertexStreamType>;
+			}
+			int count_VSNeedStreams;
+			ar.Read(out count_VSNeedStreams);
+			for(int i = 0; i<count_VSNeedStreams; i++)
+			{
+				EngineNS.NxRHI.EVertexStreamType t;
+				ar.Read(out t);
+				t_VSNeedStreams.Add(t);
+			}
+			EngineNS.Hash64 type_SaveData;
+			ar.Read(out type_SaveData);
+			var meta_SaveData = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_SaveData);
+			if(meta_SaveData != null)
+			{
+				EngineNS.Hash64 ver_SaveData;
+				ar.Read(out ver_SaveData);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_SaveData.ClassType.TypeString, ver_SaveData );
+				if (fn != null)
+				{
+					EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance.TSaveData t_SaveData = null;
+					t_SaveData = srcObj.SaveData;
+					if (t_SaveData == null)
+					{
+						t_SaveData = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_SaveData.ClassType) as EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance.TSaveData;
+					}
+					fn(ar, t_SaveData);
+					srcObj.SaveData = t_SaveData;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "SaveData", false);
+						}
+					}
+				}
+			}
+		};
 	}
 	static class EngineNS_Graphics_Pipeline_Shader_TtMaterialInstanceAMeta
 	{
@@ -150848,6 +153382,110 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
+	static class EngineNS_Graphics_Pipeline_Shadow_TtContactShadowNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Shadow.TtContactShadowNode;
+			ar.Write(srcObj.ContactShadowLength);
+			ar.Write(srcObj.DepthBias);
+			ar.Write(srcObj.Enable);
+			ar.Write(srcObj.FadeDistance);
+			ar.Write(srcObj.FadeLength);
+			ar.Write(srcObj.NumSteps);
+			ar.Write(srcObj.ShadowIntensity);
+			ar.Write(srcObj.UniqueId);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Pipeline.Shadow.TtContactShadowNode;
+			var srcObj = src as EngineNS.Graphics.Pipeline.Shadow.TtContactShadowNode;
+			tarObj.ContactShadowLength = srcObj.ContactShadowLength;
+			tarObj.DepthBias = srcObj.DepthBias;
+			tarObj.Enable = srcObj.Enable;
+			tarObj.FadeDistance = srcObj.FadeDistance;
+			tarObj.FadeLength = srcObj.FadeLength;
+			tarObj.NumSteps = srcObj.NumSteps;
+			tarObj.ShadowIntensity = srcObj.ShadowIntensity;
+			tarObj.UniqueId = srcObj.UniqueId;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_11140492584710236544 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Shadow.TtContactShadowNode;
+			System.Single t_ContactShadowLength;
+			ar.Read(out t_ContactShadowLength);
+			srcObj.ContactShadowLength = t_ContactShadowLength;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ContactShadowLength", false);
+				}
+			}
+			System.Single t_DepthBias;
+			ar.Read(out t_DepthBias);
+			srcObj.DepthBias = t_DepthBias;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DepthBias", false);
+				}
+			}
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+			System.Single t_FadeDistance;
+			ar.Read(out t_FadeDistance);
+			srcObj.FadeDistance = t_FadeDistance;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FadeDistance", false);
+				}
+			}
+			System.Single t_FadeLength;
+			ar.Read(out t_FadeLength);
+			srcObj.FadeLength = t_FadeLength;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FadeLength", false);
+				}
+			}
+			System.Int32 t_NumSteps;
+			ar.Read(out t_NumSteps);
+			srcObj.NumSteps = t_NumSteps;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NumSteps", false);
+				}
+			}
+			System.Single t_ShadowIntensity;
+			ar.Read(out t_ShadowIntensity);
+			srcObj.ShadowIntensity = t_ShadowIntensity;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadowIntensity", false);
+				}
+			}
+			System.Guid t_UniqueId;
+			ar.Read(out t_UniqueId);
+			srcObj.UniqueId = t_UniqueId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "UniqueId", false);
+				}
+			}
+		};
+	}
 	static class EngineNS_Graphics_Pipeline_Shadow_TtExponentialShadowNode
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -151066,52 +153704,180 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.TtDeferredPolicyBase;
-			ar.Write(srcObj.DisableAO);
-			ar.Write(srcObj.DisableHDR);
-			ar.Write(srcObj.DisablePointLight);
+			ar.Write(srcObj.EnableAO);
+			ar.Write(srcObj.EnableContactShadow);
+			ar.Write(srcObj.EnableGI);
+			ar.Write(srcObj.EnableLocalLights);
+			ar.Write(srcObj.ShadowMode);
 			ar.Write(srcObj.TypeFog);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
 			var tarObj = tar as EngineNS.Graphics.Pipeline.TtDeferredPolicyBase;
 			var srcObj = src as EngineNS.Graphics.Pipeline.TtDeferredPolicyBase;
-			tarObj.DisableAO = srcObj.DisableAO;
-			tarObj.DisableHDR = srcObj.DisableHDR;
-			tarObj.DisablePointLight = srcObj.DisablePointLight;
+			tarObj.EnableAO = srcObj.EnableAO;
+			tarObj.EnableContactShadow = srcObj.EnableContactShadow;
+			tarObj.EnableGI = srcObj.EnableGI;
+			tarObj.EnableLocalLights = srcObj.EnableLocalLights;
+			tarObj.ShadowMode = srcObj.ShadowMode;
 			tarObj.TypeFog = srcObj.TypeFog;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5998283359797127 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.TtDeferredPolicyBase;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableContactShadow;
+			ar.Read(out t_EnableContactShadow);
+			srcObj.EnableContactShadow = t_EnableContactShadow;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableContactShadow", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1765725197176727181 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.TtDeferredPolicyBase;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_4433640487391870259 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.TtDeferredPolicyBase;
 			System.Boolean t_DisableAO;
 			ar.Read(out t_DisableAO);
-			srcObj.DisableAO = t_DisableAO;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableAO", false);
-				}
-			}
 			System.Boolean t_DisableHDR;
 			ar.Read(out t_DisableHDR);
-			srcObj.DisableHDR = t_DisableHDR;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
-				}
-			}
 			System.Boolean t_DisablePointLight;
 			ar.Read(out t_DisablePointLight);
-			srcObj.DisablePointLight = t_DisablePointLight;
+			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
+			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisablePointLight", false);
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8048419175116741211 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.TtDeferredPolicyBase;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableContactShadow;
+			ar.Read(out t_EnableContactShadow);
+			srcObj.EnableContactShadow = t_EnableContactShadow;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableContactShadow", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
 				}
 			}
 			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
 			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
+				}
+			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
 			ar.Read(out t_TypeFog);
 			srcObj.TypeFog = t_TypeFog;
@@ -151127,35 +153893,28 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Graphics.Pipeline.TtDeferredPolicyBase;
 			System.Boolean t_DisableAO;
 			ar.Read(out t_DisableAO);
-			srcObj.DisableAO = t_DisableAO;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableAO", false);
-				}
-			}
 			System.Boolean t_DisableHDR;
 			ar.Read(out t_DisableHDR);
-			srcObj.DisableHDR = t_DisableHDR;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
-				}
-			}
 			System.Boolean t_DisablePointLight;
 			ar.Read(out t_DisablePointLight);
-			srcObj.DisablePointLight = t_DisablePointLight;
+			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
+			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisablePointLight", false);
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
 				}
 			}
-			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
-			ar.Read(out t_ShadowMode);
 			EngineNS.Graphics.Pipeline.Common.TtAntiAliasingNode.ETypeAA t_TypeAA;
 			ar.Read(out t_TypeAA);
+			srcObj.TypeAA = t_TypeAA;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeAA", false);
+				}
+			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
 			ar.Read(out t_TypeFog);
 			srcObj.TypeFog = t_TypeFog;
@@ -151171,29 +153930,48 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Graphics.Pipeline.TtDeferredPolicyBase;
 			System.Boolean t_DisableAO;
 			ar.Read(out t_DisableAO);
-			srcObj.DisableAO = t_DisableAO;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableAO", false);
-				}
-			}
 			System.Boolean t_DisableHDR;
 			ar.Read(out t_DisableHDR);
-			srcObj.DisableHDR = t_DisableHDR;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
-				}
-			}
 			System.Boolean t_DisablePointLight;
 			ar.Read(out t_DisablePointLight);
-			srcObj.DisablePointLight = t_DisablePointLight;
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisablePointLight", false);
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_17965078111118069651 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.TtDeferredPolicyBase;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
 				}
 			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
@@ -151212,52 +153990,180 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.TtForwordPolicyBase;
-			ar.Write(srcObj.DisableAO);
-			ar.Write(srcObj.DisableHDR);
-			ar.Write(srcObj.DisablePointLight);
+			ar.Write(srcObj.EnableAO);
+			ar.Write(srcObj.EnableContactShadow);
+			ar.Write(srcObj.EnableGI);
+			ar.Write(srcObj.EnableLocalLights);
+			ar.Write(srcObj.ShadowMode);
 			ar.Write(srcObj.TypeFog);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
 			var tarObj = tar as EngineNS.Graphics.Pipeline.TtForwordPolicyBase;
 			var srcObj = src as EngineNS.Graphics.Pipeline.TtForwordPolicyBase;
-			tarObj.DisableAO = srcObj.DisableAO;
-			tarObj.DisableHDR = srcObj.DisableHDR;
-			tarObj.DisablePointLight = srcObj.DisablePointLight;
+			tarObj.EnableAO = srcObj.EnableAO;
+			tarObj.EnableContactShadow = srcObj.EnableContactShadow;
+			tarObj.EnableGI = srcObj.EnableGI;
+			tarObj.EnableLocalLights = srcObj.EnableLocalLights;
+			tarObj.ShadowMode = srcObj.ShadowMode;
 			tarObj.TypeFog = srcObj.TypeFog;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5998283359797127 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.TtForwordPolicyBase;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableContactShadow;
+			ar.Read(out t_EnableContactShadow);
+			srcObj.EnableContactShadow = t_EnableContactShadow;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableContactShadow", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1765725197176727181 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.TtForwordPolicyBase;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_4433640487391870259 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.TtForwordPolicyBase;
 			System.Boolean t_DisableAO;
 			ar.Read(out t_DisableAO);
-			srcObj.DisableAO = t_DisableAO;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableAO", false);
-				}
-			}
 			System.Boolean t_DisableHDR;
 			ar.Read(out t_DisableHDR);
-			srcObj.DisableHDR = t_DisableHDR;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
-				}
-			}
 			System.Boolean t_DisablePointLight;
 			ar.Read(out t_DisablePointLight);
-			srcObj.DisablePointLight = t_DisablePointLight;
+			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
+			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisablePointLight", false);
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8048419175116741211 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.TtForwordPolicyBase;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableContactShadow;
+			ar.Read(out t_EnableContactShadow);
+			srcObj.EnableContactShadow = t_EnableContactShadow;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableContactShadow", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
 				}
 			}
 			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
 			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
+				}
+			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
 			ar.Read(out t_TypeFog);
 			srcObj.TypeFog = t_TypeFog;
@@ -151273,35 +154179,28 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Graphics.Pipeline.TtForwordPolicyBase;
 			System.Boolean t_DisableAO;
 			ar.Read(out t_DisableAO);
-			srcObj.DisableAO = t_DisableAO;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableAO", false);
-				}
-			}
 			System.Boolean t_DisableHDR;
 			ar.Read(out t_DisableHDR);
-			srcObj.DisableHDR = t_DisableHDR;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
-				}
-			}
 			System.Boolean t_DisablePointLight;
 			ar.Read(out t_DisablePointLight);
-			srcObj.DisablePointLight = t_DisablePointLight;
+			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
+			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisablePointLight", false);
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
 				}
 			}
-			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
-			ar.Read(out t_ShadowMode);
 			EngineNS.Graphics.Pipeline.Common.TtAntiAliasingNode.ETypeAA t_TypeAA;
 			ar.Read(out t_TypeAA);
+			srcObj.TypeAA = t_TypeAA;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeAA", false);
+				}
+			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
 			ar.Read(out t_TypeFog);
 			srcObj.TypeFog = t_TypeFog;
@@ -151317,29 +154216,48 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Graphics.Pipeline.TtForwordPolicyBase;
 			System.Boolean t_DisableAO;
 			ar.Read(out t_DisableAO);
-			srcObj.DisableAO = t_DisableAO;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableAO", false);
-				}
-			}
 			System.Boolean t_DisableHDR;
 			ar.Read(out t_DisableHDR);
-			srcObj.DisableHDR = t_DisableHDR;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
-				}
-			}
 			System.Boolean t_DisablePointLight;
 			ar.Read(out t_DisablePointLight);
-			srcObj.DisablePointLight = t_DisablePointLight;
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisablePointLight", false);
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_17965078111118069651 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.TtForwordPolicyBase;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
 				}
 			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
@@ -151500,52 +154418,180 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.TtRenderPolicy;
-			ar.Write(srcObj.DisableAO);
-			ar.Write(srcObj.DisableHDR);
-			ar.Write(srcObj.DisablePointLight);
+			ar.Write(srcObj.EnableAO);
+			ar.Write(srcObj.EnableContactShadow);
+			ar.Write(srcObj.EnableGI);
+			ar.Write(srcObj.EnableLocalLights);
+			ar.Write(srcObj.ShadowMode);
 			ar.Write(srcObj.TypeFog);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
 			var tarObj = tar as EngineNS.Graphics.Pipeline.TtRenderPolicy;
 			var srcObj = src as EngineNS.Graphics.Pipeline.TtRenderPolicy;
-			tarObj.DisableAO = srcObj.DisableAO;
-			tarObj.DisableHDR = srcObj.DisableHDR;
-			tarObj.DisablePointLight = srcObj.DisablePointLight;
+			tarObj.EnableAO = srcObj.EnableAO;
+			tarObj.EnableContactShadow = srcObj.EnableContactShadow;
+			tarObj.EnableGI = srcObj.EnableGI;
+			tarObj.EnableLocalLights = srcObj.EnableLocalLights;
+			tarObj.ShadowMode = srcObj.ShadowMode;
 			tarObj.TypeFog = srcObj.TypeFog;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5998283359797127 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.TtRenderPolicy;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableContactShadow;
+			ar.Read(out t_EnableContactShadow);
+			srcObj.EnableContactShadow = t_EnableContactShadow;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableContactShadow", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1765725197176727181 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.TtRenderPolicy;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_4433640487391870259 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.TtRenderPolicy;
 			System.Boolean t_DisableAO;
 			ar.Read(out t_DisableAO);
-			srcObj.DisableAO = t_DisableAO;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableAO", false);
-				}
-			}
 			System.Boolean t_DisableHDR;
 			ar.Read(out t_DisableHDR);
-			srcObj.DisableHDR = t_DisableHDR;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
-				}
-			}
 			System.Boolean t_DisablePointLight;
 			ar.Read(out t_DisablePointLight);
-			srcObj.DisablePointLight = t_DisablePointLight;
+			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
+			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisablePointLight", false);
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8048419175116741211 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.TtRenderPolicy;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableContactShadow;
+			ar.Read(out t_EnableContactShadow);
+			srcObj.EnableContactShadow = t_EnableContactShadow;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableContactShadow", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
 				}
 			}
 			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
 			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
+				}
+			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
 			ar.Read(out t_TypeFog);
 			srcObj.TypeFog = t_TypeFog;
@@ -151561,35 +154607,28 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Graphics.Pipeline.TtRenderPolicy;
 			System.Boolean t_DisableAO;
 			ar.Read(out t_DisableAO);
-			srcObj.DisableAO = t_DisableAO;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableAO", false);
-				}
-			}
 			System.Boolean t_DisableHDR;
 			ar.Read(out t_DisableHDR);
-			srcObj.DisableHDR = t_DisableHDR;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
-				}
-			}
 			System.Boolean t_DisablePointLight;
 			ar.Read(out t_DisablePointLight);
-			srcObj.DisablePointLight = t_DisablePointLight;
+			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
+			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisablePointLight", false);
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
 				}
 			}
-			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
-			ar.Read(out t_ShadowMode);
 			EngineNS.Graphics.Pipeline.Common.TtAntiAliasingNode.ETypeAA t_TypeAA;
 			ar.Read(out t_TypeAA);
+			srcObj.TypeAA = t_TypeAA;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeAA", false);
+				}
+			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
 			ar.Read(out t_TypeFog);
 			srcObj.TypeFog = t_TypeFog;
@@ -151605,29 +154644,48 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Graphics.Pipeline.TtRenderPolicy;
 			System.Boolean t_DisableAO;
 			ar.Read(out t_DisableAO);
-			srcObj.DisableAO = t_DisableAO;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableAO", false);
-				}
-			}
 			System.Boolean t_DisableHDR;
 			ar.Read(out t_DisableHDR);
-			srcObj.DisableHDR = t_DisableHDR;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
-				}
-			}
 			System.Boolean t_DisablePointLight;
 			ar.Read(out t_DisablePointLight);
-			srcObj.DisablePointLight = t_DisablePointLight;
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisablePointLight", false);
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_17965078111118069651 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.TtRenderPolicy;
+			System.Boolean t_EnableAO;
+			ar.Read(out t_EnableAO);
+			srcObj.EnableAO = t_EnableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableAO", false);
+				}
+			}
+			System.Boolean t_EnableGI;
+			ar.Read(out t_EnableGI);
+			srcObj.EnableGI = t_EnableGI;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableGI", false);
+				}
+			}
+			System.Boolean t_EnableLocalLights;
+			ar.Read(out t_EnableLocalLights);
+			srcObj.EnableLocalLights = t_EnableLocalLights;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableLocalLights", false);
 				}
 			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
@@ -153422,6 +156480,7 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.EditorFont);
 			ar.Write(srcObj.EditorSmallFont);
 			ar.Write(srcObj.EditorUIFontSize);
+			ar.Write(srcObj.EnableSourceControl);
 			ar.Write(srcObj.Feature_UseRVT);
 			ar.Write(srcObj.HasDebugLayer);
 			ar.Write(srcObj.ImGuiIniPath);
@@ -153504,6 +156563,7 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.EditorFont = srcObj.EditorFont;
 			tarObj.EditorSmallFont = srcObj.EditorSmallFont;
 			tarObj.EditorUIFontSize = srcObj.EditorUIFontSize;
+			tarObj.EnableSourceControl = srcObj.EnableSourceControl;
 			tarObj.Feature_UseRVT = srcObj.Feature_UseRVT;
 			tarObj.HasDebugLayer = srcObj.HasDebugLayer;
 			tarObj.ImGuiIniPath = srcObj.ImGuiIniPath;
@@ -154024,6 +157084,506 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "UseRenderDoc", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_2236498628157778409 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.TtEngineConfig;
+			System.Int32 t_AdaperId;
+			ar.Read(out t_AdaperId);
+			srcObj.AdaperId = t_AdaperId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AdaperId", false);
+				}
+			}
+			System.Boolean t_AutoSyncPropertyData;
+			ar.Read(out t_AutoSyncPropertyData);
+			srcObj.AutoSyncPropertyData = t_AutoSyncPropertyData;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AutoSyncPropertyData", false);
+				}
+			}
+			System.Boolean t_CompressAstc;
+			ar.Read(out t_CompressAstc);
+			srcObj.CompressAstc = t_CompressAstc;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CompressAstc", false);
+				}
+			}
+			System.Boolean t_CompressDxt;
+			ar.Read(out t_CompressDxt);
+			srcObj.CompressDxt = t_CompressDxt;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CompressDxt", false);
+				}
+			}
+			System.Boolean t_CompressEtc;
+			ar.Read(out t_CompressEtc);
+			srcObj.CompressEtc = t_CompressEtc;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CompressEtc", false);
+				}
+			}
+			System.String t_CookAssetType;
+			ar.Read(out t_CookAssetType);
+			srcObj.CookAssetType = t_CookAssetType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CookAssetType", false);
+				}
+			}
+			System.Boolean t_CookDXBC;
+			ar.Read(out t_CookDXBC);
+			srcObj.CookDXBC = t_CookDXBC;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CookDXBC", false);
+				}
+			}
+			System.Boolean t_CookDXIL;
+			ar.Read(out t_CookDXIL);
+			srcObj.CookDXIL = t_CookDXIL;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CookDXIL", false);
+				}
+			}
+			System.Boolean t_CookGLSL;
+			ar.Read(out t_CookGLSL);
+			srcObj.CookGLSL = t_CookGLSL;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CookGLSL", false);
+				}
+			}
+			System.Boolean t_CookMETAL;
+			ar.Read(out t_CookMETAL);
+			srcObj.CookMETAL = t_CookMETAL;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CookMETAL", false);
+				}
+			}
+			System.Boolean t_CookSPIRV;
+			ar.Read(out t_CookSPIRV);
+			srcObj.CookSPIRV = t_CookSPIRV;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CookSPIRV", false);
+				}
+			}
+			EngineNS.Bricks.Network.RPC.EAuthority t_DefaultAuthority;
+			ar.Read(out t_DefaultAuthority);
+			srcObj.DefaultAuthority = t_DefaultAuthority;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DefaultAuthority", false);
+				}
+			}
+			EngineNS.RName t_DefaultGame;
+			ar.Read(out t_DefaultGame);
+			srcObj.DefaultGame = t_DefaultGame;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DefaultGame", false);
+				}
+			}
+			EngineNS.RName t_DefaultMaterial;
+			ar.Read(out t_DefaultMaterial);
+			srcObj.DefaultMaterial = t_DefaultMaterial;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DefaultMaterial", false);
+				}
+			}
+			EngineNS.RName t_DefaultMaterialInstance;
+			ar.Read(out t_DefaultMaterialInstance);
+			srcObj.DefaultMaterialInstance = t_DefaultMaterialInstance;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DefaultMaterialInstance", false);
+				}
+			}
+			EngineNS.RName t_DefaultTexture;
+			ar.Read(out t_DefaultTexture);
+			srcObj.DefaultTexture = t_DefaultTexture;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DefaultTexture", false);
+				}
+			}
+			EngineNS.RName t_DefaultVMS;
+			ar.Read(out t_DefaultVMS);
+			srcObj.DefaultVMS = t_DefaultVMS;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DefaultVMS", false);
+				}
+			}
+			System.Boolean t_DoUnitTest;
+			ar.Read(out t_DoUnitTest);
+			srcObj.DoUnitTest = t_DoUnitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DoUnitTest", false);
+				}
+			}
+			EngineNS.RName t_EditorEffectFont;
+			ar.Read(out t_EditorEffectFont);
+			srcObj.EditorEffectFont = t_EditorEffectFont;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EditorEffectFont", false);
+				}
+			}
+			EngineNS.RName t_EditorFont;
+			ar.Read(out t_EditorFont);
+			srcObj.EditorFont = t_EditorFont;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EditorFont", false);
+				}
+			}
+			EngineNS.RName t_EditorSmallFont;
+			ar.Read(out t_EditorSmallFont);
+			srcObj.EditorSmallFont = t_EditorSmallFont;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EditorSmallFont", false);
+				}
+			}
+			System.Single t_EditorUIFontSize;
+			ar.Read(out t_EditorUIFontSize);
+			srcObj.EditorUIFontSize = t_EditorUIFontSize;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EditorUIFontSize", false);
+				}
+			}
+			System.Boolean t_EnableSourceControl;
+			ar.Read(out t_EnableSourceControl);
+			srcObj.EnableSourceControl = t_EnableSourceControl;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableSourceControl", false);
+				}
+			}
+			System.Boolean t_Feature_UseRVT;
+			ar.Read(out t_Feature_UseRVT);
+			srcObj.Feature_UseRVT = t_Feature_UseRVT;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Feature_UseRVT", false);
+				}
+			}
+			System.Boolean t_HasDebugLayer;
+			ar.Read(out t_HasDebugLayer);
+			srcObj.HasDebugLayer = t_HasDebugLayer;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HasDebugLayer", false);
+				}
+			}
+			System.String t_ImGuiIniPath;
+			ar.Read(out t_ImGuiIniPath);
+			srcObj.ImGuiIniPath = t_ImGuiIniPath;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ImGuiIniPath", false);
+				}
+			}
+			System.Int32 t_Interval;
+			ar.Read(out t_Interval);
+			srcObj.Interval = t_Interval;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Interval", false);
+				}
+			}
+			System.Int32 t_InvisibleWindowInterval;
+			ar.Read(out t_InvisibleWindowInterval);
+			srcObj.InvisibleWindowInterval = t_InvisibleWindowInterval;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "InvisibleWindowInterval", false);
+				}
+			}
+			System.Boolean t_IsAftermath;
+			ar.Read(out t_IsAftermath);
+			srcObj.IsAftermath = t_IsAftermath;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsAftermath", false);
+				}
+			}
+			System.Boolean t_IsDebugShader;
+			ar.Read(out t_IsDebugShader);
+			srcObj.IsDebugShader = t_IsDebugShader;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsDebugShader", false);
+				}
+			}
+			System.Boolean t_IsGpuBaseValidation;
+			ar.Read(out t_IsGpuBaseValidation);
+			srcObj.IsGpuBaseValidation = t_IsGpuBaseValidation;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsGpuBaseValidation", false);
+				}
+			}
+			System.Boolean t_IsGpuDred;
+			ar.Read(out t_IsGpuDred);
+			srcObj.IsGpuDred = t_IsGpuDred;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsGpuDred", false);
+				}
+			}
+			System.Boolean t_IsParrallelWorldGather;
+			ar.Read(out t_IsParrallelWorldGather);
+			srcObj.IsParrallelWorldGather = t_IsParrallelWorldGather;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsParrallelWorldGather", false);
+				}
+			}
+			System.Boolean t_IsScopeWithSource;
+			ar.Read(out t_IsScopeWithSource);
+			srcObj.IsScopeWithSource = t_IsScopeWithSource;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsScopeWithSource", false);
+				}
+			}
+			System.Boolean t_IsTryUnloadMacrossAssembly;
+			ar.Read(out t_IsTryUnloadMacrossAssembly);
+			srcObj.IsTryUnloadMacrossAssembly = t_IsTryUnloadMacrossAssembly;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsTryUnloadMacrossAssembly", false);
+				}
+			}
+			System.Boolean t_IsWriteShaderDebugFile;
+			ar.Read(out t_IsWriteShaderDebugFile);
+			srcObj.IsWriteShaderDebugFile = t_IsWriteShaderDebugFile;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsWriteShaderDebugFile", false);
+				}
+			}
+			EngineNS.RName t_MainRPolicyName;
+			ar.Read(out t_MainRPolicyName);
+			srcObj.MainRPolicyName = t_MainRPolicyName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MainRPolicyName", false);
+				}
+			}
+			EngineNS.Vector4 t_MainWindow;
+			ar.Read(out t_MainWindow);
+			srcObj.MainWindow = t_MainWindow;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MainWindow", false);
+				}
+			}
+			System.String t_MainWindowType;
+			ar.Read(out t_MainWindowType);
+			srcObj.MainWindowType = t_MainWindowType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MainWindowType", false);
+				}
+			}
+			EngineNS.EMultiRenderMode t_MultiRenderMode;
+			ar.Read(out t_MultiRenderMode);
+			srcObj.MultiRenderMode = t_MultiRenderMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MultiRenderMode", false);
+				}
+			}
+			System.String t_NativeDll;
+			ar.Read(out t_NativeDll);
+			srcObj.NativeDll = t_NativeDll;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NativeDll", false);
+				}
+			}
+			System.Int32 t_NumOfThreadPool;
+			ar.Read(out t_NumOfThreadPool);
+			srcObj.NumOfThreadPool = t_NumOfThreadPool;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NumOfThreadPool", false);
+				}
+			}
+			EngineNS.RName t_PlayGameName;
+			ar.Read(out t_PlayGameName);
+			srcObj.PlayGameName = t_PlayGameName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "PlayGameName", false);
+				}
+			}
+			System.Collections.Generic.List<System.String> t_Plugins = null;
+			t_Plugins = srcObj.Plugins;
+			if (t_Plugins == null)
+			{
+				t_Plugins = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.String>)) as System.Collections.Generic.List<System.String>;
+			}
+			int count_Plugins;
+			ar.Read(out count_Plugins);
+			for(int i = 0; i<count_Plugins; i++)
+			{
+				System.String t;
+				ar.Read(out t);
+				t_Plugins.Add(t);
+			}
+			System.Boolean t_ReduceWorkWhenWindowInvisible;
+			ar.Read(out t_ReduceWorkWhenWindowInvisible);
+			srcObj.ReduceWorkWhenWindowInvisible = t_ReduceWorkWhenWindowInvisible;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ReduceWorkWhenWindowInvisible", false);
+				}
+			}
+			EngineNS.NxRHI.ERhiType t_RHIType;
+			ar.Read(out t_RHIType);
+			srcObj.RHIType = t_RHIType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RHIType", false);
+				}
+			}
+			System.String t_RootServerURL;
+			ar.Read(out t_RootServerURL);
+			srcObj.RootServerURL = t_RootServerURL;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RootServerURL", false);
+				}
+			}
+			System.String t_RpcRootType;
+			ar.Read(out t_RpcRootType);
+			srcObj.RpcRootType = t_RpcRootType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RpcRootType", false);
+				}
+			}
+			System.Boolean t_SupportMultWindows;
+			ar.Read(out t_SupportMultWindows);
+			srcObj.SupportMultWindows = t_SupportMultWindows;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SupportMultWindows", false);
+				}
+			}
+			System.Collections.Generic.List<System.String> t_TypeAssemblies = null;
+			t_TypeAssemblies = srcObj.TypeAssemblies;
+			if (t_TypeAssemblies == null)
+			{
+				t_TypeAssemblies = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.String>)) as System.Collections.Generic.List<System.String>;
+			}
+			int count_TypeAssemblies;
+			ar.Read(out count_TypeAssemblies);
+			for(int i = 0; i<count_TypeAssemblies; i++)
+			{
+				System.String t;
+				ar.Read(out t);
+				t_TypeAssemblies.Add(t);
+			}
+			EngineNS.RName t_UIDefaultTexture;
+			ar.Read(out t_UIDefaultTexture);
+			srcObj.UIDefaultTexture = t_UIDefaultTexture;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "UIDefaultTexture", false);
+				}
+			}
+			System.Boolean t_UsePhysxMT;
+			ar.Read(out t_UsePhysxMT);
+			srcObj.UsePhysxMT = t_UsePhysxMT;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "UsePhysxMT", false);
+				}
+			}
+			System.Boolean t_UseRenderDoc;
+			ar.Read(out t_UseRenderDoc);
+			srcObj.UseRenderDoc = t_UseRenderDoc;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "UseRenderDoc", false);
+				}
+			}
+			System.Boolean t_UseRenderThread;
+			ar.Read(out t_UseRenderThread);
+			srcObj.UseRenderThread = t_UseRenderThread;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "UseRenderThread", false);
 				}
 			}
 		};
@@ -178336,6 +181896,7 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.ShaderNode.Var.VarColor3@EngineCore");
 				kls.Writer = EngineNS_Bricks_CodeBuilder_ShaderNode_Var_VarColor3.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_ShaderNode_Var_VarColor3.CopyCurrentVersion;
+				kls.RegVersion(12320289989026182853, EngineNS_Bricks_CodeBuilder_ShaderNode_Var_VarColor3.Read_12320289989026182853);
 				kls.RegVersion(9509460419736837420, EngineNS_Bricks_CodeBuilder_ShaderNode_Var_VarColor3.Read_9509460419736837420);
 			}
 			{
@@ -180767,6 +184328,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Editor_TtEditorConfig.WriteCurrentVersion;
 				kls.Copy = EngineNS_Editor_TtEditorConfig.CopyCurrentVersion;
 				kls.RegVersion(14523384837765808760, EngineNS_Editor_TtEditorConfig.Read_14523384837765808760);
+				kls.RegVersion(9829039287951372466, EngineNS_Editor_TtEditorConfig.Read_9829039287951372466);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.EGui.TtUVAnim@EngineCore");
@@ -181401,6 +184963,15 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(17610127961532539339, EngineNS_Graphics_Pipeline_Common_Post_TtLuminanceThresholeOutLumNode.Read_17610127961532539339);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.Post.TtSSAONode@EngineCore");
+				kls.Writer = EngineNS_Graphics_Pipeline_Common_Post_TtSSAONode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Pipeline_Common_Post_TtSSAONode.CopyCurrentVersion;
+				kls.RegVersion(3352419873968971594, EngineNS_Graphics_Pipeline_Common_Post_TtSSAONode.Read_3352419873968971594);
+				kls.RegVersion(6152420914188868799, EngineNS_Graphics_Pipeline_Common_Post_TtSSAONode.Read_6152420914188868799);
+				kls.RegVersion(6172874246472953967, EngineNS_Graphics_Pipeline_Common_Post_TtSSAONode.Read_6172874246472953967);
+				kls.RegVersion(9537471600833130186, EngineNS_Graphics_Pipeline_Common_Post_TtSSAONode.Read_9537471600833130186);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.Post.TtSunShaftDepthThresholeNode@EngineCore");
 				kls.Writer = EngineNS_Graphics_Pipeline_Common_Post_TtSunShaftDepthThresholeNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Common_Post_TtSunShaftDepthThresholeNode.CopyCurrentVersion;
@@ -181419,6 +184990,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Graphics_Pipeline_Common_TtAntiAliasingNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Common_TtAntiAliasingNode.CopyCurrentVersion;
 				kls.RegVersion(10213394745706711997, EngineNS_Graphics_Pipeline_Common_TtAntiAliasingNode.Read_10213394745706711997);
+				kls.RegVersion(388796026575051016, EngineNS_Graphics_Pipeline_Common_TtAntiAliasingNode.Read_388796026575051016);
 				kls.RegVersion(6960915415435731531, EngineNS_Graphics_Pipeline_Common_TtAntiAliasingNode.Read_6960915415435731531);
 				kls.RegVersion(7959925610935056749, EngineNS_Graphics_Pipeline_Common_TtAntiAliasingNode.Read_7959925610935056749);
 				kls.RegVersion(9676977852925175428, EngineNS_Graphics_Pipeline_Common_TtAntiAliasingNode.Read_9676977852925175428);
@@ -181635,6 +185207,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = EngineNS_Graphics_Pipeline_Deferred_MultiViewID_TtBasePassNode.CopyCurrentVersion;
 				kls.RegVersion(12123656021883384974, EngineNS_Graphics_Pipeline_Deferred_MultiViewID_TtBasePassNode.Read_12123656021883384974);
 				kls.RegVersion(138870130550221859, EngineNS_Graphics_Pipeline_Deferred_MultiViewID_TtBasePassNode.Read_138870130550221859);
+				kls.RegVersion(15974273577363406509, EngineNS_Graphics_Pipeline_Deferred_MultiViewID_TtBasePassNode.Read_15974273577363406509);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Deferred.TtDeferredBasePassNode@EngineCore");
@@ -181642,6 +185215,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = EngineNS_Graphics_Pipeline_Deferred_TtDeferredBasePassNode.CopyCurrentVersion;
 				kls.RegVersion(14803348231580179961, EngineNS_Graphics_Pipeline_Deferred_TtDeferredBasePassNode.Read_14803348231580179961);
 				kls.RegVersion(17607725939172084306, EngineNS_Graphics_Pipeline_Deferred_TtDeferredBasePassNode.Read_17607725939172084306);
+				kls.RegVersion(4322477947055638671, EngineNS_Graphics_Pipeline_Deferred_TtDeferredBasePassNode.Read_4322477947055638671);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Deferred.TtDeferredDirLightingNode@EngineCore");
@@ -181719,8 +185293,12 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Graphics_Pipeline_Mobile_TtMobileEditorFSPolicy.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Mobile_TtMobileEditorFSPolicy.CopyCurrentVersion;
 				kls.RegVersion(15567830835772408686, EngineNS_Graphics_Pipeline_Mobile_TtMobileEditorFSPolicy.Read_15567830835772408686);
+				kls.RegVersion(1765725197176727181, EngineNS_Graphics_Pipeline_Mobile_TtMobileEditorFSPolicy.Read_1765725197176727181);
+				kls.RegVersion(17965078111118069651, EngineNS_Graphics_Pipeline_Mobile_TtMobileEditorFSPolicy.Read_17965078111118069651);
 				kls.RegVersion(2209381975495933358, EngineNS_Graphics_Pipeline_Mobile_TtMobileEditorFSPolicy.Read_2209381975495933358);
 				kls.RegVersion(5430323303408736858, EngineNS_Graphics_Pipeline_Mobile_TtMobileEditorFSPolicy.Read_5430323303408736858);
+				kls.RegVersion(5998283359797127, EngineNS_Graphics_Pipeline_Mobile_TtMobileEditorFSPolicy.Read_5998283359797127);
+				kls.RegVersion(8048419175116741211, EngineNS_Graphics_Pipeline_Mobile_TtMobileEditorFSPolicy.Read_8048419175116741211);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Mobile.TtMobileForwordNodeBase@EngineCore");
@@ -181734,8 +185312,12 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Graphics_Pipeline_Mobile_TtMobileFSPolicy.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Mobile_TtMobileFSPolicy.CopyCurrentVersion;
 				kls.RegVersion(12276500947907991, EngineNS_Graphics_Pipeline_Mobile_TtMobileFSPolicy.Read_12276500947907991);
+				kls.RegVersion(1765725197176727181, EngineNS_Graphics_Pipeline_Mobile_TtMobileFSPolicy.Read_1765725197176727181);
+				kls.RegVersion(17965078111118069651, EngineNS_Graphics_Pipeline_Mobile_TtMobileFSPolicy.Read_17965078111118069651);
 				kls.RegVersion(3287939895973450911, EngineNS_Graphics_Pipeline_Mobile_TtMobileFSPolicy.Read_3287939895973450911);
 				kls.RegVersion(357462442836665470, EngineNS_Graphics_Pipeline_Mobile_TtMobileFSPolicy.Read_357462442836665470);
+				kls.RegVersion(5998283359797127, EngineNS_Graphics_Pipeline_Mobile_TtMobileFSPolicy.Read_5998283359797127);
+				kls.RegVersion(8048419175116741211, EngineNS_Graphics_Pipeline_Mobile_TtMobileFSPolicy.Read_8048419175116741211);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Mobile.TtMobileOpaqueNode@EngineCore");
@@ -181762,7 +185344,11 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Shader.CommanShading.UBasePassPolicy@EngineCore");
 				kls.Writer = EngineNS_Graphics_Pipeline_Shader_CommanShading_UBasePassPolicy.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Shader_CommanShading_UBasePassPolicy.CopyCurrentVersion;
+				kls.RegVersion(1765725197176727181, EngineNS_Graphics_Pipeline_Shader_CommanShading_UBasePassPolicy.Read_1765725197176727181);
+				kls.RegVersion(17965078111118069651, EngineNS_Graphics_Pipeline_Shader_CommanShading_UBasePassPolicy.Read_17965078111118069651);
 				kls.RegVersion(4433640487391870259, EngineNS_Graphics_Pipeline_Shader_CommanShading_UBasePassPolicy.Read_4433640487391870259);
+				kls.RegVersion(5998283359797127, EngineNS_Graphics_Pipeline_Shader_CommanShading_UBasePassPolicy.Read_5998283359797127);
+				kls.RegVersion(8048419175116741211, EngineNS_Graphics_Pipeline_Shader_CommanShading_UBasePassPolicy.Read_8048419175116741211);
 				kls.RegVersion(9916826898964841430, EngineNS_Graphics_Pipeline_Shader_CommanShading_UBasePassPolicy.Read_9916826898964841430);
 				kls.RegVersion(9939326464367118426, EngineNS_Graphics_Pipeline_Shader_CommanShading_UBasePassPolicy.Read_9939326464367118426);
 			}
@@ -181815,7 +185401,9 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = EngineNS_Graphics_Pipeline_Shader_TtMaterial.CopyCurrentVersion;
 				kls.RegVersion(10881228277520969699, EngineNS_Graphics_Pipeline_Shader_TtMaterial.Read_10881228277520969699);
 				kls.RegVersion(14019617542205654534, EngineNS_Graphics_Pipeline_Shader_TtMaterial.Read_14019617542205654534);
+				kls.RegVersion(15277554964753224627, EngineNS_Graphics_Pipeline_Shader_TtMaterial.Read_15277554964753224627);
 				kls.RegVersion(18054154474047905669, EngineNS_Graphics_Pipeline_Shader_TtMaterial.Read_18054154474047905669);
+				kls.RegVersion(8448414150197997152, EngineNS_Graphics_Pipeline_Shader_TtMaterial.Read_8448414150197997152);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore");
@@ -181846,6 +185434,8 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore");
 				kls.Writer = EngineNS_Graphics_Pipeline_Shader_TtMaterialInstance.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Shader_TtMaterialInstance.CopyCurrentVersion;
+				kls.RegVersion(13764099882389733938, EngineNS_Graphics_Pipeline_Shader_TtMaterialInstance.Read_13764099882389733938);
+				kls.RegVersion(1696315720421837764, EngineNS_Graphics_Pipeline_Shader_TtMaterialInstance.Read_1696315720421837764);
 				kls.RegVersion(3112510472570874177, EngineNS_Graphics_Pipeline_Shader_TtMaterialInstance.Read_3112510472570874177);
 				kls.RegVersion(7052944736533553247, EngineNS_Graphics_Pipeline_Shader_TtMaterialInstance.Read_7052944736533553247);
 				kls.RegVersion(7755520635858182528, EngineNS_Graphics_Pipeline_Shader_TtMaterialInstance.Read_7755520635858182528);
@@ -181861,6 +185451,12 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Graphics_Pipeline_Shader_TtShaderAssetAMeta.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Shader_TtShaderAssetAMeta.CopyCurrentVersion;
 				kls.RegVersion(14124850856776468023, EngineNS_Graphics_Pipeline_Shader_TtShaderAssetAMeta.Read_14124850856776468023);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Shadow.TtContactShadowNode@EngineCore");
+				kls.Writer = EngineNS_Graphics_Pipeline_Shadow_TtContactShadowNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Pipeline_Shadow_TtContactShadowNode.CopyCurrentVersion;
+				kls.RegVersion(11140492584710236544, EngineNS_Graphics_Pipeline_Shadow_TtContactShadowNode.Read_11140492584710236544);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Shadow.TtExponentialShadowNode@EngineCore");
@@ -181887,7 +185483,11 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore");
 				kls.Writer = EngineNS_Graphics_Pipeline_TtDeferredPolicyBase.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_TtDeferredPolicyBase.CopyCurrentVersion;
+				kls.RegVersion(1765725197176727181, EngineNS_Graphics_Pipeline_TtDeferredPolicyBase.Read_1765725197176727181);
+				kls.RegVersion(17965078111118069651, EngineNS_Graphics_Pipeline_TtDeferredPolicyBase.Read_17965078111118069651);
 				kls.RegVersion(4433640487391870259, EngineNS_Graphics_Pipeline_TtDeferredPolicyBase.Read_4433640487391870259);
+				kls.RegVersion(5998283359797127, EngineNS_Graphics_Pipeline_TtDeferredPolicyBase.Read_5998283359797127);
+				kls.RegVersion(8048419175116741211, EngineNS_Graphics_Pipeline_TtDeferredPolicyBase.Read_8048419175116741211);
 				kls.RegVersion(9916826898964841430, EngineNS_Graphics_Pipeline_TtDeferredPolicyBase.Read_9916826898964841430);
 				kls.RegVersion(9939326464367118426, EngineNS_Graphics_Pipeline_TtDeferredPolicyBase.Read_9939326464367118426);
 			}
@@ -181895,7 +185495,11 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.TtForwordPolicyBase@EngineCore");
 				kls.Writer = EngineNS_Graphics_Pipeline_TtForwordPolicyBase.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_TtForwordPolicyBase.CopyCurrentVersion;
+				kls.RegVersion(1765725197176727181, EngineNS_Graphics_Pipeline_TtForwordPolicyBase.Read_1765725197176727181);
+				kls.RegVersion(17965078111118069651, EngineNS_Graphics_Pipeline_TtForwordPolicyBase.Read_17965078111118069651);
 				kls.RegVersion(4433640487391870259, EngineNS_Graphics_Pipeline_TtForwordPolicyBase.Read_4433640487391870259);
+				kls.RegVersion(5998283359797127, EngineNS_Graphics_Pipeline_TtForwordPolicyBase.Read_5998283359797127);
+				kls.RegVersion(8048419175116741211, EngineNS_Graphics_Pipeline_TtForwordPolicyBase.Read_8048419175116741211);
 				kls.RegVersion(9916826898964841430, EngineNS_Graphics_Pipeline_TtForwordPolicyBase.Read_9916826898964841430);
 				kls.RegVersion(9939326464367118426, EngineNS_Graphics_Pipeline_TtForwordPolicyBase.Read_9939326464367118426);
 			}
@@ -181917,7 +185521,11 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.TtRenderPolicy@EngineCore");
 				kls.Writer = EngineNS_Graphics_Pipeline_TtRenderPolicy.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_TtRenderPolicy.CopyCurrentVersion;
+				kls.RegVersion(1765725197176727181, EngineNS_Graphics_Pipeline_TtRenderPolicy.Read_1765725197176727181);
+				kls.RegVersion(17965078111118069651, EngineNS_Graphics_Pipeline_TtRenderPolicy.Read_17965078111118069651);
 				kls.RegVersion(4433640487391870259, EngineNS_Graphics_Pipeline_TtRenderPolicy.Read_4433640487391870259);
+				kls.RegVersion(5998283359797127, EngineNS_Graphics_Pipeline_TtRenderPolicy.Read_5998283359797127);
+				kls.RegVersion(8048419175116741211, EngineNS_Graphics_Pipeline_TtRenderPolicy.Read_8048419175116741211);
 				kls.RegVersion(9916826898964841430, EngineNS_Graphics_Pipeline_TtRenderPolicy.Read_9916826898964841430);
 				kls.RegVersion(9939326464367118426, EngineNS_Graphics_Pipeline_TtRenderPolicy.Read_9939326464367118426);
 			}
@@ -182042,13 +185650,14 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = EngineNS_TtEngineConfig.CopyCurrentVersion;
 				kls.RegVersion(1316345951243314029, EngineNS_TtEngineConfig.Read_1316345951243314029);
 				kls.RegVersion(14127715022696337509, EngineNS_TtEngineConfig.Read_14127715022696337509);
+				kls.RegVersion(15999650985474121546, EngineNS_TtEngineConfig.Read_15999650985474121546);
 				kls.RegVersion(16295016199929048745, EngineNS_TtEngineConfig.Read_16295016199929048745);
 				kls.RegVersion(5327646614045562516, EngineNS_TtEngineConfig.Read_5327646614045562516);
 				kls.RegVersion(6912102779429404873, EngineNS_TtEngineConfig.Read_6912102779429404873);
 				kls.RegVersion(7019520563461748563, EngineNS_TtEngineConfig.Read_7019520563461748563);
 				kls.RegVersion(8426303643173551098, EngineNS_TtEngineConfig.Read_8426303643173551098);
 				kls.RegVersion(8471037071661843463, EngineNS_TtEngineConfig.Read_8471037071661843463);
-				kls.RegVersion(15999650985474121546, EngineNS_TtEngineConfig.Read_15999650985474121546);
+				kls.RegVersion(2236498628157778409, EngineNS_TtEngineConfig.Read_2236498628157778409);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Animation.DoubleAnimation@EngineCore");
@@ -182554,7 +186163,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = Survivor_TtWeaponProxyNode.CopyCurrentVersion;
 				kls.RegVersion(10759720178659608122, Survivor_TtWeaponProxyNode.Read_10759720178659608122);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("FA_11_FC_83_EB_FB_A4_B2_1E_8E_5E_8B_39_61_45_4D_6E_E9_11_D5");
+			this.VersionHash = EngineNS.Hash160.Parse("25_3E_3D_FA_01_45_C4_DE_48_AD_08_DC_54_F6_11_82_02_34_B6_B8");
 		}
 	}
 }

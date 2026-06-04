@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_17965078111118069651 Type="EngineNS.Graphics.Pipeline.TtForwordPolicyBase@EngineCore">
+  <EnableAO Type="System.Boolean@Unknown" Order="0" />
+  <EnableGI Type="System.Boolean@Unknown" Order="0" />
+  <EnableLocalLights Type="System.Boolean@Unknown" Order="0" />
+  <TypeFog Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog@EngineCore" Order="0" />
+</Hash_17965078111118069651>

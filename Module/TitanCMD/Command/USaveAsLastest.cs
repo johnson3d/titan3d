@@ -11,6 +11,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ProjectCooker.Command
@@ -18,8 +19,58 @@ namespace ProjectCooker.Command
     class TtSaveAsLastest : TtCookCommand
     {
         public Dictionary<string, Type> AssetTypes = new Dictionary<string, Type>();
-        public override async System.Threading.Tasks.Task ExecuteCommand(string[] args)
+        private List<string> BlacklistEntries = new List<string>();
+
+        private void LoadBlacklist(string[] args)
         {
+            BlacklistEntries.Clear();
+            var blacklistFile = FindArgument(args, Param_Blacklist);
+            if (string.IsNullOrEmpty(blacklistFile))
+            {
+                if (TtEngine.Instance.DynConfigData.TryGetConfig<string>("Blacklist", out var cfgBlacklist))
+                {
+                    blacklistFile = cfgBlacklist;
+                }
+            }
+            if (string.IsNullOrEmpty(blacklistFile) || !System.IO.File.Exists(blacklistFile))
+            {
+                if (!string.IsNullOrEmpty(blacklistFile))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Warning, $"Blacklist file not found: {blacklistFile}");
+                }
+                return;
+            }
+            var lines = System.IO.File.ReadAllLines(blacklistFile);
+            foreach (var line in lines)
+            {
+                var trimmed = line.Trim();
+                if (string.IsNullOrEmpty(trimmed) || trimmed.StartsWith("#") || trimmed.StartsWith("//"))
+                    continue;
+                BlacklistEntries.Add(trimmed.Replace('\\', '/'));
+            }
+            System.Console.WriteLine($"Loaded {BlacklistEntries.Count} blacklist entries from {blacklistFile}");
+        }
+
+        private bool IsBlacklisted(string relativePath)
+        {
+            if (BlacklistEntries.Count == 0)
+                return false;
+            var normalizedPath = relativePath.Replace('\\', '/');
+            foreach (var entry in BlacklistEntries)
+            {
+                if (normalizedPath.Equals(entry, StringComparison.OrdinalIgnoreCase))
+                    return true;
+                if (normalizedPath.StartsWith(entry + "/", StringComparison.OrdinalIgnoreCase))
+                    return true;
+                if (normalizedPath.StartsWith(entry, StringComparison.OrdinalIgnoreCase) && entry.EndsWith("/"))
+                    return true;
+            }
+            return false;
+        }
+
+        public override async EngineNS.Thread.Async.TtTask ExecuteCommand(string[] args)
+        {
+            LoadBlacklist(args);
             AssetTypes.Clear();
             System.Console.WriteLine("Begin AssetType");
             EngineNS.Rtti.TtTypeDescManager.Instance.InterateTypes((cb) =>
@@ -128,7 +179,7 @@ namespace ProjectCooker.Command
                 }
             }
         }
-        async System.Threading.Tasks.Task ProcAssets(System.Type type, bool bOnlyAMeta = false)
+        async EngineNS.Thread.Async.TtTask ProcAssets(System.Type type, bool bOnlyAMeta = false)
         {
             var ameta = EngineNS.Rtti.TtTypeDescManager.CreateInstance(type) as EngineNS.IO.IAssetMeta;
             var extType = ameta.TypeExt;
@@ -141,6 +192,12 @@ namespace ProjectCooker.Command
                 {
                     var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i); 
                     rp = rp.Substring(0, rp.Length - EngineNS.IO.IAssetMeta.MetaExt.Length);
+                    if (IsBlacklisted(rp))
+                    {
+                        EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                        procNum++;
+                        continue;
+                    }
                     var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                     ameta = EngineNS.TtEngine.Instance.AssetMetaManager.GetAssetMeta(rn);
                     if (ameta == null)
@@ -169,7 +226,7 @@ namespace ProjectCooker.Command
                 }
             }
         }
-        async System.Threading.Tasks.Task ProcUVAnim()
+        async EngineNS.Thread.Async.TtTask ProcUVAnim()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.EGui.TtUVAnim.AssetExt, true);
@@ -177,6 +234,12 @@ namespace ProjectCooker.Command
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await EngineNS.TtEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(rn);
                 if (asset != null)
@@ -197,6 +260,12 @@ namespace ProjectCooker.Command
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await EngineNS.TtEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(rn);
                 if (asset != null)
@@ -211,7 +280,7 @@ namespace ProjectCooker.Command
                 EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"UVAnim: {procNum}/{files.Length}");
             }
         }
-        async System.Threading.Tasks.Task ProcTextures()
+        async EngineNS.Thread.Async.TtTask ProcTextures()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.NxRHI.TtSrView.AssetExt, true);
@@ -219,6 +288,12 @@ namespace ProjectCooker.Command
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await rn.GetAsset<EngineNS.NxRHI.TtSrView>();
                 if (asset == null)
@@ -241,6 +316,12 @@ namespace ProjectCooker.Command
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await rn.GetAsset<EngineNS.NxRHI.TtSrView>();
                 if (asset == null)
@@ -256,7 +337,7 @@ namespace ProjectCooker.Command
                 EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Texture: {procNum}/{files.Length}");
             }
         }
-        async System.Threading.Tasks.Task ProcUMesh()
+        async EngineNS.Thread.Async.TtTask ProcUMesh()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Mesh.TtMaterialMesh.AssetExt, true);
@@ -264,6 +345,12 @@ namespace ProjectCooker.Command
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await rn.GetAsset<EngineNS.Graphics.Mesh.TtMaterialMesh>();
                 if (asset != null)
@@ -284,6 +371,12 @@ namespace ProjectCooker.Command
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await rn.GetAsset<EngineNS.Graphics.Mesh.TtMaterialMesh>();
                 if (asset != null)
@@ -298,7 +391,7 @@ namespace ProjectCooker.Command
                 EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Mesh: {procNum}/{files.Length}");
             }
         }
-        async System.Threading.Tasks.Task ProcMeshPrimitive()
+        async EngineNS.Thread.Async.TtTask ProcMeshPrimitive()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Mesh.TtMeshPrimitives.AssetExt, true);
@@ -306,6 +399,12 @@ namespace ProjectCooker.Command
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await rn.GetAsset<EngineNS.Graphics.Mesh.TtMeshPrimitives>();
                 if (asset != null)
@@ -326,6 +425,12 @@ namespace ProjectCooker.Command
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await rn.GetAsset<EngineNS.Graphics.Mesh.TtMeshPrimitives>();
                 if (asset != null)
@@ -340,7 +445,7 @@ namespace ProjectCooker.Command
                 EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"MeshPrimitive: {procNum}/{files.Length}");
             }
         }
-        async System.Threading.Tasks.Task ProcAnimClip()
+        async EngineNS.Thread.Async.TtTask ProcAnimClip()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Animation.Asset.TtAnimationClip.AssetExt, true);
@@ -348,6 +453,12 @@ namespace ProjectCooker.Command
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await rn.GetAsset<EngineNS.Animation.Asset.TtAnimationClip>();
                 if (asset != null)
@@ -368,6 +479,12 @@ namespace ProjectCooker.Command
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await rn.GetAsset<EngineNS.Animation.Asset.TtAnimationClip>();
                 if (asset != null)
@@ -382,7 +499,7 @@ namespace ProjectCooker.Command
                 EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"AnimClip: {procNum}/{files.Length}");
             }
         }
-        async System.Threading.Tasks.Task ProcMaterial()
+        async EngineNS.Thread.Async.TtTask ProcMaterial()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.TtMaterial.AssetExt, true);
@@ -390,6 +507,12 @@ namespace ProjectCooker.Command
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await rn.GetAsset<EngineNS.Graphics.Pipeline.Shader.TtMaterial>();// EngineNS.TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
                 if (asset != null)
@@ -427,6 +550,12 @@ namespace ProjectCooker.Command
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await rn.GetAsset<EngineNS.Graphics.Pipeline.Shader.TtMaterial>();// EngineNS.TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
                 if (asset != null)
@@ -458,7 +587,7 @@ namespace ProjectCooker.Command
                 EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Material: {procNum}/{files.Length}");
             }
         }
-        async System.Threading.Tasks.Task ProcMaterialInstance()
+        async EngineNS.Thread.Async.TtTask ProcMaterialInstance()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt, true);
@@ -466,6 +595,12 @@ namespace ProjectCooker.Command
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await rn.GetAsset<EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance>();
                 if (asset != null)
@@ -486,6 +621,12 @@ namespace ProjectCooker.Command
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await rn.GetAsset<EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance>();
                 if (asset != null)
@@ -500,7 +641,7 @@ namespace ProjectCooker.Command
                 EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"MaterialInstance: {procNum}/{files.Length}");
             }
         }
-        async System.Threading.Tasks.Task ProcScene()
+        async EngineNS.Thread.Async.TtTask ProcScene()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.GamePlay.Scene.TtScene.AssetExt + EngineNS.IO.IAssetMeta.MetaExt, true);
@@ -509,6 +650,12 @@ namespace ProjectCooker.Command
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 rp = rp.Substring(0, rp.Length - EngineNS.IO.IAssetMeta.MetaExt.Length);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var world = new EngineNS.GamePlay.TtWorld(null);
                 await world.InitWorld();
@@ -532,6 +679,12 @@ namespace ProjectCooker.Command
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 rp = rp.Substring(0, rp.Length - EngineNS.IO.IAssetMeta.MetaExt.Length);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var world = new EngineNS.GamePlay.TtWorld(null);
                 await world.InitWorld();
@@ -548,7 +701,7 @@ namespace ProjectCooker.Command
                 EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Scene: {procNum}/{files.Length}");
             }
         }
-        async System.Threading.Tasks.Task ProcPrefab()
+        async EngineNS.Thread.Async.TtTask ProcPrefab()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.GamePlay.Scene.TtPrefab.AssetExt, true);
@@ -556,6 +709,12 @@ namespace ProjectCooker.Command
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var world = new EngineNS.GamePlay.TtWorld(null);
                 await world.InitWorld();
@@ -578,6 +737,12 @@ namespace ProjectCooker.Command
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                if (IsBlacklisted(rp))
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                    procNum++;
+                    continue;
+                }
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var world = new EngineNS.GamePlay.TtWorld(null);
                 await world.InitWorld();
@@ -594,7 +759,7 @@ namespace ProjectCooker.Command
                 EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Prefab: {procNum}/{files.Length}");
             }
         }
-        async System.Threading.Tasks.Task ProcUI()
+        async EngineNS.Thread.Async.TtTask ProcUI()
         {
             var macrossEditor = new TtMacrossEditor();
             await macrossEditor.Initialize();
@@ -606,6 +771,12 @@ namespace ProjectCooker.Command
                 try
                 {
                     var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                    if (IsBlacklisted(rp))
+                    {
+                        EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                        procNum++;
+                        continue;
+                    }
                     var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                     var element = TtEngine.Instance.UIManager.Load(rn);
                     TtEngine.Instance.UIManager.Save(rn, element);
@@ -627,6 +798,12 @@ namespace ProjectCooker.Command
                 try
                 {
                     var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                    if (IsBlacklisted(rp))
+                    {
+                        EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                        procNum++;
+                        continue;
+                    }
                     var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                     var element = TtEngine.Instance.UIManager.Load(rn);
                     TtEngine.Instance.UIManager.Save(rn, element);
@@ -641,7 +818,7 @@ namespace ProjectCooker.Command
                 EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"UI: {procNum}/{files.Count}");
             }
         }
-        async System.Threading.Tasks.Task ProcMacross()
+        async EngineNS.Thread.Async.TtTask ProcMacross()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = new List<string>(EngineNS.IO.TtFileManager.GetDirectories(root, "*" + TtMacross.AssetExt, true));
@@ -653,6 +830,12 @@ namespace ProjectCooker.Command
                     var macrossEditor = new TtMacrossEditor();
                     await macrossEditor.Initialize();
                     var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                    if (IsBlacklisted(rp))
+                    {
+                        EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                        procNum++;
+                        continue;
+                    }
                     var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                     macrossEditor.LoadClassGraph(rn);
                     try
@@ -682,6 +865,12 @@ namespace ProjectCooker.Command
                     var macrossEditor = new TtMacrossEditor();
                     await macrossEditor.Initialize();
                     var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                    if (IsBlacklisted(rp))
+                    {
+                        EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Skipped(blacklist): {rp}");
+                        procNum++;
+                        continue;
+                    }
                     var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                     macrossEditor.LoadClassGraph(rn);
                     try

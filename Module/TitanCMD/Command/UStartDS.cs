@@ -8,7 +8,7 @@ namespace ProjectCooker.Command
 {
     class TtStartDS : TtCookCommand
     {
-        public override async System.Threading.Tasks.Task ExecuteCommand(string[] args)
+        public override async EngineNS.Thread.Async.TtTask ExecuteCommand(string[] args)
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             var port = FindArgument(args, DS_Port);

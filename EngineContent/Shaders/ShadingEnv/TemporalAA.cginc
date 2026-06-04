@@ -78,47 +78,133 @@ struct TAA
         return lerp(History, Filtered, ClipBlend);
     }
 
-    // YCoCg 颜色空间下的 neighborhood clamp + 时序权重计算
-    float GetBlendFactor(half4 Color, inout half4 HistoryColor, float2 Depth, float2 uv, float2 HistoryUV, float2 Motion, float alpha)
+    // Luma scaled by 4 for efficiency (matches UE4 Luma4).
+    static float Luma4(float3 Color)
     {
-        // 3x3 邻域 AABB
-        half3 AABBMin, AABBMax;
-        AABBMax = AABBMin = RGBToYCoCg(Color.rgb);
+        return (Color.g * 2.0) + (Color.r + Color.b);
+    }
+
+    // HDR weight for neighborhood sampling (UE4 Karis 2014).
+    // Attenuates bright specular outliers so they don't dominate the AABB.
+    static float HdrWeight4(float3 Color)
+    {
+        return rcp(Luma4(Color) + 4.0);
+    }
+
+    // HDR weight for final temporal blend (standard Karis luminance weight).
+    static float HdrWeight(float3 Color)
+    {
+        return rcp(1.0 + dot(Color, float3(0.2126, 0.7152, 0.0722)));
+    }
+
+    // Compute HDR-weighted filtered current-frame color from the 3×3 neighborhood.
+    // This spatially low-passes bright specular pixels so a single-pixel highlight
+    // doesn't cause the output to flash when it appears/disappears between frames.
+    // Reference: UE FilterCurrentFrameInputSamples (TemporalAA.usf)
+    float3 FilterCurrentFrame(float2 uv)
+    {
+        // Plus-shaped (5-tap) HDR-weighted filter for speed.
+        // Cardinal neighbors get weight 1, center gets weight 2 (Bartlett-like).
+        static const int2 filterOffsets[5] = {
+            int2( 0,  0),
+            int2( 0, -1),
+            int2(-1,  0),
+            int2( 1,  0),
+            int2( 0,  1),
+        };
+        static const float filterSpatialWeights[5] = { 2.0, 1.0, 1.0, 1.0, 1.0 };
+
+        float3 filteredColor = 0;
+        float totalWeight = 0;
+
+        [unroll]
+        for (int i = 0; i < 5; i++)
+        {
+            float3 sampleRGB = ColorBuffer.SampleLevel(Samp_ColorBuffer,
+                uv + (filterOffsets[i] * ViewportSizeAndRcp.zw), 0).rgb;
+            sampleRGB = sRGB2Linear(sampleRGB);
+            float hdrW = HdrWeight4(sampleRGB);
+            float w = filterSpatialWeights[i] * hdrW;
+            filteredColor += sampleRGB * w;
+            totalWeight += w;
+        }
+
+        return filteredColor / totalWeight;
+    }
+
+    // Variance Clipping + HDR-weighted neighborhood in YCoCg space.
+    // Replaces min/max AABB clamp with mu ± gamma*sigma for tighter rejection
+    // of stale history, which stabilizes specular highlights without a separate pass.
+    float GetBlendFactor(half4 FilteredColor, inout half4 HistoryColor, float2 Depth, float2 uv, float2 HistoryUV, float2 Motion, float alpha)
+    {
+        // Accumulate HDR-weighted moments in YCoCg space for variance clipping.
+        float3 m1 = 0;
+        float3 m2 = 0;
+        float totalWeight = 0;
+
         for (int k = 0; k < 9; k++)
         {
-            half3 C = RGBToYCoCg(ColorBuffer.SampleLevel(Samp_ColorBuffer, uv + (kOffsets3x3[k] * ViewportSizeAndRcp.zw), 0));
-            AABBMin = min(AABBMin, C);
-            AABBMax = max(AABBMax, C);
-        }
-        half3 HistoryYCoCg = RGBToYCoCg(HistoryColor);
-        // Clamp 比 Clip 更稳, 不容易出现 disocclusion 时的 ghost 残留
-        HistoryColor.rgb = YCoCgToRGB(clamp(HistoryYCoCg, AABBMin, AABBMax));
+            float3 sampleRGB = ColorBuffer.SampleLevel(Samp_ColorBuffer, uv + (kOffsets3x3[k] * ViewportSizeAndRcp.zw), 0).rgb;
+            sampleRGB = sRGB2Linear(sampleRGB);
+            float3 sampleYCoCg = RGBToYCoCg(sampleRGB);
+            float w = HdrWeight4(sampleRGB);
 
-        // 速度越大, 越偏向当前帧 (减少快速运动时的拖尾)
-        float scaleLength = 1000;
-        float BlendFactor = saturate(alpha + length(Motion) * scaleLength);
-        
-        // 深度 reject: 去掉了，这个不应该开启，边缘如果reject，那么线条永远无法AA
-        //float depthRefer = max(Depth.x, 1e-3f);
-        //float depthThreshold = 0.1f * depthRefer + 0.5f;
-        //if (abs(Depth.y - Depth.x) > depthThreshold)
-        //{
-        //    BlendFactor = 1.0f;
-        //}
-        // History 采样越界 (上帧物体不在屏幕里), 直接抛弃
-        if (HistoryUV.x < 0 || HistoryUV.y < 0 || HistoryUV.x > 1.0f || HistoryUV.y > 1.0f)
+            m1 += sampleYCoCg * w;
+            m2 += sampleYCoCg * sampleYCoCg * w;
+            totalWeight += w;
+        }
+
+        // Compute mean and standard deviation for variance clipping.
+        float3 mu = m1 / totalWeight;
+        float3 sigma = sqrt(abs(m2 / totalWeight - mu * mu));
+        float gamma = 1.0; // Tighter = less ghosting, looser = less flickering.
+
+        float3 varianceMin = mu - gamma * sigma;
+        float3 varianceMax = mu + gamma * sigma;
+
+        // Clip history to the variance box (tighter than min/max AABB).
+        float3 histYCoCg = RGBToYCoCg(HistoryColor.rgb);
+        float3 clippedYCoCg = ClipHistory(histYCoCg, varianceMin, varianceMax);
+        HistoryColor.rgb = YCoCgToRGB(clippedYCoCg);
+
+        // Blend factor: base alpha + velocity-driven increase.
+        float velocityScale = 1000;
+        float BlendFactor = saturate(alpha + length(Motion) * velocityScale);
+
+        // Luma-contrast anti-flicker (UE style): in high-contrast neighborhoods
+        // (bright specular next to dark diffuse), increase new-frame weight to
+        // prevent the variance box from bouncing between frames.
+        float LumaMin = RGBToYCoCg(mu - sigma).x;
+        float LumaMax = RGBToYCoCg(mu + sigma).x;
+        float LumaContrast = LumaMax - LumaMin;
+        float LumaContrastFactor = 32.0;
+        float antiFlicker = saturate(rcp(1.0 + LumaContrast * LumaContrastFactor));
+        BlendFactor = max(BlendFactor, antiFlicker);
+
+        // Make sure to have at least some small contribution.
+        float LumaHistory = Luma4(RGBToYCoCg(HistoryColor.rgb));
+        float LumaFiltered = Luma4(RGBToYCoCg(FilteredColor.rgb));
+        BlendFactor = max(BlendFactor, saturate(0.01 * LumaHistory / abs(LumaFiltered - LumaHistory + 1e-5)));
+
+        // History off-screen → discard.
+        if (any(HistoryUV < 0) || any(HistoryUV > 1.0f))
         {
             BlendFactor = 1.0f;
         }
-        //BlendFactor = alpha;
+
         return BlendFactor;
     }
     float3 GetTAAColor(float2 screen_uv, float2 JitterUV, float2 PreJitterUV, float alpha)
     {
         float2 currUV = screen_uv;
-        half4 Color = (half4) ColorBuffer.SampleLevel(Samp_ColorBuffer, currUV, 0);
-        //return Color;
-        Color.rgb = sRGB2Linear(Color.rgb);
+
+        // Use HDR-weighted filtered color instead of raw center pixel.
+        // This spatially spreads bright specular highlights so they don't
+        // cause per-frame on/off flickering in the temporal blend.
+        half4 Color;
+        Color.rgb = (half3)FilterCurrentFrame(currUV);
+        Color.a = 1;
+
         float2 Depth;
         Depth.x = DepthBuffer.SampleLevel(Samp_DepthBuffer, currUV, 0).r;
         
@@ -132,21 +218,31 @@ struct TAA
 
         Depth = LinearFromDepth(Depth);
 
-         // 邻域 AABB 也用 currUV 作为中心, 保证 clamp 范围与 Color 来自同一空间.
+        // 邻域 AABB 也用 currUV 作为中心, 保证 clamp 范围与 Color 来自同一空间.
         float blendFactor = GetBlendFactor(Color, HistoryColor, Depth, currUV, HistoryUV, Motion, alpha);
-        float3 result = lerp(HistoryColor.rgb, Color.rgb, blendFactor);
+
+        // HDR-weighted blend (Karis 2014): prevents bright specular highlights
+        // in the combined buffer from being erased by dark current frames or vice versa.
+        float wCurr = HdrWeight(Color.rgb) * blendFactor;
+        float wHist = HdrWeight(HistoryColor.rgb) * (1.0 - blendFactor);
+        float3 result = (Color.rgb * wCurr + HistoryColor.rgb * wHist)
+            / max(wCurr + wHist, 1e-5);
         result.rgb = Linear2sRGB((half3) result.rgb);
         return result;
     }
     // GetTAAColor2: 用 closest depth 邻域选 motion 的版本 (适合处理边缘/遮挡变化更稳).
     // 反 jitter 的处理与 GetTAAColor 一致, 详见上面的注释.
+    // GetTAAColor2: 用 closest depth 邻域选 motion 的版本 (适合处理边缘/遮挡变化更稳).
     float3 GetTAAColor2(float2 screen_uv, float2 JitterUV, float2 PreJitterUV, float alpha)
     {
         float2 currUV = screen_uv - JitterUV;
 
+        // Use HDR-weighted filtered color instead of raw center pixel.
+        half4 Color;
+        Color.rgb = (half3)FilterCurrentFrame(currUV);
+        Color.a = 1;
+
         float2 Depth;
-        half4 Color = (half4)ColorBuffer.Sample(Samp_ColorBuffer, currUV);
-        Color.rgb = sRGB2Linear(Color.rgb);
         Depth.x = DepthBuffer.Sample(Samp_DepthBuffer, currUV).r;
 
         // 在 3x3 邻域里挑离镜头最近的点的 UV, 用它去采 motion vector.
@@ -159,11 +255,13 @@ struct TAA
         HistoryColor.rgb = sRGB2Linear((half3)HistoryColor.rgb);
         Depth.y = PrevDepthBuffer.Sample(Samp_PrevDepthBuffer, HistoryUV.xy).r;
 
-        // 注意: GetTAAColor2 旧实现没有调用 LinearFromDepth, 这里保持原样.
-        // 如果想启用相对深度 reject, 需要先调 LinearFromDepth 再传给 GetBlendFactor.
+        float blendFactor = GetBlendFactor(Color, HistoryColor, Depth, currUV, HistoryUV, Motion, alpha);
 
-        float blendFactor = GetBlendFactor(Color, HistoryColor, Depth, screen_uv, HistoryUV, Motion, alpha);
-        float3 result = lerp(HistoryColor.rgb, Color.rgb, blendFactor);
+        // HDR-weighted blend, same as GetTAAColor.
+        float wCurr = HdrWeight(Color.rgb) * blendFactor;
+        float wHist = HdrWeight(HistoryColor.rgb) * (1.0 - blendFactor);
+        float3 result = (Color.rgb * wCurr + HistoryColor.rgb * wHist)
+            / max(wCurr + wHist, 1e-5);
         result.rgb = Linear2sRGB((half3)result.rgb);
         return result;
     }

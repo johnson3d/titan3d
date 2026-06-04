@@ -19,6 +19,7 @@ namespace EngineNS.ECS
     }
     public class TtComponentValues<T> : IComponentValues where T : struct
     {
+        public T InValidValue = default(T);
         public T[] Values;
         public void SureSize(int size)
         {
@@ -39,13 +40,19 @@ namespace EngineNS.ECS
         public ref T GetValue(int id)
         {
             if (id < 0 || id >= Values.Length)
-                throw new IndexOutOfRangeException($"Component ID {id} is out of range.");
+            {
+                Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"Component ID {id} is out of range.");
+                return ref InValidValue;
+            }
             return ref Values[id];
         }
         public void SetValue(int id, in T value)
         {
             if (id < 0 || id >= Values.Length)
-                throw new IndexOutOfRangeException($"Component ID {id} is out of range.");
+            {
+                Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"Component ID {id} is out of range.");
+                return;
+            }
             Values[id] = value;
         }
     }

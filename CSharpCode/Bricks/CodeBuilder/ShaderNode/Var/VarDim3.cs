@@ -195,6 +195,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         {
             PrevSize = new Vector2(100, 100);
         }
+        [Browsable(false)]
+        public new Vector3 Value { get => mValue; set => mValue = value; }
+        [Rtti.Meta("")]
+        [Category("Option")]
         [EGui.Controls.PropertyGrid.TtColor3PickerEditor()]
         public Vector3 Color { get => mValue; set => mValue = value; }
     }

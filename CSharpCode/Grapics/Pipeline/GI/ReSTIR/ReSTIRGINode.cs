@@ -441,12 +441,18 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             {
                 if (mEnableHzbAccel == value)
                     return;
+
+                if (mHzbNode == null)
+                {
+                    mEnableHzbAccel = false;
+                    return;
+                }
                 mEnableHzbAccel = value;
                 if (mInitial != null)
                     mInitial.IsEnableHzbAccel = value;
             }
         }
-
+        TtHzbNode mHzbNode = null;
         // ENV_USE_PROBE_FALLBACK permutation 开关: 配置型切换, 同 EnableEnvMap.
         // ProbeVolumeSource 为 null 或未 Ready 时, setter 会被 Tick 覆盖回 false.
         // 用户主动注入 ProbeVolumeSource -> 自动设为 true.
@@ -551,15 +557,17 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
 
             // Hzb pin 接入则自动开 hi-z 加速; 悬空则强制关 (即便外部曾 set true).
             // 与 EnvMap 同一套"悬空 -> 强制关"防御.
-            if (HzbPinIn.FindInLinker() != null)
+            var linker = HzbPinIn.FindInLinker();
+            if (linker != null)
             {
-                mEnableHzbAccel = true;
+                mHzbNode = linker.OutPin.HostNode as TtHzbNode;
+                EnableHzbAccel = true;
             }
             else
             {
-                mEnableHzbAccel = false;
+                mHzbNode = null;
+                EnableHzbAccel = false;
             }
-            mInitial.IsEnableHzbAccel = mEnableHzbAccel;
 
             // ProbeVolume: 外部注入 ProbeVolumeSource 后自动开启; 未注入时强制关.
             mInitial.IsEnableProbeFallback = (ProbeVolumeSource != null && ProbeVolumeSource.IsReady);
@@ -717,9 +725,19 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             
             return mSharedCBuffer;
         }
-
+        TtAttachBuffer mFallbackBlack = new TtAttachBuffer();
+        public override void FrameBuild(TtRenderPolicy policy)
+        {
+            if (policy.EnableGI == false)
+            {
+                this.ImportAttachment(IndirectDiffusePinOut, mFallbackBlack);
+                mFallbackBlack.Srv = TtEngine.Instance.GfxDevice.TextureManager.BlackTextureSRV;
+            }
+        }
         public override unsafe void Tick(TtWorld world, TtRenderPolicy policy, TtCommandList frameCmdList, bool bClear)
         {
+            if (policy.EnableGI == false)
+                return;
             if (mInitial == null || mWidth == 0 || mHeight == 0)
                 return;
 

@@ -613,12 +613,15 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     Vector3 wheelCol = normalizedRgb;
                     if (ImGuiAPI.ColorPicker3("##cgwheel_" + info.Name, (float*)&wheelCol, wheelFlags))
                     {
-                        // User changed hue/sat via wheel — apply back preserving magnitude
-                        float newMax = Math.Max(Math.Max(wheelCol.X, wheelCol.Y), Math.Max(wheelCol.Z, 0.001f));
-                        v.X = (wheelCol.X / newMax) * maxComp;
-                        v.Y = (wheelCol.Y / newMax) * maxComp;
-                        v.Z = (wheelCol.Z / newMax) * maxComp;
-                        valueChanged = true;
+                        // Guard: if wheel returns near-black (user dragged to center/outside), skip update
+                        float newMax = Math.Max(Math.Max(wheelCol.X, wheelCol.Y), Math.Max(wheelCol.Z, 0f));
+                        if (newMax > 0.001f)
+                        {
+                            v.X = (wheelCol.X / newMax) * maxComp;
+                            v.Y = (wheelCol.Y / newMax) * maxComp;
+                            v.Z = (wheelCol.Z / newMax) * maxComp;
+                            valueChanged = true;
+                        }
                     }
                 }
                 ImGuiAPI.EndGroup();

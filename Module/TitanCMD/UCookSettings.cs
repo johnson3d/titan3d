@@ -21,9 +21,10 @@ namespace ProjectCooker
         public const string Type_UI = "UI";
         public const string Type_Macross = "Macross";
 
+        public const string Param_Blacklist = "Blacklist=";
         public const string DS_Port = "DS_Port=";
 
-        public virtual async System.Threading.Tasks.Task ExecuteCommand(string[] args)
+        public virtual async EngineNS.Thread.Async.TtTask ExecuteCommand(string[] args)
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
         }

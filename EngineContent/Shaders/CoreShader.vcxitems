@@ -71,6 +71,8 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\FXAAMobile.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\GlobalDefine.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\GpuSceneCommon.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Inc\HairBRDF.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Inc\HzbRayCast.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\LightCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Math.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\MixUtility.cginc" />
@@ -167,7 +169,10 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\Hzb.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\VirtualTexture.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\ColorGradingLUT.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\ContactShadow.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\FrustumGrid3D.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\SSAO.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\SSAOFilter.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)GI\ProbeVolume\ProbeVolumeUpdate.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRInitialSampling.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRTemporalReuse.compute" />

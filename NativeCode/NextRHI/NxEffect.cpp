@@ -67,13 +67,41 @@ namespace NxRHI
 		mBinders.clear();
 
 		if (mAmplificationShader != nullptr)
-			PushBinder(EShaderType::SDT_MeshShader, mAmplificationShader->Reflector);
+		{
+			auto pReflector = mAmplificationShader->Reflector;
+			if (pReflector == nullptr)
+			{
+				pReflector = mAmplificationShader->Desc->DxILReflector;
+			}
+			PushBinder(EShaderType::SDT_MeshShader, pReflector);
+		}
 		if (mMeshShader != nullptr)
-			PushBinder(EShaderType::SDT_MeshShader, mMeshShader->Reflector);
+		{
+			auto pReflector = mMeshShader->Reflector;
+			if (pReflector == nullptr)
+			{
+				pReflector = mMeshShader->Desc->DxILReflector;
+			}
+			PushBinder(EShaderType::SDT_MeshShader, pReflector);
+		}
 		if (mVertexShader != nullptr)
-			PushBinder(EShaderType::SDT_VertexShader, mVertexShader->Reflector);
+		{
+			auto pReflector = mVertexShader->Reflector;
+			if (pReflector == nullptr)
+			{
+				pReflector = mVertexShader->Desc->DxILReflector;
+			}
+			PushBinder(EShaderType::SDT_VertexShader, pReflector);
+		}
 		if (mPixelShader != nullptr)
-			PushBinder(EShaderType::SDT_PixelShader, mPixelShader->Reflector);
+		{
+			auto pReflector = mPixelShader->Reflector;
+			if (pReflector == nullptr)
+			{
+				pReflector = mPixelShader->Desc->DxILReflector;
+			}
+			PushBinder(EShaderType::SDT_PixelShader, pReflector);
+		}
 	}
 	void IGraphicsEffect::PushBinder(EShaderType shaderType, IShaderReflector* pReflector)
 	{

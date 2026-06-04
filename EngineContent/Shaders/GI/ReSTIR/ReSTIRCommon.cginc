@@ -235,59 +235,20 @@ float3 SampleSkyRadiance(float3 dirWS)
 }
 
 // -----------------------------------------------------------------------------
-// Hi-Z 屏幕空间 ray march (linear view-space z)
+// Hi-Z 屏幕空间 ray march
 //
-// 算法: 从最粗 mip 起步, 纯粹"由粗到细"的层级遍历.
-//   - 不相交 → 推进当前 mip cell 边界 (mip 不变, 步长 = 当前 mip cell 大小)
-//   - 相交且 mip > 0 → mip-- 细化, ray 不动
-//   - 相交且 mip == 0 → 精确命中判定; miss 则推进 mip 0 cell 边界, mip 重置回 startMip
-// mip 只有"向下细化"和"重置回起始"两种变化, 永远不会出现 k ↔ k-1 振荡.
+// 薄 wrapper, 委托给通用 HzbRayCast (Inc/HzbRayCast.cginc).
+// 保留旧函数签名以兼容 ReSTIRInitialSampling.compute 的调用方.
 //
-// Hzb 约定 (TtHzbNode):
-//   Texture2D<float2>, mip0 = screen/2, R = tile minZ, G = tile maxZ (linear view-space z)
-//
-// 调用方约定:
-//   起点防自相交由调用方负责 (originWS 沿 dirWS 推一小步再算 startSS).
+// startSS / endSS: float3(uv.x, uv.y, ndcZ), 由 WorldToScreen 产出.
+//   注意: HzbRayCast 需要 Screen 空间 (NDC xy [-1,1] + DeviceZ),
+//   此 wrapper 负责 UV→NDC 的转换.
+// startLinearZ / endLinearZ: 未使用 (保留签名兼容性).
+// HzbMaxMip: 由 C# 端通过 cbReSTIR 传入的最大 mip 层级.
 // -----------------------------------------------------------------------------
+#include "../../Inc/HzbRayCast.cginc"
 
-// 2^mip 查表, 替代循环内 exp2(float(mip)) 的浮点运算. 支持 mip 0~12.
-static const float kMipScale[13] = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096 };
-
-// 推进 ray 到当前 mip 网格下的下一个 cell 内部. 返回新 uv, 通过 dT 返回 t 步进量.
-float2 HiZ_StepToNextCell(float2 curUV, float2 dirUV, float invDirLen,
-                          float2 mipSize, out float dT)
-{
-    float2 cellSize = 1.0f / mipSize;
-    float2 cellIdx  = floor(curUV * mipSize);
-
-    // 目标边: dir >= 0 取 cell 右/上边, dir < 0 取左/下边
-    float2 sideSel  = step(0.0f, dirUV); // 0 or 1
-    float2 boundary = (cellIdx + sideSel) * cellSize;
-
-    // 偏置 1/16 cell, 保证严格落入下一 cell 内部 (避开边界浮点歧义)
-    float2 crossDir = sign(dirUV);
-    // sign(0) = 0, 这种轴不参与推进, 对应 t = +inf
-    boundary += crossDir * (cellSize * 0.0625f);
-
-    float2 dist = boundary - curUV;
-    float2 t2;
-    t2.x = (abs(dirUV.x) > 1e-6f) ? (dist.x / dirUV.x) : 1e10f;
-    t2.y = (abs(dirUV.y) > 1e-6f) ? (dist.y / dirUV.y) : 1e10f;
-    float tStep = max(min(t2.x, t2.y), 0.0f); // max(,0) 防负值
-
-    dT = tStep * invDirLen;
-    return curUV + dirUV * tStep;
-}
-
-// 计算 hzb 有意义的最大 mip 层级 (mip0 Size 逐级除 2 直到 1x1)
-// 使用 firstbithigh 做整数 floor(log2), 避免浮点精度问题 (如 512.0 经 log2 得到 8.999… 被截断为 8)
-uint HiZ_CalcMaxMip(float2 hzbMip0Size)
-{
-    uint maxDim = (uint)max(hzbMip0Size.x, hzbMip0Size.y);
-    return (maxDim >= 2u) ? firstbithigh(maxDim) : 0u;
-}
-
-bool HiZTraceScreenSpace(Texture2D<float2> hzbTex, SamplerState hzbSamp,
+bool HiZTraceScreenSpace(Texture2D<float> hzbTex, SamplerState hzbSamp,
                          float2 hzbMip0Size,
                          float3 startSS, float3 endSS,
                          float startLinearZ, float endLinearZ,
@@ -296,81 +257,29 @@ bool HiZTraceScreenSpace(Texture2D<float2> hzbTex, SamplerState hzbSamp,
 {
     hitUV = 0;
 
-    // ---- ray 参数 ----
-    float2 dirUV   = endSS.xy - startSS.xy;
-    float  dirLen2 = dot(dirUV, dirUV);
-    if (dirLen2 < 1e-12f)
-        return false;
-    float invDirLen  = rsqrt(dirLen2);
-    float linearZDir = endLinearZ - startLinearZ;
+    // startSS/endSS = float3(uv, ndcZ) from WorldToScreen.
+    // Convert UV [0,1] back to NDC [-1,1]:
+    //   ndc.x = (uv.x - 0.5) * 2    = uv.x * 2 - 1
+    //   ndc.y = (0.5 - uv.y) * 2    = 1 - uv.y * 2
+    float3 rayStartScreen = float3(startSS.x * 2.0 - 1.0, 1.0 - startSS.y * 2.0, startSS.z);
+    float3 rayEndScreen   = float3(endSS.x   * 2.0 - 1.0, 1.0 - endSS.y   * 2.0, endSS.z);
+    float3 rayStepScreen  = rayEndScreen - rayStartScreen;
 
-    // ---- mip 范围: 由 C# 端通过 cbReSTIR.HzbMaxMip 传入 ----
-    uint startMip = min(HzbMaxMip, 12u);
+    // Clip to screen edge
+    float clipFactor = min(HzbRayCast_ClipToScreenEdge(rayStartScreen.xy, rayStepScreen.xy), 1.0);
+    rayStepScreen *= clipFactor;
 
-    // ---- ray 状态: uv 位置, t∈[0,1] 沿整段进度, 当前 mip ----
-    float2 curUV = startSS.xy;
-    float  curT  = 0.0f;
-    uint   mip   = startMip;
+    // CompareTolerance: full-ray Z span (will be divided by numSteps inside HzbRayCast)
+    float compareTolerance = abs(rayStepScreen.z);
 
-    [loop]
-    for (uint i = 0u; i < maxSteps; ++i)
-    {
-        // ---- 终止判定 ----
-        // UV xy 出界由调用方 (CastIndirectRay) 预截断保证不发生.
-        // 深度出界用 linear z 判定 (NDC z 经过 1/w 透视除法是非线性的, 线性插值不准确).
-        // linearZ <= 0 意味着射线跑到了摄像机后面.
-        if (curT >= 1.0f)
-            return false;
-        float curLinearZ = startLinearZ + linearZDir * curT;
-        if (curLinearZ <= 0.0f)
-            return false;
-
-        // ---- 取当前 mip tile 的 [minZ, maxZ] ----
-        float2 mipSize    = max(float2(1.0f, 1.0f), hzbMip0Size / kMipScale[mip]);
-        float2 cellSize   = 1.0f / mipSize;
-        float2 cellIdx    = floor(curUV * mipSize);
-        float2 tileCenter = (cellIdx + 0.5f) * cellSize;
-        float2 tileMinMax = hzbTex.SampleLevel(hzbSamp, tileCenter, (float)mip).rg;
-        float  tileMinZ   = tileMinMax.x;
-        float  tileMaxZ   = tileMinMax.y;
-
-        // ---- ray 段 z 范围 (当前 cell 内) ----
-        float dT_step;
-        float2 nextUV = HiZ_StepToNextCell(curUV, dirUV, invDirLen, mipSize, dT_step);
-        float  nextT  = min(curT + dT_step, 1.0f);
-        float  curZ   = startLinearZ + linearZDir * curT;
-        float  nextZ  = startLinearZ + linearZDir * nextT;
-        float  segMinZ = min(curZ, nextZ);
-        float  segMaxZ = max(curZ, nextZ);
-
-        bool intersect = !(segMaxZ < tileMinZ || segMinZ > tileMaxZ);
-
-        if (!intersect)
-        {
-            // 整 tile 不可能命中 → 推进到当前 mip cell 边界, mip 不变.
-            // 因为 mip 不变, ray 下次循环判的是同 mip 的下一个 cell, 不存在
-            // "跨子 cell 但仍在父 cell 内 → 立刻被父 cell 拉回"的振荡.
-            curUV = nextUV;
-            curT  = nextT;
-            continue;
-        }
-
-        // ---- 相交: 需要细化或精确判定 ----
-
-        if (mip > 0u)
-        {
-            // 细化: ray 不动, 用更细 mip 的更小 tile 重新判
-            mip = mip - 1u;
-            continue;
-        }
-        else
-        {
-            hitUV = startSS.xy + dirUV * curT;
-            return true;
-        }
-    }
-
-    return false;
+    // GI rays use roughness=0 (sharp trace at mip 0)
+    FHzbRayCastResult r = HzbRayCast(hzbTex, hzbSamp,
+                                     rayStartScreen, rayStepScreen,
+                                     compareTolerance,
+                                     maxSteps, 0.0,
+                                     0.0, 0.0);
+    hitUV = r.HitUV;
+    return r.bHit;
 }
 
 #endif // _ReSTIR_COMMON_H_

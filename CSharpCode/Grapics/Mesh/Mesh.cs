@@ -114,6 +114,9 @@ namespace EngineNS.Graphics.Mesh
         {
             get
             {
+                if (mPerMeshCBuffer != null)
+                    return mPerMeshCBuffer;
+
                 return GetOrCreatePerMeshCBuffer();
             }
         }

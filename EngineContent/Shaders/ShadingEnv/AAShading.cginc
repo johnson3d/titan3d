@@ -93,14 +93,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     // JitterOffset / PreJitterOffset 来自 cbPerCamera (与 GBuffer VS 注入 SV_Position 的 jitter 同源同方向).
     // TAA 在 PS 端用 currUV = screen_uv - JitterOffset 反偏当前帧回像素中心采样,
     // 同时 HistoryUV 也要减去 PreJitterOffset 反偏上一帧的 jitter, 否则静止场景会抖动.
-    if (true)
-    {
-        rt0.rgb = taa.GetTAAColor(input.vUV.xy, JitterOffset, PreJitterOffset, TaaBlendAlpha);
-    }
-    else
-    {
-        rt0.rgb = taa.GetTAAColor2(input.vUV.xy, JitterOffset, PreJitterOffset, TaaBlendAlpha);
-    }
+    rt0.rgb = taa.GetTAAColor(input.vUV.xy, JitterOffset, PreJitterOffset, TaaBlendAlpha);
 #else
     half4 rt0 = (half4)ColorBuffer.SampleLevel(Samp_ColorBuffer, uv, 0);
 #endif

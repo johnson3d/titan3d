@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_9537471600833130186 Type="EngineNS.Graphics.Pipeline.Common.Post.TtSSAONode@EngineCore">
+  <Bias Type="System.Single@Unknown" Order="0" />
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <FalloffDistance Type="System.Single@Unknown" Order="0" />
+  <Intensity Type="System.Single@Unknown" Order="0" />
+  <NumDirections Type="System.Int32@Unknown" Order="0" />
+  <NumSteps Type="System.Int32@Unknown" Order="0" />
+  <Radius Type="System.Single@Unknown" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_9537471600833130186>

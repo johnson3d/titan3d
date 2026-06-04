@@ -21,13 +21,12 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="6">
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="5">
     <e_0 Value="Engine,mesh/base/box.vms,5355ee7f-de0b-4e29-bb7d-ed4ca9d6b0cf" />
     <e_1 Value="Game,tutorials/gi/cornell/whitecolor.uminst,e26b345b-bd3f-464f-9bca-f8c05155fd02" />
     <e_2 Value="Game,tutorials/gi/cornell/redcolor.uminst,3fd4ce0d-d39c-41b3-82dd-56e68c09af8a" />
     <e_3 Value="Game,tutorials/gi/cornell/greencolor.uminst,db1806dc-3b07-4451-8871-33ab8d9040b7" />
     <e_4 Value="Engine,mesh/base/sphere.vms,7a5a0469-7899-40d9-aa67-7be6e33824d1" />
-    <e_5 Value="Engine,material/gridline.material,fe431749-ed31-45b1-93d8-34462bd00922" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
 </Root>

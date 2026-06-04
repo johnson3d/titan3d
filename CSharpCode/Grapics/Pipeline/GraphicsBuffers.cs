@@ -132,6 +132,7 @@ namespace EngineNS.Graphics.Pipeline
         public NxRHI.TtUaView Uav;
         public NxRHI.TtSrView Srv;
         public NxRHI.TtCbView Cbv;
+        public NxRHI.TtSrView StencilSrv;
         public void SetImportedBuffer(TtGpuBufferBase gpuBuffer)
         {
             GpuResource = gpuBuffer.GpuResource;
@@ -140,6 +141,7 @@ namespace EngineNS.Graphics.Pipeline
             Cbv = gpuBuffer.Cbv;
             Rtv = gpuBuffer.Rtv;
             Dsv = gpuBuffer.Dsv;
+            StencilSrv = null;
         }
         public void Dispose()
         {
@@ -150,10 +152,12 @@ namespace EngineNS.Graphics.Pipeline
                 Dsv = null;
                 Uav = null;
                 Srv = null;
+                StencilSrv = null;
             }
             else
             {
                 CoreSDK.DisposeObject(ref Srv);
+                CoreSDK.DisposeObject(ref StencilSrv);
                 CoreSDK.DisposeObject(ref Rtv);
                 CoreSDK.DisposeObject(ref Dsv);
                 CoreSDK.DisposeObject(ref Uav);
@@ -254,6 +258,12 @@ namespace EngineNS.Graphics.Pipeline
                     viewDesc.Texture2D.MipLevels = 1;
                     Srv = rc.CreateSRV(GpuResource as NxRHI.TtTexture, in viewDesc);
                     System.Diagnostics.Debug.Assert(Srv != null);
+
+                    if (BufferDesc.Format == EPixelFormat.PXF_D24_UNORM_S8_UINT)
+                    {
+                        viewDesc.Format = EPixelFormat.PXF_X24_TYPELESS_G8_UINT;
+                        StencilSrv = rc.CreateSRV(GpuResource as NxRHI.TtTexture, in viewDesc);
+                    }
                 }
                 if ((types & NxRHI.EBufferType.BFT_UAV) != 0)
                 {

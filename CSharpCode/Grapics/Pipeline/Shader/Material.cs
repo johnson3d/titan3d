@@ -10,6 +10,60 @@ using System.ComponentModel;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
+    public class TtShaderCodeViewerAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
+    {
+        bool mPopupOpen = false;
+        string mPopupId;
+        EGui.TtCodeEditor mCodeEditor;
+        string mCachedCode;
+
+        public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
+        {
+            newValue = info.Value;
+            var code = info.Value as string ?? "";
+            var preview = code.Length > 60 ? code.Substring(0, 60) + "..." : code;
+            if (string.IsNullOrEmpty(preview))
+                preview = "(empty)";
+
+            var buttonSize = new Vector2(-1, 0);
+            if (ImGuiAPI.Button($"{preview}##{info.Name}_btn", in buttonSize))
+            {
+                mPopupId = $"ShaderCode: {info.Name}##popup_{info.Name}";
+                mCachedCode = code;
+                if (mCodeEditor == null)
+                {
+                    mCodeEditor = new EGui.TtCodeEditor();
+                    mCodeEditor.SetLanguage("HLSL");
+                    mCodeEditor.SetReadOnly(true);
+                }
+                mCodeEditor.SetText(mCachedCode);
+                mPopupOpen = true;
+                ImGuiAPI.OpenPopup(mPopupId, ImGuiPopupFlags_.ImGuiPopupFlags_None);
+            }
+
+            if (mPopupOpen)
+            {
+                var popupSize = new Vector2(900, 600);
+                ImGuiAPI.SetNextWindowSize(in popupSize, ImGuiCond_.ImGuiCond_Appearing);
+                if (ImGuiAPI.BeginPopupModal(mPopupId, ref mPopupOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                {
+                    var contentSize = ImGuiAPI.GetContentRegionAvail();
+                    var editorSize = new Vector2(contentSize.X, contentSize.Y - 30);
+                    mCodeEditor.Render("##code_viewer", in editorSize, true);
+
+                    var closeSize = new Vector2(120, 0);
+                    if (ImGuiAPI.Button("Close", in closeSize))
+                    {
+                        mPopupOpen = false;
+                        ImGuiAPI.CloseCurrentPopup();
+                    }
+                    ImGuiAPI.EndPopup();
+                }
+            }
+            return false;
+        }
+    }
+
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterialAMeta@EngineCore" })]
     public partial class TtMaterialAMeta : IO.IAssetMeta
     {
@@ -447,6 +501,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             // bit3~5 reserved for future flags
             // bit6~9: ShadingMode (4 bits, use EShadingMode enum)
             ShadingModeMask = 0x03C0, // (0xF << 6)
+            ShadingModeMaskShift = 6,
         }
 
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "EShadingMode")]
@@ -454,6 +509,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             PBR = 0,
             Subsurface = 1,
+            Hair = 2,
         }
 
         private const int ShadingModeBitOffset = 6;
@@ -637,6 +693,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public NxRHI.TtShaderCode DefineCode { get; } = new NxRHI.TtShaderCode();
         public NxRHI.TtShaderCode SourceCode { get; } = new NxRHI.TtShaderCode();
+        [TtShaderCodeViewer]
         [Category("Option")]
         public string DefineCodeText
         {
@@ -645,6 +702,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return DefineCode.TextCode;
             }
         }
+        [TtShaderCodeViewer]
         [Category("Option")]
         public string SourceCodeText
         {
@@ -1273,8 +1331,50 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 mPipelineDesc.m_Rasterizer = value; 
                 UpdatePipeline();
+                SerialId++;
             }
     }
+        public const uint StencilWriteDisabled = 0xFFFFFFFF;
+        protected uint mStencilWriteValue = StencilWriteDisabled;
+        [Rtti.Meta("", Order = 1)]
+        [Category("State")]
+        [Description("Stencil tag written during BasePass (0~254). 0xFFFFFFFF = disabled")]
+        public uint StencilWriteValue
+        {
+            get => mStencilWriteValue;
+            set
+            {
+                if (mStencilWriteValue == value)
+                    return;
+                mStencilWriteValue = value;
+                ref var dsDesc = ref mPipelineDesc.m_DepthStencil;
+                if (value == StencilWriteDisabled)
+                {
+                    dsDesc.StencilEnable = 0;
+                    dsDesc.StencilWriteMask = 0;
+                    dsDesc.StencilRef = 0;
+                    mPipelineDesc.StencilRef = 0;
+                }
+                else
+                {
+                    dsDesc.StencilEnable = 1;
+                    dsDesc.StencilReadMask = 0xFF;
+                    dsDesc.StencilWriteMask = 0xFF;
+                    dsDesc.StencilRef = value;
+                    mPipelineDesc.StencilRef = value;
+                    var opDesc = new NxRHI.FStencilOpDesc();
+                    opDesc.StencilFailOp = NxRHI.EStencilOp.STOP_KEEP;
+                    opDesc.StencilDepthFailOp = NxRHI.EStencilOp.STOP_KEEP;
+                    opDesc.StencilPassOp = NxRHI.EStencilOp.STOP_REPLACE;
+                    opDesc.StencilFunc = NxRHI.EComparisionMode.CMP_ALWAYS;
+                    dsDesc.FrontFace = opDesc;
+                    dsDesc.BackFace = opDesc;
+                }
+                mPipelineDesc.m_DepthStencil = dsDesc;
+                UpdatePipeline();
+                SerialId++;
+            }
+        }
         [Rtti.Meta("")]
         [Category("State")]
         public NxRHI.FDepthStencilDesc DepthStencil
@@ -1283,7 +1383,26 @@ namespace EngineNS.Graphics.Pipeline.Shader
             set
             {
                 mPipelineDesc.m_DepthStencil = value;
+                // Re-apply StencilWriteValue if active, because deserialization
+                // order may cause DepthStencil to overwrite the stencil state
+                // that StencilWriteValue setter already configured.
+                if (mStencilWriteValue != StencilWriteDisabled)
+                {
+                    ref var ds = ref mPipelineDesc.m_DepthStencil;
+                    ds.StencilEnable = 1;
+                    ds.StencilReadMask = 0xFF;
+                    ds.StencilWriteMask = 0xFF;
+                    ds.StencilRef = mStencilWriteValue;
+                    var opDesc = new NxRHI.FStencilOpDesc();
+                    opDesc.StencilFailOp = NxRHI.EStencilOp.STOP_KEEP;
+                    opDesc.StencilDepthFailOp = NxRHI.EStencilOp.STOP_KEEP;
+                    opDesc.StencilPassOp = NxRHI.EStencilOp.STOP_REPLACE;
+                    opDesc.StencilFunc = NxRHI.EComparisionMode.CMP_ALWAYS;
+                    ds.FrontFace = opDesc;
+                    ds.BackFace = opDesc;
+                }
                 UpdatePipeline();
+                SerialId++;
             }
         }
         [Rtti.Meta("")]
@@ -1295,6 +1414,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 mPipelineDesc.m_Blend = value;
                 UpdatePipeline();
+                SerialId++;
             }
         }
         #endregion

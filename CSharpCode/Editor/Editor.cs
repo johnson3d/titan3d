@@ -70,6 +70,32 @@ namespace EngineNS.Editor
         public Color4b TextureBoderColor { get; set; } = Color4b.LightPink;
         [Rtti.Meta("")]
         public Color4b PgcBoderColor { get; set; } = Color4b.Khaki;
+
+        // Preview Studio Settings
+        [Rtti.Meta("")]
+        public Vector4 StudioFloorColor { get; set; } = new Vector4(0.18f, 0.18f, 0.18f, 1.0f);
+        [Rtti.Meta("")]
+        public Vector3 StudioLightDirection { get; set; } = new Vector3(-0.24f, -0.92f, 0.29f);
+        [Rtti.Meta("")]
+        public Vector3 StudioSunLightColor { get; set; } = new Vector3(1.0f, 0.95f, 0.92f);
+        [Rtti.Meta("")]
+        public float StudioSunLightIntensity { get; set; } = 3.6f;
+        [Rtti.Meta("")]
+        public Vector3 StudioSkyLightColor { get; set; } = new Vector3(0.31f, 0.34f, 0.40f);
+        [Rtti.Meta("")]
+        public Vector3 StudioGroundLightColor { get; set; } = new Vector3(0.24f, 0.22f, 0.20f);
+        [Rtti.Meta("")]
+        public float StudioGridFade { get; set; } = 0.24f;
+        [Rtti.Meta("")]
+        public float StudioGridHeightOffset { get; set; } = 0.006f;
+        [Rtti.Meta("")]
+        public string StudioDefaultFloorMaterial { get; set; } = "material/whitecolor.uminst";
+        [Rtti.Meta("")]
+        public string StudioSkyboxImageName { get; set; } = "editor/studio/sakura_prefiltered_env_12_blur.png";
+        [Rtti.Meta("")]
+        public Vector3 StudioFallbackSkyColorBottom { get; set; } = new Vector3(0.58f, 0.62f, 0.70f);
+        [Rtti.Meta("")]
+        public Vector3 StudioFallbackSkyColorTop { get; set; } = new Vector3(0.26f, 0.43f, 0.68f);
     }
 
     public partial class TtEditor : TtModule<TtEngine>

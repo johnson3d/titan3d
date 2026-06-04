@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using static EngineNS.Graphics.Pipeline.Shader.TtMaterial;
 
 namespace EngineNS.Graphics.Pipeline.Deferred
 {
@@ -63,40 +64,205 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     public class TtDeferredBasePassNode : Common.TtBasePassNode
     {
         //MRT中存储的数据格式设计，共128bits
+        // Pure semantic GBuffer data definition — how these fields are packed into MRT
+        // is entirely handled by EncodeGBuffer/DecodeGBuffer in shader code.
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FGBufferDataBase")]
         public struct FGBufferDataBase
         {
-            //rt0:rgba8
-            public Vector3 mMtlColorRaw; //8bits:rt0.rgb
-            //8bits CustomData: padding to MtlColorRaw.w
-            public float mCustomData;	//8bits:rt0.a .r = SubsurfaceProfileIndex/255 (SSS) or SpecOcclusion (PBR)
+            #region Helpers
+            static Vector2 OctEncode(Vector3 n)
+            {
+                var an = new Vector3(MathF.Abs(n.X), MathF.Abs(n.Y), MathF.Abs(n.Z));
+                float invSum = 1.0f / (an.X + an.Y + an.Z);
+                float ox = n.X * invSum;
+                float oy = n.Y * invSum;
+                if (n.Z < 0.0f)
+                {
+                    float tmpX = (1.0f - MathF.Abs(oy)) * (ox >= 0.0f ? 1.0f : -1.0f);
+                    float tmpY = (1.0f - MathF.Abs(ox)) * (oy >= 0.0f ? 1.0f : -1.0f);
+                    ox = tmpX;
+                    oy = tmpY;
+                }
+                return new Vector2(ox * 0.5f + 0.5f, oy * 0.5f + 0.5f);
+            }
+            static Vector3 OctDecode(Vector2 enc)
+            {
+                float fx = enc.X * 2.0f - 1.0f;
+                float fy = enc.Y * 2.0f - 1.0f;
+                float nz = 1.0f - MathF.Abs(fx) - MathF.Abs(fy);
+                float t = Math.Clamp(-nz, 0.0f, 1.0f);
+                float nx = fx + (fx >= 0.0f ? -t : t);
+                float ny = fy + (fy >= 0.0f ? -t : t);
+                var v = new Vector3(nx, ny, nz);
+                v.Normalize();
+                return v;
+            }
+            static Vector3 EncodeNormalXYZ(Vector3 n) => n * 0.5f + new Vector3(0.5f);
+            static Vector3 DecodeNormalXYZ(Vector3 enc) => enc * 2.0f - new Vector3(1.0f);
+            #endregion
 
-            //rt1:rgb10a2
-            public Vector3 mWorldNormal; //10bits Oct-encoded world space normal to rt1.rg
-            public int mRenderFlags_10Bit;//if (TtEngine.Instance.GfxDevice.Config.UseOctahedronNormal == 1) {padding to rt1.b} else {padding to rt3.b}
-            public float mMask;//padding to rg1.a
+            #region ShadingMode
+            public int GetShadingMode()
+            {
+                return (mRenderFlags_10Bit & (int)ERenderFlags.ShadingModeMask) >> (int)ERenderFlags.ShadingModeMaskShift;
+            }
+            public bool IsHair() => GetShadingMode() == (int)EShadingMode.Hair;
+            public bool IsSubsurface() => GetShadingMode() == (int)EShadingMode.Subsurface;
+            #endregion
 
-            //rt2:rgba8
-            public float mMetallicity; //8bits:rt2.r
-            //非金属（Metallic=0）：F0 = AbsSpecular（通常 0.04，即 4% 反射率，对应电介质）
-            //金属（Metallic=1）：F0 = Albedo（金属的反射色就是它的"固有色"）
-            public float mSpecular; //8bits:rt2.g,这个用在float3 OptSpecShading = AbsSpecular - AbsSpecular * Metallic + Metallic * Albedo;感觉可以优化为固定AbsSpecular=0.04
-            public float mAO; //8bits:rt2.b
-            public float mRoughness;//8bits:rt.a
+            #region MRT Encode / Decode
+            public void EncodeGBuffer(out Vector4 rt0/*rgba8*/, out Vector4 rt1/*rgb10a2*/, out Vector4 rt2/*rgba8*/, out Vector4 rt3/*rgb10a2*/)
+            {
+                //rt0 = Vector4.Zero;
+                //rt1 = Vector4.Zero;
+                //rt2 = Vector4.Zero;
+                //rt3 = Vector4.Zero;
 
-            //rt3:rgb10a2
-            public Vector2 mMotionVector;//10bits:rt3.rg
-            public uint mCustomData_10Bit;//if (TtEngine.Instance.GfxDevice.Config.UseOctahedronNormal == 1){10bits:rt3.b} else {HasCustomData_10Bit()==false}
-            //2bits Opacity: padding to MotionVector.w
-            public float mOpacity;	//2bits:rt3.a 4-level mask (0/0.33/0.67/1.0)
+                rt0.X = mMtlColorRaw.X;
+                rt0.Y = mMtlColorRaw.Y;
+                rt0.Z = mMtlColorRaw.Z;
+
+                // RenderFlags → rt3.b (10-bit integer normalized to [0,1])
+                rt3.Z = mRenderFlags_10Bit / 1023.0f;
+
+                bool useOctNormal = TtEngine.Instance.GfxDevice.Config.UseOctahedronNormal;
+
+                if (IsHair())
+                {
+                    // Hair: normal oct-encoded into rt0.a + rt2.r, tangent into rt1
+                    var normalOct = OctEncode(mWorldNormal);
+                    rt0.W = normalOct.X;
+                    rt2.X = normalOct.Y;
+
+                    if (!useOctNormal)
+                    {
+                        var encTangent = EncodeNormalXYZ(mWorldTangent);
+                        rt1.X = encTangent.X;
+                        rt1.Y = encTangent.Y;
+                        rt1.Z = encTangent.Z;
+                    }
+                    else
+                    {
+                        var tangentOct = OctEncode(mWorldTangent);
+                        rt1.X = tangentOct.X;
+                        rt1.Y = tangentOct.Y;
+                        rt1.Z = 0;
+                    }
+                }
+                else
+                {
+                    // rt0.a: per-ShadingMode scalar
+                    if (IsSubsurface())
+                        rt0.W = Math.Clamp(mSubsurfaceProfileIndex / 255.0f, 0.0f, 1.0f);
+                    else
+                        rt0.W = mSpecOcclusion;
+
+                    if (!useOctNormal)
+                    {
+                        var encNormal = EncodeNormalXYZ(mWorldNormal);
+                        rt1.X = encNormal.X;
+                        rt1.Y = encNormal.Y;
+                        rt1.Z = encNormal.Z;
+                    }
+                    else
+                    {
+                        var normalOct = OctEncode(mWorldNormal);
+                        rt1.X = normalOct.X;
+                        rt1.Y = normalOct.Y;
+                        rt1.Z = 0;
+                    }
+
+                    rt2.X = mMetallicity;
+                }
+
+                rt1.W = mMask;
+                rt2.Y = mSpecular;
+                rt2.Z = mRoughness;
+                rt2.W = mAO;
+
+                // Motion vector (direct pass-through, matching shader non-MOTIONVECTOR_SCALAR path)
+                rt3.X = mMotionVector.X;
+                rt3.Y = -mMotionVector.Y;
+                rt3.W = Math.Clamp(mOpacity, 0.0f, 1.0f);
+            }
+
+            public void DecodeGBuffer(Vector4 rt0, Vector4 rt1, Vector4 rt2, Vector4 rt3)
+            {
+                mMtlColorRaw = new Vector3(rt0.X, rt0.Y, rt0.Z);
+
+                // RenderFlags from rt3.b
+                mRenderFlags_10Bit = (int)(rt3.Z * 1023.0f + 0.5f);
+
+                bool useOctNormal = TtEngine.Instance.GfxDevice.Config.UseOctahedronNormal;
+                Vector3 decodedDir;
+                if (!useOctNormal)
+                    decodedDir = DecodeNormalXYZ(new Vector3(rt1.X, rt1.Y, rt1.Z));
+                else
+                    decodedDir = OctDecode(new Vector2(rt1.X, rt1.Y));
+
+                if (IsHair())
+                {
+                    mWorldTangent = decodedDir;
+                    mWorldNormal = OctDecode(new Vector2(rt0.W, rt2.X));
+                    mMetallicity = 0;
+                    mSubsurfaceProfileIndex = 0;
+                    mSpecOcclusion = 0;
+                }
+                else
+                {
+                    mWorldNormal = decodedDir;
+                    mWorldTangent = Vector3.Zero;
+                    mMetallicity = rt2.X;
+
+                    if (IsSubsurface())
+                    {
+                        mSubsurfaceProfileIndex = (float)(int)(rt0.W * 255.0f + 0.5f);
+                        mSpecOcclusion = 0;
+                    }
+                    else
+                    {
+                        mSubsurfaceProfileIndex = 0;
+                        mSpecOcclusion = rt0.W;
+                    }
+                }
+
+                mMask = rt1.W;
+                mSpecular = rt2.Y;
+                mRoughness = rt2.Z;
+                mAO = rt2.W;
+
+                // Motion vector (direct pass-through)
+                mMotionVector = new Vector2(rt3.X, rt3.Y);
+                mOpacity = rt3.W;
+            }
+            #endregion
+
+            public Vector3 mMtlColorRaw;
+            public float mSubsurfaceProfileIndex; // SSS profile index (0~255 integer, normalized in encode)
+            public float mSpecOcclusion;           // specular occlusion for PBR shading mode
+
+            public Vector3 mWorldNormal;
+            public Vector3 mWorldTangent;
+            public int mRenderFlags_10Bit;
+            public float mMask;
+
+            public float mMetallicity;
+            // F0 = lerp(AbsSpecular, Albedo, Metallic)
+            public float mSpecular;
+            public float mAO;
+            public float mRoughness;
+
+            public Vector2 mMotionVector;
+            public uint mCustomData_10Bit;
+            public float mOpacity;
         }
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
         public TtRenderGraphPin GpuCullPinIn = TtRenderGraphPin.CreateInput("GpuCull", NxRHI.EBufferType.BFT_NONE);
-        public TtRenderGraphPin Rt0PinOut = TtRenderGraphPin.CreateInputOutput("MRT0", true, EPixelFormat.PXF_R16G16B16A16_FLOAT, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//rgb - metallicty
-        public TtRenderGraphPin Rt1PinOut = TtRenderGraphPin.CreateInputOutput("MRT1", true, EPixelFormat.PXF_R11G11B10_FLOAT, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//normal - Flags
+        public TtRenderGraphPin Rt0PinOut = TtRenderGraphPin.CreateInputOutput("MRT0", true, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//rgb - metallicty
+        public TtRenderGraphPin Rt1PinOut = TtRenderGraphPin.CreateInputOutput("MRT1", true, EPixelFormat.PXF_R10G10B10A2_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//normal - Flags
         public TtRenderGraphPin Rt2PinOut = TtRenderGraphPin.CreateInputOutput("MRT2", true, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//Roughness,Emissive,Specular,unused
         public TtRenderGraphPin Rt3PinOut = TtRenderGraphPin.CreateInputOutput("MRT3", true, EPixelFormat.PXF_R10G10B10A2_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//motionXY,RenderFlag10Bits,custom.g
-        public TtRenderGraphPin DepthStencilPinOut = TtRenderGraphPin.CreateInputOutput("DepthStencil", true, EPixelFormat.PXF_D32_FLOAT, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);//EPixelFormat.PXF_D24_UNORM_S8_UINT Stencil is not necessity
+        public TtRenderGraphPin DepthStencilPinOut = TtRenderGraphPin.CreateInputOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
 
         public TtCpuCullingNode CpuCullNode = null;
         public TtGpuCullingNode GpuCullNode = null;
@@ -237,6 +403,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 return mOpaqueShading;
             }
         }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public bool EnableHDR { get; set; }
         public override void BeforeTick(TtRenderPolicy policy)
         {
             //if (DepthStencilPinOut.FindInLinker() == null)
@@ -245,7 +414,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             //    DepthStencilPinOut.IsAutoResize = true;
             //}
 
-            if (policy.DisableHDR)
+            if (EnableHDR == false)
             {
                 if (Rt0PinOut.Attachement.Format != EPixelFormat.PXF_R8G8B8A8_UNORM)
                 {

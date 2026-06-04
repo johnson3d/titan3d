@@ -21,6 +21,10 @@ namespace EngineNS.GamePlay
             get => mCurrentScene;
             set
             {
+                if (mCurrentScene != null)
+                {
+                    mCurrentScene.GetWorld()?.CollideOctree.Clear();
+                }
                 mCurrentScene = value;
             }
         }
