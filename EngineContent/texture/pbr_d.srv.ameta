@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
-  <AssetId Type="System.Guid@Unknown" Value="43F492E0-FC97-4721-99CD-53F33EA8D252" />
-  <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,texture/pbr_d.srv,43F492E0-FC97-4721-99CD-53F33EA8D252" />
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
+  <AssetId Type="System.Guid@Unknown" Value="43f492e0-fc97-4721-99cd-53f33ea8d252" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,texture/pbr_d.srv,43f492e0-fc97-4721-99cd-53f33ea8d252" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

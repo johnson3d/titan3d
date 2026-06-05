@@ -61,6 +61,7 @@
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
             <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
+            <IsStatic Type="System.Boolean@Unknown" Value="False" />
             <VariableName Type="System.String@Unknown" Value="tmp_r_FindPgcNodeByName_1051611981" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -84,6 +85,7 @@
           <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
           <IsBindable Type="System.Boolean@Unknown" Value="False" />
           <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
+          <IsStatic Type="System.Boolean@Unknown" Value="False" />
           <VariableName Type="System.String@Unknown" Value="ret_2298037646" />
           <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
             <IsEnum Type="System.Boolean@Unknown" Value="False" />

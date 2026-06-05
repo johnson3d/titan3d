@@ -1,13 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using BCnEncoder.Decoder;
+﻿using BCnEncoder.Decoder;
 using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
 using BCnEncoder.Shared.ImageFiles;
 using CommunityToolkit.HighPerformance;
 using EngineNS.Bricks.ImageDecoder;
+using EngineNS.IO;
+using Mono.CompilerServices.SymbolWriter;
+using StbImageSharp;
 using StbImageWriteSharp;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text;
 
 namespace EngineNS.NxRHI
 {
@@ -962,27 +966,40 @@ namespace EngineNS.NxRHI
         /// <returns>DXT 压缩格式</returns>
         public static ETextureCompressFormat SelectDxtFormat(TtPicDesc desc)
         {
+            if (IsHdrFormat(desc))
+            {
+                return ETextureCompressFormat.TCF_BC6;
+            }
             // 法线贴图使用 BC5
             if (desc.IsNormal)
             {
                 return ETextureCompressFormat.TCF_BC5;
             }
-
-            // 根据 Alpha 位数选择格式
-            if (desc.BitNumAlpha == 8 || desc.BitNumAlpha == 4)
+            else if(desc.BitNumRed == 8 && desc.BitNumGreen ==0 && desc.BitNumBlue ==0 && desc.BitNumAlpha == 0)
             {
-                return ETextureCompressFormat.TCF_Dxt3;
+                return ETextureCompressFormat.TCF_BC4;
+            }
+            else if (desc.BitNumAlpha > 1)
+            {
+                return ETextureCompressFormat.TCF_BC3;
             }
             else if (desc.BitNumAlpha == 1)
             {
-                return ETextureCompressFormat.TCF_Dxt1a;
+                return ETextureCompressFormat.TCF_BC1A;
             }
             else
             {
-                return ETextureCompressFormat.TCF_Dxt1;
+                return ETextureCompressFormat.TCF_BC1;
             }
         }
-
+        public static bool IsHdrFormat(TtPicDesc desc)
+        {
+            if(desc.BitNumRed > 8 || desc.BitNumGreen > 8 || desc.BitNumBlue > 8)
+            {
+                return true;
+            }
+            return false;
+        }
         /// <summary>
         /// 选择 ETC2 压缩格式
         /// </summary>
@@ -1073,7 +1090,7 @@ namespace EngineNS.NxRHI
 
             if (isHdr)
             {
-                desc.CompressFormat = TtTextureHelper.SelectCompressFormat(desc);
+                desc.CompressFormat = TtTextureHelper.SelectHdrCompressFormat(desc);
                 switch (desc.CompressFormat)
                 {
                     case ETextureCompressFormat.TCF_None:
@@ -1109,12 +1126,22 @@ namespace EngineNS.NxRHI
                             SavePngMipsFromLayers(pngMipsNode, layers, desc);
                         }
                         break;
-                    default:
+                    case ETextureCompressFormat.TCF_BC1:
+                    case ETextureCompressFormat.TCF_BC1A:
+                    case ETextureCompressFormat.TCF_BC2:
+                    case ETextureCompressFormat.TCF_BC3:
+                    case ETextureCompressFormat.TCF_BC4:
+                    case ETextureCompressFormat.TCF_BC5:
+                    case ETextureCompressFormat.TCF_BC6:
+                    case ETextureCompressFormat.TCF_BC6_FLOAT:
                         {
                             // DXT / ETC2 compressed
                             var dxtMipsNode = node.GetOrAddNode("DxtMips", 0, 0, true);
                             SaveDxtMipsFromLayers(dxtMipsNode, layers, desc, isHdr: false);
                         }
+                        break;
+                    default:
+                        System.Diagnostics.Debug.Assert(false, $"Unsupported compression format {desc.CompressFormat}");
                         break;
                 }
             }
@@ -1302,25 +1329,37 @@ namespace EngineNS.NxRHI
                 bool isKtx = false;
                 switch (desc.CompressFormat)
                 {
-                    case ETextureCompressFormat.TCF_Dxt1:
+                    case ETextureCompressFormat.TCF_BC1:
                         desc.Format = desc.sRGB ? EPixelFormat.PXF_BC1_UNORM_SRGB : EPixelFormat.PXF_BC1_UNORM;
                         encoder.OutputOptions.Format = CompressionFormat.Bc1;
                         break;
-                    case ETextureCompressFormat.TCF_Dxt1a:
+                    case ETextureCompressFormat.TCF_BC1A:
                         desc.Format = desc.sRGB ? EPixelFormat.PXF_BC1_UNORM_SRGB : EPixelFormat.PXF_BC1_UNORM;
                         encoder.OutputOptions.Format = CompressionFormat.Bc1WithAlpha;
                         break;
-                    case ETextureCompressFormat.TCF_Dxt3:
+                    case ETextureCompressFormat.TCF_BC2:
                         desc.Format = desc.sRGB ? EPixelFormat.PXF_BC2_UNORM_SRGB : EPixelFormat.PXF_BC2_UNORM;
                         encoder.OutputOptions.Format = CompressionFormat.Bc2;
                         break;
-                    case ETextureCompressFormat.TCF_Dxt5:
+                    case ETextureCompressFormat.TCF_BC3:
                         desc.Format = desc.sRGB ? EPixelFormat.PXF_BC3_UNORM_SRGB : EPixelFormat.PXF_BC3_UNORM;
                         encoder.OutputOptions.Format = CompressionFormat.Bc3;
+                        break;
+                    case ETextureCompressFormat.TCF_BC4:
+                        desc.Format = EPixelFormat.PXF_BC4_UNORM;
+                        encoder.OutputOptions.Format = CompressionFormat.Bc4;
                         break;
                     case ETextureCompressFormat.TCF_BC5:
                         desc.Format = EPixelFormat.PXF_BC5_UNORM;
                         encoder.OutputOptions.Format = CompressionFormat.Bc5;
+                        break;
+                    case ETextureCompressFormat.TCF_BC6:
+                        desc.Format = EPixelFormat.PXF_BC6H_UF16;
+                        encoder.OutputOptions.Format = CompressionFormat.Bc6U;
+                        break;
+                    case ETextureCompressFormat.TCF_BC6_FLOAT:
+                        desc.Format = EPixelFormat.PXF_BC6H_SF16;
+                        encoder.OutputOptions.Format = CompressionFormat.Bc6S;
                         break;
                     case ETextureCompressFormat.TCF_Etc2_RGB8:
                         desc.Format = desc.sRGB ? EPixelFormat.PXF_ETC2_SRGB8 : EPixelFormat.PXF_ETC2_RGB8;
@@ -1407,7 +1446,7 @@ namespace EngineNS.NxRHI
 
             if (isHdr)
             {
-                desc.CompressFormat = TtTextureHelper.SelectCompressFormat(desc);
+                desc.CompressFormat = TtTextureHelper.SelectHdrCompressFormat(desc);
                 if (desc.CompressFormat == ETextureCompressFormat.TCF_None)
                 {
                     desc.Format = EPixelFormat.PXF_R32G32B32A32_FLOAT;
@@ -1597,17 +1636,29 @@ namespace EngineNS.NxRHI
                     // Set pixel format based on compress format
                     switch (desc.CompressFormat)
                     {
-                        case ETextureCompressFormat.TCF_Dxt1:
+                        case ETextureCompressFormat.TCF_BC1:
                             desc.Format = desc.sRGB ? EPixelFormat.PXF_BC1_UNORM_SRGB : EPixelFormat.PXF_BC1_UNORM;
                             break;
-                        case ETextureCompressFormat.TCF_Dxt3:
+                        case ETextureCompressFormat.TCF_BC1A:
+                            desc.Format = desc.sRGB ? EPixelFormat.PXF_BC1_UNORM_SRGB : EPixelFormat.PXF_BC1_UNORM;
+                            break;
+                        case ETextureCompressFormat.TCF_BC2:
                             desc.Format = desc.sRGB ? EPixelFormat.PXF_BC2_UNORM_SRGB : EPixelFormat.PXF_BC2_UNORM;
                             break;
-                        case ETextureCompressFormat.TCF_Dxt5:
+                        case ETextureCompressFormat.TCF_BC3:
                             desc.Format = desc.sRGB ? EPixelFormat.PXF_BC3_UNORM_SRGB : EPixelFormat.PXF_BC3_UNORM;
+                            break;
+                        case ETextureCompressFormat.TCF_BC4:
+                            desc.Format = EPixelFormat.PXF_BC4_UNORM;
                             break;
                         case ETextureCompressFormat.TCF_BC5:
                             desc.Format = EPixelFormat.PXF_BC5_UNORM;
+                            break;
+                        case ETextureCompressFormat.TCF_BC6:
+                            desc.Format = EPixelFormat.PXF_BC6H_UF16;
+                            break;
+                        case ETextureCompressFormat.TCF_BC6_FLOAT:
+                            desc.Format = EPixelFormat.PXF_BC6H_SF16;
                             break;
                         default:
                             desc.Format = desc.sRGB ? EPixelFormat.PXF_BC1_UNORM_SRGB : EPixelFormat.PXF_BC1_UNORM;
@@ -1619,17 +1670,29 @@ namespace EngineNS.NxRHI
                     encoder.OutputOptions.Quality = CompressionQuality.Balanced;
                     switch (desc.CompressFormat)
                     {
-                        case ETextureCompressFormat.TCF_Dxt1:
+                        case ETextureCompressFormat.TCF_BC1:
                             encoder.OutputOptions.Format = CompressionFormat.Bc1;
                             break;
-                        case ETextureCompressFormat.TCF_Dxt3:
+                        case ETextureCompressFormat.TCF_BC1A:
+                            encoder.OutputOptions.Format = CompressionFormat.Bc1WithAlpha;
+                            break;
+                        case ETextureCompressFormat.TCF_BC2:
                             encoder.OutputOptions.Format = CompressionFormat.Bc2;
                             break;
-                        case ETextureCompressFormat.TCF_Dxt5:
+                        case ETextureCompressFormat.TCF_BC3:
                             encoder.OutputOptions.Format = CompressionFormat.Bc3;
+                            break;
+                        case ETextureCompressFormat.TCF_BC4:
+                            encoder.OutputOptions.Format = CompressionFormat.Bc4;
                             break;
                         case ETextureCompressFormat.TCF_BC5:
                             encoder.OutputOptions.Format = CompressionFormat.Bc5;
+                            break;
+                        case ETextureCompressFormat.TCF_BC6:
+                            encoder.OutputOptions.Format = CompressionFormat.Bc6U;
+                            break;
+                        case ETextureCompressFormat.TCF_BC6_FLOAT:
+                            encoder.OutputOptions.Format = CompressionFormat.Bc6S;
                             break;
                         default:
                             encoder.OutputOptions.Format = CompressionFormat.Bc1;
@@ -1705,6 +1768,10 @@ namespace EngineNS.NxRHI
                 UpdateAMetaReferences(ameta);
                 ameta.SaveAMeta(this);
             }
+            else
+            {
+                System.Diagnostics.Debug.Assert(false, "Failed to save asset: AMeta is null or of wrong type.");
+            }
 
             var texture = GetTexture();
             if (!texture.IsValidPointer)
@@ -1753,6 +1820,89 @@ namespace EngineNS.NxRHI
             }
         }
 
+        /// <summary>
+        /// Re-compress and save this texture asset from uncompressed source data.
+        /// Useful when switching target platform (e.g. DXT → ASTC) or changing quality settings.
+        /// Loads source image via LoadUncompressImageLDR/HDR, then calls SaveTexture with current engine config.
+        /// </summary>
+        /// <summary>
+        /// Re-cook this texture asset for the current platform.
+        /// Invalidates the existing .txc cache and regenerates compressed data.
+        /// For new-format .srv (with RawSource), uses TtTextureCookManager directly.
+        /// For legacy .srv, falls back to LoadUncompressImage + SaveTexture.
+        /// </summary>
+        public bool CookAsset(RName name)
+        {
+            // Try the new CookManager path (works for new-format .srv with RawSource)
+            if (TtTextureCookManager.IsCookValid(name))
+                return true;
+            if (TtTextureCookManager.Cook(name))
+                return true;
+
+            // Fallback for legacy .srv (no RawSource node): use LoadUncompressImage → SaveTexture
+            var desc = this.PicDesc;
+            if (desc == null)
+                return false;
+
+            desc.CompressFormat = SelectCompressFormat(desc);
+            var cookedPath = TtTextureCookManager.GetCookedPath(name);
+            if (cookedPath == null)
+                return false;
+
+            using (var xnd = new IO.TtXndHolder("CookedTexture", 0, 0))
+            {
+                if (desc.IsHdr())
+                {
+                    var imageFloat = LoadUncompressImageHDR();
+                    if (imageFloat == null)
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtAssetGategory>(Profiler.ELogTag.Warning,
+                            $"CookAsset({name}): failed to load HDR source image");
+                        return false;
+                    }
+
+                    if (desc.CubeFaces == 6)
+                    {
+                        StbImageSharp.ImageResultFloat cubeImage = null;
+                        TtTextureHelper.GenerateBaseCubeMipFromLongitudeLatitude2D(ref cubeImage, imageFloat, 512);
+                        imageFloat = cubeImage;
+                    }
+
+                    CookTextureTo(name, xnd.RootNode.mCoreObject, imageFloat, desc);
+                }
+                else
+                {
+                    var ldrImage = LoadUncompressImageLDR();
+                    if (ldrImage == null)
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtAssetGategory>(Profiler.ELogTag.Warning,
+                            $"CookAsset({name}): failed to load LDR source image");
+                        return false;
+                    }
+
+                    CookTextureTo(name, xnd.RootNode.mCoreObject, ldrImage, desc);
+                }
+
+                // Write platform and timestamp metadata
+                var platformAttr = xnd.RootNode.mCoreObject.GetOrAddAttribute("Platform", 0, 0, true);
+                using (var aw = platformAttr.GetWriter(64))
+                {
+                    aw.Write(TtEngine.Instance.GfxDevice.Config.TextureAssetCompressType.ToString());
+                }
+                var tsAttr = xnd.RootNode.mCoreObject.GetOrAddAttribute("SourceTimestamp", 0, 0, true);
+                using (var aw = tsAttr.GetWriter(8))
+                {
+                    long ts = System.IO.File.Exists(name.Address)
+                        ? System.IO.File.GetLastWriteTimeUtc(name.Address).Ticks : 0;
+                    aw.Write(ts);
+                }
+
+                xnd.SaveXnd(cookedPath);
+            }
+
+            return true;
+        }
+
         private bool SaveCubeAsset(XndNode node, EPixelFormat format, int width, int height, bool isHdr, RName assetName)
         {
             var cubeList = ReadbackTexCubeArray(0);
@@ -1799,10 +1949,124 @@ namespace EngineNS.NxRHI
 
             int cubeFaces = (int)arraySize;
             var desc = BuildPicDescFromTexture(format, width, height, 0, (uint)cubeFaces);
+            desc.IsNormal = this.PicDesc.IsNormal;
             SaveLayersToXnd(node, layers, desc, isHdr, assetName);
             return true;
         }
 
         #endregion
+
+        internal static ETextureCompressFormat SelectCompressFormat(TtPicDesc desc)
+        {
+            if (desc.DontCompress)
+            {
+                return ETextureCompressFormat.TCF_None;
+            }
+
+            var config = TtEngine.Instance?.GfxDevice.Config;
+            switch (config.TextureAssetCompressType)
+            {
+                case Graphics.Pipeline.TtGfxDeviceConfig.ETextureAssetCompressType.DXT:
+                    return SelectDxtFormat(desc);
+                case Graphics.Pipeline.TtGfxDeviceConfig.ETextureAssetCompressType.ETC2:
+                    return SelectEtc2Format(desc);
+                case Graphics.Pipeline.TtGfxDeviceConfig.ETextureAssetCompressType.ASTC:
+                    return SelectAstcFormat(desc);
+                default:
+                    return ETextureCompressFormat.TCF_None;
+            }
+        }
+
+        public static unsafe TtSrView ImportImage(System.IO.Stream stream, ImportAttribute importer, bool bSaveAsset)
+        {
+            var extName = IO.TtFileManager.GetExtName(importer.mSourceFile).ToLower();
+            var rn = RName.GetRName(importer.mDir.Name + importer.mName + TtSrView.AssetExt, importer.mDir.RNameType);
+            var desc = importer.mDesc;
+            desc.CompressFormat = SelectCompressFormat(desc);
+
+            var ameta = rn.AMeta as TtSrViewAMeta;
+            if (ameta == null)
+            {
+                ameta = new TtSrViewAMeta();
+                ameta.SetAssetName(rn);
+                ameta.AssetId = Guid.NewGuid();
+                ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtSrView)).TypeString;
+                ameta.Description = $"This is a {typeof(TtSrView).FullName}\n";
+                ameta.OriginImageAddress = importer.mSourceFile;
+
+                TtEngine.Instance.AssetMetaManager.RegAsset(ameta, true);
+            }
+            
+            // Save directly from source pixels (avoids GPU readback → re-compress lossy roundtrip).
+            // The old SaveAssetTo path does GPU readback → decode → re-encode which introduces
+            // artifacts and data corruption for block-compressed textures.
+            SaveAssetDirect(importer, rn, desc, ameta);
+
+            TtEngine.Instance.GfxDevice.TextureManager.UnsafeRemove(rn);
+            //TtEngine.Instance.GfxDevice.TextureManager.UnsafeAdd(rn, result);
+            var result = TtEngine.Instance.GfxDevice.TextureManager.GetTexture(rn, desc.Desc.MipLevel).GetResultUntilCompleted();
+
+            return result;
+        }
+
+        /// <summary>
+        /// Save imported texture asset: .srv stores only raw source data (RawSource node + Desc).
+        /// Then triggers a cook to generate the platform-compressed .txc cache.
+        /// </summary>
+        private static void SaveAssetDirect(ImportAttribute importer, RName rn, TtPicDesc desc, TtSrViewAMeta ameta)
+        {
+            using (var xnd = new IO.TtXndHolder("TtSrView", 0, 0))
+            {
+                // Save raw source data to "RawSource" node (no BC compression)
+                using (var srcStream = System.IO.File.OpenRead(importer.mSourceFile))
+                {
+                    var extName = IO.TtFileManager.GetExtName(importer.mSourceFile).ToLower();
+                    if (extName == ".hdr")
+                    {
+                        var imageFloat = StbImageSharp.ImageResultFloat.FromStream(srcStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                        desc.Width = imageFloat.Width;
+                        desc.Height = imageFloat.Height;
+                        TtTextureCookManager.SaveHdrToRawNode(xnd.RootNode.mCoreObject, imageFloat);
+                    }
+                    else if (extName == ".exr")
+                    {
+                        var exrBytes = new byte[srcStream.Length];
+                        srcStream.Read(exrBytes, 0, exrBytes.Length);
+                        srcStream.Position = 0;
+                        var exrFile = new Jither.OpenEXR.EXRFile(srcStream);
+                        int w = exrFile.Parts[0].DisplayWindow.Width;
+                        int h = exrFile.Parts[0].DisplayWindow.Height;
+                        desc.Width = w;
+                        desc.Height = h;
+                        TtTextureCookManager.SaveExrToRawNode(xnd.RootNode.mCoreObject, exrBytes, w, h);
+                    }
+                    else
+                    {
+                        var image = StbImageSharp.TtMemImage.FromStream(srcStream, StbImageSharp.ColorComponents.Default);
+                        if (image != null)
+                        {
+                            desc.Width = image.Width;
+                            desc.Height = image.Height;
+                            TtTextureCookManager.SaveLdrToRawNode(xnd.RootNode.mCoreObject, image);
+                        }
+                    }
+                }
+
+                // Save PicDesc metadata
+                TtTextureHelper.SaveDescToNode(xnd.RootNode.mCoreObject, desc);
+
+                xnd.SaveXnd(rn.Address);
+                TtEngine.Instance.SourceControlModule.AddFile(rn.Address);
+            }
+
+            if (ameta != null)
+            {
+                rn.AMeta?.AddAssetFile(rn.Address);
+                ameta.SaveAMeta((IAsset)null);
+            }
+
+            // Trigger cook to generate .txc cache for current platform
+            TtTextureCookManager.Cook(rn);
+        }
     }
 }

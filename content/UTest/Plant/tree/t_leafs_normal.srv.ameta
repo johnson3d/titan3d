@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="32f237bb-9449-4851-9b36-6035cbe700c8" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/plant/tree/t_leafs_normal.srv,32f237bb-9449-4851-9b36-6035cbe700c8" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />

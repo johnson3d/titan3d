@@ -592,17 +592,17 @@ namespace EngineNS.NxRHI
             }
 
             // 根据 Alpha 位数选择格式
-            if (desc.BitNumAlpha == 8 || desc.BitNumAlpha == 4)
+            if (desc.BitNumAlpha > 1)
             {
-                return ETextureCompressFormat.TCF_Dxt3;
+                return ETextureCompressFormat.TCF_BC3;
             }
             else if (desc.BitNumAlpha == 1)
             {
-                return ETextureCompressFormat.TCF_Dxt1a;
+                return ETextureCompressFormat.TCF_BC1A;
             }
             else
             {
-                return ETextureCompressFormat.TCF_Dxt1;
+                return ETextureCompressFormat.TCF_BC1;
             }
         }
 
@@ -663,7 +663,7 @@ namespace EngineNS.NxRHI
         /// </summary>
         /// <param name="desc">纹理描述符</param>
         /// <returns>压缩格式</returns>
-        public static ETextureCompressFormat SelectCompressFormat(TtPicDesc desc)
+        public static ETextureCompressFormat SelectHdrCompressFormat(TtPicDesc desc)
         {
             // 如果不压缩，返回 None
             if (desc.DontCompress)

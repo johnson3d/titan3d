@@ -59,6 +59,7 @@
           <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
           <IsBindable Type="System.Boolean@Unknown" Value="False" />
           <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
+          <IsStatic Type="System.Boolean@Unknown" Value="False" />
           <VariableName Type="System.String@Unknown" Value="ret_3886106516" />
           <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
             <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -126,58 +127,65 @@
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_4>
   </Nodes>
-  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="7">
-    <e_0 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
-      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore,&gt;@Unknown" Count="7">
+    <e_0 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="00000000-0000-0000-0000-000000000000" />
         <OutNodeId Type="System.Guid@Unknown" Value="3ab61bb0-fb05-48ca-998d-7a5750e8952a" />
         <OutPinName Type="System.String@Unknown" Value="host" />
       </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
     </e_0>
-    <e_1 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
-      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+    <e_1 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="00000000-0000-0000-0000-000000000000" />
         <OutNodeId Type="System.Guid@Unknown" Value="3ab61bb0-fb05-48ca-998d-7a5750e8952a" />
         <OutPinName Type="System.String@Unknown" Value="host" />
       </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
     </e_1>
-    <e_2 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
-      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+    <e_2 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="ff004fb9-090b-4ddf-9d23-40c3381276ee" />
         <InPinName Type="System.String@Unknown" Value=" &gt;&gt;" />
         <OutNodeId Type="System.Guid@Unknown" Value="8ba4515b-811c-46b9-afe6-5c52e26eb654" />
         <OutPinName Type="System.String@Unknown" Value="&gt;&gt; " />
       </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
     </e_2>
-    <e_3 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
-      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+    <e_3 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="8ba4515b-811c-46b9-afe6-5c52e26eb654" />
         <InPinName Type="System.String@Unknown" Value=" &gt;&gt;" />
         <OutNodeId Type="System.Guid@Unknown" Value="3ab61bb0-fb05-48ca-998d-7a5750e8952a" />
         <OutPinName Type="System.String@Unknown" Value="&gt;&gt; " />
       </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
     </e_3>
-    <e_4 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
-      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+    <e_4 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="00000000-0000-0000-0000-000000000000" />
         <OutNodeId Type="System.Guid@Unknown" Value="00000000-0000-0000-0000-000000000000" />
       </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
     </e_4>
-    <e_5 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
-      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+    <e_5 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="07c5814f-7e35-41e6-888b-e581081e6fc3" />
         <InPinName Type="System.String@Unknown" Value=" &gt;&gt;" />
         <OutNodeId Type="System.Guid@Unknown" Value="ff004fb9-090b-4ddf-9d23-40c3381276ee" />
         <OutPinName Type="System.String@Unknown" Value="&gt;&gt; " />
       </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
     </e_5>
-    <e_6 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
-      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+    <e_6 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="07c5814f-7e35-41e6-888b-e581081e6fc3" />
         <InPinName Type="System.String@Unknown" Value="ret_3886106516" />
         <OutNodeId Type="System.Guid@Unknown" Value="ba4e4574-fb5f-45ac-8158-268eb72437bf" />
         <OutPinName Type="System.String@Unknown" Value="Get" />
       </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
     </e_6>
   </Linkers>
 </Root>

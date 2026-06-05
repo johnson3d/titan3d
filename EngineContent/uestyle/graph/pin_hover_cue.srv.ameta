@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="d453c8ed-8aab-4f10-929f-87b7983b82e9" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,uestyle/graph/pin_hover_cue.srv,d453c8ed-8aab-4f10-929f-87b7983b82e9" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />

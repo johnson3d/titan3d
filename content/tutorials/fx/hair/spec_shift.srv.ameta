@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="829e77ac0483e906d9b11b726d776f8deef60af659398083b8b782a9f194c023" />
+      <Path Type="System.String@Unknown" Value="spec_shift.srv" />
+    </e_0>
+  </AssetFiles>
   <AssetId Type="System.Guid@Unknown" Value="9ba13f4c-6638-4395-b847-c7821a8dbf66" />
-  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/fx/hair/spec_shift.srv,7aa58352-1968-4ccd-ac44-68998695c298" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/fx/hair/spec_shift.srv,9ba13f4c-6638-4395-b847-c7821a8dbf66" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.TtSrView&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

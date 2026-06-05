@@ -2,7 +2,7 @@
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="46c6ced9-399e-4ed8-83a2-29004f7abe73" />
-  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/water/lake_n.srv,00000000-0000-0000-0000-000000000000" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/water/lake_n.srv,46c6ced9-399e-4ed8-83a2-29004f7abe73" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.TtSrView&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

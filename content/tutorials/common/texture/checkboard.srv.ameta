@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="ee75eb43-86e6-4e8a-8f3c-d674e688e22b" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/texture/checkboard.srv,ee75eb43-86e6-4e8a-8f3c-d674e688e22b" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />

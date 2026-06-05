@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="c052cb5b-d1be-4d6a-86b5-c765ea4aa929" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,uestyle/graph/regularnode_title_highlight.srv,c052cb5b-d1be-4d6a-86b5-c765ea4aa929" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="e8d9b866-77bb-4870-976b-872b5cd87576" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/pivotpainter/hilltree/hilltree_01_atlas_specular_tex.srv,e8d9b866-77bb-4870-976b-872b5cd87576" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.TtSrView&#xA;" />

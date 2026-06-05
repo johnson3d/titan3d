@@ -18,7 +18,7 @@
     </e_0>
     <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.TtFindNode@EngineCore" />
-      <Label Type="System.String@Unknown" Value="CpuCulling" />
+      <Label Type="System.String@Unknown" Value="Ref-&gt;CpuCulling:Visibles" />
       <Name Type="System.String@Unknown" Value="Ref-&gt;CpuCulling:Visibles" />
       <NodeId Type="System.Guid@Unknown" Value="60c5d021-dd5c-433f-8d32-bdc00698e926" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="1991.6238,-82.33858" />
@@ -211,7 +211,7 @@
     </e_15>
     <e_16 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.TtFindNode@EngineCore" />
-      <Label Type="System.String@Unknown" Value="PrevDepth" />
+      <Label Type="System.String@Unknown" Value="Ref-&gt;PrevDepth:Prev" />
       <Name Type="System.String@Unknown" Value="Ref-&gt;PrevDepth:Prev" />
       <NodeId Type="System.Guid@Unknown" Value="ddb76249-40f1-458e-ba10-8f4c55f55a32" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="-684.09534,578.40546" />

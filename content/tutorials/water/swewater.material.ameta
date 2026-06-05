@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="c357e609d0fdab5eaf91d5c547044c315b6368e37e59e331ce8da2148273c4ae" />
+      <Hash Type="System.String@Unknown" Value="1ff3fd710943a2b1a6b6f0c34e6e2d76175dd76e1cd197921932871572fa3282" />
       <Path Type="System.String@Unknown" Value="swewater.material" />
     </e_0>
   </AssetFiles>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="d2ea56cf-55e9-408a-9c9f-492ad2e37de3" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/terrain/rain.srv,d2ea56cf-55e9-408a-9c9f-492ad2e37de3" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />

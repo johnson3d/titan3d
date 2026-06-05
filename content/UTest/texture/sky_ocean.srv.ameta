@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="47cce872-4434-473d-8ef0-dfeb30200ef1" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/texture/sky_ocean.srv,47cce872-4434-473d-8ef0-dfeb30200ef1" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />

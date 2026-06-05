@@ -279,7 +279,7 @@ namespace EngineNS.Editor.Forms
                             StbImageSharp.TtMemImage image = NxRHI.TtSrView.LoadOriginPng(AssetName);
                             using (var xnd = new IO.TtXndHolder("TtSrView", 0, 0))
                             {
-                                NxRHI.TtSrView.SaveTexture(AssetName, xnd.RootNode.mCoreObject, image, this.TextureSRV.PicDesc);
+                                NxRHI.TtSrView.CookTextureTo(AssetName, xnd.RootNode.mCoreObject, image, this.TextureSRV.PicDesc);
                                 xnd.SaveXnd(AssetName.Address);
                             }
                         }
@@ -290,7 +290,7 @@ namespace EngineNS.Editor.Forms
                             NxRHI.TtSrView.LoadOriginHdr(AssetName, ref imageFloat);
                             using (var xnd = new IO.TtXndHolder("TtSrView", 0, 0))
                             {
-                                NxRHI.TtSrView.SaveTexture(AssetName, xnd.RootNode.mCoreObject, imageFloat, this.TextureSRV.PicDesc);
+                                NxRHI.TtSrView.CookTextureTo(AssetName, xnd.RootNode.mCoreObject, imageFloat, this.TextureSRV.PicDesc);
                                 xnd.SaveXnd(AssetName.Address);
                             }
                         }
@@ -307,6 +307,11 @@ namespace EngineNS.Editor.Forms
                         }
                         break;
                 }
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("ToRawSource", in btSize))
+            {
+                ConvertToRawSourceFormat();
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.ToggleButton("R", ref mShowR, in btSize, 0))
@@ -371,6 +376,67 @@ namespace EngineNS.Editor.Forms
         bool mShowG = true;
         bool mShowB = true;
         bool mShowA = false;
+
+        /// <summary>
+        /// Convert the current .srv asset to the new RawSource format.
+        /// Reads the original image from the existing .srv (using LoadUncompressImage),
+        /// then re-saves the .srv with only RawSource node + Desc, and triggers a cook.
+        /// </summary>
+        private void ConvertToRawSourceFormat()
+        {
+            var srv = TextureSRV;
+            if (srv == null || srv.AssetName == null)
+                return;
+
+            var rn = srv.AssetName;
+            var desc = srv.PicDesc;
+            if (desc == null)
+                return;
+
+            bool isHdr = desc.IsHdr();
+            bool success = false;
+
+            using (var xnd = new IO.TtXndHolder("TtSrView", 0, 0))
+            {
+                if (isHdr)
+                {
+                    var imageFloat = srv.LoadUncompressImageHDR();
+                    if (imageFloat != null)
+                    {
+                        NxRHI.TtTextureCookManager.SaveHdrToRawNode(xnd.RootNode.mCoreObject, imageFloat);
+                        success = true;
+                    }
+                }
+                else
+                {
+                    var ldrImage = srv.LoadUncompressImageLDR();
+                    if (ldrImage != null)
+                    {
+                        NxRHI.TtTextureCookManager.SaveLdrToRawNode(xnd.RootNode.mCoreObject, ldrImage);
+                        success = true;
+                    }
+                }
+
+                if (success)
+                {
+                    NxRHI.TtTextureHelper.SaveDescToNode(xnd.RootNode.mCoreObject, desc);
+                    xnd.SaveXnd(rn.Address);
+                    TtEngine.Instance.SourceControlModule.AddFile(rn.Address);
+
+                    // Trigger cook for current platform
+                    NxRHI.TtTextureCookManager.Cook(rn);
+
+                    Profiler.Log.WriteLine<Profiler.TtEditorGategory>(Profiler.ELogTag.Info,
+                        $"Converted {rn} to RawSource format successfully.");
+                }
+                else
+                {
+                    Profiler.Log.WriteLine<Profiler.TtEditorGategory>(Profiler.ELogTag.Warning,
+                        $"ConvertToRawSource({rn}): failed to load source image.");
+                }
+            }
+        }
+
         bool mLeftShow = true;
         protected unsafe void DrawLeft()
         {

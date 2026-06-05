@@ -188,7 +188,7 @@ namespace EngineNS.Editor
                                 var tagDir = RName.GetRName("icons", RName.ERNameType.Engine);
                                 foreach(var file in files)
                                 {
-                                    NxRHI.TtSrView.ImportAttribute.ImportImage(file, tagDir, new NxRHI.TtSrView.TtPicDesc());
+                                    //NxRHI.TtSrView.ImportAttribute.ImportImage(file, tagDir, new NxRHI.TtSrView.TtPicDesc());
                                 }
                             },
                         },

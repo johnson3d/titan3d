@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="681fceb3-c38b-45d1-addb-32a910424f7a" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/pivotpainter/box042_rgb_xvector_a_random0-1_uv_2.srv,681fceb3-c38b-45d1-addb-32a910424f7a" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.TtSrView&#xA;" />

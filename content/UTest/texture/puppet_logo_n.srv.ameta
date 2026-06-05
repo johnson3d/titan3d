@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="32de717c-224f-4801-839a-b7c44b197c73" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/texture/puppet_logo_n.srv,32de717c-224f-4801-839a-b7c44b197c73" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />

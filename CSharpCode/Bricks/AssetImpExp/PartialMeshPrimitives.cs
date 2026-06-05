@@ -641,9 +641,12 @@ namespace EngineNS.Graphics.Mesh
                                                 importer.mDir = mDir;
                                                 importer.mName = textureName;
                                                 stream.Seek(0, SeekOrigin.Begin);
-                                                var rn = importer.ImportImageImpl(stream);
-                                                mtl.SetSrv(shaderName, rn);
-                                                return rn != null;
+                                                var srv = NxRHI.TtSrView.ImportImage(stream, importer, true);
+                                                if (srv != null)
+                                                {
+                                                    mtl.SetSrv(shaderName, srv.AssetName);
+                                                }
+                                                return srv != null;
                                             }
                                         }
                                         catch (Exception ex)
@@ -826,7 +829,11 @@ namespace EngineNS.Graphics.Mesh
                         importer.mSourceFile = texturePath;
                         importer.mDir = dir;
                         importer.mName = textureName;
-                        return importer.ImportImageImpl(stream);
+                        var srv = NxRHI.TtSrView.ImportImage(stream, importer, true);
+                        if (srv != null)
+                        {
+                        }
+                        return srv.AssetName;
                     }
                 }
                 catch (Exception ex)
@@ -850,7 +857,11 @@ namespace EngineNS.Graphics.Mesh
                     importer.mSourceFile = textureName + ".png";
                     importer.mDir = dir;
                     importer.mName = textureName;
-                    return importer.ImportImageImpl(stream);
+                    var srv = NxRHI.TtSrView.ImportImage(stream, importer, true);
+                    if (srv != null)
+                    {
+                    }
+                    return srv.AssetName;
                 }
             }
 

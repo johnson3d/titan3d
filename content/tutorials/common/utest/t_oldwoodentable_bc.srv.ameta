@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="1bfbf7a4-9732-4773-9f6c-7690257aa15c" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/utest/t_oldwoodentable_bc.srv,1bfbf7a4-9732-4773-9f6c-7690257aa15c" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />

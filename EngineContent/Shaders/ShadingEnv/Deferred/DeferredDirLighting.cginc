@@ -261,11 +261,19 @@ FDeferredShadingResult DeferredDirLighting_Hair(FDeferredShadingContext ctx)
 	FDeferredShadingResult result = (FDeferredShadingResult)0;
 
 	half3 T = ctx.GBuffer.WorldTangent;
-	half3 specularColor = half3(0.04h, 0.04h, 0.04h);
+	half3 N = ctx.N; // Geometric normal (decoded from GBuffer rt0.a + rt2.r for Hair)
+
+	// Hair F0: brighter than dielectrics to make highlights visible.
+	// Use albedo-tinted specular for colored hair highlights.
+	half3 specularColor = lerp(half3(0.08h, 0.08h, 0.08h), ctx.Albedo, 0.3h);
+
+	// Per-pixel shift from GBuffer.Mask (tangent-map alpha, stored in rt1.b, 10-bit)
+	half shiftOffset = ctx.GBuffer.Mask * 2.0h - 1.0h; // remap [0,1] to [-1,1]
 
 	half3 hairDiffuse, hairSpecular;
-	HairShadingSeparated(T, ctx.L, ctx.V, ctx.Albedo, specularColor,
-		ctx.Roughness, ctx.Cdir * ctx.Idir,
+	HairShadingSeparated(T, ctx.L, ctx.V, N,
+		ctx.Albedo, specularColor, ctx.Roughness,
+		shiftOffset, ctx.Cdir * ctx.Idir,
 		hairDiffuse, hairSpecular);
 
 	result.BaseShading = hairDiffuse * ctx.FinalShadowValue

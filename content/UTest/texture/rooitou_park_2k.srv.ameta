@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="1e625731-7c5e-4099-a65e-4ee5feecd18e" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/texture/rooitou_park_2k.srv,1e625731-7c5e-4099-a65e-4ee5feecd18e" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />

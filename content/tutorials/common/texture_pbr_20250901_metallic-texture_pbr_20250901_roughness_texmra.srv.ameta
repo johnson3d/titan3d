@@ -2,7 +2,7 @@
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="3667e865-f76e-4210-bc88-84dfe312b506" />
-  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/texture_pbr_20250901_metallic-texture_pbr_20250901_roughness_texmra.srv,00000000-0000-0000-0000-000000000000" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/texture_pbr_20250901_metallic-texture_pbr_20250901_roughness_texmra.srv,3667e865-f76e-4210-bc88-84dfe312b506" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.TtSrView&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

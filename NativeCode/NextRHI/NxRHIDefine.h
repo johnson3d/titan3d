@@ -58,10 +58,10 @@ namespace NxRHI
 		ETextureCompressFormat
 	{
 		TCF_None = 0,//no compress
-			TCF_Dxt1,//rgb:5-6-5 a:0 = bc1
-			TCF_Dxt1a,//rgb:5-6-5 a:1 = bc1
-			TCF_Dxt3,//rgb:5-6-5 a:8 = bc2
-			TCF_Dxt5,//rgba 8 = bc3
+			TCF_BC1,//DXT rgb:5-6-5 a:0 = bc1
+			TCF_BC1A,//DXT1a rgb:5-6-5 a:1 = bc1a,Never use this format
+			TCF_BC2,//DXT3 rgb:5-6-5 a:8 = bc2,Never use this format
+			TCF_BC3,//DXT5 rgba 8 = bc3
 			TCF_BC4,//r channel
 			TCF_BC5,//rg:8-8
 			TCF_BC6,//hdr, Does not support negative values

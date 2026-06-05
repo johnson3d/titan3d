@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="82f5d894-8c2c-46b4-9752-8bd902d08f2b" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,uestyle/content/uniformshadow.srv,82f5d894-8c2c-46b4-9752-8bd902d08f2b" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="4b34b295-55b3-4975-92bf-fd865e10dd83" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/texture/kloppenheim_06_2k.srv,4b34b295-55b3-4975-92bf-fd865e10dd83" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />

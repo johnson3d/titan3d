@@ -168,6 +168,7 @@ namespace EngineNS.IO
             SetSysDir(ESystemDir.RenderDoc, "renderdoc");
             SetSysDir(ESystemDir.DebugUtility, "debugutility");
             SetSysDir(ESystemDir.AfterMath, "aftermath");
+            SetSysDir(ESystemDir.CookedAssets, "cookedassets");
             SureDirectory(GetPath(ERootDir.Engine, ESystemDir.MetaData));
             SureDirectory(GetPath(ERootDir.Game, ESystemDir.Config));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.GraphicEffect));
@@ -176,6 +177,8 @@ namespace EngineNS.IO
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.RenderDoc));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.DebugUtility));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.AfterMath));
+            SureDirectory(GetPath(ERootDir.Cache, ESystemDir.CookedAssets));
+
             GpuDump.NvAftermath.SetOutputRoot(GetPath(ERootDir.Cache, ESystemDir.AfterMath));
         }
         partial void InitDirectory(string[] args);
@@ -206,6 +209,7 @@ namespace EngineNS.IO
             RenderDoc,
             DebugUtility,
             AfterMath,
+            CookedAssets,
             Count,
         }
         public string BinariesDir { get; private set; }

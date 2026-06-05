@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="6ac2a7ed-f664-472b-9bfd-f424b418f95a" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/texture/ground8.srv,6ac2a7ed-f664-472b-9bfd-f424b418f95a" />
   <Description Type="System.String@Unknown" Value="This is a Asset" />

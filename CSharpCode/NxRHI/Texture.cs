@@ -365,6 +365,27 @@ namespace EngineNS.NxRHI
                 get => Desc.sRGB != 0 ? true : false;
                 set => Desc.sRGB = value ? 1 : 0;
             }
+            [Category("General")]
+            public bool IsHdr()
+            {
+                switch (Desc.Format)
+                {
+                    case EPixelFormat.PXF_R16_FLOAT:
+                    case EPixelFormat.PXF_R16G16_FLOAT:
+                    case EPixelFormat.PXF_R16G16B16A16_FLOAT:
+                    case EPixelFormat.PXF_R32_FLOAT:
+                    case EPixelFormat.PXF_R32G32_FLOAT:
+                    case EPixelFormat.PXF_R32G32B32_FLOAT:
+                    case EPixelFormat.PXF_R32G32B32A32_FLOAT:
+                    case EPixelFormat.PXF_BC6H_UF16:
+                    case EPixelFormat.PXF_BC6H_SF16:
+                    case EPixelFormat.PXF_BC6H_TYPELESS:
+                        return true;
+                }
+                if (BitNumRed > 8 || BitNumGreen > 8 || BitNumBlue > 8)
+                    return true;
+                return false;
+            }
             public bool StripOriginSource
             {
                 get => Desc.StripOriginSource != 0 ? true : false;
@@ -578,20 +599,24 @@ namespace EngineNS.NxRHI
                 TtEngine.Instance.EventPoster.RunOn((state)=>
                 {
                     TtEngine.Instance.BlockOperation($"ImportImage:{mSourceFile}");
-                    ImportImageImpl();
+                    //ImportImageImpl_Deprecated();
+                    using (var stream = System.IO.File.OpenRead(mSourceFile))
+                    {
+                        TtSrView.ImportImage(stream, this, true);
+                    }
                     TtEngine.Instance.ResumeOperation();
                     return true;
                 }, Thread.Async.EAsyncTarget.AsyncIO);
                 return true;
             }
-            public RName ImportImageImpl()
+            public RName ImportImageImpl_Deprecated()
             {
                 using (var stream = System.IO.File.OpenRead(mSourceFile))
                 {
-                    return ImportImageImpl(stream);
+                    return ImportImageImpl_Deprecated(stream);
                 }
             }
-            public unsafe RName ImportImageImpl(System.IO.Stream stream)
+            public unsafe RName ImportImageImpl_Deprecated(System.IO.Stream stream)
             {
                 if (stream == null)
                     return null;
@@ -614,7 +639,7 @@ namespace EngineNS.NxRHI
                     else
                         processedImage = imageFloat;
 
-                    TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, processedImage, mDesc);
+                    TtSrView.CookTextureTo(rn, xnd.RootNode.mCoreObject, processedImage, mDesc);
                 }
                 else if (extName.ToLower() == ".exr")
                 {
@@ -643,7 +668,7 @@ namespace EngineNS.NxRHI
                             mDesc.MipLevel = 1;
                     }
 
-                    TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, image, mDesc);
+                    TtSrView.CookTextureTo(rn, xnd.RootNode.mCoreObject, image, mDesc);
                 }
 
                 xnd.SaveXnd(rn.Address);
@@ -668,7 +693,7 @@ namespace EngineNS.NxRHI
                 return rn;
             }
 
-            public static bool ImportImage(string sourceFile, RName dir, TtPicDesc desc)
+            public static bool ImportImage_Deprecated(string sourceFile, RName dir, TtPicDesc desc)
             {
                 using (var stream = System.IO.File.OpenRead(sourceFile))
                 {
@@ -681,11 +706,11 @@ namespace EngineNS.NxRHI
                     var name = IO.TtFileManager.GetPureName(sourceFile);
                     var rn = RName.GetRName(dir.Name.TrimEnd('\\').TrimEnd('/') + "/" + name + TtSrView.AssetExt, dir.RNameType);
 
-                    return SaveSrv(image, rn, desc);
+                    return SaveSrv_Deprecated(image, rn, desc);
                 }
             }
 
-            public static bool SaveSrv(Jither.OpenEXR.EXRFile file, RName rn, TtPicDesc desc)
+            public static bool SaveSrv_Deprecated(Jither.OpenEXR.EXRFile file, RName rn, TtPicDesc desc)
             {
                 var part = file.Parts[0];
                 System.Diagnostics.Debug.Assert(part.DataReader != null);
@@ -711,13 +736,13 @@ namespace EngineNS.NxRHI
                 return true;
             }
 
-            public static bool SaveSrv(StbImageSharp.ImageResultFloat image, RName rn, TtPicDesc desc)
+            public static bool SaveSrv_Deprecated(StbImageSharp.ImageResultFloat image, RName rn, TtPicDesc desc)
             {
                 desc.Width = image.Width;
                 desc.Height = image.Height;
 
                 var xnd = new IO.TtXndHolder("USrView", 0, 0);
-                TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, image, desc);
+                TtSrView.CookTextureTo(rn, xnd.RootNode.mCoreObject, image, desc);
                 xnd.SaveXnd(rn.Address);
 
                 var ameta = new TtSrViewAMeta();
@@ -733,13 +758,13 @@ namespace EngineNS.NxRHI
                 return true;
             }
 
-            public static bool SaveSrv(StbImageSharp.TtMemImage image, RName rn, TtPicDesc desc)
+            public static bool SaveSrv_Deprecated(StbImageSharp.TtMemImage image, RName rn, TtPicDesc desc)
             {
                 desc.Width = image.Width;
                 desc.Height = image.Height;
 
                 var xnd = new IO.TtXndHolder("TtSrView", 0, 0);
-                TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, image, desc);
+                TtSrView.CookTextureTo(rn, xnd.RootNode.mCoreObject, image, desc);
                 xnd.SaveXnd(rn.Address);
 
                 var ameta = new TtSrViewAMeta();
@@ -773,7 +798,8 @@ namespace EngineNS.NxRHI
             }
             public override void ImportSource(string sourceFile, RName dir)
             {
-                ImportImage(sourceFile, dir, new TtPicDesc());
+                System.Diagnostics.Debug.Assert(false);
+                //ImportImage(sourceFile, dir, new TtPicDesc());
             }
         }
 
@@ -838,6 +864,438 @@ namespace EngineNS.NxRHI
         {
             mOriginImageObject = null;
         }
+
+        /// <summary>
+        /// Load the uncompressed LDR source image from local file or .srv asset.
+        /// Priority: 1) OriginImageAddress local file  2) XND "Png"/"OriginSource" embedded  3) XND "PngMips" mip0  4) XND "DxtMips" decoded mip0
+        /// Returns null if no source can be found.
+        /// </summary>
+        public StbImageSharp.TtMemImage LoadUncompressImageLDR()
+        {
+            var ameta = GetAMeta() as TtSrViewAMeta;
+
+            // 1) Try local source file
+            if (ameta != null && !string.IsNullOrEmpty(ameta.OriginImageAddress)
+                && System.IO.File.Exists(ameta.OriginImageAddress)
+                && ameta.OriginImageType == Bricks.ImageDecoder.UImageType.PNG)
+            {
+                using (var stream = System.IO.File.OpenRead(ameta.OriginImageAddress))
+                {
+                    var image = StbImageSharp.TtMemImage.FromStream(stream, StbImageSharp.ColorComponents.Default);
+                    if (image != null)
+                        return image;
+                }
+            }
+
+            // 2) Try reading from .srv XND file
+            var rn = AssetName;
+            if (rn == null || string.IsNullOrEmpty(rn.Address))
+                return null;
+
+            using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
+            {
+                if (xnd == null)
+                    return null;
+
+                // 2a) New format: RawSource node
+                var rawNode = xnd.RootNode.TryGetChildNode("RawSource");
+                if (rawNode.IsValidPointer)
+                {
+                    var image = TtTextureCookManager.LoadLdrFromRawNode(rawNode);
+                    if (image != null)
+                        return image;
+                }
+
+                // 2b) Embedded original PNG data (legacy)
+                var attr = xnd.RootNode.TryGetAttribute("OriginSource");
+                if (attr.IsValidPointer == false)
+                    attr = xnd.RootNode.TryGetAttribute("Png");
+                if (attr.IsValidPointer)
+                {
+                    byte[] pngData;
+                    using (var ar = attr.GetReader(null))
+                    {
+                        ar.ReadNoSize(out pngData, (int)attr.GetReaderLength());
+                    }
+                    using (var memStream = new System.IO.MemoryStream(pngData))
+                    {
+                        var image = StbImageSharp.TtMemImage.FromStream(memStream, StbImageSharp.ColorComponents.Default);
+                        if (image != null)
+                            return image;
+                    }
+                }
+
+                // 2b) PngMips node — read mip 0
+                var pngMipsNode = xnd.RootNode.TryGetChildNode("PngMips");
+                if (pngMipsNode.IsValidPointer)
+                {
+                    var mip0Attr = pngMipsNode.TryGetAttribute("PngMip0");
+                    if (mip0Attr.IsValidPointer)
+                    {
+                        byte[] data;
+                        using (var ar = mip0Attr.GetReader(null))
+                        {
+                            ar.ReadNoSize(out data, (int)mip0Attr.GetReaderLength());
+                        }
+                        using (var memStream = new System.IO.MemoryStream(data))
+                        {
+                            var image = StbImageSharp.TtMemImage.FromStream(memStream, StbImageSharp.ColorComponents.Default);
+                            if (image != null)
+                                return image;
+                        }
+                    }
+                }
+
+                // 2c) DxtMips node — decode BC compressed mip 0
+                var dxtMipsNode = xnd.RootNode.TryGetChildNode("DxtMips");
+                if (dxtMipsNode.IsValidPointer)
+                {
+                    var image = DecodeDxtMip0FromXnd(dxtMipsNode);
+                    if (image != null)
+                        return image;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Decode mip 0 from a DxtMips XND node back to uncompressed TtMemImage.
+        /// Handles both legacy (DxtMip0 attribute) and new (Face0/DxtMip0) formats.
+        /// </summary>
+        private StbImageSharp.TtMemImage DecodeDxtMip0FromXnd(XndNode dxtMipsNode)
+        {
+            byte[] compressedData = null;
+
+            // Try legacy format: DxtMip0 attribute directly on DxtMips node
+            var mip0Attr = dxtMipsNode.TryGetAttribute("DxtMip0");
+            if (mip0Attr.IsValidPointer)
+            {
+                using (var ar = mip0Attr.GetReader(null))
+                {
+                    ar.ReadNoSize(out compressedData, (int)mip0Attr.GetReaderLength());
+                }
+            }
+            else
+            {
+                // New format: Face0/DxtMip0
+                var faceNode = dxtMipsNode.TryGetChildNode("Face0");
+                if (faceNode.IsValidPointer)
+                {
+                    mip0Attr = faceNode.TryGetAttribute("DxtMip0");
+                    if (mip0Attr.IsValidPointer)
+                    {
+                        using (var ar = mip0Attr.GetReader(null))
+                        {
+                            ar.ReadNoSize(out compressedData, (int)mip0Attr.GetReaderLength());
+                        }
+                    }
+                }
+            }
+
+            if (compressedData == null || compressedData.Length == 0)
+                return null;
+
+            var desc = PicDesc;
+            if (desc == null)
+                return null;
+
+            int width = desc.Width;
+            int height = desc.Height;
+            var bcnFormat = GetBCnCompressionFormat(desc.Format);
+            if (bcnFormat == null)
+                return null;
+
+            var decoder = new BCnEncoder.Decoder.BcDecoder();
+            var decoded = decoder.DecodeRaw(compressedData, width, height, bcnFormat.Value);
+            if (decoded == null || decoded.Length == 0)
+                return null;
+
+            // Convert ColorRgba32[] to TtMemImage (RGBA byte array)
+            var image = new StbImageSharp.TtMemImage();
+            image.Width = width;
+            image.Height = height;
+            image.Comp = StbImageSharp.ColorComponents.RedGreenBlueAlpha;
+            image.SourceComp = StbImageSharp.ColorComponents.RedGreenBlueAlpha;
+            image.Data = new byte[width * height * 4];
+            for (int i = 0; i < decoded.Length && i < width * height; i++)
+            {
+                int idx = i * 4;
+                image.Data[idx] = decoded[i].r;
+                image.Data[idx + 1] = decoded[i].g;
+                image.Data[idx + 2] = decoded[i].b;
+                image.Data[idx + 3] = decoded[i].a;
+            }
+            return image;
+        }
+
+        /// <summary>
+        /// Load the uncompressed HDR source image from local file or .srv asset.
+        /// Priority: 1) OriginImageAddress local file (hdr/exr)  2) XND "PngMips" decoded as float  3) XND "DxtMips" BC6H decoded
+        /// Returns null if no source can be found.
+        /// </summary>
+        public StbImageSharp.ImageResultFloat LoadUncompressImageHDR()
+        {
+            var ameta = GetAMeta() as TtSrViewAMeta;
+
+            // 1) Try local source file
+            if (ameta != null && !string.IsNullOrEmpty(ameta.OriginImageAddress)
+                && System.IO.File.Exists(ameta.OriginImageAddress))
+            {
+                var imageType = ameta.OriginImageType;
+                switch (imageType)
+                {
+                    case Bricks.ImageDecoder.UImageType.HDR:
+                        using (var stream = System.IO.File.OpenRead(ameta.OriginImageAddress))
+                        {
+                            var result = StbImageSharp.ImageResultFloat.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                            if (result != null)
+                                return result;
+                        }
+                        break;
+                    case Bricks.ImageDecoder.UImageType.EXR:
+                        var exrResult = LoadExrFromFile(ameta.OriginImageAddress);
+                        if (exrResult != null)
+                            return exrResult;
+                        break;
+                }
+            }
+
+            // 2) Try reading from .srv XND file
+            var rn = AssetName;
+            if (rn == null || string.IsNullOrEmpty(rn.Address))
+                return null;
+
+            using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
+            {
+                if (xnd == null)
+                    return null;
+
+                // 2a) New format: RawSource node
+                var rawNode = xnd.RootNode.TryGetChildNode("RawSource");
+                if (rawNode.IsValidPointer)
+                {
+                    var image = TtTextureCookManager.LoadHdrFromRawNode(rawNode);
+                    if (image != null)
+                        return image;
+                }
+
+                // 2b) PngMips node — decode mip 0 PNG and convert to float
+                var pngMipsNode = xnd.RootNode.TryGetChildNode("PngMips");
+                if (pngMipsNode.IsValidPointer)
+                {
+                    var mip0Attr = pngMipsNode.TryGetAttribute("PngMip0");
+                    if (mip0Attr.IsValidPointer)
+                    {
+                        byte[] data;
+                        using (var ar = mip0Attr.GetReader(null))
+                        {
+                            ar.ReadNoSize(out data, (int)mip0Attr.GetReaderLength());
+                        }
+                        using (var memStream = new System.IO.MemoryStream(data))
+                        {
+                            var ldrImage = StbImageSharp.TtMemImage.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                            if (ldrImage != null)
+                                return ConvertLdrToFloat(ldrImage);
+                        }
+                    }
+                }
+
+                // 2b) DxtMips node — decode BC6H mip 0
+                var dxtMipsNode = xnd.RootNode.TryGetChildNode("DxtMips");
+                if (dxtMipsNode.IsValidPointer)
+                {
+                    var imageFloat = DecodeDxtMip0HdrFromXnd(dxtMipsNode);
+                    if (imageFloat != null)
+                        return imageFloat;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Load an EXR file from disk and return as ImageResultFloat.
+        /// </summary>
+        internal static StbImageSharp.ImageResultFloat LoadExrFromFile(string filePath)
+        {
+            using (var stream = System.IO.File.OpenRead(filePath))
+            {
+                var exrFile = new Jither.OpenEXR.EXRFile(stream);
+                if (exrFile.Parts.Count == 0)
+                    return null;
+                var part = exrFile.Parts[0];
+                if (part.DataReader == null)
+                    return null;
+
+                int width = part.DisplayWindow.Width;
+                int height = part.DisplayWindow.Height;
+                int totalChannels = part.Channels.Count;
+                int bytesPerChannel = part.Channels[0].Type == Jither.OpenEXR.EXRDataType.Float ? 4 : 2;
+                int channelCount = Math.Min(totalChannels, 4);
+
+                byte[] pixelData = new byte[part.DataReader.GetTotalByteCount()];
+                part.DataReader.ReadInterleaved(pixelData, new[] { "R", "G", "B", "A" });
+
+                var imageFloat = new StbImageSharp.ImageResultFloat()
+                {
+                    Width = width,
+                    Height = height,
+                    Comp = channelCount >= 4
+                        ? StbImageSharp.ColorComponents.RedGreenBlueAlpha
+                        : StbImageSharp.ColorComponents.RedGreenBlue,
+                    Data = new float[width * height * channelCount]
+                };
+
+                for (int i = 0; i < width * height; i++)
+                {
+                    for (int c = 0; c < channelCount && c < totalChannels; c++)
+                    {
+                        int srcIdx = i * totalChannels * bytesPerChannel + c * bytesPerChannel;
+                        int destIdx = i * channelCount + c;
+                        imageFloat.Data[destIdx] = bytesPerChannel == 4
+                            ? BitConverter.ToSingle(pixelData, srcIdx)
+                            : (float)BitConverter.ToHalf(pixelData, srcIdx);
+                    }
+                }
+                return imageFloat;
+            }
+        }
+
+        /// <summary>
+        /// Load an EXR file object (already parsed) into an ImageResultFloat.
+        /// </summary>
+        internal static StbImageSharp.ImageResultFloat LoadExrToImageFloat(Jither.OpenEXR.EXRFile exrFile)
+        {
+            if (exrFile.Parts.Count == 0)
+                return null;
+            var part = exrFile.Parts[0];
+            if (part.DataReader == null)
+                return null;
+
+            int width = part.DisplayWindow.Width;
+            int height = part.DisplayWindow.Height;
+            int totalChannels = part.Channels.Count;
+            int bytesPerChannel = part.Channels[0].Type == Jither.OpenEXR.EXRDataType.Float ? 4 : 2;
+            int channelCount = Math.Min(totalChannels, 4);
+
+            byte[] pixelData = new byte[part.DataReader.GetTotalByteCount()];
+            part.DataReader.ReadInterleaved(pixelData, new[] { "R", "G", "B", "A" });
+
+            var imageFloat = new StbImageSharp.ImageResultFloat()
+            {
+                Width = width,
+                Height = height,
+                Comp = channelCount >= 4
+                    ? StbImageSharp.ColorComponents.RedGreenBlueAlpha
+                    : StbImageSharp.ColorComponents.RedGreenBlue,
+                Data = new float[width * height * channelCount]
+            };
+
+            for (int i = 0; i < width * height; i++)
+            {
+                for (int c = 0; c < channelCount && c < totalChannels; c++)
+                {
+                    int srcIdx = i * totalChannels * bytesPerChannel + c * bytesPerChannel;
+                    int destIdx = i * channelCount + c;
+                    imageFloat.Data[destIdx] = bytesPerChannel == 4
+                        ? BitConverter.ToSingle(pixelData, srcIdx)
+                        : (float)BitConverter.ToHalf(pixelData, srcIdx);
+                }
+            }
+            return imageFloat;
+        }
+
+        /// <summary>
+        /// Convert a LDR TtMemImage (byte RGBA) to ImageResultFloat (normalized 0~1).
+        /// </summary>
+        private static StbImageSharp.ImageResultFloat ConvertLdrToFloat(StbImageSharp.TtMemImage ldrImage)
+        {
+            int channelCount = 4;
+            var imageFloat = new StbImageSharp.ImageResultFloat()
+            {
+                Width = ldrImage.Width,
+                Height = ldrImage.Height,
+                Comp = StbImageSharp.ColorComponents.RedGreenBlueAlpha,
+                Data = new float[ldrImage.Width * ldrImage.Height * channelCount]
+            };
+
+            for (int i = 0; i < ldrImage.Data.Length; i++)
+            {
+                imageFloat.Data[i] = ldrImage.Data[i] / 255.0f;
+            }
+            return imageFloat;
+        }
+
+        /// <summary>
+        /// Decode HDR (BC6H) mip 0 from DxtMips XND node back to ImageResultFloat.
+        /// </summary>
+        private StbImageSharp.ImageResultFloat DecodeDxtMip0HdrFromXnd(XndNode dxtMipsNode)
+        {
+            byte[] compressedData = null;
+
+            // Try legacy format: DxtMip0 directly
+            var mip0Attr = dxtMipsNode.TryGetAttribute("DxtMip0");
+            if (mip0Attr.IsValidPointer)
+            {
+                using (var ar = mip0Attr.GetReader(null))
+                {
+                    ar.ReadNoSize(out compressedData, (int)mip0Attr.GetReaderLength());
+                }
+            }
+            else
+            {
+                // New format: Face0/DxtMip0
+                var faceNode = dxtMipsNode.TryGetChildNode("Face0");
+                if (faceNode.IsValidPointer)
+                {
+                    mip0Attr = faceNode.TryGetAttribute("DxtMip0");
+                    if (mip0Attr.IsValidPointer)
+                    {
+                        using (var ar = mip0Attr.GetReader(null))
+                        {
+                            ar.ReadNoSize(out compressedData, (int)mip0Attr.GetReaderLength());
+                        }
+                    }
+                }
+            }
+
+            if (compressedData == null || compressedData.Length == 0)
+                return null;
+
+            var desc = PicDesc;
+            if (desc == null)
+                return null;
+
+            int width = desc.Width;
+            int height = desc.Height;
+
+            var decoder = new BCnEncoder.Decoder.BcDecoder();
+            var bcnHdrFormat = (desc.Format == EPixelFormat.PXF_BC6H_SF16)
+                ? CompressionFormat.Bc6S : CompressionFormat.Bc6U;
+            var decoded = decoder.DecodeRawHdr(compressedData, width, height, bcnHdrFormat);
+            if (decoded == null || decoded.Length == 0)
+                return null;
+
+            var imageFloat = new StbImageSharp.ImageResultFloat()
+            {
+                Width = width,
+                Height = height,
+                Comp = StbImageSharp.ColorComponents.RedGreenBlueAlpha,
+                Data = new float[width * height * 4]
+            };
+
+            for (int i = 0; i < decoded.Length && i < width * height; i++)
+            {
+                int idx = i * 4;
+                imageFloat.Data[idx] = decoded[i].r;
+                imageFloat.Data[idx + 1] = decoded[i].g;
+                imageFloat.Data[idx + 2] = decoded[i].b;
+                imageFloat.Data[idx + 3] = 1.0f;
+            }
+            return imageFloat;
+        }
+
         public void SaveAssetTo_Deprecated(RName name)
         {
             //if (SaveAssetTo2(name) == true)
@@ -847,15 +1305,15 @@ namespace EngineNS.NxRHI
             {
                 if (mOriginImageObject.GetType() == typeof(TtMemImage))
                 {
-                    ImportAttribute.SaveSrv(mOriginImageObject as TtMemImage, name, this.PicDesc);
+                    ImportAttribute.SaveSrv_Deprecated(mOriginImageObject as TtMemImage, name, this.PicDesc);
                 }
                 else if (mOriginImageObject.GetType() == typeof(ImageResultFloat))
                 {
-                    ImportAttribute.SaveSrv(mOriginImageObject as ImageResultFloat, name, this.PicDesc);
+                    ImportAttribute.SaveSrv_Deprecated(mOriginImageObject as ImageResultFloat, name, this.PicDesc);
                 }
                 else if (mOriginImageObject.GetType() == typeof(EXRFile))
                 {
-                    ImportAttribute.SaveSrv(mOriginImageObject as EXRFile, name, this.PicDesc);
+                    ImportAttribute.SaveSrv_Deprecated(mOriginImageObject as EXRFile, name, this.PicDesc);
                 }
                 return;
             }
@@ -871,14 +1329,14 @@ namespace EngineNS.NxRHI
                             Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, $"SaveAssetTo failed: LoadOriginImage({AssetName}) = null");
                             return;
                         }
-                        ImportAttribute.SaveSrv(image, name, this.PicDesc);
+                        ImportAttribute.SaveSrv_Deprecated(image, name, this.PicDesc);
                     }
                     break;
                 case EngineNS.Bricks.ImageDecoder.UImageType.HDR:
                     {
                         StbImageSharp.ImageResultFloat imageFloat = new StbImageSharp.ImageResultFloat();
                         LoadOriginHdr(AssetName, ref imageFloat);
-                        ImportAttribute.SaveSrv(imageFloat, name, this.PicDesc);
+                        ImportAttribute.SaveSrv_Deprecated(imageFloat, name, this.PicDesc);
                     }
                     break;
                 case EngineNS.Bricks.ImageDecoder.UImageType.EXR:
@@ -890,7 +1348,7 @@ namespace EngineNS.NxRHI
                             Profiler.Log.WriteLine<Profiler.TtEditorGategory>(Profiler.ELogTag.Warning, $"SaveAssetTo failed: LoadOriginImage({AssetName}) = null");
                             return;
                         }
-                        ImportAttribute.SaveSrv(file, name, this.PicDesc);
+                        ImportAttribute.SaveSrv_Deprecated(file, name, this.PicDesc);
                     }
                     break;
                 case UImageType.Unkown:
@@ -1007,11 +1465,21 @@ namespace EngineNS.NxRHI
             var oldTexture = StreamingTexture;
             StreamingTexture = await TtEngine.Instance.EventPoster.Post((state) =>
             {
-                var xnd = IO.TtXndHolder.LoadXnd(AssetName.Address);
-                if (xnd == null)
-                    return null;
+                using (var xnd = IO.TtXndHolder.LoadXnd(AssetName.Address))
+                {
+                    if (xnd == null)
+                        return null;
 
-                return LoadTexture2DMipLevel(this.AssetName, xnd.RootNode, this.PicDesc, level, oldTexture);
+                    // New format: load from cooked cache
+                    if (TtTextureCookManager.HasRawSource(xnd.RootNode))
+                    {
+                        TtPicDesc cookedDesc;
+                        return TtTextureCookManager.LoadFromCooked(this.AssetName, level, out cookedDesc);
+                    }
+
+                    // Legacy format: load directly from .srv
+                    return LoadTexture2DMipLevel(this.AssetName, xnd.RootNode, this.PicDesc, level, oldTexture);
+                }
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
@@ -1281,10 +1749,10 @@ namespace EngineNS.NxRHI
             }
 
             // 使用ImageResultFloat的序列化
-            SaveTexture(assetName, node, imageFloat_Mip0, desc);
+            CookTextureTo(assetName, node, imageFloat_Mip0, desc);
         }
         
-        public static unsafe void SaveTexture(RName assetName, XndNode node, StbImageSharp.ImageResultFloat image, TtPicDesc desc)
+        public static unsafe void CookTextureTo(RName assetName, XndNode node, StbImageSharp.ImageResultFloat image, TtPicDesc desc)
         {
             var writeComp = UStbImageUtility.ConvertColorComponent(image.Comp);
             if (desc.Depth == 0)
@@ -1297,38 +1765,38 @@ namespace EngineNS.NxRHI
 
             }
 
-            if (desc.StripOriginSource && assetName != null)
-            {
-                using (var memStream = new System.IO.FileStream(assetName.Address + ".hdr", System.IO.FileMode.OpenOrCreate))
-                {
-                    var writer = new StbImageWriteSharp.ImageWriter();
-                    fixed (void* fptr = image.Data)
-                    {
-                        writer.WriteHdr(fptr, image.Width, image.Height, writeComp, memStream);
-                    }
-                }
-            }
-            else
-            {
-                if (desc.IsAutoSaveSrcImage == true)
-                {
-                    using (var memStream = new System.IO.MemoryStream())
-                    {
-                        var writer = new StbImageWriteSharp.ImageWriter();
-                        fixed (void* fptr = image.Data)
-                        {
-                            writer.WriteHdr(fptr, image.Width, image.Height, writeComp, memStream);
-                        }
-                        var rawData = memStream.ToArray();
+            //if (desc.StripOriginSource && assetName != null)
+            //{
+            //    using (var memStream = new System.IO.FileStream(assetName.Address + ".hdr", System.IO.FileMode.OpenOrCreate))
+            //    {
+            //        var writer = new StbImageWriteSharp.ImageWriter();
+            //        fixed (void* fptr = image.Data)
+            //        {
+            //            writer.WriteHdr(fptr, image.Width, image.Height, writeComp, memStream);
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    if (desc.IsAutoSaveSrcImage == true)
+            //    {
+            //        using (var memStream = new System.IO.MemoryStream())
+            //        {
+            //            var writer = new StbImageWriteSharp.ImageWriter();
+            //            fixed (void* fptr = image.Data)
+            //            {
+            //                writer.WriteHdr(fptr, image.Width, image.Height, writeComp, memStream);
+            //            }
+            //            var rawData = memStream.ToArray();
 
-                        var rawAttr = node.GetOrAddAttribute("Hdr", 0, 0, true);
-                        using (var ar = rawAttr.GetWriter((ulong)memStream.Position))
-                        {
-                            ar.WriteNoSize(rawData, (int)memStream.Position);
-                        }
-                    }
-                }
-            }
+            //            var rawAttr = node.GetOrAddAttribute("Hdr", 0, 0, true);
+            //            using (var ar = rawAttr.GetWriter((ulong)memStream.Position))
+            //            {
+            //                ar.WriteNoSize(rawData, (int)memStream.Position);
+            //            }
+            //        }
+            //    }
+            //}
 
             if (image.Width % 4 != 0 || image.Height % 4 != 0)
             {
@@ -1337,7 +1805,7 @@ namespace EngineNS.NxRHI
             int mipLevel = 0;
             var curImage = image;
             desc.MipSizes.Clear();
-            desc.CompressFormat = TtTextureHelper.SelectCompressFormat(desc);
+            desc.CompressFormat = TtTextureHelper.SelectHdrCompressFormat(desc);
             switch (desc.CompressFormat)
             {
                 case ETextureCompressFormat.TCF_None:
@@ -1402,48 +1870,48 @@ namespace EngineNS.NxRHI
             }
             return StbImageWriteSharp.ColorComponents.RedGreenBlue;
         }
-        public static unsafe void SaveTexture(RName assetName, XndNode node, StbImageSharp.TtMemImage image, TtPicDesc desc)
+        public static unsafe void CookTextureTo(RName assetName, XndNode node, StbImageSharp.TtMemImage image, TtPicDesc desc)
         {
             desc.Height = image.Height;
             desc.Width = image.Width;
-            if (desc.StripOriginSource && assetName != null)
-            {
-                using (var memStream = new System.IO.FileStream(assetName.Address + ".png", System.IO.FileMode.OpenOrCreate))
-                {
-                    var writer = new StbImageWriteSharp.ImageWriter();
-                    writer.WritePng(image.Data, image.Width, image.Height, GetImageWriteFormat(image), memStream);
-                }
-            }
-            else
-            {
-                if (desc.IsAutoSaveSrcImage == true)
-                {
-                    using (var memStream = new System.IO.MemoryStream(image.Data.Length))
-                    {
-                        var writer = new StbImageWriteSharp.ImageWriter();
+            //if (desc.StripOriginSource && assetName != null)
+            //{
+            //    using (var memStream = new System.IO.FileStream(assetName.Address + ".png", System.IO.FileMode.OpenOrCreate))
+            //    {
+            //        var writer = new StbImageWriteSharp.ImageWriter();
+            //        writer.WritePng(image.Data, image.Width, image.Height, GetImageWriteFormat(image), memStream);
+            //    }
+            //}
+            //else
+            //{
+            //    if (desc.IsAutoSaveSrcImage == true)
+            //    {
+            //        using (var memStream = new System.IO.MemoryStream(image.Data.Length))
+            //        {
+            //            var writer = new StbImageWriteSharp.ImageWriter();
 
-                        writer.WritePng(image.Data, image.Width, image.Height, GetImageWriteFormat(image), memStream);
-                        var pngData = memStream.ToArray();
+            //            writer.WritePng(image.Data, image.Width, image.Height, GetImageWriteFormat(image), memStream);
+            //            var pngData = memStream.ToArray();
 
-                        var size = (uint)memStream.Length;
-                        if (size > 0)
-                        {
-                            var len = CoreSDK.CompressBound_ZSTD(size) + 5;
-                            using (var d = BigStackBuffer.CreateInstance((int)len))
-                            {
-                                void* srcBuffer = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(pngData, 0).ToPointer();
-                                var wSize = (uint)CoreSDK.Compress_ZSTD(d.GetBuffer(), len, srcBuffer, size, 1);
-                            }
-                        }
+            //            var size = (uint)memStream.Length;
+            //            if (size > 0)
+            //            {
+            //                var len = CoreSDK.CompressBound_ZSTD(size) + 5;
+            //                using (var d = BigStackBuffer.CreateInstance((int)len))
+            //                {
+            //                    void* srcBuffer = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(pngData, 0).ToPointer();
+            //                    var wSize = (uint)CoreSDK.Compress_ZSTD(d.GetBuffer(), len, srcBuffer, size, 1);
+            //                }
+            //            }
 
-                        var attr = node.GetOrAddAttribute("Png", 0, 0, true);
-                        using (var ar = attr.GetWriter((ulong)memStream.Position))
-                        {
-                            ar.WriteNoSize(pngData, (int)memStream.Position);
-                        }
-                    }
-                }
-            }
+            //            var attr = node.GetOrAddAttribute("Png", 0, 0, true);
+            //            using (var ar = attr.GetWriter((ulong)memStream.Position))
+            //            {
+            //                ar.WriteNoSize(pngData, (int)memStream.Position);
+            //            }
+            //        }
+            //    }
+            //}
 
             if (image.Width % 4 != 0 || image.Height % 4 != 0)
             {
@@ -1480,10 +1948,10 @@ namespace EngineNS.NxRHI
                         }
                     }
                     break;
-                case ETextureCompressFormat.TCF_Dxt1://rgb:5-6-5 a:0
-                case ETextureCompressFormat.TCF_Dxt1a://rgb:5-6-5 a:1
-                case ETextureCompressFormat.TCF_Dxt3://rgb:5-6-5 a:8
-                case ETextureCompressFormat.TCF_Dxt5://rg:8-8
+                case ETextureCompressFormat.TCF_BC1:
+                case ETextureCompressFormat.TCF_BC1A:
+                case ETextureCompressFormat.TCF_BC2:
+                case ETextureCompressFormat.TCF_BC3:
                 case ETextureCompressFormat.TCF_BC4:
                 case ETextureCompressFormat.TCF_BC5:
                 case ETextureCompressFormat.TCF_BC6:
@@ -2148,37 +2616,49 @@ namespace EngineNS.NxRHI
             EPixelFormat descPixelFormat = EPixelFormat.PXF_UNKNOWN;
             switch (desc.CompressFormat)
             {
-                case ETextureCompressFormat.TCF_Dxt1:
+                case ETextureCompressFormat.TCF_BC1:
                     if (desc.sRGB)
                         descPixelFormat = EPixelFormat.PXF_BC1_UNORM_SRGB;
                     else
                         descPixelFormat = EPixelFormat.PXF_BC1_UNORM;
                     encoder.OutputOptions.Format = CompressionFormat.Bc1;
                     break;
-                case ETextureCompressFormat.TCF_Dxt1a:
+                case ETextureCompressFormat.TCF_BC1A:
                     if (desc.sRGB)
                         descPixelFormat = EPixelFormat.PXF_BC1_UNORM_SRGB;
                     else
                         descPixelFormat = EPixelFormat.PXF_BC1_UNORM;
                     encoder.OutputOptions.Format = CompressionFormat.Bc1WithAlpha;
                     break;
-                case ETextureCompressFormat.TCF_Dxt3:
+                case ETextureCompressFormat.TCF_BC2:
                     if (desc.sRGB)
                         descPixelFormat = EPixelFormat.PXF_BC2_UNORM_SRGB;
                     else
                         descPixelFormat = EPixelFormat.PXF_BC2_UNORM;
                     encoder.OutputOptions.Format = CompressionFormat.Bc2;
                     break;
-                case ETextureCompressFormat.TCF_Dxt5:
+                case ETextureCompressFormat.TCF_BC3:
                     if (desc.sRGB)
                         descPixelFormat = EPixelFormat.PXF_BC3_UNORM_SRGB;
                     else
                         descPixelFormat = EPixelFormat.PXF_BC3_UNORM;
                     encoder.OutputOptions.Format = CompressionFormat.Bc3;
                     break;
+                case ETextureCompressFormat.TCF_BC4:
+                    descPixelFormat = EPixelFormat.PXF_BC4_UNORM;
+                    encoder.OutputOptions.Format = CompressionFormat.Bc4;
+                    break;
                 case ETextureCompressFormat.TCF_BC5:
                         descPixelFormat = EPixelFormat.PXF_BC5_UNORM;
                     encoder.OutputOptions.Format = CompressionFormat.Bc5;
+                    break;
+                case ETextureCompressFormat.TCF_BC6:
+                    descPixelFormat = EPixelFormat.PXF_BC6H_UF16;
+                    encoder.OutputOptions.Format = CompressionFormat.Bc6U;
+                    break;
+                case ETextureCompressFormat.TCF_BC6_FLOAT:
+                    descPixelFormat = EPixelFormat.PXF_BC6H_SF16;
+                    encoder.OutputOptions.Format = CompressionFormat.Bc6S;
                     break;
                 case ETextureCompressFormat.TCF_Etc2_RGB8:
                     if (desc.sRGB)
@@ -2410,10 +2890,11 @@ namespace EngineNS.NxRHI
                         }
                         return null;
                     }
-                case ETextureCompressFormat.TCF_Dxt1:
-                case ETextureCompressFormat.TCF_Dxt1a:
-                case ETextureCompressFormat.TCF_Dxt3:
-                case ETextureCompressFormat.TCF_Dxt5:
+                case ETextureCompressFormat.TCF_BC1:
+                case ETextureCompressFormat.TCF_BC1A:
+                case ETextureCompressFormat.TCF_BC2:
+                case ETextureCompressFormat.TCF_BC3:
+                case ETextureCompressFormat.TCF_BC4:
                 case ETextureCompressFormat.TCF_BC5:
                 case ETextureCompressFormat.TCF_BC6:
                 case ETextureCompressFormat.TCF_BC6_FLOAT:
@@ -3150,6 +3631,13 @@ namespace EngineNS.NxRHI
                     if (xnd == null)
                         return null;
 
+                    // New format: .srv has "RawSource" node → load from cooked cache
+                    if (TtTextureCookManager.HasRawSource(xnd.RootNode))
+                    {
+                        return TtTextureCookManager.LoadOrCook(rn, xnd.RootNode, mipLevel, out desc);
+                    }
+
+                    // Legacy format: .srv has PngMips/DxtMips → load directly
                     desc = TtTextureHelper.LoadPictureDesc(xnd.RootNode);
 
                     if (mipLevel == -1 || mipLevel > desc.MipLevel)

@@ -412,9 +412,11 @@ namespace EngineNS.Plugins.BlenderImporter
                                 importer.mDir = outputDir;
                                 importer.mName = textureName;
                                 stream.Seek(0, SeekOrigin.Begin);
-                                var rn = importer.ImportImageImpl(stream);
-                                mtl.SetSrv(shaderName, rn);
-                                return rn != null;
+                                var srv = NxRHI.TtSrView.ImportImage(stream, importer, true);
+                                if (srv == null)
+                                    return false;
+                                mtl.SetSrv(shaderName, srv.AssetName);
+                                return true;
                             }
                         }
                         catch (Exception ex)
@@ -519,7 +521,10 @@ namespace EngineNS.Plugins.BlenderImporter
                 importer.mSourceFile = textureName + ".png";
                 importer.mDir = dir;
                 importer.mName = textureName;
-                return importer.ImportImageImpl(stream);
+                var srv = NxRHI.TtSrView.ImportImage(stream, importer, true);
+                if (srv == null)
+                    return null;
+                return srv.AssetName;
             }
         }
 
@@ -571,7 +576,11 @@ namespace EngineNS.Plugins.BlenderImporter
                     importer.mSourceFile = texturePath;
                     importer.mDir = dir;
                     importer.mName = textureName;
-                    return importer.ImportImageImpl(stream);
+                    var srv = NxRHI.TtSrView.ImportImage(stream, importer, true);
+                    if (srv != null)
+                    {
+                    }
+                    return srv.AssetName;
                 }
             }
             catch (Exception ex)
@@ -595,7 +604,11 @@ namespace EngineNS.Plugins.BlenderImporter
                 importer.mSourceFile = textureName + ".png";
                 importer.mDir = dir;
                 importer.mName = textureName;
-                return importer.ImportImageImpl(stream);
+                var srv = NxRHI.TtSrView.ImportImage(stream, importer, true);
+                if (srv != null)
+                {
+                }
+                return srv.AssetName;
             }
         }
 

@@ -94,7 +94,7 @@ namespace ProjectCooker.Command
             if (assetTypes == null)
             {
                 //throw new Exception("AssetType error");
-                //await ProcTextures();
+                await ProcTextures();
                 await ProcUVAnim();
                 await ProcMeshPrimitive();
                 await ProcUMesh();
@@ -304,7 +304,7 @@ namespace ProjectCooker.Command
                 //    asset.PicDesc.CompressFormat = EngineNS.NxRHI.ETextureCompressFormat.TCF_None;
 
 
-                //asset.SaveAssetTo(rn);
+                asset.CookAsset(rn);
                 asset.GetAMeta().SaveAMeta(asset);
                 procNum++;
                 EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Texture: {procNum}/{files.Length}");

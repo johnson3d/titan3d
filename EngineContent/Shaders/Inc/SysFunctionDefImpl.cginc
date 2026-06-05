@@ -26,7 +26,7 @@ float3 MTL_OUTPUT::GetWorldNormal(PS_INPUT input)
 float3 MTL_OUTPUT::GetWorldTangent(PS_INPUT input)
 {
     half3 worldTan = normalize(mTangent);
-#if USE_PS_Normal == 1 && USE_PS_Tangent == 1
+#if USE_PS_Normal == 1 && USE_PS_Tangent == 1 && MTL_FLOWMAP_TANGENT == 1
     CalcTangentMap((float3)mTangent, (float4) input.vTangent, (float3) input.vNormal, worldTan);
 #endif
     return worldTan;

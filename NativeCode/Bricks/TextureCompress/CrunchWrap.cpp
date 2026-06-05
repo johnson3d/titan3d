@@ -36,12 +36,11 @@ namespace TextureCompress
 	{
 		switch (fmt)
 		{
-		case NxRHI::ETextureCompressFormat::TCF_Dxt1:
-		case NxRHI::ETextureCompressFormat::TCF_Dxt1a:
+		case NxRHI::ETextureCompressFormat::TCF_BC1:
 			return crn_format::cCRNFmtDXT1;
-		case NxRHI::ETextureCompressFormat::TCF_Dxt3:
+		case NxRHI::ETextureCompressFormat::TCF_BC2:
 			return crn_format::cCRNFmtDXT3;
-		case NxRHI::ETextureCompressFormat::TCF_Dxt5:
+		case NxRHI::ETextureCompressFormat::TCF_BC3:
 			return crn_format::cCRNFmtDXT5;
 		default:
 			return crn_format::cCRNFmtInvalid;
@@ -57,18 +56,17 @@ namespace TextureCompress
 	{
 		switch (fmt)
 		{
-		case NxRHI::ETextureCompressFormat::TCF_Dxt1:
-		case NxRHI::ETextureCompressFormat::TCF_Dxt1a:
+		case NxRHI::ETextureCompressFormat::TCF_BC1:
 			if(srgb)
 				return PXF_BC1_UNORM_SRGB;
 			else
 				return PXF_BC1_UNORM;
-		case NxRHI::ETextureCompressFormat::TCF_Dxt3:
+		case NxRHI::ETextureCompressFormat::TCF_BC2:
 			if (srgb)
 				return PXF_BC2_UNORM_SRGB;
 			else
 				return PXF_BC2_UNORM;
-		case NxRHI::ETextureCompressFormat::TCF_Dxt5:
+		case NxRHI::ETextureCompressFormat::TCF_BC3:
 			if (srgb)
 				return PXF_BC3_UNORM_SRGB;
 			else
@@ -96,10 +94,6 @@ namespace TextureCompress
 		comp_params.m_pImages[5][0] = pSrcImage->Image5;
 
 		comp_params.m_format = ToCrunchFomat(fmt);
-		if (fmt == NxRHI::ETextureCompressFormat::TCF_Dxt1a)
-		{
-			comp_params.set_flag(cCRNCompFlagDXT1AForTransparency, true);
-		}
 		comp_params.set_flag(cCRNCompFlagPerceptual, srgb);
 		comp_params.set_flag(cCRNCompFlagHierarchical, use_adaptive_block_sizes);
 		

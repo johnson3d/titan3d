@@ -11,6 +11,7 @@
       <Position Type="EngineNS.Vector2@EngineCore" Value="865,223.99998" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtCopy2SwapChainNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
+        <UniqueId Type="System.Guid@Unknown" Value="f7bb471f-0706-40f2-bb40-754957d1d371" />
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
@@ -25,20 +26,21 @@
   </Nodes>
   <PolicyType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore" />
   <RenderPolicy Type="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore">
-    <DisableAO Type="System.Boolean@Unknown" Value="False" />
-    <DisableHDR Type="System.Boolean@Unknown" Value="False" />
-    <DisablePointLight Type="System.Boolean@Unknown" Value="False" />
+    <EnableAO Type="System.Boolean@Unknown" Value="True" />
+    <EnableContactShadow Type="System.Boolean@Unknown" Value="True" />
+    <EnableGI Type="System.Boolean@Unknown" Value="True" />
+    <EnableLocalLights Type="System.Boolean@Unknown" Value="True" />
     <ShadowMode Type="EngineNS.Graphics.Pipeline.EShadowMode@EngineCore" Value="Csm" />
-    <TypeAA Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA@EngineCore" Value="Taa" />
     <TypeFog Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog@EngineCore" Value="None" />
   </RenderPolicy>
-  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
-      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="9f1f1cbc-9cfe-4392-93a3-fbf7f992c628" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="00000000-0000-0000-0000-000000000000" />
       </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
     </e_0>
   </Linkers>
 </Root>

@@ -460,6 +460,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 mNormalMode = value;
             }
         }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public bool IsFlowMapTangent { get; set; } = false;
         protected ERenderLayer mRenderLayer = ERenderLayer.RL_Opaque;
         [Rtti.Meta("")]
         [Category("Option")]
@@ -643,6 +646,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     break;
             }
 
+            if (IsFlowMapTangent)
+            {
+                codeBuilder.AddLine("#define MTL_FLOWMAP_TANGENT 1", ref sourceCode);
+            }
 
             if (AlphaTest)
             {

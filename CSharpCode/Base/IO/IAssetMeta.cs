@@ -1135,15 +1135,24 @@ namespace EngineNS.IO
             }
             return null;
         }
-        public bool RegAsset(IAssetMeta ameta)
+        public bool RegAsset(IAssetMeta ameta, bool bForce = false)
         {
             lock (this)
             {
                 if (Assets.ContainsKey(ameta.AssetId) ||
                 RNameAssets.ContainsKey(ameta.GetAssetName()))
                 {
-                    Profiler.Log.WriteLine<Profiler.TtAssetGategory>(Profiler.ELogTag.Error, $"RegAsset {ameta.AssetName}/{ameta.AssetId} failed ");
-                    return false;
+                    if (bForce)
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtAssetGategory>(Profiler.ELogTag.Error, $"RegAsset {ameta.AssetName}/{ameta.AssetId} failed ");
+                        return false;
+                    }
+                    else
+                    {
+                        Assets[ameta.AssetId] = ameta;
+                        RNameAssets[ameta.GetAssetName()] = ameta;
+                        return true;
+                    }
                 }
                 Assets.Add(ameta.AssetId, ameta);
                 RNameAssets.Add(ameta.GetAssetName(), ameta);

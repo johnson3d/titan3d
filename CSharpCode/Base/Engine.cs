@@ -70,7 +70,7 @@ namespace EngineNS
         public string ImGuiIniPath { get; set; } = "imgui.ini";
         [Rtti.Meta("")]
         [Category("Option")]
-        public string CookAssetType { get; set; } = "Scene+Mesh+Material+MaterialInst+AnimClip+MeshPrimitive+UI+Prefab+Macross+UVAnim+RPolicy+AnimationClip+BlendSpace+MaterialFunction";
+        public string CookAssetType { get; set; } = "Texture+Scene+Mesh+Material+MaterialInst+AnimClip+MeshPrimitive+UI+Prefab+Macross+UVAnim+RPolicy+AnimationClip+BlendSpace+MaterialFunction";
         [Rtti.Meta("")]
         [Category("Option")]
         public EMultiRenderMode MultiRenderMode { get; set; } = EMultiRenderMode.Queue;
