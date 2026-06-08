@@ -68,6 +68,30 @@ namespace EngineNS.Editor.Forms
         Dictionary<FBoneLine, TtRenderMesh> BoneLineMeshes = new();
         public TtSkeletonAsset SkeletonAsset { get; set; } = null;
         public TtLocalSpaceRuntimePose CurrentPose = null;
+        bool mXRay = false;
+
+        Graphics.Pipeline.Shader.TtMaterial ShowMaterial = null;
+        Graphics.Pipeline.Shader.TtMaterial GetBoneMaterial()
+        {
+            if (ShowMaterial == null)
+            {
+                ShowMaterial = TtEngine.Instance.GfxDevice.MaterialInstanceManager.VtxColorMaterial;
+            }
+            return ShowMaterial;
+        }
+
+        /// <summary>
+        /// 开启/关闭 X-Ray 模式（关闭深度测试，骨架始终绘制在最前面）
+        /// </summary>
+        public void SetXRay(bool xray)
+        {
+            mXRay = xray;
+            var mat = GetBoneMaterial();
+            var ds = mat.DepthStencil;
+            ds.m_DepthEnable = xray ? 0 : 1;
+            mat.DepthStencil = ds;
+        }
+
         protected override Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var nodeData = data as TtSkeletonShowNodeData;
@@ -75,11 +99,12 @@ namespace EngineNS.Editor.Forms
             var animPose = SkeletonAsset.Skeleton.CreatePose() as Animation.SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
             CurrentPose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animPose);
             var runtimePose = TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(CurrentPose);
+            var wireMat = GetBoneMaterial();
             for (int i = 0; i < SkeletonAsset.Skeleton.Limbs.Count; ++i)
             {
                 var index = SkeletonAsset.Skeleton.Limbs[i].Index.Value;
                 var meshProvider = Graphics.Mesh.TtMeshDataProvider.MakeSphere(0.005f, 5, 5, Color4b.Green.ToB8G8R8A8());
-                var mesh = meshProvider.ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
+                var mesh = meshProvider.ToDrawMesh(wireMat);
                 BoneMeshes.Add(index, mesh);
             }
             CreateBoneLineMesh(SkeletonAsset.Skeleton.Root);
@@ -92,7 +117,7 @@ namespace EngineNS.Editor.Forms
             {
                 var end = child.Index.Value;
                 var meshProvider = Graphics.Mesh.TtMeshDataProvider.MakeBox(0, -0.0005f, -0.0005f, 1, 0.001f, 0.001f, Color4b.Green.ToB8G8R8A8());
-                var mesh = meshProvider.ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
+                var mesh = meshProvider.ToDrawMesh(GetBoneMaterial());
                 var boneLine = new FBoneLine() { Start = start, End = end };
                 BoneLineMeshes.Add(boneLine, mesh);
                 CreateBoneLineMesh(child);
@@ -120,6 +145,48 @@ namespace EngineNS.Editor.Forms
                 ShowBoneLine(child, runtimePose, rp);
             }
         }
+        int mHighlightedBoneIndex = -1;
+
+        /// <summary>
+        /// 高亮指定骨骼（放大球体并变色），传 null 取消高亮
+        /// </summary>
+        public void HighlightBone(string boneName)
+        {
+            int newIndex = -1;
+            if (boneName != null && SkeletonAsset?.Skeleton != null)
+            {
+                foreach (var limb in SkeletonAsset.Skeleton.Limbs)
+                {
+                    if (limb.Desc?.Name == boneName)
+                    {
+                        newIndex = limb.Index.Value;
+                        break;
+                    }
+                }
+            }
+
+            if (mHighlightedBoneIndex == newIndex)
+                return;
+
+            var mat = GetBoneMaterial();
+
+            // 恢复旧的
+            if (mHighlightedBoneIndex >= 0 && BoneMeshes.ContainsKey(mHighlightedBoneIndex))
+            {
+                var mp = Graphics.Mesh.TtMeshDataProvider.MakeSphere(0.005f, 5, 5, Color4b.Green.ToB8G8R8A8());
+                BoneMeshes[mHighlightedBoneIndex] = mp.ToDrawMesh(mat);
+            }
+
+            // 高亮新的
+            if (newIndex >= 0 && BoneMeshes.ContainsKey(newIndex))
+            {
+                var mp = Graphics.Mesh.TtMeshDataProvider.MakeSphere(0.01f, 8, 8, 0xFF0000FF);
+                BoneMeshes[newIndex] = mp.ToDrawMesh(mat);
+            }
+
+            mHighlightedBoneIndex = newIndex;
+        }
+
         public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             var runtimePose = TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(CurrentPose);
@@ -133,7 +200,7 @@ namespace EngineNS.Editor.Forms
             base.OnGatherVisibleMeshes(rp);
         }
     }
-    public class TtSkeletonEditor : Editor.IAssetEditor, ITickable, IRootForm
+    public class TtSkeletonEditor : Editor.IAssetEditor, ITickable, IRootForm, ISkeletonTreeHost
     {
         public int GetTickOrder()
         {
@@ -142,6 +209,7 @@ namespace EngineNS.Editor.Forms
         public Animation.Asset.TtSkeletonAsset SkeletonAsset;
         public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
         public EGui.Controls.PropertyGrid.TtPropertyGrid AnimationClipPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+        TtSkeletonTreePanel SkeletonTreePanel = new TtSkeletonTreePanel();
         ~TtSkeletonEditor()
         {
             Dispose();
@@ -194,9 +262,14 @@ namespace EngineNS.Editor.Forms
 
             var rightId = id;
             uint leftId = 0;
+            uint leftUpId = 0;
+            uint leftDownId = 0;
             ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
+            ImGuiAPI.DockBuilderSplitNode(leftId, ImGuiDir.ImGuiDir_Down, 0.5f, ref leftDownId, ref leftUpId);
 
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Left", mDockKeyClass), leftId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Skeleton", mDockKeyClass), leftUpId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("BoneDetails", mDockKeyClass), leftDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Left", mDockKeyClass), leftDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Right", mDockKeyClass), rightId);
             ImGuiAPI.DockBuilderFinish(id);
         }
@@ -229,6 +302,7 @@ namespace EngineNS.Editor.Forms
             ResetDockspace();
             EGui.UIProxy.DockProxy.EndMainForm(result);
 
+            DrawSkeleton();
             DrawLeft();
             DrawRight();
         }
@@ -258,6 +332,35 @@ namespace EngineNS.Editor.Forms
 
             }
         }
+        public void OnBoneSelected(ILimb selectedBone)
+        {
+        }
+
+        public void OnShapeSelected(Graphics.Mesh.PhysicsAsset.TtCollisionShape shape, GamePlay.Scene.TtNode proxyNode)
+        {
+        }
+
+        bool mShowSkeletonPanel = true;
+        bool mShowBoneDetails = true;
+        protected void DrawSkeleton()
+        {
+            if (!SkeletonTreePanel.HasSkeleton)
+                return;
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Skeleton", ref mShowSkeletonPanel, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                SkeletonTreePanel.OnDrawTree();
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+
+            var showDetails = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "BoneDetails", ref mShowBoneDetails, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (showDetails)
+            {
+                SkeletonTreePanel.OnDrawBoneDetails();
+            }
+            EGui.UIProxy.DockProxy.EndPanel(showDetails);
+        }
+
         bool mLeftShow = true;
         protected unsafe void DrawLeft()
         {
@@ -329,6 +432,7 @@ namespace EngineNS.Editor.Forms
             AnimationClipPreview = new TtAnimationClipPreview();
             AnimationClipPreview.SkeletonEditor = this;
             AnimationClipPropGrid.Target = AnimationClipPreview;
+            SkeletonTreePanel.SetSkeleton(SkeletonAsset.Skeleton, this);
             TtEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }

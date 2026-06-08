@@ -213,7 +213,7 @@ namespace EngineNS.Editor
             dirLight.SkyLightColor = cfg?.StudioSkyLightColor ?? new Vector3(0.31f, 0.34f, 0.40f);
             dirLight.GroundLightColor = cfg?.StudioGroundLightColor ?? new Vector3(0.24f, 0.22f, 0.20f);
         }
-        public void FrameStudioCamera(in BoundingBox assetBounds, float padding = 1.2f)
+        public void FrameStudioCamera(in BoundingBox assetBounds, float padding = 1.2f, float zoomTimeInSecond = 0.0f)
         {
             if (RenderPolicy?.DefaultCamera == null)
                 return;
@@ -221,7 +221,18 @@ namespace EngineNS.Editor
             DBoundingSphere sphere;
             sphere.Center = assetBounds.GetCenter().AsDVector();
             sphere.Radius = MathHelper.Max(assetBounds.GetMaxSide() * padding, 1.0f);
-            RenderPolicy.DefaultCamera.AutoZoom(in sphere);
+            RenderPolicy.DefaultCamera.AutoZoom(in sphere, zoomTimeInSecond);
+        }
+        public override bool FocusViewport()
+        {
+            if (StudioContext != null)
+            {
+                var assetBounds = StudioContext.AssetBounds;
+                FrameStudioCamera(in assetBounds);
+                return true;
+            }
+
+            return base.FocusViewport();
         }
         public async Thread.Async.TtTask<TtPreviewStudioContext> CreateStudioEnvironment(
             BoundingBox assetBounds,

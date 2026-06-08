@@ -82,6 +82,28 @@ namespace EngineNS.Editor
         }
     }
 
+    public class TtRenderDocFrameCountMenuItem : EGui.UIProxy.IUIProxyBase
+    {
+        public void Cleanup() { }
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            await Thread.TtAsyncDummyClass.DummyFunc();
+            return true;
+        }
+        public unsafe bool OnDraw(in ImDrawList drawList, in Support.TtAnyPointer drawData)
+        {
+            ImGuiAPI.Text("Frames:");
+            ImGuiAPI.SameLine(0, 4);
+            ImGuiAPI.SetNextItemWidth(120);
+            int frameCount = TtEngine.Instance.EditorInstance.RenderDocCaptureFrameCount;
+            if (ImGuiAPI.InputInt("##CapFrames", (int*)&frameCount, 1, 1, ImGuiInputTextFlags_.ImGuiInputTextFlags_None))
+            {
+                TtEngine.Instance.EditorInstance.RenderDocCaptureFrameCount = Math.Max(1, frameCount);
+            }
+            return false;
+        }
+    }
+
     public partial class TtMainEditorApplication : TtSlateApplication, ITickable
     {
         public int GetTickOrder()
@@ -308,10 +330,13 @@ namespace EngineNS.Editor
                                 {
                                     IRenderDocTool.GetInstance().SetGpuDevice(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject);
                                     IRenderDocTool.GetInstance().SetActiveWindow(this.NativeWindow.HWindow.ToPointer());
+                                    var frameCount = Math.Max(1, TtEngine.Instance.EditorInstance.RenderDocCaptureFrameCount);
+                                    TtEngine.Instance.GfxDevice.RenderQueue.RemainingCaptureFrames = frameCount - 1;
                                     TtEngine.Instance.GfxDevice.RenderQueue.CaptureRenderDocFrame = true;
                                 }
                             },
                         },
+                        new TtRenderDocFrameCountMenuItem(),
                         new EGui.UIProxy.MenuItemProxy()
                         {
                             MenuName = "CapMem",

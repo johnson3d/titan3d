@@ -38,6 +38,10 @@ namespace EngineNS.Editor
         {
 
         }
+        public virtual void OnNodeUI_LDoubleClick(INodeUIProvider provider)
+        {
+
+        }
         public virtual void OnNodeUI_Activated(INodeUIProvider provider)
         {
 
@@ -91,6 +95,10 @@ namespace EngineNS.GamePlay.Scene
                 {
                     tree.OnNodeUI_LClick(this);
                 }
+                if (ImGuiAPI.IsItemDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                {
+                    tree.OnNodeUI_LDoubleClick(this);
+                }
                 if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
                 {
                     tree.OnNodeUI_RClick(this);
@@ -109,6 +117,10 @@ namespace EngineNS.GamePlay.Scene
                 if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                 {
                     tree.OnNodeUI_LClick(this);
+                }
+                if (ImGuiAPI.IsItemDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                {
+                    tree.OnNodeUI_LDoubleClick(this);
                 }
                 if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
                 {

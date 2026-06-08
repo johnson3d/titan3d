@@ -577,8 +577,9 @@ namespace EngineNS.Plugins.BlenderImporter
                     importer.mDir = dir;
                     importer.mName = textureName;
                     var srv = NxRHI.TtSrView.ImportImage(stream, importer, true);
-                    if (srv != null)
+                    if (srv == null)
                     {
+                        return null;
                     }
                     return srv.AssetName;
                 }
@@ -605,8 +606,9 @@ namespace EngineNS.Plugins.BlenderImporter
                 importer.mDir = dir;
                 importer.mName = textureName;
                 var srv = NxRHI.TtSrView.ImportImage(stream, importer, true);
-                if (srv != null)
+                if (srv == null)
                 {
+                    return null;
                 }
                 return srv.AssetName;
             }

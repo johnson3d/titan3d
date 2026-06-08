@@ -254,6 +254,13 @@ namespace EngineNS.Editor.Forms
                 }
                 return base.OnEvent(in e);
             }
+            public override bool FocusViewport()
+            {
+                if (HostEditor?.mWorldOutliner?.FocusSelectedNodesInViewport() == true)
+                    return true;
+
+                return base.FocusViewport();
+            }
         }
 
         // 统一的"清空所有选择"入口: 同时清理
@@ -590,6 +597,7 @@ namespace EngineNS.Editor.Forms
             Scene = await name.GetAsset<TtScene>(PreviewViewport.World);// TtEngine.Instance.SceneManager.CreateScene(PreviewViewport.World, name);
             if (Scene == null)
                 return false;
+            Scene.NodeName = name.PureName;
             var rpolicy = Scene.RPolicyName;
             if (rpolicy == null)
                 rpolicy = TtEngine.Instance.Config.MainRPolicyName;
@@ -704,28 +712,6 @@ namespace EngineNS.Editor.Forms
                 //ImGuiAPI.BeginChild("Client", ref sz, false, ImGuiWindowFlags_.)
                 ImGuiAPI.Separator();
 
-                //if (ImGuiAPI.IsWindowHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_ChildWindows))
-                {
-                    if (TtEngine.Instance.InputSystem.IsKeyPressed(Bricks.Input.Keycode.KEY_f))
-                    {
-                        DBoundingBox box = DBoundingBox.EmptyBox();
-                        for (int i = 0; i < mWorldOutliner.SelectedNodes.Count; i++)
-                        {
-                            var transform = mWorldOutliner.SelectedNodes[i].Placement.AbsTransform;
-                            var corners = mWorldOutliner.SelectedNodes[i].RefAABB.GetCorners();
-                            for (int cornerIdx = 0; cornerIdx < corners.Length; cornerIdx++)
-                            {
-                                var absPos = transform.TransformPosition(in corners[cornerIdx]);
-                                box.Merge(in absPos);
-                            }
-                        }
-                        if (!box.IsEmpty())
-                        {
-                            DBoundingSphere sphere = new DBoundingSphere(box.GetCenter(), (float)box.GetMaxSide());
-                            PreviewViewport.CameraController.Camera.AutoZoom(in sphere, 0.2f);
-                        }
-                    }
-                }
             }
             ResetDockspace();
             EGui.UIProxy.DockProxy.EndMainForm(IsDrawing);

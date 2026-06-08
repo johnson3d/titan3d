@@ -486,6 +486,74 @@ namespace EngineNS.Graphics.Mesh
         }
         #endregion
 
+        #region EllipticalConeWireframe
+        /// <summary>
+        /// 生成椭圆锥线框（LineList），用于可视化 Swing1/Swing2 关节限制角。
+        /// 锥体沿 +X 轴延伸，Swing1 控制 Y 方向张角，Swing2 控制 Z 方向张角。
+        /// </summary>
+        /// <param name="length">锥体长度（沿 X 轴）</param>
+        /// <param name="swing1Rad">Swing1 半角（弧度），Y 方向</param>
+        /// <param name="swing2Rad">Swing2 半角（弧度），Z 方向</param>
+        /// <param name="segments">椭圆底面分段数</param>
+        /// <param name="color">线框颜色</param>
+        public static unsafe TtMeshDataProvider MakeEllipticalConeWireframe(
+            float length, float swing1Rad, float swing2Rad, int segments = 32, UInt32 color = 0xFFFFFFFF)
+        {
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
+            meshBuilder.AssetName = RName.GetRName("@MakeEllipticalConeWireframe", RName.ERNameType.Transient);
+            var builder = meshBuilder.mCoreObject;
+            uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
+                (1 << (int)NxRHI.EVertexStreamType.VST_Color));
+            builder.Init(streams, false, 1);
+
+            float radiusY = length * (float)Math.Tan(swing1Rad);
+            float radiusZ = length * (float)Math.Tan(swing2Rad);
+            float maxR = Math.Max(radiusY, radiusZ);
+            var aabb = new BoundingBox(-maxR, -maxR, 0, maxR, maxR, length);
+            builder.SetAABB(ref aabb);
+
+            // 顶点 0 = 锥顶（原点）
+            var apex = Vector3.Zero;
+            builder.AddVertex(in apex, in Vector3.UnitX, in Vector2.One, color);
+
+            // 顶点 1..segments = 椭圆底面上的点
+            for (int i = 0; i < segments; i++)
+            {
+                float theta = 2.0f * MathHelper.PI * i / segments;
+                float y = radiusY * (float)Math.Sin(theta);
+                float z = radiusZ * (float)Math.Cos(theta);
+                var pos = new Vector3(length, y, z);
+                builder.AddVertex(in pos, in Vector3.UnitX, in Vector2.One, color);
+            }
+
+            // 线段：锥顶到底面（每隔几个点画一条母线，4条主母线）
+            int motherLineInterval = segments / 4;
+            if (motherLineInterval < 1) motherLineInterval = 1;
+            int motherLineCount = 0;
+            for (int i = 0; i < segments; i += motherLineInterval)
+            {
+                builder.AddLine(0, (UInt16)(1 + i));
+                motherLineCount++;
+            }
+
+            // 线段：底面椭圆环
+            for (int i = 0; i < segments; i++)
+            {
+                UInt16 a = (UInt16)(1 + i);
+                UInt16 b = (UInt16)(1 + (i + 1) % segments);
+                builder.AddLine(a, b);
+            }
+
+            var dpDesc = new NxRHI.FMeshAtomDesc();
+            dpDesc.SetDefault();
+            dpDesc.PrimitiveType = NxRHI.EPrimitiveType.EPT_LineList;
+            dpDesc.NumPrimitives = (uint)(motherLineCount + segments);
+
+            builder.PushAtomLOD(0, &dpDesc);
+            return meshBuilder;
+        }
+        #endregion
+
         #region Rect2D
         public class UMakeRect2DParameter
         {

@@ -132,6 +132,7 @@ namespace EngineNS.Bricks.NodeGraph
         public string GroupName;
         public bool ShowIcon = true;
         public bool ShowName = true;
+        public bool Visible = true;
 
         public bool IsHit(float x, float y)
         {
@@ -417,96 +418,109 @@ namespace EngineNS.Bricks.NodeGraph
             fNodeH += TitleHeight;
             fNodeH += styles.TitlePadding.Y;
             PrevPos.Y = Position.Y + fNodeH;
+            // Collect visible pins for layout (hidden pins skip layout entirely)
+            var visibleInputs = new List<PinIn>();
+            foreach (var pin in Inputs)
+            {
+                if (pin.Visible)
+                    visibleInputs.Add(pin);
+            }
+            var visibleOutputs = new List<PinOut>();
+            foreach (var pin in Outputs)
+            {
+                if (pin.Visible)
+                    visibleOutputs.Add(pin);
+            }
+
             float maxInputSizeX = 0;
-            var lines = Math.Max(Inputs.Count, Outputs.Count);
+            var lines = Math.Max(visibleInputs.Count, visibleOutputs.Count);
             for (int i = 0; i < lines; i++)
             {
                 lineWidth = 0;
                 lineHeight = 0;
                 float extPadding = 0;
-                if (i < Inputs.Count)
+                if (i < visibleInputs.Count)
                 {
+                    var curInput = visibleInputs[i];
                     var inIcon = styles.PinInStyle.Image;
-                    if (Inputs[i].LinkDesc != null)
+                    if (curInput.LinkDesc != null)
                     {
-                        if (Inputs[i].LinkDesc.Icon != null)
+                        if (curInput.LinkDesc.Icon != null)
                         {
-                            inIcon = Inputs[i].LinkDesc.Icon;
+                            inIcon = curInput.LinkDesc.Icon;
                         }
                     }
 
                     var offset = styles.PinInStyle.Offset + styles.PinPadding;
                     lineWidth += offset;
-                    Inputs[i].Position = Position + new Vector2(offset, fNodeH);
-                    Inputs[i].Size = inIcon.Size;
+                    curInput.Position = Position + new Vector2(offset, fNodeH);
+                    curInput.Size = inIcon.Size;
 
-                    nameSize = CalcTextSize(Inputs[i].Name);
-                    var inputSize = Inputs[i].Size;
+                    nameSize = CalcTextSize(curInput.Name);
+                    var inputSize = curInput.Size;
                     SetIfBigger(ref inputSize.Y, nameSize.Y);
                     inputSize.X += styles.PinSpacing;
                     inputSize.X += nameSize.X;
-                    Inputs[i].Size = inputSize;
+                    curInput.Size = inputSize;
                     lineWidth += inputSize.X;
 
-                    //lineWidth += styles.MinSpaceInOut;
+                    SetIfBigger(ref lineHeight, curInput.Size.Y);
 
-                    SetIfBigger(ref lineHeight, Inputs[i].Size.Y);
-
-                    if (Inputs[i].LinkDesc != null)
+                    if (curInput.LinkDesc != null)
                     {
-                        SetIfBigger(ref extPadding, Inputs[i].LinkDesc.ExtPadding);
+                        SetIfBigger(ref extPadding, curInput.LinkDesc.ExtPadding);
                     }
-                    if(Inputs[i].EditValue != null)
+                    if(curInput.EditValue != null)
                     {
-                        var editWidth = Inputs[i].EditValue.ControlWidth + styles.PinSpacing;
+                        var editWidth = curInput.EditValue.ControlWidth + styles.PinSpacing;
                         lineWidth += editWidth;
                         inputSize.X += editWidth;
-                        var editHeight = Inputs[i].EditValue.ControlHeight;
+                        var editHeight = curInput.EditValue.ControlHeight;
                         SetIfBigger(ref inputSize.Y, editHeight);
                         SetIfBigger(ref lineHeight, inputSize.Y);
-                        Inputs[i].Size = inputSize;
+                        curInput.Size = inputSize;
                     }
 
-                    Inputs[i].HotPosition = new Vector2(
-                        Inputs[i].Position.X,
-                        Inputs[i].Position.Y + (Inputs[i].Size.Y - inIcon.Size.Y) * 0.5f + 2.0f);
-                    Inputs[i].HotSize = inIcon.Size;
-                    Inputs[i].NamePosition = new Vector2(
-                        Inputs[i].HotPosition.X + Inputs[i].HotSize.X + styles.PinSpacing,
-                        Inputs[i].Position.Y + (Inputs[i].Size.Y - nameSize.Y) * 0.5f);
+                    curInput.HotPosition = new Vector2(
+                        curInput.Position.X,
+                        curInput.Position.Y + (curInput.Size.Y - inIcon.Size.Y) * 0.5f + 2.0f);
+                    curInput.HotSize = inIcon.Size;
+                    curInput.NamePosition = new Vector2(
+                        curInput.HotPosition.X + curInput.HotSize.X + styles.PinSpacing,
+                        curInput.Position.Y + (curInput.Size.Y - nameSize.Y) * 0.5f);
 
-                    Inputs[i].EditValuePosition = Inputs[i].NamePosition + new Vector2(styles.PinSpacing + nameSize.X, 0);
+                    curInput.EditValuePosition = curInput.NamePosition + new Vector2(styles.PinSpacing + nameSize.X, 0);
                 }
                 SetIfBigger(ref maxInputSizeX, lineWidth);
-                if (i < Outputs.Count)
+                if (i < visibleOutputs.Count)
                 {
+                    var curOutput = visibleOutputs[i];
                     var inIcon = styles.PinOutStyle.Image;
-                    if (Outputs[i].LinkDesc != null)
+                    if (curOutput.LinkDesc != null)
                     {
-                        if (Outputs[i].LinkDesc.Icon != null)
+                        if (curOutput.LinkDesc.Icon != null)
                         {
-                            inIcon = Outputs[i].LinkDesc.Icon;
+                            inIcon = curOutput.LinkDesc.Icon;
                         }
                     }
                     lineWidth += styles.PinOutStyle.Offset + styles.PinPadding;
-                    Outputs[i].Position = new Vector2(styles.PinOutStyle.Offset + styles.PinPadding, Position.Y + fNodeH);
-                    Outputs[i].Size = inIcon.Size;
-                    Outputs[i].HotSize = inIcon.Size;
+                    curOutput.Position = new Vector2(styles.PinOutStyle.Offset + styles.PinPadding, Position.Y + fNodeH);
+                    curOutput.Size = inIcon.Size;
+                    curOutput.HotSize = inIcon.Size;
 
-                    nameSize = CalcTextSize(Outputs[i].Name);
-                    var outputSize = Outputs[i].Size;
+                    nameSize = CalcTextSize(curOutput.Name);
+                    var outputSize = curOutput.Size;
                     SetIfBigger(ref outputSize.Y, nameSize.Y);
                     outputSize.X += styles.PinSpacing;
                     outputSize.X += nameSize.X;
-                    Outputs[i].Size = outputSize;
+                    curOutput.Size = outputSize;
                     lineWidth += outputSize.X;
-                    //lineWidth += styles.MinSpaceInOut;
 
-                    SetIfBigger(ref lineHeight, Outputs[i].Size.Y);
+                    SetIfBigger(ref lineHeight, curOutput.Size.Y);
 
-                    if (Outputs[i].LinkDesc != null)
+                    if (curOutput.LinkDesc != null)
                     {
-                        SetIfBigger(ref extPadding, Outputs[i].LinkDesc.ExtPadding);
+                        SetIfBigger(ref extPadding, curOutput.LinkDesc.ExtPadding);
                     }
                 }
 
@@ -520,19 +534,20 @@ namespace EngineNS.Bricks.NodeGraph
             {
                 Size = new Vector2(Size.X, TitleHeight + PrevSize.Y + doubleSpacing);
             }
-            for (int i = 0; i < Outputs.Count; i++)
+            for (int i = 0; i < visibleOutputs.Count; i++)
             {
-                float oldValue = Outputs[i].Position.X;
-                Outputs[i].Position = new Vector2(Position.X + Size.X - oldValue - Outputs[i].Size.X, Outputs[i].Position.Y);
+                var curOutput = visibleOutputs[i];
+                float oldValue = curOutput.Position.X;
+                curOutput.Position = new Vector2(Position.X + Size.X - oldValue - curOutput.Size.X, curOutput.Position.Y);
 
-                Outputs[i].HotPosition = new Vector2(
-                    Outputs[i].Position.X + Outputs[i].Size.X - Outputs[i].HotSize.X,
-                    Outputs[i].Position.Y + (Outputs[i].Size.Y - Outputs[i].HotSize.Y) * 0.5f + 2.0f);
+                curOutput.HotPosition = new Vector2(
+                    curOutput.Position.X + curOutput.Size.X - curOutput.HotSize.X,
+                    curOutput.Position.Y + (curOutput.Size.Y - curOutput.HotSize.Y) * 0.5f + 2.0f);
 
-                nameSize = CalcTextSize(Outputs[i].Name);
-                Outputs[i].NamePosition = new Vector2(
-                    Outputs[i].Position.X,
-                    Outputs[i].Position.Y + (Outputs[i].Size.Y - nameSize.Y) * 0.5f);
+                nameSize = CalcTextSize(curOutput.Name);
+                curOutput.NamePosition = new Vector2(
+                    curOutput.Position.X,
+                    curOutput.Position.Y + (curOutput.Size.Y - nameSize.Y) * 0.5f);
             }
         }
         public bool IsHit(float x, float y)
@@ -559,12 +574,12 @@ namespace EngineNS.Bricks.NodeGraph
         {
             foreach (var i in Inputs)
             {
-                if (i.IsHit(x, y))
+                if (i.Visible && i.IsHit(x, y))
                     return i;
             }
             foreach (var i in Outputs)
             {
-                if (i.IsHit(x, y))
+                if (i.Visible && i.IsHit(x, y))
                     return i;
             }
             return null;
@@ -600,6 +615,8 @@ namespace EngineNS.Bricks.NodeGraph
         {
             if (InNode == this)
                 return false;
+            if (!oPin.Visible || !iPin.Visible)
+                return false;
             if (oPin.LinkDesc != null && iPin.LinkDesc != null)
             {
                 foreach (var i in oPin.LinkDesc.CanLinks)
@@ -620,6 +637,8 @@ namespace EngineNS.Bricks.NodeGraph
         public virtual bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (OutNode == this)
+                return false;
+            if (!iPin.Visible || !oPin.Visible)
                 return false;
             if (oPin.LinkDesc != null && iPin.LinkDesc != null)
             {

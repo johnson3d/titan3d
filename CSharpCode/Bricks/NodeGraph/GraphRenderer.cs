@@ -164,6 +164,12 @@ namespace EngineNS.Bricks.NodeGraph
                         tempGraph.Linkers.RemoveAt(i);
                         break;
                     }
+                    // Skip drawing if either pin is hidden
+                    if (!cur.InPin.Visible || !cur.OutPin.Visible)
+                    {
+                        i++;
+                        continue;
+                    }
                     DrawLinker(cmd, cur);
                     i++;
                 }
@@ -553,6 +559,8 @@ namespace EngineNS.Bricks.NodeGraph
             for(int i=0; i<node.Inputs.Count; i++)
             {
                 var inPin = node.Inputs[i];
+                if (!inPin.Visible)
+                    continue;
 
                 var start = CanvasToDraw(inPin.HotPosition);
                 var end = CanvasToDraw(inPin.HotPosition + inPin.HotSize);
@@ -617,6 +625,8 @@ namespace EngineNS.Bricks.NodeGraph
 
             foreach (var i in node.Outputs)
             {
+                if (!i.Visible)
+                    continue;
                 var start = CanvasToDraw(i.HotPosition);
                 var end = CanvasToDraw(i.HotPosition + i.HotSize);
                 if(i.ShowIcon)

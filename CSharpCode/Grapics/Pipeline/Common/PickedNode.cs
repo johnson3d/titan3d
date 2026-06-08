@@ -1,5 +1,6 @@
 ﻿using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline.Shader;
+using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,6 +18,17 @@ namespace EngineNS.Graphics.Pipeline.Common
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_Normal,
                 NxRHI.EVertexStreamType.VST_Tangent,};
+        }
+        public unsafe override void OnDrawCall(ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtRenderMesh.TtAtom atom)
+        {
+            if (atom.Material.Blend.RenderTarget[0].BlendEnable == 1)
+            {
+                var mtl = atom.Material;
+                NxRHI.FGpuPipelineDesc pipelineDesc = mtl.PipelineDesc;
+                pipelineDesc.m_Blend.RenderTarget[0].BlendEnable = 0;
+                var pipeline = TtEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(TtEngine.Instance.GfxDevice.RenderContext, in pipelineDesc);
+                drawcall.BindPipeline(pipeline);
+            }
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Picked", "Pick\\Picked", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]

@@ -437,7 +437,14 @@ static float2 DecodeMotionVector(float2 v)
 #if !defined(MOTIONVECTOR_SCALAR)
 	return v.xy;
 #else
-	return (v.xy - 0.5) / MOTIONVECTOR_SCALAR;
+	float2 decoded = (v.xy - 0.5) / MOTIONVECTOR_SCALAR;
+	// R10G10B10A2_UNORM 的 10bit 精度无法精确表示 0.5 (零 motion),
+	// 量化误差 = 1/1023/MOTIONVECTOR_SCALAR ≈ 0.00195. 小于此阈值的 motion
+	// 是格式噪声而非真实运动, 必须截断为零, 否则 TAA reprojection 每帧偏移 ~1.6px.
+	float motionDeadzone = 1.0 / (1023.0 * MOTIONVECTOR_SCALAR);
+	decoded.x = abs(decoded.x) < motionDeadzone ? 0.0 : decoded.x;
+	decoded.y = abs(decoded.y) < motionDeadzone ? 0.0 : decoded.y;
+	return decoded;
 #endif
 }
 

@@ -569,21 +569,28 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return mWireColorMateria;
             }
         }
-        public TtMaterialInstance WireVtxColorMateria
+        public TtMaterial VtxColorMaterial
         {
             get;
             private set;
         }
+        public TtMaterialInstance WireVtxColorMaterial
+        {
+            get;
+            private set;
+        }
+        public TtMaterialInstance WhiteColorMaterial { get; private set; }
+        public TtMaterialInstance RedColorMaterial { get; private set; }
         public async Thread.Async.TtTask<bool> Initialize(TtEngine engine)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            await RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine).GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
-            await RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine).GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
+            WhiteColorMaterial = await RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine).GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
+            RedColorMaterial = await RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine).GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
             await RName.GetRName("axis/axis_x_d.uminst", RName.ERNameType.Engine).GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
             await RName.GetRName("axis/axis_face.uminst", RName.ERNameType.Engine).GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
 
-            mWireColorMateria = await RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
+            mWireColorMateria = WhiteColorMaterial.CloneMaterialInstance();
             if (mWireColorMateria == null)
                 return false;
 
@@ -593,7 +600,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             mWireColorMateria.Rasterizer = rast;
             mWireColorMateria.RenderLayer = ERenderLayer.RL_Translucent;
 
-            WireVtxColorMateria = await RName.GetRName("material/wire_vfx_color.uminst", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
+            VtxColorMaterial = await RName.GetRName("material/vfx_color.material", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterial>();
+            WireVtxColorMaterial = await RName.GetRName("material/wire_vfx_color.uminst", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
 
             return true;
         }

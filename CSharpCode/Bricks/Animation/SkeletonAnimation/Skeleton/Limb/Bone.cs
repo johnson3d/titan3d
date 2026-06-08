@@ -1,18 +1,24 @@
 ﻿using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Animation.SkeletonAnimation.Skeleton.Limb
 {
 
+    [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtBoneDesc : IO.BaseSerializer, ILimbDesc
     {
         [Rtti.Meta("")]
+        [Category("General")]
+        [ReadOnly(true)]
         public string Name { get; set; }
         [Rtti.Meta("")]
         public uint NameHash { get; set; }
         [Rtti.Meta("")]
+        [Category("General")]
+        [ReadOnly(true)]
         public string ParentName { get; set; }
         [Rtti.Meta("")]
         public uint ParentHash { get; set; }

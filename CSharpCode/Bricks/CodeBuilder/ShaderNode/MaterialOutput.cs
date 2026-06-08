@@ -101,6 +101,52 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         //public PinIn VertexOffset { get; set; } = new PinIn();
         //[Browsable(false)]
         //public PinIn AO { get; set; } = new PinIn();
+        // Pin names that are only relevant to specific ShadingModes.
+        // Pins not listed here are always visible (common to all modes).
+        private static readonly HashSet<string> HairOnlyPins = new HashSet<string>
+        {
+            "ShiftOffset ", "Tangent ",
+        };
+        private static readonly HashSet<string> SubsurfaceOnlyPins = new HashSet<string>
+        {
+            "SubsurfaceProfile ", "SubAlbedo ", "ShadowColor ", "DeepShadow ",
+        };
+        private static readonly HashSet<string> HairHiddenPins = new HashSet<string>
+        {
+            "Mask ", "Opacity ", "SubsurfaceProfile ", "SubAlbedo ", "ShadowColor ", "DeepShadow ",
+        };
+        private static readonly HashSet<string> SubsurfaceHiddenPins = new HashSet<string>
+        {
+            "ShiftOffset ", "Tangent ", "Mask ",
+        };
+        private static readonly HashSet<string> PBRHiddenPins = new HashSet<string>
+        {
+            "ShiftOffset ", "Tangent ", "SubsurfaceProfile ", "SubAlbedo ", "ShadowColor ", "DeepShadow ",
+        };
+
+        public void UpdatePinVisibility(TtMaterial.EShadingMode shadingMode)
+        {
+            HashSet<string> hiddenPins;
+            switch (shadingMode)
+            {
+                case TtMaterial.EShadingMode.Hair:
+                    hiddenPins = HairHiddenPins;
+                    break;
+                case TtMaterial.EShadingMode.Subsurface:
+                    hiddenPins = SubsurfaceHiddenPins;
+                    break;
+                case TtMaterial.EShadingMode.PBR:
+                default:
+                    hiddenPins = PBRHiddenPins;
+                    break;
+            }
+            foreach (var pin in FieldPins)
+            {
+                pin.Visible = !hiddenPins.Contains(pin.Name);
+            }
+            LayoutDirty = true;
+        }
+
         public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)

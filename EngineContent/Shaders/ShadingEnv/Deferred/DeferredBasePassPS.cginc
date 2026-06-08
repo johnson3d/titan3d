@@ -52,7 +52,8 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
     if (baseShadingModeEarly == EShadingMode_Hair)
     {
         GBuffer.WorldTangent = mtl.GetWorldTangent(input);
-        GBuffer.WorldNormal = normalize((half3)input.vNormal);
+        GBuffer.WorldNormal = mtl.GetWorldNormal(input);
+        GBuffer.ShiftOffset = (half)mtl.mShiftOffset;
     }
     else
     {

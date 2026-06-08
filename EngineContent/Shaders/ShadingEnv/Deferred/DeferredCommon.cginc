@@ -77,25 +77,28 @@ struct FGBufferData : FGBufferDataBase
 		// RenderFlags → rt3.b (R10G10B10A2_UNORM, 10-bit integer)
 		rt3.b = ((half) RenderFlags_10Bit) / 1023.0h;
 
+		// rt0.a packs a per-ShadingMode scalar:
+		//   Hair       → ShiftOffset (remapped from [-1,1] to [0,1])
+		//   Subsurface → SubsurfaceProfileIndex (normalized to 0~1)
+		//   PBR/other  → SpecOcclusion
 		if (IsHair())
 		{
-			// Hair: rt1 stores tangent, normal oct-encoded into rt0.a + rt2.r
+			rt0.a = ShiftOffset * 0.5h + 0.5h; // remap [-1,1] to [0,1]
+
+			// Hair: normal oct-encoded into rt1.b + rt2.r, tangent into rt1.rg
 			half2 normalOct = (half2)OctEncode(WorldNormal.xyz);
-			rt0.a = normalOct.x;
-			rt2.r = normalOct.y;
 
 			#if USE_OCTAHEDRON_NORMAL == 0
 				rt1.rgb = (half3)EncodeNormalXYZ(WorldTangent.xyz);
+				Specular = normalOct.x; // sacrifice Specular channel for normalOct.x, use default 0.06 on decode
 			#else
 				rt1.rg = (half2)OctEncode(WorldTangent.xyz);
-				rt1.b = 0;
+				rt1.b = normalOct.x;
 			#endif
+			rt2.r = normalOct.y;
 		}
 		else
 		{
-			// rt0.a packs a per-ShadingMode scalar:
-			//   Subsurface → SubsurfaceProfileIndex (normalized to 0~1)
-			//   PBR/other  → SpecOcclusion
 			if (IsSubsurface())
 			{
 				rt0.a = saturate((half)SubsurfaceProfileIndex / 255.0h);
@@ -141,10 +144,16 @@ struct FGBufferData : FGBufferDataBase
         if (IsHair())
         {
             WorldTangent = decodedDir;
-            WorldNormal = (half3)OctDecode(half2(rt0.a, rt2.r));
+            #if USE_OCTAHEDRON_NORMAL == 0
+                WorldNormal = (half3)OctDecode(half2(rt2.g, rt2.r)); // non-oct: normalOct.x stored in Specular channel
+                rt2.g = 0.06h; // restore Specular to default for Hair
+            #else
+                WorldNormal = (half3)OctDecode(half2(rt1.b, rt2.r));
+            #endif
             Metallicity = 0;
             SubsurfaceProfileIndex = 0;
             SpecOcclusion = 0;
+            ShiftOffset = rt0.a * 2.0h - 1.0h; // remap [0,1] back to [-1,1]
         }
         else
         {

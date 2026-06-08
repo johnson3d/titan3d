@@ -65,8 +65,10 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	//   - psCustomUV1/UV2 (上面已经先赋值好的 MV 用纯净 clip)
 	//   - cbPerCamera 的任何矩阵
 	//   - 其他 pass (shadow / GI / 反射等) 的几何
-	// JitterOffset 本身就是屏幕空间的亚像素偏移, 直接加到 clip.xy 即可.
-	output.vPosition.xy += JitterOffset.xy;
+	// JitterOffset 是 UV 单位 ((halton-0.5)/viewport_size). clip.xy / w = NDC, NDC*0.5+0.5 = UV.
+	// 要让所有深度的像素在屏幕上偏移相同的亚像素量:
+	//   clip 偏移 = jitterUV * 2 (UV→NDC) * w (NDC→clip), 透视除法后恒为 jitterUV*2 NDC.
+	output.vPosition.xy += JitterOffset.xy * (2.0 * output.vPosition.w);
 #if USE_PS_Custom0 == 1
 	output.psCustomUV0.w = output.vPosition.w;
 #endif

@@ -58,10 +58,10 @@ namespace EngineNS.Bricks.PhysicsCore
             var meshPrimitve = TriMesh.ToMeshProvider().ToMesh();
 
             var matrials = new Graphics.Pipeline.Shader.TtMaterial[1];
-            matrials[0] = await RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine).GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
+            matrials[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.WhiteColorMaterial;
 
             var matrials1 = new Graphics.Pipeline.Shader.TtMaterial[1];
-            matrials1[0] = await RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine).CreateAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
+            matrials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.RedColorMaterial;
             var rast = matrials1[0].Rasterizer;
             rast.FillMode = NxRHI.EFillMode.FMD_WIREFRAME;
             matrials1[0].Rasterizer = rast;

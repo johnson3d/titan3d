@@ -318,9 +318,7 @@ namespace EngineNS.Editor.Forms
         {
             if (ImGuiAPI.MenuItem($"Goto", null, false, true))
             {
-                var camera = WorldViewportState.CameraController.Camera;
-                var radius = (node.RefAABB.GetMaxSide()) * 5.0f;
-                camera.LookAtLH(node.Placement.Position - camera.GetDirection().AsDVector() * radius, node.Placement.Position, Vector3.Up);
+                FocusNodeInViewport(node);
             }
             if (ImGuiAPI.MenuItem($"DoCommand", null, false, true))
             {
@@ -343,7 +341,19 @@ namespace EngineNS.Editor.Forms
                 }
             }
         }
+        public virtual bool FocusNodeInViewport(GamePlay.Scene.TtNode node)
+        {
+            return WorldViewportState?.AutoZoomToNode(node) == true;
+        }
+        public bool FocusSelectedNodesInViewport()
+        {
+            return WorldViewportState?.AutoZoomToNodes(SelectedNodes) == true;
+        }
         public List<GamePlay.Scene.TtNode> SelectedNodes = new List<GamePlay.Scene.TtNode>();
+        public override void OnNodeUI_LDoubleClick(INodeUIProvider provider)
+        {
+            FocusNodeInViewport(provider as GamePlay.Scene.TtNode);
+        }
         public override void OnNodeUI_LClick(INodeUIProvider provider)
         {
             //var ctrlKeyDown = TtEngine.Instance.InputSystem.IsCtrlKeyDown();

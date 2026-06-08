@@ -439,11 +439,24 @@ namespace EngineNS.Graphics.Pipeline
         }
         public unsafe virtual bool OnEvent(in Bricks.Input.Event e)
         {
+            if (e.Type == Bricks.Input.EventType.KEYDOWN &&
+                e.Keyboard.Keysym.Sym == Bricks.Input.Keycode.KEY_f &&
+                e.Keyboard.Repeat == 0 &&
+                IsViewportSlateFocused &&
+                FocusViewport())
+            {
+                return true;
+            }
+
             if (CurrentIntercativeMode != null)
             {
                 return CurrentIntercativeMode.OnEvent(in e);
             }
             return true;
+        }
+        public virtual bool FocusViewport()
+        {
+            return false;
         }
         protected virtual ImTextureRef GetShowTexture()
         {

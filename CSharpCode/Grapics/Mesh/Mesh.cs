@@ -127,6 +127,7 @@ namespace EngineNS.Graphics.Mesh
                 var binder = NxRHI.TtShader.TtCommonShaderResourceIndexer.Instance.cbPerMesh;
                 mPerMeshCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
                 SetWorldMatrixToCBuffer(in Matrix.Identity);
+                mPerMeshCBuffer.FlushDirty();
             }
             return mPerMeshCBuffer;
         }

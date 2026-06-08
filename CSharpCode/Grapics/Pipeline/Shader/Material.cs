@@ -1257,6 +1257,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         #region RHIResource
         protected NxRHI.FGpuPipelineDesc mPipelineDesc;
+        public ref NxRHI.FGpuPipelineDesc PipelineDesc
+        {
+            get => ref mPipelineDesc;
+        }
+
         NxRHI.TtGpuPipeline mPipeline;
         public NxRHI.TtGpuPipeline Pipeline
         {

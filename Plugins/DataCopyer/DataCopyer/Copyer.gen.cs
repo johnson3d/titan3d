@@ -139657,6 +139657,1325 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.GamePlay.TtPlacementBase;
 		};
 	}
+	static class EngineNS_Graphics_Mesh_PhysicsAsset_TtBoneBody
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody;
+			ar.Write(srcObj.AngularDamping);
+			ar.Write(srcObj.BoneName);
+			ar.Write(srcObj.BoneNameHash);
+			ar.Write(srcObj.LinearDamping);
+			ar.Write(srcObj.Mass);
+			if (srcObj.Shapes != null)
+			{
+				var Srclst = srcObj.Shapes as System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtCollisionShape>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody;
+			var srcObj = src as EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody;
+			tarObj.AngularDamping = srcObj.AngularDamping;
+			tarObj.BoneName = srcObj.BoneName;
+			tarObj.BoneNameHash = srcObj.BoneNameHash;
+			tarObj.LinearDamping = srcObj.LinearDamping;
+			tarObj.Mass = srcObj.Mass;
+			if (srcObj.Shapes != null)
+			{
+				if (tarObj.Shapes == null)
+				{
+					tarObj.Shapes = new();
+				}
+				if (tarObj.Shapes != null)
+				{
+					var Tarlst = tarObj.Shapes as System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtCollisionShape>;
+					var Srclst = srcObj.Shapes as System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtCollisionShape>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Graphics.Mesh.PhysicsAsset.TtCollisionShape tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Graphics.Mesh.PhysicsAsset.TtCollisionShape;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1113412095593981577 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody;
+			System.Single t_AngularDamping;
+			ar.Read(out t_AngularDamping);
+			srcObj.AngularDamping = t_AngularDamping;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AngularDamping", false);
+				}
+			}
+			System.String t_BoneName;
+			ar.Read(out t_BoneName);
+			srcObj.BoneName = t_BoneName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BoneName", false);
+				}
+			}
+			System.UInt32 t_BoneNameHash;
+			ar.Read(out t_BoneNameHash);
+			srcObj.BoneNameHash = t_BoneNameHash;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BoneNameHash", false);
+				}
+			}
+			System.Single t_LinearDamping;
+			ar.Read(out t_LinearDamping);
+			srcObj.LinearDamping = t_LinearDamping;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "LinearDamping", false);
+				}
+			}
+			System.Single t_Mass;
+			ar.Read(out t_Mass);
+			srcObj.Mass = t_Mass;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Mass", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtCollisionShape> t_Shapes = null;
+			t_Shapes = srcObj.Shapes;
+			if (t_Shapes == null)
+			{
+				t_Shapes = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtCollisionShape>)) as System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtCollisionShape>;
+			}
+			int count_Shapes;
+			ar.Read(out count_Shapes);
+			for(int i = 0; i<count_Shapes; i++)
+			{
+				EngineNS.Graphics.Mesh.PhysicsAsset.TtCollisionShape t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Graphics.Mesh.PhysicsAsset.TtCollisionShape;
+						fn(ar, t);
+					}
+				}
+				t_Shapes.Add(t);
+				srcObj.Shapes = t_Shapes;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtCollisionShape>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Graphics_Mesh_PhysicsAsset_TtBoneConstraint
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint;
+			ar.Write(srcObj.BoneNameA);
+			ar.Write(srcObj.BoneNameB);
+			ar.Write(srcObj.ConstraintType);
+			ar.Write(srcObj.Swing1LimitDeg);
+			ar.Write(srcObj.Swing2LimitDeg);
+			ar.Write(srcObj.TwistLimitDeg);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint;
+			var srcObj = src as EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint;
+			tarObj.BoneNameA = srcObj.BoneNameA;
+			tarObj.BoneNameB = srcObj.BoneNameB;
+			tarObj.ConstraintType = srcObj.ConstraintType;
+			tarObj.Swing1LimitDeg = srcObj.Swing1LimitDeg;
+			tarObj.Swing2LimitDeg = srcObj.Swing2LimitDeg;
+			tarObj.TwistLimitDeg = srcObj.TwistLimitDeg;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_6097100525553137773 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint;
+			System.String t_BoneNameA;
+			ar.Read(out t_BoneNameA);
+			srcObj.BoneNameA = t_BoneNameA;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BoneNameA", false);
+				}
+			}
+			System.String t_BoneNameB;
+			ar.Read(out t_BoneNameB);
+			srcObj.BoneNameB = t_BoneNameB;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BoneNameB", false);
+				}
+			}
+			EngineNS.Graphics.Mesh.PhysicsAsset.EConstraintType t_ConstraintType;
+			ar.Read(out t_ConstraintType);
+			srcObj.ConstraintType = t_ConstraintType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ConstraintType", false);
+				}
+			}
+			System.Single t_Swing1LimitDeg;
+			ar.Read(out t_Swing1LimitDeg);
+			srcObj.Swing1LimitDeg = t_Swing1LimitDeg;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Swing1LimitDeg", false);
+				}
+			}
+			System.Single t_Swing2LimitDeg;
+			ar.Read(out t_Swing2LimitDeg);
+			srcObj.Swing2LimitDeg = t_Swing2LimitDeg;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Swing2LimitDeg", false);
+				}
+			}
+			System.Single t_TwistLimitDeg;
+			ar.Read(out t_TwistLimitDeg);
+			srcObj.TwistLimitDeg = t_TwistLimitDeg;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TwistLimitDeg", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_13537653911877044705 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint;
+			System.String t_BoneNameA;
+			ar.Read(out t_BoneNameA);
+			srcObj.BoneNameA = t_BoneNameA;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BoneNameA", false);
+				}
+			}
+			System.String t_BoneNameB;
+			ar.Read(out t_BoneNameB);
+			srcObj.BoneNameB = t_BoneNameB;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BoneNameB", false);
+				}
+			}
+			EngineNS.Graphics.Mesh.PhysicsAsset.EConstraintType t_ConstraintType;
+			ar.Read(out t_ConstraintType);
+			srcObj.ConstraintType = t_ConstraintType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ConstraintType", false);
+				}
+			}
+			System.Single t_SwingLimitDeg;
+			ar.Read(out t_SwingLimitDeg);
+			System.Single t_TwistLimitDeg;
+			ar.Read(out t_TwistLimitDeg);
+			srcObj.TwistLimitDeg = t_TwistLimitDeg;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TwistLimitDeg", false);
+				}
+			}
+		};
+	}
+	static class EngineNS_Graphics_Mesh_PhysicsAsset_TtBoxShape
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtBoxShape;
+			ar.Write(srcObj.HalfExtent);
+			ar.Write(srcObj.Offset);
+			ar.Write(srcObj.Rotation);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Mesh.PhysicsAsset.TtBoxShape;
+			var srcObj = src as EngineNS.Graphics.Mesh.PhysicsAsset.TtBoxShape;
+			tarObj.HalfExtent = srcObj.HalfExtent;
+			tarObj.Offset = srcObj.Offset;
+			tarObj.Rotation = srcObj.Rotation;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_11718616367635721676 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtBoxShape;
+			EngineNS.Vector3 t_HalfExtent;
+			ar.Read(out t_HalfExtent);
+			srcObj.HalfExtent = t_HalfExtent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HalfExtent", false);
+				}
+			}
+			EngineNS.Vector3 t_Offset;
+			ar.Read(out t_Offset);
+			srcObj.Offset = t_Offset;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Offset", false);
+				}
+			}
+			EngineNS.Quaternion t_Rotation;
+			ar.Read(out t_Rotation);
+			srcObj.Rotation = t_Rotation;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Rotation", false);
+				}
+			}
+		};
+	}
+	static class EngineNS_Graphics_Mesh_PhysicsAsset_TtCapsuleShape
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtCapsuleShape;
+			ar.Write(srcObj.HalfHeight);
+			ar.Write(srcObj.Offset);
+			ar.Write(srcObj.Radius);
+			ar.Write(srcObj.Rotation);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Mesh.PhysicsAsset.TtCapsuleShape;
+			var srcObj = src as EngineNS.Graphics.Mesh.PhysicsAsset.TtCapsuleShape;
+			tarObj.HalfHeight = srcObj.HalfHeight;
+			tarObj.Offset = srcObj.Offset;
+			tarObj.Radius = srcObj.Radius;
+			tarObj.Rotation = srcObj.Rotation;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_14966712567875938569 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtCapsuleShape;
+			System.Single t_HalfHeight;
+			ar.Read(out t_HalfHeight);
+			srcObj.HalfHeight = t_HalfHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HalfHeight", false);
+				}
+			}
+			EngineNS.Vector3 t_Offset;
+			ar.Read(out t_Offset);
+			srcObj.Offset = t_Offset;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Offset", false);
+				}
+			}
+			System.Single t_Radius;
+			ar.Read(out t_Radius);
+			srcObj.Radius = t_Radius;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Radius", false);
+				}
+			}
+			EngineNS.Quaternion t_Rotation;
+			ar.Read(out t_Rotation);
+			srcObj.Rotation = t_Rotation;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Rotation", false);
+				}
+			}
+		};
+	}
+	static class EngineNS_Graphics_Mesh_PhysicsAsset_TtCollisionShape
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtCollisionShape;
+			ar.Write(srcObj.Offset);
+			ar.Write(srcObj.Rotation);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Mesh.PhysicsAsset.TtCollisionShape;
+			var srcObj = src as EngineNS.Graphics.Mesh.PhysicsAsset.TtCollisionShape;
+			tarObj.Offset = srcObj.Offset;
+			tarObj.Rotation = srcObj.Rotation;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15599621281549470622 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtCollisionShape;
+			EngineNS.Vector3 t_Offset;
+			ar.Read(out t_Offset);
+			srcObj.Offset = t_Offset;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Offset", false);
+				}
+			}
+			EngineNS.Quaternion t_Rotation;
+			ar.Read(out t_Rotation);
+			srcObj.Rotation = t_Rotation;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Rotation", false);
+				}
+			}
+		};
+	}
+	static class EngineNS_Graphics_Mesh_PhysicsAsset_TtPhysicsAsset
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAsset;
+			ar.Write(srcObj.AssetName);
+			if (srcObj.Bodies != null)
+			{
+				var Srclst = srcObj.Bodies as System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+			if (srcObj.Constraints != null)
+			{
+				var Srclst = srcObj.Constraints as System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAsset;
+			var srcObj = src as EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAsset;
+			tarObj.AssetName = srcObj.AssetName;
+			if (srcObj.Bodies != null)
+			{
+				if (tarObj.Bodies == null)
+				{
+					tarObj.Bodies = new();
+				}
+				if (tarObj.Bodies != null)
+				{
+					var Tarlst = tarObj.Bodies as System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody>;
+					var Srclst = srcObj.Bodies as System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+			if (srcObj.Constraints != null)
+			{
+				if (tarObj.Constraints == null)
+				{
+					tarObj.Constraints = new();
+				}
+				if (tarObj.Constraints != null)
+				{
+					var Tarlst = tarObj.Constraints as System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint>;
+					var Srclst = srcObj.Constraints as System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15273887796480653796 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAsset;
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			srcObj.AssetName = t_AssetName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody> t_Bodies = null;
+			t_Bodies = srcObj.Bodies;
+			if (t_Bodies == null)
+			{
+				t_Bodies = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody>)) as System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody>;
+			}
+			int count_Bodies;
+			ar.Read(out count_Bodies);
+			for(int i = 0; i<count_Bodies; i++)
+			{
+				EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody;
+						fn(ar, t);
+					}
+				}
+				t_Bodies.Add(t);
+				srcObj.Bodies = t_Bodies;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody>), false);
+					}
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint> t_Constraints = null;
+			t_Constraints = srcObj.Constraints;
+			if (t_Constraints == null)
+			{
+				t_Constraints = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint>)) as System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint>;
+			}
+			int count_Constraints;
+			ar.Read(out count_Constraints);
+			for(int i = 0; i<count_Constraints; i++)
+			{
+				EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint;
+						fn(ar, t);
+					}
+				}
+				t_Constraints.Add(t);
+				srcObj.Constraints = t_Constraints;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint>), false);
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Graphics_Mesh_PhysicsAsset_TtPhysicsAssetAMeta
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAssetAMeta;
+			if (srcObj.AssetFiles != null)
+			{
+				var Srclst = srcObj.AssetFiles as System.Collections.Generic.List<EngineNS.IO.TtFileInfo>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+			ar.Write(srcObj.AssetId);
+			ar.Write(srcObj.AssetName);
+			ar.Write(srcObj.Description);
+			if (srcObj.Icon != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.Icon.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.Icon);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
+			if (srcObj.RefAssetRNames != null)
+			{
+				var Srclst = srcObj.RefAssetRNames as System.Collections.Generic.List<EngineNS.RName>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					ar.Write(Srclst[i]);
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+			ar.Write(srcObj.TypeStr);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAssetAMeta;
+			var srcObj = src as EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAssetAMeta;
+			if (srcObj.AssetFiles != null)
+			{
+				if (tarObj.AssetFiles == null)
+				{
+					tarObj.AssetFiles = new();
+				}
+				if (tarObj.AssetFiles != null)
+				{
+					var Tarlst = tarObj.AssetFiles as System.Collections.Generic.List<EngineNS.IO.TtFileInfo>;
+					var Srclst = srcObj.AssetFiles as System.Collections.Generic.List<EngineNS.IO.TtFileInfo>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.IO.TtFileInfo tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.IO.TtFileInfo;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+			tarObj.AssetId = srcObj.AssetId;
+			tarObj.Description = srcObj.Description;
+			if (srcObj.Icon != null)
+			{
+				if (tarObj.Icon == null || tarObj.Icon.GetType() != srcObj.Icon.GetType())
+				{
+					tarObj.Icon = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.Icon.GetType()) as EngineNS.EGui.TtUVAnim;
+				}
+				if (tarObj.Icon != null)
+				{
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.EGui.TtUVAnim>.TypeDesc.TypeString);
+					if (fn != null)
+					{
+						fn(tarObj.Icon, srcObj.Icon);
+					}
+				}
+			}
+			else if (srcObj.Icon == null)
+			{
+				tarObj.Icon = null;
+			}
+			if (srcObj.RefAssetRNames != null)
+			{
+				if (tarObj.RefAssetRNames == null)
+				{
+					tarObj.RefAssetRNames = new();
+				}
+				if (tarObj.RefAssetRNames != null)
+				{
+					var Tarlst = tarObj.RefAssetRNames as System.Collections.Generic.List<EngineNS.RName>;
+					var Srclst = srcObj.RefAssetRNames as System.Collections.Generic.List<EngineNS.RName>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						Tarlst.Add(Srclst[i]);
+					}
+				}
+			}
+			tarObj.TypeStr = srcObj.TypeStr;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_6680938785434307405 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAssetAMeta;
+			System.Collections.Generic.List<EngineNS.IO.TtFileInfo> t_AssetFiles = null;
+			t_AssetFiles = srcObj.AssetFiles;
+			if (t_AssetFiles == null)
+			{
+				t_AssetFiles = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.IO.TtFileInfo>)) as System.Collections.Generic.List<EngineNS.IO.TtFileInfo>;
+			}
+			int count_AssetFiles;
+			ar.Read(out count_AssetFiles);
+			for(int i = 0; i<count_AssetFiles; i++)
+			{
+				EngineNS.IO.TtFileInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.IO.TtFileInfo;
+						fn(ar, t);
+					}
+				}
+				t_AssetFiles.Add(t);
+				srcObj.AssetFiles = t_AssetFiles;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.IO.TtFileInfo>), false);
+					}
+				}
+			}
+			System.Guid t_AssetId;
+			ar.Read(out t_AssetId);
+			srcObj.AssetId = t_AssetId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetId", false);
+				}
+			}
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			System.String t_Description;
+			ar.Read(out t_Description);
+			srcObj.Description = t_Description;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Description", false);
+				}
+			}
+			EngineNS.Hash64 type_Icon;
+			ar.Read(out type_Icon);
+			var meta_Icon = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Icon);
+			if(meta_Icon != null)
+			{
+				EngineNS.Hash64 ver_Icon;
+				ar.Read(out ver_Icon);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Icon.ClassType.TypeString, ver_Icon );
+				if (fn != null)
+				{
+					EngineNS.EGui.TtUVAnim t_Icon = null;
+					t_Icon = srcObj.Icon;
+					if (t_Icon == null)
+					{
+						t_Icon = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Icon.ClassType) as EngineNS.EGui.TtUVAnim;
+					}
+					fn(ar, t_Icon);
+					srcObj.Icon = t_Icon;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Icon", false);
+						}
+					}
+				}
+			}
+			System.Collections.Generic.List<EngineNS.RName> t_RefAssetRNames = null;
+			t_RefAssetRNames = srcObj.RefAssetRNames;
+			if (t_RefAssetRNames == null)
+			{
+				t_RefAssetRNames = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.RName>)) as System.Collections.Generic.List<EngineNS.RName>;
+			}
+			int count_RefAssetRNames;
+			ar.Read(out count_RefAssetRNames);
+			for(int i = 0; i<count_RefAssetRNames; i++)
+			{
+				EngineNS.RName t;
+				ar.Read(out t);
+				t_RefAssetRNames.Add(t);
+			}
+			System.String t_TypeStr;
+			ar.Read(out t_TypeStr);
+			srcObj.TypeStr = t_TypeStr;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeStr", false);
+				}
+			}
+		};
+	}
+	static class EngineNS_Graphics_Mesh_PhysicsAsset_TtPhysicsAssetNode_TtPhysicsAssetNodeData
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAssetNode.TtPhysicsAssetNodeData;
+			ar.Write(srcObj.BehaviorName);
+			ar.Write(srcObj.Name);
+			ar.Write(srcObj.NodeStyles);
+			if (srcObj.BoundVolume != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.BoundVolume.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.BoundVolume);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
+			if (srcObj.Placement != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.Placement.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.Placement);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAssetNode.TtPhysicsAssetNodeData;
+			var srcObj = src as EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAssetNode.TtPhysicsAssetNodeData;
+			tarObj.BehaviorName = srcObj.BehaviorName;
+			tarObj.Name = srcObj.Name;
+			tarObj.NodeStyles = srcObj.NodeStyles;
+			if (srcObj.BoundVolume != null)
+			{
+				if (tarObj.BoundVolume == null || tarObj.BoundVolume.GetType() != srcObj.BoundVolume.GetType())
+				{
+					tarObj.BoundVolume = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.BoundVolume.GetType()) as EngineNS.GamePlay.Scene.TtBoundVolume;
+				}
+				if (tarObj.BoundVolume != null)
+				{
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.GamePlay.Scene.TtBoundVolume>.TypeDesc.TypeString);
+					if (fn != null)
+					{
+						fn(tarObj.BoundVolume, srcObj.BoundVolume);
+					}
+				}
+			}
+			else if (srcObj.BoundVolume == null)
+			{
+				tarObj.BoundVolume = null;
+			}
+			if (srcObj.Placement != null)
+			{
+				if (tarObj.Placement == null || tarObj.Placement.GetType() != srcObj.Placement.GetType())
+				{
+					tarObj.Placement = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.Placement.GetType()) as EngineNS.GamePlay.TtPlacementBase;
+				}
+				if (tarObj.Placement != null)
+				{
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.GamePlay.TtPlacementBase>.TypeDesc.TypeString);
+					if (fn != null)
+					{
+						fn(tarObj.Placement, srcObj.Placement);
+					}
+				}
+			}
+			else if (srcObj.Placement == null)
+			{
+				tarObj.Placement = null;
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_14192322476631630344 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAssetNode.TtPhysicsAssetNodeData;
+			EngineNS.RName t_BehaviorName;
+			ar.Read(out t_BehaviorName);
+			srcObj.BehaviorName = t_BehaviorName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			EngineNS.GamePlay.Scene.TtNode.ENodeStyles t_NodeStyles;
+			ar.Read(out t_NodeStyles);
+			srcObj.NodeStyles = t_NodeStyles;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeStyles", false);
+				}
+			}
+			EngineNS.Hash64 type_BoundVolume;
+			ar.Read(out type_BoundVolume);
+			var meta_BoundVolume = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BoundVolume);
+			if(meta_BoundVolume != null)
+			{
+				EngineNS.Hash64 ver_BoundVolume;
+				ar.Read(out ver_BoundVolume);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BoundVolume.ClassType.TypeString, ver_BoundVolume );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtBoundVolume t_BoundVolume = null;
+					t_BoundVolume = srcObj.BoundVolume;
+					if (t_BoundVolume == null)
+					{
+						t_BoundVolume = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BoundVolume.ClassType) as EngineNS.GamePlay.Scene.TtBoundVolume;
+					}
+					fn(ar, t_BoundVolume);
+					srcObj.BoundVolume = t_BoundVolume;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BoundVolume", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_Placement;
+			ar.Read(out type_Placement);
+			var meta_Placement = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Placement);
+			if(meta_Placement != null)
+			{
+				EngineNS.Hash64 ver_Placement;
+				ar.Read(out ver_Placement);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Placement.ClassType.TypeString, ver_Placement );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.TtPlacementBase t_Placement = null;
+					t_Placement = srcObj.Placement;
+					if (t_Placement == null)
+					{
+						t_Placement = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Placement.ClassType) as EngineNS.GamePlay.TtPlacementBase;
+					}
+					fn(ar, t_Placement);
+					srcObj.Placement = t_Placement;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Placement", false);
+						}
+					}
+				}
+			}
+		};
+	}
+	static class EngineNS_Graphics_Mesh_PhysicsAsset_TtPhysicsAssetNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAssetNode;
+			ar.Write(srcObj.BehaviorName);
+			if (srcObj.Parent != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.Parent.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.Parent);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
+			if (srcObj.ParentScene != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.ParentScene.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.ParentScene);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
+			if (srcObj.RootNode != null)
+			{
+				var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.RootNode.GetType());
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+				if (fn != null && meta != null)
+				{
+					ar.Write(false);
+					ar.Write(EngineNS.Hash64.FromString(typeStr));
+					ar.Write(meta.CurrentVersion.MetaHash);
+					fn(ar, srcObj.RootNode);
+				}
+				else
+				{
+					ar.Write(true);
+				}
+			}
+			else
+			{
+				ar.Write(true);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAssetNode;
+			var srcObj = src as EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAssetNode;
+			tarObj.BehaviorName = srcObj.BehaviorName;
+			if (srcObj.Parent != null)
+			{
+				if (tarObj.Parent == null || tarObj.Parent.GetType() != srcObj.Parent.GetType())
+				{
+					tarObj.Parent = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.Parent.GetType()) as EngineNS.GamePlay.Scene.TtNode;
+				}
+				if (tarObj.Parent != null)
+				{
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.GamePlay.Scene.TtNode>.TypeDesc.TypeString);
+					if (fn != null)
+					{
+						fn(tarObj.Parent, srcObj.Parent);
+					}
+				}
+			}
+			else if (srcObj.Parent == null)
+			{
+				tarObj.Parent = null;
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_17543872329442000835 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAssetNode;
+			EngineNS.RName t_BehaviorName;
+			ar.Read(out t_BehaviorName);
+			srcObj.BehaviorName = t_BehaviorName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
+				}
+			}
+			EngineNS.Hash64 type_Parent;
+			ar.Read(out type_Parent);
+			var meta_Parent = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Parent);
+			if(meta_Parent != null)
+			{
+				EngineNS.Hash64 ver_Parent;
+				ar.Read(out ver_Parent);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Parent.ClassType.TypeString, ver_Parent );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtNode t_Parent = null;
+					t_Parent = srcObj.Parent;
+					if (t_Parent == null)
+					{
+						t_Parent = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Parent.ClassType) as EngineNS.GamePlay.Scene.TtNode;
+					}
+					fn(ar, t_Parent);
+					srcObj.Parent = t_Parent;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Parent", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_ParentScene;
+			ar.Read(out type_ParentScene);
+			var meta_ParentScene = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_ParentScene);
+			if(meta_ParentScene != null)
+			{
+				EngineNS.Hash64 ver_ParentScene;
+				ar.Read(out ver_ParentScene);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_ParentScene.ClassType.TypeString, ver_ParentScene );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtScene t_ParentScene = null;
+					t_ParentScene = srcObj.ParentScene;
+					if (t_ParentScene == null)
+					{
+						t_ParentScene = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_ParentScene.ClassType) as EngineNS.GamePlay.Scene.TtScene;
+					}
+					fn(ar, t_ParentScene);
+				}
+			}
+			EngineNS.Hash64 type_RootNode;
+			ar.Read(out type_RootNode);
+			var meta_RootNode = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_RootNode);
+			if(meta_RootNode != null)
+			{
+				EngineNS.Hash64 ver_RootNode;
+				ar.Read(out ver_RootNode);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_RootNode.ClassType.TypeString, ver_RootNode );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtNode t_RootNode = null;
+					t_RootNode = srcObj.RootNode;
+					if (t_RootNode == null)
+					{
+						t_RootNode = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_RootNode.ClassType) as EngineNS.GamePlay.Scene.TtNode;
+					}
+					fn(ar, t_RootNode);
+				}
+			}
+		};
+	}
+	static class EngineNS_Graphics_Mesh_PhysicsAsset_TtPlaneShape
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtPlaneShape;
+			ar.Write(srcObj.Offset);
+			ar.Write(srcObj.PlaneNormal);
+			ar.Write(srcObj.Rotation);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Mesh.PhysicsAsset.TtPlaneShape;
+			var srcObj = src as EngineNS.Graphics.Mesh.PhysicsAsset.TtPlaneShape;
+			tarObj.Offset = srcObj.Offset;
+			tarObj.PlaneNormal = srcObj.PlaneNormal;
+			tarObj.Rotation = srcObj.Rotation;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_10471171735880523460 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtPlaneShape;
+			EngineNS.Vector3 t_Offset;
+			ar.Read(out t_Offset);
+			srcObj.Offset = t_Offset;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Offset", false);
+				}
+			}
+			EngineNS.Vector3 t_PlaneNormal;
+			ar.Read(out t_PlaneNormal);
+			srcObj.PlaneNormal = t_PlaneNormal;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "PlaneNormal", false);
+				}
+			}
+			EngineNS.Quaternion t_Rotation;
+			ar.Read(out t_Rotation);
+			srcObj.Rotation = t_Rotation;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Rotation", false);
+				}
+			}
+		};
+	}
+	static class EngineNS_Graphics_Mesh_PhysicsAsset_TtSphereShape
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtSphereShape;
+			ar.Write(srcObj.Offset);
+			ar.Write(srcObj.Radius);
+			ar.Write(srcObj.Rotation);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Mesh.PhysicsAsset.TtSphereShape;
+			var srcObj = src as EngineNS.Graphics.Mesh.PhysicsAsset.TtSphereShape;
+			tarObj.Offset = srcObj.Offset;
+			tarObj.Radius = srcObj.Radius;
+			tarObj.Rotation = srcObj.Rotation;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_13518304242759491563 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.PhysicsAsset.TtSphereShape;
+			EngineNS.Vector3 t_Offset;
+			ar.Read(out t_Offset);
+			srcObj.Offset = t_Offset;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Offset", false);
+				}
+			}
+			System.Single t_Radius;
+			ar.Read(out t_Radius);
+			srcObj.Radius = t_Radius;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Radius", false);
+				}
+			}
+			EngineNS.Quaternion t_Rotation;
+			ar.Read(out t_Rotation);
+			srcObj.Rotation = t_Rotation;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Rotation", false);
+				}
+			}
+		};
+	}
 	static class EngineNS_Graphics_Mesh_TtMaterialMesh_TtSubMaterialedMesh_TSaveData
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -140392,6 +141711,7 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Write(true);
 			}
 			ar.Write(srcObj.IsClustered);
+			ar.Write(srcObj.PhysicsAssetRName);
 			if (srcObj.RefAssetRNames != null)
 			{
 				var Srclst = srcObj.RefAssetRNames as System.Collections.Generic.List<EngineNS.RName>;
@@ -140451,6 +141771,7 @@ namespace EngineNS.Plugins.DataCopyer
 				tarObj.Icon = null;
 			}
 			tarObj.IsClustered = srcObj.IsClustered;
+			tarObj.PhysicsAssetRName = srcObj.PhysicsAssetRName;
 			if (srcObj.RefAssetRNames != null)
 			{
 				if (tarObj.RefAssetRNames == null)
@@ -140469,6 +141790,131 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 			tarObj.TypeStr = srcObj.TypeStr;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_4971093511040250742 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.TtMeshPrimitivesAMeta;
+			System.Collections.Generic.List<EngineNS.IO.TtFileInfo> t_AssetFiles = null;
+			t_AssetFiles = srcObj.AssetFiles;
+			if (t_AssetFiles == null)
+			{
+				t_AssetFiles = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.IO.TtFileInfo>)) as System.Collections.Generic.List<EngineNS.IO.TtFileInfo>;
+			}
+			int count_AssetFiles;
+			ar.Read(out count_AssetFiles);
+			for(int i = 0; i<count_AssetFiles; i++)
+			{
+				EngineNS.IO.TtFileInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.IO.TtFileInfo;
+						fn(ar, t);
+					}
+				}
+				t_AssetFiles.Add(t);
+				srcObj.AssetFiles = t_AssetFiles;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.IO.TtFileInfo>), false);
+					}
+				}
+			}
+			System.Guid t_AssetId;
+			ar.Read(out t_AssetId);
+			srcObj.AssetId = t_AssetId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetId", false);
+				}
+			}
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			System.String t_Description;
+			ar.Read(out t_Description);
+			srcObj.Description = t_Description;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Description", false);
+				}
+			}
+			EngineNS.Hash64 type_Icon;
+			ar.Read(out type_Icon);
+			var meta_Icon = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Icon);
+			if(meta_Icon != null)
+			{
+				EngineNS.Hash64 ver_Icon;
+				ar.Read(out ver_Icon);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Icon.ClassType.TypeString, ver_Icon );
+				if (fn != null)
+				{
+					EngineNS.EGui.TtUVAnim t_Icon = null;
+					t_Icon = srcObj.Icon;
+					if (t_Icon == null)
+					{
+						t_Icon = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Icon.ClassType) as EngineNS.EGui.TtUVAnim;
+					}
+					fn(ar, t_Icon);
+					srcObj.Icon = t_Icon;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Icon", false);
+						}
+					}
+				}
+			}
+			System.Boolean t_IsClustered;
+			ar.Read(out t_IsClustered);
+			srcObj.IsClustered = t_IsClustered;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsClustered", false);
+				}
+			}
+			EngineNS.RName t_PhysicsAssetRName;
+			ar.Read(out t_PhysicsAssetRName);
+			srcObj.PhysicsAssetRName = t_PhysicsAssetRName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "PhysicsAssetRName", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.RName> t_RefAssetRNames = null;
+			t_RefAssetRNames = srcObj.RefAssetRNames;
+			if (t_RefAssetRNames == null)
+			{
+				t_RefAssetRNames = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.RName>)) as System.Collections.Generic.List<EngineNS.RName>;
+			}
+			int count_RefAssetRNames;
+			ar.Read(out count_RefAssetRNames);
+			for(int i = 0; i<count_RefAssetRNames; i++)
+			{
+				EngineNS.RName t;
+				ar.Read(out t);
+				t_RefAssetRNames.Add(t);
+			}
+			System.String t_TypeStr;
+			ar.Read(out t_TypeStr);
+			srcObj.TypeStr = t_TypeStr;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeStr", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5747535511953630085 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -185391,6 +186837,73 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(9524687136534877311, EngineNS_GamePlay_TtPlacementBase.Read_9524687136534877311);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody@EngineCore");
+				kls.Writer = EngineNS_Graphics_Mesh_PhysicsAsset_TtBoneBody.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Mesh_PhysicsAsset_TtBoneBody.CopyCurrentVersion;
+				kls.RegVersion(1113412095593981577, EngineNS_Graphics_Mesh_PhysicsAsset_TtBoneBody.Read_1113412095593981577);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint@EngineCore");
+				kls.Writer = EngineNS_Graphics_Mesh_PhysicsAsset_TtBoneConstraint.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Mesh_PhysicsAsset_TtBoneConstraint.CopyCurrentVersion;
+				kls.RegVersion(13537653911877044705, EngineNS_Graphics_Mesh_PhysicsAsset_TtBoneConstraint.Read_13537653911877044705);
+				kls.RegVersion(6097100525553137773, EngineNS_Graphics_Mesh_PhysicsAsset_TtBoneConstraint.Read_6097100525553137773);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Mesh.PhysicsAsset.TtBoxShape@EngineCore");
+				kls.Writer = EngineNS_Graphics_Mesh_PhysicsAsset_TtBoxShape.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Mesh_PhysicsAsset_TtBoxShape.CopyCurrentVersion;
+				kls.RegVersion(11718616367635721676, EngineNS_Graphics_Mesh_PhysicsAsset_TtBoxShape.Read_11718616367635721676);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Mesh.PhysicsAsset.TtCapsuleShape@EngineCore");
+				kls.Writer = EngineNS_Graphics_Mesh_PhysicsAsset_TtCapsuleShape.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Mesh_PhysicsAsset_TtCapsuleShape.CopyCurrentVersion;
+				kls.RegVersion(14966712567875938569, EngineNS_Graphics_Mesh_PhysicsAsset_TtCapsuleShape.Read_14966712567875938569);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Mesh.PhysicsAsset.TtCollisionShape@EngineCore");
+				kls.Writer = EngineNS_Graphics_Mesh_PhysicsAsset_TtCollisionShape.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Mesh_PhysicsAsset_TtCollisionShape.CopyCurrentVersion;
+				kls.RegVersion(15599621281549470622, EngineNS_Graphics_Mesh_PhysicsAsset_TtCollisionShape.Read_15599621281549470622);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAsset@EngineCore");
+				kls.Writer = EngineNS_Graphics_Mesh_PhysicsAsset_TtPhysicsAsset.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Mesh_PhysicsAsset_TtPhysicsAsset.CopyCurrentVersion;
+				kls.RegVersion(15273887796480653796, EngineNS_Graphics_Mesh_PhysicsAsset_TtPhysicsAsset.Read_15273887796480653796);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAssetAMeta@EngineCore");
+				kls.Writer = EngineNS_Graphics_Mesh_PhysicsAsset_TtPhysicsAssetAMeta.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Mesh_PhysicsAsset_TtPhysicsAssetAMeta.CopyCurrentVersion;
+				kls.RegVersion(6680938785434307405, EngineNS_Graphics_Mesh_PhysicsAsset_TtPhysicsAssetAMeta.Read_6680938785434307405);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAssetNode.TtPhysicsAssetNodeData@EngineCore");
+				kls.Writer = EngineNS_Graphics_Mesh_PhysicsAsset_TtPhysicsAssetNode_TtPhysicsAssetNodeData.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Mesh_PhysicsAsset_TtPhysicsAssetNode_TtPhysicsAssetNodeData.CopyCurrentVersion;
+				kls.RegVersion(14192322476631630344, EngineNS_Graphics_Mesh_PhysicsAsset_TtPhysicsAssetNode_TtPhysicsAssetNodeData.Read_14192322476631630344);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAssetNode@EngineCore");
+				kls.Writer = EngineNS_Graphics_Mesh_PhysicsAsset_TtPhysicsAssetNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Mesh_PhysicsAsset_TtPhysicsAssetNode.CopyCurrentVersion;
+				kls.RegVersion(17543872329442000835, EngineNS_Graphics_Mesh_PhysicsAsset_TtPhysicsAssetNode.Read_17543872329442000835);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Mesh.PhysicsAsset.TtPlaneShape@EngineCore");
+				kls.Writer = EngineNS_Graphics_Mesh_PhysicsAsset_TtPlaneShape.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Mesh_PhysicsAsset_TtPlaneShape.CopyCurrentVersion;
+				kls.RegVersion(10471171735880523460, EngineNS_Graphics_Mesh_PhysicsAsset_TtPlaneShape.Read_10471171735880523460);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Mesh.PhysicsAsset.TtSphereShape@EngineCore");
+				kls.Writer = EngineNS_Graphics_Mesh_PhysicsAsset_TtSphereShape.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Mesh_PhysicsAsset_TtSphereShape.CopyCurrentVersion;
+				kls.RegVersion(13518304242759491563, EngineNS_Graphics_Mesh_PhysicsAsset_TtSphereShape.Read_13518304242759491563);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Mesh.TtMaterialMesh.TtSubMaterialedMesh.TSaveData@EngineCore");
 				kls.Writer = EngineNS_Graphics_Mesh_TtMaterialMesh_TtSubMaterialedMesh_TSaveData.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Mesh_TtMaterialMesh_TtSubMaterialedMesh_TSaveData.CopyCurrentVersion;
@@ -185443,6 +186956,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Graphics_Mesh_TtMeshPrimitivesAMeta.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Mesh_TtMeshPrimitivesAMeta.CopyCurrentVersion;
 				kls.RegVersion(5747535511953630085, EngineNS_Graphics_Mesh_TtMeshPrimitivesAMeta.Read_5747535511953630085);
+				kls.RegVersion(4971093511040250742, EngineNS_Graphics_Mesh_TtMeshPrimitivesAMeta.Read_4971093511040250742);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Mesh.TtRenderMesh.TtAtom@EngineCore");
@@ -185971,11 +187485,11 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Graphics_Pipeline_Shader_TtMaterial.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Shader_TtMaterial.CopyCurrentVersion;
 				kls.RegVersion(10881228277520969699, EngineNS_Graphics_Pipeline_Shader_TtMaterial.Read_10881228277520969699);
+				kls.RegVersion(13163398620267487148, EngineNS_Graphics_Pipeline_Shader_TtMaterial.Read_13163398620267487148);
 				kls.RegVersion(14019617542205654534, EngineNS_Graphics_Pipeline_Shader_TtMaterial.Read_14019617542205654534);
 				kls.RegVersion(15277554964753224627, EngineNS_Graphics_Pipeline_Shader_TtMaterial.Read_15277554964753224627);
 				kls.RegVersion(18054154474047905669, EngineNS_Graphics_Pipeline_Shader_TtMaterial.Read_18054154474047905669);
 				kls.RegVersion(8448414150197997152, EngineNS_Graphics_Pipeline_Shader_TtMaterial.Read_8448414150197997152);
-				kls.RegVersion(13163398620267487148, EngineNS_Graphics_Pipeline_Shader_TtMaterial.Read_13163398620267487148);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore");
@@ -186008,10 +187522,10 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = EngineNS_Graphics_Pipeline_Shader_TtMaterialInstance.CopyCurrentVersion;
 				kls.RegVersion(13764099882389733938, EngineNS_Graphics_Pipeline_Shader_TtMaterialInstance.Read_13764099882389733938);
 				kls.RegVersion(1696315720421837764, EngineNS_Graphics_Pipeline_Shader_TtMaterialInstance.Read_1696315720421837764);
+				kls.RegVersion(17413545116874543743, EngineNS_Graphics_Pipeline_Shader_TtMaterialInstance.Read_17413545116874543743);
 				kls.RegVersion(3112510472570874177, EngineNS_Graphics_Pipeline_Shader_TtMaterialInstance.Read_3112510472570874177);
 				kls.RegVersion(7052944736533553247, EngineNS_Graphics_Pipeline_Shader_TtMaterialInstance.Read_7052944736533553247);
 				kls.RegVersion(7755520635858182528, EngineNS_Graphics_Pipeline_Shader_TtMaterialInstance.Read_7755520635858182528);
-				kls.RegVersion(17413545116874543743, EngineNS_Graphics_Pipeline_Shader_TtMaterialInstance.Read_17413545116874543743);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceAMeta@EngineCore");
@@ -186736,7 +188250,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = Survivor_TtWeaponProxyNode.CopyCurrentVersion;
 				kls.RegVersion(10759720178659608122, Survivor_TtWeaponProxyNode.Read_10759720178659608122);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("53_2A_80_41_38_7D_44_7D_BA_A6_86_E9_2D_54_CB_2F_FC_15_5F_EA");
+			this.VersionHash = EngineNS.Hash160.Parse("7E_19_EF_B1_1F_DE_E3_23_07_93_E5_F6_7C_AB_3B_96_5D_F6_CA_A5");
 		}
 	}
 }

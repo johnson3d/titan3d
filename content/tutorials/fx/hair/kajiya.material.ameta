@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="1336fef4f6d8389fd4d8fe234d4d68f93626561572e8c5737f61074f2203ecb2" />
+      <Hash Type="System.String@Unknown" Value="2abf0fd3f67d3e59d57a03222cfb3e73adf8079198644657a4561d74f5b0f98b" />
       <Path Type="System.String@Unknown" Value="kajiya.material" />
     </e_0>
   </AssetFiles>
@@ -17,8 +17,9 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Value="Game,tutorials/fx/hair/t_hair01_d.srv,4a31c4a9-7c27-4922-9eec-fb7d20cf6d88" />
+    <e_1 Value="Game,tutorials/fx/hair/t_hair_n.srv,9fcc6d5b-8d7f-4ecc-8d78-d63ab812008e" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

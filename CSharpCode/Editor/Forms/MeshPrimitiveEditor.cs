@@ -1,6 +1,9 @@
+using EngineNS.Animation.Asset;
+using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
 using EngineNS.GamePlay.Camera;
 using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline;
+using EngineNS.Graphics.Pipeline.Shader;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -136,7 +139,7 @@ namespace EngineNS.Editor.Forms
         public RName PlaneMaterialName { get; set; }
         public RName ImportBaseMaterial { get; set; }
     }
-    public class TtMeshPrimitiveEditor : TtLightEnvironemnt, Editor.IAssetEditor, IRootForm
+    public class TtMeshPrimitiveEditor : TtLightEnvironemnt, Editor.IAssetEditor, IRootForm, ISkeletonTreeHost
     {
         public int GetTickOrder()
         {
@@ -158,6 +161,7 @@ namespace EngineNS.Editor.Forms
         public EGui.Controls.PropertyGrid.TtPropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         EngineNS.GamePlay.Scene.TtMeshNode mCurrentMeshNode;
         //EngineNS.GamePlay.Scene.TtMeshNode mArrowMeshNode;
+        int mLastPickedProxyCount = 0;
         float mCurrentMeshRadius = 1.0f;
         public float PlaneScale = 5.0f;
         EngineNS.GamePlay.Scene.TtMeshNode PlaneMeshNode;
@@ -204,6 +208,8 @@ namespace EngineNS.Editor.Forms
             }
         }
         TtDebugShowTool DebugShowTool;
+        TtSkeletonTreePanel SkeletonTreePanel = new TtSkeletonTreePanel();
+        bool mShowSkeletonPanel = true;
         bool mShowNormal = false;
         bool mShowTangent = false;
         ~TtMeshPrimitiveEditor()
@@ -213,6 +219,7 @@ namespace EngineNS.Editor.Forms
         public void Dispose()
         {
             Mesh = null;
+            MeshMaterial = null; 
             CoreSDK.DisposeObject(ref PreviewViewport);
             MeshPropGrid.Target = null;
             EditorPropGrid.Target = null;
@@ -227,6 +234,15 @@ namespace EngineNS.Editor.Forms
         {
             return this;
         }
+        public void SetMeshWireFrame(bool wireframe)
+        {
+            if (Mesh == null || MeshMaterial == null)
+                return;
+            var rast = MeshMaterial.Rasterizer;
+            rast.FillMode = wireframe ? NxRHI.EFillMode.FMD_WIREFRAME : NxRHI.EFillMode.FMD_SOLID;
+            MeshMaterial.Rasterizer = rast;
+        }
+        TtMaterial MeshMaterial = null;
         protected async Thread.Async.TtTask<bool> Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
@@ -235,11 +251,12 @@ namespace EngineNS.Editor.Forms
 
             (viewport as Editor.TtPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
-            var mtl = await TtEngine.Instance.ConfigManager.GetConfig<Editor.Forms.TtMeshPrimitiveEditorConfig>().MaterialName.GetAsset<Graphics.Pipeline.Shader.TtMaterial>();// TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(TtEngine.Instance.Config.MeshPrimitiveEditorConfig.MaterialName);
+            var config = TtEngine.Instance.ConfigManager.GetConfig<Editor.Forms.TtMeshPrimitiveEditorConfig>();
+            MeshMaterial = await TtEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(config.MaterialName);
             var materials = new Graphics.Pipeline.Shader.TtMaterial[Mesh.mCoreObject.GetAtomNumber()];
             for (int i = 0; i < materials.Length; i++)
             {
-                materials[i] = mtl;
+                materials[i] = MeshMaterial;
             }
             var mesh = new Graphics.Mesh.TtRenderMesh();
             var meshNodeData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
@@ -256,12 +273,18 @@ namespace EngineNS.Editor.Forms
             meshNodeData.MeshName = Mesh.AssetName;
             var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, meshNodeData, typeof(GamePlay.TtPlacement), mesh,
                         DVector3.Zero, Vector3.One, Quaternion.Identity);
-            meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
+            meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
             meshNode.NodeData.Name = "PreviewObject";
             meshNode.IsAcceptShadow = true;
             meshNode.IsCastShadow = true;
 
             mCurrentMeshNode = meshNode;
+
+            if (Mesh.PartialSkeleton != null)
+            {
+                SkeletonTreePanel.SetSkeleton(Mesh.PartialSkeleton, this);
+                SkeletonTreePanel.SetMeshAssetName(Mesh.AssetName, PreviewViewport.World);
+            }
 
             DebugShowTool = new TtDebugShowTool();
             List<Graphics.Mesh.TtMeshPrimitives> MeshPrimitivesList = new List<Graphics.Mesh.TtMeshPrimitives>();
@@ -470,6 +493,7 @@ namespace EngineNS.Editor.Forms
             DrawPreview();
             DrawEditorDetails();
             DrawMeshDetails();
+            DrawSkeleton();
         }
         bool mDockInitialized = false;
         protected void ResetDockspace(bool force = false)
@@ -497,9 +521,11 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
             ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
 
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Skeleton", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), middleId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MeshDetails", mDockKeyClass), rightDownId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightUpId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MeshDetails", mDockKeyClass), rightUpId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("BoneDetails", mDockKeyClass), rightUpId);
 
             ImGuiAPI.DockBuilderFinish(id);
         }
@@ -579,7 +605,18 @@ namespace EngineNS.Editor.Forms
             {
                 ApplyNodeTransformToMesh();
             }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("ExportSkeleton", in btSize))
+            {
+                ExportSkeletonAsset();
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.Checkbox("Wireframe", ref mWireframe))
+            {
+                SetMeshWireFrame(mWireframe);
+            }
         }
+        bool mWireframe = false;
 
         /// <summary>
         /// 将当前 meshNode 的 Placement 变换（位移/旋转/缩放）烘焙到顶点数据中，
@@ -656,6 +693,73 @@ namespace EngineNS.Editor.Forms
 
             // 保存 vms
             Mesh.SaveAssetTo(Mesh.AssetName);
+        }
+
+        void ExportSkeletonAsset()
+        {
+            if (Mesh?.PartialSkeleton == null)
+            {
+                Profiler.Log.WriteLine<Profiler.TtLogCategory>(Profiler.ELogTag.Warning, "ExportSkeleton", "Mesh has no PartialSkeleton to export.");
+                return;
+            }
+
+            var noExtName = Mesh.AssetName.NoExtName;
+            var skeletonRName = RName.GetRName(noExtName + TtSkeletonAsset.AssetExt, Mesh.AssetName.RNameType);
+
+            var skeletonAsset = new TtSkeletonAsset();
+            skeletonAsset.Skeleton = Mesh.PartialSkeleton;
+
+            var ameta = skeletonRName.AMeta;
+            if (ameta == null)
+            {
+                ameta = new TtSkeletonAssetAMeta();
+                ameta.SetAssetName(skeletonRName);
+                ameta.AssetId = Guid.NewGuid();
+                ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtSkeletonAsset)).TypeString;
+                ameta.Description = $"Exported from {Mesh.AssetName}";
+                ameta.SaveAMeta((IO.IAsset)null);
+                TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
+            }
+            
+            skeletonAsset.SaveAssetTo(skeletonRName);
+
+            Profiler.Log.WriteLine<Profiler.TtLogCategory>(Profiler.ELogTag.Info, "ExportSkeleton", $"Skeleton saved to {skeletonRName}");
+        }
+
+        public void OnBoneSelected(ILimb selectedBone)
+        {
+        }
+
+        public void OnShapeSelected(Graphics.Mesh.PhysicsAsset.TtCollisionShape shape, GamePlay.Scene.TtNode proxyNode)
+        {
+            if (shape == null || proxyNode == null)
+            {
+                // 清除 Axis 选中，不绑定任何节点
+                PreviewViewport.Axis?.SetSelectedNodes((System.Collections.Generic.List<GamePlay.Scene.TtNode>)null);
+                return;
+            }
+            // 清除旧选中，Axis 绑定到代理节点
+            PreviewViewport.Axis?.SetSelectedNodes(new System.Collections.Generic.List<GamePlay.Scene.TtNode> { proxyNode });
+        }
+
+        bool mShowBoneDetails = true;
+        protected void DrawSkeleton()
+        {
+            if (!SkeletonTreePanel.HasSkeleton)
+                return;
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Skeleton", ref mShowSkeletonPanel, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                SkeletonTreePanel.OnDrawTree();
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+
+            var showDetails = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "BoneDetails", ref mShowBoneDetails, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (showDetails)
+            {
+                SkeletonTreePanel.OnDrawBoneDetails();
+            }
+            EGui.UIProxy.DockProxy.EndPanel(showDetails);
         }
 
         bool ShowEditorPropGrid = true;
@@ -759,6 +863,40 @@ namespace EngineNS.Editor.Forms
         public override void TickLogic(float ellapse)
         {
             PreviewViewport.TickLogic(ellapse);
+
+            // ESC 取消 Shape 选中
+            if (SkeletonTreePanel.SelectedShape != null
+                && TtEngine.Instance.InputSystem.IsKeyDown(Bricks.Input.Keycode.KEY_ESCAPE))
+            {
+                SkeletonTreePanel.SelectShape(null);
+            }
+
+            // 检测 HitProxy 选中/取消 Shape（只在 PickedProxies 变化时处理）
+            var policy = PreviewViewport.RenderPolicy as Graphics.Pipeline.TtRenderPolicy;
+            if (policy != null)
+            {
+                int currentCount = policy.PickedProxiableManager.PickedProxies.Count;
+                if (currentCount != mLastPickedProxyCount)
+                {
+                    mLastPickedProxyCount = currentCount;
+
+                    Graphics.Mesh.PhysicsAsset.TtCollisionShape pickedShape = null;
+                    foreach (var proxy in policy.PickedProxiableManager.PickedProxies)
+                    {
+                        if (proxy is Graphics.Mesh.PhysicsAsset.TtCollisionShape shape)
+                        {
+                            pickedShape = shape;
+                            break;
+                        }
+                    }
+                    if (pickedShape != SkeletonTreePanel.SelectedShape)
+                    {
+                        SkeletonTreePanel.SelectShape(pickedShape);
+                    }
+                }
+            }
+
+            SkeletonTreePanel.TickShapeProxy();
         }
         public override void TickRender(float ellapse)
         {

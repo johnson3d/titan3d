@@ -20,6 +20,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)MeshDataProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MeshPrimitives.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Modifier\CStaticModifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PhysicsAsset\TtPhysicsAsset.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PhysicsAsset\TtPhysicsAssetNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Mesh.brick" />

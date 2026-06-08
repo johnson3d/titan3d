@@ -1,11 +1,12 @@
-﻿using EngineNS.Graphics.Pipeline;
+﻿using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
+using EngineNS.Graphics.Pipeline;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace EngineNS.Editor.Forms
 {
-    public class TtMeshEditor : TtLightEnvironemnt, Editor.IAssetEditor, IRootForm
+    public class TtMeshEditor : TtLightEnvironemnt, Editor.IAssetEditor, IRootForm, ISkeletonTreeHost
     {
         public int GetTickOrder()
         {
@@ -184,7 +185,9 @@ namespace EngineNS.Editor.Forms
                 if (SkinModifier!=null && Mesh.Skeleton!=null)
                 {
                     SkinModifier.Skeleton = (await Mesh.Skeleton.GetAsset<Animation.Asset.TtSkeletonAsset>()).Skeleton;
-                    BoneTree.mRoot = new TtLimbTree.TtLimbNode(SkinModifier.Skeleton);
+                    SkeletonTreePanel.SetSkeleton(SkinModifier.Skeleton, this);
+                    var meshPrimRName = Mesh.SubMeshes.Count > 0 ? Mesh.SubMeshes[0].Mesh?.AssetName : null;
+                    SkeletonTreePanel.SetMeshAssetName(meshPrimRName, viewport.World);
                 }
             }
 
@@ -316,11 +319,12 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
             ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
 
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Skeleton", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), middleId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("sdfPreview", mDockKeyClass), middleId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MeshDetails", mDockKeyClass), rightDownId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Skeleton", mDockKeyClass), rightDownId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightUpId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MeshDetails", mDockKeyClass), rightUpId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("BoneDetails", mDockKeyClass), rightUpId);
 
             ImGuiAPI.DockBuilderFinish(id);
         }
@@ -390,115 +394,35 @@ namespace EngineNS.Editor.Forms
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }
-        internal class TtLimbTree : EngineNS.Editor.TtTreeNodeDrawer
+        TtSkeletonTreePanel SkeletonTreePanel = new TtSkeletonTreePanel();
+        bool mShowSkeletonPanel = true;
+
+        public void OnBoneSelected(ILimb selectedBone)
         {
-            internal class TtLimbNode : EngineNS.Editor.INodeUIProvider
-            {
-                public TtLimbNode(Animation.SkeletonAnimation.Skeleton.Limb.ILimb lb)
-                {
-                    Limb = lb;
-                }
-                internal Animation.SkeletonAnimation.Skeleton.Limb.ILimb Limb;
-                List<TtLimbNode> mChildren = null;
-                internal List<TtLimbNode> Children
-                {
-                    get
-                    {
-                        if (mChildren == null)
-                        {
-                            mChildren = new List<TtLimbNode>();
-                            foreach (var i in Limb.Children)
-                            {
-                                var childNode = new TtLimbNode(i);
-                                mChildren.Add(childNode);
-                            }
-                        }
-                        return mChildren;
-                    }
-                }
-                public int NumOfChildUI()
-                {
-                    return Children.Count;
-                }
-                public EngineNS.Editor.INodeUIProvider GetChildUI(int index)
-                {
-                    if (index>=Children.Count)
-                        return null;
-                    return Children[index];
-                }
-                public string NodeName
-                {
-                    get
-                    {
-                        if (Limb.Desc==null)
-                            return "Skeleton";
-                        return Limb.Desc.Name;
-                    }
-                }
-                public bool Selected { get; set; }
-                public bool DrawNode(EngineNS.Editor.INodeUIProvider parent, EngineNS.Editor.TtTreeNodeDrawer tree, int index, int NumOfChild)
-                {
-                    ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
-                    if (this.Selected)
-                        flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
-                    bool ret = false;
-                    var name = (string.IsNullOrEmpty(NodeName) ? "EmptyName" : NodeName) + "##" + index;
-                    if (NumOfChild == 0)
-                    {
-                        flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
-                    }
-                    ret = ImGuiAPI.TreeNodeEx(name, flags);
-                    if (ImGuiAPI.IsItemActivated())
-                    {
-                        tree.OnNodeUI_Activated(this);
-                    }
-                    if (ImGuiAPI.IsItemDeactivated())
-                    {
-                    }
-                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
-                    {
-                        tree.OnNodeUI_LClick(this);
-                    }
-                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
-                    {
-                        tree.OnNodeUI_RClick(this);
-                    }
-                    
-                    return ret;
-                }
-                public EngineNS.GamePlay.TtWorld GetWorld()
-                {
-                    return null;
-                }
-            }
-            internal TtLimbTree()
-            {
-                
-            }
-            internal TtLimbNode mRoot;
-            internal unsafe void OnDraw(TtMeshEditor host)
-            {
-                //host.SkinModifier.mCoreObject
-                DrawTree(null, mRoot, 0);
-            }
-            public override void OnNodeUI_RClick(EngineNS.Editor.INodeUIProvider provider)
-            {
-                //Host.PopItemMenu(Thread, (provider as TtTimeScopeNode).TimeInfo, "GotoSource");
-            }
         }
 
-        internal TtLimbTree BoneTree = new TtLimbTree();
+        public void OnShapeSelected(Graphics.Mesh.PhysicsAsset.TtCollisionShape shape, GamePlay.Scene.TtNode proxyNode)
+        {
+        }
+
+        bool mShowBoneDetails = true;
         protected void DrawSkeleton()
         {
-            if (SkinModifier == null || SkinModifier.Skeleton == null)
+            if (!SkeletonTreePanel.HasSkeleton)
                 return;
-            var sz = new Vector2(-1);
-            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Skeleton", ref ShowMeshPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Skeleton", ref mShowSkeletonPanel, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                BoneTree.OnDraw(this);
+                SkeletonTreePanel.OnDrawTree();
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
+
+            var showDetails = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "BoneDetails", ref mShowBoneDetails, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (showDetails)
+            {
+                SkeletonTreePanel.OnDrawBoneDetails();
+            }
+            EGui.UIProxy.DockProxy.EndPanel(showDetails);
         }
         bool ShowPreview = true;
         protected unsafe void DrawPreview()

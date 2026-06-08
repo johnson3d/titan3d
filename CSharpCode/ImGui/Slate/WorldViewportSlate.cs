@@ -117,6 +117,53 @@ namespace EngineNS.EGui.Slate
         }
         public bool CameralWheelMoveWithLookAt { get; set; } = false;
         #endregion
+
+        public bool AutoZoomToNode(TtNode node, float zoomTimeInSecond = 0.0f)
+        {
+            if (node == null)
+                return false;
+
+            return AutoZoomToNodes(new TtNode[] { node }, zoomTimeInSecond);
+        }
+        public bool AutoZoomToNodes(IList<TtNode> nodes, float zoomTimeInSecond = 0.0f)
+        {
+            var camera = CameraController?.Camera;
+            if (nodes == null || nodes.Count == 0 || camera == null)
+                return false;
+
+            var box = DBoundingBox.EmptyBox();
+            bool hasTarget = false;
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                var node = nodes[i];
+                if (node == null || node.Placement == null)
+                    continue;
+
+                node.GetWorldSpaceBoundingBox(out var nodeBox);
+                if (nodeBox.IsEmpty())
+                {
+                    var position = node.Placement.AbsTransform.Position;
+                    box.Merge(in position);
+                }
+                else
+                {
+                    box.Merge(in nodeBox);
+                }
+                hasTarget = true;
+            }
+
+            if (hasTarget == false)
+                return false;
+
+            var radius = (float)Math.Max(box.GetMaxSide(), 1.0);
+            var sphere = new DBoundingSphere(box.GetCenter(), radius);
+            camera.AutoZoom(in sphere, zoomTimeInSecond);
+            return true;
+        }
+        public override bool FocusViewport()
+        {
+            return AutoZoomToNode(World?.Root);
+        }
         
 
         #region Debug Assist

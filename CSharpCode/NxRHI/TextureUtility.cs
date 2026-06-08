@@ -1996,11 +1996,14 @@ namespace EngineNS.NxRHI
 
                 TtEngine.Instance.AssetMetaManager.RegAsset(ameta, true);
             }
-            
+
             // Save directly from source pixels (avoids GPU readback → re-compress lossy roundtrip).
             // The old SaveAssetTo path does GPU readback → decode → re-encode which introduces
             // artifacts and data corruption for block-compressed textures.
-            SaveAssetDirect(importer, rn, desc, ameta);
+            if (SaveAssetDirect(importer, rn, desc, ameta) == false)
+            {
+                return null;
+            }
 
             TtEngine.Instance.GfxDevice.TextureManager.UnsafeRemove(rn);
             //TtEngine.Instance.GfxDevice.TextureManager.UnsafeAdd(rn, result);
@@ -2013,50 +2016,64 @@ namespace EngineNS.NxRHI
         /// Save imported texture asset: .srv stores only raw source data (RawSource node + Desc).
         /// Then triggers a cook to generate the platform-compressed .txc cache.
         /// </summary>
-        private static void SaveAssetDirect(ImportAttribute importer, RName rn, TtPicDesc desc, TtSrViewAMeta ameta)
+        private static bool SaveAssetDirect(ImportAttribute importer, RName rn, TtPicDesc desc, TtSrViewAMeta ameta)
         {
             using (var xnd = new IO.TtXndHolder("TtSrView", 0, 0))
             {
                 // Save raw source data to "RawSource" node (no BC compression)
-                using (var srcStream = System.IO.File.OpenRead(importer.mSourceFile))
+                if (System.IO.File.Exists(importer.mSourceFile) == false)
                 {
-                    var extName = IO.TtFileManager.GetExtName(importer.mSourceFile).ToLower();
-                    if (extName == ".hdr")
+                    Profiler.Log.WriteLine<Profiler.TtAssetGategory>(Profiler.ELogTag.Warning, $"Failed to save asset{rn}: source file {importer.mSourceFile} does not exist.");
+                    return false;
+                }
+                try
+                {
+                    using (var srcStream = System.IO.File.OpenRead(importer.mSourceFile))
                     {
-                        var imageFloat = StbImageSharp.ImageResultFloat.FromStream(srcStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
-                        desc.Width = imageFloat.Width;
-                        desc.Height = imageFloat.Height;
-                        TtTextureCookManager.SaveHdrToRawNode(xnd.RootNode.mCoreObject, imageFloat);
-                    }
-                    else if (extName == ".exr")
-                    {
-                        var exrBytes = new byte[srcStream.Length];
-                        srcStream.Read(exrBytes, 0, exrBytes.Length);
-                        srcStream.Position = 0;
-                        var exrFile = new Jither.OpenEXR.EXRFile(srcStream);
-                        int w = exrFile.Parts[0].DisplayWindow.Width;
-                        int h = exrFile.Parts[0].DisplayWindow.Height;
-                        desc.Width = w;
-                        desc.Height = h;
-                        TtTextureCookManager.SaveExrToRawNode(xnd.RootNode.mCoreObject, exrBytes, w, h);
-                    }
-                    else
-                    {
-                        var image = StbImageSharp.TtMemImage.FromStream(srcStream, StbImageSharp.ColorComponents.Default);
-                        if (image != null)
+                        var extName = IO.TtFileManager.GetExtName(importer.mSourceFile).ToLower();
+                        if (extName == ".hdr")
                         {
-                            desc.Width = image.Width;
-                            desc.Height = image.Height;
-                            TtTextureCookManager.SaveLdrToRawNode(xnd.RootNode.mCoreObject, image);
+                            var imageFloat = StbImageSharp.ImageResultFloat.FromStream(srcStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                            desc.Width = imageFloat.Width;
+                            desc.Height = imageFloat.Height;
+                            TtTextureCookManager.SaveHdrToRawNode(xnd.RootNode.mCoreObject, imageFloat);
+                        }
+                        else if (extName == ".exr")
+                        {
+                            var exrBytes = new byte[srcStream.Length];
+                            srcStream.Read(exrBytes, 0, exrBytes.Length);
+                            srcStream.Position = 0;
+                            var exrFile = new Jither.OpenEXR.EXRFile(srcStream);
+                            int w = exrFile.Parts[0].DisplayWindow.Width;
+                            int h = exrFile.Parts[0].DisplayWindow.Height;
+                            desc.Width = w;
+                            desc.Height = h;
+                            TtTextureCookManager.SaveExrToRawNode(xnd.RootNode.mCoreObject, exrBytes, w, h);
+                        }
+                        else
+                        {
+                            var image = StbImageSharp.TtMemImage.FromStream(srcStream, StbImageSharp.ColorComponents.Default);
+                            if (image != null)
+                            {
+                                desc.Width = image.Width;
+                                desc.Height = image.Height;
+                                TtTextureCookManager.SaveLdrToRawNode(xnd.RootNode.mCoreObject, image);
+                            }
                         }
                     }
+
+                    // Save PicDesc metadata
+                    TtTextureHelper.SaveDescToNode(xnd.RootNode.mCoreObject, desc);
+
+                    xnd.SaveXnd(rn.Address);
+                    TtEngine.Instance.SourceControlModule.AddFile(rn.Address);
                 }
-
-                // Save PicDesc metadata
-                TtTextureHelper.SaveDescToNode(xnd.RootNode.mCoreObject, desc);
-
-                xnd.SaveXnd(rn.Address);
-                TtEngine.Instance.SourceControlModule.AddFile(rn.Address);
+                catch (Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                    return false;
+                }
+                
             }
 
             if (ameta != null)
@@ -2066,7 +2083,7 @@ namespace EngineNS.NxRHI
             }
 
             // Trigger cook to generate .txc cache for current platform
-            TtTextureCookManager.Cook(rn);
+            return TtTextureCookManager.Cook(rn);
         }
     }
 }

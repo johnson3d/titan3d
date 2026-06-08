@@ -63,6 +63,12 @@ namespace EngineNS.Graphics.Mesh
 
         [Rtti.Meta("")]
         public bool IsClustered { get; set; } = false;
+
+        /// <summary>
+        /// 编辑器中最近关联的 PhysicsAsset 路径，打开编辑器时自动加载。cook 后可丢弃。
+        /// </summary>
+        [Rtti.Meta("")]
+        public RName PhysicsAssetRName { get; set; }
     }
 
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMeshPrimitives@EngineCore" })]

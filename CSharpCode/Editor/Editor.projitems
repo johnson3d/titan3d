@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Forms\SceneEditor_Macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\LightEnvironemntEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\SkeletonEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\SkeletonTreePanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\AnimationClipEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\AssetReferViewer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\CpuProfiler.cs" />

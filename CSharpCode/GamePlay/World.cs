@@ -216,7 +216,7 @@ namespace EngineNS.GamePlay
                 meshProvider.TransientIB = sharedIB;
                 if (material == null)
                 {
-                    material = TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria;
+                    material = TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMaterial;
                 }
                 var mesh = meshProvider.ToDrawMesh(material);
                 var localTrans = FTransform.CreateTransform(aabb.Minimum, in Vector3.One, in Quaternion.Identity);

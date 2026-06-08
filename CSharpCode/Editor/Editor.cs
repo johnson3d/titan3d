@@ -104,6 +104,7 @@ namespace EngineNS.Editor
         {
             get => TtEngine.Instance.ConfigManager.GetConfig<Editor.TtEditorConfig>();
         }
+        public int RenderDocCaptureFrameCount = 1;
         public EGui.TtUVAnim PhyMaterialIcon { get; set; }
         public EGui.TtUVAnim FontIcon { get; set; }
         public EGui.TtUVAnim MacrossIcon { get; set; }

@@ -830,8 +830,9 @@ namespace EngineNS.Graphics.Mesh
                         importer.mDir = dir;
                         importer.mName = textureName;
                         var srv = NxRHI.TtSrView.ImportImage(stream, importer, true);
-                        if (srv != null)
+                        if (srv == null)
                         {
+                            return null;
                         }
                         return srv.AssetName;
                     }
@@ -858,8 +859,9 @@ namespace EngineNS.Graphics.Mesh
                     importer.mDir = dir;
                     importer.mName = textureName;
                     var srv = NxRHI.TtSrView.ImportImage(stream, importer, true);
-                    if (srv != null)
+                    if (srv == null)
                     {
+                        return null;
                     }
                     return srv.AssetName;
                 }

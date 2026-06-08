@@ -129,25 +129,28 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                 if (IsHair())
                 {
-                    // Hair: normal oct-encoded into rt0.a + rt2.r, tangent into rt1
-                    var normalOct = OctEncode(mWorldNormal);
-                    rt0.W = normalOct.X;
-                    rt2.X = normalOct.Y;
+                    // Hair: rt0.a = ShiftOffset, normal oct-encoded into rt1.b + rt2.r
+                    rt0.W = mShiftOffset * 0.5f + 0.5f; // remap [-1,1] to [0,1]
 
+                    var normalOct = OctEncode(mWorldNormal);
+                    
                     if (!useOctNormal)
                     {
                         var encTangent = EncodeNormalXYZ(mWorldTangent);
                         rt1.X = encTangent.X;
                         rt1.Y = encTangent.Y;
                         rt1.Z = encTangent.Z;
+                        // non-oct mode: no room for normalOct.X in rt1.b
+                        mSpecular = normalOct.X;//放弃高光了
                     }
                     else
                     {
                         var tangentOct = OctEncode(mWorldTangent);
                         rt1.X = tangentOct.X;
                         rt1.Y = tangentOct.Y;
-                        rt1.Z = 0;
+                        rt1.Z = normalOct.X; // normalOct.X stored in rt1.b (10-bit)
                     }
+                    rt2.X = normalOct.Y;//头发不需要金属度
                 }
                 else
                 {
@@ -203,10 +206,16 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 if (IsHair())
                 {
                     mWorldTangent = decodedDir;
-                    mWorldNormal = OctDecode(new Vector2(rt0.W, rt2.X));
+                    float normalOctX = useOctNormal ? rt1.Z : rt2.Y;
+                    if (!useOctNormal)
+                    {//不是octahedron编码时，rt2.y存储了normalOctX，那么给高光一个缺省值0.06f
+                        rt2.Y = 0.06f;
+                    }
+                    mWorldNormal = OctDecode(new Vector2(normalOctX, rt2.X));
                     mMetallicity = 0;
                     mSubsurfaceProfileIndex = 0;
                     mSpecOcclusion = 0;
+                    mShiftOffset = rt0.W * 2.0f - 1.0f; // remap [0,1] back to [-1,1]
                 }
                 else
                 {
@@ -240,6 +249,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             public Vector3 mMtlColorRaw;
             public float mSubsurfaceProfileIndex; // SSS profile index (0~255 integer, normalized in encode)
             public float mSpecOcclusion;           // specular occlusion for PBR shading mode
+            public float mShiftOffset;             // Hair tangent shift offset [-1,1], stored as [0,1] in GBuffer
 
             public Vector3 mWorldNormal;
             public Vector3 mWorldTangent;

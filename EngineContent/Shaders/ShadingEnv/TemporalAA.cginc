@@ -171,20 +171,25 @@ struct TAA
         float velocityScale = 1000;
         float BlendFactor = saturate(alpha + length(Motion) * velocityScale);
 
-        // Luma-contrast anti-flicker (UE style): in high-contrast neighborhoods
-        // (bright specular next to dark diffuse), increase new-frame weight to
-        // prevent the variance box from bouncing between frames.
+        // Luma-contrast anti-flicker: 高对比度邻域 (高光紧邻暗区) 中, variance box 帧间
+        // 振荡剧烈, 需要增加新帧权重来快速跟踪变化, 避免闪烁.
+        // 低对比度区域 variance 小, history 稳定可信, 不应拉高 blend factor.
         float LumaMin = RGBToYCoCg(mu - sigma).x;
         float LumaMax = RGBToYCoCg(mu + sigma).x;
         float LumaContrast = LumaMax - LumaMin;
         float LumaContrastFactor = 32.0;
-        float antiFlicker = saturate(rcp(1.0 + LumaContrast * LumaContrastFactor));
-        BlendFactor = max(BlendFactor, antiFlicker);
+        // 高对比度时 antiFlicker → 1 (多用新帧); 低对比度时 → 0 (信任 history).
+        float antiFlicker = saturate(LumaContrast * LumaContrastFactor);
+        BlendFactor = max(BlendFactor, antiFlicker * alpha * 4.0);
 
-        // Make sure to have at least some small contribution.
+        // Luminance-difference stability: 当 history 和当前帧差异极大时 (disocclusion/
+        // 场景切换), 增加新帧权重加速收敛. 差异小时不抬高 blend.
         float LumaHistory = Luma4(RGBToYCoCg(HistoryColor.rgb));
         float LumaFiltered = Luma4(RGBToYCoCg(FilteredColor.rgb));
-        BlendFactor = max(BlendFactor, saturate(0.01 * LumaHistory / abs(LumaFiltered - LumaHistory + 1e-5)));
+        float lumaDiff = abs(LumaFiltered - LumaHistory);
+        // 只在差异足够大（相对 history 亮度超过 10%）时才抬高 blend factor.
+        float lumaReject = saturate(lumaDiff / max(LumaHistory * 0.1, 0.01));
+        BlendFactor = max(BlendFactor, lumaReject * 0.5);
 
         // History off-screen → discard.
         if (any(HistoryUV < 0) || any(HistoryUV > 1.0f))
@@ -209,9 +214,11 @@ struct TAA
         Depth.x = DepthBuffer.SampleLevel(Samp_DepthBuffer, currUV, 0).r;
         
         float2 Motion = DecodeMotionVector(MotionBuffer.SampleLevel(Samp_MotionBuffer, currUV.xy, 0).xy);
-        // History 采样也需要反偏上一帧的 jitter, 否则静止场景下当前帧和历史帧的
-        // jitter 不同会导致混合结果在帧间跳动.
-        float2 HistoryUV = screen_uv.xy - JitterUV - Motion.xy + PreJitterUV;
+        // Jitter 不改变像素在 RT 中的存储坐标 (只影响光栅化的亚像素采样偏移),
+        // 因此 history reprojection 只需 screen_uv - Motion, 不应包含任何 jitter 项.
+        // 旧写法 "screen_uv - JitterUV - Motion + PreJitterUV" 会在每帧引入不同的
+        // 亚像素偏移到 HistoryUV, 导致静止场景全像素抖动.
+        float2 HistoryUV = screen_uv.xy - Motion.xy;
         half4 HistoryColor = (half4) PrevColorBuffer.SampleLevel(Samp_PrevColorBuffer, HistoryUV.xy, 0);
         HistoryColor.rgb = sRGB2Linear((half3) HistoryColor.rgb);
         Depth.y = PrevDepthBuffer.SampleLevel(Samp_PrevDepthBuffer, HistoryUV.xy, 0).r;
@@ -249,8 +256,8 @@ struct TAA
         // 物体边缘上选最近点能避免 disocclusion 像素拿到错误的 motion (背景的 motion).
         float2 closest = GetClosestUV(currUV.xy);
         float2 Motion = DecodeMotionVector(MotionBuffer.SampleLevel(Samp_MotionBuffer, closest.xy, 0).xy);
-        // History 采样也需要反偏上一帧的 jitter, 与 GetTAAColor 保持一致.
-        float2 HistoryUV = screen_uv.xy - Motion - PreJitterUV;
+        // 同 GetTAAColor: HistoryUV 只跟 motion 有关, 不含 jitter 项.
+        float2 HistoryUV = screen_uv.xy - Motion;
         half4 HistoryColor = PrevColorBuffer.Sample(Samp_PrevColorBuffer, HistoryUV);
         HistoryColor.rgb = sRGB2Linear((half3)HistoryColor.rgb);
         Depth.y = PrevDepthBuffer.Sample(Samp_PrevDepthBuffer, HistoryUV.xy).r;

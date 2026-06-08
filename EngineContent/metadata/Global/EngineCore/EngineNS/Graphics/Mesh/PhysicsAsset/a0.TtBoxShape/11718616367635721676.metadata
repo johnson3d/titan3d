@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_11718616367635721676 Type="EngineNS.Graphics.Mesh.PhysicsAsset.TtBoxShape@EngineCore">
+  <HalfExtent Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <Offset Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <Rotation Type="EngineNS.Quaternion@EngineCore" Order="0" />
+</Hash_11718616367635721676>

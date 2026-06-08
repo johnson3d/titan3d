@@ -406,6 +406,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public float mOpacity;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "mMask")]
         public float mMask;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "mShiftOffset")]
+        public float mShiftOffset;
 
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "GetWorldNormal")]
         public Vector3 GetWorldNormal(PS_INPUT input)

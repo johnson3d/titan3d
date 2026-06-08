@@ -40,7 +40,7 @@ namespace EngineNS.NxPhysics
         }
         public override async Thread.Async.TtTask<bool> Initialize(TtEngine host)
         {
-            DebugShapeMaterial = await RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine).GetAsset<Graphics.Pipeline.Shader.TtMaterialInstance>();
+            DebugShapeMaterial = TtEngine.Instance.GfxDevice.MaterialInstanceManager.WhiteColorMaterial;
                 //host.GfxDevice.MaterialInstanceManager.GetMaterialInstance(
                 //RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
 

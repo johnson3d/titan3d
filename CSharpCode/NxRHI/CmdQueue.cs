@@ -25,6 +25,7 @@ namespace EngineNS.NxRHI
     {
         #region RenderDoc Capture
         public bool CaptureRenderDocFrame = false;
+        public int RemainingCaptureFrames = 0;
         public bool BeginFrameCapture()
         {
             if (CaptureRenderDocFrame == false)
@@ -48,6 +49,12 @@ namespace EngineNS.NxRHI
             //System.Diagnostics.Debug.Assert(IRenderDocTool.GetInstance().IsFrameCapturing());
             CaptureRenderDocFrame = false;
             IRenderDocTool.GetInstance().EndFrameCapture();
+
+            if (RemainingCaptureFrames > 0)
+            {
+                RemainingCaptureFrames--;
+                CaptureRenderDocFrame = true;
+            }
 
             ulong timeStamp = 0;
             var idx = IRenderDocTool.GetInstance().GetNumCaptures() - 1;

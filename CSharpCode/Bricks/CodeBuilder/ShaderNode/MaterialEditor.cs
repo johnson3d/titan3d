@@ -272,10 +272,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
 
         public bool IsDrawing { get; set; }
+        private Graphics.Pipeline.Shader.TtMaterial.EShadingMode mLastShadingMode = (Graphics.Pipeline.Shader.TtMaterial.EShadingMode)0xFF;
         public unsafe void OnDraw()
         {
             if (Visible == false || Material == null)
                 return;
+
+            // Sync pin visibility when ShadingMode changes
+            if (MaterialOutput != null && Material.ShadingMode != mLastShadingMode)
+            {
+                mLastShadingMode = Material.ShadingMode;
+                MaterialOutput.UpdatePinVisibility(mLastShadingMode);
+            }
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);

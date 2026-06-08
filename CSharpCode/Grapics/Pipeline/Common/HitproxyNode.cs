@@ -9,6 +9,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 {
     public class TtHitproxyShading : Shader.TtGraphicsShadingEnv
     {
+        TtGpuPipeline NoBlendPipeline = null;
         public TtHitproxyShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/pick/HitProxy.cginc", RName.ERNameType.Engine);
@@ -16,6 +17,17 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position};
+        }
+        public unsafe override void OnDrawCall(ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtRenderMesh.TtAtom atom)
+        {
+            if (atom.Material.Blend.RenderTarget[0].BlendEnable == 1)
+            {
+                var mtl = atom.Material;
+                NxRHI.FGpuPipelineDesc pipelineDesc = mtl.PipelineDesc;
+                pipelineDesc.m_Blend.RenderTarget[0].BlendEnable = 0;
+                var pipeline = TtEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(TtEngine.Instance.GfxDevice.RenderContext, in pipelineDesc);
+                drawcall.BindPipeline(pipeline);
+            }
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Hitproxy", "Hitproxy", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_6097100525553137773 Type="EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint@EngineCore">
+  <BoneNameA Type="System.String@Unknown" Order="0" />
+  <BoneNameB Type="System.String@Unknown" Order="0" />
+  <ConstraintType Type="EngineNS.Graphics.Mesh.PhysicsAsset.EConstraintType@EngineCore" Order="0" />
+  <Swing1LimitDeg Type="System.Single@Unknown" Order="0" />
+  <Swing2LimitDeg Type="System.Single@Unknown" Order="0" />
+  <TwistLimitDeg Type="System.Single@Unknown" Order="0" />
+</Hash_6097100525553137773>

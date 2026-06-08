@@ -77,11 +77,11 @@ namespace EngineNS.GamePlay.Scene
             }
             return base.OnTickLogic(args);
         }
-        public class USplinePoint : Graphics.Pipeline.IProxiable
+        public class TtSplinePoint : Graphics.Pipeline.IProxiable
         {
             public bool Selected { get; set; }
 
-            ~USplinePoint()
+            ~TtSplinePoint()
             {
                 TtEngine.Instance?.GfxDevice.HitproxyManager.UnmapProxy(this);
             }
@@ -129,7 +129,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        public List<USplinePoint> SplinePoints = new List<USplinePoint>(); 
+        public List<TtSplinePoint> SplinePoints = new List<TtSplinePoint>(); 
         public void UpdateSplineMesh()
         {
             {
@@ -137,7 +137,7 @@ namespace EngineNS.GamePlay.Scene
                 if (cookedMesh == null)
                     return;
                 var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
-                materials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
+                materials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.WhiteColorMaterial;
                 var mesh2 = new Graphics.Mesh.TtRenderMesh();
                 var ok1 = mesh2.Initialize(cookedMesh, materials1,
                     Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
@@ -197,7 +197,7 @@ namespace EngineNS.GamePlay.Scene
                         //if (i.Start == i.End)
                         //    continue;
 
-                        var sPoint = new USplinePoint();
+                        var sPoint = new TtSplinePoint();
                         sPoint.CurveIndex = i + 1;
                         sPoint.Spline = Spline;
                         TtEngine.Instance.GfxDevice.HitproxyManager.MapProxy(sPoint);
