@@ -160,7 +160,7 @@ namespace EngineNS.UI
             if (uiHost.AssetName != null)
                 uiNode.NodeData.Name = uiHost.AssetName.Name;
             else
-                uiNode.NodeData.Name = uiNode.SceneId.ToString();
+                uiNode.NodeData.Name = uiNode.NodeId.ToString();
             uiNode.AddUIHost(uiHost);
             uiNode.Parent = parent;
             uiNode.Placement.SetTransform(in pos, in scale, in quat);

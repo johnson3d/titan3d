@@ -66,11 +66,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
 
         public override TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
-            var linkedDataPin = statementBuildContext.MethodDescription.GetLinkedDataPin(DataPins[0]);
+            var linkedDataPin = IDataLineOperator.GetLinkedDataPin(statementBuildContext.OwnerDescription, DataInPins[0]); 
             if (linkedDataPin != null)
             {
                 System.Diagnostics.Debug.Assert(linkedDataPin is TtDataOutPinDescription);
-                FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
+                FExpressionBuildContext buildContext = new() { OwnerDescription = statementBuildContext.OwnerDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                 if (linkedDataPin.Parent is TtExpressionDescription expressionDescription)
                 {
                     var right = (linkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
@@ -112,12 +112,12 @@ namespace EngineNS.DesignMacross.Design.Expressions
             }
 
             var executionOutPin = ExecutionOutPins[0];
-            var linkedExecPin = statementBuildContext.MethodDescription.GetLinkedExecutionPin(executionOutPin);
+            var linkedExecPin = IExecutionLineOperator.GetLinkedExecutionPin(statementBuildContext.OwnerDescription, executionOutPin);
             if (linkedExecPin != null)
             {
                 FStatementBuildContext buildContext = new() {
                     ExecuteSequenceStatement = new(), 
-                    MethodDescription = statementBuildContext.MethodDescription,
+                    OwnerDescription = statementBuildContext.OwnerDescription,
                     ClassBuildContext = statementBuildContext.ClassBuildContext
                 };
                 (linkedExecPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);

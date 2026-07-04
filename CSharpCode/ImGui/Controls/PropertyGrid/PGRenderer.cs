@@ -272,7 +272,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor);
                 ImGuiAPI.Separator();
 
-                TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.TtBaseRenderer.enFont.Font_13px);
+                TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.TtBaseRenderer.enFont.Font_15px);
 
                 Vector2 size = Vector2.MinusOne;
                 //Vector2 size = Vector2.Zero;
@@ -328,7 +328,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             ImGuiAPI.TableSetColumnIndex(0);
             var frameHeight = ImGuiAPI.GetFrameHeight();
             var textSize = ImGuiAPI.CalcTextSize(displayName, false, -1);
-            var itemNamePadding = new Vector2(0, (frameHeight - textSize.Y - UIProxy.StyleConfig.Instance.PGCellPadding.Y * 2) * 0.5f);
+            var itemNamePaddingY = Math.Max(0.0f, (frameHeight - textSize.Y - UIProxy.StyleConfig.Instance.PGCellPadding.Y * 2) * 0.5f);
+            var itemNamePadding = new Vector2(0, itemNamePaddingY);
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in itemNamePadding);
             ImGuiAPI.AlignTextToFramePadding();
             var treeNodeRet = ImGuiAPI.TreeNodeEx(displayName, flags, displayName);
@@ -483,7 +484,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     //ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.PGHeadColor);
                     ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FrameRounding, 0);
                     ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in EGui.UIProxy.StyleConfig.Instance.PGCategoryPadding);
-                    TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.TtBaseRenderer.enFont.Font_Bold_13px);
+                    TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.TtBaseRenderer.enFont.Font_15px);
 
                     if(isSubPropertyGrid)
                     {
@@ -528,9 +529,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     tableBegin = ImGuiAPI.BeginTable("PGTable", 3, mTabFlags, in outerSize, 0.0f);
                     if(tableBegin)
                     {
-                        ImGuiAPI.TableSetupColumn("Name", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthStretch, 0.45f, 0);
-                        ImGuiAPI.TableSetupColumn("Value", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthStretch, 1.0f, 0);
-                        ImGuiAPI.TableSetupColumn("Ext", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_.ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_.ImGuiTableColumnFlags_NoHeaderWidth, 24, 0);
+                        ImGuiAPI.TableSetupColumn("Name", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthStretch, 0.50f, 0);
+                        ImGuiAPI.TableSetupColumn("Value", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthStretch, 1.25f, 0);
+                        ImGuiAPI.TableSetupColumn("Ext", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_.ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_.ImGuiTableColumnFlags_NoHeaderWidth, 32, 0);
                     }
                 }
                 if (tableBegin || isSubPropertyGrid)
@@ -630,7 +631,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             //if (propDesc.IsMouseHovered)
                             //    drawList.AddRectFilled(ref mHightlightRowMin, ref mHightlightRowMax, EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor, 0, ImDrawFlags_.ImDrawFlags_None);
 
-                            if (propertyValue == null && propDesc.CanCreateNew && CanNewObject(showTypeDesc))
+                            if (propertyValue == null && propDesc.CanCreateNew && CanNewObject(showTypeDesc)
+                                && (propDesc.CustomValueEditor == null || !propDesc.CustomValueEditor.UserDraw))
                             {
                                 object newValue;
                                 var retVal = DrawNameLabel(displayName, flags, ref itemEditorInfo);

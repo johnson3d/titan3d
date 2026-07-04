@@ -75,7 +75,7 @@ namespace EngineNS.DistanceField
         {
             get => TtSdfAsset.AssetExt;
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return await TtEngine.Instance.SdfAssetManager.GetSdfAsset(GetAssetName());
         }

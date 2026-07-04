@@ -9,11 +9,14 @@
     <Import_RootNamespace>EngineNS.DesignMacross</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Base\Description\IOperator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\GraphElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\GraphViewport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\GraphCamera.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Outline\OutlineContextMenuHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DesignMacrossNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\ConnectingLine\GraphElement_Line.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\ConnectingLine\LineDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\ConnectingLine\GraphElement_DataLine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Value\CenterDataReferenceDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Value\NullDescription.cs" />
@@ -33,6 +36,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\FlowControl\GraphElement_ExecuteSequenceStatement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\FlowControl\IfStatementDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\FlowControl\WhileLoopStatementDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\PureMethodInvokeDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\MethodInvokeDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ArithmeticOperator\GraphElement_ValueOperator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ArithmeticOperator\ArithmeticOperatorDescription.cs" />
@@ -64,12 +68,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\FlowControl\GraphElement_If.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\GraphElement_StatementDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\FlowControl\ReturnStatementDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\PureStatementDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\StatementDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Variable\OutlineElement_Variable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\Elements\GraphElement_DockPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\Elements\GraphElement_Icon.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\Elements\GraphElement_ComboBox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\Elements\GraphElement_RNameSelect.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\Elements\GraphElement_PinEditableBox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\Elements\GraphElement_TextBox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\NavigableGraphsPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\ConnectingLine\DataLineDescription.cs" />

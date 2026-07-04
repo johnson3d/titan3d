@@ -164,6 +164,7 @@ namespace EngineNS.IO
             SetSysDir(ESystemDir.GraphicEffect, "effect/graphic");
             SetSysDir(ESystemDir.ComputeEffect, "effect/compute");
             SetSysDir(ESystemDir.RayTracingEffect, "effect/raytracing");
+            SetSysDir(ESystemDir.Shader, "shaders");
             SetSysDir(ESystemDir.PSO, "pso");
             SetSysDir(ESystemDir.RenderDoc, "renderdoc");
             SetSysDir(ESystemDir.DebugUtility, "debugutility");
@@ -173,11 +174,14 @@ namespace EngineNS.IO
             SureDirectory(GetPath(ERootDir.Game, ESystemDir.Config));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.GraphicEffect));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.ComputeEffect));
+            SureDirectory(GetPath(ERootDir.Cache, ESystemDir.RayTracingEffect));
+            SureDirectory(GetPath(ERootDir.Cache, ESystemDir.Shader));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.PSO));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.RenderDoc));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.DebugUtility));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.AfterMath));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.CookedAssets));
+            SureDirectory(GetRoot(ERootDir.Cache) + "snapshots/");
 
             GpuDump.NvAftermath.SetOutputRoot(GetPath(ERootDir.Cache, ESystemDir.AfterMath));
         }
@@ -205,6 +209,7 @@ namespace EngineNS.IO
             GraphicEffect,
             ComputeEffect,
             RayTracingEffect,
+            Shader,
             PSO,
             RenderDoc,
             DebugUtility,

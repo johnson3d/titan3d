@@ -98,6 +98,7 @@
     <None Include="$(MSBuildThisFileDirectory)Occlusion\Occlusion.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Occlusion\SetupDrawClusterArgs.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\AAShading.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\CBufferShaderBinderGen.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\CommonLighting.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredBasePassPS.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredCommon.cginc" />
@@ -150,6 +151,7 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Collision\BVH\GpuBvhTraversal.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\QuarkDAGVisualize.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\SWRasterizer.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\Effectors.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\EmitShape.compute" />

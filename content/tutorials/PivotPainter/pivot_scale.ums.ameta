@@ -16,5 +16,6 @@
     <e_0 Value="Game,tutorials/pivotpainter/simplepivotpainterexample.vms,3b0a1183-d1b2-4274-90b7-18b48affd3f1" />
     <e_1 Value="Game,tutorials/pivotpainter/pivot_scale.material,2a3e4c32-dd71-4f3b-b83a-8a435335314f" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
 </Root>

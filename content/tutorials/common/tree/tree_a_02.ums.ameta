@@ -17,5 +17,6 @@
     <e_1 Value="Game,tutorials/common/tree/utest/material/tree/m_tree_leave.material,47f835ff-fb34-4426-9bbf-db39c6f6ef1b" />
     <e_2 Value="Game,tutorials/common/tree/utest/material/tree/m_tree_branch2.material,c5b0eb40-cb5a-4191-8f6a-29292c978f90" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
 </Root>

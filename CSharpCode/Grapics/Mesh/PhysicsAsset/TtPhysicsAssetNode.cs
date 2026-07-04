@@ -30,10 +30,13 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
             return node;
         }
 
-        public static Color4b ColorNormal = Color4b.FromArgb(0x40,0, 0xff, 0);
-        public static Color4b ColorHighlight = Color4b.FromArgb(0x80, 0xff, 0xff, 0);
-
-        public static Color4b ColorConstraint = Color4b.FromArgb(0xC0, 0x40, 0xA0, 0xFF);
+        // 颜色从 TtMeshPrimitiveEditorConfig 读取，支持用户自定义
+        static Editor.Forms.TtMeshPrimitiveEditorConfig GetEditorConfig()
+        {
+            return TtEngine.Instance?.ConfigManager?.GetConfig<Editor.Forms.TtMeshPrimitiveEditorConfig>();
+        }
+        public static Color4b ColorNormal => GetEditorConfig()?.PhysicsShapeColor ?? Color4b.FromArgb(0x40, 0, 0xff, 0);
+        public static Color4b ColorConstraint => GetEditorConfig()?.ConstraintConeColor ?? Color4b.FromArgb(0xC0, 0x40, 0xA0, 0xFF);
 
         TtPhysicsAsset mPhysicsAsset;
         List<TtCollisionShape> mShapes = new List<TtCollisionShape>();
@@ -89,8 +92,7 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
         /// </summary>
         public void RebuildShape(TtCollisionShape shape)
         {
-            bool isHighlighted = shape.BoneName == mHighlightedBone;
-            shape.BuildDebugMesh(isHighlighted ? ColorHighlight : ColorNormal);
+            shape.BuildDebugMesh(ColorNormal);
         }
 
         /// <summary>
@@ -104,7 +106,7 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
 
             foreach (var shape in mShapes)
             {
-                shape.BuildDebugMesh(shape.BoneName == boneName ? ColorHighlight : ColorNormal);
+                shape.BuildDebugMesh(ColorNormal);
             }
 
             // 查找该骨骼关联的 Constraint 并构建椭圆锥 debug mesh
@@ -167,7 +169,7 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
                     Vector3.One,
                     shape.Rotation);
 
-                if (meshPose != null && skeleton != null && !string.IsNullOrEmpty(shape.BoneName))
+                if (skeleton != null && !string.IsNullOrEmpty(shape.BoneName))
                 {
                     // 查找骨骼索引
                     int boneIndex = -1;
@@ -180,10 +182,14 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
                         }
                     }
 
-                    if (boneIndex >= 0 && boneIndex < meshPose.Transforms.Count)
+                    if (boneIndex >= 0 && boneIndex < skeleton.Limbs.Count)
                     {
-                        // Shape 局部 Transform 乘以 骨骼 Transform
-                        var boneTransform = meshPose.Transforms[boneIndex];
+                        // 使用 InitMatrix 定位，与 TtSkeletonShowNode 的骨骼球保持一致
+                        var limbDesc = skeleton.Limbs[boneIndex].Desc;
+                        var initMat = limbDesc.InitMatrix;
+                        var bonePos = initMat.Translation.AsDVector();
+                        var boneQuat = Quaternion.RotationMatrix(in initMat);
+                        var boneTransform = FTransform.CreateTransform(bonePos, Vector3.One, boneQuat);
                         FTransform worldTransform;
                         FTransform.MultiplyNoParentScale(out worldTransform, in shapeLocalTransform, in boneTransform);
                         shape.DebugMesh.SetWorldTransform(in worldTransform, rp.World, false);
@@ -201,30 +207,32 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
                 rp.AddVisibleMesh(shape.DebugMesh);
             }
 
-            // 渲染选中骨骼的 Constraint 椭圆锥：锥顶在父骨骼，张开方向从父指向子（约束子骨骼的运动范围）
-            if (mActiveConstraint?.DebugMesh != null && meshPose != null && skeleton != null)
+            // 渲染选中骨骼的 Constraint 椭圆锥：锥顶在子骨骼，张开方向从父指向子（约束子骨骼的运动范围）
+            // 使用 InitMatrix.Translation 定位，与 TtSkeletonShowNode 的骨骼球保持一致
+            if (mActiveConstraint?.DebugMesh != null && skeleton != null)
             {
                 int childIdx = FindBoneIndex(skeleton, mActiveConstraint.BoneNameB);
                 int parentIdx = FindBoneIndex(skeleton, mActiveConstraint.BoneNameA);
 
                 if (childIdx >= 0 && parentIdx >= 0
-                    && childIdx < meshPose.Transforms.Count && parentIdx < meshPose.Transforms.Count)
+                    && childIdx < skeleton.Limbs.Count && parentIdx < skeleton.Limbs.Count)
                 {
-                    var childT = meshPose.Transforms[childIdx];
-                    var parentT = meshPose.Transforms[parentIdx];
+                    var childPos = skeleton.Limbs[childIdx].Desc.InitMatrix.Translation.AsDVector();
+                    var parentPos = skeleton.Limbs[parentIdx].Desc.InitMatrix.Translation.AsDVector();
 
                     // 父→子方向
-                    var dir = (childT.mPosition - parentT.mPosition).ToSingleVector3();
+                    var dir = (childPos - parentPos).ToSingleVector3();
                     if (dir.LengthSquared() > 1e-8f)
                     {
                         dir.Normalize();
                         var coneQuat = Quaternion.GetQuaternion(Vector3.UnitX, dir);
-                        var coneTransform = FTransform.CreateTransform(childT.mPosition, Vector3.One, coneQuat);
+                        var coneTransform = FTransform.CreateTransform(childPos, Vector3.One, coneQuat);
                         mActiveConstraint.DebugMesh.SetWorldTransform(in coneTransform, rp.World, false);
                     }
                     else
                     {
-                        mActiveConstraint.DebugMesh.SetWorldTransform(in parentT, rp.World, false);
+                        var fallback = FTransform.CreateTransform(childPos, Vector3.One, Quaternion.Identity);
+                        mActiveConstraint.DebugMesh.SetWorldTransform(in fallback, rp.World, false);
                     }
                     rp.AddVisibleMesh(mActiveConstraint.DebugMesh);
                 }

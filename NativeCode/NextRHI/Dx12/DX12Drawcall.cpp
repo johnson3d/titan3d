@@ -304,6 +304,11 @@ namespace NxRHI
 		device->CheckDeviceThread();
 		auto dx12Cmd = (DX12CommandList*)cmdlist;
 		
+		if (ScissorRect != nullptr)
+		{
+			cmdlist->SetScissor(1, &ScissorRect->ScissorRect);
+		}
+
 		{
 			AUTO_SAMP("NxRHI.GraphicDraw.Commit.Geom");
 			if (dx12Cmd->mCurrentGeomMesh != Mesh || AttachVB != dx12Cmd->mCurrentAttachVA)

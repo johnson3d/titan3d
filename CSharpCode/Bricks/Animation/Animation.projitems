@@ -10,13 +10,18 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AnimUtil.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_KawaiiPhysics.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_AnimStateMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_PoseOutput.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\AnimASTBuildUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\BlendTreeClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\BlnedTreeOperator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\BlendTreeGraphContextMenuUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\GraphElement_PoseLine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\BlendTreeNodeClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\BlendTree_KawaiiPhysicsClassDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\GraphElement_BlendTreeNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\GraphElement_BlendTree_KawaiiPhysics.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\PoseLineDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Graph_BlendTree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\BlendTree_AnimStateMachineClassDescription.cs" />
@@ -105,9 +110,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Asset\SKeletonAsset.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\Skeleton\Limb\Socket.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AnimationModule.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)MorphAnimation\" />
+    <Compile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\TtKawaiiPhysicsContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\TtKawaiiSetupData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\TtKawaiiPhysicsComponent.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Animation.brick" />

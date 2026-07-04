@@ -1,5 +1,44 @@
 {
-  "MaterialName": "material/sysdft.material:Engine",
-  "PlaneMaterialName": "material/whitecolor.uminst:Engine",
-  "ImportBaseMaterial": "material/pbr.material:Engine"
+  "BoneSphereColor": {
+    "R": 0,
+    "G": 128,
+    "B": 0,
+    "A": 255,
+    "Name": "FF008000"
+  },
+  "BoneSphereHighlightColor": {
+    "R": 255,
+    "G": 0,
+    "B": 0,
+    "A": 255,
+    "Name": "FFFF0000"
+  },
+  "BoneLineColor": {
+    "R": 0,
+    "G": 128,
+    "B": 0,
+    "A": 255,
+    "Name": "FF008000"
+  },
+  "PhysicsShapeColor": {
+    "R": 0,
+    "G": 128,
+    "B": 0,
+    "A": 64,
+    "Name": "40008000"
+  },
+  "PhysicsShapeHighlightColor": {
+    "R": 255,
+    "G": 0,
+    "B": 0,
+    "A": 255,
+    "Name": "FFFF0000"
+  },
+  "ConstraintConeColor": {
+    "R": 218,
+    "G": 165,
+    "B": 32,
+    "A": 255,
+    "Name": "FFDAA520"
+  }
 }

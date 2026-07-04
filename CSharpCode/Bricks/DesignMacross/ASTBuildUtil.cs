@@ -1,5 +1,7 @@
-﻿using EngineNS.Animation.StateMachine;
+﻿using EngineNS.Animation.BlendTree;
+using EngineNS.Animation.StateMachine;
 using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Bricks.StateMachine;
 using EngineNS.Bricks.StateMachine.TimedSM;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Design;
@@ -18,16 +20,16 @@ namespace EngineNS.DesignMacross
         public static string InitMethodReturedValueVarName = "returnedValue";
         public static string GenerateClassName(IClassDescription classDescription)
         {
-            if(bGenerateDebugable)
+            if (bGenerateDebugable)
             {
-                return ClassNamePrefix + GetDescriptionCascadeName(classDescription); 
+                return ClassNamePrefix + GetDescriptionCascadeName(classDescription);
             }
             else
             {
-                return ClassNamePrefix + classDescription.Name + "_" + (uint)classDescription.Id.GetHashCode() ;
+                return ClassNamePrefix + classDescription.Name + "_" + (uint)classDescription.Id.GetHashCode();
             }
         }
-        public static string GenerateVariableName(IVariableDescription  variableDescription)
+        public static string GenerateVariableName(IVariableDescription variableDescription)
         {
             if (bGenerateDebugable)
             {
@@ -38,7 +40,7 @@ namespace EngineNS.DesignMacross
                 return VariableNamePrefix + variableDescription.Name;// + "_" + (uint)variableDescription.Id.GetHashCode();
             }
         }
-        public static string GenerateMethodName(IMethodDescription  methodDescription)
+        public static string GenerateMethodName(IMethodDescription methodDescription)
         {
             if (bGenerateDebugable)
             {
@@ -62,7 +64,7 @@ namespace EngineNS.DesignMacross
         }
         static string GetDescriptionCascadeName(IDescription description)
         {
-            if(description.Parent != null)
+            if (description.Parent != null)
             {
                 return GetDescriptionCascadeName(description.Parent) + "_" + description.Name;
             }
@@ -106,18 +108,18 @@ namespace EngineNS.DesignMacross
         public static TtMethodDeclaration CreateMethodDeclaration(IMethodDescription description, ref FClassBuildContext classBuildContext)
         {
             TtVariableDeclaration returnVar = null;
-            if(description.ReturnValueType != null)
+            if (description.ReturnValueType != null)
             {
                 returnVar = TtASTBuildUtil.CreateMethodReturnVariableDeclaration(
-                    new(description.ReturnValueType), 
+                    new(description.ReturnValueType),
                     TtASTBuildUtil.CreateDefaultValueExpression(new(description.ReturnValueType)));
             }
             List<TtMethodArgumentDeclaration> args = new();
-            foreach(var argDesc in description.Arguments)
+            foreach (var argDesc in description.Arguments)
             {
                 args.Add(CreateMethodArgumentDeclaration(argDesc));
             }
-           var methodDeclaration = CreateMethodDeclaration(description.Name, returnVar, args, description.IsOverride, description.AsyncType);
+            var methodDeclaration = CreateMethodDeclaration(description.Name, returnVar, args, description.IsOverride, description.AsyncType);
 
             return methodDeclaration;
         }
@@ -132,21 +134,21 @@ namespace EngineNS.DesignMacross
             methodDeclaration.IsOverride = isOverrid;
             methodDeclaration.AsyncType = asyncType;
             methodDeclaration.MethodName = methodName;
-            if(returnVar != null)
+            if (returnVar != null)
             {
                 methodDeclaration.ReturnValue = returnVar;
             }
-            if(arguments != null)
+            if (arguments != null)
             {
                 methodDeclaration.Arguments = arguments;
             }
-           
+
             return methodDeclaration;
         }
 
         public static TtMethodArgumentDeclaration CreateMethodArgumentDeclaration(string argName, TtTypeReference argType, EMethodArgumentAttribute argOperationType, bool ssParamArray = false)
         {
-           return new TtMethodArgumentDeclaration()
+            return new TtMethodArgumentDeclaration()
             {
                 VariableType = argType,
                 VariableName = argName,
@@ -175,7 +177,7 @@ namespace EngineNS.DesignMacross
                 VisitMode = varVisisMode
             };
         }
-        public static TtDefaultValueExpression CreateDefaultValueExpression(TtTypeReference type)   
+        public static TtDefaultValueExpression CreateDefaultValueExpression(TtTypeReference type)
         {
             return new TtDefaultValueExpression(type);
         }
@@ -221,6 +223,36 @@ namespace EngineNS.DesignMacross
                 new TtVariableReferenceExpression("CenterData", new TtVariableReferenceExpression(description.VariableName)),
                 new TtVariableReferenceExpression("CenterData"));
             method.MethodBody.Sequence.Add(centerDataAssign);
+        }
+
+        // 通过反射将list中的所有数值转换为CodeBuilder表达式
+        public static void CreateList(string listName, System.Collections.IList list, TtMethodDeclaration method)
+        {
+            //new list           
+            var listType = TtTypeDesc.TypeOf(list.GetType());
+
+            var listCreate = TtASTBuildUtil.CreateVariableDeclaration(listName, new TtTypeReference(listType),
+                                        new TtCreateObjectExpression(listType.CSharpTypeName));
+            method.MethodBody.Sequence.Add(listCreate);
+            if (list.GetType().IsGenericType)
+            {
+                var genericType = list.GetType().GenericTypeArguments[0];
+                ;
+                var genericTypeName = genericType.Name;
+                foreach (var item in list)
+                {
+                    List<TtPrimitiveExpression> initPrimitives = new();
+                    foreach (var property in item.GetType().GetProperties())
+                    {
+                        initPrimitives.Add(new TtPrimitiveExpression(TtTypeDesc.TypeOf(property.PropertyType), property.GetValue(item)));
+                    }
+                    var itemCreateExp = new TtCreateObjectExpression(genericType.FullName, initPrimitives.ToArray());
+
+                    var listAddStatment = new TtMethodInvokeStatement("Add", null, new TtVariableReferenceExpression(listName), new TtMethodInvokeArgumentExpression { Expression = itemCreateExp });
+                    method.MethodBody.Sequence.Add(listAddStatment);
+                }
+            }
+
         }
     }
 }

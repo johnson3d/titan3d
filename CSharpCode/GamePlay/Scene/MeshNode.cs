@@ -13,7 +13,7 @@ namespace EngineNS.GamePlay.Scene
 {
     [Bricks.CodeBuilder.ContextMenu("MeshNode", "Graphics\\MeshNode", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtMeshNode.TtMeshNodeData), DefaultNamePrefix = "Mesh")]
-    [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.UMeshNode@EngineCore", "EngineNS.GamePlay.Scene.UMeshNode" })]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.GamePlay.Scene.UMeshNode@EngineCore", "EngineNS.GamePlay.Scene.UMeshNode" })]
     public partial class TtMeshNode : TtGpuSceneNode
     {
         public object Tag { get; set; } = null;
@@ -22,7 +22,7 @@ namespace EngineNS.GamePlay.Scene
             CoreSDK.DisposeObject(ref mMesh);
             base.Dispose();
         }
-        [Rtti.Meta("",NameAlias = new string[] { "EngineNS.GamePlay.Scene.UMeshNode.UMeshNodeData@EngineCore" })]
+        [Rtti.Meta("", NameAlias = new string[] { "EngineNS.GamePlay.Scene.UMeshNode.UMeshNodeData@EngineCore" })]
         public class TtMeshNodeData : TtNodeData
         {
             public TtMeshNodeData()
@@ -66,6 +66,9 @@ namespace EngineNS.GamePlay.Scene
                     AtomType = Rtti.TtTypeDesc.TypeStr(value);
                 }
             }
+
+            [Rtti.Meta("")]
+            public Guid InstanceGroupNodeId { get; set; } = Guid.Empty;
         }
         protected override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
@@ -77,13 +80,13 @@ namespace EngineNS.GamePlay.Scene
                 return false;
 
             var meshData = data as TtMeshNodeData;
-            if (meshData.MeshName!=null)
+            if (meshData.MeshName != null)
             {
-                var materialMesh = await meshData.MeshName.GetAsset<Graphics.Mesh.TtMaterialMesh>();
-                if (materialMesh != null)
+                MaterialMesh = await meshData.MeshName.GetAsset<Graphics.Mesh.TtMaterialMesh>();
+                if (MaterialMesh != null)
                 {
                     var mesh = new Graphics.Mesh.TtRenderMesh();
-                    if (mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom))
+                    if (mesh.Initialize(MaterialMesh, meshData.MdfQueue, meshData.Atom))
                     {
                         this.RenderMesh = mesh;
                     }
@@ -94,9 +97,9 @@ namespace EngineNS.GamePlay.Scene
                     //await materialMesh.Mesh.TryLoadClusteredMesh();
                 }
             }
-            
+
             this.SetStyle(ENodeStyles.ParallelTick);
-            
+
             return true;
         }
         public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtRenderMesh> meshes)
@@ -104,9 +107,9 @@ namespace EngineNS.GamePlay.Scene
             if (mMesh == null)
                 return;
             meshes.Add(mMesh);
-            foreach(var i in Children)
+            foreach (var i in Children)
             {
-                if(i.HitproxyType == Graphics.Pipeline.TtHitProxy.EHitproxyType.FollowParent)
+                if (i.HitproxyType == Graphics.Pipeline.TtHitProxy.EHitproxyType.FollowParent)
                     i.GetHitProxyDrawMesh(meshes);
             }
         }
@@ -133,7 +136,7 @@ namespace EngineNS.GamePlay.Scene
         }
         protected override void OnSetPrefabTemplate()
         {
-            
+
         }
         public override bool IsAcceptShadow
         {
@@ -172,17 +175,18 @@ namespace EngineNS.GamePlay.Scene
         public static async Thread.Async.TtTask<TtMeshNode> AddMeshNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, Graphics.Mesh.TtRenderMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
-            var meshNode = await GamePlay.Scene.TtNode.SpawnNode<TtMeshNode>(parent, async (nd)=>
+            var meshNode = await GamePlay.Scene.TtNode.SpawnNode<TtMeshNode>(parent, async (nd) =>
             {
 
             }, data, EBoundVolumeType.Box, placementType) as TtMeshNode;
             if (mesh.MaterialMesh.AssetName != null)
                 meshNode.NodeData.Name = mesh.MaterialMesh.AssetName.Name;
             else
-                meshNode.NodeData.Name = meshNode.SceneId.ToString();
+                meshNode.NodeData.Name = meshNode.NodeId.ToString();
             meshNode.RenderMesh = mesh;
-            
-            meshNode.Placement.SetTransform(in pos, in scale, in quat);
+            meshNode.MaterialMesh = mesh.MaterialMesh;
+
+            meshNode.Placement.SetTransform(in pos, in scale, in quat); 
 
             return meshNode;
         }
@@ -193,7 +197,7 @@ namespace EngineNS.GamePlay.Scene
             if (materialMesh == null)
                 return null;
             var mesh = new Graphics.Mesh.TtRenderMesh();
-            
+
             var ok = mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
             if (ok == false)
                 return null;
@@ -217,11 +221,25 @@ namespace EngineNS.GamePlay.Scene
         {
             return BoundVolume as UBoxBV;
         }
+        TtMaterialMesh mMaterialMesh;
+        public TtMaterialMesh MaterialMesh
+        {
+            get
+            {
+                if (mMaterialMesh != null)
+                    return mMaterialMesh;
+                return RenderMesh?.MaterialMesh;
+            }
+            private set
+            {
+                mMaterialMesh = value;
+            }
+        }
         Graphics.Mesh.TtRenderMesh mMesh;
         [Rtti.Meta("", NameAlias = new string[] { "Mesh" })]
-        public override Graphics.Mesh.TtRenderMesh RenderMesh 
+        public override Graphics.Mesh.TtRenderMesh RenderMesh
         {
-            get 
+            get
             {
                 return mMesh;
             }
@@ -231,7 +249,7 @@ namespace EngineNS.GamePlay.Scene
                 {
                     mMesh.HostNode = null;
                 }
-                
+
                 mMesh = value;
 
                 if (mMesh != null)
@@ -265,7 +283,7 @@ namespace EngineNS.GamePlay.Scene
         }
         [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
         [Category("Option")]
-        public RName MeshName 
+        public RName MeshName
         {
             get
             {
@@ -286,8 +304,8 @@ namespace EngineNS.GamePlay.Scene
                 {
                     var mesh = new Graphics.Mesh.TtRenderMesh();
 
-                    var materialMesh = await value.GetAsset<Graphics.Mesh.TtMaterialMesh>();
-                    var ok = mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
+                    MaterialMesh = await value.GetAsset<Graphics.Mesh.TtMaterialMesh>();
+                    var ok = mesh.Initialize(MaterialMesh, meshData.MdfQueue, meshData.Atom);
                     if (ok == false)
                         return;
                     RenderMesh = mesh;
@@ -316,7 +334,7 @@ namespace EngineNS.GamePlay.Scene
         {
             get
             {
-                if(NodeData is TtMeshNodeData meshNodeData)
+                if (NodeData is TtMeshNodeData meshNodeData)
                 {
                     return meshNodeData.MdfQueue;
 
@@ -337,8 +355,8 @@ namespace EngineNS.GamePlay.Scene
             var meshNodeData = NodeData as TtMeshNodeData;
             var mesh = new Graphics.Mesh.TtRenderMesh();
 
-            var materialMesh = await MeshName.GetAsset<Graphics.Mesh.TtMaterialMesh>();
-            var ok = mesh.Initialize(materialMesh, meshNodeData.MdfQueue, meshNodeData.Atom);
+            MaterialMesh = await MeshName.GetAsset<Graphics.Mesh.TtMaterialMesh>();
+            var ok = mesh.Initialize(MaterialMesh, meshNodeData.MdfQueue, meshNodeData.Atom);
             if (ok == false)
                 return;
             RenderMesh = mesh;
@@ -362,9 +380,28 @@ namespace EngineNS.GamePlay.Scene
             await base.OnPostInitNode(parent, extArg);
 
             UpdateAbsTransform();
+
+            // Restore InstanceGroupNode reference
             var meshData = NodeData as TtMeshNodeData;
+            if (meshData != null && meshData.InstanceGroupNodeId != Guid.Empty)
+            {
+                var scene = this.GetNearestParentScene();
+                if (scene != null)
+                {
+                    var instanceGroupId = meshData.InstanceGroupNodeId;
+                    var targetNode = scene.FindNode(in instanceGroupId, true) as TtInstanceMeshNode;
+                    if (targetNode != null)
+                    {
+                        mInstanceGroupNode = targetNode;
+                        targetNode.RegisterMergedNode(this);
+                    }
+                }
+            }
+
+            meshData = NodeData as TtMeshNodeData;
             if (meshData == null || meshData.MeshName == null)
             {
+                MaterialMesh = null;
                 var cookedMesh = Graphics.Mesh.TtMeshDataProvider.MakeBoxWireframe(0, 0, 0, 5, 5, 5).ToMesh();
                 var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
                 materials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria;// TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria.CloneMaterialInstance();
@@ -388,8 +425,37 @@ namespace EngineNS.GamePlay.Scene
                 this.IsAcceptShadow = this.IsAcceptShadow;
             }
         }
+        #region Instancing
+        private TtInstanceMeshNode mInstanceGroupNode = null;
+
+        [Category("Instancing")]
+        [TtPGInstanceNodeSelector]
+        public TtInstanceMeshNode InstanceGroupNode
+        {
+            get => mInstanceGroupNode;
+            set
+            {
+                if (mInstanceGroupNode == value)
+                    return;
+                // Unregister from old
+                mInstanceGroupNode?.UnregisterMergedNode(this);
+                mInstanceGroupNode = value;
+                // Register to new
+                mInstanceGroupNode?.RegisterMergedNode(this);
+                // Persist
+                var data = NodeData as TtMeshNodeData;
+                if (data != null)
+                    data.InstanceGroupNodeId = value?.NodeId ?? Guid.Empty;
+            }
+        }
+        #endregion
+
         public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
+            // If merged into an InstanceMeshNode, skip independent rendering
+            if (mInstanceGroupNode != null)
+                return;
+
             UpdateCameralOffset(rp.World);
 
             if (mMesh == null)
@@ -435,7 +501,24 @@ namespace EngineNS.GamePlay.Scene
             return null;
             //return TtOnTickLogicScope<TtMeshNode>.Scope;
         }
-        public Animation.SkeletonAnimation.Runtime.Pose.TtLocalSpaceRuntimePose RuntimePose { get; set; } = null;
+        private Animation.SkeletonAnimation.Runtime.Pose.TtLocalSpaceRuntimePose mRuntimePose = null;
+        public Animation.SkeletonAnimation.Runtime.Pose.TtLocalSpaceRuntimePose RuntimePose
+        {
+            get => mRuntimePose;
+            set
+            {
+                if (value != null)
+                {
+                    mRuntimePose = value;
+                    mMeshSpaceRuntimePose = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(RuntimePose);
+                }
+            }
+        }
+        private Animation.SkeletonAnimation.Runtime.Pose.TtMeshSpaceRuntimePose mMeshSpaceRuntimePose = null;
+        public Animation.SkeletonAnimation.Runtime.Pose.TtMeshSpaceRuntimePose MeshSpaceRuntimePose
+        {
+            get => mMeshSpaceRuntimePose;
+        }
         public override bool IsNoTick
         {
             get
@@ -455,26 +538,26 @@ namespace EngineNS.GamePlay.Scene
         {
             if (HasSkin && RenderMesh.MdfQueue is TtMdfSkinMesh mdfSkin)
             {
-                if(mdfSkin.PerSkinMeshCBuffer == null)
+                if (mdfSkin.PerSkinMeshCBuffer == null)
                 {
                     mdfSkin.PerSkinMeshCBuffer = PerSkinMeshCBuffer;
                 }
-                if(RuntimePose != null)
+                if (mMeshSpaceRuntimePose != null)
                 {
-                    var meshSpaceRuntimePose = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(RuntimePose);
-                    var length = meshSpaceRuntimePose.Descs.Count;
+                    Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(ref mMeshSpaceRuntimePose,RuntimePose);
+                    var length = mMeshSpaceRuntimePose.Descs.Count;
                     var shaderBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerSkinMeshCBufferVarIndexer.Instance;
                     Vector4* absPos = (Vector4*)PerSkinMeshCBuffer.mCoreObject.GetVarPtrToWrite(shaderBinder.AbsBonePos, (uint)length);
                     Quaternion* absQuat = (Quaternion*)PerSkinMeshCBuffer.mCoreObject.GetVarPtrToWrite(shaderBinder.AbsBoneQuat, (uint)length);
 
-                    for (var i = 0; i < meshSpaceRuntimePose.Descs.Count; ++i)
+                    for (var i = 0; i < mMeshSpaceRuntimePose.Descs.Count; ++i)
                     {
-                        var boneDesc = meshSpaceRuntimePose.Descs[i] as Animation.SkeletonAnimation.Skeleton.Limb.TtBoneDesc;
+                        var boneDesc = mMeshSpaceRuntimePose.Descs[i] as Animation.SkeletonAnimation.Skeleton.Limb.TtBoneDesc;
                         //var index = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.GetIndex(boneDesc.NameHash, meshSpaceRuntimePose);
                         var index = new IndexInSkeleton(i);
                         if (index.IsValid())
                         {
-                            var trans = meshSpaceRuntimePose.Transforms[index.Value];
+                            var trans = mMeshSpaceRuntimePose.Transforms[index.Value];
                             *((Vector3*)absPos) = trans.Position.ToSingleVector3() + trans.Quat * boneDesc.InvPos;
                             absPos->W = 0;
                             *absQuat = boneDesc.InvQuat * trans.Quat;
@@ -487,7 +570,7 @@ namespace EngineNS.GamePlay.Scene
                     PerSkinMeshCBuffer.mCoreObject.FlushWrite(true, TtEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
                 }
             }
-                
+
             return true;
         }
 

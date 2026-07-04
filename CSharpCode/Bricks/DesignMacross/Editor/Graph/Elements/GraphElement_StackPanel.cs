@@ -21,9 +21,11 @@ namespace EngineNS.DesignMacross.Editor
     public class TtGraphElement_StackPanel : TtWidgetGraphElement, ILayoutable
     {
         public EOrientation Orientation { get; set; } = EOrientation.Vertical;
-        public Color4f BackgroundColor { get; set; } = new Color4f(0, 0, 0);
+        public Color4f BackgroundColor { get; set; } = new Color4f(0, 0, 0, 0);
         public List<IGraphElement> Children { get; set; } = new List<IGraphElement>();
         public FMargin Margin { get; set; } = FMargin.Default;
+        public float Rounding { get; set; } = 0;
+        public ERoundCornerType CornerType = ERoundCornerType.None;
         public void AddElement(IGraphElement element)
         {
             Children.Add(element);
@@ -70,7 +72,7 @@ namespace EngineNS.DesignMacross.Editor
 
         }
 
-        public override void OnUnSelected()
+        public override void OnUnSelected(ref FMouseEventContext context)
         {
 
         }
@@ -144,7 +146,7 @@ namespace EngineNS.DesignMacross.Editor
 
         public SizeF Arranging(Rect finalRect)
         {
-            Size = new SizeF(finalRect.Width, finalRect.Height);
+            Size = finalRect.Size;
             Location = finalRect.Location + new Vector2(Margin.Left, Margin.Top);
 
             if (Orientation == EOrientation.Vertical)
@@ -166,10 +168,10 @@ namespace EngineNS.DesignMacross.Editor
                                 startLocation.X = (finalRect.Width - childMeasuringSize.Width) * 0.5f;
                                 break;
                             case EHorizontalAlignment.Left:
-                                startLocation.X = 0;
+                                startLocation.X = 0 + -layoutableChild.Margin.Left;
                                 break;
                             case EHorizontalAlignment.Stretch:
-                                childMeasuringSize.Width = finalRect.Width;
+                                childMeasuringSize.Width = finalRect.Width - layoutableChild.Margin.Left - layoutableChild.Margin.Right;
                                 break;
                         }
                         Rect rect = new Rect(startLocation, childMeasuringSize);
@@ -196,10 +198,10 @@ namespace EngineNS.DesignMacross.Editor
                                 startLocation.Y = (finalRect.Height - childMeasuringSize.Height) * 0.5f;
                                 break;
                             case EVerticalAlignment.Top:
-                                startLocation.Y = 0;
+                                startLocation.Y = 0 + layoutableChild.Margin.Top;
                                 break;
                             case EVerticalAlignment.Stretch:
-                                childMeasuringSize.Height = finalRect.Height;
+                                childMeasuringSize.Height = finalRect.Height - layoutableChild.Margin.Top - layoutableChild.Margin.Bottom;
                                 break;
                         }
                         Rect rect = new Rect(startLocation, childMeasuringSize);
@@ -218,6 +220,9 @@ namespace EngineNS.DesignMacross.Editor
         {
             TtGraphElement_StackPanel stackPanel = renderableElement as TtGraphElement_StackPanel;
             var cmd = ImGuiAPI.GetWindowDrawList();
+            var start = context.ViewportTransform(stackPanel.AbsLocation);
+            var end = context.ViewportTransform(stackPanel.AbsLocation + new Vector2(stackPanel.Size.Width, stackPanel.Size.Height));
+            cmd.AddRectFilled(start, end, ImGuiAPI.ColorConvertFloat4ToU32(stackPanel.BackgroundColor), stackPanel.Rounding, (ImDrawFlags_)stackPanel.CornerType);
             foreach (var child in stackPanel.Children)
             {
                 var render = TtElementRenderDevice.CreateGraphElementRender(child);

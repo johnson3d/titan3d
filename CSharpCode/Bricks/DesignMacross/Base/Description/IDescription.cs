@@ -22,7 +22,7 @@ namespace EngineNS.DesignMacross.Base.Description
     public struct FStatementBuildContext
     {
         public FClassBuildContext ClassBuildContext;
-        public IMethodDescription MethodDescription;
+        public IDescription OwnerDescription;
         public TtExecuteSequenceStatement ExecuteSequenceStatement { get; set; }
         public void AddStatement(TtStatementBase statement)
         {
@@ -31,18 +31,21 @@ namespace EngineNS.DesignMacross.Base.Description
             ExecuteSequenceStatement.Sequence.Add(statement);
         }
     }
+
     public struct FExpressionBuildContext
     {
         public FClassBuildContext ClassBuildContext;
-        public IMethodDescription MethodDescription;
+        public IDescription OwnerDescription;
         public TtExecuteSequenceStatement Sequence;
         public TtDataPinDescription SelfPin;
         public TtDataPinDescription TargetPin;
     }
+
     public struct FDescriptionUpdateContext
     {
         public IClassDescription ClassDescription;
     }
+
     public interface IDescription  : IO.ISerializer
     {
         public Guid Id { get; set; }
@@ -50,6 +53,7 @@ namespace EngineNS.DesignMacross.Base.Description
         public IDescription Parent { get; set; }
         public void UpdateData(ref FDescriptionUpdateContext updateContext);
     }
+
     public interface IClassDescription : IDescription
     {
         public string ClassName { get; }
@@ -84,10 +88,6 @@ namespace EngineNS.DesignMacross.Base.Description
         public bool IsOverride { get; set; } 
         public TtMethodDeclaration.EAsyncType AsyncType { get; set; }
         public TtMethodDeclaration BuildMethodDeclaration(ref FClassBuildContext classBuildContext);
-        public TtExecutionPinDescription GetLinkedExecutionPin(TtExecutionPinDescription execPin);
-        public TtDataPinDescription GetLinkedDataPin(TtDataPinDescription dataPin);
-        public TtDataLineDescription GetDataLineWithPin(TtDataPinDescription dataPin);
-        public TtExecutionLineDescription GetExecutionLineWithPin(TtExecutionPinDescription execPin);
     }
 
     public interface IDesignableVariableDescription : IVariableDescription, IClassDescription
@@ -105,7 +105,7 @@ namespace EngineNS.DesignMacross.Base.Description
     }
     public class TtPinsCheckContext
     {
-        public IMethodDescription MethodDescription { get; set; }
+        public IDescription GraphDescription { get; set; }
         public List<IDescription> ErrorDescriptions { get; set; } = new();
     }
 }

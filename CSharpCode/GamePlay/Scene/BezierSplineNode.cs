@@ -144,7 +144,6 @@ namespace EngineNS.GamePlay.Scene
                 if (ok1)
                 {
                     mesh2.IsAcceptShadow = false;
-                    mesh2.IsUnlit = true;
                     mDebugSplineMesh = mesh2;
 
                     mDebugSplineMesh.HostNode = this;
@@ -175,7 +174,6 @@ namespace EngineNS.GamePlay.Scene
                     Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfInstanceStaticMesh>.TypeDesc);
                 if (ok1)
                 {
-                    mesh2.IsUnlit = true;
                     mDebugPointMesh = mesh2;
 
                     mDebugPointMesh.HostNode = this;

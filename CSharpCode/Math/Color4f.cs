@@ -119,6 +119,17 @@ namespace EngineNS
         /// <summary>
         /// 带参构造函数
         /// </summary>
+        /// <param name="color">颜色对象</param>
+        public Color4f(Color3f color, float alpha)
+        {
+            Alpha = alpha;
+            Red = color.Red;
+            Green = color.Green;
+            Blue = color.Blue;
+        }
+        /// <summary>
+        /// 带参构造函数
+        /// </summary>
         /// <param name="color">颜色值，使用Vector3表示</param>
 	    public Color4f(Vector3 color)
         {

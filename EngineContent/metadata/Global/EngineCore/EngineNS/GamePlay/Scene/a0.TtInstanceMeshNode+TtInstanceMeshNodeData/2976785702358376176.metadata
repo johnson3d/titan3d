@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2976785702358376176 Type="EngineNS.GamePlay.Scene.TtInstanceMeshNode.TtInstanceMeshNodeData@EngineCore">
+  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Capacity Type="System.UInt32@Unknown" Order="0" />
+  <InstanceTransforms Type="System.Collections.Generic.List&lt;EngineNS.FTransform@EngineCore,&gt;@Unknown" Order="0" />
+  <MeshName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.TtNode.ENodeStyles@EngineCore" Order="0" />
+  <UseInstanceBounding Type="System.Boolean@Unknown" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.TtBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.TtPlacementBase@EngineCore" Order="2" />
+</Hash_2976785702358376176>

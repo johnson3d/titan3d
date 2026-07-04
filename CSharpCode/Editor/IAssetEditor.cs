@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Editor
 {
-    public class UAssetEditorAttribute : Attribute
+    public class TtAssetEditorAttribute : Attribute
     {
         public Type EditorType;
     }

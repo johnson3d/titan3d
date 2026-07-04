@@ -42,8 +42,8 @@ namespace NxRHI
 			//mDesc->AddElement(se.SemanticName.c_str(), se.SemanticIndex, se.Format, se.InputSlot, se.AlignedByteOffset, se.IsInstanceData, se.InstanceDataStepRate);
 		}
 
-		auto hr = device->mDevice->CreateInputLayout(&elems[0], (UINT)elems.size(), &desc->ShaderDesc->Dxbc[0],
-			desc->ShaderDesc->Dxbc.size(), &mLayout);
+		auto hr = device->mDevice->CreateInputLayout(&elems[0], (UINT)elems.size(), &desc->ShaderDesc->RhiData[0],
+			desc->ShaderDesc->RhiData.size(), &mLayout);
 		if (FAILED(hr))
 			return false;
 		

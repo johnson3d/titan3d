@@ -17,7 +17,6 @@ namespace EngineNS.Animation.Macross.BlendTree
         public Color4f NameColor { get; set; } = new Color4f(0.0f, 0.0f, 0.0f);
         public Color4f BackgroundColor { get; set; } = new Color4f(0.5f, 188f / 255, 212f / 255, 240f / 255);
         public Color4f BorderColor { get; set; } = new Color4f(0.5f, 0.9f, 0.9f, 0.9f);
-        public float BorderThickness { get; set; } = 2;
         public TtGraphElement_StackPanel ElementContainer = new TtGraphElement_StackPanel();
         public TtGraphElement_TextBlock NameTextBlock = new TtGraphElement_TextBlock();
         public TtGraphElement_StackPanel BlendTreeNodeDescStackPanel = new TtGraphElement_StackPanel();
@@ -32,16 +31,19 @@ namespace EngineNS.Animation.Macross.BlendTree
             ElementContainer.HorizontalAlignment = EHorizontalAlignment.Stretch;
             ElementContainer.VerticalAlignment = EVerticalAlignment.Stretch;
 
-            BlendTreeNodeDescStackPanel.Margin = new FMargin(2, 2, 2, 2);
+            //BlendTreeNodeDescStackPanel.Margin = new FMargin(2, 2, 2, 2);
             BlendTreeNodeDescStackPanel.HorizontalAlignment = EHorizontalAlignment.Left;
             BlendTreeNodeDescStackPanel.Parent = ElementContainer;
+            BlendTreeNodeDescStackPanel.BackgroundColor = new Color4f(147 / 255.0f, 112 / 255.0f, 219 / 255.0f);
+            BlendTreeNodeDescStackPanel.Rounding = Rounding;
+            BlendTreeNodeDescStackPanel.CornerType = ERoundCornerType.RoundCornersTop;
             ElementContainer.AddElement(BlendTreeNodeDescStackPanel);
 
             NameTextBlock.Content = BlendTreeNodeClassDescription.Name;
             NameTextBlock.VerticalAlignment = EVerticalAlignment.Center;
             NameTextBlock.HorizontalAlignment = EHorizontalAlignment.Left;
             NameTextBlock.FontScale = 1.2f;
-            NameTextBlock.BackgroundColor = new Color4f(0, 0.8f, 0);
+            NameTextBlock.Rounding = Rounding;
             BlendTreeNodeDescStackPanel.AddElement(NameTextBlock);
 
             PinsPanel.Margin = new FMargin(0, 0, 0, 0);
@@ -100,8 +102,29 @@ namespace EngineNS.Animation.Macross.BlendTree
             }
             return list;
         }
+        public List<IGraphElement> EnumerateChildRverse<T>() where T : class
+        {
+            List<IGraphElement> list = EnumerateChild<T>();
+            list.Reverse();
+            return list;
+        }
         public override void ConstructElements(ref FGraphElementRenderingContext context)
         {
+            NameColor = TtAnimDesignMacrossGraphStyles.BlendTreeNodeTitleForegroundColor;
+            BackgroundColor = TtAnimDesignMacrossGraphStyles.BlendTreeNodeBackgroundColor;
+            BorderColor = TtAnimDesignMacrossGraphStyles.BlendTreeNodeBorderColor;
+            BlendTreeNodeDescStackPanel.BackgroundColor = TtAnimDesignMacrossGraphStyles.BlendTreeNodeTitleBackgroundColor;
+            if (IsSelected)
+            {
+                BorderColor = TtDesignMacrossGraphStyles.GraphElementSelectedColor;
+            }
+            if (HighLightState == EHighLigthState.LowLight)
+            {
+                NameColor = new Color4f(NameColor.ToColor3f(), TtDesignMacrossGraphStyles.LowLigthAlpha);
+                BackgroundColor = new Color4f(BackgroundColor.ToColor3f(), TtDesignMacrossGraphStyles.LowLigthAlpha);
+                BorderColor = new Color4f(BorderColor.ToColor3f(), TtDesignMacrossGraphStyles.LowLigthAlpha);
+                BlendTreeNodeDescStackPanel.BackgroundColor = new Color4f(BlendTreeNodeDescStackPanel.BackgroundColor.ToColor3f(), TtDesignMacrossGraphStyles.LowLigthAlpha);
+            }
             LeftSidePinsDockPanel.Clear();
             {
                 foreach (var posePin in BlendTreeNodeClassDescription.PoseInPins)

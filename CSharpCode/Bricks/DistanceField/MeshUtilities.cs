@@ -297,196 +297,200 @@ namespace EngineNS.DistanceField
 
             var embreeManager = new Bricks.Collision.Embree.TtEmbreeManager();
             embreeManager.Initialize();
-            var embreeScene = embreeManager.CreateScene();
-            var embreeGeom = embreeManager.CreateGeometry(MeshName, meshProvider);
-            embreeScene.AttachGeometry(embreeGeom);
-            embreeScene.CommitScene();
-
-            // Whether to use an Embree Point Query to compute the closest unsigned distance.  Rays will only be traced to determine backfaces visible for sign.
-            const bool bUsePointQuery = true;
-
-            List<Vector3> SampleDirections = new List<Vector3>();
+            using (var embreeScene = embreeManager.CreateScene())
             {
-                int NumVoxelDistanceSamples = bUsePointQuery ? 49 : 576;
-                GenerateStratifiedUniformHemisphereSamples(NumVoxelDistanceSamples, ref SampleDirections);
-                List<Vector3> OtherHemisphereSamples = new List<Vector3>();
-                GenerateStratifiedUniformHemisphereSamples(NumVoxelDistanceSamples, ref OtherHemisphereSamples);
+                var embreeGeom = embreeManager.CreateGeometry(MeshName, meshProvider);
+                embreeScene.AttachGeometry(embreeGeom);
+                embreeScene.CommitScene();
 
-                for (int i = 0; i < OtherHemisphereSamples.Count; i++)
+                // Whether to use an Embree Point Query to compute the closest unsigned distance.  Rays will only be traced to determine backfaces visible for sign.
+                const bool bUsePointQuery = true;
+
+                List<Vector3> SampleDirections = new List<Vector3>();
                 {
-                    var Sample = OtherHemisphereSamples[i];
-                    Sample.Y *= -1.0f;
-                    SampleDirections.Add(Sample);
-                }
-            }
+                    int NumVoxelDistanceSamples = bUsePointQuery ? 49 : 576;
+                    GenerateStratifiedUniformHemisphereSamples(NumVoxelDistanceSamples, ref SampleDirections);
+                    List<Vector3> OtherHemisphereSamples = new List<Vector3>();
+                    GenerateStratifiedUniformHemisphereSamples(NumVoxelDistanceSamples, ref OtherHemisphereSamples);
 
-            int PerMeshMax = sdfConfig.MaxPerMeshResolution;
-
-            // Meshes with explicit artist-specified scale can go higher
-            int MaxNumBlocksOneDim = (int)MathHelper.Min(Math.Round((DistanceFieldResolutionScale <= 1 ? PerMeshMax / 2.0 : PerMeshMax) / sdfConfig.UniqueDataBrickSize), sdfConfig.MaxIndirectionDimension - 1);
-
-            float VoxelDensity = sdfConfig.fDefaultVoxelDensity;
-
-            float NumVoxelsPerLocalSpaceUnit = VoxelDensity * DistanceFieldResolutionScale;
-
-            var LocalSpaceMeshBounds = meshProvider.AABB;
-            // Make sure the mesh bounding box has positive extents to handle planes
-            {
-                var MeshBoundsCenter = LocalSpaceMeshBounds.GetCenter();
-                var MeshBoundsExtent = Vector3.Maximize(LocalSpaceMeshBounds.GetExtent(), Vector3.One);
-                LocalSpaceMeshBounds = new BoundingBox(MeshBoundsCenter - MeshBoundsExtent, MeshBoundsCenter + MeshBoundsExtent);
-            }
-
-            // We sample on voxel corners and use central differencing for gradients, so a box mesh using two-sided materials whose vertices lie on LocalSpaceMeshBounds produces a zero gradient on intersection
-            // Expand the mesh bounds by a fraction of a voxel to allow room for a pullback on the hit location for computing the gradient.
-            // Only expand for two sided meshes as this adds significant Mesh SDF tracing cost
-            //if (embreeScene.bMostlyTwoSided)
-            //{
-                // TODO
-            //}
-
-            // The tracing shader uses a Volume space that is normalized by the maximum extent, to keep Volume space within [-1, 1], we must match that behavior when encoding
-            float LocalToVolumeScale = 1.0f / LocalSpaceMeshBounds.GetExtent().GetMaxValue();
-
-            Vector3 DesiredDimensions = LocalSpaceMeshBounds.GetSize() * (NumVoxelsPerLocalSpaceUnit / (float)sdfConfig.UniqueDataBrickSize);
-            Vector3i Mip0IndirectionDimensions = new Vector3i(
-                MathHelper.Clamp((int)Math.Round(DesiredDimensions.X), 1, MaxNumBlocksOneDim),
-                MathHelper.Clamp((int)Math.Round(DesiredDimensions.Y), 1, MaxNumBlocksOneDim),
-                MathHelper.Clamp((int)Math.Round(DesiredDimensions.Z), 1, MaxNumBlocksOneDim));
-
-            List<Byte> StreamableMipData = new List<byte>();
-
-            for (int MipIndex = 0; MipIndex < DistanceFieldConfig.NumMips; MipIndex++)
-            {
-                Vector3i IndirectionDimensions = new Vector3i(
-                    (int)MathHelper.DivideAndRoundUp((uint)Mip0IndirectionDimensions.X, (uint)(1 << MipIndex)),
-                    (int)MathHelper.DivideAndRoundUp((uint)Mip0IndirectionDimensions.Y, (uint)(1 << MipIndex)),
-                    (int)MathHelper.DivideAndRoundUp((uint)Mip0IndirectionDimensions.Z, (uint)(1 << MipIndex)));
-
-                BoundingBox DistanceFieldVolumeBounds = LocalSpaceMeshBounds;
-                // Expand to guarantee one voxel border for gradient reconstruction using bilinear filtering
-                if (sdfConfig.MeshDistanceFieldObjectBorder != 0)
-                {
-                    Vector3 TexelObjectSpaceSize = LocalSpaceMeshBounds.GetSize() / new Vector3(IndirectionDimensions * sdfConfig.UniqueDataBrickSize - new Vector3i(2 * sdfConfig.MeshDistanceFieldObjectBorder));
-                    DistanceFieldVolumeBounds = BoundingBox.ExpandBy(LocalSpaceMeshBounds, TexelObjectSpaceSize);
-                }
-
-                Vector3 IndirectionVoxelSize = DistanceFieldVolumeBounds.GetSize() / new Vector3(IndirectionDimensions);
-                float IndirectionVoxelRadius = IndirectionVoxelSize.Length();
-
-                bool bUseSimpleTranceDistance = false;
-                float LocalSpaceTraceDistance = 0;
-                Vector2 DistanceFieldToVolumeScaleBias = Vector2.Zero;
-                if (bUseSimpleTranceDistance)
-                {
-                    // method 1, Trance Distance: LocalSpaceMeshBounds.ExtentLength
-                    LocalSpaceTraceDistance = LocalSpaceMeshBounds.GetExtent().Length();
-                    float MaxDistanceForEncoding = LocalSpaceMeshBounds.GetExtent().GetMaxValue();
-                    DistanceFieldToVolumeScaleBias = new Vector2(2.0f * MaxDistanceForEncoding, -MaxDistanceForEncoding);
-                }
-                else
-                {
-                    // method 2, Trance Distance: 4 * voxelSize
-                    Vector3 VolumeSpaceDistanceFieldVoxelSize = IndirectionVoxelSize * LocalToVolumeScale / sdfConfig.UniqueDataBrickSize;
-                    float MaxDistanceForEncoding = VolumeSpaceDistanceFieldVoxelSize.Length() * sdfConfig.BandSizeInVoxels;
-                    LocalSpaceTraceDistance = MaxDistanceForEncoding / LocalToVolumeScale;
-                    DistanceFieldToVolumeScaleBias = new Vector2(2.0f * MaxDistanceForEncoding, -MaxDistanceForEncoding);
-                }
-
-                bool bUseFloatFormat = false;
-                bool bUseMultiThread = true;
-                List<FSparseMeshDistanceFieldAsyncTask> sdfTaskList = new List<FSparseMeshDistanceFieldAsyncTask>();
-                for (int YIndex = 0; YIndex < IndirectionDimensions.Y; YIndex++)
-                {
-                    for (int ZIndex = 0; ZIndex < IndirectionDimensions.Z; ZIndex++)
+                    for (int i = 0; i < OtherHemisphereSamples.Count; i++)
                     {
-                        for (int XIndex = 0; XIndex < IndirectionDimensions.X; XIndex++)
+                        var Sample = OtherHemisphereSamples[i];
+                        Sample.Y *= -1.0f;
+                        SampleDirections.Add(Sample);
+                    }
+                }
+
+                int PerMeshMax = sdfConfig.MaxPerMeshResolution;
+
+                // Meshes with explicit artist-specified scale can go higher
+                int MaxNumBlocksOneDim = (int)MathHelper.Min(Math.Round((DistanceFieldResolutionScale <= 1 ? PerMeshMax / 2.0 : PerMeshMax) / sdfConfig.UniqueDataBrickSize), sdfConfig.MaxIndirectionDimension - 1);
+
+                float VoxelDensity = sdfConfig.fDefaultVoxelDensity;
+
+                float NumVoxelsPerLocalSpaceUnit = VoxelDensity * DistanceFieldResolutionScale;
+
+                var LocalSpaceMeshBounds = meshProvider.AABB;
+                // Make sure the mesh bounding box has positive extents to handle planes
+                {
+                    var MeshBoundsCenter = LocalSpaceMeshBounds.GetCenter();
+                    var MeshBoundsExtent = Vector3.Maximize(LocalSpaceMeshBounds.GetExtent(), Vector3.One);
+                    LocalSpaceMeshBounds = new BoundingBox(MeshBoundsCenter - MeshBoundsExtent, MeshBoundsCenter + MeshBoundsExtent);
+                }
+
+                // We sample on voxel corners and use central differencing for gradients, so a box mesh using two-sided materials whose vertices lie on LocalSpaceMeshBounds produces a zero gradient on intersection
+                // Expand the mesh bounds by a fraction of a voxel to allow room for a pullback on the hit location for computing the gradient.
+                // Only expand for two sided meshes as this adds significant Mesh SDF tracing cost
+                //if (embreeScene.bMostlyTwoSided)
+                //{
+                // TODO
+                //}
+
+                // The tracing shader uses a Volume space that is normalized by the maximum extent, to keep Volume space within [-1, 1], we must match that behavior when encoding
+                float LocalToVolumeScale = 1.0f / LocalSpaceMeshBounds.GetExtent().GetMaxValue();
+
+                Vector3 DesiredDimensions = LocalSpaceMeshBounds.GetSize() * (NumVoxelsPerLocalSpaceUnit / (float)sdfConfig.UniqueDataBrickSize);
+                Vector3i Mip0IndirectionDimensions = new Vector3i(
+                    MathHelper.Clamp((int)Math.Round(DesiredDimensions.X), 1, MaxNumBlocksOneDim),
+                    MathHelper.Clamp((int)Math.Round(DesiredDimensions.Y), 1, MaxNumBlocksOneDim),
+                    MathHelper.Clamp((int)Math.Round(DesiredDimensions.Z), 1, MaxNumBlocksOneDim));
+
+                List<Byte> StreamableMipData = new List<byte>();
+
+                for (int MipIndex = 0; MipIndex < DistanceFieldConfig.NumMips; MipIndex++)
+                {
+                    Vector3i IndirectionDimensions = new Vector3i(
+                        (int)MathHelper.DivideAndRoundUp((uint)Mip0IndirectionDimensions.X, (uint)(1 << MipIndex)),
+                        (int)MathHelper.DivideAndRoundUp((uint)Mip0IndirectionDimensions.Y, (uint)(1 << MipIndex)),
+                        (int)MathHelper.DivideAndRoundUp((uint)Mip0IndirectionDimensions.Z, (uint)(1 << MipIndex)));
+
+                    BoundingBox DistanceFieldVolumeBounds = LocalSpaceMeshBounds;
+                    // Expand to guarantee one voxel border for gradient reconstruction using bilinear filtering
+                    if (sdfConfig.MeshDistanceFieldObjectBorder != 0)
+                    {
+                        Vector3 TexelObjectSpaceSize = LocalSpaceMeshBounds.GetSize() / new Vector3(IndirectionDimensions * sdfConfig.UniqueDataBrickSize - new Vector3i(2 * sdfConfig.MeshDistanceFieldObjectBorder));
+                        DistanceFieldVolumeBounds = BoundingBox.ExpandBy(LocalSpaceMeshBounds, TexelObjectSpaceSize);
+                    }
+
+                    Vector3 IndirectionVoxelSize = DistanceFieldVolumeBounds.GetSize() / new Vector3(IndirectionDimensions);
+                    float IndirectionVoxelRadius = IndirectionVoxelSize.Length();
+
+                    bool bUseSimpleTranceDistance = false;
+                    float LocalSpaceTraceDistance = 0;
+                    Vector2 DistanceFieldToVolumeScaleBias = Vector2.Zero;
+                    if (bUseSimpleTranceDistance)
+                    {
+                        // method 1, Trance Distance: LocalSpaceMeshBounds.ExtentLength
+                        LocalSpaceTraceDistance = LocalSpaceMeshBounds.GetExtent().Length();
+                        float MaxDistanceForEncoding = LocalSpaceMeshBounds.GetExtent().GetMaxValue();
+                        DistanceFieldToVolumeScaleBias = new Vector2(2.0f * MaxDistanceForEncoding, -MaxDistanceForEncoding);
+                    }
+                    else
+                    {
+                        // method 2, Trance Distance: 4 * voxelSize
+                        Vector3 VolumeSpaceDistanceFieldVoxelSize = IndirectionVoxelSize * LocalToVolumeScale / sdfConfig.UniqueDataBrickSize;
+                        float MaxDistanceForEncoding = VolumeSpaceDistanceFieldVoxelSize.Length() * sdfConfig.BandSizeInVoxels;
+                        LocalSpaceTraceDistance = MaxDistanceForEncoding / LocalToVolumeScale;
+                        DistanceFieldToVolumeScaleBias = new Vector2(2.0f * MaxDistanceForEncoding, -MaxDistanceForEncoding);
+                    }
+
+                    bool bUseFloatFormat = false;
+                    bool bUseMultiThread = true;
+                    List<FSparseMeshDistanceFieldAsyncTask> sdfTaskList = new List<FSparseMeshDistanceFieldAsyncTask>();
+                    for (int YIndex = 0; YIndex < IndirectionDimensions.Y; YIndex++)
+                    {
+                        for (int ZIndex = 0; ZIndex < IndirectionDimensions.Z; ZIndex++)
                         {
-                            sdfTaskList.Add(new FSparseMeshDistanceFieldAsyncTask(
-                                sdfConfig,
-                                embreeManager,
-                                embreeScene,
-                                SampleDirections,
-                                LocalSpaceTraceDistance,
-                                DistanceFieldVolumeBounds,
-                                LocalToVolumeScale,
-                                DistanceFieldToVolumeScaleBias,
-                                new Vector3i(XIndex, YIndex, ZIndex),
-                                IndirectionDimensions,
-                                bUsePointQuery,
-                                bUseFloatFormat));
+                            for (int XIndex = 0; XIndex < IndirectionDimensions.X; XIndex++)
+                            {
+                                sdfTaskList.Add(new FSparseMeshDistanceFieldAsyncTask(
+                                    sdfConfig,
+                                    embreeManager,
+                                    embreeScene,
+                                    SampleDirections,
+                                    LocalSpaceTraceDistance,
+                                    DistanceFieldVolumeBounds,
+                                    LocalToVolumeScale,
+                                    DistanceFieldToVolumeScaleBias,
+                                    new Vector3i(XIndex, YIndex, ZIndex),
+                                    IndirectionDimensions,
+                                    bUsePointQuery,
+                                    bUseFloatFormat));
+                            }
                         }
                     }
-                }
-                if(bUseMultiThread == true)
-                {
-                    TtEngine.Instance.EventPoster.ParallelFor(sdfTaskList.Count, static (index, state) =>
+                    if (bUseMultiThread == true)
                     {
-                        var pTaskList = state.GetForArgument0<List<FSparseMeshDistanceFieldAsyncTask>>();
-                        var task = pTaskList[(int)index];
+                        TtEngine.Instance.EventPoster.ParallelFor(sdfTaskList.Count, static (index, state) =>
+                        {
+                            var pTaskList = state.GetForArgument0<List<FSparseMeshDistanceFieldAsyncTask>>();
+                            var task = pTaskList[(int)index];
 
-                        task.DoWork();
+                            task.DoWork();
 
-                    }, -1, sdfTaskList);
-                }
-                else
-                {
-                    foreach(var task in sdfTaskList)
-                    {
-                        task.DoWork();
+                        }, -1, sdfTaskList);
                     }
-                }
-
-                List<uint> IndirectionTable = new List<uint>();
-                IndirectionTable.Resize(IndirectionDimensions.X * IndirectionDimensions.Y * IndirectionDimensions.Z, sdfConfig.InvalidBrickIndex);
-
-                List<FSparseMeshDistanceFieldAsyncTask> ValidBricks = new List<FSparseMeshDistanceFieldAsyncTask>();
-                foreach (var task in sdfTaskList)
-                {
-                    if (task.IsValid())
+                    else
                     {
-                        ValidBricks.Add(task);
+                        foreach (var task in sdfTaskList)
+                        {
+                            task.DoWork();
+                        }
                     }
+
+                    List<uint> IndirectionTable = new List<uint>();
+                    IndirectionTable.Resize(IndirectionDimensions.X * IndirectionDimensions.Y * IndirectionDimensions.Z, sdfConfig.InvalidBrickIndex);
+
+                    List<FSparseMeshDistanceFieldAsyncTask> ValidBricks = new List<FSparseMeshDistanceFieldAsyncTask>();
+                    foreach (var task in sdfTaskList)
+                    {
+                        if (task.IsValid())
+                        {
+                            ValidBricks.Add(task);
+                        }
+                    }
+
+                    int NumBricks = ValidBricks.Count;
+                    int BrickSizeBytes = sdfConfig.BrickSize * sdfConfig.BrickSize * sdfConfig.BrickSize;
+
+                    var OutMip = new TtSparseSdfMip();
+                    for (int BrickIndex = 0; BrickIndex < ValidBricks.Count; BrickIndex++)
+                    {
+                        var Brick = ValidBricks[BrickIndex];
+                        int IndirectionIndex = (Brick.BrickCoordinate.Z * IndirectionDimensions.Y + Brick.BrickCoordinate.Y) * IndirectionDimensions.X + Brick.BrickCoordinate.X;
+                        IndirectionTable[IndirectionIndex] = (uint)BrickIndex;
+
+                        System.Diagnostics.Debug.Assert(BrickSizeBytes == Brick.DistanceFieldVolume.Count);
+                        OutMip.DistanceFieldBrickData.AddRange(Brick.DistanceFieldVolume);
+                    }
+
+                    //int IndirectionTableBytes = IndirectionTable.Count * sizeof(uint);
+                    //int MipDataBytes = IndirectionTableBytes + DistanceFieldBrickData.Count * sizeof(short);
+
+                    OutMip.IndirectionDimensions = IndirectionDimensions;
+                    OutMip.DistanceFieldToVolumeScaleBias = DistanceFieldToVolumeScaleBias;
+                    OutMip.NumDistanceFieldBricks = NumBricks;
+                    OutMip.IndirectionTable = IndirectionTable;
+                    OutData.Mips.Add(OutMip);
                 }
 
-                int NumBricks = ValidBricks.Count;
-                int BrickSizeBytes = sdfConfig.BrickSize * sdfConfig.BrickSize * sdfConfig.BrickSize;
+                OutData.bMostlyTwoSided = false;// embreeScene.bMostlyTwoSided;
+                OutData.LocalSpaceMeshBounds = LocalSpaceMeshBounds;
 
-                var OutMip = new TtSparseSdfMip();
-                for (int BrickIndex = 0; BrickIndex < ValidBricks.Count; BrickIndex++)
+                float BuildTime = (float)(Support.TtTime.GetTickCount() - StartTime) / 1000.0f;
+
+                if (BuildTime > 0.0f)
                 {
-                    var Brick = ValidBricks[BrickIndex];
-                    int IndirectionIndex = (Brick.BrickCoordinate .Z * IndirectionDimensions.Y + Brick.BrickCoordinate.Y) * IndirectionDimensions.X + Brick.BrickCoordinate.X;
-                    IndirectionTable[IndirectionIndex] = (uint)BrickIndex;
+                    float memoryKB = OutData.GetAllocatedSize() / 1024.0f;
+                    var occupied = (int)Math.Round(100.0f * OutData.Mips[0].NumDistanceFieldBricks / (float)(Mip0IndirectionDimensions.X * Mip0IndirectionDimensions.Y * Mip0IndirectionDimensions.Z));
 
-                    System.Diagnostics.Debug.Assert(BrickSizeBytes == Brick.DistanceFieldVolume.Count);
-                    OutMip.DistanceFieldBrickData.AddRange(Brick.DistanceFieldVolume);
+                    Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, $"SDF Generate: Finished distance field build in {BuildTime:0.00} - " +
+                        $"{Mip0IndirectionDimensions.X * sdfConfig.UniqueDataBrickSize}x{Mip0IndirectionDimensions.Y * sdfConfig.UniqueDataBrickSize}x{Mip0IndirectionDimensions.Z * sdfConfig.UniqueDataBrickSize} " +
+                        $"sparse distance field, {memoryKB:0.0}Kb total, {occupied}% occupied, {meshProvider.mCoreObject.GetPrimitiveNumber()} triangles, {MeshName}");
                 }
-
-                //int IndirectionTableBytes = IndirectionTable.Count * sizeof(uint);
-                //int MipDataBytes = IndirectionTableBytes + DistanceFieldBrickData.Count * sizeof(short);
-
-                OutMip.IndirectionDimensions = IndirectionDimensions;
-                OutMip.DistanceFieldToVolumeScaleBias = DistanceFieldToVolumeScaleBias;
-                OutMip.NumDistanceFieldBricks = NumBricks;
-                OutMip.IndirectionTable = IndirectionTable;
-                OutData.Mips.Add(OutMip);
             }
 
-            OutData.bMostlyTwoSided = false;// embreeScene.bMostlyTwoSided;
-            OutData.LocalSpaceMeshBounds = LocalSpaceMeshBounds;
-
-            float BuildTime = (float)(Support.TtTime.GetTickCount() - StartTime)/1000.0f;
-
-            if (BuildTime > 0.0f)
-            {
-                float memoryKB = OutData.GetAllocatedSize()/1024.0f;
-                var occupied = (int)Math.Round(100.0f * OutData.Mips[0].NumDistanceFieldBricks / (float)(Mip0IndirectionDimensions.X * Mip0IndirectionDimensions.Y * Mip0IndirectionDimensions.Z));
-                   
-                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, $"SDF Generate: Finished distance field build in {BuildTime:0.00} - " +
-                    $"{Mip0IndirectionDimensions.X * sdfConfig.UniqueDataBrickSize}x{Mip0IndirectionDimensions.Y * sdfConfig.UniqueDataBrickSize}x{Mip0IndirectionDimensions.Z * sdfConfig.UniqueDataBrickSize} " +
-                    $"sparse distance field, {memoryKB:0.0}Kb total, {occupied}% occupied, {meshProvider.mCoreObject.GetPrimitiveNumber()} triangles, {MeshName}");
-            }
+            embreeManager.Dispose();
         }
     }
 }

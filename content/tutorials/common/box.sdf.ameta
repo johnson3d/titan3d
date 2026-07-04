@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.DistanceField.TtSdfAssetAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="046f72bd-8eb9-4cac-b632-c0a095a630c9" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/box.sdf,5244b6b4-e30e-4402-8853-732293e65c61" />
@@ -13,4 +13,5 @@
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.DistanceField.TtSdfAsset@EngineCore" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
 </Root>

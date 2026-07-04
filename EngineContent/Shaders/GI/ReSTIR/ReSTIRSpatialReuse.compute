@@ -1,9 +1,20 @@
 // ReSTIR GI - Pass 3: Spatial Reuse
 // 在邻域内 K 个像素中重采样 reservoir, 利用空间相干性提升单帧质量
 
+// 由 C# 端 UPermutationItem "ENV_USE_UNLIT_SKIP" 自动注入
+// 0 = 不检测 Unlit 材质 (MRT3 pin 悬空时强制为 0, GBufferRT3 不声明)
+// 1 = 从 GBufferRT3 提取 ShadingMode, Unlit 像素直接透传 reservoir 不做空域复用
+// MRT3 pin 悬空时, C# 端会强制保持为 0
+#ifndef ENV_USE_UNLIT_SKIP
+#define ENV_USE_UNLIT_SKIP 0
+#endif
+
 #include "ReSTIRCommon.cginc"
 
 Texture2D<float4> GBufferRT1;       // normal + flags
+#if ENV_USE_UNLIT_SKIP
+Texture2D<float4> GBufferRT3;       // motion vector + RenderFlags_10Bit + custom
+#endif
 Texture2D<float>  DepthBuffer;
 
 SamplerState Samp_PointClamp;
@@ -33,6 +44,20 @@ void CS_Main(uint3 id : SV_DispatchThreadID)
         OutReservoirs[pixelIndex] = InReservoirs[pixelIndex];
         return;
     }
+
+#if ENV_USE_UNLIT_SKIP
+    // Unlit 材质不接收间接光照, 直接透传 reservoir 退出
+    {
+        half4 rt3 = (half4)GBufferRT3.SampleLevel(Samp_PointClamp, uv, 0);
+        int renderFlags = (int)(rt3.b * 1023.0h + 0.5h);
+        int shadingMode = (renderFlags & SHADINGMODE_BIT_MASK) >> SHADINGMODE_BIT_OFFSET;
+        if (shadingMode == EShadingMode_Unlit)
+        {
+            OutReservoirs[pixelIndex] = InReservoirs[pixelIndex];
+            return;
+        }
+    }
+#endif
 
     float3 currN = DecodeNormalFromGBuffer(GBufferRT1.SampleLevel(Samp_PointClamp, uv, 0));
     float3 currWP = ReconstructWorldPos(uv, depth);

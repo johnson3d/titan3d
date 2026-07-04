@@ -18,6 +18,24 @@ namespace NxRHI
 	std::atomic<int>		IComputeDraw::NumOfInstance;
 	std::atomic<int>		ICopyDraw::NumOfInstance;
 
+	void IGraphicDraw::SetMeshAtomDesc(const FMeshAtomDesc* desc)
+	{
+		if (AtomDesc != nullptr)
+		{
+			AtomDesc->AtomDesc = *desc;
+			return;
+		}
+		AtomDesc = MakeWeakRef(new TMeshAtomDesc(*desc));
+	}
+	void IGraphicDraw::SetScissorRect(const FScissorRect* rect)
+	{
+		if (ScissorRect != nullptr)
+		{
+			ScissorRect->ScissorRect = *rect;
+			return;
+		}
+		ScissorRect = MakeWeakRef(new TScissorRect(*rect));
+	}
 	void IGraphicDraw::UpdateGpuDrawState(IGpuDevice* device, ICommandList* cmdlist, IRenderPass* rpass)
 	{
 		auto topo = EPrimitiveType::EPT_TriangleList;
@@ -152,6 +170,10 @@ namespace NxRHI
 		if (Mesh == nullptr || ShaderEffect == nullptr)
 			return;
 
+		if (ScissorRect != nullptr)
+		{
+			cmdlist->SetScissor(1, &ScissorRect->ScissorRect);
+		}
 		Mesh->Commit(cmdlist);
 
 		if (AttachVB != nullptr)

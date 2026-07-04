@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="6bee2c5403d81a5abfb6aa26d18e07bc2f18ec4ece818760b96d70e64890c779" />
+      <Path Type="System.String@Unknown" Value="t_graychan_eyeball_heartalp.srv" />
+    </e_0>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="6b9b8cf3-8614-4b16-8593-33311725ac2c" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/animation/material/t_graychan_eyeball_heartalp.srv,6b9b8cf3-8614-4b16-8593-33311725ac2c" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.TtSrView&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <OriginImageAddress Type="System.String@Unknown" Value="F:\Assets\GrayChan\Game\KawaiiPhysicsSample\Model\GrayChan\Textures\T_GrayChan_Eyeball_HeartAlp.PNG" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.TtSrView@EngineCore" />
+</Root>

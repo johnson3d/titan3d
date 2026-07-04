@@ -40,7 +40,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 var mtl = i as TtMaterialAMeta;
                 if (mtl == null)
                     continue;
-                var holdAsset = await mtl.LoadAsset();
+                var holdAsset = await mtl.GetAsset();
                 holdAsset.SaveAssetTo(mtl.GetAssetName());
             }
             //await TtEngine.Instance.EventPoster.Post((state) =>
@@ -51,7 +51,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //Resume Editor Operate
             TtEngine.Instance.ResumeOperation();
         }
-        public override async TtTask<IAsset> LoadAsset(params object[] args)
+        public override async TtTask<IAsset> GetAsset(params object[] args)
         {
             return await TtEngine.Instance.GfxDevice.MaterialFunctionManager.GetMaterialFunction(this.AssetName);
         }
@@ -96,7 +96,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 var f = i as Bricks.CodeBuilder.ShaderNode.Control.TtCallMaterialFunctionNode;
                 if (f != null)
                 {
-                    ameta.RefAssetRNames.Add(f.FunctionName);
+                    ameta.AddReferenceAsset(f.FunctionName);
                 }
             }
         }
@@ -133,7 +133,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     foreach (var refFunc in RefMaterialFunctions)
                     {
                         if (refFunc != null)
-                            ameta.RefAssetRNames.Add(refFunc);
+                            ameta.AddReferenceAsset(refFunc);
                     }
                     ameta.SaveAMeta(this);
                 }

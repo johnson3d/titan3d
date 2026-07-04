@@ -17,6 +17,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         public TtRenderPolicyAsset PolicyGraph { get; private set; }
         public TtGraphRenderer GraphRenderer { get; } = new TtGraphRenderer();
         public EGui.Controls.PropertyGrid.TtPropertyGrid NodePropGrid { get; } = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+        public EGui.Controls.PropertyGrid.TtPropertyGrid PolicyPropGrid { get; } = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public float LeftWidth = 0;
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
@@ -31,6 +32,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         public void Dispose()
         {
             NodePropGrid.Target = null;
+            PolicyPropGrid.Target = null;
         }
         public IRootForm GetRootForm()
         {
@@ -62,6 +64,9 @@ namespace EngineNS.Bricks.RenderPolicyEditor
 
             await NodePropGrid.Initialize();
             NodePropGrid.Target = PolicyGraph;
+
+            await PolicyPropGrid.Initialize();
+            PolicyPropGrid.Target = PolicyGraph.PolicyGraph.RenderPolicy;
 
             GraphRenderer.SetGraph(this.PolicyGraph.PolicyGraph);
 
@@ -105,6 +110,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             EGui.UIProxy.DockProxy.EndMainForm(IsDrawing);
 
             DrawRenderGraph();
+            DrawPolicyDetails();
             DrawNodeDetails();
         }
         protected void DrawToolBar()
@@ -152,6 +158,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("RenderGraph", mDockKeyClass), middleId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("PolicyDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
 
             ImGuiAPI.DockBuilderFinish(id);
@@ -175,6 +182,17 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             if (show)
             {
                 NodePropGrid.OnDraw(true, false, false);
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        bool ShowPolicyPropGrid = true;
+        protected void DrawPolicyDetails()
+        {
+            var sz = new Vector2(-1);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "PolicyDetails", ref ShowPolicyPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                PolicyPropGrid.OnDraw(true, false, false);
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }

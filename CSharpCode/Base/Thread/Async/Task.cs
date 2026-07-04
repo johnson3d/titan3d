@@ -356,7 +356,7 @@ namespace EngineNS.Thread.Async
         public T GetResultUntilCompleted()
         {
             WaitCompleted();
-            return this.GetResultAndRelease();
+            return this.UnsafeGetResultAndRelease();
         }
         public void WaitCompleted()
         {
@@ -371,7 +371,7 @@ namespace EngineNS.Thread.Async
             }
         }
 
-        public T GetResultAndRelease()
+        public T UnsafeGetResultAndRelease()
         {
             return GetAwaiter().GetResult();
         }

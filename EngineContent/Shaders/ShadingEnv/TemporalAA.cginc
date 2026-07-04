@@ -219,7 +219,12 @@ struct TAA
         // 旧写法 "screen_uv - JitterUV - Motion + PreJitterUV" 会在每帧引入不同的
         // 亚像素偏移到 HistoryUV, 导致静止场景全像素抖动.
         float2 HistoryUV = screen_uv.xy - Motion.xy;
+        HistoryUV = saturate(HistoryUV.xy);
         half4 HistoryColor = (half4) PrevColorBuffer.SampleLevel(Samp_PrevColorBuffer, HistoryUV.xy, 0);
+        if (any(isnan(HistoryColor)))
+        {
+            HistoryColor = (half4) 0;
+        }
         HistoryColor.rgb = sRGB2Linear((half3) HistoryColor.rgb);
         Depth.y = PrevDepthBuffer.SampleLevel(Samp_PrevDepthBuffer, HistoryUV.xy, 0).r;
 

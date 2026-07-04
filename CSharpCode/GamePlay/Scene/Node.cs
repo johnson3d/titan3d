@@ -427,6 +427,7 @@ namespace EngineNS.GamePlay.Scene
             IsDirty = (1 << 0),
             IsSelected = (1 << 1),
             IsPrefab = (1 << 2),
+            EditorHidden = (1 << 3),
         }
         public uint RuntimeStyles { get; set; } = 0;
         public ENodeStyles NodeStyles
@@ -468,6 +469,10 @@ namespace EngineNS.GamePlay.Scene
         public bool HasStyle(ENodeStyles style)
         {
             return (NodeStyles & style) == style;
+        }
+        public bool HasAnyStyle(ENodeStyles style)
+        {
+            return (NodeStyles & style) != 0;
         }
         public void SetStyle(ENodeStyles style)
         {
@@ -520,6 +525,37 @@ namespace EngineNS.GamePlay.Scene
                 {
                     UnsetRuntimeStyle(ENodeRuntimeStyles.IsSelected);
                 }
+            }
+        }
+        [Browsable(false)]
+        public bool IsEditorVisible
+        {
+            get => HasRuntimeStyle(ENodeRuntimeStyles.EditorHidden) == false;
+            set
+            {
+                if (value)
+                {
+                    UnsetRuntimeStyle(ENodeRuntimeStyles.EditorHidden);
+                }
+                else
+                {
+                    SetRuntimeStyle(ENodeRuntimeStyles.EditorHidden);
+                }
+            }
+        }
+        [Browsable(false)]
+        public bool IsEditorVisibleInHierarchy
+        {
+            get
+            {
+                var node = this;
+                while (node != null)
+                {
+                    if (node.IsEditorVisible == false)
+                        return false;
+                    node = node.Parent;
+                }
+                return true;
             }
         }
         [Browsable(false)]
@@ -741,10 +777,6 @@ namespace EngineNS.GamePlay.Scene
         {
             get => false;
         }
-        public virtual bool IsSceneManagedType()
-        {
-            return false;
-        }
 
         [Rtti.Meta("")]
         public virtual Guid NodeId
@@ -778,11 +810,6 @@ namespace EngineNS.GamePlay.Scene
             return null;
         }
 
-        public virtual UInt32 SceneId
-        {
-            get => UInt32.MaxValue;
-            internal set { }
-        }
         [Category("Option")]
         public virtual string NodeName
         {
@@ -792,7 +819,7 @@ namespace EngineNS.GamePlay.Scene
                 {
                     return NodeData.Name;
                 }
-                return SceneId.ToString();
+                return NodeId.ToString();
             }
             set
             {
@@ -1033,6 +1060,8 @@ namespace EngineNS.GamePlay.Scene
         {
             foreach(var i in Children)
             {
+                if (rp.UseEditorVisibilityFilter && i.IsEditorVisibleInHierarchy == false)
+                    continue;
                 if (i.HasStyle(ENodeStyles.VisibleFollowParent) && i.TryTreeGatherVisibleMeshes(rp))
                 {
                     i.OnGatherVisibleMeshes(rp);
@@ -1755,9 +1784,9 @@ namespace EngineNS.GamePlay.Scene
             if (fn(this, arg) == false)
                 return false;
             var tempChildren = Children;
-            foreach (var i in tempChildren)
+            for (int i = 0; i < tempChildren.Count; i++)
             {
-                if (i.IterateNodes(fn, arg) == false)
+                if (tempChildren[i].IterateNodes(fn, arg) == false)
                     return false;
             }
             return true;
@@ -1931,16 +1960,6 @@ namespace EngineNS.GamePlay.Scene
             }
         }
 
-        UInt32 mSceneId = UInt32.MaxValue;
-        public override UInt32 SceneId
-        {
-            get => mSceneId;
-            internal set => mSceneId = value;
-        }
-        public override bool IsSceneManagedType()
-        {
-            return true;
-        }
         protected uint CameralOffsetSerialId = 0;
         public void UpdateCameralOffset(TtWorld world)
         {
@@ -1991,10 +2010,6 @@ namespace EngineNS.GamePlay.Scene
 
     public partial class TtLightWeightNodeBase : TtNode
     {
-        public override bool IsSceneManagedType()
-        {
-            return false;
-        }
         protected override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)            
         {
             return await base.InitializeNode(world, data, bvType, placementType);
@@ -2016,6 +2031,7 @@ namespace EngineNS.GamePlay.Scene
         }
     }
 }
+
 
 
 #if TitanEngine_AutoGen_Macross

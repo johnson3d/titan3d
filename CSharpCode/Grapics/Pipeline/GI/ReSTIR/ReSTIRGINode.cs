@@ -73,6 +73,18 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             set { EnableProbeFallback.SetValue(value); this.UpdatePermutation().AddWaitTask(); }
         }
 
+        // ENV_USE_UNLIT_SKIP: 0 -> 不检测 Unlit 材质 (MRT3 pin 悬空时强制为 0)
+        //                     1 -> 从 GBufferRT3 提取 ShadingMode, Unlit 像素提前退出
+        // GBufferRT3 binder 仅在 1 的编译产物里存在, OnDrawCall 用 FindAttachBuffer
+        // + binder 保护; MRT3 pin 悬空时, C# 端会强制保持 0.
+        public TtPermutationItem EnableUnlitSkip { get; set; }
+        [Category("Option")]
+        public bool IsEnableUnlitSkip
+        {
+            get { return EnableUnlitSkip.GetValue() == (int)EPermutation_Bool.TrueValue; }
+            set { EnableUnlitSkip.SetValue(value); this.UpdatePermutation().AddWaitTask(); }
+        }
+
         public TtReSTIRInitialSamplingShading()
         {
             CodeName = RName.GetRName("Shaders/GI/ReSTIR/ReSTIRInitialSampling.compute", RName.ERNameType.Engine);
@@ -87,6 +99,8 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             EnableHzbAccel.SetValue((int)EPermutation_Bool.FalseValue);
             EnableProbeFallback = this.PushPermutation<EPermutation_Bool>("ENV_USE_PROBE_FALLBACK", (int)EPermutation_Bool.BitWidth);
             EnableProbeFallback.SetValue((int)EPermutation_Bool.FalseValue);
+            EnableUnlitSkip = this.PushPermutation<EPermutation_Bool>("ENV_USE_UNLIT_SKIP", (int)EPermutation_Bool.BitWidth);
+            EnableUnlitSkip.SetValue((int)EPermutation_Bool.FalseValue);
 
             UpdatePermutation().AddWaitTask();
         }
@@ -103,6 +117,12 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             drawcall.BindSrv("GBufferRT0", node.GetAttachBuffer(node.GBufferRT0PinIn).Srv);
             drawcall.BindSrv("GBufferRT1", node.GetAttachBuffer(node.GBufferRT1PinIn).Srv);
             drawcall.BindSrv("DepthBuffer", node.GetAttachBuffer(node.DepthPinIn).Srv);
+
+            // GBufferRT3: 仅在 ENV_USE_UNLIT_SKIP=1 编译产物里存在 binder.
+            // MRT3 pin 悬空时, permutation 一定是 0, binder 不存在, FindAttachBuffer 返回 null.
+            var mrt3Buffer = node.FindAttachBuffer(node.GBufferRT3PinIn);
+            if (mrt3Buffer != null)
+                drawcall.BindSrv("GBufferRT3", mrt3Buffer.Srv);
             drawcall.BindSrv("PrevColor", node.GetAttachBuffer(node.PrevColorPinIn).Srv);
             drawcall.BindSampler("Samp_PointClamp", TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
             // 4 个 ReSTIR pass 的 cbReSTIR layout 完全一致, 同一 TtCbView 可以跨 shading 复用
@@ -219,10 +239,25 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
     {
         public override Vector3ui DispatchArg => new Vector3ui(8, 8, 1);
 
+        // ENV_USE_UNLIT_SKIP: 与 InitialSampling 同一套 permutation, 同步开关.
+        // GBufferRT3 binder 仅在 1 的编译产物里存在.
+        public TtPermutationItem EnableUnlitSkip { get; set; }
+        [Category("Option")]
+        public bool IsEnableUnlitSkip
+        {
+            get { return EnableUnlitSkip.GetValue() == (int)EPermutation_Bool.TrueValue; }
+            set { EnableUnlitSkip.SetValue(value); this.UpdatePermutation().AddWaitTask(); }
+        }
+
         public TtReSTIRSpatialReuseShading()
         {
             CodeName = RName.GetRName("Shaders/GI/ReSTIR/ReSTIRSpatialReuse.compute", RName.ERNameType.Engine);
             MainName = "CS_Main";
+
+            this.BeginPermutaion();
+            EnableUnlitSkip = this.PushPermutation<EPermutation_Bool>("ENV_USE_UNLIT_SKIP", (int)EPermutation_Bool.BitWidth);
+            EnableUnlitSkip.SetValue((int)EPermutation_Bool.FalseValue);
+
             UpdatePermutation().AddWaitTask();
         }
 
@@ -234,6 +269,11 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
 
             drawcall.BindSrv("GBufferRT1", node.GetAttachBuffer(node.GBufferRT1PinIn).Srv);
             drawcall.BindSrv("DepthBuffer", node.GetAttachBuffer(node.DepthPinIn).Srv);
+
+            // GBufferRT3: 仅在 ENV_USE_UNLIT_SKIP=1 编译产物里存在 binder.
+            var mrt3Buffer = node.FindAttachBuffer(node.GBufferRT3PinIn);
+            if (mrt3Buffer != null)
+                drawcall.BindSrv("GBufferRT3", mrt3Buffer.Srv);
             drawcall.BindSampler("Samp_PointClamp", TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
             var cbBinder = drawcall.FindBinder(EShaderBindType.SBT_CBV, "cbReSTIR");
             if (cbBinder.IsValidPointer)
@@ -319,6 +359,7 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
         public TtRenderGraphPin GBufferRT0PinIn  = TtRenderGraphPin.CreateInput("MRT0", EBufferType.BFT_SRV);
         public TtRenderGraphPin GBufferRT1PinIn  = TtRenderGraphPin.CreateInput("MRT1", EBufferType.BFT_SRV);
         public TtRenderGraphPin GBufferRT2PinIn  = TtRenderGraphPin.CreateInput("MRT2", EBufferType.BFT_SRV);
+        public TtRenderGraphPin GBufferRT3PinIn  = TtRenderGraphPin.CreateInput("MRT3", EBufferType.BFT_SRV);
         public TtRenderGraphPin DepthPinIn       = TtRenderGraphPin.CreateInput("Depth", EBufferType.BFT_SRV | EBufferType.BFT_DSV);
         public TtRenderGraphPin MotionVectorPinIn = TtRenderGraphPin.CreateInput("MotionVector", EBufferType.BFT_SRV);
         public TtRenderGraphPin PrevColorPinIn   = TtRenderGraphPin.CreateInput("PrevColor", EBufferType.BFT_SRV);
@@ -520,6 +561,11 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             AddInput(GBufferRT0PinIn);
             AddInput(GBufferRT1PinIn);
             AddInput(GBufferRT2PinIn);
+            // MRT3 允许悬空 (用 FindAttachBuffer 检测):
+            //   不接 -> ENV_USE_UNLIT_SKIP=0, 不做 Unlit 材质跳过 (节省 GBufferRT3 读取开销)
+            //   接入 -> ENV_USE_UNLIT_SKIP=1, 从 GBufferRT3 提取 ShadingMode 跳过 Unlit 像素
+            AddInput(GBufferRT3PinIn);
+            GBufferRT3PinIn.IsAllowInputNull = true;
             AddInput(DepthPinIn);
             AddInput(MotionVectorPinIn);
             // PrevColor 是 InitialSampling pass 唯一的间接光源, HLSL 端没有 fallback,
@@ -573,10 +619,16 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             mInitial.IsEnableProbeFallback = (ProbeVolumeSource != null && ProbeVolumeSource.IsReady);
             mEnableProbeFallback = mInitial.IsEnableProbeFallback;
 
+            // MRT3 pin 接入则自动开 Unlit 跳过; 悬空则强制关.
+            bool hasMRT3 = GBufferRT3PinIn.FindInLinker() != null;
+            mInitial.IsEnableUnlitSkip = hasMRT3;
+
             await mInitial.UpdatePermutation();
 
             mTemporal = await TtShadingEnv.CreateShadingEnv<TtReSTIRTemporalReuseShading>();
-            mSpatial = await TtShadingEnv.CreateShadingEnv<TtReSTIRSpatialReuseShading>();
+            mSpatial = new TtReSTIRSpatialReuseShading();
+            mSpatial.IsEnableUnlitSkip = hasMRT3;
+            await mSpatial.UpdatePermutation();
             mResolve = await TtShadingEnv.CreateShadingEnv<TtReSTIRResolveShading>();
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;

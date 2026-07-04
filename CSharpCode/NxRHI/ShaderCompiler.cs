@@ -74,6 +74,7 @@ namespace EngineNS.NxRHI
     public class TtShaderDesc : AuxPtrType<NxRHI.FShaderDesc>
     {
         public Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId PermutationId { get; set; }
+        public Hash160 RhiDataHash { get; set; }
         public TtShaderDesc()
         {
             mCoreObject = FShaderDesc.CreateInstance();
@@ -86,6 +87,19 @@ namespace EngineNS.NxRHI
         public bool LoadXnd(XndNode node)
         {
             return false;
+        }
+        public unsafe void ComputeRhiDataHash()
+        {
+            var size = mCoreObject.GetRhiDataSize();
+            if (size > 0)
+            {
+                var ptr = (byte*)mCoreObject.GetRhiData();
+                RhiDataHash = Hash160.CreateHash160(ptr, size);
+            }
+            else
+            {
+                RhiDataHash = Hash160.Emtpy;
+            }
         }
         public string DebugName
         {

@@ -200,13 +200,13 @@ namespace NxRHI
 		
 		desc.VS =
 		{
-			&ShaderEffect->mVertexShader->Desc->DxIL[0],
-			ShaderEffect->mVertexShader->Desc->DxIL.size()
+			&ShaderEffect->mVertexShader->Desc->RhiData[0],
+			ShaderEffect->mVertexShader->Desc->RhiData.size()
 		};
 		desc.PS =
 		{
-			&ShaderEffect->mPixelShader->Desc->DxIL[0],
-			ShaderEffect->mPixelShader->Desc->DxIL.size()
+			&ShaderEffect->mPixelShader->Desc->RhiData[0],
+			ShaderEffect->mPixelShader->Desc->RhiData.size()
 		};
 
 		MemStreamReader ar;
@@ -278,17 +278,17 @@ namespace NxRHI
 		if (ShaderEffect->mAmplificationShader != nullptr)
 		{
 			Stream.AS = {
-				&ShaderEffect->mAmplificationShader->Desc->DxIL[0],
-				ShaderEffect->mAmplificationShader->Desc->DxIL.size()
+				&ShaderEffect->mAmplificationShader->Desc->RhiData[0],
+				ShaderEffect->mAmplificationShader->Desc->RhiData.size()
 			};
 		}
 		Stream.MS = {
-			&ShaderEffect->mMeshShader->Desc->DxIL[0],
-			ShaderEffect->mMeshShader->Desc->DxIL.size()
+			&ShaderEffect->mMeshShader->Desc->RhiData[0],
+			ShaderEffect->mMeshShader->Desc->RhiData.size()
 		};
 		Stream.PS = {
-			&ShaderEffect->mPixelShader->Desc->DxIL[0],
-			ShaderEffect->mPixelShader->Desc->DxIL.size()
+			&ShaderEffect->mPixelShader->Desc->RhiData[0],
+			ShaderEffect->mPixelShader->Desc->RhiData.size()
 		};
 		Stream.Raster = CD3DX12_RASTERIZER_DESC(pDx12->mRasterState);
 		Stream.Blend = CD3DX12_BLEND_DESC(pDx12->mBlendState);
@@ -348,12 +348,12 @@ namespace NxRHI
 		Stream.InputLayout = { &mDx12Elements[0], (UINT)mDx12Elements.size() };
 		Stream.PrimitiveTopologyType = PrimitiveTypeToDX12(TopologyType);
 		Stream.VS = {
-			&ShaderEffect->mVertexShader->Desc->DxIL[0],
-			ShaderEffect->mVertexShader->Desc->DxIL.size()
+			&ShaderEffect->mVertexShader->Desc->RhiData[0],
+			ShaderEffect->mVertexShader->Desc->RhiData.size()
 		};
 		Stream.PS = {
-			&ShaderEffect->mPixelShader->Desc->DxIL[0],
-			ShaderEffect->mPixelShader->Desc->DxIL.size()
+			&ShaderEffect->mPixelShader->Desc->RhiData[0],
+			ShaderEffect->mPixelShader->Desc->RhiData.size()
 		};
 		Stream.Raster = CD3DX12_RASTERIZER_DESC(pDx12->mRasterState);
 		Stream.Blend = CD3DX12_BLEND_DESC(pDx12->mBlendState);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Thread.Async;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -840,35 +841,41 @@ namespace EngineNS.Rtti
                 //        }
                 //    }
                 //});
+
+                //这里居然出现了TtTask<bool>没有被注册的情况，增加Methords的return&parameters注册
+                //var type = typeof(TtTask<bool>);
+                //RegType(type, desc);
+                var do_RegType = (Type tp) =>
+                {
+                    if (tp.IsGenericType == false)
+                        return;
+                    var propAssmDesc = FindAssemblyDesc(tp.Assembly);
+                    if (propAssmDesc != null)
+                    {
+                        RegType(tp, propAssmDesc);
+                    }
+                };
+
                 foreach (var i in tps)
                 {
                     if (i.IsGenericType)
                         continue;
                     RegType(i, desc);
+
                     foreach (var j in i.GetProperties())
                     {
-                        if (j.PropertyType.IsGenericType == false)
-                        {
-                            continue;
-                        }
-
-                        var propAssmDesc = FindAssemblyDesc(j.PropertyType.Assembly);
-                        if (propAssmDesc != null)
-                        {
-                            RegType(j.PropertyType, propAssmDesc);
-                        }
+                        do_RegType(j.PropertyType);
                     }
                     foreach (var j in i.GetFields())
                     {
-                        if (j.FieldType.IsGenericType == false)
+                        do_RegType(j.FieldType);
+                    }
+                    foreach (var j in i.GetMethods())
+                    {
+                        do_RegType(j.ReturnType);
+                        foreach (var k in j.GetParameters())
                         {
-                            continue;
-                        }
-
-                        var propAssmDesc = FindAssemblyDesc(j.FieldType.Assembly);
-                        if (propAssmDesc != null)
-                        {
-                            RegType(j.FieldType, propAssmDesc);
+                            do_RegType(k.ParameterType);
                         }
                     }
                 }

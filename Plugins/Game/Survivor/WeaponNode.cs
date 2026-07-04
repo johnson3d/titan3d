@@ -1,4 +1,4 @@
-﻿using EngineNS;
+using EngineNS;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Character;
 using EngineNS.GamePlay.Scene;
@@ -14,6 +14,20 @@ namespace Survivor
 {
     public class TtWeaponController
     {
+        protected static void LogWarning(string message)
+        {
+            EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, message);
+        }
+
+        protected static void ReleasePrefab(TtPrefabNode prefab)
+        {
+            if (prefab == null)
+                return;
+
+            prefab.RemoveFromWorld();
+            TtEngine.Instance.GameInstance?.PrefabPoolManager?.ReleasePrefab(prefab);
+        }
+
         public static TtWeaponController GetTtWeaponController(int weaponId)
         {
             TtWeaponController controller = null;
@@ -47,7 +61,7 @@ namespace Survivor
             return EngineNS.Rtti.TtTypeDescManager.CreateInstance(type) as TtWeaponController;
         }
         public TtWeaponNode WeaponNode { get; set; }
-        public TtWeaponData WeaponData { get => WeaponNode.WeaponData; }
+        public TtWeaponData WeaponData { get => WeaponNode?.WeaponData; }
         protected float mCurrentTime = 0;
         public virtual void Init()
         {
@@ -76,15 +90,18 @@ namespace Survivor
 
         public override void Tick(TtWorld world)
         {
-            var playerNode = TtGameMode.GetSurvivorGameMode().Player;
+            var playerNode = TtGameMode.GetSurvivorGameMode()?.Player;
+            if (world == null || WeaponNode == null || WeaponData == null || playerNode?.Placement == null)
+                return;
+
             mCurrentTime += world.DeltaTimeSecond;
             Vector3 hostPosition = Vector3.Zero;
             if(WeaponNode.Parent is TtMonsterNode monsterNode)
             {
-                if (monsterNode.MonseterPlacement!=null)
-                {
-                    hostPosition = monsterNode.MonseterPlacement.Position.ToSingleVector3();
-                }
+                if (monsterNode.StateNode?.IsDead != false || monsterNode.MonseterPlacement == null)
+                    return;
+
+                hostPosition = monsterNode.MonseterPlacement.Position.ToSingleVector3();
             }
             else
             {
@@ -102,7 +119,10 @@ namespace Survivor
         }
         protected void Fire()
         {
-            var playerNode = TtGameMode.GetSurvivorGameMode().Player;
+            var playerNode = TtGameMode.GetSurvivorGameMode()?.Player;
+            if (playerNode == null)
+                return;
+
             WeaponNode.Attack(playerNode, null);
         }
     }
@@ -119,6 +139,9 @@ namespace Survivor
             public Vector3 OriginalLocation;
             public void Update(TtWorld world)
             {
+                if (Element?.Placement == null || world == null)
+                    return;
+
                 Element.Placement.Position += Direction * Speed * world.DeltaTimeSecond;
             }
         }
@@ -130,6 +153,9 @@ namespace Survivor
         List<FSimpleElementController> mBeRemoved = new List<FSimpleElementController>();
         public override void Tick(TtWorld world)
         {
+            if (world == null || WeaponNode == null || WeaponData == null)
+                return;
+
             mCurrentTime += world.DeltaTimeSecond;
             if (mCurrentTime > WeaponData.CoolDown)
             {
@@ -139,6 +165,12 @@ namespace Survivor
             }
             foreach (var bullet in BulletPrefabs)
             {
+                if (bullet.Element?.Placement == null)
+                {
+                    mBeRemoved.Add(bullet);
+                    continue;
+                }
+
                 bullet.Update(world);
                 var distance = Vector3.Distance(bullet.OriginalLocation,
                     bullet.Element.Placement.AbsTransform.Position.ToSingleVector3());
@@ -149,28 +181,36 @@ namespace Survivor
             }
             foreach (var weapon in mBeRemoved)
             {
-                weapon.Element.RemoveFromWorld();
                 BulletPrefabs.Remove(weapon);
-                TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon.Element);
+                ReleasePrefab(weapon.Element);
             }
             mBeRemoved.Clear();
             base.Tick(world);
         }
         protected void Fire()
         {
+            if (WeaponNode?.Parent?.Parent == null || WeaponData == null || string.IsNullOrEmpty(WeaponData.Shape))
+                return;
+
             var weaponPrefabName = RName.ParseFrom(WeaponData.Shape);
             if (weaponPrefabName != null)
             {
-                var WeaponPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(WeaponNode.GetWorld(), RName.ParseFrom(WeaponData.Shape), false);
+                var WeaponPrefab = EngineNS.TtEngine.Instance.GameInstance?.PrefabPoolManager?.CreatePrefab(WeaponNode.GetWorld(), weaponPrefabName, false);
                 if (WeaponPrefab != null)
                 {
                     WeaponPrefab.Parent = WeaponNode.Parent.Parent;
                     var proxyNode = WeaponPrefab.FindFirstChild<TtWeaponProxyNode>() as TtWeaponProxyNode;
+                    if (proxyNode == null)
+                    {
+                        LogWarning($"Weapon prefab({WeaponData.Shape}) has no TtWeaponProxyNode");
+                        ReleasePrefab(WeaponPrefab);
+                        return;
+                    }
                     proxyNode.WeaponNode = WeaponNode;
 
                     var singleControll = new FSimpleElementController();
                     singleControll.Element = WeaponPrefab;
-                    singleControll.Speed = WeaponNode.RoleData.ProjectileSpeed;
+                    singleControll.Speed = WeaponNode.RoleData?.ProjectileSpeed ?? WeaponData.ProjectileSpeed;
                     var character = WeaponNode.Parent.FindFirstChild<TtCharacter>();
                     if (character != null)
                     {
@@ -178,6 +218,10 @@ namespace Survivor
                         singleControll.OriginalLocation = character.Placement.AbsTransform.Position.ToSingleVector3();
                         WeaponPrefab.Placement.Position = DVector3.Up + singleControll.OriginalLocation;
                         BulletPrefabs.Add(singleControll);
+                    }
+                    else
+                    {
+                        ReleasePrefab(WeaponPrefab);
                     }
                 }
             }
@@ -193,8 +237,9 @@ namespace Survivor
             public float Speed;
             public void Update(TtWorld world)
             {
-                if (Target.StateNode.IsDead)
+                if (world == null || Element?.Placement == null || Target?.MonseterPlacement == null || Target.StateNode?.IsDead != false)
                     return;
+
                 var dir = Target.MonseterPlacement.AbsTransform.Position - Element.Placement.AbsTransform.Position;
                 dir.Y = 0;
                 if (dir.Length() < 0.1)
@@ -213,6 +258,9 @@ namespace Survivor
         List<FNearestElementController> mBeRemoved = new List<FNearestElementController>();
         public override void Tick(TtWorld world)
         {
+            if (world == null || WeaponNode == null || WeaponData == null)
+                return;
+
             mCurrentTime += world.DeltaTimeSecond;
             if (mCurrentTime > WeaponData.CoolDown)
             {
@@ -222,6 +270,12 @@ namespace Survivor
             }
             foreach (var bullet in BulletPrefabs)
             {
+                if (bullet.Element?.Placement == null || bullet.Target?.MonseterPlacement == null || bullet.Target.StateNode?.IsDead != false)
+                {
+                    mBeRemoved.Add(bullet);
+                    continue;
+                }
+
                 bullet.Update(world);
             }
             CleanupBullet();
@@ -233,15 +287,17 @@ namespace Survivor
             {
                 foreach (var weapon in mBeRemoved)
                 {
-                    weapon.Element.RemoveFromWorld();
                     BulletPrefabs.Remove(weapon);
-                    //TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon.Element);
+                    ReleasePrefab(weapon.Element);
                 }
                 mBeRemoved.Clear();
             }
         }
         protected void Fire()
         {
+            if (WeaponNode?.Parent?.Parent == null || WeaponData == null || string.IsNullOrEmpty(WeaponData.Shape))
+                return;
+
             TtMonsterNode nearestNode = GetNearestMonster();
             if(nearestNode == null) 
                 return;
@@ -249,22 +305,32 @@ namespace Survivor
             var bulletPrefabName = RName.ParseFrom(WeaponData.Shape);
             if(bulletPrefabName != null)
             {
-                var bulletPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(WeaponNode.GetWorld(), RName.ParseFrom(WeaponData.Shape), false);
+                var bulletPrefab = EngineNS.TtEngine.Instance.GameInstance?.PrefabPoolManager?.CreatePrefab(WeaponNode.GetWorld(), bulletPrefabName, false);
                 if (bulletPrefab != null)
                 {
                     bulletPrefab.Parent = WeaponNode.Parent.Parent;
                     var proxyNode = bulletPrefab.FindFirstChild<TtWeaponProxyNode>();
+                    if (proxyNode == null)
+                    {
+                        LogWarning($"Weapon prefab({WeaponData.Shape}) has no TtWeaponProxyNode");
+                        ReleasePrefab(bulletPrefab);
+                        return;
+                    }
                     proxyNode.WeaponNode = WeaponNode;
 
                     var controller = new FNearestElementController();
                     controller.Element = bulletPrefab;
-                    controller.Speed = WeaponNode.RoleData.ProjectileSpeed;
+                    controller.Speed = WeaponNode.RoleData?.ProjectileSpeed ?? WeaponData.ProjectileSpeed;
                     controller.Target = nearestNode;
                     var character = WeaponNode.Parent.FindFirstChild<TtCharacter>();
                     if(character != null)
                     {
                         bulletPrefab.Placement.Position = DVector3.Up + character.Placement.AbsTransform.Position.ToSingleVector3();
                         BulletPrefabs.Add(controller);
+                    }
+                    else
+                    {
+                        ReleasePrefab(bulletPrefab);
                     }
                 }
             }
@@ -281,6 +347,9 @@ namespace Survivor
         }
         protected TtMonsterNode GetNearestMonster()
         {
+            if (WeaponNode?.Parent?.Placement == null || WeaponData == null || WeaponNode.GetWorld()?.CollideOctree == null)
+                return null;
+
             List<TtNode> nearNodes = new List<TtNode>();
             Aabb aabb = new Aabb();
             aabb.Center = WeaponNode.Parent.Placement.AbsTransform.Position;
@@ -290,11 +359,7 @@ namespace Survivor
             List<TtMonsterNode> monsters = new List<TtMonsterNode>();
             foreach(var nd in nearNodes)
             {
-                if(nd.Parent is TtMonsterNode monsterdd && monsterdd.StateNode.IsDead)
-                {
-
-                }
-                if(nd.Parent is TtMonsterNode monsterNd && !monsterNd.StateNode.IsDead)
+                if(nd?.Parent is TtMonsterNode monsterNd && monsterNd.StateNode?.IsDead == false && monsterNd.MonseterPlacement != null)
                 {
                     monsters.Add(monsterNd);
                 }
@@ -358,6 +423,12 @@ namespace Survivor
         protected override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
+            if (WeaponNodeData == null)
+            {
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, "Weapon node has no TtWeaponNodeData");
+                return true;
+            }
+
             if(WeaponNodeData.WeaponId > 0)
             {
                 WeaponData = TtDatabase.Instance.GetWeaponData(WeaponNodeData.WeaponId);
@@ -368,6 +439,11 @@ namespace Survivor
                 else
                 {
                     mWeaponController = TtWeaponController.GetTtWeaponController(WeaponData.ItemId);
+                    if (mWeaponController == null)
+                    {
+                        EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, $"Weapon controller({WeaponData.ItemId}) not found");
+                        return true;
+                    }
                     mWeaponController.WeaponNode = this;
                     mWeaponController.Init();
                 }
@@ -375,9 +451,14 @@ namespace Survivor
             else if(!string.IsNullOrEmpty(WeaponNodeData.WeaponType))
             {
                 mWeaponController = TtWeaponController.GetTtWeaponController(WeaponNodeData.WeaponType);
-                mWeaponController.WeaponNode = this;
+                if (mWeaponController == null)
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, $"Weapon controller({WeaponNodeData.WeaponType}) not found");
+                    return true;
+                }
                 WeaponData = new TtWeaponData();
                 WeaponData.CoolDown = 1;
+                mWeaponController.WeaponNode = this;
                 mWeaponController.Init();
             }
  
@@ -392,21 +473,25 @@ namespace Survivor
         }
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
-            mWeaponController.Tick(args.World);
+            mWeaponController?.Tick(args.World);
             return base.OnTickLogic(args);
         }
         [EngineNS.Rtti.Meta]
         public void Attack(TtNode targetNode, TtNode bulletNode)
         {
-            if(targetNode == this.Parent)
+            if(targetNode == null || targetNode == this.Parent || WeaponData == null)
                 return;
 
             var stateNode = targetNode.FindFirstChild<TtStateNode>(null, true) as TtStateNode;
+            if (stateNode == null)
+                return;
+
             stateNode.BeAttacked(this);
-            mWeaponController.OnBulletHit(bulletNode);
+            mWeaponController?.OnBulletHit(bulletNode);
         }
     }
 }
+
 #if TitanEngine_AutoGen_Macross
 #region TitanEngine_AutoGen_Macross
 

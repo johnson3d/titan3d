@@ -15,18 +15,22 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)Cluster.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ClusterDAG.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DisjointSet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)GraphPartitioner.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)HashTable.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)NxNaniteMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)HierarchyBuilder.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxQuarkMesh.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)TriangleUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)Cluster.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ClusterDAG.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DisjointSet.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)GraphPartitioner.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)HashTable.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)NxNaniteMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)HierarchyBuilder.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxQuarkMesh.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)TriangleUtil.h" />
   </ItemGroup>
 </Project>

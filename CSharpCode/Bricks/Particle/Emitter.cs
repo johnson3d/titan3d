@@ -335,6 +335,8 @@ namespace EngineNS.Bricks.Particle
             {
                 return ShaderName;
             }
+            if (mMcObject == null)
+                return null;
             return RName.GetRName(mMcObject.Name.Name + $"/{mMcObject.Name.PureName}.shader", mMcObject.Name.RNameType);
         }
         public virtual string GetEmitShapeHLSL()
@@ -343,7 +345,8 @@ namespace EngineNS.Bricks.Particle
             string sourceCode = "";
             //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
 
-            var code = IO.TtFileManager.ReadAllText($"{GetEmitterShader().Address}");
+            var shaderName = GetEmitterShader();
+            var code = IO.TtFileManager.ReadAllText($"{shaderName?.Address}");
             codeBuilder.AddLine(code, ref sourceCode);
 
             codeBuilder.AddLine("\nvoid DoParticleEmitShape(TtEmitter emt, inout FParticle cur, uint shapeIndex)", ref sourceCode);

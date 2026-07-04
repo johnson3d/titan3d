@@ -1,9 +1,11 @@
 using EngineNS.Animation.Asset;
 using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
+using EngineNS.Bricks.GpuDriven;
 using EngineNS.GamePlay.Camera;
 using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.Graphics.Pipeline.Shader;
+using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -138,6 +140,27 @@ namespace EngineNS.Editor.Forms
         public RName MaterialName { get; set; }
         public RName PlaneMaterialName { get; set; }
         public RName ImportBaseMaterial { get; set; }
+
+        // ─── Skeleton & PhysicsAsset Colors ──────────────────
+        [Rtti.Meta("")]
+        [System.ComponentModel.Category("Skeleton Colors")]
+        public Color4b BoneSphereColor { get; set; } = Color4b.Green;
+
+        [Rtti.Meta("")]
+        [System.ComponentModel.Category("Skeleton Colors")]
+        public Color4b BoneSphereHighlightColor { get; set; } = Color4b.Red;
+
+        [Rtti.Meta("")]
+        [System.ComponentModel.Category("Skeleton Colors")]
+        public Color4b BoneLineColor { get; set; } = Color4b.Green;
+
+        [Rtti.Meta("")]
+        [System.ComponentModel.Category("PhysicsAsset Colors")]
+        public Color4b PhysicsShapeColor { get; set; } = Color4b.FromArgb(0x40, Color4b.Green);
+
+        [Rtti.Meta("")]
+        [System.ComponentModel.Category("PhysicsAsset Colors")]
+        public Color4b ConstraintConeColor { get; set; } = Color4b.Goldenrod;
     }
     public class TtMeshPrimitiveEditor : TtLightEnvironemnt, Editor.IAssetEditor, IRootForm, ISkeletonTreeHost
     {
@@ -162,6 +185,7 @@ namespace EngineNS.Editor.Forms
         EngineNS.GamePlay.Scene.TtMeshNode mCurrentMeshNode;
         //EngineNS.GamePlay.Scene.TtMeshNode mArrowMeshNode;
         int mLastPickedProxyCount = 0;
+        Graphics.Pipeline.IProxiable mLastPickedBoneOrShape = null;
         float mCurrentMeshRadius = 1.0f;
         public float PlaneScale = 5.0f;
         EngineNS.GamePlay.Scene.TtMeshNode PlaneMeshNode;
@@ -212,6 +236,24 @@ namespace EngineNS.Editor.Forms
         bool mShowSkeletonPanel = true;
         bool mShowNormal = false;
         bool mShowTangent = false;
+
+        #region QuarkDAG Debug
+        bool mShowQuarkDAGPanel = false;
+        bool mQuarkDAGBuilt = false;
+        TtPreviewViewport QuarkPreviewViewport;
+        uint mQuarkClusterCount = 0;
+        uint mQuarkMipLevels = 0;
+        int mQuarkLODLevel = 0;
+        int mQuarkLODLevelPrev = -1; // force initial build
+        int mQuarkMaxGroupSize = 32;
+        int mQuarkClusterSize = 128;
+        bool mShowQuarkOverlay = true;
+        uint mQuarkLODTriCount = 0;
+        uint mQuarkLODClusterCount = 0;
+        uint mQuarkOrigTriCount = 0;
+        GamePlay.Scene.TtMeshNode mQuarkMeshNode;
+        TtMaterial mQuarkMaterial;
+        #endregion
         ~TtMeshPrimitiveEditor()
         {
             Dispose();
@@ -219,7 +261,8 @@ namespace EngineNS.Editor.Forms
         public void Dispose()
         {
             Mesh = null;
-            MeshMaterial = null; 
+            MeshMaterial = null;
+            CoreSDK.DisposeObject(ref QuarkPreviewViewport);
             CoreSDK.DisposeObject(ref PreviewViewport);
             MeshPropGrid.Target = null;
             EditorPropGrid.Target = null;
@@ -494,6 +537,7 @@ namespace EngineNS.Editor.Forms
             DrawEditorDetails();
             DrawMeshDetails();
             DrawSkeleton();
+            DrawQuarkDAG();
         }
         bool mDockInitialized = false;
         protected void ResetDockspace(bool force = false)
@@ -523,6 +567,7 @@ namespace EngineNS.Editor.Forms
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Skeleton", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), middleId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("QuarkDAG", mDockKeyClass), middleId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightUpId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MeshDetails", mDockKeyClass), rightUpId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("BoneDetails", mDockKeyClass), rightUpId);
@@ -611,12 +656,28 @@ namespace EngineNS.Editor.Forms
                 ExportSkeletonAsset();
             }
             ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("BuildTexelFactor", in btSize))
+            {
+                Mesh?.ComputeAndApplyTexelFactor();
+            }
+            ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Checkbox("Wireframe", ref mWireframe))
             {
                 SetMeshWireFrame(mWireframe);
             }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("BuildNaniteDAG", in btSize))
+            {
+                BuildNaniteDAG();
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.ToggleButton("DAG", ref mShowQuarkDAGPanel, in btSize, 0))
+            {
+            }
         }
         bool mWireframe = false;
+
+
 
         /// <summary>
         /// 将当前 meshNode 的 Placement 变换（位移/旋转/缩放）烘焙到顶点数据中，
@@ -854,6 +915,360 @@ namespace EngineNS.Editor.Forms
             this.PreviewViewport.Visible = show;
             EGui.UIProxy.DockProxy.EndPanel(show);
         }
+
+        #region QuarkDAG Debug Methods
+
+        unsafe void BuildNaniteDAG()
+        {
+            if (Mesh == null || !Mesh.mCoreObject.IsValidPointer)
+                return;
+
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            Mesh.mCoreObject.BuildNaniteDAGEx(rc.mCoreObject, (uint)mQuarkMaxGroupSize, (uint)mQuarkClusterSize);
+
+            uint clusterCount = Mesh.mCoreObject.GetClusterCount();
+            if (clusterCount == 0)
+            {
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, "BuildNaniteDAG produced 0 clusters");
+                return;
+            }
+
+            Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info,
+                $"BuildNaniteDAG: {clusterCount} clusters, {Mesh.mCoreObject.GetDAGMipLevels()} mip levels");
+
+            // Initialize visualization node
+            InitQuarkVisNode();
+            mQuarkDAGBuilt = true;
+            mShowQuarkDAGPanel = true;
+        }
+
+        async void InitQuarkVisNode()
+        {
+            // Create a dedicated PreviewViewport for QuarkDAG visualization using standard deferred pipeline
+            if (QuarkPreviewViewport == null)
+            {
+                var policyRName = TtEngine.Instance.Config.MainRPolicyName;
+                QuarkPreviewViewport = new TtPreviewViewport();
+                QuarkPreviewViewport.Title = "QuarkDAGViewport";
+                QuarkPreviewViewport.PreviewAsset = policyRName;
+                QuarkPreviewViewport.OnInitialize = Initialize_QuarkDAGHardwareRaster;
+                QuarkPreviewViewport.OnDrawViewportUIAction = DrawQuarkStatsOverlay;
+                await QuarkPreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication,
+                    policyRName, 0.01f, 1000.0f);
+            }
+
+            mQuarkClusterCount = Mesh.mCoreObject.GetClusterCount();
+            mQuarkMipLevels = Mesh.mCoreObject.GetDAGMipLevels();
+
+            unsafe
+            {
+                // Store original mesh triangle count
+                var atom = Mesh.mCoreObject.GetAtom(0, 0);
+                mQuarkOrigTriCount = (atom != null) ? atom->NumPrimitives : 0;
+                mQuarkLODLevel = 0;
+                mQuarkLODLevelPrev = 0;
+            }
+        }
+
+        /// <summary>
+        /// Build a standard mesh from cluster VB/IB data and render with hardware rasterization.
+        /// This verifies that the cluster data itself is correct before debugging software rasterizer.
+        /// </summary>
+        async Thread.Async.TtTask<bool> Initialize_QuarkDAGHardwareRaster(
+            TtViewportSlate viewport, TtSlateApplication application,
+            TtRenderPolicy policy, float zMin, float zMax)
+        {
+            viewport.RenderPolicy = policy;
+            (viewport as TtPreviewViewport).CameraController.ControlCamera(policy.DefaultCamera);
+
+            // Build mesh from cluster data (unsafe operations in separate method)
+            var meshPrim = BuildClusterMeshFromDAG(mQuarkLODLevel);
+            if (meshPrim == null)
+                return false;
+
+            // Load material and cache it for later LOD switches
+            var config = TtEngine.Instance.ConfigManager.GetConfig<TtMeshPrimitiveEditorConfig>();
+            mQuarkMaterial = await TtEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(config.MaterialName);
+            var materials = new TtMaterial[1];
+            materials[0] = mQuarkMaterial;
+
+            var renderMesh = new TtRenderMesh();
+            renderMesh.Initialize(meshPrim, materials, Rtti.TtTypeDescGetter<TtMdfStaticMesh>.TypeDesc);
+
+            // Add mesh node to viewport world
+            mQuarkMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(
+                viewport.World, viewport.World.Root,
+                new GamePlay.Scene.TtMeshNode.TtMeshNodeData(),
+                typeof(GamePlay.TtPlacement), renderMesh,
+                DVector3.Zero, Vector3.One, Quaternion.Identity);
+            mQuarkMeshNode.NodeData.Name = "ClusterMesh";
+            mQuarkMeshNode.IsCastShadow = true;
+
+            // Auto-zoom camera
+            var aabb = Mesh.mCoreObject.mAABB;
+            var daabb = new DBoundingBox(in aabb);
+            policy.DefaultCamera.AutoZoom(in daabb, 0.0f, true);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Rebuild the cluster mesh for a different LOD level and swap it in the viewport.
+        /// </summary>
+        async void RebuildQuarkLODMesh(int newLevel)
+        {
+            if (QuarkPreviewViewport == null || !QuarkPreviewViewport.IsInlitialized)
+                return;
+            if (mQuarkMaterial == null)
+                return;
+
+            var meshPrim = BuildClusterMeshFromDAG(newLevel);
+            if (meshPrim == null)
+                return;
+
+            // Update LOD stats for overlay
+            mQuarkLODTriCount = 0;
+            mQuarkLODClusterCount = 0;
+            var coreObj = Mesh.mCoreObject;
+            uint cc = coreObj.GetClusterCount();
+            for (uint i = 0; i < cc; i++)
+            {
+                if (newLevel < 0 || coreObj.GetClusterMipLevel((int)i) == newLevel)
+                {
+                    mQuarkLODClusterCount++;
+                    var c = coreObj.GetCluster((int)i);
+                    mQuarkLODTriCount += (uint)c.IndexCount / 3;
+                }
+            }
+
+            // Remove old mesh node
+            if (mQuarkMeshNode != null)
+            {
+                mQuarkMeshNode.Parent = null;
+            }
+
+            // Create new render mesh
+            var materials = new TtMaterial[1];
+            materials[0] = mQuarkMaterial;
+            var renderMesh = new TtRenderMesh();
+            renderMesh.Initialize(meshPrim, materials, Rtti.TtTypeDescGetter<TtMdfStaticMesh>.TypeDesc);
+
+            // Add new mesh node
+            var viewport = QuarkPreviewViewport;
+            mQuarkMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(
+                viewport.World, viewport.World.Root,
+                new GamePlay.Scene.TtMeshNode.TtMeshNodeData(),
+                typeof(GamePlay.TtPlacement), renderMesh,
+                DVector3.Zero, Vector3.One, Quaternion.Identity);
+            mQuarkMeshNode.NodeData.Name = "ClusterMesh";
+            mQuarkMeshNode.IsCastShadow = true;
+        }
+
+        /// <summary>
+        /// Unsafe helper: builds TtMeshPrimitives from cluster VB/IB data with per-cluster vertex colors.
+        /// mipLevel: which LOD level to render (-1 = all levels)
+        /// </summary>
+        unsafe TtMeshPrimitives BuildClusterMeshFromDAG(int mipLevel)
+        {
+            var coreObj = Mesh.mCoreObject;
+            uint clusterCount = coreObj.GetClusterCount();
+            uint vbCount = coreObj.GetClustersVBCount();
+            uint ibCount = coreObj.GetClustersIBCount();
+
+            if (clusterCount == 0 || vbCount == 0 || ibCount == 0)
+                return null;
+
+            var vbPtr = coreObj.GetClustersVB(); // v3dxVector3*
+            var ibPtr = coreObj.GetClustersIB(); // uint*
+
+            // Collect clusters at the target mip level
+            var activeClusters = new System.Collections.Generic.List<uint>();
+            for (uint i = 0; i < clusterCount; i++)
+            {
+                if (mipLevel < 0 || coreObj.GetClusterMipLevel((int)i) == mipLevel)
+                    activeClusters.Add(i);
+            }
+            if (activeClusters.Count == 0)
+                return null;
+
+            // Create MeshDataProvider with Position + Normal + Color + UV, 32-bit indices
+            var meshBuilder = new TtMeshDataProvider();
+            meshBuilder.AssetName = RName.GetRName("@QuarkDAGClusterMesh", RName.ERNameType.Transient);
+            var builder = meshBuilder.mCoreObject;
+            uint streams = (uint)((1 << (int)EVertexStreamType.VST_Position) |
+                (1 << (int)EVertexStreamType.VST_Normal) |
+                (1 << (int)EVertexStreamType.VST_Color) |
+                (1 << (int)EVertexStreamType.VST_UV));
+            builder.Init(streams, true, 1); // isIndex32 = true
+
+            var aabb = coreObj.mAABB;
+            builder.SetAABB(ref aabb);
+
+            // For each active cluster: add its vertices (with cluster color) and triangles
+            // We need to remap global vertex indices to our local builder indices
+            var dummyNor = Vector3.UnitY;
+            var dummyUV = Vector2.Zero;
+            uint localVertBase = 0;
+            uint totalTriangles = 0;
+
+            for (int ci = 0; ci < activeClusters.Count; ci++)
+            {
+                uint clusterId = activeClusters[ci];
+                var cluster = coreObj.GetCluster((int)clusterId);
+                uint color = ClusterIDToColor(clusterId);
+
+                int vStart = cluster.VertexStart;
+                int vCount = cluster.VertexCount;
+                int iStart = cluster.IndexStart;
+                int iCount = cluster.IndexCount;
+
+                // Add vertices for this cluster
+                for (int v = 0; v < vCount; v++)
+                {
+                    int globalV = vStart + v;
+                    var pos = new Vector3(vbPtr[globalV].X, vbPtr[globalV].Y, vbPtr[globalV].Z);
+                    builder.AddVertex(in pos, in dummyNor, in dummyUV, color);
+                }
+
+                // Add triangles, remapping from global IB index to local vertex index
+                uint triCount = (uint)iCount / 3;
+                for (uint t = 0; t < triCount; t++)
+                {
+                    // Global indices in mClustersIB already point to global VB positions
+                    // We need to remap: globalIndex - cluster.VertexStart = local offset within this cluster
+                    uint i0 = ibPtr[iStart + t * 3 + 0] - (uint)vStart + localVertBase;
+                    uint i1 = ibPtr[iStart + t * 3 + 1] - (uint)vStart + localVertBase;
+                    uint i2 = ibPtr[iStart + t * 3 + 2] - (uint)vStart + localVertBase;
+                    builder.AddTriangle(i0, i1, i2);
+                }
+
+                localVertBase += (uint)vCount;
+                totalTriangles += triCount;
+            }
+
+            if (totalTriangles == 0)
+                return null;
+
+            // Push atom description
+            var dpDesc = new FMeshAtomDesc();
+            dpDesc.SetDefault();
+            dpDesc.NumPrimitives = totalTriangles;
+            builder.PushAtomLOD(0, &dpDesc);
+
+            return meshBuilder.ToMesh();
+        }
+
+        static uint ClusterIDToColor(uint id)
+        {
+            // Generate distinct colors per cluster using a hash
+            uint h = id * 2654435761u; // Knuth multiplicative hash
+            byte r = (byte)((h >> 0) & 0xFF);
+            byte g = (byte)((h >> 8) & 0xFF);
+            byte b = (byte)((h >> 16) & 0xFF);
+            // Ensure minimum brightness
+            r = (byte)Math.Max(r, (byte)60);
+            g = (byte)Math.Max(g, (byte)60);
+            b = (byte)Math.Max(b, (byte)60);
+            return (uint)(0xFF000000 | (b << 16) | (g << 8) | r); // ABGR format
+        }
+
+        bool mShowQuarkDAG = true;
+        protected unsafe void DrawQuarkDAG()
+        {
+            if (!mShowQuarkDAGPanel)
+                return;
+
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "QuarkDAG", ref mShowQuarkDAG, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                if (!mQuarkDAGBuilt)
+                {
+                    ImGuiAPI.TextColored(new Vector4(1, 1, 0, 1), "Click [BuildNaniteDAG] to generate DAG data");
+                }
+                else
+                {
+                    ImGuiAPI.Text($"Clusters: {mQuarkClusterCount} | MipLevels: {mQuarkMipLevels}");
+
+                    // MaxGroupSize input + ClusterSize input + Rebuild button
+                    ImGuiAPI.SetNextItemWidth(160);
+                    ImGuiAPI.InputInt("MaxGroupSize", ref mQuarkMaxGroupSize, 4, 8, ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                    if (mQuarkMaxGroupSize < 4) mQuarkMaxGroupSize = 4;
+                    ImGuiAPI.SameLine(0, 10);
+                    ImGuiAPI.SetNextItemWidth(160);
+                    ImGuiAPI.InputInt("ClusterSize", ref mQuarkClusterSize, 16, 32, ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                    if (mQuarkClusterSize < 32) mQuarkClusterSize = 32;
+                    if (mQuarkClusterSize > 256) mQuarkClusterSize = 256;
+                    ImGuiAPI.SameLine(0, 10);
+                    if (ImGuiAPI.Button("Rebuild DAG", in Vector2.Zero))
+                    {
+                        // Rebuild with new MaxGroupSize
+                        BuildNaniteDAG();
+                        mQuarkLODLevel = 0;
+                        mQuarkLODLevelPrev = -1;
+                    }
+                    ImGuiAPI.SameLine(0, 20);
+                    ImGuiAPI.Checkbox("Show Stats", ref mShowQuarkOverlay);
+
+                    // LOD Level slider
+                    if (mQuarkMipLevels > 1)
+                    {
+                        int maxLevel = (int)mQuarkMipLevels - 1;
+                        if (ImGuiAPI.SliderInt("LOD Level", ref mQuarkLODLevel, 0, maxLevel, "%d", ImGuiSliderFlags_.ImGuiSliderFlags_None))
+                        {
+                            // Slider value changed
+                        }
+
+                        // Detect change and rebuild mesh
+                        if (mQuarkLODLevel != mQuarkLODLevelPrev)
+                        {
+                            mQuarkLODLevelPrev = mQuarkLODLevel;
+                            RebuildQuarkLODMesh(mQuarkLODLevel);
+                        }
+                    }
+
+                    // --- Viewport (standard deferred pipeline handles everything) ---
+                    if (QuarkPreviewViewport != null && QuarkPreviewViewport.IsInlitialized)
+                    {
+                        QuarkPreviewViewport.ViewportType = TtViewportSlate.EViewportType.ChildWindow;
+                        QuarkPreviewViewport.OnDraw();
+                    }
+                }
+            }
+            if (QuarkPreviewViewport != null && QuarkPreviewViewport.IsInlitialized)
+                QuarkPreviewViewport.Visible = show;
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+
+        void TickQuarkDAGVisualize()
+        {
+            // Standard pipeline handles camera/lighting automatically, nothing to do here
+        }
+
+        Vector2 DrawQuarkStatsOverlay(in Vector2 startDrawPos)
+        {
+            if (!mShowQuarkOverlay)
+                return Vector2.Zero;
+
+            var cmdlst = ImGuiAPI.GetWindowDrawList();
+            var textPos = new Vector2(startDrawPos.X + 4, startDrawPos.Y + 4);
+            float lineH = 16;
+            uint textColor = 0xFF00FFFF; // Yellow (ABGR)
+
+            cmdlst.AddText(in textPos, textColor, $"OrigTris: {mQuarkOrigTriCount}", null);
+            textPos.Y += lineH;
+            cmdlst.AddText(in textPos, textColor, $"ClusterSize: {mQuarkClusterSize}", null);
+            textPos.Y += lineH;
+            cmdlst.AddText(in textPos, textColor, $"Clusters(total): {mQuarkClusterCount}", null);
+            textPos.Y += lineH;
+            cmdlst.AddText(in textPos, textColor, $"MipLevels: {mQuarkMipLevels}", null);
+            textPos.Y += lineH;
+            cmdlst.AddText(in textPos, textColor, $"LOD {mQuarkLODLevel}: {mQuarkLODClusterCount} clusters, {mQuarkLODTriCount} tris", null);
+            textPos.Y += lineH;
+
+            return new Vector2(200, textPos.Y - startDrawPos.Y);
+        }
+
+        #endregion
         #endregion
         public void OnEvent(in Bricks.Input.Event e)
         {
@@ -863,6 +1278,10 @@ namespace EngineNS.Editor.Forms
         public override void TickLogic(float ellapse)
         {
             PreviewViewport.TickLogic(ellapse);
+            if (QuarkPreviewViewport?.IsInlitialized == true)
+                QuarkPreviewViewport.TickLogic(ellapse);
+
+            TickQuarkDAGVisualize();
 
             // ESC 取消 Shape 选中
             if (SkeletonTreePanel.SelectedShape != null
@@ -871,27 +1290,55 @@ namespace EngineNS.Editor.Forms
                 SkeletonTreePanel.SelectShape(null);
             }
 
-            // 检测 HitProxy 选中/取消 Shape（只在 PickedProxies 变化时处理）
+            // Delete 删除选中的 Shape
+            if (SkeletonTreePanel.SelectedShape != null
+                && TtEngine.Instance.InputSystem.IsKeyPressed(Bricks.Input.Keycode.KEY_DELETE))
+            {
+                // 先从 PickedProxiableManager 中移除，清除描边效果
+                var rp = PreviewViewport.RenderPolicy as Graphics.Pipeline.TtRenderPolicy;
+                if (rp != null)
+                    rp.PickedProxiableManager.Unselected(SkeletonTreePanel.SelectedShape);
+                SkeletonTreePanel.DeleteSelectedShape();
+            }
+
+            // 检测 HitProxy 选中/取消 Shape 或骨骼（强制单选）
             var policy = PreviewViewport.RenderPolicy as Graphics.Pipeline.TtRenderPolicy;
             if (policy != null)
             {
-                int currentCount = policy.PickedProxiableManager.PickedProxies.Count;
-                if (currentCount != mLastPickedProxyCount)
+                // 在 PickedProxies 中查找最新的 bone/shape（取最后一个，即最新点击的）
+                Graphics.Pipeline.IProxiable latestPicked = null;
+                foreach (var proxy in policy.PickedProxiableManager.PickedProxies)
                 {
-                    mLastPickedProxyCount = currentCount;
+                    if (proxy is TtBoneHitProxy || proxy is Graphics.Mesh.PhysicsAsset.TtCollisionShape)
+                        latestPicked = proxy;
+                }
 
-                    Graphics.Mesh.PhysicsAsset.TtCollisionShape pickedShape = null;
-                    foreach (var proxy in policy.PickedProxiableManager.PickedProxies)
+                // 强制单选：清除 PickedProxies 中除 latestPicked 外的所有 bone/shape
+                for (int i = policy.PickedProxiableManager.PickedProxies.Count - 1; i >= 0; i--)
+                {
+                    var p = policy.PickedProxiableManager.PickedProxies[i];
+                    if (p == latestPicked)
+                        continue;
+                    if (p is TtBoneHitProxy || p is Graphics.Mesh.PhysicsAsset.TtCollisionShape)
+                        policy.PickedProxiableManager.Unselected(p);
+                }
+
+                // 选中对象发生变化时处理
+                if (latestPicked != mLastPickedBoneOrShape)
+                {
+                    mLastPickedBoneOrShape = latestPicked;
+
+                    if (latestPicked is TtBoneHitProxy pickedBone)
                     {
-                        if (proxy is Graphics.Mesh.PhysicsAsset.TtCollisionShape shape)
-                        {
-                            pickedShape = shape;
-                            break;
-                        }
+                        SkeletonTreePanel.TryHandleHitProxy(pickedBone);
                     }
-                    if (pickedShape != SkeletonTreePanel.SelectedShape)
+                    else if (latestPicked is Graphics.Mesh.PhysicsAsset.TtCollisionShape pickedShape)
                     {
                         SkeletonTreePanel.SelectShape(pickedShape);
+                    }
+                    else
+                    {
+                        // 无选中 — 如有需要可清除
                     }
                 }
             }
@@ -914,6 +1361,8 @@ namespace EngineNS.Editor.Forms
         public override void TickSync(float ellapse)
         {
             PreviewViewport.TickSync(ellapse);
+            if (QuarkPreviewViewport?.IsInlitialized == true)
+                QuarkPreviewViewport.TickSync(ellapse);
         }
 
         public string GetWindowsName()
@@ -926,7 +1375,7 @@ namespace EngineNS.Editor.Forms
 
 namespace EngineNS.Graphics.Mesh
 {
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.TtMeshPrimitiveEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(Editor.Forms.TtMeshPrimitiveEditor))]
     public partial class TtMeshPrimitives
     {
     }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_9683494527768284866 Type="EngineNS.Graphics.Mesh.TtMeshPrimitivesAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Order="0" />
+  <AssetId Type="System.Guid@Unknown" Order="0" />
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Description Type="System.String@Unknown" Order="0" />
+  <HasBLAS Type="System.Boolean@Unknown" Order="0" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore" Order="0" />
+  <IsClustered Type="System.Boolean@Unknown" Order="0" />
+  <PhysicsAssetRName Type="EngineNS.RName@EngineCore" Order="0" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Order="0" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Order="0" />
+  <StreamingTexelFactor Type="System.Single@Unknown" Order="0" />
+  <TypeStr Type="System.String@Unknown" Order="0" />
+</Hash_9683494527768284866>

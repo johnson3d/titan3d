@@ -140,7 +140,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
         public static TtLocalSpaceRuntimePose CreateLocalSpaceRuntimePose(AnimatablePose.TtAnimatableSkeletonPose skeletonPose)
         {
             TtLocalSpaceRuntimePose pose = new TtLocalSpaceRuntimePose();
-            //if(skeletonPose != null)
+            if (skeletonPose != null)
             {
                 for (int i = 0; i < skeletonPose.LimbPoses.Count; ++i)
                 {

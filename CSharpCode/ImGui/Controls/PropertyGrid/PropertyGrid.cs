@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -66,6 +67,17 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             public Rtti.TtTypeDesc Type;
             public object Value;
             public object ObjectInstance;
+            public object FirstObjectInstance
+            {
+                get
+                {
+                    if (ObjectInstance is IList lst)
+                    {
+                        return lst[0];
+                    }
+                    return ObjectInstance;
+                }
+            }
             public float RowHeight;
             public Controls.PropertyGrid.TtPropertyGrid HostPropertyGrid;
             public bool Readonly;

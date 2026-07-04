@@ -1,46 +1,105 @@
-/.vs
-/Core.Window/x64
-/Module/CSharpCompiler/obj
-/Module/CSharpCodeTools/obj
-/Module/CppWeavingTools/obj
-/Module/Engine.Console/obj
-/Module/Engine.Window/obj
-/Module/GameProject/obj
-/Module/MainEditor/obj
-/Module/ProjectCooker/obj
-/binaries/net5.0
+﻿# ==============================================================================
+# .NET 工程通用构建输出（覆盖所有 Module / Plugins 下的工程）
+# ==============================================================================
+**/bin/
+**/obj/
+# 豁免 3rd 下有意提交的预编译依赖目录
+!3rd/**/bin/
+!3rd/**/obj/
+
+# ==============================================================================
+# Visual Studio / IDE
+# ==============================================================================
+.vs/
+*.suo
+*.db
+*.opendb
+*.ipch
+*.sdf
+*.ncb
+*.aps
+*.user
+
+# MSVC 构建日志 / 中间文件
+*.tlog
+*.lastbuildstate
+*.iobj
+*.ipdb
+
+# ==============================================================================
+# Binaries 构建输出
+# ==============================================================================
 /binaries/debug/
 /binaries/release/
 /binaries/temp/
+/binaries/net5.0
+/binaries/net7.0
+/binaries/net8.0
+/binaries/Tools/
+/binaries/Plugins
+/binaries/BrickManager/
+/binaries/Tracer/
+/binaries/AloneGame/
+/binaries/aftermath-shaders/
 /binaries/Core.Window.lib
-/binaries/Core.Window.pdb
-/binaries/imgui.ini
 /binaries/Core.Window.dll
 /binaries/Core.Window.exp
+imgui.ini
+
+# ==============================================================================
+# PDB 符号文件
+# ==============================================================================
+*.pdb
+
+# ==============================================================================
+# C++ 构建中间产物
+# ==============================================================================
+/Core.Window/x64
 /Core.Window/binaries/
+/Core.iOS/ARM64
+intermediate
+
+# ==============================================================================
+# Artifacts / Cache / Packages / CodeGen
+# ==============================================================================
 /artifacts/
 /cache
+packages
 /codegen/**/*.h
 /codegen/**/*.cpp
 /codegen/**/*.cs
 /codegen/**/*.stamp
-/binaries/Tools/net5.0
-/Core.Window/Core.Window.vcxproj.user
-/Core.iOS/ARM64
-obj/
-intermediate
-Module/GameBuilder/obj
-Module/Engine.Android/obj
-Module/CompilingGenerator/obj
-Module/CompilingGenerator/bin
-Module/TtEngineLints/obj
-Module/TtEngineLints/bin
-packages
-binaries/net7.0
-binaries/net8.0
-binaries/Tools/net7.0
-binaries/Tools/net8.0
-binaries/Plugins
-*.user
-*.pdb
+
+# ==============================================================================
+# Plugins 构建输出
+# ==============================================================================
+Plugins/**/binaries/
+
+# ==============================================================================
+# 第三方库构建中间产物
+# ==============================================================================
+3rd/native/crunch/lib/
+3rd/native/lp_solve/lpsolve55/x64/Release/
+
+# ==============================================================================
+# Copilot / IDE 临时文件
+# ==============================================================================
+.aone_copilot/mcp_state.json
+
+# ==============================================================================
+# 代码生成临时项目文件
+# ==============================================================================
+content/MacrossGenCSharp.projitems
+content/MacrossGenCSharp.shproj
+
+# ==============================================================================
+# OS 通用
+# ==============================================================================
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# ==============================================================================
+# 其他
+# ==============================================================================
 content/Sheng

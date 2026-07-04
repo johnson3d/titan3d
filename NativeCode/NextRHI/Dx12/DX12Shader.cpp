@@ -152,11 +152,11 @@ namespace NxRHI
 			ASSERT(false);
 			return false;
 		}
-		desc->DxIL.resize((UINT)pBlob->GetBufferSize());
-		memcpy(&desc->DxIL[0], pBlob->GetBufferPointer(), (UINT)pBlob->GetBufferSize());
+		desc->RhiData.resize((UINT)pBlob->GetBufferSize());
+		memcpy(&desc->RhiData[0], pBlob->GetBufferPointer(), (UINT)pBlob->GetBufferSize());
 
 		ID3D12ShaderReflection* pReflection;
-		hr = D3DReflect(&desc->DxIL[0], desc->DxIL.size(), IID_PPV_ARGS(&pReflection));
+		hr = D3DReflect(&desc->RhiData[0], desc->RhiData.size(), IID_PPV_ARGS(&pReflection));
 		if (FAILED(hr))
 		{
 			return false;
@@ -195,15 +195,15 @@ namespace NxRHI
 	bool DX12Shader::Init(DX12GpuDevice* device, FShaderDesc* desc)
 	{
 		Desc = desc;
-		if (Desc->DxIL.size() == 0)
+		if (Desc->RhiData.size() == 0)
 			return false;
 
 #if defined(HasModule_GpuDump)
-		GpuDump::NvAftermath::RegByteCode(desc->DebugName.c_str(), &Desc->DxIL[0], (UINT)Desc->DxIL.size());
+		GpuDump::NvAftermath::RegByteCode(desc->DebugName.c_str(), &Desc->RhiData[0], (UINT)Desc->RhiData.size());
 #endif
 
 		//Reflect(desc);
-		Reflector = desc->DxILReflector;
+		Reflector = desc->Reflector;
 
 		return true;
 	}
@@ -307,8 +307,8 @@ namespace NxRHI
 
 	bool DX12Shader::Reflect(FShaderDesc* desc, ID3D12LibraryReflection* pReflection)
 	{
-		desc->DxILReflector = MakeWeakRef(new IShaderReflector());
-		auto dxilReflector = desc->DxILReflector;
+		desc->Reflector = MakeWeakRef(new IShaderReflector());
+		auto dxilReflector = desc->Reflector;
 		D3D12_LIBRARY_DESC libDesc{};
 		pReflection->GetDesc(&libDesc);
 		for (UINT i = 0; i < libDesc.FunctionCount; i++)
@@ -337,9 +337,9 @@ namespace NxRHI
 
 	bool DX12Shader::Reflect(FShaderDesc* desc, ID3D12ShaderReflection* pReflection)
 	{
-		desc->DxILReflector = MakeWeakRef(new IShaderReflector());
+		desc->Reflector = MakeWeakRef(new IShaderReflector());
 
-		auto Reflector = desc->DxILReflector;
+		auto Reflector = desc->Reflector;
 
 		D3D12_SHADER_DESC shaderDesc;
 		pReflection->GetDesc(&shaderDesc);
@@ -385,7 +385,7 @@ namespace NxRHI
 	void DX12Shader::CreateBinder(ID3D12ShaderReflectionConstantBuffer* pCBuffer, FShaderDesc* desc, D3D12_SHADER_INPUT_BIND_DESC& csibDesc)
 	{
 		HRESULT hr = S_OK;
-		auto Reflector = desc->DxILReflector;
+		auto Reflector = desc->Reflector;
 		auto binder = MakeWeakRef(new FShaderBinder(desc->Type));
 		binder->Space = desc->Type;
 		switch (csibDesc.Type)

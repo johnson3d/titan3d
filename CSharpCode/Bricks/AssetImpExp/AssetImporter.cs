@@ -127,7 +127,7 @@ namespace EngineNS.Bricks.AssetImpExp
             {
                 var preAssimpTransform = AssimpSceneUtil.AccumulatePreTransform(meshNode.Parent);
                 var preTransform = AssimpSceneUtil.AssimpMatrix4x4Decompose(preAssimpTransform);
-                var nodeTransform = AssimpSceneUtil.AssimpMatrix4x4Decompose(meshNode.Transform);
+                var nodeTransform = AssimpSceneUtil.AssimpMatrix4x4Decompose(AssimpSceneUtil.GetRowMajorMatrix(meshNode.Transform));
                 if (preTransform.scaling != Vector3.One || nodeTransform.scaling != Vector3.One)
                 {
                     nodeHasScale = true;
@@ -322,7 +322,7 @@ namespace EngineNS.Bricks.AssetImpExp
         }
         public static System.Numerics.Matrix4x4 GetCoordinateConvertMatrix(Assimp.Scene scene)
         {
-            if(!IsFBXFile(scene))
+            if (!IsFBXFile(scene))
             {
                 return System.Numerics.Matrix4x4.Identity;
             }
@@ -340,9 +340,8 @@ namespace EngineNS.Bricks.AssetImpExp
                                                             upVec.X, upVec.Y, upVec.Z, 0.0f,
                                                             forwardVec.X, forwardVec.Y, forwardVec.Z, 0.0f,
                                                             0.0f, 0.0f, 0.0f, 1.0f);
-            System.Numerics.Matrix4x4 finalCoordinate;
-            System.Numerics.Matrix4x4.Invert(coordinateConvert, out finalCoordinate);
-            return finalCoordinate;
+
+            return coordinateConvert;
         }
 
         public static List<Assimp.Node> FindMeshNodes(Assimp.Scene scene)
@@ -483,7 +482,7 @@ namespace EngineNS.Bricks.AssetImpExp
 
         public static System.Numerics.Matrix4x4 AccumulatePreTransform(Assimp.Node preTransformNode)
         {
-            var transform = preTransformNode.Transform;
+            var transform = GetRowMajorMatrix(preTransformNode.Transform);
             if (IsParentIs_AssimpFbxPre_Node(preTransformNode))
             {
                 return transform * AccumulatePreTransform(preTransformNode.Parent);
@@ -495,24 +494,34 @@ namespace EngineNS.Bricks.AssetImpExp
         }
         public static System.Numerics.Matrix4x4 GetAbsBoneNodeMatrix(Assimp.Node node, Assimp.Scene scene)
         {
-            if (AssimpSceneUtil.IsSceneRootNode(node.Parent, scene) || node.Parent.HasMeshes || AssimpSceneUtil.IsParentIs_AssimpFbxPre_Node(node))
+            var nodeTransform = GetRowMajorMatrix(node.Transform);
+            if (AssimpSceneUtil.IsSceneRootNode(node.Parent, scene) || node.Parent.HasMeshes)
             {
-                return node.Transform;
+                return nodeTransform;
+            }
+            else if (AssimpSceneUtil.IsParentIs_AssimpFbxPre_Node(node))
+            {
+                return nodeTransform * GetRowMajorMatrix(node.Parent.Transform);
             }
             else
             {
-                return node.Transform * GetAbsBoneNodeMatrix(node.Parent, scene);
+                return nodeTransform * GetAbsBoneNodeMatrix(node.Parent, scene);
             }
         }
         public static System.Numerics.Matrix4x4 GetAbsNodeMatrix(Assimp.Node node, Assimp.Scene scene)
         {
-            if (AssimpSceneUtil.IsSceneRootNode(node, scene) || AssimpSceneUtil.IsSceneRootNode(node.Parent, scene) || node.Parent.HasMeshes)
+            var nodeTransform = GetRowMajorMatrix(node.Transform);
+            if (AssimpSceneUtil.IsSceneRootNode(node.Parent, scene) || node.Parent.HasMeshes)
             {
-                return node.Transform;
+                return nodeTransform;
+            }
+            else if (AssimpSceneUtil.IsParentIs_AssimpFbxPre_Node(node))
+            {
+                return nodeTransform * GetRowMajorMatrix(node.Parent.Transform);
             }
             else
             {
-                System.Numerics.Matrix4x4.Decompose(node.Transform, out var scaling, out var rotation, out var translation);
+                System.Numerics.Matrix4x4.Decompose(nodeTransform, out var scaling, out var rotation, out var translation);
                 if (scaling.X < 0 || scaling.Y < 0 || scaling.Z < 0)
                 {
                     
@@ -522,7 +531,7 @@ namespace EngineNS.Bricks.AssetImpExp
                 }
                 else
                 {
-                    return node.Transform * GetAbsNodeMatrix(node.Parent, scene);
+                    return nodeTransform * GetAbsNodeMatrix(node.Parent, scene);
                 }
             }
         }
@@ -539,7 +548,7 @@ namespace EngineNS.Bricks.AssetImpExp
         {
             if (node.Parent.Name.Contains(node.Name) && IsParentIs_AssimpFbxPre_Node(node) && node.Parent.Name.Contains("GeometricTranslation"))
             {
-                return node.Parent.Transform;
+                return GetRowMajorMatrix(node.Parent.Transform);
             }
             return Matrix4x4.Identity;
         }
@@ -589,6 +598,10 @@ namespace EngineNS.Bricks.AssetImpExp
             {
                 return FindParent_AssimpFbx_Node(node.Parent);
             }
+        }
+        public static System.Numerics.Matrix4x4 GetRowMajorMatrix(System.Numerics.Matrix4x4 matrix)
+        {
+            return Matrix4x4.Transpose(matrix);
         }
         public static (Vector3 scaling, Quaternion rotation, Vector3 translation) AssimpMatrix4x4Decompose(System.Numerics.Matrix4x4 matrix)
         {
@@ -732,6 +745,7 @@ namespace EngineNS.Bricks.AssetImpExp
             }
             return null;
         }
+        
         static TtBoneDesc MakeBoneDesc(Assimp.Scene scene, Node boneNode, Node rootBoneNode, TtAssetImportOption_Mesh importOption)
         {
             TtBoneDesc boneDesc = new TtBoneDesc();
@@ -744,7 +758,9 @@ namespace EngineNS.Bricks.AssetImpExp
                 boneDesc.ParentHash = Standart.Hash.xxHash.xxHash32.ComputeHash(boneDesc.ParentName);
             }
 
-            var boneAbsNodeTransform = AssimpSceneUtil.GetAbsNodeMatrix(boneNode, scene);
+            var boneAbsNodeTransform = AssimpSceneUtil.GetAbsBoneNodeMatrix(boneNode, scene);
+
+
             Matrix initMatrix = Matrix.Identity;
             if (AssimpSceneUtil.IsZUpLeftHandCoordinate(scene))
             {
@@ -1508,7 +1524,7 @@ namespace EngineNS.Bricks.AssetImpExp
                 // position
                 {
                     var node = AssimpSceneUtil.FindNode(element.NodeName, aiScene);
-                    System.Numerics.Matrix4x4.Decompose(node.Transform, out var s, out var r, out var t);
+                    System.Numerics.Matrix4x4.Decompose(AssimpSceneUtil.GetRowMajorMatrix(node.Transform), out var s, out var r, out var t);
                     var curve = GeneratePositionCurve(element, aiAnim.TicksPerSecond, aiAnim, aiScene, importOption);
                     animChunk.AnimCurvesList.Add(curve.Id, curve);
 

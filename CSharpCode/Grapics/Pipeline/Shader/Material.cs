@@ -3,10 +3,12 @@ using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.GamePlay;
 using EngineNS.Graphics.Pipeline.Deferred;
+using EngineNS.Graphics.Pipeline.UserParameters;
 using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using static EngineNS.Graphics.Pipeline.Shader.TtMaterial;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
@@ -75,7 +77,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return "Material";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(GetAssetName());
         }
@@ -114,7 +116,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         public override string ToString()
         {
-            string result = $"Materai:{AssetName}\n";
+            string result = $"Materai:{AssetName}";
             return result;
         }
         protected Hash160 mMaterialHash;
@@ -158,7 +160,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
                 var material = (mAsset as TtMaterial);
                 material.mPipelineDesc.SetDefault();
-                material.UpdateShaderCode(true);
+                material.UpdateShaderCode();
             }
         }
         #region IAsset
@@ -197,36 +199,36 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 var node = xml.LastChild as System.Xml.XmlElement;
                 var thisTypeStr = node.GetAttribute("Type");
-                var typeDesc = Rtti.TtTypeDesc.TypeOf(thisTypeStr);
-                if (typeDesc == Rtti.TtTypeDescGetter<Bricks.CodeBuilder.ShaderNode.TtMaterialEditor>.TypeDesc)
-                {
-                    System.Diagnostics.Debug.Assert(false);
-                    object pThis = new Bricks.CodeBuilder.ShaderNode.TtMaterialEditor();
-                    IO.SerializerHelper.ReadObjectMetaFields(this, node, ref pThis, null);
-                    MaterialGraph = (pThis as Bricks.CodeBuilder.ShaderNode.TtMaterialEditor).MaterialGraph;
-                    {   
-                        var xml2 = new System.Xml.XmlDocument();
-                        var xmlRoot2 = xml2.CreateElement($"Root", xml2.NamespaceURI);
-                        xml2.AppendChild(xmlRoot2);
-                        IO.SerializerHelper.WriteObjectMetaFields(xml2, xmlRoot2, MaterialGraph);
-                        var xmlText = IO.TtFileManager.GetXmlText(xml2);
-                        this.GraphXMLString = xmlText;
-                    }
-                }
-                else
+                //var typeDesc = Rtti.TtTypeDesc.TypeOf(thisTypeStr);
+                //if (typeDesc == Rtti.TtTypeDescGetter<Bricks.CodeBuilder.ShaderNode.TtMaterialEditor>.TypeDesc)
+                //{
+                //    System.Diagnostics.Debug.Assert(false);
+                //    object pThis = new Bricks.CodeBuilder.ShaderNode.TtMaterialEditor();
+                //    IO.SerializerHelper.ReadObjectMetaFields(this, node, ref pThis, null);
+                //    MaterialGraph = (pThis as Bricks.CodeBuilder.ShaderNode.TtMaterialEditor).MaterialGraph;
+                //    {   
+                //        var xml2 = new System.Xml.XmlDocument();
+                //        var xmlRoot2 = xml2.CreateElement($"Root", xml2.NamespaceURI);
+                //        xml2.AppendChild(xmlRoot2);
+                //        IO.SerializerHelper.WriteObjectMetaFields(xml2, xmlRoot2, MaterialGraph);
+                //        var xmlText = IO.TtFileManager.GetXmlText(xml2);
+                //        this.GraphXMLString = xmlText;
+                //    }
+                //}
+                //else
                 {
                     object pThis = MaterialGraph;
                     IO.SerializerHelper.ReadObjectMetaFields(this, node, ref pThis, null);
                 }
             }
             
-            string code = "";
             var MaterialOutput = MaterialGraph.FindFirstTypedNode<Bricks.CodeBuilder.ShaderNode.TtMaterialOutput>("Output", false);
             if (MaterialOutput == null)
             {
                 MaterialOutput = Bricks.CodeBuilder.ShaderNode.TtMaterialOutput.NewNode(MaterialGraph);
                 MaterialGraph.AddNode(MaterialOutput);
             }
+            string code = "";
             GenMateralGraphCode(ref code, this, new UHLSLCodeGenerator(), MaterialGraph, MaterialOutput);
 
             var ameta = this.GetAMeta();
@@ -264,7 +266,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     try
                     {
                         ar.ReadTo(material, null);
-                        material.UpdateShaderCode(false);
+                        material.UpdateShaderCode();
                         material.SerialId++;
                     }
                     catch (Exception ex)
@@ -294,10 +296,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public virtual void GetDefines(List<KeyValuePair<string, string>> vars)
         {
         }
-        public static TtMaterial LoadXnd(TtMaterialManager manager, IO.TtXndNode node)
+        public static TtMaterial LoadXnd(TtMaterialManager manager, IO.TtXndNode xndNode)
         {
             IO.ISerializer result = null;
-            var attr = node.TryGetAttribute("Material");
+            var attr = xndNode.TryGetAttribute("Material");
             if (attr.NativePointer != IntPtr.Zero)
             {
                 using (var ar = attr.GetReader(null))
@@ -309,10 +311,46 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var material = result as TtMaterial;
             if (material != null)
             {
-                material.UpdateShaderCode(false);
+                material.UpdateShaderCode();
+
+                var MaterialGraph = new Bricks.CodeBuilder.ShaderNode.TtMaterialGraph();
+                var xml = IO.TtFileManager.LoadXmlFromString(material.GraphXMLString);
+                if (xml != null)
+                {
+                    var node = xml.LastChild as System.Xml.XmlElement;
+                    var thisTypeStr = node.GetAttribute("Type");
+                    var typeDesc = Rtti.TtTypeDesc.TypeOf(thisTypeStr);
+                    object pThis = MaterialGraph;
+                    IO.SerializerHelper.ReadObjectMetaFields(material, node, ref pThis, null);
+
+                    foreach (var i in MaterialGraph.Nodes)
+                    {
+                        var cb = i as Bricks.CodeBuilder.ShaderNode.Control.TtCallCBufferParameterNode;
+                        if (cb != null)
+                        {
+                            if (material.CBufferNodes == null)
+                            {
+                                material.CBufferNodes = new List<Bricks.CodeBuilder.ShaderNode.Control.TtCallCBufferParameterNode>();
+                            }
+                            material.CBufferNodes.Add(cb);
+                        }
+                    }
+                }
+
                 return material;
             }
             return null;
+        }
+        public List<Bricks.CodeBuilder.ShaderNode.Control.TtCallCBufferParameterNode> CBufferNodes = null;
+        public virtual void OnDrawCall(Mesh.TtRenderMesh.TtAtom atom, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+        {
+            if (CBufferNodes == null)
+                return;
+
+            foreach (var i in CBufferNodes)
+            {
+                i.OnDrawCall(atom, i.CBufferParameter, drawcall, policy);
+            }
         }
         public static void GenMateralGraphCode(ref string code, TtMaterial Material, UHLSLCodeGenerator mHLSLCodeGen, 
             Bricks.CodeBuilder.ShaderNode.TtMaterialGraph MaterialGraph, 
@@ -324,6 +362,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 if (f != null)
                 {
                     f.MaterialFunction.WriteRefHLSLCode(ref code);
+                }
+
+                var cb = i as Bricks.CodeBuilder.ShaderNode.Control.TtCallCBufferParameterNode;
+                if (cb != null)
+                {
+                    cb.CBufferParameter.WriteRefHLSLCode(ref code);
                 }
             }
 
@@ -400,48 +444,18 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 if (Material.PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal) == false)
                     Material.PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal);
             }
-            Material.UpdateShaderCode(false);
+            Material.UpdateShaderCode();
         }
+        #region Render Option
         [Flags]
         public enum InnerFlags : UInt32
         {
-            None = 0,
-            Is64bitVColorAlpha = 1 << 0,
+            Deprecated = 0,
         }
-        [Rtti.Meta, Browsable(false)]
-        public InnerFlags Flags { get; set; }
-
-        #region Render Option
-        [Category("Option")]
-        public virtual bool Is64bitVColorAlpha
-        { 
-            get => (Flags & InnerFlags.Is64bitVColorAlpha) != 0;
-            set
-            {
-                if (value)
-                    Flags |= InnerFlags.Is64bitVColorAlpha;
-                else
-                    Flags &= ~InnerFlags.Is64bitVColorAlpha;
-            }
-        }
-        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "ELightingMode")]
         public enum ELightingMode : uint
         {
-            Stand = 0,
-            Unlight,
-            Skin,
-            Transmit,
-            Hair,
-            Eye,
-            Num,
+            Deprecated = 0,
         }
-        [Rtti.Meta("")]
-        [Category("Option")]
-        public virtual ELightingMode LightingMode
-        {
-            get;
-            set;
-        } = ELightingMode.Stand;
         public enum ENormalMode
         {
             Normal,
@@ -498,10 +512,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public enum ERenderFlags : uint
         {
             None = 0,
-            DisableEnvColor = 1,
+            //DisableEnvColor = 1,
             // bit1~2: per-mesh object flags (merged into GBuffer at encode time)
             AcceptShadow = (1 << 1),
-            UnLight = (1 << 2),
+            //UnLight = (1 << 2),
             // bit3~5 reserved for future flags
             // bit6~9: ShadingMode (4 bits, use EShadingMode enum)
             ShadingModeMask = 0x03C0, // (0xF << 6)
@@ -514,6 +528,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             PBR = 0,
             Subsurface = 1,
             Hair = 2,
+            Unlit = 15,
         }
 
         private const int ShadingModeBitOffset = 6;
@@ -522,21 +537,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
         [Rtti.Meta("")]
         [Category("Option")]
         public virtual ERenderFlags RenderFlags { get => mRenderFlags; }
-        [Category("Option")]
-        public virtual bool DisableEnvColor
-        {
-            get
-            {
-                return (mRenderFlags & ERenderFlags.DisableEnvColor) != 0;
-            }
-            set
-            {
-                if (value)
-                    mRenderFlags |= ERenderFlags.DisableEnvColor;
-                else
-                    mRenderFlags &= (~ERenderFlags.DisableEnvColor);
-            }
-        }
         [Rtti.Meta("")]
         [Category("Option")]
         public virtual EShadingMode ShadingMode
@@ -555,7 +555,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         [Rtti.Meta("")]
         public List<string> UserDefines { get; set; } = new List<string>();
-        internal virtual void UpdateShaderCode(bool EmptyMaterial)
+        internal virtual void UpdateShaderCode()
         {
             var codeBuilder = new Bricks.CodeBuilder.UHLSLCodeGenerator();
             string sourceCode = "";
@@ -584,27 +584,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 }
             }
 
-            if (EmptyMaterial)
-            {
-                this.HLSLCode = "void DO_VS_MATERIAL_IMPL(in PS_INPUT input, inout MTL_OUTPUT mtl)\n{\n}\n";
-                this.HLSLCode += "void DO_PS_MATERIAL_IMPL(in PS_INPUT input, inout MTL_OUTPUT mtl)\n" +
-                    "{\n" +
-                        "mtl.mAlbedo = float3(0.5,0.5,0.5);\n" +
-                        "mtl.mMetallic = 1.0f;\n" +
-                        "mtl.mRough = 0.5f;\n" +
-                        "mtl.mEmissive = float3(0.1,0.1,0.1);\n" +
-                    "}\n";
-                //codeBuilder.AddLine("void DO_PS_MATERIAL_IMPL(in PS_INPUT input, inout MTL_OUTPUT mtl)");
-                //codeBuilder.PushBrackets();
-                //codeBuilder.AddLine("mtl.mAlbedo = float3(0.5,0.5,0.5);");
-                //codeBuilder.AddLine("mtl.mMetallic = 1.0f;");
-                //codeBuilder.AddLine("mtl.mRough = 0.5f;");
-                //codeBuilder.AddLine("mtl.mEmissive = float3(0.1,0.1,0.1);");
-                //codeBuilder.PopBrackets();
-                sourceCode += this.HLSLCode;
-                //codeBuilder.AppendCode(this.HLSLCode, false, true);
-            }
-            else
             {
                 sourceCode += this.HLSLCode;
                 //codeBuilder.AppendCode(this.HLSLCode, false, true);
@@ -621,14 +600,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
             codeBuilder.AddLine("#undef DO_PS_MATERIAL", ref sourceCode);
             codeBuilder.AddLine("#define DO_PS_MATERIAL DO_PS_MATERIAL_IMPL", ref sourceCode);
 
-            if (Is64bitVColorAlpha)
-                codeBuilder.AddLine("#define MTL_ID_64BITVCOLORALPHA 1", ref sourceCode);
-            else
-                codeBuilder.AddLine("#define MTL_ID_64BITVCOLORALPHA 0", ref sourceCode);
+            //if (Is64bitVColorAlpha)
+            //    codeBuilder.AddLine("#define MTL_ID_64BITVCOLORALPHA 1", ref sourceCode);
+            //else
+            //    codeBuilder.AddLine("#define MTL_ID_64BITVCOLORALPHA 0", ref sourceCode);
 
             codeBuilder.AddLine($"#define MTL_RENDERFLAGS {(uint)mRenderFlags}", ref sourceCode);
 
-            codeBuilder.AddLine($"#define MTL_LightingMode {nameof(ELightingMode)}_{System.Enum.GetName(LightingMode)}", ref sourceCode);
+            //codeBuilder.AddLine($"#define MTL_LightingMode {nameof(ELightingMode)}_{System.Enum.GetName(LightingMode)}", ref sourceCode);
             switch (NormalMode)
             {
                 case ENormalMode.Normal:

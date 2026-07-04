@@ -46,6 +46,7 @@ namespace EngineNS.DesignMacross.Base.Graph
                 var mouseEventContext = new FMouseEventContext();
                 mouseEventContext.GraphElementRenderingContext = elementRenderingContext;
                 mouseEventContext.MouseAbsPos = ImGuiAPI.GetMousePos();
+                mouseEventContext.MouseAbsRect = new Rect(ImGuiAPI.GetMousePos() - Vector2.One, new SizeF(1.0f, 1.0f));
 
                 if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Right))
                 {
@@ -61,7 +62,6 @@ namespace EngineNS.DesignMacross.Base.Graph
                 {
                     ContextMenuElement = graphElement;
                     meunable.SetContextMenuableId(PopupMenu);
-                    var pos = elementRenderingContext.ViewportInverseTransform(ImGuiAPI.GetMousePos());
                     if (ContextMenuElement is IGraphElementSelectable selectable && selectable.HitCheck(ref mouseEventContext))
                     {
                         ImGuiAPI.CloseCurrentPopup();
@@ -82,11 +82,12 @@ namespace EngineNS.DesignMacross.Base.Graph
                 var mouseEventContext = new FMouseEventContext();
                 mouseEventContext.GraphElementRenderingContext = elementRenderingContext;
                 mouseEventContext.MouseAbsPos = ImGuiAPI.GetMousePos();
+                mouseEventContext.MouseAbsRect = new Rect(ImGuiAPI.GetMousePos() - Vector2.One, new SizeF(1.0f, 1.0f));
 
                 ContextMenuElement = graph;
                 meunable.SetContextMenuableId(PopupMenu);
                 if (ContextMenuElement is IGraphElementSelectable selectable && selectable.HitCheck(ref mouseEventContext))
-                {
+                {                    
                     ImGuiAPI.CloseCurrentPopup();
                     PopupMenu.StringId = graph.Name + "_" + graph.Id + "_" + "ContextMenu";
                     PopupMenu.Reset();

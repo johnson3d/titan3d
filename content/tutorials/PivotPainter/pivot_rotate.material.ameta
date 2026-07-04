@@ -17,5 +17,6 @@
     <e_1 Value="Game,tutorials/pivotpainter/pp2_rgb_xvect_a_xextent.srv,6d94e776-a1c9-4246-8532-7aa06a83d2fb" />
     <e_2 Value="Game,tutorials/pivotpainter/simpexpivpos.srv,09e7679b-e9a4-4e93-b05e-aa6a1a3d1f78" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

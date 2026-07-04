@@ -414,7 +414,7 @@ namespace EngineNS.EGui
                     passClears.SetDefault();
                     passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
 
-                    drawCmd.mCoreObject.mIsDirectGpuDraw = true;
+                    //drawCmd.mCoreObject.mIsDirectGpuDraw = true;
 
                     if (drawCmd.BeginPass(swapChain.BeginFrameBuffers(drawCmd), in passClears, "ImGui"))
                     {
@@ -492,21 +492,23 @@ namespace EngineNS.EGui
                                 //    (int)(pcmd->ClipRect.Y - clip_off.Y),
                                 //    (int)(pcmd->ClipRect.Z - clip_off.X),
                                 //    (int)(pcmd->ClipRect.W - clip_off.Y));
-                                drawCmd.SetScissor(in ScissorRect);
+                                //drawCmd.SetScissor(in ScissorRect);
+                                drawcall.mCoreObject.SetScissorRect(ScissorRect);
 
                                 var dpDesc = new NxRHI.FMeshAtomDesc();
                                 dpDesc.SetDefault();
                                 dpDesc.m_BaseVertexIndex = (uint)(vtx_offset + pcmd->VtxOffset);
                                 dpDesc.m_StartIndex = (uint)(idx_offset + pcmd->IdxOffset);
                                 dpDesc.m_NumPrimitives = pcmd->ElemCount / 3;
-                                rhiData.PrimitiveMesh.mCoreObject.SetAtom(0, 0, in dpDesc);
+                                //rhiData.PrimitiveMesh.mCoreObject.SetAtom(0, 0, in dpDesc);
+                                drawcall.mCoreObject.SetMeshAtomDesc(in dpDesc);
                                 if (ScissorRect.m_MinX >= ScissorRect.m_MaxX || ScissorRect.m_MinY >= ScissorRect.m_MaxY)
                                 {
 
                                 }
                                 else
                                 {
-                                    drawCmd.DirectGpuDraw(drawcall);
+                                    drawCmd.PushGpuDraw(drawcall);
                                 }
                             }
                             idx_offset += (int)cmd_list.IdxBufferSize;
@@ -516,7 +518,7 @@ namespace EngineNS.EGui
                         drawCmd.EndPass();
                     }
 
-                    drawCmd.mCoreObject.mIsDirectGpuDraw = false;
+                    //drawCmd.mCoreObject.mIsDirectGpuDraw = false;
                     NxRHI.FScissorRect fullRect;
                     var fwSize = presentWindow.GetWindowSize();
                     fullRect.m_MinX = 0;
@@ -528,6 +530,7 @@ namespace EngineNS.EGui
                 }
                 drawCmd.EndCommand();
 
+                //drawCmd.FlushDraws();
                 rc.GpuQueue.ExecuteCommandList(drawCmd);
             }
             

@@ -84,6 +84,8 @@ namespace EngineNS.Bricks.NodeGraph
         public string PinHoverCueImg = "uestyle/graph/pin_hover_cue.srv";
         public string BreakpointNodeImg = "uestyle/graph/ip_breakpoint.srv";
         public string AnimationFinalPosePin = "uestyle/graph/animationnode_result.srv";
+        public string AnimationPosePinConnected = "uestyle/graph/posepin_connected_15x28.srv";
+        public string AnimationPosePinDisConnected = "uestyle/graph/posepin_disconnected_15x28.srv";
 
     }
 }

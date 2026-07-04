@@ -28,6 +28,7 @@
   "SupportMultWindows": true,
   "DoUnitTest": true,
   "RHIType": "RHI_D3D11",
+  "ShaderLanguage": "SL_DXBC",
   "HasDebugLayer": false,
   "IsGpuBaseValidation": false,
   "IsDebugShader": true,

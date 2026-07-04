@@ -82,7 +82,7 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return "Macross";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return null;
@@ -129,7 +129,7 @@ namespace EngineNS.Bricks.CodeBuilder
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMacross@EngineCore", "EngineNS.Bricks.CodeBuilder.UMacross" })]
     [TtMacross.MacrossCreate]
     [IO.AssetCreateMenu(MenuName = "Script/Macross")]
-    [Editor.UAssetEditor(EditorType = typeof(Bricks.CodeBuilder.MacrossNode.TtMacrossEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(Bricks.CodeBuilder.MacrossNode.TtMacrossEditor))]
     public partial class TtMacross : IO.IAsset
     {
         public const string AssetExt = ".macross";
@@ -290,19 +290,23 @@ namespace EngineNS.Bricks.CodeBuilder
             {
                 foreach (var j in i.Nodes)
                 {
-                    var n = j as Bricks.CodeBuilder.MacrossNode.MethodNode;
-                    if (n == null)
-                        continue;
-                    foreach (var pin in n.Inputs)
-                    {
-                        if (pin.EditValue == null)
-                            continue;
-                        var rnm = pin.EditValue.Value as RName;
-                        if (rnm != null)
-                        {
-                            ameta.AddReferenceAsset(rnm);
-                        }
-                    }
+                    var mnode = j as TtMacrossNodeBase;
+                    if (mnode != null)
+                        mnode.OnUpdateAMetaReferences(graph, ameta);
+
+                    //var n = j as Bricks.CodeBuilder.MacrossNode.MethodNode;
+                    //if (n == null)
+                    //    continue;
+                    //foreach (var pin in n.Inputs)
+                    //{
+                    //    if (pin.EditValue == null)
+                    //        continue;
+                    //    var rnm = pin.EditValue.Value as RName;
+                    //    if (rnm != null)
+                    //    {
+                    //        ameta.AddReferenceAsset(rnm);
+                    //    }
+                    //}
                 }
             }
         }

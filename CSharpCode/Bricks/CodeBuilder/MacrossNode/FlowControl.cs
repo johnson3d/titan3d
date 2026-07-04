@@ -585,7 +585,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 });
         }
 
-        public static ReturnNode NewReturnNode(UMacrossMethodGraph funGraph)
+        public static ReturnNode NewReturnNode(TtMacrossMethodGraph funGraph)
         {
             var result = new ReturnNode();
             result.Initialize(funGraph);
@@ -603,7 +603,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             AddPinIn(BeforeExec);
         }
-        public void Initialize(UMacrossMethodGraph methodGraph)
+        public void Initialize(TtMacrossMethodGraph methodGraph)
         {
             if (methodGraph.MethodDatas.Count != 1)
                 return;
@@ -690,7 +690,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
 
-            var methodGraph = ParentGraph as UMacrossMethodGraph;
+            var methodGraph = ParentGraph as TtMacrossMethodGraph;
             if(methodGraph != null)
             {
                 foreach (var i in Arguments)
@@ -713,7 +713,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             base.OnPreRead(tagObject, hostObject, fromXml);
 
-            var funGraph = this.ParentGraph as UMacrossMethodGraph;
+            var funGraph = this.ParentGraph as TtMacrossMethodGraph;
             if (funGraph == null)
                 return;
             Initialize(funGraph);
@@ -749,7 +749,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (iPin == BeforeExec)
                 return true;
 
-            var funGraph = this.ParentGraph as UMacrossMethodGraph;
+            var funGraph = this.ParentGraph as TtMacrossMethodGraph;
             if (funGraph == null)
                 return false;
 

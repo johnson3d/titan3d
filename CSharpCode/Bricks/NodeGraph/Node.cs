@@ -169,6 +169,7 @@ namespace EngineNS.Bricks.NodeGraph
     public class PinIn : NodePin
     {
         [Rtti.Meta("")]
+        [Category("Option")]
         public UEditableValue EditValue { get; set; } = null;
 
         public override void CopyTo(NodePin pin)

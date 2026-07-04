@@ -9,9 +9,9 @@ class F2MManager
 	friend class VPakFile;
 	VCritical				mLocker;
 	VCritical				mTryReleaseLocker;
-	std::map<VStringA, VRes2Memory*>	mF2Mems;
+	std::map<VStringA, AutoRef<VRes2Memory>>	mF2Mems;
 
-	std::vector<VPakFile*>	mMountPaks;
+	std::vector<AutoRef<VPakFile>>	mMountPaks;
 public:
 	static F2MManager* Instance;
 	std::atomic<int> FileOpenNumber = 0;

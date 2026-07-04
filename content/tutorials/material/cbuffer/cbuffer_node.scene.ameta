@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="4ba3781ee9910d688f47b03df210f41e3b1ce7f958a3601785dd794edbfe0e63" />
+      <Path Type="System.String@Unknown" Value="cbuffer_node.scene/cbuffer_node.scene" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="6cdf0d400f3b0a74ac692996837745f39b7486581304d37a6c8ebdf2fbc49bc6" />
+      <Path Type="System.String@Unknown" Value="cbuffer_node.scene/class_graph.dat" />
+    </e_1>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="5a8a5dc2-fcb0-4958-8184-71d4c87e7dd0" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/material/cbuffer/cbuffer_node.scene,5a8a5dc2-fcb0-4958-8184-71d4c87e7dd0" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtScene&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
+</Root>

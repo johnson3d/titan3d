@@ -36,22 +36,29 @@ namespace EngineNS.DesignMacross.Design.Expressions
 
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
-            var methodDesc = expressionBuildContext.MethodDescription as TtMethodDescription;
+            var graphDesc = expressionBuildContext.OwnerDescription;
             
             TtBinaryOperatorExpression expression = new();
             expression.Operation = Op;
             var dataInPin_Left = DataInPins[0];
             var dataInPin_Right = DataInPins[1];
-            var leftLinkedDataPin = methodDesc.GetLinkedDataPin(dataInPin_Left);
+            var leftLinkedDataPin = IDataLineOperator.GetLinkedDataPin(graphDesc,dataInPin_Left);
             if(leftLinkedDataPin != null)
             {
                 System.Diagnostics.Debug.Assert(leftLinkedDataPin is TtDataOutPinDescription);
-                FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
                 if(leftLinkedDataPin.Parent is TtExpressionDescription expressionDescription)
                 {
+                    FExpressionBuildContext buildContext = new() { OwnerDescription = expressionBuildContext.OwnerDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
                     expression.Left = (leftLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
                 }
-                if(leftLinkedDataPin.Parent is TtStatementDescription statementDescription)
+                if (leftLinkedDataPin.Parent is TtPureStatementDescription pureStatementDescription)
+                {
+                    FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = expressionBuildContext.Sequence, OwnerDescription = expressionBuildContext.OwnerDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
+                    var pureState = (leftLinkedDataPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);
+                    expressionBuildContext.Sequence.Sequence.Add(pureState);
+                    expression.Left = (leftLinkedDataPin.Parent as TtStatementDescription).BuildExpressionForOutPin(leftLinkedDataPin);
+                }
+                else if (leftLinkedDataPin.Parent is TtStatementDescription statementDescription)
                 {
                     expression.Left = (leftLinkedDataPin.Parent as TtStatementDescription).BuildExpressionForOutPin(leftLinkedDataPin);
                 }
@@ -60,16 +67,23 @@ namespace EngineNS.DesignMacross.Design.Expressions
             {
                 expression.Left = new TtDefaultValueExpression() { Type = new TtTypeReference(dataInPin_Left.TypeDesc) };
             }
-            var rightLinkedDataPin = methodDesc.GetLinkedDataPin(dataInPin_Right);
+            var rightLinkedDataPin = IDataLineOperator.GetLinkedDataPin(graphDesc, dataInPin_Right);
             if (rightLinkedDataPin != null)
             {
                 System.Diagnostics.Debug.Assert(rightLinkedDataPin is TtDataOutPinDescription);
-                FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
                 if (rightLinkedDataPin.Parent is TtExpressionDescription expressionDescription)
                 {
+                    FExpressionBuildContext buildContext = new() { OwnerDescription = expressionBuildContext.OwnerDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
                     expression.Right = (rightLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
                 }
-                if (rightLinkedDataPin.Parent is TtStatementDescription statementDescription)
+                if (rightLinkedDataPin.Parent is TtPureStatementDescription pureStatementDescription)
+                {
+                    FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = expressionBuildContext.Sequence, OwnerDescription = expressionBuildContext.OwnerDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
+                    var pureState = (rightLinkedDataPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);
+                    expressionBuildContext.Sequence.Sequence.Add(pureState);
+                    expression.Right = (rightLinkedDataPin.Parent as TtStatementDescription).BuildExpressionForOutPin(rightLinkedDataPin);
+                }
+                else if(rightLinkedDataPin.Parent is TtStatementDescription statementDescription)
                 {
                     expression.Right = (rightLinkedDataPin.Parent as TtStatementDescription).BuildExpressionForOutPin(rightLinkedDataPin);
                 }
@@ -81,7 +95,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             }
             return expression;
         }
-        public void PinTypeSpreading(TtDataPinDescription dataPin, TtMethodDescription methodDescription)
+        public void PinTypeSpreading(TtDataPinDescription dataPin, IDescription graphDescription)
         {
             foreach (var otherPin in DataInPins)
             {
@@ -132,19 +146,19 @@ namespace EngineNS.DesignMacross.Design.Expressions
                 //}
             }
         }
-        public override bool IsPinsLinkable(TtDataPinDescription selfPin, TtDataPinDescription targetPin)
+        public override bool IsDataPinsLinkable(TtDataPinDescription selfPin, TtDataPinDescription targetPin)
         {
             return selfPin.TypeDesc == targetPin.TypeDesc || selfPin.TypeDesc == null || targetPin.TypeDesc == null;
         }
-        public override void OnPinConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, TtMethodDescription methodDescription)
+        public override void OnDataPinConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, IDescription graphDescription)
         {
             if (selfPin.TypeDesc == null)
             {
                 selfPin.TypeDesc = connectedPin.TypeDesc;
-                PinTypeSpreading(selfPin, methodDescription);
+                PinTypeSpreading(selfPin, graphDescription);
             }
         }
-        public override void OnPinDisConnected(TtDataPinDescription selfPin, TtDataPinDescription disConnectedPin, TtMethodDescription methodDescription)
+        public override void OnDataPinDisConnected(TtDataPinDescription selfPin, TtDataPinDescription disConnectedPin, IDescription graphDescription)
         {
             selfPin.TypeDesc = null;
         }

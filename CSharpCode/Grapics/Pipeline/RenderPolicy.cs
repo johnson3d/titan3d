@@ -1,3 +1,4 @@
+using EngineNS.GamePlay;
 using EngineNS.Graphics.Pipeline.Common;
 using EngineNS.Graphics.Pipeline.Deferred;
 using EngineNS.NxRHI;
@@ -77,11 +78,11 @@ namespace EngineNS.Graphics.Pipeline
         } = EShadowMode.Advance;
         [Rtti.Meta("")]
         [Category("Feature")]
-        public bool EnableContactShadow
+        public Deferred.EContactShadowMode ContactShadowMode
         {
             get;
             set;
-        } = true;
+        } = Deferred.EContactShadowMode.InputNode;
         [Category("Feature")]
         public TtAntiAliasingNode.ETypeAA TypeAA
         {
@@ -144,11 +145,14 @@ namespace EngineNS.Graphics.Pipeline
                     if (Host == null)
                         return false;
 
-                    foreach (var i in Host.NodeLayers)
+                    if (Host.NodeLayers != null)
                     {
-                        foreach (var j in i)
+                        foreach (var i in Host.NodeLayers)
                         {
-                            ImGuiAPI.Text(j.Name);
+                            foreach (var j in i)
+                            {
+                                ImGuiAPI.Text(j.Name);
+                            }
                         }
                     }
                     return false;
@@ -174,6 +178,11 @@ namespace EngineNS.Graphics.Pipeline
         {
             get;
             internal set;
+        }
+        [Rtti.Meta("")]
+        public TtWorld GetWorld()
+        {
+            return RenderViewport?.World;
         }
         public bool IsInitialized { get; set; } = false;
         public TtCamera DefaultCamera { get => mDefaultCamera; }
@@ -622,3 +631,26 @@ namespace EngineNS.Graphics.Pipeline
         }
     }
 }
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.Graphics.Pipeline
+{
+	partial class TtRenderPolicy
+	{
+		public unsafe TtWorld macross_GetWorld (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
+		{
+			var stackframe = mcStack.TopFrame;
+			{
+				if(stackframe != null)
+				{
+				}
+			}
+			var _return_value = GetWorld();
+			return _return_value;
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

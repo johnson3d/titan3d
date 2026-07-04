@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.CodeBuilder.TtMacrossAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="85ecfa6de586e4ea58278538fb6b25b33533cfef596295b0f71275111c1d98d6" />
+      <Path Type="System.String@Unknown" Value="buffer_setter.macross/class_graph.dat" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="b5689e6ac18c6500d9d4063a2b0c5800314d2df87827bf1a1a8ee5ab488b1eb7" />
+      <Path Type="System.String@Unknown" Value="buffer_setter.macross/[o]getcbuffer_e1_78_df_53_e5_53_d9_c0_62_25_87_c2_c2_a4_23_d7_37_92_e5_28.fn" />
+    </e_1>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="b27aba9e-72f7-4646-9d1f-66b465d62e17" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/material/cbuffer/buffer_setter.macross,b27aba9e-72f7-4646-9d1f-66b465d62e17" />
+  <BaseTypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCBufferSetter@EngineCore" />
+  <Description Type="System.String@Unknown" Value="MacrossType:EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCBufferSetter@EngineCore&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <IsDisable Type="System.Boolean@Unknown" Value="False" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.CodeBuilder.TtMacross@EngineCore" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+</Root>

@@ -33,12 +33,12 @@ namespace EngineNS.DesignMacross.Design.Statement
 
         public override TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
-            var methodDesc = statementBuildContext.MethodDescription as TtMethodDescription;
+            var graphDesc = statementBuildContext.OwnerDescription;
             TtExecuteSequenceStatement retValue = new TtExecuteSequenceStatement();
             for(int i=0; i< ExecutionOutPins.Count; i++)
             {
                 var pin = ExecutionOutPins[i];
-                var linkedPin = methodDesc.GetLinkedExecutionPin(pin);
+                var linkedPin = IExecutionLineOperator.GetLinkedExecutionPin(graphDesc,pin);
                 if(linkedPin != null)
                 {
                     var statement = (linkedPin.Parent as TtStatementDescription).BuildStatement(ref statementBuildContext);

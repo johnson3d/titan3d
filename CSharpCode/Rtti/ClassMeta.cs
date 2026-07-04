@@ -690,6 +690,9 @@ namespace EngineNS.Rtti
             }
             public string GetMethodDeclareString(bool removeDllVersion)
             {
+                if (ReturnType == null)
+                    return "";
+
                 var result = $"{ReturnType.FullName} {MethodName}(";
                 var method = GetMethod();
                 if (method == null)
@@ -1086,30 +1089,11 @@ namespace EngineNS.Rtti
         {
             return "Metadata";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return null;
         }
-        //public unsafe override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
-        //{
-        //    var start = ImGuiAPI.GetItemRectMin();
-        //    var end = start + sz;
-
-        //    var name = IO.FileManager.GetPureName(GetAssetName().Name);
-        //    var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
-        //    Vector2 tpos;
-        //    tpos.Y = start.Y + sz.Y - tsz.Y;
-        //    tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
-        //    ImGuiAPI.PushClipRect(in start, in end, true);
-
-        //    end.Y -= tsz.Y;
-        //    OnDrawSnapshot(in cmdlist, ref start, ref end);
-        //    cmdlist.AddRect(in start, in end, (uint)EGui.UCoreStyles.Instance.SnapBorderColor.ToArgb(),
-        //        EGui.UCoreStyles.Instance.SnapRounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll, EGui.UCoreStyles.Instance.SnapThinkness);
-
-        //    cmdlist.AddText(in tpos, 0xFFFF00FF, name, null);
-        //    ImGuiAPI.PopClipRect();
-        //}
+        public override string TypeExt => ".metadata";
     }
     public class TtMetaVersion
     {

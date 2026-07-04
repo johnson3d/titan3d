@@ -169,7 +169,29 @@ namespace EngineNS.Editor.Forms
         }
         protected override bool OnDrawNode(INodeUIProvider parent, INodeUIProvider provider, int index, int NumOfChild)
         {
-            return provider.DrawNode(parent,this, index, NumOfChild);
+            var node = provider as GamePlay.Scene.TtNode;
+            if (ShouldDrawEditorVisibilityToggle(node))
+            {
+                DrawEditorVisibilityToggle(node);
+                ImGuiAPI.SameLine(0, -1);
+            }
+
+            var disabledText = node != null && node.IsEditorVisibleInHierarchy == false;
+            if (disabledText)
+            {
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextDisableColor);
+            }
+            try
+            {
+                return provider.DrawNode(parent,this, index, NumOfChild);
+            }
+            finally
+            {
+                if (disabledText)
+                {
+                    ImGuiAPI.PopStyleColor(1);
+                }
+            }
             //ImGuiTreeNodeFlags_ flags = 0;
             //if (provider.Selected)
             //    flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
@@ -177,6 +199,121 @@ namespace EngineNS.Editor.Forms
             //ImGuiAPI.SameLine(0, -3);
             //ImGuiAPI.Text(provider.NodeName);
             //return ret;
+        }
+        protected virtual bool ShouldDrawEditorVisibilityToggle(GamePlay.Scene.TtNode node)
+        {
+            return node != null && node.HasStyle(GamePlay.Scene.TtNode.ENodeStyles.Transient) == false;
+        }
+        protected virtual void DrawEditorVisibilityToggle(GamePlay.Scene.TtNode node)
+        {
+            var visible = node.IsEditorVisible;
+            var buttonSize = new Vector2(18, 18);
+            var id = $"##OutlinerEditorVisible_{GetEditorVisibilityButtonId(node)}";
+            if (ImGuiAPI.InvisibleButton(id, in buttonSize, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft))
+            {
+                node.IsEditorVisible = !visible;
+                if (node.IsEditorVisible == false)
+                {
+                    RemoveHiddenNodeFromSelection(node);
+                }
+            }
+
+            var min = ImGuiAPI.GetItemRectMin();
+            var max = ImGuiAPI.GetItemRectMax();
+            var hovered = ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+            DrawEditorVisibilityEyeIcon(in min, in max, visible, hovered);
+
+            if (hovered)
+            {
+                ImGuiAPI.SetTooltip(visible ? "Hide in editor" : "Show in editor");
+            }
+        }
+        static void DrawEditorVisibilityEyeIcon(in Vector2 itemMin, in Vector2 itemMax, bool visible, bool hovered)
+        {
+            var style = EGui.UIProxy.StyleConfig.Instance;
+            var color = hovered
+                ? style.ToolButtonTextColor_Hover
+                : (visible ? style.ToolButtonTextColor : style.TextDisableColor);
+
+            var center = new Vector2(
+                (itemMin.X + itemMax.X) * 0.5f,
+                (itemMin.Y + itemMax.Y) * 0.5f);
+            const float halfWidth = 6.5f;
+            const float halfHeight = 4.0f;
+            const float stroke = 1.4f;
+
+            var left = new Vector2(center.X - halfWidth, center.Y);
+            var right = new Vector2(center.X + halfWidth, center.Y);
+            var topCtrl0 = new Vector2(center.X - halfWidth * 0.55f, center.Y - halfHeight);
+            var topCtrl1 = new Vector2(center.X + halfWidth * 0.55f, center.Y - halfHeight);
+            var bottomCtrl0 = new Vector2(center.X + halfWidth * 0.55f, center.Y + halfHeight);
+            var bottomCtrl1 = new Vector2(center.X - halfWidth * 0.55f, center.Y + halfHeight);
+
+            var drawList = ImGuiAPI.GetWindowDrawList();
+            drawList.AddBezierCubic(in left, in topCtrl0, in topCtrl1, in right, color, stroke, 12);
+            drawList.AddBezierCubic(in right, in bottomCtrl0, in bottomCtrl1, in left, color, stroke, 12);
+
+            if (visible)
+            {
+                drawList.AddCircleFilled(in center, 2.0f, color, 10);
+            }
+            else
+            {
+                var slashStart = new Vector2(center.X - halfWidth + 1.0f, center.Y + halfHeight + 1.0f);
+                var slashEnd = new Vector2(center.X + halfWidth - 1.0f, center.Y - halfHeight - 1.0f);
+                drawList.AddLine(in slashStart, in slashEnd, color, 1.6f);
+            }
+        }
+        static string GetEditorVisibilityButtonId(GamePlay.Scene.TtNode node)
+        {
+            if (node.NodeId != Guid.Empty)
+                return node.NodeId.ToString();
+            return node.GetHashCode().ToString();
+        }
+        void RemoveHiddenNodeFromSelection(GamePlay.Scene.TtNode hiddenRoot)
+        {
+            var selected = SelectedNodes;
+            if (selected == null || selected.Count == 0)
+                return;
+
+            var changed = false;
+            for (int i = selected.Count - 1; i >= 0; i--)
+            {
+                var node = selected[i];
+                if (node == null || IsNodeInSubtree(node, hiddenRoot))
+                {
+                    if (node != null)
+                        node.Selected = false;
+                    selected.RemoveAt(i);
+                    changed = true;
+                }
+            }
+            if (changed == false)
+                return;
+
+            if (selected.Count == 0)
+            {
+                var sceneEditor = WorldViewportState != null ? GetHostSceneEditor(WorldViewportState) : null;
+                if (sceneEditor != null)
+                    sceneEditor.DeselectAll();
+                else
+                    WorldViewportState?.OnHitproxySelectedMulti(true, System.Array.Empty<Graphics.Pipeline.IProxiable>());
+            }
+            else
+            {
+                WorldViewportState?.OnHitproxySelectedMulti(true, selected.ToArray());
+            }
+        }
+        static bool IsNodeInSubtree(GamePlay.Scene.TtNode node, GamePlay.Scene.TtNode root)
+        {
+            var cur = node;
+            while (cur != null)
+            {
+                if (cur == root)
+                    return true;
+                cur = cur.Parent;
+            }
+            return false;
         }
         #region PopMenu
         System.Action OnDrawMenu = null;
@@ -190,7 +327,8 @@ namespace EngineNS.Editor.Forms
             menuName = menuString;
             nodeName = menuName;
         }
-        private async System.Threading.Tasks.Task<GamePlay.Scene.TtNode> NewNode(Rtti.TtClassMeta i)
+        internal uint NameSerialId = 0;
+        private async Thread.Async.TtTask<GamePlay.Scene.TtNode> NewNode(Rtti.TtClassMeta i)
         {
             if (mAddToNode == null)
                 return null;
@@ -202,7 +340,7 @@ namespace EngineNS.Editor.Forms
             {
                 prefix = attr.DefaultNamePrefix;
             }
-            newNode.NodeData.Name = $"{prefix}_{newNode.SceneId}";
+            newNode.NodeData.Name = $"{prefix}_{NameSerialId++}";
             return newNode;
         }
         public void UpdateAddNodeMenu()

@@ -88,10 +88,11 @@ namespace EngineNS.DesignMacross.Base.Graph
     public interface IEnumChild
     {
         public List<IGraphElement> EnumerateChild<T>() where T : class;
+        public List<IGraphElement> EnumerateChildRverse<T>() where T : class;
     }
     public interface IZoomable
     {
-        public void Zooming(float delta)
+        public void Zooming(float delta, FMouseEventContext eventContext)
         {
 
         }
@@ -105,18 +106,22 @@ namespace EngineNS.DesignMacross.Base.Graph
     {
         public FGraphElementRenderingContext GraphElementRenderingContext;
         public Vector2 MouseAbsPos;
+        public Rect MouseAbsRect;
     }
     public interface IGraphElementSelectable : IGraphElementDraggable
     {
+        public bool CanMultiSelect { get; }
+        public bool IsSelected { get; }
         public bool HitCheck(ref FMouseEventContext context);
         public void OnSelected(ref FMouseEventContext context);
-        public void OnUnSelected();
+        public void OnUnSelected(ref FMouseEventContext context);
         public void OnMouseOver(ref FMouseEventContext context);
         public void OnMouseLeave(ref FMouseEventContext context);
         public void OnMouseLeftButtonDown(ref FMouseEventContext context);
         public void OnMouseLeftButtonUp(ref FMouseEventContext context);
         public void OnMouseRightButtonDown(ref FMouseEventContext context);
         public void OnMouseRightButtonUp(ref FMouseEventContext context);
+        public void OnMouseMove(ref FMouseEventContext context);
     }
     public interface IResizebale
     {
@@ -174,6 +179,8 @@ namespace EngineNS.DesignMacross.Base.Graph
 
     public interface IGraph : IGraphElement, IZoomable
     {
+        public TtGraphViewport ViewPort { get; } 
+        public TtGraphCamera Camera { get; }
         public void ConstructElements(ref FGraphRenderingContext context);
         public void AfterConstructElements(ref FGraphRenderingContext context);
     }

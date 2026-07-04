@@ -27,5 +27,6 @@
     <e_2 Value="Game,project_factory/belica/textures_new/belica_gun01_m_belica_new_head_occlusionroughnessmetallic.srv,87994c2f-8e48-473d-be27-158f64cb10e0" />
     <e_3 Value="Game,tutorials/fx/skin3s/man_skin0.sssprofile,ed32b522-df4b-4e5d-b921-8003df5546f3" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

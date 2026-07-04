@@ -59,9 +59,11 @@ namespace EngineNS.Thread
             
         }
         public static TtContextThread WaitingThread = null;
+        public static object WaitingThreadMonitor = new object();
         private static int WaitingCount = 0;
         private static void EnterWaitingThread(TtContextThread thread)
         {
+            System.Threading.Monitor.Enter(WaitingThreadMonitor);
             if (WaitingThread!=null)
             {
                 System.Diagnostics.Debug.Assert(WaitingThread.ThreadId == thread.ThreadId);
@@ -75,6 +77,7 @@ namespace EngineNS.Thread
             WaitingCount--;
             if (WaitingCount == 0)
                 WaitingThread = null;
+            System.Threading.Monitor.Exit(WaitingThreadMonitor);
         }
         protected bool mIsRun = false;
         private bool mIsFinished = false;
@@ -374,7 +377,7 @@ namespace EngineNS.Thread
         {
             get;
         } = new Queue<Async.TtAsyncTaskStateBase>();
-        public void EnqueueAsync(Async.TtAsyncTaskStateBase evt)
+        public virtual void EnqueueAsync(Async.TtAsyncTaskStateBase evt)
         {
             System.Diagnostics.Debug.Assert(IsFinished == false);
             lock (AsyncEvents)
@@ -424,9 +427,9 @@ namespace EngineNS.Thread
                     {
                         Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Logic Thread[Async] is Blocked({(cur - start)/1000}ms > {limit / 1000}):\n{state.ToString()}");
                     }
-                    else if (TtEngine.Instance.EventPoster.IsThread(Async.EAsyncTarget.Render))
+                    else if (TtEngine.Instance.EventPoster.IsThread(Async.EAsyncTarget.Rhi))
                     {
-                        Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Render Thread[Async] is Blocked({(cur - start) /1000}ms > {limit / 1000}):\n{state.ToString()}");
+                        Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Rhi Thread[Async] is Blocked({(cur - start) /1000}ms > {limit / 1000}):\n{state.ToString()}");
                         //if (cur.CallStackTrace != null)
                         //{
                         //    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"StackInof=>{cur.CallStackTrace}");

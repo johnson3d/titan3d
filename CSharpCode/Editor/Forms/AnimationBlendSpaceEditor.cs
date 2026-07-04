@@ -388,7 +388,7 @@ namespace EngineNS.Editor.Forms
 }
 namespace EngineNS.Animation.Asset.BlendSpace
 {
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.TtAnimationBlendSpaceEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(Editor.Forms.TtAnimationBlendSpaceEditor))]
     public partial class TtBlendSpace2D
     {
 

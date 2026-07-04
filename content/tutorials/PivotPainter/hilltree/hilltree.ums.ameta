@@ -18,5 +18,6 @@
     <e_2 Value="Game,tutorials/pivotpainter/hilltree/mi_root.uminst,4ac41dac-30d3-4778-ba9b-d2c284ece3e7" />
     <e_3 Value="Game,tutorials/pivotpainter/hilltree/mi_branch.uminst,d25e3a38-f278-413d-b8df-262424569a03" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
 </Root>

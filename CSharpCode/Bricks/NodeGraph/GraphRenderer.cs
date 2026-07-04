@@ -1,5 +1,6 @@
 ﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
 using EngineNS.EGui.Controls;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -614,10 +615,18 @@ namespace EngineNS.Bricks.NodeGraph
                 }
 				if (inPin.EditValue != null)
                 {
-                    var pos = CanvasToDraw(inPin.EditValuePosition) - ImGuiAPI.GetWindowPos();
+                    //var p0 = CanvasToDraw(inPin.EditValuePosition) - ImGuiAPI.GetWindowPos();
+                    //ImGuiAPI.SetCursorPos(p0);
+                    //var p1 = ImGuiAPI.GetCursorPos();
+                    //ImGuiAPI.Dummy(in Vector2.Zero);
+                    //var p2 = ImGuiAPI.GetCursorPos();
+
+                    //SetCursorPos在超出内容区域后，Dummy会强行修正，导致GetCursorPos对不上
+                    //所以类似graph这种基本依靠自绘制的系统，SetCursorScreenPos才是最可靠的
+                    var pos = CanvasToDraw(inPin.EditValuePosition);
+                    ImGuiAPI.SetCursorScreenPos(pos);
                     pos.Y -= style->FramePadding.Y;
-                    ImGuiAPI.SetCursorPos(pos);
-                    ImGuiAPI.Dummy(in Vector2.Zero);
+                    var pos1 = ImGuiAPI.GetCursorScreenPos();
                     inPin.EditValue.OnDraw(node, inPin, styles, 1/mGraph.ScaleVPWithDpiScale, false);
                 }
             }

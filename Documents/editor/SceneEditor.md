@@ -187,6 +187,7 @@ EmptyName       <- 根节点 (Scene)
 | 视图 | **W / A / S / D** | 飞行式移动 |
 | 视图 | **F** | Frame 选中节点到视野 |
 | 文件 | **Ctrl + S** | Save |
+| 调试 | **F11** | RenderDoc 抓帧（捕获当前帧供 GPU 调试分析） |
 
 ---
 

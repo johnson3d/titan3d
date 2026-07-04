@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.Particle.TtNebulaParticleAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="10bdb02a-4950-4098-a8f7-e7095087b244" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/particles/test01.nebula,10bdb02a-4950-4098-a8f7-e7095087b244" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.Particle.TtNebulaParticle&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
@@ -14,5 +16,6 @@
     <e_0 Value="Game,tutorials/common/mesh01.ums,15ec2216-bf13-481e-a2ef-d3a8a9b739a8" />
     <e_1 Value="Game,utest/mesh/unit_sphere.ums,887ddcfe-6da8-4cdc-b3c7-150ce117b94d" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Particle.TtNebulaParticle@EngineCore" />
 </Root>

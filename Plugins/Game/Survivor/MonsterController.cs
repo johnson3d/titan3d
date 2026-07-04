@@ -31,7 +31,7 @@ namespace Survivor
         }
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
-            if(Player != null && MonsterNode != null && !MonsterNode.StateNode.IsDead)
+            if (Player?.Placement != null && MonsterNode?.StateNode?.IsDead == false && MonsterNode.MonseterPlacement != null && MonsterNode.MonsterData != null)
             {
                 float distance = (float)DVector3.Distance(Player.Placement.AbsTransform.Position,
                                             MonsterNode.MonseterPlacement.AbsTransform.Position);
@@ -40,11 +40,21 @@ namespace Survivor
                     //move
                     var dir = Player.Placement.AbsTransform.Position -
                                                 MonsterNode.MonseterPlacement.AbsTransform.Position;
+                    if (dir.Length() <= 0.001)
+                        return base.OnTickLogic(args);
+
                     dir.Normalize();
                     dir.Y = 0;
                     var pos = MonsterNode.MonseterPlacement.Position + dir * MonsterNode.MonsterData.Speed * args.World.DeltaTimeSecond;
                     var simpleMovement = MonsterNode.MonsterPrefab.FindFirstChild<TtSimpleMovement>(null, true) as TtSimpleMovement;
-                    simpleMovement.SetDesiredPosition(pos.ToSingleVector3());
+                    if (simpleMovement != null)
+                    {
+                        simpleMovement.SetDesiredPosition(pos.ToSingleVector3());
+                    }
+                    else
+                    {
+                        MonsterNode.MonseterPlacement.Position = pos;
+                    }
                     MonsterNode.MonseterPlacement.Quat = Quaternion.RotationFrowTwoVector(Vector3.Forward, -dir.ToSingleVector3());
                 }
                 else

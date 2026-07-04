@@ -1,4 +1,6 @@
-﻿namespace EngineNS.DesignMacross.Base.Graph
+﻿using System.Collections.Generic;
+
+namespace EngineNS.DesignMacross.Base.Graph
 {
 
     public class TtMouseEventProcesser
@@ -26,6 +28,11 @@
 
         IGraphElement ProcessSelectableElementHitCheck(IGraphElement element, Vector2 pos, ref FMouseEventContext context)
         {
+            if (!context.GraphElementRenderingContext.ViewPort.IsInViewport(ImGuiAPI.GetMousePos()))
+            {
+                return null;
+            }
+
             IGraphElement finalHit = null;
             if (element is IGraphElementSelectable selectableElement)
             {
@@ -36,7 +43,7 @@
                     HitElementStack.Push(element);
                     if (element is IEnumChild enumChild)
                     {
-                        var children = enumChild.EnumerateChild<IGraphElement>();
+                        var children = enumChild.EnumerateChildRverse<IGraphElement>();
                         foreach (var child in children)
                         {
                             var hit = ProcessSelectableElementHitCheck(child, pos, ref context);
@@ -51,6 +58,30 @@
             }
             return finalHit;
         }
+        public List<IGraphElement> ProcessSelectableElementsHitCheck(TtGraph graph, Vector2 pos, ref FMouseEventContext context)
+        {
+            List<IGraphElement> Hits = new();
+            if (!context.GraphElementRenderingContext.ViewPort.IsInViewport(ImGuiAPI.GetMousePos()))
+            {
+                return null;
+            }
+
+            if (graph is IGraphElementSelectable selectableElement)
+            {
+                if (graph is IEnumChild enumChild)
+                {
+                    var children = enumChild.EnumerateChildRverse<IGraphElement>();
+                    foreach (var child in children)
+                    {
+                        if (child.HitCheck(ref context))
+                        {
+                            Hits.Add(child);
+                        }
+                    }
+                }
+            }
+            return Hits;
+        }
 
         internal IContextMeunable mOpenedContextMenu = null;
         public Stack<IGraphElement> HitElementStack = new Stack<IGraphElement>();
@@ -64,6 +95,7 @@
             mouseEventContext.GraphElementRenderingContext = context;
             var MousePos = ImGuiAPI.GetMousePos();
             mouseEventContext.MouseAbsPos = MousePos;
+            mouseEventContext.MouseAbsRect = new Rect(MousePos - Vector2.One, new SizeF(1.0f, 1.0f));
             //var topmostElement = ProcessGraphHitCheck(graph, context.ViewPort.ViewportInverseTransform(context.Camera.Location, MousePos), ref context);
             var topmostElement = ProcessSelectableElementHitCheck(graph, MousePos, ref mouseEventContext);
             if (topmostElement != null)
@@ -77,11 +109,13 @@
                 {
                     IsDragging = true;
                     DraggingButton = ImGuiMouseButton_.ImGuiMouseButton_Left;
+                    topmostElement.OnMouseMove(ref mouseEventContext);
                 }
                 if (ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Right, -1.0f))
                 {
                     IsDragging = true;
                     DraggingButton = ImGuiMouseButton_.ImGuiMouseButton_Right;
+                    topmostElement.OnMouseMove(ref mouseEventContext);
                 }
                 if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left) && !IsDragging)
                 {
@@ -120,7 +154,23 @@
                 }
                 if (ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Left, false))
                 {
-                    topmostElement.OnSelected(ref mouseEventContext);
+                    //foreach (var element in context.DesignedGraph.Elements)
+                    //{
+                    //    if (element == topmostElement)
+                    //        continue;
+
+                    //    if (element is TtDescriptionGraphElement descGraphElement)
+                    //    {
+                    //        descGraphElement.OnUnSelected(ref mouseEventContext);
+                    //    }
+                    //}
+                    if (topmostElement is IGraphElementSelectable selectable)
+                    {
+                        if (!selectable.IsSelected)
+                        {
+                            topmostElement.OnSelected(ref mouseEventContext);
+                        }
+                    }
                 }
                 if (IsDragging)
                 {
@@ -129,8 +179,19 @@
                         if (DraggingElement is IGraphElementDraggable draggableEle && draggableEle != graph)
                         {
                             var delta = ImGuiAPI.GetMouseDragDelta(ImGuiMouseButton_.ImGuiMouseButton_Left, -1.0f);
-                            draggableEle.OnDragging(delta / context.Camera.Scale);
                             ImGuiAPI.ResetMouseDragDelta(ImGuiMouseButton_.ImGuiMouseButton_Left);
+                            //draggableEle.OnDragging(delta / context.Camera.Scale);
+                            foreach (var selectedElement in mouseEventContext.GraphElementRenderingContext.DesignedGraph.SelectedElements)
+                            {
+                                if (selectedElement != draggableEle)
+                                {
+                                    if (selectedElement is IGraphElementDraggable draggableSelected)
+                                    {
+                                        draggableSelected.OnDragging(delta / context.Camera.Scale);
+                                    }
+                                }
+                            }
+
                         }
                     }
                     if (DraggingButton == ImGuiMouseButton_.ImGuiMouseButton_Right)
@@ -141,9 +202,9 @@
                     }
 
                 }
-                if (ImGuiAPI.GetIO().MouseWheel != 0)
+                if (ImGuiAPI.GetIO().MouseWheel != 0 && !ImGuiAPI.IsPopupOpen("0", ImGuiPopupFlags_.ImGuiPopupFlags_AnyPopupId))
                 {
-                    graph.Zooming(ImGuiAPI.GetIO().MouseWheel);
+                    graph.Zooming(ImGuiAPI.GetIO().MouseWheel, mouseEventContext);
                 }
 
             }

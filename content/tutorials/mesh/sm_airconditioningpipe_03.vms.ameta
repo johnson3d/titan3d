@@ -4,6 +4,7 @@
   <AssetId Type="System.Guid@Unknown" Value="9ae889ae-6e85-455b-8161-e3d0b42f4dfb" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/mesh/sm_airconditioningpipe_03.vms,9ae889ae-6e85-455b-8161-e3d0b42f4dfb" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.TtMeshPrimitives&#xA;" />
+  <HasBLAS Type="System.Boolean@Unknown" Value="False" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
@@ -14,5 +15,7 @@
   </Icon>
   <IsClustered Type="System.Boolean@Unknown" Value="False" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <StreamingTexelFactor Type="System.Single@Unknown" Value="2.205458" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMeshPrimitives@EngineCore" />
 </Root>

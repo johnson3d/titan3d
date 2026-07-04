@@ -201,19 +201,18 @@ namespace EngineNS.Animation.Asset
                     animClip.Duration = (float)(anim.DurationInTicks / anim.TicksPerSecond);
                     animClip.AnimationChunkName = chunk.RescouceName;
                     animClip.AnimationChunk = chunk;
+                    
+                    var ameta = new TtAnimationClipAMeta();
+                    ameta.SetAssetName(rn);
+                    ameta.AssetId = Guid.NewGuid();
+                    ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtAnimationClip)).TypeString;
+                    ameta.Description = $"This is a {typeof(TtAnimationClip).FullName}\n";
+                    ameta.SaveAMeta(animClip);
+                    TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
+
                     animClip.SaveAssetTo(rn);
                     EngineNS.TtEngine.Instance.AnimationModule.AnimationChunkManager.Remove(rn);
                     EngineNS.TtEngine.Instance.AnimationModule.AnimationClipManager.Remove(rn);
-                    if (animClip != null)
-                    {
-                        var ameta = new TtAnimationClipAMeta();
-                        ameta.SetAssetName(rn);
-                        ameta.AssetId = Guid.NewGuid();
-                        ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtAnimationClip)).TypeString;
-                        ameta.Description = $"This is a {typeof(TtAnimationClip).FullName}\n";
-                        ameta.SaveAMeta(animClip);
-                        TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
-                    }
                 }
                 return true;
             }

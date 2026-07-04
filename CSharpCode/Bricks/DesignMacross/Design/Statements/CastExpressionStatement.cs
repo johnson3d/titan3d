@@ -58,7 +58,8 @@ namespace EngineNS.DesignMacross.Design.Expressions
             {
                 Operation = TtBinaryOperatorExpression.EBinaryOperation.Is,
             };
-            var linkedDataPin = statementBuildContext.MethodDescription.GetLinkedDataPin(DataInPins[0]);
+
+            var linkedDataPin = IDataLineOperator.GetLinkedDataPin(statementBuildContext.OwnerDescription, DataInPins[0]);
             if (linkedDataPin == null) 
             {
 
@@ -67,13 +68,13 @@ namespace EngineNS.DesignMacross.Design.Expressions
             {
                 if(linkedDataPin.Parent is TtExpressionDescription expressionDescription)
                 {
-                    FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
+                    FExpressionBuildContext buildContext = new() { OwnerDescription = statementBuildContext.OwnerDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                     var left = expressionDescription.BuildExpression(ref buildContext);
                     binaryOP.Left = left;
                 }
                 if (linkedDataPin.Parent is TtStatementDescription statementDescription)
                 {
-                    FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
+                    FExpressionBuildContext buildContext = new() { OwnerDescription = statementBuildContext.OwnerDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                     var left = statementDescription.BuildExpressionForOutPin(linkedDataPin);
                     binaryOP.Left = left;
                 }
@@ -89,7 +90,8 @@ namespace EngineNS.DesignMacross.Design.Expressions
             };
             statementBuildContext.AddStatement(casted);
             var executionOutPin_True = ExecutionOutPins[0];
-            var linkedTrueExecPin = statementBuildContext.MethodDescription.GetLinkedExecutionPin(executionOutPin_True);
+
+            var linkedTrueExecPin = IExecutionLineOperator.GetLinkedExecutionPin(statementBuildContext.OwnerDescription, executionOutPin_True);
             if (linkedTrueExecPin == null)
             {
                 //空语句
@@ -111,24 +113,24 @@ namespace EngineNS.DesignMacross.Design.Expressions
                     castExpression.TargetType = new TtTypeReference(TargetType);
                     if (linkedDataPin.Parent is TtExpressionDescription expressionDescription)
                     {
-                        FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
+                        FExpressionBuildContext buildContext = new() { OwnerDescription = statementBuildContext.OwnerDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                         castExpression.Expression = expressionDescription.BuildExpression(ref buildContext);
                     }
                     if (linkedDataPin.Parent is TtStatementDescription statementDescription)
                     {
-                        FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
+                        FExpressionBuildContext buildContext = new() { OwnerDescription = statementBuildContext.OwnerDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                         castExpression.Expression = statementDescription.BuildExpressionForOutPin(linkedDataPin);
                     }
                     var assign = TtASTBuildUtil.CreateAssignOperatorStatement(new TtVariableReferenceExpression(castedVarName), castExpression);
                     trueExecuteSequenceStatement.Sequence.Add(assign);
-                    FStatementBuildContext trueStatementBuildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
+                    FStatementBuildContext trueStatementBuildContext = new() { ExecuteSequenceStatement = new(), OwnerDescription = statementBuildContext.OwnerDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                     (linkedTrueExecPin.Parent as TtStatementDescription).BuildStatement(ref trueStatementBuildContext);
                     trueExecuteSequenceStatement.Sequence.Add(trueStatementBuildContext.ExecuteSequenceStatement);
                     ifStatement.TrueStatement = trueExecuteSequenceStatement;
                 }
             }
             var executionOutPin_False = ExecutionOutPins[1];
-            var linkedFalseExecPin = statementBuildContext.MethodDescription.GetLinkedExecutionPin(executionOutPin_False);
+            var linkedFalseExecPin = IExecutionLineOperator.GetLinkedExecutionPin(statementBuildContext.OwnerDescription,executionOutPin_False);
             if (linkedFalseExecPin == null)
             {
                 //空
@@ -136,7 +138,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             else
             {
                 System.Diagnostics.Debug.Assert(linkedFalseExecPin is TtExecutionInPinDescription);
-                FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
+                FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = new(), OwnerDescription = statementBuildContext.OwnerDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                 (linkedFalseExecPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);
                 ifStatement.FalseStatement = buildContext.ExecuteSequenceStatement;
             }
@@ -147,7 +149,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             return new TtVariableReferenceExpression("result_" + Name + "_" + (uint)Id.ToString().GetHashCode());
         }
-        public override bool IsPinsLinkable(TtDataPinDescription selfPin, TtDataPinDescription targetPin)
+        public override bool IsDataPinsLinkable(TtDataPinDescription selfPin, TtDataPinDescription targetPin)
         {
             if(SourcePin == selfPin)
             {
@@ -159,14 +161,14 @@ namespace EngineNS.DesignMacross.Design.Expressions
             }
             return false;
         }
-        public override void OnPinConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, TtMethodDescription methodDescription)
+        public override void OnDataPinConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, IDescription graphDescription)
         {
             if (SourcePin == selfPin)
             {
                 SourceType = connectedPin.TypeDesc;
             }
         }
-        public override void OnPinDisConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, TtMethodDescription methodDescription)
+        public override void OnDataPinDisConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, IDescription graphDescription)
         {
             if (SourcePin == selfPin)
             {

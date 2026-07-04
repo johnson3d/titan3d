@@ -18,7 +18,6 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState{
         public Color4f NameColor { get; set; } = new Color4f(0.0f, 0.0f, 0.0f);
         public Color4f BackgroundColor { get; set; } = new Color4f(111f / 255, 168f / 255, 219f / 255);
         public Color4f BorderColor { get; set; } = new Color4f(0.5f, 0.6f, 0.6f, 0.6f);
-        public float BorderThickness { get; set; } = 4;
 
         public TtGraphElement_StackPanel ElementContainer = new TtGraphElement_StackPanel();
         public TtGraphElement_TextBlock NameTextBlock = new TtGraphElement_TextBlock();
@@ -282,6 +281,12 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState{
                     list.Add(element);
                 }
             }
+            return list;
+        }
+        public List<IGraphElement> EnumerateChildRverse<T>() where T : class
+        {
+            List<IGraphElement> list = EnumerateChild<T>();
+            list.Reverse();
             return list;
         }
     }

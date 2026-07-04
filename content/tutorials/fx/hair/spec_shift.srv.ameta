@@ -19,5 +19,6 @@
   </Icon>
   <OriginImageAddress Type="System.String@Unknown" Value="G:\v2-9f250369fdc272cf6abf7d9ec314c67d_1440w.png" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.TtSrView@EngineCore" />
 </Root>

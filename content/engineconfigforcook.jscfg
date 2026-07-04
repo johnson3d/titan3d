@@ -28,6 +28,7 @@
   "SupportMultWindows": true,
   "DoUnitTest": false,
   "RHIType": "RHI_VirtualDevice",
+  "ShaderLanguage": "SL_DXIL",
   "HasDebugLayer": false,
   "IsGpuBaseValidation": false,
   "IsDebugShader": false,

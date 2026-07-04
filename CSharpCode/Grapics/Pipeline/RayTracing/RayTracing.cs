@@ -200,5 +200,32 @@ namespace EngineNS.Graphics.Mesh
             asDesc.m_Geometries = pGeometries;
             return TtEngine.Instance.GfxDevice.RenderContext.CreateAccelerationStructure(in asDesc);
         }
+
+        /// <summary>
+        /// 尝试构建 BLAS.
+        /// 当 AMeta.HasBLAS == true 时, 在 mesh 加载完成后自动调用.
+        /// 当前 DXR 不支持 Blob 序列化, 始终从 VB/IB 重建.
+        /// </summary>
+        public async Thread.Async.TtTask TryLoadOrBuildBLAS()
+        {
+            if (BLAS != null)
+                return;
+
+            var meshMeta = GetAMeta() as TtMeshPrimitivesAMeta;
+            if (meshMeta == null || meshMeta.HasBLAS == false)
+                return;
+
+            BLAS = await TtEngine.Instance.EventPoster.Post((state) =>
+            {
+                return CreateAStructure(this);
+            }, Thread.Async.EAsyncTarget.TPools);
+
+            if (BLAS != null)
+            {
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(
+                    Profiler.ELogTag.Info, "BLAS",
+                    $"BLAS built for {AssetName}");
+            }
+        }
     }
 }

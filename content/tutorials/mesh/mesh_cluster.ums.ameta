@@ -16,5 +16,6 @@
     <e_0 Value="Game,tutorials/mesh/sm_airconditioningpipe_03.vms,9ae889ae-6e85-455b-8161-e3d0b42f4dfb" />
     <e_1 Value="Engine,material/sysdft.material,8c2e9c64-ae7a-4172-9e64-114a3d36cc40" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
 </Root>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="79ec7d0485c0eb5a97621046cf37ac3d5ef7d200ba196ae5969a1cd85ccb543b" />
+      <Path Type="System.String@Unknown" Value="ism0.scene/ism0.scene" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="ff911c6c77cfd4764c0879e834a3db326474ea47aa06583d09684d2d09b3ac14" />
+      <Path Type="System.String@Unknown" Value="ism0.scene/class_graph.dat" />
+    </e_1>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="57db7b39-4ed4-4be3-849e-117b376e9370" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/level/ism/ism0.scene,57db7b39-4ed4-4be3-849e-117b376e9370" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtScene&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Game,tutorials/common/oldwood0.ums,dc6ec359-fb69-4d56-a6e0-c4551078cf05" />
+    <e_1 Value="Engine,material/gridline.material,fe431749-ed31-45b1-93d8-34462bd00922" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="Default" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
+</Root>

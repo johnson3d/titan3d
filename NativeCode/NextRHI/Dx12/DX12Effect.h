@@ -135,7 +135,7 @@ namespace NxRHI
 		}
 		virtual bool BuildHitGroup(FHitGroup* group) override;
 		virtual const IShaderReflector* GetReflector() const { 
-			return mShaderLibDesc->DxILReflector;
+			return mShaderLibDesc->Reflector;
 		}
 		AutoRef<ID3D12StateObject> CreateDxrStateObject(DX12GpuDevice* device, DX12RayTracingEffect* effect);
 	};

@@ -23,7 +23,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
         {
             return "BlendSpace";
         }
-        public override async TtTask<IAsset> LoadAsset(params object[] args)
+        public override async TtTask<IAsset> GetAsset(params object[] args)
         {
             return await TtEngine.Instance.AnimationModule.BlendSpaceClipManager.GetAnimation(AssetName);
         }

@@ -119,23 +119,24 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	clip(Alpha - AlphaTestThreshold);
 #endif // AlphaTest
 
-#if MTL_LightingMode == ELightingMode_Unlight
-	{
-		half3 Emissive = (half3)mtl.mEmissive;
-		half3 UnlitShading = Albedo + Emissive;
+    uint shadingMode = GetShadingMode(MaterialRenderFlags | MeshRenderFlags);
+    if (shadingMode == EShadingMode_Unlit)
+    {
+        half3 Emissive = (half3) mtl.mEmissive;
+        half3 UnlitShading = Albedo + Emissive;
 		
-		half PerPixelViewerDistance = (half)input.psCustomUV0.w;
+        half PerPixelViewerDistance = (half) input.psCustomUV0.w;
 
 #if ENV_DISABLE_AO == 1
 #else
-		UnlitShading.b = (half)floor(UnlitShading.b * AO_M);
+        UnlitShading.b = (half) floor(UnlitShading.b * AO_M);
 #endif
-		output.RT0 = half4(UnlitShading, PerPixelViewerDistance * rcp((half)ZFar));
+        output.RT0 = half4(UnlitShading, PerPixelViewerDistance * rcp((half) ZFar));
 
-		output.RT0.a = 1;
-	}
-#else
-	{
+        output.RT0.a = 1;
+    }
+    else
+    {
         half3 N = normalize((half3) mtl.GetWorldNormal(input));
         half Metallic = (half) mtl.mMetallic;
         half Smoothness = (half) mtl.mRough;
@@ -196,93 +197,85 @@ PS_OUTPUT PS_Main(PS_INPUT input)
         half3 Cground = (half3) DirLight.GroundLightColor;
         half DirLightLeak = (half) DirLight.SunLightLeak;
 
-#if MTL_LightingMode == ELightingMode_Skin
-		
-#elif  MTL_LightingMode == ELightingMode_Transimit
-		
-#elif MTL_LightingMode == ELightingMode_Hair
-		
-#elif MTL_LightingMode == ELightingMode_Eye
-		
-#else
-        half Sdiff = 1.0h - Metallic;
-        half3 OptDiffShading = Sdiff * Albedo;
+        if (shadingMode == EShadingMode_PBR)
+        {
+            half Sdiff = 1.0h - Metallic;
+            half3 OptDiffShading = Sdiff * Albedo;
 
-        AbsSpecular = 0.08h * AbsSpecular;
-        half3 OptSpecShading = AbsSpecular - AbsSpecular * Metallic + Metallic * Albedo;
+            AbsSpecular = 0.08h * AbsSpecular;
+            half3 OptSpecShading = AbsSpecular - AbsSpecular * Metallic + Metallic * Albedo;
 
-        half3 H = normalize(L + V);
-        half NoLsigned = dot(N, L);
-        half NoL = max(NoLsigned, 0.0h);
-        half NoH = max(dot(N, H), 0.0h);
-        half LoH = max(dot(L, H), 0.0h);
-        half NoV = max(dot(N, V), 0.0h);
+            half3 H = normalize(L + V);
+            half NoLsigned = dot(N, L);
+            half NoL = max(NoLsigned, 0.0h);
+            half NoH = max(dot(N, H), 0.0h);
+            half LoH = max(dot(L, H), 0.0h);
+            half NoV = max(dot(N, V), 0.0h);
 
 		//sky light;
 		//half SkyAtten = 1.0h - NoL;
-        half SkyAtten = min(1.0h, 2.0h - NoL - ShadowValue);
-        half3 SkyShading = lerp(Cground, Csky, 0.5h * N.y + 0.5h) * SkyAtten * SkyAtten * OptDiffShading * Ienv_light;
+            half SkyAtten = min(1.0h, 2.0h - NoL - ShadowValue);
+            half3 SkyShading = lerp(Cground, Csky, 0.5h * N.y + 0.5h) * SkyAtten * SkyAtten * OptDiffShading * Ienv_light;
 		//half3 SkyShading = (0.35h * N.y + 0.65h) * Csky * OptDiffShading * ECCd;
 		//half3 SkyShading = (0.35h * N.y + 0.65h) * Ienv_light * Csky * OptDiffShading * ECCd;
 		//half3 SkyShading = Ienv_light * Csky * OptDiffShading * ECCd;
 
 		//half3 DirLightDiffuseShading = NoL * Idir * Cdir * OptDiffShading * ECCd;
-        half3 DirLightDiffuseShading = RetroDiffuseMobile(NoL, NoV, LoH, Roughness) * Idir * Cdir * OptDiffShading;
+            half3 DirLightDiffuseShading = RetroDiffuseMobile(NoL, NoV, LoH, Roughness) * Idir * Cdir * OptDiffShading;
 
-        half3 DirLightSpecShading = BRDFMobile(Roughness, N, H, NoH, LoH, NoV, NoL, OptSpecShading) * sqrt(NoL) * Idir * Cdir;
+            half3 DirLightSpecShading = BRDFMobile(Roughness, N, H, NoH, LoH, NoV, NoL, OptSpecShading) * sqrt(NoL) * Idir * Cdir;
 
 		//sphere env mapping;
-        half3 R = 2 * dot(V, N) * N - V;
-        R = GetOffSpecularPeakReflectionDir(N, R, Roughness);
-        half EnvMipLevel = GetTexMipLevelFromRoughness(Roughness, (half)EnvMapMaxMipLevel);
-        half3 EnvSpecLightColor = (half3) gEnvMap.SampleLevel(Samp_gEnvMap, R, EnvMipLevel).rgb;
-        half Ihdr = max(0.6h, CalcLuminanceYCbCr(EnvSpecLightColor));
-        Ihdr = exp2((Ihdr - 0.6h) * 7.5h);
-        half3 EnvSpec = (half3) EnvBRDFMobile(EnvSpecLightColor, OptSpecShading, Roughness, NoV) * Ihdr;
+            half3 R = 2 * dot(V, N) * N - V;
+            R = GetOffSpecularPeakReflectionDir(N, R, Roughness);
+            half EnvMipLevel = GetTexMipLevelFromRoughness(Roughness, (half) EnvMapMaxMipLevel);
+            half3 EnvSpecLightColor = (half3) gEnvMap.SampleLevel(Samp_gEnvMap, R, EnvMipLevel).rgb;
+            half Ihdr = max(0.6h, CalcLuminanceYCbCr(EnvSpecLightColor));
+            Ihdr = exp2((Ihdr - 0.6h) * 7.5h);
+            half3 EnvSpec = (half3) EnvBRDFMobile(EnvSpecLightColor, OptSpecShading, Roughness, NoV) * Ihdr;
 
-        half FinalShadowValue = min(1.0h, ShadowValue + DirLightLeak);
-        AOs = min((NoL + FinalShadowValue) * 0.25h + AOs, 1.0h);
+            half FinalShadowValue = min(1.0h, ShadowValue + DirLightLeak);
+            AOs = min((NoL + FinalShadowValue) * 0.25h + AOs, 1.0h);
 
-        half AoOffset = CalcLuminanceYCbCr((EnvSpec + Emissive) * 10.0h);
-        AoOffsetEncoded = 0.9999h - min(0.9999h, FinalShadowValue * 0.5h + AoOffset);
+            half AoOffset = CalcLuminanceYCbCr((EnvSpec + Emissive) * 10.0h);
+            AoOffsetEncoded = 0.9999h - min(0.9999h, FinalShadowValue * 0.5h + AoOffset);
 
 #if ENV_DISABLE_AO == 1
-		AOs = 1.0h;
-		AoOffsetEncoded = 0.0h;
+		    AOs = 1.0h;
+		    AoOffsetEncoded = 0.0h;
 #endif
 
-        BaseShading = DirLightDiffuseShading * FinalShadowValue + DirLightSpecShading * ShadowValue + SkyShading;
-        BaseShading = BaseShading * AOs + EnvSpec * min(ShadowValue + 0.85h, 1.0h);
+            BaseShading = DirLightDiffuseShading * FinalShadowValue + DirLightSpecShading * ShadowValue + SkyShading;
+            BaseShading = BaseShading * AOs + EnvSpec * min(ShadowValue + 0.85h, 1.0h);
 		
-		//point light part;
+		    //point light part;
 #if ENV_DISABLE_POINTLIGHTS == 0
-		//BaseShading += MultiPbrPointLightMobile(input, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness);
-		if (true)
-		{
-			float2 uv = input.psCustomUV0.xy;
-			/*uv.x = saturate( (input.vPosition.x + 1.0f) * 0.5f );
-			uv.y = saturate( (1.0f - input.vPosition.y) * 0.5f );*/
-			float2 tileIdxF = (uv.xy * ViewportSizeAndRcp.xy) / TileSize;
-			uint2 tileIdx = (uint2)tileIdxF;
-			uint indexOfTile = GetTileIndex(tileIdx.x, tileIdx.y);
-			uint NumOfLights = min(TilingBuffer[indexOfTile].NumPointLight, 32);
-			for (int i = 0; i < NumOfLights; i++)
-			{
-				uint lightIndex = TilingBuffer[indexOfTile].PointLights[i];
-				FPointLight light = GpuScene_PointLights[lightIndex];
-				BaseShading += PointLightShading(light, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness);
-			}
+		    //BaseShading += MultiPbrPointLightMobile(input, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness);
+		    if (true)
+		    {
+			    float2 uv = input.psCustomUV0.xy;
+			    /*uv.x = saturate( (input.vPosition.x + 1.0f) * 0.5f );
+			    uv.y = saturate( (1.0f - input.vPosition.y) * 0.5f );*/
+			    float2 tileIdxF = (uv.xy * ViewportSizeAndRcp.xy) / TileSize;
+			    uint2 tileIdx = (uint2)tileIdxF;
+			    uint indexOfTile = GetTileIndex(tileIdx.x, tileIdx.y);
+			    uint NumOfLights = min(TilingBuffer[indexOfTile].NumPointLight, 32);
+			    for (int i = 0; i < NumOfLights; i++)
+			    {
+				    uint lightIndex = TilingBuffer[indexOfTile].PointLights[i];
+				    FPointLight light = GpuScene_PointLights[lightIndex];
+				    BaseShading += PointLightShading(light, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness);
+			    }
 
-			// SpotLight shading
-			for (uint si = 0; si < GpuScene_SpotLightNum; si++)
-			{
-				FSpotLight spotLight = GpuScene_SpotLights[si];
-				BaseShading += SpotLightShading(spotLight, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness);
-			}
-		}
+			    // SpotLight shading
+			    for (uint si = 0; si < GpuScene_SpotLightNum; si++)
+			    {
+				    FSpotLight spotLight = GpuScene_SpotLights[si];
+				    BaseShading += SpotLightShading(spotLight, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness);
+			    }
+		    }
 #endif//#if ENV_DISABLE_POINTLIGHTS == 0
-
-#endif//#ifdef MTL_ID_SKIN
+        }
         BaseShading += Emissive;
 
 #if ENV_DISABLE_AO == 1
@@ -292,16 +285,8 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
         output.RT0 = half4(BaseShading, PerPixelViewerDistance * rcp((half) ZFar));
         output.RT1 = half4(1, 1, 0, 1);
-        //if (input.psCustomUV1.x == 0)
-        //{
-        //    output.RT0 = half4(1, 0, 0, 1);
-        //}
-        //else
-        //{
-        //    output.RT0 = half4(1, 0, 1, 1);
-        //}
+        
     }
-#endif//#ifdef MTL_ID_UNLIT
 
 	//output.RT0.rgb = Albedo;
 	//output.RT0.a = Alpha;

@@ -40,6 +40,9 @@ namespace Survivor
 
         public void CountToTriggerPlayerDead()
 		{
+            if (IsNeedTriggerPlayerDead)
+                return;
+
 			IsNeedTriggerPlayerDead = true;
 
         }
@@ -50,6 +53,7 @@ namespace Survivor
         }
     }
 }
+
 #if TitanEngine_AutoGen_Macross
 #region TitanEngine_AutoGen_Macross
 

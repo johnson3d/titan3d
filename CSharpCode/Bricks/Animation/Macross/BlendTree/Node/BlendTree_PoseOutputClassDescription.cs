@@ -42,6 +42,7 @@ namespace EngineNS.Animation.Macross.BlendTree
             List<TtClassDeclaration> classDeclarationsBuilded = new();
             var thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
             thisClassDeclaration.AddMethod(BuildOverrideInitializeMethod());
+     
             classDeclarationsBuilded.Add(thisClassDeclaration);
             return classDeclarationsBuilded;
         }
@@ -81,6 +82,7 @@ namespace EngineNS.Animation.Macross.BlendTree
             methodDeclaration.MethodBody.Sequence.Add(returnValueAssign);
             return methodDeclaration;
         }
+
         #endregion
     }
 }

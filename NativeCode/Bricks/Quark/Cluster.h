@@ -59,7 +59,7 @@ public:
 
 	float		Simplify( UINT TargetNumTris, float TargetError = 0.0f, UINT LimitNumTris = 0, bool bForNaniteFallback = false );
 	FAdjacency	BuildAdjacency() const;
-	void		Split( FGraphPartitioner& Partitioner, const FAdjacency& Adjacency ) const;
+	void		Split( FGraphPartitioner& Partitioner, const FAdjacency& Adjacency, UINT InClusterSize = ClusterSize ) const;
 	void		Bound();
 
 private:
@@ -109,9 +109,13 @@ public:
 	float		EdgeLength = 0.0f;
 	float		LODError = 0.0f;
 	float		SurfaceArea = 0.0f;
-	
-    //v3dxSphere	SphereBounds;
-    //v3dxSphere	LODBounds;
+
+	v3dxSphere	SphereBounds;
+	v3dxSphere	LODBounds;
+
+	UINT		GroupIndex = ~0u;
+	UINT		GroupPartIndex = ~0u;
+	UINT		GeneratingGroupIndex = ~0u;
 
 // 	UINT		GroupIndex			= MAX_uint32;
 // 	UINT		GroupPartIndex		= MAX_uint32;

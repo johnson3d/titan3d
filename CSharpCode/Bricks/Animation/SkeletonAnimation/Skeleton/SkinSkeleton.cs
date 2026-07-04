@@ -39,6 +39,10 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
             pose.ConstructHierarchy();
             return pose;
         }
+        public SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose CreateSkeletonPose()
+        {
+            return CreatePose() as SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
+        }
         public TtSkinSkeleton()
         {
 

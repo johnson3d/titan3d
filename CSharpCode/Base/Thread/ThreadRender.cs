@@ -26,6 +26,16 @@ namespace EngineNS.Thread
                 return mScopeTick;
             }
         }
+        public override void EnqueueAsync(Async.TtAsyncTaskStateBase evt)
+        {
+            base.EnqueueAsync(evt);
+            mRenderBegin.Set();
+        }
+        public override void EnqueueContinue(Async.TtAsyncTaskStateBase evt)
+        {
+            base.EnqueueContinue(evt);
+            mRenderBegin.Set();
+        }
         public override void Tick()
         {
             mRenderBegin.WaitOne();

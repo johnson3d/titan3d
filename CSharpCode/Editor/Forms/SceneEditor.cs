@@ -507,6 +507,9 @@ namespace EngineNS.Editor.Forms
                 if (!att.HasKeyString(TtNode.EditorKeyword))
                     continue;
 
+                if (classMeta.ClassType.IsSubclassOf(typeof(TtLightWeightNodeBase)))
+                    continue;
+
                 // MenuPaths[0] 是分类（如 "Graphics"），最后一个是节点显示名
                 string categoryName = att.MenuPaths.Length > 1 ? att.MenuPaths[0] : "General";
                 string nodeName = att.MenuPaths[att.MenuPaths.Length - 1];
@@ -557,6 +560,8 @@ namespace EngineNS.Editor.Forms
 
             InitMainMenu();
             InitPlaceItems();
+
+            PreviewViewport.AssetEditor = this;
             return true;
         }
         public IRootForm GetRootForm()
@@ -636,7 +641,11 @@ namespace EngineNS.Editor.Forms
 
             CpuCullNode = PreviewViewport.RenderPolicy.FindNode<Graphics.Pipeline.TtCpuCullingNode>("CpuCulling");
 
-            CullFilters = TtWorld.TtVisParameter.EVisCullFilter.UtilityEditor | TtWorld.TtVisParameter.EVisCullFilter.LightDebug;
+            if (CpuCullNode != null)
+            {
+                CpuCullNode.VisParameter.UseEditorVisibilityFilter = true;
+                CullFilters = TtWorld.TtVisParameter.EVisCullFilter.UtilityEditor | TtWorld.TtVisParameter.EVisCullFilter.LightDebug;
+            }
             //System.Diagnostics.Debug.Assert(CpuCullNode != null);
             return true;
         }
@@ -1289,7 +1298,7 @@ namespace EngineNS.Editor.Forms
             var attr = TtNode.GetNodeAttribute(nodeType);
             if (attr != null)
                 prefix = attr.DefaultNamePrefix;
-            newNode.NodeData.Name = $"{prefix}_{newNode.SceneId}";
+            newNode.NodeData.Name = $"{prefix}_{this.mWorldOutliner.NameSerialId++}";
 
             // 放置在相机前方
             newNode.Placement.Position = CalcPlacePosition();
@@ -1395,6 +1404,10 @@ namespace EngineNS.Editor.Forms
             TtEngine.Instance.TickableManager.AddTickable(this);
 
             CpuCullNode = PreviewViewport.RenderPolicy.FindNode<Graphics.Pipeline.TtCpuCullingNode>("CpuCulling");
+            if (CpuCullNode != null)
+            {
+                CpuCullNode.VisParameter.UseEditorVisibilityFilter = true;
+            }
             //System.Diagnostics.Debug.Assert(CpuCullNode != null);
             return true;
         }
@@ -1422,12 +1435,12 @@ namespace EngineNS.Editor.Forms
 
 namespace EngineNS.GamePlay.Scene
 {
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.TtSceneEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(Editor.Forms.TtSceneEditor))]
     public partial class TtScene
     {
     }
 
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.TtPrefabEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(Editor.Forms.TtPrefabEditor))]
     public partial class TtPrefab
     {
     }

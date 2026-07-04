@@ -627,6 +627,17 @@ namespace EngineNS
             return 0;
         }
         #endregion
+
+        [Rtti.Meta("")]
+        public static bool ConvertStringToBoolean(string val)
+        {
+            try
+            {
+                return System.Convert.ToBoolean(val);
+            }
+            catch { }
+            return false;
+        }
     }
     [Rtti.Meta("")]
     public partial class MathHelper
@@ -2301,6 +2312,17 @@ namespace EngineNS
 				}
 			}
 			var _return_value = ConvertStringToDouble(val);
+			return _return_value;
+		}
+		public static unsafe bool macross_ConvertStringToBoolean (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string val) 
+		{
+			var stackframe = mcStack.TopFrame;
+			{
+				if(stackframe != null)
+				{
+				}
+			}
+			var _return_value = ConvertStringToBoolean(val);
 			return _return_value;
 		}
 	}

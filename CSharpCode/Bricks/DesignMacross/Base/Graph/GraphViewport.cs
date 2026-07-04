@@ -13,11 +13,7 @@
 
         public Vector2 ViewportTransform(Vector2 cameraPos, Vector2 pos)
         {
-            return pos - cameraPos + Location;
-        }
-        public Vector2 ViewportInverseTransform(Vector2 cameraPos, Vector2 pos)
-        {
-            return pos + cameraPos - Location;
+            return pos + cameraPos + Location;
         }
     }
 }

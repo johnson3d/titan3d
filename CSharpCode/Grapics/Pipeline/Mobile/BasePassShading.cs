@@ -55,11 +55,6 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public override bool IsValidPermutation(TtMdfQueueBase mdfQueue, Shader.TtMaterial mtl)
         {
-            if (mtl.LightingMode != Shader.TtMaterial.ELightingMode.Stand)
-            {
-                if(DisableAO.GetValue() == 1 || DisablePointLights.GetValue() == 1)
-                    return false;
-            }
             return true;
         }
         public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall)

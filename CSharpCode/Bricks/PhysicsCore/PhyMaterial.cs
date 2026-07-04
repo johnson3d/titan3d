@@ -16,7 +16,7 @@ namespace EngineNS.Bricks.PhysicsCore
             //物理材质不会引用别的资产
             return false;
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return await TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterial(GetAssetName());
         }
@@ -36,7 +36,7 @@ namespace EngineNS.Bricks.PhysicsCore
     }
     [TtPhyMaterial.TtPhyMaterialImport]
     [IO.AssetCreateMenu(MenuName = "Physics/PhysicsMaterial")]
-    [Editor.UAssetEditor(EditorType = typeof(TtPhyMaterialEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(TtPhyMaterialEditor))]
     public class TtPhyMaterial : AuxPtrType<PhyMaterial>, IO.IAsset, IO.ISerializer
     {
         public const string AssetExt = ".pxmtl";

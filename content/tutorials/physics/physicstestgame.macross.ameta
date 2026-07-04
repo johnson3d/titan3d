@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.CodeBuilder.TtMacrossAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="30868408-be72-4779-b08c-c6729f57946a" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/physics/physicstestgame.macross,30868408-be72-4779-b08c-c6729f57946a" />
@@ -18,4 +18,5 @@
     <e_1 Value="Game,tutorials/physics/physicstest.scene,6c2c165c-f595-45d6-b1d5-352a05135a57" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.CodeBuilder.TtMacross@EngineCore" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
 </Root>

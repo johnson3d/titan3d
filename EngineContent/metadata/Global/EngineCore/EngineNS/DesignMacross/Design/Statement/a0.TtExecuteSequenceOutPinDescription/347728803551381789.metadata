@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_347728803551381789 Type="EngineNS.DesignMacross.Design.Statement.TtExecuteSequenceOutPinDescription@EngineCore">
+  <CanMutilLink Type="System.Boolean@Unknown" Order="0" />
+  <Deleteable Type="System.Boolean@Unknown" Order="0" />
+  <Id Type="System.Guid@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Order="0" />
+</Hash_347728803551381789>

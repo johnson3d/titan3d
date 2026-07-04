@@ -36,6 +36,21 @@ namespace EngineNS.DesignMacross.Design.Statements
         public override void ConstructElements(ref FGraphElementRenderingContext context)
         {
             ComboBox.CurrentSelected = CastStatementDescription.TargetType;
+            NameColor = TtDesignMacrossGraphStyles.StatementTitleForegroundColor;
+            BackgroundColor = TtDesignMacrossGraphStyles.StatementBackgroundColor;
+            BorderColor = TtDesignMacrossGraphStyles.GraphElementBorderColor;
+            ExpressionDescStackPanel.BackgroundColor = TtDesignMacrossGraphStyles.StatementTitleBackgroundColor;
+            if (IsSelected)
+            {
+                BorderColor = TtDesignMacrossGraphStyles.GraphElementSelectedColor;
+            }
+            if (HighLightState == EHighLigthState.LowLight)
+            {
+                NameColor = new Color4f(NameColor.ToColor3f(), TtDesignMacrossGraphStyles.LowLigthAlpha);
+                BackgroundColor = new Color4f(BackgroundColor.ToColor3f(), TtDesignMacrossGraphStyles.LowLigthAlpha);
+                BorderColor = new Color4f(BorderColor.ToColor3f(), TtDesignMacrossGraphStyles.LowLigthAlpha);
+                ExpressionDescStackPanel.BackgroundColor = new Color4f(ExpressionDescStackPanel.BackgroundColor.ToColor3f(), TtDesignMacrossGraphStyles.LowLigthAlpha);
+            }
             LeftSidePinsStackPanel.Clear();
             {
                 foreach (var execInPin in StatementDescription.ExecutionInPins)

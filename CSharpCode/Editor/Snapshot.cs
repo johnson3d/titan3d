@@ -21,7 +21,8 @@ namespace EngineNS.Editor
         }
         public unsafe static void Save(RName rname, IO.IAssetMeta ameta, NxRHI.ITexture tex, uint x, uint y, uint w, uint h, ESnapSide side = ESnapSide.Center, bool bAsync = true)
         {
-            var file = rname.Address + ".snap";
+            var file = ameta.GetSnapshotFilePath();
+            IO.TtFileManager.SureDirectory(IO.TtFileManager.GetParentPathName(file));
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var fenceDesc = new NxRHI.FFenceDesc();
             fenceDesc.m_InitValue = 0;
@@ -124,13 +125,16 @@ namespace EngineNS.Editor
                 writer.WritePng(image.Data, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
                 ameta.ResetSnapshot();
             }
-            ameta.AddAssetFile(file);
-            TtEngine.Instance.SourceControlModule.AddFile(file);
+            if (!ameta.IsSnapshotInCacheDir())
+            {
+                ameta.AddAssetFile(file);
+                TtEngine.Instance.SourceControlModule.AddFile(file);
+            }
             return image;
         }
         public static async Thread.Async.TtTask<TtSnapshot> Load(IAssetMeta assetMeta, bool autoGenerate = true)
         {
-            var file = assetMeta.GetAssetName().Address + ".snap";
+            var file = assetMeta.GetSnapshotFilePath();
             TtSnapshot result = new TtSnapshot();
             if (IO.TtFileManager.FileExists(file))
                 result.mTextureRSV = await TtEngine.Instance.GfxDevice.TextureManager.CreateTexture(file);
@@ -251,7 +255,8 @@ namespace EngineNS.Editor
                     image = StbImageSharp.ImageProcessor.GetBoxDownSampler(image, 128, height);
                 }
 
-                var file = assetMeta.GetAssetName().Address + ".snap";
+                var file = assetMeta.GetSnapshotFilePath();
+                IO.TtFileManager.SureDirectory(IO.TtFileManager.GetParentPathName(file));
 
                 using (var memStream = new System.IO.FileStream(file, System.IO.FileMode.OpenOrCreate))// .MemoryStream(pBitmapDesc->Stride * pBitmapDesc->Height))
                 {
@@ -260,8 +265,11 @@ namespace EngineNS.Editor
                     writer.WritePng(image.Data, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
                     assetMeta.ResetSnapshot();
                 }
-                assetMeta.AddAssetFile(file);
-                TtEngine.Instance.SourceControlModule.AddFile(file);
+                if (!assetMeta.IsSnapshotInCacheDir())
+                {
+                    assetMeta.AddAssetFile(file);
+                    TtEngine.Instance.SourceControlModule.AddFile(file);
+                }
             }
 
             return true;

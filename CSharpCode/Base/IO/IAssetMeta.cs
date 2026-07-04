@@ -205,6 +205,13 @@ namespace EngineNS.IO
         Loading,
         LoadFailed,
     }
+    public enum ESnapshotStorage
+    {
+        Default,       // 遵循 TtEngineConfig.SaveSnapshotInAssetDir
+        InAssetDir,    // 强制保存在资产同目录
+        InCacheDir,    // 强制保存在cache目录
+    }
+
     [Rtti.Meta("")]
     public partial class IAssetMeta
     {
@@ -212,6 +219,8 @@ namespace EngineNS.IO
         protected RName mAssetName;
         public bool HasSnapshot { get; set; } = true;
         public bool IsSelected = false;
+        [Rtti.Meta("")]
+        public ESnapshotStorage SnapshotStorage { get; set; } = ESnapshotStorage.Default;
 
         public enum EAssetStatus
         {
@@ -261,7 +270,7 @@ namespace EngineNS.IO
                 Task = null;
             }
         }
-        public virtual async Thread.Async.TtTask<IAsset> LoadAsset(params object[] args)
+        public virtual async Thread.Async.TtTask<IAsset> GetAsset(params object[] args)
         {//LoadAsset是从manager中Get Or Create出来，只会有一份实例
             System.Diagnostics.Debug.Assert(false);
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -291,7 +300,7 @@ namespace EngineNS.IO
             TtEngine.Instance.AssetMetaManager.GetAssetHolder(this, holders);
             foreach (var i in holders)
             {
-                var holdAsset = await i.LoadAsset();
+                var holdAsset = await i.GetAsset();
                 holdAsset.SaveAssetTo(i.GetAssetName());
             }
             //Resume Editor Operate
@@ -305,7 +314,19 @@ namespace EngineNS.IO
 
             DeleteFile(address + MetaExt);
 
-            DeleteFile(address + ".snap");
+            // 删除snap: 优先按当前策略路径删, 同时兼容旧路径
+            var snapFile = GetSnapshotFilePath();
+            if (IsSnapshotInCacheDir())
+            {
+                // cache目录中的snap不走SourceControl
+                IO.TtFileManager.DeleteFile(snapFile);
+                // 兼容: 旧的资产目录下的snap也尝试删除
+                DeleteFile(address + ".snap");
+            }
+            else
+            {
+                DeleteFile(address + ".snap");
+            }
 
             if (mAssetName != null && mAssetName.Name == name && mAssetName.RNameType == type)
             {
@@ -335,13 +356,13 @@ namespace EngineNS.IO
         {
             if (mAssetName.Name == name && mAssetName.RNameType == type)
                 return;
-            IAsset asset = await LoadAsset();
+            IAsset asset = await GetAsset();
             List<EngineNS.IO.IAssetMeta> holders = new List<EngineNS.IO.IAssetMeta>();
             TtEngine.Instance.AssetMetaManager.GetAssetHolder(this, holders);
             List<EngineNS.IO.IAsset> holdAssets = new List<EngineNS.IO.IAsset>();
             foreach (var i in holders)
             {
-                var holdAsset = await i.LoadAsset();
+                var holdAsset = await i.GetAsset();
                 if (holdAsset != null)
                 {
                     holdAssets.Add(holdAsset);
@@ -350,10 +371,15 @@ namespace EngineNS.IO
 
             var savedName = mAssetName.Name;
             var savedType = mAssetName.RNameType;
-            var targetSnapName = TtEngine.Instance.FileManager.GetRoot2(type) + name + ".snap";
-            IO.TtFileManager.MoveFile(mAssetName.Address + ".snap", targetSnapName);
-            if (IO.TtFileManager.FileExists(targetSnapName))
-                TtEngine.Instance.SourceControlModule.AddFile(targetSnapName, true);
+            if (!IsSnapshotInCacheDir())
+            {
+                // snap在资产目录, 需要移动到新位置
+                var targetSnapName = TtEngine.Instance.FileManager.GetRoot2(type) + name + ".snap";
+                IO.TtFileManager.MoveFile(mAssetName.Address + ".snap", targetSnapName);
+                if (IO.TtFileManager.FileExists(targetSnapName))
+                    TtEngine.Instance.SourceControlModule.AddFile(targetSnapName, true);
+            }
+            // snap在cache目录时, AssetId不变, 路径不变, 无需移动
 
             TtEngine.Instance.AssetMetaManager.RemoveAMeta(this);
             IO.TtFileManager.DeleteFile(mAssetName.Address + IAssetMeta.MetaExt);
@@ -397,7 +423,7 @@ namespace EngineNS.IO
         {
             if (mAssetName.Name == name && mAssetName.RNameType == type)
                 return;
-            IAsset asset = await LoadAsset();
+            IAsset asset = await GetAsset();
             if (asset == null)
                 return;
             var tarName = RName.GetRName(name, type);
@@ -405,16 +431,23 @@ namespace EngineNS.IO
             ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(asset.GetType()).TypeString;
             foreach (var i in this.RefAssetRNames)
             {
-                ameta.RefAssetRNames.Add(i);
+                ameta.AddReferenceAsset(i);
             }
-
+                
             ameta.SaveAMeta(asset);
             asset.AssetName = tarName;
             asset.SaveAssetTo(tarName);
             asset.AssetName = mAssetName;
 
-            IO.TtFileManager.CopyFile(mAssetName.Address + ".snap", tarName.Address + ".snap");
-            TtEngine.Instance.SourceControlModule.AddFile(mAssetName.Address + ".snap", true);
+            if (ameta.IsSnapshotInCacheDir())
+            {
+                IO.TtFileManager.SureDirectory(IO.TtFileManager.GetParentPathName(ameta.GetSnapshotFilePath()));
+            }
+            IO.TtFileManager.CopyFile(GetSnapshotFilePath(), ameta.GetSnapshotFilePath());
+            if (!ameta.IsSnapshotInCacheDir())
+            {
+                TtEngine.Instance.SourceControlModule.AddFile(ameta.GetSnapshotFilePath(), true);
+            }
         }
         public virtual async Thread.Async.TtTask RenameTo(string name, RName.ERNameType type)
         {
@@ -424,6 +457,65 @@ namespace EngineNS.IO
         }
         #endregion
 
+        public string GetSnapshotFilePath()
+        {
+            bool useAssetDir;
+            switch (SnapshotStorage)
+            {
+                case ESnapshotStorage.InAssetDir:
+                    useAssetDir = true;
+                    break;
+                case ESnapshotStorage.InCacheDir:
+                    useAssetDir = false;
+                    break;
+                default:
+                    useAssetDir = TtEngine.Instance.Config.SaveSnapshotInAssetDir;
+                    break;
+            }
+
+            if (useAssetDir)
+            {
+                return mAssetName.Address + ".snap";
+            }
+            else
+            {
+                var idStr = AssetId.ToString("N"); // 32字符无分隔符
+                var bucket = idStr.Substring(0, 2);
+                var cacheRoot = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache);
+                return cacheRoot + "snapshots/" + bucket + "/" + idStr + ".snap";
+            }
+        }
+        public bool IsSnapshotInCacheDir()
+        {
+            switch (SnapshotStorage)
+            {
+                case ESnapshotStorage.InAssetDir: return false;
+                case ESnapshotStorage.InCacheDir: return true;
+                default: return !TtEngine.Instance.Config.SaveSnapshotInAssetDir;
+            }
+        }
+        /// <summary>
+        /// 切换 SnapshotStorage 时，将已有的 snap 文件迁移到新路径，并触发重新加载
+        /// </summary>
+        public void MigrateSnapshotFile(ESnapshotStorage newStorage)
+        {
+            if (newStorage == SnapshotStorage)
+                return;
+
+            var oldPath = GetSnapshotFilePath();
+            SnapshotStorage = newStorage;
+            var newPath = GetSnapshotFilePath();
+
+            if (oldPath != newPath && IO.TtFileManager.FileExists(oldPath))
+            {
+                IO.TtFileManager.SureDirectory(IO.TtFileManager.GetParentPathName(newPath));
+                IO.TtFileManager.CopyFile(oldPath, newPath);
+                IO.TtFileManager.DeleteFile(oldPath);
+            }
+
+            SaveAMeta((IAsset)null);
+            ResetSnapshot();
+        }
         public virtual void ResetSnapshot()
         {
             HasSnapshot = true;
@@ -486,7 +578,7 @@ namespace EngineNS.IO
             List<IAsset> holders = new List<IAsset>();
             foreach (var i in metas)
             {
-                var asset = await i.LoadAsset();
+                var asset = await i.GetAsset();
                 holders.Add(asset);
             }
 
@@ -723,6 +815,23 @@ namespace EngineNS.IO
             {
                 this.AutoGenSnapshot().AddWaitTask();
             }
+            if (ImGuiAPI.BeginMenu("SnapshotStorage", true))
+            {
+                var curStorage = SnapshotStorage;
+                if (ImGuiAPI.MenuItem("Default", null, curStorage == ESnapshotStorage.Default, true))
+                {
+                    MigrateSnapshotFile(ESnapshotStorage.Default);
+                }
+                if (ImGuiAPI.MenuItem("InAssetDir", null, curStorage == ESnapshotStorage.InAssetDir, true))
+                {
+                    MigrateSnapshotFile(ESnapshotStorage.InAssetDir);
+                }
+                if (ImGuiAPI.MenuItem("InCacheDir", null, curStorage == ESnapshotStorage.InCacheDir, true))
+                {
+                    MigrateSnapshotFile(ESnapshotStorage.InCacheDir);
+                }
+                ImGuiAPI.EndMenu();
+            }
             if (OnDrawContextMenu(ref drawList))
                 ContentBrowser.CreateNewAssets = createNewAssetValueStore;
         }
@@ -813,6 +922,28 @@ namespace EngineNS.IO
         public Guid AssetId { get; set; }
         [Rtti.Meta("")]
         public List<RName> RefAssetRNames { get; set; } = new List<RName>();
+        public List<IO.IAssetMeta> mRefAssetMetas = null;
+        public List<IO.IAssetMeta> RefAssetMetas
+        {
+            get
+            {
+                if (mRefAssetMetas == null)
+                {
+                    if (RefAssetRNames.Count == 0)
+                        return null;
+                    foreach(var i in RefAssetRNames)
+                    {
+                        var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(i.AssetId);
+                        if (ameta==null)
+                        {
+                            continue;
+                        }
+                        mRefAssetMetas.Add(ameta);
+                    }
+                }
+                return mRefAssetMetas;
+            }
+        }
 
         public void TryFixRefAssetRNames()
         {
@@ -870,6 +1001,7 @@ namespace EngineNS.IO
             if (RefAssetRNames.Contains(rn))
                 return;
             RefAssetRNames.Add(rn);
+            mRefAssetMetas = null;
         }
         bool mDraggingInViewport = false;
         public virtual bool DraggingInViewport
@@ -1185,7 +1317,7 @@ namespace EngineNS.IO
                 }
                 if (i.Value.RefAssetRNames.Contains(ameta.GetAssetName()))
                 {
-                    var ast = await i.Value.LoadAsset();
+                    var ast = await i.Value.GetAsset();
                     holders.Add(name, ast);
                 }
             }

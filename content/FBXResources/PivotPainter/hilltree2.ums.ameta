@@ -12,11 +12,11 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="4">
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
     <e_0 Value="Game,fbxresources/pivotpainter/hilltree_p2.vms,63a137dc-1788-4b96-87c8-2280cc60baf3" />
     <e_1 Value="Game,fbxresources/pivotpainter/mi_leave2.uminst,bd4a7a3d-3ae5-453b-b4b9-a69300c94919" />
     <e_2 Value="Game,fbxresources/pivotpainter/mi_branch2.uminst,d5966cb7-b596-4819-9f2d-2f7e766cb153" />
-    <e_3 Value="Game,fbxresources/pivotpainter/mi_branch2.uminst,d5966cb7-b596-4819-9f2d-2f7e766cb153" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
 </Root>

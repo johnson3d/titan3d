@@ -18,7 +18,6 @@ namespace EngineNS.Bricks.StateMachine.Macross
         public Color4f NameColor { get; set; } = new Color4f(0.0f, 0.0f, 0.0f);
         public Color4f BackgroundColor { get; set; } = new Color4f(158 / 255, 194f / 255, 229f / 255);
         public Color4f BorderColor { get; set; } = new Color4f(0.5f, 0.6f, 0.6f, 0.6f);
-        public float BorderThickness { get; set; } = 4;
 
         public override SizeF Size 
         {

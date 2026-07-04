@@ -32,6 +32,36 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton.Limb
         public EngineNS.Vector3 InvScale { get; set; }
         [Rtti.Meta("")]
         public EngineNS.Quaternion InvQuat { get; set; }
+        [Rtti.Meta("")]
+        [Category("General")]
+        [ReadOnly(true)]
+        public EngineNS.Vector3 Position
+        {
+            get
+            {
+                return InitMatrix.Translation;
+            }
+        }
+        [Rtti.Meta("")]
+        [Category("General")]
+        [ReadOnly(true)]
+        public EngineNS.FRotator Rotation
+        {
+            get
+            {
+                return InitMatrix.Rotation.ToEuler();
+            }
+        }
+        [Rtti.Meta("")]
+        [Category("General")]
+        [ReadOnly(true)]
+        public EngineNS.Vector3 Scale
+        {
+            get
+            {
+                return InitMatrix.Scale;
+            }
+        }
     }
     public class TtBone : IO.BaseSerializer, ILimb
     {

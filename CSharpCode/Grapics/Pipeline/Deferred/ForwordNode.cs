@@ -9,21 +9,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 {
     public class TtOpaqueShading : Shader.TtGraphicsShadingEnv
     {
-        public TtPermutationItem DisableAO
-        {
-            get;
-            set;
-        }
-        public TtPermutationItem DisablePointLights
-        {
-            get;
-            set;
-        }
-        public TtPermutationItem DisableShadow
-        {
-            get;
-            set;
-        }
         public TtPermutationItem EnableMotionVector
         {
             get;
@@ -34,16 +19,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             CodeName = RName.GetRName("shaders/ShadingEnv/forword/ForwordOpaque.cginc", RName.ERNameType.Engine);
 
             this.BeginPermutaion();
-            DisableAO = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_AO", (int)Shader.EPermutation_Bool.BitWidth);
-            DisablePointLights = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_POINTLIGHTS", (int)Shader.EPermutation_Bool.BitWidth);
-            DisableShadow = this.PushPermutation<Shader.EPermutation_Bool>("DISABLE_SHADOW_ALL", (int)Shader.EPermutation_Bool.BitWidth);
-            var editorMode = this.PushPermutation<Shader.EPermutation_Bool>("MODE_EDITOR", (int)Shader.EPermutation_Bool.BitWidth);
             EnableMotionVector = this.PushPermutation<Shader.EPermutation_Bool>("ENABLE_MOTION_VECTOR", (int)Shader.EPermutation_Bool.BitWidth);
 
-            DisableAO.SetValue((int)Shader.EPermutation_Bool.FalseValue);
-            DisableShadow.SetValue((int)Shader.EPermutation_Bool.FalseValue);
-            DisablePointLights.SetValue((int)Shader.EPermutation_Bool.FalseValue);
-            editorMode.SetValue((int)Shader.EPermutation_Bool.TrueValue);
             EnableMotionVector.SetValue((int)Shader.EPermutation_Bool.FalseValue);
 
             UpdatePermutation().AddWaitTask();

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.Procedure.UPgcAssetAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="5d465e03-5de6-45aa-8243-65b9d40c0bde" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.Procedure.UPgcAsset&#xA;Hahah" />
@@ -18,4 +18,5 @@
     <e_5 Value="Game,utest/texture/groundsnow.srv,270f28e0-0d68-4b59-b129-b5a15ba7daf7" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.UPgcAsset@EngineCore" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
 </Root>

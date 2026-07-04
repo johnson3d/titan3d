@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="f7c544862a2fb6d78907f45a076436923d63576056bdc11dbae0956216326ad5" />
+      <Hash Type="System.String@Unknown" Value="b3306f33dc564aac85e48a6f71e2dad3af09446559548bb9f8fd37bfc7a93947" />
       <Path Type="System.String@Unknown" Value="pivot_hierarchy.material" />
     </e_0>
   </AssetFiles>
@@ -26,5 +26,6 @@
     <e_5 Value="Game,tutorials/pivotpainter/hilltree/windturblencevectorandgustmagnitude.srv,02adb684-5bcd-4938-a5e6-d95c8505229f" />
     <e_6 Value="Game,tutorials/fx/skin3s/skin.mtlfunc,c2689d10-892c-4168-815f-80a94ba2272f" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

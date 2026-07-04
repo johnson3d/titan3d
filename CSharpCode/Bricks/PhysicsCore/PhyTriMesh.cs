@@ -16,7 +16,7 @@ namespace EngineNS.Bricks.PhysicsCore
             //物理Mesh不会引用别的资产
             return false;
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return await TtEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMesh(GetAssetName());
         }
@@ -36,7 +36,7 @@ namespace EngineNS.Bricks.PhysicsCore
     }
     [TtPhyTriMesh.UPhyMeshImport]
     [IO.AssetCreateMenu(MenuName = "Physics/PhysicsMesh")]
-    [Editor.UAssetEditor(EditorType = typeof(UPhyTriMeshEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(UPhyTriMeshEditor))]
 
     public class TtPhyTriMesh : AuxPtrType<PhyTriMesh>, IO.IAsset, IO.ISerializer
     {

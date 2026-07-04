@@ -12,7 +12,8 @@ namespace EngineNS.DesignMacross.Editor
         public float FontScale { get; set; } = 1;
         public Color4f TextColor { get; set; } = new Color4f(0, 0, 0);
         public Color4f BackgroundColor { get; set; } = new Color4f(0, 0, 0, 0);
-        public float Rounding { get; set; } = 5;
+        public float Rounding { get; set; } = 0;
+        public ERoundCornerType CornerType = ERoundCornerType.None;
 
         public Func<string> GetBrowserRNameValueFunc;
         public Action<string> SetBrowserRNameValueFunc;
@@ -53,7 +54,7 @@ namespace EngineNS.DesignMacross.Editor
             
         }
 
-        public override void OnUnSelected()
+        public override void OnUnSelected(ref FMouseEventContext context)
         {
             
         }   
@@ -167,9 +168,9 @@ namespace EngineNS.DesignMacross.Editor
             var cmd = ImGuiAPI.GetWindowDrawList();
             var start = context.ViewportTransform(element.AbsLocation);
             ImGuiAPI.SetCursorScreenPos(in start);
-            ImGuiAPI.Dummy(in Vector2.Zero);
+            //ImGuiAPI.Dummy(in Vector2.Zero);
             //ImGuiAPI.SetNextItemWidth(element.Size.Width);
-
+            ImGuiAPI.PushItemWidth(element.Size.Width * context.Camera.Scale);
             if (element.GetBrowserRNameValueFunc() != null)
             {
                 var iconSize = new Vector2(64, 64) * context.Camera.Scale;
@@ -222,6 +223,7 @@ namespace EngineNS.DesignMacross.Editor
             {
                 element.SetBrowserRNameValueFunc(element.GetContentBrowser().SelectedAssets[0].GetAssetName().ToString());
             }
+            ImGuiAPI.PopItemWidth();
         }
     }
 }

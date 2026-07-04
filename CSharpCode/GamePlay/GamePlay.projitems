@@ -35,6 +35,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Player\Player.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\BezierSplineNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\GridNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\InstanceMeshNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\MeshNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\PrimitiveMeshNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\Node_Editor.cs" />

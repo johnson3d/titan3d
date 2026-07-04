@@ -22,7 +22,7 @@ namespace EngineNS.Bricks.DataSet
             //物理材质不会引用别的资产
             return false;
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return null;
         }
@@ -48,7 +48,7 @@ namespace EngineNS.Bricks.DataSet
 
     [TtDataSet.TtDataSetImport]
     [IO.AssetCreateMenu(MenuName = "DataSet")]
-    [Editor.UAssetEditor(EditorType = typeof(TtDataSetEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(TtDataSetEditor))]
     public partial class TtDataSet : IO.IAsset
     {
         public const string AssetExt = ".dataset";

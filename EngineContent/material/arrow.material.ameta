@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
-  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="1e546449725d29643ac7e3118e07fbd7b0a69ba27881a40153e3359773645f2e" />
+      <Path Type="System.String@Unknown" Value="arrow.material" />
+    </e_0>
+  </AssetFiles>
   <AssetId Type="System.Guid@Unknown" Value="2b10690a-2c57-402a-b033-750ce2e76fb1" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,material/arrow.material,2b10690a-2c57-402a-b033-750ce2e76fb1" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterial&#xA;Hahah" />
@@ -13,5 +18,6 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

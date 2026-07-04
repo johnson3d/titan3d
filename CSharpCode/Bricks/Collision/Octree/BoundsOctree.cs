@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Profiler;
 using System.Collections.Generic;
@@ -318,7 +318,7 @@ namespace EngineNS.Bricks.Collision.Octree
         public bool IsAlive => WeakNode.TryGetTarget(out _);
     }
 
-    public class TtCollideOctree : IDisposable
+    public partial class TtCollideOctree : IDisposable
     {
         public Bricks.Collision.Octree.TtBoundsOctree<TtOctreeEntry> mOctree = null;
         public NxRHI.TtTransientBuffer TransientVB = new();
@@ -409,6 +409,7 @@ namespace EngineNS.Bricks.Collision.Octree
             mOctree.GetColliding(mEntryBuffer, in bound);
             ResolveEntries(mEntryBuffer, nodes);
         }
+        [Rtti.Meta("")]
         public bool IsColliding(in DRay checkRay, double maxDistance)
         {
             return mOctree.IsColliding(in checkRay, maxDistance);
@@ -527,3 +528,26 @@ namespace EngineNS.GamePlay.Scene
 }
 
 
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.Bricks.Collision.Octree
+{
+	partial class TtCollideOctree
+	{
+		public unsafe bool macross_IsColliding (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, in DRay checkRay, double maxDistance) 
+		{
+			var stackframe = mcStack.TopFrame;
+			{
+				if(stackframe != null)
+				{
+				}
+			}
+			var _return_value = IsColliding(in checkRay, maxDistance);
+			return _return_value;
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

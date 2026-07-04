@@ -17,6 +17,11 @@ struct PS_OUTPUT
 	float4 RT0 : SV_Target0;
 };
 
+int GetShadingMode(uint RenderFlags_10Bit)
+{
+    return (RenderFlags_10Bit & SHADINGMODE_BIT_MASK) >> SHADINGMODE_BIT_OFFSET;
+}
+
 PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 {
 	PS_OUTPUT output = (PS_OUTPUT)0;
@@ -44,7 +49,8 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 	clip(Alpha - AlphaTestThreshold);
 #endif // AlphaTest
 
-#if MTL_LightingMode == ELightingMode_Unlight
+    uint shadingMode = GetShadingMode(MaterialRenderFlags | MeshRenderFlags);
+    if (shadingMode == EShadingMode_Unlit)
 	{
 		half3 Emissive = (half3)mtl.mEmissive;
 		half3 UnlitShading = Albedo + Emissive;
@@ -59,7 +65,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 
 		output.RT0.a = 1;
 	}
-#else
+	else
 	{
 		half3 N = normalize((half3)mtl.mNormal);
 		half Metallic = (half)mtl.mMetallic;
@@ -147,130 +153,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		half3 Csky = (half3)DirLight.SkyLightColor;
 		half3 Cground = (half3)DirLight.GroundLightColor;
         half DirLightLeak = (half) DirLightLeak.SunLightLeak;
-
-#if MTL_LightingMode == ELightingMode_Skin
-		/*{
-			half Sbrtf = Transmit * 0.25h;
-			half Sbrdf = 1.0h - Sbrtf;
-			Metallic = 0.2h * Sbrdf;
-			half Sdiff = Sbrdf - Metallic;
-			AbsSpecular = 0.08h * AbsSpecular;
-			half Sspec = AbsSpecular - AbsSpecular * Metallic + Metallic;
-
-			half3 OptDiffShading = Sdiff * Albedo;
-			half3 OptSpecShading = Sspec * Albedo;
-
-			half3 SkyDiffuseShading = (0.45h * N.y + 0.55h) * Csky * OptDiffShading * ECCd * Ienv_light;
-
-			half3 H = normalize(L + V);
-
-			half NoLSigned = dot(N, L);
-			half NoL = max(NoLSigned, 0.0h);
-			half NoH = max(dot(N, H), 0.0h);
-			half LoH = max(dot(L, H), 0.0h);
-			half NoV = max(dot(N, V), 0.0h);
-
-			half3 DirLightDiffuseShading = RetroDiffuseMobile(NoL, NoV, LoH, Roughness) * ECCd * Idir * Cdir * OptDiffShading;
-
-			half3 DirLightSpecShading = BRDFMobile(Roughness, N, H, NoH, LoH, NoV, NoL, OptSpecShading) * NoL * Idir * Cdir;
-
-			half Td = 1.0h - abs(NoLSigned);
-			half InverseNoL = 1.0h - max(0.0h, -NoLSigned);
-			half3 TransmitShading = Td * InverseNoL * SubAlbedo * Sbrtf * Idir * Cdir;
-
-			BaseShading = (DirLightDiffuseShading + DirLightSpecShading + TransmitShading) * ShadowValue + SkyDiffuseShading;
-
-		}*/
-#elif  MTL_LightingMode == ELightingMode_Transimit
-		half Sbrdf = 1.0h - Transmit * 0.5h;
-		half Sdiff = 1.0h - Metallic;
-		AbsSpecular = 0.08h * AbsSpecular;
-		half Sspec = AbsSpecular - AbsSpecular * Metallic + Metallic;
-
-		half3 OptDiffShading = Sbrdf * Sdiff * Albedo;
-		half3 OptSpecShading = Sbrdf * Sspec * Albedo;
-
-		half3 H = normalize(L + V);
-		half NoLsigned = dot(N, L);
-		half NoL = max(NoLsigned, 0.0h);
-		half NoH = max(dot(N, H), 0.0h);
-
-		//half SkyAtten = 1.0h - NoL;
-		half SkyAtten = min(1.0h, 2.0h - NoL - ShadowValue);
-		half3 SkyShading = lerp(Cground, Csky, 0.5h * N.y + 0.5h) * SkyAtten * SkyAtten * OptDiffShading * Ienv_light;
-
-		half3 DirLightDiffuseShading = NoL * Idir * Cdir * OptDiffShading;
-		half3 DirLightSpecShading = BRDFMobileSimple(Roughness, N, H, NoH, OptSpecShading) * NoL * Idir * Cdir;
-
-		half TwistedShadowValue = min(ShadowValue + 0.25h * Transmit + DirLightLeak, 1.0h);
-		AOs = min((NoL + TwistedShadowValue) * 0.25h + AOs, 1.0h);
-
-		//BaseShading = (DirLightDiffuseShading + DirLightSpecShading) * TwistedShadowValue + SkyShading;
-		BaseShading = DirLightDiffuseShading * TwistedShadowValue + DirLightSpecShading * ShadowValue + SkyShading;
-		BaseShading *= AOs;
-
-		half3 OptTransmitDiffuseShading = Transmit * max(Sdiff - 0.25h, 0.0h) * Albedo;
-		half NoLFlipped = max(-NoLsigned, 0.0h);
-		half SSS = 0.25h;
-		half3 DirLightTransmitDiffuseShading = pow((NoLFlipped + SSS) / Square(1.0h + SSS), Roughness * (-1.5h) + 2.0h) * Idir * Cdir * OptTransmitDiffuseShading;
-
-		half3 OptTransmitSpecShading = Transmit * min(Sspec + 0.25h, 1.0h) * Albedo;
-		half LoVFlipped = max(dot(-L, V), 0.0h);
-		half3 DirLightTransmitSpecShading = pow(LoVFlipped, 8.0h - Roughness) * Idir * Cdir * OptTransmitSpecShading;
-
-		BaseShading = BaseShading + (DirLightTransmitDiffuseShading + DirLightTransmitSpecShading) * min(1.0h, ShadowValue + 0.63h);
-
-		AoOffsetEncoded = 0.0h;
-
-#elif MTL_LightingMode == ELightingMode_Hair
-		//{
-		//	half3 SkyDiffuseShading = (half3)(0.45h * (half)input.vNormal.y + 0.55h) * Csky * Albedo * ECCd * Ienv_light * 0.15h;
-
-		//	//sphere env mapping;
-		//	half NoV = (half)max(dot((half3)input.vNormal, V), 0.0h);
-		//	half3 VrN = 2.0h * NoV * (half3)input.vNormal - V;
-		//	half3 EnvMapUV = CalcSphereMapUV(VrN, 0.8h, (half)EnvMapMaxMipLevel);
-		//	half3 EnvSpecColor = (half3)gEnvMap.SampleLevel(Samp_gEnvMap, EnvMapUV.xy, EnvMapUV.z).rgb;
-		//	half3 EnvSpecShading = (half3)EnvSpecColor * 0.75h * Albedo;
-
-		//	half3 HairShading = (half3)HairShadingMobile(Albedo, SubAlbedo, Roughness, L, V, (half3)input.vNormal, N, Transmit, Metallic) * Idir * Cdir;
-		//	
-		//	BaseShading = HairShading * ShadowValue + SkyDiffuseShading + EnvSpecShading;
-		//	//BaseShading = HairShading + SkyDiffuseShading;
-		//	//BaseShading = HairShading;
-		//}
-#elif MTL_LightingMode == ELightingMode_Eye
-		//{
-			//half Sdiff = 1.0f - Metallic;
-
-			//half3 OptDiffShading = Sdiff * Albedo;
-
-			//half3 SkyShading = lerp(half3(0.1h, 0.1h, 0.1h), Csky, 0.5h * N.y + 0.5h) * OptDiffShading * ECCd * Ienv_light;
-			////half3 SkyShading = (0.35h * N.y + 0.65h) * Csky * OptDiffShading * ECCd * Ienv_light;
-			//
-			//half NoL = max(dot(N, L), 0.0h);
-			//half NoV = max(dot(N, V), 0.0h);
-
-			//half3 DirLightDiffuseShading = NoL * Idir * Cdir * OptDiffShading * ECCd;
-
-			////half NoV = max(dot(input.vNormal, V), 0.0f);
-			////half3 VrN = 2.0f * NoV * input.vNormal - V;
-
-			//half3 VrN = 2.0h * NoV * N - V;
-
-			//half3 EnvMapUV = CalcSphereMapUV(VrN, 0.3h, (half)EyeEnvMapMaxMipLevel);
-			//half3 EnvSpecLightColor = (half3)gEyeEnvMap.SampleLevel(Samp_gEyeEnvMap, EnvMapUV.xy, EnvMapUV.z).rgb;
-			//half Threshold = 0.5h;
-			//half Lum = max(0.0h, CalcLuminance(EnvSpecLightColor) - Threshold) * 2.0h;
-
-			//half EyeSparkIntensity = 2.0h;
-			//half3 EnvSpecShading = EnvSpecLightColor * Lum * Lum * Mask * EyeSparkIntensity;
-
-			//BaseShading = SkyShading + DirLightDiffuseShading * ShadowValue/* + DirLightSpecShading*/;
-			//BaseShading *= AO;
-			//BaseShading += EnvSpecShading;
-	//}
-#else
+		
 		half Sdiff = 1.0h - Metallic;
 		half3 OptDiffShading = Sdiff * Albedo;
 
@@ -348,8 +231,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 			}
 		}
 #endif//#if ENV_DISABLE_POINTLIGHTS == 0
-
-#endif//#ifdef MTL_ID_SKIN
+		
 		BaseShading += Emissive;
 
 		//half4 FogTRNF = half4(300.0h, 500.0h, 10.0h, 300.0h);

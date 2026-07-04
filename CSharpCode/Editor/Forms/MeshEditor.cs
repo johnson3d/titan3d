@@ -490,7 +490,7 @@ namespace EngineNS.Editor.Forms
 
 namespace EngineNS.Graphics.Mesh
 {
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.TtMeshEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(Editor.Forms.TtMeshEditor))]
     public partial class TtMaterialMesh
     {
         

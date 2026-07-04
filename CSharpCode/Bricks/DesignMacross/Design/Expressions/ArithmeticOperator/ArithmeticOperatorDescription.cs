@@ -18,16 +18,16 @@ namespace EngineNS.DesignMacross.Design.Expressions
             AddDataInPin(new() { Name = "" });
             AddDataInPin(new() { Name = "" });
             AddDataOutPin(new() { Name = "=" });
-            
+
         }
 
-        public override bool IsPinsLinkable(TtDataPinDescription selfPin, TtDataPinDescription targetPin)
+        public override bool IsDataPinsLinkable(TtDataPinDescription selfPin, TtDataPinDescription targetPin)
         {
-            if(base.IsPinsLinkable(selfPin, targetPin))
+            if (base.IsDataPinsLinkable(selfPin, targetPin))
             {
                 return true;
             }
-            if(selfPin.TypeDesc == null)
+            if (selfPin.TypeDesc == null)
             {
                 return true;
             }
@@ -36,60 +36,74 @@ namespace EngineNS.DesignMacross.Design.Expressions
 
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
-            var methodDesc = expressionBuildContext.MethodDescription as TtMethodDescription;
+            var graphDesc = expressionBuildContext.OwnerDescription;
 
             TtBinaryOperatorExpression expression = new();
             expression.Operation = Op;
             var dataInPin_Left = DataInPins[0];
             var dataInPin_Right = DataInPins[1];
-            var leftLinkedDataPin = methodDesc.GetLinkedDataPin(dataInPin_Left);
+            var leftLinkedDataPin = IDataLineOperator.GetLinkedDataPin(graphDesc, dataInPin_Left);
             if (leftLinkedDataPin != null)
             {
                 System.Diagnostics.Debug.Assert(leftLinkedDataPin is TtDataOutPinDescription);
                 if (leftLinkedDataPin.Parent is TtExpressionDescription expressionDescription)
                 {
-                    FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
+                    FExpressionBuildContext buildContext = new() { OwnerDescription = expressionBuildContext.OwnerDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
                     expression.Left = (leftLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
                 }
-                if (leftLinkedDataPin.Parent is TtStatementDescription statementDescription)
+                if (leftLinkedDataPin.Parent is TtPureStatementDescription pureStatementDescription)
+                {
+                    FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = expressionBuildContext.Sequence, OwnerDescription = expressionBuildContext.OwnerDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
+                    var pureState = (leftLinkedDataPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);
+                    expressionBuildContext.Sequence.Sequence.Add(pureState);
+                    expression.Left = (leftLinkedDataPin.Parent as TtStatementDescription).BuildExpressionForOutPin(leftLinkedDataPin);
+                }
+                else if (leftLinkedDataPin.Parent is TtStatementDescription statementDescription)
                 {
                     expression.Left = (leftLinkedDataPin.Parent as TtStatementDescription).BuildExpressionForOutPin(leftLinkedDataPin);
                 }
             }
-            var rightLinkedDataPin = methodDesc.GetLinkedDataPin(dataInPin_Right);
+            var rightLinkedDataPin = IDataLineOperator.GetLinkedDataPin(graphDesc, dataInPin_Right);
             if (rightLinkedDataPin != null)
             {
                 System.Diagnostics.Debug.Assert(rightLinkedDataPin is TtDataOutPinDescription);
 
                 if (rightLinkedDataPin.Parent is TtExpressionDescription expressionDescription)
                 {
-                    FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
+                    FExpressionBuildContext buildContext = new() { OwnerDescription = expressionBuildContext.OwnerDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
                     expression.Right = (rightLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
                 }
-                if (rightLinkedDataPin.Parent is TtStatementDescription statementDescription)
+                if (rightLinkedDataPin.Parent is TtPureStatementDescription pureStatementDescription)
+                {
+                    FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = expressionBuildContext.Sequence, OwnerDescription = expressionBuildContext.OwnerDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
+                    var pureState = (rightLinkedDataPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);
+                    expressionBuildContext.Sequence.Sequence.Add(pureState);
+                    expression.Right = (rightLinkedDataPin.Parent as TtStatementDescription).BuildExpressionForOutPin(rightLinkedDataPin);
+                }
+                else if (rightLinkedDataPin.Parent is TtStatementDescription statementDescription)
                 {
                     expression.Right = (rightLinkedDataPin.Parent as TtStatementDescription).BuildExpressionForOutPin(rightLinkedDataPin);
                 }
             }
             return expression;
         }
-        public void PinTypeSpreading(TtDataPinDescription dataPin, TtMethodDescription methodDescription)
+        public void PinTypeSpreading(TtDataPinDescription dataPin, IDescription graphDescription)
         {
-            foreach(var otherPin in DataInPins)
+            foreach (var otherPin in DataInPins)
             {
                 if (otherPin == dataPin)
                     continue;
 
-                if(dataPin.TypeDesc != null)
+                if (dataPin.TypeDesc != null)
                 {
-                    if(otherPin.TypeDesc == null)
+                    if (otherPin.TypeDesc == null)
                     {
                         otherPin.TypeDesc = dataPin.TypeDesc;
                     }
                 }
                 else
                 {
-                    if(otherPin.TypeDesc != null)
+                    if (otherPin.TypeDesc != null)
                     {
                         dataPin.TypeDesc = otherPin.TypeDesc;
                     }
@@ -105,18 +119,18 @@ namespace EngineNS.DesignMacross.Design.Expressions
                     if (otherPin.TypeDesc == null)
                     {
                         otherPin.TypeDesc = dataPin.TypeDesc;
-                        var linkedPin = methodDescription.GetLinkedDataPin(dataPin);
-                        if(linkedPin != null && linkedPin.TypeDesc == null)
+                        var linkedPin = IDataLineOperator.GetLinkedDataPin(graphDescription, dataPin);
+                        if (linkedPin != null && linkedPin.TypeDesc == null)
                         {
-                            if(linkedPin.Parent is TtBinaryArithmeticOperatorDescription valueOperatorDescription)
+                            if (linkedPin.Parent is TtBinaryArithmeticOperatorDescription valueOperatorDescription)
                             {
                                 linkedPin.TypeDesc = dataPin.TypeDesc;
-                                valueOperatorDescription.PinTypeSpreading(linkedPin, methodDescription);
+                                valueOperatorDescription.PinTypeSpreading(linkedPin, graphDescription);
                             }
                             if (linkedPin.Parent is TtBinaryLogicOperatorDescription logicOperatorDescription)
                             {
                                 linkedPin.TypeDesc = dataPin.TypeDesc;
-                                logicOperatorDescription.PinTypeSpreading(linkedPin, methodDescription);
+                                logicOperatorDescription.PinTypeSpreading(linkedPin, graphDescription);
                             }
 
                         }
@@ -124,15 +138,15 @@ namespace EngineNS.DesignMacross.Design.Expressions
                 }
             }
         }
-        public override void OnPinConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, TtMethodDescription methodDescription)
+        public override void OnDataPinConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, IDescription graphDescription)
         {
-            if(selfPin.TypeDesc == null)
+            if (selfPin.TypeDesc == null)
             {
                 selfPin.TypeDesc = connectedPin.TypeDesc;
-                PinTypeSpreading(selfPin, methodDescription);
+                PinTypeSpreading(selfPin, graphDescription);
             }
         }
-        public override void OnPinDisConnected(TtDataPinDescription selfPin, TtDataPinDescription disConnectedPin, TtMethodDescription methodDescription)
+        public override void OnDataPinDisConnected(TtDataPinDescription selfPin, TtDataPinDescription disConnectedPin, IDescription graphDescription)
         {
             selfPin.TypeDesc = null;
         }
@@ -168,18 +182,18 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public TtIndexerOperatorDescription()
         {
             AddDataInPin(TargetPin);
-            
+
             AddDataOutPin(new() { Name = "[]" });
         }
-        public override bool IsPinsLinkable(TtDataPinDescription selfPin, TtDataPinDescription targetPin)
+        public override bool IsDataPinsLinkable(TtDataPinDescription selfPin, TtDataPinDescription targetPin)
         {
             if (selfPin == TargetPin && selfPin.TypeDesc != null && selfPin.TypeDesc.SystemType.IsArray)
             {
                 return false;
             }
-            return base.IsPinsLinkable(selfPin, targetPin);
+            return base.IsDataPinsLinkable(selfPin, targetPin);
         }
-        public override void OnPinConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, TtMethodDescription methodDescription)
+        public override void OnDataPinConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, IDescription graphDescription)
         {
             if (selfPin == TargetPin && selfPin.TypeDesc.SystemType.IsArray)
             {
@@ -188,13 +202,13 @@ namespace EngineNS.DesignMacross.Design.Expressions
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
-            var methodDesc = expressionBuildContext.MethodDescription as TtMethodDescription;
+            var graphDesc = expressionBuildContext.OwnerDescription;
             var expression = new TtIndexerOperatorExpression();
-            var leftLinkedDataPin = methodDesc.GetLinkedDataPin(TargetPin);
+            var leftLinkedDataPin = IDataLineOperator.GetLinkedDataPin(graphDesc, TargetPin);
             if (leftLinkedDataPin != null)
             {
                 System.Diagnostics.Debug.Assert(leftLinkedDataPin is TtDataOutPinDescription);
-                FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
+                FExpressionBuildContext buildContext = new() { OwnerDescription = expressionBuildContext.OwnerDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
                 expression.Target = (leftLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
             }
 
@@ -202,11 +216,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
             for (int i = 0; i < ArrayDimension; i++)
             {
                 var dataInPin_index = DataInPins[1 + i];
-                var indexLinkedDataPin = methodDesc.GetLinkedDataPin(dataInPin_index);
+                var indexLinkedDataPin = IDataLineOperator.GetLinkedDataPin(graphDesc, dataInPin_index);
                 if (indexLinkedDataPin != null)
                 {
                     System.Diagnostics.Debug.Assert(indexLinkedDataPin is TtDataOutPinDescription);
-                    FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
+                    FExpressionBuildContext buildContext = new() { OwnerDescription = expressionBuildContext.OwnerDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
                     expression.Indices.Add((indexLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext));
                 }
             }

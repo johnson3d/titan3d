@@ -10,8 +10,8 @@ namespace EngineNS.IO
         int LevelOfDetail { get; set; }
         int TargetLOD { get; }
         int MaxLOD { get; }
-        System.Threading.Tasks.Task<bool> CurLoadTask { get; set; }
-        System.Threading.Tasks.Task<bool> LoadLOD(int level);
+        Thread.Async.TtTask<bool>? CurLoadTask { get; set; }
+        Thread.Async.TtTask<bool> LoadLOD(int level);
     }
 
     public class TtStreamingManager
@@ -39,10 +39,13 @@ namespace EngineNS.IO
                     {
                         if (i.CurLoadTask != null)
                         {
-                            if (i.CurLoadTask.IsCompleted == false)
+                            if (i.CurLoadTask.Value.IsCompleted == false)
                                 continue;
                             else
+                            {
+                                i.CurLoadTask.Value.Dispose();
                                 i.CurLoadTask = null;
+                            }   
                         }
 
                         if (false == UpdateTargetLOD(i))
@@ -68,6 +71,10 @@ namespace EngineNS.IO
                 }   
             }
         }
+        public unsafe virtual bool UpdateTargetLOD(IO.IStreaming asset)
+        {
+            return true;
+        }
         public int GetNeedStreamingNumber()
         {
             int count = 0;
@@ -80,10 +87,6 @@ namespace EngineNS.IO
                 count++;
             }
             return count;
-        }
-        public virtual bool UpdateTargetLOD(IStreaming asset)
-        {
-            return true;
         }
         internal IStreaming UnsafeRemove(RName name)
         {

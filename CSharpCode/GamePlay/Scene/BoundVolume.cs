@@ -50,7 +50,7 @@ namespace EngineNS.GamePlay.Scene
         {
             get
             {
-                if (HostNode.EntityManager == null || HostNode.Id < 0)
+                if (HostNode == null || HostNode.EntityManager == null || HostNode.Id < 0)
                 {
                     return ref mAbsAABB;
                 }
@@ -131,6 +131,8 @@ namespace EngineNS.GamePlay.Scene
                         var node = manager.GetEntity<TtNode>(i);
                         if (node == null)
                             continue;
+                        if (VisParameter.UseEditorVisibilityFilter && node.IsEditorVisibleInHierarchy == false)
+                            continue;
                         if (node.HashVisual==false)
                             continue;
                         if (VisParameter.CullType == TtWorld.TtVisParameter.EVisCull.Shadow && node.IsCastShadow == false)
@@ -142,7 +144,7 @@ namespace EngineNS.GamePlay.Scene
                             continue;
                         if (VisParameter.OnVisitNode != null && VisParameter.OnVisitNode(bv.HostNode, VisParameter) == false)
                             continue;
-                        if (node.HasStyle(TtNode.ENodeStyles.VisibleFollowParent))
+                        if (node.HasAnyStyle(TtNode.ENodeStyles.VisibleFollowParent | TtNode.ENodeStyles.Invisible))
                             continue;
 
                         ref var aabb = ref values.GetValue(node.Id);
@@ -196,6 +198,8 @@ namespace EngineNS.GamePlay.Scene
                     var node = manager.GetEntity<TtNode>(i);
                     if (node == null)
                         return;
+                    if (VisParameter.UseEditorVisibilityFilter && node.IsEditorVisibleInHierarchy == false)
+                        return;
                     if (node.HashVisual==false)
                         return;
                     if (VisParameter.CullType == TtWorld.TtVisParameter.EVisCull.Shadow && node.IsCastShadow == false)
@@ -206,7 +210,7 @@ namespace EngineNS.GamePlay.Scene
                         return;
                     if (VisParameter.OnVisitNode != null && VisParameter.OnVisitNode(bv.HostNode, VisParameter) == false)
                         return;
-                    if (node.HasStyle(TtNode.ENodeStyles.VisibleFollowParent))
+                    if (node.HasAnyStyle(TtNode.ENodeStyles.VisibleFollowParent | TtNode.ENodeStyles.Invisible))
                         return;
 
                     ref var aabb = ref values.GetValue(node.Id);
@@ -265,6 +269,7 @@ namespace EngineNS.GamePlay
         public Scene.TtWorldEntityManager EntityManager { get; private set; }
         #region Octree
         private TtCollideOctree mCollideOctree = new TtCollideOctree();
+        [Rtti.Meta("")]
         public TtCollideOctree CollideOctree
         {
             get => mCollideOctree;
@@ -418,4 +423,3 @@ namespace EngineNS.GamePlay
         }
     }
 }
-

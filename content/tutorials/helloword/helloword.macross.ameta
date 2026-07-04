@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.CodeBuilder.TtMacrossAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="ee0b9aa1-a1d5-4d8f-83c9-b708c4e9ddb9" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/helloword/helloword.macross,ee0b9aa1-a1d5-4d8f-83c9-b708c4e9ddb9" />
@@ -18,4 +18,5 @@
     <e_1 Value="Game,tutorials/helloword/map01.scene,40c22bd4-a6ad-4599-b3e9-dbfe79f1a7d7" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.CodeBuilder.TtMacross@EngineCore" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
 </Root>

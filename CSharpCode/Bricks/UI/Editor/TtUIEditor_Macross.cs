@@ -23,7 +23,7 @@ namespace EngineNS.UI.Editor
             public bool RemoveSuccess;
         };
 
-        bool OnMacrossEditorRemoveMethod(Bricks.CodeBuilder.MacrossNode.UMacrossMethodGraph method)
+        bool OnMacrossEditorRemoveMethod(Bricks.CodeBuilder.MacrossNode.TtMacrossMethodGraph method)
         {
             MacrossEditorRemoveMethodQueryData data = new MacrossEditorRemoveMethodQueryData();
             data.RemoveSuccess = true;

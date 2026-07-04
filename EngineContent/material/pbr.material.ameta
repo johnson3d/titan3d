@@ -26,5 +26,6 @@
     <e_1 Value="Engine,texture/pbr_n.srv,200a085f-65d2-4d33-aa4d-79915e8f09a9" />
     <e_2 Value="Engine,texture/pbr_orm.srv,fe280199-f8e8-4388-b0e2-71972d034b44" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

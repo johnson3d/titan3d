@@ -15,7 +15,8 @@ namespace EngineNS.DesignMacross.Editor
         public float FontScale { get; set; } = 1;
         public Color4f TextColor { get; set; } = new Color4f(0, 0, 0);
         public Color4f BackgroundColor { get; set; } = new Color4f(0, 0, 0, 0);
-        public float Rounding { get; set; } = 5;
+        public float Rounding { get; set; } = 0;
+        public ERoundCornerType CornerType = ERoundCornerType.None;
         public TtGraphElement_TextBox(string content = "TextBox", EVerticalAlignment verticalAlignment = EVerticalAlignment.Top, EHorizontalAlignment horizontalAlignment = EHorizontalAlignment.Left)
         {
             Content = content;
@@ -30,7 +31,7 @@ namespace EngineNS.DesignMacross.Editor
 
         public override bool HitCheck(ref FMouseEventContext context)
         {
-            return false;
+            return true;
         }
 
         public override void OnDragging(Vector2 delta)
@@ -44,7 +45,7 @@ namespace EngineNS.DesignMacross.Editor
             
         }
 
-        public override void OnUnSelected()
+        public override void OnUnSelected(ref FMouseEventContext context)
         {
             
         }   
@@ -146,8 +147,8 @@ namespace EngineNS.DesignMacross.Editor
             var cmd = ImGuiAPI.GetWindowDrawList();
             var start = context.ViewportTransform(textBox.AbsLocation);
             ImGuiAPI.SetCursorScreenPos(in start);
-            ImGuiAPI.Dummy(in Vector2.Zero);
-            ImGuiAPI.SetNextItemWidth(textBox.Size.Width);
+            //ImGuiAPI.Dummy(in Vector2.Zero);
+            ImGuiAPI.PushItemWidth(textBox.Size.Width * context.Camera.Scale);
             string inputValue = "";
             var oldScale = ImGuiAPI.GetFont().Scale;
             var font = ImGuiAPI.GetFont();
@@ -159,7 +160,7 @@ namespace EngineNS.DesignMacross.Editor
             }
             font.Scale = oldScale;
             ImGuiAPI.PopFont();
-            
+            ImGuiAPI.PopItemWidth();
         }
     }
 }

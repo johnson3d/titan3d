@@ -28,5 +28,6 @@
     <e_3 Value="Game,tutorials/gi/cornell/greencolor.uminst,db1806dc-3b07-4451-8871-33ab8d9040b7" />
     <e_4 Value="Engine,mesh/base/sphere.vms,7a5a0469-7899-40d9-aa67-7be6e33824d1" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
 </Root>

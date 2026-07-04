@@ -531,6 +531,9 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\HairBRDF.cginc">
       <Filter>Inc</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\CBufferShaderBinderGen.cginc">
+      <Filter>ShadingEnv</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">
@@ -646,6 +649,9 @@
     </FxCompile>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\SSAOFilter.compute">
       <Filter>Compute\ScreenSpace</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\QuarkDAGVisualize.compute">
+      <Filter>Compute\GpuDriven</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

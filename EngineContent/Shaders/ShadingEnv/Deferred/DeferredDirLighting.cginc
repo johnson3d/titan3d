@@ -49,9 +49,90 @@ Texture2D GShadowMap DX_AUTOBIND;
 #endif
 SamplerState Samp_GShadowMap DX_AUTOBIND;
 
-#if ENV_ENABLE_CONTACT_SHADOW == 1
+#if ENV_ContactShadowMode == EContactShadowMode_InputNode
 Texture2D GContactShadow DX_AUTOBIND;
 SamplerState Samp_GContactShadow DX_AUTOBIND;
+#elif ENV_ContactShadowMode == EContactShadowMode_Inline
+// Inline contact shadow: screen-space ray march directly inside the lighting pass.
+// Zero extra bandwidth (no intermediate texture), reuses DepthBuffer already bound here.
+// Field names are prefixed InlineCS_ to avoid clashing with the global HLSL namespace.
+cbuffer cbInlineContactShadow DX_AUTOBIND
+{
+    int   InlineCS_NumSteps;
+    float InlineCS_Length;
+    float InlineCS_DepthBias;
+    float InlineCS_FadeDistance;
+    float InlineCS_FadeLength;
+    float InlineCS_Intensity;
+    uint  InlineCS_FrameIndex;
+    float InlineCS_Pad0;
+};
+
+#if ENV_INLINE_CS_USE_HZB == 1
+Texture2D<float> GHzbTexture DX_AUTOBIND;
+SamplerState Samp_GHzbTexture DX_AUTOBIND;
+#include "../../Inc/HzbRayCast.cginc"
+#endif
+
+// Interleaved Gradient Noise with temporal jitter to break up the per-step banding.
+float InlineContactShadow_IGN(float2 pixelPos, float frameId)
+{
+    pixelPos += frameId * float2(47.0, 17.0) * 0.695f;
+    float3 magic = float3(0.06711056, 0.00583715, 52.9829189);
+    return frac(magic.z * frac(dot(pixelPos, magic.xy)));
+}
+
+// Returns 1.0 when unoccluded, 0.0 when an occluder is found along the ray to the light.
+float InlineContactShadowRayMarch(float3 rayOriginWorld, float3 lightDir, float dither)
+{
+    int   numSteps  = max(InlineCS_NumSteps, 1);
+    float rayLength = InlineCS_Length;
+
+#if ENV_INLINE_CS_USE_HZB
+    // HZB-accelerated hierarchical ray march (matches CastContactShadowRay HZB path).
+    float3 biasedOrigin = rayOriginWorld + lightDir * InlineCS_DepthBias;
+    FHzbRayCastResult hzbResult = HzbRayCastFromWorldRay(
+        GHzbTexture, Samp_GHzbTexture,
+        biasedOrigin, lightDir, rayLength,
+        (uint)numSteps, dither, 0.0);
+    return hzbResult.bHit ? 0.0 : 1.0;
+#else
+    float4 rayStartClip = mul(float4(rayOriginWorld, 1.0), GetViewPrjMtx());
+    float3 rayEndWorld  = rayOriginWorld + lightDir * rayLength;
+    float4 rayEndClip   = mul(float4(rayEndWorld, 1.0), GetViewPrjMtx());
+
+    float3 rayStartNDC = rayStartClip.xyz / rayStartClip.w;
+    float3 rayEndNDC   = rayEndClip.xyz / rayEndClip.w;
+
+    float2 startUV = float2(rayStartNDC.x * 0.5 + 0.5, 0.5 - rayStartNDC.y * 0.5);
+    float2 endUV   = float2(rayEndNDC.x * 0.5 + 0.5,   0.5 - rayEndNDC.y * 0.5);
+    float  startZ  = rayStartNDC.z;
+    float  endZ    = rayEndNDC.z;
+
+    float2 rayUV = endUV - startUV;
+    float  rayZ  = endZ  - startZ;
+
+    float thicknessWorld = rayLength / (float)numSteps * 2.0;
+    float stepSize = 1.0 / (float)numSteps;
+    float t = stepSize * (dither + 0.5);
+
+    [loop]
+    for (int i = 0; i < numSteps; i++)
+    {
+        float2 sampleUV = startUV + rayUV * t;
+        float  sampleZ  = startZ  + rayZ  * t;
+        if (any(sampleUV < 0.0) || any(sampleUV > 1.0)) break;
+
+        float sceneDepthNDC = DepthBuffer.SampleLevel(Samp_DepthBuffer, sampleUV, 0).r;
+        float sceneLinear = LinearFromDepth(sceneDepthNDC);
+        float rayLinear   = LinearFromDepth(sampleZ);
+        float depthDiff   = rayLinear - sceneLinear;
+        if (depthDiff > InlineCS_DepthBias && depthDiff < thicknessWorld) return 0.0;
+        t += stepSize;
+    }
+    return 1.0;
+#endif
+}
 #endif
 
 #if ENV_ENABLE_SSAO == 1
@@ -363,14 +444,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
 	FGBufferData GBuffer = (FGBufferData)0;
 	GBuffer.DecodeGBuffer(rt0, rt1, rt2, rt3);
-
-	//if (GBuffer.ObjectFlags_2Bit == 0)
-    if (GBuffer.IsUnlit() && GBuffer.IsAcceptShadow() == false)
-    {
-        output.RT0.rgb = GBuffer.MtlColorRaw;
-        return output;
-    }
-
+	
 	//bool NoPixel = (dot(GBuffer.WorldNormal, GBuffer.WorldNormal) < 0.01f);
     bool NoPixel = false;
 	
@@ -524,7 +598,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	ShadowValue = 1.0h;
 #endif
 
-#if ENV_ENABLE_CONTACT_SHADOW == 1
+#if ENV_ContactShadowMode == EContactShadowMode_InputNode
 	// Contact Shadow: 5-tap cross filter to soften dither noise
 	{
 		float2 texelSize = ViewportSizeAndRcp.zw;
@@ -535,6 +609,21 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		contactShadow += GContactShadow.SampleLevel(Samp_GContactShadow, uv + float2(0, -texelSize.y), 0).r;
 		contactShadow *= 0.2;
 		ShadowValue = min(ShadowValue, (half)contactShadow);
+	}
+#elif ENV_ContactShadowMode == EContactShadowMode_Inline
+	if (GBuffer.IsAcceptShadow())
+	{
+		float csLinDepth = LinearFromDepth(rtDepth);
+		float csFade = saturate((csLinDepth - InlineCS_FadeDistance) / max(InlineCS_FadeLength, 0.001));
+		if (csFade < 1.0)
+		{
+			uint2 csPixel = (uint2)(uv * ViewportSizeAndRcp.xy);
+			float csDither = InlineContactShadow_IGN((float2)csPixel + 0.5, (float)InlineCS_FrameIndex);
+			float csFactor = InlineContactShadowRayMarch(WorldPos, (float3)L, csDither);
+			float csResult = lerp(1.0 - InlineCS_Intensity, 1.0, csFactor);
+			csResult = lerp(csResult, 1.0, csFade);
+			ShadowValue = min(ShadowValue, (half)csResult);
+		}
 	}
 #endif
 
@@ -583,16 +672,8 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     half3 R = 2 * dot(V, N) * N - V;
 	// Point lobe in off-specular peak direction
     R = GetOffSpecularPeakReflectionDir(N, R, GBuffer.Roughness);
-    half3 EnvSpecLightColor = 0;
-    if (GBuffer.IsDisableEnvColor() == false)
-    {
-        half EnvMipLevel = GetTexMipLevelFromRoughness(Roughness, (half)EnvMapMaxMipLevel);
-        EnvSpecLightColor = (half3) gEnvMap.SampleLevel(Samp_gEnvMap, R, EnvMipLevel).rgb;
-    }
-    else
-    {
-        EnvSpecLightColor = 0;
-    }	
+    half EnvMipLevel = GetTexMipLevelFromRoughness(Roughness, (half) EnvMapMaxMipLevel);
+    half3 EnvSpecLightColor = (half3) gEnvMap.SampleLevel(Samp_gEnvMap, R, EnvMipLevel).rgb;
 	float RoughnessSq = GBuffer.Roughness * GBuffer.Roughness;
 	float SpecularOcclusion = GetSpecularOcclusion(NoV, RoughnessSq, AOs);
 	half3 EnvSpec = (half3)EnvBRDF(EnvSpecLightColor, OptSpecShading, Roughness, NoV, gPreIntegratedGF, Samp_gPreIntegratedGF) * SpecularOcclusion;
@@ -631,6 +712,9 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	FDeferredShadingResult shadingResult = (FDeferredShadingResult)0;
 	switch (shadingMode)
 	{
+        case EShadingMode_Unlit:
+            shadingResult.BaseShading = Albedo;
+            break;
 		case EShadingMode_Subsurface:
 			shadingResult = DeferredDirLighting_Subsurface(shadingCtx);
 			break;

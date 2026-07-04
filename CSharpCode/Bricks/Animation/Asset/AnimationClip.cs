@@ -14,6 +14,10 @@ namespace EngineNS.Animation.Asset
     [Rtti.Meta("")]
     public class TtAnimationClipAMeta : IO.IAssetMeta
     {
+        [Rtti.Meta("")]
+        [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
+        public RName PreviewMeshName { get; set; }
+
         public override string TypeExt
         {
             get => TtAnimationClip.AssetExt;
@@ -27,7 +31,7 @@ namespace EngineNS.Animation.Asset
         {
             return "AnimationClip";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(GetAssetName());
         }
@@ -118,6 +122,7 @@ namespace EngineNS.Animation.Asset
             }
 
             xnd.SaveXnd(name.Address);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
 
             var ameta = name.AMeta;
             if (ameta != null)

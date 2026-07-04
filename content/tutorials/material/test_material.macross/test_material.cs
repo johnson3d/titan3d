@@ -11,10 +11,6 @@
         public static EngineNS.Macross.TtMacrossBreak breaker_InitViewportSlateWithScene_2890131646 = new EngineNS.Macross.TtMacrossBreak("breaker_InitViewportSlateWithScene_2890131646");
         public static EngineNS.Macross.TtMacrossBreak breaker_FindFirstChild_2034756304 = new EngineNS.Macross.TtMacrossBreak("breaker_FindFirstChild_2034756304");
         public static EngineNS.Macross.TtMacrossBreak breaker_return_1924148349 = new EngineNS.Macross.TtMacrossBreak("breaker_return_1924148349");
-        public static EngineNS.Macross.TtMacrossBreak breaker_GetMaterial_1597294926 = new EngineNS.Macross.TtMacrossBreak("breaker_GetMaterial_1597294926");
-        public static EngineNS.Macross.TtMacrossBreak breaker_Sin_1732946206 = new EngineNS.Macross.TtMacrossBreak("breaker_Sin_1732946206");
-        public static EngineNS.Macross.TtMacrossBreak breaker_CreateColor3f_919645327 = new EngineNS.Macross.TtMacrossBreak("breaker_CreateColor3f_919645327");
-        public static EngineNS.Macross.TtMacrossBreak breaker_SetColor3_516167510 = new EngineNS.Macross.TtMacrossBreak("breaker_SetColor3_516167510");
         public static EngineNS.Macross.TtMacrossBreak breaker_if_690337321 = new EngineNS.Macross.TtMacrossBreak("breaker_if_690337321");
         EngineNS.Macross.TtMacrossStackFrame mFrame_BeginPlay_1342966456 = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("tutorials/material/test_material.macross", EngineNS.RName.ERNameType.Game));
         EngineNS.Macross.TtMacrossStackTracer mStack_BeginPlay_1342966456 = new EngineNS.Macross.TtMacrossStackTracer();
@@ -62,34 +58,10 @@
             {
                 mFrame_Tick_63600741.SetWatchVariable("host", host);
                 mFrame_Tick_63600741.SetWatchVariable("elapsedMillisecond", elapsedMillisecond);
-                EngineNS.Graphics.Pipeline.Shader.TtMaterial tmp_r_GetMaterial_1597294926 = default(EngineNS.Graphics.Pipeline.Shader.TtMaterial);
-                System.Single tmp_r_Sin_1732946206 = default(System.Single);
-                EngineNS.Color3f tmp_r_CreateColor3f_919645327 = default(EngineNS.Color3f);
-                System.Boolean tmp_r_SetColor3_516167510 = default(System.Boolean);
                 mFrame_Tick_63600741.SetWatchVariable("Condition0_690337321", (Member_0 != null));
                 breaker_if_690337321.TryBreak(mStack_Tick_63600741, this);
                 if ((Member_0 != null))
                 {
-                    mFrame_Tick_63600741.SetWatchVariable("v_subMesh_GetMaterial_1597294926", 0);
-                    mFrame_Tick_63600741.SetWatchVariable("v_atom_GetMaterial_1597294926", 0);
-                    breaker_GetMaterial_1597294926.TryBreak(mStack_Tick_63600741, this);
-                    tmp_r_GetMaterial_1597294926 = Member_0.RenderMesh.GetMaterial(0,0);
-                    mFrame_Tick_63600741.SetWatchVariable("tmp_r_GetMaterial_1597294926", tmp_r_GetMaterial_1597294926);
-                    mFrame_Tick_63600741.SetWatchVariable("v_v_Sin_1732946206", EngineNS.TtEngine.Instance.TickCountSecond);
-                    breaker_Sin_1732946206.TryBreak(mStack_Tick_63600741, this);
-                    tmp_r_Sin_1732946206 = EngineNS.MathHelper.Sin(EngineNS.TtEngine.Instance.TickCountSecond);
-                    mFrame_Tick_63600741.SetWatchVariable("tmp_r_Sin_1732946206", tmp_r_Sin_1732946206);
-                    mFrame_Tick_63600741.SetWatchVariable("v_r_CreateColor3f_919645327", 1f);
-                    mFrame_Tick_63600741.SetWatchVariable("v_g_CreateColor3f_919645327", tmp_r_Sin_1732946206);
-                    mFrame_Tick_63600741.SetWatchVariable("v_b_CreateColor3f_919645327", 0f);
-                    breaker_CreateColor3f_919645327.TryBreak(mStack_Tick_63600741, this);
-                    tmp_r_CreateColor3f_919645327 = EngineNS.MathHelper.CreateColor3f(1f,tmp_r_Sin_1732946206,0f);
-                    mFrame_Tick_63600741.SetWatchVariable("tmp_r_CreateColor3f_919645327", tmp_r_CreateColor3f_919645327);
-                    mFrame_Tick_63600741.SetWatchVariable("v_name_SetColor3_516167510", "Color3_2");
-                    mFrame_Tick_63600741.SetWatchVariable("tmp_r_CreateColor3f_919645327", tmp_r_CreateColor3f_919645327);
-                    breaker_SetColor3_516167510.TryBreak(mStack_Tick_63600741, this);
-                    tmp_r_SetColor3_516167510 = tmp_r_GetMaterial_1597294926.SetColor3("Color3_2",in tmp_r_CreateColor3f_919645327);
-                    mFrame_Tick_63600741.SetWatchVariable("tmp_r_SetColor3_516167510", tmp_r_SetColor3_516167510);
                 }
                 else
                 {

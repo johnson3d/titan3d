@@ -1083,10 +1083,10 @@ namespace EngineNS.EGui.Controls
                         var type = Rtti.TtTypeDesc.TypeOf(ameta.TypeStr).SystemType;
                         if (type != null)
                         {
-                            var attrs = type.GetCustomAttributes(typeof(Editor.UAssetEditorAttribute), false);
+                            var attrs = type.GetCustomAttributes(typeof(Editor.TtAssetEditorAttribute), false);
                             if (attrs.Length > 0)
                             {
-                                var editorAttr = attrs[0] as Editor.UAssetEditorAttribute;
+                                var editorAttr = attrs[0] as Editor.TtAssetEditorAttribute;
                                 Editor.TtAssetEditorManager.TryOpenEditor(editorAttr.EditorType, ameta.GetAssetName(), null, true).AddWaitTask();
                             }
                         }

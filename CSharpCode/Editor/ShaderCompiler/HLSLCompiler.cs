@@ -31,23 +31,23 @@ namespace EngineNS.Editor.ShaderCompiler
         static CoreSDK.FDelegate_FOnShaderTranslated OnShaderTranslated = OnShaderTranslatedImpl;
         static void OnShaderTranslatedImpl(NxRHI.FShaderDesc arg0)
         {
-            var glsl = arg0.GetGLCode();
-            if (glsl.Length > 0)
+            var text = arg0.GetRhiDataAsText();
+            if (text.Length > 0)
             {
                 bool changed = false;
-                if (glsl.Contains("#error No extension available for FP16."))
+                if (text.Contains("#error No extension available for FP16."))
                 {
-                    glsl = glsl.Replace("#error No extension available for Int16.", "#define float16_t float");
+                    text = text.Replace("#error No extension available for FP16.", "#define float16_t float");
                     changed = true;
                 }
-                if (glsl.Contains("#error No extension available for Int16."))
+                if (text.Contains("#error No extension available for Int16."))
                 {
-                    glsl = glsl.Replace("#error No extension available for Int16.", "#define uint16_t uint");
+                    text = text.Replace("#error No extension available for Int16.", "#define uint16_t uint");
                     changed = true;
                 }
                 if (changed)
                 {
-                    arg0.SetGLCode(glsl);
+                    arg0.SetRhiDataFromText(text);
                 }
             }
         }
@@ -301,13 +301,80 @@ namespace EngineNS.Editor.ShaderCompiler
             }
             return null;
         }
+        public static string GetShaderCachePath()
+        {
+            var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Shader);
+            IO.TtFileManager.SureDirectory(path);
+            return path;
+        }
+        public static string GetShaderFileExtension(NxRHI.EShaderLanguage lang)
+        {
+            switch (lang)
+            {
+                case NxRHI.EShaderLanguage.SL_DXBC:
+                    return ".dxbc";
+                case NxRHI.EShaderLanguage.SL_DXIL:
+                    return ".dxil";
+                case NxRHI.EShaderLanguage.SL_SPIRV:
+                    return ".spirv";
+                case NxRHI.EShaderLanguage.SL_GLSL:
+                    return ".glsl";
+                case NxRHI.EShaderLanguage.SL_METAL:
+                    return ".metal";
+                default:
+                    return ".bin";
+            }
+        }
+        public static void SaveShaderToCache(NxRHI.TtShaderDesc desc, Hash160 hash)
+        {
+            var path = GetShaderCachePath();
+            IO.TtFileManager.SureDirectory(path);
+            var lang = TtEngine.Instance.Config.ShaderLanguage;
+            var file = path + hash.ToString() + GetShaderFileExtension(lang);
+            var xnd = new IO.TtXndHolder("TtShader", 0, 0);
+            var node = xnd.RootNode.mCoreObject;
+            unsafe
+            {
+                desc.mCoreObject.SaveXnd(node);
+            }
+            xnd.SaveXnd(file);
+        }
+        public static NxRHI.TtShaderDesc LoadShaderFromCache(Hash160 hash, NxRHI.EShaderType type)
+        {
+            var path = GetShaderCachePath();
+            var lang = TtEngine.Instance.Config.ShaderLanguage;
+            var file = path + hash.ToString() + GetShaderFileExtension(lang);
+            if (!IO.TtFileManager.FileExists(file))
+                return null;
+            using (var xnd = IO.TtXndHolder.LoadXnd(file))
+            {
+                if (xnd == null)
+                    return null;
+                var desc = new NxRHI.TtShaderDesc(type);
+                unsafe
+                {
+                    if (desc.mCoreObject.LoadXnd(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, xnd.RootNode.mCoreObject) == false)
+                        return null;
+                }
+                return desc;
+            }
+        }
+        public static void DeleteShaderCache(Hash160 hash)
+        {
+            var path = GetShaderCachePath();
+            var hashStr = hash.ToString();
+            string[] extensions = { ".dxbc", ".dxil", ".spirv", ".glsl", ".metal" };
+            foreach (var ext in extensions)
+            {
+                var file = path + hashStr + ext;
+                if (IO.TtFileManager.FileExists(file))
+                    IO.TtFileManager.DeleteFile(file);
+            }
+        }
         public unsafe NxRHI.TtShaderDesc CompileShader(string shader, string entry, NxRHI.EShaderType type,
-            Graphics.Pipeline.Shader.TtShadingEnv shadingEnvshadingEnv, FPermutationId permutationId, Graphics.Pipeline.Shader.TtMaterial mtl, Type mdfType,
+            Graphics.Pipeline.Shader.TtShadingEnv shadingEnv, FPermutationId permutationId, Graphics.Pipeline.Shader.TtMaterial mtl, Type mdfType,
             NxRHI.TtShaderDefinitions defines, TtHLSLInclude incProvider, string sm = null, bool bDebugShader = true, string extHlslVersion = null, bool asModule = false)
         {
-            bool ignoreDXBC = false;
-            bool ignoreDXIR = false;
-            bool ignoreSpirv = false;
             var code_text = IO.TtFileManager.ReadAllText(shader);
             var metaIndex = code_text.IndexOf($"/**Meta Begin:({entry})");
             if (metaIndex >= 0)
@@ -318,7 +385,7 @@ namespace EngineNS.Editor.ShaderCompiler
                 {
                     code_text = code_text.Substring(0, metaIndex);
                     var lines = code_text.Split("\r\n");
-                    foreach(var i in lines)
+                    foreach (var i in lines)
                     {
                         if (string.IsNullOrEmpty(i))
                             continue;
@@ -334,27 +401,6 @@ namespace EngineNS.Editor.ShaderCompiler
                                     extHlslVersion = pairs[1];
                                     if (extHlslVersion == "none")
                                         extHlslVersion = null;
-                                    break;
-                                case "IgnoreIR":
-                                    {
-                                        var text = pairs[1];
-                                        var segs = i.Split('+');
-                                        foreach (var s in segs)
-                                        {
-                                            switch (s)
-                                            {
-                                                case "DXBC":
-                                                    ignoreDXBC = true;
-                                                    break;
-                                                case "DXIR":
-                                                    ignoreDXIR = true;
-                                                    break;
-                                                case "Spirv":
-                                                    ignoreSpirv = true;
-                                                    break;
-                                            }
-                                        }
-                                    }
                                     break;
                             }
                         }
@@ -373,7 +419,6 @@ namespace EngineNS.Editor.ShaderCompiler
             UserInclude = incProvider;
             Material = mtl;
             MdfQueueType = Rtti.TtTypeDesc.TypeOf(mdfType);
-            //IShaderDefinitions defPtr = new IShaderDefinitions((void*)0);
             using (var defPtr = new NxRHI.TtShaderDefinitions())
             {
                 if (defines != null)
@@ -383,7 +428,6 @@ namespace EngineNS.Editor.ShaderCompiler
                 if (mtl != null && mtl.Defines != null)
                 {
                     defPtr.MergeDefinitions(mtl.Defines);
-                    // TODO: add material VS Input ?
                     var vsStreams = mtl.GetVSNeedStreams();
                     if (vsStreams != null)
                     {
@@ -392,7 +436,6 @@ namespace EngineNS.Editor.ShaderCompiler
                             defPtr.AddDefine(GetVertexStreamDefine(i), "1");
                         }
                     }
-
                     var psInputs = mtl.GetPSNeedInputs();
                     if (psInputs != null)
                     {
@@ -402,7 +445,7 @@ namespace EngineNS.Editor.ShaderCompiler
                         }
                     }
                 }
-                var graphicsEnv = shadingEnvshadingEnv as Graphics.Pipeline.Shader.TtGraphicsShadingEnv;
+                var graphicsEnv = shadingEnv as Graphics.Pipeline.Shader.TtGraphicsShadingEnv;
                 if (graphicsEnv != null)
                 {
                     {
@@ -448,37 +491,35 @@ namespace EngineNS.Editor.ShaderCompiler
                 }
                 else
                 {
-                    var computeEnv = shadingEnvshadingEnv as Graphics.Pipeline.Shader.TtComputeShadingEnv;
+                    var computeEnv = shadingEnv as Graphics.Pipeline.Shader.TtComputeShadingEnv;
                     if (computeEnv != null)
                     {
-                        defines.mCoreObject.AddDefine("DispatchX", $"{computeEnv.DispatchArg.X}");
-                        defines.mCoreObject.AddDefine("DispatchY", $"{computeEnv.DispatchArg.Y}");
-                        defines.mCoreObject.AddDefine("DispatchZ", $"{computeEnv.DispatchArg.Z}");
+                        defPtr.AddDefine("DispatchX", $"{computeEnv.DispatchArg.X}");
+                        defPtr.AddDefine("DispatchY", $"{computeEnv.DispatchArg.Y}");
+                        defPtr.AddDefine("DispatchZ", $"{computeEnv.DispatchArg.Z}");
                     }
                 }
                 switch (type)
                 {
                     case NxRHI.EShaderType.SDT_AmplificationShader:
-                        defPtr.AddDefine("ShaderStage", "0");//ASStage
+                        defPtr.AddDefine("ShaderStage", "0");
                         break;
                     case NxRHI.EShaderType.SDT_MeshShader:
-                        defPtr.AddDefine("ShaderStage", "0");//MSStage
+                        defPtr.AddDefine("ShaderStage", "0");
                         break;
                     case NxRHI.EShaderType.SDT_VertexShader:
-                        defPtr.AddDefine("ShaderStage", "0");//VSStage
+                        defPtr.AddDefine("ShaderStage", "0");
                         break;
                     case NxRHI.EShaderType.SDT_PixelShader:
-                        defPtr.AddDefine("ShaderStage", "1");//PSStage
+                        defPtr.AddDefine("ShaderStage", "1");
                         break;
                     case NxRHI.EShaderType.SDT_ComputeShader:
-                        defPtr.AddDefine("ShaderStage", "0");//CSStage
+                        defPtr.AddDefine("ShaderStage", "0");
                         break;
                     case NxRHI.EShaderType.SDT_RayTracing:
-                        defPtr.AddDefine("ShaderStage", "0");//CSStage
+                        defPtr.AddDefine("ShaderStage", "0");
                         extHlslVersion = "2021";
                         asModule = true;
-                        ignoreDXBC = true;
-                        ignoreSpirv = true;//dxc 2021 does not support dxr shader to spirv
                         break;
                     default:
                         System.Diagnostics.Debugger.Break();
@@ -487,8 +528,9 @@ namespace EngineNS.Editor.ShaderCompiler
 
                 defPtr.MergeDefinitions(TtEngine.Instance.GfxDevice.RenderContext.GlobalEnvDefines);
 
-                int CP_SM_major = 6;
-                int CP_SM_minor = 5;
+                var cfg = TtEngine.Instance.Config;
+                int CP_SM_major = cfg.ShaderModelMajor;
+                int CP_SM_minor = cfg.ShaderModelMinor;
                 if (sm != null)
                 {
                     var segs = sm.Split('_');
@@ -498,96 +540,69 @@ namespace EngineNS.Editor.ShaderCompiler
                         CP_SM_minor = int.Parse(segs[1]);
                     }
                 }
-                var cfg = TtEngine.Instance.Config;
-                int CompileCount = 0;
-                var compile_sm = sm;
-                if (sm == null)
-                {
-                    compile_sm = $"{CP_SM_major}_{CP_SM_minor}";
-                }
-                if (cfg.CookDXBC && ignoreDXBC == false)
+                var compile_sm = $"{CP_SM_major}_{CP_SM_minor}";
+
+                var shaderLang = cfg.ShaderLanguage;
+                bool compiled = false;
+                if (shaderLang == NxRHI.EShaderLanguage.SL_DXBC)
                 {
                     if (type == NxRHI.EShaderType.SDT_MeshShader || type == NxRHI.EShaderType.SDT_AmplificationShader)
                         return null;
                     defPtr.AddDefine("RHI_TYPE", "RHI_DX11");
                     defPtr.AddDefine("CP_SM_major", "5");
                     defPtr.AddDefine("CP_SM_minor", "0");
-                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, "5_0", defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion, null, asModule);
-                    if (ok == false)
-                        return null;
-                    CompileCount++;
+                    compiled = mShaderCompiler.CompileShader(desc, shader, entry, type, "5_0", defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion, null, asModule);
                 }
-                if (cfg.CookDXIL && ignoreDXIR == false)
+                else if (shaderLang == NxRHI.EShaderLanguage.SL_DXIL)
                 {
                     if (extHlslVersion == null)
                         extHlslVersion = "2021";
                     defPtr.AddDefine("RHI_TYPE", "RHI_DX12");
                     defPtr.AddDefine("CP_SM_major", CP_SM_major.ToString());
                     defPtr.AddDefine("CP_SM_minor", CP_SM_minor.ToString());
-                    if (extHlslVersion != null)
-                    {
-                        defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
-                    }
-                    
-                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXIL, bDebugShader, extHlslVersion, null, asModule);
-                    if (ok == false)
-                        return null;
-                    CompileCount++;
+                    defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
+                    compiled = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXIL, bDebugShader, extHlslVersion, null, asModule);
                 }
-                if (cfg.CookGLSL && ignoreSpirv == false)
-                {
-                    if (extHlslVersion == null)
-                        extHlslVersion = "2021";
-                    defPtr.AddDefine("RHI_TYPE", "RHI_GL");
-                    defPtr.AddDefine("CP_SM_major", CP_SM_major.ToString());
-                    defPtr.AddDefine("CP_SM_minor", CP_SM_minor.ToString());
-                    if (extHlslVersion != null)
-                    {
-                        defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
-                    }
-                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion, null, asModule);
-                    if (ok == false)
-                        return null;
-                    CompileCount++;
-                }
-                if (cfg.CookMETAL && ignoreSpirv == false)
-                {
-                    if (extHlslVersion == null)
-                        extHlslVersion = "2021";
-                    defPtr.AddDefine("RHI_TYPE", "RHI_MTL");
-                    defPtr.AddDefine("CP_SM_major", CP_SM_major.ToString());
-                    defPtr.AddDefine("CP_SM_minor", CP_SM_minor.ToString());
-                    if (extHlslVersion != null)
-                    {
-                        defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
-                    }
-                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, 
-                        extHlslVersion, null, asModule);
-                    if (ok == false)
-                        return null;
-                    CompileCount++;
-                }
-                if (cfg.CookSPIRV && ignoreSpirv == false)
+                else if (shaderLang == NxRHI.EShaderLanguage.SL_SPIRV)
                 {
                     if (extHlslVersion == null)
                         extHlslVersion = "2021";
                     defPtr.AddDefine("RHI_TYPE", "RHI_VK");
                     defPtr.AddDefine("CP_SM_major", CP_SM_major.ToString());
                     defPtr.AddDefine("CP_SM_minor", CP_SM_minor.ToString());
-                    if (extHlslVersion != null)
-                    {
-                        defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
-                    }
-                    //var vkArgs = "-fvk-t-shift 100 0 -fvk-u-shift 200 0 -fvk-s-shift 300 0 -fvk-b-shift 0 0";
-                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_SPIRV, bDebugShader,
-                        extHlslVersion, null, asModule);// "-fspv-extension=SPV_KHR_shader_draw_parameters");
-                    if (ok == false)
-                        return null;
-                    CompileCount++;
+                    defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
+                    compiled = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_SPIRV, bDebugShader, extHlslVersion, null, asModule);
+                }
+                else if (shaderLang == NxRHI.EShaderLanguage.SL_GLSL)
+                {
+                    if (extHlslVersion == null)
+                        extHlslVersion = "2021";
+                    defPtr.AddDefine("RHI_TYPE", "RHI_GL");
+                    defPtr.AddDefine("CP_SM_major", CP_SM_major.ToString());
+                    defPtr.AddDefine("CP_SM_minor", CP_SM_minor.ToString());
+                    defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
+                    compiled = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_GLSL, bDebugShader, extHlslVersion, null, asModule);
+                }
+                else if (shaderLang == NxRHI.EShaderLanguage.SL_METAL)
+                {
+                    if (extHlslVersion == null)
+                        extHlslVersion = "2021";
+                    defPtr.AddDefine("RHI_TYPE", "RHI_MTL");
+                    defPtr.AddDefine("CP_SM_major", CP_SM_major.ToString());
+                    defPtr.AddDefine("CP_SM_minor", CP_SM_minor.ToString());
+                    defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
+                    compiled = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_METAL, bDebugShader, extHlslVersion, null, asModule);
                 }
 
-                if (CompileCount == 0)
+                if (!compiled)
                     return null;
+
+                // Compute hash from compiled binary data
+                desc.ComputeRhiDataHash();
+                if (shadingEnv.IsOnlyBuildMode == false)
+                {
+                    SaveShaderToCache(desc, desc.RhiDataHash);
+                }
                 return desc;
             }
         }

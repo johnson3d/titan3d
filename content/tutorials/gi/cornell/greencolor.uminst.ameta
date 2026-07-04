@@ -22,7 +22,8 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Value="Engine,material/arrow.material,2b10690a-2c57-402a-b033-750ce2e76fb1" />
+    <e_0 Value="Engine,material/color_pbr.material,72e31028-f2d7-474d-b965-1ff8ebc418e6" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
 </Root>

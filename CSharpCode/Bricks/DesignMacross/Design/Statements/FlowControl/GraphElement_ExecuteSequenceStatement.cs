@@ -55,7 +55,7 @@ namespace EngineNS.DesignMacross.Design.Statements
                         (data) =>
                         {
                             var cmdData = data as PinAddCmdData;
-                            executeSequence.RemoveExecuteOutPin(cmdData.AddedPin);
+                            executeSequence.RemoveExecutionOutPin(cmdData.AddedPin);
                         });
                 });
             }
@@ -72,7 +72,7 @@ namespace EngineNS.DesignMacross.Design.Statements
                     (data) =>
                     {
                         var cmdData = data as PinAddCmdData;
-                        executeSequence.RemoveExecuteOutPin(cmdData.AddedPin);
+                        executeSequence.RemoveExecutionOutPin(cmdData.AddedPin);
                     });
             });
             if(outPin.Deleteable)
@@ -84,7 +84,7 @@ namespace EngineNS.DesignMacross.Design.Statements
                         (data) =>
                         {
                             var cmdData = data as PinAddCmdData;
-                            executeSequence.RemoveExecuteOutPin(cmdData.SrcOutPin);
+                            executeSequence.RemoveExecutionOutPin(cmdData.SrcOutPin);
                         },
                         cmdData,
                         (data) =>

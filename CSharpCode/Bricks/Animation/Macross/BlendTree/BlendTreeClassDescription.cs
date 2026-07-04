@@ -1,24 +1,26 @@
-﻿using EngineNS.Animation.BlendTree;
+﻿using Assimp;
+using EngineNS.Animation.BlendTree;
+using EngineNS.Animation.Macross.BlendTree.Node;
+using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
+using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
 using EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState;
 using EngineNS.Bricks.CodeBuilder;
-using EngineNS.Bricks.StateMachine.Macross.SubState;
 using EngineNS.Bricks.StateMachine;
+using EngineNS.Bricks.StateMachine.Macross.SubState;
 using EngineNS.DesignMacross;
+using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.DesignMacross.Design;
+using EngineNS.DesignMacross.Design.ConnectingLine;
+using EngineNS.DesignMacross.Design.Expressions;
+using EngineNS.DesignMacross.Design.Statement;
+using EngineNS.Rtti;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
-using EngineNS.DesignMacross.Design.ConnectingLine;
-using EngineNS.Rtti;
 using System.Linq.Expressions;
-using EngineNS.Animation.Macross.BlendTree.Node;
-using EngineNS.DesignMacross.Base.Description;
-using Assimp;
-using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
-using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
+using System.Text;
 
 namespace EngineNS.Animation.Macross.BlendTree
 {
@@ -32,7 +34,7 @@ namespace EngineNS.Animation.Macross.BlendTree
     [OutlineElement_Leaf(typeof(TtOutlineElement_BlendTreeGraph))]
     [Designable(typeof(TtLocalSpacePoseBlendTree), "BlendTree")]
     [Graph(typeof(TtGraph_BlendTree))]
-    public class TtBlendTreeClassDescription : TtDesignableVariableDescription
+    public class TtBlendTreeClassDescription : TtDesignableVariableDescription, IDataLineOperator, IPoseLineOperator, IExpressionOperator, IStatementOperator
     {
         [Rtti.Meta("")]
         [Category("Option")]
@@ -45,6 +47,14 @@ namespace EngineNS.Animation.Macross.BlendTree
         public List<TtBlendTreeNodeClassDescription> Nodes { get; set; } = new List<TtBlendTreeNodeClassDescription>();
         [Rtti.Meta, DrawInGraph]
         public List<TtPoseLineDescription> PoseLines { get; set; } = new();
+        [Rtti.Meta, DrawInGraph]
+        public List<TtDataLineDescription> DataLines { get; set; } = new();
+        [Rtti.Meta, DrawInGraph]
+        public List<TtExpressionDescription> Expressions { get; set; } = new();
+        [Rtti.Meta, DrawInGraph]
+        public List<TtStatementDescription> Statements { get; set; } = new();
+
+        #region Node
         public bool AddNode(TtBlendTreeNodeClassDescription node)
         {
             Nodes.Add(node);
@@ -57,8 +67,42 @@ namespace EngineNS.Animation.Macross.BlendTree
             node.Parent = null;
             return true;
         }
+        public TtBlendTreeNodeClassDescription GetLinkedBlendTreeNode(TtPosePinDescription pin)
+        {
+            Guid linkedPinId = Guid.Empty;
+            foreach (var line in PoseLines)
+            {
+                if (line.FromId == pin.Id)
+                {
+                    linkedPinId = line.ToId;
+                }
+                if (line.ToId == pin.Id)
+                {
+                    linkedPinId = line.FromId;
+                }
+            }
+            if (linkedPinId == Guid.Empty)
+            {
+                return null;
+            }
+            foreach (var node in Nodes)
+            {
+                if (node.TryGetPosePin(linkedPinId, out var linkedPin))
+                {
+                    return node;
+                }
+            }
+            return null;
+        }
+        #endregion
+
+        #region IPoseLineOperator
         public void AddPoseLine(TtPoseLineDescription poseLine)
         {
+            if(ContainsDataLineBetweenPins(poseLine.FromId, poseLine.ToId))
+            {
+                return;
+            };
             PoseLines.Add(poseLine);
             poseLine.Parent = this;
         }
@@ -69,6 +113,22 @@ namespace EngineNS.Animation.Macross.BlendTree
             poseLine.Parent = null;
             return true;
         }
+        public TtPoseLineDescription GetPoseLineWithPin(TtPosePinDescription dataPin)
+        {
+            foreach (var poseLine in PoseLines)
+            {
+                if (poseLine.FromId == dataPin.Id)
+                {
+                    return poseLine;
+                }
+                if (poseLine.ToId == dataPin.Id)
+                {
+                    return poseLine;
+                }
+            }
+            return null;
+        }
+
 
         public TtPosePinDescription GetLinkedPosePin(TtPosePinDescription posePin)
         {
@@ -95,6 +155,228 @@ namespace EngineNS.Animation.Macross.BlendTree
             }
             return null;
         }
+        public bool ContainsPoseLineBetweenPins(TtPosePinDescription pinA, TtPosePinDescription pinB)
+        {
+            return ContainsPoseLineBetweenPins(pinA.Id, pinB.Id);
+        }
+        public bool ContainsPoseLineBetweenPins(Guid pinAId, Guid pinBId)
+        {
+            foreach (var poseLine in PoseLines)
+            {
+                if ((poseLine.FromId == pinAId && poseLine.ToId == pinBId) ||
+                    (poseLine.FromId == pinBId && poseLine.ToId == pinAId))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        #endregion
+
+        #region IDataLineOperator
+        public void AddDataLine(TtDataLineDescription dataLine)
+        {
+            if(ContainsDataLineBetweenPins(dataLine.FromId, dataLine.ToId))
+            {
+                return;
+            }
+            DataLines.Add(dataLine);
+            dataLine.Parent = this;
+
+            var fromPin = GetDataPinById(dataLine.FromId);
+            var toPin = GetDataPinById(dataLine.ToId);
+            System.Diagnostics.Debug.Assert(fromPin != null && toPin != null);
+            IDataPinOperator.OnDataPinConnected(fromPin.Parent, fromPin, toPin, this);
+            IDataPinOperator.OnDataPinConnected(toPin.Parent, toPin, fromPin, this);
+        }
+        public TtDataPinDescription GetDataPinById(Guid dataPinId)
+        {
+            foreach (var node in Nodes)
+            {
+                if (node.TryGetDataPin(dataPinId, out var dataPin))
+                {
+                    return dataPin;
+                }
+            }
+            foreach (var statement in Statements)
+            {
+                if (statement.TryGetDataPin(dataPinId, out var dataPin))
+                {
+                    return dataPin;
+                }
+            }
+
+            foreach (var exp in Expressions)
+            {
+                if (exp.TryGetDataPin(dataPinId, out var dataPin))
+                {
+                    return dataPin;
+                }
+            }
+            return null;
+        }
+        public bool RemoveDataLine(TtDataLineDescription dataLine)
+        {
+            DataLines.Remove(dataLine);
+            dataLine.Parent = null;
+            var fromPin = GetDataPinById(dataLine.FromId);
+            var toPin = GetDataPinById(dataLine.ToId);
+
+            if (fromPin != null && fromPin.Parent != null)
+            {
+                IDataPinOperator.OnDataPinDisConnected(fromPin.Parent, fromPin, toPin, this);
+            }
+            if (toPin != null && toPin.Parent != null)
+            {
+                IDataPinOperator.OnDataPinDisConnected(toPin.Parent, toPin, fromPin, this);
+            }
+            return true;
+        }
+        public TtDataPinDescription GetLinkedDataPin(TtDataPinDescription dataPin)
+        {
+            var linkedPinId = Guid.Empty;
+            foreach (var dataLine in DataLines)
+            {
+                if (dataLine.FromId == dataPin.Id)
+                {
+                    linkedPinId = dataLine.ToId;
+                    break;
+                }
+                if (dataLine.ToId == dataPin.Id)
+                {
+                    linkedPinId = dataLine.FromId;
+                    break;
+                }
+            }
+            foreach (var statement in Statements)
+            {
+                if (statement.TryGetDataPin(linkedPinId, out var linkedPin))
+                {
+                    return linkedPin;
+                }
+            }
+
+            foreach (var exp in Expressions)
+            {
+                if (exp.TryGetDataPin(linkedPinId, out var linkedPin))
+                {
+                    return linkedPin;
+                }
+            }
+            foreach (var node in Nodes)
+            {
+                if (node.TryGetDataPin(linkedPinId, out var linkedPin))
+                {
+                    return linkedPin;
+                }
+            }
+            return null;
+        }
+
+        public TtDataLineDescription GetDataLineWithPin(TtDataPinDescription dataPin)
+        {
+            foreach (var dataLine in DataLines)
+            {
+                if (dataLine.FromId == dataPin.Id)
+                {
+                    return dataLine;
+                }
+                if (dataLine.ToId == dataPin.Id)
+                {
+                    return dataLine;
+                }
+            }
+            return null;
+        }
+        public List<TtDataLineDescription> GetDataLinesWithPin(TtDataPinDescription dataPin)
+        {
+            List<TtDataLineDescription> result = new();
+            foreach (var dataLine in DataLines)
+            {
+                if (dataLine.FromId == dataPin.Id)
+                {
+                    result.Add(dataLine);
+                }
+                if (dataLine.ToId == dataPin.Id)
+                {
+                    result.Add(dataLine);
+                }
+            }
+            return result;
+        }
+
+        public bool ContainsDataLineBetweenPins(TtDataPinDescription pinA, TtDataPinDescription pinB)
+        {
+            return ContainsDataLineBetweenPins(pinA.Id, pinB.Id);
+        }
+        public bool ContainsDataLineBetweenPins(Guid pinAId, Guid pinBId)
+        {
+            foreach (var dataLine in DataLines)
+            {
+                if ((dataLine.FromId == pinAId && dataLine.ToId == pinBId) ||
+                    (dataLine.FromId == pinBId && dataLine.ToId == pinAId))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        #endregion
+
+
+        #region IExepressionOperator 
+        public void AddExpression(TtExpressionDescription expression)
+        {
+            Expressions.Add(expression);
+            expression.Parent = this;
+        }
+        public bool RemoveExpression(TtExpressionDescription expression)
+        {
+            Expressions.Remove(expression);
+            expression.Parent = null;
+            return true;
+        }
+        #endregion
+
+        #region IStatementOperator
+        public void AddStatement(TtStatementDescription statement)
+        {
+            Statements.Add(statement);
+            statement.Parent = this;
+        }
+        public bool RemoveStatement(TtStatementDescription statement)
+        {
+            Statements.Remove(statement);
+            statement.Parent = null;
+            return true;
+        }
+        #endregion
+
+        public override void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+            foreach (var node in Nodes)
+            {
+                node.UpdateData(ref updateContext);
+            }
+            foreach (var expression in Expressions)
+            {
+                expression.UpdateData(ref updateContext);
+            }
+            foreach (var statement in Statements)
+            {
+                statement.UpdateData(ref updateContext);
+            }
+            foreach (var poseLine in PoseLines)
+            {
+                poseLine.UpdateData(ref updateContext);
+            }
+            foreach (var dataLines in DataLines)
+            {
+                dataLines.UpdateData(ref updateContext);
+            }
+            base.UpdateData(ref updateContext);
+        }
+
 
         public override List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
@@ -255,32 +537,6 @@ namespace EngineNS.Animation.Macross.BlendTree
         }
         #endregion
 
-        public TtBlendTreeNodeClassDescription GetLinkedBlendTreeNode(TtPosePinDescription pin)
-        {
-            Guid linkedPinId = Guid.Empty;
-            foreach(var line in PoseLines)
-            {
-                if (line.FromId == pin.Id)
-                {
-                    linkedPinId = line.ToId;
-                }
-                if (line.ToId == pin.Id)
-                {
-                    linkedPinId = line.FromId;
-                }
-            }
-            if(linkedPinId == Guid.Empty)
-            {
-                return null;
-            }
-            foreach (var node in Nodes) 
-            {
-                if(node.TryGetPosePin(linkedPinId, out var linkedPin))
-                {
-                    return node;
-                }
-            }
-            return null;
-        }
+       
     }
 }

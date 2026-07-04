@@ -25,7 +25,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
             var dataPinIn = new TtDataInPinDescription() { TypeDesc = TtTypeDesc.TypeOf<bool>() , Parent = this };
             endNode.DataInPins.Add(dataPinIn);
             AddStatement(endNode);
-            AddExecutionLine(new() { Parent = this, FromId = Start.GetExecutionOutPins()[0].Id, ToId = endNode.ExecutionInPins[0].Id });
+            AddExecutionLine(new() { Parent = this, FromId = Start.ExecutionOutPins[0].Id, ToId = endNode.ExecutionInPins[0].Id });
         }
     }
     [GraphElement(typeof(TtGraphElement_TimedStateTransition))]

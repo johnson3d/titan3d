@@ -4,6 +4,8 @@
 #include "NxInputAssembly.h"
 #include "NxDrawcall.h"
 #include "../../Math/v3dxRayCast.h"
+#include "../Bricks/Quark/ClusterDAG.h"
+#include "../Bricks/Quark/HierarchyBuilder.h"
 
 #define new VNEW
 
@@ -750,7 +752,7 @@ namespace NxRHI
             mClustersVB.resize(vbCount);
             mClustersIB.resize(ibCount);
 
-            for (int i = 0; i < mClusters.size(); ++i)
+            for (int i = 0; i < (int)mClusters.size(); ++i)
             {
                 // vb, ib offset info
                 mClusters[i].VertexStart = vbOffset;
@@ -759,7 +761,12 @@ namespace NxRHI
                 mClusters[i].IndexCount = int(mClusters[i].Indexes.size());
 
                 memcpy((BYTE*)&mClustersVB[vbOffset], (BYTE*)&mClusters[i].Verts[0], int(mClusters[i].Verts.size()) * sizeof(float));
-                memcpy((BYTE*)&mClustersIB[ibOffset], (BYTE*)&mClusters[i].Indexes[0], int(mClusters[i].Indexes.size()) * sizeof(UINT));
+
+                // Add vbOffset to convert local cluster indices to global VB indices
+                for (int idx = 0; idx < (int)mClusters[i].Indexes.size(); idx++)
+                {
+                    mClustersIB[ibOffset + idx] = mClusters[i].Indexes[idx] + vbOffset;
+                }
 
                 vbOffset += mClusters[i].VertexCount;
                 ibOffset += mClusters[i].IndexCount;
@@ -794,6 +801,89 @@ namespace NxRHI
 	{
 		ASSERT(index < int(mClusters.size()));
 		return &mClusters[index];
+	}
+
+	float FMeshPrimitives::GetClusterLODError(int index) const
+	{
+		if (index < 0 || index >= (int)mClusters.size())
+			return 0.0f;
+		return mClusters[index].LODError;
+	}
+
+	int FMeshPrimitives::GetClusterMipLevel(int index) const
+	{
+		if (index < 0 || index >= (int)mClusters.size())
+			return 0;
+		return mClusters[index].MipLevel;
+	}
+
+	int FMeshPrimitives::BuildNaniteDAG(IGpuDevice* device)
+	{
+		return BuildNaniteDAGEx(device, 32);
+	}
+
+	int FMeshPrimitives::BuildNaniteDAGEx(IGpuDevice* device, UINT maxGroupSize, UINT clusterSize)
+	{
+		std::vector<v3dxVector3> Verts;
+		std::vector<UINT> Indexes;
+
+		if (!GetMeshBuffer(device, Verts, Indexes))
+			return 0;
+
+		// Build the full DAG with configurable group size and cluster size
+		FClusterDAG DAG(8, maxGroupSize, clusterSize);
+		std::vector<INT32> MaterialIndexes; // Empty for now
+		UINT NumLevel0 = DAG.AddMesh(Verts, Indexes, MaterialIndexes);
+		if (NumLevel0 == 0)
+			return 0;
+
+		VFX_LTRACE(ELTT_info, "[BuildNaniteDAG] Level 0: %u clusters from %u triangles\n", NumLevel0, (UINT)(Indexes.size() / 3));
+
+		// Build hierarchy levels
+		DAG.BuildDAG();
+		DAG.PrintDAGInfo();
+
+		// Copy all clusters from DAG into mClusters
+		mClusters.clear();
+		mClusters.resize(DAG.Clusters.size());
+		for (UINT i = 0; i < (UINT)DAG.Clusters.size(); i++)
+		{
+			mClusters[i] = *DAG.Clusters[i];
+		}
+		mDAGMipLevels = DAG.NumMipLevels;
+
+		// Rebuild flat VB/IB for all clusters (for visualization)
+		mClustersVB.clear();
+		mClustersIB.clear();
+
+		int vbOffset = 0;
+		int ibOffset = 0;
+		for (UINT i = 0; i < (UINT)mClusters.size(); i++)
+		{
+			auto& Cluster = mClusters[i];
+			Cluster.VertexStart = vbOffset;
+			Cluster.VertexCount = (int)Cluster.NumVerts;
+			Cluster.IndexStart = ibOffset;
+			Cluster.IndexCount = (int)Cluster.Indexes.size();
+
+			for (UINT v = 0; v < Cluster.NumVerts; v++)
+			{
+				mClustersVB.push_back(Cluster.GetPosition(v));
+			}
+
+			for (UINT idx = 0; idx < (UINT)Cluster.Indexes.size(); idx++)
+			{
+				mClustersIB.push_back(Cluster.Indexes[idx] + vbOffset);
+			}
+
+			vbOffset += Cluster.VertexCount;
+			ibOffset += Cluster.IndexCount;
+		}
+
+		VFX_LTRACE(ELTT_info, "[BuildNaniteDAG] Total: %u clusters, %u verts, %u indices, %u mip levels\n",
+			(UINT)mClusters.size(), (UINT)mClustersVB.size(), (UINT)mClustersIB.size(), mDAGMipLevels);
+
+		return (int)mClusters.size();
 	}
 	bool FMeshPrimitives::LoadXnd(IGpuDevice* device, const char* name, XndHolder* xnd, bool isLoad)
 	{

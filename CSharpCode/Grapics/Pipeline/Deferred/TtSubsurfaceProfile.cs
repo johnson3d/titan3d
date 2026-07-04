@@ -38,7 +38,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             return false;
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return await TtEngine.Instance.GfxDevice.SubsurfaceProfileManager.GetProfile(GetAssetName());
         }
@@ -58,7 +58,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
     [TtSubsurfaceProfileData.TtSubsurfaceProfileImport]
     [IO.AssetCreateMenu(MenuName = "Graphics/SubsurfaceProfile")]
-    [Editor.UAssetEditor(EditorType = typeof(TtSubsurfaceProfileEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(TtSubsurfaceProfileEditor))]
     public class TtSubsurfaceProfileData : IO.BaseSerializer, IO.IAsset, IO.ISerializer
     {
         public const string AssetExt = ".sssprofile";

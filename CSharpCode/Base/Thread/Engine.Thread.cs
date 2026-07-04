@@ -62,7 +62,7 @@ namespace EngineNS
                 case Thread.Async.EAsyncTarget.Logic:
                     ctx = this.ThreadLogic;
                     break;
-                case Thread.Async.EAsyncTarget.Render:
+                case Thread.Async.EAsyncTarget.Rhi:
                     ctx = this.ThreadRHI;
                     break;
                 case Thread.Async.EAsyncTarget.Main:
@@ -85,7 +85,7 @@ namespace EngineNS
                     return ctx == this.ThreadPhysics;
                 case Thread.Async.EAsyncTarget.Logic:
                     return ctx == this.ThreadLogic;
-                case Thread.Async.EAsyncTarget.Render:
+                case Thread.Async.EAsyncTarget.Rhi:
                     return ctx == this.ThreadRHI;
                 case Thread.Async.EAsyncTarget.Main:
                     return ctx == this.ThreadMain;

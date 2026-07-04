@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UAnimationClipEditor : Editor.IAssetEditor, ITickable, IRootForm
+    public class TtAnimationClipEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
         public int GetTickOrder()
         {
@@ -20,7 +20,7 @@ namespace EngineNS.Editor.Forms
         public Animation.Asset.TtAnimationClip AnimationClip;
         public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
         public EGui.Controls.PropertyGrid.TtPropertyGrid AnimationClipPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
-        ~UAnimationClipEditor()
+        ~TtAnimationClipEditor()
         {
             Dispose();
         }
@@ -208,7 +208,11 @@ namespace EngineNS.Editor.Forms
             AnimationClipPropGrid.Target = AnimationClipPreview;
             TtEngine.Instance.TickableManager.AddTickable(this);
 
-            AnimationClipPreview.PreivewMesh = AnimationClip.PreviewMeshName;
+            var ameta = AssetName.AMeta as Animation.Asset.TtAnimationClipAMeta;
+            if (ameta != null && ameta.PreviewMeshName != null)
+                AnimationClipPreview.PreivewMesh = ameta.PreviewMeshName;
+            else
+                AnimationClipPreview.PreivewMesh = AnimationClip.PreviewMeshName;
             return true;
         }
         public async TtTask OnPreviewMeshChange(TtMaterialMesh materialMesh)
@@ -247,7 +251,7 @@ namespace EngineNS.Editor.Forms
         class TtAnimationClipPreview
         {
             [Browsable(false)]
-            public UAnimationClipEditor AnimationClipEditor = null;
+            public TtAnimationClipEditor AnimationClipEditor = null;
             [Browsable(false)]
             public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
             private RName mPreivewMeshName;
@@ -277,6 +281,12 @@ namespace EngineNS.Editor.Forms
                         AssetState = IO.EAssetState.LoadFinished;
                         await AnimationClipEditor.OnPreviewMeshChange(Mesh);
                         AnimationClipEditor.AnimationClip.PreviewMeshName = value;
+                        var ameta = AnimationClipEditor.AssetName.AMeta as Animation.Asset.TtAnimationClipAMeta;
+                        if (ameta != null)
+                        {
+                            ameta.PreviewMeshName = value;
+                            ameta.SaveAMeta((IO.IAsset)null);
+                        }
                     };
                     exec();
                 }
@@ -315,7 +325,7 @@ namespace EngineNS.Editor.Forms
 }
 namespace EngineNS.Animation.Asset
 {
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.UAnimationClipEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(Editor.Forms.TtAnimationClipEditor))]
     public partial class TtAnimationClip
     {
 

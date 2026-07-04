@@ -44,6 +44,7 @@ namespace EngineNS.Graphics.Pipeline
                 RenderPolicy = null;
             }
         }
+        public IAssetEditor AssetEditor { get; set; } = null;
         protected NxRHI.FViewPort mViewport = new NxRHI.FViewPort();
         public NxRHI.FViewPort Viewport { get => mViewport; }
         NxRHI.FScissorRect mScissorRect = new NxRHI.FScissorRect();

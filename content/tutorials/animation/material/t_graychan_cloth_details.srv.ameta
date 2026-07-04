@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="b01e1b80bd6b71bd65aed4eeabf4ddf47c318a9a054521f1712994767ade223e" />
+      <Path Type="System.String@Unknown" Value="t_graychan_cloth_details.srv" />
+    </e_0>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="5eeca20c-b7af-4a5a-9702-45edf3de740d" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/animation/material/t_graychan_cloth_details.srv,5eeca20c-b7af-4a5a-9702-45edf3de740d" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.TtSrView&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <OriginImageAddress Type="System.String@Unknown" Value="F:\Assets\GrayChan\Game\KawaiiPhysicsSample\Model\GrayChan\Textures\T_GrayChan_Cloth_Details.PNG" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.TtSrView@EngineCore" />
+</Root>

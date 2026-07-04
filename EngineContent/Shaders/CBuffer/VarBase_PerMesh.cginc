@@ -25,11 +25,6 @@ cbuffer cbPerMesh DX_BIND_B(5)
 	{
 		return (MeshRenderFlags & ERenderFlags_AcceptShadow) != 0;
 	}
-
-	bool IsUnlit()
-	{
-		return (MeshRenderFlags & ERenderFlags_UnLight) != 0;
-	}
 };
 
 #endif

@@ -289,8 +289,8 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
             var end = renderingContext.ViewportTransform(AbsLocation + new Vector2(Size.Width, Size.Height));
             Rect rect = new Rect(start.X, start.Y, end.X - start.X, end.Y - start.Y);
             //冗余一点
-            Rect mouseRect = new Rect(context.MouseAbsPos - Vector2.One, new SizeF(1.0f, 1.0f));
-            return rect.IntersectsWith(mouseRect);
+            //Rect mouseRect = new Rect(context.MouseAbsPos - Vector2.One, new SizeF(1.0f, 1.0f));
+            return rect.IntersectsWith(context.MouseAbsRect);
         }
     }
 

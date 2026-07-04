@@ -363,7 +363,7 @@ namespace EngineNS.Editor.Forms
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.UMaterialInstanceEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(Editor.Forms.UMaterialInstanceEditor))]
     public partial class TtMaterialInstance
     {
     }

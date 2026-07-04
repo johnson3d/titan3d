@@ -116,12 +116,13 @@ namespace EngineNS.Bricks.DataCopyer
             foreach (var i in metaVersion.Propertys)
             {
                 if (i.PropInfo != null)
-                {
+                {   
                     if (i.PropInfo.CanRead == false || (i.PropInfo.GetGetMethod() != null && i.PropInfo.GetGetMethod().IsStatic))
                     {
                         continue;
                     }
-                    if (i.PropInfo.GetCustomAttribute<Rtti.MetaAttribute>().IsNoSerializable)
+                    var attr = i.PropInfo.GetCustomAttribute<Rtti.MetaAttribute>();
+                    if (attr!=null && attr.IsNoSerializable)
                     {
                         continue;
                     }
@@ -145,7 +146,9 @@ namespace EngineNS.Bricks.DataCopyer
                         if (type != null)
                         {
                             discardObj = ReadObject(ar, type.SystemType, obj, null, hasSkip);
+                            continue;
                         }
+                        System.Diagnostics.Debug.Assert(false);
                         return;
                     }
                     if (IsPrimitiveType(i.PropInfo.PropertyType))

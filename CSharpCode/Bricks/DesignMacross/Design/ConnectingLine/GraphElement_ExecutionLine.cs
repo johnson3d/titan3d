@@ -1,18 +1,18 @@
-﻿using EngineNS.Bricks.NodeGraph;
+﻿using EngineNS.Animation.Macross.BlendTree;
+using EngineNS.Bricks.NodeGraph;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.DesignMacross.Editor;
 using EngineNS.EGui.Controls;
+using NPOI.SS.UserModel;
 
 namespace EngineNS.DesignMacross.Design.ConnectingLine
 {
     [ImGuiElementRender(typeof(TtGraphElementRender_ExecutionLine))]
-    public class TtGraphElement_ExecutionLine : TtDescriptionGraphElement
+    public class TtGraphElement_ExecutionLine : TtGraphElement_Line
     {
         public TtExecutionLineDescription ExecutionLineDescription { get => Description as TtExecutionLineDescription; }
-        public IGraphElement From { get; set; } = null;
-        public IGraphElement To { get; set; } = null;
 
         public TtGraphElement_ExecutionLine(IDescription description, IGraphElementStyle style) : base(description, style)
         {
@@ -45,84 +45,39 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             }
             base.AfterConstructElements(ref context);
         }
+        public override void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
+        {
+            popupMenu.bHasSearchBox = false;
+            var parentMenu = popupMenu.Menu;
+            var cmdHistory = context.CommandHistory;
+            parentMenu.AddMenuSeparator("GENERAL");
+
+            if (context.DesignedGraph is TtGraph graph)
+            {
+                var graphDesc = graph.Description as IExecutionLineOperator;
+                if (graphDesc != null)
+                {
+                    parentMenu.AddMenuItem("Break Link", null, (TtMenuItem item, object sender) =>
+                    {
+                        cmdHistory.CreateAndExtuteCommand("Break Link",
+                            (data) => { graphDesc.RemoveExecutionLine(ExecutionLineDescription); },
+                            (data) => { graphDesc.AddExecutionLine(ExecutionLineDescription); }
+                            );
+                    });
+                }
+            }
+        }
     }
     [ImGuiElementRender(typeof(TtGraphElementRender_PreviewExecutionLine))]
-    public class TtGraphElement_PreviewExecutionLine : IGraphElement
+    public class TtGraphElement_PreviewExecutionLine : TtGraphElement_PreviewLine
     {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public Vector2 Location { get; set; }
-        public Vector2 AbsLocation { get; set; }
-        public SizeF Size { get; set; }
-        public IGraphElement Parent { get; set; }
-        public IGraphElementStyle Style { get; set; }
 
-        public TtExecutionPinDescription StartPin { get; set; } = null;
-
-        #region Selectable
-        public bool CanDrag()
-        {
-            return false;
-        }
-
-        public void OnDragging(Vector2 delta)
-        {
-
-        }
-
-        public bool HitCheck(ref FMouseEventContext context)
-        {
-            return false;
-        }
-
-        public void OnSelected(ref FMouseEventContext context)
-        {
-        }
-
-        public void OnUnSelected()
-        {
-        }
-
-        public void OnMouseOver(ref FMouseEventContext context)
-        {
-        }
-
-        public void OnMouseLeave(ref FMouseEventContext context)
-        {
-        }
-
-        public void OnMouseLeftButtonDown(ref FMouseEventContext context)
-        {
-        }
-
-        public void OnMouseLeftButtonUp(ref FMouseEventContext context)
-        {
-        }
-
-        public void OnMouseRightButtonDown(ref FMouseEventContext context)
-        {
-        }
-
-        public void OnMouseRightButtonUp(ref FMouseEventContext context)
-        {
-        }
-        #endregion
 
     }
     [ImGuiElementRender(typeof(TtGraphElementRender_ExecutionPin))]
-    public class TtGraphElement_ExecutionPin : TtDescriptionGraphElement
+    public class TtGraphElement_ExecutionPin : TtGraphElement_Pin
     {
         public TtExecutionPinDescription ExecutionPinDescription { get => Description as TtExecutionPinDescription; }
-        public override FMargin Margin { get; set; } = new FMargin(2, 2, 2, 2);
-        public TtGraphElement_TextBlock NameTextBlock = new TtGraphElement_TextBlock();
-        public TtGraphElement_StackPanel ElementContainer = new();
-        public TtGraphElement_Icon Icon = new();
-        public Color4f BackgroundColor
-        {
-            get => Style.BackgroundColor;
-            set => Style.BackgroundColor = value;
-        }
-        public float Rounding { get; set; } = 5;
         public TtGraphElement_ExecutionPin(IDescription description, IGraphElementStyle style) : base(description, style)
         {
             bool isIconAtLeft = false;
@@ -136,6 +91,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             }
             ElementContainer.Parent = this;
             ElementContainer.Orientation = EOrientation.Horizontal;
+            ElementContainer.VerticalAlignment = EVerticalAlignment.Center;
             NameTextBlock.Content = ExecutionPinDescription.Name;
             NameTextBlock.VerticalAlignment = EVerticalAlignment.Center;
             NameTextBlock.HorizontalAlignment = EHorizontalAlignment.Left;
@@ -239,39 +195,40 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             {
                 var renderContext = context.GraphElementRenderingContext;
                 var methodGraph = renderContext.DesignedGraph as TtGraph_Method;
-                methodGraph.PreviewExecutionLine = new TtGraphElement_PreviewExecutionLine();
-                methodGraph.PreviewExecutionLine.AbsLocation = Icon.AbsCenter;
-                methodGraph.PreviewExecutionLine.StartPin = ExecutionPinDescription;
+                methodGraph.PreviewLine = new TtGraphElement_PreviewExecutionLine
+                {
+                    AbsLocation = Icon.AbsCenter,
+                    StartPin = ExecutionPinDescription
+                };
             }
         }
 
         public override void OnMouseLeftButtonUp(ref FMouseEventContext context)
         {
             var renderContext = context.GraphElementRenderingContext;
-            var methodGraph = renderContext.DesignedGraph as TtGraph_Method;
-            if (methodGraph.PreviewDataLine != null)
+            var graph = renderContext.DesignedGraph as TtGraph;
+            if (graph.PreviewLine != null && graph.PreviewLine.StartPin is TtExecutionPinDescription startPin)
             {
-                methodGraph.PreviewDataLine = null;
-            }
-            if (methodGraph.PreviewExecutionLine != null)
-            {
-                var startPin = methodGraph.PreviewExecutionLine.StartPin;
                 if (startPin != ExecutionPinDescription && startPin.Parent != ExecutionPinDescription.Parent)
                 {
                     var fromId = Guid.Empty;
                     var fromDescName = "";
                     var toId = Guid.Empty;
                     var toDescName = "";
+                    TtExecutionOutPinDescription fromPin = null;
+                    TtExecutionInPinDescription toPin = null;
                     bool validLine = false;
-                    if (methodGraph.PreviewExecutionLine.StartPin is TtExecutionInPinDescription)
+                    if (startPin is TtExecutionInPinDescription)
                     {
                         if (ExecutionPinDescription is TtExecutionOutPinDescription)
                         {
                             validLine = true;
                             fromId = ExecutionPinDescription.Id;
+                            fromPin = ExecutionPinDescription as TtExecutionOutPinDescription;
                             fromDescName = ExecutionPinDescription.Parent.Name;
-                            toId = methodGraph.PreviewExecutionLine.StartPin.Id;
-                            toDescName = methodGraph.PreviewExecutionLine.StartPin.Parent.Name;
+                            toId = startPin.Id;
+                            toPin = startPin as TtExecutionInPinDescription;
+                            toDescName = startPin.Parent.Name;
                         }
                     }
                     else
@@ -279,23 +236,50 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
                         if (ExecutionPinDescription is TtExecutionInPinDescription)
                         {
                             validLine = true;
-                            System.Diagnostics.Debug.Assert(methodGraph.PreviewExecutionLine.StartPin is TtExecutionOutPinDescription);
-                            fromId = methodGraph.PreviewExecutionLine.StartPin.Id;
-                            fromDescName = methodGraph.PreviewExecutionLine.StartPin.Parent.Name;
+                            System.Diagnostics.Debug.Assert(startPin is TtExecutionOutPinDescription);
+                            fromId = startPin.Id;
+                            fromPin = startPin as TtExecutionOutPinDescription;
+                            fromDescName = startPin.Parent.Name;
                             toId = ExecutionPinDescription.Id;
+                            toPin = ExecutionPinDescription as TtExecutionInPinDescription;
                             toDescName = ExecutionPinDescription.Parent.Name;
                         }
                     }
-                    if (validLine)
+                    var graphDesc = graph.Description as IExecutionLineOperator;
+                    if (validLine && !graphDesc.ContainsExecutionLineBetweenPins(fromId, toId))
                     {
+                        var linkedLineFromPin = graphDesc.GetExecutionLineWithPin(fromPin);
+                        var linkedLineToPin = graphDesc.GetExecutionLineWithPin(toPin);
                         var line = new TtExecutionLineDescription() { Name = "Exec_" + fromDescName + "_To_" + toDescName, FromId = fromId, ToId = toId };
                         renderContext.CommandHistory.CreateAndExtuteCommand("AddExecutionLine",
-                                (data) => { methodGraph.MethodDescription.AddExecutionLine(line); },
-                                (data) => { methodGraph.MethodDescription.RemoveExecutionLine(line); });
+                                (data) =>
+                                {
+                                    if (linkedLineFromPin != null && !fromPin.CanMutilLink)
+                                    {
+                                        graphDesc.RemoveExecutionLine(linkedLineFromPin);
+                                    }
+                                    if (linkedLineToPin != null && !toPin.CanMutilLink)
+                                    {
+                                        graphDesc.RemoveExecutionLine(linkedLineToPin);
+                                    }
+                                    graphDesc.AddExecutionLine(line); 
+                                },
+                                (data) => 
+                                {
+                                    if (linkedLineFromPin != null)
+                                    {
+                                        graphDesc.AddExecutionLine(linkedLineFromPin);
+                                    }
+                                    if (linkedLineToPin != null)
+                                    {
+                                        graphDesc.AddExecutionLine(linkedLineToPin);
+                                    }
+                                    graphDesc.RemoveExecutionLine(line); 
+                                });
                     }
                 }
             }
-            methodGraph.PreviewExecutionLine = null;
+            graph.PreviewLine = null;
         }
         public override void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
         {
@@ -304,17 +288,18 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             var cmdHistory = context.CommandHistory;
             parentMenu.AddMenuSeparator("GENERAL");
 
-            if (context.DesignedGraph is TtGraph_Method methodGraph)
+            if (context.DesignedGraph is TtGraph graph)
             {
-                foreach (var line in methodGraph.MethodDescription.ExecutionLines)
+                var graphDesc = graph.Description as IExecutionLineOperator;
+                foreach (var line in graphDesc.ExecutionLines)
                 {
                     if (line.FromId == Id || line.ToId == Id)
                     {
                         parentMenu.AddMenuItem("Break Link", null, (TtMenuItem item, object sender) =>
                         {
                             cmdHistory.CreateAndExtuteCommand("Break Link",
-                                (data) => { methodGraph.MethodDescription.RemoveExecutionLine(line); },
-                                (data) => { methodGraph.MethodDescription.AddExecutionLine(line); }
+                                (data) => { graphDesc.RemoveExecutionLine(line); },
+                                (data) => { graphDesc.AddExecutionLine(line); }
                                 );
                         });
                     }
@@ -344,7 +329,21 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
 
             var p2 = new Vector2(p1.X + ctDelta, p1.Y);
             var p3 = new Vector2(p4.X - ctDelta, p4.Y);
-            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1, 1, 1, 1)), TtDesignMacrossGraphStyles.LineNormalThickness * context.Camera.Scale, 30);
+
+            var lineColor = new Color4f(1, 1, 1, 1);
+            var thickness = TtDesignMacrossGraphStyles.LineNormalThickness;
+            if (line.HighLightState == EHighLigthState.HighLigth)
+            {
+                lineColor.Alpha = 1.0f;
+                thickness = TtDesignMacrossGraphStyles.LineHighLightThickness;
+            }
+            else if (line.HighLightState == EHighLigthState.LowLight)
+            {
+                lineColor.Alpha = 0.6f;
+                thickness = TtDesignMacrossGraphStyles.LineLowLightThickness;
+            }
+
+            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(lineColor), thickness * context.Camera.Scale, 100);
         }
     }
     public class TtGraphElementRender_PreviewExecutionLine : IGraphElementRender
@@ -377,7 +376,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
 
             var p2 = new Vector2(p1.X + ctDelta, p1.Y);
             var p3 = new Vector2(p4.X - ctDelta, p4.Y);
-            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1, 1, 1, 1)), TtDesignMacrossGraphStyles.LineNormalThickness * context.Camera.Scale, 30);
+            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1, 1, 1, 1)), TtDesignMacrossGraphStyles.LineNormalThickness * context.Camera.Scale, 100);
         }
     }
     public class TtGraphElementRender_ExecutionPin : IGraphElementRender
@@ -385,6 +384,14 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         public void Draw(IRenderableElement renderableElement, ref FGraphElementRenderingContext context)
         {
             var pin = renderableElement as TtGraphElement_ExecutionPin;
+            if (pin.HighLightState == EHighLigthState.HighLigth || pin.HighLightState == EHighLigthState.Normal)
+            {
+                pin.Icon.TintColor = new Color4f(pin.Icon.TintColor, 1.0f);
+            }
+            else if (pin.HighLightState == EHighLigthState.LowLight)
+            {
+                pin.Icon.TintColor = new Color4f(pin.Icon.TintColor, TtDesignMacrossGraphStyles.LowLigthAlpha);
+            }
             var cmdlist = ImGuiAPI.GetWindowDrawList();
             var nodeStart = context.ViewportTransform(pin.AbsLocation);
             var nodeEnd = context.ViewportTransform(pin.AbsLocation + new Vector2(pin.Size.Width, pin.Size.Height));

@@ -1,14 +1,15 @@
-﻿using EngineNS.DesignMacross.Editor;
-using EngineNS.DesignMacross.Base.Graph;
-using System.Collections;
-using System.Reflection;
-using EngineNS.Rtti;
-using EngineNS.DesignMacross.Base.Render;
+﻿using EngineNS.Bricks.StateMachine.Macross.SubState;
 using EngineNS.DesignMacross.Base.Description;
-using System.Diagnostics;
+using EngineNS.DesignMacross.Base.Graph;
+using EngineNS.DesignMacross.Base.Render;
 using EngineNS.DesignMacross.Design;
+using EngineNS.DesignMacross.Design.ConnectingLine;
+using EngineNS.DesignMacross.Editor;
 using EngineNS.EGui.Controls;
-using EngineNS.Bricks.StateMachine.Macross.SubState;
+using EngineNS.Rtti;
+using System.Collections;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
 {
@@ -22,7 +23,6 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
             Description = description;
 
         }
-
         public override void ConstructElements(ref FGraphRenderingContext context)
         {
             Elements.Clear();

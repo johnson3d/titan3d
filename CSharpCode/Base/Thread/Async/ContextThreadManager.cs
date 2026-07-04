@@ -32,6 +32,7 @@ namespace EngineNS.Thread.Async
         Physics,
         Logic,
         Render,
+        Rhi,//Rhi in Main
         Main,
         AsyncEditor,
         TPools,//塞在这个队列的异步处理，必须相互之间没有依赖，可以并行，因为线程池会有多条线程去取出来执行

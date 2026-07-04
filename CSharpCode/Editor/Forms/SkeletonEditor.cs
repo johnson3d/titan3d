@@ -46,14 +46,57 @@ namespace EngineNS.Editor.Forms
             return !(left == right);
         }
     }
+    /// <summary>
+    /// 骨骼球体的 HitProxy 代理对象，使编辑器视口中的骨骼球可被点击拾取。
+    /// </summary>
+    public class TtBoneHitProxy : Graphics.Pipeline.IProxiable
+    {
+        public int BoneIndex;
+        public string BoneName;
+        public ILimb Limb;
+
+        public Graphics.Pipeline.TtHitProxy HitProxy { get; set; }
+        public Graphics.Pipeline.TtHitProxy.EHitproxyType HitproxyType { get; set; } = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
+        public bool Selected { get; set; }
+
+        public Graphics.Mesh.TtRenderMesh Mesh { get; set; }
+
+        public void OnHitProxyChanged()
+        {
+            if (Mesh == null) return;
+            if (HitProxy == null || HitproxyType == Graphics.Pipeline.TtHitProxy.EHitproxyType.None)
+            {
+                Mesh.IsDrawHitproxy = false;
+                return;
+            }
+            Mesh.IsDrawHitproxy = true;
+            var value = HitProxy.ConvertHitProxyIdToVector4();
+            Mesh.SetHitproxy(in value);
+        }
+
+        public void GetHitProxyDrawMesh(List<Graphics.Mesh.TtRenderMesh> meshes)
+        {
+            if (Mesh != null)
+                meshes.Add(Mesh);
+        }
+    }
+
     //[Rtti.Meta("", NameAlias = new string[] { "EngineNS.Editor.Forms.USkeletonShowNode@EngineCore", "EngineNS.Editor.Forms.USkeletonShowNode" })]
     public class TtSkeletonShowNode : TtVisual
     {
+        // 从配置读取颜色，支持用户自定义
+        static TtMeshPrimitiveEditorConfig GetEditorConfig()
+        {
+            return TtEngine.Instance?.ConfigManager?.GetConfig<TtMeshPrimitiveEditorConfig>();
+        }
+        static Color4b BoneSphereColor => GetEditorConfig()?.BoneSphereColor ?? Color4b.Green;
+        static Color4b BoneSphereHighlightColor => GetEditorConfig()?.BoneSphereHighlightColor ?? Color4b.FromArgb(0xFF, 0xFF, 0x00, 0x00);
+        static Color4b BoneLineColor => GetEditorConfig()?.BoneLineColor ?? Color4b.Green;
         public static async Thread.Async.TtTask<TtSkeletonShowNode> AddNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
             var node = await GamePlay.Scene.TtNode.SpawnNode<TtSkeletonShowNode>(parent, null, data, EBoundVolumeType.Box, placementType);
-            node.NodeData.Name = node.SceneId.ToString();
+            node.NodeData.Name = node.NodeId.ToString();
 
             node.Placement.SetTransform(in pos, in scale, in quat);
 
@@ -66,6 +109,17 @@ namespace EngineNS.Editor.Forms
         }
         Dictionary<int, TtRenderMesh> BoneMeshes = new();
         Dictionary<FBoneLine, TtRenderMesh> BoneLineMeshes = new();
+        Dictionary<int, TtBoneHitProxy> BoneProxies = new();
+
+        /// <summary>
+        /// 查找与 HitProxy 拾取结果对应的 TtBoneHitProxy，用于外部处理骨骼选中
+        /// </summary>
+        public TtBoneHitProxy FindBoneProxy(Graphics.Pipeline.IProxiable proxy)
+        {
+            if (proxy is TtBoneHitProxy boneProxy && BoneProxies.ContainsValue(boneProxy))
+                return boneProxy;
+            return null;
+        }
         public TtSkeletonAsset SkeletonAsset { get; set; } = null;
         public TtLocalSpaceRuntimePose CurrentPose = null;
         bool mXRay = false;
@@ -96,16 +150,28 @@ namespace EngineNS.Editor.Forms
         {
             var nodeData = data as TtSkeletonShowNodeData;
             SkeletonAsset = nodeData.SkeletonAsset;
-            var animPose = SkeletonAsset.Skeleton.CreatePose() as Animation.SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
+            var animPose = SkeletonAsset.Skeleton.CreateSkeletonPose();
             CurrentPose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animPose);
-            var runtimePose = TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(CurrentPose);
+            //var runtimePose = TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(CurrentPose);
             var wireMat = GetBoneMaterial();
             for (int i = 0; i < SkeletonAsset.Skeleton.Limbs.Count; ++i)
             {
-                var index = SkeletonAsset.Skeleton.Limbs[i].Index.Value;
-                var meshProvider = Graphics.Mesh.TtMeshDataProvider.MakeSphere(0.005f, 5, 5, Color4b.Green.ToB8G8R8A8());
+                var limb = SkeletonAsset.Skeleton.Limbs[i];
+                var index = limb.Index.Value;
+                var meshProvider = Graphics.Mesh.TtMeshDataProvider.MakeSphere(0.005f, 5, 5, BoneSphereColor.ToB8G8R8A8());
                 var mesh = meshProvider.ToDrawMesh(wireMat);
                 BoneMeshes.Add(index, mesh);
+
+                // 为每个骨骼球创建 HitProxy 代理
+                var boneProxy = new TtBoneHitProxy()
+                {
+                    BoneIndex = index,
+                    BoneName = limb.Desc?.Name,
+                    Limb = limb,
+                    Mesh = mesh
+                };
+                TtEngine.Instance.GfxDevice.HitproxyManager.MapProxy(boneProxy);
+                BoneProxies.Add(index, boneProxy);
             }
             CreateBoneLineMesh(SkeletonAsset.Skeleton.Root);
             return base.InitializeNode(world, data, bvType, placementType);
@@ -116,11 +182,33 @@ namespace EngineNS.Editor.Forms
             foreach (var child in limb.Children)
             {
                 var end = child.Index.Value;
-                var meshProvider = Graphics.Mesh.TtMeshDataProvider.MakeBox(0, -0.0005f, -0.0005f, 1, 0.001f, 0.001f, Color4b.Green.ToB8G8R8A8());
+                var meshProvider = Graphics.Mesh.TtMeshDataProvider.MakeBox(0, -0.0005f, -0.0005f, 1, 0.001f, 0.001f, BoneLineColor.ToR8G8B8A8());
                 var mesh = meshProvider.ToDrawMesh(GetBoneMaterial());
                 var boneLine = new FBoneLine() { Start = start, End = end };
                 BoneLineMeshes.Add(boneLine, mesh);
                 CreateBoneLineMesh(child);
+            }
+        }
+        void ShowBoneLineWhitInitMatrix(ILimb limb, TtWorld.TtVisParameter rp)
+        {
+            var startIndex = limb.Index.Value;
+            var startTranslation = limb.Desc.InitMatrix.Translation;
+            foreach (var child in limb.Children)
+            {
+                var endIndex = child.Index.Value;
+                var endTranslation = child.Desc.InitMatrix.Translation;
+                var dir = endTranslation - startTranslation;
+                var length = dir.Length();
+                dir.Normalize();
+                Quaternion rotation = Quaternion.GetQuaternion(Vector3.Right, dir);
+                var boneLine = new FBoneLine() { Start = startIndex, End = endIndex };
+                if (BoneLineMeshes.ContainsKey(boneLine))
+                {
+                    FTransform transfrom = FTransform.CreateTransform(startTranslation.AsDVector(), new Vector3(length, 1, 1), rotation);
+                    BoneLineMeshes[boneLine].SetWorldTransform(transfrom, rp.World, false);
+                    rp.AddVisibleMesh(BoneLineMeshes[boneLine]);
+                }
+                ShowBoneLineWhitInitMatrix(child, rp);
             }
         }
         void ShowBoneLine(ILimb limb, TtMeshSpaceRuntimePose runtimePose, TtWorld.TtVisParameter rp)
@@ -173,15 +261,27 @@ namespace EngineNS.Editor.Forms
             // 恢复旧的
             if (mHighlightedBoneIndex >= 0 && BoneMeshes.ContainsKey(mHighlightedBoneIndex))
             {
-                var mp = Graphics.Mesh.TtMeshDataProvider.MakeSphere(0.005f, 5, 5, Color4b.Green.ToB8G8R8A8());
+                var mp = Graphics.Mesh.TtMeshDataProvider.MakeSphere(0.005f, 5, 5, BoneSphereColor.ToR8G8B8A8());
                 BoneMeshes[mHighlightedBoneIndex] = mp.ToDrawMesh(mat);
+                // 同步更新 HitProxy 代理的网格引用
+                if (BoneProxies.TryGetValue(mHighlightedBoneIndex, out var oldProxy))
+                {
+                    oldProxy.Mesh = BoneMeshes[mHighlightedBoneIndex];
+                    oldProxy.OnHitProxyChanged();
+                }
             }
 
             // 高亮新的
             if (newIndex >= 0 && BoneMeshes.ContainsKey(newIndex))
             {
-                var mp = Graphics.Mesh.TtMeshDataProvider.MakeSphere(0.01f, 8, 8, 0xFF0000FF);
+                var mp = Graphics.Mesh.TtMeshDataProvider.MakeSphere(0.01f, 8, 8, BoneSphereHighlightColor.ToR8G8B8A8());
                 BoneMeshes[newIndex] = mp.ToDrawMesh(mat);
+                // 同步更新 HitProxy 代理的网格引用
+                if (BoneProxies.TryGetValue(newIndex, out var newProxy))
+                {
+                    newProxy.Mesh = BoneMeshes[newIndex];
+                    newProxy.OnHitProxyChanged();
+                }
             }
 
             mHighlightedBoneIndex = newIndex;
@@ -189,14 +289,19 @@ namespace EngineNS.Editor.Forms
 
         public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
+            if (CurrentPose == null)
+                return;
+
             var runtimePose = TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(CurrentPose);
             foreach(var bone in SkeletonAsset.Skeleton.Limbs)
             {
-                var transfrom = runtimePose.Transforms[bone.Index.Value];
+                var translation = bone.Desc.InitMatrix.Translation;
+                var transfrom = FTransform.CreateTransform(translation.AsDVector(), Vector3.One, Quaternion.Identity);
                 BoneMeshes[bone.Index.Value].SetWorldTransform(in transfrom, rp.World, true);
                 rp.AddVisibleMesh(BoneMeshes[bone.Index.Value]);
             }
-            ShowBoneLine(SkeletonAsset.Skeleton.Root, runtimePose, rp);
+            //ShowBoneLine(SkeletonAsset.Skeleton.Root, runtimePose, rp);
+            ShowBoneLineWhitInitMatrix(SkeletonAsset.Skeleton.Root, rp);
             base.OnGatherVisibleMeshes(rp);
         }
     }
@@ -519,7 +624,7 @@ namespace EngineNS.Editor.Forms
 }
 namespace EngineNS.Animation.Asset
 {
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.TtSkeletonEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(Editor.Forms.TtSkeletonEditor))]
     public partial class TtSkeletonAsset
     {
 

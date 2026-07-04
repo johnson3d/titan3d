@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_16743854954652379389 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore">
+  <CanMutilLink Type="System.Boolean@Unknown" Order="0" />
+  <Id Type="System.Guid@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Order="0" />
+  <TypeVaule Type="System.Object@Unknown" Order="0" />
+</Hash_16743854954652379389>

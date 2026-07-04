@@ -1,6 +1,8 @@
 ﻿using EngineNS.Bricks.NodeGraph;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
+using NPOI.SS.UserModel;
+using static EngineNS.Bricks.NodeGraph.UNodeGraphStyles;
 
 namespace EngineNS.DesignMacross.Editor
 {
@@ -10,7 +12,9 @@ namespace EngineNS.DesignMacross.Editor
         public EHorizontalAlignment HorizontalAlignment { get; set; } = EHorizontalAlignment.Left;
         public EVerticalAlignment VerticalAlignment { get; set; } = EVerticalAlignment.Top;
         public Color4f BackgroundColor { get; set; } = new Color4f(0, 0, 0, 0);
-        public float Rounding { get; set; } = 5;
+        public Color4f TintColor { get; set; } = new Color4f(1, 1, 1, 1);
+        public float Rounding { get; set; } = 0;
+        public ERoundCornerType CornerType = ERoundCornerType.None;
         public RName IconName { get; set; }
         public Vector2 AbsCenter { get { return AbsLocation + new Vector2(Size.Width, Size.Height) / 2.0f; } }
         public TtGraphElement_Icon()
@@ -39,7 +43,7 @@ namespace EngineNS.DesignMacross.Editor
             
         }
 
-        public override void OnUnSelected()
+        public override void OnUnSelected(ref FMouseEventContext context)
         {
             
         }   
@@ -70,11 +74,13 @@ namespace EngineNS.DesignMacross.Editor
             var cmdlist = ImGuiAPI.GetWindowDrawList();
             var nodeStart = context.ViewportTransform(pinElement.AbsLocation);
             var nodeEnd = context.ViewportTransform(pinElement.AbsLocation + new Vector2(pinElement.Size.Width, pinElement.Size.Height));
-            cmdlist.AddRectFilled(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(pinElement.BackgroundColor), pinElement.Rounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll);
+            cmdlist.AddRectFilled(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(pinElement.BackgroundColor), pinElement.Rounding, (ImDrawFlags_)pinElement.CornerType);
             var styles = UNodeGraphStyles.DefaultStyles;
             EGui.TtUVAnim icon = new EGui.TtUVAnim();
             icon.TextureName = pinElement.IconName;
             icon.Size = new Vector2(pinElement.Size.Width, pinElement.Size.Height);
+            icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(pinElement.TintColor);
+            //icon.Color = 0xFFFF0000;
             icon.OnDraw(cmdlist, nodeStart, nodeEnd, 0);
         }
     }

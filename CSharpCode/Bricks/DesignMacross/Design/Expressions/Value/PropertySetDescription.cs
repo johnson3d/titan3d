@@ -37,14 +37,14 @@ namespace EngineNS.DesignMacross.Design.Expressions
         }
         public override TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
-            var methodDesc = statementBuildContext.MethodDescription as TtMethodDescription;
+            var graphDesc = statementBuildContext.OwnerDescription;
             
             TtExpressionBase hostExp = null;
             var hostPin = DataInPins[0];
             if (hostPin != null)
             {
-                var linkedHostPin = methodDesc.GetLinkedDataPin(hostPin);
-                var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, Sequence = statementBuildContext.ExecuteSequenceStatement, ClassBuildContext = statementBuildContext.ClassBuildContext };
+                var linkedHostPin = IDataLineOperator.GetLinkedDataPin(graphDesc,hostPin);
+                var buildContext = new FExpressionBuildContext() { OwnerDescription = statementBuildContext.OwnerDescription, Sequence = statementBuildContext.ExecuteSequenceStatement, ClassBuildContext = statementBuildContext.ClassBuildContext };
                 var linkedDesc = linkedHostPin.Parent;
                 if (linkedDesc is TtExpressionDescription linkedExpressionDesc)
                 {
@@ -59,7 +59,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
 
             TtExpressionBase rightSideExp = null;
             var otherInPin = DataInPins[1];
-            var linkedDataPin = methodDesc.GetLinkedDataPin(otherInPin);
+            var linkedDataPin = IDataLineOperator.GetLinkedDataPin(graphDesc, otherInPin);
             if (linkedDataPin == null)
             {
                 //TODO: TtMethodInvokeReflectedDescription 要报错
@@ -67,7 +67,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             else
             {
                 System.Diagnostics.Debug.Assert(linkedDataPin is TtDataOutPinDescription);
-                var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, Sequence = statementBuildContext.ExecuteSequenceStatement, ClassBuildContext = statementBuildContext.ClassBuildContext };
+                var buildContext = new FExpressionBuildContext() { OwnerDescription = statementBuildContext.OwnerDescription, Sequence = statementBuildContext.ExecuteSequenceStatement, ClassBuildContext = statementBuildContext.ClassBuildContext };
                 var linkedDesc = linkedDataPin.Parent;
                 if (linkedDesc is TtExpressionDescription linkedExpressionDesc)
                 {
@@ -82,7 +82,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             var propertySetStatement = TtASTBuildUtil.CreateAssignOperatorStatement(leftSideExp, rightSideExp);
             statementBuildContext.AddStatement(propertySetStatement);
             var executionOutPin = ExecutionOutPins[0];
-            var linkedExecPin = methodDesc.GetLinkedExecutionPin(executionOutPin);
+            var linkedExecPin = IExecutionLineOperator.GetLinkedExecutionPin(graphDesc,executionOutPin);
             if (linkedExecPin == null)
             {
                 //空语句

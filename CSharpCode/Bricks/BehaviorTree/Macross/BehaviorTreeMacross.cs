@@ -30,7 +30,7 @@ namespace EngineNS.BehaviorTree.Macross
         {
             return "BehaviorTreeMacross";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return null;
@@ -69,7 +69,7 @@ namespace EngineNS.BehaviorTree.Macross
     }
     [BehaviorTreeMacrossCreate]
     [IO.AssetCreateMenu(MenuName = "Anim/BehaviorTreeMacross")]
-    [Editor.UAssetEditor(EditorType = typeof(TtBehaviorTreeMacrossEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(TtBehaviorTreeMacrossEditor))]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.BehaviorTree.Macross.UBehaviorTreeMacross@EngineCore", "EngineNS.BehaviorTree.Macross.UBehaviorTreeMacross" })]
     public partial class TtBehaviorTreeMacross : IO.IAsset
     {

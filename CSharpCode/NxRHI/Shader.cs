@@ -247,6 +247,7 @@ namespace EngineNS.NxRHI
         }
         #endregion
 
+        public TtShaderDesc ShaderDesc { get; internal set; }
         internal TtShaderReflector mReflector;
         public TtShaderReflector Reflector
         {
@@ -263,44 +264,6 @@ namespace EngineNS.NxRHI
         }
 
         public Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId PermutationId { get; set; }
-        public const string AssetExt = ".shader";
-        public string TypeExt { get => AssetExt; }
-        public unsafe void SaveTo(RName shader, in Hash160 hash, EShaderType eShader)
-        {
-            if (eShader != EShaderType.SDT_ComputeShader)
-                return;
-            var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.ComputeEffect);
-            var file = path + hash.ToString() + TtShader.AssetExt;
-            var xnd = new IO.TtXndHolder("UShader", 0, 0);
-
-            var descAttr = new XndAttribute(xnd.RootNode.mCoreObject.GetOrAddAttribute("Desc", 0, 0, true));
-            using (var ar = descAttr.GetWriter(30))
-            {
-                ar.Write(shader);
-                ar.Write(this.PermutationId);
-                ar.Write(hash);
-
-                ar.Write(mCoreObject.GetDesc().Type);
-            }
-
-            using (var vsNode = xnd.mCoreObject.NewNode("ShaderDesc", 0, 0))
-            {
-                xnd.RootNode.mCoreObject.AddNode(vsNode);
-                mCoreObject.GetDesc().SaveXnd(vsNode);
-            }
-
-            xnd.SaveXnd(file);
-        }
-        public unsafe static TtShader Load(IO.TtXndHolder xnd, out Hash160 hash)
-        {
-            Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId permutationId;
-            var desc = LoadDesc(xnd, out hash, out permutationId);
-
-            var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            var result = rc.CreateShader(desc);
-            result.PermutationId = permutationId;
-            return result;
-        }
         public static unsafe TtShaderDesc LoadDesc(IO.TtXndHolder xnd, out Hash160 hash, out Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId permutationId)
         {
             hash = Hash160.Emtpy;

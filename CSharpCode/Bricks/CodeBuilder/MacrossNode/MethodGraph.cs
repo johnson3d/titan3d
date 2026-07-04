@@ -21,12 +21,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public UCSharpCodeGenerator CSCodeGen { get; }
         public UHLSLCodeGenerator HlslCodeGen { get; }
         public TtCodeGeneratorBase CodeGen { get; }
-        public List<UMacrossMethodGraph> Methods { get; }
+        public List<TtMacrossMethodGraph> Methods { get; }
         public EGui.Controls.PropertyGrid.TtPropertyGrid PGMember { get; set; }
-        public void RemoveMethod(UMacrossMethodGraph method, bool realDelete);
+        public void RemoveMethod(TtMacrossMethodGraph method, bool realDelete);
         public void SetConfigUnionNode(NodeGraph.IUnionNode node);
     }
-    public partial class UMethodStartNode : TtNodeBase, IAfterExecNode
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode@EngineCore", "EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode" })]
+    public partial class TtMethodStartNode : TtNodeBase, IAfterExecNode
     {
         public override string Label 
         {
@@ -84,14 +85,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public static UMethodStartNode NewStartNode(UMacrossMethodGraph graph, TtMethodDeclaration methodDec)
+        public static TtMethodStartNode NewStartNode(TtMacrossMethodGraph graph, TtMethodDeclaration methodDec)
         {
-            var result = new UMethodStartNode();
+            var result = new TtMethodStartNode();
             result.MethodGraph = graph;
             result.Initialize(graph, methodDec);
             return result;
         }
-        public UMethodStartNode()
+        public TtMethodStartNode()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF40FF40;
@@ -102,7 +103,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             AfterExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             Position = new Vector2(100, 100);
         }
-        private void Initialize(UMacrossMethodGraph graph, TtMethodDeclaration methodDec)
+        private void Initialize(TtMacrossMethodGraph graph, TtMethodDeclaration methodDec)
         {
             MethodGraph = graph;
             MethodId = methodDec.Id;
@@ -115,13 +116,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
             base.OnPreRead(tagObject, hostObject, fromXml);
-            var graph = hostObject as UMacrossMethodGraph;
+            var graph = hostObject as TtMacrossMethodGraph;
             if (graph == null)
                 return;
 
             MethodGraph = graph;
         }
-        public UMacrossMethodGraph MethodGraph;
+        public TtMacrossMethodGraph MethodGraph;
         public List<PinOut> Arguments = new List<PinOut>();
         List<PinOut> mTemplateArguments = new List<PinOut>();
         public void UpdateMethodDefine(TtMethodDeclaration methodDec)
@@ -292,7 +293,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     }
     public class MethodData : IO.BaseSerializer
     {
-        public UMethodStartNode StartNode;
+        public TtMethodStartNode StartNode;
         [Rtti.Meta("")]
         public TtMethodDeclaration MethodDec { get; set; }
         public Rtti.TtClassMeta.TtMethodMeta Method;
@@ -352,11 +353,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //    methodData.StartNode = UMethodStartNode.NewStartNode(graph, methodData.MethodDec);
         //    return methodData;
         //}
-        public static MethodData CreateFromMethod(UMacrossMethodGraph graph, TtMethodDeclaration method)
+        public static MethodData CreateFromMethod(TtMacrossMethodGraph graph, TtMethodDeclaration method)
         {
             MethodData methodData = new MethodData();
             methodData.MethodDec = method;
-            methodData.StartNode = UMethodStartNode.NewStartNode(graph, method);
+            methodData.StartNode = TtMethodStartNode.NewStartNode(graph, method);
             return methodData;
         }
         public override string ToString()
@@ -372,7 +373,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
     }
-    public partial class UMacrossMethodGraph : TtNodeGraph, IPropertyCustomization
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossMethodGraph@EngineCore", "EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossMethodGraph" })]
+    public partial class TtMacrossMethodGraph : TtNodeGraph, IPropertyCustomization
     {
         [Rtti.Meta, Category("Option")]
         public List<TtVariableDeclaration> LocalVars { get; set; } = new List<TtVariableDeclaration>();
@@ -430,7 +432,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         class InputsOperationCallbackAttribute : PGListOperationCallbackAttribute
         {
-            void PreInsertOperation(int index, object value, UMacrossMethodGraph graph)
+            void PreInsertOperation(int index, object value, TtMacrossMethodGraph graph)
             {
                 var name = "InValue" + index;
                 var methodDec = graph.MethodDatas[0].MethodDec;
@@ -461,17 +463,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     foreach(var ins in (IEnumerable)objInstance)
                     {
-                        var graph = ins as UMacrossMethodGraph;
+                        var graph = ins as TtMacrossMethodGraph;
                         PreInsertOperation(index, value, graph);
                     }
                 }
                 else
                 {
-                    var graph = objInstance as UMacrossMethodGraph;
+                    var graph = objInstance as TtMacrossMethodGraph;
                     PreInsertOperation(index, value, graph);
                 }
             }
-            void AfterInsertOperation(int index, object value, UMacrossMethodGraph graph)
+            void AfterInsertOperation(int index, object value, TtMacrossMethodGraph graph)
             {
                 var arg = value as TtMethodArgumentDeclaration;
                 var methodDec = graph.MethodDatas[0].MethodDec;
@@ -490,17 +492,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         if (ins == null)
                             continue;
 
-                        var graph = ins as UMacrossMethodGraph;
+                        var graph = ins as TtMacrossMethodGraph;
                         AfterInsertOperation(index, value, graph);
                     }
                 }
                 else
                 {
-                    var graph = objInstance as UMacrossMethodGraph;
+                    var graph = objInstance as TtMacrossMethodGraph;
                     AfterInsertOperation(index, value, graph);
                 }
             }
-            void AfterRemoveOperation(int index, UMacrossMethodGraph graph)
+            void AfterRemoveOperation(int index, TtMacrossMethodGraph graph)
             {
                 var methodDec = graph.MethodDatas[0].MethodDec;
                 methodDec.Arguments.RemoveAt(index);
@@ -515,19 +517,19 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         if (ins == null)
                             continue;
 
-                        var graph = ins as UMacrossMethodGraph;
+                        var graph = ins as TtMacrossMethodGraph;
                         AfterRemoveOperation(index, graph);
                     }
                 }
                 else
                 {
-                    var graph = objInstance as UMacrossMethodGraph;
+                    var graph = objInstance as TtMacrossMethodGraph;
                     AfterRemoveOperation(index, graph);
                 }
             }
 
             TtMethodArgumentDeclaration mOldDec = new TtMethodArgumentDeclaration();
-            void PreValueChanged(int index, UMacrossMethodGraph graph, TtMethodArgumentDeclaration value)
+            void PreValueChanged(int index, TtMacrossMethodGraph graph, TtMethodArgumentDeclaration value)
             {
                 mOldDec.VariableName = value.VariableName;
             }
@@ -541,17 +543,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         if (ins == null)
                             continue;
 
-                        var graph = ins as UMacrossMethodGraph;
+                        var graph = ins as TtMacrossMethodGraph;
                         PreValueChanged(index, graph, value as TtMethodArgumentDeclaration);
                     }
                 }
                 else
                 {
-                    var graph = objInstance as UMacrossMethodGraph;
+                    var graph = objInstance as TtMacrossMethodGraph;
                     PreValueChanged(index, graph, value as TtMethodArgumentDeclaration);
                 }
             }
-            void AfterValueChanged(int index, UMacrossMethodGraph graph, TtMethodArgumentDeclaration value)
+            void AfterValueChanged(int index, TtMacrossMethodGraph graph, TtMethodArgumentDeclaration value)
             {
                 if(value.VariableName != mOldDec.VariableName)
                 {
@@ -576,13 +578,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         if (ins == null)
                             continue;
 
-                        var graph = ins as UMacrossMethodGraph;
+                        var graph = ins as TtMacrossMethodGraph;
                         AfterValueChanged(index, graph, value as TtMethodArgumentDeclaration);
                     }
                 }
                 else
                 {
-                    var graph = objInstance as UMacrossMethodGraph;
+                    var graph = objInstance as TtMacrossMethodGraph;
                     AfterValueChanged(index, graph, value as TtMethodArgumentDeclaration);
                 }
             }
@@ -640,7 +642,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         class OutputsOperationCallbackAttribute : PGListOperationCallbackAttribute
         {
-            void PreInsertOperation(int index, object value, UMacrossMethodGraph graph)
+            void PreInsertOperation(int index, object value, TtMacrossMethodGraph graph)
             {
                 var name = "OutValue" + index;
                 var methodDec = graph.MethodDatas[0].MethodDec;
@@ -671,17 +673,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     foreach (var ins in (IEnumerable)objInstance)
                     {
-                        var graph = ins as UMacrossMethodGraph;
+                        var graph = ins as TtMacrossMethodGraph;
                         PreInsertOperation(index, value, graph);
                     }
                 }
                 else
                 {
-                    var graph = objInstance as UMacrossMethodGraph;
+                    var graph = objInstance as TtMacrossMethodGraph;
                     PreInsertOperation(index, value, graph);
                 }
             }
-            void AfterInsertOperation(int index, object value, UMacrossMethodGraph graph)
+            void AfterInsertOperation(int index, object value, TtMacrossMethodGraph graph)
             {
                 var arg = value as TtMethodArgumentDeclaration;
                 var methodDec = graph.MethodDatas[0].MethodDec;
@@ -701,17 +703,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         if (ins == null)
                             continue;
 
-                        var graph = ins as UMacrossMethodGraph;
+                        var graph = ins as TtMacrossMethodGraph;
                         AfterInsertOperation(index, value, graph);
                     }
                 }
                 else
                 {
-                    var graph = objInstance as UMacrossMethodGraph;
+                    var graph = objInstance as TtMacrossMethodGraph;
                     AfterInsertOperation(index, value, graph);
                 }
             }
-            void AfterRemoveOperation(int index, UMacrossMethodGraph graph)
+            void AfterRemoveOperation(int index, TtMacrossMethodGraph graph)
             {
                 var methodDec = graph.MethodDatas[0].MethodDec;
                 methodDec.Arguments.RemoveAt(index + graph.Inputs.Count);
@@ -726,18 +728,18 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         if (ins == null)
                             continue;
 
-                        var graph = ins as UMacrossMethodGraph;
+                        var graph = ins as TtMacrossMethodGraph;
                         AfterRemoveOperation(index, graph);
                     }
                 }
                 else
                 {
-                    var graph = objInstance as UMacrossMethodGraph;
+                    var graph = objInstance as TtMacrossMethodGraph;
                     AfterRemoveOperation(index, graph);
                 }
             }
             TtMethodArgumentDeclaration mOldDec = new TtMethodArgumentDeclaration();
-            void PreValueChanged(int index, UMacrossMethodGraph graph, TtMethodArgumentDeclaration value)
+            void PreValueChanged(int index, TtMacrossMethodGraph graph, TtMethodArgumentDeclaration value)
             {
                 mOldDec.VariableName = value.VariableName;
             }
@@ -751,17 +753,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         if (ins == null)
                             continue;
 
-                        var graph = ins as UMacrossMethodGraph;
+                        var graph = ins as TtMacrossMethodGraph;
                         PreValueChanged(index, graph, value as TtMethodArgumentDeclaration);
                     }
                 }
                 else
                 {
-                    var graph = objInstance as UMacrossMethodGraph;
+                    var graph = objInstance as TtMacrossMethodGraph;
                     PreValueChanged(index, graph, value as TtMethodArgumentDeclaration);
                 }
             }
-            void AfterValueChanged(int index, UMacrossMethodGraph graph, TtMethodArgumentDeclaration value)
+            void AfterValueChanged(int index, TtMacrossMethodGraph graph, TtMethodArgumentDeclaration value)
             {
                 if (value.VariableName != mOldDec.VariableName)
                 {
@@ -793,13 +795,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         if (ins == null)
                             continue;
 
-                        var graph = ins as UMacrossMethodGraph;
+                        var graph = ins as TtMacrossMethodGraph;
                         AfterValueChanged(index, graph, value as TtMethodArgumentDeclaration);
                     }
                 }
                 else
                 {
-                    var graph = objInstance as UMacrossMethodGraph;
+                    var graph = objInstance as TtMacrossMethodGraph;
                     AfterValueChanged(index, graph, value as TtMethodArgumentDeclaration);
                 }
             }
@@ -820,9 +822,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return null;
         }
-        public static UMacrossMethodGraph NewGraph(IMacrossMethodHolder kls, TtMethodDeclaration method = null)
+        public static TtMacrossMethodGraph NewGraph(IMacrossMethodHolder kls, TtMethodDeclaration method = null)
         {
-            var result = new UMacrossMethodGraph();
+            var result = new TtMacrossMethodGraph();
             result.MacrossEditor = kls;
             result.Initialize();
             //result.FunctionName = funName;
@@ -852,18 +854,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return;
         }
         public Bricks.NodeGraph.TtGraphRenderer GraphRenderer = new NodeGraph.TtGraphRenderer();
-        //[Obsolete]
-        //public void BuildCodeExpr(ICodeGen cGen)
-        //{
-        //    Function.LocalVars.Clear();
-        //    Function.Body.Lines.Clear();
-        //    foreach(UNodeExpr i in this.Nodes)
-        //    {
-        //        i.HasError = false;
-        //        i.CodeExcept = null;
-        //    }
-        //    StartNode.BuildExpr(this, cGen);
-        //}
         public void BuildExpression(TtClassDeclaration classDesc)
         {
             for(int i=0; i<Nodes.Count; i++)
@@ -882,16 +872,26 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                 MethodDatas[i].MethodDec.MethodBody.Sequence.Clear();
                 MethodDatas[i].MethodDec.LocalVariables.Clear();
-                MethodDatas[i].MethodDec.LocalVariables.AddRange(this.LocalVars);
-                BuildCodeStatementsData data = new BuildCodeStatementsData()
+
+                if (MethodEditMode == EMethodEditMode.CSharp)
                 {
-                    ClassDec = classDesc,
-                    MethodDec = MethodDatas[i].MethodDec,
-                    CodeGen = MacrossEditor.CodeGen,
-                    NodeGraph = this,
-                    CurrentStatements = MethodDatas[i].MethodDec.MethodBody.Sequence,
-                };
-                MethodDatas[i].StartNode.BuildStatements(null, ref data);
+                    // Script mode: use raw code directly, skip graph traversal
+                    MethodDatas[i].MethodDec.RawBodyCode = ScriptCode ?? "";
+                }
+                else
+                {
+                    MethodDatas[i].MethodDec.RawBodyCode = null;
+                    MethodDatas[i].MethodDec.LocalVariables.AddRange(this.LocalVars);
+                    BuildCodeStatementsData data = new BuildCodeStatementsData()
+                    {
+                        ClassDec = classDesc,
+                        MethodDec = MethodDatas[i].MethodDec,
+                        CodeGen = MacrossEditor.CodeGen,
+                        NodeGraph = this,
+                        CurrentStatements = MethodDatas[i].MethodDec.MethodBody.Sequence,
+                    };
+                    MethodDatas[i].StartNode.BuildStatements(null, ref data);
+                }
             }
         }
         public void BuildExpression(ref BuildCodeStatementsData data)
@@ -911,26 +911,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 MethodDatas[0].StartNode.BuildStatements(null, ref data);
             }
         }
-        //[Rtti.Meta("")]
-        //public string FunctionName
-        //{
-        //    get { return Function.GetFunctionDeclType(); }
-        //}
-        //[Rtti.Meta("")]
-        //public Guid StartNodeId
-        //{
-        //    get { return StartNode.NodeId; }
-        //    set
-        //    {
-        //        StartNode = this.FindNode(value) as UMethodStartNode;
-        //        if (StartNode == null)
-        //        {
-        //            StartNode = UMethodStartNode.NewStartNode(this);
-        //            AddNode(StartNode);
-        //        }
-        //    }
-        //}
-        //private UMethodStartNode StartNode;
         [Browsable(false)]
         public IMacrossMethodHolder MacrossEditor
         {
@@ -1003,7 +983,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         if (objIns == null)
                             continue;
 
-                        var graph = objIns as UMacrossMethodGraph;
+                        var graph = objIns as TtMacrossMethodGraph;
                         if (graph != null && graph.MethodDatas.Count == 1)
                         {
                             if (!graph.MethodDatas[0].MethodDec.IsOverride)
@@ -1016,7 +996,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
                 else
                 {
-                    var graph = info.ObjectInstance as UMacrossMethodGraph;
+                    var graph = info.ObjectInstance as TtMacrossMethodGraph;
                     if (graph != null && graph.MethodDatas.Count == 1)
                     {
                         if (!graph.MethodDatas[0].MethodDec.IsOverride)
@@ -1037,8 +1017,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return GraphName;
         }
         public bool VisibleInClassGraphTables = false;
-        //[Rtti.Meta("")]
-        //public DefineFunction Function { get; set; }
         [Rtti.Meta("")]
         [Browsable(false)]
         public List<MethodData> MethodDatas
@@ -1379,7 +1357,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             var node = IUnionNode.CreateUnionNode<UnionNode, UnionPinDefine, EndPointNode>(this, nodeList);
             node.Name = "Collapse Node";
-            ((UMacrossMethodGraph)(node.ContentGraph)).MacrossEditor = MacrossEditor;
+            ((TtMacrossMethodGraph)(node.ContentGraph)).MacrossEditor = MacrossEditor;
             DeleteSelectedNodes();
         }
         public override TtGraphRenderer GetGraphRenderer()
@@ -1877,7 +1855,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         private void NodeOnLinkedTo(TtNodeBase node, PinOut oPin, TtNodeBase InNode, PinIn iPin, TtPinLinker linker)
         {
-            var funcGraph = ParentGraph as UMacrossMethodGraph;
+            var funcGraph = ParentGraph as TtMacrossMethodGraph;
             if (funcGraph == null || oPin.LinkDesc == null || iPin.LinkDesc == null)
             {
                 return;
@@ -1891,7 +1869,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         private void NodeOnLinkedFrom(TtNodeBase node, PinIn iPin, TtNodeBase OutNode, PinOut oPin, TtPinLinker linker)
         {
-            var funcGraph = ParentGraph as UMacrossMethodGraph;
+            var funcGraph = ParentGraph as TtMacrossMethodGraph;
             if (funcGraph == null || oPin.LinkDesc == null || iPin.LinkDesc == null)
             {
                 return;
@@ -1983,18 +1961,155 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public object GetPropertyValue(string propertyName)
         {
-            return PropertyCustomizationHelper<UMacrossMethodGraph>.GetPropertyValue(this, propertyName);
+            return PropertyCustomizationHelper<TtMacrossMethodGraph>.GetPropertyValue(this, propertyName);
         }
 
         public void SetPropertyValue(string propertyName, object value)
         {
-            PropertyCustomizationHelper<UMacrossMethodGraph>.SetPropertyValue(this, propertyName, value);
+            PropertyCustomizationHelper<TtMacrossMethodGraph>.SetPropertyValue(this, propertyName, value);
         }
 
         public override void SetConfigUnionNode(IUnionNode node)
         {
             this.MacrossEditor.SetConfigUnionNode(node);
         }
+
+        #region CodeEditor
+        public enum EMethodEditMode
+        {
+            Graph,
+            CSharp,
+        }
+        EMethodEditMode mMethodEditMode = EMethodEditMode.Graph;
+        [Rtti.Meta(""), Category("Option")]
+        public EMethodEditMode MethodEditMode
+        {
+            get => mMethodEditMode;
+            set
+            {
+                if (mMethodEditMode != value)
+                {
+                    if (mMethodEditMode == EMethodEditMode.CSharp)
+                        SyncScriptCodeFromEditor();
+                    mMethodEditMode = value;
+                    mScriptEditorInitialized = false; // force re-init with signature check
+                }
+            }
+        }
+        [Rtti.Meta(""), Browsable(false)]
+        public string ScriptCode { get; set; }
+
+        [Browsable(false)]
+        public EGui.TtCodeEditor ScriptEditor { get; private set; }
+        bool mScriptEditorInitialized = false;
+
+        public void EnsureScriptEditor()
+        {
+            if (ScriptEditor == null)
+            {
+                ScriptEditor = new EGui.TtCodeEditor();
+                ScriptEditor.SetLanguage("C#");
+                ScriptEditor.SetViewStyle(EGui.ECodeEditorViewStyle.Dark);
+                ScriptEditor.SetReadOnly(false);
+            }
+            if (!mScriptEditorInitialized)
+            {
+                mScriptEditorInitialized = true;
+                var correctedCode = RebuildScriptWithCorrectSignature(ScriptCode);
+                ScriptEditor.SetText(correctedCode);
+            }
+        }
+
+        /// <summary>
+        /// Rebuild full function code with the correct signature.
+        /// Preserves the user's function body content.
+        /// </summary>
+        string RebuildScriptWithCorrectSignature(string code)
+        {
+            var sig = GetMethodSignature();
+            if (string.IsNullOrEmpty(code))
+            {
+                return sig + "\n{\n    \n}";
+            }
+            // Extract body between first '{' and last '}'
+            var firstBrace = code.IndexOf('{');
+            var lastBrace = code.LastIndexOf('}');
+            if (firstBrace >= 0 && lastBrace > firstBrace)
+            {
+                var body = code.Substring(firstBrace + 1, lastBrace - firstBrace - 1);
+                return sig + "\n{" + body + "\n}";
+            }
+            // Can't parse structure, wrap raw content in correct signature
+            return sig + "\n{\n" + code + "\n}";
+        }
+
+        public void SyncScriptCodeFromEditor()
+        {
+            if (ScriptEditor != null)
+            {
+                ScriptCode = ScriptEditor.Text;
+            }
+        }
+
+        public string GetMethodSignature()
+        {
+            if (MethodDatas.Count == 0)
+                return "";
+            var methodDec = MethodDatas[0].MethodDec;
+            string sig = "";
+            switch (methodDec.VisitMode)
+            {
+                case EVisisMode.Protected:
+                    sig += "protected ";
+                    break;
+                case EVisisMode.Public:
+                    sig += "public ";
+                    break;
+                case EVisisMode.None:
+                    break;
+                default:
+                    sig += "private ";
+                    break;
+            }
+            if (methodDec.IsOverride)
+                sig += "override ";
+            switch (methodDec.AsyncType)
+            {
+                case TtMethodDeclaration.EAsyncType.None:
+                    sig += (methodDec.ReturnValue != null) ? methodDec.ReturnValue.VariableType.ToString() : "void";
+                    break;
+                case TtMethodDeclaration.EAsyncType.SystemTask:
+                    sig += "async System.Threading.Tasks.Task";
+                    sig += (methodDec.ReturnValue != null) ? ("<" + methodDec.ReturnValue.VariableType.ToString() + ">") : "";
+                    break;
+                case TtMethodDeclaration.EAsyncType.CustomTask:
+                    sig += "async EngineNS.Thread.Async.TtTask";
+                    sig += (methodDec.ReturnValue != null) ? ("<" + methodDec.ReturnValue.VariableType.ToString() + ">") : "";
+                    break;
+            }
+            sig += " " + methodDec.MethodName + "(";
+            for (int i = 0; i < methodDec.Arguments.Count; i++)
+            {
+                switch (methodDec.Arguments[i].OperationType)
+                {
+                    case EMethodArgumentAttribute.In:
+                        sig += "in ";
+                        break;
+                    case EMethodArgumentAttribute.Out:
+                        sig += "out ";
+                        break;
+                    case EMethodArgumentAttribute.Ref:
+                        sig += "ref ";
+                        break;
+                }
+                sig += methodDec.Arguments[i].VariableType.ToString() + " " + methodDec.Arguments[i].VariableName;
+                if (i < methodDec.Arguments.Count - 1)
+                    sig += ", ";
+            }
+            sig += ")";
+            return sig;
+        }
+        #endregion
     }
 }
 

@@ -18,7 +18,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return "MInst";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(GetAssetName());
         }
@@ -379,11 +379,16 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             set
             {
+                if (value == null)
+                {
+                    return;
+                }
                 if (AssetState == IO.EAssetState.Loading)
                     return;
                 AssetState = IO.EAssetState.Loading;
+                
                 var task = value.GetAsset<TtMaterial>();// TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(value);
-                TtEngine.Instance.TaskCollector.AddWaitTask(task, (tsk) =>
+                task.AddWaitTask((tsk) =>
                 {
                     ParentMaterial = task.DirectResult;
                     AssetState = IO.EAssetState.LoadFinished;
@@ -417,19 +422,16 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return mParentMaterial.RenderFlags;
             }
         }
-        public override bool DisableEnvColor
+        public override EShadingMode ShadingMode
         {
             get
             {
                 if (mParentMaterial == null)
-                    return false;
-                return mParentMaterial.DisableEnvColor;
-            }
-            set
-            {
-                
+                    return EShadingMode.PBR;
+                return mParentMaterial.ShadingMode;
             }
         }
+        
         public override ENormalMode NormalMode
         {
             get
@@ -441,32 +443,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
             set
             {
                 
-            }
-        }
-        public override ELightingMode LightingMode
-        {
-            get
-            {
-                if (mParentMaterial == null)
-                    return ELightingMode.Unlight;
-                return mParentMaterial.LightingMode;
-            }
-            set
-            {
-
-            }
-        }
-        public override bool Is64bitVColorAlpha
-        {
-            get
-            {
-                if (mParentMaterial == null)
-                    return false;
-                return mParentMaterial.Is64bitVColorAlpha;
-            }
-            set
-            {
-
             }
         }
 
@@ -556,6 +532,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 if (PerMaterialCBuffer != null)
                     this.UpdateCBufferVars(PerMaterialCBuffer, PerMaterialCBuffer.ShaderBinder);
             }
+        }
+
+        public override void OnDrawCall(Mesh.TtRenderMesh.TtAtom atom, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+        {
+            ParentMaterial.OnDrawCall(atom, drawcall, policy);
         }
         #endregion
     }

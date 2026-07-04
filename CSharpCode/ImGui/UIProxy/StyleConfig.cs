@@ -130,7 +130,7 @@ namespace EngineNS.EGui.UIProxy
 
         [Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
-        public Vector2 PGNormalItemSpacing = new Vector2(0, 2);
+        public Vector2 PGNormalItemSpacing = new Vector2(0, 3);
 
         [Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
@@ -332,6 +332,26 @@ namespace EngineNS.EGui.UIProxy
 
         [Category("ContentBrowser")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
+        public Vector2 ContentBrowserFolderItemSpacing = new Vector2(4, 5);
+
+        [Category("ContentBrowser")]
+        [Controls.PropertyGrid.TtShowInPropertyGrid]
+        public Vector2 ContentBrowserFolderFramePadding = new Vector2(5, 5);
+
+        [Category("ContentBrowser")]
+        [Controls.PropertyGrid.TtShowInPropertyGrid]
+        public float ContentBrowserFolderIconSize = 18.0f;
+
+        [Category("ContentBrowser")]
+        [Controls.PropertyGrid.TtShowInPropertyGrid]
+        public float ContentBrowserFolderIconIndent = 5.0f;
+
+        [Category("ContentBrowser")]
+        [Controls.PropertyGrid.TtShowInPropertyGrid]
+        public float ContentBrowserFolderTextSpacing = 5.0f;
+
+        [Category("ContentBrowser")]
+        [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ContentBrowserAssetTileBg = 0xFF211A15;
 
@@ -417,7 +437,7 @@ namespace EngineNS.EGui.UIProxy
 
         [Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
-        public Vector2 PGNormalFramePadding = new Vector2(4, 6);
+        public Vector2 PGNormalFramePadding = new Vector2(5, 7);
 
 
         [Category("PropertyGrid")]
@@ -431,7 +451,7 @@ namespace EngineNS.EGui.UIProxy
 
         [Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
-        public Vector2 PGInputFramePadding = new Vector2(8, 5);
+        public Vector2 PGInputFramePadding = new Vector2(8, 6);
 
         [Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
@@ -440,7 +460,7 @@ namespace EngineNS.EGui.UIProxy
 
         [Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
-        public Vector2 PGCategoryPadding = new Vector2(8, 6);
+        public Vector2 PGCategoryPadding = new Vector2(8, 7);
 
         [Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
@@ -452,7 +472,7 @@ namespace EngineNS.EGui.UIProxy
 
         [Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
-        public Vector2 PGSearchBoxFramePadding = new Vector2(30, 6);
+        public Vector2 PGSearchBoxFramePadding = new Vector2(32, 7);
 
         [Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
@@ -481,11 +501,11 @@ namespace EngineNS.EGui.UIProxy
 
         [Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
-        public Vector2 PGCellPadding = new Vector2(8, 4);
+        public Vector2 PGCellPadding = new Vector2(8, 5);
 
         [Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
-        public Vector2 PGColorBoxSize = new Vector2(30, 15);
+        public Vector2 PGColorBoxSize = new Vector2(34, 18);
 
         [Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]

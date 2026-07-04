@@ -31,6 +31,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\VarNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossSceneNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Control\CallNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Control\CallCBufferParameterNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Control\HLSLMethod.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Control\IfNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Control\ReturnNode.cs" />

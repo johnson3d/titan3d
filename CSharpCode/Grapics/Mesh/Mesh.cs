@@ -1,6 +1,8 @@
 using EngineNS.Bricks.Terrain.CDLOD;
+using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.Graphics.Pipeline.Deferred;
+using EngineNS.NxRHI;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
@@ -23,7 +25,7 @@ namespace EngineNS.NxRHI
 
 namespace EngineNS.Graphics.Mesh
 {
-    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Mesh.TtMesh@EngineCore", "EngineNS.Graphics.Mesh.TtMesh" })]
+    //[Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Mesh.TtMesh@EngineCore", "EngineNS.Graphics.Mesh.TtMesh" })]
     public partial class TtRenderMesh : IDisposable
     {
         public string DebugName { get; set; } = null;
@@ -40,7 +42,55 @@ namespace EngineNS.Graphics.Mesh
             CoreSDK.DisposeObject(ref mPerMeshCBuffer);
         }
         public Graphics.Pipeline.Shader.TtGraphicsShadingEnv UserShading = null;
+        [Rtti.Meta("")]
         public GamePlay.Scene.TtNode HostNode { get; set; }
+        public DBoundingBox AABB
+        {
+            get
+            {
+                if (HostNode == null)
+                    return DBoundingBox.Empty;
+                return HostNode.RefAABB;
+            }
+        }
+        public void GatherSrViews(List<TtSrViewAMeta> srvs)
+        {
+            if (this.MaterialMesh.AssetName != null)
+            {
+                var ameta = this.MaterialMesh.GetAMeta();
+                if (ameta.RefAssetMetas == null)
+                    return;
+                foreach (var i in ameta.RefAssetMetas)
+                {
+                    if (i is TtSrViewAMeta s)
+                    {
+                        srvs.Add(s);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var i in this.SubMeshes)
+                {
+                    foreach (var j in i.Atoms)
+                    {
+                        for (int k = 0; k < j.Material.NumOfSRV; k++)
+                        {
+                            var entry = j.Material.UsedSrView[k];
+                            if (entry.Value == null)
+                                continue;
+                            
+                            var ameta = entry.Value.AMeta as TtSrViewAMeta;
+                            if (ameta != null)
+                            {
+                                if (srvs.Contains(ameta) == false)
+                                    srvs.Add(ameta);
+                            }
+                        }
+                    }
+                }
+            }
+        }
         bool mIsCastShadow = false;
         public bool IsCastShadow 
         { 
@@ -54,6 +104,10 @@ namespace EngineNS.Graphics.Mesh
             {
                 mIsCastShadow = value;
             }
+        }
+        public TtMeshPrimitives GetMeshPrimitives(int index)
+        {
+            return MaterialMesh.GetMeshPrimitives(index);
         }
         public TtMaterialMesh MaterialMesh { get; private set; }
         public uint MaterialMeshSerialId { get; private set; }
@@ -91,25 +145,6 @@ namespace EngineNS.Graphics.Mesh
                 PerMeshCBuffer?.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.MeshRenderFlags, in MeshRenderFlags);
             }
         }
-        public bool IsUnlit
-        {
-            get
-            {
-                return (MeshRenderFlags & Graphics.Pipeline.Shader.TtMaterial.ERenderFlags.UnLight) != 0;
-            }
-            set
-            {
-                if (value)
-                {
-                    MeshRenderFlags |= Graphics.Pipeline.Shader.TtMaterial.ERenderFlags.UnLight;
-                }
-                else
-                {
-                    MeshRenderFlags &= (~Graphics.Pipeline.Shader.TtMaterial.ERenderFlags.UnLight);
-                }
-                PerMeshCBuffer?.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.MeshRenderFlags, in MeshRenderFlags);
-            }
-        }
         public NxRHI.TtCbView PerMeshCBuffer 
         {
             get
@@ -139,7 +174,7 @@ namespace EngineNS.Graphics.Mesh
         public delegate void FOnBuildDrawcall(NxRHI.TtGraphicDraw drawcall);
         public FOnBuildDrawcall OnBuildDrawcall = null;
         public object Tag { get; set; }
-        [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Mesh.TtMesh.TtAtom@EngineCore", "EngineNS.Graphics.Mesh.TtMesh.TtAtom" })]
+        //[Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Mesh.TtMesh.TtAtom@EngineCore", "EngineNS.Graphics.Mesh.TtMesh.TtAtom" })]
         public class TtAtom : IDisposable
         {
             public void Dispose()
@@ -158,10 +193,31 @@ namespace EngineNS.Graphics.Mesh
             }
             public TtSubMesh SubMesh;
             public int AtomIndex;
-
+            [Rtti.Meta("")]
+            public TtRenderMesh RenderMesh
+            {
+                get
+                {
+                    return SubMesh.Mesh;
+                }
+            }
+            [Rtti.Meta("")]
+            public TtNode HostNode
+            {
+                get
+                {
+                    return RenderMesh.HostNode;
+                }
+            }
             public uint MaterialSerialId;
-            public Pipeline.Shader.TtMaterial Material;
-            public Pipeline.Shader.TtMaterial GetMeshMaterial()
+            //主要直接使用Material，MeshMaterial是仿制动态，有人切换MaterialMesh的材质，用来做对比的
+            [Rtti.Meta("")]
+            public Pipeline.Shader.TtMaterial Material
+            {
+                get;
+                set;
+            }
+            private Pipeline.Shader.TtMaterial GetMeshMaterial()
             {
                 if (SubMesh == null)
                     return null;
@@ -423,7 +479,7 @@ namespace EngineNS.Graphics.Mesh
                 ViewDrawCalls drawCalls = GetOrCreateDrawCalls(targetView.TargetViewIdentifier, policy);
                 if (drawCalls.Policy != policy)
                 {
-                    Material = this.GetMeshMaterial();
+                    Material = meshMaterial;
                     MaterialSerialId = Material.SerialId;
                     ResetDrawCalls();
                     if (TargetViews == null)
@@ -436,7 +492,7 @@ namespace EngineNS.Graphics.Mesh
                 //检查shading切换参数
                 if (result != null && result.IsPermutationChanged())
                 {
-                    Material = this.GetMeshMaterial();
+                    Material = meshMaterial;
                     MaterialSerialId = Material.SerialId;
                     ResetDrawCalls();
                     if (TargetViews == null)
@@ -447,7 +503,7 @@ namespace EngineNS.Graphics.Mesh
                 }
                 if (drawCalls.State == 1 && result == null)
                 {
-                    Material = this.GetMeshMaterial();
+                    Material = meshMaterial;
                     MaterialSerialId = Material.SerialId;
                     ResetDrawCalls();
                     if (TargetViews == null)
@@ -495,7 +551,8 @@ namespace EngineNS.Graphics.Mesh
                 }
 
                 result.TagObject = node;
-                
+
+                meshMaterial?.OnDrawCall(this, result, policy);
                 var shading = node.GetPassShading(this);
                 using (new Profiler.TimeScopeHelper(ScopeOnDrawCall))
                 {

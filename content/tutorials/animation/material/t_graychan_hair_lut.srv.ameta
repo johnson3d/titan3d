@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="9374b6d723a527bad3619bd311334facb58f09dc79925314ef815c95cdf5e3fd" />
+      <Path Type="System.String@Unknown" Value="t_graychan_hair_lut.srv" />
+    </e_0>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="9dbee43d-6768-458b-a49b-b5af4023c454" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/animation/material/t_graychan_hair_lut.srv,9dbee43d-6768-458b-a49b-b5af4023c454" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.TtSrView&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <OriginImageAddress Type="System.String@Unknown" Value="F:\Assets\GrayChan\Game\KawaiiPhysicsSample\Model\GrayChan\Textures\T_GrayChan_Hair_LUT.PNG" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.TtSrView@EngineCore" />
+</Root>

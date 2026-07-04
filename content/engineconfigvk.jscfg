@@ -28,6 +28,7 @@
   "SupportMultWindows": true,
   "DoUnitTest": true,
   "RHIType": "RHI_VK",
+  "ShaderLanguage": "SL_SPIRV",
   "HasDebugLayer": false,
   "IsGpuBaseValidation": false,
   "IsDebugShader": true,

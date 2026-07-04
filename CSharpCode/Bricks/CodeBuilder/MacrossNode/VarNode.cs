@@ -11,6 +11,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
     public partial class VarNode : TtMacrossNodeBase
     {
+        [Rtti.Meta("")]
+        [Category("Option")]
+        [ReadOnly(true)]
+        public override string Name { get => base.Name; set => base.Name = value; }
         public TtVariableDeclaration Var;
         public Rtti.TtTypeDesc VarType;
         public PinIn SetPin { get; set; } = new PinIn();
@@ -18,6 +22,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             MultiLinks = true,
         };
+        [Category("Option")]
+        public UEditableValue InputValue 
+        { 
+            get
+            {
+                return SetPin?.EditValue;
+            }
+        }
         public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             return VarType;
@@ -93,6 +105,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     [ContextMenu("self,this,my,myself", "Self\\Self", TtMacross.MacrossEditorKeyword)]
     public partial class SelfNode : TtMacrossNodeBase
     {
+        [Rtti.Meta("")]
+        [Category("Option")]
+        [ReadOnly(true)]
+        public override string Name { get => base.Name; set => base.Name = value; }
         public PinOut OutPin { get; set; } = new PinOut();
         public SelfNode()
         {
@@ -121,6 +137,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     [ContextMenu("null", "Data\\null", TtMacross.MacrossEditorKeyword)]
     public partial class NullNode : TtMacrossNodeBase
     {
+        [Rtti.Meta("")]
+        [Category("Option")]
+        [ReadOnly(true)]
+        public override string Name { get => base.Name; set => base.Name = value; }
         public PinOut OutPin { get; set; } = new PinOut();
         public NullNode()
         {
@@ -140,7 +160,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
 
-    public partial class MemberVar : VarNode, UEditableValue.IValueEditNotify, IAfterExecNode, IBeforeExecNode, EGui.Controls.PropertyGrid.IPropertyCustomization
+    public partial class MemberVar : VarNode, UEditableValue.IValueEditNotify, IAfterExecNode, IBeforeExecNode
     {
         public PinOut AfterExec { get; set; } = new PinOut();
         public PinIn BeforeExec { get; set; } = new PinIn();
@@ -213,7 +233,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
             base.OnPreRead(tagObject, hostObject, fromXml);
-            var klsGraph = hostObject as UMacrossMethodGraph;
+            var klsGraph = hostObject as TtMacrossMethodGraph;
             if (klsGraph == null)
                 return;
             mDefClass = klsGraph.MacrossEditor.DefClass;
@@ -335,35 +355,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        [Browsable(false)]
-        public bool IsPropertyVisibleDirty { get; set; } = false;
-        public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
-        {
-            if (IsGet)
-                return;
-
-            var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
-            proDesc.Name = Name;
-            proDesc.DisplayName = Name;
-            proDesc.PropertyType = VarType;
-            //proDesc.CustomValueEditor = SetPin.EditValue;
-            collection.Add(proDesc);
-        }
-
-        public object GetPropertyValue(string propertyName)
-        {
-            if (IsGet)
-                return null;
-            return SetPin.EditValue?.Value;
-        }
-
-        public void SetPropertyValue(string propertyName, object value)
-        {
-            if (IsGet || SetPin.EditValue == null)
-                return;
-            SetPin.EditValue.Value = value;
-        }
-
         public void OnValueChanged(UEditableValue ev)
         {
         }
@@ -393,7 +384,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
 
-    public partial class MethodLocalVar : VarNode, UEditableValue.IValueEditNotify, IAfterExecNode, IBeforeExecNode, EGui.Controls.PropertyGrid.IPropertyCustomization
+    public partial class MethodLocalVar : VarNode, UEditableValue.IValueEditNotify, IAfterExecNode, IBeforeExecNode
     {
         public PinOut AfterExec { get; set; } = new PinOut();
         public PinIn BeforeExec { get; set; } = new PinIn();
@@ -423,7 +414,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public static MethodLocalVar NewMethodLocalVar(UMacrossMethodGraph kls, string varName, bool isGet)
+        public static MethodLocalVar NewMethodLocalVar(TtMacrossMethodGraph kls, string varName, bool isGet)
         {
             var result = new MethodLocalVar();
             result.Initialize(kls, varName, isGet);
@@ -435,7 +426,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             TitleColor = MacrossStyles.Instance.VarTitleColor;
             BackColor = MacrossStyles.Instance.VarBGColor;
         }
-        private void Initialize(UMacrossMethodGraph kls, string varName, bool isGet)
+        private void Initialize(TtMacrossMethodGraph kls, string varName, bool isGet)
         {
             mDefMethod = kls;
             IsGet = isGet;
@@ -466,12 +457,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
             base.OnPreRead(tagObject, hostObject, fromXml);
-            var klsGraph = hostObject as UMacrossMethodGraph;
+            var klsGraph = hostObject as TtMacrossMethodGraph;
             if (klsGraph == null)
                 return;
             mDefMethod = klsGraph;
         }
-        private UMacrossMethodGraph mDefMethod;
+        private TtMacrossMethodGraph mDefMethod;
         [Rtti.Meta("",Order = 1)]
         public string LocalName
         {
@@ -577,36 +568,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 EGui.Controls.CtrlUtility.DrawHelper(Var.VariableType.TypeDesc.FullName);
             }
         }
-
-        [Browsable(false)]
-        public bool IsPropertyVisibleDirty { get; set; } = false;
-        public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
-        {
-            if (IsGet)
-                return;
-
-            var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
-            proDesc.Name = Name;
-            proDesc.DisplayName = Name;
-            proDesc.PropertyType = VarType;
-            //proDesc.CustomValueEditor = SetPin.EditValue;
-            collection.Add(proDesc);
-        }
-
-        public object GetPropertyValue(string propertyName)
-        {
-            if (IsGet)
-                return null;
-            return SetPin.EditValue?.Value;
-        }
-
-        public void SetPropertyValue(string propertyName, object value)
-        {
-            if (IsGet || SetPin.EditValue == null)
-                return;
-            SetPin.EditValue.Value = value;
-        }
-
+        
         public void OnValueChanged(UEditableValue ev)
         {
         }
@@ -636,7 +598,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
 
-    public partial class ClassPropertyVar : VarNode, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode, EGui.Controls.PropertyGrid.IPropertyCustomization
+    public partial class ClassPropertyVar : VarNode, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode
     {
         public static ClassPropertyVar NewClassProperty(Rtti.TtClassMeta.TtPropertyMeta meta, bool isGet)
         {
@@ -894,9 +856,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             return ClassProperty.FieldType;
         }
-
-        [Browsable(false)]
-        public bool IsPropertyVisibleDirty { get; set; } = false;
         public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
             if (IsGet)
@@ -948,7 +907,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     node.UnLightDebuggerLine();
             }
         }
-        public override void OpenNode(UMacrossMethodGraph graph)
+        public override void OpenNode(TtMacrossMethodGraph graph)
         {
             if (this.ClassProperty.PropInfo!=null)
             {
@@ -957,7 +916,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
 
-    public partial class ClassFieldVar : VarNode, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode, IPropertyCustomization
+    public partial class ClassFieldVar : VarNode, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode
     {   
         public static ClassFieldVar NewClassMemberVar(Rtti.TtClassMeta.TtFieldMeta meta, bool isGet)
         {
@@ -1253,36 +1212,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             return ClassField.FieldType;
-        }
-
-        [Browsable(false)]
-        public bool IsPropertyVisibleDirty { get; set; } = false;
-        public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
-        {
-            if (IsGet)
-                return;
-
-            var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
-            proDesc.Name = Name;
-            proDesc.DisplayName = Name;
-            proDesc.PropertyType = VarType;
-            //proDesc.CustomValueEditor = SetPin.EditValue;
-            collection.Add(proDesc);
-        }
-
-        public object GetPropertyValue(string propertyName)
-        {
-            if (IsGet)
-                return null;
-            return SetPin.EditValue.Value;
-        }
-
-        public void SetPropertyValue(string propertyName, object value)
-        {
-            if (IsGet)
-                return;
-            SetPin.EditValue.Value = value;
-            OnValueChanged(SetPin.EditValue);
         }
 
         public void LightDebuggerLine()

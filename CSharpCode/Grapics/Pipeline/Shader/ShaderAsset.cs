@@ -16,7 +16,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return "Nebula";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return TtShaderAsset.LoadAsset(GetAssetName());
         }
@@ -41,7 +41,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
     [TtShaderAsset.TtShaderAssetImport]
     [IO.AssetCreateMenu(MenuName = "FX/Shader")]
-    [EngineNS.Editor.UAssetEditor(EditorType = typeof(TtShaderAssetEditor))]
+    [EngineNS.Editor.TtAssetEditor(EditorType = typeof(TtShaderAssetEditor))]
     public class TtShaderAsset : IO.IAsset
     {
         public const string AssetExt = ".shader";

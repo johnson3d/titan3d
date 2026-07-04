@@ -18,7 +18,8 @@ namespace EngineNS.DesignMacross.Editor
         public float FontScale { get; set; } = 1;
         public Color4f TextColor { get; set; } = new Color4f(0, 0, 0);
         public Color4f BackgroundColor { get; set; } = new Color4f(0, 0, 0, 0);
-        public float Rounding { get; set; } = 5;
+        public float Rounding { get; set; } = 0;
+        public ERoundCornerType CornerType = ERoundCornerType.None;
         public IList Items { get; set; }
         public object CurrentSelected = null;
         public TtGraphElement_ComboBox(string content = "None", EVerticalAlignment verticalAlignment = EVerticalAlignment.Top, EHorizontalAlignment horizontalAlignment = EHorizontalAlignment.Left)
@@ -49,7 +50,7 @@ namespace EngineNS.DesignMacross.Editor
             
         }
 
-        public override void OnUnSelected()
+        public override void OnUnSelected(ref FMouseEventContext context)
         {
             
         }   
@@ -152,7 +153,7 @@ namespace EngineNS.DesignMacross.Editor
             ImGuiAPI.SetCursorScreenPos(in start);
             ImGuiAPI.Dummy(in Vector2.Zero);
             //ImGuiAPI.PushStyleColor();
-            if (EGui.UIProxy.ComboBox.BeginCombo("##DMCComboBoxe", comboBoxElement.CurrentSelected == null? "None" : comboBoxElement.CurrentSelected.ToString(), comboBoxElement.Size.Width))
+            if (EGui.UIProxy.ComboBox.BeginCombo("##DMCComboBoxe" + Guid.NewGuid().ToString(), comboBoxElement.CurrentSelected == null? "None" : comboBoxElement.CurrentSelected.ToString(), comboBoxElement.Size.Width))
             {
                 var searchBar = TtEngine.Instance.UIProxyManager["SMDescSearchBar"] as EGui.UIProxy.SearchBarProxy;
                 if (searchBar == null)

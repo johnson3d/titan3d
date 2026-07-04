@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_18286414240814229075 Type="EngineNS.Graphics.Pipeline.UserParameters.TtCBufferParameter@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <CallNodeName Type="System.String@Unknown" Order="0" />
+  <HLSLCode Type="System.String@Unknown" Order="0" />
+  <MethodMeta Type="EngineNS.Rtti.TtClassMeta.TtMethodMeta@EngineCore" Order="0" />
+  <ParameterDefinitions Type="System.Collections.Generic.List&lt;EngineNS.Graphics.Pipeline.UserParameters.TtCBufferParameterDefinition@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_18286414240814229075>

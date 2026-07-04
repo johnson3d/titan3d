@@ -9,16 +9,6 @@ struct FGBufferData : FGBufferDataBase
     {
         return USE_OCTAHEDRON_NORMAL != 0;
     }
-
-    void SetDisableEnvColor()
-    {
-        RenderFlags_10Bit |= ERenderFlags_DisableEnvColor;
-    }
-    bool IsDisableEnvColor()
-    {
-        return (RenderFlags_10Bit & ERenderFlags_DisableEnvColor) != 0;
-    }
-
     void SetShadingMode(int mode)
     {
         RenderFlags_10Bit = (RenderFlags_10Bit & ~SHADINGMODE_BIT_MASK) | ((mode << SHADINGMODE_BIT_OFFSET) & SHADINGMODE_BIT_MASK);
@@ -48,22 +38,6 @@ struct FGBufferData : FGBufferDataBase
 	bool IsAcceptShadow()
 	{
         return (RenderFlags_10Bit & ERenderFlags_AcceptShadow) != 0;
-    }
-
-	bool IsUnlit()
-	{
-        return (RenderFlags_10Bit & ERenderFlags_UnLight) != 0;
-    }
-    void SetUnlit(bool bUnlit)
-    {
-        if (bUnlit)
-        {
-            RenderFlags_10Bit |= ERenderFlags_UnLight;
-        }
-        else
-        {
-            RenderFlags_10Bit &= ~ERenderFlags_UnLight;
-        }
     }
 
     // All MRT packing logic is centralized here.

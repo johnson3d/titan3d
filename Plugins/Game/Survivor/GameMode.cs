@@ -22,6 +22,7 @@ namespace Survivor
             set
             {
                 mBattleUI = value;
+                mHpProgressUI = null;
                 if (value != null)
                 {
                     var mo = value.MacrossObject;
@@ -29,10 +30,6 @@ namespace Survivor
                     {
                         mHpProgressUI = EngineNS.Rtti.TtTypeDescManager.GetPropertyMember(mo, "ElementVar_4728652819903166736") as TtProgress;
                     }
-                }
-                else
-                {
-                    mHpProgressUI = null;
                 }
             }
         }
@@ -100,39 +97,72 @@ namespace Survivor
         [EngineNS.Rtti.Meta]
         public async TtTask InitMonsterSpawner() 
         { 
+            if (CurrentScene == null)
+            {
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, "InitMonsterSpawner skipped: CurrentScene is null");
+                return;
+            }
+
             var nodeData = new TtMonsterSpawnerNode.TtMonsterSpawnerNodeData();
             var node = await TtNode.SpawnNode<TtMonsterSpawnerNode>(CurrentScene, null,
                 nodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
-            node.Parent = CurrentScene;
+            if (node != null)
+                node.Parent = CurrentScene;
         }
         [EngineNS.Rtti.Meta]
         public async TtTask<bool> InitControlledCharacter(EngineNS.GamePlay.Controller.TtCharacterController cc, int roleId)
         {
             var roleData = TtDatabase.Instance.GetHeroData(roleId);
             if (roleData == null)
+            {
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, $"Hero({roleId}) not found");
                 return false;
+            }
+            if (cc == null)
+            {
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, "InitControlledCharacter skipped: controller is null");
+                return false;
+            }
             Player = cc.ControlledCharacter;
             if (Player == null)
+            {
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, "InitControlledCharacter skipped: controlled character is null");
                 return false;
+            }
             await InitCharacter(cc, Player, roleData);
             return true;
         }
 
         private async TtTask InitCharacter(EngineNS.GamePlay.Controller.TtCharacterController cc, TtCharacter player, TtRoleData roleData)
         {
+            if (player == null || roleData == null)
+                return;
+
             var stateNodeData = new TtCharacterStateNode.TtCharacterStateNodeData();
             stateNodeData.RoleData = roleData;
             var stateNode = await TtNode.SpawnNode<TtCharacterStateNode>(player, null,
                 stateNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
+            if (stateNode == null)
+            {
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, "Create character state node failed");
+                return;
+            }
+
             stateNode.NodeName = "StateNode";
             stateNode.CurrentHP = roleData.Health;
             stateNode.OnDead = ()=>
             {
                 var game = TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame;
-                game.CountToTriggerPlayerDead();
+                game?.CountToTriggerPlayerDead();
             };
 
             var prefabNode = player.Parent;
+            if (prefabNode == null)
+            {
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, "Create character weapons skipped: player prefab is null");
+                return;
+            }
+
             {
                 var weaponNodeData = new TtWeaponNode.TtWeaponNodeData();
                 weaponNodeData.WeaponId = roleData.Weapon1;
@@ -153,11 +183,12 @@ namespace Survivor
         [EngineNS.Rtti.Meta]
         public static TtGameMode GetSurvivorGameMode()
         {
-            var game = TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame;
-            return game.SurvivorGameMode;
+            var game = TtEngine.Instance.GameInstance?.MacrossGame as TtMacrossSurvivorGame;
+            return game?.SurvivorGameMode;
         }
     }
 }
+
 
 #if TitanEngine_AutoGen_Macross
 #region TitanEngine_AutoGen_Macross

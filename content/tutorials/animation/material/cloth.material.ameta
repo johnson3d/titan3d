@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="50c7727b3d69a47a5b00789ad90b5e341968229e798ac5747fd46d12cfd5d255" />
+      <Path Type="System.String@Unknown" Value="cloth.material" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="2a0580de175d2092e319dca0d99cf92233f3d3da24fb76f4577de59837819f13" />
+      <Path Type="System.String@Unknown" Value="cloth.material.snap" />
+    </e_1>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="58a31793-01e0-42c0-aaf9-f5a157d0fa35" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/animation/material/cloth.material,58a31793-01e0-42c0-aaf9-f5a157d0fa35" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.TtMaterial&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
+    <e_0 Value="Game,tutorials/animation/material/t_graychan_cloth.srv,7abb849b-52ca-445a-bd20-7faba1d1a430" />
+    <e_1 Value="Game,tutorials/animation/material/t_graychan_cloth_details.srv,5eeca20c-b7af-4a5a-9702-45edf3de740d" />
+    <e_2 Value="Game,tutorials/animation/material/t_graychan_cloth_msr.srv,71b43c9b-3589-4ed1-a6d7-23aced05131f" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
+</Root>

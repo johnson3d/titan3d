@@ -78,6 +78,8 @@ namespace EngineNS.DesignMacross.Editor.GraphPanel
             graphContext.DescriptionsElement = context.DescriptionsElement;
             graphContext.DesignedClassDescription = context.DesignedClassDescription;
             var currentRenderingGraph = navigableGraphsPanel.Navigation.Peek();
+            graphContext.Camera = currentRenderingGraph.Camera;
+            graphContext.ViewPort = currentRenderingGraph.ViewPort;
             currentRenderingGraph.ConstructElements(ref graphContext);
             currentRenderingGraph.AfterConstructElements(ref graphContext);
             var graphRender = TtElementRenderDevice.CreateGraphRender(currentRenderingGraph);

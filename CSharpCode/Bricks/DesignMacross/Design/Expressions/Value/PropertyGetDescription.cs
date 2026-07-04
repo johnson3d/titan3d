@@ -31,7 +31,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
-            var linkedDataPin = expressionBuildContext.MethodDescription.GetLinkedDataPin(DataInPins[0]);
+            var linkedDataPin =  IDataLineOperator.GetLinkedDataPin(expressionBuildContext.OwnerDescription, DataInPins[0]);
             if(linkedDataPin == null)
             {
 
@@ -40,7 +40,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             {
                 if(linkedDataPin.Parent is TtExpressionDescription expressionDescription)
                 {
-                    FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
+                    FExpressionBuildContext buildContext = new() { OwnerDescription = expressionBuildContext.OwnerDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
                     var hostExpression = expressionDescription.BuildExpression(ref buildContext);
                     return new TtVariableReferenceExpression(Name, hostExpression);
                 }

@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="1bbc9ee57bebd3453ee200658c6c6d0b8deca9a4c99bac7a9bc4497159689517" />
+      <Hash Type="System.String@Unknown" Value="745142b1905ab16a7977de514281ca4f882492f14fb611d3c16d4e426485c153" />
       <Path Type="System.String@Unknown" Value="skin_material.material" />
     </e_0>
   </AssetFiles>
@@ -24,5 +24,6 @@
     <e_3 Value="Game,tutorials/fx/skin3s/skin.mtlfunc,c2689d10-892c-4168-815f-80a94ba2272f" />
     <e_4 Value="Game,tutorials/fx/skin3s/man_skin0.sssprofile,ed32b522-df4b-4e5d-b921-8003df5546f3" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

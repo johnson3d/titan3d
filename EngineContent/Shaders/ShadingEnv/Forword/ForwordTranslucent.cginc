@@ -87,6 +87,11 @@ struct PS_OUTPUT
 #endif
 };
 
+int GetShadingMode(uint RenderFlags_10Bit)
+{
+    return (RenderFlags_10Bit & SHADINGMODE_BIT_MASK) >> SHADINGMODE_BIT_OFFSET;
+}
+
 PS_OUTPUT PS_Main(PS_INPUT input)
 {
 	PS_OUTPUT output = (PS_OUTPUT)0;
@@ -116,23 +121,27 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		half3 Emissive = (half3)mtl.mEmissive;
 		half3 BaseShading = half3(0.0h, 0.0h, 0.0h);
 
-#if MTL_LightingMode == ELightingMode_Unlight
-		BaseShading = (half3)mtl.mAlbedo;
-#else
-		//lighting for translucent
-		half3 diffColor, specColor;
-		GetDirLightingColor(diffColor, specColor, input, mtl, 1.0h);
-		half3 skyColor = GetSkyColor(Albedo, mtl, 1.0h);
-		BaseShading = Linear2sRGB(diffColor + specColor + skyColor);
-		//BaseShading = (half3)mtl.mAlbedo;
-#endif
+        uint shadingMode = GetShadingMode(MaterialRenderFlags | MeshRenderFlags);
+        if (shadingMode == EShadingMode_Unlit)
+        {
+            BaseShading = (half3) mtl.mAlbedo;
+        }
+		else
+        {
+			//lighting for translucent
+            half3 diffColor, specColor;
+            GetDirLightingColor(diffColor, specColor, input, mtl, 1.0h);
+            half3 skyColor = GetSkyColor(Albedo, mtl, 1.0h);
+            BaseShading = Linear2sRGB(diffColor + specColor + skyColor);
+			//BaseShading = (half3)mtl.mAlbedo;
+        }
 
 		BaseShading += Emissive;
 		
 		//BaseShading.b = (half)floor(BaseShading.b * AO_M);
-		output.RT0.rgb = BaseShading;
-		output.RT0.a = Alpha;
-	}
+            output.RT0.rgb = BaseShading;
+            output.RT0.a = Alpha;
+    }
 
 #if ENABLE_MOTION_VECTOR == 1
 	{

@@ -601,8 +601,8 @@ namespace NxRHI
 		pipeDesc.pRootSignature = mSignature;
 		pipeDesc.CS =
 		{
-			reinterpret_cast<BYTE*>(&mComputeShader->Desc->DxIL[0]),
-			mComputeShader->Desc->DxIL.size()
+			reinterpret_cast<BYTE*>(&mComputeShader->Desc->RhiData[0]),
+			mComputeShader->Desc->RhiData.size()
 		};
 		pipeDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 		auto hr = device->mDevice->CreateComputePipelineState(&pipeDesc, IID_PPV_ARGS(mPipelineState.GetAddressOf()));
@@ -741,7 +741,7 @@ namespace NxRHI
 	{
 		CD3DX12_STATE_OBJECT_DESC raytracingPipeline{ D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE };
 		auto lib = raytracingPipeline.CreateSubobject<CD3DX12_DXIL_LIBRARY_SUBOBJECT>();
-		D3D12_SHADER_BYTECODE libdxil = CD3DX12_SHADER_BYTECODE(&effect->mShaderLibDesc->DxIL[0], effect->mShaderLibDesc->DxIL.size());
+		D3D12_SHADER_BYTECODE libdxil = CD3DX12_SHADER_BYTECODE(&effect->mShaderLibDesc->RhiData[0], effect->mShaderLibDesc->RhiData.size());
 		lib->SetDXILLibrary(&libdxil);
 		for (auto& i : this->mFunctions)
 		{
@@ -752,7 +752,7 @@ namespace NxRHI
 
 		if (true)
 		{
-			auto reflector = effect->GetShaderLibDesc()->DxILReflector;
+			auto reflector = effect->GetShaderLibDesc()->Reflector;
 			mGlobalReflector = MakeWeakRef(new IShaderReflector());
 
 			mSignatureBuilder.Build(reflector);

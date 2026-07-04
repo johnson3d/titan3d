@@ -64,11 +64,11 @@ namespace EngineNS
             if (type == null)
                 return;
 
-            var attrs = type.GetCustomAttributes(typeof(Editor.UAssetEditorAttribute), false);
+            var attrs = type.GetCustomAttributes(typeof(Editor.TtAssetEditorAttribute), false);
             if (attrs.Length == 0)
                 return;
 
-            var editorAttr = attrs[0] as Editor.UAssetEditorAttribute;
+            var editorAttr = attrs[0] as Editor.TtAssetEditorAttribute;
             if (editorAttr?.EditorType == null)
                 return;
 
@@ -657,11 +657,14 @@ namespace EngineNS
         }
 
         #region AMeta
+        public IO.IAssetMeta mAMeta = null;
         public IO.IAssetMeta AMeta
         {
             get
             {
-                return TtEngine.Instance.AssetMetaManager.GetAssetMeta(this);
+                if (mAMeta == null)
+                    mAMeta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(this);
+                return mAMeta;
             }
         }
         public async Thread.Async.TtTask<T> GetAsset<T>(params object[] args) where T : class, IO.IAsset
@@ -669,7 +672,7 @@ namespace EngineNS
             var ameta = AMeta;
             if (ameta == null || ameta.AssetStatus != IO.IAssetMeta.EAssetStatus.Valid)
                 return default(T);
-            return await ameta.LoadAsset(args) as T;
+            return await ameta.GetAsset(args) as T;
         }
         public async Thread.Async.TtTask<T> CreateAsset<T>(params object[] args) where T : class, IO.IAsset
         {

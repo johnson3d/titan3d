@@ -522,7 +522,7 @@ namespace EngineNS.Editor.Forms
 
 namespace EngineNS.NxRHI
 {
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.TtTextureViewer))]
+    [Editor.TtAssetEditor(EditorType = typeof(Editor.Forms.TtTextureViewer))]
     public partial class TtSrView
     {
         public class TtViewTexture : EGui.Controls.PropertyGrid.TtButtonAttribute

@@ -1,0 +1,390 @@
+#ifndef __QUARK_DAG_VISUALIZE_H__
+#define __QUARK_DAG_VISUALIZE_H__
+
+#include "../../Inc/VertexLayout.cginc"
+#include "FRaster.cginc"
+
+// Visualization modes
+#define VIS_MODE_CLUSTER_ID     0
+#define VIS_MODE_MIP_LEVEL      1
+#define VIS_MODE_LOD_ERROR      2
+
+// Extended cluster data for visualization
+struct FClusterVisData
+{
+    float3 BoundMin;
+    int IndexStart;
+    float3 BoundMax;
+    int IndexEnd;
+    matrix WVPMatrix;
+    uint ClusterID;
+    uint MipLevel;
+    float LODError;
+    float MaxLODError;
+};
+
+StructuredBuffer<FClusterVisData> ClusterVisBuffer;
+ByteAddressBuffer VisVertexBuffer;
+ByteAddressBuffer VisIndexBuffer;
+
+VK_IMAGE(rgba8)
+RWTexture2D<float4> VisOutputTexture;
+RWTexture2D<uint> VisDepthTexture;
+
+struct FVisParams
+{
+    float2 RTSize;
+    uint VisMode;
+    uint FilterMipLevel;
+    uint ClusterCount;
+    uint ShowAllMips;
+    float2 padding;
+};
+
+cbuffer cbVisParams DX_AUTOBIND
+{
+    FVisParams VisParams;
+}
+
+// Hash function for generating cluster colors
+float3 HashColor(uint id)
+{
+    uint h = id;
+    h = ((h >> 16) ^ h) * 0x45d9f3b;
+    h = ((h >> 16) ^ h) * 0x45d9f3b;
+    h = (h >> 16) ^ h;
+    
+    float r = frac(float(h) * 0.0000152587890625f); // /65536
+    h = h * 1103515245u + 12345u;
+    float g = frac(float(h) * 0.0000152587890625f);
+    h = h * 1103515245u + 12345u;
+    float b = frac(float(h) * 0.0000152587890625f);
+    
+    // Increase saturation
+    float3 color = float3(r, g, b);
+    color = lerp(float3(0.3, 0.3, 0.3), color, 0.8);
+    return saturate(color);
+}
+
+// Mip level to rainbow color
+float3 MipLevelColor(uint mipLevel)
+{
+    const float3 colors[8] = {
+        float3(0.2, 0.5, 1.0),   // Level 0: blue
+        float3(0.0, 0.8, 0.8),   // Level 1: cyan
+        float3(0.0, 1.0, 0.3),   // Level 2: green
+        float3(0.6, 1.0, 0.0),   // Level 3: yellow-green
+        float3(1.0, 0.9, 0.0),   // Level 4: yellow
+        float3(1.0, 0.5, 0.0),   // Level 5: orange
+        float3(1.0, 0.2, 0.0),   // Level 6: red-orange
+        float3(1.0, 0.0, 0.3)    // Level 7: red
+    };
+    
+    uint idx = min(mipLevel, 7);
+    return colors[idx];
+}
+
+// LOD Error to heatmap color (blue -> green -> yellow -> red)
+float3 LODErrorHeatmap(float error, float maxError)
+{
+    float t = saturate(error / max(maxError, 0.001));
+    
+    float3 color;
+    if (t < 0.33)
+    {
+        color = lerp(float3(0.0, 0.0, 1.0), float3(0.0, 1.0, 0.0), t * 3.0);
+    }
+    else if (t < 0.66)
+    {
+        color = lerp(float3(0.0, 1.0, 0.0), float3(1.0, 1.0, 0.0), (t - 0.33) * 3.0);
+    }
+    else
+    {
+        color = lerp(float3(1.0, 1.0, 0.0), float3(1.0, 0.0, 0.0), (t - 0.66) * 3.0);
+    }
+    return color;
+}
+
+FQuarkVertex GetVisVertex(int index)
+{
+    FQuarkVertex vert;
+    const int Stride = 3 + 3 + 2;
+    int curIndex = Stride * index;
+
+    vert.Position.x = asfloat(VisVertexBuffer.Load((curIndex++) * 4));
+    vert.Position.y = asfloat(VisVertexBuffer.Load((curIndex++) * 4));
+    vert.Position.z = asfloat(VisVertexBuffer.Load((curIndex++) * 4));
+    
+    vert.Normal.x = asfloat(VisVertexBuffer.Load((curIndex++) * 4));
+    vert.Normal.y = asfloat(VisVertexBuffer.Load((curIndex++) * 4));
+    vert.Normal.z = asfloat(VisVertexBuffer.Load((curIndex++) * 4));
+    
+    vert.UV.x = asfloat(VisVertexBuffer.Load((curIndex++) * 4));
+    vert.UV.y = asfloat(VisVertexBuffer.Load((curIndex++) * 4));
+    
+    return vert;
+}
+
+// Software rasterization with atomic depth test (InterlockedMin).
+// Depth is quantized to uint: closer = smaller value.
+void RasterizeTriWithColor(float2 A, float2 B, float2 C, float3 depthsNDC, float3 color)
+{
+    float2 Size = VisParams.RTSize;
+
+    float2 Min;
+    Min.x = max(min(min(A.x, B.x), C.x), 0);
+    Min.y = max(min(min(A.y, B.y), C.y), 0);
+
+    float2 Max;
+    Max.x = min(max(max(A.x, B.x), C.x), Size.x - 1);
+    Max.y = min(max(max(A.y, B.y), C.y), Size.y - 1);
+
+    // Limit raster area to avoid excessive iteration
+    Max = min(Max, Min + 127);
+
+    float yA_B = A.y - B.y;
+    float xB_A = B.x - A.x;
+    float d1 = A.x * B.y - B.x * A.y;
+
+    float yA_C = A.y - C.y;
+    float xC_A = C.x - A.x;
+    float d2 = A.x * C.y - C.x * A.y;
+
+    float denom1 = yA_B * C.x + xB_A * C.y + d1;
+    float denom2 = yA_C * B.x + xC_A * B.y + d2;
+
+    if (abs(denom1) < 0.001 || abs(denom2) < 0.001)
+        return;
+
+    float invDenom1 = 1.0 / denom1;
+    float invDenom2 = 1.0 / denom2;
+
+    for (int y = (int)Min.y; y <= (int)Max.y; y++)
+    {
+        for (int x = (int)Min.x; x <= (int)Max.x; x++)
+        {
+            float sigma = (yA_B * x + xB_A * y + d1) * invDenom1;
+            float gamma = (yA_C * x + xC_A * y + d2) * invDenom2;
+
+            if (sigma < 0 || gamma < 0 || sigma + gamma > 1)
+                continue;
+
+            // Barycentric interpolation of depth (NDC z)
+            float alpha = 1.0 - sigma - gamma;
+            float depth = alpha * depthsNDC.x + sigma * depthsNDC.y + gamma * depthsNDC.z;
+
+            // Quantize depth to uint (closer = smaller, reversed-Z aware: depth 0=near, 1=far)
+            uint depthUint = (uint)(saturate(depth) * 4294967040.0); // 0xFFFFFF00 scale
+
+            uint2 pixel = uint2(x, y);
+            uint prevDepth;
+            InterlockedMin(VisDepthTexture[pixel], depthUint, prevDepth);
+
+            // Only write color if we won the depth test
+            if (depthUint <= prevDepth)
+            {
+                VisOutputTexture[pixel] = float4(color, 1.0);
+            }
+        }
+    }
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_ClearVisTexture(uint3 DTid : SV_DispatchThreadID)
+{
+    int2 uv = DTid.xy;
+    if (uv.x < (int)VisParams.RTSize.x && uv.y < (int)VisParams.RTSize.y)
+    {
+        VisOutputTexture[uv] = float4(0.05, 0.05, 0.05, 1.0);
+        VisDepthTexture[uv] = 0xFFFFFFFF; // far
+    }
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_VisualizeDAG(uint3 DTid : SV_DispatchThreadID)
+{
+    uint clusterIdx = DTid.x;
+    if (clusterIdx >= VisParams.ClusterCount)
+        return;
+
+    FClusterVisData cluster = ClusterVisBuffer[clusterIdx];
+
+    // MipLevel filter
+    if (VisParams.ShowAllMips == 0)
+    {
+        if (cluster.MipLevel != VisParams.FilterMipLevel)
+            return;
+    }
+
+    // Determine color based on visualization mode
+    float3 color = float3(1, 1, 1);
+    if (VisParams.VisMode == VIS_MODE_CLUSTER_ID)
+    {
+        color = HashColor(cluster.ClusterID);
+    }
+    else if (VisParams.VisMode == VIS_MODE_MIP_LEVEL)
+    {
+        color = MipLevelColor(cluster.MipLevel);
+    }
+    else if (VisParams.VisMode == VIS_MODE_LOD_ERROR)
+    {
+        color = LODErrorHeatmap(cluster.LODError, cluster.MaxLODError);
+    }
+
+    // Add simple shading: darken based on triangle facing
+    int indexStart = cluster.IndexStart;
+    int indexEnd = cluster.IndexEnd;
+    int triCount = (indexEnd - indexStart) / 3;
+
+    for (int tri = 0; tri < triCount; tri++)
+    {
+        int i0 = VisIndexBuffer.Load((indexStart + tri * 3 + 0) * 4);
+        int i1 = VisIndexBuffer.Load((indexStart + tri * 3 + 1) * 4);
+        int i2 = VisIndexBuffer.Load((indexStart + tri * 3 + 2) * 4);
+
+        FQuarkVertex v0 = GetVisVertex(i0);
+        FQuarkVertex v1 = GetVisVertex(i1);
+        FQuarkVertex v2 = GetVisVertex(i2);
+
+        // Transform to screen space
+        float4 p0 = mul(float4(v0.Position, 1), cluster.WVPMatrix);
+        float4 p1 = mul(float4(v1.Position, 1), cluster.WVPMatrix);
+        float4 p2 = mul(float4(v2.Position, 1), cluster.WVPMatrix);
+
+        // Perspective divide
+        if (p0.w <= 0 || p1.w <= 0 || p2.w <= 0)
+            continue;
+
+        // NDC to screen-space pixel coordinates
+        float2 s0 = (p0.xy / p0.w) * float2(0.5, -0.5) + 0.5;
+        float2 s1 = (p1.xy / p1.w) * float2(0.5, -0.5) + 0.5;
+        float2 s2 = (p2.xy / p2.w) * float2(0.5, -0.5) + 0.5;
+        s0 *= VisParams.RTSize;
+        s1 *= VisParams.RTSize;
+        s2 *= VisParams.RTSize;
+
+        // Simple backface cull
+        float2 e01 = s1 - s0;
+        float2 e02 = s2 - s0;
+        float det = e01.x * e02.y - e01.y * e02.x;
+        if (det >= 0)
+            continue;
+
+        // Simple shading: use normal dot light
+        float3 faceNormal = normalize(cross(v1.Position - v0.Position, v2.Position - v0.Position));
+        float ndotl = saturate(dot(faceNormal, normalize(float3(0.5, 1.0, 0.3)))) * 0.6 + 0.4;
+        float3 shadedColor = color * ndotl;
+
+        // Per-vertex NDC depth for barycentric interpolation
+        float3 depths = float3(p0.z / p0.w, p1.z / p1.w, p2.z / p2.w);
+        RasterizeTriWithColor(s0, s1, s2, depths, shadedColor);
+    }
+}
+
+// BVH box wireframe visualization
+struct FBVHBoxData
+{
+    float3 Center;
+    float LODError;
+    float3 Extent;
+    uint Level;
+};
+
+StructuredBuffer<FBVHBoxData> BVHBoxBuffer;
+
+cbuffer cbBVHParams DX_AUTOBIND
+{
+    float2 BVHRTSize;
+    uint BVHBoxCount;
+    uint BVHFilterLevel;
+    matrix BVHViewProj;
+}
+
+void DrawLine2D(float2 p0, float2 p1, float3 color, float2 rtSize)
+{
+    float2 diff = p1 - p0;
+    float steps = max(abs(diff.x), abs(diff.y));
+    if (steps < 1) return;
+    steps = min(steps, 2048); // Limit iterations
+    
+    float2 inc = diff / steps;
+    float2 pos = p0;
+    
+    for (float i = 0; i <= steps; i += 1.0)
+    {
+        int2 pixel = int2(pos);
+        if (pixel.x >= 0 && pixel.x < (int)rtSize.x && pixel.y >= 0 && pixel.y < (int)rtSize.y)
+        {
+            VisOutputTexture[pixel] = float4(color, 1.0);
+        }
+        pos += inc;
+    }
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_DrawBVHBoxes(uint3 DTid : SV_DispatchThreadID)
+{
+    uint boxIdx = DTid.x;
+    if (boxIdx >= BVHBoxCount)
+        return;
+
+    FBVHBoxData box = BVHBoxBuffer[boxIdx];
+
+    // Filter by level
+    if (box.Level != BVHFilterLevel)
+        return;
+
+    // Generate 8 corners of the box
+    float3 corners[8];
+    corners[0] = box.Center + float3(-box.Extent.x, -box.Extent.y, -box.Extent.z);
+    corners[1] = box.Center + float3( box.Extent.x, -box.Extent.y, -box.Extent.z);
+    corners[2] = box.Center + float3( box.Extent.x,  box.Extent.y, -box.Extent.z);
+    corners[3] = box.Center + float3(-box.Extent.x,  box.Extent.y, -box.Extent.z);
+    corners[4] = box.Center + float3(-box.Extent.x, -box.Extent.y,  box.Extent.z);
+    corners[5] = box.Center + float3( box.Extent.x, -box.Extent.y,  box.Extent.z);
+    corners[6] = box.Center + float3( box.Extent.x,  box.Extent.y,  box.Extent.z);
+    corners[7] = box.Center + float3(-box.Extent.x,  box.Extent.y,  box.Extent.z);
+
+    // Project to screen
+    float2 screenCorners[8];
+    bool visible = false;
+    for (int i = 0; i < 8; i++)
+    {
+        float4 p = mul(float4(corners[i], 1), BVHViewProj);
+        if (p.w > 0)
+        {
+            screenCorners[i] = p.xy / p.w;
+            visible = true;
+        }
+        else
+        {
+            screenCorners[i] = float2(-9999, -9999);
+        }
+    }
+
+    if (!visible)
+        return;
+
+    // BVH level color
+    float3 wireColor = MipLevelColor(box.Level);
+    wireColor = lerp(wireColor, float3(1, 1, 1), 0.3);
+
+    // Draw 12 edges of the box
+    // Bottom face
+    DrawLine2D(screenCorners[0], screenCorners[1], wireColor, BVHRTSize);
+    DrawLine2D(screenCorners[1], screenCorners[2], wireColor, BVHRTSize);
+    DrawLine2D(screenCorners[2], screenCorners[3], wireColor, BVHRTSize);
+    DrawLine2D(screenCorners[3], screenCorners[0], wireColor, BVHRTSize);
+    // Top face
+    DrawLine2D(screenCorners[4], screenCorners[5], wireColor, BVHRTSize);
+    DrawLine2D(screenCorners[5], screenCorners[6], wireColor, BVHRTSize);
+    DrawLine2D(screenCorners[6], screenCorners[7], wireColor, BVHRTSize);
+    DrawLine2D(screenCorners[7], screenCorners[4], wireColor, BVHRTSize);
+    // Vertical edges
+    DrawLine2D(screenCorners[0], screenCorners[4], wireColor, BVHRTSize);
+    DrawLine2D(screenCorners[1], screenCorners[5], wireColor, BVHRTSize);
+    DrawLine2D(screenCorners[2], screenCorners[6], wireColor, BVHRTSize);
+    DrawLine2D(screenCorners[3], screenCorners[7], wireColor, BVHRTSize);
+}
+
+#endif

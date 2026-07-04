@@ -61,7 +61,8 @@ namespace EngineNS.DesignMacross.Base.Graph
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoNav))
             {
                 {
-                    popupMenu.PopedPosition = context.ViewportInverseTransform(mPopMousePosition);
+                    //popupMenu.PopedPosition = context.ViewportInverseTransform(mPopMousePosition);
+                    popupMenu.PopedPosition = mPopMousePosition;
                     var size = ImGuiAPI.GetWindowSize();
 
 

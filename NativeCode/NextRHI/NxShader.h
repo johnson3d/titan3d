@@ -148,6 +148,15 @@ namespace NxRHI
 			return Reflector;
 		}
 	};
+	enum TR_ENUM() 
+		EShaderLanguage
+	{
+		SL_DXBC = 1,
+		SL_DXIL = (1 << 1),
+		SL_GLSL = (1 << 2),
+		SL_SPIRV = (1 << 3),
+		SL_METAL = (1 << 4)
+	};
 	struct TR_CLASS()
 		FShaderDesc : public IWeakRefObject
 	{
@@ -157,42 +166,48 @@ namespace NxRHI
 			
 		}
 		EShaderType		Type = EShaderType::SDT_Unknown;
+		EShaderLanguage	Language = EShaderLanguage::SL_DXBC;
 		VNameString		DebugName;
 		VNameString		FunctionName;
 		std::vector<EVertexStreamType>	InputStreams;
 		std::string		HLSL;
-		std::vector<BYTE>	Dxbc;
-		std::vector<BYTE>	DxIL;
-		std::vector<BYTE>	SpirV;
-		std::string		Es300Code;
-		std::string		MetalCode;
+		std::vector<BYTE>	RhiData;
 
-		AutoRef<IShaderReflector>	DxbcReflector;
-		AutoRef<IShaderReflector>	DxILReflector;
-		AutoRef<IShaderReflector>	SpirvReflector;
+		AutoRef<IShaderReflector>	Reflector;
 		AutoRef<IShader>	Shader;
-		const char* GetGLCode() const {
-			return Es300Code.c_str();
-		}
-		void SetGLCode(const char* code) {
-			Es300Code = code;
-		}
-		const char* GetMetalCode() const {
-			return MetalCode.c_str();
-		}
-		void SetMetalCode(const char* code) {
-			MetalCode = code;
-		}
 
-		void SetDXBC(const BYTE * pData, UINT size)
-		{
-			Dxbc.resize(size);
-			memcpy(&Dxbc[0], pData, size);
+		inline BYTE* GetRHIData() {
+			if (RhiData.size() == 0)
+				return nullptr;
+			return &RhiData[0];
 		}
-		void SetSpirV(const BYTE* pData, UINT size)
+		inline UINT GetRHIDataSize() {
+			return (UINT)RhiData.size();
+		}
+		void SetRhiData(const BYTE* pData, UINT size)
 		{
-			SpirV.resize(size);
-			memcpy(&SpirV[0], pData, size);
+			RhiData.resize(size);
+			if (size > 0)
+				memcpy(&RhiData[0], pData, size);
+		}
+		const BYTE* GetRhiData() const {
+			if (RhiData.empty())
+				return nullptr;
+			return &RhiData[0];
+		}
+		UINT GetRhiDataSize() const {
+			return (UINT)RhiData.size();
+		}
+		const char* GetRhiDataAsText() const {
+			if (RhiData.empty())
+				return "";
+			return (const char*)&RhiData[0];
+		}
+		void SetRhiDataFromText(const char* code) {
+			size_t len = strlen(code);
+			RhiData.resize(len);
+			if (len > 0)
+				memcpy(&RhiData[0], code, len);
 		}
 
 		void SaveXnd(XndNode* node);
@@ -252,15 +267,6 @@ namespace NxRHI
 		void ClearDefines();
 		void RemoveDefine(const char* name);
 		void MergeDefinitions(IShaderDefinitions* def);
-	};
-	enum TR_ENUM() 
-		EShaderLanguage
-	{
-		SL_DXBC = 1,
-		SL_DXIL = (1 << 1),
-		SL_GLSL = (1 << 2),
-		SL_SPIRV = (1 << 3),
-		SL_METAL = (1 << 4)
 	};
 	struct TR_CLASS()
 		FShaderCode : public IWeakRefObject

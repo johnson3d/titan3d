@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.WorldSimulator;
+using EngineNS.Bricks.WorldSimulator;
 using EngineNS.EGui.Slate;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Mesh;
@@ -161,6 +161,7 @@ namespace EngineNS.GamePlay
 
             public EVisCull CullType = EVisCull.Normal;
             public EVisCullFilter CullFilters = EVisCullFilter.None;// EVisCullFilter.All;
+            public bool UseEditorVisibilityFilter = false;
             public bool IsUseECS = true;
             public DBoundingBox CullBox;
             public TtWorld World;
@@ -311,6 +312,8 @@ namespace EngineNS.GamePlay
             rootNode.IterateNodes(static (node, arg) =>
             {
                 var rp = arg as TtVisParameter;
+                if (rp.UseEditorVisibilityFilter && node.IsEditorVisibleInHierarchy == false)
+                    return false;
                 if (rp.OnVisitNode != null)
                 {
                     using (new Profiler.TimeScopeHelper(ScopeOnVisitNode))
@@ -423,8 +426,7 @@ namespace EngineNS.GamePlay
             mesh2.Initialize(cookedMesh, materials1, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
             mesh2.SetWorldTransform(in node.Placement.AbsTransform, this, true);
             mesh2.IsAcceptShadow = false;
-            mesh2.IsUnlit = true;
-
+            
             bvs.Add(new Graphics.Pipeline.FVisibleMesh() { Mesh = mesh2 });
 
             return false;
@@ -618,6 +620,7 @@ namespace EngineNS.GamePlay
         #endregion
     }
 }
+
 #if TitanEngine_AutoGen_Macross
 #region TitanEngine_AutoGen_Macross
 

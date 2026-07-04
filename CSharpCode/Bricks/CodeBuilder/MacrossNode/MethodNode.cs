@@ -19,7 +19,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             public EMethodArgumentAttribute OpType;
             public bool IsCustomPin = false;
 
-            public UMacrossMethodGraph DelegateGraph;
+            public TtMacrossMethodGraph DelegateGraph;
             public List<PinData> SubPins;
 
             public EGui.UIProxy.MenuItemProxy.MenuState AddPinMenuState;
@@ -163,7 +163,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             public string ArgumentName { get; set; }
 
             [Rtti.Meta("")]
-            public UMacrossMethodGraph DelegateGraph { get; set; } = null;
+            public TtMacrossMethodGraph DelegateGraph { get; set; } = null;
 
             public class ExtPinData : IO.BaseSerializer
             {
@@ -447,6 +447,19 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //}
         }
 
+        public override void OnUpdateAMetaReferences(TtMacrossEditor graph, IMacrossMeta ameta)
+        {
+            foreach (var pin in Inputs)
+            {
+                if (pin.EditValue == null)
+                    continue;
+                var rnm = pin.EditValue.Value as RName;
+                if (rnm != null)
+                {
+                    ameta.AddReferenceAsset(rnm);
+                }
+            }
+        }
         public void SetSelfMethod()
         {
             if (Self == null)
@@ -799,7 +812,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
-        public override void OpenNode(UMacrossMethodGraph graph)
+        public override void OpenNode(TtMacrossMethodGraph graph)
         {
             if (this.Method?.GetMethod()!=null)
             {
@@ -883,8 +896,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if(hitType.IsDelegate)
             {
                 var method = Method;
-                var macrossGraph = ParentGraph as UMacrossMethodGraph;
-                UMacrossMethodGraph showGraph = null;
+                var macrossGraph = ParentGraph as TtMacrossMethodGraph;
+                TtMacrossMethodGraph showGraph = null;
                 for(int i=0; i<Arguments.Count; i++)
                 {
                     if(hitPin == Arguments[i].PinIn)
@@ -926,7 +939,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     VariableType = new TtTypeReference(type),
                                 });
                             }
-                            showGraph = UMacrossMethodGraph.NewGraph(macrossGraph.MacrossEditor, f);
+                            showGraph = TtMacrossMethodGraph.NewGraph(macrossGraph.MacrossEditor, f);
                             showGraph.MethodDatas[0].IsDelegate = true;
                             //macrossGraph.MacrossEditor.Methods.Add(showGraph);
                             //macrossGraph.MacrossEditor.DefClass.Methods.Add(f);
@@ -940,7 +953,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     showGraph.ParentGraph = this.ParentGraph;
                     showGraph.VisibleInClassGraphTables = true;
-                    ((UMacrossMethodGraph)ParentGraph).GraphRenderer.SetGraph(showGraph);
+                    ((TtMacrossMethodGraph)ParentGraph).GraphRenderer.SetGraph(showGraph);
                 }
             }
         }

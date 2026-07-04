@@ -15,6 +15,7 @@
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Value="Engine,icons/icons.srv,3969ef46-2a5a-4a3a-aebb-13d5a1776b06" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <SnapUVEnd Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   <SnapUVStart Type="EngineNS.Vector2@EngineCore" Value="0,0" />
   <TextureName Type="EngineNS.RName@EngineCore" Value="Engine,icons/icons.srv,3969ef46-2a5a-4a3a-aebb-13d5a1776b06" />

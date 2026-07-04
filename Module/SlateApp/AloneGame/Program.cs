@@ -20,6 +20,13 @@ class Program
         }
         Console.WriteLine($"Config={cfg}");
 
+        var forceRenderDoc = EngineNS.TtEngine.FindArgument(args, "ForceRenderDoc=");
+        if (forceRenderDoc == "1" || string.Equals(forceRenderDoc, "true", StringComparison.OrdinalIgnoreCase))
+        {
+            var renderDoc = EngineNS.IO.TtFileManager.CombinePath(root, "3rd/native/renderdoc/bin/renderdoc.dll");
+            EngineNS.IRenderDocTool.GetInstance().InitRenderDoc(renderDoc);
+        }
+
         var task = EngineNS.TtEngine.StartEngine(new EngineNS.TtEngine(args), cfg, false);
 
         while (true)

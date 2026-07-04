@@ -279,7 +279,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         TtAttachBuffer mFallbackShadowMask = new TtAttachBuffer();
         public override void FrameBuild(TtRenderPolicy policy)
         {
-            if (policy.EnableContactShadow == false)
+            if (policy.ContactShadowMode != Deferred.EContactShadowMode.InputNode)
             {
                 this.ImportAttachment(ShadowMaskPinOut, mFallbackShadowMask);
                 mFallbackShadowMask.Srv = TtEngine.Instance.GfxDevice.TextureManager.WhiteTextureSRV;
@@ -288,7 +288,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         public override unsafe void Tick(GamePlay.TtWorld world,
             TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            if (policy.EnableContactShadow == false)
+            if (policy.ContactShadowMode != Deferred.EContactShadowMode.InputNode)
                 return;
 
             if (mShading == null || !mShading.IsReady)

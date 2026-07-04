@@ -1,4 +1,5 @@
 ﻿using EngineNS.DesignMacross.Base.Description;
+using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.Rtti;
 using System.Collections;
@@ -39,7 +40,7 @@ namespace EngineNS.DesignMacross.Base.Outline
     public interface IOutlilneElementSelectable : IOutlilneElementDraggable
     {
         public void OnSelected(ref FOutlineElementRenderingContext context);
-        public void OnUnSelected();
+        public void OnUnSelected(ref FMouseEventContext context);
     }
     public interface IOutlineElement : IRenderableElement
     {

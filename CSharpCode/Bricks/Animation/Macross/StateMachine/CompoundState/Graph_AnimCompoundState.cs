@@ -1,17 +1,18 @@
-﻿using EngineNS.DesignMacross.Editor;
-using EngineNS.DesignMacross.Base.Graph;
-using System.Collections;
-using System.Reflection;
-using EngineNS.Rtti;
-using EngineNS.DesignMacross.Base.Render;
-using EngineNS.DesignMacross.Base.Description;
-using System.Diagnostics;
-using EngineNS.DesignMacross.Design;
-using EngineNS.EGui.Controls;
-using EngineNS.Bricks.StateMachine.Macross.CompoundState;
+﻿using EngineNS.Bricks.Animation.Macross.StateMachine.SubState;
 using EngineNS.Bricks.StateMachine.Macross;
-using EngineNS.Bricks.Animation.Macross.StateMachine.SubState;
+using EngineNS.Bricks.StateMachine.Macross.CompoundState;
 using EngineNS.DesignMacross;
+using EngineNS.DesignMacross.Base.Description;
+using EngineNS.DesignMacross.Base.Graph;
+using EngineNS.DesignMacross.Base.Render;
+using EngineNS.DesignMacross.Design;
+using EngineNS.DesignMacross.Editor;
+using EngineNS.EGui.Controls;
+using EngineNS.Rtti;
+using SixLabors.Fonts;
+using System.Collections;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
 {
@@ -34,6 +35,8 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
             elementRenderingContext.EditorInteroperation = context.EditorInteroperation;
             elementRenderingContext.GraphElementStyleManager = context.GraphElementStyleManager;
             elementRenderingContext.DescriptionsElement = context.DescriptionsElement;
+            elementRenderingContext.DesignedClassDescription = context.DesignedClassDescription;
+            elementRenderingContext.DesignedGraph = this;
 
             foreach (var property in Description.GetType().GetProperties())
             {
@@ -88,6 +91,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
             popupMenu.bHasSearchBox = true;
             var cmdHistory = context.CommandHistory;
             var graphElementStyleManager = context.GraphElementStyleManager;
+            var tempContext = context;
             //for now just put here, util we have the init method
             foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
             {
@@ -100,10 +104,11 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
                              (TtMenuItem item, object sender) =>
                              {
                                  var popMenu = sender as TtPopupMenu;
+                                 var popedPosition = tempContext.CameraTransform(popMenu.PopedPosition);
                                  if (Rtti.TtTypeDescManager.CreateInstance(typeDesc) is TtAnimSubStateClassDescription state)
                                  {
                                      state.Name = GetValidNodeName(state.Name);
-                                     var style = graphElementStyleManager.GetOrAdd(state, popMenu.PopedPosition);
+                                     var style = graphElementStyleManager.GetOrAdd(state, popedPosition);
                                      cmdHistory.CreateAndExtuteCommand("AddAnimState",
                                          (data) => { TimedCompoundStateClassDescription.AddState(state); },
                                          (data) => { TimedCompoundStateClassDescription.RemoveState(state); });
@@ -128,12 +133,13 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
                              (TtMenuItem item, object sender) =>
                              {
                                  var popMenu = sender as TtPopupMenu;
+                                 var popedPosition = tempContext.CameraTransform(popMenu.PopedPosition);
                                  var hubDesc = new TtTimedCompoundStateHubClassDescription
                                  {
                                      TimedCompoundStateClassDescriptionId = compoundState.Id,
                                      TimedCompoundStateClassDescription = compoundState,
                                  };
-                                 var style = graphElementStyleManager.GetOrAdd(hubDesc, popMenu.PopedPosition);
+                                 var style = graphElementStyleManager.GetOrAdd(hubDesc, popedPosition);
                                  cmdHistory.CreateAndExtuteCommand("AddHub",
                                    (data) => { TimedCompoundStateClassDescription.AddHub(hubDesc); },
                                    (data) => { TimedCompoundStateClassDescription.RemoveHub(hubDesc); });
@@ -146,35 +152,35 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
     {
         public void Draw(IRenderableElement renderableElement, ref FGraphRenderingContext context)
         {
-            var timedStatesHubGraph = renderableElement as TtGraph_TimedCompoundState;
-            if (timedStatesHubGraph == null)
+            var graph = renderableElement as TtGraph;
+            if (graph == null)
                 return;
 
-            if (ImGuiAPI.BeginChild(timedStatesHubGraph.Name + "_Graph", in Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
+            if (ImGuiAPI.BeginChild(graph.Name + "_Graph", in Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
             {
                 var cmd = ImGuiAPI.GetWindowDrawList();
 
                 Vector2 sz = ImGuiAPI.GetWindowContentRegionMax() - ImGuiAPI.GetWindowContentRegionMin();
                 var winPos = ImGuiAPI.GetWindowPos();
                 // initialize
-                timedStatesHubGraph.Size = new SizeF(sz.X, sz.Y);
-                timedStatesHubGraph.ViewPort.Location = winPos;
-                timedStatesHubGraph.ViewPort.Size = new SizeF(sz.X, sz.Y);
-                timedStatesHubGraph.Camera.Size = new SizeF(sz.X, sz.Y);
+                graph.Size = new SizeF(sz.X, sz.Y);
+                graph.ViewPort.Location = winPos;
+                graph.ViewPort.Size = new SizeF(sz.X, sz.Y);
+                graph.Camera.Size = new SizeF(sz.X, sz.Y);
 
-                timedStatesHubGraph.CommandHistory = context.CommandHistory;
-                context.ViewPort = timedStatesHubGraph.ViewPort;
-                context.Camera = timedStatesHubGraph.Camera;
+                graph.CommandHistory = context.CommandHistory;
+                context.ViewPort = graph.ViewPort;
+                context.Camera = graph.Camera;
                 //
 
                 FGraphElementRenderingContext elementRenderingContext = default;
                 elementRenderingContext.Camera = context.Camera;
                 elementRenderingContext.ViewPort = context.ViewPort;
-                elementRenderingContext.CommandHistory = timedStatesHubGraph.CommandHistory;
+                elementRenderingContext.CommandHistory = graph.CommandHistory;
                 elementRenderingContext.EditorInteroperation = context.EditorInteroperation;
                 elementRenderingContext.GraphElementStyleManager = context.GraphElementStyleManager;
                 elementRenderingContext.DescriptionsElement = context.DescriptionsElement;
-                elementRenderingContext.DesignedGraph = timedStatesHubGraph;
+                elementRenderingContext.DesignedGraph = graph;
 
                 TtGraphElement_GridLine grid = new TtGraphElement_GridLine();
                 grid.Size = new SizeF(sz.X, sz.Y);
@@ -182,7 +188,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
                 if (gridRender != null)
                     gridRender.Draw(grid, ref elementRenderingContext);
 
-                foreach (var element in timedStatesHubGraph.Elements)
+                foreach (var element in graph.Elements)
                 {
                     if (element is ILayoutable layoutable)
                     {
@@ -190,7 +196,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
                         layoutable.Arranging(new Rect(element.Location, size));
                     }
                 }
-                foreach (var element in timedStatesHubGraph.Elements)
+                foreach (var element in graph.Elements)
                 {
                     var elementRender = TtElementRenderDevice.CreateGraphElementRender(element);
                     if (elementRender != null)
@@ -198,7 +204,23 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
                         elementRender.Draw(element, ref elementRenderingContext);
                     }
                 }
-                TtMouseEventProcesser.Instance.Processing(timedStatesHubGraph, ref elementRenderingContext);
+                if ((graph.SelectingRect != null))
+                {
+                    var selectingRectRender = TtElementRenderDevice.CreateGraphElementRender(graph.SelectingRect);
+                    if (selectingRectRender != null)
+                    {
+                        selectingRectRender.Draw(graph.SelectingRect, ref elementRenderingContext);
+                    }
+                }
+                if (ImGuiAPI.IsKeyDown(ImGuiKey.ImGuiKey_LeftCtrl))
+                {
+                    graph.CanMultiSelect = true;
+                }
+                else
+                {
+                    graph.CanMultiSelect = false;
+                }
+                TtMouseEventProcesser.Instance.Processing(graph, ref elementRenderingContext);
                 TtGraphContextMenuHandler.Instance.HandleContextMenu(TtMouseEventProcesser.Instance.LastElement, ref elementRenderingContext);
             }
             ImGuiAPI.EndChild();

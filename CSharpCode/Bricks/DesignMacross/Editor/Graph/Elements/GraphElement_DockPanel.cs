@@ -13,7 +13,9 @@ namespace EngineNS.DesignMacross.Editor
     [ImGuiElementRender(typeof(TtGraphElementRender_DockPanel))]
     public class TtGraphElement_DockPanel : TtWidgetGraphElement, ILayoutable
     {
-        public Color4f BackgroundColor { get; set; } = new Color4f(0, 0, 0);
+        public Color4f BackgroundColor { get; set; } = new Color4f(0, 0, 0, 0);
+        public float Rounding { get; set; } = 0;
+        public ERoundCornerType CornerType = ERoundCornerType.None;
         public Dictionary<EDockPosition, IGraphElement> Children { get; set; } = new();
         public FMargin Margin { get; set; } = FMargin.Default;
         public EHorizontalAlignment HorizontalAlignment { get; set; } = EHorizontalAlignment.Stretch;
@@ -60,7 +62,7 @@ namespace EngineNS.DesignMacross.Editor
 
         }
 
-        public override void OnUnSelected()
+        public override void OnUnSelected(ref FMouseEventContext context)
         {
 
         }
@@ -222,6 +224,9 @@ namespace EngineNS.DesignMacross.Editor
         {
             TtGraphElement_DockPanel dockPanel = renderableElement as TtGraphElement_DockPanel;
             var cmd = ImGuiAPI.GetWindowDrawList();
+            var start = context.ViewportTransform(dockPanel.AbsLocation);
+            var end = context.ViewportTransform(dockPanel.AbsLocation + new Vector2(dockPanel.Size.Width, dockPanel.Size.Height));
+            cmd.AddRectFilled(start, end, ImGuiAPI.ColorConvertFloat4ToU32(dockPanel.BackgroundColor), dockPanel.Rounding, (ImDrawFlags_)dockPanel.CornerType);
             foreach (var child in dockPanel.Children)
             {
                 var render = TtElementRenderDevice.CreateGraphElementRender(child.Value);

@@ -21,7 +21,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         {
             return TtEngine.Instance.EditorInstance.Config.RenderPolicyBoderColor;
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return TtRenderPolicyAsset.LoadAsset(GetAssetName());
         }
@@ -68,7 +68,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
     }
     [TtRenderPolicyAsset.Import]
     [IO.AssetCreateMenu(MenuName = "FX/RenderPolicy")]
-    [Editor.UAssetEditor(EditorType = typeof(TtPolicyEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(TtPolicyEditor))]
     //[Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.RenderPolicyEditor.URenderPolicyAsset@EngineCore" })]
     public class TtRenderPolicyAsset : IO.IAsset
     {

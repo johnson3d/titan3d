@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="1ff3fd710943a2b1a6b6f0c34e6e2d76175dd76e1cd197921932871572fa3282" />
+      <Hash Type="System.String@Unknown" Value="126fed534b32df35cca118bfaa92e9ed1116a27e3add63b39f0cf0a6b24bb456" />
       <Path Type="System.String@Unknown" Value="swewater.material" />
     </e_0>
   </AssetFiles>
@@ -22,5 +22,6 @@
     <e_1 Value="Game,tutorials/water/swe_utility.mtlfunc,587e74dc-45b6-47ab-85ee-a077fe822273" />
     <e_2 Value="Game,tutorials/water/water_shine.mtlfunc,146ccf75-ebb3-48bc-b720-053cb9fe10db" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

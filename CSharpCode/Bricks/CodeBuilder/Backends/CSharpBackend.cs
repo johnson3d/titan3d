@@ -216,6 +216,20 @@ namespace EngineNS.Bricks.CodeBuilder
                     var attGen = data.CodeGen.GetCodeObjectGen(methodDec.Attributes[i].GetType());
                     attGen.GenCodes(methodDec.Attributes[i], ref sourceCode, ref data);
                 }
+
+                if (!string.IsNullOrEmpty(methodDec.RawBodyCode))
+                {
+                    // EMethodEditMode.CSharp: output user-written full function code directly
+                    var lines = methodDec.RawBodyCode.Split('\n');
+                    foreach (var line in lines)
+                    {
+                        data.CodeGen.AddLine(line.TrimEnd('\r'), ref sourceCode);
+                    }
+                    data.Method.ResetRuntimeData();
+                    data.Method = null;
+                    return;
+                }
+
                 string methodDecStr = "";
                 switch(methodDec.VisitMode)
                 {

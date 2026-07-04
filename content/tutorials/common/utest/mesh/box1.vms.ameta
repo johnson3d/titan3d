@@ -16,5 +16,7 @@
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Value="Game,tutorials/common/utest/mesh/box1.vms.clustermesh,00000000-0000-0000-0000-000000000000" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <StreamingTexelFactor Type="System.Single@Unknown" Value="1" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMeshPrimitives@EngineCore" />
 </Root>

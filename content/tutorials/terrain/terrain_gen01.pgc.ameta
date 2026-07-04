@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.Procedure.UPgcAssetAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="d2a5fe45-8b63-4ce7-bf0e-59bacfa9efe3" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/terrain/terrain_gen01.pgc,d2a5fe45-8b63-4ce7-bf0e-59bacfa9efe3" />
@@ -16,4 +16,5 @@
     <e_1 Value="Game,tutorials/common/texture/ground8_nmp.srv,e877d865-70bc-4319-8542-4d5c26cc99bb" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.UPgcAsset@EngineCore" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
 </Root>

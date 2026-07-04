@@ -13,4 +13,38 @@
   <ItemGroup>
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\KawaiiContext.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\SimParticle.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\XPBDSolver.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\SimJointHelpers.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\CosseratRodSolver.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\KawaiiChainSolver.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\KawaiiClothSolver.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Constraints\BoneConstraints.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Collision\ColliderBase.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Collision\CollisionUtils.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Collision\ClothUntangling.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\KawaiiTypes.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\KawaiiPhySettings.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\KawaiiContext.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\SimParticle.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\XPBDSolver.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\SimJointHelpers.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\CosseratRodSolver.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\KawaiiChainSolver.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\KawaiiClothSolver.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Constraints\DistanceConstraint.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Constraints\BendingConstraint.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Constraints\BoneConstraints.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Collision\ColliderBase.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Collision\CollisionUtils.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Collision\DynamicCollider.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Collision\MeshCollider.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Collision\DynamicBVH.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Collision\TopLevelBVH.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Collision\ClothUntangling.h" />
+  </ItemGroup>
 </Project>

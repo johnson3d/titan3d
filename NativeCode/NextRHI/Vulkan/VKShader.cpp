@@ -79,16 +79,16 @@ namespace NxRHI
 	bool VKShader::Init(VKGpuDevice* device, FShaderDesc* desc)
 	{
 		Desc = desc;
-		if (Desc->SpirV.size() == 0)
+		if (Desc->RhiData.size() == 0)
 			return false;
 
 		//Reflect(desc);
-		Reflector = desc->SpirvReflector;
+		Reflector = desc->Reflector;
 
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		createInfo.codeSize = desc->SpirV.size();
-		createInfo.pCode = reinterpret_cast<const uint32_t*>(&desc->SpirV[0]);
+		createInfo.codeSize = desc->RhiData.size();
+		createInfo.pCode = reinterpret_cast<const uint32_t*>(&desc->RhiData[0]);
 
 		if (vkCreateShaderModule(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mShader) != VK_SUCCESS)
 		{
@@ -96,7 +96,7 @@ namespace NxRHI
 		}
 
 #if defined(HasModule_GpuDump)
-		GpuDump::NvAftermath::RegByteCode(desc->DebugName.c_str(), &desc->SpirV[0], (UINT)createInfo.codeSize);
+		GpuDump::NvAftermath::RegByteCode(desc->DebugName.c_str(), &desc->RhiData[0], (UINT)createInfo.codeSize);
 #endif
 
 		return true;
@@ -199,9 +199,9 @@ namespace NxRHI
 
 	bool VKShader::Reflect(FShaderDesc* desc)
 	{
-		desc->SpirvReflector = MakeWeakRef(new IShaderReflector());
+		desc->Reflector = MakeWeakRef(new IShaderReflector());
 
-		auto Reflector = desc->SpirvReflector;
+		auto Reflector = desc->Reflector;
 
 		spvc_context context = NULL;
 		spvc_parsed_ir ir = NULL;
@@ -213,9 +213,9 @@ namespace NxRHI
 		size_t count;
 		size_t i;
 
-		const SpvId* spirv = (const SpvId*)& desc->SpirV[0];
-		ASSERT(desc->SpirV.size() % sizeof(SpvId) == 0)
-		size_t word_count = desc->SpirV.size() / sizeof(SpvId);
+		const SpvId* spirv = (const SpvId*)& desc->RhiData[0];
+		ASSERT(desc->RhiData.size() % sizeof(SpvId) == 0)
+		size_t word_count = desc->RhiData.size() / sizeof(SpvId);
 
 		// Create context.
 		spvc_context_create(&context);

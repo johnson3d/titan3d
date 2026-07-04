@@ -21,5 +21,6 @@
     <e_0 Value="Game,tutorials/fx/hair/t_hair01_d.srv,4a31c4a9-7c27-4922-9eec-fb7d20cf6d88" />
     <e_1 Value="Game,tutorials/fx/hair/t_hair_n.srv,9fcc6d5b-8d7f-4ecc-8d78-d63ab812008e" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

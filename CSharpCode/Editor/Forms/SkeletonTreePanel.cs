@@ -35,6 +35,7 @@ namespace EngineNS.Editor.Forms
         // ─── PhysicsAsset toolbar state ─────────────────────────────
         RName mPhysicsAssetRName;
         bool mEditPhysicsAsset = false;
+        bool mShowBones = false;
         GamePlay.TtWorld mWorld;
         TtPhysicsAsset mLoadedPhysicsAsset;
         EGui.Controls.TtContentBrowser mPhyAssetBrowser;
@@ -135,12 +136,17 @@ namespace EngineNS.Editor.Forms
                 ImGuiAPI.OpenPopup("PhyAssetSelector", ImGuiPopupFlags_.ImGuiPopupFlags_None);
             }
 
-            // ── Row 2: Edit checkbox + Save ──
+            // ── Row 2: ShowBones + EditPhysics + Save ──
+            if (ImGuiAPI.Checkbox("ShowBones", ref mShowBones))
+            {
+                ToggleSkeletonShow(mShowBones);
+            }
+            ImGuiAPI.SameLine(0, 8);
+
             if (ImGuiAPI.Checkbox("EditPhysics", ref mEditPhysicsAsset))
             {
                 if (mPhysicsAssetNode != null)
                     mPhysicsAssetNode.ShowDebug = mEditPhysicsAsset;
-                ToggleSkeletonShow(mEditPhysicsAsset);
             }
             ImGuiAPI.SameLine(0, 8);
 
@@ -217,6 +223,7 @@ namespace EngineNS.Editor.Forms
             }
             mLoadedPhysicsAsset = asset;
             mEditPhysicsAsset = true;
+            mShowBones = true;
             await SetPhysicsAsset(asset, mWorld);
             ToggleSkeletonShow(true);
         }
@@ -246,6 +253,9 @@ namespace EngineNS.Editor.Forms
             }
         }
 
+        // ─── Details 面板 Shapes 列表变化监控 ────────────────────
+        int mLastShapesCount = -1;
+
         public void OnDrawBoneDetails()
         {
             if (!mBoneDetailsInitialized)
@@ -254,6 +264,41 @@ namespace EngineNS.Editor.Forms
                 mBoneDetailsInitialized = true;
             }
             mBoneDetailsPropGrid.OnDraw(true, false, false);
+
+            // 监控 Shapes 列表变化：当用户通过 Details 面板“+”按钮添加 Shape 时，自动补全 BoneName 并重建 DebugMesh
+            if (mBoneDetailsPropGrid.Target is TtBoneBody body && mLoadedPhysicsAsset != null)
+            {
+                int curCount = body.Shapes.Count;
+                if (mLastShapesCount >= 0 && curCount > mLastShapesCount)
+                {
+                    // 有新 Shape 被添加，补全初始化
+                    bool needRebuild = false;
+                    for (int i = 0; i < body.Shapes.Count; i++)
+                    {
+                        var shape = body.Shapes[i];
+                        if (string.IsNullOrEmpty(shape.BoneName))
+                        {
+                            shape.BoneName = body.BoneName;
+                            needRebuild = true;
+                        }
+                    }
+                    if (needRebuild)
+                    {
+                        if (mSkeleton != null)
+                            mLoadedPhysicsAsset.RebuildConstraints(mSkeleton);
+                        if (mPhysicsAssetNode != null)
+                        {
+                            mPhysicsAssetNode.BuildFromAsset(mLoadedPhysicsAsset);
+                            mPhysicsAssetNode.ShowDebug = mEditPhysicsAsset;
+                        }
+                    }
+                }
+                mLastShapesCount = curCount;
+            }
+            else
+            {
+                mLastShapesCount = -1;
+            }
         }
 
         internal void SelectBone(ILimb bone)
@@ -261,14 +306,22 @@ namespace EngineNS.Editor.Forms
             if (mSelectedBone == bone)
                 return;
 
+            // 互斥：选中骨骼时必须清除 Shape 选中
+            if (mSelectedShape != null)
+            {
+                mSelectedShape = null;
+                mDraggingShape = false;
+                mHost?.OnShapeSelected(null, null);
+            }
+
             if (mRootNode != null)
                 ClearSelection(mRootNode);
 
             mSelectedBone = bone;
 
-            // 编辑 PhysicsAsset 时显示 TtBoneBody，否则显示 TtBoneDesc
+            // 已加载 PhysicsAsset 时显示 TtBoneBody（可编辑 Shapes），否则显示 TtBoneDesc
             var boneName = bone?.Desc?.Name;
-            if (mEditPhysicsAsset && mLoadedPhysicsAsset != null && boneName != null)
+            if (mLoadedPhysicsAsset != null && boneName != null)
             {
                 var boneBody = FindOrCreateBoneBody(boneName);
                 mBoneDetailsPropGrid.Target = boneBody;
@@ -325,6 +378,15 @@ namespace EngineNS.Editor.Forms
                 return;
             }
 
+            // 互斥：选中 Shape 时必须清除骨骼选中
+            if (mSelectedBone != null)
+            {
+                if (mRootNode != null)
+                    ClearSelection(mRootNode);
+                mSelectedBone = null;
+                mSkeletonShowNode?.HighlightBone(null);
+            }
+
             // 显示 Shape 属性到 BoneDetails
             mBoneDetailsPropGrid.Target = shape;
 
@@ -363,29 +425,25 @@ namespace EngineNS.Editor.Forms
         }
 
         /// <summary>
-        /// 获取 Shape 在世界空间的位置（骨骼 Transform + Shape Offset）
+        /// 获取 Shape 在世界空间的位置（骨骼 InitMatrix + Shape Offset）
         /// </summary>
         DVector3 GetShapeWorldPosition(TtCollisionShape shape)
         {
-            if (mSkeletonShowNode?.CurrentPose != null && mSkeletonShowNode.SkeletonAsset?.Skeleton != null
-                && !string.IsNullOrEmpty(shape.BoneName))
+            if (mSkeletonShowNode?.SkeletonAsset?.Skeleton != null && !string.IsNullOrEmpty(shape.BoneName))
             {
-                var meshPose = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(mSkeletonShowNode.CurrentPose);
                 var skeleton = mSkeletonShowNode.SkeletonAsset.Skeleton;
                 foreach (var limb in skeleton.Limbs)
                 {
                     if (limb.Desc?.Name == shape.BoneName)
                     {
-                        int boneIndex = limb.Index.Value;
-                        if (boneIndex >= 0 && boneIndex < meshPose.Transforms.Count)
-                        {
-                            var boneT = meshPose.Transforms[boneIndex];
-                            var shapeLocal = FTransform.CreateTransform(shape.Offset.AsDVector(), Vector3.One, shape.Rotation);
-                            FTransform worldT;
-                            FTransform.MultiplyNoParentScale(out worldT, in shapeLocal, in boneT);
-                            return worldT.mPosition;
-                        }
-                        break;
+                        var initMat = limb.Desc.InitMatrix;
+                        var bonePos = initMat.Translation.AsDVector();
+                        var boneQuat = Quaternion.RotationMatrix(in initMat);
+                        var boneT = FTransform.CreateTransform(bonePos, Vector3.One, boneQuat);
+                        var shapeLocal = FTransform.CreateTransform(shape.Offset.AsDVector(), Vector3.One, shape.Rotation);
+                        FTransform worldT;
+                        FTransform.MultiplyNoParentScale(out worldT, in shapeLocal, in boneT);
+                        return worldT.mPosition;
                     }
                 }
             }
@@ -393,29 +451,21 @@ namespace EngineNS.Editor.Forms
         }
 
         /// <summary>
-        /// 获取 Shape 在世界空间的旋转（骨骼旋转 * Shape 本地旋转）
+        /// 获取 Shape 在世界空间的旋转（骨骼 InitMatrix 旋转 * Shape 本地旋转）
         /// </summary>
         Quaternion GetShapeWorldQuaternion(TtCollisionShape shape)
         {
-            if (mSkeletonShowNode?.CurrentPose != null && mSkeletonShowNode.SkeletonAsset?.Skeleton != null
-                && !string.IsNullOrEmpty(shape.BoneName))
+            if (mSkeletonShowNode?.SkeletonAsset?.Skeleton != null && !string.IsNullOrEmpty(shape.BoneName))
             {
-                var meshPose = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(mSkeletonShowNode.CurrentPose);
                 var skeleton = mSkeletonShowNode.SkeletonAsset.Skeleton;
                 foreach (var limb in skeleton.Limbs)
                 {
                     if (limb.Desc?.Name == shape.BoneName)
                     {
-                        int boneIndex = limb.Index.Value;
-                        if (boneIndex >= 0 && boneIndex < meshPose.Transforms.Count)
-                        {
-                            var boneT = meshPose.Transforms[boneIndex];
-                            var shapeLocal = FTransform.CreateTransform(DVector3.Zero, Vector3.One, shape.Rotation);
-                            FTransform worldT;
-                            FTransform.MultiplyNoParentScale(out worldT, in shapeLocal, in boneT);
-                            return worldT.mQuat;
-                        }
-                        break;
+                        var initMat = limb.Desc.InitMatrix;
+                        var boneQuat = Quaternion.RotationMatrix(in initMat);
+                        var shapeRot = shape.Rotation;
+                        return Quaternion.Multiply(in shapeRot, in boneQuat);
                     }
                 }
             }
@@ -423,28 +473,24 @@ namespace EngineNS.Editor.Forms
         }
 
         /// <summary>
-        /// 获取骨骼的 MeshSpace Transform
+        /// 获取骨骼的 InitMatrix Transform（与 Shape/Constraint 渲染保持一致）
         /// </summary>
         bool TryGetBoneTransform(string boneName, out FTransform boneTransform)
         {
             boneTransform = FTransform.Identity;
-            if (mSkeletonShowNode?.CurrentPose == null || mSkeletonShowNode.SkeletonAsset?.Skeleton == null
-                || string.IsNullOrEmpty(boneName))
+            if (mSkeletonShowNode?.SkeletonAsset?.Skeleton == null || string.IsNullOrEmpty(boneName))
                 return false;
 
-            var meshPose = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(mSkeletonShowNode.CurrentPose);
             var skeleton = mSkeletonShowNode.SkeletonAsset.Skeleton;
             foreach (var limb in skeleton.Limbs)
             {
                 if (limb.Desc?.Name == boneName)
                 {
-                    int idx = limb.Index.Value;
-                    if (idx >= 0 && idx < meshPose.Transforms.Count)
-                    {
-                        boneTransform = meshPose.Transforms[idx];
-                        return true;
-                    }
-                    break;
+                    var initMat = limb.Desc.InitMatrix;
+                    var bonePos = initMat.Translation.AsDVector();
+                    var boneQuat = Quaternion.RotationMatrix(in initMat);
+                    boneTransform = FTransform.CreateTransform(bonePos, Vector3.One, boneQuat);
+                    return true;
                 }
             }
             return false;
@@ -526,6 +572,13 @@ namespace EngineNS.Editor.Forms
         /// </summary>
         public bool TryHandleHitProxy(Graphics.Pipeline.IProxiable proxy)
         {
+            // 骨骼球 HitProxy 拾取：始终响应，不依赖 EditPhysicsAsset 状态
+            if (proxy is TtBoneHitProxy boneProxy)
+            {
+                SelectBone(boneProxy.Limb);
+                return true;
+            }
+
             if (!mEditPhysicsAsset || mPhysicsAssetNode == null)
                 return false;
 
@@ -543,11 +596,11 @@ namespace EngineNS.Editor.Forms
         {
             if (ImGuiAPI.BeginPopup("BoneContextMenu", ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                bool canAddShape = mRClickedBone != null && mLoadedPhysicsAsset != null && mEditPhysicsAsset;
+                bool canAddShape = mRClickedBone != null && mLoadedPhysicsAsset != null;
 
                 if (!canAddShape)
                 {
-                    ImGuiAPI.TextDisabled("Load a PhysicsAsset and enable EditPhysics first");
+                    ImGuiAPI.TextDisabled("Load a PhysicsAsset first");
                 }
                 else
                 {
@@ -599,6 +652,42 @@ namespace EngineNS.Editor.Forms
 
             // 新增 Shape 自动选中，Detail 面板自动显示其属性
             SelectShape(shape);
+        }
+
+        /// <summary>
+        /// 删除当前选中的 Shape
+        /// </summary>
+        public void DeleteSelectedShape()
+        {
+            if (mSelectedShape == null || mLoadedPhysicsAsset == null)
+                return;
+
+            var shapeToDelete = mSelectedShape;
+
+            // 先取消选中
+            SelectShape(null);
+
+            // 从所属 BoneBody 的 Shapes 列表中移除
+            foreach (var body in mLoadedPhysicsAsset.Bodies)
+            {
+                if (body.Shapes.Remove(shapeToDelete))
+                    break;
+            }
+
+            // 注销 HitProxy
+            TtEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(shapeToDelete);
+
+            // 重建 Constraints 和 DebugMesh
+            if (mSkeleton != null)
+                mLoadedPhysicsAsset.RebuildConstraints(mSkeleton);
+            if (mPhysicsAssetNode != null)
+            {
+                mPhysicsAssetNode.BuildFromAsset(mLoadedPhysicsAsset);
+                mPhysicsAssetNode.ShowDebug = mEditPhysicsAsset;
+            }
+
+            // 重置 Detail 面板
+            mBoneDetailsPropGrid.Target = null;
         }
 
         // ─── PhysicsAsset DebugMesh Management ─────────────────────

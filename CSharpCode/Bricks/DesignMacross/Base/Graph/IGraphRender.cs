@@ -1,6 +1,7 @@
-﻿using EngineNS.DesignMacross.Editor;
-using EngineNS.DesignMacross.Base.Render;
+﻿using EngineNS.DesignMacross.Base.Render;
 using EngineNS.DesignMacross.Design;
+using EngineNS.DesignMacross.Editor;
+using NPOI.SS.Formula.Functions;
 
 namespace EngineNS.DesignMacross.Base.Graph
 {
@@ -18,9 +19,9 @@ namespace EngineNS.DesignMacross.Base.Graph
         {
             return ViewPort.ViewportTransform(Camera.Location, pos);
         }
-        public Vector2 ViewPortInverseTransform(Vector2 pos)
+        public Vector2 ScreenTransform(Vector2 viewportTransform)
         {
-            return ViewPort.ViewportInverseTransform(Camera.Location, pos);
+            return ((viewportTransform - ViewPort.Location) + Camera.Location) / Camera.Scale;
         }
     }
     public struct FGraphElementRenderingContext
@@ -37,9 +38,9 @@ namespace EngineNS.DesignMacross.Base.Graph
         {
             return ViewPort.ViewportTransform(Camera.Location, pos * Camera.Scale);
         }
-        public Vector2 ViewportInverseTransform(Vector2 pos)
+        public Vector2 CameraTransform(Vector2 viewportTransform)
         {
-            return ViewPort.ViewportInverseTransform(Camera.Location, pos/ Camera.Scale);
+            return ((viewportTransform - ViewPort.Location) - Camera.Location) / Camera.Scale;
         }
         
     }

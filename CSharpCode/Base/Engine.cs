@@ -167,20 +167,14 @@ namespace EngineNS
         [Category("Option")]
         public string RpcRootType { get; set; }// = Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.UnitTest.UTest_Rpc));
         [Rtti.Meta("")]
-        [Category("Option")]
-        public bool CookDXBC { get; set; } = true;
+        [Category("Shader")]
+        public NxRHI.EShaderLanguage ShaderLanguage { get; set; } = NxRHI.EShaderLanguage.SL_DXIL;
         [Rtti.Meta("")]
-        [Category("Option")]
-        public bool CookDXIL { get; set; } = false;
+        [Category("Shader")]
+        public int ShaderModelMajor { get; set; } = 6;
         [Rtti.Meta("")]
-        [Category("Option")]
-        public bool CookSPIRV { get; set; } = false;
-        [Rtti.Meta("")]
-        [Category("Option")]
-        public bool CookGLSL { get; set; } = false;
-        [Rtti.Meta("")]
-        [Category("Option")]
-        public bool CookMETAL { get; set; } = false;
+        [Category("Shader")]
+        public int ShaderModelMinor { get; set; } = 5;
         [Rtti.Meta("")]
         [Category("Option")]
         public bool CompressDxt { get; set; } = true;
@@ -242,6 +236,10 @@ namespace EngineNS
         [Rtti.Meta("")]
         [Category("Option")]
         public RName UIDefaultTexture { get; set; }
+        [Rtti.Meta("")]
+        [Category("Option")]
+        [DisplayName("Save Snapshot In Asset Dir")]
+        public bool SaveSnapshotInAssetDir { get; set; } = false;
         [Rtti.Meta("")]
         [Category("Option")]
         public bool IsWriteShaderDebugFile { get; set; } = false;

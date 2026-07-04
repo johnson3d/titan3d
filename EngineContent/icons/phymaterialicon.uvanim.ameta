@@ -15,6 +15,7 @@
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Value="Engine,uestyle/graph/regularnode_shadow_selected.srv,af5c8272-337a-4adb-96cf-4f1aa084742d" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <SnapUVEnd Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   <SnapUVStart Type="EngineNS.Vector2@EngineCore" Value="0,0" />
   <TextureName Type="EngineNS.RName@EngineCore" Value="Engine,uestyle/graph/regularnode_shadow_selected.srv,af5c8272-337a-4adb-96cf-4f1aa084742d" />

@@ -1,0 +1,2 @@
+EngineCore
+EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescriptionElementStyle@EngineCore

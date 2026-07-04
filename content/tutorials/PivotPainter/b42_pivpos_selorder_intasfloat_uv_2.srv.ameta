@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="ad7a98b9-eb3f-4cf3-b5b2-cf4cd881759b" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/pivotpainter/b42_pivpos_selorder_intasfloat_uv_2.srv,ad7a98b9-eb3f-4cf3-b5b2-cf4cd881759b" />
@@ -14,4 +14,5 @@
   <OriginImageAddress Type="System.String@Unknown" Value="tutorials/pivotpainter/b42_pivpos_selorder_intasfloat_uv_2.srv:Game" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.TtSrView@EngineCore" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
 </Root>

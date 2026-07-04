@@ -42,13 +42,15 @@ namespace EngineNS.Bricks.Collision.Embree
     }
     public class TtEmbreeScene : AuxPtrType<EngineNS.FEmbreeScene>
     {
+        public Collision.Embree.TtEmbreeManager EmbreeManager { get; private set; }
         public TtEmbreeScene()
         {
             mCoreObject = EngineNS.FEmbreeScene.CreateInstance();
         }
-        public TtEmbreeScene(FEmbreeScene self)
+        public TtEmbreeScene(FEmbreeScene self, TtEmbreeManager manager)
         {
             mCoreObject = self;
+            EmbreeManager = manager;
         }
 
         public void AttachGeometry(TtEmbreeGeometry Geometry)
@@ -105,7 +107,7 @@ namespace EngineNS.Bricks.Collision.Embree
         }
         public TtEmbreeScene CreateScene()
         {
-            return new TtEmbreeScene(mCoreObject.CreateScene());
+            return new TtEmbreeScene(mCoreObject.CreateScene(), this);
         }
         public TtEmbreeGeometry CreateGeometry(string name, TtMeshDataProvider meshProvider)
         {

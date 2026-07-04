@@ -13,11 +13,9 @@ namespace EngineNS.DesignMacross.Design.Statement
     {
         public TtStatementDescription StatementDescription { get => Description as TtStatementDescription; }
         public float Rounding { get; set; } = 5;
-        public Color4f NameColor { get; set; } = new Color4f(0.0f, 0.0f, 0.0f);
-        public Color4f BackgroundColor { get; set; } = new Color4f(0.5f, 188f / 255, 212f / 255, 240f / 255);
-        //public Color4f BackgroundColor { get; set; } = new Color4f(0.5f, 0.9f, 0.9f, 0.9f);
-        public Color4f BorderColor { get; set; } = new Color4f(0.5f, 0.9f, 0.9f, 0.9f);
-        public float BorderThickness { get; set; } = 2;
+        public Color4f NameColor { get; set; } = TtDesignMacrossGraphStyles.StatementTitleForegroundColor;
+        public Color4f BackgroundColor { get; set; } = TtDesignMacrossGraphStyles.StatementBackgroundColor;
+        public Color4f BorderColor { get; set; } = TtDesignMacrossGraphStyles.GraphElementBorderColor;
         public TtGraphElement_StackPanel ElementContainer = new TtGraphElement_StackPanel();
         public TtGraphElement_TextBlock NameTextBlock = new TtGraphElement_TextBlock();
         public TtGraphElement_StackPanel ExpressionDescStackPanel = new TtGraphElement_StackPanel();
@@ -33,16 +31,19 @@ namespace EngineNS.DesignMacross.Design.Statement
             ElementContainer.HorizontalAlignment = EHorizontalAlignment.Stretch;
             ElementContainer.VerticalAlignment = EVerticalAlignment.Stretch;
 
-            ExpressionDescStackPanel.Margin = new FMargin(2, 2, 2, 2);
             ExpressionDescStackPanel.HorizontalAlignment = EHorizontalAlignment.Left;
             ExpressionDescStackPanel.Parent = ElementContainer;
+            ExpressionDescStackPanel.BackgroundColor = TtDesignMacrossGraphStyles.StatementTitleBackgroundColor;
+            ExpressionDescStackPanel.Rounding = Rounding;
+            ExpressionDescStackPanel.CornerType = ERoundCornerType.RoundCornersTop;
             ElementContainer.AddElement(ExpressionDescStackPanel);
 
             NameTextBlock.Content = StatementDescription.Name;
             NameTextBlock.VerticalAlignment = EVerticalAlignment.Center;
             NameTextBlock.HorizontalAlignment = EHorizontalAlignment.Left;
             NameTextBlock.FontScale = 1.2f;
-            NameTextBlock.BackgroundColor = new Color4f(0, 0.8f, 0);
+            NameTextBlock.Rounding = Rounding;
+            NameTextBlock.TextColor = NameColor;
             ExpressionDescStackPanel.AddElement(NameTextBlock);
 
             PinsPanel.Margin = new FMargin(0, 0, 0, 0);
@@ -53,7 +54,7 @@ namespace EngineNS.DesignMacross.Design.Statement
             LeftSidePinsStackPanel.Margin = new FMargin(0, 0, 0, 0);
             LeftSidePinsStackPanel.Parent = PinsPanel;
             LeftSidePinsStackPanel.Orientation = EOrientation.Vertical;
-            PinsPanel.AddElement(EDockPosition.Left,LeftSidePinsStackPanel);
+            PinsPanel.AddElement(EDockPosition.Left, LeftSidePinsStackPanel);
 
             RightSidePinsStackPanel.Margin = new FMargin(0, 0, 0, 0);
             RightSidePinsStackPanel.Parent = PinsPanel;
@@ -102,6 +103,14 @@ namespace EngineNS.DesignMacross.Design.Statement
             }
             return list;
         }
+
+        public List<IGraphElement> EnumerateChildRverse<T>() where T : class
+        {
+            List<IGraphElement> list = EnumerateChild<T>();
+            list.Reverse();
+            return list;
+        }
+
         public override void OnSelected(ref FMouseEventContext context)
         {
             context.GraphElementRenderingContext.EditorInteroperation.PGMember.Target = Description;
@@ -109,6 +118,22 @@ namespace EngineNS.DesignMacross.Design.Statement
         }
         public override void ConstructElements(ref FGraphElementRenderingContext context)
         {
+            NameColor = TtDesignMacrossGraphStyles.StatementTitleForegroundColor;
+            BackgroundColor = TtDesignMacrossGraphStyles.StatementBackgroundColor;
+            BorderColor = TtDesignMacrossGraphStyles.GraphElementBorderColor;
+            ExpressionDescStackPanel.BackgroundColor = TtDesignMacrossGraphStyles.StatementTitleBackgroundColor;
+            if(IsSelected)
+            {
+                BorderColor = TtDesignMacrossGraphStyles.GraphElementSelectedColor;
+            }
+            if (HighLightState == EHighLigthState.LowLight)
+            {
+                NameColor = new Color4f(NameColor.ToColor3f(), TtDesignMacrossGraphStyles.LowLigthAlpha);
+                BackgroundColor = new Color4f(BackgroundColor.ToColor3f(), TtDesignMacrossGraphStyles.LowLigthAlpha);
+                BorderColor = new Color4f(BorderColor.ToColor3f(), TtDesignMacrossGraphStyles.LowLigthAlpha);
+                ExpressionDescStackPanel.BackgroundColor = new Color4f(ExpressionDescStackPanel.BackgroundColor.ToColor3f(), TtDesignMacrossGraphStyles.LowLigthAlpha); 
+            }
+
             LeftSidePinsStackPanel.Clear();
             {
                 foreach (var execInPin in StatementDescription.ExecutionInPins)
@@ -179,59 +204,45 @@ namespace EngineNS.DesignMacross.Design.Statement
                    List<TtDataLineDescription> dataLinesToBeRemoved = new();
                    foreach (var pin in StatementDescription.DataPins)
                    {
-                       if(StatementDescription.Parent is IMethodDescription methodDescription)
+                       var line = IDataLineOperator.GetDataLineWithPin(StatementDescription.Parent, pin);
+                       if (line != null)
                        {
-                           var line = methodDescription.GetDataLineWithPin(pin);
-                           if(line != null)
-                           {
-                               dataLinesToBeRemoved.Add(line);
-                           }
+                           dataLinesToBeRemoved.Add(line);
                        }
-                       
                    }
                    foreach (var pin in StatementDescription.ExecutionPins)
                    {
-                       if (StatementDescription.Parent is IMethodDescription methodDescription)
+                       var line = IExecutionLineOperator.GetExecutionLineWithPin(StatementDescription.Parent, pin);
+                       if (line != null)
                        {
-                           var line = methodDescription.GetExecutionLineWithPin(pin);
-                           if (line != null)
-                           {
-                               executionLinesToBeRemoved.Add(line);
-                           }
+                           executionLinesToBeRemoved.Add(line);
                        }
-
                    }
 
+                   var statementDescriptionParent = StatementDescription.Parent;
                    cmdHistory.CreateAndExtuteCommand("DeleteStatement",
                        (data) =>
                        {
-                           if (StatementDescription.Parent is TtMethodDescription methodDescription)
+                           IStatementOperator.RemoveStatement(statementDescriptionParent, StatementDescription);
+                           foreach (var line in executionLinesToBeRemoved)
                            {
-                               methodDescription.Statements.Remove(StatementDescription);
-                               foreach (var line in executionLinesToBeRemoved)
-                               {
-                                   methodDescription.RemoveExecutionLine(line);
-                               }
-                               foreach (var line in dataLinesToBeRemoved)
-                               {
-                                   methodDescription.RemoveDataLine(line);
-                               }
+                               IExecutionLineOperator.RemoveExecutionLine(statementDescriptionParent, line);
                            }
-                           
+                           foreach (var line in dataLinesToBeRemoved)
+                           {
+                               IDataLineOperator.RemoveDataLine(statementDescriptionParent, line);
+                           }
                        },
                        (data) =>
                        {
-                           if (StatementDescription.Parent is TtMethodDescription methodDescription)
+                           IStatementOperator.AddStatement(statementDescriptionParent, StatementDescription);
+                           foreach (var line in executionLinesToBeRemoved)
                            {
-                               methodDescription.Statements.Add(StatementDescription);
-                               foreach (var line in executionLinesToBeRemoved)
-                               {
-                                   methodDescription.AddExecutionLine(line);
-                               }
-                               foreach (var line in dataLinesToBeRemoved)
-                               {
-                                   methodDescription.AddDataLine(line);
-                               }
+                               IExecutionLineOperator.AddExecutionLine(statementDescriptionParent, line);
+                           }
+                           foreach (var line in dataLinesToBeRemoved)
+                           {
+                               IDataLineOperator.AddDataLine(statementDescriptionParent, line);
                            }
                        });
                });

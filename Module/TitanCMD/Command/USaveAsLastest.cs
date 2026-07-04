@@ -86,10 +86,14 @@ namespace ProjectCooker.Command
 
             var assetTypes = GetArguments(args, Param_Types);
 
-            if (TtEngine.Instance.DynConfigData.TryGetConfig<string>("AssetType", out var cfgName))
+            if (assetTypes == null)
             {
-                assetTypes = cfgName.Split('+');
+                assetTypes = AssetTypes.Keys.ToArray();
             }
+            //if (TtEngine.Instance.DynConfigData.TryGetConfig<string>("AssetType", out var cfgName))
+            //{
+            //    assetTypes = cfgName.Split('+');
+            //}
 
             if (assetTypes == null)
             {
@@ -205,7 +209,7 @@ namespace ProjectCooker.Command
                         EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Warning, $"GetAssetMeta {rn} failed");
                         continue;
                     }
-                    var asset = await ameta.LoadAsset();
+                    var asset = await ameta.GetAsset();
                     if (asset != null)
                     {
                         if (bOnlyAMeta)
@@ -668,6 +672,8 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetScene {rn} failed");
                 }
+                asset.DisposeWithChildren();
+                world.Dispose();
                 procNum++;
                 EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Scene: {procNum}/{files.Length}");
             }
@@ -697,6 +703,8 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetScene {rn} failed");
                 }
+                asset.DisposeWithChildren();
+                world.Dispose();
                 procNum++;
                 EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Scene: {procNum}/{files.Length}");
             }

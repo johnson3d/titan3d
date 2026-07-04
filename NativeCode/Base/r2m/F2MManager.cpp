@@ -1,4 +1,5 @@
 #include "F2MManager.h"
+#include "VPakFile.h"
 
 #define new VNEW
 
@@ -68,12 +69,14 @@ void F2MManager::OnAfterWriteFile(LPCSTR file)
 	}
 	auto f2m = it->second;
 	f2m->OnAfterWriteFile();
+	mF2Mems.erase(it);
 }
 VRes2Memory* F2MManager::GetFile2Memory(LPCSTR file)
 {
 	if (file == nullptr)
 		return nullptr;
-	mLocker.Lock();
+
+	VAutoLock(mLocker);
 	auto it = mF2Mems.find(file);
 	if (it == mF2Mems.end())
 	{
@@ -81,7 +84,7 @@ VRes2Memory* F2MManager::GetFile2Memory(LPCSTR file)
 		//1.read from OS file system 
 		//2.read from apk on android platform
 		//3.read from mounted tpak
-		VRes2Memory* f2m = CreateFile2Memory(file, FALSE);
+		auto f2m = MakeWeakRef<VRes2Memory>(CreateFile2Memory(file, FALSE));
 		if (f2m == nullptr)
 		{
 			for (auto p : mMountPaks)
@@ -89,34 +92,25 @@ VRes2Memory* F2MManager::GetFile2Memory(LPCSTR file)
 				std::string fullName;
 				if (p->GetFullName(file, fullName))
 				{
-					f2m = p->CreateF2M(fullName.c_str());
+					VPackFile2Memory* p_f2m = p->CreateF2M(fullName.c_str());
+					VRes2Memory* tt = static_cast<VRes2Memory*>(p_f2m);
+					f2m = MakeWeakRef(tt);
 					break;
 				}
 			}
 		}
 		if (f2m == nullptr)
 			return nullptr;
-		f2m->AddRef();
 
-		VAutoLock(mLocker);
-		if (it == mF2Mems.end())
-		{
-			mF2Mems.insert(std::make_pair(file, f2m));
-			return f2m;
-		}
-		else
-		{
-			f2m->Release();
-			return it->second;
-		}
+		mF2Mems.insert(std::make_pair(file, f2m));
+		f2m->AddRef();
+		return f2m;
 	}
 	else
 	{
-		mLocker.Unlock();
+		it->second->AddRef();
+		return it->second;
 	}
-
-	it->second->AddRef();
-	return it->second;
 }
 
 F2MManager::F2MManager()
@@ -147,7 +141,6 @@ void F2MManager::Cleanup()
 	for (auto it = mF2Mems.begin(); it != mF2Mems.end(); it++)
 	{
 		it->second->TryReleaseHolder();
-		Safe_Release(it->second);
 	}
 	mF2Mems.clear();
 }

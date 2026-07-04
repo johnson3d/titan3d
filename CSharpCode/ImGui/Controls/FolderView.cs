@@ -154,7 +154,8 @@ namespace EngineNS.EGui.Controls
             ApplyDirectoryShowCheckResults();
             var styleConfig = UIProxy.StyleConfig.Instance;
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ChildRounding, 3.0f);
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, new Vector2(4, 3));
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, in styleConfig.ContentBrowserFolderItemSpacing);
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in styleConfig.ContentBrowserFolderFramePadding);
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ChildBg, styleConfig.ContentBrowserFolderBg);
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, styleConfig.BorderColor);
             if (ImGuiAPI.BeginChild("LeftWindow", in size, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
@@ -169,14 +170,16 @@ namespace EngineNS.EGui.Controls
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, UIProxy.StyleConfig.Instance.TVHeader);
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, UIProxy.StyleConfig.Instance.TVHeaderActive);
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, UIProxy.StyleConfig.Instance.TVHeaderHovered);
+                TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.TtBaseRenderer.enFont.Font_18px);
                 DrawDirectories(RName.GetRName("", RName.ERNameType.Game));
                 DrawDirectories(RName.GetRName("", RName.ERNameType.Engine));
                 DrawDirectories(RName.GetRName("", RName.ERNameType.Cloud));
+                TtEngine.Instance.GfxDevice.SlateRenderer.PopFont();
                 ImGuiAPI.PopStyleColor(3);
             }
             ImGuiAPI.EndChild();
             ImGuiAPI.PopStyleColor(2);
-            ImGuiAPI.PopStyleVar(2);
+            ImGuiAPI.PopStyleVar(3);
 
             if (!string.IsNullOrEmpty(mCreateFolderDir))
             {
@@ -236,13 +239,11 @@ namespace EngineNS.EGui.Controls
             ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
             if (root == CurrentDir)
                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
-            TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.TtBaseRenderer.enFont.Font_Bold_13px);
             if (CurrentDir != null && CurrentDir.Address.Contains(root.Address))
             {
                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen;
             }
             var treeNodeResult = ImGuiAPI.TreeNodeEx(root.RNameType.ToString(), flags);
-            TtEngine.Instance.GfxDevice.SlateRenderer.PopFont();
             DrawDirContextMenu(root.Address);
             if (treeNodeResult)
             {
@@ -355,19 +356,21 @@ namespace EngineNS.EGui.Controls
             var treeNodeResult = ImGuiAPI.TreeNodeEx("", flags, "");
 
             var cmdList = ImGuiAPI.GetWindowDrawList();
-            var start = ImGuiAPI.GetItemRectMin();
-            var end = ImGuiAPI.GetItemRectMax();
+            var itemMin = ImGuiAPI.GetItemRectMin();
+            var itemMax = ImGuiAPI.GetItemRectMax();
+            var start = itemMin;
             //cmdList.AddRect(start, end, 0xFF0000FF, 0, ImDrawFlags_.ImDrawFlags_None, 1);
             //ImGuiAPI.SameLine(0, -1);
             var curPos = ImGuiAPI.GetCursorScreenPos();
             Vector2 rectSize = Vector2.Zero;
             var imViewPort = ImGuiAPI.GetWindowViewport();
             var dpiScale = imViewPort->DpiScale;
-            float imgSize = 16.0f * dpiScale;
-            float iconIndent = 5 * dpiScale;
+            var styleConfig = UIProxy.StyleConfig.Instance;
+            float imgSize = styleConfig.ContentBrowserFolderIconSize * dpiScale;
+            float iconIndent = styleConfig.ContentBrowserFolderIconIndent * dpiScale;
 
             start.X = curPos.X + iconIndent;
-            start.Y = ImGuiAPI.GetItemRectMin().Y + ((end.Y - start.Y) - imgSize) * 0.5f;
+            start.Y = itemMin.Y + ((itemMax.Y - itemMin.Y) - imgSize) * 0.5f;
 
             if (treeNodeResult)
             {
@@ -382,11 +385,11 @@ namespace EngineNS.EGui.Controls
                 if (shadowImg != null)
                     shadowImg.OnDraw(cmdList, start, start + new Vector2(imgSize, imgSize), UIProxy.StyleConfig.Instance.TextDisableColor);
             }
-            rectSize.X = imgSize + style->ItemSpacing.X;
+            rectSize.X = imgSize + styleConfig.ContentBrowserFolderTextSpacing * dpiScale;
             rectSize.Y = imgSize;
             start.X += rectSize.X;
             var textSize = ImGuiAPI.CalcTextSize(dirName, false, 0.0f);
-            start.Y = ImGuiAPI.GetItemRectMin().Y + ((end.Y - start.Y) - textSize.Y) * 0.5f;
+            start.Y = itemMin.Y + ((itemMax.Y - itemMin.Y) - textSize.Y) * 0.5f;
             cmdList.AddText(start, textColor, dirName, null);
             rectSize.X += textSize.X;
             rectSize.Y = MathF.Max(rectSize.Y, textSize.Y);

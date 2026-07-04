@@ -31,7 +31,7 @@ namespace EngineNS.DesignMacross.Base.Outline
             context.EditorInteroperation.PGMember.Target = Description;
         }
 
-        public void OnUnSelected()
+        public void OnUnSelected(ref FMouseEventContext context)
         {
             
         }
@@ -105,7 +105,7 @@ namespace EngineNS.DesignMacross.Base.Outline
             context.EditorInteroperation.PGMember.Target = Description;
         }
 
-        public void OnUnSelected()
+        public void OnUnSelected(ref FMouseEventContext context)
         {
 
         }

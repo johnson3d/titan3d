@@ -149,8 +149,8 @@ namespace NxRHI
 			//ASSERT(false);
 			return false;
 		}
-		desc->Dxbc.resize((UINT)pBlob->GetBufferSize());
-		memcpy(&desc->Dxbc[0], pBlob->GetBufferPointer(), (UINT)pBlob->GetBufferSize());
+		desc->RhiData.resize((UINT)pBlob->GetBufferSize());
+		memcpy(&desc->RhiData[0], pBlob->GetBufferPointer(), (UINT)pBlob->GetBufferSize());
 
 		DX11Shader::Reflect(desc);
 
@@ -185,34 +185,33 @@ namespace NxRHI
 	bool DX11Shader::Init(DX11GpuDevice* device, FShaderDesc* desc)
 	{
 		Desc = desc;
-		if (Desc->Dxbc.size() == 0)
+		if (Desc->RhiData.size() == 0)
 			return false;
 
 #if defined(HasModule_GpuDump)
-		GpuDump::NvAftermath::RegByteCode(desc->DebugName.c_str(), &Desc->Dxbc[0], (UINT)Desc->Dxbc.size());
+		GpuDump::NvAftermath::RegByteCode(desc->DebugName.c_str(), &Desc->RhiData[0], (UINT)Desc->RhiData.size());
 #endif
-		//Reflect(desc);
-		Reflector = desc->DxbcReflector;
+		Reflector = desc->Reflector;
 
 		switch (desc->Type)
 		{
 			case SDT_ComputeShader:
 			{
-				auto hr = device->mDevice->CreateComputeShader(&desc->Dxbc[0], desc->Dxbc.size(), NULL, &mComputeShader);
+				auto hr = device->mDevice->CreateComputeShader(&desc->RhiData[0], desc->RhiData.size(), NULL, &mComputeShader);
 				if (FAILED(hr))
 					return false;
 			}
 			break;
 			case SDT_VertexShader:
 			{
-				auto hr = device->mDevice->CreateVertexShader(&desc->Dxbc[0], desc->Dxbc.size(), NULL, &mVertexShader);
+				auto hr = device->mDevice->CreateVertexShader(&desc->RhiData[0], desc->RhiData.size(), NULL, &mVertexShader);
 				if (FAILED(hr))
 					return false;
 			}
 			break;
 			case SDT_PixelShader:
 			{
-				auto hr = device->mDevice->CreatePixelShader(&desc->Dxbc[0], desc->Dxbc.size(), NULL, &mPixelShader);
+				auto hr = device->mDevice->CreatePixelShader(&desc->RhiData[0], desc->RhiData.size(), NULL, &mPixelShader);
 				if (FAILED(hr))
 					return false;
 			}
@@ -320,10 +319,10 @@ namespace NxRHI
 
 	bool DX11Shader::Reflect(FShaderDesc* desc)
 	{
-		desc->DxbcReflector = MakeWeakRef(new IShaderReflector());
-		auto Reflector = desc->DxbcReflector;
+		desc->Reflector = MakeWeakRef(new IShaderReflector());
+		auto Reflector = desc->Reflector;
 		ID3D11ShaderReflection* pReflection;
-		auto hr = D3DReflect(&desc->Dxbc[0], desc->Dxbc.size(), IID_ID3D11ShaderReflection, (void**)&pReflection);
+		auto hr = D3DReflect(&desc->RhiData[0], desc->RhiData.size(), IID_ID3D11ShaderReflection, (void**)&pReflection);
 		if (FAILED(hr))
 		{
 			return false;

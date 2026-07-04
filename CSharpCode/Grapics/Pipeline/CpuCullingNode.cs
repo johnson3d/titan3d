@@ -126,7 +126,95 @@ namespace EngineNS.Graphics.Pipeline
             {
                 mVisParameter.World = world;
                 world.GatherVisibleMeshes(mVisParameter);
-            }   
+            }
+
+            AccumulateStreamingDemands();
+        }
+
+        // 屏幕尺寸模型：裁剪完成后，遍历可见 mesh，把每张引用纹理的"屏幕 texel 需求"
+        // 以 max 聚合推送给 TtTextureManager 的线程安全快照（供 RebalanceStreaming 反推 wanted mip）。
+        // 复用 buffer 避免每帧 GC。
+        private readonly List<NxRHI.TtSrViewAMeta> mDemandSrvScratch = new List<NxRHI.TtSrViewAMeta>();
+        private ulong mLastDemandFrame = 0;
+        private void AccumulateStreamingDemands()
+        {
+            var gfxConfig = TtEngine.Instance.GfxDevice.Config;
+            if (gfxConfig.EnableTextureStreaming == false || gfxConfig.TextureStreamingScreenSpace == false)
+                return;
+
+            var camera = mVisParameter.CullCamera;
+            // 正交相机无透视距离衰减，屏幕模型退化无意义，跳过。
+            if (camera == null || camera.IsOrtho)
+                return;
+
+            var frame = TtEngine.Instance.CurrentTickFrame;
+            int throttle = gfxConfig.TextureStreamingDemandThrottleFrames;
+            if (throttle > 0 && mLastDemandFrame != 0 && frame - mLastDemandFrame < (ulong)throttle)
+                return;
+            mLastDemandFrame = frame;
+
+            var texMgr = TtEngine.Instance.GfxDevice.TextureManager;
+            if (texMgr == null)
+                return;
+
+            var camPos = camera.GetPosition();
+            float halfHeight = camera.Height * 0.5f;
+            float zNear = camera.ZNear;
+            if (zNear <= 0.0f)
+                zNear = 0.01f;
+
+            var visibleMeshes = mVisParameter.VisibleMeshes;
+            for (int m = 0; m < visibleMeshes.Count; m++)
+            {
+                var mesh = visibleMeshes[m].Mesh;
+                if (mesh == null)
+                    continue;
+
+                var aabb = mesh.AABB;
+                var center = aabb.GetCenter();
+                float radius = (float)(aabb.GetMaxSide() * 0.5);
+
+                double dx = center.X - camPos.X;
+                double dy = center.Y - camPos.Y;
+                double dz = center.Z - camPos.Z;
+                float distance = (float)System.Math.Sqrt(dx * dx + dy * dy + dz * dz) - radius;
+                if (distance < zNear)
+                    distance = zNear;
+
+                // UE 半屏约定：normalizedScreenSize = ViewportHeight*0.5 / distance。
+                float normalizedScreenSize = halfHeight / distance;
+
+                // mesh 级 texelFactor：取各 Atom 的 StreamingTexelFactor 最大值（缺省 1.0）。
+                float texelFactor = 1.0f;
+                bool hasFactor = false;
+                var subMeshes = mesh.SubMeshes;
+                for (int s = 0; s < subMeshes.Count; s++)
+                {
+                    var prim = mesh.GetMeshPrimitives(s);
+                    if (prim == null)
+                        continue;
+                    if (prim.GetAMeta() is Graphics.Mesh.TtMeshPrimitivesAMeta pmeta)
+                    {
+                        if (hasFactor == false || pmeta.StreamingTexelFactor > texelFactor)
+                        {
+                            texelFactor = pmeta.StreamingTexelFactor;
+                            hasFactor = true;
+                        }
+                    }
+                }
+
+                float wantedTexels = texelFactor * normalizedScreenSize;
+
+                mDemandSrvScratch.Clear();
+                mesh.GatherSrViews(mDemandSrvScratch);
+                for (int i = 0; i < mDemandSrvScratch.Count; i++)
+                {
+                    var ameta = mDemandSrvScratch[i];
+                    if (ameta == null)
+                        continue;
+                    texMgr.AccumulateScreenDemand(ameta.GetAssetName(), wantedTexels, frame);
+                }
+            }
         }
         public override void TickSync(TtRenderPolicy policy)
         {

@@ -243,211 +243,73 @@ namespace NxRHI
 	}
 	void FShaderDesc::SaveXnd(XndNode* node)
 	{
-		//node->SetName(FunctionName.c_str());
 		{
 			auto pAttr = node->GetOrAddAttribute("ShaderDesc", 0, 0);
 			pAttr->BeginWrite();
 			pAttr->Write(Type);
+			pAttr->Write(Language);
 			pAttr->Write(DebugName);
 			pAttr->Write(FunctionName);
 			pAttr->EndWrite();
 		}
 
-		if (Dxbc.size() > 0)
+		if (RhiData.size() > 0)
 		{
-			auto pAttr = node->GetOrAddAttribute("DXBC", 0, 0);
+			auto pAttr = node->GetOrAddAttribute("RhiData", 0, 0);
 			pAttr->BeginWrite();
-			pAttr->Write(&Dxbc[0], (UINT)Dxbc.size());
+			pAttr->Write(&RhiData[0], (UINT)RhiData.size());
 			pAttr->EndWrite();
 
-			if (DxbcReflector != nullptr)
+			if (Reflector != nullptr)
 			{
-				pAttr = node->GetOrAddAttribute("DxbcReflector", 0, 0);
+				pAttr = node->GetOrAddAttribute("Reflector", 0, 0);
 				pAttr->BeginWrite();
-				DxbcReflector->SaveXnd(pAttr);
+				Reflector->SaveXnd(pAttr);
 				pAttr->EndWrite();
 			}
-		}
-		if (DxIL.size() > 0)
-		{
-			auto pAttr = node->GetOrAddAttribute("DXIL", 0, 0);
-			pAttr->BeginWrite();
-			pAttr->Write(&DxIL[0], (UINT)DxIL.size());
-			pAttr->EndWrite();
-
-			if (DxILReflector != nullptr)
-			{
-				pAttr = node->GetOrAddAttribute("DxilReflector", 0, 0);
-				pAttr->BeginWrite();
-				DxILReflector->SaveXnd(pAttr);
-				pAttr->EndWrite();
-			}
-		}
-		if (SpirV.size() > 0)
-		{
-			auto pAttr = node->GetOrAddAttribute("SPIRV", 0, 0);
-			pAttr->BeginWrite();
-			pAttr->Write(&SpirV[0], (UINT)SpirV.size());
-			pAttr->EndWrite();
-
-			if (SpirvReflector != nullptr)
-			{
-				pAttr = node->GetOrAddAttribute("SpirvReflector", 0, 0);
-				pAttr->BeginWrite();
-				SpirvReflector->SaveXnd(pAttr);
-				pAttr->EndWrite();
-			}
-		}
-		if (Es300Code.size() > 0)
-		{
-			auto pAttr = node->GetOrAddAttribute("GLES", 0, 0);
-			pAttr->BeginWrite();
-			pAttr->Write(Es300Code);
-			pAttr->EndWrite();
-		}
-		if (MetalCode.size() > 0)
-		{
-			auto pAttr = node->GetOrAddAttribute("METAL", 0, 0);
-			pAttr->BeginWrite();
-			pAttr->Write(MetalCode);
-			pAttr->EndWrite();
 		}
 	}
 	bool FShaderDesc::LoadXnd(IGpuDevice* device, XndNode* node)
 	{
-		//FunctionName = node->GetName();
 		{
 			auto pAttr = node->FindFirstAttribute("ShaderDesc");
+			if (pAttr == nullptr)
+				return false;
 			pAttr->BeginRead();
 			pAttr->Read(Type);
+			pAttr->Read(Language);
 			pAttr->Read(DebugName);
 			pAttr->Read(FunctionName);
 			pAttr->EndRead();
 		}
-		switch (device->Desc.RhiType)
+
+		auto pAttr = node->FindFirstAttribute("RhiData");
+		if (pAttr != nullptr)
 		{
-			case ERhiType::RHI_D3D11:
-			{
-				auto pAttr = node->FindFirstAttribute("DXBC");
-				if (pAttr != nullptr)
-				{
-					pAttr->BeginRead();
-					Dxbc.resize((size_t)pAttr->GetReaderLength());
-					pAttr->Read(&Dxbc[0], (UINT)Dxbc.size());
-					pAttr->EndRead();
+			pAttr->BeginRead();
+			RhiData.resize((size_t)pAttr->GetReaderLength());
+			if (RhiData.size() > 0)
+				pAttr->Read(&RhiData[0], (UINT)RhiData.size());
+			pAttr->EndRead();
 
-					pAttr = node->FindFirstAttribute("DxbcReflector");
-					if (pAttr != nullptr)
-					{
-						DxbcReflector = MakeWeakRef(new IShaderReflector());
-						pAttr->BeginRead();
-						DxbcReflector->LoadXnd(device, pAttr, this->Type);
-						pAttr->EndRead();
-					}
-					else
-					{
-						return false;
-					}
-				}
-				else
-				{
-					return false;
-				}
-			}
-			break;
-			case ERhiType::RHI_VirtualDevice:
-			case ERhiType::RHI_D3D12:
+			pAttr = node->FindFirstAttribute("Reflector");
+			if (pAttr != nullptr)
 			{
-				auto pAttr = node->FindFirstAttribute("DXIL");
-				if (pAttr != nullptr)
-				{
-					pAttr->BeginRead();
-					DxIL.resize((size_t)pAttr->GetReaderLength());
-					pAttr->Read(&DxIL[0], (UINT)DxIL.size());
-					pAttr->EndRead();
-
-					pAttr = node->FindFirstAttribute("DxilReflector");
-					if (pAttr != nullptr)
-					{
-						DxILReflector = MakeWeakRef(new IShaderReflector());
-						pAttr->BeginRead();
-						DxILReflector->LoadXnd(device, pAttr, this->Type);
-						pAttr->EndRead();
-					}
-					else
-					{
-						return false;
-					}
-				}
-				else
-				{
-					return false;
-				}
+				Reflector = MakeWeakRef(new IShaderReflector());
+				pAttr->BeginRead();
+				Reflector->LoadXnd(device, pAttr, this->Type);
+				pAttr->EndRead();
 			}
-			break;
-			case ERhiType::RHI_VK:
+			else
 			{
-				auto pAttr = node->FindFirstAttribute("SPIRV");
-				if (pAttr != nullptr)
-				{
-					pAttr->BeginRead();
-					SpirV.resize((size_t)pAttr->GetReaderLength());
-					pAttr->Read(&SpirV[0], (UINT)SpirV.size());
-					pAttr->EndRead();
-
-					pAttr = node->FindFirstAttribute("SpirvReflector");
-					if (pAttr != nullptr)
-					{
-						SpirvReflector = MakeWeakRef(new IShaderReflector());
-						pAttr->BeginRead();
-						SpirvReflector->LoadXnd(device, pAttr, this->Type);
-						pAttr->EndRead();
-					}
-					else
-					{
-						return false;
-					}
-				}
-				else
-				{
-					return false;
-				}
+				return false;
 			}
-			break;
-			case ERhiType::RHI_GL:
-			{
-				auto pAttr = node->FindFirstAttribute("GLES");
-				if (pAttr != nullptr)
-				{
-					pAttr->BeginRead();
-					pAttr->Read(Es300Code);
-					pAttr->EndRead();
-				}
-				else
-				{
-					return false;
-				}
-			}
-			break;
-			case ERhiType::RHI_Metal:
-			{
-				auto pAttr = node->FindFirstAttribute("METAL");
-				if (pAttr != nullptr)
-				{
-					pAttr->BeginRead();
-					pAttr->Read(MetalCode);
-					pAttr->EndRead();
-				}
-				else
-				{
-					return false;
-				}
-			}
-			break;
-			default:
-				break;
 		}
-		
+		else
+		{
+			return false;
+		}
+
 		return true;
 	}
 	const AutoRef<IShader>& FShaderDesc::GetOrCreateShader(IGpuDevice* pDevice)

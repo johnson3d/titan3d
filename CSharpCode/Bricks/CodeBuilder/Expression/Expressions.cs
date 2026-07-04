@@ -216,13 +216,15 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             if (mTypeDesc != null)
                 return mTypeDesc.IsEqual(type);
-            return TypeFullName == type.FullName;
+            var fname = type.FullName.Replace("+", ".");
+            return TypeFullName == fname;
         }
         public bool IsEqual(TtTypeDesc type)
         {
             if (mTypeDesc != null)
                 return mTypeDesc == type;
-            return TypeFullName == type.FullName;
+            var fname = type.FullName.Replace("+", ".");
+            return TypeFullName == fname;
         }
         public virtual void GetReferenceMacrossRName(HashSet<RName> rNames)
         {
@@ -994,6 +996,11 @@ namespace EngineNS.Bricks.CodeBuilder
         }
 
         public TtExecuteSequenceStatement MethodBody = new TtExecuteSequenceStatement();
+        /// <summary>
+        /// When set, code generator will output this raw code as method body instead of generating from expression tree.
+        /// Used by EMethodEditMode.CSharp to support hand-written code.
+        /// </summary>
+        public string RawBodyCode = null;
         public int MethodSegmentDeep = 0;
         public bool ReturnHasGenerated = false;
         public bool HasUnsafeCode = false;

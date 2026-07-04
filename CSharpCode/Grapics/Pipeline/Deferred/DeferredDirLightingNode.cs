@@ -12,6 +12,21 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Deferred
 {
+    /// <summary>
+    /// Contact shadow 的三种工作模式 (互斥):
+    /// None      - 关闭 contact shadow
+    /// InputNode - 使用外部 TtContactShadowNode (独立 compute pass, 连 ContactShadowPinIn)
+    /// Inline    - 在 DeferredDirLighting.cginc 内联 ray march (零额外带宽)
+    /// </summary>
+    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "EContactShadowMode")]
+    public enum EContactShadowMode : uint
+    {
+        None = 0,
+        InputNode,
+        Inline,
+
+        TypeCount,
+    }
     public partial class TtDeferredDirLightingShading : Shader.TtGraphicsShadingEnv
     {
         #region Permutation
@@ -25,7 +40,13 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get;
             set;
         }
-        public TtPermutationItem EnableContactShadow
+        public TtPermutationItem ContactShadowMode
+        {
+            get;
+            set;
+        }
+        // ENV_INLINE_CS_USE_HZB: inline contact shadow uses HZB-accelerated ray march when HzbPinIn is connected.
+        public TtPermutationItem InlineContactShadowHzb
         {
             get;
             set;
@@ -69,8 +90,13 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             ShadowModePermutation = this.PushPermutation<EShadowMode>("ENV_EShadowMode", GetBitWidth((int)EShadowMode.Num));
             ShadowModePermutation.SetValue((int)EShadowMode.Csm);
 
-            EnableContactShadow = this.PushPermutation<Shader.EPermutation_Bool>("ENV_ENABLE_CONTACT_SHADOW", (int)Shader.EPermutation_Bool.BitWidth);
-            EnableContactShadow.SetValue((int)Shader.EPermutation_Bool.FalseValue);
+            // ETypeAA-style single enum permutation: shader compares ENV_ContactShadowMode == EContactShadowMode_xxx.
+            ContactShadowMode = this.PushPermutation<EContactShadowMode>("ENV_ContactShadowMode", (int)EContactShadowMode.TypeCount);
+            ContactShadowMode.SetValue((uint)EContactShadowMode.None);
+
+            // Inline contact shadow HZB acceleration switch (driven by HzbPinIn connection in FrameBuild).
+            InlineContactShadowHzb = this.PushPermutation<Shader.EPermutation_Bool>("ENV_INLINE_CS_USE_HZB", (int)Shader.EPermutation_Bool.BitWidth);
+            InlineContactShadowHzb.SetValue((int)Shader.EPermutation_Bool.FalseValue);
 
             EnableSSAO = this.PushPermutation<Shader.EPermutation_Bool>("ENV_ENABLE_SSAO", (int)Shader.EPermutation_Bool.BitWidth);
             EnableSSAO.SetValue((int)Shader.EPermutation_Bool.FalseValue);
@@ -205,6 +231,24 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
             #endregion
 
+            #region inline contact shadow
+            index = drawcall.FindBinder("cbInlineContactShadow");
+            if (index.IsValidPointer)
+                drawcall.BindCBV(index, dirLightingNode.GetOrCreateInlineContactShadowCBuffer(index));
+
+            // HZB for inline contact shadow ray march (ENV_INLINE_CS_USE_HZB == 1)
+            index = drawcall.FindBinder("GHzbTexture");
+            if (index.IsValidPointer)
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.HzbPinIn);
+                if (attachBuffer?.Srv != null)
+                    drawcall.BindSRV(index, attachBuffer.Srv);
+            }
+            index = drawcall.FindBinder("Samp_GHzbTexture");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+            #endregion
+
             #region SSAO
             index = drawcall.FindBinder("GSSAOTexture");
             if (index.IsValidPointer)
@@ -232,7 +276,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             index = drawcall.FindBinder("gPreIntegratedGF");
             if (index.IsValidPointer)
             {
-                drawcall.BindSRV(index, TtEngine.Instance.GetPreIntegratedDFSrv(cmd));
+                var srv = TtEngine.Instance.GetPreIntegratedDFSrv(cmd);
+                if (srv != null)
+                    drawcall.BindSRV(index, srv);
             }
             index = drawcall.FindBinder("Samp_gPreIntegratedGF");
             if (index.IsValidPointer)
@@ -364,6 +410,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
         public TtRenderGraphPin ContactShadowPinIn = TtRenderGraphPin.CreateInput("ContactShadow", NxRHI.EBufferType.BFT_SRV);
 
+        public TtRenderGraphPin HzbPinIn = TtRenderGraphPin.CreateInput("Hzb", NxRHI.EBufferType.BFT_SRV);
+
         public TtRenderGraphPin SSAOPinIn = TtRenderGraphPin.CreateInput("SSAO", NxRHI.EBufferType.BFT_SRV);
 
         public TtRenderGraphPin SpecularPinOut = TtRenderGraphPin.CreateOutput("Specular", true, EPixelFormat.PXF_R16G16B16A16_FLOAT, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
@@ -374,6 +422,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void Dispose()
         {
+            CoreSDK.DisposeObject(ref mInlineContactShadowCBuffer);
             base.Dispose();
         }
         public override void InitNodePins()
@@ -412,25 +461,63 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             AddInput(ContactShadowPinIn);
             ContactShadowPinIn.IsAllowInputNull = true;
 
+            AddInput(HzbPinIn);
+            HzbPinIn.IsAllowInputNull = true;
+
             AddInput(SSAOPinIn);
             SSAOPinIn.IsAllowInputNull = true;
         }
         public bool IsSeparatedSpecularEnabled => SpecularPinOut.FindOutLinkers().Count > 0;
-        bool mIsEnableContactShadow = false;
-        [Category("Shading")]
-        public bool IsEnableContactShadow 
-        {
-            get => mIsEnableContactShadow;
-            set
-            {
-                mIsEnableContactShadow = value;
-                if (ContactShadowNode == null)
-                    mIsEnableContactShadow = false;
-            }
-        }
+
+        // Contact shadow mode is owned by the render policy (policy.ContactShadowMode).
+        // The connected input node (when present) is resolved in Initialize.
         [Category("Shading")]
         public TtContactShadowNode ContactShadowNode { get; set; }
+
+        // ---- Inline Contact Shadow parameters (used when ContactShadowMode == Inline) ----
+        [Category("Inline Contact Shadow")]
+        public float InlineContactShadowLength { get; set; } = 0.5f;
+        [Category("Inline Contact Shadow")]
+        public int InlineContactShadowNumSteps { get; set; } = 12;
+        [Category("Inline Contact Shadow")]
+        public float InlineContactShadowDepthBias { get; set; } = 0.001f;
+        [Category("Inline Contact Shadow")]
+        public float InlineContactShadowFadeDistance { get; set; } = 50.0f;
+        [Category("Inline Contact Shadow")]
+        public float InlineContactShadowFadeLength { get; set; } = 20.0f;
+        [Category("Inline Contact Shadow")]
+        public float InlineContactShadowIntensity { get; set; } = 0.8f;
+        TtCbView mInlineContactShadowCBuffer;
+
+        /// <summary>
+        /// §1.1 compliant: first CreateCBV fills all fields + MarkDirty + FlushDirty.
+        /// </summary>
+        public TtCbView GetOrCreateInlineContactShadowCBuffer(FEffectBinder binder)
+        {
+            if (mInlineContactShadowCBuffer == null)
+            {
+                mInlineContactShadowCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+                FillInlineContactShadowCBuffer(mInlineContactShadowCBuffer);
+                mInlineContactShadowCBuffer.MarkDirty();
+                mInlineContactShadowCBuffer.FlushDirty();
+                return mInlineContactShadowCBuffer;
+            }
+            FillInlineContactShadowCBuffer(mInlineContactShadowCBuffer);
+            return mInlineContactShadowCBuffer;
+        }
+
+        void FillInlineContactShadowCBuffer(TtCbView cb)
+        {
+            cb.SetValue("InlineCS_NumSteps", InlineContactShadowNumSteps);
+            cb.SetValue("InlineCS_Length", InlineContactShadowLength);
+            cb.SetValue("InlineCS_DepthBias", InlineContactShadowDepthBias);
+            cb.SetValue("InlineCS_FadeDistance", InlineContactShadowFadeDistance);
+            cb.SetValue("InlineCS_FadeLength", InlineContactShadowFadeLength);
+            cb.SetValue("InlineCS_Intensity", InlineContactShadowIntensity);
+            cb.SetValue("InlineCS_FrameIndex", (uint)TtEngine.Instance.FrameCount);
+        }
         internal bool IsSSAOConnected;
+        internal bool IsHzbConnected;
         public override unsafe TtGraphicsBuffers CreateGBuffers(TtRenderPolicy policy, EPixelFormat format)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
@@ -544,18 +631,19 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             {
                 var contactlinker = ContactShadowPinIn.FindInLinker();
-                if (contactlinker != null)
+                ContactShadowNode = contactlinker?.OutPin.HostNode as TtContactShadowNode;
+
+                // policy 选了 InputNode 但没有连接 TtContactShadowNode -> 运行期会自动退回 Inline, 这里启动时提醒一次
+                if (policy.ContactShadowMode == EContactShadowMode.InputNode && ContactShadowNode == null)
                 {
-                    ContactShadowNode = contactlinker.OutPin.HostNode as TtContactShadowNode;
-                    IsEnableContactShadow = true;
-                    
-                }
-                else
-                {
-                    ContactShadowNode = null;
-                    IsEnableContactShadow = false;
+                    Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(
+                        Profiler.ELogTag.Warning,
+                        $"DeferredDirLighting({debugName}): policy.ContactShadowMode=InputNode but no TtContactShadowNode connected to ContactShadowPinIn, falling back to Inline mode.");
                 }
             }
+
+            // Inline contact shadow HZB acceleration: enabled at FrameBuild when in Inline mode + HzbPinIn connected.
+            IsHzbConnected = (HzbPinIn.FindInLinker() != null);
 
             // SSAO: enable permutation if pin is connected
             IsSSAOConnected = (SSAOPinIn.FindInLinker() != null);
@@ -601,19 +689,34 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
-            // Drive contact shadow permutation by pin connection state
-            if (mBasePassShading != null && ContactShadowNode != null)
+            // Drive the single tri-state contact shadow permutation (ETypeAA-style enum mode).
+            // Mode is owned by the render policy (policy.ContactShadowMode); the node only falls
+            // back InputNode -> Inline locally when no TtContactShadowNode is connected.
+            if (mBasePassShading != null)
             {
-                bool shouldEnableContactShadow = IsEnableContactShadow && policy.EnableContactShadow;
-                var desired = shouldEnableContactShadow
-                    ? (uint)Shader.EPermutation_Bool.TrueValue
-                    : (uint)Shader.EPermutation_Bool.FalseValue;
-                if (mBasePassShading.EnableContactShadow.Value.GetValue(mBasePassShading.EnableContactShadow) != desired)
+                EContactShadowMode desiredMode = policy.ContactShadowMode;
+                if (desiredMode == EContactShadowMode.InputNode && ContactShadowNode == null)
+                    desiredMode = EContactShadowMode.Inline;
+
+                if (mBasePassShading.ContactShadowMode.Value.GetValue(mBasePassShading.ContactShadowMode) != (uint)desiredMode)
                 {
-                    mBasePassShading.EnableContactShadow.SetValue(desired);
+                    mBasePassShading.ContactShadowMode.SetValue((uint)desiredMode);
                     mBasePassShading.UpdatePermutation().AddWaitTask();
                 }
-                ContactShadowNode.Enable = IsEnableContactShadow;
+
+                if (ContactShadowNode != null)
+                    ContactShadowNode.Enable = (desiredMode == EContactShadowMode.InputNode);
+
+                // Inline contact shadow HZB variant: only meaningful in Inline mode with HZB connected.
+                bool useInlineHzb = (desiredMode == EContactShadowMode.Inline) && IsHzbConnected;
+                var desiredHzb = useInlineHzb
+                    ? (uint)Shader.EPermutation_Bool.TrueValue
+                    : (uint)Shader.EPermutation_Bool.FalseValue;
+                if (mBasePassShading.InlineContactShadowHzb.Value.GetValue(mBasePassShading.InlineContactShadowHzb) != desiredHzb)
+                {
+                    mBasePassShading.InlineContactShadowHzb.SetValue(desiredHzb);
+                    mBasePassShading.UpdatePermutation().AddWaitTask();
+                }
             }
 
             // Drive SSAO permutation by pin connection + policy
@@ -776,13 +879,44 @@ namespace EngineNS
         {
             if (PreIntegratedDFTexture == null || PreIntegratedDFSrv == null)
             {
+                if (PreIntegratedDFData == IntPtr.Zero)
+                {
+                    InitPreIntegratedDF();
+                }
+                if (PreIntegratedDFData == IntPtr.Zero)
+                {
+                    Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(
+                        Profiler.ELogTag.Warning,
+                        "PreIntegratedDFData is null, skip PreIntegratedDF SRV creation.");
+                    return null;
+                }
+
                 var desc = new NxRHI.FTextureDesc();
                 desc.SetDefault();
                 desc.Format = EPixelFormat.PXF_R16G16_UNORM;
                 desc.Width = 128;
                 desc.Height = 32;
+                uint rowPitch = desc.Width * sizeof(UInt16) * 2;
+                uint totalSize = rowPitch * desc.Height;
 
-                PreIntegratedDFTexture = TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
+                unsafe
+                {
+                    var initData = new NxRHI.FMappedSubResource();
+                    initData.SetDefault();
+                    initData.pData = PreIntegratedDFData.ToPointer();
+                    initData.RowPitch = rowPitch;
+                    initData.DepthPitch = totalSize;
+                    desc.InitData = &initData;
+                    PreIntegratedDFTexture = TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
+                }
+                if (PreIntegratedDFTexture == null)
+                {
+                    Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(
+                        Profiler.ELogTag.Warning,
+                        "Create PreIntegratedDFTexture failed.");
+                    return null;
+                }
+
                 var srvDesc = new NxRHI.FSrvDesc();
                 //srvDesc.SetTexture2DArray();
                 //srvDesc.Format = desc.Format;
@@ -794,21 +928,6 @@ namespace EngineNS
                 srvDesc.Format = desc.Format;
                 srvDesc.Texture2D.MipLevels = desc.MipLevels;
                 PreIntegratedDFSrv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(PreIntegratedDFTexture, in srvDesc);
-
-                var fp = new NxRHI.FSubResourceFootPrint();
-                fp.SetDefault();
-                fp.Format = PreIntegratedDFTexture.mCoreObject.Desc.Format;
-                fp.Width = PreIntegratedDFTexture.mCoreObject.Desc.Width;
-                fp.Height = PreIntegratedDFTexture.mCoreObject.Desc.Height;
-                fp.Depth = 1;
-                fp.RowPitch = (uint)fp.Width * sizeof(UInt16) * 2;
-                uint BufferSize = 128 * 32 * (uint)sizeof(UInt16) * 2;
-                fp.TotalSize = BufferSize;
-
-                unsafe
-                {
-                    PreIntegratedDFTexture.UpdateGpuData(cmd, 0, PreIntegratedDFData.ToPointer(), &fp);
-                }
             }
 
             return PreIntegratedDFSrv;

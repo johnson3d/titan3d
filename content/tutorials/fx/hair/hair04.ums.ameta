@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="bafe3e7e6f1f3dae97289329c76f5bc59a6f06bf0f583742fda12cf0489d4776" />
+      <Path Type="System.String@Unknown" Value="hair04.ums" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="32071dd179df5020eb9f85a0c436d38cdac43d048543c35ac0d10972144cefb9" />
+      <Path Type="System.String@Unknown" Value="hair04.ums.snap" />
+    </e_1>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="b02511c7-ebc5-4f51-b53b-c8f23c8c9db1" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/fx/hair/hair04.ums,b02511c7-ebc5-4f51-b53b-c8f23c8c9db1" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.TtMaterialMesh&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Game,tutorials/fx/hair/hair04.vms,966bdbaf-6081-4f26-99f8-5b8f0aa6f034" />
+    <e_1 Value="Game,tutorials/fx/hair/kajiya.material,17b3fa7a-d9b8-421f-a1bd-1dd74662cdae" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
+</Root>

@@ -402,6 +402,7 @@ namespace EngineNS.NxRHI
         public TtShader CreateShader(TtShaderDesc desc)
         {
             var result = new TtShader();
+            result.ShaderDesc = desc;
             result.PermutationId = desc.PermutationId;
             result.mCoreObject = mCoreObject.CreateShader(desc.mCoreObject);
             if (result.mCoreObject.IsValidPointer == false)

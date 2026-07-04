@@ -93,7 +93,7 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
         protected void RebuildDebugMeshIfActive()
         {
             if (DebugMesh != null)
-                BuildDebugMesh(Selected ? TtPhysicsAssetNode.ColorHighlight : TtPhysicsAssetNode.ColorNormal);
+                BuildDebugMesh(TtPhysicsAssetNode.ColorNormal);
         }
 
         /// <summary>
@@ -353,7 +353,7 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
     {
         public override string TypeExt => TtPhysicsAsset.AssetExt;
 
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return await TtPhysicsAsset.LoadAsset(GetAssetName());
         }

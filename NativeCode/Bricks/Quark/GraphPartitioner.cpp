@@ -172,7 +172,7 @@ void FGraphPartitioner::BisectGraph( FGraphData* Graph, FGraphData* ChildGraphs[
 				//Swap( Indexes[ Front ], Indexes[ Back ] );
 				auto temp = Indexes[Front];
 				Indexes[Front] = Indexes[Back];
-				Indexes[Back] = Indexes[Front];
+				Indexes[Back] = temp;
 
 				SwappedWith[ Front ] = Back;
 				SwappedWith[ Back ] = Front;

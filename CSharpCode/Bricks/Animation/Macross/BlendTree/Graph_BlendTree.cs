@@ -21,7 +21,6 @@ namespace EngineNS.Animation.Macross.BlendTree
     public class TtGraph_BlendTree : TtGraph
     {
         public TtBlendTreeClassDescription BlendTreeClassDescription { get => Description as TtBlendTreeClassDescription; }
-        public TtGraphElement_PreviewPoseLine PreviewPoseLine { get; set; } = null;
         public TtGraph_BlendTree(IDescription description) : base(description)
         {
             Description = description;
@@ -38,6 +37,8 @@ namespace EngineNS.Animation.Macross.BlendTree
             elementRenderingContext.EditorInteroperation = context.EditorInteroperation;
             elementRenderingContext.GraphElementStyleManager = context.GraphElementStyleManager;
             elementRenderingContext.DescriptionsElement = context.DescriptionsElement;
+            elementRenderingContext.DesignedClassDescription = context.DesignedClassDescription;
+            elementRenderingContext.DesignedGraph = this;
 
             foreach (var property in Description.GetType().GetProperties())
             {
@@ -101,54 +102,23 @@ namespace EngineNS.Animation.Macross.BlendTree
             }
         }
 
-        public override void OnMouseLeftButtonUp(ref FMouseEventContext context)
-        {
-            if (PreviewPoseLine != null)
-            {
-                var renderContext = context.GraphElementRenderingContext;
-                TtGraphContextMenuHandler.Instance.HandleLinkedPinContextMenu(this, ref renderContext);
-                PreviewPoseLine = null;
-            }
-        }
 
         public override void ConstructLinkedPinContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
         {
             popupMenu.bHasSearchBox = true;
-            
+            TtBlendTreeGraphLinkedPinContextMenuUtil.ConstructMenuItemsAboutPinClassPropertiesAndMethods(ref context, popupMenu, this);
+            TtBlendTreeGraphLinkedPinContextMenuUtil.ConstructMenuItemsAboutContextMenuAttribute(ref context, popupMenu, this);
+            TtBlendTreeGraphLinkedPinContextMenuUtil.ConstructMenuItemsAboutMetas(ref context, popupMenu, this);
+            TtBlendTreeGraphLinkedPinContextMenuUtil.ConstructMenuItemsAboutDesignedClass(ref context, popupMenu, this);
         }
         #region IContextMeunable
 
         public override void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
         {
             popupMenu.bHasSearchBox = true;
-            var cmdHistory = context.CommandHistory;
-            var graphElementStyleManager = context.GraphElementStyleManager;
-            //for now just put here, util we have the init method
-            foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
-            {
-                foreach (var typeDesc in service.Types.Values)
-                {
-                    var att = typeDesc.GetCustomAttribute<AnimBlendTreeContextMenuAttribute>(true);
-                    if (att != null && att.KeyStrings.Contains(UDesignMacross.MacrossAnimEditorKeyword))
-                    {
-                        TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, att.MenuPaths, att.FilterStrings,
-                             (TtMenuItem item, object sender) =>
-                             {
-                                 var popMenu = sender as TtPopupMenu;
-                                 if (Rtti.TtTypeDescManager.CreateInstance(typeDesc) is TtBlendTreeNodeClassDescription node)
-                                 {
-                                     node.Name = GetValidNodeName(node.Name);
-                                     var style = graphElementStyleManager.GetOrAdd(node, popMenu.PopedPosition);
-                                     cmdHistory.CreateAndExtuteCommand("AddBlendTreeNode",
-                                         (data) => { BlendTreeClassDescription.AddNode(node); },
-                                         (data) => { BlendTreeClassDescription.RemoveNode(node); });
-
-                                 }
-                             });
-
-                    }
-                }
-            }
+            TtBlendTreeGraphContextMenuUtil.ConstructMenuItemsAboutContextMenuAttribute(ref context, popupMenu, this);
+            TtBlendTreeGraphContextMenuUtil.ConstructMenuItemsAboutDesignedClass(ref context, popupMenu, this);
+            TtBlendTreeGraphContextMenuUtil.ConstructMenuItemsAboutMetas(ref context, popupMenu, this);
 
         }
         public string GetValidNodeName(string name)
@@ -171,7 +141,7 @@ namespace EngineNS.Animation.Macross.BlendTree
     {
         public void Draw(IRenderableElement renderableElement, ref FGraphRenderingContext context)
         {
-            var graph = renderableElement as TtGraph_BlendTree;
+            var graph = renderableElement as TtGraph;
             if (graph == null)
                 return;
 
@@ -199,7 +169,9 @@ namespace EngineNS.Animation.Macross.BlendTree
                 elementRenderingContext.EditorInteroperation = context.EditorInteroperation;
                 elementRenderingContext.GraphElementStyleManager = context.GraphElementStyleManager;
                 elementRenderingContext.DescriptionsElement = context.DescriptionsElement;
+                elementRenderingContext.DesignedClassDescription = context.DesignedClassDescription;
                 elementRenderingContext.DesignedGraph = graph;
+
 
                 TtGraphElement_GridLine grid = new TtGraphElement_GridLine();
                 grid.Size = new SizeF(sz.X, sz.Y);
@@ -215,6 +187,31 @@ namespace EngineNS.Animation.Macross.BlendTree
                         layoutable.Arranging(new Rect(element.Location, size));
                     }
                 }
+                graph.Elements.Sort((e1, e2) =>
+                {
+                    if (e1 is TtGraphElement_Line)
+                    {
+                        if (e2 is TtGraphElement_Line)
+                        {
+                            return 0;
+                        }
+                        else
+                        {
+                            return -1;
+                        }
+                    }
+                    else
+                    {
+                        if (e2 is TtGraphElement_Line)
+                        {
+                            return 1;
+                        }
+                        else
+                        {
+                            return 0;
+                        }
+                    }
+                });
                 foreach (var element in graph.Elements)
                 {
                     var elementRender = TtElementRenderDevice.CreateGraphElementRender(element);
@@ -223,15 +220,31 @@ namespace EngineNS.Animation.Macross.BlendTree
                         elementRender.Draw(element, ref elementRenderingContext);
                     }
                 }
-                if (graph.PreviewPoseLine != null)
+
+                if (graph.PreviewLine != null)
                 {
-                    var previewDataLineRender = TtElementRenderDevice.CreateGraphElementRender(graph.PreviewPoseLine);
+                    var previewDataLineRender = TtElementRenderDevice.CreateGraphElementRender(graph.PreviewLine);
                     if (previewDataLineRender != null)
                     {
-                        previewDataLineRender.Draw(graph.PreviewPoseLine, ref elementRenderingContext);
+                        previewDataLineRender.Draw(graph.PreviewLine, ref elementRenderingContext);
                     }
                 }
-
+                if ((graph.SelectingRect != null))
+                {
+                    var selectingRectRender = TtElementRenderDevice.CreateGraphElementRender(graph.SelectingRect);
+                    if (selectingRectRender != null)
+                    {
+                        selectingRectRender.Draw(graph.SelectingRect, ref elementRenderingContext);
+                    }
+                }
+                if(ImGuiAPI.IsKeyDown(ImGuiKey.ImGuiKey_LeftCtrl))
+                {
+                    graph.CanMultiSelect = true;
+                }
+                else
+                {
+                    graph.CanMultiSelect = false;
+                }
                 TtMouseEventProcesser.Instance.Processing(graph, ref elementRenderingContext);
                 TtGraphContextMenuHandler.Instance.HandleContextMenu(TtMouseEventProcesser.Instance.LastElement, ref elementRenderingContext);
             }

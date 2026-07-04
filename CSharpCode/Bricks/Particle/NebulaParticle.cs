@@ -19,7 +19,7 @@ namespace EngineNS.Bricks.Particle
         {
             return "Nebula";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return await TtEngine.Instance.NebulaTemplateManager.GetParticle(GetAssetName());
         }
@@ -39,7 +39,7 @@ namespace EngineNS.Bricks.Particle
     }
     [TtNebulaParticle.TtNebulaParticleImport]
     [IO.AssetCreateMenu(MenuName = "FX/NebulaParticle")]
-    [EngineNS.Editor.UAssetEditor(EditorType = typeof(Editor.TtParticleEditor))]
+    [EngineNS.Editor.TtAssetEditor(EditorType = typeof(Editor.TtParticleEditor))]
     public partial class TtNebulaParticle : IO.BaseSerializer, IO.IAsset, IDisposable
     {
         public const string AssetExt = ".nebula";

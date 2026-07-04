@@ -38,9 +38,9 @@ namespace EngineNS.DesignMacross.Design.Statements
                 LoopIndexName = "__loopIndex_" + (uint)this.Id.ToString().GetHashCode(),
                 IncludeEnd = IncludeEnd,
             };
-            var methodDesc = statementBuildContext.MethodDescription as TtMethodDescription;
+            var graphDesc = statementBuildContext.OwnerDescription;
 
-            var linkedDataPin = methodDesc.GetLinkedDataPin(DataInPins[0]);
+            var linkedDataPin = IDataLineOperator.GetLinkedDataPin(graphDesc, DataInPins[0]);
             if (linkedDataPin == null)
             {
                 // Begin index default 0
@@ -49,7 +49,7 @@ namespace EngineNS.DesignMacross.Design.Statements
             else
             {
                 System.Diagnostics.Debug.Assert(linkedDataPin is TtDataOutPinDescription);
-                var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
+                var buildContext = new FExpressionBuildContext() { OwnerDescription = statementBuildContext.OwnerDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                 var linkedDesc = linkedDataPin.Parent;
                 if(linkedDesc is TtExpressionDescription linkedExpressionDesc)
                 {
@@ -63,7 +63,7 @@ namespace EngineNS.DesignMacross.Design.Statements
                 }             
             }
 
-            linkedDataPin = methodDesc.GetLinkedDataPin(DataInPins[1]);
+            linkedDataPin = IDataLineOperator.GetLinkedDataPin(graphDesc, DataInPins[1]);
             if(linkedDataPin == null)
             {
                 // end index default 1
@@ -72,7 +72,7 @@ namespace EngineNS.DesignMacross.Design.Statements
             else
             {
                 System.Diagnostics.Debug.Assert(linkedDataPin is TtDataOutPinDescription);
-                var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
+                var buildContext = new FExpressionBuildContext() { OwnerDescription = statementBuildContext.OwnerDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                 var linkedDesc = linkedDataPin.Parent;
                 if (linkedDesc is TtExpressionDescription linkedExpressionDesc)
                 {
@@ -86,7 +86,7 @@ namespace EngineNS.DesignMacross.Design.Statements
                 }
             }
 
-            linkedDataPin = methodDesc.GetLinkedDataPin(DataInPins[2]);
+            linkedDataPin = IDataLineOperator.GetLinkedDataPin(graphDesc, DataInPins[2]);
             if(linkedDataPin == null)
             {
                 // step default 1
@@ -95,7 +95,7 @@ namespace EngineNS.DesignMacross.Design.Statements
             else
             {
                 System.Diagnostics.Debug.Assert(linkedDataPin is TtDataOutPinDescription);
-                var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
+                var buildContext = new FExpressionBuildContext() { OwnerDescription = statementBuildContext.OwnerDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                 var linkedDesc = linkedDataPin.Parent;
                 if (linkedDesc is TtExpressionDescription linkedExpressionDesc)
                 {
@@ -110,7 +110,7 @@ namespace EngineNS.DesignMacross.Design.Statements
             }
 
             var executionOutPin_LoopBody = ExecutionOutPins[1];
-            var linkedLoopBodyExecPin = methodDesc.GetLinkedExecutionPin(executionOutPin_LoopBody);
+            var linkedLoopBodyExecPin = IExecutionLineOperator.GetLinkedExecutionPin(graphDesc, executionOutPin_LoopBody);
             if(linkedLoopBodyExecPin == null)
             {
                 forStatement.LoopBody = new TtExecuteSequenceStatement();
@@ -121,7 +121,7 @@ namespace EngineNS.DesignMacross.Design.Statements
                 var buildContext = new FStatementBuildContext()
                 {
                     ExecuteSequenceStatement = new(),
-                    MethodDescription = statementBuildContext.MethodDescription,
+                    OwnerDescription = statementBuildContext.OwnerDescription,
                     ClassBuildContext = statementBuildContext.ClassBuildContext
                 };
                 (linkedLoopBodyExecPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);
@@ -130,7 +130,7 @@ namespace EngineNS.DesignMacross.Design.Statements
             statementBuildContext.AddStatement(forStatement);
 
             var executionOutPin_Next = ExecutionOutPins[0];
-            var linkedNextPin = methodDesc.GetLinkedExecutionPin(executionOutPin_Next);
+            var linkedNextPin = IExecutionLineOperator.GetLinkedExecutionPin(graphDesc, executionOutPin_Next);
             if (linkedNextPin != null)
             {
                 System.Diagnostics.Debug.Assert(linkedNextPin is TtExecutionInPinDescription);

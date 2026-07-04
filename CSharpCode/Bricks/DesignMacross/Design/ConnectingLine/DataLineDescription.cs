@@ -1,113 +1,106 @@
-﻿using EngineNS.DesignMacross.Base.Description;
-using EngineNS.DesignMacross.Base.Graph;
+﻿using EngineNS.DesignMacross.Base.Graph;
+using EngineNS.DesignMacross.Editor;
 using EngineNS.Rtti;
-using System.Diagnostics;
-using System.Reflection;
+using System.ComponentModel;
 
 namespace EngineNS.DesignMacross.Design.ConnectingLine
 {
     public class TtDataPinDescriptionElementStyle : TtGraphElementStyle
     {
-        public bool BrowserVisible = false;
-        public EGui.Controls.TtContentBrowser ContentBrowser = EngineNS.Editor.TtEditor.NewPopupContentBrowser();
-        public string FilterExts;
-        public Rtti.TtTypeDesc ShowType;
+
+
     }
+
+    public class TtDataInPinDescriptionElementStyle : TtGraphElementStyle
+    {
+        public TtGraphElement_PinEditableBox PinEditableBox { get; set; } = new();
+    }
+
     [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     [GraphElementStyle(typeof(TtDataPinDescriptionElementStyle))]
-    public class TtDataPinDescription : IDescription
+    public class TtDataPinDescription : TtPinDescription
     {
-        public IDescription Parent { get; set; }
-        [Rtti.Meta("")]
-        public Guid Id { get; set; } = Guid.NewGuid();
-        [Rtti.Meta("")]
-        public string Name { get; set; } = "";
-        [Rtti.Meta("")]
-        public TtTypeDesc TypeDesc { get; set; } = null;
-        public void UpdateData(ref FDescriptionUpdateContext updateContext)
-        {
 
-        }
-        #region ISerializer
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-            if (hostObject is IDescription parentDescription)
-            {
-                Parent = parentDescription;
-            }
-            else
-            {
-                Debug.Assert(false);
-            }
-        }
-
-        public void OnPropertyRead(object tagObject, string name, bool fromXml)
-        {
-
-        }
-        public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
-        public void OnPropertyWrite(string prop, bool fromXml)
-        {
-
-        }
-        #endregion ISerializer
     }
     [GraphElement(typeof(TtGraphElement_DataInPin))]
+    [GraphElementStyle(typeof(TtDataInPinDescriptionElementStyle))]
     public class TtDataInPinDescription : TtDataPinDescription
     {
         [Rtti.Meta("")]
         public string TypeVaule { get; set; } = null;
+        [Category("Option")]
+        public object Vaule 
+        {
+            get
+            {
+                return GetTypeValue();
+            }
+            set
+            {
+                TypeVaule = value.ToString();
+            }
+        }
+        public object GetTypeValue()
+        {
+            if (TypeVaule == null)
+            {
+                TypeVaule = GetDefaultVale(TypeDesc).ToString();
+            }
+            return TypeVaule;
+        }
+        public static object GetDefaultVale(TtTypeDesc typeDesc)
+        {
+            if (typeDesc.SystemType == typeof(bool))
+            {
+                return false;
+            }
+            else if (typeDesc.SystemType == typeof(SByte) ||
+                typeDesc.SystemType == typeof(Int16)  ||
+                typeDesc.SystemType == typeof(Int32)  ||
+                typeDesc.SystemType == typeof(byte)   ||
+                typeDesc.SystemType == typeof(UInt16) ||
+                typeDesc.SystemType == typeof(UInt32) ||
+                typeDesc.SystemType == typeof(UInt64) ||
+                typeDesc.SystemType == typeof(Int64)  ||
+                typeDesc.SystemType == typeof(float)  ||
+                typeDesc.SystemType == typeof(double))
+            {
+                return 0;
+            }
+            else if (typeDesc.SystemType == typeof(Vector2))
+            {
+                return Vector2.Zero;
+            }
+            else if (typeDesc.SystemType == typeof(Vector3))
+            {
+                return Vector3.Zero;
+            }
+            else if (typeDesc.SystemType == typeof(Vector4))
+            {
+                return Vector4.Zero;
+            }
+            else if (typeDesc.SystemType == typeof(string))
+            {
+                return "";
+            }
+            else if (typeDesc.SystemType == typeof(Color4b))
+            {
+                return Color4b.Black;
+            }
+            return null;
+        }
     }
     [GraphElement(typeof(TtGraphElement_DataPin))]
     public class TtDataOutPinDescription : TtDataPinDescription
     {
-        
+
     }
+
+
     [GraphElement(typeof(TtGraphElement_DataLine))]
     [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public class TtDataLineDescription : IDescription
+    public class TtDataLineDescription : TtLineDescription
     {
-        public IDescription Parent { get; set; }
-        [Rtti.Meta("")]
-        public Guid Id { get; set; } = Guid.NewGuid();
-        [Rtti.Meta("")]
-        public string Name { get; set; }
-        /// <summary>
-        /// DataPinId
-        /// </summary>
-        [Rtti.Meta("")] 
-        public Guid FromId { get; set; } = Guid.Empty;
-        /// <summary>
-        /// DataPinId
-        /// </summary>
-        [Rtti.Meta("")] 
-        public Guid ToId { get; set; } = Guid.Empty;
-        public void UpdateData(ref FDescriptionUpdateContext updateContext)
-        {
 
-        }
-        #region ISerializer
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-            if (hostObject is IDescription parentDescription)
-            {
-                Parent = parentDescription;
-            }
-            else
-            {
-                Debug.Assert(false);
-            }
-        }
-
-        public void OnPropertyRead(object tagObject, string prop, bool fromXml)
-        {
-
-        }
-        public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
-        public void OnPropertyWrite(string prop, bool fromXml)
-        {
-
-        }
-        #endregion ISerializer
     }
 }

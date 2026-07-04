@@ -796,7 +796,7 @@ namespace EngineNS.NxRHI
                     var blockHeight = desc.BlockDimenstions[i].Y;
                     if (blockWidth % 4 != 0 || blockHeight % 4 != 0)
                     {
-                        desc.MipLevel = i;
+                        desc.MipLevel = i + 1;
                         break;
                     }
                 }

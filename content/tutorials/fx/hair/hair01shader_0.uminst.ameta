@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
+  <AssetId Type="System.Guid@Unknown" Value="0c3e6b28-ac7e-4029-b1dd-be6594b5caad" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/fx/hair/hair01shader_0.uminst,0c3e6b28-ac7e-4029-b1dd-be6594b5caad" />
+  <Description Type="System.String@Unknown" Value="This is a Asset" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="4">
+    <e_0 Value="Engine,material/pbr.material,95d0c6ba-5ec5-497b-8738-03c2d2965cba" />
+    <e_1 Value="Engine,texture/pbr_d.srv,43f492e0-fc97-4721-99cd-53f33ea8d252" />
+    <e_2 Value="Engine,texture/pbr_n.srv,200a085f-65d2-4d33-aa4d-79915e8f09a9" />
+    <e_3 Value="Engine,texture/pbr_orm.srv,fe280199-f8e8-4388-b0e2-71972d034b44" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
+</Root>

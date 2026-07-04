@@ -27,6 +27,44 @@ namespace EngineNS.Graphics.Pipeline
         {
             get; set;
         } = ETextureAssetCompressType.DXT;
+
+        [Rtti.Meta("")]
+        [Category("TextureStreaming")]
+        public bool EnableTextureStreaming { get; set; } = true;
+        [Rtti.Meta("")]
+        [Category("TextureStreaming")]
+        public int TextureStreamingPoolMB { get; set; } = 1024;
+        [Rtti.Meta("")]
+        [Category("TextureStreaming")]
+        public float TextureStreamingPoolTargetRatio { get; set; } = 0.9f;
+        [Rtti.Meta("")]
+        [Category("TextureStreaming")]
+        public float TextureStreamingHysteresisSeconds { get; set; } = 15.0f;
+        [Rtti.Meta("")]
+        [Category("TextureStreaming")]
+        public int TextureStreamingMinResidentLOD { get; set; } = 1;
+        [Rtti.Meta("")]
+        [Category("TextureStreaming")]
+        public float TextureStreamingUpdateIntervalMS { get; set; } = 150.0f;
+        /// <summary>
+        /// 屏幕尺寸模型总开关（从属于 EnableTextureStreaming）。开启后由可见 mesh 的屏幕投影尺寸
+        /// 推算 wanted mip。默认关闭：StreamingTexelFactor 尚未标定（缺省 1.0）时贸然开启会过度降级。
+        /// </summary>
+        [Rtti.Meta("")]
+        [Category("TextureStreaming")]
+        public bool TextureStreamingScreenSpace { get; set; } = false;
+        /// <summary>
+        /// 屏幕需求的可见新鲜度窗口（帧数）。RebalanceStreaming 用 nowFrame-demandFrame &lt;= 该值判定本周期可见。
+        /// </summary>
+        [Rtti.Meta("")]
+        [Category("TextureStreaming")]
+        public int TextureStreamingVisibilityFrames { get; set; } = 20;
+        /// <summary>
+        /// 裁剪节点采集屏幕需求的节流帧数。0=每帧采集；&gt;0 时每 N 帧采集一次以降低渲染线程开销。
+        /// </summary>
+        [Rtti.Meta("")]
+        [Category("TextureStreaming")]
+        public int TextureStreamingDemandThrottleFrames { get; set; } = 0;
     }
     public partial class TtGfxDevice : TtModule<TtEngine>
     {
@@ -356,6 +394,8 @@ namespace EngineNS.Graphics.Pipeline
         public Shader.TtMaterialInstanceManager MaterialInstanceManager { get; private set; } = new Shader.TtMaterialInstanceManager();
         [Rtti.Meta("")]
         public Shader.TtMaterialFunctionManager MaterialFunctionManager { get; private set; } = new Shader.TtMaterialFunctionManager();
+        [Rtti.Meta("")]
+        public UserParameters.TtCBufferParameterManager CBufferManager { get; private set; } = new UserParameters.TtCBufferParameterManager();
         public EGui.Slate.TtBaseRenderer SlateRenderer { get; private set; }
         public Graphics.Pipeline.Shader.TtEffectManager EffectManager
         {

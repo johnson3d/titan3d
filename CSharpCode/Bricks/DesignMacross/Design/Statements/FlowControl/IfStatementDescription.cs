@@ -22,9 +22,9 @@ namespace EngineNS.DesignMacross.Design.Statement
         public override TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
             var ifStatement = new TtIfStatement();
-            var methodDesc = statementBuildContext.MethodDescription as TtMethodDescription;          
+            var graphDesc = statementBuildContext.OwnerDescription;          
             
-            var linkedDataPin = methodDesc.GetLinkedDataPin(DataInPins[0]);
+            var linkedDataPin = IDataLineOperator.GetLinkedDataPin(graphDesc, DataInPins[0]);
             if(linkedDataPin == null)
             {
                 //默认为false
@@ -33,13 +33,13 @@ namespace EngineNS.DesignMacross.Design.Statement
             else
             {
                 System.Diagnostics.Debug.Assert(linkedDataPin is TtDataOutPinDescription);
-                FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
+                FExpressionBuildContext buildContext = new() { OwnerDescription = statementBuildContext.OwnerDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                 var condition = (linkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
                 ifStatement.Condition = condition;
             }
 
             var executionOutPin_True = ExecutionOutPins[0];
-            var linkedTrueExecPin = methodDesc.GetLinkedExecutionPin(executionOutPin_True);
+            var linkedTrueExecPin = IExecutionLineOperator.GetLinkedExecutionPin(graphDesc, executionOutPin_True);
             if(linkedTrueExecPin == null)
             {
                 //空语句
@@ -52,14 +52,14 @@ namespace EngineNS.DesignMacross.Design.Statement
                 System.Diagnostics.Debug.Assert(linkedTrueExecPin is TtExecutionInPinDescription);
                 FStatementBuildContext buildContext = new() {
                     ExecuteSequenceStatement = new(),
-                    MethodDescription = statementBuildContext.MethodDescription,
+                    OwnerDescription = statementBuildContext.OwnerDescription,
                     ClassBuildContext = statementBuildContext.ClassBuildContext
                 };
                 (linkedTrueExecPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);
                 ifStatement.TrueStatement = buildContext.ExecuteSequenceStatement;
             }
             var executionOutPin_False = ExecutionOutPins[1];
-            var linkedFalseExecPin = methodDesc.GetLinkedExecutionPin(executionOutPin_False);
+            var linkedFalseExecPin = IExecutionLineOperator.GetLinkedExecutionPin(graphDesc, executionOutPin_False);
             if(linkedFalseExecPin == null)
             {
                 //空
@@ -69,7 +69,7 @@ namespace EngineNS.DesignMacross.Design.Statement
                 System.Diagnostics.Debug.Assert(linkedFalseExecPin is TtExecutionInPinDescription);
                 FStatementBuildContext buildContext = new() {
                     ExecuteSequenceStatement = new(), 
-                    MethodDescription = statementBuildContext.MethodDescription,
+                    OwnerDescription = statementBuildContext.OwnerDescription,
                     ClassBuildContext = statementBuildContext.ClassBuildContext
                 };
                 (linkedFalseExecPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);

@@ -40,6 +40,10 @@ void EmbreeErrorFunc(void* userPtr, RTCError code, const char* str)
 {
 	VFX_LTRACE(ELTT_Error, "Embree error: %s Code=%u", str, (UINT)code);
 }
+FEmbreeGeometry::FEmbreeGeometry()
+{
+
+}
 
 FEmbreeGeometry::~FEmbreeGeometry()
 {

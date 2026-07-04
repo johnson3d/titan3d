@@ -3,6 +3,7 @@ using EngineNS.Thread.Async;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Graphics.Mesh
@@ -18,7 +19,7 @@ namespace EngineNS.Graphics.Mesh
         {
             return "VMS";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(GetAssetName());
         }
@@ -35,7 +36,7 @@ namespace EngineNS.Graphics.Mesh
             ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtMeshPrimitives)).TypeString;
             foreach (var i in this.RefAssetRNames)
             {
-                ameta.RefAssetRNames.Add(i);
+                ameta.AddReferenceAsset(i);
             }
             ameta.SaveAMeta((IO.IAsset)null);
 
@@ -69,6 +70,23 @@ namespace EngineNS.Graphics.Mesh
         /// </summary>
         [Rtti.Meta("")]
         public RName PhysicsAssetRName { get; set; }
+
+        /// <summary>
+        /// 纹理流送用的 texel factor，表示该 mesh 在世界单位下每个纹理 texel 所覆盖的尺度，
+        /// 供 TtTextureManager 的 streaming 调度根据 mesh 屏幕尺寸推算期望 mip。
+        /// 参考 UE 的 FStreamingTextureBuildInfo.TexelFactor。
+        /// TODO: 后续由 TtMeshPrimitiveEditor 在构建期根据三角形世界面积与 UV 面积之比统计填充，
+        /// 当前先给缺省值。
+        /// </summary>
+        [Rtti.Meta("")]
+        public float StreamingTexelFactor { get; set; } = 1.0f;
+
+        /// <summary>
+        /// 标识该 Mesh 是否需要构建 BLAS (Bottom Level Acceleration Structure).
+        /// 为 true 时, 加载 Mesh 后会自动在 cache/cookedassets/blas/ 下查找或构建 BLAS.
+        /// </summary>
+        [Rtti.Meta("")]
+        public bool HasBLAS { get; set; } = false;
     }
 
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMeshPrimitives@EngineCore" })]
@@ -180,9 +198,14 @@ namespace EngineNS.Graphics.Mesh
             var result = new TtMeshPrimitivesAMeta();
             return result;
         }
+        IO.IAssetMeta mAMeta = null;
         public IO.IAssetMeta GetAMeta()
         {
-            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            if (mAMeta == null)
+            {
+                mAMeta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            }
+            return mAMeta;
         }
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
@@ -191,11 +214,119 @@ namespace EngineNS.Graphics.Mesh
             var meshMeta = ameta as TtMeshPrimitivesAMeta;
             if (meshMeta != null && meshMeta.IsClustered)
             {
-                ameta.RefAssetRNames.Add(RName.GetRName(AssetName.Name + ".clustermesh", AssetName.RNameType));
+                ameta.AddReferenceAsset(RName.GetRName(AssetName.Name + ".clustermesh", AssetName.RNameType));
             }
         }
+        /// <summary>
+        /// 参考 UE FUVDensityAccumulator：遍历 mesh 所有三角形，按「世界面积 / UV 面积」统计加权平均
+        /// 得到 StreamingTexelFactor（1 UV 单位对应多少世界单位），写入 ameta 并保存。
+        /// </summary>
+        public unsafe void ComputeAndApplyTexelFactor()
+        {
+            var mdp = new TtMeshDataProvider();
+            if (!mdp.InitFrom(this))
+                return;
+
+            var builder = mdp.mCoreObject;
+            int vertexCount = (int)builder.VertexNumber;
+            if (vertexCount == 0)
+                return;
+
+            var pPos = (Vector3*)builder.GetStream(NxRHI.EVertexStreamType.VST_Position).GetData();
+            var pUV = (Vector2*)builder.GetStream(NxRHI.EVertexStreamType.VST_UV).GetData();
+            if (pPos == null || pUV == null)
+                return;
+
+            bool isIndex32 = mdp.IsIndex32;
+            byte* pIndices = (byte*)builder.GetIndices().GetData();
+            if (pIndices == null)
+                return;
+
+            // 收集所有三角形的 (weight, uvDensity)
+            var elements = new List<(float Weight, float UVDensity)>();
+
+            uint numAtoms = builder.GetAtomNumber();
+            for (uint a = 0; a < numAtoms; a++)
+            {
+                var atom = builder.GetAtom(a, 0);
+                uint startIdx = atom->m_StartIndex;
+                uint numTri = atom->m_NumPrimitives;
+
+                for (uint t = 0; t < numTri; t++)
+                {
+                    int i0, i1, i2;
+                    if (isIndex32)
+                    {
+                        int* pi = (int*)pIndices;
+                        i0 = pi[startIdx + t * 3 + 0];
+                        i1 = pi[startIdx + t * 3 + 1];
+                        i2 = pi[startIdx + t * 3 + 2];
+                    }
+                    else
+                    {
+                        ushort* pi = (ushort*)pIndices;
+                        i0 = pi[startIdx + t * 3 + 0];
+                        i1 = pi[startIdx + t * 3 + 1];
+                        i2 = pi[startIdx + t * 3 + 2];
+                    }
+
+                    // 世界面积（叉积长度 = 2x 三角形面积）
+                    Vector3 e1 = pPos[i1] - pPos[i0];
+                    Vector3 e2 = pPos[i2] - pPos[i0];
+                    float worldArea = Vector3.Cross(e1, e2).Length();
+
+                    if (worldArea <= 1e-8f)
+                        continue;
+
+                    // UV 面积（2D 叉积绝对值）
+                    Vector2 uv1 = pUV[i1] - pUV[i0];
+                    Vector2 uv2 = pUV[i2] - pUV[i0];
+                    float uvArea = MathF.Abs(uv1.X * uv2.Y - uv1.Y * uv2.X);
+
+                    if (uvArea <= 1e-8f)
+                        continue;
+
+                    float weight = MathF.Sqrt(worldArea);
+                    float density = MathF.Sqrt(worldArea / uvArea);
+                    elements.Add((weight, density));
+                }
+            }
+
+            if (elements.Count == 0)
+            {
+                Profiler.Log.WriteLine<Profiler.TtLogCategory>(
+                    Profiler.ELogTag.Warning, "BuildTexelFactor", "No valid triangles found.");
+                return;
+            }
+
+            // 排序 + 去头尾各 10% 极端值 + 面积加权平均（与 UE FUVDensityAccumulator 一致）
+            elements.Sort((x, y) => x.UVDensity.CompareTo(y.UVDensity));
+            int discard = (int)(elements.Count * 0.1f);
+            float sumWeighted = 0, sumWeight = 0;
+            for (int i = discard; i < elements.Count - discard; i++)
+            {
+                sumWeighted += elements[i].UVDensity * elements[i].Weight;
+                sumWeight += elements[i].Weight;
+            }
+
+            float texelFactor = (sumWeight > 1e-8f) ? (sumWeighted / sumWeight) : 1.0f;
+
+            // 写入 ameta
+            var meshMeta = GetAMeta() as TtMeshPrimitivesAMeta;
+            if (meshMeta != null)
+            {
+                meshMeta.StreamingTexelFactor = texelFactor;
+                meshMeta.SaveAMeta((IO.IAsset)null);
+                Profiler.Log.WriteLine<Profiler.TtLogCategory>(
+                    Profiler.ELogTag.Info, "BuildTexelFactor",
+                    $"StreamingTexelFactor = {texelFactor:F4} for {AssetName}");
+            }
+        }
+
         public void SaveAssetTo(RName name)
         {
+            ComputeAndApplyTexelFactor();
+
             var ameta = this.GetAMeta();
             if (ameta != null)
             {
@@ -236,6 +367,39 @@ namespace EngineNS.Graphics.Mesh
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// 预构建的 BLAS (Bottom Level Acceleration Structure), 供光线追踪 TLAS 组装使用.
+        /// 由 TryLoadOrBuildBLAS 在 mesh 加载后自动填充 (当 AMeta.HasBLAS == true 时).
+        /// </summary>
+        public NxRHI.TtAccelerationStructure BLAS { get; private set; }
+
+        /// <summary>
+        /// 编辑器代理属性: 读写 AMeta.HasBLAS, 标记该 Mesh 是否需要构建 BLAS.
+        /// </summary>
+        [Category("RayTracing")]
+        public bool HasBLAS
+        {
+            get
+            {
+                var meta = GetAMeta() as TtMeshPrimitivesAMeta;
+                return meta?.HasBLAS ?? false;
+            }
+            set
+            {
+                var meta = GetAMeta() as TtMeshPrimitivesAMeta;
+                if (meta != null)
+                {
+                    meta.HasBLAS = value;
+                    meta.SaveAMeta(this);
+                    if (meta.HasBLAS)
+                    {
+                        // 编辑器中勾选后立即触发构建
+                        TryLoadOrBuildBLAS().AddWaitTask();
+                    }
+                }
+            }
         }
         public unsafe static TtMeshPrimitives LoadXnd(RName name, TtMeshPrimitiveManager manager, IO.TtXndHolder xnd, bool bTryLoadMeshlets)
         {
@@ -461,6 +625,7 @@ namespace EngineNS.Graphics.Mesh
             if (result != null)
             {
                 await result.TryLoadClusteredMesh();
+                await result.TryLoadOrBuildBLAS();
                 return result;
             }
             return null;

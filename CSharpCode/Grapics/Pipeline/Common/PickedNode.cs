@@ -141,6 +141,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmdlist.BeginPass(PickedBuffer.FrameBuffers, in passClears, "Picked");
                 foreach (var i in PickedManager.PickedProxies)
                 {
+                    if (i is GamePlay.Scene.TtNode node && node.IsEditorVisibleInHierarchy == false)
+                        continue;
                     i.GetHitProxyDrawMesh(mPickedMeshes);
                 }
                 foreach (var mesh in mPickedMeshes)

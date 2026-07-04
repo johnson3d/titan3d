@@ -74,8 +74,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //    System.Diagnostics.Debug.Assert(false);
             //}
         }
-
-        public TtShadingEnv Clone()
+        public bool IsOnlyBuildMode { get; set; } = false;
+        public virtual TtShadingEnv Clone()
         {
             var result = Activator.CreateInstance(this.GetType()) as TtShadingEnv;
             result.ShaderDefinitions = this.ShaderDefinitions;
@@ -83,6 +83,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.CodeName = this.CodeName;
             result.mCurrentPermutationId = this.mCurrentPermutationId;
             result.PermutationBitWidth = this.PermutationBitWidth;
+            result.IsOnlyBuildMode = IsOnlyBuildMode;
             foreach (var i in this.PermutationValues)
             {
                 var newItem = new TtPermutationItem();
@@ -558,7 +559,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return "McShading";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             //return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
             return null;
@@ -580,7 +581,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     [Rtti.Meta("")]
     [TtMacrossShadingEnv.TtMacrossShadingEnvImport]
     [IO.AssetCreateMenu(MenuName = "FX/McShader")]
-    [EngineNS.Editor.UAssetEditor(EditorType = typeof(TtMacrossShadingEnvEditor))]
+    [EngineNS.Editor.TtAssetEditor(EditorType = typeof(TtMacrossShadingEnvEditor))]
     public class TtMacrossShadingEnv : TtComputeShadingEnv, IO.IAsset
     {
         public const string AssetExt = ".mcshading";

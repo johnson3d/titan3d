@@ -29,10 +29,10 @@ void IMeshSimplify::SimplifyMesh(const v3dxVector3* posArray, int numOfPos, cons
 	for (int i = 0; i < numOfTri; i++)
 	{
 		Simplify::Triangle t;
-		t.v[0] = Indices[i * 3].A;
-		t.v[1] = Indices[i * 3].B;
-		t.v[2] = Indices[i * 3].C;
-		t.material = Indices[i * 3].Material;
+		t.v[0] = Indices[i].A;
+		t.v[1] = Indices[i].B;
+		t.v[2] = Indices[i].C;
+		t.material = Indices[i].Material;
 		Simplify::triangles.push_back(t);
 	}
 
@@ -52,10 +52,10 @@ void IMeshSimplify::SimplifyMesh(const v3dxVector3* posArray, int numOfPos, cons
 	{
 		for (int i = 0; i < *outNumOfTri; i++)
 		{
-			outIndices[i * 3].A = Simplify::triangles[i].v[0];
-			outIndices[i * 3].B = Simplify::triangles[i].v[1];
-			outIndices[i * 3].C = Simplify::triangles[i].v[2];
-			outIndices[i * 3].Material = Simplify::triangles[i].material;
+			outIndices[i].A = Simplify::triangles[i].v[0];
+			outIndices[i].B = Simplify::triangles[i].v[1];
+			outIndices[i].C = Simplify::triangles[i].v[2];
+			outIndices[i].Material = Simplify::triangles[i].material;
 		}
 	}
 

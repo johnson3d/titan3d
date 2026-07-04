@@ -30,14 +30,16 @@ namespace EngineNS.DesignMacross.Editor
             }
             AlreadyNavigated = false;
         }
+        TtGraphPanelRender Render = new();
         public void Draw(FDesignMacrossEditorRenderingContext context)
         {
-            TtGraphPanelRender render = new TtGraphPanelRender();
-            render.Draw(this, context);
+            //TtGraphPanelRender render = new TtGraphPanelRender();
+            Render.Draw(this, context);
         }
     }
     public struct TtGraphPanelRender
     {
+        TtNavigableGraphsPanelRender NavigableGraphsPanelRender;
         public void Draw(TtGraphEditPanel graphEditPanel, FDesignMacrossEditorRenderingContext context)
         {
             //Macross.UMacrossBreak mBreakerStore = null;
@@ -81,8 +83,7 @@ namespace EngineNS.DesignMacross.Editor
                         graphContext.GraphElementStyleManager = context.GraphElementStyleManager;
                         graphContext.DescriptionsElement = context.DescriptionsElement;
                         graphContext.DesignedClassDescription = context.DesignedClassDescription;
-                        var render = new TtNavigableGraphsPanelRender();
-                        render.Draw(ui.Value, context);
+                        NavigableGraphsPanelRender.Draw(ui.Value, context);
                         ImGuiAPI.EndTabItem();
                     }
                     if(!showTab)

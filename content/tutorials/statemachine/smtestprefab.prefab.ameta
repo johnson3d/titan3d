@@ -20,5 +20,6 @@
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Value="Engine,mesh/base/box_1.ums,b91bb4f4-7d54-4ba5-8342-a0767ec2e0ac" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtPrefab@EngineCore" />
 </Root>

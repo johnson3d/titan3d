@@ -71,6 +71,7 @@ namespace EngineNS.EGui.Slate
             Font_Bold_13px,
             Font_13px,
             Font_Icon,
+            Font_18px,
         }
         const uint ImGuiFreeTypeLoaderFlags_LightHinting = 1u << 3;
         const float TextRasterizerMultiply = 1.05f;
@@ -191,6 +192,7 @@ namespace EngineNS.EGui.Slate
             CreateFontSlot(fontAtlas, smallFont, 13.0f, textRanges);
 
             CreateFontSlot(fontAtlas, iconFont, 18.0f, iconRanges);
+            CreateFontSlot(fontAtlas, editorFont, 18.0f, textRanges);
 
             if (rendererHasTextures == false)
             {

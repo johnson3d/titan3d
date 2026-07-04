@@ -25,7 +25,7 @@ namespace EngineNS.GamePlay.Scene
         {
             return TtEngine.Instance.EditorInstance.Config.SceneBoderColor;
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return await TtEngine.Instance.SceneManager.CreateScene(args[0] as TtWorld, GetAssetName());
         }

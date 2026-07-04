@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.Font.TtFontSDFAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="5c48bf52-c603-4308-8145-17a2802f1aaa" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.Font.TtFontSDFAMeta&#xA;" />
@@ -12,4 +12,5 @@
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Font.TtFontSDFAMeta@EngineCore" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
 </Root>

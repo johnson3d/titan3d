@@ -14,5 +14,6 @@
   </Icon>
   <OriginImageAddress Type="System.String@Unknown" Value="tutorials/pivotpainter/hilltree/t_craghead_oak_tile_01_n_tex.srv:Game" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.TtSrView@EngineCore" />
 </Root>

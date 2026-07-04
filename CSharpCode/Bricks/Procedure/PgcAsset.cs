@@ -15,7 +15,7 @@ namespace EngineNS.Bricks.Procedure
         {
             return TtEngine.Instance.ConfigManager.GetConfig<Editor.TtEditorConfig>().PgcBoderColor;
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             //return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
             return null;
@@ -63,7 +63,7 @@ namespace EngineNS.Bricks.Procedure
     [Rtti.Meta("")]
     [UPgcAsset.Import]
     [IO.AssetCreateMenu(MenuName = "Procedure")]
-    [Editor.UAssetEditor(EditorType = typeof(UPgcEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(UPgcEditor))]
     public class UPgcAsset : IO.IAsset
     {
         public const string AssetExt = ".pgc";

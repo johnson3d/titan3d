@@ -263,9 +263,15 @@ namespace NxRHI
 		}
 		// cluster interfaces
 		int ClusterizeTriangles(IGpuDevice* device);
+		int BuildNaniteDAG(IGpuDevice* device);
+		int BuildNaniteDAGEx(IGpuDevice* device, UINT maxGroupSize, UINT clusterSize = 128);
 		bool SaveClusters(XndNode* pNode);
 		int LoadClusters(XndHolder* xnd, IGpuDevice* device);
 		QuarkCluster* GetCluster(int index);
+		UINT GetClusterCount() const { return (UINT)mClusters.size(); }
+		UINT GetDAGMipLevels() const { return mDAGMipLevels; }
+		float GetClusterLODError(int index) const;
+		int GetClusterMipLevel(int index) const;
 		
 		v3dxVector3* GetClustersVB()
 		{
@@ -304,6 +310,7 @@ namespace NxRHI
 		std::vector<QuarkCluster> mClusters;
 		std::vector<v3dxVector3> mClustersVB;
 		std::vector<UINT> mClustersIB;
+		UINT mDAGMipLevels = 0;
 
         AutoRef<FVertexArray>		mClustersVertexArray;
         AutoRef<IIbView>			mClustersIndexView;

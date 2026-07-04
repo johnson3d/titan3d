@@ -21,6 +21,11 @@ struct PS_OUTPUT
 	float4 RT3 : SV_Target3;//R10G10B10A2:motion.xy,unused,unused
 };
 
+int GetShadingMode(uint RenderFlags_10Bit)
+{
+    return (RenderFlags_10Bit & SHADINGMODE_BIT_MASK) >> SHADINGMODE_BIT_OFFSET;
+}
+
 PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 {
 	PS_OUTPUT output = (PS_OUTPUT)0;
@@ -77,9 +82,6 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
     GBuffer.Mask = (half) mtl.mMask;
 
     GBuffer.RenderFlags_10Bit = MaterialRenderFlags | MeshRenderFlags;
-#if MTL_LightingMode == ELightingMode_Unlight
-	GBuffer.SetUnlit(true);
-#endif
 	//GBuffer.MotionVector.xy = input.psCustomUV0.xy;
 	
     float2 previousScreenPos = (input.psCustomUV1.xy / input.psCustomUV1.w) * 0.5 + 0.5;

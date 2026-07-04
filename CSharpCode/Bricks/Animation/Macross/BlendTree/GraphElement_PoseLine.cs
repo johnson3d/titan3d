@@ -2,18 +2,17 @@
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
+using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.DesignMacross.Editor;
 using EngineNS.EGui.Controls;
+using SixLabors.Fonts;
 
 namespace EngineNS.Animation.Macross.BlendTree
 {
     [ImGuiElementRender(typeof(TtGraphElementRender_PoseLine))]
-    public class TtGraphElement_PoseLine : TtDescriptionGraphElement
+    public class TtGraphElement_PoseLine : TtGraphElement_Line
     {
         public TtPoseLineDescription PoseLineDescription { get => Description as TtPoseLineDescription; }
-        public IGraphElement From { get; set; } = null;
-        public IGraphElement To { get; set; } = null;
-
         public TtGraphElement_PoseLine(IDescription description, IGraphElementStyle style) : base(description, style)
         {
         }
@@ -38,87 +37,41 @@ namespace EngineNS.Animation.Macross.BlendTree
             To = context.DescriptionsElement[PoseLineDescription.ToId];
             base.AfterConstructElements(ref context);
         }
+        public override void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
+        {
+            popupMenu.bHasSearchBox = false;
+            var parentMenu = popupMenu.Menu;
+            var cmdHistory = context.CommandHistory;
+            parentMenu.AddMenuSeparator("GENERAL");
+
+            if (context.DesignedGraph is TtGraph graph)
+            {
+                var graphDesc = graph.Description as IPoseLineOperator;
+                if (graphDesc != null)
+                {
+                    parentMenu.AddMenuItem("Break Link", null, (TtMenuItem item, object sender) =>
+                    {
+                        cmdHistory.CreateAndExtuteCommand("Break Link",
+                            (data) => { graphDesc.RemovePoseLine(PoseLineDescription); },
+                            (data) => { graphDesc.AddPoseLine(PoseLineDescription); }
+                            );
+                    });
+                }
+            }
+        }
     }
     [ImGuiElementRender(typeof(TtGraphElementRender_PreviewPoseLine))]
-    public class TtGraphElement_PreviewPoseLine : IGraphElement
+    public class TtGraphElement_PreviewPoseLine : TtGraphElement_PreviewLine
     {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public Vector2 Location { get; set; }
-        public Vector2 AbsLocation { get; set; }
-        public SizeF Size { get; set; }
-        public IGraphElement Parent { get; set; }
-        public IGraphElementStyle Style { get; set; }
-
-        public TtPosePinDescription StartPin { get; set; } = null;
-
-        #region Selectable
-        public bool CanDrag()
-        {
-            return false;
-        }
-
-        public void OnDragging(Vector2 delta)
-        {
-
-        }
-
-        public bool HitCheck(ref FMouseEventContext context)
-        {
-            return false;
-        }
-
-        public void OnSelected(ref FMouseEventContext context)
-        {
-        }
-
-        public void OnUnSelected()
-        {
-        }
-
-        public void OnMouseOver(ref FMouseEventContext context)
-        {
-        }
-
-        public void OnMouseLeave(ref FMouseEventContext context)
-        {
-        }
-
-        public void OnMouseLeftButtonDown(ref FMouseEventContext context)
-        {
-        }
-
-        public void OnMouseLeftButtonUp(ref FMouseEventContext context)
-        {
-        }
-
-        public void OnMouseRightButtonDown(ref FMouseEventContext context)
-        {
-        }
-
-        public void OnMouseRightButtonUp(ref FMouseEventContext context)
-        {
-        }
-        #endregion
 
     }
     [ImGuiElementRender(typeof(TtGraphElementRender_PosePin))]
-    public class TtGraphElement_PosePin : TtDescriptionGraphElement
+    public class TtGraphElement_PosePin : TtGraphElement_Pin
     {
         public TtPosePinDescription PosePinDescription { get => Description as TtPosePinDescription; }
-        public override FMargin Margin { get; set; } = new FMargin(2, 2, 2, 2);
-        public TtGraphElement_TextBlock NameTextBlock = new TtGraphElement_TextBlock();
-        public TtGraphElement_StackPanel ElementContainer = new();
-        public TtGraphElement_Icon Icon = new();
-        public string DisconnectedPinIconName { get; set; } = UNodeGraphStyles.DefaultStyles.PinDisconnectedVarImg;
-        public string ConnectedPinIconName { get; set; } = UNodeGraphStyles.DefaultStyles.PinConnectedVarImg;
-        public SizeF IconSize { get; set; } = new SizeF(18, 15);
-        public Color4f BackgroundColor
-        {
-            get => Style.BackgroundColor;
-            set => Style.BackgroundColor = value;
-        }
-        public float Rounding { get; set; } = 5;
+        public string DisconnectedPinIconName { get; set; } = UNodeGraphStyles.DefaultStyles.AnimationPosePinDisConnected;
+        public string ConnectedPinIconName { get; set; } = UNodeGraphStyles.DefaultStyles.AnimationPosePinConnected;
+        public SizeF IconSize { get; set; } = new SizeF(15, 28);
         public TtGraphElement_PosePin(IDescription description, IGraphElementStyle style) : base(description, style)
         {
             bool isIconAtLeft = false;
@@ -132,6 +85,7 @@ namespace EngineNS.Animation.Macross.BlendTree
             }
             ElementContainer.Parent = this;
             ElementContainer.Orientation = EOrientation.Horizontal;
+            ElementContainer.VerticalAlignment = EVerticalAlignment.Center;
             NameTextBlock.Content = PosePinDescription.Name;
             NameTextBlock.VerticalAlignment = EVerticalAlignment.Center;
             NameTextBlock.HorizontalAlignment = EHorizontalAlignment.Left;
@@ -228,34 +182,39 @@ namespace EngineNS.Animation.Macross.BlendTree
         {
             var renderContext = context.GraphElementRenderingContext;
             var methodGraph = renderContext.DesignedGraph as TtGraph_BlendTree;
-            methodGraph.PreviewPoseLine = new TtGraphElement_PreviewPoseLine();
-            methodGraph.PreviewPoseLine.AbsLocation = Icon.AbsCenter;
-            methodGraph.PreviewPoseLine.StartPin = PosePinDescription;
+            methodGraph.PreviewLine = new TtGraphElement_PreviewPoseLine
+            {
+                AbsLocation = Icon.AbsCenter,
+                StartPin = PosePinDescription
+            };
         }
 
         public override void OnMouseLeftButtonUp(ref FMouseEventContext context)
         {
             var renderContext = context.GraphElementRenderingContext;
-            var blendTreeGraph = renderContext.DesignedGraph as TtGraph_BlendTree;
-            if (blendTreeGraph.PreviewPoseLine != null)
+            var graph = renderContext.DesignedGraph as TtGraph;
+            if (graph.PreviewLine != null && graph.PreviewLine.StartPin is TtPosePinDescription startPin)
             {
-                var startPin = blendTreeGraph.PreviewPoseLine.StartPin;
                 if (startPin != PosePinDescription && startPin.Parent != PosePinDescription.Parent)
                 {
                     var fromId = Guid.Empty;
                     var fromDescName = "";
                     var toId = Guid.Empty;
                     var toDescName = "";
+                    TtPoseOutPinDescription fromPin = null;
+                    TtPoseInPinDescription toPin = null;
                     bool validLine = false;
-                    if (blendTreeGraph.PreviewPoseLine.StartPin is TtPoseInPinDescription)
+                    if (startPin is TtPoseInPinDescription)
                     {
                         if (PosePinDescription is TtPoseOutPinDescription)
                         {
                             validLine = true;
                             fromId = PosePinDescription.Id;
+                            fromPin = PosePinDescription as TtPoseOutPinDescription;
                             fromDescName = PosePinDescription.Parent.Name;
-                            toId = blendTreeGraph.PreviewPoseLine.StartPin.Id;
-                            toDescName = blendTreeGraph.PreviewPoseLine.StartPin.Parent.Name;
+                            toId = startPin.Id;
+                            toPin = startPin as TtPoseInPinDescription;
+                            toDescName = startPin.Parent.Name;
                         }
                     }
                     else
@@ -263,23 +222,51 @@ namespace EngineNS.Animation.Macross.BlendTree
                         if (PosePinDescription is TtPoseInPinDescription)
                         {
                             validLine = true;
-                            System.Diagnostics.Debug.Assert(blendTreeGraph.PreviewPoseLine.StartPin is TtPoseOutPinDescription);
-                            fromId = blendTreeGraph.PreviewPoseLine.StartPin.Id;
-                            fromDescName = blendTreeGraph.PreviewPoseLine.StartPin.Parent.Name;
+                            System.Diagnostics.Debug.Assert(startPin is TtPoseOutPinDescription);
+                            fromId = startPin.Id;
+                            fromPin = startPin as TtPoseOutPinDescription;
+                            fromDescName = startPin.Parent.Name;
                             toId = PosePinDescription.Id;
+                            toPin = PosePinDescription as TtPoseInPinDescription;
                             toDescName = PosePinDescription.Parent.Name;
                         }
                     }
-                    if (validLine)
-                    {
+
+                    var graphDesc = graph.Description as IPoseLineOperator;
+                    if (validLine && !graphDesc.ContainsPoseLineBetweenPins(fromId, toId))
+                    { 
+                        var linkedLineFromPin = graphDesc.GetPoseLineWithPin(fromPin);
+                        var linkedLineToPin = graphDesc.GetPoseLineWithPin(toPin);
                         var line = new TtPoseLineDescription() { Name = "Data_" + fromDescName + "_To_" + toDescName, FromId = fromId, ToId = toId };
                         renderContext.CommandHistory.CreateAndExtuteCommand("AddPoseLine",
-                            (data) => { blendTreeGraph.BlendTreeClassDescription.AddPoseLine(line); },
-                            (data) => { blendTreeGraph.BlendTreeClassDescription.RemovePoseLine(line); });
+                            (data) =>
+                            {
+                                if (linkedLineFromPin != null)
+                                {
+                                    graphDesc.RemovePoseLine(linkedLineFromPin);
+                                }
+                                if (linkedLineToPin != null)
+                                {
+                                    graphDesc.RemovePoseLine(linkedLineToPin);
+                                }
+                                graphDesc.AddPoseLine(line); 
+                            },
+                            (data) => 
+                            {
+                                if (linkedLineFromPin != null)
+                                {
+                                    graphDesc.AddPoseLine(linkedLineFromPin);
+                                }
+                                if (linkedLineToPin != null)
+                                {
+                                    graphDesc.AddPoseLine(linkedLineToPin);
+                                }
+                                graphDesc.RemovePoseLine(line); 
+                            });
                     }
                 }
             }
-            blendTreeGraph.PreviewPoseLine = null;
+            graph.PreviewLine = null;
         }
         public override void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
         {
@@ -317,9 +304,33 @@ namespace EngineNS.Animation.Macross.BlendTree
             var cmdlist = ImGuiAPI.GetWindowDrawList();
             var fromPin = line.From as TtGraphElement_PosePin;
             var toPin = line.To as TtGraphElement_PosePin;
+            if (fromPin == null || toPin == null)
+                return;
+
             var nodeStart = context.ViewportTransform(fromPin.Icon.AbsCenter);
             var nodeEnd = context.ViewportTransform(toPin.Icon.AbsCenter);
-            cmdlist.AddLine(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1, 1, 1, 1)), 5);
+            var p1 = nodeStart;
+            var p4 = nodeEnd;
+            var delta = p4 - p1;
+            var ctDelta = Math.Min(TtDesignMacrossGraphStyles.LineBezierMaxDelta, Math.Max(TtDesignMacrossGraphStyles.LineBezierMinDelta, Math.Max(Math.Abs(delta.X), Math.Abs(delta.Y)) * 0.5f));
+
+            var p2 = new Vector2(p1.X + ctDelta, p1.Y);
+            var p3 = new Vector2(p4.X - ctDelta, p4.Y);
+
+            var lineColor = new Color4f(1, 1, 1, 1);
+            var thickness = TtDesignMacrossGraphStyles.LineNormalThickness;
+            if (line.HighLightState == EHighLigthState.HighLigth)
+            {
+                lineColor.Alpha = 1.0f;
+                thickness = TtDesignMacrossGraphStyles.LineHighLightThickness;
+            }
+            else if (line.HighLightState == EHighLigthState.LowLight)
+            {
+                lineColor.Alpha = 0.6f;
+                thickness = TtDesignMacrossGraphStyles.LineLowLightThickness;
+            }
+            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(lineColor), thickness * context.Camera.Scale, 100);
+
         }
     }
     public class TtGraphElementRender_PreviewPoseLine : IGraphElementRender
@@ -328,10 +339,32 @@ namespace EngineNS.Animation.Macross.BlendTree
         {
             var line = renderableElement as TtGraphElement_PreviewPoseLine;
             var cmdlist = ImGuiAPI.GetWindowDrawList();
-            var nodeStart = context.ViewportTransform(line.AbsLocation);
-            var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
-            var nodeEnd = context.ViewportTransform(mousePosInViewPort);
-            cmdlist.AddLine(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1, 1, 1, 1)), 5);
+            var nodeStart = Vector2.Zero;
+            var nodeEnd = Vector2.Zero;
+            if (line.StartPin is TtPoseOutPinDescription)
+            {
+                nodeStart = context.ViewportTransform(line.AbsLocation);
+                //var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
+                //nodeEnd = context.ViewportTransform(mousePosInViewPort);
+                nodeEnd = ImGuiAPI.GetMousePos();
+            }
+            else
+            {
+                nodeEnd = context.ViewportTransform(line.AbsLocation);
+                //var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
+                //nodeStart = context.ViewportTransform(mousePosInViewPort);
+                nodeStart = ImGuiAPI.GetMousePos();
+            }
+
+            var p1 = nodeStart;
+            var p4 = nodeEnd;
+            var delta = p4 - p1;
+            var ctDelta = Math.Min(TtDesignMacrossGraphStyles.LineBezierMaxDelta, Math.Max(TtDesignMacrossGraphStyles.LineBezierMinDelta, Math.Max(Math.Abs(delta.X), Math.Abs(delta.Y)) * 0.5f));
+
+            var p2 = new Vector2(p1.X + ctDelta, p1.Y);
+            var p3 = new Vector2(p4.X - ctDelta, p4.Y);
+            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1, 1, 1, 1)), TtDesignMacrossGraphStyles.LineNormalThickness * context.Camera.Scale, 100);
+
         }
     }
     public class TtGraphElementRender_PosePin : IGraphElementRender
@@ -339,6 +372,14 @@ namespace EngineNS.Animation.Macross.BlendTree
         public void Draw(IRenderableElement renderableElement, ref FGraphElementRenderingContext context)
         {
             var pin = renderableElement as TtGraphElement_PosePin;
+            if (pin.HighLightState == EHighLigthState.HighLigth || pin.HighLightState == EHighLigthState.Normal)
+            {
+                pin.Icon.TintColor = new Color4f(pin.Icon.TintColor, 1.0f);
+            }
+            else if (pin.HighLightState == EHighLigthState.LowLight)
+            {
+                pin.Icon.TintColor = new Color4f(pin.Icon.TintColor, 0.6f);
+            }
             var cmdlist = ImGuiAPI.GetWindowDrawList();
             var nodeStart = context.ViewportTransform(pin.AbsLocation);
             var nodeEnd = context.ViewportTransform(pin.AbsLocation + new Vector2(pin.Size.Width, pin.Size.Height));

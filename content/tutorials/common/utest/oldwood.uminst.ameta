@@ -16,5 +16,6 @@
     <e_0 Value="Game,tutorials/common/utest/ttt.material,22a64b03-1048-42de-801f-9cd6ef88dcb2" />
     <e_1 Value="Game,tutorials/common/utest/t_oldwoodentable_bc.srv,1bfbf7a4-9732-4773-9f6c-7690257aa15c" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
 </Root>

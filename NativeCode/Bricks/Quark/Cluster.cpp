@@ -3,6 +3,8 @@
 #include "HashTable.h"
 #include "Cluster.h"
 #include "GraphPartitioner.h"
+#include "../MeshSimplify/IMeshSimplify.h"
+#include "meshoptimizer.h"
 
 NS_BEGIN
 
@@ -198,16 +200,155 @@ QuarkCluster::QuarkCluster( QuarkCluster& SrcCluster, UINT TriBegin, UINT TriEnd
 // Merge
 QuarkCluster::QuarkCluster(const std::vector<QuarkCluster*>& MergeList)
 {
-	ASSERT(false);
+	NumVerts = 0;
+	NumTris = 0;
+	NumTexCoords = 0;
+	bHasColors = false;
+	bPreserveArea = false;
+	NumExternalEdges = 0;
+
+	// Calculate total sizes
+	UINT TotalVerts = 0;
+	UINT TotalTris = 0;
+	for (auto* Cluster : MergeList)
+	{
+		TotalVerts += Cluster->NumVerts;
+		TotalTris += Cluster->NumTris;
+	}
+
+	Verts.reserve(TotalVerts * GetVertSize());
+	Indexes.reserve(3 * TotalTris);
+	MaterialIndexes.reserve(TotalTris);
+	ExternalEdges.reserve(3 * TotalTris);
+
+	// Use hash table to weld shared boundary vertices during merge
+	FHashTable HashTable(RoundUpToPowerOfTwo(TotalVerts));
+
+	// Merge all clusters with vertex deduplication
+	for (auto* Cluster : MergeList)
+	{
+		// Build old->new index mapping for this cluster
+		std::vector<UINT> OldToNew(Cluster->NumVerts);
+		for (UINT i = 0; i < Cluster->NumVerts; i++)
+		{
+			OldToNew[i] = AddVert((const float*)&Cluster->GetPosition(i), HashTable);
+		}
+
+		// Copy indices with remapping
+		for (UINT i = 0; i < (UINT)Cluster->Indexes.size(); i++)
+		{
+			Indexes.push_back(OldToNew[Cluster->Indexes[i]]);
+		}
+
+		// Copy material indexes
+		for (UINT i = 0; i < (UINT)Cluster->MaterialIndexes.size(); i++)
+		{
+			MaterialIndexes.push_back(Cluster->MaterialIndexes[i]);
+		}
+
+		// Copy external edges
+		for (UINT i = 0; i < (UINT)Cluster->ExternalEdges.size(); i++)
+		{
+			ExternalEdges.push_back(Cluster->ExternalEdges[i]);
+			NumExternalEdges += Cluster->ExternalEdges[i] != 0 ? 1 : 0;
+		}
+
+		NumTris += Cluster->NumTris;
+	}
+
+	// Take MipLevel from the first cluster
+	if (!MergeList.empty())
+	{
+		MipLevel = MergeList[0]->MipLevel;
+	}
+
+	Bound();
 }
 
 float QuarkCluster::Simplify( UINT TargetNumTris, float TargetError, UINT LimitNumTris, bool bForNaniteFallback )
 {
-	ASSERT(false);
-	return 0.0;
+	if (NumTris <= TargetNumTris)
+		return 0.0f;
+
+	// Use meshopt_simplify for high-quality topology-preserving simplification
+	size_t target_index_count = (size_t)TargetNumTris * 3;
+	float meshopt_error = 0.0f;
+
+	// Compute mesh scale for error metric (before simplification)
+	const UINT VertSize = GetVertSize();
+	float scale = meshopt_simplifyScale((const float*)&Verts[0], (size_t)NumVerts, VertSize * sizeof(float));
+
+	std::vector<unsigned int> destination(Indexes.size()); // worst case: same as input
+
+	size_t result_index_count = meshopt_simplify(
+		destination.data(),
+		Indexes.data(),
+		Indexes.size(),
+		(const float*)&Verts[0],
+		(size_t)NumVerts,
+		VertSize * sizeof(float),
+		target_index_count,
+		0.05f,  // 5% relative error tolerance
+		meshopt_SimplifyLockBorder,  // Lock border vertices to prevent gaps at open edges
+		&meshopt_error);
+
+	if (result_index_count == 0)
+		return 0.0f;
+
+	UINT NewNumTris = (UINT)(result_index_count / 3);
+
+	// Compact unused vertices
+	std::vector<bool> vertUsed(NumVerts, false);
+	for (size_t i = 0; i < result_index_count; i++)
+	{
+		vertUsed[destination[i]] = true;
+	}
+
+	std::vector<UINT> vertRemap(NumVerts, ~0u);
+	UINT NewNumVerts = 0;
+	std::vector<float> NewVerts;
+	NewVerts.reserve(NumVerts * VertSize);
+
+	for (UINT i = 0; i < NumVerts; i++)
+	{
+		if (vertUsed[i])
+		{
+			vertRemap[i] = NewNumVerts;
+			for (UINT k = 0; k < VertSize; k++)
+				NewVerts.push_back(Verts[i * VertSize + k]);
+			NewNumVerts++;
+		}
+	}
+
+	// Rebuild indices with compacted vertex mapping
+	Indexes.clear();
+	Indexes.reserve(result_index_count);
+	for (size_t i = 0; i < result_index_count; i++)
+	{
+		Indexes.push_back(vertRemap[destination[i]]);
+	}
+
+	// Update cluster data
+	Verts = std::move(NewVerts);
+	NumVerts = NewNumVerts;
+	NumTris = NewNumTris;
+
+	// Rebuild external edges (mark all as potentially external after simplification)
+	ExternalEdges.clear();
+	ExternalEdges.resize(NumTris * 3, 1);
+	NumExternalEdges = NumTris * 3;
+
+	// Rebuild material indices
+	MaterialIndexes.clear();
+	MaterialIndexes.resize(NumTris, 0);
+
+	// Recalculate bounds
+	Bound();
+
+	return meshopt_error * scale;
 }
 
-void QuarkCluster::Split( FGraphPartitioner& Partitioner, const FAdjacency& Adjacency ) const
+void QuarkCluster::Split( FGraphPartitioner& Partitioner, const FAdjacency& Adjacency, UINT InClusterSize ) const
 {
 	FDisjointSet DisjointSet( NumTris );
 	for( INT32 EdgeIndex = 0; EdgeIndex < Indexes.size(); EdgeIndex++ )
@@ -260,7 +401,7 @@ void QuarkCluster::Split( FGraphPartitioner& Partitioner, const FAdjacency& Adja
 	}
 	Graph->AdjacencyOffset[ NumTris ] = INT32(Graph->Adjacency.size());
 
-	Partitioner.PartitionStrict( Graph, ClusterSize - 4, ClusterSize, false );
+	Partitioner.PartitionStrict( Graph, InClusterSize - 4, InClusterSize, false );
 }
 
 FAdjacency QuarkCluster::BuildAdjacency() const
@@ -327,20 +468,39 @@ void QuarkCluster::Bound()
 {
 	Bounds = v3dxBox3();
 	SurfaceArea = 0.0f;
-	
+
+	if (NumVerts == 0)
+	{
+		SphereBounds = v3dxSphere(v3dxVector3::ZERO, 0.0f);
+		LODBounds = SphereBounds;
+		return;
+	}
+
 	std::vector< v3dxVector3> Positions;
 	Positions.resize(NumVerts);
 
+	v3dxVector3 Centroid(0, 0, 0);
 	for( UINT i = 0; i < NumVerts; i++ )
 	{
 		Positions[i] = GetPosition(i);
 		Bounds += Positions[i];
+		Centroid += Positions[i];
 	}
-	//SphereBounds = v3dxSphere( Positions.GetData(), Positions.size() );
-	//LODBounds = SphereBounds;
-	
+	Centroid /= (float)NumVerts;
+
+	// Compute bounding sphere using Ritter's algorithm
+	// Start with centroid, find farthest point, then expand
+	float MaxRadiusSq = 0.0f;
+	for (UINT i = 0; i < NumVerts; i++)
+	{
+		float DistSq = (Positions[i] - Centroid).getLengthSq();
+		MaxRadiusSq = std::max(MaxRadiusSq, DistSq);
+	}
+	SphereBounds = v3dxSphere(Centroid, Math::Sqrt(MaxRadiusSq));
+	LODBounds = SphereBounds;
+
 	float MaxEdgeLength2 = 0.0f;
-	for( int i = 0; i < Indexes.size(); i += 3 )
+	for( int i = 0; i < (int)Indexes.size(); i += 3 )
 	{
 		v3dxVector3 v[3];
 		v[0] = GetPosition( Indexes[ i + 0 ] );

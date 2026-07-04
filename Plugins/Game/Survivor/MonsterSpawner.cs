@@ -39,16 +39,31 @@ namespace Survivor
 
         public virtual void CreateMonster(int monsterId, FTransform transform, TtMonsterSpawnerNode spawner)
         {
+            if (spawner == null)
+                return;
+
             var monsterData = TtDatabase.Instance.GetMonsterData(monsterId);
+            if (monsterData == null)
+            {
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, $"Monster({monsterId}) not found");
+                return;
+            }
+
             InitMonster(monsterData, transform, spawner).AddWaitTask();
             //InitMonster(monsterData, transform, world).WaitCompletedAndDispose();
         }
         private async TtTask InitMonster(TtMonsterData monsterData, FTransform transform, TtMonsterSpawnerNode spawner)
         {
+            if (monsterData == null || spawner?.GetWorld() == null)
+                return;
+
             var monsterNodeData = new TtMonsterNode.TtMonsterNodeData();
             //monsterNodeData.MonsterId = monsterData.Weapon1;
             await TtNode.SpawnNode<TtMonsterNode>(spawner, async (monsterNode) =>
             {
+                if (monsterNode == null)
+                    return;
+
                 monsterNode.MonsterData = monsterData;
 
                 var stateNodeData = new TtMonsterStateNode.TtMonsterStateNodeData();
@@ -59,7 +74,21 @@ namespace Survivor
                 monsterNode.StateNode = stateNode;
 
                 RName monsterName = RName.ParseFrom(monsterData.Prefab);
-                var monsterPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(spawner.GetWorld(), monsterName, false);
+                if (monsterName == null)
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, $"Monster({monsterData.MonsterId}) prefab name is empty");
+                    monsterNode.RemoveFromWorld();
+                    return;
+                }
+
+                var monsterPrefab = EngineNS.TtEngine.Instance.GameInstance?.PrefabPoolManager?.CreatePrefab(spawner.GetWorld(), monsterName, false);
+                if (monsterPrefab == null)
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, $"Monster prefab({monsterData.Prefab}) not found");
+                    monsterNode.RemoveFromWorld();
+                    return;
+                }
+
                 monsterPrefab.IsCollide = true;
                 var node = monsterPrefab.Placement.HostNode;
                 monsterPrefab.Placement.SetTransform(transform);
@@ -67,22 +96,35 @@ namespace Survivor
                 monsterPrefab.Parent = monsterNode;
                 monsterNode.MonsterPrefab = monsterPrefab;
                 var controlNode = monsterPrefab.FindFirstChild<TtPhyControllerNodeBase>(null, true);
-                controlNode.SetFootPosition(transform.Position.ToSingleVector3());
+                if (controlNode != null)
+                {
+                    controlNode.SetFootPosition(transform.Position.ToSingleVector3());
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, $"Monster prefab({monsterData.Prefab}) has no physics controller");
+                }
 
                 var monsterCtrollerData = new TtMonsterController.TtMonsterControllerData();
                 var monsterCtroller = await TtNode.SpawnNode<TtMonsterController>(monsterNode, null,
                     monsterCtrollerData, EBoundVolumeType.Box, typeof(TtPlacement));
-                monsterCtroller.Player = TtGameMode.GetSurvivorGameMode().Player;
-                monsterCtroller.MonsterNode = monsterNode;
-                monsterCtroller.Parent = monsterNode;
-                monsterNode.Controller = monsterCtroller;
+                if (monsterCtroller != null)
+                {
+                    monsterCtroller.Player = TtGameMode.GetSurvivorGameMode()?.Player;
+                    monsterCtroller.MonsterNode = monsterNode;
+                    monsterCtroller.Parent = monsterNode;
+                    monsterNode.Controller = monsterCtroller;
+                }
 
                 var weaponNodeData = new TtWeaponNode.TtWeaponNodeData();
                 weaponNodeData.WeaponType = "Melee";
                 var weaponNode = await TtNode.SpawnNode<TtWeaponNode>(monsterNode, null,
                     weaponNodeData, EBoundVolumeType.None, typeof(TtPlacement));
-                weaponNode.WeaponData.Damage = monsterData.Damage;
-                weaponNode.WeaponData.AttackRange = monsterData.AttackRange;
+                if (weaponNode?.WeaponData != null)
+                {
+                    weaponNode.WeaponData.Damage = monsterData.Damage;
+                    weaponNode.WeaponData.AttackRange = monsterData.AttackRange;
+                }
             }, monsterNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
         }
     }
@@ -121,18 +163,21 @@ namespace Survivor
         float mAccumulateTime = 0;
         public override void Tick(TtMonsterSpawnerNode spawner)
         {
-            var world = spawner.GetWorld();
+            var world = spawner?.GetWorld();
+            if (world == null)
+                return;
+
             if (TtEngine.Instance.PlayMode == EPlayMode.Editor || world.IsGameWorld == false)
                 return;
             if (mAccumulateTime > CoolDown)
             {
-                var player = TtGameMode.GetSurvivorGameMode().Player;
-                if (player != null)
+                var player = TtGameMode.GetSurvivorGameMode()?.Player;
+                if (player?.Placement != null)
                 {
                     var playerLocation = player.Placement.AbsTransform.Position;
+                    var random = new Random();
                     for (int i = 0; i < MonsterCount; i++)
                     {
-                        var random = new Random();
                         Vector3 location = Vector3.Zero;
                         const int randomMin = -15;
                         const int randomMax = 15;

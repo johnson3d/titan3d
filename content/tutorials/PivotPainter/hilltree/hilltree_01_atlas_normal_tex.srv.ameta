@@ -14,5 +14,6 @@
   </Icon>
   <OriginImageAddress Type="System.String@Unknown" Value="C:\Users\johnsonsong\Documents\WeChat Files\johnson3d\FileStorage\File\2024-11\HillTree_01_Atlas_Normal_Tex.TGA" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.TtSrView@EngineCore" />
 </Root>

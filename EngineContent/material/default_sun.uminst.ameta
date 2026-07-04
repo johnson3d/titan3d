@@ -16,5 +16,6 @@
     <e_0 Value="Engine,material/dft_unlit.material,186277e8-1070-4c99-ae81-1ac1d1ea7624" />
     <e_1 Value="Engine,texture/checkboard.srv,23521d76-b70d-4d3d-80e3-c5ec4740fc09" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
 </Root>

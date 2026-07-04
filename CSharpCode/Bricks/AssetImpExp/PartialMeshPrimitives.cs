@@ -1,19 +1,27 @@
 using Assimp;
-using EngineNS.Animation.Asset;
 using EngineNS.Animation.SkeletonAnimation.Skeleton;
 using EngineNS.Bricks.AssetImpExp;
-using NPOI.SS.Formula.Functions;
-using Org.BouncyCastle.Asn1.Cms;
-using Org.BouncyCastle.Crypto.IO;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Text;
-using static EngineNS.Graphics.Mesh.TtMaterialMesh;
 
 namespace EngineNS.Graphics.Mesh
 {
+    public enum EImportAssetType
+    {
+        Mesh,
+        Material,
+        Texture,
+        Skeleton,
+    }
+    public class TtImportAssetEntry
+    {
+        public EImportAssetType AssetType { get; set; }
+        public string Name { get; set; }
+        public string Detail { get; set; }
+        public bool Selected { get; set; } = true;
+        public int SourceIndex { get; set; } = -1;
+        public List<TtImportAssetEntry> Children { get; set; } = null;
+    }
     public class TtMeshImportSetting
     {
         [Category("FileInfo"), ReadOnly(true)]
@@ -58,10 +66,52 @@ namespace EngineNS.Graphics.Mesh
         public bool JoinIdenticalVertices { get; set; } = true;
         [Category("ImportSetting"), Browsable(false)]
         public TtAssetImporter AssetImporter { get; set; } = null;
+        [Browsable(false)]
+        public List<TtImportAssetEntry> PreviewEntries { get; set; } = new List<TtImportAssetEntry>();
 
         public async System.Threading.Tasks.Task<bool> ImportAndSaveMesh(RName dir)
         {
             return await TtMeshPrimitives.ImportAttribute.ImportAndSaveMesh(dir, this);
+        }
+
+        public bool IsMeshNodeSelected(int meshNodeIndex)
+        {
+            foreach (var entry in PreviewEntries)
+            {
+                if (entry.AssetType == EImportAssetType.Mesh && entry.SourceIndex == meshNodeIndex)
+                    return entry.Selected;
+            }
+            return true;
+        }
+
+        public bool IsMaterialSelected(int materialIndex)
+        {
+            foreach (var entry in PreviewEntries)
+            {
+                if (entry.AssetType == EImportAssetType.Material && entry.SourceIndex == materialIndex)
+                    return entry.Selected;
+            }
+            return true;
+        }
+
+        public bool IsSkeletonSelected(int skeletonIndex)
+        {
+            foreach (var entry in PreviewEntries)
+            {
+                if (entry.AssetType == EImportAssetType.Skeleton && entry.SourceIndex == skeletonIndex)
+                    return entry.Selected;
+            }
+            return true;
+        }
+
+        public bool HasAnyMeshSelected()
+        {
+            foreach (var entry in PreviewEntries)
+            {
+                if (entry.AssetType == EImportAssetType.Mesh && entry.Selected)
+                    return true;
+            }
+            return PreviewEntries.Count == 0;
         }
     }
     public partial class TtMeshPrimitives
@@ -385,6 +435,13 @@ namespace EngineNS.Graphics.Mesh
                         PGAsset.OnDraw(false, false, false);
                     }
 
+                    // Draw asset selection list for FromFile mode
+                    if (MeshType == "FromFile" && MeshImportSettings.Count > 0)
+                    {
+                        ImGuiAPI.Separator();
+                        DrawAssetSelectionList();
+                    }
+
                     ImGuiAPI.EndPopup();
                 }
                 EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
@@ -494,6 +551,104 @@ namespace EngineNS.Graphics.Mesh
                 }
             }
 
+            void DrawAssetSelectionList()
+            {
+                ImGuiAPI.Text("Assets to Import:");
+                var headerColor = new Vector4(0.4f, 0.8f, 1.0f, 1.0f);
+
+                foreach (var setting in MeshImportSettings)
+                {
+                    if (setting.PreviewEntries.Count == 0)
+                        continue;
+
+                    if (MeshImportSettings.Count > 1)
+                    {
+                        var sourceLabel = IO.TtFileManager.GetPureName(setting.SourceFile);
+                        if (string.IsNullOrWhiteSpace(sourceLabel))
+                            sourceLabel = setting.FileName;
+                        ImGuiAPI.TextColored(in headerColor, $"[{sourceLabel}]");
+                    }
+
+                    // Select All / Deselect All buttons
+                    var btnSize = new Vector2(0, 0);
+                    if (ImGuiAPI.Button($"Select All##{setting.GetHashCode()}", in btnSize))
+                    {
+                        SetAllEntrySelections(setting.PreviewEntries, true);
+                    }
+                    ImGuiAPI.SameLine(0, 8);
+                    if (ImGuiAPI.Button($"Deselect All##{setting.GetHashCode()}", in btnSize))
+                    {
+                        SetAllEntrySelections(setting.PreviewEntries, false);
+                    }
+
+                    // Group entries by type
+                    DrawAssetGroup("Meshes", EImportAssetType.Mesh, setting.PreviewEntries, new Vector4(0.5f, 1.0f, 0.5f, 1.0f));
+                    DrawAssetGroup("Materials", EImportAssetType.Material, setting.PreviewEntries, new Vector4(1.0f, 0.8f, 0.3f, 1.0f));
+                    DrawAssetGroup("Skeletons", EImportAssetType.Skeleton, setting.PreviewEntries, new Vector4(0.8f, 0.5f, 1.0f, 1.0f));
+                }
+            }
+
+            static void SetAllEntrySelections(List<TtImportAssetEntry> entries, bool selected)
+            {
+                foreach (var entry in entries)
+                {
+                    entry.Selected = selected;
+                    if (entry.Children != null)
+                        SetAllEntrySelections(entry.Children, selected);
+                }
+            }
+
+            unsafe void DrawAssetGroup(string groupLabel, EImportAssetType assetType, List<TtImportAssetEntry> entries, Vector4 labelColor)
+            {
+                var filtered = new List<TtImportAssetEntry>();
+                foreach (var entry in entries)
+                {
+                    if (entry.AssetType == assetType)
+                        filtered.Add(entry);
+                }
+                if (filtered.Count == 0)
+                    return;
+
+                ImGuiAPI.TextColored(in labelColor, groupLabel);
+                ImGuiAPI.Indent(16);
+                foreach (var entry in filtered)
+                {
+                    var selected = entry.Selected;
+                    if (ImGuiAPI.Checkbox($"{entry.Name}##{entry.AssetType}_{entry.SourceIndex}", ref selected))
+                    {
+                        entry.Selected = selected;
+                    }
+                    if (!string.IsNullOrEmpty(entry.Detail))
+                    {
+                        ImGuiAPI.SameLine(0, 8);
+                        var detailColor = new Vector4(0.6f, 0.6f, 0.6f, 1.0f);
+                        ImGuiAPI.TextColored(in detailColor, $"({entry.Detail})");
+                    }
+
+                    // Draw children (e.g. textures under materials, materials under meshes)
+                    if (entry.Children != null && entry.Children.Count > 0)
+                    {
+                        ImGuiAPI.Indent(16);
+                        foreach (var child in entry.Children)
+                        {
+                            var childSelected = child.Selected;
+                            if (ImGuiAPI.Checkbox($"{child.Name}##{child.AssetType}_{entry.SourceIndex}_{child.SourceIndex}", ref childSelected))
+                            {
+                                child.Selected = childSelected;
+                            }
+                            if (!string.IsNullOrEmpty(child.Detail))
+                            {
+                                ImGuiAPI.SameLine(0, 8);
+                                var detailColor = new Vector4(0.5f, 0.5f, 0.5f, 1.0f);
+                                ImGuiAPI.TextColored(in detailColor, $"({child.Detail})");
+                            }
+                        }
+                        ImGuiAPI.Unindent(16);
+                    }
+                }
+                ImGuiAPI.Unindent(16);
+            }
+
             void AppendImportSetting(TtMeshImportSetting meshImportSetting, string path)
             {
                 if (MeshImportSettings.Count == 0)
@@ -514,7 +669,10 @@ namespace EngineNS.Graphics.Mesh
                 {
                     var pluginSetting = plugin.CreateMeshImportSetting(path, out error);
                     if (pluginSetting != null)
+                    {
+                        PopulatePreviewEntries(pluginSetting);
                         return pluginSetting;
+                    }
                     if (string.IsNullOrWhiteSpace(error))
                         error = $"Asset source import plugin failed to import source file: {path}";
                     return null;
@@ -527,7 +685,155 @@ namespace EngineNS.Graphics.Mesh
                     return null;
                 }
                 meshImportSetting.SourceFile = path;
+                PopulatePreviewEntries(meshImportSetting);
                 return meshImportSetting;
+            }
+
+            static void PopulatePreviewEntries(TtMeshImportSetting setting)
+            {
+                setting.PreviewEntries.Clear();
+                var scene = setting.AssetImporter?.AiScene;
+                if (scene == null)
+                    return;
+
+                // Scan mesh nodes
+                var meshNodes = Bricks.AssetImpExp.AssimpSceneUtil.FindMeshNodes(scene);
+                for (int i = 0; i < meshNodes.Count; i++)
+                {
+                    var node = meshNodes[i];
+                    var validMeshCount = 0;
+                    var totalVertices = 0;
+                    foreach (var meshIdx in node.MeshIndices)
+                    {
+                        var mesh = scene.Meshes[meshIdx];
+                        if (mesh.PrimitiveType != PrimitiveType.Line && mesh.PrimitiveType != PrimitiveType.Point)
+                        {
+                            validMeshCount++;
+                            totalVertices += mesh.VertexCount;
+                        }
+                    }
+                    if (validMeshCount == 0)
+                        continue;
+
+                    var meshEntry = new TtImportAssetEntry()
+                    {
+                        AssetType = EImportAssetType.Mesh,
+                        Name = node.Name,
+                        Detail = $"{validMeshCount} sub-mesh(es), {totalVertices} vertices",
+                        SourceIndex = i,
+                        Selected = true,
+                    };
+
+                    // Collect referenced material indices for this mesh node
+                    var childEntries = new List<TtImportAssetEntry>();
+                    var referencedMaterials = new HashSet<int>();
+                    foreach (var meshIdx in node.MeshIndices)
+                    {
+                        var mesh = scene.Meshes[meshIdx];
+                        if (mesh.PrimitiveType != PrimitiveType.Line && mesh.PrimitiveType != PrimitiveType.Point)
+                            referencedMaterials.Add(mesh.MaterialIndex);
+                    }
+                    foreach (var matIdx in referencedMaterials)
+                    {
+                        if (matIdx < scene.Materials.Count)
+                        {
+                            var mat = scene.Materials[matIdx];
+                            childEntries.Add(new TtImportAssetEntry()
+                            {
+                                AssetType = EImportAssetType.Material,
+                                Name = $"[{matIdx}] {mat.Name}",
+                                Detail = mat.IsPBRMaterial ? "PBR" : "Standard",
+                                SourceIndex = matIdx,
+                                Selected = true,
+                            });
+                        }
+                    }
+                    if (childEntries.Count > 0)
+                        meshEntry.Children = childEntries;
+
+                    setting.PreviewEntries.Add(meshEntry);
+                }
+
+                // Scan materials (top-level listing for the whole file)
+                if (scene.HasMaterials)
+                {
+                    for (int i = 0; i < scene.Materials.Count; i++)
+                    {
+                        var mat = scene.Materials[i];
+                        var textureChildren = new List<TtImportAssetEntry>();
+                        CollectMaterialTextures(mat, i, textureChildren);
+
+                        setting.PreviewEntries.Add(new TtImportAssetEntry()
+                        {
+                            AssetType = EImportAssetType.Material,
+                            Name = $"[{i}] {mat.Name}",
+                            Detail = mat.IsPBRMaterial ? "PBR" : "Standard",
+                            SourceIndex = i,
+                            Selected = true,
+                            Children = textureChildren.Count > 0 ? textureChildren : null,
+                        });
+                    }
+                }
+
+                // Scan skeletons
+                if (!setting.AsStaticMesh)
+                {
+                    try
+                    {
+                        var importOption = new Bricks.AssetImpExp.TtAssetImportOption_Mesh()
+                        {
+                            UnitScale = setting.UnitScale,
+                            AsStaticMesh = false,
+                        };
+                        var skeletons = Bricks.AssetImpExp.SkeletonGenerater.Generate(scene, importOption);
+                        for (int i = 0; i < skeletons.Count; i++)
+                        {
+                            var skeleton = skeletons[i];
+                            var rootName = skeleton.Root?.Desc?.Name ?? "Unknown";
+                            setting.PreviewEntries.Add(new TtImportAssetEntry()
+                            {
+                                AssetType = EImportAssetType.Skeleton,
+                                Name = rootName,
+                                Detail = $"{skeleton.Limbs.Count} bones",
+                                SourceIndex = i,
+                                Selected = true,
+                            });
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // Skeleton scan failure should not block import
+                    }
+                }
+            }
+
+            static void CollectMaterialTextures(Assimp.Material mat, int materialIndex, List<TtImportAssetEntry> outEntries)
+            {
+                int textureIndex = 0;
+                void TryAdd(TextureSlot slot, string slotName)
+                {
+                    if (string.IsNullOrEmpty(slot.FilePath))
+                        return;
+                    outEntries.Add(new TtImportAssetEntry()
+                    {
+                        AssetType = EImportAssetType.Texture,
+                        Name = $"{slotName}: {IO.TtFileManager.GetPureName(slot.FilePath)}",
+                        Detail = slot.FilePath,
+                        SourceIndex = textureIndex++,
+                        Selected = true,
+                    });
+                }
+
+                if (mat.IsPBRMaterial)
+                {
+                    TryAdd(mat.PBR.TextureBaseColor, "BaseColor");
+                    TryAdd(mat.PBR.TextureMetalness, "Metalness");
+                }
+                TryAdd(mat.TextureDiffuse, "Diffuse");
+                TryAdd(mat.TextureNormal, "Normal");
+                TryAdd(mat.TextureSpecular, "Specular");
+                TryAdd(mat.TextureHeight, "Height");
+                TryAdd(mat.TextureAmbient, "Ambient");
             }
 
             private async Thread.Async.TtTask<bool> DoImport()
@@ -567,6 +873,7 @@ namespace EngineNS.Graphics.Mesh
                 AssetImportOption.AsStaticMesh = improtSetting.AsStaticMesh;
                 AssetImportOption.ApplyTransformToVertex = improtSetting.ApplyTransformToVertex;
                 AssetImportOption.GenerateUMS = improtSetting.GenerateUMS;
+                bool HasSkeleton = false;
                 var skeletons = AssetImportOption.AsStaticMesh ?
                     new List<TtSkinSkeleton>() :
                     SkeletonGenerater.Generate(improtSetting.AssetImporter.AiScene, AssetImportOption);
@@ -576,18 +883,25 @@ namespace EngineNS.Graphics.Mesh
                 }
                 else if (skeletons.Count == 1)
                 {
-                    var rn = RName.GetRName(mDir.Name + improtSetting.FileName + Animation.Asset.TtSkeletonAsset.AssetExt, mDir.RNameType);
-                    await SaveSkeleton(rn, skeletons[0]);
+                    if (improtSetting.IsSkeletonSelected(0))
+                    {
+                        var rn = RName.GetRName(mDir.Name + improtSetting.FileName + Animation.Asset.TtSkeletonAsset.AssetExt, mDir.RNameType);
+                        await SaveSkeleton(rn, skeletons[0]);
+                        HasSkeleton = true;
+                    }
                 }
                 else
                 {
-                    //TODO: muti skeletons in the scene
-                    //var meshNode = SkeletonGenerater.FindSkeletonMeshNode(skeletons[0], AssetImporter.AiScene);
-                    //foreach(var skeleton in skeletons)
-                    //{
-                    //    var rn = RName.GetRName(mDir.Name + meshPrimitives.mCoreObject.GetName() + Animation.Asset.USkeletonAsset.AssetExt, mDir.RNameType);
-                    //    await SaveSkeleton(rn, meshPrimitives.PartialSkeleton);
-                    //}
+                    for (int skIdx = 0; skIdx < skeletons.Count; skIdx++)
+                    {
+                        if (!improtSetting.IsSkeletonSelected(skIdx))
+                            continue;
+                        var skeleton = skeletons[skIdx];
+                        var rootName = skeleton.Root?.Desc?.Name ?? improtSetting.FileName;
+                        var rn = RName.GetRName(mDir.Name + rootName + Animation.Asset.TtSkeletonAsset.AssetExt, mDir.RNameType);
+                        await SaveSkeleton(rn, skeleton);
+                        HasSkeleton = true;
+                    }
                 }
 
                 var scene = improtSetting.AssetImporter.AiScene;
@@ -607,6 +921,8 @@ namespace EngineNS.Graphics.Mesh
 
                     for (int i = 0; i < scene.Materials.Count; i++)
                     {
+                        if (!improtSetting.IsMaterialSelected(i))
+                            continue;
                         var m = scene.Materials[i];
                         var mtl = Graphics.Pipeline.Shader.TtMaterialInstance.CreateMaterialInstance(baseMtl);
                         var materialName = GetSafeImportAssetName($"{m.Name}_{i}");
@@ -716,17 +1032,42 @@ namespace EngineNS.Graphics.Mesh
                 var meshPrimitives = improtSetting.MergeMeshes ?
                     MeshGenerater.GenerateMerged(improtSetting.FileName, improtSetting.AssetImporter.AiScene, AssetImportOption) :
                     MeshGenerater.Generate(skeletons, improtSetting.AssetImporter.AiScene, AssetImportOption);
-                foreach (var mesh in meshPrimitives)
+
+                // Build a set of selected mesh node names for filtering
+                var selectedMeshNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var hasAnyMeshFilter = false;
+                foreach (var entry in improtSetting.PreviewEntries)
                 {
-                    var rn = RName.GetRName(mDir.Name + mesh.Mesh.mCoreObject.GetName() + TtMeshPrimitives.AssetExt, mDir.RNameType);
+                    if (entry.AssetType == EImportAssetType.Mesh)
+                    {
+                        hasAnyMeshFilter = true;
+                        if (entry.Selected)
+                            selectedMeshNames.Add(entry.Name);
+                    }
+                }
+
+                for (int meshIdx = 0; meshIdx < meshPrimitives.Count; meshIdx++)
+                {
+                    var mesh = meshPrimitives[meshIdx];
+                    var meshName = mesh.Mesh.mCoreObject.GetName();
+
+                    // Skip unselected meshes
+                    if (hasAnyMeshFilter && !selectedMeshNames.Contains(meshName))
+                        continue;
+
+                    var rn = RName.GetRName(mDir.Name + meshName + TtMeshPrimitives.AssetExt, mDir.RNameType);
                     await SaveMesh(rn, mesh.Mesh);
                     if (AssetImportOption.GenerateUMS)
                     {
-                        var umsRN = RName.GetRName(mDir.Name + mesh.Mesh.mCoreObject.GetName() + TtMaterialMesh.AssetExt, mDir.RNameType);
+                        var umsRN = RName.GetRName(mDir.Name + meshName + TtMaterialMesh.AssetExt, mDir.RNameType);
                         var ums = new TtMaterialMesh
                         {
                             AssetName = umsRN,
                         };
+                        if(HasSkeleton)
+                        {
+                            ums.Skeleton = RName.GetRName(mDir.Name + improtSetting.FileName + Animation.Asset.TtSkeletonAsset.AssetExt, mDir.RNameType);
+                        }
                         ums.SubMeshes[0].Mesh = mesh.Mesh;
                         for(int i = 0; i < ums.SubMeshes[0].Materials.Count; i++)
                         {

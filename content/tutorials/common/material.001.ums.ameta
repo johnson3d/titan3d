@@ -25,5 +25,6 @@
     <e_0 Value="Game,tutorials/common/material.001.vms,199e6f5e-d2d9-4e77-8e63-b801549886c6" />
     <e_1 Value="Game,tutorials/common/material_0.uminst,cf8f0b85-8d8f-43c4-8787-42e124526699" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
 </Root>

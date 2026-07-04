@@ -29,9 +29,27 @@ namespace NxRHI
 		{
 			AtomDesc.SetDefault();
 		}
+		TMeshAtomDesc(const FMeshAtomDesc& desc)
+		{
+			AtomDesc = desc;
+		}
 		FMeshAtomDesc AtomDesc;
 		FMeshAtomDesc* GetAtomDescPtr() {
 			return &AtomDesc;
+		}
+	};
+
+	class TR_CLASS()
+		TScissorRect : public VIUnknown
+	{
+	public:
+		TScissorRect(const FScissorRect& desc)
+		{
+			ScissorRect = desc;
+		}
+		FScissorRect ScissorRect;
+		FScissorRect* GetScissorRectPtr() {
+			return &ScissorRect;
 		}
 	};
 
@@ -129,6 +147,8 @@ namespace NxRHI
 			}
 			return nullptr;
 		}
+		void SetMeshAtomDesc(const FMeshAtomDesc* desc);
+		void SetScissorRect(const FScissorRect* rect);
 	public:
 		static std::atomic<int>		NumOfInstance;
 		std::map<const FEffectBinder*, FBindResource>	BindResources;
@@ -145,6 +165,7 @@ namespace NxRHI
 		UINT						ViewInstanceMask = 0;
 		const IGpuDrawState*		GpuDrawState = nullptr;
 		AutoRef<TMeshAtomDesc> AtomDesc;
+		AutoRef<TScissorRect> ScissorRect;
 	protected:
 		void UpdateGpuDrawState(IGpuDevice* device, ICommandList* cmdlist, IRenderPass* rpass);
 		virtual void OnGpuDrawStateUpdated() {}

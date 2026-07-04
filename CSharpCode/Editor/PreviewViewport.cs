@@ -502,8 +502,7 @@ namespace EngineNS.Editor
 
             skyboxMesh.Initialize(provider.ToMesh(), materials,
                 Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
-            skyboxMesh.IsUnlit = true;
-
+            
             var skyboxNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(World, World.Root,
                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), skyboxMesh,
                 new DVector3(assetCenter.X, assetCenter.Y, assetCenter.Z), new Vector3(radius), Quaternion.Identity);
@@ -531,8 +530,7 @@ namespace EngineNS.Editor
             materials[0] = materialInstance;
             backdropMesh.Initialize(Graphics.Mesh.TtMeshDataProvider.MakeSphere(1.0f, 32, 16, 0xffffffff).ToMesh(), materials,
                 Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
-            backdropMesh.IsUnlit = true;
-
+            
             var backdropNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(World, World.Root,
                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), backdropMesh,
                 new DVector3(assetCenter.X, assetCenter.Y, assetCenter.Z), new Vector3(radius), Quaternion.Identity);

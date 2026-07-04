@@ -66,6 +66,10 @@ struct PS_OUTPUT
 	float4 RT0 : SV_Target0;
 };
 
+int GetShadingMode(uint RenderFlags_10Bit)
+{
+    return (RenderFlags_10Bit & SHADINGMODE_BIT_MASK) >> SHADINGMODE_BIT_OFFSET;
+}
 PS_OUTPUT PS_Main(PS_INPUT input)
 {
 	PS_OUTPUT output = (PS_OUTPUT)0;
@@ -108,19 +112,23 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		half3 L = -(half3)normalize(DirLight.Direction.xyz);
 		half3 V = (half3)normalize(CameraPosition - WorldPos);*/
 
-#if MTL_LightingMode == ELightingMode_Unlight
-		BaseShading = Albedo;
-#else
-		//lighting for translucent
-		BaseShading = Albedo;
-#endif
+        uint shadingMode = GetShadingMode(MaterialRenderFlags | MeshRenderFlags);
+        if (shadingMode == EShadingMode_Unlit)
+        {
+            BaseShading = Albedo;
+        }
+		else
+        {
+			//lighting for translucent
+            BaseShading = Albedo;
+        }
 
-		BaseShading += Emissive;
+        BaseShading += Emissive;
 
-		BaseShading.b = (half)floor(BaseShading.b * AO_M);
-		output.RT0.rgb = BaseShading;
-		output.RT0.a = Alpha;
-	}
+        BaseShading.b = (half) floor(BaseShading.b * AO_M);
+        output.RT0.rgb = BaseShading;
+        output.RT0.a = Alpha;
+    }
 
 	return output;
 }

@@ -53,11 +53,13 @@ namespace Survivor
                 if (data.CurrentHP != value)
                 {
                     data.CurrentHP = value;
-                    if (TtGameMode.GetSurvivorGameMode().HpProgressUI == null)
+                    var gameMode = TtGameMode.GetSurvivorGameMode();
+                    if (gameMode?.HpProgressUI == null || StateData?.RoleData == null || StateData.RoleData.Health <= 0)
                         return;
+
                     var percent = (float)value / (float)StateData.RoleData.Health;
                     percent = EngineNS.MathHelper.Clamp(percent, 0.0f, 1.0f);
-                    TtGameMode.GetSurvivorGameMode().HpProgressUI.Percent = percent;
+                    gameMode.HpProgressUI.Percent = percent;
                 }
             }
         }
@@ -89,6 +91,9 @@ namespace Survivor
         }
         public override void BeAttacked(TtWeaponNode weaponNode)
         {
+            if (IsDead || weaponNode?.WeaponData == null)
+                return;
+
             var hp = this.CurrentHP - weaponNode.WeaponData.Damage;
             if (hp <= 0 && !IsDead)
             {
@@ -120,6 +125,9 @@ namespace Survivor
         public TtMonsterStateNodeData StateData { get => NodeData as TtMonsterStateNodeData; }
         public override void BeAttacked(TtWeaponNode weaponNode)
         {
+            if (IsDead || weaponNode?.WeaponData == null)
+                return;
+
             var hp = this.CurrentHP - weaponNode.WeaponData.Damage;
             if (hp <= 0 && !IsDead)
             {
@@ -135,6 +143,7 @@ namespace Survivor
         }
     }
 }
+
 #if TitanEngine_AutoGen_Macross
 #region TitanEngine_AutoGen_Macross
 

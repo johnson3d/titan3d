@@ -99,6 +99,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)HitproxyManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PresentWindow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StateManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UserParameters\CBufferParameters.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UserParameters\CBufferParameterEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\MaterialToTexture.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewportSlate.cs" />
   </ItemGroup>

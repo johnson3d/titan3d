@@ -17,6 +17,7 @@ struct TR_CLASS()
 	RTCGeometry InternalGeometry = nullptr;
 	std::vector<UINT> IndexBuffer32;
 	unsigned int GeomID = 0;
+	FEmbreeGeometry();
 	~FEmbreeGeometry();
 
 	virtual void SetGeometryTransform(const v3dxMatrix4& matrix);

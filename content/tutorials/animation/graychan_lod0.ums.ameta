@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="137bed4130225560ca597fc2fc87c86e69b408839347a768411a0bd6929d0183" />
+      <Path Type="System.String@Unknown" Value="graychan_lod0.ums" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="9635149dd255102c5d6762c9c24469d83fd028fb5a49b26a4637bbca184d930b" />
+      <Path Type="System.String@Unknown" Value="graychan_lod0.ums.snap" />
+    </e_1>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="7c682a4f-438f-40e9-8f02-f7545e7fd2f6" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/animation/graychan_lod0.ums,7c682a4f-438f-40e9-8f02-f7545e7fd2f6" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.TtMaterialMesh&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="4">
+    <e_0 Value="Game,tutorials/animation/graychan_lod0.vms,5b7c009d-439c-4593-81e2-cd28e6bbedcf" />
+    <e_1 Value="Game,tutorials/animation/material/cloth.material,58a31793-01e0-42c0-aaf9-f5a157d0fa35" />
+    <e_2 Value="Game,tutorials/animation/material/hair.material,1d1de9b8-1e25-4818-bada-ad112983ebfa" />
+    <e_3 Value="Engine,material/sysdft_color.material,baf3aa75-f9a3-4fbc-a413-4465f746a90b" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
+</Root>

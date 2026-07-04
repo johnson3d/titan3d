@@ -27,9 +27,9 @@ namespace EngineNS.DesignMacross.Design.Statements
         public override TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
             var whileStatement = new TtWhileLoopStatement();
-            var methodDesc = statementBuildContext.MethodDescription as TtMethodDescription;
+            var graphDesc = statementBuildContext.OwnerDescription;
 
-            var linkedDataPin = methodDesc.GetLinkedDataPin(DataInPins[0]);
+            var linkedDataPin = IDataLineOperator.GetLinkedDataPin(graphDesc, DataInPins[0]);
             if (linkedDataPin == null)
             {
                 // 默认为false
@@ -38,13 +38,13 @@ namespace EngineNS.DesignMacross.Design.Statements
             else
             {
                 System.Diagnostics.Debug.Assert(linkedDataPin is TtDataOutPinDescription);
-                var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
+                var buildContext = new FExpressionBuildContext() { OwnerDescription = statementBuildContext.OwnerDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                 var condition = (linkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
                 whileStatement.Condition = condition;
             }
 
             var executionOutPin_LoopBody = ExecutionOutPins[1];
-            var linkedLoopBodyExecPin = methodDesc.GetLinkedExecutionPin(executionOutPin_LoopBody);
+            var linkedLoopBodyExecPin = IExecutionLineOperator.GetLinkedExecutionPin(graphDesc, executionOutPin_LoopBody);
             if (linkedLoopBodyExecPin == null)
             {
                 whileStatement.LoopBody = new TtExecuteSequenceStatement();
@@ -55,7 +55,7 @@ namespace EngineNS.DesignMacross.Design.Statements
                 var buildContext = new FStatementBuildContext()
                 {
                     ExecuteSequenceStatement = new(),
-                    MethodDescription = statementBuildContext.MethodDescription,
+                    OwnerDescription = statementBuildContext.OwnerDescription,
                     ClassBuildContext = statementBuildContext.ClassBuildContext
                 };
                 whileStatement.LoopBody = (linkedLoopBodyExecPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);
@@ -63,7 +63,7 @@ namespace EngineNS.DesignMacross.Design.Statements
             statementBuildContext.AddStatement(whileStatement);
 
             var executionOutPin_Next = ExecutionOutPins[0];
-            var linkedNextPin = methodDesc.GetLinkedExecutionPin(executionOutPin_Next);
+            var linkedNextPin = IExecutionLineOperator.GetLinkedExecutionPin(graphDesc, executionOutPin_Next);
             if(linkedNextPin != null)
             {
                 System.Diagnostics.Debug.Assert(linkedNextPin is TtExecutionInPinDescription);

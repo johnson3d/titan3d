@@ -4,6 +4,7 @@ using EngineNS.DesignMacross.Base.Description;
 using System.Text;
 using System.Diagnostics;
 using EngineNS.DesignMacross.Design;
+using EngineNS.Macross;
 
 namespace EngineNS.DesignMacross.Editor
 {
@@ -191,6 +192,7 @@ namespace EngineNS.DesignMacross.Editor
                 return null;
             }
         }
+
         public void CompileCode()
         {
             TtEngine.Instance.MacrossManager.ClearGameProjectTemplateBuildFiles();
@@ -210,10 +212,20 @@ namespace EngineNS.DesignMacross.Editor
                 }
 
             }
-            else
+
+            if (!TtMacrossModule.LastCompileResult.Success) 
             {
-                Debug.Assert(false);
+                foreach(var Diag in TtMacrossModule.LastCompileResult.Diagnostics)
+                {
+                    if (Diag.FilePath == AssetName.Address)
+                    {
+                        System.Diagnostics.Debug.Assert(false);
+                    }
+                }
             }
+
+            
+ 
         }
         #endregion CodeGen
 

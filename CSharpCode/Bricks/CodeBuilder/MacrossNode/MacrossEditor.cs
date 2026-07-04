@@ -39,9 +39,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             InitializeManMenu();
             await PGMember.Initialize();
             await mUnionNodeConfigRenderer.Initialize();
-            mCodeEditor.SetLanguage("C#");
+            //mCodeEditor.SetLanguage("C#");
+            mCodeEditor.SetLanguage(IsGenShader ? "HLSL" : "C#");
             mCodeEditor.SetViewStyle(EGui.ECodeEditorViewStyle.Dark);
             mCodeEditor.SetErrorMarkers(null);
+            mCodeEditor.SetReadOnly(true);
             return true;
         }
 
@@ -113,8 +115,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public TtClassDeclaration DefClass { get; } = new TtClassDeclaration();
         //public DefineClass DefClass { get; } = new DefineClass();
         //[Rtti.Meta("",Order = 1)]
-        public List<UMacrossMethodGraph> Methods { get; } = new List<UMacrossMethodGraph>();
-        public List<UMacrossMethodGraph> MethodDeletedList { get; } = new List<UMacrossMethodGraph>();
+        public List<TtMacrossMethodGraph> Methods { get; } = new List<TtMacrossMethodGraph>();
+        public List<TtMacrossMethodGraph> MethodDeletedList { get; } = new List<TtMacrossMethodGraph>();
         public RName AssetName { get; set; }
         protected bool mVisible = true;
         public bool Visible 
@@ -126,7 +128,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
         public EGui.Controls.PropertyGrid.TtPropertyGrid PGMember { get; set; } = new EGui.Controls.PropertyGrid.TtPropertyGrid();
-        public List<UMacrossMethodGraph> OpenFunctions = new List<UMacrossMethodGraph>();
+        public List<TtMacrossMethodGraph> OpenFunctions = new List<TtMacrossMethodGraph>();
         public MemberVar DraggingMember { get; set; }
         public bool IsDraggingMember { get; set; } = false;
         public MethodLocalVar DraggingLocalVar { get; set; }
@@ -149,7 +151,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     return CSCodeGen;
             }
         }
-        string GetMethodFileName(RName rn, UMacrossMethodGraph method)
+        string GetMethodFileName(RName rn, TtMacrossMethodGraph method)
         {
             string declName = "";
             foreach (var k in method.MethodDatas)
@@ -306,7 +308,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     try
                     {
                         var funcXml = IO.TtFileManager.LoadXml(funcFiles[i]);
-                        var funcGraph = UMacrossMethodGraph.NewGraph(this);
+                        var funcGraph = TtMacrossMethodGraph.NewGraph(this);
                         object pFuncGraph = funcGraph;
                         IO.SerializerHelper.ReadObjectMetaFields(null, funcXml.LastChild as System.Xml.XmlElement, ref pFuncGraph, null);
 
@@ -379,7 +381,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     try
                     {
                         var funcXml = IO.TtFileManager.LoadXml(delFuncFiles[i]);
-                        var funcGraph = UMacrossMethodGraph.NewGraph(this);
+                        var funcGraph = TtMacrossMethodGraph.NewGraph(this);
                         object pFuncGraph = funcGraph;
                         IO.SerializerHelper.ReadObjectMetaFields(null, funcXml.LastChild as System.Xml.XmlElement, ref pFuncGraph, null);
                         funcGraph.AssetName = this.AssetName;
@@ -966,8 +968,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public Func<UMacrossMethodGraph, bool> OnRemoveMethod;
-        public void RemoveMethod(UMacrossMethodGraph method, bool realDelete)
+        public Func<TtMacrossMethodGraph, bool> OnRemoveMethod;
+        public void RemoveMethod(TtMacrossMethodGraph method, bool realDelete)
         {
             if (OnRemoveMethod != null)
             {
@@ -1018,7 +1020,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         }
 
-        public UMacrossMethodGraph AddMethod(TtMethodDeclaration methodDesc)
+        public TtMacrossMethodGraph AddMethod(TtMethodDeclaration methodDesc)
         {
             var metaAtt = new TtAttribute()
             {
@@ -1028,7 +1030,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 methodDesc.Attributes.Add(metaAtt);
             DefClass.AddMethod(methodDesc);
 
-            var func = UMacrossMethodGraph.NewGraph(this, methodDesc);
+            var func = TtMacrossMethodGraph.NewGraph(this, methodDesc);
             Methods.Add(func);
             for (int i = 0; i < OpenFunctions.Count; i++)
             {
@@ -1040,8 +1042,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public Func<TtVariableDeclaration, bool> OnAddMember;
         public Func<TtVariableDeclaration, bool> OnRemoveMember;
 
-        public Func<TtVariableDeclaration, UMacrossMethodGraph, bool> OnAddMethodLocalVar;
-        public Func<TtVariableDeclaration, UMacrossMethodGraph, bool> OnRemoveMethodLocalVar;
+        public Func<TtVariableDeclaration, TtMacrossMethodGraph, bool> OnAddMethodLocalVar;
+        public Func<TtVariableDeclaration, TtMacrossMethodGraph, bool> OnRemoveMethodLocalVar;
 
         bool mClassViewShow = true;
         EGui.UIProxy.MenuItemProxy.MenuState mNewMethodMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
@@ -1057,7 +1059,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
 
         bool DrawMethod(
-            UMacrossMethodGraph method, 
+            TtMacrossMethodGraph method, 
             in Vector2 regionSize, 
             in Vector2 buttonSize, 
             float buttonOffset, 
@@ -1457,7 +1459,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 ImGuiAPI.TreePop();
             }
         }
-        public void OpenMethodGraph(UMacrossMethodGraph method)
+        public void OpenMethodGraph(TtMacrossMethodGraph method)
         {
             mSettingCurrentFuncIndex = OpenFunctions.IndexOf(method);
             if (mSettingCurrentFuncIndex < 0)
@@ -1500,8 +1502,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         EGui.TtCodeEditor mCodeEditor = new EGui.TtCodeEditor();
         bool ShowTextEditor = true;
         string TextEditorTitle = "TextEditor";
-        UMacrossMethodGraph CurrentTextoutMethod = null;
-        bool mCodeEditorReadOnly = false;
+        TtMacrossMethodGraph CurrentTextoutMethod = null;
+        bool mCodeEditorReadOnly = true;
         EGui.ECodeEditorViewStyle mCodeEditorViewStyle = EGui.ECodeEditorViewStyle.Dark;
 
         string GetCodeEditorWindowTitle()
@@ -1744,7 +1746,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         Macross.TtMacrossBreak mBreakerStore = null;
         bool mGraphWindowShow = true;
         int mSettingCurrentFuncIndex = -1;
-        UMacrossMethodGraph CurrentOpenMethod = null;
+        TtMacrossMethodGraph CurrentOpenMethod = null;
         protected unsafe void DrawGraph()
         {
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "GraphWindow", ref mGraphWindowShow, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse);
@@ -1823,15 +1825,45 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EGui.UIProxy.DockProxy.EndPanel(show);
         }
 
-        public void DrawFunctionGraph(UMacrossMethodGraph func, Vector2 size)
+        public unsafe void DrawFunctionGraph(TtMacrossMethodGraph func, Vector2 size)
         {
-            if (ImGuiAPI.BeginChild("Function", in size, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
+            // Mode switch toolbar
+            var modeLabel = func.MethodEditMode == TtMacrossMethodGraph.EMethodEditMode.Graph ? "Graph" : "CSharp";
+            ImGuiAPI.Text("Mode:");
+            ImGuiAPI.SameLine(0, 4);
+            ImGuiAPI.SetNextItemWidth(80);
+            if (ImGuiAPI.BeginCombo("##EditMode" + func.KeyName, modeLabel, ImGuiComboFlags_.ImGuiComboFlags_None))
             {
-                ((UMacrossMethodGraph)(func.GraphRenderer.Graph)).UpdateSelectPG();
-                func.GraphRenderer.OnDraw();                
-                //func.OnDraw(null, false);
+                if (ImGuiAPI.Selectable("Graph", func.MethodEditMode == TtMacrossMethodGraph.EMethodEditMode.Graph, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                    func.MethodEditMode = TtMacrossMethodGraph.EMethodEditMode.Graph;
+                if (ImGuiAPI.Selectable("CSharp", func.MethodEditMode == TtMacrossMethodGraph.EMethodEditMode.CSharp, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                    func.MethodEditMode = TtMacrossMethodGraph.EMethodEditMode.CSharp;
+                ImGuiAPI.EndCombo();
             }
-            ImGuiAPI.EndChild();
+            var toolbarHeight = ImGuiAPI.GetItemRectSize().Y + ImGuiAPI.GetStyle()->ItemSpacing.Y;
+            var contentSize = new Vector2(size.X, size.Y - toolbarHeight);
+
+            if (func.MethodEditMode == TtMacrossMethodGraph.EMethodEditMode.CSharp)
+            {
+                // CSharp script editing mode: show full function code editor
+                func.EnsureScriptEditor();
+                if (ImGuiAPI.BeginChild("ScriptEditor", in contentSize, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                {
+                    func.ScriptEditor.Render("##ScriptCode", in contentSize, false);
+                    func.SyncScriptCodeFromEditor();
+                }
+                ImGuiAPI.EndChild();
+            }
+            else
+            {
+                if (ImGuiAPI.BeginChild("Function", in contentSize, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
+                {
+                    ((TtMacrossMethodGraph)(func.GraphRenderer.Graph)).UpdateSelectPG();
+                    func.GraphRenderer.OnDraw();                
+                    //func.OnDraw(null, false);
+                }
+                ImGuiAPI.EndChild();
+            }
         }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";

@@ -164,8 +164,8 @@ namespace EngineNS.Editor.Forms
                         //从Task中得到Result，拷贝到ProfilerThreadNames
                         ProfilerThreadNames.Clear();
                         ProfilerThreadNames.AddRange(mRpcProfilerThreads.DirectResult.ThreadNames);
-                        //拷贝结束，可以调用GetResultAndRelease()释放Awaiter了
-                        var t = mRpcProfilerThreads.GetResultAndRelease();
+                        //拷贝结束，UnsafeGetResultAndRelease()释放Awaiter了
+                        var t = mRpcProfilerThreads.UnsafeGetResultAndRelease();
                         //回收mRpcProfilerThreads.DirectResult，也就是Profiler.TtRpcProfiler.RpcProfilerThreads
                         t.RecycleThis();
                     }
@@ -214,7 +214,7 @@ namespace EngineNS.Editor.Forms
                                     SetTimeList(scopes);
                                     TimeScopeTree.SetTreeNodes(scopes);
                                     //Task.Result使用结束后才可以Release await
-                                    mRpcProfilerData.GetResultAndRelease();
+                                    mRpcProfilerData.UnsafeGetResultAndRelease();
                                     t.RecycleThis();
                                 }
                                 //mRpcProfilerData = Profiler.TtRpcProfiler_RpcCaller.GetProfilerData(i, new());

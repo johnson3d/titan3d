@@ -4,15 +4,16 @@ using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.DesignMacross.Design.Expressions;
+using EngineNS.DesignMacross.Design.Statement;
 using EngineNS.DesignMacross.Editor;
 using EngineNS.EGui.Controls;
 using EngineNS.Rtti;
+using Microsoft.CodeAnalysis;
+using SixLabors.Fonts;
 using System.Collections;
 using System.Diagnostics;
-using System.Reflection;
-using EngineNS.DesignMacross.Design.Statement;
-using Microsoft.CodeAnalysis;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace EngineNS.DesignMacross.Design
 {
@@ -27,6 +28,8 @@ namespace EngineNS.DesignMacross.Design
         public override void OnSelected(ref FMouseEventContext context)
         {
             context.GraphElementRenderingContext.EditorInteroperation.PGMember.Target = Description.Parent;
+            IsSelected = true;
+            context.GraphElementRenderingContext.DesignedGraph.SelecteGraphElement(this);
         }
     }
     public struct ElementLocation
@@ -38,13 +41,10 @@ namespace EngineNS.DesignMacross.Design
     public class TtGraph_Method : TtGraph, IContextMeunable
     {
         public virtual TtMethodDescription MethodDescription { get => Description as TtMethodDescription; }
-        public TtGraphElement_PreviewExecutionLine PreviewExecutionLine { get; set; } = null;
-        public TtGraphElement_PreviewDataLine PreviewDataLine { get; set; } = null;
         public TtGraph_Method(IDescription description) : base(description)
         {
 
         }
-
         public override void ConstructElements(ref FGraphRenderingContext context)
         {
             Elements.Clear();
@@ -55,6 +55,8 @@ namespace EngineNS.DesignMacross.Design
             elementRenderingContext.EditorInteroperation = context.EditorInteroperation;
             elementRenderingContext.GraphElementStyleManager = context.GraphElementStyleManager;
             elementRenderingContext.DescriptionsElement = context.DescriptionsElement;
+            elementRenderingContext.DesignedClassDescription = context.DesignedClassDescription;
+            elementRenderingContext.DesignedGraph = this;
 
             foreach (var property in MethodDescription.GetType().GetProperties())
             {
@@ -136,18 +138,6 @@ namespace EngineNS.DesignMacross.Design
             }
         }
 
-        public override void OnMouseLeftButtonUp(ref FMouseEventContext context)
-        {
-            if (PreviewDataLine != null || PreviewExecutionLine != null)
-            {
-                var renderContext = context.GraphElementRenderingContext;
-                TtGraphContextMenuHandler.Instance.HandleLinkedPinContextMenu(this, ref renderContext);
-                PreviewDataLine = null;
-                PreviewExecutionLine = null;
-            }
-        }
-
-
 
         public override void ConstructLinkedPinContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
         {
@@ -166,6 +156,8 @@ namespace EngineNS.DesignMacross.Design
             TtMethodGraphContextMenuUtil.ConstructMenuItemsAboutDesignedClass(ref context, popupMenu, this);
             TtMethodGraphContextMenuUtil.ConstructMenuItemsAboutMetas(ref context, popupMenu, this);
         }
+
+   
         #endregion IContextMeunable
 
     }
@@ -173,35 +165,35 @@ namespace EngineNS.DesignMacross.Design
     {
         public void Draw(IRenderableElement renderableElement, ref FGraphRenderingContext context)
         {
-            var methodGraph = renderableElement as TtGraph_Method;
-            if (methodGraph == null)
+            var graph = renderableElement as TtGraph;
+            if (graph == null)
                 return;
-            if (ImGuiAPI.BeginChild(methodGraph.Name + "_Graph", in Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
+            if (ImGuiAPI.BeginChild(graph.Name + "_Graph", in Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
             {
                 var cmd = ImGuiAPI.GetWindowDrawList();
 
                 Vector2 sz = ImGuiAPI.GetWindowContentRegionMax() - ImGuiAPI.GetWindowContentRegionMin();
                 var winPos = ImGuiAPI.GetWindowPos();
                 // initialize
-                methodGraph.Size = new SizeF(sz.X, sz.Y);
-                methodGraph.ViewPort.Location = winPos;
-                methodGraph.ViewPort.Size = new SizeF(sz.X, sz.Y);
-                methodGraph.Camera.Size = new SizeF(sz.X, sz.Y);
+                graph.Size = new SizeF(sz.X, sz.Y);
+                graph.ViewPort.Location = winPos;
+                graph.ViewPort.Size = new SizeF(sz.X, sz.Y);
+                graph.Camera.Size = new SizeF(sz.X, sz.Y);
 
-                methodGraph.CommandHistory = context.CommandHistory;
-                context.ViewPort = methodGraph.ViewPort;
-                context.Camera = methodGraph.Camera;
+                graph.CommandHistory = context.CommandHistory;
+                context.ViewPort = graph.ViewPort;
+                context.Camera = graph.Camera;
                 //
 
                 FGraphElementRenderingContext elementRenderingContext = default;
                 elementRenderingContext.Camera = context.Camera;
                 elementRenderingContext.ViewPort = context.ViewPort;
-                elementRenderingContext.CommandHistory = methodGraph.CommandHistory;
+                elementRenderingContext.CommandHistory = graph.CommandHistory;
                 elementRenderingContext.EditorInteroperation = context.EditorInteroperation;
                 elementRenderingContext.GraphElementStyleManager = context.GraphElementStyleManager;
                 elementRenderingContext.DescriptionsElement = context.DescriptionsElement;
                 elementRenderingContext.DesignedClassDescription = context.DesignedClassDescription;
-                elementRenderingContext.DesignedGraph = methodGraph;
+                elementRenderingContext.DesignedGraph = graph;
 
                 TtGraphElement_GridLine grid = new TtGraphElement_GridLine();
                 grid.Size = new SizeF(sz.X, sz.Y);
@@ -209,7 +201,7 @@ namespace EngineNS.DesignMacross.Design
                 if (gridRender != null)
                     gridRender.Draw(grid, ref elementRenderingContext);
 
-                foreach (var element in methodGraph.Elements)
+                foreach (var element in graph.Elements)
                 {
                     if (element is ILayoutable layoutable)
                     {
@@ -217,11 +209,11 @@ namespace EngineNS.DesignMacross.Design
                         layoutable.Arranging(new Rect(element.Location, size));
                     }
                 }
-                methodGraph.Elements.Sort((e1, e2) => 
+                graph.Elements.Sort((e1, e2) => 
                 {
-                    if((e1 is TtGraphElement_DataLine || e1 is TtGraphElement_ExecutionLine))
+                    if(e1 is TtGraphElement_Line)
                     {
-                        if((e2 is TtGraphElement_DataLine || e2 is TtGraphElement_ExecutionLine))
+                        if(e2 is TtGraphElement_Line)
                         {
                             return 0;
                         }
@@ -232,7 +224,7 @@ namespace EngineNS.DesignMacross.Design
                     }
                     else
                     {
-                        if ((e2 is TtGraphElement_DataLine || e2 is TtGraphElement_ExecutionLine))
+                        if (e2 is TtGraphElement_Line)
                         {
                             return 1;
                         }
@@ -242,7 +234,7 @@ namespace EngineNS.DesignMacross.Design
                         }
                     }
                 });
-                foreach (var element in methodGraph.Elements)
+                foreach (var element in graph.Elements)
                 {
                     var elementRender = TtElementRenderDevice.CreateGraphElementRender(element);
                     if (elementRender != null)
@@ -251,24 +243,31 @@ namespace EngineNS.DesignMacross.Design
                     }
                 }
 
-                if (methodGraph.PreviewExecutionLine != null)
+                if (graph.PreviewLine != null)
                 {
-                    var previewExecutionLineRender = TtElementRenderDevice.CreateGraphElementRender(methodGraph.PreviewExecutionLine);
-                    if (previewExecutionLineRender != null)
+                    var previewLineRender = TtElementRenderDevice.CreateGraphElementRender(graph.PreviewLine);
+                    if (previewLineRender != null)
                     {
-                        previewExecutionLineRender.Draw(methodGraph.PreviewExecutionLine, ref elementRenderingContext);
+                        previewLineRender.Draw(graph.PreviewLine, ref elementRenderingContext);
                     }
                 }
-                if (methodGraph.PreviewDataLine != null)
+                if ((graph.SelectingRect != null))
                 {
-                    var previewDataLineRender = TtElementRenderDevice.CreateGraphElementRender(methodGraph.PreviewDataLine);
-                    if (previewDataLineRender != null)
+                    var selectingRectRender = TtElementRenderDevice.CreateGraphElementRender(graph.SelectingRect);
+                    if (selectingRectRender != null)
                     {
-                        previewDataLineRender.Draw(methodGraph.PreviewDataLine, ref elementRenderingContext);
+                        selectingRectRender.Draw(graph.SelectingRect, ref elementRenderingContext);
                     }
                 }
-
-                TtMouseEventProcesser.Instance.Processing(methodGraph, ref elementRenderingContext);
+                if (ImGuiAPI.IsKeyDown(ImGuiKey.ImGuiKey_LeftCtrl))
+                {
+                    graph.CanMultiSelect = true;
+                }
+                else
+                {
+                    graph.CanMultiSelect = false;
+                }
+                TtMouseEventProcesser.Instance.Processing(graph, ref elementRenderingContext);
                 TtGraphContextMenuHandler.Instance.HandleContextMenu(TtMouseEventProcesser.Instance.LastElement, ref elementRenderingContext);
             }
             ImGuiAPI.EndChild();

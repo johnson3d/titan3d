@@ -30,7 +30,7 @@ namespace EngineNS.UI
             set;
         } = false;
 
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             //return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
             return null;
@@ -56,7 +56,7 @@ namespace EngineNS.UI
     [Rtti.Meta("")]
     [TtUIAsset.Import]
     [IO.AssetCreateMenu(MenuName = "UI/UI")]
-    [EngineNS.Editor.UAssetEditor(EditorType = typeof(EngineNS.UI.Editor.TtUIEditor))]
+    [EngineNS.Editor.TtAssetEditor(EditorType = typeof(EngineNS.UI.Editor.TtUIEditor))]
     public class TtUIAsset : IO.IAsset, IDisposable
     {
         public const string AssetExt = ".ui";

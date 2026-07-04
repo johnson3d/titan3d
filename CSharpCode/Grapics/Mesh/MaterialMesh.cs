@@ -24,7 +24,7 @@ namespace EngineNS.Graphics.Mesh
         {
             return "UMS";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(GetAssetName());
         }
@@ -191,14 +191,14 @@ namespace EngineNS.Graphics.Mesh
 
             foreach (var i in SubMeshes)
             {
-                ameta.RefAssetRNames.Add(i.MeshName);
+                ameta.AddReferenceAsset(i.MeshName);
                 if (i.Materials != null)
                 {
                     foreach (var j in i.Materials)
                     {
                         if (j == null)
                             continue;
-                        ameta.RefAssetRNames.Add(j.AssetName);
+                        ameta.AddReferenceAsset(j.AssetName);
                     }
                 }
             }
@@ -633,6 +633,25 @@ namespace EngineNS.Graphics.Mesh
         }
         [Rtti.Meta("")]
         public List<TtSubMaterialedMesh> SubMeshes { get; set; } = new List<TtSubMaterialedMesh>() { new TtSubMaterialedMesh() };
+        public Animation.SkeletonAnimation.Skeleton.TtSkinSkeleton GetMainSkeleton()
+        {
+            return SubMeshes[0].Mesh?.PartialSkeleton;
+            //if (SubMeshes.Count == 1)
+            //{
+            //    return;
+            //}
+            //MergedSkeleton = new Animation.SkeletonAnimation.Skeleton.TtSkinSkeleton();
+            //foreach (var m in SubMeshes)
+            //{
+            //    if(m.Mesh?.PartialSkeleton != null)
+            //    {
+            //        if (MergedSkeleton != null)
+            //        {
+            //            MergedSkeleton = m.Mesh.PartialSkeleton;
+            //        }
+            //    }
+            //}
+        }
         Rtti.TtTypeDesc mMdfQueueType = null;
         [Rtti.Meta("")]
         public Rtti.TtTypeDesc MdfQueueType 
@@ -659,6 +678,8 @@ namespace EngineNS.Graphics.Mesh
         }
         public Graphics.Mesh.TtMeshPrimitives GetMeshPrimitives(int index)
         {
+            if (index < 0 || index >= SubMeshes.Count)
+                return null;
             return SubMeshes[index].Mesh;
         }
         BoundingBox mAABB;

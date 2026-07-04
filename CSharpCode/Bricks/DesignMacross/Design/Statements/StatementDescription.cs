@@ -10,7 +10,7 @@ using System.Reflection;
 namespace EngineNS.DesignMacross.Design.Statement
 {
     [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public class TtStatementDescription : IStatementDescription
+    public class TtStatementDescription : IStatementDescription, IDataPinOperator, IExecutionPinOperator
     {
         [Rtti.Meta("")]
         public Guid Id { get; set; } = Guid.NewGuid();
@@ -61,6 +61,7 @@ namespace EngineNS.DesignMacross.Design.Statement
             return null;
         }
         public virtual TtExpressionBase BuildExpressionForOutPin(TtDataPinDescription pin) { return null; }
+        #region IDataPinOperator
         public void AddDataInPin(TtDataInPinDescription pinDescription)
         {
             if (!DataInPins.Contains(pinDescription))
@@ -69,14 +70,7 @@ namespace EngineNS.DesignMacross.Design.Statement
                 DataInPins.Add(pinDescription);
             }
         }
-        public void ClearDataInPin()
-        {
-            foreach(var pin in DataInPins)
-            {
-                pin.Parent = null;
-            }
-            DataInPins.Clear();
-        }
+
         public bool RemoveDataInPin(TtDataInPinDescription pinDescription)
         {
             if (DataInPins.Contains(pinDescription))
@@ -87,6 +81,7 @@ namespace EngineNS.DesignMacross.Design.Statement
             }
             return false;
         }
+
         public void AddDataOutPin(TtDataOutPinDescription pinDescription)
         {
             if (!DataOutPins.Contains(pinDescription))
@@ -94,14 +89,6 @@ namespace EngineNS.DesignMacross.Design.Statement
                 pinDescription.Parent = this;
                 DataOutPins.Add(pinDescription);
             }
-        }
-        public void ClearDataOutPin()
-        {
-            foreach (var pin in DataOutPins)
-            {
-                pin.Parent = null;
-            }
-            DataOutPins.Clear();
         }
         public bool RemoveDataOutPin(TtDataOutPinDescription pinDescription)
         {
@@ -125,86 +112,17 @@ namespace EngineNS.DesignMacross.Design.Statement
             }
             return false;
         }
-        public virtual void OnPinConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, TtMethodDescription methodDescription)
+        public List<TtDataInPinDescription> GetDataInPins(TtTypeDesc typeDesc)
         {
-
-        }
-        public virtual void OnPinDisConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, TtMethodDescription methodDescription)
-        {
-
-        }
-        public virtual bool PinsChecking(TtPinsCheckContext pinsCheckContext)
-        {
-            bool isPinsCorrect = true;
-            var methodDesc = pinsCheckContext.MethodDescription;
-            foreach (var inDataPin in DataInPins)
+            var pins = new List<TtDataInPinDescription>();
+            foreach (var pin in DataInPins)
             {
-                var linkedPin = methodDesc.GetLinkedDataPin(inDataPin);
-                if (linkedPin != null)
+                if (pin.TypeDesc == typeDesc)
                 {
-                    if (linkedPin.TypeDesc == inDataPin.TypeDesc)
-                    {
-                        if (linkedPin.Parent is TtExpressionDescription linkedExpressionDesc)
-                        {
-                            isPinsCorrect = linkedExpressionDesc.PinsChecking(pinsCheckContext);
-                        }
-                    }
-                    else
-                    {
-                        pinsCheckContext.ErrorDescriptions.Add(this);
-                        isPinsCorrect = false;
-                    }
+                    pins.Add(pin);
                 }
             }
-            foreach(var outExecPin in ExecutionOutPins)
-            {
-                var linkedPin = methodDesc.GetLinkedExecutionPin(outExecPin);
-                if(linkedPin != null)
-                {
-                    if(linkedPin.Parent is TtStatementDescription linkedDesc)
-                    {
-                        isPinsCorrect = linkedDesc.PinsChecking(pinsCheckContext);
-                    }
-                }
-            }
-            return isPinsCorrect;
-        }
-        public void AddExecutionInPin(TtExecutionInPinDescription pinDescription)
-        {
-            if (!ExecutionInPins.Contains(pinDescription))
-            {
-                pinDescription.Parent = this;
-                ExecutionInPins.Add(pinDescription);
-            }
-        }
-        public void AddExecutionOutPin(TtExecutionOutPinDescription pinDescription)
-        {
-            if (!ExecutionOutPins.Contains(pinDescription))
-            {
-                pinDescription.Parent = this;
-                ExecutionOutPins.Add(pinDescription);
-            }
-        }
-        public void InsertExecuteOutPin(int index, TtExecutionOutPinDescription pinDescription)
-        {
-            if (index < 0)
-                return;
-            if (!ExecutionOutPins.Contains(pinDescription))
-            {
-                pinDescription.Parent = this;
-                if (index > ExecutionOutPins.Count)
-                    ExecutionOutPins.Add(pinDescription);
-                else
-                    ExecutionOutPins.Insert(index, pinDescription);
-            }
-        }
-        public int GetExecuteOutPinIndex(TtExecutionOutPinDescription pinDescription)
-        {
-            return ExecutionOutPins.IndexOf(pinDescription);
-        }
-        public bool RemoveExecuteOutPin(TtExecutionOutPinDescription pinDescription)
-        {
-            return ExecutionOutPins.Remove(pinDescription);
+            return pins;
         }
         public bool TryGetDataPin(Guid pinId, out TtDataPinDescription pin)
         {
@@ -224,61 +142,8 @@ namespace EngineNS.DesignMacross.Design.Statement
                     return true;
                 }
             }
+
             pin = null;
-            return false;
-        }
-        public bool TryGetExecutePin(Guid pinId, out TtExecutionPinDescription pin)
-        {
-            foreach (var executionPin in ExecutionInPins)
-            {
-                if (executionPin.Id == pinId)
-                {
-                    pin = executionPin;
-                    return true;
-                }
-            }
-            foreach (var executionPin in ExecutionOutPins)
-            {
-                if (executionPin.Id == pinId)
-                {
-                    pin = executionPin;
-                    return true;
-                }
-            }
-            pin = null;
-            return false;
-        }
-        public virtual bool IsPinsLinkable(TtDataPinDescription selfPin, TtDataPinDescription targetPin)
-        {
-            return selfPin.TypeDesc == targetPin.TypeDesc;
-        }
-        public List<TtDataInPinDescription> GetDataInPins(TtTypeDesc typeDesc)
-        {
-            var pins = new List<TtDataInPinDescription>();
-            foreach (var pin in DataInPins)
-            {
-                if (pin.TypeDesc == typeDesc)
-                {
-                    pins.Add(pin);
-                }
-            }
-            return pins;
-        }
-        public virtual bool TryGetLinkableDataInPins(TtDataPinDescription targetPin, out List<TtDataInPinDescription> outLinkablePins)
-        {
-            var pins = new List<TtDataInPinDescription>();
-            foreach (var pin in DataInPins)
-            {
-                if (IsPinsLinkable(pin, targetPin))
-                {
-                    pins.Add(pin);
-                }
-            }
-            outLinkablePins = pins;
-            if (pins.Count > 0)
-            {
-                return true;
-            }
             return false;
         }
         public List<TtDataOutPinDescription> GetDataOutPins(TtTypeDesc typeDesc)
@@ -293,31 +158,132 @@ namespace EngineNS.DesignMacross.Design.Statement
             }
             return pins;
         }
-        public virtual bool TryGetLinkableDataOutPins(TtDataPinDescription targetPin, out List<TtDataOutPinDescription> outLinkablePins)
+        public virtual bool IsDataPinsLinkable(TtDataPinDescription selfPin, TtDataPinDescription targetPin)
         {
-            var pins = new List<TtDataOutPinDescription>();
-            foreach (var pin in DataOutPins)
+            return selfPin.TypeDesc == targetPin.TypeDesc;
+        }
+        public virtual void OnDataPinConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, IDescription graphDescription)
+        {
+
+        }
+        public virtual void OnDataPinDisConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, IDescription graphDescription)
+        {
+
+        }
+        #endregion
+        public virtual bool PinsChecking(TtPinsCheckContext pinsCheckContext)
+        {
+            bool isPinsCorrect = true;
+            var graphDesc = pinsCheckContext.GraphDescription;
+            foreach (var inDataPin in DataInPins)
             {
-                if (IsPinsLinkable(pin, targetPin))
+                if(graphDesc is IDataLineOperator lineOperator)
                 {
-                    pins.Add(pin);
+                    var linkedPin = lineOperator.GetLinkedDataPin(inDataPin);
+                    if (linkedPin != null)
+                    {
+                        if (linkedPin.TypeDesc == inDataPin.TypeDesc)
+                        {
+                            if (linkedPin.Parent is TtExpressionDescription linkedExpressionDesc)
+                            {
+                                isPinsCorrect = linkedExpressionDesc.PinsChecking(pinsCheckContext);
+                            }
+                        }
+                        else
+                        {
+                            pinsCheckContext.ErrorDescriptions.Add(this);
+                            isPinsCorrect = false;
+                        }
+                    }
                 }
             }
-            outLinkablePins = pins;
-            if (pins.Count > 0)
+            foreach(var outExecPin in ExecutionOutPins)
             {
-                return true;
+                if (graphDesc is IExecutionLineOperator lineOperator)
+                {
+                    var linkedPin = lineOperator.GetLinkedExecutionPin(outExecPin);
+                    if (linkedPin != null)
+                    {
+                        if (linkedPin.Parent is TtStatementDescription linkedDesc)
+                        {
+                            isPinsCorrect = linkedDesc.PinsChecking(pinsCheckContext);
+                        }
+                    }
+                }
             }
+            return isPinsCorrect;
+        }
+
+        #region IExecutionPinOperator
+        public void AddExecutionInPin(TtExecutionInPinDescription pinDescription)
+        {
+            if (!ExecutionInPins.Contains(pinDescription))
+            {
+                pinDescription.Parent = this;
+                ExecutionInPins.Add(pinDescription);
+            }
+        }
+        public void AddExecutionOutPin(TtExecutionOutPinDescription pinDescription)
+        {
+            if (!ExecutionOutPins.Contains(pinDescription))
+            {
+                pinDescription.Parent = this;
+                ExecutionOutPins.Add(pinDescription);
+            }
+        }
+
+        public bool RemoveExecutionInPin(TtExecutionInPinDescription pinDescription)
+        {
+            pinDescription.Parent = null;
+            return ExecutionInPins.Remove(pinDescription);
+        }
+        public bool RemoveExecutionOutPin(TtExecutionOutPinDescription pinDescription)
+        {
+            pinDescription.Parent = null;
+            return ExecutionOutPins.Remove(pinDescription);
+        }
+
+        public int GetExecuteOutPinIndex(TtExecutionOutPinDescription pinDescription)
+        {
+            return ExecutionOutPins.IndexOf(pinDescription);
+        }
+        public bool TryGetExecutionPin(Guid pinId, out TtExecutionPinDescription execPin)
+        {
+            foreach (var executionPin in ExecutionInPins)
+            {
+                if (executionPin.Id == pinId)
+                {
+                    execPin = executionPin;
+                    return true;
+                }
+            }
+            foreach (var executionPin in ExecutionOutPins)
+            {
+                if (executionPin.Id == pinId)
+                {
+                    execPin = executionPin;
+                    return true;
+                }
+            }
+
+            execPin = null;
             return false;
         }
-        public List<TtExecutionInPinDescription> GetExecutionInPins()
+        public void InsertExecuteOutPin(int index, TtExecutionOutPinDescription pinDescription)
         {
-            return ExecutionInPins;
+            if (index < 0)
+                return;
+            if (!ExecutionOutPins.Contains(pinDescription))
+            {
+                pinDescription.Parent = this;
+                if (index > ExecutionOutPins.Count)
+                    ExecutionOutPins.Add(pinDescription);
+                else
+                    ExecutionOutPins.Insert(index, pinDescription);
+            }
         }
-        public List<TtExecutionOutPinDescription> GetExecutionOutPins()
-        {
-            return ExecutionOutPins;
-        }
+        #endregion
+
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
             if (hostObject is IDescription parentDescription)

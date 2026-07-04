@@ -112,7 +112,7 @@ namespace EngineNS.NxRHI
         }
         public void TickSync(float elapsedTime)
         {
-
+            QueueStats.Reset();
         }
         public void TickLogic(float elapsedTime)
         {

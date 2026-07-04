@@ -130,7 +130,7 @@ namespace EngineNS.DesignMacross.Design.Statement
 
         public override TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
-            var methodDesc = statementBuildContext.MethodDescription as TtMethodDescription;
+            var graphDesc = statementBuildContext.OwnerDescription;
 
             TtMethodInvokeStatement methodInvoke = new TtMethodInvokeStatement()
             {
@@ -146,8 +146,8 @@ namespace EngineNS.DesignMacross.Design.Statement
                 var hostPin = DataInPins[0];
                 if (hostPin != null)
                 {
-                    var linkedHostPin = methodDesc.GetLinkedDataPin(hostPin);
-                    var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, Sequence = statementBuildContext.ExecuteSequenceStatement, ClassBuildContext = statementBuildContext.ClassBuildContext };
+                    var linkedHostPin = IDataLineOperator.GetLinkedDataPin(graphDesc, hostPin);
+                    var buildContext = new FExpressionBuildContext() { OwnerDescription = statementBuildContext.OwnerDescription, Sequence = statementBuildContext.ExecuteSequenceStatement, ClassBuildContext = statementBuildContext.ClassBuildContext };
                     var linkedDesc = linkedHostPin.Parent;
                     if (linkedDesc is TtExpressionDescription linkedExpressionDesc)
                     {
@@ -177,7 +177,7 @@ namespace EngineNS.DesignMacross.Design.Statement
             }
             foreach (var pin in otherInPins)
             {
-                var linkedDataPin = methodDesc.GetLinkedDataPin(pin);
+                var linkedDataPin = IDataLineOperator.GetLinkedDataPin(graphDesc, pin);
                 if (linkedDataPin == null)
                 {
                     var dataInPin = pin as TtDataInPinDescription;
@@ -190,7 +190,7 @@ namespace EngineNS.DesignMacross.Design.Statement
                             var argStatement = new TtMethodInvokeStatement("ParseFrom",
                                    argVarDec,
                                    new TtClassReferenceExpression(dataInPin.TypeDesc),
-                                   new TtMethodInvokeArgumentExpression { Expression = new TtPrimitiveExpression(dataInPin.TypeVaule) });
+                                   new TtMethodInvokeArgumentExpression { Expression = new TtPrimitiveExpression(dataInPin.TypeDesc, dataInPin.TypeVaule) });
                             argStatement.ReturnValue = argVarDec;
                             
                             statementBuildContext.AddStatement(argVarDec);
@@ -201,13 +201,14 @@ namespace EngineNS.DesignMacross.Design.Statement
                         {
                             var argName = "result_MethodArg" + ((uint)pin.GetHashCode()).ToString();
                             var argVarDec = TtASTBuildUtil.CreateVariableDeclaration(argName, new TtTypeReference(dataInPin.TypeDesc), new TtDefaultValueExpression(dataInPin.TypeDesc));
-                            var argStatement = new TtMethodInvokeStatement("Parse",
-                                   argVarDec,
-                                   new TtClassReferenceExpression(dataInPin.TypeDesc),
-                                   new TtMethodInvokeArgumentExpression { Expression = new TtPrimitiveExpression(dataInPin.TypeVaule) });
-                            argStatement.ReturnValue = argVarDec;
+                            //var argStatement = new TtMethodInvokeStatement("Parse",
+                            //       argVarDec,
+                            //       new TtClassReferenceExpression(dataInPin.TypeDesc),
+                            //       new TtMethodInvokeArgumentExpression { Expression = new TtPrimitiveExpression(dataInPin.TypeDesc, dataInPin.TypeVaule) });
+                            //argStatement.ReturnValue = argVarDec;
+                            var argVarDecAssign = TtASTBuildUtil.CreateAssignOperatorStatement(new TtVariableReferenceExpression(argName), new TtPrimitiveExpression(dataInPin.TypeDesc, dataInPin.TypeVaule));
                             statementBuildContext.AddStatement(argVarDec);
-                            statementBuildContext.AddStatement(argStatement);
+                            statementBuildContext.AddStatement(argVarDecAssign);
                             methodInvoke.Arguments.Add(new TtMethodInvokeArgumentExpression(new TtVariableReferenceExpression(argName)));
                         }
                     }
@@ -215,7 +216,7 @@ namespace EngineNS.DesignMacross.Design.Statement
                 else
                 {
                     System.Diagnostics.Debug.Assert(linkedDataPin is TtDataOutPinDescription);
-                    var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, Sequence = statementBuildContext.ExecuteSequenceStatement, ClassBuildContext = statementBuildContext.ClassBuildContext };
+                    var buildContext = new FExpressionBuildContext() { OwnerDescription = statementBuildContext.OwnerDescription, Sequence = statementBuildContext.ExecuteSequenceStatement, ClassBuildContext = statementBuildContext.ClassBuildContext };
                     var linkedDesc = linkedDataPin.Parent;
                     if (linkedDesc is TtExpressionDescription linkedExpressionDesc)
                     {
@@ -234,7 +235,7 @@ namespace EngineNS.DesignMacross.Design.Statement
             statementBuildContext.AddStatement(methodInvoke);
 
             var executionOutPin = ExecutionOutPins[0];
-            var linkedExecPin = methodDesc.GetLinkedExecutionPin(executionOutPin);
+            var linkedExecPin = IExecutionLineOperator.GetLinkedExecutionPin(graphDesc, executionOutPin);
             if (linkedExecPin == null)
             {
                 //空语句

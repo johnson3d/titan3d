@@ -12,7 +12,6 @@ namespace EngineNS.DesignMacross.Design
         public Color4f NameColor { get; set; } = new Color4f(0.0f, 0.0f, 0.0f);
         public Color4f BackgroundColor { get; set; } = new Color4f(255f / 255, 168f / 255, 219f / 255);
         public Color4f BorderColor { get; set; } = new Color4f(0.5f, 0.6f, 0.6f, 0.6f);
-        public float BorderThickness { get; set; } = 4;
         public TtDelegateEventDescription DelegateEventDescription { get => Description as TtDelegateEventDescription; }
 
         public TtGraphElement_StackPanel ElementContainer = new TtGraphElement_StackPanel();

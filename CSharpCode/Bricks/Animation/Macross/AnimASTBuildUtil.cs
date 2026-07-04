@@ -49,6 +49,17 @@ namespace EngineNS.Animation.Macross
 
             return methodDeclaration;
         }
+        public static TtMethodDeclaration CreateBlendTreeOverridedTickMethodStatement()
+        {
+            var args = new List<TtMethodArgumentDeclaration>
+            {
+                TtASTBuildUtil.CreateMethodArgumentDeclaration("elapseSecond", new(TtTypeDesc.TypeOf<float>()), EMethodArgumentAttribute.Default),
+                TtASTBuildUtil.CreateMethodArgumentDeclaration("context", new(TtTypeDesc.TypeOf<FAnimBlendTreeContext>()), EMethodArgumentAttribute.Ref)
+            };
+            var methodDeclaration = TtASTBuildUtil.CreateMethodDeclaration("Tick", null, args, true);
+
+            return methodDeclaration;
+        }
         public static TtMethodDeclaration CreateStateMachineOverridedInitMethodStatement()
         {
             var returnVar = TtASTBuildUtil.CreateMethodReturnVariableDeclaration(new(typeof(bool)), TtASTBuildUtil.CreateDefaultValueExpression(new(typeof(bool))));
@@ -94,6 +105,15 @@ namespace EngineNS.Animation.Macross
                 null, new TtBaseReferenceExpression(),
                 new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression("elapseSecond") },
                 new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression("context"), OperationType = EMethodArgumentAttribute.In });
+            baseInitializeInvoke.IsAsync = false;
+            method.MethodBody.Sequence.Add(baseInitializeInvoke);
+        }
+        public static void CreateBaseTickInvokeStatementRefContext(TtMethodDeclaration method)
+        {
+            var baseInitializeInvoke = new TtMethodInvokeStatement("Tick",
+                null, new TtBaseReferenceExpression(),
+                new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression("elapseSecond") },
+                new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression("context"), OperationType = EMethodArgumentAttribute.Ref });
             baseInitializeInvoke.IsAsync = false;
             method.MethodBody.Sequence.Add(baseInitializeInvoke);
         }

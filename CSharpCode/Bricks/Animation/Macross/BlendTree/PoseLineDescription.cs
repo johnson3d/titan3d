@@ -1,4 +1,5 @@
-﻿using EngineNS.DesignMacross.Base.Description;
+﻿using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
+using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.Rtti;
@@ -7,9 +8,12 @@ using System.Reflection;
 
 namespace EngineNS.Animation.Macross.BlendTree
 {
-    public class TtPosePinDescription : TtDataPinDescription
+    public class TtPosePinDescription : TtPinDescription
     {
-
+        public TtPosePinDescription()
+        {
+            TypeDesc = TtTypeDesc.TypeOf<TtLocalSpaceRuntimePose>();
+        }
     }
 
     [GraphElement(typeof(TtGraphElement_PosePin))]
@@ -23,51 +27,12 @@ namespace EngineNS.Animation.Macross.BlendTree
     {
         
     }
+
+
     [GraphElement(typeof(TtGraphElement_PoseLine))]
     [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public class TtPoseLineDescription : IDescription
+    public class TtPoseLineDescription : TtLineDescription
     {
-        public IDescription Parent { get; set; }
-        [Rtti.Meta("")]
-        public Guid Id { get; set; } = Guid.NewGuid();
-        [Rtti.Meta("")]
-        public string Name { get; set; }
-        /// <summary>
-        /// DataPinId
-        /// </summary>
-        [Rtti.Meta("")] 
-        public Guid FromId { get; set; } = Guid.Empty;
-        /// <summary>
-        /// DataPinId
-        /// </summary>
-        [Rtti.Meta("")] 
-        public Guid ToId { get; set; } = Guid.Empty;
-        public void UpdateData(ref FDescriptionUpdateContext updateContext)
-        {
 
-        }
-        #region ISerializer
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-            if (hostObject is IDescription parentDescription)
-            {
-                Parent = parentDescription;
-            }
-            else
-            {
-                Debug.Assert(false);
-            }
-        }
-
-        public void OnPropertyRead(object tagObject, string prop, bool fromXml)
-        {
-
-        }
-        public void OnPostRead(object tagObject, object hostObject, bool fromXml) { }
-        public void OnPropertyWrite(string prop, bool fromXml)
-        {
-
-        }
-        #endregion ISerializer
     }
 }

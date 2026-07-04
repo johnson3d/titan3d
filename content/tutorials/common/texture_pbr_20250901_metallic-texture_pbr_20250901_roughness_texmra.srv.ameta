@@ -14,5 +14,6 @@
   </Icon>
   <OriginImageAddress Type="System.String@Unknown" Value="texture_pbr_20250901_metallic-texture_pbr_20250901_roughness_TexMRA.png" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.TtSrView@EngineCore" />
 </Root>

@@ -36,9 +36,10 @@ namespace Survivor
         }
         float TimeToRemove = 2;
         float AccTimeToRemove = 0;
+        bool mIsRemoved = false;
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
-            if (StateNode != null && StateNode.IsDead)
+            if (!mIsRemoved && StateNode != null && StateNode.IsDead)
             {
                 if (AccTimeToRemove > TimeToRemove)
                 {
@@ -54,15 +55,25 @@ namespace Survivor
         }
         public void OnDead()
         {
+            if (mIsRemoved)
+                return;
+
+            mIsRemoved = true;
             RemoveFromWorld();
 
-            MonsterPrefab.Parent = null;
-            MonsterPrefab.IsCollide = false;
+            if (MonsterPrefab != null)
+            {
+                MonsterPrefab.Parent = null;
+                MonsterPrefab.IsCollide = false;
+            }
 
             //EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(MonsterPrefab);
             MonsterPrefab = null;
-            Controller.MonsterNode = null;
-            Controller.Player = null;
+            if (Controller != null)
+            {
+                Controller.MonsterNode = null;
+                Controller.Player = null;
+            }
         }
     }
 }

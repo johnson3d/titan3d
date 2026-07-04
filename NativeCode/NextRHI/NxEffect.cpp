@@ -71,7 +71,7 @@ namespace NxRHI
 			auto pReflector = mAmplificationShader->Reflector;
 			if (pReflector == nullptr)
 			{
-				pReflector = mAmplificationShader->Desc->DxILReflector;
+				pReflector = mAmplificationShader->Desc->Reflector;
 			}
 			PushBinder(EShaderType::SDT_MeshShader, pReflector);
 		}
@@ -80,7 +80,7 @@ namespace NxRHI
 			auto pReflector = mMeshShader->Reflector;
 			if (pReflector == nullptr)
 			{
-				pReflector = mMeshShader->Desc->DxILReflector;
+				pReflector = mMeshShader->Desc->Reflector;
 			}
 			PushBinder(EShaderType::SDT_MeshShader, pReflector);
 		}
@@ -89,7 +89,7 @@ namespace NxRHI
 			auto pReflector = mVertexShader->Reflector;
 			if (pReflector == nullptr)
 			{
-				pReflector = mVertexShader->Desc->DxILReflector;
+				pReflector = mVertexShader->Desc->Reflector;
 			}
 			PushBinder(EShaderType::SDT_VertexShader, pReflector);
 		}
@@ -98,7 +98,7 @@ namespace NxRHI
 			auto pReflector = mPixelShader->Reflector;
 			if (pReflector == nullptr)
 			{
-				pReflector = mPixelShader->Desc->DxILReflector;
+				pReflector = mPixelShader->Desc->Reflector;
 			}
 			PushBinder(EShaderType::SDT_PixelShader, pReflector);
 		}

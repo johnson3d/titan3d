@@ -11,6 +11,7 @@ using EngineNS.IO;
 using EngineNS.NxRHI;
 using EngineNS.Support;
 using Jither.OpenEXR;
+using MathNet.Numerics.Financial;
 using StbImageSharp;
 using System;
 using System.Collections.Generic;
@@ -86,7 +87,7 @@ namespace EngineNS.NxRHI
                 return UImageType.Unkown;
             }
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
         }
@@ -115,13 +116,13 @@ namespace EngineNS.NxRHI
 
             if (mAssetName.Name == name && mAssetName.RNameType == type)
                 return;
-            IAsset asset = await LoadAsset();
+            IAsset asset = await GetAsset();
             List<EngineNS.IO.IAssetMeta> holders = new List<EngineNS.IO.IAssetMeta>();
             TtEngine.Instance.AssetMetaManager.GetAssetHolder(this, holders);
             List<EngineNS.IO.IAsset> holdAssets = new List<EngineNS.IO.IAsset>();
             foreach (var i in holders)
             {
-                var holdAsset = await i.LoadAsset();
+                var holdAsset = await i.GetAsset();
                 if (holdAsset != null)
                 {
                     holdAssets.Add(holdAsset);
@@ -1432,6 +1433,11 @@ namespace EngineNS.NxRHI
         }
         public override void Dispose()
         {
+            if (CurLoadTask != null)
+            {
+                CurLoadTask.Value.Dispose();
+                CurLoadTask = null;
+            }
             FreeTextureHandle();
             base.Dispose();
         }
@@ -1453,8 +1459,61 @@ namespace EngineNS.NxRHI
             }
         }
         [Browsable(false)]
-        public System.Threading.Tasks.Task<bool> CurLoadTask { get; set; }
-        public async System.Threading.Tasks.Task<bool> LoadLOD(int level)
+        public Thread.Async.TtTask<bool>? CurLoadTask { get; set; }
+
+        #region TextureStreaming
+        /// <summary>
+        /// 返回加载 lod 个 mip（包含最高 lod 个分辨率层级）所占的字节数。
+        /// lod 语义与 LoadLOD 一致：lod 表示 mip 数量，对应 mip index 区间 [MaxLOD-lod, MaxLOD-1]。
+        /// 根据每个 mip 的 Width/Height/Format 自算，以与实际 GPU 占用对齐（块压缩按 4x4 对齐）。
+        /// </summary>
+        public long GetStreamingBytesForLOD(int lod)
+        {
+            var maxLod = MaxLOD;
+            if (maxLod <= 0 || lod <= 0)
+                return 0;
+            if (lod > maxLod)
+                lod = maxLod;
+
+            int baseWidth = Width;
+            int baseHeight = Height;
+            if (baseWidth <= 0 || baseHeight <= 0)
+                return 0;
+
+            var format = Format;
+            bool isBlock = IsBlockCompressedFormat(format);
+            uint cubeFaces = CubeFaces;
+            if (cubeFaces == 0)
+                cubeFaces = 1;
+
+            long total = 0;
+            // mip index 区间 [maxLod-lod, maxLod-1]
+            for (int mip = maxLod - lod; mip < maxLod; mip++)
+            {
+                int w = System.Math.Max(1, baseWidth >> mip);
+                int h = System.Math.Max(1, baseHeight >> mip);
+                long mipBytes;
+                if (isBlock)
+                {
+                    int blocksW = System.Math.Max(1, (w + 3) / 4);
+                    int blocksH = System.Math.Max(1, (h + 3) / 4);
+                    mipBytes = (long)blocksW * blocksH * GetBlockByteSize(format);
+                }
+                else
+                {
+                    mipBytes = (long)w * h * CoreSDK.GetPixelFormatByteWidth(format);
+                }
+                total += mipBytes;
+            }
+            return total * cubeFaces;
+        }
+
+        /// <summary>当前已驻留字节数。</summary>
+        [Browsable(false)]
+        public long CurrentResidentBytes => GetStreamingBytesForLOD(LevelOfDetail);
+        #endregion
+
+        public async Thread.Async.TtTask<bool> LoadLOD(int level)
         {
             if (level == 0)
             {
@@ -2887,6 +2946,15 @@ namespace EngineNS.NxRHI
                             var hdrNode = node.TryGetChildNode("HdrMips");
                             if (hdrNode.IsValidPointer)
                                 return LoadHdrTexture2DMipLevel(rn, node, desc, level);
+                            else
+                            {
+                                var exrNode = node.TryGetChildNode("ExrMips");
+                                if (exrNode.IsValidPointer)
+                                {
+                                    Profiler.Log.WriteLine<Profiler.TtAssetGategory>(Profiler.ELogTag.Warning, $"Exr format is not supported");
+                                    return null;
+                                }
+                            }
                         }
                         return null;
                     }
@@ -3657,6 +3725,7 @@ namespace EngineNS.NxRHI
                 return null;
             }
 
+            mipLevel = (int)tex2d.mCoreObject.Desc.MipLevels;
             tex2d.SetDebugName("Texture:" + rn.ToString());
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
@@ -3922,6 +3991,15 @@ namespace EngineNS.NxRHI
             if (srv == null)
                 return false;
 
+            var gfxConfig = TtEngine.Instance.GfxDevice.Config;
+            // 开启 streaming 时，TargetLOD 已由 RebalanceStreaming 阶段统一决定，这里不再单独调整。
+            if (gfxConfig.EnableTextureStreaming)
+            {
+                RebalanceStreaming();
+                return true;
+            }
+
+            // Fallback：保留旧的全有/全无逻辑。
             var nowFrame = TtEngine.Instance.CurrentTickFrame;
             var resState = srv.mCoreObject.GetResourceState();
             if (nowFrame - resState->GetAccessFrame() > 15 * (uint)TtEngine.Instance.Config.TargetFps)//15 second & 60 target fps
@@ -3938,7 +4016,254 @@ namespace EngineNS.NxRHI
                 return true;
             }
         }
-        float TickInterval = 150;
+
+        #region TextureStreaming
+        /// <summary>当前预算上限（字节）。</summary>
+        public long PoolBudgetBytes { get; private set; }
+        /// <summary>所有纹理当前已驻留总字节。</summary>
+        public long ResidentBytes { get; private set; }
+        /// <summary>预算裁剪后的期望总字节。</summary>
+        public long WantedBytes { get; private set; }
+        /// <summary>被预算压制而降级的纹理数量。</summary>
+        public int NumThrottled { get; private set; }
+        /// <summary>本轮命中屏幕需求（可见）的纹理数量。</summary>
+        public int NumScreenVisible { get; private set; }
+
+        // 屏幕尺寸模型：由 CpuCullingNode 在裁剪后推送每张纹理的屏幕 texel 需求（多 mesh/多 view 取 max）。
+        private struct FScreenDemand
+        {
+            public float WantedTexels;
+            public ulong Frame;
+        }
+        private readonly Dictionary<RName, FScreenDemand> mScreenDemands = new Dictionary<RName, FScreenDemand>();
+        // 复用缓存：收集待清理的陈旧屏幕需求 key，避免遍历字典时修改与每次分配。
+        private readonly List<RName> mScreenDemandStaleKeys = new List<RName>();
+
+        /// <summary>
+        /// 由裁剪节点（渲染线程）累积某张纹理本帧的屏幕 texel 需求。同帧多次累积取 max（覆盖多 mesh/多 view）。
+        /// </summary>
+        public void AccumulateScreenDemand(RName texName, float wantedTexels, ulong frame)
+        {
+            if (texName == null)
+                return;
+            lock (mScreenDemands)
+            {
+                if (mScreenDemands.TryGetValue(texName, out var d) && d.Frame == frame)
+                {
+                    if (wantedTexels > d.WantedTexels)
+                    {
+                        d.WantedTexels = wantedTexels;
+                    }
+                }
+                else
+                {
+                    d.WantedTexels = wantedTexels;
+                    d.Frame = frame;
+                }
+                mScreenDemands[texName] = d;
+            }
+        }
+
+        /// <summary>
+        /// 将屏幕需求的 texel 数反推为 wanted lod（lod=mip 数量，越大分辨率越高，合法 [clampedMin, maxLod]）。
+        /// </summary>
+        private int ScreenTexelsToLod(float wantedTexels, int baseWidth, int maxLod, int clampedMin)
+        {
+            int wanted;
+            if (baseWidth <= 0 || wantedTexels >= baseWidth)
+            {
+                wanted = maxLod;
+            }
+            else
+            {
+                int dropped = (int)System.Math.Floor(System.Math.Log2(baseWidth / System.Math.Max(1.0f, wantedTexels)));
+                if (dropped < 0)
+                    dropped = 0;
+                if (dropped > maxLod - 1)
+                    dropped = maxLod - 1;
+                wanted = maxLod - dropped;
+            }
+            if (wanted < clampedMin)
+                wanted = clampedMin;
+            if (wanted > maxLod)
+                wanted = maxLod;
+            return wanted;
+        }
+
+        // RebalanceStreaming 的临时工作项（Wanted/Priority 仅在调度期间有效，不污染 TtSrView）。
+        private sealed class FStreamingWork
+        {
+            public TtSrView Srv;
+            public int Wanted;
+            public int InitialWanted;
+            public float Priority;
+        }
+        private readonly List<FStreamingWork> mStreamingScratch = new List<FStreamingWork>();
+
+        /// <summary>
+        /// 阶段 A：为每张纹理计算期望 LOD，然后在全局内存预算约束下抢占式降级，
+        /// 最后写入每个 srv.TargetLOD。参考 UE FRenderAssetStreamingManager。
+        /// </summary>
+        public unsafe void RebalanceStreaming()
+        {
+            var gfxConfig = TtEngine.Instance.GfxDevice.Config;
+            var nowFrame = TtEngine.Instance.CurrentTickFrame;
+            var targetFps = (uint)System.Math.Max(1, TtEngine.Instance.Config.TargetFps);
+            ulong coldFrames = (ulong)System.Math.Max(1.0f, gfxConfig.TextureStreamingHysteresisSeconds) * targetFps;
+            int minResidentLod = System.Math.Max(1, gfxConfig.TextureStreamingMinResidentLOD);
+            bool useScreenSpace = gfxConfig.TextureStreamingScreenSpace;
+            ulong visibilityFrames = (ulong)System.Math.Max(1, gfxConfig.TextureStreamingVisibilityFrames);
+            int screenVisibleCount = 0;
+
+            mStreamingScratch.Clear();
+            long wantedTotal = 0;
+            long residentTotal = 0;
+
+            lock (StreamingAssets)
+            {
+                foreach (var i in StreamingAssets.Values)
+                {
+                    var srv = i as TtSrView;
+                    if (srv == null)
+                        continue;
+
+                    var maxLod = srv.MaxLOD;
+                    if (maxLod <= 0)
+                        continue;
+
+                    int clampedMin = System.Math.Min(minResidentLod, maxLod);
+
+                    var resState = srv.mCoreObject.GetResourceState();
+                    ulong lastAccess = resState->GetAccessFrame();
+                    ulong idle = nowFrame >= lastAccess ? nowFrame - lastAccess : 0;
+                    bool isHot = idle <= coldFrames;
+                    // 优先级：越近被访问 -> 越高（越不易被降级）。
+                    float recency = 1.0f / (1.0f + idle);
+
+                    int wanted;
+                    float priority;
+                    if (useScreenSpace)
+                    {
+                        // 屏幕优先：本周期可见的纹理用屏幕需求反推 wanted；不可见的沿用冷热兜底。
+                        FScreenDemand demand = default;
+                        bool screenVisible = false;
+                        var an = srv.AssetName;
+                        if (an != null)
+                        {
+                            lock (mScreenDemands)
+                            {
+                                if (mScreenDemands.TryGetValue(an, out demand) && nowFrame - demand.Frame <= visibilityFrames)
+                                    screenVisible = true;
+                            }
+                        }
+
+                        if (screenVisible)
+                        {
+                            wanted = ScreenTexelsToLod(demand.WantedTexels, srv.Width, maxLod, clampedMin);
+                            // 可见项加基数，优先级高于不可见项。
+                            priority = 1000.0f + recency * 1000.0f + wanted;
+                            screenVisibleCount++;
+                        }
+                        else
+                        {
+                            wanted = isHot ? maxLod : clampedMin;
+                            priority = recency * 1000.0f + wanted;
+                        }
+                    }
+                    else
+                    {
+                        // 热：希望升到物理全分辨率 MaxLOD；冷：降到保底常驻。
+                        wanted = isHot ? maxLod : clampedMin;
+                        priority = recency * 1000.0f + wanted;
+                    }
+
+                    var work = new FStreamingWork
+                    {
+                        Srv = srv,
+                        Wanted = wanted,
+                        InitialWanted = wanted,
+                        Priority = priority,
+                    };
+
+                    wantedTotal += srv.GetStreamingBytesForLOD(wanted);
+                    residentTotal += srv.GetStreamingBytesForLOD(srv.LevelOfDetail);
+                    mStreamingScratch.Add(work);
+                }
+            }
+
+            long budget = (long)(gfxConfig.TextureStreamingPoolMB * 1024L * 1024L * gfxConfig.TextureStreamingPoolTargetRatio);
+            PoolBudgetBytes = budget;
+            ResidentBytes = residentTotal;
+
+            int throttled = 0;
+            long finalTotal = wantedTotal;
+            if (wantedTotal > budget && budget > 0)
+            {
+                // 按优先级升序（低优先级先被降级）。
+                mStreamingScratch.Sort((a, b) => a.Priority.CompareTo(b.Priority));
+                // 反复逐级下调 Wanted，直到总量不超预算或无可再降。
+                while (finalTotal > budget)
+                {
+                    bool anyReduced = false;
+                    for (int n = 0; n < mStreamingScratch.Count; n++)
+                    {
+                        var work = mStreamingScratch[n];
+                        int clampedMin = System.Math.Min(minResidentLod, work.Srv.MaxLOD);
+                        if (work.Wanted > clampedMin)
+                        {
+                            long before = work.Srv.GetStreamingBytesForLOD(work.Wanted);
+                            work.Wanted--;
+                            long after = work.Srv.GetStreamingBytesForLOD(work.Wanted);
+                            finalTotal -= (before - after);
+                            anyReduced = true;
+                            if (finalTotal <= budget)
+                                break;
+                        }
+                    }
+                    if (!anyReduced)
+                        break;
+                }
+            }
+
+            // Apply：写回 TargetLOD。throttled 仅统计因预算被进一步削减的纹理。
+            for (int n = 0; n < mStreamingScratch.Count; n++)
+            {
+                var work = mStreamingScratch[n];
+                if (work.Srv.TargetLOD != work.Wanted)
+                    work.Srv.TargetLOD = work.Wanted;
+                if (work.Wanted < work.InitialWanted)
+                    throttled++;
+            }
+
+            WantedBytes = finalTotal;
+            NumThrottled = throttled;
+            NumScreenVisible = screenVisibleCount;
+            mStreamingScratch.Clear();
+
+            // 清理长期不可见的屏幕需求条目，防止字典随场景累积无界增长。
+            // 阈值取可见窗口的若干倍，给视角回摆留缓冲，避免误删马上又可见的项。
+            if (useScreenSpace)
+            {
+                ulong staleFrames = visibilityFrames * 8;
+                lock (mScreenDemands)
+                {
+                    if (mScreenDemands.Count > 0)
+                    {
+                        mScreenDemandStaleKeys.Clear();
+                        foreach (var kv in mScreenDemands)
+                        {
+                            if (nowFrame >= kv.Value.Frame && nowFrame - kv.Value.Frame > staleFrames)
+                                mScreenDemandStaleKeys.Add(kv.Key);
+                        }
+                        for (int n = 0; n < mScreenDemandStaleKeys.Count; n++)
+                            mScreenDemands.Remove(mScreenDemandStaleKeys[n]);
+                        mScreenDemandStaleKeys.Clear();
+                    }
+                }
+            }
+        }
+        #endregion
+
         float EllapsedRemainTime = 150;
         [ThreadStatic]
         private static Profiler.TimeScope mScopeTick;
@@ -3959,7 +4284,7 @@ namespace EngineNS.NxRHI
                 if (EllapsedRemainTime <= 0)
                 {
                     UpdateStreamingState();
-                    EllapsedRemainTime = TickInterval;
+                    EllapsedRemainTime = TtEngine.Instance.GfxDevice.Config.TextureStreamingUpdateIntervalMS;
                 }
                 foreach (var i in mWaitRemoves)
                 {

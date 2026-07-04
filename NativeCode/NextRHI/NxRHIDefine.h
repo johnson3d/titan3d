@@ -8,6 +8,46 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FViewPort
+	{
+	public:
+		FViewPort()
+		{
+			TopLeftX = 0;
+			TopLeftY = 0;
+			Width = 0;
+			Height = 0;
+			MinDepth = 0;
+			MaxDepth = 1.0F;
+		}
+		TR_DECL(FViewPort);
+
+		float TopLeftX;
+		float TopLeftY;
+		float Width;
+		float Height;
+		float MinDepth;
+		float MaxDepth;
+	};
+
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FScissorRect
+	{
+		FScissorRect()
+		{
+			MinX = 0;
+			MinY = 0;
+			MaxX = 1;
+			MaxY = 1;
+		}
+		TR_DECL(FScissorRect);
+		int MinX;
+		int MinY;
+		int MaxX;
+		int MaxY;
+	};
+
 	class ITexture;
 	enum TR_ENUM()
 		EQueueType

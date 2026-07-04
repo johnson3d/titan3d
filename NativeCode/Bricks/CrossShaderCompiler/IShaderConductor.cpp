@@ -182,7 +182,7 @@ bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FS
 			return false;
 		}
 
-		desc->SetDXBC((BYTE*)pBlob->GetBufferPointer(), (UINT)pBlob->GetBufferSize());
+		desc->SetRhiData((BYTE*)pBlob->GetBufferPointer(), (UINT)pBlob->GetBufferSize());
 
 #endif
 	}
@@ -420,8 +420,9 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 			{
 				auto& finalResult = result[i];
 				size_t sz = finalResult.target.Size();
-				desc->DxIL.resize(sz);
-				memcpy(&desc->DxIL[0], (char*)finalResult.target.Data(), finalResult.target.Size());			
+				desc->RhiData.resize(sz);
+				memcpy(&desc->RhiData[0], (char*)finalResult.target.Data(), finalResult.target.Size());
+				desc->Language = EShaderLanguage::SL_DXIL;
 
 #if defined(HasModule_Dx12)
 				if (asModule)
@@ -445,21 +446,25 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 			}
 			else if(dest[i].language == ShaderConductor::ShadingLanguage::Essl)
 			{
-				desc->Es300Code = std::string((char*)result[i].target.Data(), result[i].target.Size());
+				auto& data = result[i].target;
+				desc->RhiData.resize(data.Size());
+				memcpy(&desc->RhiData[0], (char*)data.Data(), data.Size());
+				desc->Language = EShaderLanguage::SL_GLSL;
 			}
 			else if (dest[i].language == ShaderConductor::ShadingLanguage::Msl_iOS)
 			{
-				desc->MetalCode = std::string((char*)result[i].target.Data(), result[i].target.Size());
+				auto& data = result[i].target;
+				desc->RhiData.resize(data.Size());
+				memcpy(&desc->RhiData[0], (char*)data.Data(), data.Size());
+				desc->Language = EShaderLanguage::SL_METAL;
 			}
 			else if (dest[i].language == ShaderConductor::ShadingLanguage::SpirV)
 			{
-				//MySpirvCallback cb;
-				//cb.ShaderStage = type;
-				//auto finalResult = ProcessSpirv(result[i], &cb);
 				auto& finalResult = result[i];
 				size_t sz = finalResult.target.Size();
-				desc->SpirV.resize(sz);
-				memcpy(&desc->SpirV[0], (char*)finalResult.target.Data(), finalResult.target.Size());
+				desc->RhiData.resize(sz);
+				memcpy(&desc->RhiData[0], (char*)finalResult.target.Data(), finalResult.target.Size());
+				desc->Language = EShaderLanguage::SL_SPIRV;
 #if defined(HasModule_Vulkan)
 				VKShader::Reflect(desc);
 #endif

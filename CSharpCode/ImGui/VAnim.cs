@@ -23,7 +23,7 @@ namespace EngineNS.EGui
         {
             return "UVAnim";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
             return null;
@@ -84,7 +84,7 @@ namespace EngineNS.EGui
     //[Rtti.Meta("",NameAlias = new string[] { "EngineNS.EGui.UUvAnim@EngineCore" })]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.EGui.UUvAnim@EngineCore", "EngineNS.EGui.UUvAnim" })]
     [TtUVAnim.Import]
-    [Editor.UAssetEditor(EditorType = typeof(UUvAnimEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(UUvAnimEditor))]
     [IO.AssetCreateMenu(MenuName = "UI/UVAnim")]
     public partial class TtUVAnim : IO.BaseSerializer, IO.IAsset
     {
@@ -133,7 +133,7 @@ namespace EngineNS.EGui
             }
             ameta.RefAssetRNames.Clear();
             if (TextureName != null)
-                ameta.RefAssetRNames.Add(TextureName);
+                ameta.AddReferenceAsset(TextureName);
         }
         public void SaveAssetTo(RName name)
         {

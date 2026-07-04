@@ -573,7 +573,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
-    [Editor.UAssetEditor(EditorType = typeof(Bricks.CodeBuilder.ShaderNode.TtMaterialEditor))]
+    [Editor.TtAssetEditor(EditorType = typeof(Bricks.CodeBuilder.ShaderNode.TtMaterialEditor))]
     public partial class TtMaterial
     {
     }

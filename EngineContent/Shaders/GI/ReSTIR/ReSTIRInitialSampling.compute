@@ -38,6 +38,14 @@
 #define ENV_USE_PROBE_FALLBACK 0
 #endif
 
+// 由 C# 端 UPermutationItem "ENV_USE_UNLIT_SKIP" 自动注入
+// 0 = 不检测 Unlit 材质 (MRT3 pin 悬空时强制为 0, GBufferRT3 不声明)
+// 1 = 从 GBufferRT3 提取 ShadingMode, Unlit 像素提前退出不做 GI 采样
+// MRT3 pin 悬空时, C# 端会强制保持为 0
+#ifndef ENV_USE_UNLIT_SKIP
+#define ENV_USE_UNLIT_SKIP 0
+#endif
+
 // 注意: SampleSkyRadiance 写在 ReSTIRCommon.cginc 内, 该函数会在
 // ENV_USE_SKY_CUBE == 1 分支引用 EnvMap / Samp_EnvMap 这两个全局符号,
 // 因此必须先声明这两个资源, 再 include common 头.
@@ -68,6 +76,9 @@ StructuredBuffer<BvhNodeGpu>      ProbeBvhNodes;
 
 Texture2D<float4> GBufferRT0;       // base color
 Texture2D<float4> GBufferRT1;       // normal + flags
+#if ENV_USE_UNLIT_SKIP
+Texture2D<float4> GBufferRT3;       // motion vector + RenderFlags_10Bit + custom
+#endif
 Texture2D<float>  DepthBuffer;
 Texture2D<float4> PrevColor;        // 上一帧最终光照 (含 indirect, AntiAliasing 节点输出的 PreColor)
 
@@ -431,10 +442,25 @@ void CS_Main(uint3 id : SV_DispatchThreadID)
     float4 rt0 = GBufferRT0.SampleLevel(Samp_PointClamp, uv, 0);
     float4 rt1 = GBufferRT1.SampleLevel(Samp_PointClamp, uv, 0);
     float4 rt2 = float4(0, 0, 0, 0);
+#if ENV_USE_UNLIT_SKIP
+    float4 rt3 = GBufferRT3.SampleLevel(Samp_PointClamp, uv, 0);
+#else
     float4 rt3 = float4(0, 0, 0, 0);
+#endif
 
     FGBufferData gbuffer = (FGBufferData)0;
     gbuffer.DecodeGBuffer(rt0, rt1, rt2, rt3);
+
+#if ENV_USE_UNLIT_SKIP
+    // Unlit 材质不接收间接光照, 直接写空 reservoir 退出
+    if (gbuffer.GetShadingMode() == EShadingMode_Unlit)
+    {
+        ReSTIRPackedReservoir packed;
+        PackReservoir(reservoir, packed);
+        OutReservoirs[pixelIndex] = packed;
+        return;
+    }
+#endif
 
     float3 visiblePos = ReconstructWorldPos(uv, depth);
     float3 visibleN = normalize(gbuffer.WorldNormal);

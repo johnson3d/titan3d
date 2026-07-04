@@ -11,11 +11,9 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtExpressionDescription ExpressionDescription { get => Description as TtExpressionDescription; }
         public float Rounding { get; set; } = 5;
-        public Color4f NameColor { get; set; } = new Color4f(0.0f, 0.0f, 0.0f);
-        public Color4f BackgroundColor { get; set; } = new Color4f(0.5f, 188f / 255, 212f / 255, 240f / 255);
-        //public Color4f BackgroundColor { get; set; } = new Color4f(0.5f, 0.9f, 0.9f, 0.9f);
-        public Color4f BorderColor { get; set; } = new Color4f(0.5f, 0.9f, 0.9f, 0.9f);
-        public float BorderThickness { get; set; } = 2;
+        public Color4f NameColor { get; set; } = TtDesignMacrossGraphStyles.ExpressionTitleForegroundColor;
+        public Color4f BackgroundColor { get; set; } = TtDesignMacrossGraphStyles.ExpressionBackgroundColor;
+        public Color4f BorderColor { get; set; } = TtDesignMacrossGraphStyles.GraphElementBorderColor;
         public TtGraphElement_StackPanel ElementContainer = new TtGraphElement_StackPanel();
         public TtGraphElement_TextBlock NameTextBlock = new TtGraphElement_TextBlock();
         public TtGraphElement_StackPanel ExpressionDescStackPanel = new TtGraphElement_StackPanel();
@@ -31,16 +29,20 @@ namespace EngineNS.DesignMacross.Design.Expressions
             ElementContainer.HorizontalAlignment = EHorizontalAlignment.Stretch;
             ElementContainer.VerticalAlignment = EVerticalAlignment.Stretch;
 
-            ExpressionDescStackPanel.Margin = new FMargin(2, 2, 2, 2);
+            //ExpressionDescStackPanel.Margin = new FMargin(2, 2, 2, 2);
             ExpressionDescStackPanel.HorizontalAlignment = EHorizontalAlignment.Left;
             ExpressionDescStackPanel.Parent = ElementContainer;
+            ExpressionDescStackPanel.BackgroundColor = TtDesignMacrossGraphStyles.ExpressionTitleBackgroundColor;
+            ExpressionDescStackPanel.Rounding = Rounding;
+            ExpressionDescStackPanel.CornerType = ERoundCornerType.RoundCornersTop;
             ElementContainer.AddElement(ExpressionDescStackPanel);
 
             NameTextBlock.Content = ExpressionDescription.Name;
             NameTextBlock.VerticalAlignment = EVerticalAlignment.Center;
             NameTextBlock.HorizontalAlignment = EHorizontalAlignment.Left;
             NameTextBlock.FontScale = 1.2f;
-            NameTextBlock.BackgroundColor = new Color4f(0, 0.8f, 0);
+            NameTextBlock.Rounding = Rounding;
+            NameTextBlock.TextColor = NameColor;
             ExpressionDescStackPanel.AddElement(NameTextBlock);
 
             PinsPanel.Margin = new FMargin(0, 0, 0, 0);
@@ -51,7 +53,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             LeftSidePinsStackPanel.Margin = new FMargin(0, 0, 0, 0);
             LeftSidePinsStackPanel.Parent = PinsPanel;
             LeftSidePinsStackPanel.Orientation = EOrientation.Vertical;
-            PinsPanel.AddElement(EDockPosition.Left,LeftSidePinsStackPanel);
+            PinsPanel.AddElement(EDockPosition.Left, LeftSidePinsStackPanel);
 
             RightSidePinsStackPanel.Margin = new FMargin(0, 0, 0, 0);
             RightSidePinsStackPanel.Parent = PinsPanel;
@@ -100,12 +102,32 @@ namespace EngineNS.DesignMacross.Design.Expressions
             }
             return list;
         }
-
+        public List<IGraphElement> EnumerateChildRverse<T>() where T : class
+        {
+            List<IGraphElement> list = EnumerateChild<T>();
+            list.Reverse();
+            return list;
+        }
         public override void ConstructElements(ref FGraphElementRenderingContext context)
         {
+            NameColor = TtDesignMacrossGraphStyles.ExpressionTitleForegroundColor;
+            BackgroundColor = TtDesignMacrossGraphStyles.ExpressionBackgroundColor;
+            BorderColor = TtDesignMacrossGraphStyles.GraphElementBorderColor;
+            ExpressionDescStackPanel.BackgroundColor = TtDesignMacrossGraphStyles.ExpressionTitleBackgroundColor;
+            if (IsSelected)
+            {
+                BorderColor = TtDesignMacrossGraphStyles.GraphElementSelectedColor;
+            }
+            if (HighLightState == EHighLigthState.LowLight)
+            {
+                NameColor = new Color4f(NameColor.ToColor3f(), TtDesignMacrossGraphStyles.LowLigthAlpha);
+                BackgroundColor = new Color4f(BackgroundColor.ToColor3f(), TtDesignMacrossGraphStyles.LowLigthAlpha);
+                BorderColor = new Color4f(BorderColor.ToColor3f(), TtDesignMacrossGraphStyles.LowLigthAlpha);
+                ExpressionDescStackPanel.BackgroundColor = new Color4f(ExpressionDescStackPanel.BackgroundColor.ToColor3f(), TtDesignMacrossGraphStyles.LowLigthAlpha);
+            }
             LeftSidePinsStackPanel.Clear();
             {
-                foreach(var execInPin in ExpressionDescription.ExecutionInPins)
+                foreach (var execInPin in ExpressionDescription.ExecutionInPins)
                 {
                     var execPinAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<TtGraphElement_ExecutionPin>(execInPin.GetType());
                     if (execPinAttribute != null)
@@ -132,7 +154,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             }
             RightSidePinsStackPanel.Clear();
             {
-                foreach(var execOutPin in ExpressionDescription.ExecutionOutPins)
+                foreach (var execOutPin in ExpressionDescription.ExecutionOutPins)
                 {
                     var execPinAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<TtGraphElement_ExecutionPin>(execOutPin.GetType());
                     if (execPinAttribute != null)
@@ -173,59 +195,47 @@ namespace EngineNS.DesignMacross.Design.Expressions
                    List<TtDataLineDescription> dataLinesToBeRemoved = new();
                    foreach (var pin in ExpressionDescription.DataPins)
                    {
-                       if (ExpressionDescription.Parent is IMethodDescription methodDescription)
+                       var line = IDataLineOperator.GetDataLineWithPin(ExpressionDescription.Parent, pin);
+                       if (line != null)
                        {
-                           var line = methodDescription.GetDataLineWithPin(pin);
-                           if (line != null)
-                           {
-                               dataLinesToBeRemoved.Add(line);
-                           }
+                           dataLinesToBeRemoved.Add(line);
                        }
 
                    }
                    foreach (var pin in ExpressionDescription.ExecutionPins)
                    {
-                       if (ExpressionDescription.Parent is IMethodDescription methodDescription)
+                       var line = IExecutionLineOperator.GetExecutionLineWithPin(ExpressionDescription.Parent, pin);
+                       if (line != null)
                        {
-                           var line = methodDescription.GetExecutionLineWithPin(pin);
-                           if (line != null)
-                           {
-                               executionLinesToBeRemoved.Add(line);
-                           }
+                           executionLinesToBeRemoved.Add(line);
                        }
 
                    }
 
+                   var expressionDescriptionParent = ExpressionDescription.Parent;
                    cmdHistory.CreateAndExtuteCommand("DeleteExpression",
                        (data) =>
                        {
-                           if (ExpressionDescription.Parent is TtMethodDescription methodDescription)
+                           IExpressionOperator.RemoveExpression(expressionDescriptionParent, ExpressionDescription);
+                           foreach (var line in executionLinesToBeRemoved)
                            {
-                               methodDescription.Expressions.Remove(ExpressionDescription);
-                               foreach (var line in executionLinesToBeRemoved)
-                               {
-                                   methodDescription.RemoveExecutionLine(line);
-                               }
-                               foreach (var line in dataLinesToBeRemoved)
-                               {
-                                   methodDescription.RemoveDataLine(line);
-                               }
+                               IExecutionLineOperator.RemoveExecutionLine(expressionDescriptionParent, line);
                            }
-
+                           foreach (var line in dataLinesToBeRemoved)
+                           {
+                               IDataLineOperator.RemoveDataLine(expressionDescriptionParent, line);
+                           }
                        },
                        (data) =>
                        {
-                           if (ExpressionDescription.Parent is TtMethodDescription methodDescription)
+                           IExpressionOperator.AddExpression(expressionDescriptionParent, ExpressionDescription);
+                           foreach (var line in executionLinesToBeRemoved)
                            {
-                               methodDescription.Expressions.Add(ExpressionDescription);
-                               foreach (var line in executionLinesToBeRemoved)
-                               {
-                                   methodDescription.AddExecutionLine(line);
-                               }
-                               foreach (var line in dataLinesToBeRemoved)
-                               {
-                                   methodDescription.AddDataLine(line);
-                               }
+                               IExecutionLineOperator.AddExecutionLine(expressionDescriptionParent, line);
+                           }
+                           foreach (var line in dataLinesToBeRemoved)
+                           {
+                               IDataLineOperator.AddDataLine(expressionDescriptionParent, line);
                            }
                        });
                });

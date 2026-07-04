@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_12396032927931178661 Type="EngineNS.Graphics.Pipeline.UserParameters.TtCBufferParameterDefinition@EngineCore">
+  <DefaultValue Type="System.String@Unknown" Order="0" />
+  <ParamName Type="System.String@Unknown" Order="0" />
+  <VarType Type="EngineNS.Graphics.Pipeline.UserParameters.ECBVarType@EngineCore" Order="0" />
+</Hash_12396032927931178661>

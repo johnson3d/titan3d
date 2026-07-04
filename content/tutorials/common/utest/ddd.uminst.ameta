@@ -17,5 +17,6 @@
     <e_0 Value="Game,tutorials/common/utest/ttt.material,22a64b03-1048-42de-801f-9cd6ef88dcb2" />
     <e_1 Value="Game,tutorials/common/utest/taxi.srv,babfeb65-4511-4601-b421-f653fbbebda3" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
 </Root>

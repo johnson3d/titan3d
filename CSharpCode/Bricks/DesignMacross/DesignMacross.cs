@@ -77,7 +77,7 @@ namespace EngineNS.DesignMacross
         {
             return "DesignMacross";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return null;
@@ -118,7 +118,7 @@ namespace EngineNS.DesignMacross
     [Rtti.Meta("")]
     [DesignMacrossCreate]
     [IO.AssetCreateMenu(MenuName = "Script/DesignMacross")]
-    [EngineNS.Editor.UAssetEditor(EditorType = typeof(DesignMacross.Editor.TtDesignMacrossEditor))]
+    [EngineNS.Editor.TtAssetEditor(EditorType = typeof(DesignMacross.Editor.TtDesignMacrossEditor))]
     public partial class UDesignMacross : IO.BaseSerializer, IO.IAsset
     {
         public const string AssetExt = ".designmacross";

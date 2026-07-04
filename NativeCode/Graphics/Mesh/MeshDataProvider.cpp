@@ -319,6 +319,7 @@ namespace NxRHI
 				copyDesc.MiscFlags = (EResourceMiscFlag)0;
 				copyDesc.RowPitch = copyDesc.Size;
 				copyDesc.DepthPitch = copyDesc.Size;
+				copyDesc.InitData = nullptr;
 				copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
 				cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, vb->Buffer, 0, copyDesc.Size);
 			}
@@ -342,6 +343,7 @@ namespace NxRHI
 				copyDesc.MiscFlags = (EResourceMiscFlag)0;
 				copyDesc.RowPitch = copyDesc.Size;
 				copyDesc.DepthPitch = copyDesc.Size;
+				copyDesc.InitData = nullptr;
 				copyIB = MakeWeakRef(device->CreateBuffer(&copyDesc));
 				cmd.GetCmdList()->CopyBufferRegion(copyIB, 0, ib->Buffer, 0, copyDesc.Size);
 			}

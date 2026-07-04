@@ -37,13 +37,13 @@ namespace EngineNS.DesignMacross.Design.Statement
         }
         public override TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
-            var linkedPin = statementBuildContext.MethodDescription.GetLinkedDataPin(DataInPins[0]);
+            var linkedPin = IDataLineOperator.GetLinkedDataPin(statementBuildContext.OwnerDescription,DataInPins[0]);
             if(linkedPin != null)
             {
                 TtExpressionBase rightSide = null;
                 if(linkedPin.Parent is TtExpressionDescription expressionDescription)
                 {
-                    FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
+                    FExpressionBuildContext buildContext = new() { OwnerDescription = statementBuildContext.OwnerDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                     rightSide = expressionDescription.BuildExpression(ref buildContext);
                 }
                 if(linkedPin.Parent is TtStatementDescription statementDescription)

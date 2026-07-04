@@ -72,6 +72,11 @@ namespace EngineNS.Editor.Forms
             selected.Clear();
             host.NodeInspector.Target = null;
             SceneEditorViewport?.Axis?.SetSelectedNodes(selected);
+
+            // 清除渲染层描边/高亮
+            var policy = host.RenderPolicy as Graphics.Pipeline.TtRenderPolicy;
+            if (policy?.PickedProxiableManager != null)
+                policy.PickedProxiableManager.ClearSelected();
         }
 
         // 检查是否符合 Ctrl+左键按 Move 轴的复制条件; 符合则同步克隆所有选中节点,

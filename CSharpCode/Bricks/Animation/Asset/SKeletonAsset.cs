@@ -13,7 +13,7 @@ namespace EngineNS.Animation.Asset
         {
             get => TtSkeletonAsset.AssetExt;
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             return await TtEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(GetAssetName());
         }
@@ -79,9 +79,9 @@ namespace EngineNS.Animation.Asset
         }
         #endregion
 
-        public static TtSkeletonAsset LoadXnd(TtSkeletonAssetManager manager, IO.TtXndNode node)
+        public static unsafe TtSkeletonAsset LoadXnd(TtSkeletonAssetManager manager, IO.TtXndNode node)
         {
-            unsafe
+            try
             {
                 IO.ISerializer result = null;
                 var attr = node.TryGetAttribute("SkeletonAsset");
@@ -99,6 +99,11 @@ namespace EngineNS.Animation.Asset
                     asset.Skeleton.ConstructHierarchy();
                     return asset;
                 }
+                return null;
+            }
+            catch (Exception e)
+            {
+                Profiler.Log.WriteException(e);
                 return null;
             }
         }
