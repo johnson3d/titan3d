@@ -204,7 +204,7 @@ void FClusterDAG::BuildDAG()
 		CurrentLevel++;
 		NumMipLevels = CurrentLevel + 1;
 
-		printf("[ClusterDAG] Level %d: %u clusters -> %u parent clusters\n",
+		VFX_LTRACE(ELTT_info, "[ClusterDAG] Level %d: %u clusters -> %u parent clusters\n",
 			CurrentLevel - 1, (UINT)LevelClusters.size(), (UINT)ParentIndices.size());
 	}
 }

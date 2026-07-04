@@ -25,7 +25,7 @@ void FHierarchyBuilder::Build(const FClusterDAG& DAG, std::vector<FPackedHierarc
 
 	BuildRecursive(DAG, AllClusterIndices, OutNodes);
 
-	printf("[HierarchyBuilder] Built %u BVH nodes for %u clusters\n",
+	VFX_LTRACE(ELTT_info, "[HierarchyBuilder] Built %u BVH nodes for %u clusters\n",
 		(UINT)OutNodes.size(), (UINT)DAG.Clusters.size());
 }
 
@@ -287,7 +287,7 @@ void QuarkGeometryAsset::BuildFromDAG(const FClusterDAG& DAG)
 		RootLODError = std::max(RootLODError, DAG.Clusters[i]->LODError);
 	}
 
-	printf("[QuarkGeometryAsset] Packed: %u clusters, %u verts, %u indices, %u BVH nodes\n",
+	VFX_LTRACE(ELTT_info, "[QuarkGeometryAsset] Packed: %u clusters, %u verts, %u indices, %u BVH nodes\n",
 		NumClusters, GetTotalVertexCount(), GetTotalIndexCount(), NumHierarchyNodes);
 }
 
