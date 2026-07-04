@@ -16,19 +16,23 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)allocator.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)clusterizer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)indexanalyzer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)indexcodec.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)indexgenerator.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)overdrawanalyzer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)meshletcodec.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)meshletutils.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)opacitymap.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)overdrawoptimizer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)partition.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)quantization.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)rasterizer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)simplifier.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)spatialorder.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)stripifier.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)vcacheanalyzer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)tangentspace.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)vcacheoptimizer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)vertexcodec.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)vertexfilter.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)vfetchanalyzer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)vfetchoptimizer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -36,5 +40,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)LICENSE.md" />
+    <None Include="$(MSBuildThisFileDirectory)README.md" />
   </ItemGroup>
 </Project>
