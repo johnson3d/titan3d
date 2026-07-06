@@ -27,19 +27,18 @@ void CorrectAttributesColor( float* Attributes )
 
 QuarkCluster::QuarkCluster(
 	const std::vector< v3dxVector3 >& InVerts,
+	const std::vector< v3dxVector3 >& InNormals,
+	const std::vector< float >& InTangents,
+	const std::vector< float >& InUVs,
 	const std::vector< UINT >& InIndexes,
-	//const std::vector< INT32 >& InMaterialIndexes,
-	//UINT InNumTexCoords, bool bInHasColors, bool bInPreserveArea,
+	const std::vector< INT32 >& InMaterialIndexes,
 	UINT TriBegin, UINT TriEnd, const FGraphPartitioner& Partitioner, const FAdjacency& Adjacency )
 {
-	//GUID = (uint64(TriBegin) << 32) | TriEnd;
-	
+	// Determine stride based on tangent availability
+	const bool bHasTangents = (InTangents.size() >= InVerts.size() * 4);
+	mVertStride = bHasTangents ? 12 : 8;
+
 	NumTris = TriEnd - TriBegin;
-	//ensure(NumTriangles <= QuarkCluster::ClusterSize);
-	
-    //bHasColors = bInHasColors;
-    //bPreserveArea = bInPreserveArea;
-    //NumTexCoords = InNumTexCoords;
 
 	Verts.reserve( NumTris * GetVertSize() );
 	Indexes.reserve( 3 * NumTris );
@@ -47,10 +46,10 @@ QuarkCluster::QuarkCluster(
 	ExternalEdges.reserve( 3 * NumTris );
 	NumExternalEdges = 0;
 
-	//ASSERT(InMaterialIndexes.size() * 3 == InIndexes.size());
+	const bool bHasNormals = !InNormals.empty();
+	const bool bHasUVs = (InUVs.size() >= InVerts.size() * 2);
 
 	std::map< UINT, UINT > OldToNewIndex;
-	//OldToNewIndex.reserve( NumTris );
 
 	for( UINT i = TriBegin; i < TriEnd; i++ )
 	{
@@ -74,21 +73,34 @@ QuarkCluster::QuarkCluster(
 				NewIndex = NumVerts++;
 				OldToNewIndex.insert(std::make_pair(OldIndex, NewIndex));
 				
-				const v3dxVector3& InVert = InVerts[ OldIndex ];
-
-				GetPosition( NewIndex ) = InVert;
-                //GetNormal( NewIndex ) = InVert.TangentZ;
-                //
-                //if( bHasColors )
-                //{
-                //	GetColor( NewIndex ) = InVert.Color.ReinterpretAsLinear();
-                //}
-                //
-                //FVector2f* UVs = GetUVs( NewIndex );
-                //for( UINT UVIndex = 0; UVIndex < NumTexCoords; UVIndex++ )
-                //{
-                //	UVs[ UVIndex ] = InVert.UVs[ UVIndex ];
-                //}
+				// Position
+				GetPosition( NewIndex ) = InVerts[ OldIndex ];
+				// Normal
+				if (bHasNormals && OldIndex < InNormals.size())
+					GetNormal( NewIndex ) = InNormals[ OldIndex ];
+				else
+					GetNormal( NewIndex ) = v3dxVector3(0.0f, 1.0f, 0.0f);
+				// Tangent (only when stride=12)
+				if (bHasTangents)
+				{
+					float* tanDst = GetTangent( NewIndex );
+					tanDst[0] = InTangents[ OldIndex * 4 + 0 ];
+					tanDst[1] = InTangents[ OldIndex * 4 + 1 ];
+					tanDst[2] = InTangents[ OldIndex * 4 + 2 ];
+					tanDst[3] = InTangents[ OldIndex * 4 + 3 ];
+				}
+				// UV
+				float* uvDst = GetUVs( NewIndex );
+				if (bHasUVs)
+				{
+					uvDst[0] = InUVs[ OldIndex * 2 + 0 ];
+					uvDst[1] = InUVs[ OldIndex * 2 + 1 ];
+				}
+				else
+				{
+					uvDst[0] = 0.0f;
+					uvDst[1] = 0.0f;
+				}
 			}
 
 			Indexes.push_back( NewIndex );
@@ -108,28 +120,20 @@ QuarkCluster::QuarkCluster(
 			NumExternalEdges += AdjCount != 0 ? 1 : 0;
 		}
 
-		//MaterialIndexes.push_back( InMaterialIndexes[ TriIndex ] );
+		if (!InMaterialIndexes.empty() && TriIndex < InMaterialIndexes.size())
+			MaterialIndexes.push_back( InMaterialIndexes[ TriIndex ] );
+		else
+			MaterialIndexes.push_back( 0 );
 	}
 
 	SanitizeVertexData();
-
-    //for( UINT VertexIndex = 0; VertexIndex < NumVerts; VertexIndex++ )
-    //{
-    //	float* Attributes = GetAttributes( VertexIndex );
-    //
-    //	// Make sure this vertex is valid from the start
-    //	if( bHasColors )
-    //		CorrectAttributesColor( Attributes );
-    //	else
-    //		CorrectAttributes( Attributes );
-    //}
-
 	Bound();
 }
 
 // Split
 QuarkCluster::QuarkCluster( QuarkCluster& SrcCluster, UINT TriBegin, UINT TriEnd, const FGraphPartitioner& Partitioner, const FAdjacency& Adjacency )
 	: MipLevel( SrcCluster.MipLevel )
+	, mVertStride( SrcCluster.mVertStride )
 {
 	//GUID = MurmurFinalize64(SrcCluster.GUID) ^ ((uint64(TriBegin) << 32) | TriEnd);
 
@@ -206,6 +210,10 @@ QuarkCluster::QuarkCluster(const std::vector<QuarkCluster*>& MergeList)
 	bHasColors = false;
 	bPreserveArea = false;
 	NumExternalEdges = 0;
+
+	// Inherit stride from first cluster (all clusters in a DAG share the same stride)
+	if (!MergeList.empty())
+		mVertStride = MergeList[0]->mVertStride;
 
 	// Calculate total sizes
 	UINT TotalVerts = 0;
@@ -535,10 +543,7 @@ static void SanitizeFloat( float& X, float MinValue, float MaxValue, float Defau
 
 void QuarkCluster::SanitizeVertexData()
 {
-	const float FltThreshold = 1e12f;	// Fairly arbitrary threshold for sensible float values.
-										// Should be large enough for all practical purposes, while still leaving enough headroom
-										// so that overflows shouldn't be a concern.
-										// With a 1e12 threshold, even x^3 fits comfortable in float range.
+	const float FltThreshold = 1e12f;
 
 	for( UINT VertexIndex = 0; VertexIndex < NumVerts; VertexIndex++ )
 	{
@@ -547,29 +552,17 @@ void QuarkCluster::SanitizeVertexData()
 		SanitizeFloat( Position.Y, -FltThreshold, FltThreshold, 0.0f );
 		SanitizeFloat( Position.Z, -FltThreshold, FltThreshold, 0.0f );
 
-//         v3dxVector3& Normal = GetNormal(VertexIndex);
-//         if (!(Normal.X >= -FltThreshold && Normal.X <= FltThreshold &&
-//             Normal.Y >= -FltThreshold && Normal.Y <= FltThreshold &&
-//             Normal.Z >= -FltThreshold && Normal.Z <= FltThreshold))	// Don't flip condition. Intentionally written like this to be NaN-safe
-//         {
-//             Normal = v3dxVector3::UpVector;
-//         }
-// 		
-// 		if( bHasColors )
-// 		{
-// 			FLinearColor& Color = GetColor( VertexIndex );
-// 			SanitizeFloat( Color.R, 0.0f, 1.0f, 1.0f );
-// 			SanitizeFloat( Color.G, 0.0f, 1.0f, 1.0f );
-// 			SanitizeFloat( Color.B, 0.0f, 1.0f, 1.0f );
-// 			SanitizeFloat( Color.A, 0.0f, 1.0f, 1.0f );
-// 		}
-// 
-// 		FVector2f* UVs = GetUVs( VertexIndex );
-// 		for( UINT UvIndex = 0; UvIndex < NumTexCoords; UvIndex++ )
-// 		{
-// 			SanitizeFloat( UVs[ UvIndex ].X, -FltThreshold, FltThreshold, 0.0f );
-// 			SanitizeFloat( UVs[ UvIndex ].Y, -FltThreshold, FltThreshold, 0.0f );
-// 		}
+		v3dxVector3& Normal = GetNormal( VertexIndex );
+		if (!(Normal.X >= -FltThreshold && Normal.X <= FltThreshold &&
+			Normal.Y >= -FltThreshold && Normal.Y <= FltThreshold &&
+			Normal.Z >= -FltThreshold && Normal.Z <= FltThreshold))
+		{
+			Normal = v3dxVector3(0.0f, 1.0f, 0.0f);
+		}
+
+		float* UVs = GetUVs( VertexIndex );
+		SanitizeFloat( UVs[0], -FltThreshold, FltThreshold, 0.0f );
+		SanitizeFloat( UVs[1], -FltThreshold, FltThreshold, 0.0f );
 	}
 }
 

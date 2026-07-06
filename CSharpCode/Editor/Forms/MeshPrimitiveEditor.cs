@@ -136,10 +136,14 @@ namespace EngineNS.Editor.Forms
             MaterialName = RName.GetRName("material/sysdft.material", RName.ERNameType.Engine);
             PlaneMaterialName = RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine);
             ImportBaseMaterial = RName.GetRName("material/pbr.material", RName.ERNameType.Engine);
+
+            QuarkDebugMaterialName = RName.GetRName("material/vfx_color.material", RName.ERNameType.Engine);
         }
         public RName MaterialName { get; set; }
         public RName PlaneMaterialName { get; set; }
         public RName ImportBaseMaterial { get; set; }
+
+        public RName QuarkDebugMaterialName { get; set; }
 
         // ─── Skeleton & PhysicsAsset Colors ──────────────────
         [Rtti.Meta("")]
@@ -251,8 +255,19 @@ namespace EngineNS.Editor.Forms
         uint mQuarkLODTriCount = 0;
         uint mQuarkLODClusterCount = 0;
         uint mQuarkOrigTriCount = 0;
+        // BVH Traverse mode
+        int mQuarkLODMode = 0; // 0=Fixed MipLevel, 1=BVH Traverse
+        float mQuarkBVHErrorThreshold = 8.0f;
+        float mQuarkBVHErrorThresholdPrev = -1.0f;
+        int mQuarkBVHMinMip = 0;
+        int mQuarkBVHMaxMip = 0;
         GamePlay.Scene.TtMeshNode mQuarkMeshNode;
         TtMaterial mQuarkMaterial;
+        // VisBuffer software rasterization preview (via quark_dag_vis.rpolicy)
+        bool mShowVisBuffer = false;
+        bool mVisBufferInitialized = false;
+        TtPreviewViewport QuarkVisBufferViewport;
+        Bricks.GpuDriven.EVisBufferResolveMode mVisResolveMode = Bricks.GpuDriven.EVisBufferResolveMode.ClusterID;
         #endregion
         ~TtMeshPrimitiveEditor()
         {
@@ -263,6 +278,7 @@ namespace EngineNS.Editor.Forms
             Mesh = null;
             MeshMaterial = null;
             CoreSDK.DisposeObject(ref QuarkPreviewViewport);
+            CoreSDK.DisposeObject(ref QuarkVisBufferViewport);
             CoreSDK.DisposeObject(ref PreviewViewport);
             MeshPropGrid.Target = null;
             EditorPropGrid.Target = null;
@@ -666,9 +682,9 @@ namespace EngineNS.Editor.Forms
                 SetMeshWireFrame(mWireframe);
             }
             ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("BuildNaniteDAG", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("BuildQuarkDAG", in btSize))
             {
-                BuildNaniteDAG();
+                BuildQuarkDAG();
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.ToggleButton("DAG", ref mShowQuarkDAGPanel, in btSize, 0))
@@ -918,23 +934,23 @@ namespace EngineNS.Editor.Forms
 
         #region QuarkDAG Debug Methods
 
-        unsafe void BuildNaniteDAG()
+        unsafe void BuildQuarkDAG()
         {
             if (Mesh == null || !Mesh.mCoreObject.IsValidPointer)
                 return;
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            Mesh.mCoreObject.BuildNaniteDAGEx(rc.mCoreObject, (uint)mQuarkMaxGroupSize, (uint)mQuarkClusterSize);
+            Mesh.mCoreObject.BuildQuarkDAGEx(rc.mCoreObject, (uint)mQuarkMaxGroupSize, (uint)mQuarkClusterSize);
 
             uint clusterCount = Mesh.mCoreObject.GetClusterCount();
             if (clusterCount == 0)
             {
-                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, "BuildNaniteDAG produced 0 clusters");
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, "BuildQuarkDAG produced 0 clusters");
                 return;
             }
 
             Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info,
-                $"BuildNaniteDAG: {clusterCount} clusters, {Mesh.mCoreObject.GetDAGMipLevels()} mip levels");
+                $"BuildQuarkDAG: {clusterCount} clusters, {Mesh.mCoreObject.GetDAGMipLevels()} mip levels");
 
             // Initialize visualization node
             InitQuarkVisNode();
@@ -988,7 +1004,7 @@ namespace EngineNS.Editor.Forms
 
             // Load material and cache it for later LOD switches
             var config = TtEngine.Instance.ConfigManager.GetConfig<TtMeshPrimitiveEditorConfig>();
-            mQuarkMaterial = await TtEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(config.MaterialName);
+            mQuarkMaterial = await TtEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(config.QuarkDebugMaterialName);
             var materials = new TtMaterial[1];
             materials[0] = mQuarkMaterial;
 
@@ -1065,6 +1081,176 @@ namespace EngineNS.Editor.Forms
         }
 
         /// <summary>
+        /// BVH Traverse mode: use SelectClustersForLOD to pick a cross-mip-level cluster cut
+        /// based on screen-space error threshold and camera parameters.
+        /// </summary>
+        async void RebuildQuarkBVHMesh()
+        {
+            if (QuarkPreviewViewport == null || !QuarkPreviewViewport.IsInlitialized)
+                return;
+            if (mQuarkMaterial == null || Mesh == null)
+                return;
+
+            var coreObj = Mesh.mCoreObject;
+            uint clusterCount = coreObj.GetClusterCount();
+            if (clusterCount == 0) return;
+
+            // Get camera parameters from the viewport
+            var camera = QuarkPreviewViewport.RenderPolicy?.DefaultCamera;
+            if (camera == null) return;
+
+            var dPos = camera.GetPosition();
+            var camPos = new Vector3((float)dPos.X, (float)dPos.Y, (float)dPos.Z);
+            float screenHeight = QuarkPreviewViewport.ClientSize.Y;
+            if (screenHeight < 1) screenHeight = 512;
+            float fov = camera.mCoreObject.mFov; // radians
+
+            // Call native BVH traversal (unsafe block for pointer ops)
+            var activeClusters = SelectClustersForLOD_Unsafe(coreObj, ref camPos, screenHeight, fov, mQuarkBVHErrorThreshold);
+            if (activeClusters == null || activeClusters.Count == 0) return;
+
+            // Build mesh from selected clusters
+            var meshPrim = BuildClusterMeshFromIndices(activeClusters);
+            if (meshPrim == null) return;
+
+            // Remove old mesh node
+            if (mQuarkMeshNode != null)
+                mQuarkMeshNode.Parent = null;
+
+            // Create new render mesh
+            var materials = new TtMaterial[1];
+            materials[0] = mQuarkMaterial;
+            var renderMesh = new TtRenderMesh();
+            renderMesh.Initialize(meshPrim, materials, Rtti.TtTypeDescGetter<TtMdfStaticMesh>.TypeDesc);
+
+            var viewport = QuarkPreviewViewport;
+            mQuarkMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(
+                viewport.World, viewport.World.Root,
+                new GamePlay.Scene.TtMeshNode.TtMeshNodeData(),
+                typeof(GamePlay.TtPlacement), renderMesh,
+                DVector3.Zero, Vector3.One, Quaternion.Identity);
+            if (mQuarkMeshNode != null)
+            {
+                mQuarkMeshNode.NodeData.Name = "BVHClusterMesh";
+                mQuarkMeshNode.IsCastShadow = true;
+            }
+        }
+
+        /// <summary>
+        /// Unsafe helper: calls native SelectClustersForLOD and returns the selected cluster indices.
+        /// </summary>
+        unsafe System.Collections.Generic.List<uint> SelectClustersForLOD_Unsafe(
+            NxRHI.FMeshPrimitives coreObj, ref Vector3 camPos, float screenHeight, float fov, float errorThreshold)
+        {
+            uint clusterCount = coreObj.GetClusterCount();
+            if (clusterCount == 0) return null;
+
+            // Use fixed array for output
+            var outBuffer = new uint[clusterCount];
+            uint selectedCount;
+            fixed (uint* outPtr = outBuffer)
+            fixed (Vector3* camPtr = &camPos)
+            {
+                selectedCount = coreObj.SelectClustersForLOD(camPtr, screenHeight, fov, errorThreshold, outPtr, clusterCount);
+            }
+
+            if (selectedCount == 0) return null;
+
+            // Compute stats
+            var activeClusters = new System.Collections.Generic.List<uint>((int)selectedCount);
+            mQuarkBVHMinMip = int.MaxValue;
+            mQuarkBVHMaxMip = int.MinValue;
+            mQuarkLODTriCount = 0;
+            mQuarkLODClusterCount = selectedCount;
+
+            for (uint i = 0; i < selectedCount; i++)
+            {
+                uint idx = outBuffer[i];
+                activeClusters.Add(idx);
+                int mip = coreObj.GetClusterMipLevel((int)idx);
+                if (mip < mQuarkBVHMinMip) mQuarkBVHMinMip = mip;
+                if (mip > mQuarkBVHMaxMip) mQuarkBVHMaxMip = mip;
+                var c = coreObj.GetCluster((int)idx);
+                mQuarkLODTriCount += (uint)c.IndexCount / 3;
+            }
+
+            return activeClusters;
+        }
+
+        /// <summary>
+        /// Build mesh from an explicit list of cluster indices (for BVH traverse mode).
+        /// </summary>
+        unsafe TtMeshPrimitives BuildClusterMeshFromIndices(System.Collections.Generic.List<uint> activeClusters)
+        {
+            var coreObj = Mesh.mCoreObject;
+            uint vbCount = coreObj.GetClustersVBCount();
+            uint ibCount = coreObj.GetClustersIBCount();
+            if (vbCount == 0 || ibCount == 0 || activeClusters.Count == 0)
+                return null;
+
+            var vbPtr = coreObj.GetClustersVB();
+            var ibPtr = coreObj.GetClustersIB();
+            var vbStride = coreObj.GetClustersVBStride();
+
+            var meshBuilder = new TtMeshDataProvider();
+            meshBuilder.AssetName = RName.GetRName("@QuarkDAGBVHMesh", RName.ERNameType.Transient);
+            var builder = meshBuilder.mCoreObject;
+            uint streams = (uint)((1 << (int)EVertexStreamType.VST_Position) |
+                (1 << (int)EVertexStreamType.VST_Normal) |
+                (1 << (int)EVertexStreamType.VST_Color) |
+                (1 << (int)EVertexStreamType.VST_UV));
+            builder.Init(streams, true, 1);
+
+            var aabb = coreObj.mAABB;
+            builder.SetAABB(ref aabb);
+
+            var dummyNor = Vector3.UnitY;
+            var dummyUV = Vector2.Zero;
+            uint localVertBase = 0;
+            uint totalTriangles = 0;
+
+            for (int ci = 0; ci < activeClusters.Count; ci++)
+            {
+                uint clusterId = activeClusters[ci];
+                var cluster = coreObj.GetCluster((int)clusterId);
+                uint color = ClusterIDToColor(clusterId);
+
+                int vStart = cluster.VertexStart;
+                int vCount = cluster.VertexCount;
+                int iStart = cluster.IndexStart;
+                int iCount = cluster.IndexCount;
+
+                for (int v = 0; v < vCount; v++)
+                {
+                    int globalV = vStart + v;
+                    var pos = new Vector3(vbPtr[globalV * vbStride], vbPtr[globalV * vbStride + 1], vbPtr[globalV * vbStride + 2]);
+                    builder.AddVertex(in pos, in dummyNor, in dummyUV, color);
+                }
+
+                uint triCount = (uint)iCount / 3;
+                for (uint t = 0; t < triCount; t++)
+                {
+                    uint i0 = ibPtr[iStart + t * 3 + 0] - (uint)vStart + localVertBase;
+                    uint i1 = ibPtr[iStart + t * 3 + 1] - (uint)vStart + localVertBase;
+                    uint i2 = ibPtr[iStart + t * 3 + 2] - (uint)vStart + localVertBase;
+                    builder.AddTriangle(i0, i1, i2);
+                }
+
+                localVertBase += (uint)vCount;
+                totalTriangles += triCount;
+            }
+
+            if (totalTriangles == 0) return null;
+
+            var dpDesc = new FMeshAtomDesc();
+            dpDesc.SetDefault();
+            dpDesc.NumPrimitives = totalTriangles;
+            builder.PushAtomLOD(0, &dpDesc);
+
+            return meshBuilder.ToMesh();
+        }
+
+        /// <summary>
         /// Unsafe helper: builds TtMeshPrimitives from cluster VB/IB data with per-cluster vertex colors.
         /// mipLevel: which LOD level to render (-1 = all levels)
         /// </summary>
@@ -1078,8 +1264,9 @@ namespace EngineNS.Editor.Forms
             if (clusterCount == 0 || vbCount == 0 || ibCount == 0)
                 return null;
 
-            var vbPtr = coreObj.GetClustersVB(); // v3dxVector3*
+            var vbPtr = coreObj.GetClustersVB(); // float*
             var ibPtr = coreObj.GetClustersIB(); // uint*
+            var vbStride = coreObj.GetClustersVBStride();
 
             // Collect clusters at the target mip level
             var activeClusters = new System.Collections.Generic.List<uint>();
@@ -1126,7 +1313,7 @@ namespace EngineNS.Editor.Forms
                 for (int v = 0; v < vCount; v++)
                 {
                     int globalV = vStart + v;
-                    var pos = new Vector3(vbPtr[globalV].X, vbPtr[globalV].Y, vbPtr[globalV].Z);
+                    var pos = new Vector3(vbPtr[globalV * vbStride], vbPtr[globalV * vbStride + 1], vbPtr[globalV * vbStride + 2]);
                     builder.AddVertex(in pos, in dummyNor, in dummyUV, color);
                 }
 
@@ -1158,18 +1345,38 @@ namespace EngineNS.Editor.Forms
             return meshBuilder.ToMesh();
         }
 
+        // Must match HashColor in QuarkDAGVisualize.compute / QuarkVisResolve.compute
         static uint ClusterIDToColor(uint id)
         {
-            // Generate distinct colors per cluster using a hash
-            uint h = id * 2654435761u; // Knuth multiplicative hash
-            byte r = (byte)((h >> 0) & 0xFF);
-            byte g = (byte)((h >> 8) & 0xFF);
-            byte b = (byte)((h >> 16) & 0xFF);
-            // Ensure minimum brightness
-            r = (byte)Math.Max(r, (byte)60);
-            g = (byte)Math.Max(g, (byte)60);
-            b = (byte)Math.Max(b, (byte)60);
-            return (uint)(0xFF000000 | (b << 16) | (g << 8) | r); // ABGR format
+            uint h = id;
+            h = ((h >> 16) ^ h) * 0x45d9f3b;
+            h = ((h >> 16) ^ h) * 0x45d9f3b;
+            h = (h >> 16) ^ h;
+
+            float r = Frac(h * 0.0000152587890625f); // /65536
+            h = h * 1103515245u + 12345u;
+            float g = Frac(h * 0.0000152587890625f);
+            h = h * 1103515245u + 12345u;
+            float b = Frac(h * 0.0000152587890625f);
+
+            // Increase saturation (lerp with 0.3 gray, factor 0.8)
+            r = 0.3f * 0.2f + r * 0.8f;
+            g = 0.3f * 0.2f + g * 0.8f;
+            b = 0.3f * 0.2f + b * 0.8f;
+
+            r = Math.Clamp(r, 0f, 1f);
+            g = Math.Clamp(g, 0f, 1f);
+            b = Math.Clamp(b, 0f, 1f);
+
+            byte rb = (byte)(r * 255);
+            byte gb = (byte)(g * 255);
+            byte bb = (byte)(b * 255);
+            return (uint)(0xFF000000 | (bb << 16) | (gb << 8) | rb); // ABGR format
+        }
+
+        static float Frac(float x)
+        {
+            return x - MathF.Floor(x);
         }
 
         bool mShowQuarkDAG = true;
@@ -1183,7 +1390,7 @@ namespace EngineNS.Editor.Forms
             {
                 if (!mQuarkDAGBuilt)
                 {
-                    ImGuiAPI.TextColored(new Vector4(1, 1, 0, 1), "Click [BuildNaniteDAG] to generate DAG data");
+                    ImGuiAPI.TextColored(new Vector4(1, 1, 0, 1), "Click [BuildQuarkDAG] to generate DAG data");
                 }
                 else
                 {
@@ -1202,32 +1409,96 @@ namespace EngineNS.Editor.Forms
                     if (ImGuiAPI.Button("Rebuild DAG", in Vector2.Zero))
                     {
                         // Rebuild with new MaxGroupSize
-                        BuildNaniteDAG();
+                        BuildQuarkDAG();
                         mQuarkLODLevel = 0;
                         mQuarkLODLevelPrev = -1;
                     }
                     ImGuiAPI.SameLine(0, 20);
                     ImGuiAPI.Checkbox("Show Stats", ref mShowQuarkOverlay);
 
-                    // LOD Level slider
-                    if (mQuarkMipLevels > 1)
+                    // LOD Mode selector: Fixed MipLevel / BVH Traverse
+                    ImGuiAPI.Separator();
+                    ImGuiAPI.Text("LOD Mode:");
+                    ImGuiAPI.SameLine(0, 10);
+                    if (ImGuiAPI.RadioButton("Fixed MipLevel", mQuarkLODMode == 0))
                     {
-                        int maxLevel = (int)mQuarkMipLevels - 1;
-                        if (ImGuiAPI.SliderInt("LOD Level", ref mQuarkLODLevel, 0, maxLevel, "%d", ImGuiSliderFlags_.ImGuiSliderFlags_None))
+                        if (mQuarkLODMode != 0) { mQuarkLODMode = 0; mQuarkLODLevelPrev = -1; }
+                    }
+                    ImGuiAPI.SameLine(0, 10);
+                    if (ImGuiAPI.RadioButton("BVH Traverse", mQuarkLODMode == 1))
+                    {
+                        if (mQuarkLODMode != 1) { mQuarkLODMode = 1; mQuarkBVHErrorThresholdPrev = -1.0f; }
+                    }
+
+                    if (mQuarkLODMode == 0)
+                    {
+                        // Fixed MipLevel mode
+                        if (mQuarkMipLevels > 1)
                         {
-                            // Slider value changed
+                            int maxLevel = (int)mQuarkMipLevels - 1;
+                            if (ImGuiAPI.SliderInt("LOD Level", ref mQuarkLODLevel, 0, maxLevel, "%d", ImGuiSliderFlags_.ImGuiSliderFlags_None))
+                            {
+                            }
+                            if (mQuarkLODLevel != mQuarkLODLevelPrev)
+                            {
+                                mQuarkLODLevelPrev = mQuarkLODLevel;
+                                RebuildQuarkLODMesh(mQuarkLODLevel);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // BVH Traverse mode
+                        ImGuiAPI.SetNextItemWidth(200);
+                        ImGuiAPI.SliderFloat("Error Threshold (px)", ref mQuarkBVHErrorThreshold, 0.5f, 64.0f, "%.1f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+
+                        // Auto-rebuild when threshold changes or camera moves
+                        bool needRebuild = (mQuarkBVHErrorThreshold != mQuarkBVHErrorThresholdPrev);
+                        if (needRebuild)
+                        {
+                            mQuarkBVHErrorThresholdPrev = mQuarkBVHErrorThreshold;
+                            RebuildQuarkBVHMesh();
                         }
 
-                        // Detect change and rebuild mesh
-                        if (mQuarkLODLevel != mQuarkLODLevelPrev)
+                        if (ImGuiAPI.Button("Refresh BVH", in Vector2.Zero))
                         {
-                            mQuarkLODLevelPrev = mQuarkLODLevel;
-                            RebuildQuarkLODMesh(mQuarkLODLevel);
+                            RebuildQuarkBVHMesh();
                         }
                     }
 
-                    // --- Viewport (standard deferred pipeline handles everything) ---
-                    if (QuarkPreviewViewport != null && QuarkPreviewViewport.IsInlitialized)
+                    // --- VisBuffer Preview (above viewport to avoid scrollbar) ---
+                    ImGuiAPI.Separator();
+                    if (ImGuiAPI.Checkbox("VisBuffer Preview (SW Raster)", ref mShowVisBuffer))
+                    {
+                        if (mShowVisBuffer && !mVisBufferInitialized)
+                            InitVisBufferViewport();
+                    }
+
+                    if (mShowVisBuffer && mVisBufferInitialized)
+                    {
+                        // Resolve mode selector
+                        ImGuiAPI.SameLine(0, 20);
+                        ImGuiAPI.Text("Mode:");
+                        ImGuiAPI.SameLine(0, 5);
+                        var modeInt = (int)mVisResolveMode;
+                        ImGuiAPI.SetNextItemWidth(120);
+                        if (ImGuiAPI.Combo("##VisResolveMode", ref modeInt,
+                            "ClusterID\0MipLevel\0TriangleID\0InstanceID\0", 4))
+                        {
+                            mVisResolveMode = (Bricks.GpuDriven.EVisBufferResolveMode)modeInt;
+                            var resolveNode = QuarkVisBufferViewport?.RenderPolicy?.FindNode<Bricks.GpuDriven.TtQuarkVisResolveNode>();
+                            if (resolveNode != null)
+                                resolveNode.ResolveMode = mVisResolveMode;
+                        }
+                    }
+
+                    // --- Viewport: show VisBuffer viewport or hardware raster viewport ---
+                    if (mShowVisBuffer && QuarkVisBufferViewport != null && QuarkVisBufferViewport.IsInlitialized)
+                    {
+                        QuarkVisBufferViewport.ViewportType = TtViewportSlate.EViewportType.ChildWindow;
+                        QuarkVisBufferViewport.OnDraw();
+                    }
+                    else if (QuarkPreviewViewport != null && QuarkPreviewViewport.IsInlitialized)
                     {
                         QuarkPreviewViewport.ViewportType = TtViewportSlate.EViewportType.ChildWindow;
                         QuarkPreviewViewport.OnDraw();
@@ -1235,13 +1506,72 @@ namespace EngineNS.Editor.Forms
                 }
             }
             if (QuarkPreviewViewport != null && QuarkPreviewViewport.IsInlitialized)
-                QuarkPreviewViewport.Visible = show;
+                QuarkPreviewViewport.Visible = show && !mShowVisBuffer;
+            if (QuarkVisBufferViewport != null && QuarkVisBufferViewport.IsInlitialized)
+                QuarkVisBufferViewport.Visible = show && mShowVisBuffer;
             EGui.UIProxy.DockProxy.EndPanel(show);
         }
 
         void TickQuarkDAGVisualize()
         {
-            // Standard pipeline handles camera/lighting automatically, nothing to do here
+            // VisBuffer pipeline: rpolicy handles Tick automatically,
+            // we just need to keep camera updated each frame.
+            if (mShowVisBuffer && mVisBufferInitialized && QuarkVisBufferViewport?.RenderPolicy != null)
+            {
+                var visBufferNode = QuarkVisBufferViewport.RenderPolicy.FindNode<Bricks.GpuDriven.TtQuarkVisBufferNode>();
+                var camera = QuarkVisBufferViewport.RenderPolicy.DefaultCamera;
+                if (visBufferNode != null && camera != null)
+                {
+                    visBufferNode.UpdateCamera(camera);
+                }
+            }
+        }
+
+        async void InitVisBufferViewport()
+        {
+            if (mVisBufferInitialized) return;
+
+            var policyRName = RName.GetRName("graphics/quark_dag_vis.rpolicy", RName.ERNameType.Engine);
+            QuarkVisBufferViewport = new TtPreviewViewport();
+            QuarkVisBufferViewport.Title = "VisBufferViewport";
+            QuarkVisBufferViewport.PreviewAsset = policyRName;
+            QuarkVisBufferViewport.OnInitialize = Initialize_VisBufferViewport;
+            QuarkVisBufferViewport.HasAssetSnap = true; // Skip auto-snapshot (no valid RT initially)
+            await QuarkVisBufferViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication,
+                policyRName, 0.01f, 1000.0f);
+            QuarkVisBufferViewport.HasAssetSnap = true; // Re-set after Initialize overwrites it
+
+            mVisBufferInitialized = true;
+        }
+
+        async Thread.Async.TtTask<bool> Initialize_VisBufferViewport(
+            TtViewportSlate viewport, TtSlateApplication application,
+            TtRenderPolicy policy, float zMin, float zMax)
+        {
+            viewport.RenderPolicy = policy;
+            (viewport as TtPreviewViewport).CameraController.ControlCamera(policy.DefaultCamera);
+            // Prevent auto-snapshot (this viewport has no meaningful snap target)
+            (viewport as TtPreviewViewport).HasAssetSnap = true;
+
+            // VisBufferNode ↔ ResolveNode link is established automatically by
+            // ResolveNode.Initialize via pin Linker, no manual FindNode needed.
+
+            // Upload initial DAG data
+            var visBufferNode = policy.FindNode<Bricks.GpuDriven.TtQuarkVisBufferNode>();
+            if (visBufferNode != null && Mesh != null && Mesh.mCoreObject.IsValidPointer)
+            {
+                visBufferNode.UploadDAGData(Mesh, policy.DefaultCamera);
+            }
+
+            // Auto-zoom camera to mesh bounds
+            if (Mesh != null && Mesh.mCoreObject.IsValidPointer)
+            {
+                var aabb = Mesh.mCoreObject.mAABB;
+                var daabb = new DBoundingBox(in aabb);
+                policy.DefaultCamera.AutoZoom(in daabb, 0.0f, true);
+            }
+
+            return true;
         }
 
         Vector2 DrawQuarkStatsOverlay(in Vector2 startDrawPos)
@@ -1262,8 +1592,21 @@ namespace EngineNS.Editor.Forms
             textPos.Y += lineH;
             cmdlst.AddText(in textPos, textColor, $"MipLevels: {mQuarkMipLevels}", null);
             textPos.Y += lineH;
-            cmdlst.AddText(in textPos, textColor, $"LOD {mQuarkLODLevel}: {mQuarkLODClusterCount} clusters, {mQuarkLODTriCount} tris", null);
-            textPos.Y += lineH;
+
+            if (mQuarkLODMode == 0)
+            {
+                cmdlst.AddText(in textPos, textColor, $"LOD {mQuarkLODLevel}: {mQuarkLODClusterCount} clusters, {mQuarkLODTriCount} tris", null);
+                textPos.Y += lineH;
+            }
+            else
+            {
+                cmdlst.AddText(in textPos, textColor, $"BVH Mode (err={mQuarkBVHErrorThreshold:F1}px)", null);
+                textPos.Y += lineH;
+                cmdlst.AddText(in textPos, textColor, $"Selected: {mQuarkLODClusterCount} clusters, {mQuarkLODTriCount} tris", null);
+                textPos.Y += lineH;
+                cmdlst.AddText(in textPos, textColor, $"MipRange: [{mQuarkBVHMinMip}, {mQuarkBVHMaxMip}]", null);
+                textPos.Y += lineH;
+            }
 
             return new Vector2(200, textPos.Y - startDrawPos.Y);
         }
@@ -1280,6 +1623,8 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.TickLogic(ellapse);
             if (QuarkPreviewViewport?.IsInlitialized == true)
                 QuarkPreviewViewport.TickLogic(ellapse);
+            if (QuarkVisBufferViewport?.IsInlitialized == true)
+                QuarkVisBufferViewport.TickLogic(ellapse);
 
             TickQuarkDAGVisualize();
 
@@ -1348,6 +1693,10 @@ namespace EngineNS.Editor.Forms
         public override void TickRender(float ellapse)
         {
             PreviewViewport.TickRender(ellapse);
+            if (QuarkPreviewViewport?.IsInlitialized == true)
+                QuarkPreviewViewport.TickRender(ellapse);
+            if (QuarkVisBufferViewport?.IsInlitialized == true)
+                QuarkVisBufferViewport.TickRender(ellapse);
 
             if (IsDrawing == false)
                 return;
@@ -1363,6 +1712,8 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.TickSync(ellapse);
             if (QuarkPreviewViewport?.IsInlitialized == true)
                 QuarkPreviewViewport.TickSync(ellapse);
+            if (QuarkVisBufferViewport?.IsInlitialized == true)
+                QuarkVisBufferViewport.TickSync(ellapse);
         }
 
         public string GetWindowsName()

@@ -43,8 +43,8 @@ struct FClusterGroup
 class FClusterDAG
 {
 public:
-	FClusterDAG(UINT InMinGroupSize = 8, UINT InMaxGroupSize = 32, UINT InClusterSize = 128)
-		: MinGroupSize(InMinGroupSize), MaxGroupSize(InMaxGroupSize), ClusterSize(InClusterSize) {}
+	FClusterDAG(UINT InVertStride = 8, UINT InMaxGroupSize = 32, UINT InClusterSize = 128)
+		: VertStride(InVertStride), MinGroupSize(8), MaxGroupSize(InMaxGroupSize), ClusterSize(InClusterSize) {}
 	~FClusterDAG();
 
 	// === Build Pipeline ===
@@ -53,6 +53,9 @@ public:
 	// Returns the number of clusters created at level 0
 	UINT AddMesh(
 		const std::vector<v3dxVector3>& Verts,
+		const std::vector<v3dxVector3>& Normals,
+		const std::vector<float>& Tangents,  // float4 per vertex, empty = no tangent
+		const std::vector<float>& UVs,
 		const std::vector<UINT>& Indexes,
 		const std::vector<INT32>& MaterialIndexes);
 
@@ -86,6 +89,7 @@ public:
 	std::vector<UINT> MipLevelStart;
 
 	// Configurable group size parameters
+	UINT VertStride = 8;  // 8 or 12
 	UINT MinGroupSize = 8;
 	UINT MaxGroupSize = 32;
 	UINT ClusterSize = 128; // Max triangles per cluster (UE Nanite default: 128)

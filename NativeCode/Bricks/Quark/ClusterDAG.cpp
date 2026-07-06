@@ -18,6 +18,9 @@ FClusterDAG::~FClusterDAG()
 
 UINT FClusterDAG::AddMesh(
 	const std::vector<v3dxVector3>& Verts,
+	const std::vector<v3dxVector3>& Normals,
+	const std::vector<float>& Tangents,
+	const std::vector<float>& UVs,
 	const std::vector<UINT>& Indexes,
 	const std::vector<INT32>& MaterialIndexes)
 {
@@ -119,7 +122,7 @@ UINT FClusterDAG::AddMesh(
 	for (const auto& Range : Partitioner.Ranges)
 	{
 		QuarkCluster* NewCluster = new QuarkCluster(
-			Verts, Indexes,
+			Verts, Normals, Tangents, UVs, Indexes, MaterialIndexes,
 			Range.Begin, Range.End,
 			Partitioner, Adjacency);
 		NewCluster->MipLevel = 0;

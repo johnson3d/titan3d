@@ -651,12 +651,16 @@ namespace NxRHI
             ASSERT(Partitioner.Ranges.size() > 0);
         }
 
-		// build cluster
+		// build cluster (legacy path: no normals/tangents/uvs/materials)
+		std::vector<v3dxVector3> EmptyNormals;
+		std::vector<float> EmptyTangents;
+		std::vector<float> EmptyUVs;
+		std::vector<INT32> EmptyMaterials;
 		mClusters.resize(Partitioner.Ranges.size());
 		for (int i = 0; i < Partitioner.Ranges.size(); ++i)
 		{
 			auto& Range = Partitioner.Ranges[i];
-			mClusters[i] = QuarkCluster(Verts, Indexes, Range.Begin, Range.End, Partitioner, Adjacency);
+			mClusters[i] = QuarkCluster(Verts, EmptyNormals, EmptyTangents, EmptyUVs, Indexes, EmptyMaterials, Range.Begin, Range.End, Partitioner, Adjacency);
 		}
 		return int(mClusters.size());
 #else
@@ -671,6 +675,7 @@ namespace NxRHI
 		cluster.VertexCount = Verts.size();
 		cluster.IndexStart = 0;
 		cluster.IndexCount = Indexes.size();
+		cluster.PrimaryMaterialID = 0;
 
 		mClusters.push_back(cluster);
 #endif
@@ -681,12 +686,19 @@ namespace NxRHI
         auto pAttr = pNode->GetOrAddAttribute("Cluster", 0, 0);
         pAttr->BeginWrite();
 		
+		// Version 2: full vertex attributes (dynamic stride)
+		int version = 2;
+		pAttr->Write(version);
+
+		int vertStride = mClusters.empty() ? 8 : (int)mClusters[0].mVertStride;
+		pAttr->Write(vertStride);
+
 		int clusterCount = int(mClusters.size());
         pAttr->Write(clusterCount);
 
-        for (int i = 0; i < mClusters.size(); ++i)
+        for (int i = 0; i < (int)mClusters.size(); ++i)
         {
-            // vb
+            // vb (stride=8 floats per vertex)
             int vertCount = int(mClusters[i].Verts.size());
             pAttr->Write(vertCount);
             pAttr->Write((BYTE*)&mClusters[i].Verts[0], vertCount * sizeof(float));
@@ -694,6 +706,11 @@ namespace NxRHI
             int indexCount = int(mClusters[i].Indexes.size());
             pAttr->Write(indexCount);
             pAttr->Write((BYTE*)&mClusters[i].Indexes[0], indexCount * sizeof(UINT));
+			// material indexes
+			int matCount = int(mClusters[i].MaterialIndexes.size());
+			pAttr->Write(matCount);
+			if (matCount > 0)
+				pAttr->Write((BYTE*)&mClusters[i].MaterialIndexes[0], matCount * sizeof(INT32));
 			// bounding box
 			pAttr->Write((BYTE*)&mClusters[i].Bounds, sizeof(v3dxBox3));
         }
@@ -716,18 +733,29 @@ namespace NxRHI
 		if (pAttr)
 		{
 			pAttr->BeginRead();
+			
+			int version;
+			pAttr->Read(version);
+			
+			int vertStride;
+			pAttr->Read(vertStride);
+
 			int clusterCount;
 			pAttr->Read(clusterCount);
 
+			const UINT VertStride = (UINT)vertStride;
 			mClusters.resize(clusterCount);
 			for (int i = 0; i < clusterCount; ++i)
 			{
-				// vb
+				mClusters[i].mVertStride = VertStride;
+
+				// vb (dynamic stride)
 				int vertCount;
 				pAttr->Read(vertCount);
-				vbCount += vertCount / 3;
+				vbCount += vertCount / VertStride;
 				mClusters[i].Verts.resize(vertCount);
-				pAttr->Read((BYTE*)&mClusters[i].Verts[0], vertCount*sizeof(float));
+				pAttr->Read((BYTE*)&mClusters[i].Verts[0], vertCount * sizeof(float));
+				mClusters[i].NumVerts = vertCount / VertStride;
 
 				// ib
 				int indexCount;
@@ -735,6 +763,14 @@ namespace NxRHI
 				ibCount += indexCount;
 				mClusters[i].Indexes.resize(indexCount);
 				pAttr->Read((BYTE*)&mClusters[i].Indexes[0], indexCount * sizeof(UINT));
+				mClusters[i].NumTris = indexCount / 3;
+
+				// material indexes
+				int matCount;
+				pAttr->Read(matCount);
+				mClusters[i].MaterialIndexes.resize(matCount);
+				if (matCount > 0)
+					pAttr->Read((BYTE*)&mClusters[i].MaterialIndexes[0], matCount * sizeof(INT32));
 
 				// bounding box				
                 pAttr->Read((BYTE*)&mClusters[i].Bounds, sizeof(v3dxBox3));
@@ -749,18 +785,25 @@ namespace NxRHI
             int vbOffset, ibOffset;
             vbOffset = ibOffset = 0;
 
-            mClustersVB.resize(vbCount);
+			const UINT VertStride = mClusters[0].mVertStride; // dynamic: 8 or 12
+            mClustersVB.resize(vbCount * VertStride);
             mClustersIB.resize(ibCount);
 
             for (int i = 0; i < (int)mClusters.size(); ++i)
             {
                 // vb, ib offset info
                 mClusters[i].VertexStart = vbOffset;
-                mClusters[i].VertexCount = int(mClusters[i].Verts.size()) / 3;
+                mClusters[i].VertexCount = int(mClusters[i].Verts.size()) / VertStride;
                 mClusters[i].IndexStart = ibOffset;
                 mClusters[i].IndexCount = int(mClusters[i].Indexes.size());
 
-                memcpy((BYTE*)&mClustersVB[vbOffset], (BYTE*)&mClusters[i].Verts[0], int(mClusters[i].Verts.size()) * sizeof(float));
+                // Compute primary MaterialID (first triangle's material)
+                if (!mClusters[i].MaterialIndexes.empty())
+                    mClusters[i].PrimaryMaterialID = mClusters[i].MaterialIndexes[0];
+                else
+                    mClusters[i].PrimaryMaterialID = 0;
+
+                memcpy(&mClustersVB[vbOffset * VertStride], &mClusters[i].Verts[0], int(mClusters[i].Verts.size()) * sizeof(float));
 
                 // Add vbOffset to convert local cluster indices to global VB indices
                 for (int idx = 0; idx < (int)mClusters[i].Indexes.size(); idx++)
@@ -772,10 +815,10 @@ namespace NxRHI
                 ibOffset += mClusters[i].IndexCount;
             }
 
-			// vb view
+			// vb view (position only for visualization)
 			mClustersVertexArray = MakeWeakRef(new FVertexArray());
             FVbvDesc vbvDesc{};
-            vbvDesc.Stride = sizeof(v3dxVector3);
+            vbvDesc.Stride = VertStride * sizeof(float);
             vbvDesc.Size = vbvDesc.Stride * vbCount;
 			FMappedSubResource initData{};
 			initData.pData = (BYTE*)&mClustersVB[0];
@@ -817,12 +860,12 @@ namespace NxRHI
 		return mClusters[index].MipLevel;
 	}
 
-	int FMeshPrimitives::BuildNaniteDAG(IGpuDevice* device)
+	int FMeshPrimitives::BuildQuarkDAG(IGpuDevice* device)
 	{
-		return BuildNaniteDAGEx(device, 32);
+		return BuildQuarkDAGEx(device, 32);
 	}
 
-	int FMeshPrimitives::BuildNaniteDAGEx(IGpuDevice* device, UINT maxGroupSize, UINT clusterSize)
+	int FMeshPrimitives::BuildQuarkDAGEx(IGpuDevice* device, UINT maxGroupSize, UINT clusterSize)
 	{
 		std::vector<v3dxVector3> Verts;
 		std::vector<UINT> Indexes;
@@ -830,14 +873,109 @@ namespace NxRHI
 		if (!GetMeshBuffer(device, Verts, Indexes))
 			return 0;
 
+		// Extract Normal and UV from source mesh
+		std::vector<v3dxVector3> Normals;
+		std::vector<float> UVs;
+		{
+			auto normal_vb = mGeometryMesh->GetVertexBuffer(VST_Normal);
+			if (normal_vb != nullptr && normal_vb->Buffer != nullptr)
+			{
+				IBlobObject normalBlob;
+				AutoRef<NxRHI::IBuffer> copyBuf;
+				{
+					FTransientCmd cmd(device, NxRHI::QU_Transfer, "Mesh.ReadNormal");
+					auto copyDesc = normal_vb->Buffer->Desc;
+					copyDesc.Usage = USAGE_STAGING;
+					copyDesc.CpuAccess = ECpuAccess::CAS_READ;
+					copyDesc.MiscFlags = (EResourceMiscFlag)0;
+					copyDesc.RowPitch = copyDesc.Size;
+					copyDesc.DepthPitch = copyDesc.Size;
+					copyBuf = MakeWeakRef(device->CreateBuffer(&copyDesc));
+					cmd.GetCmdList()->CopyBufferRegion(copyBuf, 0, normal_vb->Buffer, 0, copyDesc.Size);
+				}
+				device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
+				copyBuf->FetchGpuData(device, 0, &normalBlob);
+				Normals.resize(mDesc.VertexNumber);
+				memcpy(&Normals[0], (BYTE*)normalBlob.GetData() + sizeof(UINT) * 2, mDesc.VertexNumber * sizeof(v3dxVector3));
+			}
+
+			auto uv_vb = mGeometryMesh->GetVertexBuffer(VST_UV);
+			if (uv_vb != nullptr && uv_vb->Buffer != nullptr)
+			{
+				IBlobObject uvBlob;
+				AutoRef<NxRHI::IBuffer> copyBuf;
+				{
+					FTransientCmd cmd(device, NxRHI::QU_Transfer, "Mesh.ReadUV");
+					auto copyDesc = uv_vb->Buffer->Desc;
+					copyDesc.Usage = USAGE_STAGING;
+					copyDesc.CpuAccess = ECpuAccess::CAS_READ;
+					copyDesc.MiscFlags = (EResourceMiscFlag)0;
+					copyDesc.RowPitch = copyDesc.Size;
+					copyDesc.DepthPitch = copyDesc.Size;
+					copyBuf = MakeWeakRef(device->CreateBuffer(&copyDesc));
+					cmd.GetCmdList()->CopyBufferRegion(copyBuf, 0, uv_vb->Buffer, 0, copyDesc.Size);
+				}
+				device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
+				copyBuf->FetchGpuData(device, 0, &uvBlob);
+				// UV is float2 per vertex
+				UVs.resize(mDesc.VertexNumber * 2);
+				memcpy(&UVs[0], (BYTE*)uvBlob.GetData() + sizeof(UINT) * 2, mDesc.VertexNumber * 2 * sizeof(float));
+			}
+		}
+
+		// Extract Tangent (float4 per vertex) from source mesh
+		std::vector<float> Tangents;
+		{
+			auto tangent_vb = mGeometryMesh->GetVertexBuffer(VST_Tangent);
+			if (tangent_vb != nullptr && tangent_vb->Buffer != nullptr)
+			{
+				IBlobObject tangentBlob;
+				AutoRef<NxRHI::IBuffer> copyBuf;
+				{
+					FTransientCmd cmd(device, NxRHI::QU_Transfer, "Mesh.ReadTangent");
+					auto copyDesc = tangent_vb->Buffer->Desc;
+					copyDesc.Usage = USAGE_STAGING;
+					copyDesc.CpuAccess = ECpuAccess::CAS_READ;
+					copyDesc.MiscFlags = (EResourceMiscFlag)0;
+					copyDesc.RowPitch = copyDesc.Size;
+					copyDesc.DepthPitch = copyDesc.Size;
+					copyBuf = MakeWeakRef(device->CreateBuffer(&copyDesc));
+					cmd.GetCmdList()->CopyBufferRegion(copyBuf, 0, tangent_vb->Buffer, 0, copyDesc.Size);
+				}
+				device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
+				copyBuf->FetchGpuData(device, 0, &tangentBlob);
+				// Tangent is float4 (v3dVector4_t) per vertex
+				Tangents.resize(mDesc.VertexNumber * 4);
+				memcpy(&Tangents[0], (BYTE*)tangentBlob.GetData() + sizeof(UINT) * 2, mDesc.VertexNumber * 4 * sizeof(float));
+			}
+		}
+
+		// Derive per-triangle MaterialIndex from FGeomMesh::Atoms
+		UINT numTriangles = (UINT)(Indexes.size() / 3);
+		std::vector<INT32> MaterialIndexes(numTriangles, 0);
+		
+		auto& atoms = mGeometryMesh->Atoms;
+		for (UINT atomIdx = 0; atomIdx < (UINT)atoms.size(); atomIdx++)
+		{
+			if (atoms[atomIdx].empty()) continue;
+			auto& desc = atoms[atomIdx][0]; // LOD 0
+			UINT triStart = desc.StartIndex / 3;
+			UINT triEnd = triStart + desc.NumPrimitives;
+			for (UINT t = triStart; t < triEnd && t < numTriangles; t++)
+			{
+				MaterialIndexes[t] = (INT32)atomIdx;
+			}
+		}
+
 		// Build the full DAG with configurable group size and cluster size
-		FClusterDAG DAG(8, maxGroupSize, clusterSize);
-		std::vector<INT32> MaterialIndexes; // Empty for now
-		UINT NumLevel0 = DAG.AddMesh(Verts, Indexes, MaterialIndexes);
+		bool bHasTangents = !Tangents.empty();
+		UINT vertStride = bHasTangents ? 12 : 8;
+		FClusterDAG DAG(vertStride, maxGroupSize, clusterSize);
+		UINT NumLevel0 = DAG.AddMesh(Verts, Normals, Tangents, UVs, Indexes, MaterialIndexes);
 		if (NumLevel0 == 0)
 			return 0;
 
-		VFX_LTRACE(ELTT_info, "[BuildNaniteDAG] Level 0: %u clusters from %u triangles\n", NumLevel0, (UINT)(Indexes.size() / 3));
+		VFX_LTRACE(ELTT_info, "[BuildQuarkDAG] Level 0: %u clusters from %u triangles\n", NumLevel0, (UINT)(Indexes.size() / 3));
 
 		// Build hierarchy levels
 		DAG.BuildDAG();
@@ -852,10 +990,14 @@ namespace NxRHI
 		}
 		mDAGMipLevels = DAG.NumMipLevels;
 
-		// Rebuild flat VB/IB for all clusters (for visualization)
+		// Persist DAG groups for BVH traversal LOD selection
+		mDAGGroups = std::move(DAG.Groups);
+
+		// Rebuild flat VB/IB for all clusters (dynamic stride)
 		mClustersVB.clear();
 		mClustersIB.clear();
 
+		const UINT VertStride = mClusters.empty() ? 8 : mClusters[0].mVertStride;
 		int vbOffset = 0;
 		int ibOffset = 0;
 		for (UINT i = 0; i < (UINT)mClusters.size(); i++)
@@ -866,9 +1008,18 @@ namespace NxRHI
 			Cluster.IndexStart = ibOffset;
 			Cluster.IndexCount = (int)Cluster.Indexes.size();
 
+			// Compute primary MaterialID (first triangle's material)
+			if (!Cluster.MaterialIndexes.empty())
+				Cluster.PrimaryMaterialID = Cluster.MaterialIndexes[0];
+			else
+				Cluster.PrimaryMaterialID = 0;
+
+			// Copy full vertex data (pos+normal+uv) from cluster's Verts array
 			for (UINT v = 0; v < Cluster.NumVerts; v++)
 			{
-				mClustersVB.push_back(Cluster.GetPosition(v));
+				const float* src = &Cluster.Verts[v * VertStride];
+				for (UINT f = 0; f < VertStride; f++)
+					mClustersVB.push_back(src[f]);
 			}
 
 			for (UINT idx = 0; idx < (UINT)Cluster.Indexes.size(); idx++)
@@ -880,11 +1031,102 @@ namespace NxRHI
 			ibOffset += Cluster.IndexCount;
 		}
 
-		VFX_LTRACE(ELTT_info, "[BuildNaniteDAG] Total: %u clusters, %u verts, %u indices, %u mip levels\n",
-			(UINT)mClusters.size(), (UINT)mClustersVB.size(), (UINT)mClustersIB.size(), mDAGMipLevels);
+		VFX_LTRACE(ELTT_info, "[BuildQuarkDAG] Total: %u clusters, %u verts, %u indices, %u mip levels\n",
+			(UINT)mClusters.size(), (UINT)(mClustersVB.size() / VertStride), (UINT)mClustersIB.size(), mDAGMipLevels);
 
 		return (int)mClusters.size();
 	}
+
+	UINT FMeshPrimitives::SelectClustersForLOD(
+		const v3dxVector3& cameraPos,
+		float screenHeight, float fov,
+		float errorThreshold,
+		UINT* outClusterIndices, UINT maxCount)
+	{
+		if (mClusters.empty() || mDAGGroups.empty() || outClusterIndices == nullptr || maxCount == 0)
+			return 0;
+
+		// projectionFactor: converts world-space error to screen-space pixels
+		// screenError = (LODError * screenHeight) / (2.0 * distance * tan(fov/2))
+		float tanHalfFov = tanf(fov * 0.5f);
+		if (tanHalfFov < 1e-6f) tanHalfFov = 1e-6f;
+		float projFactor = screenHeight / (2.0f * tanHalfFov);
+
+		UINT selectedCount = 0;
+
+		// Start from the coarsest level clusters (root cut)
+		// These are clusters at the highest MipLevel
+		std::vector<UINT> pendingClusters;
+		for (UINT i = 0; i < (UINT)mClusters.size(); i++)
+		{
+			if (mClusters[i].MipLevel == (int)(mDAGMipLevels - 1))
+			{
+				pendingClusters.push_back(i);
+			}
+		}
+
+		// BFS traversal: for each pending cluster, decide whether to render it or refine
+		while (!pendingClusters.empty())
+		{
+			std::vector<UINT> nextPending;
+
+			for (UINT clusterIdx : pendingClusters)
+			{
+				auto& cluster = mClusters[clusterIdx];
+
+				// Compute screen-space error for this cluster
+				v3dxVector3 lodCenter = cluster.LODBounds.getCenter();
+				float dx = cameraPos.X - lodCenter.X;
+				float dy = cameraPos.Y - lodCenter.Y;
+				float dz = cameraPos.Z - lodCenter.Z;
+				float distance = sqrtf(dx * dx + dy * dy + dz * dz);
+				if (distance < 1e-4f) distance = 1e-4f;
+
+				float screenError = (cluster.LODError * projFactor) / distance;
+
+				// If at Level 0 (finest), must select regardless of error
+				if (cluster.MipLevel == 0 || screenError <= errorThreshold)
+				{
+					// Select this cluster for rendering
+					if (selectedCount < maxCount)
+					{
+						outClusterIndices[selectedCount] = clusterIdx;
+						selectedCount++;
+					}
+				}
+				else
+				{
+					// Need finer detail: find the group that generated this cluster
+					UINT genGroupIdx = cluster.GeneratingGroupIndex;
+					if (genGroupIdx < (UINT)mDAGGroups.size())
+					{
+						// Push children of that group to next iteration
+						for (UINT childIdx : mDAGGroups[genGroupIdx].Children)
+						{
+							if (childIdx < (UINT)mClusters.size())
+							{
+								nextPending.push_back(childIdx);
+							}
+						}
+					}
+					else
+					{
+						// Fallback: if no group info, select this cluster anyway
+						if (selectedCount < maxCount)
+						{
+							outClusterIndices[selectedCount] = clusterIdx;
+							selectedCount++;
+						}
+					}
+				}
+			}
+
+			pendingClusters = std::move(nextPending);
+		}
+
+		return selectedCount;
+	}
+
 	bool FMeshPrimitives::LoadXnd(IGpuDevice* device, const char* name, XndHolder* xnd, bool isLoad)
 	{
 		if (xnd == nullptr)

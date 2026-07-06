@@ -136,6 +136,9 @@
     <Filter Include="GI\ProbeVolume">
       <UniqueIdentifier>{fdce1409-203d-4bef-8b61-d1a59b7aec78}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Bricks\GpuDriven\Quark">
+      <UniqueIdentifier>{d27c1903-bfa1-417a-9506-ec1f8bc44da2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -158,9 +161,6 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\NoPixelShader.shadingenv">
       <Filter>ShadingEnv\Sys</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\MergeInstance.shadingenv">
-      <Filter>Compute\GpuDriven</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\GpuDrivenDataDef.cginc">
       <Filter>Compute\GpuDriven</Filter>
@@ -380,9 +380,6 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\FRaster.cginc">
       <Filter>Bricks\GpuDriven</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\QuarkResolve.cginc">
-      <Filter>Bricks\GpuDriven</Filter>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\ClusterCulling.cginc">
       <Filter>Bricks\GpuDriven</Filter>
     </None>
@@ -534,6 +531,9 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\CBufferShaderBinderGen.cginc">
       <Filter>ShadingEnv</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\QuarkResolve_deprecated.cginc">
+      <Filter>Bricks\GpuDriven\Quark</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">
@@ -650,8 +650,14 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\SSAOFilter.compute">
       <Filter>Compute\ScreenSpace</Filter>
     </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\QuarkDAGVisualize.compute">
-      <Filter>Compute\GpuDriven</Filter>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\Quark\QuarkDAGVisualize.compute">
+      <Filter>Bricks\GpuDriven\Quark</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\Quark\QuarkVisBuffer.compute">
+      <Filter>Bricks\GpuDriven\Quark</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\Quark\QuarkVisResolve.compute">
+      <Filter>Bricks\GpuDriven\Quark</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

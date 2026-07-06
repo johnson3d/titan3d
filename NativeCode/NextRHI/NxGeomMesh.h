@@ -13,6 +13,7 @@
 #include "../Bricks/Quark/DisjointSet.h"
 #include "../Bricks/Quark/GraphPartitioner.h"
 #include "../Bricks/Quark/Cluster.h"
+#include "../Bricks/Quark/ClusterDAG.h"
 
 struct VHitResult;
 
@@ -263,8 +264,8 @@ namespace NxRHI
 		}
 		// cluster interfaces
 		int ClusterizeTriangles(IGpuDevice* device);
-		int BuildNaniteDAG(IGpuDevice* device);
-		int BuildNaniteDAGEx(IGpuDevice* device, UINT maxGroupSize, UINT clusterSize = 128);
+		int BuildQuarkDAG(IGpuDevice* device);
+		int BuildQuarkDAGEx(IGpuDevice* device, UINT maxGroupSize, UINT clusterSize = 128);
 		bool SaveClusters(XndNode* pNode);
 		int LoadClusters(XndHolder* xnd, IGpuDevice* device);
 		QuarkCluster* GetCluster(int index);
@@ -272,8 +273,21 @@ namespace NxRHI
 		UINT GetDAGMipLevels() const { return mDAGMipLevels; }
 		float GetClusterLODError(int index) const;
 		int GetClusterMipLevel(int index) const;
+
+		// BVH traversal LOD selection: returns the number of selected clusters
+		// cameraPos: camera world position
+		// screenHeight: viewport height in pixels
+		// fov: camera field of view in radians
+		// errorThreshold: screen-space error threshold in pixels
+		// outClusterIndices: output buffer for selected cluster indices
+		// maxCount: max capacity of outClusterIndices
+		UINT SelectClustersForLOD(
+			const v3dxVector3& cameraPos,
+			float screenHeight, float fov,
+			float errorThreshold,
+			UINT* outClusterIndices, UINT maxCount);
 		
-		v3dxVector3* GetClustersVB()
+		float* GetClustersVB()
 		{
 			return &mClustersVB[0];
 		}
@@ -283,7 +297,16 @@ namespace NxRHI
 		}
 		UINT GetClustersVBCount()
 		{
-			return (UINT)mClustersVB.size();
+			UINT stride = GetClustersVBStride();
+			return stride > 0 ? (UINT)(mClustersVB.size() / stride) : 0;
+		}
+		UINT GetClustersVBStride()
+		{
+			return mClusters.empty() ? 8 : mClusters[0].mVertStride;
+		}
+		bool GetClustersHasTangents()
+		{
+			return GetClustersVBStride() == 12;
 		}
 		UINT GetClustersIBCount()
 		{
@@ -308,7 +331,8 @@ namespace NxRHI
 
 		// cluster relative
 		std::vector<QuarkCluster> mClusters;
-		std::vector<v3dxVector3> mClustersVB;
+		std::vector<FClusterGroup> mDAGGroups; // DAG group hierarchy for BVH traversal
+		std::vector<float> mClustersVB; // stride=8 floats (pos3+normal3+uv2) per vertex
 		std::vector<UINT> mClustersIB;
 		UINT mDAGMipLevels = 0;
 

@@ -1,0 +1,298 @@
+#ifndef __QUARK_VIS_RESOLVE_H__
+#define __QUARK_VIS_RESOLVE_H__
+
+#include "../../../Inc/VertexLayout.cginc"
+
+// ===========================================================================
+// QuarkVisResolve: Resolve 64-bit VisBuffer → ColorRT + DepthRT
+// Supports: ClusterID/MipLevel/TriangleID hash + NormalLit + UV Checker
+// ===========================================================================
+
+// Input: 64-bit VisBuffer (ByteAddressBuffer)
+// Layout per pixel: [lo32 = PackedID, hi32 = DepthBits]
+// PackedID = InstanceID:8 | ClusterID:16 | TriangleID:8
+ByteAddressBuffer VisBuffer64;
+
+// Vertex/Index/Cluster buffers for attribute reconstruction
+ByteAddressBuffer VisVertexBuffer;       // dynamic stride: 8 floats (32B) or 12 floats (48B) per vertex
+ByteAddressBuffer VisIndexBuffer;        // uint per index
+
+struct FClusterVisData
+{
+    float3 BoundMin;
+    int IndexStart;
+    float3 BoundMax;
+    int IndexEnd;
+    float4x4 WVPMatrix;
+    uint ClusterID;
+    uint MipLevel;
+    float LODError;
+    float MaxLODError;
+    uint MaterialID;
+    uint InstanceID;
+    uint VertexStart;
+    uint Padding;
+};
+StructuredBuffer<FClusterVisData> ClusterVisBuffer;
+
+// Output: Color + Depth
+VK_IMAGE(rgba8)
+RWTexture2D<float4> ResolveColorRT;
+RWTexture2D<float> ResolveDepthRT;
+
+struct FResolveParams
+{
+    float2 RTSize;
+    uint ResolveMode;   // 0=ClusterID, 1=MipLevel, 2=TriangleID, 3=InstanceID, 4=NormalLit, 5=UVChecker, 6=TangentVis
+    uint ClusterCount;
+    uint VertexStride;  // 8 or 12 (in floats)
+    uint HasTangents;   // 0 or 1
+    uint2 Padding;
+};
+
+cbuffer cbResolveParams DX_AUTOBIND
+{
+    FResolveParams ResolveParams;
+}
+
+// ===========================================================================
+// Hash function for generating distinct colors from an integer ID
+// ===========================================================================
+float3 HashColor(uint id)
+{
+    uint h = id;
+    h = ((h >> 16) ^ h) * 0x45d9f3b;
+    h = ((h >> 16) ^ h) * 0x45d9f3b;
+    h = (h >> 16) ^ h;
+    
+    float r = frac(float(h) * 0.0000152587890625f);
+    h = h * 1103515245u + 12345u;
+    float g = frac(float(h) * 0.0000152587890625f);
+    h = h * 1103515245u + 12345u;
+    float b = frac(float(h) * 0.0000152587890625f);
+    
+    float3 color = float3(r, g, b);
+    color = lerp(float3(0.3, 0.3, 0.3), color, 0.8);
+    return saturate(color);
+}
+
+// ===========================================================================
+// Unpack helpers
+// ===========================================================================
+uint UnpackTriangleID(uint packedID) { return packedID & 0xFF; }
+uint UnpackClusterID(uint packedID) { return (packedID >> 8) & 0xFFFF; }
+uint UnpackInstanceID(uint packedID) { return (packedID >> 24) & 0xFF; }
+
+// ===========================================================================
+// Tangent reconstruction (Christian Schüler method, same as UE5 Nanite)
+// ===========================================================================
+float3 ReconstructTangent(float3 pos0, float3 pos1, float3 pos2,
+                          float3 normal,
+                          float2 uv0, float2 uv1, float2 uv2,
+                          out float bitangentSign)
+{
+    float3 edge10 = pos1 - pos0;
+    float3 edge20 = pos2 - pos0;
+    float2 duv10 = uv1 - uv0;
+    float2 duv20 = uv2 - uv0;
+
+    float3 geoNormal = cross(edge10, edge20);
+    float texSign = duv10.x * duv20.y - duv20.x * duv10.y;
+
+    float3 perp2 = cross(normal, edge20);
+    float3 perp1 = cross(edge10, normal);
+    float3 tangentX = perp2 * duv10.x + perp1 * duv20.x;
+
+    // Check for degenerate UV (near-zero determinant)
+    float lenSq = dot(tangentX, tangentX);
+    if (lenSq < 1e-12)
+    {
+        // Fallback: construct arbitrary tangent from normal (Nanite GetNaniteFallbackTangent)
+        float sign_nz = normal.z >= 0.0 ? 1.0 : -1.0;
+        float a = -rcp(sign_nz + normal.z);
+        float b = normal.x * normal.y * a;
+        tangentX = float3(1.0 + sign_nz * a * normal.x * normal.x, sign_nz * b, -sign_nz * normal.x);
+        bitangentSign = 1.0;
+        return tangentX;
+    }
+
+    tangentX = normalize(tangentX);
+    bitangentSign = texSign * dot(normal, geoNormal) < 0.0 ? -1.0 : 1.0;
+    return tangentX;
+}
+
+// ===========================================================================
+// Reconstruct barycentrics from screen-space triangle projection
+// ===========================================================================
+float3 ReconstructBarycentrics(float3 v0, float3 v1, float3 v2, float4x4 wvpMatrix, float2 pixelPos, float2 screenSize)
+{
+    // Project vertices to clip space
+    float4 clip0 = mul(wvpMatrix, float4(v0, 1));
+    float4 clip1 = mul(wvpMatrix, float4(v1, 1));
+    float4 clip2 = mul(wvpMatrix, float4(v2, 1));
+    
+    // NDC to screen
+    float2 s0 = ((clip0.xy / clip0.w) * float2(0.5, -0.5) + 0.5) * screenSize;
+    float2 s1 = ((clip1.xy / clip1.w) * float2(0.5, -0.5) + 0.5) * screenSize;
+    float2 s2 = ((clip2.xy / clip2.w) * float2(0.5, -0.5) + 0.5) * screenSize;
+    
+    // Barycentric via edge functions
+    float2 e01 = s1 - s0;
+    float2 e02 = s2 - s0;
+    float2 ep = pixelPos - s0;
+    float invArea = 1.0 / (e01.x * e02.y - e01.y * e02.x);
+    float w1 = (ep.x * e02.y - ep.y * e02.x) * invArea;
+    float w2 = (e01.x * ep.y - e01.y * ep.x) * invArea;
+    float w0 = 1.0 - w1 - w2;
+    
+    return float3(w0, w1, w2);
+}
+
+// ===========================================================================
+// Main resolve pass: one thread per pixel
+// ===========================================================================
+[numthreads(8, 8, 1)]
+void CS_ResolveVisBuffer(uint3 DTid : SV_DispatchThreadID)
+{
+    uint2 screenSize = uint2(ResolveParams.RTSize);
+    if (DTid.x >= screenSize.x || DTid.y >= screenSize.y)
+        return;
+
+    uint addr = (DTid.y * screenSize.x + DTid.x) * 8;
+    uint2 data = VisBuffer64.Load2(addr);
+    uint packedID = data.x;
+    uint depthBits = data.y;
+
+    // Background check based on Z convention
+#if USE_INVERSE_Z == 1
+    if (depthBits == 0)  // reverse-Z: 0 = infinitely far = no geometry
+#else
+    if (depthBits == 0xFFFFFFFF)  // forward-Z: max = infinitely far = no geometry
+#endif
+    {
+        ResolveColorRT[DTid.xy] = float4(0.1, 0.1, 0.12, 1.0);
+#if USE_INVERSE_Z == 1
+        ResolveDepthRT[DTid.xy] = 0.0;
+#else
+        ResolveDepthRT[DTid.xy] = 1.0;
+#endif
+        return;
+    }
+
+    // Decode depth
+    float depth = asfloat(depthBits);
+
+    // Decode IDs
+    uint triID = UnpackTriangleID(packedID);
+    uint clusterID = UnpackClusterID(packedID);
+    uint instanceID = UnpackInstanceID(packedID);
+
+    // Compute color based on resolve mode
+    float3 color = float3(1, 0, 1); // magenta fallback
+    uint mode = ResolveParams.ResolveMode;
+
+    if (mode == 0) // ClusterID hash
+    {
+        color = HashColor(clusterID);
+    }
+    else if (mode == 1) // MipLevel
+    {
+        if (clusterID < ResolveParams.ClusterCount)
+        {
+            uint mipLvl = ClusterVisBuffer[clusterID].MipLevel;
+            color = HashColor(mipLvl);
+        }
+    }
+    else if (mode == 2) // TriangleID hash
+    {
+        color = HashColor(triID + clusterID * 128);
+    }
+    else if (mode == 3) // InstanceID hash
+    {
+        color = HashColor(instanceID);
+    }
+    else if (mode >= 4 && mode <= 6) // NormalLit / UVChecker / TangentVis — need attribute reconstruction
+    {
+        if (clusterID < ResolveParams.ClusterCount)
+        {
+            FClusterVisData cluster = ClusterVisBuffer[clusterID];
+            
+            // Dynamic byte stride from cbuffer
+            uint byteStride = ResolveParams.VertexStride * 4; // 32 or 48
+            uint uvByteOffset = (ResolveParams.HasTangents != 0) ? 40 : 24; // after tangent4 or after normal3
+            
+            // Read triangle indices (global index = cluster.IndexStart + triID * 3)
+            uint idxBase = (uint)cluster.IndexStart + triID * 3;
+            uint i0 = VisIndexBuffer.Load(idxBase * 4);
+            uint i1 = VisIndexBuffer.Load((idxBase + 1) * 4);
+            uint i2 = VisIndexBuffer.Load((idxBase + 2) * 4);
+            
+            // Read vertex positions (position at offset 0)
+            float3 pos0 = asfloat(VisVertexBuffer.Load3(i0 * byteStride));
+            float3 pos1 = asfloat(VisVertexBuffer.Load3(i1 * byteStride));
+            float3 pos2 = asfloat(VisVertexBuffer.Load3(i2 * byteStride));
+            
+            // Reconstruct barycentrics
+            float2 pixelPos = float2(DTid.xy) + 0.5;
+            float3 bary = ReconstructBarycentrics(pos0, pos1, pos2, cluster.WVPMatrix, pixelPos, float2(screenSize));
+            
+            // Read normals (offset 12 bytes = 3 floats from vertex start)
+            float3 n0 = asfloat(VisVertexBuffer.Load3(i0 * byteStride + 12));
+            float3 n1 = asfloat(VisVertexBuffer.Load3(i1 * byteStride + 12));
+            float3 n2 = asfloat(VisVertexBuffer.Load3(i2 * byteStride + 12));
+            float3 normal = normalize(bary.x * n0 + bary.y * n1 + bary.z * n2);
+            
+            if (mode == 4) // NormalLit
+            {
+                // Simple NdotL with fixed light direction
+                float3 lightDir = normalize(float3(0.5, 1.0, 0.3));
+                float ndotl = saturate(dot(normal, lightDir)) * 0.7 + 0.3;
+                color = HashColor(clusterID) * ndotl;
+            }
+            else if (mode == 5) // UVChecker
+            {
+                // Read UVs at dynamic offset
+                float2 uv0 = asfloat(VisVertexBuffer.Load2(i0 * byteStride + uvByteOffset));
+                float2 uv1 = asfloat(VisVertexBuffer.Load2(i1 * byteStride + uvByteOffset));
+                float2 uv2 = asfloat(VisVertexBuffer.Load2(i2 * byteStride + uvByteOffset));
+                float2 uv = bary.x * uv0 + bary.y * uv1 + bary.z * uv2;
+                
+                // Checkerboard pattern
+                float checker = ((frac(uv.x * 8.0) > 0.5) != (frac(uv.y * 8.0) > 0.5)) ? 0.85 : 0.35;
+                color = float3(checker, checker, checker);
+            }
+            else // mode == 6: TangentVis
+            {
+                float3 tangent;
+                float bitangentSign;
+                
+                if (ResolveParams.HasTangents != 0)
+                {
+                    // Direct read: tangent float4 at offset 24 bytes (6 floats)
+                    float4 tan0 = asfloat(VisVertexBuffer.Load4(i0 * byteStride + 24));
+                    float4 tan1 = asfloat(VisVertexBuffer.Load4(i1 * byteStride + 24));
+                    float4 tan2 = asfloat(VisVertexBuffer.Load4(i2 * byteStride + 24));
+                    float4 interpTan = bary.x * tan0 + bary.y * tan1 + bary.z * tan2;
+                    tangent = normalize(interpTan.xyz);
+                    bitangentSign = interpTan.w >= 0.0 ? 1.0 : -1.0;
+                }
+                else
+                {
+                    // Implicit reconstruction from triangle geometry + UV
+                    float2 uv0 = asfloat(VisVertexBuffer.Load2(i0 * byteStride + uvByteOffset));
+                    float2 uv1 = asfloat(VisVertexBuffer.Load2(i1 * byteStride + uvByteOffset));
+                    float2 uv2 = asfloat(VisVertexBuffer.Load2(i2 * byteStride + uvByteOffset));
+                    tangent = ReconstructTangent(pos0, pos1, pos2, normal, uv0, uv1, uv2, bitangentSign);
+                }
+                
+                // Visualize tangent direction as color (remap [-1,1] to [0,1])
+                color = tangent * 0.5 + 0.5;
+            }
+        }
+    }
+
+    ResolveColorRT[DTid.xy] = float4(color, 1.0);
+    ResolveDepthRT[DTid.xy] = depth;
+}
+
+#endif // __QUARK_VIS_RESOLVE_H__

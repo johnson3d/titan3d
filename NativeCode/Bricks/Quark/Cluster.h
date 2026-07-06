@@ -49,9 +49,11 @@ public:
 	QuarkCluster() {}
 	QuarkCluster(
 		const std::vector< v3dxVector3 >& InVerts,
+		const std::vector< v3dxVector3 >& InNormals,
+		const std::vector< float >& InTangents,   // float4 per vertex (xyz + sign), empty = no tangent
+		const std::vector< float >& InUVs,
 		const std::vector< UINT >& InIndexes,
-		//const std::vector < INT32 >& InMaterialIndexes,
-		//UINT InNumTexCoords, bool bInHasColors, bool bInPreserveArea,
+		const std::vector< INT32 >& InMaterialIndexes,
 		UINT TriBegin, UINT TriEnd, const FGraphPartitioner& Partitioner, const FAdjacency& Adjacency );
 
     QuarkCluster( QuarkCluster& SrcCluster, UINT TriBegin, UINT TriEnd, const FGraphPartitioner& Partitioner, const FAdjacency& Adjacency );
@@ -66,17 +68,16 @@ private:
 	UINT		AddVert( const float* Vert, FHashTable& HashTable );
 
 public:
-	UINT				GetVertSize() const;
-	v3dxVector3&			GetPosition( UINT VertIndex );
-// 	float*				GetAttributes( UINT VertIndex );
-// 	v3dxVector3&			GetNormal( UINT VertIndex );
-// 	FLinearColor&		GetColor( UINT VertIndex );
-// 	FVector2f*			GetUVs( UINT VertIndex );
+	UINT			GetVertSize() const;
+	v3dxVector3&		GetPosition( UINT VertIndex );
+	v3dxVector3&		GetNormal( UINT VertIndex );
+	float*				GetTangent( UINT VertIndex );       // offset 6, only valid when mVertStride==12
+	float*				GetUVs( UINT VertIndex );           // offset 6 (stride=8) or 10 (stride=12)
 
 	const v3dxVector3& GetPositionConst( UINT VertIndex ) const;
-// 	const v3dxVector3&	GetNormal( UINT VertIndex ) const;
-// 	const FLinearColor&	GetColor( UINT VertIndex ) const;
-// 	const FVector2f*	GetUVs( UINT VertIndex ) const;
+	const v3dxVector3&	GetNormalConst( UINT VertIndex ) const;
+	const float*		GetTangentConst( UINT VertIndex ) const;
+	const float*		GetUVsConst( UINT VertIndex ) const;
 
 	void				SanitizeVertexData();
 
@@ -84,6 +85,7 @@ public:
 
 	static const UINT	ClusterSize = 128;
 
+	UINT		mVertStride = 8;  // 8 (no tangent) or 12 (with tangent)
 	UINT		NumVerts = 0;
 	UINT		NumTris = 0;
 	UINT		NumTexCoords = 0;
@@ -128,16 +130,16 @@ public:
 // 	std::vector<uint8>	StripIndexData;
 
 	// export members
-    int VertexStart;
-    int VertexCount;
-    int IndexStart;
-    int IndexCount;
+    int VertexStart = 0;
+    int VertexCount = 0;
+    int IndexStart = 0;
+    int IndexCount = 0;
+    int PrimaryMaterialID = 0;
 };
 
 inline UINT QuarkCluster::GetVertSize() const
 {
-	//return 6 + ( bHasColors ? 4 : 0 ) + NumTexCoords * 2; // 3 pos, 3 normal
-	return 3;
+	return mVertStride; // 8 (pos3+normal3+uv2) or 12 (pos3+normal3+tangent4+uv2)
 }
 
 inline v3dxVector3& QuarkCluster::GetPosition( UINT VertIndex )
@@ -150,40 +152,39 @@ inline const v3dxVector3& QuarkCluster::GetPositionConst( UINT VertIndex ) const
 	return *reinterpret_cast< const v3dxVector3* >( &Verts[ VertIndex * GetVertSize() ] );
 }
 
-// inline float* QuarkCluster::GetAttributes( UINT VertIndex )
-// {
-// 	return &Verts[ VertIndex * GetVertSize() + 3 ];
-// }
-// 
-// inline v3dxVector3& QuarkCluster::GetNormal( UINT VertIndex )
-// {
-// 	return *reinterpret_cast< v3dxVector3* >( &Verts[ VertIndex * GetVertSize() + 3 ] );
-// }
-// 
-// inline const v3dxVector3& QuarkCluster::GetNormal( UINT VertIndex ) const
-// {
-// 	return *reinterpret_cast< const v3dxVector3* >( &Verts[ VertIndex * GetVertSize() + 3 ] );
-// }
-// 
-// inline FLinearColor& QuarkCluster::GetColor( UINT VertIndex )
-// {
-// 	return *reinterpret_cast< FLinearColor* >( &Verts[ VertIndex * GetVertSize() + 6 ] );
-// }
-// 
-// inline const FLinearColor& QuarkCluster::GetColor( UINT VertIndex ) const
-// {
-// 	return *reinterpret_cast< const FLinearColor* >( &Verts[ VertIndex * GetVertSize() + 6 ] );
-// }
-// 
-// inline FVector2f* QuarkCluster::GetUVs( UINT VertIndex )
-// {
-// 	return reinterpret_cast< FVector2f* >( &Verts[ VertIndex * GetVertSize() + 6 + ( bHasColors ? 4 : 0 ) ] );
-// }
-// 
-// inline const FVector2f* QuarkCluster::GetUVs( UINT VertIndex ) const
-// {
-// 	return reinterpret_cast< const FVector2f* >( &Verts[ VertIndex * GetVertSize() + 6 + ( bHasColors ? 4 : 0 ) ] );
-// }
+inline v3dxVector3& QuarkCluster::GetNormal( UINT VertIndex )
+{
+	return *reinterpret_cast< v3dxVector3* >( &Verts[ VertIndex * GetVertSize() + 3 ] );
+}
+
+inline const v3dxVector3& QuarkCluster::GetNormalConst( UINT VertIndex ) const
+{
+	return *reinterpret_cast< const v3dxVector3* >( &Verts[ VertIndex * GetVertSize() + 3 ] );
+}
+
+// Tangent: float4 at offset 6 (only valid when mVertStride==12)
+inline float* QuarkCluster::GetTangent( UINT VertIndex )
+{
+	return &Verts[ VertIndex * GetVertSize() + 6 ];
+}
+
+inline const float* QuarkCluster::GetTangentConst( UINT VertIndex ) const
+{
+	return &Verts[ VertIndex * GetVertSize() + 6 ];
+}
+
+// UV: offset 6 (stride=8, no tangent) or offset 10 (stride=12, after tangent4)
+inline float* QuarkCluster::GetUVs( UINT VertIndex )
+{
+	UINT uvOffset = (mVertStride == 12) ? 10 : 6;
+	return &Verts[ VertIndex * GetVertSize() + uvOffset ];
+}
+
+inline const float* QuarkCluster::GetUVsConst( UINT VertIndex ) const
+{
+	UINT uvOffset = (mVertStride == 12) ? 10 : 6;
+	return &Verts[ VertIndex * GetVertSize() + uvOffset ];
+}
 
 
 class TR_CLASS()

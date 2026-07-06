@@ -25,7 +25,7 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\ClusterCulling.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\FRaster.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\GpuCulling.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\QuarkResolve.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\QuarkResolve_deprecated.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\EmitterBase.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\EmitterBaseImpl.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\NebulaParticle.cginc" />
@@ -48,7 +48,6 @@
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerViewport.cginc" />
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PreFramePerMesh.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\GpuDrivenDataDef.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\MergeInstance.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\VertexShaderVTF.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Compute\MacrossComputeShadingEnv.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Compute\MacrossComputeShadingEnvImpl.cginc" />
@@ -151,7 +150,9 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Collision\BVH\GpuBvhTraversal.compute" />
-    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\QuarkDAGVisualize.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\Quark\QuarkDAGVisualize.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\Quark\QuarkVisBuffer.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\Quark\QuarkVisResolve.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\SWRasterizer.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\Effectors.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\EmitShape.compute" />

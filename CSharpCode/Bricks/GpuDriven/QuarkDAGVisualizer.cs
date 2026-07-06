@@ -32,6 +32,10 @@ namespace EngineNS.Bricks.GpuDriven
         public uint MipLevel;
         public float LODError;
         public float MaxLODError;
+        public uint MaterialID;
+        public uint InstanceID;
+        public uint VertexStart;
+        public uint Padding;
     }
 
     /// <summary>
@@ -54,7 +58,7 @@ namespace EngineNS.Bricks.GpuDriven
 
         public TtQuarkVisClearShading()
         {
-            CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/QuarkDAGVisualize.compute", RName.ERNameType.Engine);
+            CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/Quark/QuarkDAGVisualize.compute", RName.ERNameType.Engine);
             MainName = "CS_ClearVisTexture";
             this.UpdatePermutation().AddWaitTask();
         }
@@ -93,7 +97,7 @@ namespace EngineNS.Bricks.GpuDriven
 
         public TtQuarkVisDAGShading()
         {
-            CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/QuarkDAGVisualize.compute", RName.ERNameType.Engine);
+            CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/Quark/QuarkDAGVisualize.compute", RName.ERNameType.Engine);
             MainName = "CS_VisualizeDAG";
             this.UpdatePermutation().AddWaitTask();
         }
@@ -135,7 +139,7 @@ namespace EngineNS.Bricks.GpuDriven
 
         public TtQuarkVisBVHShading()
         {
-            CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/QuarkDAGVisualize.compute", RName.ERNameType.Engine);
+            CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/Quark/QuarkDAGVisualize.compute", RName.ERNameType.Engine);
             MainName = "CS_DrawBVHBoxes";
             this.UpdatePermutation().AddWaitTask();
         }
@@ -346,7 +350,7 @@ namespace EngineNS.Bricks.GpuDriven
 
         /// <summary>
         /// Upload DAG cluster data for visualization.
-        /// Call this after BuildNaniteDAG completes to populate the visualization buffers.
+        /// Call this after BuildQuarkDAG completes to populate the visualization buffers.
         /// </summary>
         public unsafe void UploadDAGData(Graphics.Mesh.TtMeshPrimitives mesh, TtCamera camera)
         {
@@ -374,25 +378,11 @@ namespace EngineNS.Bricks.GpuDriven
             uint vbCount = coreObj.GetClustersVBCount();
             if (vbCount > 0)
             {
-                int floatCount = (int)(vbCount * 8);
+                int floatCount = (int)(vbCount * coreObj.GetClustersVBStride());
                 VisVertices.SetSize(floatCount);
                 var vbPtr = coreObj.GetClustersVB();
-                var tempVB = new float[floatCount];
-                for (uint v = 0; v < vbCount; v++)
-                {
-                    tempVB[v * 8 + 0] = vbPtr[v].X;
-                    tempVB[v * 8 + 1] = vbPtr[v].Y;
-                    tempVB[v * 8 + 2] = vbPtr[v].Z;
-                    tempVB[v * 8 + 3] = 0; // Normal X
-                    tempVB[v * 8 + 4] = 1; // Normal Y (up)
-                    tempVB[v * 8 + 5] = 0; // Normal Z
-                    tempVB[v * 8 + 6] = 0; // UV X
-                    tempVB[v * 8 + 7] = 0; // UV Y
-                }
-                fixed (float* pVB = &tempVB[0])
-                {
-                    VisVertices.UpdateData(0, pVB, floatCount * sizeof(float));
-                }
+                // Direct copy: C++ stores full vertex data (stride=8 or 12)
+                VisVertices.UpdateData(0, vbPtr, floatCount * sizeof(float));
             }
 
             // Upload index buffer
@@ -422,6 +412,10 @@ namespace EngineNS.Bricks.GpuDriven
                 clusterArray[i].MipLevel = (uint)coreObj.GetClusterMipLevel((int)i);
                 clusterArray[i].LODError = coreObj.GetClusterLODError((int)i);
                 clusterArray[i].MaxLODError = mMaxLODError;
+                clusterArray[i].MaterialID = (uint)cluster.PrimaryMaterialID;
+                clusterArray[i].InstanceID = 0;
+                clusterArray[i].VertexStart = (uint)cluster.VertexStart;
+                clusterArray[i].Padding = 0;
             }
 
             int clusterBufSize = (int)clusterCount;

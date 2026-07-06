@@ -490,7 +490,7 @@ namespace EngineNS.Bricks.GpuDriven
     {
         public TtQuarkResolveShading()
         {
-            CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/QuarkResolve.cginc", RName.ERNameType.Engine);
+            CodeName = RName.GetRName("Shaders/Bricks/GpuDriven/Quark/QuarkResolve_deprecated.cginc", RName.ERNameType.Engine);
 
             this.UpdatePermutation().AddWaitTask();
         }

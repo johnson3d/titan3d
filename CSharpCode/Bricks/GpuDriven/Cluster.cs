@@ -106,15 +106,17 @@ namespace EngineNS.Bricks.GpuDriven
             }
 
             var vbCount = mesh.mCoreObject.GetClustersVBCount();
-            var ibCount = mesh.mCoreObject.GetClustersIBCount();            
+            var ibCount = mesh.mCoreObject.GetClustersIBCount();
+            var vbStride = mesh.mCoreObject.GetClustersVBStride();
             unsafe
             {
                 result.Vertices = new Vector3[vbCount];
-                EngineNS.Vector3* vb = mesh.mCoreObject.GetClustersVB();
+                float* vb = mesh.mCoreObject.GetClustersVB();
                 
-                fixed (Vector3* dest = &result.Vertices[0])
+                for (uint v = 0; v < vbCount; v++)
                 {
-                    CoreSDK.MemoryCopy(dest, vb, vbCount * (uint)sizeof(Vector3));
+                    float* src = vb + v * vbStride;
+                    result.Vertices[v] = new Vector3(src[0], src[1], src[2]);
                 }
 
                 result.Indices = new uint[ibCount];

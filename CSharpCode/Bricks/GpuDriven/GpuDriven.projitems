@@ -14,5 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)SWRasterizer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VisibilityCulling.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QuarkDAGVisualizer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QuarkVisBuffer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QuarkVisResolve.cs" />
   </ItemGroup>
 </Project>

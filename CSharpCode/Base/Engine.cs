@@ -174,7 +174,7 @@ namespace EngineNS
         public int ShaderModelMajor { get; set; } = 6;
         [Rtti.Meta("")]
         [Category("Shader")]
-        public int ShaderModelMinor { get; set; } = 5;
+        public int ShaderModelMinor { get; set; } = 6;
         [Rtti.Meta("")]
         [Category("Option")]
         public bool CompressDxt { get; set; } = true;

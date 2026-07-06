@@ -1,0 +1,274 @@
+#ifndef __QUARK_VISBUFFER_H__
+#define __QUARK_VISBUFFER_H__
+
+#include "../../../Inc/GlobalDefine.cginc"
+#include "../../../Inc/VertexLayout.cginc"
+#include "../FRaster.cginc"
+
+// ===========================================================================
+// QuarkVisBuffer: 64-bit Visibility Buffer (SM6.6 InterlockedCompareExchange64)
+// Each pixel = [Depth_hi32 | PackedID_lo32]
+// PackedID = TriangleID:8 | ClusterID:16 | InstanceID:8
+// ===========================================================================
+
+struct FClusterVisData
+{
+    float3 BoundMin;
+    int IndexStart;
+    float3 BoundMax;
+    int IndexEnd;
+    matrix WVPMatrix;
+    uint ClusterID;
+    uint MipLevel;
+    float LODError;
+    float MaxLODError;
+    uint MaterialID;
+    uint InstanceID;
+    uint VertexStart;
+    uint Padding;
+};
+
+StructuredBuffer<FClusterVisData> ClusterVisBuffer;
+ByteAddressBuffer VisVertexBuffer;
+ByteAddressBuffer VisIndexBuffer;
+
+// 64-bit VisBuffer: RWByteAddressBuffer (size = Width * Height * 8)
+RWByteAddressBuffer VisBuffer64;
+
+struct FVisBufferParams
+{
+    float2 RTSize;
+    uint ClusterCount;
+    uint VertexStride;  // 8 or 12 (in floats)
+    uint CullMode;      // 0=None(double-sided), 1=CCW front(default), 2=CW front
+    uint3 Padding;
+};
+
+cbuffer cbVisBuffer DX_AUTOBIND
+{
+    FVisBufferParams VisBufferParams;
+}
+
+// ===========================================================================
+// Quark Material Output (stub — will be replaced by material system)
+// materialIndex: per-triangle material ID, used to dispatch to correct material
+// ===========================================================================
+MTL_OUTPUT GetQuarkMaterialOutput(PS_INPUT input, uint materialIndex)
+{
+    MTL_OUTPUT mtl = (MTL_OUTPUT)0;
+    mtl.mNormal = input.Get_vNormal();
+    mtl.mTangent = input.Get_vTangent();
+    mtl.mAlpha = 1.0h;
+    mtl.mAlphaTest = 0.0h;  // 0 = no alpha test, all pixels pass
+    // TODO: switch on materialIndex to apply per-material logic
+    return mtl;
+}
+
+// ===========================================================================
+// Pass 1: Clear VisBuffer
+// ===========================================================================
+[numthreads(8, 8, 1)]
+void CS_ClearVisBuffer(uint3 DTid : SV_DispatchThreadID)
+{
+    uint2 screenSize = uint2(VisBufferParams.RTSize);
+    if (DTid.x >= screenSize.x || DTid.y >= screenSize.y)
+        return;
+
+    uint addr = (DTid.y * screenSize.x + DTid.x) * 8;
+    // Clear: lo = 0 (no ID), hi = sentinel depth
+#if USE_INVERSE_Z == 1
+    VisBuffer64.Store2(addr, uint2(0, 0));           // reverse-Z: depth=0 = infinitely far
+#else
+    VisBuffer64.Store2(addr, uint2(0, 0xFFFFFFFF));  // forward-Z: depth=max = infinitely far
+#endif
+}
+
+// ===========================================================================
+// Helper: Pack 64-bit value for atomic CAS
+// High 32 = quantized depth, Low 32 = packed ID
+// InterlockedMin comparison: smaller 64-bit value = closer depth
+// ===========================================================================
+uint PackID(uint triLocalID, uint clusterID, uint instanceID)
+{
+    return (instanceID << 24) | (clusterID << 8) | (triLocalID & 0xFF);
+}
+
+// ===========================================================================
+// Pass 2: Software Rasterize (one thread per triangle)
+// ThreadGroup = one cluster (128 threads max per cluster)
+// ===========================================================================
+[numthreads(128, 1, 1)]
+void CS_RasterizeVisBuffer(uint3 GroupID : SV_GroupID, uint3 GroupThreadID : SV_GroupThreadID)
+{
+    uint clusterIdx = GroupID.x;
+    if (clusterIdx >= VisBufferParams.ClusterCount)
+        return;
+
+    FClusterVisData cluster = ClusterVisBuffer[clusterIdx];
+    uint triLocalID = GroupThreadID.x;
+    uint triGlobalStart = (uint)cluster.IndexStart;
+    uint triGlobalEnd = (uint)cluster.IndexEnd;
+    uint triCount = (triGlobalEnd - triGlobalStart) / 3;
+
+    if (triLocalID >= triCount)
+        return;
+
+    uint2 screenSize = uint2(VisBufferParams.RTSize);
+    matrix wvp = cluster.WVPMatrix;
+
+    // Load triangle indices
+    uint idx0 = VisIndexBuffer.Load((triGlobalStart + triLocalID * 3 + 0) * 4);
+    uint idx1 = VisIndexBuffer.Load((triGlobalStart + triLocalID * 3 + 1) * 4);
+    uint idx2 = VisIndexBuffer.Load((triGlobalStart + triLocalID * 3 + 2) * 4);
+
+    // Load vertex positions (3 floats per vertex, dynamic byte stride)
+    uint byteStride = VisBufferParams.VertexStride * 4; // 32 or 48
+    uint normalByteOffset = 12; // always at offset 3 floats
+    uint tangentByteOffset = 24; // at offset 6 floats (only valid when stride==12)
+    uint uvByteOffset = (VisBufferParams.VertexStride == 12) ? 40 : 24;
+    float3 v0 = asfloat(VisVertexBuffer.Load3(idx0 * byteStride));
+    float3 v1 = asfloat(VisVertexBuffer.Load3(idx1 * byteStride));
+    float3 v2 = asfloat(VisVertexBuffer.Load3(idx2 * byteStride));
+
+    // Preload normals
+    float3 n0 = asfloat(VisVertexBuffer.Load3(idx0 * byteStride + normalByteOffset));
+    float3 n1 = asfloat(VisVertexBuffer.Load3(idx1 * byteStride + normalByteOffset));
+    float3 n2 = asfloat(VisVertexBuffer.Load3(idx2 * byteStride + normalByteOffset));
+
+    // Preload tangents (valid only when stride==12)
+    float4 t0 = (float4)0, t1 = (float4)0, t2 = (float4)0;
+    if (VisBufferParams.VertexStride == 12)
+    {
+        t0 = asfloat(VisVertexBuffer.Load4(idx0 * byteStride + tangentByteOffset));
+        t1 = asfloat(VisVertexBuffer.Load4(idx1 * byteStride + tangentByteOffset));
+        t2 = asfloat(VisVertexBuffer.Load4(idx2 * byteStride + tangentByteOffset));
+    }
+
+    // Preload UVs
+    float2 uv0 = asfloat(VisVertexBuffer.Load2(idx0 * byteStride + uvByteOffset));
+    float2 uv1 = asfloat(VisVertexBuffer.Load2(idx1 * byteStride + uvByteOffset));
+    float2 uv2 = asfloat(VisVertexBuffer.Load2(idx2 * byteStride + uvByteOffset));
+
+    // Transform to clip space
+    // Note: StructuredBuffer stores C# row-major matrix; use mul(M, v) for correct pos*VP
+    float4 clip0 = mul(wvp, float4(v0, 1.0));
+    float4 clip1 = mul(wvp, float4(v1, 1.0));
+    float4 clip2 = mul(wvp, float4(v2, 1.0));
+
+    // Perspective divide
+    if (clip0.w <= 0 && clip1.w <= 0 && clip2.w <= 0)
+        return;
+
+    float3 ndc0 = clip0.xyz / clip0.w;
+    float3 ndc1 = clip1.xyz / clip1.w;
+    float3 ndc2 = clip2.xyz / clip2.w;
+
+    // NDC to screen space
+    float2 screen0 = float2((ndc0.x * 0.5 + 0.5) * screenSize.x, (0.5 - ndc0.y * 0.5) * screenSize.y);
+    float2 screen1 = float2((ndc1.x * 0.5 + 0.5) * screenSize.x, (0.5 - ndc1.y * 0.5) * screenSize.y);
+    float2 screen2 = float2((ndc2.x * 0.5 + 0.5) * screenSize.x, (0.5 - ndc2.y * 0.5) * screenSize.y);
+
+    // Compute screen-space bounding box
+    float2 bbMin = min(min(screen0, screen1), screen2);
+    float2 bbMax = max(max(screen0, screen1), screen2);
+
+    int2 pixMin = int2(max(floor(bbMin), float2(0, 0)));
+    int2 pixMax = int2(min(ceil(bbMax), float2(screenSize) - 1));
+
+    // Back-face culling (configurable via CullMode)
+    float2 e01 = screen1 - screen0;
+    float2 e02 = screen2 - screen0;
+    float area2 = e01.x * e02.y - e01.y * e02.x;
+    uint cullMode = VisBufferParams.CullMode;
+    if (cullMode == 1) // CCW front: cull CW (area <= 0)
+    {
+        if (area2 <= 0) 
+            return;
+    }
+    else if (cullMode == 2) // CW front: cull CCW (area >= 0)
+    {
+        if (area2 >= 0)
+            return;
+    }
+    // cullMode == 0: no culling (double-sided)
+
+    if (area2 == 0)
+        return; // degenerate triangle
+    float invArea2 = 1.0 / area2;
+
+    // Rasterize: iterate pixels in bounding box
+    uint packedID = PackID(triLocalID, cluster.ClusterID, cluster.InstanceID);
+
+    for (int py = pixMin.y; py <= pixMax.y; py++)
+    {
+        for (int px = pixMin.x; px <= pixMax.x; px++)
+        {
+            float2 p = float2(px + 0.5, py + 0.5);
+
+            // Barycentric coordinates
+            float2 ep = p - screen0;
+            float w1 = (ep.x * e02.y - ep.y * e02.x) * invArea2;
+            float w2 = (e01.x * ep.y - e01.y * ep.x) * invArea2;
+            float w0 = 1.0 - w1 - w2;
+
+            if (w0 < 0 || w1 < 0 || w2 < 0)
+                continue;
+
+            // Material alpha test: construct PS_INPUT with interpolated attributes
+            PS_INPUT psInput = (PS_INPUT)0;
+            float2 uv = w0 * uv0 + w1 * uv1 + w2 * uv2;
+            float3 normal = normalize(w0 * n0 + w1 * n1 + w2 * n2);
+            float4 tangent = w0 * t0 + w1 * t1 + w2 * t2;
+            tangent.xyz = normalize(tangent.xyz);
+            psInput.Set_vUV(uv);
+            psInput.Set_vNormal(normal);
+            psInput.Set_vTangent(tangent);
+
+            MTL_OUTPUT mtl = GetQuarkMaterialOutput(psInput, cluster.MaterialID);
+            if (mtl.mAlphaTest > 0 && mtl.mAlpha < mtl.mAlphaTest)
+                continue;
+
+            // Interpolate depth (NDC Z)
+            float depth = w0 * ndc0.z + w1 * ndc1.z + w2 * ndc2.z;
+            if (depth < 0 || depth > 1)
+                continue;
+
+            // Store depth as raw float bits: IEEE 754 positive floats have same ordering as uint
+            // asuint(0.1) < asuint(0.9) → InterlockedMin64 picks smallest = closest (forward-Z)
+            // Full 24-bit mantissa precision, no quantization waste
+            uint depthBits = asuint(depth);
+
+            // 64-bit atomic min: layout = [lo32=packedID, hi32=depthBits]
+            // As uint64 (little-endian): value = packedID | (depthBits << 32)
+            // InterlockedMin64 picks smallest value → smallest depth → closest pixel
+            uint addr = (uint(py) * screenSize.x + uint(px)) * 8;
+
+#if (CP_SM_major > 6) || (CP_SM_major == 6 && CP_SM_minor >= 6)
+            uint64_t newVal = ((uint64_t)depthBits << 32) | (uint64_t)packedID;
+            uint64_t oldVal;
+#if USE_INVERSE_Z == 1
+            // Reverse-Z: closer = larger depth → keep MAX
+            VisBuffer64.InterlockedMax64(addr, newVal, oldVal);
+#else
+            // Forward-Z: closer = smaller depth → keep MIN
+            VisBuffer64.InterlockedMin64(addr, newVal, oldVal);
+#endif
+#else
+            // SM < 6.6 fallback: two-step (has race condition, may flicker)
+            uint oldDepth;
+#if USE_INVERSE_Z == 1
+            VisBuffer64.InterlockedMax(addr + 4, depthBits, oldDepth);
+            if (depthBits >= oldDepth)
+#else
+            VisBuffer64.InterlockedMin(addr + 4, depthBits, oldDepth);
+            if (depthBits <= oldDepth)
+#endif
+            {
+                VisBuffer64.Store(addr, packedID);
+            }
+#endif
+        }
+    }
+}
+
+#endif // __QUARK_VISBUFFER_H__
