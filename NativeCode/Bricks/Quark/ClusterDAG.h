@@ -38,6 +38,21 @@ struct FClusterGroup
 	v3dxBox3 Bounds;
 };
 
+// GPU-friendly flattened export of FClusterGroup for LOD cut selection
+struct FClusterGroupExport
+{
+	v3dxVector3 LODBoundsCenter;   // Bounding sphere center
+	float LODBoundsRadius;          // Bounding sphere radius
+	float ParentLODError;           // Parent simplification error
+	int MipLevel;                   // Group DAG level (0=leaf group)
+	int ChildrenStart;              // Start index in flattened ChildrenIndices array
+	int ChildrenCount;              // Number of children cluster indices
+	int ParentsStart;               // Start index in flattened ParentsIndices array
+	int ParentsCount;               // Number of parent cluster indices
+	int Padding0;
+	int Padding1;
+};
+
 // The complete Cluster DAG: stores all clusters across all LOD levels,
 // all groups, and the hierarchy relationships.
 class FClusterDAG
@@ -74,6 +89,27 @@ public:
 
 	// Print DAG statistics for debugging
 	void PrintDAGInfo() const;
+
+	// === GPU LOD Selection Export ===
+
+	// Export flattened group data for GPU-driven LOD cut selection.
+	// Caller must provide output buffers; returns the number of groups exported.
+	// outGroups: array of FClusterGroupExport[NumGroups]
+	// outChildrenIndices: flattened children cluster indices
+	// outParentsIndices: flattened parents cluster indices
+	// outClusterGroupMap: per-cluster mapping to its generating group index
+	// outRootGroupIndices: indices of the coarsest-level groups (pass 0 input)
+	UINT ExportGroupsForGPU(
+		void* outGroups, UINT maxGroups,
+		UINT* outChildrenIndices, UINT maxChildren,
+		UINT* outParentsIndices, UINT maxParents,
+		UINT* outClusterGroupMap, UINT maxClusters,
+		UINT* outRootGroupIndices, UINT maxRootGroups,
+		UINT& outChildrenTotal, UINT& outParentsTotal, UINT& outRootGroupCount) const;
+
+	// Query sizes needed for ExportGroupsForGPU allocation
+	void GetExportSizes(UINT& outGroupCount, UINT& outChildrenTotal,
+		UINT& outParentsTotal, UINT& outClusterCount, UINT& outRootGroupCount) const;
 
 public:
 	// All clusters across all levels (Level 0 = finest, Level N = coarsest)

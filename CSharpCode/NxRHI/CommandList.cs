@@ -90,6 +90,10 @@ namespace EngineNS.NxRHI
     }
     public class TtCommandList : AuxPtrType<NxRHI.ICommandList>
     {
+        static public TtCommandList GetCmdList()
+        {
+            return TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+        }
         ECommandListState mCommandListState = ECommandListState.None;
         public ECommandListState CommandListState
         {
@@ -319,9 +323,10 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.GetCmdRecorder().PushGpuDraw(draw);
         }
-        public unsafe void PushAction(IActionDraw.FDelegate_OnActionDraw action, void* arg)
+        public unsafe void PushAction(IActionDraw.FDelegate_OnActionDraw action, void* arg,
+        [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
         {
-            var draw = TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.CreateActionDraw();
+            var draw = TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.CreateActionDraw(filePath, lineNumber);
             draw.OnActionDraw = action;
             draw.Arg = arg;
             mCoreObject.PushGpuDraw(draw);

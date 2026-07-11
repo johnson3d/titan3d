@@ -462,7 +462,7 @@ namespace EngineNS.Bricks.GpuDriven
                 CBShadingStruct.SetValue("ShadingStruct", in mShadingStruct);
             }
             
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = NxRHI.TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmd, "SwRasterize"))
             {
                 // get total dispatch param

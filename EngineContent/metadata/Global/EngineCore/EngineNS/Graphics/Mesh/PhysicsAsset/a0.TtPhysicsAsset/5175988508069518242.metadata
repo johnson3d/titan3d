@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_5175988508069518242 Type="EngineNS.Graphics.Mesh.PhysicsAsset.TtPhysicsAsset@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Bodies Type="System.Collections.Generic.List&lt;EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody@EngineCore,&gt;@Unknown" Order="0" />
+  <Constraints Type="System.Collections.Generic.List&lt;EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneConstraint@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_5175988508069518242>

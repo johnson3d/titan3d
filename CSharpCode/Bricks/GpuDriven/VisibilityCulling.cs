@@ -271,7 +271,7 @@ namespace EngineNS.Bricks.GpuDriven
                 CBCameraFrustum.SetValue("FrustumInfo", in mFrustumCullingData);
             }
 
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = NxRHI.TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmd, "CullCluster"))
             {
                 VisParameter.World = world;

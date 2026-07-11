@@ -189,7 +189,7 @@ namespace NS_tutorials.animation
 {
     [EngineNS.Macross.TtMacross]
     [EngineNS.Macross.TtMacrossSign(RName_Name = "tutorials/animation/dmc_grayanim.designmacross", RName_Type = EngineNS.RName.ERNameType.Game)]
-    public partial class DMC_KawaiiPhysics_3916161430 : EngineNS.Animation.BlendTree.Node.TtLocalSpaceBlendTree_KawaiiPhysics<dmc_grayanim>
+    public partial class DMC_KawaiiPhysics_1383711289 : EngineNS.Animation.BlendTree.Node.TtLocalSpaceBlendTree_KawaiiPhysics<dmc_grayanim>
     {
         EngineNS.Macross.TtMacrossStackFrame mFrame_Initialize_561274663 = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("tutorials/animation/dmc_grayanim.designmacross", EngineNS.RName.ERNameType.Game));
         EngineNS.Macross.TtMacrossStackTracer mStack_Initialize_561274663 = new EngineNS.Macross.TtMacrossStackTracer();
@@ -200,6 +200,41 @@ namespace NS_tutorials.animation
                 System.Boolean returnedValue = default(System.Boolean);
                 mFrame_Initialize_561274663.SetWatchVariable("context", context);
                 System.Collections.Generic.List<EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiChainSetup> TempChainSetups = new System.Collections.Generic.List<EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiChainSetup>();
+                EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiChainSetup TempChainSetups_Item_1053127852 = new EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiChainSetup();
+                TempChainSetups_Item_1053127852.Name = "Chain";
+                TempChainSetups_Item_1053127852.RootBoneIndex = 8;
+                TempChainSetups_Item_1053127852.EndBoneIndex = 9;
+                TempChainSetups_Item_1053127852.TailBoneLength = 0f;
+                TempChainSetups_Item_1053127852.TailBoneAxis = EngineNS.Bricks.Animation.KawaiiPhysics.EKawaiiTailBoneAxis.X_Positive;
+                TempChainSetups_Item_1053127852.ConstrainBoneLength = true;
+                TempChainSetups_Item_1053127852.BoneLengthConstraintBlend = 1f;
+                TempChainSetups_Item_1053127852.RootCollision = false;
+                TempChainSetups_Item_1053127852.LODThreshold = -1;
+                EngineNS.KawaiiPhysics.FKawaiiPhySettings PhysicsSettings_Instance_3246619459 = new EngineNS.KawaiiPhysics.FKawaiiPhySettings();
+                PhysicsSettings_Instance_3246619459.NativePointer = 0;
+                PhysicsSettings_Instance_3246619459.Stiffness = 0.05f;
+                PhysicsSettings_Instance_3246619459.Damping = 0.1f;
+                PhysicsSettings_Instance_3246619459.WorldDampingLocation = 0.8f;
+                PhysicsSettings_Instance_3246619459.WorldDampingRotation = 0.8f;
+                PhysicsSettings_Instance_3246619459.LimitAngle = 0f;
+                PhysicsSettings_Instance_3246619459.Radius = 3f;
+                PhysicsSettings_Instance_3246619459.WindCoefficient = 1f;
+                PhysicsSettings_Instance_3246619459.DragCoefficient = 0f;
+                PhysicsSettings_Instance_3246619459.MaxFrameDisplacement = 0f;
+                TempChainSetups_Item_1053127852.PhysicsSettings = PhysicsSettings_Instance_3246619459;
+                EngineNS.KawaiiPhysics.FKawaiiPhySettings PhysicsSettingsRandom_Instance_904244130 = new EngineNS.KawaiiPhysics.FKawaiiPhySettings();
+                PhysicsSettingsRandom_Instance_904244130.NativePointer = 0;
+                PhysicsSettingsRandom_Instance_904244130.Stiffness = 0f;
+                PhysicsSettingsRandom_Instance_904244130.Damping = 0f;
+                PhysicsSettingsRandom_Instance_904244130.WorldDampingLocation = 0f;
+                PhysicsSettingsRandom_Instance_904244130.WorldDampingRotation = 0f;
+                PhysicsSettingsRandom_Instance_904244130.LimitAngle = 0f;
+                PhysicsSettingsRandom_Instance_904244130.Radius = 0f;
+                PhysicsSettingsRandom_Instance_904244130.WindCoefficient = 0f;
+                PhysicsSettingsRandom_Instance_904244130.DragCoefficient = 0f;
+                PhysicsSettingsRandom_Instance_904244130.MaxFrameDisplacement = 0f;
+                TempChainSetups_Item_1053127852.PhysicsSettingsRandom = PhysicsSettingsRandom_Instance_904244130;
+                TempChainSetups.Add(TempChainSetups_Item_1053127852);
                 System.Collections.Generic.List<EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiClothSetup> TempClothSetups = new System.Collections.Generic.List<EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiClothSetup>();
                 System.Collections.Generic.List<EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiRodSetup> TempRodSetups = new System.Collections.Generic.List<EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiRodSetup>();
                 ChainSetups = TempChainSetups;
@@ -242,7 +277,7 @@ namespace NS_tutorials.animation
         [EngineNS.Rtti.Meta]
         [System.ComponentModel.Category("Macross")]
         [System.ComponentModel.DisplayName("KawaiiPhysics")]
-        public DMC_KawaiiPhysics_3916161430 KawaiiPhysics { get; set; }
+        public DMC_KawaiiPhysics_1383711289 KawaiiPhysics { get; set; }
         EngineNS.Macross.TtMacrossStackFrame mFrame_Initialize_561274663 = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("tutorials/animation/dmc_grayanim.designmacross", EngineNS.RName.ERNameType.Game));
         EngineNS.Macross.TtMacrossStackTracer mStack_Initialize_561274663 = new EngineNS.Macross.TtMacrossStackTracer();
         public override async EngineNS.Thread.Async.TtTask<System.Boolean> Initialize(EngineNS.Animation.BlendTree.FAnimBlendTreeContext context)
@@ -258,7 +293,7 @@ namespace NS_tutorials.animation
                 BlendTree_StateMachine = new DMC_BlendTree_StateMachine_829722290();
                 BlendTree_StateMachine.CenterData = CenterData;
                 await BlendTree_StateMachine.Initialize(context);
-                KawaiiPhysics = new DMC_KawaiiPhysics_3916161430();
+                KawaiiPhysics = new DMC_KawaiiPhysics_1383711289();
                 KawaiiPhysics.CenterData = CenterData;
                 await KawaiiPhysics.Initialize(context);
                 PoseOutput.FromNode = KawaiiPhysics;

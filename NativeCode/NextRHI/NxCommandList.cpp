@@ -220,7 +220,7 @@ namespace NxRHI
 		bfDesc.Size = Count * sizeof(UINT);
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
-		auto copyBuffer = MakeWeakRef(GetGpuDevice()->CreateBuffer(&bfDesc));
+		auto copyBuffer = MakeWeakRef(GetGpuDevice()->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 		FMappedSubResource mapped{};
 		if (copyBuffer->Map(0, &mapped, false))
 		{
@@ -242,7 +242,7 @@ namespace NxRHI
 				continue;
 			}
 
-			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 			cpDraw->BindBufferDest(BufferWriters[i].Buffer);
 			cpDraw->BindBufferSrc(copyBuffer);
 			cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;

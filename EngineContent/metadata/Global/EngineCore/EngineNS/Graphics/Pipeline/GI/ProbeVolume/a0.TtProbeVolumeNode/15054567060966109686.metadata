@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_15054567060966109686 Type="EngineNS.Graphics.Pipeline.GI.ProbeVolume.TtProbeVolumeNode@EngineCore">
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <EnableEnvMap Type="System.Boolean@Unknown" Order="0" />
+  <HistoryBlendAlpha Type="System.Single@Unknown" Order="0" />
+  <MaxRayDistance Type="System.Single@Unknown" Order="0" />
+  <ProbeSpacing Type="System.Single@Unknown" Order="0" />
+  <ProbesPerFrame Type="System.UInt32@Unknown" Order="0" />
+  <RaysPerProbe Type="System.UInt32@Unknown" Order="0" />
+  <SkyColor Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <SkyIntensity Type="System.Single@Unknown" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_15054567060966109686>

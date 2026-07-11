@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_16725746233955461746 Type="EngineNS.Bricks.CodeBuilder.TtSwitchStatement@EngineCore">
+  <Condition Type="EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore" Order="0" />
+  <Statements Type="System.Collections.Generic.Dictionary&lt;EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore,EngineNS.Bricks.CodeBuilder.TtStatementBase@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_16725746233955461746>

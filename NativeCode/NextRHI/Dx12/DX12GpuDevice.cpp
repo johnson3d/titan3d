@@ -378,7 +378,7 @@ namespace NxRHI
 		QueryDevice();
 
 		FFenceDesc fcDesc{};
-		mFrameFence = MakeWeakRef(this->CreateFence(&fcDesc, "Dx12 Frame Fence"));
+		mFrameFence = MakeWeakRef(this->CreateFence(&fcDesc, "Dx12 Frame Fence", __FILE__, __LINE__));
 
 		if (CmdSigForIndirectDraw == nullptr)
 		{
@@ -548,7 +548,7 @@ namespace NxRHI
 			FCbvDesc desc{};
 			desc.BufferSize = 1;
 			desc.ShaderBinder = nullptr;
-			mNullCBV = MakeWeakRef((DX12CbView*)this->CreateCBV(nullptr, &desc));
+			mNullCBV = MakeWeakRef((DX12CbView*)this->CreateCBV(nullptr, &desc, __FILE__, __LINE__));
 		}
 		
 		mDescriptorPoolManager = MakeWeakRef(new DX12DesriptorPoolManager());
@@ -558,30 +558,30 @@ namespace NxRHI
 		bfDesc.SetDefault(true, (EBufferType)(EBufferType::BFT_SRV | EBufferType::BFT_UAV));
 		bfDesc.Size = sizeof(float);
 		bfDesc.StructureStride = sizeof(float);
-		auto nullBuffer = MakeWeakRef(this->CreateBuffer(&bfDesc));
+		auto nullBuffer = MakeWeakRef(this->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 		{	
 			FSrvDesc desc{};
 			desc.SetBuffer(true);
 			desc.Buffer.NumElements = 1;
 			desc.Buffer.StructureByteStride = sizeof(float);
-			mNullSRV = MakeWeakRef((DX12SrView*)this->CreateSRV(nullBuffer, &desc));
+			mNullSRV = MakeWeakRef((DX12SrView*)this->CreateSRV(nullBuffer, &desc, __FILE__, __LINE__));
 		}
 		{
 			FUavDesc desc{};
 			desc.SetBuffer(true);
 			desc.Buffer.NumElements = 1;
 			desc.Buffer.StructureByteStride = sizeof(float);
-			mNullUAV = MakeWeakRef((DX12UaView*)this->CreateUAV(nullBuffer, &desc));
+			mNullUAV = MakeWeakRef((DX12UaView*)this->CreateUAV(nullBuffer, &desc, __FILE__, __LINE__));
 		}
 		{
 			FSamplerDesc desc{};
 			desc.SetDefault();
-			mNullSampler = MakeWeakRef((DX12Sampler*)this->CreateSampler(&desc));
+			mNullSampler = MakeWeakRef((DX12Sampler*)this->CreateSampler(&desc, __FILE__, __LINE__));
 		}
 		//mNullRTV = mRtvAllocator->Alloc<DX12PagedHeap>();
 		//mNullDSV = mDsvAllocator->Alloc<DX12PagedHeap>();
 
-		mPostCmdList = MakeWeakRef((DX12CommandList*)this->CreateCommandList());
+		mPostCmdList = MakeWeakRef((DX12CommandList*)this->CreateCommandList(__FILE__, __LINE__));
 		mPostCmdList->SetDebugName("PostCmdList");
 		mPostCmdRecorder = MakeWeakRef(new ICmdRecorder(this));
 
@@ -641,9 +641,10 @@ namespace NxRHI
 		}
 		//ASSERT(op4.Native16BitShaderOpsSupported);
 	}
-	IBuffer* DX12GpuDevice::CreateBuffer(const FBufferDesc* desc)
+	IBuffer* DX12GpuDevice::CreateBuffer(const FBufferDesc* desc, const char* file, int line)
 	{
-		auto result = new DX12Buffer();
+		ASSERT(file != nullptr);
+		auto result = NewObjectWithInfo<DX12Buffer>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc) == false)
 		{
 			result->Release();
@@ -651,9 +652,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ITexture* DX12GpuDevice::CreateTexture(const FTextureDesc* desc)
+	ITexture* DX12GpuDevice::CreateTexture(const FTextureDesc* desc, const char* file, int line)
 	{
-		auto result = new DX12Texture();
+		auto result = NewObjectWithInfo<DX12Texture>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc) == false)
 		{
 			result->Release();
@@ -661,9 +662,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ICbView* DX12GpuDevice::CreateCBV(IBuffer* pBuffer, const FCbvDesc* desc)
+	ICbView* DX12GpuDevice::CreateCBV(IBuffer* pBuffer, const FCbvDesc* desc, const char* file, int line)
 	{
-		auto result = new DX12CbView();
+		auto result = NewObjectWithInfo<DX12CbView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc) == false)
 		{
 			result->Release();
@@ -671,9 +672,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IVbView* DX12GpuDevice::CreateVBV(IBuffer* pBuffer, const FVbvDesc* desc)
+	IVbView* DX12GpuDevice::CreateVBV(IBuffer* pBuffer, const FVbvDesc* desc, const char* file, int line)
 	{
-		auto result = new DX12VbView();
+		auto result = NewObjectWithInfo<DX12VbView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, desc) == false)
 		{
 			result->Release();
@@ -681,9 +682,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IIbView* DX12GpuDevice::CreateIBV(IBuffer* pBuffer, const FIbvDesc* desc)
+	IIbView* DX12GpuDevice::CreateIBV(IBuffer* pBuffer, const FIbvDesc* desc, const char* file, int line)
 	{
-		auto result = new DX12IbView();
+		auto result = NewObjectWithInfo<DX12IbView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, desc) == false)
 		{
 			result->Release();
@@ -691,9 +692,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ISrView* DX12GpuDevice::CreateSRV(IGpuBufferData* pBuffer, const FSrvDesc* desc)
+	ISrView* DX12GpuDevice::CreateSRV(IGpuBufferData* pBuffer, const FSrvDesc* desc, const char* file, int line)
 	{
-		auto result = new DX12SrView();
+		auto result = NewObjectWithInfo<DX12SrView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc) == false)
 		{
 			result->Release();
@@ -701,9 +702,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IUaView* DX12GpuDevice::CreateUAV(IGpuBufferData* pBuffer, const FUavDesc* desc)
+	IUaView* DX12GpuDevice::CreateUAV(IGpuBufferData* pBuffer, const FUavDesc* desc, const char* file, int line)
 	{
-		auto result = new DX12UaView();
+		auto result = NewObjectWithInfo<DX12UaView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc) == false)
 		{
 			result->Release();
@@ -711,9 +712,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IRenderTargetView* DX12GpuDevice::CreateRTV(ITexture* pBuffer, const FRtvDesc* desc)
+	IRenderTargetView* DX12GpuDevice::CreateRTV(ITexture* pBuffer, const FRtvDesc* desc, const char* file, int line)
 	{
-		auto result = new DX12RenderTargetView();
+		auto result = NewObjectWithInfo<DX12RenderTargetView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, desc) == false)
 		{
 			result->Release();
@@ -721,9 +722,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IDepthStencilView* DX12GpuDevice::CreateDSV(ITexture* pBuffer, const FDsvDesc* desc)
+	IDepthStencilView* DX12GpuDevice::CreateDSV(ITexture* pBuffer, const FDsvDesc* desc, const char* file, int line)
 	{
-		auto result = new DX12DepthStencilView();
+		auto result = NewObjectWithInfo<DX12DepthStencilView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc) == false)
 		{
 			result->Release();
@@ -731,9 +732,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ISampler* DX12GpuDevice::CreateSampler(const FSamplerDesc* desc)
+	ISampler* DX12GpuDevice::CreateSampler(const FSamplerDesc* desc, const char* file, int line)
 	{
-		auto result = new DX12Sampler();
+		auto result = NewObjectWithInfo<DX12Sampler>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc) == false)
 		{
 			result->Release();
@@ -741,9 +742,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ISwapChain* DX12GpuDevice::CreateSwapChain(const FSwapChainDesc* desc)
+	ISwapChain* DX12GpuDevice::CreateSwapChain(const FSwapChainDesc* desc, const char* file, int line)
 	{
-		auto result = new DX12SwapChain();
+		auto result = NewObjectWithInfo<DX12SwapChain>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc) == false)
 		{
 			result->Release();
@@ -751,22 +752,22 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IRenderPass* DX12GpuDevice::CreateRenderPass(const FRenderPassDesc* desc)
+	IRenderPass* DX12GpuDevice::CreateRenderPass(const FRenderPassDesc* desc, const char* file, int line)
 	{
-		auto result = new IRenderPass();
+		auto result = NewObjectWithInfo<IRenderPass>(file ? file : __FILE__, line);
 		result->Desc = *desc;
 		result->SetViewInstanceLocations();
 		return result;
 	}
-	IFrameBuffers* DX12GpuDevice::CreateFrameBuffers(IRenderPass* rpass)
+	IFrameBuffers* DX12GpuDevice::CreateFrameBuffers(IRenderPass* rpass, const char* file, int line)
 	{
-		auto result = new DX12FrameBuffers();
+		auto result = NewObjectWithInfo<DX12FrameBuffers>(file ? file : __FILE__, line);
 		result->mRenderPass = rpass;
 		return result;
 	}
-	IAccelerationStructure* DX12GpuDevice::CreateAccelerationStructure(const FAccelerationStructureDesc* desc)
+	IAccelerationStructure* DX12GpuDevice::CreateAccelerationStructure(const FAccelerationStructureDesc* desc, const char* file, int line)
 	{
-		auto result = new DX12AccelerationStructure();
+		auto result = NewObjectWithInfo<DX12AccelerationStructure>(file ? file : __FILE__, line);
 		if (result->Init(this, desc) == false)
 		{
 			result->Release();
@@ -774,9 +775,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IAStructureInstance* DX12GpuDevice::CreateAccelerationStructureInstance(const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure)
+	IAStructureInstance* DX12GpuDevice::CreateAccelerationStructureInstance(const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure, const char* file, int line)
 	{
-		auto result = new DX12AStructureInstance();
+		auto result = NewObjectWithInfo<DX12AStructureInstance>(file ? file : __FILE__, line);
 		if (result->Init(this, desc, pAStructrure) == false)
 		{
 			result->Release();
@@ -784,9 +785,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ITopAccelerationStructure* DX12GpuDevice::CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc)
+	ITopAccelerationStructure* DX12GpuDevice::CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc, const char* file, int line)
 	{
-		auto result = new DX12TopAccelerationStructure();
+		auto result = NewObjectWithInfo<DX12TopAccelerationStructure>(file ? file : __FILE__, line);
 		if (result->Init(this, desc) == false)
 		{
 			result->Release();
@@ -794,9 +795,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IGpuPipeline* DX12GpuDevice::CreatePipeline(const FGpuPipelineDesc* desc)
+	IGpuPipeline* DX12GpuDevice::CreatePipeline(const FGpuPipelineDesc* desc, const char* file, int line)
 	{
-		auto result = new DX12GpuPipeline();
+		auto result = NewObjectWithInfo<DX12GpuPipeline>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc) == false)
 		{
 			result->Release();
@@ -804,13 +805,13 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IGpuDrawState* DX12GpuDevice::CreateGpuDrawState()
+	IGpuDrawState* DX12GpuDevice::CreateGpuDrawState(const char* file, int line)
 	{
-		return new DX12GpuDrawState();
+		return NewObjectWithInfo<DX12GpuDrawState>(file ? file : __FILE__, line);
 	}
-	IInputLayout* DX12GpuDevice::CreateInputLayout(FInputLayoutDesc* desc)
+	IInputLayout* DX12GpuDevice::CreateInputLayout(FInputLayoutDesc* desc, const char* file, int line)
 	{
-		auto result = new DX12InputLayout();
+		auto result = NewObjectWithInfo<DX12InputLayout>(file ? file : __FILE__, line);
 		if (result->Init(this, desc) == false)
 		{
 			result->Release();
@@ -818,9 +819,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ICommandList* DX12GpuDevice::CreateCommandList()
+	ICommandList* DX12GpuDevice::CreateCommandList(const char* file, int line)
 	{
-		auto result = new DX12CommandList();
+		auto result = NewObjectWithInfo<DX12CommandList>(file ? file : __FILE__, line);
 		if (result->Init(this) == false)
 		{
 			result->Release();
@@ -828,9 +829,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IShader* DX12GpuDevice::CreateShader(FShaderDesc* desc)
+	IShader* DX12GpuDevice::CreateShader(FShaderDesc* desc, const char* file, int line)
 	{
-		auto result = new DX12Shader();
+		auto result = NewObjectWithInfo<DX12Shader>(file ? file : __FILE__, line);
 		if (result->Init(this, desc) == false)
 		{
 			result->Release();
@@ -838,21 +839,21 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IGraphicsEffect* DX12GpuDevice::CreateShaderEffect()
+	IGraphicsEffect* DX12GpuDevice::CreateShaderEffect(const char* file, int line)
 	{
-		return new DX12GraphicsEffect();
+		return NewObjectWithInfo<DX12GraphicsEffect>(file ? file : __FILE__, line);
 	}
-	IComputeEffect* DX12GpuDevice::CreateComputeEffect()
+	IComputeEffect* DX12GpuDevice::CreateComputeEffect(const char* file, int line)
 	{
-		return new DX12ComputeEffect();
+		return NewObjectWithInfo<DX12ComputeEffect>(file ? file : __FILE__, line);
 	}
-	IRayTracingEffect* DX12GpuDevice::CreateRayTracingEffect()
+	IRayTracingEffect* DX12GpuDevice::CreateRayTracingEffect(const char* file, int line)
 	{
-		return new DX12RayTracingEffect();
+		return NewObjectWithInfo<DX12RayTracingEffect>(file ? file : __FILE__, line);
 	}
-	IFence* DX12GpuDevice::CreateFence(const FFenceDesc* desc, const char* name)
+	IFence* DX12GpuDevice::CreateFence(const FFenceDesc* desc, const char* name, const char* file, int line)
 	{
-		auto result = new DX12Fence();
+		auto result = NewObjectWithInfo<DX12Fence>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc, name) == false)
 		{
 			result->Release();
@@ -860,9 +861,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IEvent* DX12GpuDevice::CreateGpuEvent(const FEventDesc* desc, const char* name)
+	IEvent* DX12GpuDevice::CreateGpuEvent(const FEventDesc* desc, const char* name, const char* file, int line)
 	{
-		auto result = new DX12Event(name);
+		auto result = NewObjectWithInfo<DX12Event>(file ? file : __FILE__, line, name);
 		if (result->Init(this, *desc, name) == false)
 		{
 			result->Release();
@@ -870,27 +871,27 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IGraphicDraw* DX12GpuDevice::CreateGraphicDraw()
+	IGraphicDraw* DX12GpuDevice::CreateGraphicDraw(const char* file, int line)
 	{
-		auto result = new DX12GraphicDraw();
+		auto result = NewObjectWithInfo<DX12GraphicDraw>(file ? file : __FILE__, line);
 		result->mDeviceRef.FromObject(this);
 		return result;
 	}
-	IComputeDraw* DX12GpuDevice::CreateComputeDraw()
+	IComputeDraw* DX12GpuDevice::CreateComputeDraw(const char* file, int line)
 	{
-		auto result = new DX12ComputeDraw();
+		auto result = NewObjectWithInfo<DX12ComputeDraw>(file ? file : __FILE__, line);
 		result->mDeviceRef.FromObject(this);
 		return result;
 	}
-	IRayTracingDraw* DX12GpuDevice::CreateRayTracingDraw() 
+	IRayTracingDraw* DX12GpuDevice::CreateRayTracingDraw(const char* file, int line) 
 	{
-		auto result = new DX12RayTracingDraw();
+		auto result = NewObjectWithInfo<DX12RayTracingDraw>(file ? file : __FILE__, line);
 		result->mDeviceRef.FromObject(this);
 		return result;
 	}
-	IGpuScope* DX12GpuDevice::CreateGpuScope()
+	IGpuScope* DX12GpuDevice::CreateGpuScope(const char* file, int line)
 	{
-		auto result = new DX12GpuScope();
+		auto result = NewObjectWithInfo<DX12GpuScope>(file ? file : __FILE__, line);
 		if (result->Init(this) == false)
 		{
 			result->Release();
@@ -898,9 +899,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	FVertexArray* DX12GpuDevice::CreateVertexArray()
+	FVertexArray* DX12GpuDevice::CreateVertexArray(const char* file, int line)
 	{
-		return new DX12VertexArray();
+		return NewObjectWithInfo<DX12VertexArray>(file ? file : __FILE__, line);
 	}
 	void DX12GpuDevice::TickPostEvents()
 	{
@@ -1285,7 +1286,7 @@ namespace NxRHI
 	void DX12CmdQueue::Init(DX12GpuDevice* device)
 	{
 		FFenceDesc fcDesc{};
-		mFlushFence = MakeWeakRef(device->CreateFence(&fcDesc, "CmdQueue Flush"));;
+		mFlushFence = MakeWeakRef(device->CreateFence(&fcDesc, "CmdQueue Flush", __FILE__, __LINE__));;
 
 		mCmdQueue->GetTimestampFrequency(&mDefaultQueueFrequence);
 	}
@@ -1339,7 +1340,7 @@ namespace NxRHI
 		VAutoVSLLock locker(mQueueLocker);
 		if (mIdleCmdlist.empty())
 		{
-			mIdleCmdlist.push(MakeWeakRef(mDevice->CreateCommandList()));
+			mIdleCmdlist.push(MakeWeakRef(mDevice->CreateCommandList(__FILE__, __LINE__)));
 		}
 		auto result = mIdleCmdlist.front();
 		result->AddRef();

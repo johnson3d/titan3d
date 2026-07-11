@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_7153847612291249884 Type="EngineNS.Graphics.Pipeline.Deferred.TtDeferredBasePassNode@EngineCore">
+  <ClearMRT Type="System.Boolean@Unknown" Order="0" />
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <EnableHDR Type="System.Boolean@Unknown" Order="0" />
+  <EnableMeshlets Type="System.Boolean@Unknown" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_7153847612291249884>

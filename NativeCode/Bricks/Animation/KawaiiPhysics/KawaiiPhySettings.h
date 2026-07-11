@@ -9,14 +9,16 @@ namespace KawaiiPhysics
 	// FKawaiiRange / FKawaiiRotationLimits - Rotation limit ranges
 	// =====================================================================
 
-	struct FKawaiiRange
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FKawaiiRange
 	{
 		bool bEnabled = false;
 		float Min = -90.0f;
 		float Max = 90.0f;
 	};
 
-	struct FKawaiiRotationLimits
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FKawaiiRotationLimits
 	{
 		FKawaiiRange PitchLimit;
 		FKawaiiRange YawLimit;
@@ -32,7 +34,8 @@ namespace KawaiiPhysics
 	// FKawaiiPhySettings - Base physics simulation parameters per particle
 	// =====================================================================
 
-	struct FKawaiiPhySettings
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FKawaiiPhySettings
 	{
 		float Stiffness = 0.05f;
 		float Damping = 0.1f;
@@ -49,7 +52,7 @@ namespace KawaiiPhysics
 	// FKawaiiPhysicsContext - Per-frame simulation context
 	// =====================================================================
 
-	struct FKawaiiPhysicsContext
+	struct TR_CLASS(SV_LayoutStruct = 8)FKawaiiPhysicsContext
 	{
 		float DeltaTime = 0.0f;
 		float SubstepDeltaTime = 0.0f;
@@ -88,7 +91,8 @@ namespace KawaiiPhysics
 	// FKawaiiChainSetup - Chain simulation structure definition (engine-side)
 	// =====================================================================
 
-	struct FKawaiiChainSetup
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FKawaiiChainSetup
 	{
 		std::string Name;
 		int32_t RootBoneIndex = -1;
@@ -98,6 +102,8 @@ namespace KawaiiPhysics
 		bool bConstrainBoneLength = true;
 		float BoneLengthConstraintBlend = 1.0f;
 		FKawaiiRotationLimits RotationLimits;
+		FKawaiiPhySettings PhysicsSettings;
+		FKawaiiPhySettings PhysicsSettingsRandom;
 		float TailBoneLength = 0.0f;
 		ETailBoneAxis TailBoneForwardAxis = TBA_X_Positive;
 		int32_t LODThreshold = -1;
@@ -152,6 +158,8 @@ namespace KawaiiPhysics
 		float BendAndTwistStiffness = 0.05f;
 		float PointAttachmentStiffness = 0.10f;
 		float OrientationAttachmentStiffness = 0.05f;
+		FKawaiiPhySettings PhysicsSettings;
+		FKawaiiPhySettings PhysicsSettingsRandom;
 		int32_t LODThreshold = -1;
 	};
 

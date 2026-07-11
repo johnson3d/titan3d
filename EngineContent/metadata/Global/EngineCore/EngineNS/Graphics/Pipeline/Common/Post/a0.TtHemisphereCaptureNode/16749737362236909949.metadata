@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_16749737362236909949 Type="EngineNS.Graphics.Pipeline.Common.Post.TtHemisphereCaptureNode@EngineCore">
+  <CaptureIntensity Type="System.Single@Unknown" Order="0" />
+  <CaptureRotation Type="EngineNS.Matrix@EngineCore" Order="0" />
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <MaxMipLevel Type="System.Single@Unknown" Order="0" />
+  <OutputResolution Type="System.UInt32@Unknown" Order="0" />
+  <SkyTintColor Type="EngineNS.Color4f@EngineCore" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_16749737362236909949>

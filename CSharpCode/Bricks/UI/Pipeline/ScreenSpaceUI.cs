@@ -94,7 +94,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public unsafe override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist, "ScreenSpaceUI"))
             {
                 cmdlist.SetViewport(in GBuffers.Viewport);

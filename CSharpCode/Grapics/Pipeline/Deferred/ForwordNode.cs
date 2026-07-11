@@ -244,7 +244,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 }
 
                 GBuffers.BuildFrameBuffers(policy);
-                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                var cmdlist = NxRHI.TtCommandList.GetCmdList();
                 using (new NxRHI.TtCmdListScope(cmdlist, "Forword"))
                 {
                     var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
@@ -488,7 +488,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 WithDepthGBuffers.BuildFrameBuffers(policy);
                 GBuffers.BuildFrameBuffers(policy);
 
-                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                var cmdlist = NxRHI.TtCommandList.GetCmdList();
                 using (new NxRHI.TtCmdListScope(cmdlist, "Gizmos"))
                 {
                     var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;

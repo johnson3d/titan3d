@@ -137,7 +137,7 @@ namespace EngineNS.Graphics.Pipeline.Common.ColorGrading
             uint groupCount = (uint)mCurrentLutSize;
             mShading.SetDrawcallDispatch(this, policy, mComputeDraw, groupCount, groupCount, groupCount, true);
 
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = TtCommandList.GetCmdList();
             using (new TtCmdListScope(cmd, "ColorGradingLUT"))
             {
                 cmd.PushGpuDraw(mComputeDraw);

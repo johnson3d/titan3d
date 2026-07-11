@@ -528,7 +528,7 @@ namespace EngineNS.Bricks.GpuDriven
                 CBBVHParams.SetValue("BVHViewProj", in mBVHViewProj);
             }
 
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = TtCommandList.GetCmdList();
             using (new TtCmdListScope(cmd, "QuarkDAGVisualize"))
             {
                 // Pass 1: Clear texture

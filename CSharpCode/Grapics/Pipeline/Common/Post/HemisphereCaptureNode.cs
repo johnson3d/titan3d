@@ -170,7 +170,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             mInputCaptureSrv = inputAttach.Srv;
             mOutputHemisphereUav = outputAttach.Uav;
 
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = NxRHI.TtCommandList.GetCmdList();
             using (new TtCmdListScope(cmd, "HemisphereCapture"))
             {
                 mShading.SetDrawcallDispatch(this, policy, mDrawCall, resolution, resolution, 1, true);

@@ -4,207 +4,213 @@ NS_BEGIN
 
 namespace KawaiiPhysics
 {
-	void KawaiiChainSolver::Initialize(
-		const std::vector<FKawaiiChainSetup>& Setups,
-		const std::vector<v3dxVector3>& BonePositions,
-		const std::vector<v3dxQuaternion>& BoneRotations,
-		const std::vector<v3dxVector3>& BoneScales,
-		const std::vector<int32_t>& ParentIndices)
-	{
-		Chains.clear();
-		Chains.resize(Setups.size());
+void KawaiiChainSolver::Initialize(
+const std::vector<FKawaiiChainSetup>& Setups,
+const std::vector<v3dxVector3>& BonePositions,
+const std::vector<v3dxQuaternion>& BoneRotations,
+const std::vector<v3dxVector3>& BoneScales,
+const std::vector<int32_t>& ParentIndices)
+{
+Chains.clear();
+Chains.resize(Setups.size());
 
-		for (size_t i = 0; i < Setups.size(); ++i)
-		{
-			const FKawaiiChainSetup& setup = Setups[i];
-			FKawaiiChainData& chain = Chains[i];
-			chain.Name = setup.Name;
-			chain.bConstrainBoneLength = setup.bConstrainBoneLength;
-			chain.BoneLengthConstraintBlend = setup.BoneLengthConstraintBlend;
-			chain.LODThreshold = setup.LODThreshold;
-			chain.bRootCollision = setup.bRootCollision;
-			chain.RotationLimits = setup.RotationLimits;
-			chain.TailBoneForwardAxis = setup.TailBoneForwardAxis;
-			chain.TailBoneLength = setup.TailBoneLength;
+for (size_t i = 0; i < Setups.size(); ++i)
+{
+const FKawaiiChainSetup& setup = Setups[i];
+FKawaiiChainData& chain = Chains[i];
+chain.Name = setup.Name;
+chain.bConstrainBoneLength = setup.bConstrainBoneLength;
+chain.BoneLengthConstraintBlend = setup.BoneLengthConstraintBlend;
+chain.LODThreshold = setup.LODThreshold;
+chain.bRootCollision = setup.bRootCollision;
+chain.RotationLimits = setup.RotationLimits;
+chain.TailBoneForwardAxis = setup.TailBoneForwardAxis;
+chain.TailBoneLength = setup.TailBoneLength;
 
-			SimJointHelpers::BuildChainParticles(
-				BonePositions, BoneRotations, BoneScales, ParentIndices,
-				setup.RootBoneIndex, setup.EndBoneIndex,
-				setup.TailBoneForwardAxis, setup.TailBoneLength,
-				chain.Particles);
+SimJointHelpers::BuildChainParticles(
+BonePositions, BoneRotations, BoneScales, ParentIndices,
+setup.RootBoneIndex, setup.EndBoneIndex,
+setup.TailBoneForwardAxis, setup.TailBoneLength,
+chain.Particles);
 
-			SimJointHelpers::BuildChainBendingConstraints(chain.Particles, chain.BendingConstraints);
+SimJointHelpers::ApplyPhysicsSettings(
+chain.Particles,
+setup.PhysicsSettings,
+setup.PhysicsSettingsRandom,
+(uint32_t)(i + 1));
 
-			chain.FlatParticles.clear();
-			for (auto& p : chain.Particles)
-				chain.FlatParticles.push_back(&p);
+SimJointHelpers::BuildChainBendingConstraints(chain.Particles, chain.BendingConstraints);
 
-			if (!chain.Particles.empty())
-				chain.TotalLength = chain.Particles.back().LengthFromRoot;
-		}
-	}
+chain.FlatParticles.clear();
+for (auto& p : chain.Particles)
+chain.FlatParticles.push_back(&p);
 
-	void KawaiiChainSolver::Simulate(const FKawaiiPhysicsContext& Context, FTopLevelBVH* ColliderBVH)
-	{
-		for (auto& chain : Chains)
-		{
-			if (!chain.IsLODValid(Context.SimulationLOD)) continue;
-			SimulateChain(chain, Context, ColliderBVH);
-		}
-	}
+if (!chain.Particles.empty())
+chain.TotalLength = chain.Particles.back().LengthFromRoot;
+}
+}
 
-	void KawaiiChainSolver::SimulateChain(FKawaiiChainData& Chain, const FKawaiiPhysicsContext& Context, FTopLevelBVH* ColliderBVH)
-	{
-		if (Chain.Particles.size() < 2) return;
+void KawaiiChainSolver::Simulate(const FKawaiiPhysicsContext& Context, FTopLevelBVH* ColliderBVH)
+{
+for (auto& chain : Chains)
+{
+if (!chain.IsLODValid(Context.SimulationLOD)) continue;
+SimulateChain(chain, Context, ColliderBVH);
+}
+}
 
-		const float dt = Context.SubstepDeltaTime > 0.0f ? Context.SubstepDeltaTime : Context.DeltaTime;
-		if (dt < KAWAII_SMALL_NUMBER) return;
+void KawaiiChainSolver::SimulateChain(FKawaiiChainData& Chain, const FKawaiiPhysicsContext& Context, FTopLevelBVH* ColliderBVH)
+{
+if (Chain.Particles.size() < 2) return;
 
-		// Record frame start positions
-		for (auto& P : Chain.Particles)
-			P.FrameStartPosition = P.Position;
+const float dt = Context.SubstepDeltaTime > 0.0f ? Context.SubstepDeltaTime : Context.DeltaTime;
+if (dt < KAWAII_SMALL_NUMBER) return;
 
-		// Aerodynamics
-		if (Context.bEnableWind)
-			XPBDSolver::ApplyAerodynamics(Chain.Particles, dt, Context.WindForce);
+// Record frame start positions
+for (auto& P : Chain.Particles)
+P.FrameStartPosition = P.Position;
 
-		// Predict positions
-		v3dxVector3 gravity = Context.Gravity * Context.GravityScale;
-		XPBDSolver::PredictPositions(Chain.Particles, dt, gravity, Context.WindForce);
+// Aerodynamics
+if (Context.bEnableWind)
+XPBDSolver::ApplyAerodynamics(Chain.Particles, dt, Context.WindForce);
 
-		// Clear constraint lambdas
-		XPBDSolver::ClearConstraintLambdas(Chain.BendingConstraints);
+// Predict positions
+v3dxVector3 gravity = Context.Gravity * Context.GravityScale;
+XPBDSolver::PredictPositions(Chain.Particles, dt, gravity, Context.WindForce);
 
-		// Constraint iterations
-		for (int32_t iter = 0; iter < Context.ConstraintIterations; ++iter)
-		{
-			// Bending constraints
-			XPBDSolver::SolveBendingConstraints(Chain.FlatParticles, Chain.BendingConstraints, dt, (iter % 2 == 1));
+// Clear constraint lambdas
+XPBDSolver::ClearConstraintLambdas(Chain.BendingConstraints);
 
-			// Bone constraints
-			for (size_t i = 1; i < Chain.Particles.size(); ++i)
-			{
-				if (Chain.bConstrainBoneLength)
-					FBoneConstraints::ApplyLengthConstraint(Chain.BoneLengthConstraintBlend, Chain.Particles[i], Chain.Particles[i - 1]);
+// Constraint iterations
+for (int32_t iter = 0; iter < Context.ConstraintIterations; ++iter)
+{
+// Bending constraints
+XPBDSolver::SolveBendingConstraints(Chain.FlatParticles, Chain.BendingConstraints, dt, (iter % 2 == 1));
 
-				FBoneConstraints::ApplyAngleLimit(Chain.Particles[i], Chain.Particles[i - 1]);
+// Bone constraints
+for (size_t i = 1; i < Chain.Particles.size(); ++i)
+{
+if (Chain.bConstrainBoneLength)
+FBoneConstraints::ApplyLengthConstraint(Chain.BoneLengthConstraintBlend, Chain.Particles[i], Chain.Particles[i - 1]);
 
-				if (Chain.RotationLimits.IsEnabled())
-					FBoneConstraints::ApplyRotationLimits(Chain.Particles[i], Chain.Particles[i - 1], Chain.RotationLimits);
-			}
-		}
+FBoneConstraints::ApplyAngleLimit(Chain.Particles[i], Chain.Particles[i - 1]);
 
-		// Collision
-		HandleCollision(Chain, Context, ColliderBVH);
+if (Chain.RotationLimits.IsEnabled())
+FBoneConstraints::ApplyRotationLimits(Chain.Particles[i], Chain.Particles[i - 1], Chain.RotationLimits);
+}
+}
 
-		// Update velocities
-		XPBDSolver::UpdateVelocities(Chain.Particles, dt);
+// Collision
+HandleCollision(Chain, Context, ColliderBVH);
 
-		// Damping
-		XPBDSolver::ApplyDamping(Chain.Particles, dt, Context.SpeedScale);
+// Update velocities
+XPBDSolver::UpdateVelocities(Chain.Particles, dt);
 
-		// Contact friction
-		XPBDSolver::ApplyContactFriction(Chain.Particles);
+// Damping
+XPBDSolver::ApplyDamping(Chain.Particles, dt, Context.SpeedScale);
 
-		// Velocity projection at angle limit boundary
-		for (size_t i = 1; i < Chain.Particles.size(); ++i)
-			FBoneConstraints::ProjectVelocityAtAngleLimit(Chain.Particles[i], Chain.Particles[i - 1]);
+// Contact friction
+XPBDSolver::ApplyContactFriction(Chain.Particles);
 
-		// Clamp velocity & sleep
-		XPBDSolver::ClampAndSleep(Chain.Particles, Context.MaxSpeed, Context.SleepThreshold);
+// Velocity projection at angle limit boundary
+for (size_t i = 1; i < Chain.Particles.size(); ++i)
+FBoneConstraints::ProjectVelocityAtAngleLimit(Chain.Particles[i], Chain.Particles[i - 1]);
 
-		// Displacement clamping
-		XPBDSolver::ClampDisplacement(Chain.Particles);
-	}
+// Clamp velocity & sleep
+XPBDSolver::ClampAndSleep(Chain.Particles, Context.MaxSpeed, Context.SleepThreshold);
 
-	void KawaiiChainSolver::HandleCollision(FKawaiiChainData& Chain, const FKawaiiPhysicsContext& Context, FTopLevelBVH* ColliderBVH)
-	{
-		if (!ColliderBVH || ColliderBVH->IsEmpty()) return;
+// Displacement clamping
+XPBDSolver::ClampDisplacement(Chain.Particles);
+}
 
-		int32_t subSteps = std::max(1, CollisionSubSteps);
+void KawaiiChainSolver::HandleCollision(FKawaiiChainData& Chain, const FKawaiiPhysicsContext& Context, FTopLevelBVH* ColliderBVH)
+{
+if (!ColliderBVH || ColliderBVH->IsEmpty()) return;
 
-		for (int32_t step = 0; step < subSteps; ++step)
-		{
-			float subStepFraction = (float)(step + 1) / (float)subSteps;
-			int32_t startIdx = Chain.bRootCollision ? 0 : 1;
+int32_t subSteps = std::max(1, CollisionSubSteps);
 
-			for (int32_t i = startIdx; i < (int32_t)Chain.Particles.size(); ++i)
-			{
-				FSimParticle& P = Chain.Particles[i];
-				if (P.PinMode != KPM_Dynamic || !P.bCollision) continue;
+for (int32_t step = 0; step < subSteps; ++step)
+{
+float subStepFraction = (float)(step + 1) / (float)subSteps;
+int32_t startIdx = Chain.bRootCollision ? 0 : 1;
 
-				FKawaiiAABB queryBox = FKawaiiAABB::BuildAABB(P.Position, P.PhysicsSettings.Radius * 2.0f);
-				std::vector<std::shared_ptr<FBoundBoxHandle>> overlaps;
-				ColliderBVH->QueryOverlap(queryBox, overlaps);
+for (int32_t i = startIdx; i < (int32_t)Chain.Particles.size(); ++i)
+{
+FSimParticle& P = Chain.Particles[i];
+if (P.PinMode != KPM_Dynamic || !P.bCollision) continue;
 
-				for (auto& handle : overlaps)
-				{
-					if (handle && handle->Owner)
-						handle->OnPointCollision(P, subStepFraction, 0, 1.0f);
-				}
-			}
+FKawaiiAABB queryBox = FKawaiiAABB::BuildAABB(P.Position, P.PhysicsSettings.Radius * 2.0f);
+std::vector<std::shared_ptr<FBoundBoxHandle>> overlaps;
+ColliderBVH->QueryOverlap(queryBox, overlaps);
 
-			// Segment collision
-			if (bEnableSegmentCollision)
-			{
-				for (int32_t i = startIdx; i + 1 < (int32_t)Chain.Particles.size(); ++i)
-				{
-					FSimParticle& A = Chain.Particles[i];
-					FSimParticle& B = Chain.Particles[i + 1];
-					if (!A.bCollision || !B.bCollision) continue;
+for (auto& handle : overlaps)
+{
+if (handle && handle->Owner)
+handle->OnPointCollision(P, subStepFraction, 0, 1.0f);
+}
+}
 
-					FKawaiiAABB segBox;
-					segBox.Expand(A.Position);
-					segBox.Expand(B.Position);
-					segBox.ExpandByRadius(std::max(A.PhysicsSettings.Radius, B.PhysicsSettings.Radius));
+// Segment collision
+if (bEnableSegmentCollision)
+{
+for (int32_t i = startIdx; i + 1 < (int32_t)Chain.Particles.size(); ++i)
+{
+FSimParticle& A = Chain.Particles[i];
+FSimParticle& B = Chain.Particles[i + 1];
+if (!A.bCollision || !B.bCollision) continue;
 
-					std::vector<std::shared_ptr<FBoundBoxHandle>> overlaps;
-					ColliderBVH->QueryOverlap(segBox, overlaps);
+FKawaiiAABB segBox;
+segBox.Expand(A.Position);
+segBox.Expand(B.Position);
+segBox.ExpandByRadius(std::max(A.PhysicsSettings.Radius, B.PhysicsSettings.Radius));
 
-					for (auto& handle : overlaps)
-					{
-						if (handle && handle->Owner)
-							handle->OnLineCollision(A, B, subStepFraction, 0);
-					}
-				}
-			}
-		}
-	}
+std::vector<std::shared_ptr<FBoundBoxHandle>> overlaps;
+ColliderBVH->QueryOverlap(segBox, overlaps);
 
-	void KawaiiChainSolver::ResetDynamics()
-	{
-		for (auto& chain : Chains)
-		{
-			for (auto& P : chain.Particles)
-				P.SnapToPose();
-		}
-	}
+for (auto& handle : overlaps)
+{
+if (handle && handle->Owner)
+handle->OnLineCollision(A, B, subStepFraction, 0);
+}
+}
+}
+}
+}
 
-	void KawaiiChainSolver::UpdatePose(
-		const std::vector<v3dxVector3>& BonePositions,
-		const std::vector<v3dxQuaternion>& BoneRotations,
-		const std::vector<v3dxVector3>& BoneScales)
-	{
-		for (auto& chain : Chains)
-		{
-			for (size_t i = 0; i < chain.Particles.size(); ++i)
-			{
-				FSimParticle& P = chain.Particles[i];
-				if (P.bDummy)
-				{
-					if (i > 0)
-						P.UpdateDummyFromParent(chain.Particles[i - 1], chain.TailBoneForwardAxis, chain.TailBoneLength);
-					continue;
-				}
+void KawaiiChainSolver::ResetDynamics()
+{
+for (auto& chain : Chains)
+{
+for (auto& P : chain.Particles)
+P.SnapToPose();
+}
+}
 
-				int32_t boneIdx = P.BoneIndex;
-				if (boneIdx >= 0 && boneIdx < (int32_t)BonePositions.size())
-				{
-					P.UpdatePoseFromExternal(BonePositions[boneIdx], BoneRotations[boneIdx], BoneScales[boneIdx]);
-				}
-			}
-		}
-	}
+void KawaiiChainSolver::UpdatePose(
+const std::vector<v3dxVector3>& BonePositions,
+const std::vector<v3dxQuaternion>& BoneRotations,
+const std::vector<v3dxVector3>& BoneScales)
+{
+for (auto& chain : Chains)
+{
+for (size_t i = 0; i < chain.Particles.size(); ++i)
+{
+FSimParticle& P = chain.Particles[i];
+if (P.bDummy)
+{
+if (i > 0)
+P.UpdateDummyFromParent(chain.Particles[i - 1], chain.TailBoneForwardAxis, chain.TailBoneLength);
+continue;
+}
+
+int32_t boneIdx = P.BoneIndex;
+if (boneIdx >= 0 && boneIdx < (int32_t)BonePositions.size())
+{
+P.UpdatePoseFromExternal(BonePositions[boneIdx], BoneRotations[boneIdx], BoneScales[boneIdx]);
+}
+}
+}
+}
 
 } // namespace KawaiiPhysics
 

@@ -24,6 +24,43 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
         private int[] mParentIndices;
         private int mNumBones;
         private bool mInitialized = false;
+        private EngineNS.KawaiiPhysics.FKawaiiPhySettings mPhysicsSettings = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettings();
+        private EngineNS.KawaiiPhysics.FKawaiiPhySettings mPhysicsSettingsRandom = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettingsRandom();
+
+        [Rtti.Meta]
+        public bool ApplyComponentPhysicsSettings { get; set; } = true;
+
+        [Rtti.Meta]
+        public EngineNS.KawaiiPhysics.FKawaiiPhySettings PhysicsSettings
+        {
+            get => mPhysicsSettings;
+            set => mPhysicsSettings = value;
+        }
+
+        [Rtti.Meta]
+        public EngineNS.KawaiiPhysics.FKawaiiPhySettings PhysicsSettingsRandom
+        {
+            get => mPhysicsSettingsRandom;
+            set => mPhysicsSettingsRandom = value;
+        }
+
+        private void ApplyPhysicsSettings(TtKawaiiChainSetup setup)
+        {
+            if (!ApplyComponentPhysicsSettings || setup == null)
+                return;
+
+            setup.PhysicsSettings = mPhysicsSettings;
+            setup.PhysicsSettingsRandom = mPhysicsSettingsRandom;
+        }
+
+        private void ApplyPhysicsSettings(TtKawaiiRodSetup setup)
+        {
+            if (!ApplyComponentPhysicsSettings || setup == null)
+                return;
+
+            setup.PhysicsSettings = mPhysicsSettings;
+            setup.PhysicsSettingsRandom = mPhysicsSettingsRandom;
+        }
 
         private struct BoneColliderBinding
         {
@@ -70,7 +107,10 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
             {
                 mContext.InitializeChains(chainSetups.Length);
                 for (int i = 0; i < chainSetups.Length; i++)
+                {
+                    ApplyPhysicsSettings(chainSetups[i]);
                     mContext.SetChainSetup(i, chainSetups[i]);
+                }
                 mContext.BuildChains(bonePositions, boneRotations, boneScales, parentIndices);
             }
 
@@ -79,7 +119,10 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
             {
                 mContext.InitializeClothSetups(clothSetups.Length);
                 for (int i = 0; i < clothSetups.Length; i++)
+                {
+                    ApplyPhysicsSettings(clothSetups[i]);
                     mContext.SetClothSetup(i, clothSetups[i]);
+                }
                 mContext.BuildCloth(bonePositions, boneRotations, boneScales, parentIndices);
             }
 
@@ -88,7 +131,10 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
             {
                 mContext.InitializeRods(rodSetups.Length);
                 for (int i = 0; i < rodSetups.Length; i++)
+                {
+                    ApplyPhysicsSettings(rodSetups[i]);
                     mContext.SetRodSetup(i, rodSetups[i]);
+                }
                 mContext.BuildRods(bonePositions, boneRotations, boneScales, parentIndices);
             }
 

@@ -211,7 +211,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             base.Tick(world, onRemove);
 
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = NxRHI.TtCommandList.GetCmdList();
             mShadowMapNode?.Tick(world, this, cmdlist, true);
 
             GpuSceneNode?.Tick(world, this, cmdlist, true);

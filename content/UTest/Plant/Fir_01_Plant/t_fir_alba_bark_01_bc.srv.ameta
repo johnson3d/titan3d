@@ -14,5 +14,6 @@
   </Icon>
   <OriginImageAddress Type="System.String@Unknown" Value="utest/plant/fir_01_plant/t_fir_alba_bark_01_bc.srv:Game" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.TtSrView@EngineCore" />
 </Root>

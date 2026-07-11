@@ -404,8 +404,12 @@ namespace EngineNS.Rtti
                     EngineNS.IO.TtFileManager.CreateDirectory(tmpPath);
                 }
                 var txtFilepath = EngineNS.IO.TtFileManager.CombinePath(tmpPath, $"typedesc.txt");
+#if TitanEngine_NoNativeDll
+                System.IO.File.WriteAllText(txtFilepath, TypeDescText(ClassType.Assembly.Name, ClassType.TypeString));
+#else
                 EngineNS.IO.TtFileManager.WriteAllText(txtFilepath, TypeDescText(ClassType.Assembly.Name, ClassType.TypeString));
-                TtEngine.Instance.SourceControlModule.AddFile(txtFilepath, true);
+#endif
+                TtEngine.Instance?.SourceControlModule?.AddFile(txtFilepath, true);
             }   
         }
         public static string TypeDescText(string assembly, string typeStr)
@@ -1253,9 +1257,13 @@ namespace EngineNS.Rtti
                 EngineNS.IO.TtFileManager.CreateDirectory(tmpPath);
             }
             
+#if TitanEngine_NoNativeDll
+            System.IO.File.WriteAllText(xmlFilepath, xmlText);
+#else
             EngineNS.IO.TtFileManager.WriteAllText(xmlFilepath, xmlText);
+#endif
 
-            TtEngine.Instance.SourceControlModule.AddFile(xmlFilepath);
+            TtEngine.Instance?.SourceControlModule?.AddFile(xmlFilepath);
         }
     }
 
@@ -1292,37 +1300,6 @@ namespace EngineNS.Rtti
                     foreach (var j in assemblies)
                     {
                         var kls = EngineNS.IO.TtFileManager.GetDirectories(j, "*.*", true);
-                        //engine.EventPoster.ParallelFor(kls.Length, (index, state) =>
-                        //{
-                        //    var k = kls[index];
-                        //    var tmpPath = EngineNS.IO.TtFileManager.CombinePath(k, $"typedesc.txt");
-                        //    var text = EngineNS.IO.TtFileManager.ReadAllText(tmpPath);
-                        //    if (text == null)
-                        //        return;
-                        //    string readModule, strName;
-                        //    TtClassMeta.TypeDescText(text, out readModule, out strName);
-                        //    if (moduleName == null || (moduleName != null && readModule == moduleName))
-                        //    {
-                        //        bool isAlias;
-                        //        var type = TtTypeDesc.TypeOf(strName, out isAlias);// EngineNS.Rtti.UTypeDescManager.Instance.GetTypeDescFromString(strName);
-                        //        if (type != null)
-                        //        {
-                        //            //if (isAlias)
-                        //            //    continue;
-                        //            TtClassMeta meta = null;
-                        //            var key = TtTypeDesc.TypeStr(type);
-                        //            lock (mMetas)
-                        //            {
-                        //                if (mMetas.TryGetValue(key, out meta) == false)
-                        //                {
-                        //                    meta = new TtClassMeta(type);
-                        //                    mMetas[key] = meta;
-                        //                }
-                        //                meta.LoadClass(k);
-                        //            }
-                        //        }
-                        //    }
-                        //});
                         foreach (var k in kls)
                         {
                             var tmpPath = EngineNS.IO.TtFileManager.CombinePath(k, $"typedesc.txt");
@@ -1502,18 +1479,30 @@ namespace EngineNS.Rtti
                 var txtFilepath = EngineNS.IO.TtFileManager.CombinePath(i.Value.Path, $"typedesc.txt");
                 if (EngineNS.IO.TtFileManager.FileExists(txtFilepath) == false)
                 {
+#if TitanEngine_NoNativeDll
+                    System.IO.File.WriteAllText(txtFilepath, TtClassMeta.TypeDescText(i.Value.ClassType.Assembly.Name, i.Value.ClassType.TypeString));
+#else
                     EngineNS.IO.TtFileManager.WriteAllText(txtFilepath, TtClassMeta.TypeDescText(i.Value.ClassType.Assembly.Name, i.Value.ClassType.TypeString));
-                    TtEngine.Instance.SourceControlModule.AddFile(txtFilepath, true);
+#endif
+                    TtEngine.Instance?.SourceControlModule?.AddFile(txtFilepath, true);
                 }
             }
         }
         string GetPath(TtClassMeta classMeta)
         {
             string root = "";
-            if (classMeta.ClassType.Assembly.IsGameModule)
-                root = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Game, IO.TtFileManager.ESystemDir.MetaData);
+            if (TtEngine.Instance != null)
+            {
+                if (classMeta.ClassType.Assembly.IsGameModule)
+                    root = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Game, IO.TtFileManager.ESystemDir.MetaData);
+                else
+                    root = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Engine, IO.TtFileManager.ESystemDir.MetaData);
+            }
             else
-                root = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Engine, IO.TtFileManager.ESystemDir.MetaData);
+            {
+                root = MetaRoot;
+            }
+            root = IO.TtFileManager.SureAsDirectory(root).Replace('\\', '/');
 
             var dir = classMeta.ClassType.Assembly.Service;
             dir += "." + classMeta.ClassType.Assembly.Name;

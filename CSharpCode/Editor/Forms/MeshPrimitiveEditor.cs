@@ -268,6 +268,8 @@ namespace EngineNS.Editor.Forms
         bool mVisBufferInitialized = false;
         TtPreviewViewport QuarkVisBufferViewport;
         Bricks.GpuDriven.EVisBufferResolveMode mVisResolveMode = Bricks.GpuDriven.EVisBufferResolveMode.ClusterID;
+        bool mLODSelectionEnabled = false;
+        bool mLODDataUploaded = false;
         #endregion
         ~TtMeshPrimitiveEditor()
         {
@@ -343,6 +345,9 @@ namespace EngineNS.Editor.Forms
             {
                 SkeletonTreePanel.SetSkeleton(Mesh.PartialSkeleton, this);
                 SkeletonTreePanel.SetMeshAssetName(Mesh.AssetName, PreviewViewport.World);
+                var animatablePose = Mesh.PartialSkeleton?.CreateSkeletonPose();
+                var animatedPose = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animatablePose);
+                meshNode.RuntimePose = animatedPose;
             }
 
             DebugShowTool = new TtDebugShowTool();
@@ -1490,6 +1495,23 @@ namespace EngineNS.Editor.Forms
                             if (resolveNode != null)
                                 resolveNode.ResolveMode = mVisResolveMode;
                         }
+
+                        // LOD Selection toggle
+                        ImGuiAPI.SameLine(0, 20);
+                        if (ImGuiAPI.Checkbox("LOD Selection", ref mLODSelectionEnabled))
+                        {
+                            var visBufferNode = QuarkVisBufferViewport?.RenderPolicy?.FindNode<Bricks.GpuDriven.TtQuarkVisBufferNode>();
+                            if (visBufferNode != null)
+                            {
+                                if (mLODSelectionEnabled && !mLODDataUploaded)
+                                {
+                                    // BuildMergedBuffers already includes DAG upload
+                                    visBufferNode.UploadDAGGroupData(Mesh);
+                                    mLODDataUploaded = true;
+                                }
+                                visBufferNode.LODSelectionEnabled = mLODSelectionEnabled;
+                            }
+                        }
                     }
 
                     // --- Viewport: show VisBuffer viewport or hardware raster viewport ---
@@ -1556,11 +1578,13 @@ namespace EngineNS.Editor.Forms
             // VisBufferNode ↔ ResolveNode link is established automatically by
             // ResolveNode.Initialize via pin Linker, no manual FindNode needed.
 
-            // Upload initial DAG data
+            // Upload initial DAG data using new multi-mesh API
             var visBufferNode = policy.FindNode<Bricks.GpuDriven.TtQuarkVisBufferNode>();
             if (visBufferNode != null && Mesh != null && Mesh.mCoreObject.IsValidPointer)
             {
-                visBufferNode.UploadDAGData(Mesh, policy.DefaultCamera);
+                visBufferNode.ClearInstances();
+                visBufferNode.AddMeshInstance(Mesh, Matrix.Identity);
+                visBufferNode.BuildMergedBuffers(policy.DefaultCamera);
             }
 
             // Auto-zoom camera to mesh bounds

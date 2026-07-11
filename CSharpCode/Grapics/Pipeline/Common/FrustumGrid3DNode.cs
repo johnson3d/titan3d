@@ -311,7 +311,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             var gpuScene = policy.GetGpuSceneNode();
 
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = NxRHI.TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmd, "FrustumGrid3D"))
             {
                 uint totalCells = (uint)FrustumGrid.TotalCellCount;

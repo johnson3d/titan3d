@@ -309,7 +309,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
             // SetDrawcallDispatch expects pixel dimensions, not group counts.
             // It internally does Roundup(x, DispatchArg.X) to compute group count.
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmd, "ContactShadow"))
             {
                 mShading.SetDrawcallDispatch(this, policy, mDrawCall,

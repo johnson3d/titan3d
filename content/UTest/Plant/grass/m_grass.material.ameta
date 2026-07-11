@@ -16,5 +16,6 @@
     <e_0 Value="Game,utest/plant/grass/grass_d.srv,efde052b-f977-4b43-8808-7034a2fc26e1" />
     <e_1 Value="Game,utest/plant/grass/t_water_n.srv,d5ac4973-eb44-4aee-9133-5a50b66231f2" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

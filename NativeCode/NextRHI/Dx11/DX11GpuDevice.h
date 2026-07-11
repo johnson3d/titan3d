@@ -28,38 +28,38 @@ namespace NxRHI
 		~DX11GpuDevice();
 		virtual bool InitDevice(IGpuSystem* pGpuSystem, const FGpuDeviceDesc* desc) override;
 		virtual void TryFinalizeDevice(IGpuSystem* pGpuSystem) override;
-		virtual IBuffer* CreateBuffer(const FBufferDesc* desc) override;
-		virtual ITexture* CreateTexture(const FTextureDesc* desc) override;
-		virtual ITexture* CreateTexture(void* pSharedObject) override;
-		virtual ICbView* CreateCBV(IBuffer* pBuffer, const FCbvDesc* desc) override;
-		virtual IVbView* CreateVBV(IBuffer* pBuffer, const FVbvDesc* desc) override;
-		virtual IIbView* CreateIBV(IBuffer* pBuffer, const FIbvDesc* desc) override;
-		virtual ISrView* CreateSRV(IGpuBufferData* pBuffer, const FSrvDesc* desc) override;
-		virtual IUaView* CreateUAV(IGpuBufferData* pBuffer, const FUavDesc* desc) override;
-		virtual IRenderTargetView* CreateRTV(ITexture* pBuffer, const FRtvDesc* desc) override;
-		virtual IDepthStencilView* CreateDSV(ITexture* pBuffer, const FDsvDesc* desc) override;
-		virtual ISampler* CreateSampler(const FSamplerDesc* desc) override;
-		virtual ISwapChain* CreateSwapChain(const FSwapChainDesc* desc) override;
-		virtual IRenderPass* CreateRenderPass(const FRenderPassDesc* desc) override;
-		virtual IFrameBuffers* CreateFrameBuffers(IRenderPass* rpass) override;
-		virtual IAccelerationStructure* CreateAccelerationStructure(const FAccelerationStructureDesc* rpass) override;
-		virtual IAStructureInstance* CreateAccelerationStructureInstance(const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure) override;
-		virtual ITopAccelerationStructure* CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc) override;
+		virtual IBuffer* CreateBuffer(const FBufferDesc* desc, const char* file, int line) override;
+		virtual ITexture* CreateTexture(const FTextureDesc* desc, const char* file, int line) override;
+		virtual ITexture* CreateTexture(void* pSharedObject, const char* file, int line) override;
+		virtual ICbView* CreateCBV(IBuffer* pBuffer, const FCbvDesc* desc, const char* file, int line) override;
+		virtual IVbView* CreateVBV(IBuffer* pBuffer, const FVbvDesc* desc, const char* file, int line) override;
+		virtual IIbView* CreateIBV(IBuffer* pBuffer, const FIbvDesc* desc, const char* file, int line) override;
+		virtual ISrView* CreateSRV(IGpuBufferData* pBuffer, const FSrvDesc* desc, const char* file, int line) override;
+		virtual IUaView* CreateUAV(IGpuBufferData* pBuffer, const FUavDesc* desc, const char* file, int line) override;
+		virtual IRenderTargetView* CreateRTV(ITexture* pBuffer, const FRtvDesc* desc, const char* file, int line) override;
+		virtual IDepthStencilView* CreateDSV(ITexture* pBuffer, const FDsvDesc* desc, const char* file, int line) override;
+		virtual ISampler* CreateSampler(const FSamplerDesc* desc, const char* file, int line) override;
+		virtual ISwapChain* CreateSwapChain(const FSwapChainDesc* desc, const char* file, int line) override;
+		virtual IRenderPass* CreateRenderPass(const FRenderPassDesc* desc, const char* file, int line) override;
+		virtual IFrameBuffers* CreateFrameBuffers(IRenderPass* rpass, const char* file, int line) override;
+		virtual IAccelerationStructure* CreateAccelerationStructure(const FAccelerationStructureDesc* rpass, const char* file, int line) override;
+		virtual IAStructureInstance* CreateAccelerationStructureInstance(const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure, const char* file, int line) override;
+		virtual ITopAccelerationStructure* CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc, const char* file, int line) override;
 
-		virtual IGpuPipeline* CreatePipeline(const FGpuPipelineDesc* desc) override;
-		virtual IGpuDrawState* CreateGpuDrawState() override;
-		virtual IInputLayout* CreateInputLayout(FInputLayoutDesc* desc) override;
-		virtual ICommandList* CreateCommandList() override;
-		virtual IShader* CreateShader(FShaderDesc* desc) override;
-		virtual IGraphicsEffect* CreateShaderEffect() override;
-		virtual IComputeEffect* CreateComputeEffect() override;
-		virtual IFence* CreateFence(const FFenceDesc* desc, const char* name) override;
-		virtual IEvent* CreateGpuEvent(const FEventDesc* desc, const char* name) override;
+		virtual IGpuPipeline* CreatePipeline(const FGpuPipelineDesc* desc, const char* file, int line) override;
+		virtual IGpuDrawState* CreateGpuDrawState(const char* file, int line) override;
+		virtual IInputLayout* CreateInputLayout(FInputLayoutDesc* desc, const char* file, int line) override;
+		virtual ICommandList* CreateCommandList(const char* file, int line) override;
+		virtual IShader* CreateShader(FShaderDesc* desc, const char* file, int line) override;
+		virtual IGraphicsEffect* CreateShaderEffect(const char* file, int line) override;
+		virtual IComputeEffect* CreateComputeEffect(const char* file, int line) override;
+		virtual IFence* CreateFence(const FFenceDesc* desc, const char* name, const char* file, int line) override;
+		virtual IEvent* CreateGpuEvent(const FEventDesc* desc, const char* name, const char* file, int line) override;
 		virtual ICmdQueue* GetCmdQueue() override;
 
-		virtual IGraphicDraw* CreateGraphicDraw() override;
+		virtual IGraphicDraw* CreateGraphicDraw(const char* file, int line) override;
 
-		virtual IGpuScope* CreateGpuScope() override;
+		virtual IGpuScope* CreateGpuScope(const char* file, int line) override;
 
 		virtual void SetBreakOnID(int id, bool open) override;
 

@@ -302,7 +302,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 using(new TtLayerDrawBuffers.TtLayerDrawBuffersScope(HitproxyPass))
                 {
-                    var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                    var cmdlist = TtCommandList.GetCmdList();
                     using (new NxRHI.TtCmdListScope(cmdlist, "HitProxy"))
                     {
                         //draw mesh first
@@ -373,7 +373,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             {   
-                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                var cmdlist = TtCommandList.GetCmdList();
                 using (new NxRHI.TtCmdListScope(cmdlist, "HitProxy-Copy"))
                 {
                     fixed (NxRHI.FSubResourceFootPrint* pFootprint = &CopyBufferFootPrint)

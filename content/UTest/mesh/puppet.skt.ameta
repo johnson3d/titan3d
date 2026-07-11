@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Animation.Asset.TtSkeletonAssetAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="7e9cec95-05fe-4eae-8960-164d3f99108c" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Animation.Asset.USkeletonAssetAMeta&#xA;" />
@@ -13,4 +13,5 @@
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Animation.Asset.USkeletonAssetAMeta@EngineCore" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
 </Root>

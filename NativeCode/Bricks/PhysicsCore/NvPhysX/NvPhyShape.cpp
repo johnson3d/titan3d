@@ -375,7 +375,7 @@ FMeshPrimitives* NvPhyShape::IfGetTriMesh(IGpuDevice* rc)
 		vbvDesc.Stride = sizeof(v3dxVector3);
 		vbvDesc.Size = sizeof(v3dxVector3) * nVert;
 		vbvDesc.InitData = (void*)pVert;
-		auto vbPos = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc));
+		auto vbPos = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc, __FILE__, __LINE__));
 		result->GetGeomtryMesh()->VertexArray->BindVB(VST_Position, vbPos);
 
 		std::vector<v3dxVector3> normals;
@@ -388,11 +388,11 @@ FMeshPrimitives* NvPhyShape::IfGetTriMesh(IGpuDevice* rc)
 			ibDesc.Size = sizeof(USHORT) * nTri * 3;
 			ibDesc.StructureStride = sizeof(USHORT);
 			ibDesc.InitData = (void*)geom.triangleMesh->getTriangles();
-			auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc));
+			auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc, __FILE__, __LINE__));
 			FIbvDesc ibvDesc;
 			ibvDesc.Stride = ibDesc.StructureStride;
 			ibvDesc.Size = ibDesc.Size;
-			auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc));
+			auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc, __FILE__, __LINE__));
 			result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
 			FMeshPrimitives::CalcNormals16(normals, (const v3dxVector3*)pVert, nVert, (USHORT*)ibDesc.InitData, nTri);
@@ -404,11 +404,11 @@ FMeshPrimitives* NvPhyShape::IfGetTriMesh(IGpuDevice* rc)
 			ibDesc.Size = sizeof(UINT) * nTri * 3;
 			ibDesc.StructureStride = sizeof(UINT);
 			ibDesc.InitData = (void*)geom.triangleMesh->getTriangles();
-			auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc));
+			auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc, __FILE__, __LINE__));
 			FIbvDesc ibvDesc;
 			ibvDesc.Stride = ibDesc.StructureStride;
 			ibvDesc.Size = ibDesc.Size;
-			auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc));
+			auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc, __FILE__, __LINE__));
 			result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
 			FMeshPrimitives::CalcNormals32(normals, (const v3dxVector3*)pVert, nVert, (UINT*)ibDesc.InitData, nTri);
@@ -417,7 +417,7 @@ FMeshPrimitives* NvPhyShape::IfGetTriMesh(IGpuDevice* rc)
 		vbvDesc.Stride = sizeof(v3dxVector3);
 		vbvDesc.Size = sizeof(v3dxVector3) * nVert;
 		vbvDesc.InitData = (void*)&normals[0];
-		auto vbNor = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc));
+		auto vbNor = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc, __FILE__, __LINE__));
 		result->GetGeomtryMesh()->VertexArray->BindVB(VST_Normal, vbNor);
 
 		FMeshAtomDesc desc;
@@ -445,7 +445,7 @@ FMeshPrimitives* NvPhyShape::IfGetTriMesh(IGpuDevice* rc)
 		vbvDesc.Stride = sizeof(v3dxVector3);
 		vbvDesc.Size = sizeof(v3dxVector3) * nVert;
 		vbvDesc.InitData = (void*)pVert;
-		auto vbPos = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc));
+		auto vbPos = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc, __FILE__, __LINE__));
 		result->GetGeomtryMesh()->VertexArray->BindVB(VST_Position, vbPos);
 
 		std::vector<v3dxVector3> normals;
@@ -457,11 +457,11 @@ FMeshPrimitives* NvPhyShape::IfGetTriMesh(IGpuDevice* rc)
 			ibDesc.Size = sizeof(USHORT) * nTri * 3;
 			ibDesc.StructureStride = sizeof(USHORT);
 			ibDesc.InitData = (void*)geom.triangleMesh->getTriangles();
-			auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc));
+			auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc, __FILE__, __LINE__));
 			FIbvDesc ibvDesc;
 			ibvDesc.Stride = ibDesc.StructureStride;
 			ibvDesc.Size = ibDesc.Size;
-			auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc));
+			auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc, __FILE__, __LINE__));
 			result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
 			FMeshPrimitives::CalcNormals16(normals, (const v3dxVector3*)pVert, nVert, (USHORT*)ibDesc.InitData, nTri);
@@ -473,11 +473,11 @@ FMeshPrimitives* NvPhyShape::IfGetTriMesh(IGpuDevice* rc)
 			ibDesc.Size = sizeof(UINT) * nTri * 3;
 			ibDesc.StructureStride = sizeof(USHORT);
 			ibDesc.InitData = (void*)geom.triangleMesh->getTriangles();
-			auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc));
+			auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc, __FILE__, __LINE__));
 			FIbvDesc ibvDesc;
 			ibvDesc.Stride = ibDesc.StructureStride;
 			ibvDesc.Size = ibDesc.Size;
-			auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc));
+			auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc, __FILE__, __LINE__));
 			result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
 			FMeshPrimitives::CalcNormals32(normals, (const v3dxVector3*)pVert, nVert, (UINT*)ibDesc.InitData, nTri);
@@ -486,7 +486,7 @@ FMeshPrimitives* NvPhyShape::IfGetTriMesh(IGpuDevice* rc)
 		vbvDesc.Stride = sizeof(v3dxVector3);
 		vbvDesc.Size = sizeof(v3dxVector3) * nVert;
 		vbvDesc.InitData = (void*)&normals[0];
-		auto vbNor = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc));
+		auto vbNor = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc, __FILE__, __LINE__));
 		result->GetGeomtryMesh()->VertexArray->BindVB(VST_Normal, vbNor);
 
 		FMeshAtomDesc desc;
@@ -522,7 +522,7 @@ FMeshPrimitives* NvPhyShape::IfGetConvexMesh(IGpuDevice* rc)
 		vbvDesc.Stride = sizeof(v3dxVector3);
 		vbvDesc.Size = sizeof(v3dxVector3) * nVert;
 		vbvDesc.InitData = (void*)pVert;
-		auto vbPos = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc));
+		auto vbPos = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc, __FILE__, __LINE__));
 		result->GetGeomtryMesh()->VertexArray->BindVB(VST_Position, vbPos);
 
 		std::vector<v3dxVector3> normals;
@@ -560,11 +560,11 @@ FMeshPrimitives* NvPhyShape::IfGetConvexMesh(IGpuDevice* rc)
 		ibDesc.Size = sizeof(USHORT) * nTri * 3;
 		ibDesc.StructureStride = sizeof(USHORT);
 		ibDesc.InitData = &indices[0];
-		auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc));
+		auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc, __FILE__, __LINE__));
 		FIbvDesc ibvDesc;
 		ibvDesc.Stride = ibDesc.StructureStride;
 		ibvDesc.Size = ibDesc.Size;
-		auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc));
+		auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc, __FILE__, __LINE__));
 		result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
 		FMeshPrimitives::CalcNormals16(normals, (const v3dxVector3*)pVert, nVert, (USHORT*)ibDesc.InitData, nTri);
@@ -572,7 +572,7 @@ FMeshPrimitives* NvPhyShape::IfGetConvexMesh(IGpuDevice* rc)
 		vbvDesc.Stride = sizeof(v3dxVector3);
 		vbvDesc.Size = sizeof(v3dxVector3) * nVert;
 		vbvDesc.InitData = (void*)&normals[0];
-		auto vbNor = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc));
+		auto vbNor = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc, __FILE__, __LINE__));
 		result->GetGeomtryMesh()->VertexArray->BindVB(VST_Normal, vbNor);
 
 		FMeshAtomDesc desc;
@@ -599,7 +599,7 @@ FMeshPrimitives* NvPhyShape::IfGetConvexMesh(IGpuDevice* rc)
 		vbvDesc.Stride = sizeof(v3dxVector3);
 		vbvDesc.Size = sizeof(v3dxVector3) * nVert;
 		vbvDesc.InitData = (void*)pVert;
-		auto vbPos = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc));
+		auto vbPos = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc, __FILE__, __LINE__));
 		result->GetGeomtryMesh()->VertexArray->BindVB(VST_Position, vbPos);
 
 		std::vector<v3dxVector3> normals;
@@ -637,11 +637,11 @@ FMeshPrimitives* NvPhyShape::IfGetConvexMesh(IGpuDevice* rc)
 		ibDesc.Size = sizeof(USHORT) * nTri * 3;
 		ibDesc.StructureStride = sizeof(USHORT);
 		ibDesc.InitData = &indices[0];
-		auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc));
+		auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc, __FILE__, __LINE__));
 		FIbvDesc ibvDesc;
 		ibvDesc.Stride = ibDesc.StructureStride;
 		ibvDesc.Size = ibDesc.Size;
-		auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc));
+		auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc, __FILE__, __LINE__));
 		result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
 		FMeshPrimitives::CalcNormals16(normals, (const v3dxVector3*)pVert, nVert, (USHORT*)ibDesc.InitData, nTri);
@@ -649,7 +649,7 @@ FMeshPrimitives* NvPhyShape::IfGetConvexMesh(IGpuDevice* rc)
 		vbvDesc.Stride = sizeof(v3dxVector3);
 		vbvDesc.Size = sizeof(v3dxVector3) * nVert;
 		vbvDesc.InitData = (void*)&normals[0];
-		auto vbNor = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc));
+		auto vbNor = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc, __FILE__, __LINE__));
 		result->GetGeomtryMesh()->VertexArray->BindVB(VST_Normal, vbNor);
 
 		FMeshAtomDesc desc;

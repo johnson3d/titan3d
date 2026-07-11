@@ -731,7 +731,7 @@ namespace NxRHI
 			initData.pData = blob.GetData();
 			initData.RowPitch = blob.GetSize();
 			hitGroupDesc.InitData = &initData;
-			mHitGroupShaderBindTable = MakeWeakRef(new FUploadBuffer(MakeWeakRef(device->CreateBuffer(&hitGroupDesc))));
+			mHitGroupShaderBindTable = MakeWeakRef(new FUploadBuffer(MakeWeakRef(device->CreateBuffer(&hitGroupDesc, __FILE__, __LINE__))));
 		}
 		else
 		{

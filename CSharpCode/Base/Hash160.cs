@@ -259,7 +259,7 @@ namespace EngineNS
         public static unsafe Hash64 FromData(byte* pData, int size)
         {
             Hash64 result = new Hash64();
-            CalcHash64(in result, pData, size);
+            CalcHash64(ref result, pData, size);
             return result;
         }
         public static void CalcHash64(ref Hash64 hash, string source)
@@ -268,6 +268,9 @@ namespace EngineNS
         }
         public unsafe static void CalcHash64(ref Hash64 hash, byte[] source)
         {
+#if TitanEngine_NoNativeDll
+            hash.AllData = source.Length == 0 ? 0 : Standart.Hash.xxHash.xxHash64.ComputeHash(source, source.Length);
+#else
             if (source.Length == 0)
             {
                 fixed (Hash64* p = &hash)
@@ -283,13 +286,23 @@ namespace EngineNS
                     SDK_HashHelper_CalcHash64(p, pSource, source.Length);
                 }
             }
+#endif
         }
-        public static unsafe void CalcHash64(in Hash64 hash, byte* source, int size)
+        public static unsafe void CalcHash64(ref Hash64 hash, byte* source, int size)
         {
+#if TitanEngine_NoNativeDll
+            var bytes = new byte[size];
+            if (size > 0)
+            {
+                Marshal.Copy((IntPtr)source, bytes, 0, size);
+            }
+            hash.AllData = bytes.Length == 0 ? 0 : Standart.Hash.xxHash.xxHash64.ComputeHash(bytes, bytes.Length);
+#else
             fixed (Hash64* p = &hash)
             {
                 SDK_HashHelper_CalcHash64(p, source, size);
             }
+#endif
         }
         public static Hash64 Empty = new Hash64();
         public static bool operator ==(Hash64 hash1, Hash64 hash2)
@@ -332,10 +345,19 @@ namespace EngineNS
 
         public static unsafe void CalcHash64(Hash64* hash, byte* key, int len)
         {
+#if TitanEngine_NoNativeDll
+            var bytes = new byte[len];
+            if (len > 0)
+            {
+                Marshal.Copy((IntPtr)key, bytes, 0, len);
+            }
+            hash->AllData = bytes.Length == 0 ? 0 : Standart.Hash.xxHash.xxHash64.ComputeHash(bytes, bytes.Length);
+#else
             unsafe
             {
                 SDK_HashHelper_CalcHash64(hash, key, len);
             }
+#endif
         }
 
         public class EqualityComparer : IEqualityComparer<Hash64>
@@ -379,10 +401,20 @@ namespace EngineNS
         private uint mU4;
         public int CompareTo(Hash160 other)
         {
+#if TitanEngine_NoNativeDll
+            for (int i = 0; i < 20; i++)
+            {
+                var cmp = Data[i].CompareTo(other.Data[i]);
+                if (cmp != 0)
+                    return cmp;
+            }
+            return 0;
+#else
             fixed (byte* p0 = &Data[0])
             {
                 return CoreSDK.MemoryCmp(p0, &other.Data[0], 20);
             }
+#endif
         }
         public static bool operator ==(Hash160 hash1, Hash160 hash2)
         {
@@ -410,7 +442,12 @@ namespace EngineNS
             fixed (byte* pSrc = &hashCode[0])
             {
                 byte* pTar = &result.Data[0];
+#if TitanEngine_NoNativeDll
+                for (int i = 0; i < 20; i++)
+                    pTar[i] = pSrc[i];
+#else
                 CoreSDK.MemoryCopy(pTar, pSrc, 20);
+#endif
             }
             return result;
         }
@@ -422,7 +459,12 @@ namespace EngineNS
             fixed (byte* pSrc = &hashCode[0])
             {
                 byte* pTar = &result.Data[0];
+#if TitanEngine_NoNativeDll
+                for (int i = 0; i < 20; i++)
+                    pTar[i] = pSrc[i];
+#else
                 CoreSDK.MemoryCopy(pTar, pSrc, 20);
+#endif
             }
             return result;
         }
@@ -431,7 +473,12 @@ namespace EngineNS
             var bytes = new byte[length];
             fixed (byte* p = &bytes[0])
             {
+#if TitanEngine_NoNativeDll
+                var source = new ReadOnlySpan<byte>(pAttr, (int)length);
+                source.CopyTo(bytes);
+#else
                 CoreSDK.MemoryCopy(p, pAttr, length);
+#endif
             }
             return CreateHash160(bytes);
         }

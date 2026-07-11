@@ -188,6 +188,9 @@ namespace EngineNS.Editor.Forms
                     SkeletonTreePanel.SetSkeleton(SkinModifier.Skeleton, this);
                     var meshPrimRName = Mesh.SubMeshes.Count > 0 ? Mesh.SubMeshes[0].Mesh?.AssetName : null;
                     SkeletonTreePanel.SetMeshAssetName(meshPrimRName, viewport.World);
+                    var animatablePose = SkinModifier.Skeleton?.CreateSkeletonPose();
+                    var animatedPose = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animatablePose);
+                    meshNode.RuntimePose = animatedPose;
                 }
             }
 

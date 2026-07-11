@@ -288,7 +288,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 }
 
                 GBuffers.BuildFrameBuffers(policy);
-                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                var cmdlist = NxRHI.TtCommandList.GetCmdList();
                 using (new NxRHI.TtCmdListScope(cmdlist, "Opaque"))
                 {
                     var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
@@ -468,7 +468,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
             {
-                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                var cmdlist = NxRHI.TtCommandList.GetCmdList();
                 using (new NxRHI.TtCmdListScope(cmdlist, "BassPass"))
                 {
                     cmdlist.SetViewport(in GBuffers.Viewport);

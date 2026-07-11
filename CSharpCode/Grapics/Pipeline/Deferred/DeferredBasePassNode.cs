@@ -468,7 +468,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         NxRHI.TtCmdRecorder mBackgroundPassRecorder = new NxRHI.TtCmdRecorder();
         public unsafe override void Tick(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = NxRHI.TtCommandList.GetCmdList();
             mBasePassRecorder.ResetGpuDraws();
             mBackgroundPassRecorder.ResetGpuDraws();
 

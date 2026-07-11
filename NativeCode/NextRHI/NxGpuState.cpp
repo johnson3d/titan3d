@@ -17,7 +17,7 @@ namespace NxRHI
 		auto iter = GpuPipelineCache.find(hash);
 		if (iter == GpuPipelineCache.end())
 		{
-			auto tmp = MakeWeakRef(device->CreateGpuDrawState());
+			auto tmp = MakeWeakRef(device->CreateGpuDrawState(__FILE__, __LINE__));
 			tmp->Pipeline = pipeline;
 			tmp->ShaderEffect = effect;
 			tmp->TopologyType = topology;

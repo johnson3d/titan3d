@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_7095617753963634821 Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
+  <InNodeId Type="System.Guid@Unknown" Order="0" />
+  <InPinName Type="System.String@Unknown" Order="0" />
+  <OutNodeId Type="System.Guid@Unknown" Order="0" />
+  <OutPinName Type="System.String@Unknown" Order="0" />
+</Hash_7095617753963634821>

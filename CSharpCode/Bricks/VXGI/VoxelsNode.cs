@@ -394,7 +394,7 @@ namespace EngineNS.Bricks.VXGI
                     CBuffer.SetValue(idx, in VxDebugger_IndexCountPerInstance);
                 }
             }
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmd, "Voxel"))
             {
                 switch (mCurStep)

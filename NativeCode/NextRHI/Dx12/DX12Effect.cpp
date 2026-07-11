@@ -716,7 +716,7 @@ namespace NxRHI
 			initData.pData = rayGenShaderIdentifier;
 			initData.RowPitch = shaderIdentifierSize;
 			rayGenDesc.InitData = &initData;
-			mRayGenShaderTable = MakeWeakRef(new FUploadBuffer(MakeWeakRef(device->CreateBuffer(&rayGenDesc))));
+			mRayGenShaderTable = MakeWeakRef(new FUploadBuffer(MakeWeakRef(device->CreateBuffer(&rayGenDesc, __FILE__, __LINE__))));
 		}
 		{
 			FBufferDesc missDesc{};
@@ -731,7 +731,7 @@ namespace NxRHI
 			initData.pData = missShaderIdentifier;
 			initData.RowPitch = shaderIdentifierSize;
 			missDesc.InitData = &initData;
-			mMissShaderTable = MakeWeakRef(new FUploadBuffer(MakeWeakRef(device->CreateBuffer(&missDesc))));
+			mMissShaderTable = MakeWeakRef(new FUploadBuffer(MakeWeakRef(device->CreateBuffer(&missDesc, __FILE__, __LINE__))));
 		}
 
 		return true;

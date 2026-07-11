@@ -261,7 +261,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
 
             using (new TtLayerDrawBuffers.TtLayerDrawBuffersScope(LayerBasePass))
             {
-                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                var cmdlist = TtCommandList.GetCmdList();
                 using (new NxRHI.TtCmdListScope(cmdlist, "BassPass"))
                 {
                     var passClears = stackalloc NxRHI.FRenderPassClears[(int)ERenderLayer.RL_Num];

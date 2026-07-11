@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_7918986387445015843 Type="EngineNS.Graphics.Pipeline.Common.TtAvgBrightnessNode@EngineCore">
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <LuminancePower Type="System.Single@Unknown" Order="0" />
+  <MaxValidLuminance Type="System.Single@Unknown" Order="0" />
+  <MinValidLuminance Type="System.Single@Unknown" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_7918986387445015843>

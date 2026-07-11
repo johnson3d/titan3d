@@ -659,6 +659,9 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\Quark\QuarkVisResolve.compute">
       <Filter>Bricks\GpuDriven\Quark</Filter>
     </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\Quark\QuarkLODSelect.compute">
+      <Filter>Bricks\GpuDriven\Quark</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FSR1\ffx_a.h">

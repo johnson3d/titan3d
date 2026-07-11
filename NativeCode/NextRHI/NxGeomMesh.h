@@ -286,6 +286,18 @@ namespace NxRHI
 			float screenHeight, float fov,
 			float errorThreshold,
 			UINT* outClusterIndices, UINT maxCount);
+
+		// GPU LOD selection: export flattened group hierarchy data
+		void GetDAGExportSizes(UINT& outGroupCount, UINT& outChildrenTotal,
+			UINT& outParentsTotal, UINT& outClusterCount, UINT& outRootGroupCount) const;
+		UINT ExportDAGGroupsForGPU(
+			void* outGroups, UINT maxGroups,
+			UINT* outChildrenIndices, UINT maxChildren,
+			UINT* outParentsIndices, UINT maxParents,
+			UINT* outClusterGroupMap, UINT maxClusters,
+			UINT* outRootGroupIndices, UINT maxRootGroups,
+			UINT& outChildrenTotal, UINT& outParentsTotal, UINT& outRootGroupCount) const;
+		UINT GetDAGGroupCount() const { return (UINT)mDAGGroups.size(); }
 		
 		float* GetClustersVB()
 		{

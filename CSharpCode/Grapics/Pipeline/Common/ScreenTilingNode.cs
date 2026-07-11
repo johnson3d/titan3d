@@ -233,7 +233,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 return;
             var gpuScene = policy.GetGpuSceneNode();// .FindNode("GpuSceneNode") as Common.UGpuSceneNode;
 
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = NxRHI.TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmd, "ScreenTiling"))
             {
                 var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCbv;

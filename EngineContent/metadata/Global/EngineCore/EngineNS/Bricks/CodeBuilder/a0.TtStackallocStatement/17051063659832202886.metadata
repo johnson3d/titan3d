@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_17051063659832202886 Type="EngineNS.Bricks.CodeBuilder.TtStackallocStatement@EngineCore">
+  <Contents Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore,&gt;@Unknown" Order="0" />
+  <Length Type="System.Int32@Unknown" Order="0" />
+  <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore" Order="0" />
+  <VarName Type="System.String@Unknown" Order="0" />
+</Hash_17051063659832202886>

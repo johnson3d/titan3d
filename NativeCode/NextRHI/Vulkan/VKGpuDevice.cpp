@@ -667,7 +667,7 @@ namespace NxRHI
 		vkGetDeviceQueue(mDevice, presentFamily, 0, &mCmdQueue->mPresentQueue);
 		
 		FFenceDesc fcDesc{};
-		mFrameFence = MakeWeakRef(this->CreateFence(&fcDesc, "Vulkan Frame Fence"));
+		mFrameFence = MakeWeakRef(this->CreateFence(&fcDesc, "Vulkan Frame Fence", __FILE__, __LINE__));
 		
 		{
 			auto cmdAllocator = new VKCmdBufferManager();
@@ -716,7 +716,7 @@ namespace NxRHI
 			vbDesc.RowPitch = 1;
 			vbDesc.DepthPitch = 1;
 			vbDesc.StructureStride = 1;
-			mNullSSBO = MakeWeakRef((VKBuffer*)this->CreateBuffer(&vbDesc));
+			mNullSSBO = MakeWeakRef((VKBuffer*)this->CreateBuffer(&vbDesc, __FILE__, __LINE__));
 			mNullSSBO->SetDebugName("NullSSBO");
 		}
 		{
@@ -726,7 +726,7 @@ namespace NxRHI
 			vbDesc.RowPitch = 1;
 			vbDesc.DepthPitch = 1;
 			vbDesc.StructureStride = 1;
-			mNullUBO = MakeWeakRef((VKBuffer*)this->CreateBuffer(&vbDesc));
+			mNullUBO = MakeWeakRef((VKBuffer*)this->CreateBuffer(&vbDesc, __FILE__, __LINE__));
 			mNullUBO->SetDebugName("NullUBO");
 		}
 		{
@@ -736,25 +736,25 @@ namespace NxRHI
 			vbDesc.RowPitch = 1;
 			vbDesc.DepthPitch = 1;
 			vbDesc.StructureStride = 1;
-			mNullVB = MakeWeakRef((VKBuffer*)this->CreateBuffer(&vbDesc));
+			mNullVB = MakeWeakRef((VKBuffer*)this->CreateBuffer(&vbDesc, __FILE__, __LINE__));
 			mNullVB->SetDebugName("NullVB");
 		}
 		{
 			FTextureDesc texDesc{};
 			texDesc.SetDefault();
 			texDesc.BindFlags = (EBufferType)(EBufferType::BFT_SRV);
-			auto pTex = MakeWeakRef((VKTexture*)this->CreateTexture(&texDesc));
+			auto pTex = MakeWeakRef((VKTexture*)this->CreateTexture(&texDesc, __FILE__, __LINE__));
 			FSrvDesc srvDesc{};
 			srvDesc.SetTexture2D();
 			srvDesc.Format = texDesc.Format;
 			srvDesc.Texture2D.MipLevels = 1;
-			mNullSampledImage = MakeWeakRef((VKSrView*)this->CreateSRV(pTex, &srvDesc));
+			mNullSampledImage = MakeWeakRef((VKSrView*)this->CreateSRV(pTex, &srvDesc, __FILE__, __LINE__));
 			mNullSampledImage->SetDebugName("NullSampledImage");
 		}
 		{
 			FSamplerDesc samplerDesc{};
 			samplerDesc.SetDefault();
-			mNullSampler = MakeWeakRef((VKSampler*)this->CreateSampler(&samplerDesc));
+			mNullSampler = MakeWeakRef((VKSampler*)this->CreateSampler(&samplerDesc, __FILE__, __LINE__));
 			mNullSampler->SetDebugName("NullSampler");
 		}
 	}
@@ -787,9 +787,9 @@ namespace NxRHI
 		mCaps.IsSupportRayTracing = HasExtension(VK_NV_RAY_TRACING_EXTENSION_NAME);
 		mCaps.IsSupportCSInRenderPass = mVulkanExt.IsDynamicRendering;
 	}
-	IBuffer* VKGpuDevice::CreateBuffer(const FBufferDesc* desc)
+	IBuffer* VKGpuDevice::CreateBuffer(const FBufferDesc* desc, const char* file, int line)
 	{
-		auto result = new VKBuffer();
+		auto result = NewObjectWithInfo<VKBuffer>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc) == false)
 		{
 			result->Release();
@@ -797,9 +797,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ITexture* VKGpuDevice::CreateTexture(const FTextureDesc* desc)
+	ITexture* VKGpuDevice::CreateTexture(const FTextureDesc* desc, const char* file, int line)
 	{
-		auto result = new VKTexture();
+		auto result = NewObjectWithInfo<VKTexture>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc) == false)
 		{
 			result->Release();
@@ -807,9 +807,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ICbView* VKGpuDevice::CreateCBV(IBuffer* pBuffer, const FCbvDesc* desc)
+	ICbView* VKGpuDevice::CreateCBV(IBuffer* pBuffer, const FCbvDesc* desc, const char* file, int line)
 	{
-		auto result = new VKCbView();
+		auto result = NewObjectWithInfo<VKCbView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc) == false)
 		{
 			result->Release();
@@ -817,9 +817,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IVbView* VKGpuDevice::CreateVBV(IBuffer* pBuffer, const FVbvDesc* desc)
+	IVbView* VKGpuDevice::CreateVBV(IBuffer* pBuffer, const FVbvDesc* desc, const char* file, int line)
 	{
-		auto result = new VKVbView();
+		auto result = NewObjectWithInfo<VKVbView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, desc) == false)
 		{
 			result->Release();
@@ -827,9 +827,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IIbView* VKGpuDevice::CreateIBV(IBuffer* pBuffer, const FIbvDesc* desc)
+	IIbView* VKGpuDevice::CreateIBV(IBuffer* pBuffer, const FIbvDesc* desc, const char* file, int line)
 	{
-		auto result = new VKIbView();
+		auto result = NewObjectWithInfo<VKIbView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, desc) == false)
 		{
 			result->Release();
@@ -837,9 +837,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ISrView* VKGpuDevice::CreateSRV(IGpuBufferData* pBuffer, const FSrvDesc* desc)
+	ISrView* VKGpuDevice::CreateSRV(IGpuBufferData* pBuffer, const FSrvDesc* desc, const char* file, int line)
 	{
-		auto result = new VKSrView();
+		auto result = NewObjectWithInfo<VKSrView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc) == false)
 		{
 			result->Release();
@@ -847,9 +847,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IUaView* VKGpuDevice::CreateUAV(IGpuBufferData* pBuffer, const FUavDesc* desc)
+	IUaView* VKGpuDevice::CreateUAV(IGpuBufferData* pBuffer, const FUavDesc* desc, const char* file, int line)
 	{
-		auto result = new VKUaView();
+		auto result = NewObjectWithInfo<VKUaView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc) == false)
 		{
 			result->Release();
@@ -857,9 +857,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IRenderTargetView* VKGpuDevice::CreateRTV(ITexture* pBuffer, const FRtvDesc* desc)
+	IRenderTargetView* VKGpuDevice::CreateRTV(ITexture* pBuffer, const FRtvDesc* desc, const char* file, int line)
 	{
-		auto result = new VKRenderTargetView();
+		auto result = NewObjectWithInfo<VKRenderTargetView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, desc) == false)
 		{
 			result->Release();
@@ -867,9 +867,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IDepthStencilView* VKGpuDevice::CreateDSV(ITexture* pBuffer, const FDsvDesc* desc)
+	IDepthStencilView* VKGpuDevice::CreateDSV(ITexture* pBuffer, const FDsvDesc* desc, const char* file, int line)
 	{
-		auto result = new VKDepthStencilView();
+		auto result = NewObjectWithInfo<VKDepthStencilView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc) == false)
 		{
 			result->Release();
@@ -877,9 +877,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ISampler* VKGpuDevice::CreateSampler(const FSamplerDesc* desc)
+	ISampler* VKGpuDevice::CreateSampler(const FSamplerDesc* desc, const char* file, int line)
 	{
-		auto result = new VKSampler();
+		auto result = NewObjectWithInfo<VKSampler>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc) == false)
 		{
 			result->Release();
@@ -887,9 +887,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ISwapChain* VKGpuDevice::CreateSwapChain(const FSwapChainDesc* desc)
+	ISwapChain* VKGpuDevice::CreateSwapChain(const FSwapChainDesc* desc, const char* file, int line)
 	{
-		auto result = new VKSwapChain();
+		auto result = NewObjectWithInfo<VKSwapChain>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc) == false)
 		{
 			result->Release();
@@ -897,9 +897,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IRenderPass* VKGpuDevice::CreateRenderPass(const FRenderPassDesc* desc)
+	IRenderPass* VKGpuDevice::CreateRenderPass(const FRenderPassDesc* desc, const char* file, int line)
 	{
-		auto result = new VKRenderPass();
+		auto result = NewObjectWithInfo<VKRenderPass>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc) == false)
 		{
 			result->Release();
@@ -907,28 +907,28 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IFrameBuffers* VKGpuDevice::CreateFrameBuffers(IRenderPass* rpass)
+	IFrameBuffers* VKGpuDevice::CreateFrameBuffers(IRenderPass* rpass, const char* file, int line)
 	{
-		auto result = new VKFrameBuffers();
+		auto result = NewObjectWithInfo<VKFrameBuffers>(file ? file : __FILE__, line);
 		result->mRenderPass = rpass;
 		result->mDeviceRef.FromObject(this);
 		return result;
 	}
-	IAccelerationStructure* VKGpuDevice::CreateAccelerationStructure(const FAccelerationStructureDesc* rpass)
+	IAccelerationStructure* VKGpuDevice::CreateAccelerationStructure(const FAccelerationStructureDesc* rpass, const char* file, int line)
 	{
 		return nullptr;
 	}
-	IAStructureInstance* VKGpuDevice::CreateAccelerationStructureInstance(const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure)
+	IAStructureInstance* VKGpuDevice::CreateAccelerationStructureInstance(const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure, const char* file, int line)
 	{
 		return nullptr;
 	}
-	ITopAccelerationStructure* VKGpuDevice::CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc)
+	ITopAccelerationStructure* VKGpuDevice::CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc, const char* file, int line)
 	{
 		return nullptr;
 	}
-	IGpuPipeline* VKGpuDevice::CreatePipeline(const FGpuPipelineDesc* desc)
+	IGpuPipeline* VKGpuDevice::CreatePipeline(const FGpuPipelineDesc* desc, const char* file, int line)
 	{
-		auto result = new VKGpuPipeline();
+		auto result = NewObjectWithInfo<VKGpuPipeline>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc) == false)
 		{
 			result->Release();
@@ -936,13 +936,13 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IGpuDrawState* VKGpuDevice::CreateGpuDrawState()
+	IGpuDrawState* VKGpuDevice::CreateGpuDrawState(const char* file, int line)
 	{
-		return new VKGpuDrawState();
+		return NewObjectWithInfo<VKGpuDrawState>(file ? file : __FILE__, line);
 	}
-	IInputLayout* VKGpuDevice::CreateInputLayout(FInputLayoutDesc* desc)
+	IInputLayout* VKGpuDevice::CreateInputLayout(FInputLayoutDesc* desc, const char* file, int line)
 	{
-		auto result = new VKInputLayout();
+		auto result = NewObjectWithInfo<VKInputLayout>(file ? file : __FILE__, line);
 		if (result->Init(this, desc) == false)
 		{
 			result->Release();
@@ -950,9 +950,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ICommandList* VKGpuDevice::CreateCommandList()
+	ICommandList* VKGpuDevice::CreateCommandList(const char* file, int line)
 	{
-		auto result = new VKCommandList();
+		auto result = NewObjectWithInfo<VKCommandList>(file ? file : __FILE__, line);
 		if (result->Init(this) == false)
 		{
 			result->Release();
@@ -960,9 +960,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IShader* VKGpuDevice::CreateShader(FShaderDesc* desc)
+	IShader* VKGpuDevice::CreateShader(FShaderDesc* desc, const char* file, int line)
 	{
-		auto result = new VKShader();
+		auto result = NewObjectWithInfo<VKShader>(file ? file : __FILE__, line);
 		if (result->Init(this, desc) == false)
 		{
 			result->Release();
@@ -970,17 +970,17 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IGraphicsEffect* VKGpuDevice::CreateShaderEffect()
+	IGraphicsEffect* VKGpuDevice::CreateShaderEffect(const char* file, int line)
 	{
-		return new VKGraphicsEffect();
+		return NewObjectWithInfo<VKGraphicsEffect>(file ? file : __FILE__, line);
 	}
-	IComputeEffect* VKGpuDevice::CreateComputeEffect()
+	IComputeEffect* VKGpuDevice::CreateComputeEffect(const char* file, int line)
 	{
-		return new VKComputeEffect();
+		return NewObjectWithInfo<VKComputeEffect>(file ? file : __FILE__, line);
 	}
-	IFence* VKGpuDevice::CreateFence(const FFenceDesc* desc, const char* name)
+	IFence* VKGpuDevice::CreateFence(const FFenceDesc* desc, const char* name, const char* file, int line)
 	{
-		auto result = new VKFence();
+		auto result = NewObjectWithInfo<VKFence>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc, name) == false)
 		{
 			result->Release();
@@ -988,9 +988,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IEvent* VKGpuDevice::CreateGpuEvent(const FEventDesc* desc, const char* name)
+	IEvent* VKGpuDevice::CreateGpuEvent(const FEventDesc* desc, const char* name, const char* file, int line)
 	{
-		auto result = new VKEvent(name);
+		auto result = NewObjectWithInfo<VKEvent>(file ? file : __FILE__, line, name);
 		if (result->Init(this, *desc, name) == false)
 		{
 			result->Release();
@@ -998,19 +998,19 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IGraphicDraw* VKGpuDevice::CreateGraphicDraw()
+	IGraphicDraw* VKGpuDevice::CreateGraphicDraw(const char* file, int line)
 	{
-		auto result = new VKGraphicDraw();
+		auto result = NewObjectWithInfo<VKGraphicDraw>(file ? file : __FILE__, line);
 		result->mDeviceRef.FromObject(this);
 		return result;
 	}
-	IComputeDraw* VKGpuDevice::CreateComputeDraw()
+	IComputeDraw* VKGpuDevice::CreateComputeDraw(const char* file, int line)
 	{
-		auto result = new VKComputeDraw();
+		auto result = NewObjectWithInfo<VKComputeDraw>(file ? file : __FILE__, line);
 		result->mDeviceRef.FromObject(this);
 		return result;
 	}
-	IGpuScope* VKGpuDevice::CreateGpuScope()
+	IGpuScope* VKGpuDevice::CreateGpuScope(const char* file, int line)
 	{
 		return nullptr;
 	}
@@ -1063,7 +1063,7 @@ namespace NxRHI
 	void VKCmdQueue::Init(VKGpuDevice* device)
 	{
 		FFenceDesc fcDesc{};
-		mFlushFence = MakeWeakRef(device->CreateFence(&fcDesc, "CmdQueue Fence"));
+		mFlushFence = MakeWeakRef(device->CreateFence(&fcDesc, "CmdQueue Fence", __FILE__, __LINE__));
 	}
 	void VKCmdQueue::ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type)
 	{
@@ -1145,7 +1145,7 @@ namespace NxRHI
 		VAutoVSLLock locker(mCmdLocker);
 		if (mIdleCmdlist.empty())
 		{
-			mIdleCmdlist.push(MakeWeakRef(mDevice->CreateCommandList()));
+			mIdleCmdlist.push(MakeWeakRef(mDevice->CreateCommandList(__FILE__, __LINE__)));
 		}
 		auto result = mIdleCmdlist.front();
 		result->AddRef();

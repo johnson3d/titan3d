@@ -17,5 +17,6 @@
     <e_1 Value="Game,utest/plant/fir_01_plant/t_fir_alba_bark_01_bc.srv,598c63d3-30b7-4354-a068-03e8807fc0dd" />
     <e_2 Value="Game,utest/plant/fir_01_plant/t_fir_bark_01_n.srv,d6ad543f-2115-47b3-ab6b-1dad9f93e463" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
 </Root>

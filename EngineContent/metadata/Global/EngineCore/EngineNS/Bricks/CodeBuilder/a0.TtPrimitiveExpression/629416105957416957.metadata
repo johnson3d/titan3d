@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_629416105957416957 Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
+  <ObjectStr Type="System.String@Unknown" Order="0" />
+  <Type Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Order="0" />
+  <TypeIsTypeof Type="System.Boolean@Unknown" Order="0" />
+  <ValueStr Type="System.String@Unknown" Order="0" />
+</Hash_629416105957416957>

@@ -835,7 +835,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                 if (physicalIndex < 0 || physicalIndex >= (mRtViews?.Length ?? 0))
                     continue;
 
-                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                var cmdlist = TtCommandList.GetCmdList();
                 using (new NxRHI.TtCmdListScope(cmdlist, "ClipmapPage"))
                 {
                     mGBuffer.SetDepthStencil(PageDepthTextureDSV);
@@ -1034,7 +1034,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             {
                 j.SceneNode.OnGatherVisibleMeshes(mVisParameter);
             }
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist, "AdvShadow"))
             {
                 mGBuffer.SetDepthStencil(PageDepthTextureDSV);

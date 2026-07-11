@@ -230,7 +230,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             GBuffers?.SetViewportCBuffer(world, policy);
 
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist, "SSSBlur"))
             {
                 var passClears = new NxRHI.FRenderPassClears();

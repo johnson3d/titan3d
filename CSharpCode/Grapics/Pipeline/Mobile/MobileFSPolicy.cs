@@ -60,7 +60,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public unsafe override void Tick(GamePlay.TtWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
         {
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = NxRHI.TtCommandList.GetCmdList();
             BasePassNode.Tick(world, this, cmdlist, true);
             this.CommitCommandList(cmdlist, "Frame");
         }

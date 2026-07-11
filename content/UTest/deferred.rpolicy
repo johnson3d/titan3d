@@ -609,8 +609,8 @@
   </Nodes>
   <PolicyType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore" />
   <RenderPolicy Type="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore">
+    <ContactShadowMode Type="EngineNS.Graphics.Pipeline.Deferred.EContactShadowMode@EngineCore" Value="InputNode" />
     <EnableAO Type="System.Boolean@Unknown" Value="True" />
-    <EnableContactShadow Type="System.Boolean@Unknown" Value="True" />
     <EnableGI Type="System.Boolean@Unknown" Value="True" />
     <EnableLocalLights Type="System.Boolean@Unknown" Value="True" />
     <ShadowMode Type="EngineNS.Graphics.Pipeline.EShadowMode@EngineCore" Value="Csm" />

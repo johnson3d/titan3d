@@ -124,7 +124,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 return;
             }
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist, "Pick"))
             {
                 cmdlist.SetViewport(in PickedBuffer.Viewport);

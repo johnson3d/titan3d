@@ -143,7 +143,7 @@ namespace EngineNS.Bricks.AdvanceShadow
 
             mMarkingShading.SetDrawcallDispatch(this, policy, mDrawcall, screenWidth, screenHeight, 1, true);
 
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = TtCommandList.GetCmdList();
             using (new TtCmdListScope(cmdlist, "VSMPageMarking"))
             {
                 cmdlist.PushGpuDraw(mDrawcall);

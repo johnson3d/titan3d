@@ -555,4 +555,120 @@ void FClusterDAG::PrintDAGInfo() const
 	VFX_LTRACE(ELTT_info, "=======================\n");
 }
 
+void FClusterDAG::GetExportSizes(UINT& outGroupCount, UINT& outChildrenTotal,
+	UINT& outParentsTotal, UINT& outClusterCount, UINT& outRootGroupCount) const
+{
+	outGroupCount = (UINT)Groups.size();
+	outClusterCount = (UINT)Clusters.size();
+
+	UINT childrenTotal = 0;
+	UINT parentsTotal = 0;
+	UINT rootGroupCount = 0;
+
+	int maxGroupLevel = 0;
+	for (const auto& G : Groups)
+	{
+		childrenTotal += (UINT)G.Children.size();
+		parentsTotal += (UINT)G.Parents.size();
+		if (G.MipLevel > maxGroupLevel)
+			maxGroupLevel = G.MipLevel;
+	}
+
+	// Root groups = groups at the highest MipLevel
+	for (const auto& G : Groups)
+	{
+		if (G.MipLevel == maxGroupLevel)
+			rootGroupCount++;
+	}
+
+	outChildrenTotal = childrenTotal;
+	outParentsTotal = parentsTotal;
+	outRootGroupCount = rootGroupCount;
+}
+
+UINT FClusterDAG::ExportGroupsForGPU(
+	void* outGroupsRaw, UINT maxGroups,
+	UINT* outChildrenIndices, UINT maxChildren,
+	UINT* outParentsIndices, UINT maxParents,
+	UINT* outClusterGroupMap, UINT maxClusters,
+	UINT* outRootGroupIndices, UINT maxRootGroups,
+	UINT& outChildrenTotal, UINT& outParentsTotal, UINT& outRootGroupCount) const
+{
+	FClusterGroupExport* outGroups = (FClusterGroupExport*)outGroupsRaw;
+	UINT numGroups = (UINT)Groups.size();
+	if (numGroups == 0 || outGroups == nullptr)
+		return 0;
+
+	// Find max group level (root level)
+	int maxGroupLevel = 0;
+	for (const auto& G : Groups)
+	{
+		if (G.MipLevel > maxGroupLevel)
+			maxGroupLevel = G.MipLevel;
+	}
+
+	// Flatten children and parents into contiguous arrays
+	UINT childrenOffset = 0;
+	UINT parentsOffset = 0;
+	UINT rootCount = 0;
+
+	for (UINT g = 0; g < numGroups && g < maxGroups; g++)
+	{
+		const FClusterGroup& group = Groups[g];
+		FClusterGroupExport& exp = outGroups[g];
+
+		exp.LODBoundsCenter = group.LODBounds.getCenter();
+		exp.LODBoundsRadius = group.LODBounds.getRadius();
+		exp.ParentLODError = group.ParentLODError;
+		exp.MipLevel = group.MipLevel;
+		exp.ChildrenStart = (int)childrenOffset;
+		exp.ChildrenCount = (int)group.Children.size();
+		exp.ParentsStart = (int)parentsOffset;
+		exp.ParentsCount = (int)group.Parents.size();
+		exp.Padding0 = 0;
+		exp.Padding1 = 0;
+
+		// Copy children indices
+		for (UINT c = 0; c < (UINT)group.Children.size() && childrenOffset < maxChildren; c++)
+		{
+			outChildrenIndices[childrenOffset] = group.Children[c];
+			childrenOffset++;
+		}
+
+		// Copy parents indices
+		for (UINT p = 0; p < (UINT)group.Parents.size() && parentsOffset < maxParents; p++)
+		{
+			outParentsIndices[parentsOffset] = group.Parents[p];
+			parentsOffset++;
+		}
+
+		// Collect root groups (highest level)
+		if (group.MipLevel == maxGroupLevel && rootCount < maxRootGroups)
+		{
+			outRootGroupIndices[rootCount] = g;
+			rootCount++;
+		}
+	}
+
+	// Build ClusterGroupMap: for each cluster, find its generating group
+	// GeneratingGroupIndex on each cluster points to the group that created it
+	if (outClusterGroupMap != nullptr)
+	{
+		UINT numClusters = (UINT)Clusters.size();
+		for (UINT i = 0; i < numClusters && i < maxClusters; i++)
+		{
+			UINT genGroup = Clusters[i]->GeneratingGroupIndex;
+			// Level 0 clusters have no generating group (they ARE the leaf)
+			// Use ~0u as sentinel for "no group"
+			outClusterGroupMap[i] = (genGroup < numGroups) ? genGroup : ~0u;
+		}
+	}
+
+	outChildrenTotal = childrenOffset;
+	outParentsTotal = parentsOffset;
+	outRootGroupCount = rootCount;
+
+	return numGroups;
+}
+
 NS_END

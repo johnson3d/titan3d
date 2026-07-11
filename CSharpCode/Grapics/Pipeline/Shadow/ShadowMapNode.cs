@@ -475,7 +475,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
                 mShadowCameraArray[CsmIdx].UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext, TtCbView.EUpdateMode.Immediately);
                 
-                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                var cmdlist = TtCommandList.GetCmdList();
                 using (new NxRHI.TtCmdListScope(cmdlist, "ShadowMap"))
                 {
                     using (new Profiler.TimeScopeHelper(ScopeFlushDraw))

@@ -561,7 +561,7 @@ namespace EngineNS.Bricks.DataCopyer
         {
             string code = "";
             var creator = new TtCodeWriter();
-            creator.AddLine("//Gen by engine", ref code);
+            creator.AddLine($"//Gen by engine DataCopyerHash={hash}", ref code);
             List<Rtti.TtClassMeta> metas = Rtti.TtClassMetaManager.Instance.Metas.Values.ToList();
             for (int i = metas.Count - 1; i >= 0; i--)
             {
@@ -1126,7 +1126,7 @@ namespace EngineNS
                     {
                         mDataCopyer = serverPlugin.GetPluginObject<TtDataCopyer>();
                         var hash = Bricks.DataCopyer.TtDataCopyer.CalcVersionHash();
-                        if (mDataCopyer == null || hash != mDataCopyer.GetVersionHash())
+                        if (mDataCopyer == null || (TtEngine.Instance.Config.CheckMetaHash && hash != mDataCopyer.GetVersionHash()))
                         {
 #if PWindow
                             var code = TtDataCopyer.GenCode(hash);

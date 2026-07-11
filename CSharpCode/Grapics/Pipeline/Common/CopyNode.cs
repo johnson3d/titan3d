@@ -80,7 +80,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             if (mCopyDrawcall == null)
                 return;
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = NxRHI.TtCommandList.GetCmdList();
 
             using (new NxRHI.TtCmdListScope(cmdlist, "Copy"))
             {
@@ -185,7 +185,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             if (mCopyDrawcall == null)
                 return;
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = NxRHI.TtCommandList.GetCmdList();
 
             using (new NxRHI.TtCmdListScope(cmdlist, "Copy2Readback"))
             {
@@ -303,7 +303,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             if (mCopyDrawcall == null)
                 return;
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = NxRHI.TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist, "Copy2Next"))
             {
                 var srcPin = GetAttachBuffer(SrcPinIn);
@@ -566,7 +566,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 ResultBuffer = srcPin.Clone();
             }
 
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = NxRHI.TtCommandList.GetCmdList();
 
             using (new NxRHI.TtCmdListScope(cmdlist, "Debugger"))
             {

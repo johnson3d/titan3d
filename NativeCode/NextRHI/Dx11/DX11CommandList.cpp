@@ -39,7 +39,7 @@ namespace NxRHI
 		mContext->QueryInterface(IID_ID3D11DeviceContext4, (void**)&mContext4);		
 
 		FFenceDesc fcDesc{};
-		mCommitFence = MakeWeakRef(device->CreateFence(&fcDesc, "CmdList Commit Fence"));
+		mCommitFence = MakeWeakRef(device->CreateFence(&fcDesc, "CmdList Commit Fence", __FILE__, __LINE__));
 		return true;
 	}
 	bool DX11CommandList::Init(DX11GpuDevice* device, ID3D11DeviceContext* context)
@@ -539,7 +539,7 @@ namespace NxRHI
 			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
 			copyDesc.MiscFlags = (EResourceMiscFlag)0;
 
-			copyBuffer = MakeWeakRef(pDevice->CreateBuffer(&copyDesc));
+			copyBuffer = MakeWeakRef(pDevice->CreateBuffer(&copyDesc, __FILE__, __LINE__));
 			auto hwCmd = ((DX11CmdQueue*)pDevice->GetCmdQueue())->mHardwareContext;
 			hwCmd->mContext->CopyResource((ID3D11Resource*)copyBuffer->GetHWBuffer(), (ID3D11Resource*)src->GetHWBuffer());
 		}
@@ -588,7 +588,7 @@ namespace NxRHI
 		copyDesc.InitData = nullptr;
 		
 		auto pDevice = ((DX11Texture*)source)->mDeviceRef.GetPtr();
-		auto copyTexture = MakeWeakRef(pDevice->CreateTexture(&copyDesc));
+		auto copyTexture = MakeWeakRef(pDevice->CreateTexture(&copyDesc, __FILE__, __LINE__));
 
 		auto cmd = ((DX11CmdQueue*)pDevice->GetCmdQueue())->mHardwareContext;
 		cmd->mContext->CopyResource((ID3D11Resource*)copyTexture->GetHWBuffer(), (ID3D11Resource*)source->GetHWBuffer());
@@ -686,7 +686,7 @@ namespace NxRHI
 		initData.pData = ptr;
 		initData.RowPitch = bfDesc.Size;
 		bfDesc.InitData = &initData;
-		auto copyBuffer = MakeWeakRef(GetDX11Device()->CreateBuffer(&bfDesc));
+		auto copyBuffer = MakeWeakRef(GetDX11Device()->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 		/*FMappedSubResource mapped{};
 		if (copyBuffer->Map(0, &mapped, false))
 		{

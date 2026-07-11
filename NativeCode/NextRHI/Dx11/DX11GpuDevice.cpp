@@ -216,7 +216,7 @@ namespace NxRHI
 
 		FFenceDesc fcDesc{};
 		
-		mFrameFence = MakeWeakRef(this->CreateFence(&fcDesc, "Dx11 Frame Fence"));
+		mFrameFence = MakeWeakRef(this->CreateFence(&fcDesc, "Dx11 Frame Fence", __FILE__, __LINE__));
 
 		mCaps.IsSupportBufferToTexture = false;
 		mCaps.IsSupportSSBO_VS = true;
@@ -228,7 +228,7 @@ namespace NxRHI
 		mGpuResourceAlignment.RawSrvUavAlignment = 16;
 		mGpuResourceAlignment.UavCounterAlignment = 4096;*/
 
-		mPostCmdList = MakeWeakRef((DX11CommandList*)this->CreateCommandList());
+		mPostCmdList = MakeWeakRef((DX11CommandList*)this->CreateCommandList(__FILE__, __LINE__));
 		mPostCmdList->BeginCommand();
 
 		return true;
@@ -268,9 +268,9 @@ namespace NxRHI
 			//GpuDump::NvAftermath::OnDredDump(this);
 		}
 	}
-	IBuffer* DX11GpuDevice::CreateBuffer(const FBufferDesc* desc)
+	IBuffer* DX11GpuDevice::CreateBuffer(const FBufferDesc* desc, const char* file, int line)
 	{
-		auto result = new DX11Buffer();
+		auto result = NewObjectWithInfo<DX11Buffer>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc) == false)
 		{
 			result->Release();
@@ -278,9 +278,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ITexture* DX11GpuDevice::CreateTexture(const FTextureDesc* desc)
+	ITexture* DX11GpuDevice::CreateTexture(const FTextureDesc* desc, const char* file, int line)
 	{
-		auto result = new DX11Texture();
+		auto result = NewObjectWithInfo<DX11Texture>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc) == false)
 		{
 			result->Release();
@@ -288,9 +288,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ITexture* DX11GpuDevice::CreateTexture(void* pSharedObject)
+	ITexture* DX11GpuDevice::CreateTexture(void* pSharedObject, const char* file, int line)
 	{
-		auto result = new DX11Texture();
+		auto result = NewObjectWithInfo<DX11Texture>(file ? file : __FILE__, line);
 		if (result->Init(this, pSharedObject) == false)
 		{
 			result->Release();
@@ -298,9 +298,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ICbView* DX11GpuDevice::CreateCBV(IBuffer* pBuffer, const FCbvDesc* desc)
+	ICbView* DX11GpuDevice::CreateCBV(IBuffer* pBuffer, const FCbvDesc* desc, const char* file, int line)
 	{
-		auto result = new DX11CbView();
+		auto result = NewObjectWithInfo<DX11CbView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc) == false)
 		{
 			result->Release();
@@ -308,9 +308,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IVbView* DX11GpuDevice::CreateVBV(IBuffer* pBuffer, const FVbvDesc* desc)
+	IVbView* DX11GpuDevice::CreateVBV(IBuffer* pBuffer, const FVbvDesc* desc, const char* file, int line)
 	{
-		auto result = new DX11VbView();
+		auto result = NewObjectWithInfo<DX11VbView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, desc) == false)
 		{
 			result->Release();
@@ -318,9 +318,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IIbView* DX11GpuDevice::CreateIBV(IBuffer* pBuffer, const FIbvDesc* desc)
+	IIbView* DX11GpuDevice::CreateIBV(IBuffer* pBuffer, const FIbvDesc* desc, const char* file, int line)
 	{
-		auto result = new DX11IbView();
+		auto result = NewObjectWithInfo<DX11IbView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, desc) == false)
 		{
 			result->Release();
@@ -328,9 +328,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ISrView* DX11GpuDevice::CreateSRV(IGpuBufferData* pBuffer, const FSrvDesc* desc)
+	ISrView* DX11GpuDevice::CreateSRV(IGpuBufferData* pBuffer, const FSrvDesc* desc, const char* file, int line)
 	{
-		auto result = new DX11SrView();
+		auto result = NewObjectWithInfo<DX11SrView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc) == false)
 		{
 			result->Release();
@@ -338,9 +338,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IUaView* DX11GpuDevice::CreateUAV(IGpuBufferData* pBuffer, const FUavDesc* desc)
+	IUaView* DX11GpuDevice::CreateUAV(IGpuBufferData* pBuffer, const FUavDesc* desc, const char* file, int line)
 	{
-		auto result = new DX11UaView();
+		auto result = NewObjectWithInfo<DX11UaView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc) == false)
 		{
 			result->Release();
@@ -348,9 +348,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IRenderTargetView* DX11GpuDevice::CreateRTV(ITexture* pBuffer, const FRtvDesc* desc)
+	IRenderTargetView* DX11GpuDevice::CreateRTV(ITexture* pBuffer, const FRtvDesc* desc, const char* file, int line)
 	{
-		auto result = new DX11RenderTargetView();
+		auto result = NewObjectWithInfo<DX11RenderTargetView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc) == false)
 		{
 			result->Release();
@@ -358,9 +358,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IDepthStencilView* DX11GpuDevice::CreateDSV(ITexture* pBuffer, const FDsvDesc* desc)
+	IDepthStencilView* DX11GpuDevice::CreateDSV(ITexture* pBuffer, const FDsvDesc* desc, const char* file, int line)
 	{
-		auto result = new DX11DepthStencilView();
+		auto result = NewObjectWithInfo<DX11DepthStencilView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc) == false)
 		{
 			result->Release();
@@ -368,9 +368,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ISampler* DX11GpuDevice::CreateSampler(const FSamplerDesc* desc)
+	ISampler* DX11GpuDevice::CreateSampler(const FSamplerDesc* desc, const char* file, int line)
 	{
-		auto result = new DX11Sampler();
+		auto result = NewObjectWithInfo<DX11Sampler>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc) == false)
 		{
 			result->Release();
@@ -378,9 +378,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ISwapChain* DX11GpuDevice::CreateSwapChain(const FSwapChainDesc* desc)
+	ISwapChain* DX11GpuDevice::CreateSwapChain(const FSwapChainDesc* desc, const char* file, int line)
 	{
-		auto result = new DX11SwapChain();
+		auto result = NewObjectWithInfo<DX11SwapChain>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc) == false)
 		{
 			result->Release();
@@ -388,34 +388,34 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IRenderPass* DX11GpuDevice::CreateRenderPass(const FRenderPassDesc* desc)
+	IRenderPass* DX11GpuDevice::CreateRenderPass(const FRenderPassDesc* desc, const char* file, int line)
 	{
-		auto result = new IRenderPass();
+		auto result = NewObjectWithInfo<IRenderPass>(file ? file : __FILE__, line);
 		result->Desc = *desc;
 		result->SetViewInstanceLocations();
 		return result;
 	}
-	IFrameBuffers* DX11GpuDevice::CreateFrameBuffers(IRenderPass* rpass)
+	IFrameBuffers* DX11GpuDevice::CreateFrameBuffers(IRenderPass* rpass, const char* file, int line)
 	{
-		auto result = new DX11FrameBuffers();
+		auto result = NewObjectWithInfo<DX11FrameBuffers>(file ? file : __FILE__, line);
 		result->mRenderPass = rpass;
 		return result;
 	}
-	IAccelerationStructure* DX11GpuDevice::CreateAccelerationStructure(const FAccelerationStructureDesc* rpass)
+	IAccelerationStructure* DX11GpuDevice::CreateAccelerationStructure(const FAccelerationStructureDesc* rpass, const char* file, int line)
 	{
 		return nullptr;
 	}
-	IAStructureInstance* DX11GpuDevice::CreateAccelerationStructureInstance(const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure)
+	IAStructureInstance* DX11GpuDevice::CreateAccelerationStructureInstance(const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure, const char* file, int line)
 	{
 		return nullptr;
 	}
-	ITopAccelerationStructure* DX11GpuDevice::CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc)
+	ITopAccelerationStructure* DX11GpuDevice::CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc, const char* file, int line)
 	{
 		return nullptr;
 	}
-	IGpuPipeline* DX11GpuDevice::CreatePipeline(const FGpuPipelineDesc* desc)
+	IGpuPipeline* DX11GpuDevice::CreatePipeline(const FGpuPipelineDesc* desc, const char* file, int line)
 	{
-		auto result = new DX11GpuPipeline();
+		auto result = NewObjectWithInfo<DX11GpuPipeline>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc) == false)
 		{
 			result->Release();
@@ -423,13 +423,13 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IGpuDrawState* DX11GpuDevice::CreateGpuDrawState()
+	IGpuDrawState* DX11GpuDevice::CreateGpuDrawState(const char* file, int line)
 	{
-		return new DX11GpuDrawState();
+		return NewObjectWithInfo<DX11GpuDrawState>(file ? file : __FILE__, line);
 	}
-	IInputLayout* DX11GpuDevice::CreateInputLayout(FInputLayoutDesc* desc)
+	IInputLayout* DX11GpuDevice::CreateInputLayout(FInputLayoutDesc* desc, const char* file, int line)
 	{
-		auto result = new DX11InputLayout();
+		auto result = NewObjectWithInfo<DX11InputLayout>(file ? file : __FILE__, line);
 		if (result->Init(this, desc) == false)
 		{
 			result->Release();
@@ -437,9 +437,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ICommandList* DX11GpuDevice::CreateCommandList()
+	ICommandList* DX11GpuDevice::CreateCommandList(const char* file, int line)
 	{
-		auto result = new DX11CommandList();
+		auto result = NewObjectWithInfo<DX11CommandList>(file ? file : __FILE__, line);
 		if (result->Init(this) == false)
 		{
 			result->Release();
@@ -447,9 +447,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IShader* DX11GpuDevice::CreateShader(FShaderDesc* desc)
+	IShader* DX11GpuDevice::CreateShader(FShaderDesc* desc, const char* file, int line)
 	{
-		auto result = new DX11Shader();
+		auto result = NewObjectWithInfo<DX11Shader>(file ? file : __FILE__, line);
 		if (result->Init(this, desc) == false)
 		{
 			result->Release();
@@ -457,17 +457,17 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IGraphicsEffect* DX11GpuDevice::CreateShaderEffect()
+	IGraphicsEffect* DX11GpuDevice::CreateShaderEffect(const char* file, int line)
 	{
-		return new IGraphicsEffect();
+		return NewObjectWithInfo<IGraphicsEffect>(file ? file : __FILE__, line);
 	}
-	IComputeEffect* DX11GpuDevice::CreateComputeEffect()
+	IComputeEffect* DX11GpuDevice::CreateComputeEffect(const char* file, int line)
 	{
-		return new IComputeEffect();
+		return NewObjectWithInfo<IComputeEffect>(file ? file : __FILE__, line);
 	}
-	IFence* DX11GpuDevice::CreateFence(const FFenceDesc* desc, const char* name)
+	IFence* DX11GpuDevice::CreateFence(const FFenceDesc* desc, const char* name, const char* file, int line)
 	{
-		auto result = new DX11Fence();
+		auto result = NewObjectWithInfo<DX11Fence>(file ? file : __FILE__, line);
 		if (result->Init(this, *desc, name) == false)
 		{
 			result->Release();
@@ -475,9 +475,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IEvent* DX11GpuDevice::CreateGpuEvent(const FEventDesc* desc, const char* name)
+	IEvent* DX11GpuDevice::CreateGpuEvent(const FEventDesc* desc, const char* name, const char* file, int line)
 	{
-		auto result = new DX11Event(name);
+		auto result = NewObjectWithInfo<DX11Event>(file ? file : __FILE__, line, name);
 		if (result->Init(this, *desc, name) == false)
 		{
 			result->Release();
@@ -485,14 +485,14 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IGraphicDraw* DX11GpuDevice::CreateGraphicDraw()
+	IGraphicDraw* DX11GpuDevice::CreateGraphicDraw(const char* file, int line)
 	{
-		auto result = new DX11GraphicDraw();
+		auto result = NewObjectWithInfo<DX11GraphicDraw>(file ? file : __FILE__, line);
 		return result;
 	}
-	IGpuScope* DX11GpuDevice::CreateGpuScope()
+	IGpuScope* DX11GpuDevice::CreateGpuScope(const char* file, int line)
 	{
-		auto result = new DX11GpuScope();
+		auto result = NewObjectWithInfo<DX11GpuScope>(file ? file : __FILE__, line);
 		if (result->Init(this) == false)
 		{
 			result->Release();
@@ -588,7 +588,7 @@ namespace NxRHI
 		VAutoVSLLock locker(mImmCmdListLocker);
 		if (mIdleCmdlist.empty())
 		{
-			mIdleCmdlist.push(MakeWeakRef(mDevice->CreateCommandList()));
+			mIdleCmdlist.push(MakeWeakRef(mDevice->CreateCommandList(__FILE__, __LINE__)));
 		}
 		auto result = mIdleCmdlist.front();
 		result->AddRef();

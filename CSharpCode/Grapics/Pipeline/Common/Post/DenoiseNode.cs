@@ -485,7 +485,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
             int lastSpatialOutSlot = (iterations - 1) % 2;
 
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = TtCommandList.GetCmdList();
             using (new TtCmdListScope(cmd, "Denoise"))
             {
                 for (int i = 0; i < iterations; i++)

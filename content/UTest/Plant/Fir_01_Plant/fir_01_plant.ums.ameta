@@ -23,5 +23,6 @@
     <e_1 Value="Game,utest/plant/fir_01_plant/leaf.uminst,ceaf5c79-bbab-47ac-a137-6632405489b6" />
     <e_2 Value="Game,utest/plant/fir_01_plant/branch.uminst,243cedad-54d9-4bd2-a82f-7e7a62654d08" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
 </Root>

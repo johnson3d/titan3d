@@ -306,7 +306,7 @@ namespace EngineNS.EGui
                 return;
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            var drawCmd = rc.CmdListManager.GetCmdList();
+            var drawCmd = NxRHI.TtCommandList.GetCmdList();
             uint vertexOffsetInVertices = 0;
             uint indexOffsetInElements = 0;
 

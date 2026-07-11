@@ -356,7 +356,7 @@ namespace EngineNS.GamePlay.Scene
                 return;
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            var cmdlist = rc.CmdListManager.GetCmdList();
+            var cmdlist = NxRHI.TtCommandList.GetCmdList();
             using (new TtCmdListScope(cmdlist, "CubeCapture.CopyFace"))
             {
                 mCopyDraw.Mode = ECopyDrawMode.CDM_Texture2Texture;

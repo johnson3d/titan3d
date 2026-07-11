@@ -151,7 +151,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public override unsafe void Tick(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = NxRHI.TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmd, "GpuCulling"))
             {
                 Culling(policy, cmd);

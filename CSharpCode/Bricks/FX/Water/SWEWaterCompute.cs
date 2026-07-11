@@ -210,7 +210,7 @@ namespace EngineNS.Bricks.FX.Water
             // Ping-pong: 读上一帧, 写当帧
             mCurrentWriteSlot ^= 1;
 
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = TtCommandList.GetCmdList();
             using (new TtCmdListScope(cmd, "SWECompute"))
             {
                 mShading.SetDrawcallDispatch(this, policy, mDrawCall,

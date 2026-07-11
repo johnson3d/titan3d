@@ -24,10 +24,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         //    get;
         //    set;
         //}
-        public object Target 
-        { 
-            get; 
-            set; 
+        public object Target
+        {
+            get;
+            set;
         }
     }
 
@@ -105,7 +105,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             newValue = default;
             return false;
         }
-        public async Thread.Async.TtTask<bool> Initialize() 
+        public async Thread.Async.TtTask<bool> Initialize()
         {
             RefCount++;
             return await Initialize_Override();
@@ -130,7 +130,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     }
     public class TtPGTypeEditorAttribute : TtPGCustomValueEditorAttribute
     {
-        
+
         public string AssemblyFilter = null;
         public UTypeSelector.EFilterMode FilterMode = UTypeSelector.EFilterMode.IncludeObjectType | UTypeSelector.EFilterMode.IncludeValueType;
 
@@ -158,10 +158,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             //var props = bindType.SystemType.GetProperties();
             ImGuiAPI.SetNextItemWidth(-1);
             TypeSlt.FilterMode = FilterMode;
-            TypeSlt.AssemblyFilter = AssemblyFilter;            
+            TypeSlt.AssemblyFilter = AssemblyFilter;
             TypeSlt.BaseType = BaseType;
             var multiValue = info.Value as PropertyMultiValue;
-            if(multiValue != null && multiValue.HasDifferentValue())
+            if (multiValue != null && multiValue.HasDifferentValue())
             {
                 ImGuiAPI.Text(multiValue.MultiValueString);
             }
@@ -234,7 +234,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             get
             {
-                lock(s_sync)
+                lock (s_sync)
                 {
                     if (mPropertyNotFindValue == null)
                         mPropertyNotFindValue = new PropertyNotFindValueClass();
@@ -313,7 +313,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             ArrayEditor.Cleanup();
             ListEditor.Cleanup();
             DictionaryEditor.Cleanup();
-            foreach(var typeEditor in mTypeEditors.Values)
+            foreach (var typeEditor in mTypeEditors.Values)
             {
                 typeEditor.Cleanup();
             }
@@ -380,7 +380,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             valueChanged = false;
             newValue = info.Value;
             TtPGCustomValueEditorAttribute editor;
-            if(mTypeEditors.TryGetValue(info.Type, out editor))
+            if (mTypeEditors.TryGetValue(info.Type, out editor))
             {
                 valueChanged = editor.OnDraw(in info, out newValue);
                 return true;
@@ -437,7 +437,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 ImGuiColorEditFlags_ misc_flags = (mHDR ? ImGuiColorEditFlags_.ImGuiColorEditFlags_HDR : 0) | (mDragAndDrop ? 0 : ImGuiColorEditFlags_.ImGuiColorEditFlags_NoDragDrop) | (mAlphaHalfPreview ? ImGuiColorEditFlags_.ImGuiColorEditFlags_AlphaPreviewHalf : (mAlphaPreview ? ImGuiColorEditFlags_.ImGuiColorEditFlags_AlphaPreview : 0)) | (mOptionMenu ? 0 : ImGuiColorEditFlags_.ImGuiColorEditFlags_NoOptions);
                 Vector3 v;
-                if(multiValue != null)
+                if (multiValue != null)
                 {
                     if (multiValue.HasDifferentValue())
                         v = Vector3.Zero;
@@ -735,7 +735,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var endPos = startPos + boxSize;
             UInt32 drawCol;
             var multiValue = info.Value as PropertyMultiValue;
-            if(multiValue != null && multiValue.HasDifferentValue())
+            if (multiValue != null && multiValue.HasDifferentValue())
                 drawList.AddRectFilledMultiColor(in startPos, in endPos, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000, 0xFFFFFFFF);
             else
             {
@@ -762,8 +762,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 mPopupOn = true;
                 ImGuiColorEditFlags_ misc_flags = (mHDR ? ImGuiColorEditFlags_.ImGuiColorEditFlags_HDR : 0) | (mDragAndDrop ? 0 : ImGuiColorEditFlags_.ImGuiColorEditFlags_NoDragDrop) | (mAlphaHalfPreview ? ImGuiColorEditFlags_.ImGuiColorEditFlags_AlphaPreviewHalf : (mAlphaPreview ? ImGuiColorEditFlags_.ImGuiColorEditFlags_AlphaPreview : 0)) | (mOptionMenu ? 0 : ImGuiColorEditFlags_.ImGuiColorEditFlags_NoOptions);
                 Color4f v;
-                Color4b srcValue = Color4b.FromRgb(0,0,0);
-                if(multiValue != null)
+                Color4b srcValue = Color4b.FromRgb(0, 0, 0);
+                if (multiValue != null)
                 {
                     if (!multiValue.HasDifferentValue())
                         srcValue = (Color4b)multiValue.Values[0];
@@ -795,8 +795,250 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return valueChanged;
         }
     }
-}
 
+    public class TtSkeletonBoneIndexPickerEditorAttribute : TtPGCustomValueEditorAttribute
+    {
+        string mCachedPreviewString = "";
+        int mSelectedEncoded = -1;
+        List<Animation.Asset.TtSkeletonAsset> mAllSkeletonAssets = null;
+        UIProxy.ComboBox mComboBox = new UIProxy.ComboBox();
+
+        // Encode: ((skeletonListIndex + 1) << 16) | boneIndex
+        // <= 0 means invalid/none. The +1 offset distinguishes from legacy raw bone indices.
+        static int EncodeBoneRef(int skelListIdx, int boneIdx)
+        {
+            if (skelListIdx < 0 || boneIdx < 0) return -1;
+            return ((skelListIdx + 1) << 16) | (boneIdx & 0xFFFF);
+        }
+        static bool DecodeBoneRef(int encoded, out int skelListIdx, out int boneIdx)
+        {
+            if (encoded <= 0) { skelListIdx = -1; boneIdx = -1; return false; }
+            skelListIdx = (encoded >> 16) - 1;
+            boneIdx = encoded & 0xFFFF;
+            return true;
+        }
+
+        protected override async Thread.Async.TtTask<bool> Initialize_Override()
+        {
+            var rNames = new List<RName>();
+            TtEngine.Instance.AssetMetaManager.TourAssetMetas<Animation.Asset.TtSkeletonAssetAMeta, List<RName>>(
+                (rName, meta, list) => { list.Add(rName); return false; }, rNames);
+
+            mAllSkeletonAssets = new List<Animation.Asset.TtSkeletonAsset>();
+            foreach (var rName in rNames)
+            {
+                var asset = await TtEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(rName);
+                if (asset != null)
+                {
+                    bool contains = false;
+                    foreach (var skeletonAsset in mAllSkeletonAssets)
+                    {
+                        if (skeletonAsset.AssetName == rName)
+                        {
+                            contains = true;
+                            break;
+                        }
+                    }
+                    if (!contains)
+                    {
+                        mAllSkeletonAssets.Add(asset);
+                    }
+                }
+
+            }
+
+            mComboBox.Flags = ImGuiComboFlags_.ImGuiComboFlags_HeightLarge;
+            mComboBox.WinFlags = ImGuiWindowFlags_.ImGuiWindowFlags_Popup |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoResize |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoMove;
+            mComboBox.Width = -1;
+            await mComboBox.Initialize();
+
+            return await base.Initialize_Override();
+        }
+
+        public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
+        {
+            
+            var encoded = System.Convert.ToInt32(info.Value);
+            DecodeBoneRef(encoded, out int currentSkelIdx, out int currentBoneIdx);
+            newValue = currentBoneIdx;
+            if (encoded != mSelectedEncoded)
+            {
+                mSelectedEncoded = encoded;
+                mCachedPreviewString = BuildPreviewString(encoded);
+            }
+
+            var preview = mCachedPreviewString;
+            if (string.IsNullOrEmpty(preview))
+                preview = "None";
+
+            mComboBox.Name = "##SkeletonBonePicker_" + info.Name;
+            mComboBox.PreviewValue = preview;
+
+            bool comboChanged = false;
+            int comboNewEncoded = encoded;
+            var capSkelIdx = currentSkelIdx;
+            var capBoneIdx = currentBoneIdx;
+
+            mComboBox.ComboOpenAction = (in Support.TtAnyPointer data) =>
+            {
+                var comboDrawList = ImGuiAPI.GetWindowDrawList();
+                var searchBar = TtEngine.Instance.UIProxyManager["SkeletonBonePickerSearchBar"] as EGui.UIProxy.SearchBarProxy;
+                if (searchBar == null)
+                {
+                    searchBar = new EGui.UIProxy.SearchBarProxy()
+                    {
+                        InfoText = "Search bone...",
+                        Width = -1,
+                    };
+                    TtEngine.Instance.UIProxyManager["SkeletonBonePickerSearchBar"] = searchBar;
+                }
+                if (!ImGuiAPI.IsAnyItemActive() && !ImGuiAPI.IsMouseClicked(0, false))
+                    ImGuiAPI.SetKeyboardFocusHere(0);
+                searchBar.OnDraw(in comboDrawList, in Support.TtAnyPointer.Default);
+
+                bool hasSearch = !string.IsNullOrEmpty(searchBar.SearchText);
+
+                if (mAllSkeletonAssets != null)
+                {
+                    for (int si = 0; si < mAllSkeletonAssets.Count; si++)
+                    {
+                        var skeletonAsset = mAllSkeletonAssets[si];
+                        if (skeletonAsset?.Skeleton == null) continue;
+
+                        var rawName = skeletonAsset.AssetName?.Name ?? "Unknown";
+                        var skelDisplayName = rawName.EndsWith(".skt") ? rawName.Substring(0, rawName.Length - 4) : rawName;
+
+                        if (hasSearch)
+                        {
+                            // Search: show matching bones as flat Selectable items
+                            if (skeletonAsset.Skeleton.Limbs == null) continue;
+                            var searchLower = searchBar.SearchText.ToLower();
+                            foreach (var limb in skeletonAsset.Skeleton.Limbs)
+                            {
+                                var boneName = limb.Desc?.Name;
+                                if (string.IsNullOrEmpty(boneName)) continue;
+                                if (!boneName.ToLower().Contains(searchLower)) continue;
+
+                                var bi = limb.Index.Value;
+                                var label = $"[{bi}] {boneName} ({skelDisplayName})";
+                                bool sel = (si == capSkelIdx && bi == capBoneIdx);
+                                if (ImGuiAPI.Selectable(label, ref sel, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                                {
+                                    comboNewEncoded = EncodeBoneRef(si, bi);
+                                    comboChanged = true;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Tree display
+                            ImGuiTreeNodeFlags_ skFlags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None;
+                            if (si == capSkelIdx)
+                                skFlags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen;
+                            bool skOpen = ImGuiAPI.TreeNodeEx(skelDisplayName, skFlags, skelDisplayName);
+
+                            if (skOpen)
+                            {
+                                foreach (var child in skeletonAsset.Skeleton.Children)
+                                {
+                                    if (DrawBoneTreeItem(child, si, capSkelIdx, capBoneIdx, skelDisplayName, out int selectedEncoded))
+                                    {
+                                        comboNewEncoded = selectedEncoded;
+                                        comboChanged = true;
+                                    }
+                                }
+                                ImGuiAPI.TreePop();
+                            }
+                        }
+                    }
+                }
+            };
+
+            ImGuiAPI.SetNextWindowSize(Vector2.Zero, ImGuiCond_.ImGuiCond_Appearing);
+            var drawList = ImGuiAPI.GetWindowDrawList();
+            mComboBox.OnDraw(in drawList, in Support.TtAnyPointer.Default);
+
+            if (comboChanged)
+            {
+                mSelectedEncoded = comboNewEncoded;
+                mCachedPreviewString = BuildPreviewString(comboNewEncoded);
+                DecodeBoneRef(comboNewEncoded, out int changedSkelIdx, out int changedBoneIdx);
+                newValue = changedBoneIdx;
+                return true;
+            }
+
+            return false;
+        }
+
+        private unsafe bool DrawBoneTreeItem(Animation.SkeletonAnimation.Skeleton.Limb.ILimb limb, int skeletonListIdx, int currentSkelIdx, int currentBoneIdx, string skeletonName, out int selectedEncoded)
+        {
+            selectedEncoded = -1;
+            if (limb == null) return false;
+
+            var boneName = limb.Desc?.Name ?? "Unnamed";
+            var boneIndex = limb.Index.Value;
+            var label = $"[{boneIndex}] {boneName} ({skeletonName})";
+
+            bool hasChildren = limb.Children != null && limb.Children.Count > 0;
+            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None;
+            if (!hasChildren)
+                flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
+            if (skeletonListIdx == currentSkelIdx && boneIndex == currentBoneIdx)
+                flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
+
+            bool open = ImGuiAPI.TreeNodeEx(label, flags, label);
+
+            if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+            {
+                selectedEncoded = EncodeBoneRef(skeletonListIdx, boneIndex);
+            }
+
+            if (open)
+            {
+                if (hasChildren)
+                {
+                    foreach (var child in limb.Children)
+                    {
+                        if (DrawBoneTreeItem(child, skeletonListIdx, currentSkelIdx, currentBoneIdx, skeletonName, out int childEncoded))
+                        {
+                            selectedEncoded = childEncoded;
+                        }
+                    }
+                }
+                ImGuiAPI.TreePop();
+            }
+
+            return selectedEncoded >= 0;
+        }
+
+        private string BuildPreviewString(int encoded)
+        {
+            if (!DecodeBoneRef(encoded, out int skelIdx, out int boneIdx))
+                return "None";
+
+            if (mAllSkeletonAssets != null && skelIdx >= 0 && skelIdx < mAllSkeletonAssets.Count)
+            {
+                var skelAsset = mAllSkeletonAssets[skelIdx];
+                if (skelAsset?.Skeleton?.Limbs != null && boneIdx >= 0 && boneIdx < skelAsset.Skeleton.Limbs.Count)
+                {
+                    var limb = skelAsset.Skeleton.Limbs[boneIdx];
+                    var name = limb.Desc?.Name ?? "Unnamed";
+                    var skelName = skelAsset.AssetName?.Name ?? "Unknown";
+                    if (skelName.EndsWith(".skt"))
+                        skelName = skelName.Substring(0, skelName.Length - 4);
+                    return $"[{boneIdx}] {name} ({skelName})";
+                }
+            }
+
+            return $"[{boneIdx}] Unknown";
+        }
+    }
+}
+      
 namespace EngineNS
 {
     public partial class TtEngine

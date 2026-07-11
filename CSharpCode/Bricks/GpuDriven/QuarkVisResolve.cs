@@ -253,7 +253,7 @@ namespace EngineNS.Bricks.GpuDriven
                 CBResolveParams.SetValue("ResolveParams", in mResolveParams);
             }
 
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = TtCommandList.GetCmdList();
             using (new TtCmdListScope(cmd, "QuarkVisResolve"))
             {
                 mResolveShading.SetDrawcallDispatch(this, policy, mResolveDrawcall,

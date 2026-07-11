@@ -6,6 +6,8 @@ using EngineNS.Bricks.StateMachine.TimedSM;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Design;
 using EngineNS.Rtti;
+using MathNet.Numerics.Differentiation;
+using System.Reflection;
 
 namespace EngineNS.DesignMacross
 {
@@ -226,7 +228,7 @@ namespace EngineNS.DesignMacross
         }
 
         // 通过反射将list中的所有数值转换为CodeBuilder表达式
-        public static void CreateList(string listName, System.Collections.IList list, TtMethodDeclaration method)
+        public static void CreateListss(string listName, System.Collections.IList list, TtMethodDeclaration method)
         {
             //new list           
             var listType = TtTypeDesc.TypeOf(list.GetType());
@@ -253,6 +255,69 @@ namespace EngineNS.DesignMacross
                 }
             }
 
+        }
+
+        public static void CreateItem(Type itemType, object item, string itemName, TtMethodDeclaration method)
+        {
+            var listCreate = TtASTBuildUtil.CreateVariableDeclaration(itemName, new TtTypeReference(itemType),
+                            new TtCreateObjectExpression(itemType.FullName));
+            method.MethodBody.Sequence.Add(listCreate);
+            foreach (var property in itemType.GetProperties())
+            {
+                var propertyType = property.PropertyType;
+                if (propertyType.IsValueType && (propertyType.IsPrimitive || propertyType.IsEnum))
+                {
+                    AssignProperty(property, itemName, item, method);
+                }
+                else if (propertyType == typeof(String))
+                {
+                    AssignProperty(property, itemName, item, method);
+                }
+                else
+                {
+                    var pType = property.PropertyType;
+                    var pValue = property.GetValue(item);
+                    var pName = $"{property.Name}_Instance_{(uint)Guid.NewGuid().GetHashCode()}";
+                    CreateItem(pType, pValue, pName, method);
+                    var left = new TtVariableReferenceExpression(property.Name, new TtVariableReferenceExpression(itemName));
+                    var right = new TtVariableReferenceExpression(pName);
+                    var assign = CreateAssignOperatorStatement(left, right);
+                    method.MethodBody.Sequence.Add(assign);
+                }
+            }
+
+        }
+        public static void AssignProperty(PropertyInfo property, string propertyHostName, object item, TtMethodDeclaration method)
+        {
+            var left = new TtVariableReferenceExpression(property.Name, new TtVariableReferenceExpression(propertyHostName));
+            var right = new TtPrimitiveExpression(TtTypeDesc.TypeOf(property.PropertyType), property.GetValue(item));
+            var assign = CreateAssignOperatorStatement(left, right);
+            method.MethodBody.Sequence.Add(assign);
+        }
+
+        public static void CreateList(string listName, System.Collections.IList list, TtMethodDeclaration method)
+        {
+            //new list           
+            var listType = TtTypeDesc.TypeOf(list.GetType());
+
+            var listCreate = TtASTBuildUtil.CreateVariableDeclaration(listName, new TtTypeReference(listType),
+                                        new TtCreateObjectExpression(listType.CSharpTypeName));
+            method.MethodBody.Sequence.Add(listCreate);
+            if (list.GetType().IsGenericType)
+            {
+                var genericType = list.GetType().GenericTypeArguments[0];
+
+                foreach (var item in list)
+                {
+                    var itemName = $"{listName}_Item_{(uint)Guid.NewGuid().GetHashCode()}";
+                    var itemType = item.GetType();
+                    CreateItem(itemType, item, itemName, method);
+
+                    var listAddStatment = new TtMethodInvokeStatement("Add", null, new TtVariableReferenceExpression(listName), new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression(itemName) });
+                    method.MethodBody.Sequence.Add(listAddStatment);
+                }
+
+            }
         }
     }
 }

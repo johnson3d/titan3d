@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace EngineNS.NxRHI
@@ -166,28 +167,31 @@ namespace EngineNS.NxRHI
                 }, "#EndFrame#", save);
             }
         }
-        public TtCommandList CreateCommandList()
+        public TtCommandList CreateCommandList([CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtCommandList();
-            result.mCoreObject = mCoreObject.CreateCommandList();
+            result.mCoreObject = mCoreObject.CreateCommandList(filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public TtGpuScope CreateGpuScope()
+        public TtGpuScope CreateGpuScope([CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtGpuScope();
-            result.mCoreObject = mCoreObject.CreateGpuScope();
+            result.mCoreObject = mCoreObject.CreateGpuScope(filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public TtBuffer CreateBuffer(in FBufferDesc desc)
+        public TtBuffer CreateBuffer(in FBufferDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             try
             {
                 var result = new TtBuffer();
-                result.mCoreObject = mCoreObject.CreateBuffer(in desc);
+                result.mCoreObject = mCoreObject.CreateBuffer(in desc, filePath, lineNumber);
                 if (result.mCoreObject.IsValidPointer == false)
                     return null;
                 return result;
@@ -218,198 +222,218 @@ namespace EngineNS.NxRHI
         {
             return CreateCBV(null, binder);
         }
-        public TtCbView CreateCBV(TtBuffer buffer, FShaderBinder binder)
+        public TtCbView CreateCBV(TtBuffer buffer, FShaderBinder binder, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var cbvDesc = new FCbvDesc();
             cbvDesc.ShaderBinder = binder;
             var result = new TtCbView();
             if (buffer == null)
             {
-                result.mCoreObject = mCoreObject.CreateCBV(new IBuffer(), in cbvDesc);
+                result.mCoreObject = mCoreObject.CreateCBV(new IBuffer(), in cbvDesc, filePath, lineNumber);
             }
             else
             {
-                result.mCoreObject = mCoreObject.CreateCBV(buffer.mCoreObject, in cbvDesc);
+                result.mCoreObject = mCoreObject.CreateCBV(buffer.mCoreObject, in cbvDesc, filePath, lineNumber);
             }
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public TtVbView CreateVBV(TtBuffer buffer, in FVbvDesc desc)
+        public TtVbView CreateVBV(TtBuffer buffer, in FVbvDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtVbView();
             if (buffer == null)
             {
-                result.mCoreObject = mCoreObject.CreateVBV(new IBuffer(), in desc);
+                result.mCoreObject = mCoreObject.CreateVBV(new IBuffer(), in desc, filePath, lineNumber);
             }
             else
             {
-                result.mCoreObject = mCoreObject.CreateVBV(buffer.mCoreObject, in desc);
+                result.mCoreObject = mCoreObject.CreateVBV(buffer.mCoreObject, in desc, filePath, lineNumber);
             }
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public TtIbView CreateIBV(TtBuffer buffer, in FIbvDesc desc)
+        public TtIbView CreateIBV(TtBuffer buffer, in FIbvDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtIbView();
             if (buffer == null)
             {
-                result.mCoreObject = mCoreObject.CreateIBV(new IBuffer(), in desc);
+                result.mCoreObject = mCoreObject.CreateIBV(new IBuffer(), in desc, filePath, lineNumber);
             }
             else
             {
-                result.mCoreObject = mCoreObject.CreateIBV(buffer.mCoreObject, in desc);
+                result.mCoreObject = mCoreObject.CreateIBV(buffer.mCoreObject, in desc, filePath, lineNumber);
             }
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public TtTexture CreateTexture(in FTextureDesc desc)
+        public TtTexture CreateTexture(in FTextureDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
-            var ptr = mCoreObject.CreateTexture(in desc);
+            var ptr = mCoreObject.CreateTexture(in desc, filePath, lineNumber);
             if (ptr.IsValidPointer == false)
                 return null;
             var result = new TtTexture(ptr);
             ptr.NativeSuper.NativeSuper.Release();
             return result;
         }
-        public TtSrView CreateSRV(NxRHI.IBuffer buffer, in FSrvDesc desc)
+        public TtSrView CreateSRV(NxRHI.IBuffer buffer, in FSrvDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             if (desc.Type == ESrvType.ST_BufferSRV)
             {
                 var result = new TtSrView();
-                result.mCoreObject = mCoreObject.CreateSRV(buffer.NativeSuper, in desc);
+                result.mCoreObject = mCoreObject.CreateSRV(buffer.NativeSuper, in desc, filePath, lineNumber);
                 if (result.mCoreObject.IsValidPointer == false)
                     return null;
                 return result;
             }
             return null;
         }
-        public TtSrView CreateSRV(TtBuffer buffer, in FSrvDesc desc)
+        public TtSrView CreateSRV(TtBuffer buffer, in FSrvDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             if (buffer == null)
                 return null;
             if (desc.Type == ESrvType.ST_BufferSRV)
             {
                 var result = new TtSrView();
-                result.mCoreObject = mCoreObject.CreateSRV(buffer.mCoreObject.NativeSuper, in desc);
+                result.mCoreObject = mCoreObject.CreateSRV(buffer.mCoreObject.NativeSuper, in desc, filePath, lineNumber);
                 if (result.mCoreObject.IsValidPointer == false)
                     return null;
                 return result;
             }
             return null;
         }
-        public TtSrView CreateSRV(TtTexture texture, in FSrvDesc desc)
+        public TtSrView CreateSRV(TtTexture texture, in FSrvDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             if (texture == null)
                 return null;
             if (desc.Type == ESrvType.ST_BufferSRV)
                 return null;
             var result = new TtSrView();
-            result.mCoreObject = mCoreObject.CreateSRV(texture.mCoreObject.NativeSuper, in desc);
+            result.mCoreObject = mCoreObject.CreateSRV(texture.mCoreObject.NativeSuper, in desc, filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public TtUaView CreateUAV(TtBuffer buffer, in FUavDesc desc)
+        public TtUaView CreateUAV(TtBuffer buffer, in FUavDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtUaView();
-            result.mCoreObject = mCoreObject.CreateUAV(buffer.mCoreObject.NativeSuper, in desc);
+            result.mCoreObject = mCoreObject.CreateUAV(buffer.mCoreObject.NativeSuper, in desc, filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public TtUaView CreateUAV(TtTexture texture, in FUavDesc desc)
+        public TtUaView CreateUAV(TtTexture texture, in FUavDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtUaView();
-            result.mCoreObject = mCoreObject.CreateUAV(texture.mCoreObject.NativeSuper, in desc);
+            result.mCoreObject = mCoreObject.CreateUAV(texture.mCoreObject.NativeSuper, in desc, filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public TtRenderTargetView CreateRTV(TtTexture buffer, in FRtvDesc desc)
+        public TtRenderTargetView CreateRTV(TtTexture buffer, in FRtvDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtRenderTargetView();
-            result.mCoreObject = mCoreObject.CreateRTV(buffer.mCoreObject, in desc);
+            result.mCoreObject = mCoreObject.CreateRTV(buffer.mCoreObject, in desc, filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public TtDepthStencilView CreateDSV(TtTexture buffer, in FDsvDesc desc)
+        public TtDepthStencilView CreateDSV(TtTexture buffer, in FDsvDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtDepthStencilView();
-            result.mCoreObject = mCoreObject.CreateDSV(buffer.mCoreObject, in desc);
+            result.mCoreObject = mCoreObject.CreateDSV(buffer.mCoreObject, in desc, filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public TtSampler CreateSampler(in FSamplerDesc desc)
+        public TtSampler CreateSampler(in FSamplerDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtSampler();
-            result.mCoreObject = mCoreObject.CreateSampler(in desc);
+            result.mCoreObject = mCoreObject.CreateSampler(in desc, filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public TtSwapChain CreateSwapChain(in FSwapChainDesc desc)
+        public TtSwapChain CreateSwapChain(in FSwapChainDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtSwapChain();
-            result.mCoreObject = mCoreObject.CreateSwapChain(in desc);
+            result.mCoreObject = mCoreObject.CreateSwapChain(in desc, filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             result.InitRenderPass();
             return result;
         }
-        public TtRenderPass CreateRenderPass(in FRenderPassDesc desc, string identifier)
+        public TtRenderPass CreateRenderPass(in FRenderPassDesc desc, string identifier, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtRenderPass();
-            result.mCoreObject = mCoreObject.CreateRenderPass(in desc);
+            result.mCoreObject = mCoreObject.CreateRenderPass(in desc, filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             result.mCoreObject.SetIdentifier(identifier);
             return result;
         }
-        public TtFrameBuffers CreateFrameBuffers(TtRenderPass rpass)
+        public TtFrameBuffers CreateFrameBuffers(TtRenderPass rpass, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtFrameBuffers();
-            result.mCoreObject = mCoreObject.CreateFrameBuffers(rpass.mCoreObject);
+            result.mCoreObject = mCoreObject.CreateFrameBuffers(rpass.mCoreObject, filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public TtAccelerationStructure CreateAccelerationStructure(in FAccelerationStructureDesc desc)
+        public TtAccelerationStructure CreateAccelerationStructure(in FAccelerationStructureDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
-            var ptr = mCoreObject.CreateAccelerationStructure(in desc);
+            var ptr = mCoreObject.CreateAccelerationStructure(in desc, filePath, lineNumber);
             if (ptr.IsValidPointer == false)
                 return null;
             return new TtAccelerationStructure(ptr);
         }
-        public TtAStructureInstance CreateAccelerationStructureInstance(in FAStructureInstanceDesc desc, TtAccelerationStructure pAStructrure)
+        public TtAStructureInstance CreateAccelerationStructureInstance(in FAStructureInstanceDesc desc, TtAccelerationStructure pAStructrure, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
-            var ptr = mCoreObject.CreateAccelerationStructureInstance(in desc, pAStructrure.mCoreObject);
+            var ptr = mCoreObject.CreateAccelerationStructureInstance(in desc, pAStructrure.mCoreObject, filePath, lineNumber);
             if (ptr.IsValidPointer == false)
                 return null;
             return new TtAStructureInstance(ptr);
         }
-        public TtTopAccelerationStructure CreateTopAccelerationStructure(in FTopAccelerationStructureDesc desc)
+        public TtTopAccelerationStructure CreateTopAccelerationStructure(in FTopAccelerationStructureDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
-            var ptr = mCoreObject.CreateTopAccelerationStructure(in desc);
+            var ptr = mCoreObject.CreateTopAccelerationStructure(in desc, filePath, lineNumber);
             if (ptr.IsValidPointer == false)
                 return null;
             return new TtTopAccelerationStructure(ptr);
         }
-        public TtShader CreateShader(TtShaderDesc desc)
+        public TtShader CreateShader(TtShaderDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtShader();
             result.ShaderDesc = desc;
             result.PermutationId = desc.PermutationId;
-            result.mCoreObject = mCoreObject.CreateShader(desc.mCoreObject);
+            result.mCoreObject = mCoreObject.CreateShader(desc.mCoreObject, filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public TtNativeGraphicsEffect CreateShaderEffect(TtShader ams, TtShader ms, TtShader vs, TtShader ps, string identifier)
+        public TtNativeGraphicsEffect CreateShaderEffect(TtShader ams, TtShader ms, TtShader vs, TtShader ps, string identifier, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtNativeGraphicsEffect();
             if(TtEngine.Instance.GfxDevice.RenderContext.DeviceCaps.IsSupportMeshShader == false &&
@@ -417,7 +441,7 @@ namespace EngineNS.NxRHI
             {
                 Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(ELogTag.Error, $"Mesh Shader is not supported");
             }
-            result.mCoreObject = mCoreObject.CreateShaderEffect();
+            result.mCoreObject = mCoreObject.CreateShaderEffect(filePath, lineNumber);
             if (ams != null)
                 result.mCoreObject.BindAS(ams.mCoreObject);
             if (ms != null)
@@ -431,21 +455,23 @@ namespace EngineNS.NxRHI
             result.mCoreObject.SetIdentifier(identifier);
             return result;
         }
-        public TtComputeEffect CreateComputeEffect(TtShader cs)
+        public TtComputeEffect CreateComputeEffect(TtShader cs, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtComputeEffect();
             result.mComputeShader = cs;
-            result.mCoreObject = mCoreObject.CreateComputeEffect();
+            result.mCoreObject = mCoreObject.CreateComputeEffect(filePath, lineNumber);
             result.mCoreObject.BindCS(cs.mCoreObject);
             result.mCoreObject.BuildState(mCoreObject);
             return result;
         }
-        public unsafe TtRayTracingEffect CreateRayTracingEffect(TtShaderDesc shader, TtRayTracingEffect.TtRTShaderLibDesc desc)
+        public unsafe TtRayTracingEffect CreateRayTracingEffect(TtShaderDesc shader, TtRayTracingEffect.TtRTShaderLibDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtRayTracingEffect();
             result.ShaderDesc = shader;
             result.ShaderLibDesc = desc;
-            result.mCoreObject = mCoreObject.CreateRayTracingEffect();
+            result.mCoreObject = mCoreObject.CreateRayTracingEffect(filePath, lineNumber);
             result.mCoreObject.SetShaderLibDesc(shader.mCoreObject);
             if (desc != null)
             {
@@ -481,7 +507,8 @@ namespace EngineNS.NxRHI
                 return null;
             return result;
         }
-        public TtGpuPipeline CreatePipeline(in FGpuPipelineDesc desc, string identifier)
+        public TtGpuPipeline CreatePipeline(in FGpuPipelineDesc desc, string identifier, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtGpuPipeline();
             var cp = desc;
@@ -489,93 +516,103 @@ namespace EngineNS.NxRHI
                 cp.m_DepthStencil.m_DepthFunc = EComparisionMode.CMP_GREATER_EQUAL;
             else
                 cp.m_DepthStencil.m_DepthFunc = EComparisionMode.CMP_LESS_EQUAL;
-            result.mCoreObject = mCoreObject.CreatePipeline(in cp);
+            result.mCoreObject = mCoreObject.CreatePipeline(in cp, filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             result.mCoreObject.SetIdentifier(identifier);
             return result;
         }
-        public TtInputLayout CreateInputLayout(TtInputLayoutDesc desc)
+        public TtInputLayout CreateInputLayout(TtInputLayoutDesc desc, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtInputLayout();
-            result.mCoreObject = mCoreObject.CreateInputLayout(desc.mCoreObject);
+            result.mCoreObject = mCoreObject.CreateInputLayout(desc.mCoreObject, filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public TtGraphicDraw CreateGraphicDraw()
+        public TtGraphicDraw CreateGraphicDraw([CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtGraphicDraw();
-            result.mCoreObject = mCoreObject.CreateGraphicDraw();
+            result.mCoreObject = mCoreObject.CreateGraphicDraw(filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             TtStatistic.Instance.GraphicsDrawcall++;
             return result;
         }
-        public TtComputeDraw CreateComputeDraw()
+        public TtComputeDraw CreateComputeDraw([CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtComputeDraw();
-            result.mCoreObject = mCoreObject.CreateComputeDraw();
+            result.mCoreObject = mCoreObject.CreateComputeDraw(filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             TtStatistic.Instance.ComputeDrawcall++;
             return result;
         }
-        public TtRayTracingDraw CreateRayTracingDraw()
+        public TtRayTracingDraw CreateRayTracingDraw([CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtRayTracingDraw();
-            result.mCoreObject = mCoreObject.CreateRayTracingDraw();
+            result.mCoreObject = mCoreObject.CreateRayTracingDraw(filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             TtStatistic.Instance.RayTracingDrawcall++;
             return result;
         }
-        public TtCopyDraw CreateCopyDraw()
+        public TtCopyDraw CreateCopyDraw([CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtCopyDraw();
-            result.mCoreObject = mCoreObject.CreateCopyDraw();
+            result.mCoreObject = mCoreObject.CreateCopyDraw(filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             TtStatistic.Instance.TransferDrawcall++;
             return result;
         }
-        public TtActionDraw CreateActionDraw()
+        public TtActionDraw CreateActionDraw([CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtActionDraw();
-            result.mCoreObject = mCoreObject.CreateActionDraw();
+            result.mCoreObject = mCoreObject.CreateActionDraw(filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             TtStatistic.Instance.ActionDrawcall++;
             return result;
         }
-        public TtEvent CreateGpuEvent(in FEventDesc desc, string name)
+        public TtEvent CreateGpuEvent(in FEventDesc desc, string name, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtEvent();
-            result.mCoreObject = mCoreObject.CreateGpuEvent(in desc, name);
+            result.mCoreObject = mCoreObject.CreateGpuEvent(in desc, name, filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public TtVertexArray CreateVertexArray()
+        public TtVertexArray CreateVertexArray([CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
-            var ptr = mCoreObject.CreateVertexArray();
+            var ptr = mCoreObject.CreateVertexArray(filePath, lineNumber);
             if (ptr.IsValidPointer == false)
                 return null;
             var result = new TtVertexArray(ptr);
             return result;
         }
-        public TtGeomMesh CreateGeomMesh()
+        public TtGeomMesh CreateGeomMesh([CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
-            var ptr = mCoreObject.CreateGeomMesh();
+            var ptr = mCoreObject.CreateGeomMesh(filePath, lineNumber);
             if (ptr.IsValidPointer == false)
                 return null;
             var result = new TtGeomMesh(ptr);
             return result;
         }
-        public TtFence CreateFence(in FFenceDesc desc, string name)
+        public TtFence CreateFence(in FFenceDesc desc, string name, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
         {
             var result = new TtFence();
-            result.mCoreObject = mCoreObject.CreateFence(in desc, name);
+            result.mCoreObject = mCoreObject.CreateFence(in desc, name, filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;

@@ -1,4 +1,5 @@
-﻿using EngineNS.Graphics.Mesh.PhysicsAsset;
+﻿using EngineNS.EGui.Controls.PropertyGrid;
+using EngineNS.Graphics.Mesh.PhysicsAsset;
 using System;
 
 namespace EngineNS.Bricks.Animation.KawaiiPhysics
@@ -16,6 +17,30 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
         Z_Negative,
     }
 
+    public static class TtKawaiiPhysicsSetupDefaults
+    {
+        public static EngineNS.KawaiiPhysics.FKawaiiPhySettings CreatePhysicsSettings()
+        {
+            return new EngineNS.KawaiiPhysics.FKawaiiPhySettings()
+            {
+                Stiffness = 0.05f,
+                Damping = 0.1f,
+                WorldDampingLocation = 0.8f,
+                WorldDampingRotation = 0.8f,
+                LimitAngle = 0.0f,
+                Radius = 3.0f,
+                WindCoefficient = 1.0f,
+                DragCoefficient = 0.0f,
+                MaxFrameDisplacement = 0.0f,
+            };
+        }
+
+        public static EngineNS.KawaiiPhysics.FKawaiiPhySettings CreatePhysicsSettingsRandom()
+        {
+            return new EngineNS.KawaiiPhysics.FKawaiiPhySettings();
+        }
+    }
+
     /// <summary>
     /// Chain simulation setup data. Configures a single bone chain for physics simulation.
     /// </summary>
@@ -25,9 +50,11 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
         public string Name { get; set; } = "Chain";
 
         [Rtti.Meta]
+        [TtSkeletonBoneIndexPickerEditorAttribute]
         public int RootBoneIndex { get; set; } = -1;
 
         [Rtti.Meta]
+        [TtSkeletonBoneIndexPickerEditorAttribute]
         public int EndBoneIndex { get; set; } = -1;
 
         [Rtti.Meta]
@@ -50,6 +77,12 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
         /// </summary>
         [Rtti.Meta]
         public int LODThreshold { get; set; } = -1;
+
+        [Rtti.Meta]
+        public EngineNS.KawaiiPhysics.FKawaiiPhySettings PhysicsSettings { get; set; } = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettings();
+
+        [Rtti.Meta]
+        public EngineNS.KawaiiPhysics.FKawaiiPhySettings PhysicsSettingsRandom { get; set; } = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettingsRandom();
         public TtKawaiiChainSetup()
         {
 
@@ -115,9 +148,11 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
         public string Name { get; set; } = "Rod";
 
         [Rtti.Meta]
+  		[TtSkeletonBoneIndexPickerEditorAttribute]
         public int RootBoneIndex { get; set; } = -1;
 
         [Rtti.Meta]
+  		[TtSkeletonBoneIndexPickerEditorAttribute]
         public int EndBoneIndex { get; set; } = -1;
 
         [Rtti.Meta]
@@ -134,6 +169,12 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
 
         [Rtti.Meta]
         public int LODThreshold { get; set; } = -1;
+
+        [Rtti.Meta]
+        public EngineNS.KawaiiPhysics.FKawaiiPhySettings PhysicsSettings { get; set; } = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettings();
+
+        [Rtti.Meta]
+        public EngineNS.KawaiiPhysics.FKawaiiPhySettings PhysicsSettingsRandom { get; set; } = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettingsRandom();
         public TtKawaiiRodSetup()
         {
 

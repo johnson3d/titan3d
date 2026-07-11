@@ -148,7 +148,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             // Dispatch
             mShading.SetDrawcallDispatch(this, policy, mDrawcall, screenWidth, screenHeight, 1, true);
 
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = TtCommandList.GetCmdList();
             using (new TtCmdListScope(cmdlist, "VSMSoftShadow"))
             {
                 cmdlist.PushGpuDraw(mDrawcall);

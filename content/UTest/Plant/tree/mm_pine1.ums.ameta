@@ -17,5 +17,6 @@
     <e_1 Value="Game,utest/plant/tree/bark.material,99a10edf-8994-4739-be52-319dd6241de8" />
     <e_2 Value="Game,utest/plant/tree/leaf.material,daae3334-50cb-4504-8286-5b4b7a0d1a4e" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
 </Root>

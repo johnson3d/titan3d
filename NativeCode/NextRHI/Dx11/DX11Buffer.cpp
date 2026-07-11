@@ -609,7 +609,7 @@ namespace NxRHI
 		desc.MipLevels = 1;
 		desc.ArraySize = 1;
 		
-		auto result = device->CreateTexture(&desc);
+		auto result = device->CreateTexture(&desc, __FILE__, __LINE__);
 
 		outFootPrint->X = 0;
 		outFootPrint->Y = 0;
@@ -765,7 +765,7 @@ namespace NxRHI
 			bfDesc.Type = EBufferType::BFT_CBuffer;
 			bfDesc.Usage = EGpuUsage::USAGE_DYNAMIC;
 			bfDesc.CpuAccess = ECpuAccess::CAS_WRITE;
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 			ASSERT(Buffer != nullptr);
 		}
 		else
@@ -789,7 +789,7 @@ namespace NxRHI
 			bfDesc.Type = EBufferType::BFT_Vertex;
 			bfDesc.Usage = desc->Usage;
 			bfDesc.CpuAccess = desc->CpuAccess;
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 			ASSERT(Buffer != nullptr);
 		}
 		else
@@ -813,7 +813,7 @@ namespace NxRHI
 			bfDesc.Type = EBufferType::BFT_Index;
 			bfDesc.Usage = desc->Usage;
 			bfDesc.CpuAccess = desc->CpuAccess;
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 			ASSERT(Buffer != nullptr);
 		}
 		else

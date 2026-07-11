@@ -20,7 +20,7 @@ namespace NxRHI
 		desc.Size = size;
 		desc.CpuAccess = cpuAccess;
 		desc.Usage = usage;
-		mBuffer = MakeWeakRef(device->CreateBuffer(&desc));
+		mBuffer = MakeWeakRef(device->CreateBuffer(&desc, __FILE__, __LINE__));
 		Reset();
 	}
 	UINT FTransientBuffer::Alloc(IGpuDevice* device, UINT size, bool bGrow)
@@ -38,7 +38,7 @@ namespace NxRHI
 				desc.Size = mCurrentOffset + size * 10;
 				//desc.CpuAccess = cpuAccess;
 				desc.Usage = EGpuUsage::USAGE_DEFAULT;
-				mBuffer = MakeWeakRef(device->CreateBuffer(&desc));
+				mBuffer = MakeWeakRef(device->CreateBuffer(&desc, __FILE__, __LINE__));
 			}
 		}
 		auto result = mCurrentOffset;
@@ -52,7 +52,7 @@ namespace NxRHI
 		vbvDesc.Stride = stride;
 		vbvDesc.Size = size;
 		vbvDesc.Offset = Alloc(device, size, bGrow);
-		return device->CreateVBV(mBuffer, &vbvDesc);
+		return device->CreateVBV(mBuffer, &vbvDesc, __FILE__, __LINE__);
 	}
 	IIbView* FTransientBuffer::AllocIBV(IGpuDevice* device, UINT stride, UINT size, bool bGrow)
 	{
@@ -62,7 +62,7 @@ namespace NxRHI
 		ibvDesc.Size = size;
 
 		ibvDesc.Offset = Alloc(device, size, bGrow);
-		return device->CreateIBV(mBuffer, &ibvDesc);
+		return device->CreateIBV(mBuffer, &ibvDesc, __FILE__, __LINE__);
 	}
 
 	void FVertexArray::GetStreamInfo(EVertexStreamType type, UINT* stride, UINT* element, int* varType)
@@ -235,7 +235,7 @@ namespace NxRHI
 	{
 		mName = name;
 
-		mGeometryMesh = MakeWeakRef(device->CreateGeomMesh());
+		mGeometryMesh = MakeWeakRef(device->CreateGeomMesh(__FILE__, __LINE__));
 		mGeometryMesh->Atoms.resize(atom);
 		mDesc.AtomNumber = atom;
 
@@ -285,7 +285,7 @@ namespace NxRHI
                 copyDesc.MiscFlags = (EResourceMiscFlag)0;
                 copyDesc.RowPitch = copyDesc.Size;
                 copyDesc.DepthPitch = copyDesc.Size;
-                copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
+                copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
                 cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, pos_vb->Buffer, 0, copyDesc.Size);
             }
             device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
@@ -357,10 +357,10 @@ namespace NxRHI
 					copyDesc.MiscFlags = (EResourceMiscFlag)0;
 					copyDesc.RowPitch = copyDesc.Size;
 					copyDesc.DepthPitch = copyDesc.Size;
-					copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
+					copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
 					//cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, ib->Buffer, 0, copyDesc.Size);
 
-					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 					cpDraw->BindBufferDest(copyVB);
 					cpDraw->BindBufferSrc(ib->Buffer);
 					cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
@@ -445,7 +445,7 @@ namespace NxRHI
             copyDesc.MiscFlags = (EResourceMiscFlag)0;
             copyDesc.RowPitch = copyDesc.Size;
             copyDesc.DepthPitch = copyDesc.Size;
-            copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
+            copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
             cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, pos_vb->Buffer, 0, copyDesc.Size);
         }
         device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
@@ -464,10 +464,10 @@ namespace NxRHI
                 copyDesc.MiscFlags = (EResourceMiscFlag)0;
                 copyDesc.RowPitch = copyDesc.Size;
                 copyDesc.DepthPitch = copyDesc.Size;
-                copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
+                copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
                 //cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, ib->Buffer, 0, copyDesc.Size);
 
-                AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+                AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
                 cpDraw->BindBufferDest(copyVB);
                 cpDraw->BindBufferSrc(ib->Buffer);
                 cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
@@ -824,7 +824,7 @@ namespace NxRHI
 			initData.pData = (BYTE*)&mClustersVB[0];
 			initData.RowPitch = vbvDesc.Size;
 			vbvDesc.InitData = &initData;
-			auto vb = MakeWeakRef(device->CreateVBV(nullptr, &vbvDesc));
+			auto vb = MakeWeakRef(device->CreateVBV(nullptr, &vbvDesc, __FILE__, __LINE__));
 			mClustersVertexArray->BindVB(EVertexStreamType::VST_Position, vb);
 
 			// ib view
@@ -835,7 +835,7 @@ namespace NxRHI
 			initData1.pData = (BYTE*)&mClustersIB[0];
 			initData1.RowPitch = ibvDesc.Size;
 			ibvDesc.InitData = &initData1;
-			mClustersIndexView = MakeWeakRef(device->CreateIBV(nullptr, &ibvDesc));
+			mClustersIndexView = MakeWeakRef(device->CreateIBV(nullptr, &ibvDesc, __FILE__, __LINE__));
 		}
 		
 		return int(mClusters.size());
@@ -890,7 +890,7 @@ namespace NxRHI
 					copyDesc.MiscFlags = (EResourceMiscFlag)0;
 					copyDesc.RowPitch = copyDesc.Size;
 					copyDesc.DepthPitch = copyDesc.Size;
-					copyBuf = MakeWeakRef(device->CreateBuffer(&copyDesc));
+					copyBuf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
 					cmd.GetCmdList()->CopyBufferRegion(copyBuf, 0, normal_vb->Buffer, 0, copyDesc.Size);
 				}
 				device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
@@ -912,7 +912,7 @@ namespace NxRHI
 					copyDesc.MiscFlags = (EResourceMiscFlag)0;
 					copyDesc.RowPitch = copyDesc.Size;
 					copyDesc.DepthPitch = copyDesc.Size;
-					copyBuf = MakeWeakRef(device->CreateBuffer(&copyDesc));
+					copyBuf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
 					cmd.GetCmdList()->CopyBufferRegion(copyBuf, 0, uv_vb->Buffer, 0, copyDesc.Size);
 				}
 				device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
@@ -939,7 +939,7 @@ namespace NxRHI
 					copyDesc.MiscFlags = (EResourceMiscFlag)0;
 					copyDesc.RowPitch = copyDesc.Size;
 					copyDesc.DepthPitch = copyDesc.Size;
-					copyBuf = MakeWeakRef(device->CreateBuffer(&copyDesc));
+					copyBuf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
 					cmd.GetCmdList()->CopyBufferRegion(copyBuf, 0, tangent_vb->Buffer, 0, copyDesc.Size);
 				}
 				device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
@@ -1127,6 +1127,102 @@ namespace NxRHI
 		return selectedCount;
 	}
 
+	void FMeshPrimitives::GetDAGExportSizes(UINT& outGroupCount, UINT& outChildrenTotal,
+		UINT& outParentsTotal, UINT& outClusterCount, UINT& outRootGroupCount) const
+	{
+		outGroupCount = (UINT)mDAGGroups.size();
+		outClusterCount = (UINT)mClusters.size();
+		UINT childrenTotal = 0, parentsTotal = 0, rootGroupCount = 0;
+		int maxGroupLevel = 0;
+		for (const auto& G : mDAGGroups)
+		{
+			childrenTotal += (UINT)G.Children.size();
+			parentsTotal += (UINT)G.Parents.size();
+			if (G.MipLevel > maxGroupLevel)
+				maxGroupLevel = G.MipLevel;
+		}
+		for (const auto& G : mDAGGroups)
+		{
+			if (G.MipLevel == maxGroupLevel)
+				rootGroupCount++;
+		}
+		outChildrenTotal = childrenTotal;
+		outParentsTotal = parentsTotal;
+		outRootGroupCount = rootGroupCount;
+	}
+
+	UINT FMeshPrimitives::ExportDAGGroupsForGPU(
+		void* outGroupsRaw, UINT maxGroups,
+		UINT* outChildrenIndices, UINT maxChildren,
+		UINT* outParentsIndices, UINT maxParents,
+		UINT* outClusterGroupMap, UINT maxClusters,
+		UINT* outRootGroupIndices, UINT maxRootGroups,
+		UINT& outChildrenTotal, UINT& outParentsTotal, UINT& outRootGroupCount) const
+	{
+		FClusterGroupExport* outGroups = (FClusterGroupExport*)outGroupsRaw;
+		UINT numGroups = (UINT)mDAGGroups.size();
+		if (numGroups == 0 || outGroups == nullptr)
+			return 0;
+
+		int maxGroupLevel = 0;
+		for (const auto& G : mDAGGroups)
+		{
+			if (G.MipLevel > maxGroupLevel)
+				maxGroupLevel = G.MipLevel;
+		}
+
+		UINT childrenOffset = 0, parentsOffset = 0, rootCount = 0;
+
+		for (UINT g = 0; g < numGroups && g < maxGroups; g++)
+		{
+			const FClusterGroup& group = mDAGGroups[g];
+			FClusterGroupExport& exp = outGroups[g];
+
+			exp.LODBoundsCenter = group.LODBounds.getCenter();
+			exp.LODBoundsRadius = group.LODBounds.getRadius();
+			exp.ParentLODError = group.ParentLODError;
+			exp.MipLevel = group.MipLevel;
+			exp.ChildrenStart = (int)childrenOffset;
+			exp.ChildrenCount = (int)group.Children.size();
+			exp.ParentsStart = (int)parentsOffset;
+			exp.ParentsCount = (int)group.Parents.size();
+			exp.Padding0 = 0;
+			exp.Padding1 = 0;
+
+			for (UINT c = 0; c < (UINT)group.Children.size() && childrenOffset < maxChildren; c++)
+			{
+				outChildrenIndices[childrenOffset] = group.Children[c];
+				childrenOffset++;
+			}
+			for (UINT p = 0; p < (UINT)group.Parents.size() && parentsOffset < maxParents; p++)
+			{
+				outParentsIndices[parentsOffset] = group.Parents[p];
+				parentsOffset++;
+			}
+			if (group.MipLevel == maxGroupLevel && rootCount < maxRootGroups)
+			{
+				outRootGroupIndices[rootCount] = g;
+				rootCount++;
+			}
+		}
+
+		// Build ClusterGroupMap
+		if (outClusterGroupMap != nullptr)
+		{
+			UINT numClusters = (UINT)mClusters.size();
+			for (UINT i = 0; i < numClusters && i < maxClusters; i++)
+			{
+				UINT genGroup = mClusters[i].GeneratingGroupIndex;
+				outClusterGroupMap[i] = (genGroup < numGroups) ? genGroup : ~0u;
+			}
+		}
+
+		outChildrenTotal = childrenOffset;
+		outParentsTotal = parentsOffset;
+		outRootGroupCount = rootCount;
+		return numGroups;
+	}
+
 	bool FMeshPrimitives::LoadXnd(IGpuDevice* device, const char* name, XndHolder* xnd, bool isLoad)
 	{
 		if (xnd == nullptr)
@@ -1135,7 +1231,7 @@ namespace NxRHI
 		mName = name;
 		auto pNode = xnd->GetRootNode();
 		
-		mGeometryMesh = MakeWeakRef(device->CreateGeomMesh());
+		mGeometryMesh = MakeWeakRef(device->CreateGeomMesh(__FILE__, __LINE__));
 
 		XndAttribute* pAttr = pNode->TryGetAttribute("HeadAttrib");
 		if (pAttr)
@@ -1248,7 +1344,7 @@ namespace NxRHI
 			}
 		}
 
-		auto vb = MakeWeakRef(device->CreateVBV(nullptr, &vbvDesc));
+		auto vb = MakeWeakRef(device->CreateVBV(nullptr, &vbvDesc, __FILE__, __LINE__));
 		
 		Safe_DeleteArray(data);
 		resSize += vbvDesc.Size;
@@ -1270,10 +1366,10 @@ namespace NxRHI
 				copyDesc.MiscFlags = (EResourceMiscFlag)0;
 				copyDesc.RowPitch = copyDesc.Size;
 				copyDesc.DepthPitch = copyDesc.Size;
-				copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
+				copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
 				//cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, vb->Buffer, 0, copyDesc.Size);
 
-				AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+				AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 				cpDraw->BindBufferDest(copyVB);
 				cpDraw->BindBufferSrc(vb->Buffer);
 				cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
@@ -1374,7 +1470,7 @@ namespace NxRHI
 			initData.pData = data;
 			initData.RowPitch = ibvDesc.Size;
 			ibvDesc.InitData = &initData;
-			auto ib = MakeWeakRef(device->CreateIBV(nullptr, &ibvDesc));
+			auto ib = MakeWeakRef(device->CreateIBV(nullptr, &ibvDesc, __FILE__, __LINE__));
 			mGeometryMesh->BindIndexBuffer(ib);
 			mGeometryMesh->IsIndex32 = bFormatIndex32;
 			Safe_DeleteArray(data);
@@ -1442,7 +1538,7 @@ namespace NxRHI
 			initData.RowPitch = size;
 
 			vbvDesc.InitData = &initData;
-			auto vb = MakeWeakRef(cmd->mDevice.GetPtr()->CreateVBV(nullptr, &vbvDesc));
+			auto vb = MakeWeakRef(cmd->mDevice.GetPtr()->CreateVBV(nullptr, &vbvDesc, __FILE__, __LINE__));
 			if (vb == nullptr)
 				return false;
 			mGeometryMesh->VertexArray->BindVB(stream, vb);
@@ -1482,7 +1578,7 @@ namespace NxRHI
 			initData.RowPitch = size;
 
 			ibvDesc.InitData = &initData;
-			auto ib = MakeWeakRef(cmd->mDevice.GetPtr()->CreateIBV(nullptr, &ibvDesc));
+			auto ib = MakeWeakRef(cmd->mDevice.GetPtr()->CreateIBV(nullptr, &ibvDesc, __FILE__, __LINE__));
 			if (ib == nullptr)
 				return false;
 

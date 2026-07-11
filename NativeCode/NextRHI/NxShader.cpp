@@ -317,7 +317,7 @@ namespace NxRHI
 		if (Shader == nullptr)
 		{
 			AutoRef<FShaderDesc> pDesc(this);
-			Shader = MakeWeakRef(pDevice->CreateShader(pDesc));
+			Shader = MakeWeakRef(pDevice->CreateShader(pDesc, __FILE__, __LINE__));
 		}
 		return Shader;
 	}

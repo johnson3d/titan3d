@@ -27,6 +27,17 @@ namespace KawaiiPhysics
 			float TailBoneLength,
 			std::vector<FSimParticle>& OutParticles);
 
+		FKawaiiPhySettings MakeRandomizedPhysicsSettings(
+			const FKawaiiPhySettings& PhysicsSettings,
+			const FKawaiiPhySettings& PhysicsSettingsRandom,
+			uint32_t RandomSeed);
+
+		void ApplyPhysicsSettings(
+			std::vector<FSimParticle>& Particles,
+			const FKawaiiPhySettings& PhysicsSettings,
+			const FKawaiiPhySettings& PhysicsSettingsRandom,
+			uint32_t RandomSeed);
+
 		// Compute rest lengths for distance constraints
 		void BuildVerticalConstraints(
 			const std::vector<FSimParticle>& Particles,

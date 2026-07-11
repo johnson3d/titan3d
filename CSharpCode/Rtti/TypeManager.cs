@@ -546,9 +546,11 @@ namespace EngineNS.Rtti
     {
         static TtTypeDescManager()
         {
+#if !TitanEngine_NoNativeDll
             CoreSDK.SetCreateManagedObjectFunction(CreateObject);
             CoreSDK.SetFreeManagedObjectGCHandle(FreeManagedObjectGCHandle);
             CoreSDK.SetGetManagedObjectFromGCHandle(GetManagedObjectFromGCHandle);
+#endif
         }
         public delegate void Delegate_OnTypeChanged();
         public event Delegate_OnTypeChanged OnTypeChanged;

@@ -396,7 +396,7 @@ namespace EngineNS.Graphics.Pipeline
         public virtual unsafe void Tick(GamePlay.TtWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
         {
             System.Diagnostics.Debug.Assert(TtEngine.Instance.Config.UseRenderThread == false || TtEngine.Instance.ThreadRender.IsThisThread());
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = NxRHI.TtCommandList.GetCmdList();
             using (new Profiler.TimeScopeHelper(ScopeTick))
             using (new NxRHI.TtCmdListScope(cmdlist, "RenderGraphFrame"))
             {

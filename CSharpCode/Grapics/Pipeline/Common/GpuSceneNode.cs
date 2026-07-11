@@ -180,7 +180,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             if (CpuCullNode.VisParameter.VisibleNodes == null)
                 return;
 
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = NxRHI.TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmd, "GpuScene"))
             {
                 TickLogic_Light(world, policy, cmd);

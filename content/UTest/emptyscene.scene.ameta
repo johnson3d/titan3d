@@ -25,5 +25,6 @@
     <e_0 Value="Game,utest/mesh/unit_sphere.ums,887ddcfe-6da8-4cdc-b3c7-150ce117b94d" />
     <e_1 Value="Game,utest/mesh/skysphere001.ums,099ebd2d-0dda-4ca1-bc23-6b754f41b31d" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
 </Root>

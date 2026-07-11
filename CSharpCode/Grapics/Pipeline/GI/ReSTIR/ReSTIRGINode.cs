@@ -821,7 +821,7 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
                 mSpatial.SetDrawcallDispatch(this, policy, mSpatialDraw, w, h, 1, true);
             mResolve.SetDrawcallDispatch(this, policy, mResolveDraw, w, h, 1, true);
 
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = TtCommandList.GetCmdList();
             using (new TtCmdListScope(cmd, "ReSTIRGI"))
             {
                 cmd.PushGpuDraw(mInitialDraw);

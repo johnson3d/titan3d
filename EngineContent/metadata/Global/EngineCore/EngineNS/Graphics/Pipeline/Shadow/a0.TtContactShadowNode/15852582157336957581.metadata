@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_15852582157336957581 Type="EngineNS.Graphics.Pipeline.Shadow.TtContactShadowNode@EngineCore">
+  <ContactShadowLength Type="System.Single@Unknown" Order="0" />
+  <DepthBias Type="System.Single@Unknown" Order="0" />
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <FadeDistance Type="System.Single@Unknown" Order="0" />
+  <FadeLength Type="System.Single@Unknown" Order="0" />
+  <NumSteps Type="System.Int32@Unknown" Order="0" />
+  <ShadowIntensity Type="System.Single@Unknown" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_15852582157336957581>

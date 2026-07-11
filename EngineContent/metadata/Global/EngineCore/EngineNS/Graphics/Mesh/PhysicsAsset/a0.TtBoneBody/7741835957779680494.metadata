@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_7741835957779680494 Type="EngineNS.Graphics.Mesh.PhysicsAsset.TtBoneBody@EngineCore">
+  <AngularDamping Type="System.Single@Unknown" Order="0" />
+  <BoneName Type="System.String@Unknown" Order="0" />
+  <BoneNameHash Type="System.UInt32@Unknown" Order="0" />
+  <LinearDamping Type="System.Single@Unknown" Order="0" />
+  <Mass Type="System.Single@Unknown" Order="0" />
+  <Shapes Type="System.Collections.Generic.List&lt;EngineNS.Graphics.Mesh.PhysicsAsset.TtCollisionShape@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_7741835957779680494>

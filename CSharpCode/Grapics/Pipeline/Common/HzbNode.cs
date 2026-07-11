@@ -322,7 +322,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             mCurrentDepthSrv = depthAttach.Srv;
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            var cmd = rc.CmdListManager.GetCmdList();
+            var cmd = NxRHI.TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmd, "Hzb"))
             {
                 // ---------- Setup pass: depth -> mip0 ----------

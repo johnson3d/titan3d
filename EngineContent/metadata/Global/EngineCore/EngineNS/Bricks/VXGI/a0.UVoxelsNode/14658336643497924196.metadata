@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_14658336643497924196 Type="EngineNS.Bricks.VXGI.UVoxelsNode@EngineCore">
+  <DebugVoxels Type="System.Boolean@Unknown" Order="0" />
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_14658336643497924196>

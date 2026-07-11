@@ -197,11 +197,11 @@ namespace NxRHI
 				copyDesc.Size = desc.Size;
 				copyDesc.InitData = desc.InitData;
 				copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
-				auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
+				auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
 
 				FTransientCmd tsCmd(device, EQueueType::QU_Transfer, "VKBuffer.Init");
 				auto cmd = tsCmd.GetCmdList();
-				AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+				AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 				cpDraw->BindBufferDest(this);
 				cpDraw->BindBufferSrc(bf);
 				cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
@@ -271,12 +271,12 @@ namespace NxRHI
 			copyDesc.InitData = &initData;
 			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
-			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
+			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
 
 			FTransientCmd tsCmd(device, EQueueType::QU_Transfer, "UpdateGpuData");
 			auto cmd = tsCmd.GetCmdList();
 			{
-				AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+				AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 				cpDraw->BindBufferDest(this);
 				cpDraw->BindBufferSrc(bf);
 				cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
@@ -317,11 +317,11 @@ namespace NxRHI
 		copyDesc.InitData = &initData;
 		copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
-		auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
+		auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
 
 		//cmd->CopyBufferRegion(this, footPrint->GetOffset(), bf, 0, footPrint->TotalSize);
 		{
-			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 			cpDraw->BindBufferDest(this);
 			cpDraw->BindBufferSrc(bf);
 			cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
@@ -598,10 +598,10 @@ namespace NxRHI
 					copyDesc.InitData = &desc.InitData[j];
 					copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
-					auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
+					auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
 					FTransitionScope::TryAutoTransition(cmd, bf, EGpuResourceState::GRS_CopySrc, false);
 
-					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 					cpDraw->BindTextureDest(this);
 					cpDraw->BindBufferSrc(bf);
 					cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Texture;
@@ -689,7 +689,7 @@ namespace NxRHI
 		desc.DepthPitch = desc.RowPitch * Desc.Height;
 		desc.Size = desc.DepthPitch;
 
-		auto result = device->CreateBuffer(&desc);
+		auto result = device->CreateBuffer(&desc, __FILE__, __LINE__);
 
 		outFootPrint->X = 0;
 		outFootPrint->Y = 0;
@@ -773,9 +773,9 @@ namespace NxRHI
 		copyDesc.InitData = &initData;
 		copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
-		auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
+		auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
 
-		AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+		AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 		cpDraw->BindTextureDest(this);
 		cpDraw->BindBufferSrc(bf);
 		cpDraw->DestSubResource = subRes;
@@ -809,9 +809,9 @@ namespace NxRHI
 			copyDesc.InitData = &initData;
 			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
-			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
+			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
 
-			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 			cpDraw->BindTextureDest(this);
 			cpDraw->BindBufferSrc(bf);
 			cpDraw->DestSubResource = subRes;
@@ -940,7 +940,7 @@ namespace NxRHI
 			bfDesc.Usage = EGpuUsage::USAGE_DYNAMIC;
 			bfDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 			ASSERT(Buffer != nullptr);
 		}
 		else
@@ -990,7 +990,7 @@ namespace NxRHI
 			bfDesc.Type = EBufferType::BFT_Vertex;
 			bfDesc.Usage = desc->Usage;
 			bfDesc.CpuAccess = desc->CpuAccess;
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 			ASSERT(Buffer != nullptr);
 		}
 		else
@@ -1040,7 +1040,7 @@ namespace NxRHI
 			bfDesc.Type = EBufferType::BFT_Index;
 			bfDesc.Usage = desc->Usage;
 			bfDesc.CpuAccess = desc->CpuAccess;
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 			ASSERT(Buffer != nullptr);
 		}
 		else

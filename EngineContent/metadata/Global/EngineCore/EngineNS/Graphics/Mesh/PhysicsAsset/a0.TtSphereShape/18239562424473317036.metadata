@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_18239562424473317036 Type="EngineNS.Graphics.Mesh.PhysicsAsset.TtSphereShape@EngineCore">
+  <Offset Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <Radius Type="System.Single@Unknown" Order="0" />
+  <Rotation Type="EngineNS.Quaternion@EngineCore" Order="0" />
+</Hash_18239562424473317036>

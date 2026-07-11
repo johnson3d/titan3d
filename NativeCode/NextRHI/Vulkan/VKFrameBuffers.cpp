@@ -392,7 +392,7 @@ namespace NxRHI
 
 		FFenceDesc fcdesc{};
 		fcdesc.InitValue = 0;
-		FramePresentFence = MakeWeakRef(device->CreateFence(&fcdesc, VStringA_FormatV("SwapChain Frame Fence").c_str()));
+		FramePresentFence = MakeWeakRef(device->CreateFence(&fcdesc, VStringA_FormatV("SwapChain Frame Fence").c_str(), __FILE__, __LINE__));
 		return Create(device, Desc.Width, Desc.Height);
 	}
 	bool CheckSwapSurfaceFormat(const VkSurfaceFormatKHR& format, const std::vector<VkSurfaceFormatKHR>& availableFormats)
@@ -755,7 +755,7 @@ namespace NxRHI
 		rtvDesc.Height = Texture->Desc.Height;
 		rtvDesc.Format = Texture->Desc.Format;
 		rtvDesc.Texture2D.MipSlice = 0;
-		Rtv = MakeWeakRef((VKRenderTargetView*)device->CreateRTV(Texture, &rtvDesc));
+		Rtv = MakeWeakRef((VKRenderTargetView*)device->CreateRTV(Texture, &rtvDesc, __FILE__, __LINE__));
 	}
 }
 

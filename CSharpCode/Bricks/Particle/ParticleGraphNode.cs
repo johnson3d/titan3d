@@ -32,7 +32,7 @@ namespace EngineNS.Bricks.Particle
         public List<TtEmitter> PrevEmitters = new List<TtEmitter>();
         public override void Tick(TtWorld world, TtRenderPolicy policy, TtCommandList frameCmdList, bool bClear)
         {
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist, "ParticleUpdate"))
             {
                 foreach (var e in PrevEmitters)

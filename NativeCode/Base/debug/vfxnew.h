@@ -1,3 +1,5 @@
+#pragma once
+
 // vfxdebug.cpp
 // 
 // VictoryCore Code
@@ -94,6 +96,12 @@ void operator delete[](void* p, const std::nothrow_t&) VGLIBCXX_USE_NOEXCEPT;
 void* operator new(std::size_t size, void* __p, const char* file, int line) VGLIBCXX_USE_NOEXCEPT;
 void operator delete  (void*, void*, const char* file, int line) VGLIBCXX_USE_NOEXCEPT;
 #endif
+
+template<typename T, typename... Args>
+inline T* NewObjectWithInfo(const char* file, int line, Args&&... args)
+{
+	return new(file, line) T(std::forward<Args>(args)...);
+}
 
 #if defined(NONEW)
 	#define VNEW new

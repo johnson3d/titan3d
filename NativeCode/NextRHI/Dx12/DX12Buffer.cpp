@@ -268,7 +268,7 @@ namespace NxRHI
 				auto bf = CreateUploadBuffer(device, desc.InitData, totalSize, Desc.Size, "UploadBuffer");
 
 				{
-					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 					cpDraw->BindBufferDest(this);
 					cpDraw->BindBufferSrc(bf);
 					cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
@@ -340,10 +340,10 @@ namespace NxRHI
 			copyDesc.InitData = &initData;
 			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
-			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
+			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
 
 			{
-				AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+				AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 				cpDraw->BindBufferDest(this);
 				cpDraw->BindBufferSrc(bf);
 				cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
@@ -434,12 +434,12 @@ namespace NxRHI
 			copyDesc.InitData = &initData;
 			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
-			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
+			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
 
 			FTransientCmd tsCmd(device, EQueueType::QU_Transfer, "UpdateGpuData");
 			auto cmd = tsCmd.GetCmdList();
 			{
-				AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+				AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 				cpDraw->BindBufferDest(this);
 				cpDraw->BindBufferSrc(bf);
 				cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
@@ -770,7 +770,7 @@ namespace NxRHI
 					device->mDevice->GetCopyableFootprints(&resDesc, j, 1, 0, &footPrint, &numX, &rowSize, &totalSize);
 
 					auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, d, Desc.Format, &desc.InitData[j], "Upload Texture");
-					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 					cpDraw->BindTextureDest(this); 
 					cpDraw->BindBufferSrc(bf);
 					cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Texture;
@@ -858,7 +858,7 @@ namespace NxRHI
 		desc.DepthPitch = desc.RowPitch * Desc.Height;
 		desc.Size = desc.DepthPitch;
 
-		auto result = device->CreateBuffer(&desc);
+		auto result = device->CreateBuffer(&desc, __FILE__, __LINE__);
 
 		outFootPrint->X = 0;
 		outFootPrint->Y = 0;
@@ -931,7 +931,7 @@ namespace NxRHI
 			initData.DepthPitch = pFootPrint->TotalSize;
 			auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, Desc.Depth, Desc.Format, &initData, "Upload Texture");
 			
-			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 			cpDraw->BindTextureDest(this);
 			cpDraw->BindBufferSrc(bf);
 			cpDraw->DestSubResource = subRes;
@@ -1033,9 +1033,9 @@ namespace NxRHI
 			copyDesc.InitData = &initData;
 			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
-			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc));
+			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
 
-			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 			cpDraw->BindTextureDest(this);
 			cpDraw->BindBufferSrc(bf);
 			cpDraw->DestSubResource = subRes;
@@ -1151,7 +1151,7 @@ namespace NxRHI
 			bfDesc.Usage = EGpuUsage::USAGE_DYNAMIC;
 			bfDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 			ASSERT(Buffer != nullptr);
 			Buffer->SetDebugName("CBV");
 		}
@@ -1199,7 +1199,7 @@ namespace NxRHI
 			bfDesc.CpuAccess = desc->CpuAccess;
 			bfDesc.RowPitch = desc->Size;
 			bfDesc.DepthPitch = desc->Size;
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 			ASSERT(Buffer != nullptr);
 			Buffer->SetDebugName("VBV");
 		}
@@ -1242,7 +1242,7 @@ namespace NxRHI
 			bfDesc.CpuAccess = desc->CpuAccess;
 			bfDesc.RowPitch = desc->Size;
 			bfDesc.DepthPitch = desc->Size;
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 			ASSERT(Buffer != nullptr);
 			Buffer->SetDebugName("IBV");
 		}
@@ -1801,13 +1801,13 @@ namespace NxRHI
 		bfDesc.Size = (UINT)bottomLevelPrebuildInfo.ResultDataMaxSizeInBytes;
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
-		mGpuBuffer = MakeWeakRef(device->CreateBuffer(& bfDesc));
+		mGpuBuffer = MakeWeakRef(device->CreateBuffer(& bfDesc, __FILE__, __LINE__));
 
 		bfDesc.SetDefault(false, EBufferType::BFT_UAV);
 		bfDesc.Size = mScratchSize;
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
-		auto pScratchBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+		auto pScratchBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 		
 		mBuildDesc.ScratchAccelerationStructureData = pScratchBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
 		mBuildDesc.DestAccelerationStructureData = mGpuBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
@@ -1849,22 +1849,22 @@ namespace NxRHI
 		bfDesc.Size = ((bfDesc.Size + (sizeof(UINT) - 1)) / sizeof(UINT)) * sizeof(UINT);
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
-		mGpuBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+		mGpuBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 
 		FSrvDesc srvDesc{};
 		srvDesc.SetRTAS();
-		mGpuBufferSRV = MakeWeakRef(device->CreateSRV(mGpuBuffer, &srvDesc));
+		mGpuBufferSRV = MakeWeakRef(device->CreateSRV(mGpuBuffer, &srvDesc, __FILE__, __LINE__));
 
 		FUavDesc uavDesc{};
 		uavDesc.SetBuffer(true);
 		uavDesc.Buffer.NumElements = bfDesc.Size / sizeof(UINT);
-		mGpuBufferUAV = MakeWeakRef(device->CreateUAV(mGpuBuffer, &uavDesc));
+		mGpuBufferUAV = MakeWeakRef(device->CreateUAV(mGpuBuffer, &uavDesc, __FILE__, __LINE__));
 
 		bfDesc.SetDefault(false, (EBufferType)(EBufferType::BFT_UAV));
 		bfDesc.Size = mScratchSize;
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
-		mGpuScratchBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+		mGpuScratchBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 
 		return true;
 	}
@@ -1901,7 +1901,7 @@ namespace NxRHI
 			initData.pData = mInstDescs.data();
 			initData.RowPitch = bfDesc.Size;
 			bfDesc.InitData = &initData;
-			auto buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			auto buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 			mInstanceGpuBuffer = MakeWeakRef(new FUploadBuffer(buffer));
 			return true;
 		}
@@ -1938,7 +1938,7 @@ namespace NxRHI
 				bfDesc.Size = (UINT)(sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * mBottomASInstances.size());
 				bfDesc.RowPitch = bfDesc.Size;
 				bfDesc.DepthPitch = bfDesc.Size;
-				auto buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+				auto buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 				mInstanceGpuBuffer = MakeWeakRef(new FUploadBuffer(buffer));*/
 			}
 			return result;
@@ -1967,7 +1967,7 @@ namespace NxRHI
 
 			if (mSourceGpuBuffer == nullptr)
 			{
-				mSourceGpuBuffer = MakeWeakRef(device->CreateBuffer(&mGpuBuffer->Desc));
+				mSourceGpuBuffer = MakeWeakRef(device->CreateBuffer(&mGpuBuffer->Desc, __FILE__, __LINE__));
 			}
 			cmdlist->mLastContext->CopyRaytracingAccelerationStructure(mSourceGpuBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress(), 
 				mBuildDesc.DestAccelerationStructureData,

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_18308040831939942011 Type="EngineNS.Bricks.PhysicsCore.SceneNode.TtPhyControllerNodeBase.TtPhyControllerNodeDataBase@EngineCore">
+  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.TtNode.ENodeStyles@EngineCore" Order="0" />
+  <PhyQueryFlags Type="EngineNS.EPhyQueryFlag@EngineCore" Order="0" />
+  <PxMaterial Type="EngineNS.RName@EngineCore" Order="0" />
+  <QueryFilterData Type="EngineNS.FPhyFilterData@EngineCore" Order="0" />
+  <SimulationFilterData Type="EngineNS.FPhyFilterData@EngineCore" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.TtBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.TtPlacementBase@EngineCore" Order="2" />
+</Hash_18308040831939942011>

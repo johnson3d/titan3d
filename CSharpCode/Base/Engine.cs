@@ -132,6 +132,9 @@ namespace EngineNS
         public bool DoUnitTest { get; set; } = true;
         [Rtti.Meta("")]
         [Category("Option")]
+        public bool CheckMetaHash { get; set; } = false;
+        [Rtti.Meta("")]
+        [Category("Option")]
         public bool AutoSyncPropertyData { get; set; } = true;
         [Rtti.Meta("")]
         [Category("Option")]

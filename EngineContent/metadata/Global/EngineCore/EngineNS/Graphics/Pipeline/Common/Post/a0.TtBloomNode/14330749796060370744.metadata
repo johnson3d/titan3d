@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_14330749796060370744 Type="EngineNS.Graphics.Pipeline.Common.Post.TtBloomNode@EngineCore">
+  <BlurSize Type="System.Int32@Unknown" Order="0" />
+  <DownSampleSigma Type="System.Single@Unknown" Order="0" />
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <NumDownSample Type="System.Int32@Unknown" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_14330749796060370744>

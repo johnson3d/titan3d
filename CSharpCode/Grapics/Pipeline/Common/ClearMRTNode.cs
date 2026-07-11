@@ -137,7 +137,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             bool clearDS = OutputDS || DepthStencilPinOut.FindInLinker() != null;
 
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = NxRHI.TtCommandList.GetCmdList();
             {
                 using (new NxRHI.TtCmdListScope(cmdlist, "ClearMRT"))
                 {

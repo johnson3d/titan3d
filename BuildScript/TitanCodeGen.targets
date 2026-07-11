@@ -27,6 +27,7 @@
     <TitanRoot Condition="'$(TitanRoot)' == '' AND '$(SolutionDir)' != '' AND '$(SolutionDir)' != '*Undefined*'">$(SolutionDir)</TitanRoot>
     <TitanRoot Condition="'$(TitanRoot)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'BuildEngine.bat'))\</TitanRoot>
     <SkipTitanCodeGen Condition="'$(SkipTitanCodeGen)' == ''">false</SkipTitanCodeGen>
+    <SkipTitanDataCopyerGen Condition="'$(SkipTitanDataCopyerGen)' == ''">false</SkipTitanDataCopyerGen>
   </PropertyGroup>
 
   <!-- ============================================================ -->
@@ -92,6 +93,23 @@
     <Touch Files="$(_CodeGenSentinel)" AlwaysCreate="true" />
 
     <Message Importance="high" Text="[TitanCodeGen] Code generation completed." />
+  </Target>
+
+  <!-- ============================================================ -->
+  <!-- Target: TitanGenerateDataCopyer                              -->
+  <!-- Runs after Engine.Window build to pre-generate DataCopyer.   -->
+  <!-- ============================================================ -->
+  <Target Name="TitanGenerateDataCopyer"
+          AfterTargets="Build"
+          DependsOnTargets="_EnsureCodeGenToolsBuilt"
+          Condition="'$(SkipTitanCodeGen)' != 'true' AND '$(SkipTitanDataCopyerGen)' != 'true' AND '$(MSBuildProjectName)' == 'Engine.Window'">
+
+    <Message Importance="high" Text="[TitanCodeGen] Generating DataCopyer plugin..." />
+
+    <Exec Command="&quot;$(_CSharpCodeToolsExe)&quot; mode=DataCopyer TitanRoot=&quot;$(TitanRoot).&quot;"
+          WorkingDirectory="$(TitanRoot)" />
+
+    <Message Importance="high" Text="[TitanCodeGen] DataCopyer generation completed." />
   </Target>
 
 </Project>

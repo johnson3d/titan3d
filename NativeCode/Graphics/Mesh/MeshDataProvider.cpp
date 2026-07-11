@@ -320,7 +320,7 @@ namespace NxRHI
 				copyDesc.RowPitch = copyDesc.Size;
 				copyDesc.DepthPitch = copyDesc.Size;
 				copyDesc.InitData = nullptr;
-				copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc));
+				copyVB = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
 				cmd.GetCmdList()->CopyBufferRegion(copyVB, 0, vb->Buffer, 0, copyDesc.Size);
 			}
 			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
@@ -344,7 +344,7 @@ namespace NxRHI
 				copyDesc.RowPitch = copyDesc.Size;
 				copyDesc.DepthPitch = copyDesc.Size;
 				copyDesc.InitData = nullptr;
-				copyIB = MakeWeakRef(device->CreateBuffer(&copyDesc));
+				copyIB = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
 				cmd.GetCmdList()->CopyBufferRegion(copyIB, 0, ib->Buffer, 0, copyDesc.Size);
 			}
 			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);

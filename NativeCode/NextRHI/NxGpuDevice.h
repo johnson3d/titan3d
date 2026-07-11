@@ -1215,45 +1215,45 @@ namespace NxRHI
 		static bool IsFinalized(){
 			return mIsFinalized;
 		}
-		virtual IBuffer* CreateBuffer(const FBufferDesc * desc) = 0;
-		virtual ITexture* CreateTexture(const FTextureDesc * desc) = 0;
-		virtual ITexture* CreateTexture(void* pSharedObject) { return nullptr; }
-		virtual ICbView* CreateCBV(IBuffer* pBuffer, const FCbvDesc * desc) = 0;
-		virtual IVbView* CreateVBV(IBuffer* pBuffer, const FVbvDesc * desc) = 0;
-		virtual IIbView* CreateIBV(IBuffer* pBuffer, const FIbvDesc * desc) = 0;
-		virtual ISrView* CreateSRV(IGpuBufferData * pBuffer, const FSrvDesc * desc) = 0;
-		virtual IUaView* CreateUAV(IGpuBufferData * pBuffer, const FUavDesc * desc) = 0;
-		virtual IRenderTargetView* CreateRTV(ITexture * pBuffer, const FRtvDesc* desc) = 0;
-		virtual IDepthStencilView* CreateDSV(ITexture * pBuffer, const FDsvDesc* desc) = 0;
-		virtual ISampler* CreateSampler(const FSamplerDesc * desc) = 0;
-		virtual ISwapChain* CreateSwapChain(const FSwapChainDesc * desc) = 0;
-		virtual IRenderPass* CreateRenderPass(const FRenderPassDesc * desc) = 0;
-		virtual IFrameBuffers* CreateFrameBuffers(IRenderPass* rpass) = 0;
-		virtual IAccelerationStructure* CreateAccelerationStructure(const FAccelerationStructureDesc* desc) = 0;
-		virtual IAStructureInstance* CreateAccelerationStructureInstance(const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure) = 0;
-		virtual ITopAccelerationStructure* CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc) = 0;
+		virtual IBuffer* CreateBuffer(const FBufferDesc * desc, const char* file, int line) = 0;
+		virtual ITexture* CreateTexture(const FTextureDesc * desc, const char* file, int line) = 0;
+		virtual ITexture* CreateTexture(void* pSharedObject, const char* file, int line) { return nullptr; }
+		virtual ICbView* CreateCBV(IBuffer* pBuffer, const FCbvDesc * desc, const char* file, int line) = 0;
+		virtual IVbView* CreateVBV(IBuffer* pBuffer, const FVbvDesc * desc, const char* file, int line) = 0;
+		virtual IIbView* CreateIBV(IBuffer* pBuffer, const FIbvDesc * desc, const char* file, int line) = 0;
+		virtual ISrView* CreateSRV(IGpuBufferData * pBuffer, const FSrvDesc * desc, const char* file, int line) = 0;
+		virtual IUaView* CreateUAV(IGpuBufferData * pBuffer, const FUavDesc * desc, const char* file, int line) = 0;
+		virtual IRenderTargetView* CreateRTV(ITexture * pBuffer, const FRtvDesc* desc, const char* file, int line) = 0;
+		virtual IDepthStencilView* CreateDSV(ITexture * pBuffer, const FDsvDesc* desc, const char* file, int line) = 0;
+		virtual ISampler* CreateSampler(const FSamplerDesc * desc, const char* file, int line) = 0;
+		virtual ISwapChain* CreateSwapChain(const FSwapChainDesc * desc, const char* file, int line) = 0;
+		virtual IRenderPass* CreateRenderPass(const FRenderPassDesc * desc, const char* file, int line) = 0;
+		virtual IFrameBuffers* CreateFrameBuffers(IRenderPass* rpass, const char* file, int line) = 0;
+		virtual IAccelerationStructure* CreateAccelerationStructure(const FAccelerationStructureDesc* desc, const char* file, int line) = 0;
+		virtual IAStructureInstance* CreateAccelerationStructureInstance(const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure, const char* file, int line) = 0;
+		virtual ITopAccelerationStructure* CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc, const char* file, int line) = 0;
 		
-		virtual IGpuPipeline* CreatePipeline(const FGpuPipelineDesc * desc) = 0;
-		virtual IGpuDrawState* CreateGpuDrawState() = 0;
-		virtual IInputLayout* CreateInputLayout(FInputLayoutDesc* desc) = 0;
-		virtual ICommandList* CreateCommandList() = 0;
-		virtual IShader* CreateShader(FShaderDesc* desc) = 0;
-		virtual IGraphicsEffect* CreateShaderEffect() = 0;
-		virtual IComputeEffect* CreateComputeEffect() = 0;
-		virtual IRayTracingEffect* CreateRayTracingEffect() { return nullptr; }
-		virtual IFence* CreateFence(const FFenceDesc* desc, const char* name) = 0;
-		virtual IEvent* CreateGpuEvent(const FEventDesc * desc, const char* name) = 0;
+		virtual IGpuPipeline* CreatePipeline(const FGpuPipelineDesc * desc, const char* file, int line) = 0;
+		virtual IGpuDrawState* CreateGpuDrawState(const char* file, int line) = 0;
+		virtual IInputLayout* CreateInputLayout(FInputLayoutDesc* desc, const char* file, int line) = 0;
+		virtual ICommandList* CreateCommandList(const char* file, int line) = 0;
+		virtual IShader* CreateShader(FShaderDesc* desc, const char* file, int line) = 0;
+		virtual IGraphicsEffect* CreateShaderEffect(const char* file, int line) = 0;
+		virtual IComputeEffect* CreateComputeEffect(const char* file, int line) = 0;
+		virtual IRayTracingEffect* CreateRayTracingEffect(const char* file, int line) { return nullptr; }
+		virtual IFence* CreateFence(const FFenceDesc* desc, const char* name, const char* file, int line) = 0;
+		virtual IEvent* CreateGpuEvent(const FEventDesc * desc, const char* name, const char* file, int line) = 0;
 		virtual ICmdQueue* GetCmdQueue() = 0;
 
-		virtual IGraphicDraw* CreateGraphicDraw();
-		virtual IComputeDraw* CreateComputeDraw();
-		virtual IRayTracingDraw* CreateRayTracingDraw();
-		virtual ICopyDraw* CreateCopyDraw();
-		virtual IActionDraw* CreateActionDraw();
+		virtual IGraphicDraw* CreateGraphicDraw(const char* file, int line);
+		virtual IComputeDraw* CreateComputeDraw(const char* file, int line);
+		virtual IRayTracingDraw* CreateRayTracingDraw(const char* file, int line);
+		virtual ICopyDraw* CreateCopyDraw(const char* file, int line);
+		virtual IActionDraw* CreateActionDraw(const char* file, int line);
 
-		virtual FVertexArray* CreateVertexArray();
-		virtual FGeomMesh* CreateGeomMesh();
-		virtual IGpuScope* CreateGpuScope() = 0;
+		virtual FVertexArray* CreateVertexArray(const char* file, int line);
+		virtual FGeomMesh* CreateGeomMesh(const char* file, int line);
+		virtual IGpuScope* CreateGpuScope(const char* file, int line) = 0;
 		inline const FGpuResourceAlignment* GetGpuResourceAlignment() const{
 			return &mGpuResourceAlignment;
 		}

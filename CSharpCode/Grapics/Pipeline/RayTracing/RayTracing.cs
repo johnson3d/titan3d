@@ -174,7 +174,7 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
             mBasePassShading.SetDispatchRay(this, policy, mRayTracingDraw, LightingPinOut.Attachement.Width, LightingPinOut.Attachement.Height, 1);
             //TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
 
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = NxRHI.TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist, "RayTracing"))
             {
                 cmdlist.PushGpuDraw(mRayTracingDraw);

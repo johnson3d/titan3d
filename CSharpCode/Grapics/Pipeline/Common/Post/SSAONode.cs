@@ -318,7 +318,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             if (width == 0 || height == 0)
                 return;
 
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmd, "SSAO"))
             {
                 // Pass 1: Horizon-based AO → raw intermediate texture

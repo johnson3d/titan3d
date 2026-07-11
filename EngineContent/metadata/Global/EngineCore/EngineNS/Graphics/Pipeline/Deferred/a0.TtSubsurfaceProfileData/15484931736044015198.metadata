@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_15484931736044015198 Type="EngineNS.Graphics.Pipeline.Deferred.TtSubsurfaceProfileData@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <FalloffColor Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <ScatterColor Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <ScatterRadius Type="System.Single@Unknown" Order="0" />
+  <SubsurfaceOpacity Type="System.Single@Unknown" Order="0" />
+</Hash_15484931736044015198>

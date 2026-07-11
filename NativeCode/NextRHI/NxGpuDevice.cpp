@@ -136,38 +136,38 @@ namespace NxRHI
 	{
 		return mDescriptorPoolManager;
 	}
-	IGraphicDraw* IGpuDevice::CreateGraphicDraw()
+	IGraphicDraw* IGpuDevice::CreateGraphicDraw(const char* file, int line)
 	{
-		auto result = new IGraphicDraw();
+		auto result = NewObjectWithInfo<IGraphicDraw>(file ? file : __FILE__, line);
 		return result;
 	}
-	IComputeDraw* IGpuDevice::CreateComputeDraw()
+	IComputeDraw* IGpuDevice::CreateComputeDraw(const char* file, int line)
 	{
-		auto result = new IComputeDraw();
+		auto result = NewObjectWithInfo<IComputeDraw>(file ? file : __FILE__, line);
 		return result;
 	}
-	IRayTracingDraw* IGpuDevice::CreateRayTracingDraw()
+	IRayTracingDraw* IGpuDevice::CreateRayTracingDraw(const char* file, int line)
 	{
 		return nullptr;
 	}
-	ICopyDraw* IGpuDevice::CreateCopyDraw()
+	ICopyDraw* IGpuDevice::CreateCopyDraw(const char* file, int line)
 	{
-		auto result = new ICopyDraw();
+		auto result = NewObjectWithInfo<ICopyDraw>(file ? file : __FILE__, line);
 		return result;
 	}
-	IActionDraw* IGpuDevice::CreateActionDraw()
+	IActionDraw* IGpuDevice::CreateActionDraw(const char* file, int line)
 	{
-		auto result = new IActionDraw();
+		auto result = NewObjectWithInfo<IActionDraw>(file ? file : __FILE__, line);
 		return result;
 	}
-	FVertexArray* IGpuDevice::CreateVertexArray()
+	FVertexArray* IGpuDevice::CreateVertexArray(const char* file, int line)
 	{
-		return new FVertexArray();
+		return NewObjectWithInfo<FVertexArray>(file ? file : __FILE__, line);
 	}
-	FGeomMesh* IGpuDevice::CreateGeomMesh()
+	FGeomMesh* IGpuDevice::CreateGeomMesh(const char* file, int line)
 	{
-		auto result = new FGeomMesh();
-		result->VertexArray = MakeWeakRef(CreateVertexArray());
+		auto result = NewObjectWithInfo<FGeomMesh>(file ? file : __FILE__, line);
+		result->VertexArray = MakeWeakRef(CreateVertexArray(file, line));
 		return result;
 	}
 	void IGpuDevice::WaitFrameFence(int beforeFrame)

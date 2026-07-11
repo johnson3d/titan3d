@@ -249,7 +249,7 @@ namespace NxRHI
 		
 		FFenceDesc desc;
 		desc.InitValue = 0;
-		mCommitFence = MakeWeakRef(device->CreateFence(&desc, "VKCmdlist Commit fence"));
+		mCommitFence = MakeWeakRef(device->CreateFence(&desc, "VKCmdlist Commit fence", __FILE__, __LINE__));
 		
 		//mCommandBuffer = device->mCmdAllocatorManager->Alloc(device);
 

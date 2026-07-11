@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1448100053806921929 Type="EngineNS.Bricks.FX.Weather.TtCloudNoiseGenerator.TtWeatherMapSettings@EngineCore">
+  <AddCirrus Type="System.Boolean@Unknown" Order="0" />
+  <CirrusFrequency Type="System.Single@Unknown" Order="0" />
+  <CirrusStrength Type="System.Single@Unknown" Order="0" />
+  <CoverageAmount Type="System.Single@Unknown" Order="0" />
+  <CoverageFrequency Type="System.Single@Unknown" Order="0" />
+  <DensityAmount Type="System.Single@Unknown" Order="0" />
+  <DensityFrequency Type="System.Single@Unknown" Order="0" />
+  <Height Type="System.Int32@Unknown" Order="0" />
+  <Width Type="System.Int32@Unknown" Order="0" />
+</Hash_1448100053806921929>

@@ -16,12 +16,10 @@
 		  <HintPath>$(TtTitanRoot)binaries\net8.0\Engine.Window.dll</HintPath>
 		  <Private>false</Private>
 	  </Reference>
-	  <Reference Include="Survivor.All">
-		  <HintPath>$(TtTitanRoot)binaries\Plugins\Survivor\Survivor.All.dll</HintPath>
+	  <Reference Include="$(TtTitanRoot)binaries\Plugins\*\*.All.dll" Exclude="$(TtTitanRoot)binaries\Plugins\DataCopyer\*.dll">
 		  <Private>false</Private>
 	  </Reference>
-	  <Reference Include="Inventory.All">
-		  <HintPath>$(TtTitanRoot)binaries\Plugins\Inventory\Inventory.All.dll</HintPath>
+	  <Reference Include="$(TtTitanRoot)binaries\Plugins\*\*.Window.dll" Exclude="$(TtTitanRoot)binaries\Plugins\DataCopyer\*.dll;$(TtTitanRoot)binaries\Plugins\*\Engine.Window.dll">
 		  <Private>false</Private>
 	  </Reference>
     <!--<ProjectReference Include="..\..\..\Module\Engine.Window\Engine.Window.csproj">

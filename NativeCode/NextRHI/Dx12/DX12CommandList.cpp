@@ -77,7 +77,7 @@ namespace NxRHI
 
 		FFenceDesc desc;
 		desc.InitValue = 0;
-		mCommitFence = MakeWeakRef(device->CreateFence(&desc, "Dx12Cmdlist Commit fence"));
+		mCommitFence = MakeWeakRef(device->CreateFence(&desc, "Dx12Cmdlist Commit fence", __FILE__, __LINE__));
 		mContext->Close();
 		mCmdListState = ECmdListState::None;
 
@@ -932,8 +932,8 @@ namespace NxRHI
 
 	void DX12CommandList::WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters)
 	{
-		ICommandList::WriteBufferUINT32(Count, BufferWriters);
-		return;
+		/*ICommandList::WriteBufferUINT32(Count, BufferWriters);
+		return;*/
 
 		if (mLastContext == nullptr)
 		{

@@ -10,7 +10,7 @@ namespace NxRHI
 	{
 		FFenceDesc desc{};
 		desc.InitValue = 0;
-		mFrameFence = MakeWeakRef(device->CreateFence(&desc, "VKDescriptorSetFrame Fence"));
+		mFrameFence = MakeWeakRef(device->CreateFence(&desc, "VKDescriptorSetFrame Fence", __FILE__, __LINE__));
 	}
 	void NxDesriptorPoolManager::AllocFramePool()
 	{

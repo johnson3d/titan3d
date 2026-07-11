@@ -91,6 +91,9 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
                 setup.TailBoneLength, (int)setup.TailBoneAxis,
                 setup.ConstrainBoneLength, setup.BoneLengthConstraintBlend,
                 setup.RootCollision, setup.LODThreshold);
+            mCoreObject.SetChainPhysicsSettings(index,
+                setup.PhysicsSettings,
+                setup.PhysicsSettingsRandom);
         }
 
         public unsafe void BuildChains(Vector3[] bonePositions, Quaternion[] boneRotations, Vector3[] boneScales, int[] parentIndices)
@@ -128,6 +131,9 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
                 setup.ConstrainBoneLength, setup.BoneLengthConstraintBlend,
                 setup.RootCollision, setup.LODThreshold,
                 setup.LoopChains);
+            mCoreObject.SetClothPhysicsSettings(index,
+                setup.PhysicsSettings,
+                setup.PhysicsSettingsRandom);
         }
 
         public unsafe void BuildCloth(Vector3[] bonePositions, Quaternion[] boneRotations, Vector3[] boneScales, int[] parentIndices)
@@ -159,6 +165,9 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
                 setup.StretchShearStiffness, setup.BendTwistStiffness,
                 setup.PointAttachStiffness, setup.OrientAttachStiffness,
                 setup.LODThreshold);
+            mCoreObject.SetRodPhysicsSettings(index,
+                setup.PhysicsSettings,
+                setup.PhysicsSettingsRandom);
         }
 
         public unsafe void BuildRods(Vector3[] bonePositions, Quaternion[] boneRotations, Vector3[] boneScales, int[] parentIndices)

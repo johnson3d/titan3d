@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1013361159239531532 Type="EngineNS.CodeCompiler.ProjectConfig@EngineCore">
+  <CodeFiles Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Order="0" />
+  <MinVSVersion Type="System.Version@Unknown" Order="0" />
+  <ProjectFile Type="System.String@Unknown" Order="0" />
+  <ProjectGuid Type="System.Guid@Unknown" Order="0" />
+  <ProjectType Type="EngineNS.CodeCompiler.ProjectConfig.enProjectType@EngineCore" Order="0" />
+  <ReferenceProjects Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Order="0" />
+</Hash_1013361159239531532>

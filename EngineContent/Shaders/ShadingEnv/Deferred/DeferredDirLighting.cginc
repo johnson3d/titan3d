@@ -713,7 +713,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	switch (shadingMode)
 	{
         case EShadingMode_Unlit:
-            shadingResult.BaseShading = Albedo;
+            shadingResult.BaseShading = Albedo * FinalShadowValue;
             break;
 		case EShadingMode_Subsurface:
 			shadingResult = DeferredDirLighting_Subsurface(shadingCtx);

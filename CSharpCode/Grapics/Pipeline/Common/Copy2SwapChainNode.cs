@@ -133,7 +133,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             if (mCopyDrawcall == null)
                 return;
-            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmdlist = NxRHI.TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist, "Copy2SwapChain"))
             {
                 var srcPin = GetAttachBuffer(ColorPinIn);

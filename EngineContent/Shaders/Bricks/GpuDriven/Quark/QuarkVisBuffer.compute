@@ -35,13 +35,19 @@ ByteAddressBuffer VisIndexBuffer;
 // 64-bit VisBuffer: RWByteAddressBuffer (size = Width * Height * 8)
 RWByteAddressBuffer VisBuffer64;
 
+// LOD Selection: indirect cluster index buffer
+// [0]=selectedCount, [4..]=cluster indices into ClusterVisBuffer
+// When UseLODSelection==1, GroupID.x indexes into this buffer
+ByteAddressBuffer SelectedClusters;
+
 struct FVisBufferParams
 {
     float2 RTSize;
     uint ClusterCount;
     uint VertexStride;  // 8 or 12 (in floats)
     uint CullMode;      // 0=None(double-sided), 1=CCW front(default), 2=CW front
-    uint3 Padding;
+    uint UseLODSelection; // 0=direct dispatch (all clusters), 1=indirect via SelectedClusters
+    uint2 Padding;
 };
 
 cbuffer cbVisBuffer DX_AUTOBIND
@@ -96,13 +102,26 @@ uint PackID(uint triLocalID, uint clusterID, uint instanceID)
 // ===========================================================================
 // Pass 2: Software Rasterize (one thread per triangle)
 // ThreadGroup = one cluster (128 threads max per cluster)
+// Supports two modes:
+//   UseLODSelection==0: GroupID.x directly indexes ClusterVisBuffer (legacy)
+//   UseLODSelection==1: GroupID.x indexes SelectedClusters[x+1] for indirection
 // ===========================================================================
 [numthreads(128, 1, 1)]
 void CS_RasterizeVisBuffer(uint3 GroupID : SV_GroupID, uint3 GroupThreadID : SV_GroupThreadID)
 {
-    uint clusterIdx = GroupID.x;
-    if (clusterIdx >= VisBufferParams.ClusterCount)
-        return;
+    uint clusterIdx;
+    if (VisBufferParams.UseLODSelection == 1)
+    {
+        // Indirect mode: read cluster index from LOD selection output
+        clusterIdx = SelectedClusters.Load(4 + GroupID.x * 4);
+    }
+    else
+    {
+        // Direct mode: GroupID.x IS the cluster index
+        clusterIdx = GroupID.x;
+        if (clusterIdx >= VisBufferParams.ClusterCount)
+            return;
+    }
 
     FClusterVisData cluster = ClusterVisBuffer[clusterIdx];
     uint triLocalID = GroupThreadID.x;

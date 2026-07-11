@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_5530991716039486280 Type="EngineNS.Bricks.PhysicsCore.SceneNode.TtPhyRigidbodyNode@EngineCore">
+  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <NodeId Type="System.Guid@Unknown" Order="0" />
+  <ParentScene Type="EngineNS.GamePlay.Scene.TtScene@EngineCore" Order="0" />
+  <RootNode Type="EngineNS.GamePlay.Scene.TtNode@EngineCore" Order="0" />
+</Hash_5530991716039486280>

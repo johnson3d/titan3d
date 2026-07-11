@@ -1,0 +1,176 @@
+#ifndef __QUARK_LOD_SELECT_H__
+#define __QUARK_LOD_SELECT_H__
+
+#include "../../../Inc/GlobalDefine.cginc"
+
+// ===========================================================================
+// QuarkLODSelect: GPU-driven multi-pass LOD cut selection for DAG hierarchy
+// Each pass processes a work queue of group indices, deciding Accept or Expand.
+// Accept: output parent cluster indices to SelectedClusters
+// Expand: output child groups to next pass work queue
+// ===========================================================================
+
+struct FClusterGroupGPU
+{
+    float3 LODBoundsCenter;
+    float LODBoundsRadius;
+    float ParentLODError;
+    int MipLevel;
+    int ChildrenStart;
+    int ChildrenCount;
+    int ParentsStart;
+    int ParentsCount;
+    int Padding0;
+    int Padding1;
+};
+
+StructuredBuffer<FClusterGroupGPU> GroupBuffer;
+ByteAddressBuffer GroupChildrenBuffer;   // uint per entry: cluster indices
+ByteAddressBuffer GroupParentsBuffer;    // uint per entry: cluster indices
+ByteAddressBuffer ClusterGroupMap;       // uint per cluster: generating group index
+
+RWByteAddressBuffer WorkQueueCurrent;    // [0]=count, [4..]=group indices
+RWByteAddressBuffer WorkQueueNext;       // next pass expand output
+RWByteAddressBuffer SelectedClusters;    // [0]=count, [4..]=selected cluster indices
+RWByteAddressBuffer LODIndirectArgs;     // indirect dispatch args for next pass
+
+// Per-group visited flag to avoid duplicate processing
+RWByteAddressBuffer GroupVisited;        // uint per group: 0=not visited, 1=visited
+
+struct FLODSelectParams
+{
+    float4x4 ViewProj;
+    float2 ScreenSize;
+    float LODScale;       // User-adjustable LOD bias (1.0 = default)
+    uint MaxGroupCount;   // Total number of groups (for bounds checking)
+};
+
+cbuffer cbLODSelect DX_AUTOBIND
+{
+    FLODSelectParams LODSelectParams;
+}
+
+// ===========================================================================
+// CS_LODSelect: Process one group from the current work queue
+// ===========================================================================
+[numthreads(64, 1, 1)]
+void CS_LODSelect(uint3 DTid : SV_DispatchThreadID)
+{
+    uint workCount = WorkQueueCurrent.Load(0);
+    if (DTid.x >= workCount)
+        return;
+
+    uint groupIdx = WorkQueueCurrent.Load(4 + DTid.x * 4);
+    if (groupIdx >= LODSelectParams.MaxGroupCount)
+        return;
+
+    FClusterGroupGPU group = GroupBuffer[groupIdx];
+
+    // Screen-space error calculation:
+    // projectedError = (ParentLODError / distance) * ScreenSize.y * 0.5
+    float3 boundsCenter = group.LODBoundsCenter;
+    float4 clipPos = mul(LODSelectParams.ViewProj, float4(boundsCenter, 1.0));
+    float distance = max(abs(clipPos.w), 0.001);
+    float projectedError = (group.ParentLODError * LODSelectParams.ScreenSize.y * 0.5) / distance;
+    projectedError *= LODSelectParams.LODScale;
+
+    // Decision: projected error < 1 pixel → Accept parents; otherwise → Expand children
+    bool bAccept = (projectedError < 1.0);
+
+    if (bAccept)
+    {
+        // Output parent clusters to SelectedClusters
+        for (int i = 0; i < group.ParentsCount; i++)
+        {
+            uint clusterIdx = GroupParentsBuffer.Load((group.ParentsStart + i) * 4);
+            uint slot;
+            SelectedClusters.InterlockedAdd(0, 1, slot);
+            SelectedClusters.Store(4 + slot * 4, clusterIdx);
+        }
+    }
+    else
+    {
+        // Need finer detail
+        if (group.MipLevel == 0)
+        {
+            // Leaf group: children are the finest clusters, force accept them
+            for (int i = 0; i < group.ChildrenCount; i++)
+            {
+                uint clusterIdx = GroupChildrenBuffer.Load((group.ChildrenStart + i) * 4);
+                uint slot;
+                SelectedClusters.InterlockedAdd(0, 1, slot);
+                SelectedClusters.Store(4 + slot * 4, clusterIdx);
+            }
+        }
+        else
+        {
+            // Expand: push children's generating groups into next work queue
+            for (int i = 0; i < group.ChildrenCount; i++)
+            {
+                uint clusterIdx = GroupChildrenBuffer.Load((group.ChildrenStart + i) * 4);
+                uint childGroupIdx = ClusterGroupMap.Load(clusterIdx * 4);
+
+                // Skip invalid mappings (Level 0 clusters have no generating group)
+                if (childGroupIdx == 0xFFFFFFFF || childGroupIdx >= LODSelectParams.MaxGroupCount)
+                {
+                    // Fallback: directly accept this cluster
+                    uint slot;
+                    SelectedClusters.InterlockedAdd(0, 1, slot);
+                    SelectedClusters.Store(4 + slot * 4, clusterIdx);
+                    continue;
+                }
+
+                // Dedup: only add if not already visited this frame
+                uint wasVisited;
+                GroupVisited.InterlockedExchange(childGroupIdx * 4, 1, wasVisited);
+                if (wasVisited == 0)
+                {
+                    uint slot;
+                    WorkQueueNext.InterlockedAdd(0, 1, slot);
+                    WorkQueueNext.Store(4 + slot * 4, childGroupIdx);
+                }
+            }
+        }
+    }
+}
+
+// ===========================================================================
+// CS_PrepareIndirectArgs: Read WorkQueueNext[0] and write dispatch args
+// ===========================================================================
+[numthreads(1, 1, 1)]
+void CS_PrepareIndirectArgs(uint3 DTid : SV_DispatchThreadID)
+{
+    uint nextCount = WorkQueueNext.Load(0);
+    // Dispatch group count = ceil(nextCount / 64)
+    uint groupCountX = (nextCount + 63) / 64;
+    LODIndirectArgs.Store(0, groupCountX);
+    LODIndirectArgs.Store(4, 1);
+    LODIndirectArgs.Store(8, 1);
+}
+
+// ===========================================================================
+// CS_PrepareRasterIndirectArgs: Read SelectedClusters[0] and write raster dispatch args
+// Each selected cluster = one thread group of 128 threads
+// ===========================================================================
+[numthreads(1, 1, 1)]
+void CS_PrepareRasterIndirectArgs(uint3 DTid : SV_DispatchThreadID)
+{
+    uint selectedCount = SelectedClusters.Load(0);
+    LODIndirectArgs.Store(0, selectedCount);
+    LODIndirectArgs.Store(4, 1);
+    LODIndirectArgs.Store(8, 1);
+}
+
+// ===========================================================================
+// CS_ClearGroupVisited: Clear visited flags for all groups
+// ===========================================================================
+[numthreads(64, 1, 1)]
+void CS_ClearGroupVisited(uint3 DTid : SV_DispatchThreadID)
+{
+    if (DTid.x < LODSelectParams.MaxGroupCount)
+    {
+        GroupVisited.Store(DTid.x * 4, 0);
+    }
+}
+
+#endif

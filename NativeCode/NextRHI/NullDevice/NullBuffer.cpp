@@ -104,7 +104,7 @@ namespace NxRHI
 			bfDesc.SetDefault();
 			bfDesc.Size = desc->ShaderBinder->Size;
 
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 		}
 		else
 		{
@@ -112,7 +112,7 @@ namespace NxRHI
 			bfDesc.SetDefault();
 			bfDesc.Size = desc->BufferSize;
 
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 		}
 		ShaderBinder = desc->ShaderBinder;
 		return true;
@@ -132,7 +132,7 @@ namespace NxRHI
 			bfDesc.Type = EBufferType::BFT_Vertex;
 			bfDesc.Usage = desc->Usage;
 			bfDesc.CpuAccess = desc->CpuAccess;
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 			ASSERT(Buffer != nullptr);
 		}
 		else
@@ -156,7 +156,7 @@ namespace NxRHI
 			bfDesc.Type = EBufferType::BFT_Index;
 			bfDesc.Usage = desc->Usage;
 			bfDesc.CpuAccess = desc->CpuAccess;
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 			ASSERT(Buffer != nullptr);
 		}
 		else

@@ -49,23 +49,23 @@ namespace EngineNS.Animation.Macross.BlendTree
         [Category("Pins"), DisplayName("Alpha")]
         public TtDataInPinDescription AlphaPin { get => DataInPins[0]; }
 
-        [Category("Pins"), DisplayName("PhysicsSettings")]
-        public TtDataInPinDescription PhysicsSettingsPin { get => DataInPins[1]; }
+        //[Category("Pins"), DisplayName("PhysicsSettings")]
+        //public TtDataInPinDescription PhysicsSettingsPin { get => DataInPins[1]; }
         
-        [Category("Pins"), DisplayName("PhysicsSettingsRandom")]
-        public TtDataInPinDescription PhysicsSettingsRandomPin { get => DataInPins[2]; }
+        //[Category("Pins"), DisplayName("PhysicsSettingsRandom")]
+        //public TtDataInPinDescription PhysicsSettingsRandomPin { get => DataInPins[2]; }
         public TtBlendTree_KawaiiPhysicsClassDescription()
         {
             AddPoseInPin(new TtPoseInPinDescription());
             AddPoseOutPin(new TtPoseOutPinDescription());
 
             AddDataInPin(new() { Name = "Alpha", TypeDesc = TtTypeDescGetter<Single>.TypeDesc, TypeVaule = "1" });
-            AddDataInPin(new() { 
-                                 Name = "Physics Settings", 
-                                 TypeDesc = TtTypeDescGetter<Vector3>.TypeDesc, 
-                                 TypeVaule = TtDataInPinDescription.GetDefaultVale(TtTypeDescGetter<Vector3>.TypeDesc).ToString() 
-                               });
-            AddDataInPin(new() { Name = "Physics Settings Random", TypeDesc = TtTypeDescGetter<float>.TypeDesc, TypeVaule = "1" });
+            //AddDataInPin(new() { 
+            //                     Name = "Physics Settings", 
+            //                     TypeDesc = TtTypeDescGetter<Vector3>.TypeDesc, 
+            //                     TypeVaule = TtDataInPinDescription.GetDefaultVale(TtTypeDescGetter<Vector3>.TypeDesc).ToString() 
+            //                   });
+            //AddDataInPin(new() { Name = "Physics Settings Random", TypeDesc = TtTypeDescGetter<float>.TypeDesc, TypeVaule = "1" });
         }
         
         public override List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)

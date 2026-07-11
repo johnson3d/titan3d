@@ -272,7 +272,7 @@ namespace Canvas
 		bfDesc.DepthPitch = bfDesc.RowPitch * PixelHeight;
 		bfDesc.StructureStride = 0;
 		bfDesc.Size = bfDesc.RowPitch * PixelHeight;
-		auto buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+		auto buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
 		NxRHI::FMappedSubResource mapped{};
 		if (buffer->Map(0, &mapped, false))
 		{
@@ -302,7 +302,7 @@ namespace Canvas
 		}
 		else
 		{
-			AutoRef<NxRHI::ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw());
+			AutoRef<NxRHI::ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 			cpDraw->BindTextureDest(Brush->SrView->Buffer);
 			cpDraw->BindBufferSrc(buffer);
 			cpDraw->DestSubResource = 0;
@@ -560,12 +560,12 @@ namespace Canvas
 		auto device = mDeviceRef.GetPtr();
 		result->Brush = MakeWeakRef(new ITextBrush());
 		result->Brush->Init(mTextureDesc.Width, mTextureDesc.Height, mCellSizeY);
-		auto pTexture = MakeWeakRef(device->CreateTexture(&mTextureDesc));
+		auto pTexture = MakeWeakRef(device->CreateTexture(&mTextureDesc, __FILE__, __LINE__));
 		NxRHI::FSrvDesc desc{};
 		desc.SetTexture2D();
 		desc.Format = mTextureDesc.Format;
 		desc.Texture2D.MipLevels = 1;
-		result->Brush->SrView = MakeWeakRef(device->CreateSRV(pTexture, &desc));
+		result->Brush->SrView = MakeWeakRef(device->CreateSRV(pTexture, &desc, __FILE__, __LINE__));
 
 		return result;
 	}

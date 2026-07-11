@@ -324,7 +324,7 @@ namespace EngineNS.Graphics.Pipeline.GI.ProbeVolume
             // 引擎内部会除以 DispatchArg (numthreads) 得到 group count
             mUpdateShading.SetDrawcallDispatch(this, policy, mUpdateDraw, batchCount, 1, 1, true);
 
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = TtCommandList.GetCmdList();
             using (new TtCmdListScope(cmd, "ProbeVolumeUpdate"))
             {
                 cmd.PushGpuDraw(mUpdateDraw);

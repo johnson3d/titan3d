@@ -161,7 +161,7 @@ namespace NxRHI
 		rtvDesc.Height = Texture->Desc.Height;
 		rtvDesc.Format = Texture->Desc.Format;
 		rtvDesc.Texture2D.MipSlice = 0;
-		Rtv = MakeWeakRef(device->CreateRTV(Texture, &rtvDesc));
+		Rtv = MakeWeakRef(device->CreateRTV(Texture, &rtvDesc, __FILE__, __LINE__));
 	}
 }
 

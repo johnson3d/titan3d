@@ -48,8 +48,8 @@ namespace NxRHI
 			desc.Usage = EGpuUsage::USAGE_STAGING;
 			desc.RowPitch = Desc.Size;
 			desc.DepthPitch = Desc.Size;
-			auto cpBuffer = device->CreateBuffer(&desc);
-			auto cpDraw = device->CreateCopyDraw();
+			auto cpBuffer = MakeWeakRef(device->CreateBuffer(&desc, __FILE__, __LINE__));
+			auto cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 			
 			cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
 			cpDraw->FootPrint.Format = PXF_UNKNOWN;
@@ -68,7 +68,7 @@ namespace NxRHI
 
 			{
 				FTransientCmd cmd(device, EQueueType::QU_Transfer, "FetchBuffer");
-				cmd.GetCmdList()->PushGpuDraw(cpDraw);
+				cmd.GetCmdList()->PushGpuDraw(cpDraw.GetPtr());
 			}
 			device->GetCmdQueue()->Flush(EQueueType::QU_Transfer);
 			return cpBuffer->FetchGpuData(device, index, blob);
@@ -80,7 +80,7 @@ namespace NxRHI
 		cpDesc.Usage = USAGE_STAGING;
 		cpDesc.CpuAccess = CAS_READ;
 		cpDesc.Type = EBufferType::BFT_NONE;
-		auto cpBuffer = device->CreateBuffer(&cpDesc);
+		auto cpBuffer = device->CreateBuffer(&cpDesc, __FILE__, __LINE__);
 		if (cpDraw != nullptr)
 		{
 			cpDraw->BindBufferDest(cpBuffer);
@@ -112,7 +112,7 @@ namespace NxRHI
 			cpDesc.RowPitch = device->GetGpuResourceAlignment()->RoundupTexturePitch(numBlocksWide * blockSize);
 			cpDesc.Size = cpDesc.RowPitch * numBlocksHigh;
 		}
-		auto cpBuffer = device->CreateBuffer(&cpDesc);
+		auto cpBuffer = device->CreateBuffer(&cpDesc, __FILE__, __LINE__);
 		if (cpDraw != nullptr)
 		{
 			cpDraw->BindBufferDest(cpBuffer);

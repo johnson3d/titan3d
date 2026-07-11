@@ -26,5 +26,6 @@
     <e_1 Value="Game,utest/puppet/mesh/puppet.ums,f96719f6-83b6-4bd6-87f2-547a6cf50c04" />
     <e_2 Value="Game,utest/brdf_test/chair2.ums,5e719504-b5a0-4b08-bfb1-03c410445a57" />
   </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
 </Root>

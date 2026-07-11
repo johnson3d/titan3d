@@ -226,7 +226,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             var dispatchX = MathHelper.Roundup(UpSamplePinOut.Attachement.Width, threadGroupWorkRegionDim);
             var dispatchY = MathHelper.Roundup(UpSamplePinOut.Attachement.Height, threadGroupWorkRegionDim);
 
-            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            var cmd = NxRHI.TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmd, "Fsr"))
             {
                 UpSampleShadingEnv.SetDrawcallDispatch(this, policy, UpSampleDrawcall, dispatchX,

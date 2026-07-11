@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_8107414578441964518 Type="EngineNS.Graphics.Mesh.PhysicsAsset.TtPlaneShape@EngineCore">
+  <Offset Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <PlaneNormal Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <Rotation Type="EngineNS.Quaternion@EngineCore" Order="0" />
+</Hash_8107414578441964518>
