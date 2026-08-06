@@ -366,7 +366,8 @@ namespace EngineNS
                 result.Yaw = (float)(Math.Atan2(YawY, YawX));
                 
                 result.Pitch = -(MathHelper.PI * 0.5f);
-                result.Roll = -result.Yaw - (2.0f * MathHelper.Atan2(Y, W));
+                // at pitch=-90 gimbal lock: q = s*(-cos(t), sin(t), sin(t), cos(t)), t=(Yaw+Roll)/2=atan2(Y,W)
+                result.Roll = -result.Yaw + (2.0f * MathHelper.Atan2(Y, W));
             }
             else if (value > SINGULARITY_THRESHOLD)
             {

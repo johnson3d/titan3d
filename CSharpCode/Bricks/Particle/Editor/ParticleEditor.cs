@@ -84,6 +84,10 @@ namespace EngineNS.Bricks.Particle.Editor
             DrawParticleStructBuilder();
             DrawNodeDetails();
             DrawGraph();
+            if (mEditorHistory != null)
+            {
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+            }
         }
         bool mDockInitialized = false;
         protected void ResetDockspace(bool force = false)
@@ -114,6 +118,7 @@ namespace EngineNS.Bricks.Particle.Editor
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), rightUpId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("ParticlsDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Graph", mDockKeyClass), middleId);
 
             ImGuiAPI.DockBuilderFinish(id);
@@ -124,17 +129,12 @@ namespace EngineNS.Bricks.Particle.Editor
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 this.NebulaParticle.SaveAssetTo(NebulaParticle.AssetName);
+                mEditorHistory?.SetSavePoint();
             }
             ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))
-            {
-
-            }
-            ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Redo", in btSize))
-            {
-
-            }
+            // mEditorHistory为null时按钮/快捷键均为空操作, 与旧行为一致
+            EngineNS.Editor.Infrastructure.EditorUndoUtils.DrawUndoRedoButtons(mEditorHistory);
+            EngineNS.Editor.Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Compile", in btSize))
             {
@@ -240,6 +240,14 @@ namespace EngineNS.Bricks.Particle.Editor
 
         public TtParticleGraph ParticleGraph { get => NebulaParticle.ParticleGraph; }
         public TtGraphRenderer GraphRenderer { get; } = new TtGraphRenderer();
+
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退旧流程时把mEditorHistory改为null即可
+        public bool EnableUndoRedo => EditorHistory != null;
+        public EngineNS.Editor.Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        EngineNS.Editor.Infrastructure.TtEditorHistory mEditorHistory = new EngineNS.Editor.Infrastructure.TtEditorHistory();
+        EngineNS.Editor.Infrastructure.TtEditorHistoryPanel mHistoryPanel = new EngineNS.Editor.Infrastructure.TtEditorHistoryPanel();
+        #endregion
         //public CodeBuilder.UClassLayoutBuilder ParticleStructBuilder { get; } = new CodeBuilder.UClassLayoutBuilder();
         bool IsStarting = false;
         protected async Thread.Async.TtTask<bool> Initialize_PreviewParticle(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
@@ -330,6 +338,10 @@ namespace EngineNS.Bricks.Particle.Editor
             };
             ParticleGraph.Editor = this;
             GraphRenderer.SetGraph(this.ParticleGraph);
+            mEditorHistory?.Clear();
+            // 子图ParentGraph回退机制会自动继承根图的历史栈
+            ParticleGraph.HistoryHost = mEditorHistory;
+            NodePropGrid.HistoryHost = mEditorHistory;
 
             NebulaPropGrid.Target = NebulaParticle;
             return true;
@@ -337,6 +349,9 @@ namespace EngineNS.Bricks.Particle.Editor
         public void OnCloseEditor()
         {
             ParticleGraph.Editor = null;
+            ParticleGraph.HistoryHost = null;
+            NodePropGrid.HistoryHost = null;
+            mEditorHistory?.Clear();
             TtEngine.Instance.TickableManager.RemoveTickable(this);
             Dispose();
         }

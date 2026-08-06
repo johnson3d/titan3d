@@ -45,6 +45,15 @@ namespace EngineNS.Bricks.Procedure
         public TtGraphRenderer GraphRenderer { get; } = new TtGraphRenderer();
         public EGui.Controls.PropertyGrid.TtPropertyGrid NodePropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public EGui.Controls.PropertyGrid.TtPropertyGrid GraphPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退旧流程时把mEditorHistory改为null即可
+        public bool EnableUndoRedo => EditorHistory != null;
+        public EngineNS.Editor.Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        EngineNS.Editor.Infrastructure.TtEditorHistory mEditorHistory = new EngineNS.Editor.Infrastructure.TtEditorHistory();
+        EngineNS.Editor.Infrastructure.TtEditorHistoryPanel mHistoryPanel = new EngineNS.Editor.Infrastructure.TtEditorHistoryPanel();
+        #endregion
+
         public float LeftWidth = 0;
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
@@ -66,6 +75,11 @@ namespace EngineNS.Bricks.Procedure
         {
             CoreSDK.DisposeObject(ref PreviewViewport);
             NodePropGrid.Target = null;
+            NodePropGrid.HistoryHost = null;
+            GraphPropGrid.HistoryHost = null;
+            if (EditAsset != null)
+                EditAsset.AssetGraph.HistoryHost = null;
+            mEditorHistory?.Clear();
         }
         public IRootForm GetRootForm()
         {
@@ -152,6 +166,9 @@ namespace EngineNS.Bricks.Procedure
             GraphPropGrid.Target = this;
 
             GraphRenderer.SetGraph(this.EditAsset.AssetGraph);
+            mEditorHistory?.Clear();
+            EditAsset.AssetGraph.HistoryHost = mEditorHistory;
+            NodePropGrid.HistoryHost = mEditorHistory;
 
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"MaterialPreview:{AssetName}";
@@ -221,6 +238,10 @@ namespace EngineNS.Bricks.Procedure
             DrawGraphDetails();
             DrawNodeDetails();
             DrawUnionNodeConfig();
+            if (mEditorHistory != null)
+            {
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+            }
         }
         bool mDockInitialized = false;
         protected void ResetDockspace(bool force = false)
@@ -254,6 +275,7 @@ namespace EngineNS.Bricks.Procedure
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("GraphDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("UnionNodeConfig", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), rightDownId);
 
             ImGuiAPI.DockBuilderFinish(id);
         }
@@ -264,6 +286,10 @@ namespace EngineNS.Bricks.Procedure
             {
                 var noused = Save();
             }
+            ImGuiAPI.SameLine(0, -1);
+            // mEditorHistory为null时按钮/快捷键均为空操作
+            EngineNS.Editor.Infrastructure.EditorUndoUtils.DrawUndoRedoButtons(mEditorHistory);
+            EngineNS.Editor.Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Compile", in btSize))
             {
@@ -382,6 +408,7 @@ namespace EngineNS.Bricks.Procedure
         private async System.Threading.Tasks.Task Save()
         {
             EditAsset.SaveAssetTo(AssetName);
+            mEditorHistory?.SetSavePoint();
         }
         private async System.Threading.Tasks.Task Compile()
         {

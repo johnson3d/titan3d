@@ -91,6 +91,14 @@ namespace EngineNS.DesignMacross.Base.Graph
         private bool IsDragging = false;
         public void Processing(IGraph graph, ref FGraphElementRenderingContext context)
         {
+            // 有任意 popup/模态打开时(如 KawaiiPhysics 曲线编辑器的模态大窗、属性面板弹窗),
+            // 不处理图的鼠标事件 —— 否则点击会因位置几何上落在图视口内而"点透"触发
+            // 选择/右键菜单(本框架只用 IsInViewport 判定, 不看 hover/焦点/popup)。
+            // 与下方 Zooming 已有的 IsPopupOpen 门控同理, 这里提前覆盖所有按键/拖拽/命中。
+            // 保留 !IsDragging: 图内已发起的拖拽即使此时弹窗也能把拖拽正常结束, 不卡死状态。
+            if (!IsDragging && ImGuiAPI.IsPopupOpen("", ImGuiPopupFlags_.ImGuiPopupFlags_AnyPopup))
+                return;
+
             var mouseEventContext = new FMouseEventContext();
             mouseEventContext.GraphElementRenderingContext = context;
             var MousePos = ImGuiAPI.GetMousePos();

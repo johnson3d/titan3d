@@ -34,7 +34,7 @@ namespace EngineNS.Animation.Macross.BlendTree
     [OutlineElement_Leaf(typeof(TtOutlineElement_BlendTreeGraph))]
     [Designable(typeof(TtLocalSpacePoseBlendTree), "BlendTree")]
     [Graph(typeof(TtGraph_BlendTree))]
-    public class TtBlendTreeClassDescription : TtDesignableVariableDescription, IDataLineOperator, IPoseLineOperator, IExpressionOperator, IStatementOperator
+    public class TtBlendTreeClassDescription : TtDesignableVariableDescription, IDataLineOperator, IPoseLineOperator, IExpressionOperator, IStatementOperator, IAnimMacrossClassDescription
     {
         [Rtti.Meta("")]
         [Category("Option")]

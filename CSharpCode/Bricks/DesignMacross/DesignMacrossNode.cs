@@ -124,7 +124,14 @@ namespace EngineNS.DesignMacross
         }
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
-            var mcrs = MacrossGetter?.Get();
+            if(TtEngine.Instance.MacrossModule.Version != MacrossGetter?.Version)
+            {
+                mMacrossGetter.Get().MacrossNode = this;
+                var task = mMacrossGetter.Get().Initialize();
+                TtEngine.Instance.TaskCollector.AddWaitTask(task);
+
+            }
+            var mcrs = MacrossGetter?.Get();                
             if (mcrs != null && mcrs.IsInitialized)
             {
                 mcrs.PreTick(args.World.DeltaTimeSecond);

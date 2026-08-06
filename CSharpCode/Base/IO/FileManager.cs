@@ -574,16 +574,19 @@ namespace EngineNS.IO
                 return System.IO.File.ReadAllText(file);
             return System.IO.File.ReadAllText(file, encoding);
         }
-        public static void WriteAllText(string file, string text)
+        public static void WriteAllText(string file, string text, System.Text.Encoding encoding = null)
         {
+            file = file.ToLower();
             SureDirectory(GetParentPathName(file));
-            WriteAllTextImmediately(file, text);
+            WriteAllTextImmediately(file, text, encoding);
         }
-        public static void WriteAllTextImmediately(string path, string contents)
+        public static void WriteAllTextImmediately(string path, string contents, System.Text.Encoding encoding)
         {
             //System.IO.File.WriteAllText(path, contents);
             // 获取文件的字节数据
-            byte[] data = Encoding.UTF8.GetBytes(contents);
+            if(encoding == null)
+                encoding = Encoding.UTF8;
+            byte[] data = encoding.GetBytes(contents);
 
             TtRes2Memory.OnBeforeWriteFile(path);
             // 关键点：使用 FileOptions.WriteThrough

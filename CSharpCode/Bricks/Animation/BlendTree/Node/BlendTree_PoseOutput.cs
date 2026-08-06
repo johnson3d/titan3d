@@ -23,11 +23,10 @@ namespace EngineNS.Animation.BlendTree.Node
         public override void Tick(float elapseSecond, ref FAnimBlendTreeContext context)
         {
             base.Tick(elapseSecond, ref context);
-            FromNode.Tick(elapseSecond, ref context);
+            FromNode?.Tick(elapseSecond, ref context);
         }
         public override TtAnimationCommand<S, TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
-            System.Diagnostics.Debug.Assert(FromNode != null);
             if (FromNode == null)
                 return null;
 

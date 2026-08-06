@@ -62,6 +62,7 @@ namespace EngineNS.DesignMacross.Base.Outline
             var elementContext = new FOutlineElementRenderingContext();
             elementContext.CommandHistory = context.CommandHistory;
             elementContext.EditorInteroperation = context.EditorInteroperation;
+            elementContext.DesignMacrossAssetName = context.DesignMacrossAssetName;
             var elements = outline.ConstructElements();
             foreach (var element in elements)
             {

@@ -23,6 +23,8 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
         {
             CBufferParameter = null;
             mParamPropGrid.Target = null;
+            mParamPropGrid.HistoryHost = null;
+            mEditorHistory?.Clear();
             mShaderEditor = null;
         }
 
@@ -53,6 +55,8 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
             if (CBufferParameter != null)
             {
                 mParamPropGrid.Target = CBufferParameter;
+                mEditorHistory?.Clear();
+                mParamPropGrid.HistoryHost = mEditorHistory;
                 mShaderEditor.mCoreObject.SetText(CBufferParameter.HLSLCode ?? "");
             }
 
@@ -74,6 +78,15 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
 
         EGui.TtCodeEditor mShaderEditor;
         EGui.Controls.PropertyGrid.TtPropertyGrid mParamPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退旧流程时把mEditorHistory改为null即可
+        public bool EnableUndoRedo => EditorHistory != null;
+        public Editor.Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        Editor.Infrastructure.TtEditorHistory mEditorHistory = new Editor.Infrastructure.TtEditorHistory();
+        Editor.Infrastructure.TtEditorHistoryPanel mHistoryPanel = new Editor.Infrastructure.TtEditorHistoryPanel();
+        #endregion
+
 
         bool mDockInitialized = false;
         bool mLeftShow = true;
@@ -106,6 +119,7 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
             ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Left, 0.35f, ref leftId, ref rightId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Parameters", mDockKeyClass), leftId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("HLSLCode", mDockKeyClass), rightId);
 
             ImGuiAPI.DockBuilderFinish(id);
@@ -137,6 +151,10 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
 
             DrawParameters();
             DrawShaderCode();
+            if (mEditorHistory != null)
+            {
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+            }
         }
 
         protected unsafe void DrawToolBar()
@@ -146,6 +164,7 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
             {
                 CBufferParameter.SaveAssetTo(AssetName);
                 mShaderEditor.mCoreObject.SetText(CBufferParameter.HLSLCode ?? "");
+                mEditorHistory?.SetSavePoint();
             }
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Refresh", in btSize))
@@ -154,6 +173,10 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
                 CBufferParameter.UpdateMethodMeta();
                 mShaderEditor.mCoreObject.SetText(CBufferParameter.HLSLCode ?? "");
             }
+            ImGuiAPI.SameLine(0, -1);
+            // mEditorHistory为null时按钮/快捷键均为空操作
+            Editor.Infrastructure.EditorUndoUtils.DrawUndoRedoButtons(mEditorHistory);
+            Editor.Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
         }
 
         protected unsafe void DrawParameters()

@@ -104,13 +104,22 @@ namespace NxRHI
 				type = VK_DESCRIPTOR_TYPE_SAMPLER;
 				break;
 			case EShaderBindType::SBT_SRV:
-				if (binder->IsStructuredBuffer)
-					type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-				else
-					type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+				switch (binder->ResourceType)
+				{
+					case EShaderBindResourceType::SBRT_Buffer:
+						type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+						break;
+					case EShaderBindResourceType::SBRT_AccelerationStructure:
+						//TLAS binding, align with DX12 D3D12_SRV_DIMENSION_RAYTRACING_ACCELERATION_STRUCTURE
+						type = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+						break;
+					default:
+						type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+						break;
+				}
 				break;
 			case EShaderBindType::SBT_UAV:
-				if (binder->IsStructuredBuffer)
+				if (binder->ResourceType == EShaderBindResourceType::SBRT_Buffer)
 					type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 				else
 					type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;

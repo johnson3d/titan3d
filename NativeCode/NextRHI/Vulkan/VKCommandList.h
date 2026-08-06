@@ -138,6 +138,8 @@ namespace NxRHI
 		virtual void CopyBufferToTexture(ITexture* target, UINT subRes, IBuffer* src, const FSubResourceFootPrint* footprint) override;
 		virtual void CopyTextureToBuffer(IBuffer* target, const FSubResourceFootPrint* footprint, ITexture* src, UINT subRes) override;
 
+		virtual void WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters) override;
+
 		virtual void BeginEvent(const char* info, DWORD color = 0) override;
 		virtual void EndEvent() override;
 	public:
@@ -150,6 +152,7 @@ namespace NxRHI
 		std::vector<VkViewport>						mCurrentViewports;
 		std::vector<VkRect2D>						mCurrentScissorRects;
 
+		UINT						mViewInstanceMask = 0;
 		ECmdListState				mCmdListState = ECmdListState::None;
 	public:
 		inline VKGpuDevice* GetVKDevice()

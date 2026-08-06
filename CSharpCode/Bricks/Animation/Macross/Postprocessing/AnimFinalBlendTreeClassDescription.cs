@@ -22,7 +22,7 @@ namespace EngineNS.Animation.Macross.Postprocessing
     [OutlineElement_Leaf(typeof(TtOutlineElement_AnimFinalPoseOutput))]
     [Designable(typeof(TtLocalSpacePoseFinalBlendTree), "FinalBlendTree")]
     [Graph(typeof(TtGraph_BlendTree))]
-    public class TtAnimFinalBlendTreeClassDescription : TtBlendTreeClassDescription
+    public class TtAnimFinalBlendTreeClassDescription : TtBlendTreeClassDescription, IAnimMacrossClassDescription
     {
         [Rtti.Meta("")]
         [Category("Option")]

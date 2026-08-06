@@ -50,6 +50,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         {
             CoreSDK.DisposeObject(ref PreviewViewport);
             MaterialPropGrid.Target = null;
+            MaterialPropGrid.HistoryHost = null;
+            NodePropGrid.HistoryHost = null;
+            MaterialGraph.HistoryHost = null;
+            mEditorHistory?.Clear();
         }
         EGui.TtCodeEditor mShaderEditor = new EGui.TtCodeEditor();
         public EGui.TtCodeEditor ShaderEditor { get => mShaderEditor; }
@@ -222,6 +226,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             PreviewPropGrid.Target = PreviewViewport;
 
             GraphRenderer.SetGraph(MaterialGraph);
+            mEditorHistory?.Clear();
+            MaterialGraph.HistoryHost = mEditorHistory;
+            NodePropGrid.HistoryHost = mEditorHistory;
+            MaterialPropGrid.HistoryHost = mEditorHistory;
 
             TtEngine.Instance.TickableManager.AddTickable(this);
             return true;
@@ -267,6 +275,15 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public EGui.Controls.PropertyGrid.TtPropertyGrid MaterialPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public EGui.Controls.PropertyGrid.TtPropertyGrid PreviewPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public Editor.TtPreviewViewport PreviewViewport;
+
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退旧流程时把mEditorHistory改为null即可。
+        // 图结构操作(增删节点/连线/移动)由MaterialGraph.HistoryHost自动记录, 属性修改由PropertyGrid拦截
+        public bool EnableUndoRedo => EditorHistory != null;
+        public EngineNS.Editor.Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        EngineNS.Editor.Infrastructure.TtEditorHistory mEditorHistory = new EngineNS.Editor.Infrastructure.TtEditorHistory();
+        EngineNS.Editor.Infrastructure.TtEditorHistoryPanel mHistoryPanel = new EngineNS.Editor.Infrastructure.TtEditorHistoryPanel();
+        #endregion
         #region DrawUI
         protected ImGuiWindowClass mDockKeyClass;
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
@@ -311,6 +328,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             DrawNodeDetails();
             DrawMaterialDetails();
             DrawEditorDetails();
+            if (mEditorHistory != null)
+            {
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+            }
 
             DrawPreview();
         }
@@ -345,6 +366,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MaterialDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), rightUpId);
 
             ImGuiAPI.DockBuilderFinish(id);
@@ -356,6 +378,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 var noused = Save();
             }
+            ImGuiAPI.SameLine(0, -1);
+            // mEditorHistory为null时按钮/快捷键均为空操作
+            EngineNS.Editor.Infrastructure.EditorUndoUtils.DrawUndoRedoButtons(mEditorHistory);
+            EngineNS.Editor.Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Compile", in btSize))
             {
@@ -491,6 +517,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             Material.GraphXMLString = xmlText;
             
             Material.SaveAssetTo(Material.AssetName);
+            mEditorHistory?.SetSavePoint();
 
             if (await TtEngine.Instance.GfxDevice.MaterialManager.ReloadMaterial(Material.AssetName))
             {

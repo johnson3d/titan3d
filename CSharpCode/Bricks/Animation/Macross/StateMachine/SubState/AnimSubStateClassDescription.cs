@@ -21,7 +21,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.SubState
     [StateMachineContextMenu("AnimState", "AnimStateMachine\\AnimState", UDesignMacross.MacrossAnimEditorKeyword)]
     [OutlineElement_Leaf(typeof(TtOutlineElement_TimedSubState))]
     [GraphElement(typeof(TtGraphElement_AnimSubState))]
-    public class TtAnimSubStateClassDescription : TtTimedSubStateClassDescription
+    public class TtAnimSubStateClassDescription : TtTimedSubStateClassDescription, IAnimMacrossClassDescription
     {
         [Rtti.Meta("")]
         [Category("Option")]

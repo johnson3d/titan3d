@@ -15,6 +15,15 @@ namespace EngineNS.Bricks.PhysicsCore
 
         public TtPhyMaterial Material;
         public EGui.Controls.PropertyGrid.TtPropertyGrid MaterialPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退旧流程时把mEditorHistory改为null即可
+        public bool EnableUndoRedo => EditorHistory != null;
+        public Editor.Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        Editor.Infrastructure.TtEditorHistory mEditorHistory = new Editor.Infrastructure.TtEditorHistory();
+        Editor.Infrastructure.TtEditorHistoryPanel mHistoryPanel = new Editor.Infrastructure.TtEditorHistoryPanel();
+        #endregion
+
         ~TtPhyMaterialEditor()
         {
             Dispose();
@@ -23,6 +32,8 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             Material = null;
             MaterialPropGrid.Target = null;
+            MaterialPropGrid.HistoryHost = null;
+            mEditorHistory?.Clear();
         }
         public async Thread.Async.TtTask<bool> Initialize()
         {
@@ -43,6 +54,8 @@ namespace EngineNS.Bricks.PhysicsCore
                 return false;
 
             MaterialPropGrid.Target = Material;
+            mEditorHistory?.Clear();
+            MaterialPropGrid.HistoryHost = mEditorHistory;
             Visible = true;
             return true;
         }
@@ -70,6 +83,7 @@ namespace EngineNS.Bricks.PhysicsCore
             ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Left", mDockKeyClass), leftId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Right", mDockKeyClass), rightId);
             ImGuiAPI.DockBuilderFinish(id);
         }
@@ -101,6 +115,10 @@ namespace EngineNS.Bricks.PhysicsCore
 
             DrawLeft();
             DrawRight();
+            if (mEditorHistory != null)
+            {
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+            }
         }
         protected unsafe void DrawToolBar()
         {
@@ -109,12 +127,17 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 Material.SaveAssetTo(Material.AssetName);
                 var unused = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.ReloadMaterial(Material.AssetName);
+                mEditorHistory?.SetSavePoint();
             }
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Reload", in btSize))
             {
                 var unused = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.ReloadMaterial(Material.AssetName);
             }
+            ImGuiAPI.SameLine(0, -1);
+            // mEditorHistory为null时按钮/快捷键均为空操作
+            Editor.Infrastructure.EditorUndoUtils.DrawUndoRedoButtons(mEditorHistory);
+            Editor.Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
         }
         bool mLeftShow = true;
         protected unsafe void DrawLeft()

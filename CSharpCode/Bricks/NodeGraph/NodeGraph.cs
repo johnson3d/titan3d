@@ -81,6 +81,33 @@ namespace EngineNS.Bricks.NodeGraph
             }
             set { mEditor = value; }
         }
+        #region 统一Undo/Redo
+        // 统一Undo/Redo接入点: 宿主编辑器开门时把自己的历史栈挂到这里,
+        // 结构操作(增删节点/连线/移动)自动记录为命令; 为null时所有代码路径与旧行为完全一致。
+        // 子图未单独设置时回退到父图的历史栈(与Editor属性同构)。
+        EngineNS.Editor.Infrastructure.TtEditorHistory mHistoryHost;
+        [Browsable(false)]
+        public EngineNS.Editor.Infrastructure.TtEditorHistory HistoryHost
+        {
+            get
+            {
+                if (mHistoryHost == null && ParentGraph != null)
+                    return ParentGraph.HistoryHost;
+                return mHistoryHost;
+            }
+            set { mHistoryHost = value; }
+        }
+        // 连线删除命令: 命令回放时IsApplying=true, 内部调用的公开方法会自动走无记录路径
+        void RecordRemoveLinkCommand(PinOut oPin, PinIn iPin)
+        {
+            var history = HistoryHost;
+            if (history == null || history.IsApplying || oPin == null || iPin == null)
+                return;
+            history.PushCommand(new EngineNS.Editor.Infrastructure.TtDelegateCommand($"Break Link {oPin.HostNode?.Name}.{oPin.Name} -> {iPin.HostNode?.Name}.{iPin.Name}",
+                () => RemoveLink(oPin, iPin),
+                () => AddLink(oPin, iPin, true)));
+        }
+        #endregion
         [Rtti.Meta("")]
         [Browsable(false)]
         public RName AssetName { get; set; }
@@ -270,6 +297,21 @@ namespace EngineNS.Bricks.NodeGraph
             }
             if (CanLink(oPin, iPin))
             {
+                var history = HistoryHost;
+                if (history != null && history.IsApplying == false)
+                {
+                    // 新建连线可能隐式断开旧连线(非MultiLinks), 整体包为一条事务
+                    history.BeginTransaction($"Add Link {oPin.HostNode?.Name}.{oPin.Name} -> {iPin.HostNode?.Name}.{iPin.Name}");
+                    if (!iPin.MultiLinks)
+                        RemoveLink(iPin);
+                    if (!oPin.MultiLinks)
+                        RemoveLink(oPin);
+                    history.ExecuteCommand(new EngineNS.Editor.Infrastructure.TtDelegateCommand($"Add Link {oPin.HostNode?.Name}.{oPin.Name} -> {iPin.HostNode?.Name}.{iPin.Name}",
+                        () => AddLink(oPin, iPin, bCallLinked),
+                        () => RemoveLink(oPin, iPin)));
+                    history.EndTransaction();
+                    return;
+                }
                 if(!iPin.MultiLinks)
                     RemoveLink(iPin);
                 if (!oPin.MultiLinks)
@@ -298,6 +340,7 @@ namespace EngineNS.Bricks.NodeGraph
                 var linker = Linkers[i];
                 if (linker.InPin == pin || linker.OutPin == pin)
                 {
+                    RecordRemoveLinkCommand(linker.OutPin, linker.InPin);
                     linker.InPin.HostNode.OnRemoveLinker(linker);
                     linker.OutPin.HostNode.OnRemoveLinker(linker);
                     linker.InPin = null;
@@ -324,6 +367,7 @@ namespace EngineNS.Bricks.NodeGraph
         private void _RemoveLinker(int index)
         {
             var linker = Linkers[index];
+            RecordRemoveLinkCommand(linker.OutPin, linker.InPin);
             linker.InPin.HostNode.OnRemoveLinker(linker);
             linker.OutPin.HostNode.OnRemoveLinker(linker);
             Linkers.RemoveAt(index);
@@ -550,10 +594,37 @@ namespace EngineNS.Bricks.NodeGraph
                 }
             }
             Nodes.Add(node);
+            var history = HistoryHost;
+            if (history != null && history.IsApplying == false)
+            {
+                history.PushCommand(new EngineNS.Editor.Infrastructure.TtDelegateCommand($"Add Node {node.Name}",
+                    () => AddNode(node),
+                    () => RemoveNode(node)));
+            }
             return node;
         }
         public void RemoveNode(TtNodeBase node)
         {
+            var history = HistoryHost;
+            if (history != null && history.IsApplying == false)
+            {
+                // 级联断线逐条记录为子命令, 与节点移除合为一条事务;
+                // 命令Do回放时IsApplying=true, 递归调用自动走下方无记录路径(此时连线已被子命令断开)
+                history.BeginTransaction($"Remove Node {node.Name}");
+                foreach (var i in node.Inputs)
+                {
+                    RemoveLinkedIn(i);
+                }
+                foreach (var i in node.Outputs)
+                {
+                    RemoveLinkedOut(i);
+                }
+                history.ExecuteCommand(new EngineNS.Editor.Infrastructure.TtDelegateCommand($"Remove Node {node.Name}",
+                    () => RemoveNode(node),
+                    () => AddNode(node)));
+                history.EndTransaction();
+                return;
+            }
             node.OnRemoveNode();
             foreach (var i in node.Inputs)
             {
@@ -719,6 +790,7 @@ namespace EngineNS.Bricks.NodeGraph
             if (mCopyedNodes.Count <= 0)
                 return;
 
+            HistoryHost?.BeginTransaction("Paste Nodes");
             ClearSelected();
             mCopyedPins.Clear();
             var min = mCopyedNodes[0].Position;
@@ -772,14 +844,17 @@ namespace EngineNS.Bricks.NodeGraph
                 var inPin = mCopyedPins[linker.Value] as PinIn;
                 AddLink(outPin, inPin, true);
             }
+            HistoryHost?.EndTransaction();
         }
 
         public void DeleteSelectedNodes()
         {
+            HistoryHost?.BeginTransaction(SelectedNodes.Count == 1 ? $"Remove Node {SelectedNodes[0].Node.Name}" : $"Remove {SelectedNodes.Count} Nodes");
             foreach (var i in SelectedNodes)
             {
                 RemoveNode(i.Node);
             }
+            HistoryHost?.EndTransaction();
             ClearSelected();
         }
 
@@ -1043,9 +1118,11 @@ namespace EngineNS.Bricks.NodeGraph
                 if(node.IsHitTitle(PressPosition.X, PressPosition.Y))
                 {
                     mIsMovingSelNodes = true;
+                    mMoveRecord.Clear();
                     foreach (var i in SelectedNodes)
                     {
                         i.MoveOffset = PressPosition - i.Node.Position;
+                        mMoveRecord.Add((i.Node, i.Node.Position));
                     }
                 }
             }
@@ -1204,6 +1281,10 @@ namespace EngineNS.Bricks.NodeGraph
                 }
             }
             ButtonPress[(int)EMouseButton.Left] = false;
+            if (mIsMovingSelNodes)
+            {
+                RecordMoveCommand();
+            }
             mIsMovingSelNodes = false;
             mLastDragDirection = Vector2.Zero;
             mShakeTime = 0;
@@ -1425,6 +1506,7 @@ namespace EngineNS.Bricks.NodeGraph
                     CheckNodeIntersectLink(DragPosition);
                     if(CheckMouseShake())
                     {
+                        HistoryHost?.BeginTransaction("Shake Break Links");
                         if(SelectedNodes.Count == 1)
                         {
                             var node = SelectedNodes[0].Node;
@@ -1471,6 +1553,7 @@ namespace EngineNS.Bricks.NodeGraph
                                     }
                                     inLinkers[i].InPin?.HostNode.OnRemoveLinker(inLinkers[i]);
                                     inLinkers[i].OutPin?.HostNode.OnRemoveLinker(inLinkers[i]);
+                                    RecordRemoveLinkCommand(inLinkers[i].OutPin, inLinkers[i].InPin);
                                     inLinkers[i].InPin = null;
                                     inLinkers[i].OutPin = null;
                                     Linkers.Remove(inLinkers[i]);
@@ -1479,6 +1562,7 @@ namespace EngineNS.Bricks.NodeGraph
                                 {
                                     outLinkers[i].InPin?.HostNode.OnRemoveLinker(outLinkers[i]);
                                     outLinkers[i].OutPin?.HostNode.OnRemoveLinker(outLinkers[i]);
+                                    RecordRemoveLinkCommand(outLinkers[i].OutPin, outLinkers[i].InPin);
                                     outLinkers[i].InPin = null;
                                     outLinkers[i].OutPin = null;
                                     Linkers.Remove(outLinkers[i]);
@@ -1499,6 +1583,7 @@ namespace EngineNS.Bricks.NodeGraph
                                 }
                             }
                         }
+                        HistoryHost?.EndTransaction();
                     }
                 }
                 else
@@ -1535,6 +1620,30 @@ namespace EngineNS.Bricks.NodeGraph
         public TtPinLinker PreOrderLinker;
         public PinIn PreOrderPinIn;
         public PinOut PreOrderPinOut;
+        // 拖动开始时记录选中节点旧位置, 拖动结束封为一条可撤销的移动命令
+        readonly List<(TtNodeBase Node, Vector2 OldPos)> mMoveRecord = new List<(TtNodeBase, Vector2)>();
+        void RecordMoveCommand()
+        {
+            var history = HistoryHost;
+            if (history == null || history.IsApplying || mMoveRecord.Count == 0)
+            {
+                mMoveRecord.Clear();
+                return;
+            }
+            var moved = new List<(TtNodeBase Node, Vector2 OldPos, Vector2 NewPos)>();
+            foreach (var i in mMoveRecord)
+            {
+                // Shift拖拽复制时SelectedNodes已替换为副本, 副本由AddNode命令覆盖, 原节点未动不记录
+                if (i.Node.Position != i.OldPos)
+                    moved.Add((i.Node, i.OldPos, i.Node.Position));
+            }
+            mMoveRecord.Clear();
+            if (moved.Count == 0)
+                return;
+            history.PushCommand(new EngineNS.Editor.Infrastructure.TtDelegateCommand(moved.Count == 1 ? $"Move Node {moved[0].Node.Name}" : $"Move {moved.Count} Nodes",
+                () => { foreach (var m in moved) m.Node.Position = m.NewPos; },
+                () => { foreach (var m in moved) m.Node.Position = m.OldPos; }));
+        }
         void CheckNodeIntersectLink(in Vector2 dragPosition)
         {
             PreOrderLinker = null;

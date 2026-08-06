@@ -1940,11 +1940,11 @@ extern "C"
 		const float SINGULARITY_THRESHOLD = 0.4999995f;
 		if (value < -SINGULARITY_THRESHOLD)
 		{
-			ASSERT(false);
 			result.Yaw = (float)(Math::ATan2(YawY, YawX));
 
 			result.Pitch = -(Math::V3_PI * 0.5f);
-			result.Roll = -result.Yaw - (2.0f * Math::ATan2(Y, W));
+			// at pitch=-90 gimbal lock: q = s*(-cos(t), sin(t), sin(t), cos(t)), t=(Yaw+Roll)/2=atan2(Y,W)
+			result.Roll = -result.Yaw + (2.0f * Math::ATan2(Y, W));
 		}
 		else if (value > SINGULARITY_THRESHOLD)
 		{

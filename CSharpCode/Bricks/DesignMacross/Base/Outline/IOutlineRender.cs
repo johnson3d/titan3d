@@ -7,11 +7,13 @@ namespace EngineNS.DesignMacross.Base.Outline
     {
         public TtCommandHistory CommandHistory { get; set; }
         public TtEditorInteroperation EditorInteroperation { get; set; }
+        public RName DesignMacrossAssetName { get; set; }
     }
     public struct FOutlineElementRenderingContext
     {
         public TtCommandHistory CommandHistory { get; set; }
         public TtEditorInteroperation EditorInteroperation { get; set; }
+        public RName DesignMacrossAssetName { get; set; }
     }
 
     public interface IOutlineRender : IElementRender<FOutlineRenderingContext>

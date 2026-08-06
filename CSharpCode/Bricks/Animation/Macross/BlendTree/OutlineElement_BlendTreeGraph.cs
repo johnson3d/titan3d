@@ -40,7 +40,7 @@ namespace EngineNS.Animation.Macross.BlendTree
             {
                 if (treeNodeDoubleClicked)
                 {
-                    context.EditorInteroperation.GraphEditPanel.EditGraph(outlineElement_BlendTreeGraph.Description);
+                    context.EditorInteroperation.OpenGraph(outlineElement_BlendTreeGraph.Description, context);
                 }
                 else if (treeNodeIsItemClicked)
                 {

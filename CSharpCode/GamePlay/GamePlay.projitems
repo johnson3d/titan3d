@@ -9,9 +9,6 @@
     <Import_RootNamespace>EngineNS.GamePlay</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Action\Action.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Action\ActionRecorder.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Action\PropertyUtility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Axis.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Camera\ICameraControlNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Camera\Camera.cs" />

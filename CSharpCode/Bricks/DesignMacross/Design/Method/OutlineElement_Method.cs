@@ -1,4 +1,5 @@
-﻿using EngineNS.Bricks.CodeBuilder;
+﻿using EngineNS.Animation.Macross.BlendTree;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.DesignMacross.Base.Render;
@@ -42,7 +43,7 @@ namespace EngineNS.DesignMacross.Design
             {
                 if (treeNodeDoubleClicked)
                 {
-                    context.EditorInteroperation.GraphEditPanel.EditGraph(outlineElement_Method.Description);
+                    context.EditorInteroperation.OpenGraph(outlineElement_Method.Description, context);
                 }
                 else if (treeNodeIsItemClicked)
                 {
@@ -184,6 +185,7 @@ namespace EngineNS.DesignMacross.Design
                 var elementContext = new FOutlineElementRenderingContext();
                 elementContext.CommandHistory = context.CommandHistory;
                 elementContext.EditorInteroperation = context.EditorInteroperation;
+                elementContext.DesignMacrossAssetName = context.DesignMacrossAssetName;
                 var elements = elementsList.ConstructListElements();
                 foreach (var element in elements)
                 {

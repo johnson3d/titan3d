@@ -101,16 +101,7 @@ namespace EngineNS.Editor
             {
                 
             }
-            ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))
-            {
-
-            }
-            ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Redo", in btSize))
-            {
-
-            }
+            // 元数据只读查看器无编辑操作, 旧的空Undo/Redo死按钮已随统一Undo/Redo架构清理移除
         }
         public class TtMetaTree : Editor.TtTreeNodeDrawer
         {

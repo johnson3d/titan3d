@@ -309,6 +309,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 ShaderAsset.SaveAssetTo(AssetName);
             }
             ImGuiAPI.SameLine(0, -1);
+            // 统一Undo/Redo归口: 纯文本编辑器的撤销由TtCodeEditor原生托管(含Ctrl+Z),
+            // 不进统一TtEditorHistory栈(文本粒度命令成本过高), 按钮直接转发原生实现
             if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))
             {
                 mShaderEditor.mCoreObject.Undo();

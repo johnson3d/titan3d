@@ -409,11 +409,17 @@ namespace NxRHI
 		mDepthStencilState.front.passOp = StencilOp2VKStencilOp(desc.DepthStencil.FrontFace.StencilPassOp);
 		mDepthStencilState.front.depthFailOp = StencilOp2VKStencilOp(desc.DepthStencil.FrontFace.StencilDepthFailOp);
 		mDepthStencilState.front.compareOp = CompareOp2VKCompareOp(desc.DepthStencil.FrontFace.StencilFunc);
+		mDepthStencilState.front.compareMask = desc.DepthStencil.StencilReadMask;
+		mDepthStencilState.front.writeMask = desc.DepthStencil.StencilWriteMask;
+		mDepthStencilState.front.reference = desc.StencilRef;
 
 		mDepthStencilState.back.failOp = StencilOp2VKStencilOp(desc.DepthStencil.BackFace.StencilFailOp);
 		mDepthStencilState.back.passOp = StencilOp2VKStencilOp(desc.DepthStencil.BackFace.StencilPassOp);
 		mDepthStencilState.back.depthFailOp = StencilOp2VKStencilOp(desc.DepthStencil.BackFace.StencilDepthFailOp);
 		mDepthStencilState.back.compareOp = CompareOp2VKCompareOp(desc.DepthStencil.BackFace.StencilFunc);
+		mDepthStencilState.back.compareMask = desc.DepthStencil.StencilReadMask;
+		mDepthStencilState.back.writeMask = desc.DepthStencil.StencilWriteMask;
+		mDepthStencilState.back.reference = desc.StencilRef;
 
 		return true;
 	}
@@ -450,17 +456,44 @@ namespace NxRHI
 		auto effect = ShaderEffect.UnsafeConvertTo<VKGraphicsEffect>();
 		auto pVKRenderPass = this->RenderPass.UnsafeConvertTo<VKRenderPass>();
 
-		VkPipelineShaderStageCreateInfo shaderStages[2]{};
-		shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-		shaderStages[0].module = ((VKShader*)effect->GetVS())->mShader;
-		shaderStages[0].pName = effect->mVertexShader->Desc->FunctionName.c_str();
-		shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		shaderStages[1].module = ((VKShader*)effect->GetPS())->mShader;
-		shaderStages[1].pName = effect->mPixelShader->Desc->FunctionName.c_str();
+		//align with DX12GpuDrawState::BuildState/BuildMeshShaderState
+		bool bMeshShader = (effect->GetMS() != nullptr && device->mCaps.IsSupportMeshShader);
+		VkPipelineShaderStageCreateInfo shaderStages[3]{};
+		UINT stageCount = 0;
+		if (bMeshShader)
+		{
+			if (effect->GetAS() != nullptr)
+			{
+				shaderStages[stageCount].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+				shaderStages[stageCount].stage = VK_SHADER_STAGE_TASK_BIT_EXT;
+				shaderStages[stageCount].module = ((VKShader*)effect->GetAS())->mShader;
+				shaderStages[stageCount].pName = effect->mAmplificationShader->Desc->FunctionName.c_str();
+				stageCount++;
+			}
+			shaderStages[stageCount].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			shaderStages[stageCount].stage = VK_SHADER_STAGE_MESH_BIT_EXT;
+			shaderStages[stageCount].module = ((VKShader*)effect->GetMS())->mShader;
+			shaderStages[stageCount].pName = effect->mMeshShader->Desc->FunctionName.c_str();
+			stageCount++;
+			shaderStages[stageCount].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			shaderStages[stageCount].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+			shaderStages[stageCount].module = ((VKShader*)effect->GetPS())->mShader;
+			shaderStages[stageCount].pName = effect->mPixelShader->Desc->FunctionName.c_str();
+			stageCount++;
+		}
+		else
+		{
+			shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
+			shaderStages[0].module = ((VKShader*)effect->GetVS())->mShader;
+			shaderStages[0].pName = effect->mVertexShader->Desc->FunctionName.c_str();
+			shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+			shaderStages[1].module = ((VKShader*)effect->GetPS())->mShader;
+			shaderStages[1].pName = effect->mPixelShader->Desc->FunctionName.c_str();
+			stageCount = 2;
+		}
 		
-
 		VkPipelineMultisampleStateCreateInfo multisampling{};
 		multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 		multisampling.sampleShadingEnable = VK_FALSE;
@@ -494,13 +527,15 @@ namespace NxRHI
 		//vkCmdSetViewport()
 		//vkCmdSetScissor()
 
-		VkDynamicState dynVPState[2];
+		VkDynamicState dynVPState[3];
 		dynVPState[0] = VK_DYNAMIC_STATE_VIEWPORT;
 		dynVPState[1] = VK_DYNAMIC_STATE_SCISSOR;
+		//align with DX12CommandList::SetGraphicsPipeline(OMSetStencilRef)
+		dynVPState[2] = VK_DYNAMIC_STATE_STENCIL_REFERENCE;
 
 		VkPipelineDynamicStateCreateInfo dynStateInfo{};
 		dynStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-		dynStateInfo.dynamicStateCount = 2;
+		dynStateInfo.dynamicStateCount = 3;
 		dynStateInfo.pDynamicStates = dynVPState;
 
 		std::vector<VkFormat> colorFormats;
@@ -514,15 +549,20 @@ namespace NxRHI
 		pipelineRenderingCreateInfo.colorAttachmentCount = (UINT)colorFormats.size();
 		pipelineRenderingCreateInfo.pColorAttachmentFormats = colorFormats.data();
 		pipelineRenderingCreateInfo.depthAttachmentFormat = Format2VKFormat(pVKRenderPass->Desc.AttachmentDepthStencil.Format);
+		//align with DX12 view instancing(CD3DX12_PIPELINE_STATE_STREAM_VIEW_INSTANCING): multiview mask
+		if (pVKRenderPass->Desc.ViewInstanceDesc.ViewInstanceCount > 0)
+		{
+			pipelineRenderingCreateInfo.viewMask = (1u << pVKRenderPass->Desc.ViewInstanceDesc.ViewInstanceCount) - 1;
+		}
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 		pipelineInfo.pNext = &pipelineRenderingCreateInfo;
 		pipelineInfo.flags = 0;
-		pipelineInfo.stageCount = 2;
+		pipelineInfo.stageCount = stageCount;
 		pipelineInfo.pStages = shaderStages;
 
-		pipelineInfo.pInputAssemblyState = &inputAssembly;
+		pipelineInfo.pInputAssemblyState = bMeshShader ? nullptr : &inputAssembly;
 		pipelineInfo.pViewportState = &viewportState;
 		pipelineInfo.pMultisampleState = &multisampling;
 		pipelineInfo.pDynamicState = &dynStateInfo;
@@ -547,7 +587,7 @@ namespace NxRHI
 		bldState.attachmentCount = RenderPass->Desc.NumOfMRT;
 		pipelineInfo.pColorBlendState = &bldState;
 
-		pipelineInfo.pVertexInputState = &effect->mInputLayout.UnsafeConvertTo<VKInputLayout>()->mInfo;
+		pipelineInfo.pVertexInputState = bMeshShader ? nullptr : &effect->mInputLayout.UnsafeConvertTo<VKInputLayout>()->mInfo;
 
 		pipelineInfo.layout = effect->mPipelineLayout;
 		pipelineInfo.renderPass = VK_NULL_HANDLE;// this->RenderPass.UnsafeConvertTo<VKRenderPass>()->mRenderPass;

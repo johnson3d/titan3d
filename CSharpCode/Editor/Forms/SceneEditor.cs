@@ -326,6 +326,57 @@ namespace EngineNS.Editor.Forms
         public EGui.Controls.PropertyGrid.TtPropertyGrid NodeInspector = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public EGui.Controls.PropertyGrid.TtPropertyGrid ScenePropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public EGui.Controls.PropertyGrid.TtPropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退旧流程时把mEditorHistory改为null即可。
+        // 属性修改由PropertyGrid拦截; gizmo拖动由TtAxis.HistoryHost封事务; 节点增删走下方helper
+        public bool EnableUndoRedo => EditorHistory != null;
+        public Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        Infrastructure.TtEditorHistory mEditorHistory = new Infrastructure.TtEditorHistory();
+        Infrastructure.TtEditorHistoryPanel mHistoryPanel = new Infrastructure.TtEditorHistoryPanel();
+
+        /// <summary>
+        /// 删除场景节点并记录可撤销命令; history为null时行为与直接DeleteFromScene一致。
+        /// undo时恢复旧Parent并从PendingDeleteNodeFiles移除待删文件, 避免Save时误删磁盘节点文件
+        /// </summary>
+        public static void DeleteNodeWithHistory(Infrastructure.TtEditorHistory history, GamePlay.Scene.TtNode node)
+        {
+            if (node == null)
+                return;
+            var oldParent = node.Parent;
+            var scene = node.GetNearestParentScene();
+            var fileSuffix = node.NodeId.ToString() + GamePlay.Scene.TtNode.NodeExt;
+            node.DeleteFromScene();
+            if (history == null || history.IsApplying)
+                return;
+            history.PushCommand(new Infrastructure.TtDelegateCommand($"Delete Node {node.NodeName}",
+                () => node.DeleteFromScene(),
+                () =>
+                {
+                    node.Parent = oldParent;
+                    scene?.PendingDeleteNodeFiles.RemoveAll((f) => f.EndsWith(fileSuffix));
+                }));
+        }
+        /// <summary>
+        /// 新建/克隆节点已挂到parent后调用, 记录可撤销命令
+        /// </summary>
+        public static void PushNodeCreateCommand(Infrastructure.TtEditorHistory history, GamePlay.Scene.TtNode node, string commandName)
+        {
+            if (history == null || history.IsApplying || node == null)
+                return;
+            var parent = node.Parent;
+            var scene = node.GetNearestParentScene();
+            var fileSuffix = node.NodeId.ToString() + GamePlay.Scene.TtNode.NodeExt;
+            history.PushCommand(new Infrastructure.TtDelegateCommand($"{commandName} {node.NodeName}",
+                () =>
+                {
+                    node.Parent = parent;
+                    scene?.PendingDeleteNodeFiles.RemoveAll((f) => f.EndsWith(fileSuffix));
+                },
+                () => node.DeleteFromScene()));
+        }
+        #endregion
+
         [Category("Option")]
         public Graphics.Pipeline.TtRenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
         [Category("Option")]
@@ -633,6 +684,14 @@ namespace EngineNS.Editor.Forms
             ScenePropGrid.Target = Scene;
             EditorPropGrid.Target = this;
 
+            mEditorHistory?.Clear();
+            NodeInspector.HistoryHost = mEditorHistory;
+            ScenePropGrid.HistoryHost = mEditorHistory;
+            if (PreviewViewport.Axis != null)
+                PreviewViewport.Axis.HistoryHost = mEditorHistory;
+            if (mWorldOutliner != null)
+                mWorldOutliner.HistoryHost = mEditorHistory;
+
             mWorldOutliner.Title = $"Outliner:{name}";
 
             TtEngine.Instance.TickableManager.AddTickable(this);
@@ -653,6 +712,13 @@ namespace EngineNS.Editor.Forms
         {
             //TtEngine.Instance.EventProcessorManager.UnregProcessor(PreviewViewport);
             NodeInspector.Target = null;
+            NodeInspector.HistoryHost = null;
+            ScenePropGrid.HistoryHost = null;
+            if (PreviewViewport?.Axis != null)
+                PreviewViewport.Axis.HistoryHost = null;
+            if (mWorldOutliner != null)
+                mWorldOutliner.HistoryHost = null;
+            mEditorHistory?.Clear();
             TtEngine.Instance.TickableManager.RemoveTickable(this);
             Dispose();
         }
@@ -685,6 +751,7 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("SceneDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Editor Settings", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Camera Settings", mDockKeyClass), rightUpId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Outliner", mDockKeyClass), rightUpId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), middleId);
@@ -736,10 +803,15 @@ namespace EngineNS.Editor.Forms
             DrawPreview();
             DrawContentBrowser();
             DrawPlaceItemPanel();
+            if (mEditorHistory != null)
+            {
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+            }
         }
         protected virtual void Save()
         {
             this.GetAsset().SaveAssetTo(AssetName);
+            mEditorHistory?.SetSavePoint();
         }
         protected virtual void Snapshot()
         {
@@ -792,15 +864,9 @@ namespace EngineNS.Editor.Forms
                 Reload();
             }
             ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))
-            {
-
-            }
-            ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Redo", in btSize))
-            {
-
-            }
+            // mEditorHistory为null时按钮/快捷键均为空操作, 与旧行为一致
+            Infrastructure.EditorUndoUtils.DrawUndoRedoButtons(mEditorHistory);
+            Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
             //ImGuiAPI.SameLine(0, -1);
             //if (EGui.UIProxy.CustomButton.ToolButton("Test", in btSize))
             //{
@@ -1302,6 +1368,7 @@ namespace EngineNS.Editor.Forms
 
             // 放置在相机前方
             newNode.Placement.Position = CalcPlacePosition();
+            PushNodeCreateCommand(mEditorHistory, newNode, "Add Node");
         }
 
         public void OnEvent(in Bricks.Input.Event e)

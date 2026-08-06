@@ -37,10 +37,41 @@ namespace VFX_Memory
 		va_list pArgs;
 		va_start(pArgs, lpszFormat);
 
-		char Tmp[2048];
-		vsnprintf(Tmp, 1024, lpszFormat, pArgs);
+		const int c_nTmpSize = 2048;
+		thread_local static char Tmp[c_nTmpSize];
+		vsnprintf(Tmp, c_nTmpSize, lpszFormat, pArgs);
 		VFX_LTRACE(ELTT_Memory, "%s\n", Tmp);
 		va_end(pArgs);
+	}
+
+	// Dump/Check 是诊断路径，本身绝对不能崩。
+	// cookie 里的 file/debuginfo 可能已经失效(块头被踩坏、或记录字符串的模块已卸载)，
+	// 直接丢给 %s 会在 vsnprintf 内部 strlen 时触发访问违例，所以打印前先做可读性探测。
+	static const char* SafeTraceStr(const char* str, const char* def = "<bad string>")
+	{
+		if (str == nullptr)
+			return def;
+#if defined(PLATFORM_WIN)
+		const size_t c_uMaxTraceStrLen = 1024;
+		MEMORY_BASIC_INFORMATION mbi;
+		if (VirtualQuery((LPCVOID)str, &mbi, sizeof(mbi)) == 0)
+			return def;
+		if (mbi.State != MEM_COMMIT)
+			return def;
+		if (mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD))
+			return def;
+		const DWORD readable = PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY
+			| PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY;
+		if ((mbi.Protect & readable) == 0)
+			return def;
+		// 只能保证本提交区间内可读，字符串必须在区间内结束，否则可能读进未映射页
+		size_t maxLen = (size_t)(((INT_PTR)mbi.BaseAddress + (INT_PTR)mbi.RegionSize) - (INT_PTR)str);
+		if (maxLen > c_uMaxTraceStrLen)
+			maxLen = c_uMaxTraceStrLen;
+		if (memchr(str, 0, maxLen) == nullptr)
+			return def;
+#endif
+		return str;
 	}
 
 	#ifdef WIN64
@@ -206,11 +237,11 @@ namespace VFX_Memory
 		if(TestTailDCCC(pdccc)==false)
 		{
 			if(file)
-				__MemoryTrace("%s(%d) : Free Verify pointer(0x%p) failed!\n",file, (int)line,memory);
-			if(IsBadReadPtr(pcook->file,4) == 0)
-				__MemoryTrace("%s(%d) : Free Verify pointer(0x%p) failed! Alloc ID : %d\n",pcook->file, (int)pcook->line,memory,pcook->id);
+				__MemoryTrace("%s(%d) : Free Verify pointer(0x%p) failed!\n",SafeTraceStr(file), (int)line,memory);
+			if(pcook->file != nullptr)
+				__MemoryTrace("%s(%d) : Free Verify pointer(0x%p) failed! Alloc ID : %d\n",SafeTraceStr(pcook->file), (int)pcook->line,memory,(int)pcook->id);
 			else
-				__MemoryTrace("Unkown position : Free Verify pointer(0x%p) failed! Alloc ID : %d\n",memory,pcook->id);
+				__MemoryTrace("Unkown position : Free Verify pointer(0x%p) failed! Alloc ID : %d\n",memory,(int)pcook->id);
 			return;
 		}
 		if (GOnMemFreeCallBack)
@@ -243,15 +274,15 @@ namespace VFX_Memory
 
 				if (check->file != nullptr)
 				{
-					__MemoryTrace("%s(%d) : Memory leak! There have %d bytes memory had not be delete. Alloc ID : %d Info : %s\n"
-						, check->file, (int)check->line, (int)check->size, (int)check->id, check->debuginfo);
+					__MemoryTrace("%s(%d) : Memory leak(0x%p)! There have %d bytes memory had not be delete. Alloc ID : %d Info : %s\n"
+						, SafeTraceStr(check->file), (int)check->line, check->data, (int)check->size, (int)check->id, SafeTraceStr(check->debuginfo, ""));
 				}
 				else
 				{
 					if (dumpUnknown)
 					{
-						__MemoryTrace("Unkown position : Memory leak! There have %d bytes memory had not be delete. Alloc ID : %d\n"
-							, (int)check->size, (int)check->id);
+						__MemoryTrace("Unkown position(0x%p) : Memory leak! There have %d bytes memory had not be delete. Alloc ID : %d\n"
+							, check->data, (int)check->size, (int)check->id);
 					}
 				}
 				
@@ -310,23 +341,23 @@ namespace VFX_Memory
 				//if(pcook->dccc != c_uMalloc0xCC && pcook->id != (size_t)-1)
 				if (pcook->TestDCCC(c_uMalloc0xCC)==false && pcook->id != (size_t)-1)
 				{
-					if(IsBadReadPtr(pcook->file,4) == 0)
+					if(pcook->file != nullptr)
 						__MemoryTrace("%s(%d) : Verify pointer(0x%p) failed!!! Alloc ID : %d\n",
-									pcook->file, (int)pcook->line,pcook->data,pcook->id);
+									SafeTraceStr(pcook->file), (int)pcook->line,pcook->data,(int)pcook->id);
 					else
 						__MemoryTrace("Unkown position : Verify pointer(0x%p) failed!!! Alloc ID : %d\n",
-									pcook->data,pcook->id);
+									pcook->data,(int)pcook->id);
 				}
 				size_t * pdccc = reinterpret_cast<size_t*>(((INT_PTR)pcook->data) + pcook->size);
 				//if(*pdccc != c_uMalloc0xCC && pcook->id != (size_t)-1)
 				if(TestTailDCCC(pdccc)==false && pcook->id != (size_t)-1)
 				{
-					if(IsBadReadPtr(pcook->file,4) == 0)
+					if(pcook->file != nullptr)
 						__MemoryTrace("%s(%d) : Check Verify pointer(0x%p) failed! Alloc ID : %d\n",
-									pcook->file, (int)pcook->line,pcook->data,pcook->id);
+									SafeTraceStr(pcook->file), (int)pcook->line,pcook->data,(int)pcook->id);
 					else
 						__MemoryTrace("Unkown position : Check Verify pointer(0x%p) failed! Alloc ID : %d\n",
-									pcook->data,pcook->id);
+									pcook->data,(int)pcook->id);
 				}
 
 				pcook = (_small_cookie *)((INT_PTR)pcook + newsize);
@@ -415,9 +446,9 @@ namespace VFX_Memory
 		if(pcook->dccc != c_uMalloc0xCC || pcook->cookie.TestDCCC(c_uMalloc0xCC)==false)
 		{
 			if(file)
-				__MemoryTrace(vT("%s(%d) : Free Verify pointer(0x%p) failed!!!\n"),file, (int)line,memory);
-			if(IsBadReadPtr(pcook->cookie.file,4) == 0)
-				__MemoryTrace(vT("%s(%d) : Free Verify pointer(0x%p) failed!!! Alloc ID : %d\n"),pcook->cookie.file, (int)pcook->cookie.line,memory, (int)pcook->cookie.id);
+				__MemoryTrace(vT("%s(%d) : Free Verify pointer(0x%p) failed!!!\n"),SafeTraceStr(file), (int)line,memory);
+			if(pcook->cookie.file != nullptr)
+				__MemoryTrace(vT("%s(%d) : Free Verify pointer(0x%p) failed!!! Alloc ID : %d\n"),SafeTraceStr(pcook->cookie.file), (int)pcook->cookie.line,memory, (int)pcook->cookie.id);
 			else
 				__MemoryTrace(vT("Unkown position : Free Verify pointer(0x%p) failed!!! Alloc ID : %d\n"),memory, (int)pcook->cookie.id);
 			return ;
@@ -426,11 +457,11 @@ namespace VFX_Memory
 		if(*pdccc != c_uMalloc0xCC)
 		{
 			if(file)
-				__MemoryTrace(vT("%s(%d) : Free Verify pointer(0x%p) failed!\n"),file, (int)line,memory);
-			if(IsBadReadPtr(pcook->cookie.file,4) == 0)
-				__MemoryTrace(vT("%s(%d) : Free Verify pointer(0x%p) failed! Alloc ID : %d\n"),pcook->cookie.file, (int)pcook->cookie.line,memory,pcook->cookie.id);
+				__MemoryTrace(vT("%s(%d) : Free Verify pointer(0x%p) failed!\n"),SafeTraceStr(file), (int)line,memory);
+			if(pcook->cookie.file != nullptr)
+				__MemoryTrace(vT("%s(%d) : Free Verify pointer(0x%p) failed! Alloc ID : %d\n"),SafeTraceStr(pcook->cookie.file), (int)pcook->cookie.line,memory,(int)pcook->cookie.id);
 			else
-				__MemoryTrace(vT("Unkown position : Free Verify pointer(0x%p) failed! Alloc ID : %d\n"),memory,pcook->cookie.id);
+				__MemoryTrace(vT("Unkown position : Free Verify pointer(0x%p) failed! Alloc ID : %d\n"),memory,(int)pcook->cookie.id);
 		}
 
 		if (GOnMemFreeCallBack)
@@ -464,8 +495,8 @@ namespace VFX_Memory
 			}
 			if (p->cookie.file != nullptr)
 			{	
-				__MemoryTrace(vT("%s(%d) : Memory leak! There have %d bytes(%d K) memory had not be delete. Alloc ID : %d Info : %s\n")
-					, p->cookie.file, (int)p->cookie.line, (int)p->cookie.size, (int)(p->cookie.size + 1023) / 1024, (int)p->cookie.id, p->cookie.debuginfo);
+				__MemoryTrace(vT("%s(%d) : Memory leak(0x%p)! There have %d bytes(%d K) memory had not be delete. Alloc ID : %d Info : %s\n")
+					, SafeTraceStr(p->cookie.file), (int)p->cookie.line, p->cookie.data, (int)p->cookie.size, (int)(p->cookie.size + 1023) / 1024, (int)p->cookie.id, SafeTraceStr(p->cookie.debuginfo, ""));
 			}
 			else
 			{
@@ -479,7 +510,7 @@ namespace VFX_Memory
 			{
 				if(IsBadReadPtr(p,p->cookie.size) == 0)
 					__MemoryTrace(vT("%s(%d) : Verify pointer(0x%p) failed!!! Alloc ID : %d\n")
-					,p->cookie.file,(int)p->cookie.line,p->cookie.data,(int)p->cookie.id);
+					,SafeTraceStr(p->cookie.file),(int)p->cookie.line,p->cookie.data,(int)p->cookie.id);
 				else
 					__MemoryTrace(vT("Unkown position : Verify pointer(0x%p) failed!!! Alloc ID : %d\n")
 					,p->cookie.data,(int)p->cookie.id);
@@ -489,7 +520,7 @@ namespace VFX_Memory
 			{
 				if(IsBadReadPtr(p,p->cookie.size) == 0)
 					__MemoryTrace(vT("%s(%d) : Verify pointer(0x%p) failed! Alloc ID : %d\n")
-					,p->cookie.file,(int)p->cookie.line,p->cookie.data,(int)p->cookie.id);
+					,SafeTraceStr(p->cookie.file),(int)p->cookie.line,p->cookie.data,(int)p->cookie.id);
 				else
 					__MemoryTrace(vT("Unkown position : Verify pointer(0x%p) failed! Alloc ID : %d\n")
 					,p->cookie.data,(int)p->cookie.id);
@@ -508,7 +539,7 @@ namespace VFX_Memory
 			{
 				if(IsBadReadPtr(p,p->cookie.size) == 0)
 					__MemoryTrace(vT("%s(%d) : Check Verify pointer(0x%p) failed!!! Alloc ID : %d\n")
-					,p->cookie.file,(int)p->cookie.line,p->cookie.data,(int)p->cookie.id);
+					,SafeTraceStr(p->cookie.file),(int)p->cookie.line,p->cookie.data,(int)p->cookie.id);
 				else
 					__MemoryTrace(vT("Unkown position : Check Verify pointer(0x%p) failed!!! Alloc ID : %d\n")
 					,p->cookie.data,(int)p->cookie.id);
@@ -518,10 +549,10 @@ namespace VFX_Memory
 			{
 				if(IsBadReadPtr(p,p->cookie.size) == 0)
 					__MemoryTrace(vT("%s(%d) : Check Verify pointer(0x%p) failed! Alloc ID : %d\n")
-					,p->cookie.file,(int)p->cookie.line,p->cookie.data,(int)p->cookie.id);
+					,SafeTraceStr(p->cookie.file),(int)p->cookie.line,p->cookie.data,(int)p->cookie.id);
 				else
 					__MemoryTrace(vT("Unkown position : Check Verify pointer(0x%p) failed! Alloc ID : %d\n")
-					,p->cookie.data,p->cookie.id);
+					,p->cookie.data,(int)p->cookie.id);
 			}
 			p = p->next;
 		}

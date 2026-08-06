@@ -2,15 +2,15 @@
 <Root Type="EngineNS.DesignMacross.TtDesignMacrossAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="3">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="7ccb2f3eeec2389d29e7f4cfef2a1dcb7969889a02cfd24cc7931e7086ea0e2c" />
+      <Hash Type="System.String@Unknown" Value="c44d2d80bff3c1460dcece5cf10ebd91ee4f06fafae1b0ae6d3cf4255ad43073" />
       <Path Type="System.String@Unknown" Value="dmc_grayanim.designmacross/designmacrossdescription.dat" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="91583989d4c764418102d1f584ed8f13466fa21dbf8924429f6a0e9173d3bd24" />
+      <Hash Type="System.String@Unknown" Value="87f094fc36ca4cd15a101fc2e1af284430d1bfac0e37dc5331a201c79b84ed69" />
       <Path Type="System.String@Unknown" Value="dmc_grayanim.designmacross/graphelementstyles.dat" />
     </e_1>
     <e_2 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="f496daaa61cc97a66e1603845a0f8bb6974413247d5c864706685dba5f4f9262" />
+      <Hash Type="System.String@Unknown" Value="1b8833e207e0b75ab734c42ab5323cee5bf7d45f6a88d11786eb91fabee2e715" />
       <Path Type="System.String@Unknown" Value="dmc_grayanim.designmacross/dmc_grayanim.cs" />
     </e_2>
   </AssetFiles>
@@ -26,6 +26,7 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
+  <PreviewMeshName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/animation/graychan_lod0.ums,7c682a4f-438f-40e9-8f02-f7545e7fd2f6" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
   <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="Default" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.DesignMacross.UDesignMacross@EngineCore" />

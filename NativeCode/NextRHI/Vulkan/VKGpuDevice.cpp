@@ -28,6 +28,8 @@ namespace NxRHI
 	ImplVKFunctionPtr(vkSetDebugUtilsObjectNameEXT);
 	ImplVKFunctionPtr(vkCmdBeginDebugUtilsLabelEXT);
 	ImplVKFunctionPtr(vkCmdEndDebugUtilsLabelEXT);
+	ImplVKFunctionPtr(vkQueueBeginDebugUtilsLabelEXT);
+	ImplVKFunctionPtr(vkQueueEndDebugUtilsLabelEXT);
 
 	ImplVKFunctionPtr(vkDebugMarkerSetObjectNameEXT);
 	ImplVKFunctionPtr(vkCmdDebugMarkerBeginEXT);
@@ -125,6 +127,9 @@ namespace NxRHI
 		}*/
 		if (FindExtension(VK_EXT_DEBUG_REPORT_EXTENSION_NAME))
 			extensionNames.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+		//debug utils is an instance extension(BeginEvent/EndEvent labels)
+		if (FindExtension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME))
+			extensionNames.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 		if (FindExtension(VK_KHR_SURFACE_EXTENSION_NAME))
 			extensionNames.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
 		if (FindExtension(VK_NV_RAY_TRACING_EXTENSION_NAME))
@@ -201,6 +206,8 @@ namespace NxRHI
 		GetVKFunctionPtr(vkSetDebugUtilsObjectNameEXT);
 		GetVKFunctionPtr(vkCmdBeginDebugUtilsLabelEXT);
 		GetVKFunctionPtr(vkCmdEndDebugUtilsLabelEXT);
+		GetVKFunctionPtr(vkQueueBeginDebugUtilsLabelEXT);
+		GetVKFunctionPtr(vkQueueEndDebugUtilsLabelEXT);
 
 		if (isDebugSafe())
 		{
@@ -347,7 +354,20 @@ namespace NxRHI
 		{
 			return FALSE;
 		}
+		auto device = (VKGpuDevice*)pUserData;
+		if (device != nullptr && device->IsMessageHidden(messageCode))
+		{
+			return FALSE;
+		}
 		VFX_LTRACE(ELTT_Graphics, "Vk[%s]: %s\r\n", Mode, pMessage);
+		if (device != nullptr && device->IsBreakOnID(messageCode))
+		{
+#if defined(PLATFORM_WIN)
+			__debugbreak();
+#else
+			ASSERT(false);
+#endif
+		}
 		return FALSE;
 	}
 	struct VkStructureHead
@@ -357,7 +377,64 @@ namespace NxRHI
 	};
 	void VKGpuDevice::SetBreakOnID(int id, bool open)
 	{
+		//align with DX12GpuDevice::SetBreakOnID(ID3D12InfoQueue::SetBreakOnID)
+		if (open)
+			mBreakOnIDs.insert(id);
+		else
+			mBreakOnIDs.erase(id);
+	}
+	void VKGpuDevice::ShowDeviceMessage(int id, bool show)
+	{
+		//align with DX12GpuDevice::ShowDeviceMessage(ID3D12InfoQueue message filter)
+		if (show)
+			mHiddenMessageIDs.erase(id);
+		else
+			mHiddenMessageIDs.insert(id);
+	}
+	void VKGpuDevice::OnDeviceRemoved()
+	{
+		//align with DX12GpuDevice::OnDeviceRemoved, only handle the first VK_ERROR_DEVICE_LOST
+		if (mDeviceRemovedHandled.exchange(true))
+			return;
 
+		VFX_LTRACE(ELTT_Graphics, "Vulkan: VK_ERROR_DEVICE_LOST\r\n");
+#if defined(HasModule_GpuDump)
+		//official Aftermath device lost flow: wait for the crash dump before notifying the application
+		GpuDump::NvAftermath::WaitDumpComplete();
+#endif
+		if (fn_vkGetDeviceFaultInfoEXT != nullptr)
+		{
+			VkDeviceFaultCountsEXT faultCounts{};
+			faultCounts.sType = VK_STRUCTURE_TYPE_DEVICE_FAULT_COUNTS_EXT;
+			if (fn_vkGetDeviceFaultInfoEXT(mDevice, &faultCounts, nullptr) == VK_SUCCESS)
+			{
+				std::vector<VkDeviceFaultAddressInfoEXT> addressInfos(faultCounts.addressInfoCount);
+				std::vector<VkDeviceFaultVendorInfoEXT> vendorInfos(faultCounts.vendorInfoCount);
+				faultCounts.vendorBinarySize = 0;
+				VkDeviceFaultInfoEXT faultInfo{};
+				faultInfo.sType = VK_STRUCTURE_TYPE_DEVICE_FAULT_INFO_EXT;
+				faultInfo.pAddressInfos = addressInfos.empty() ? nullptr : addressInfos.data();
+				faultInfo.pVendorInfos = vendorInfos.empty() ? nullptr : vendorInfos.data();
+				if (fn_vkGetDeviceFaultInfoEXT(mDevice, &faultCounts, &faultInfo) == VK_SUCCESS)
+				{
+					VFX_LTRACE(ELTT_Graphics, "Vulkan DeviceFault: %s\r\n", faultInfo.description);
+					for (UINT i = 0; i < faultCounts.addressInfoCount; i++)
+					{
+						VFX_LTRACE(ELTT_Graphics, "Vulkan DeviceFault Address[%u]: type=%d addr=0x%llx precision=0x%llx\r\n",
+							i, (int)addressInfos[i].addressType, (unsigned long long)addressInfos[i].reportedAddress, (unsigned long long)addressInfos[i].addressPrecision);
+					}
+					for (UINT i = 0; i < faultCounts.vendorInfoCount; i++)
+					{
+						VFX_LTRACE(ELTT_Graphics, "Vulkan DeviceFault Vendor[%u]: %s code=0x%llx data=0x%llx\r\n",
+							i, vendorInfos[i].description, (unsigned long long)vendorInfos[i].vendorFaultCode, (unsigned long long)vendorInfos[i].vendorFaultData);
+					}
+				}
+			}
+		}
+		if (CoreSDK::OnGpuDeviceRemoved != nullptr)
+		{
+			CoreSDK::OnGpuDeviceRemoved(this);
+		}
 	}
 	bool VKGpuDevice::InitDevice(IGpuSystem* pGpuSystem, const FGpuDeviceDesc* desc)
 	{
@@ -421,6 +498,8 @@ namespace NxRHI
 		mDeviceExtensions.resize(deviceExtCount);
 		vkEnumerateDeviceExtensionProperties(mPhysicalDevice, nullptr, &deviceExtCount, &mDeviceExtensions[0]);
 		std::vector<const char*>	extensions;
+		//align with DX12 DRED: device fault info on device lost
+		bool bDeviceFault = false;
 		{
 			/*for (auto& i : mDeviceExtensions)
 			{
@@ -464,6 +543,28 @@ namespace NxRHI
 				extensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
 			if (HasExtension(VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME))
 				extensions.push_back(VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME);
+			//align with DX12: DXR(CheckFeatureSupport D3D12_FEATURE_D3D12_OPTIONS5)
+			if (HasExtension(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME) && 
+				HasExtension(VK_KHR_RAY_QUERY_EXTENSION_NAME) && 
+				HasExtension(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME))
+			{
+				extensions.push_back(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME);
+				extensions.push_back(VK_KHR_RAY_QUERY_EXTENSION_NAME);
+				extensions.push_back(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
+				mVulkanExt.IsRayQuery = true;
+			}
+			//align with DX12: MeshShader(CheckFeatureSupport D3D12_FEATURE_D3D12_OPTIONS7)
+			if (HasExtension(VK_EXT_MESH_SHADER_EXTENSION_NAME))
+			{
+				extensions.push_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
+				mVulkanExt.IsMeshShader = true;
+			}
+			//align with DX12 DRED: device fault info on device lost
+			if (desc->IsGpuDred && HasExtension(VK_EXT_DEVICE_FAULT_EXTENSION_NAME))
+			{
+				extensions.push_back(VK_EXT_DEVICE_FAULT_EXTENSION_NAME);
+				bDeviceFault = true;
+			}
 			
 			//extensions.push_back(VK_GOOGLE_HLSL_FUNCTIONALITY1_EXTENSION_NAME);
 			/*extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
@@ -498,6 +599,23 @@ namespace NxRHI
 		VkPhysicalDeviceRobustness2FeaturesEXT robustness2Features = {};
 		robustness2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT;
 		robustness2Features.nullDescriptor = VK_TRUE;
+
+		VkPhysicalDeviceAccelerationStructureFeaturesKHR asFeatures = {};
+		asFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+		asFeatures.accelerationStructure = VK_TRUE;
+
+		VkPhysicalDeviceRayQueryFeaturesKHR rayQueryFeatures = {};
+		rayQueryFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR;
+		rayQueryFeatures.rayQuery = VK_TRUE;
+
+		VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures = {};
+		meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
+		meshShaderFeatures.meshShader = VK_TRUE;
+		meshShaderFeatures.taskShader = VK_TRUE;
+
+		VkPhysicalDeviceFaultFeaturesEXT deviceFaultFeatures = {};
+		deviceFaultFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FAULT_FEATURES_EXT;
+		deviceFaultFeatures.deviceFault = VK_TRUE;
 
 		VkPhysicalDeviceVulkan11Features devfeatures11{};
 		devfeatures11.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
@@ -548,6 +666,24 @@ namespace NxRHI
 
 		[[maybe_unused]]VkStructureHead* curDeviceCreateChainTail = nullptr;
 		curDeviceCreateChainTail = (VkStructureHead*)&dynScissorFeatures;
+		if (mVulkanExt.IsRayQuery)
+		{
+			//VK_KHR_acceleration_structure requires bufferDeviceAddress(core in 1.2)
+			devfeatures12.bufferDeviceAddress = VK_TRUE;
+			curDeviceCreateChainTail->pNext = &asFeatures;
+			asFeatures.pNext = &rayQueryFeatures;
+			curDeviceCreateChainTail = (VkStructureHead*)&rayQueryFeatures;
+		}
+		if (mVulkanExt.IsMeshShader)
+		{
+			curDeviceCreateChainTail->pNext = &meshShaderFeatures;
+			curDeviceCreateChainTail = (VkStructureHead*)&meshShaderFeatures;
+		}
+		if (bDeviceFault)
+		{
+			curDeviceCreateChainTail->pNext = &deviceFaultFeatures;
+			curDeviceCreateChainTail = (VkStructureHead*)&deviceFaultFeatures;
+		}
 		float queuePriority = 1.0f;
 		VkDeviceQueueCreateInfo queueCreateInfos[2]{};
 		{
@@ -637,6 +773,13 @@ namespace NxRHI
 			ASSERT(false);
 			return false;
 		}
+#if defined(HasModule_GpuDump)
+		if (desc->IsAftermath && desc->IsNVIDIA())
+		{
+			//align with DX12GpuDevice::InitDevice
+			GpuDump::NvAftermath::DeviceCreated(NxRHI::RHI_VK, this);
+		}
+#endif
 		QueryDevice();
 
 		VmaAllocatorCreateInfo allocatorInfo = {};
@@ -644,6 +787,10 @@ namespace NxRHI
 		allocatorInfo.physicalDevice = mPhysicalDevice;
 		allocatorInfo.device = mDevice;
 		allocatorInfo.instance = GetVkInstance();
+		if (mVulkanExt.IsRayQuery)
+		{
+			allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+		}
 		if (vmaCreateAllocator(&allocatorInfo, &mVmaAllocator) != VK_SUCCESS) 
 		{
 			std::cerr << "Failed to create VMA allocator!" << std::endl;
@@ -665,6 +812,35 @@ namespace NxRHI
 		
 		vkGetDeviceQueue(mDevice, graphicsFamily, 0, &mCmdQueue->mGraphicsQueue);
 		vkGetDeviceQueue(mDevice, presentFamily, 0, &mCmdQueue->mPresentQueue);
+
+		if (mVulkanExt.IsRayQuery)
+		{
+			fn_vkCreateAccelerationStructureKHR = (PFN_vkCreateAccelerationStructureKHR)vkGetDeviceProcAddr(mDevice, "vkCreateAccelerationStructureKHR");
+			fn_vkDestroyAccelerationStructureKHR = (PFN_vkDestroyAccelerationStructureKHR)vkGetDeviceProcAddr(mDevice, "vkDestroyAccelerationStructureKHR");
+			fn_vkGetAccelerationStructureBuildSizesKHR = (PFN_vkGetAccelerationStructureBuildSizesKHR)vkGetDeviceProcAddr(mDevice, "vkGetAccelerationStructureBuildSizesKHR");
+			fn_vkCmdBuildAccelerationStructuresKHR = (PFN_vkCmdBuildAccelerationStructuresKHR)vkGetDeviceProcAddr(mDevice, "vkCmdBuildAccelerationStructuresKHR");
+			fn_vkGetAccelerationStructureDeviceAddressKHR = (PFN_vkGetAccelerationStructureDeviceAddressKHR)vkGetDeviceProcAddr(mDevice, "vkGetAccelerationStructureDeviceAddressKHR");
+			fn_vkCmdCopyAccelerationStructureKHR = (PFN_vkCmdCopyAccelerationStructureKHR)vkGetDeviceProcAddr(mDevice, "vkCmdCopyAccelerationStructureKHR");
+			if (fn_vkCreateAccelerationStructureKHR == nullptr || fn_vkCmdBuildAccelerationStructuresKHR == nullptr)
+			{
+				mVulkanExt.IsRayQuery = false;
+				mCaps.IsSupportRayTracing = false;
+			}
+		}
+		if (mVulkanExt.IsMeshShader)
+		{
+			fn_vkCmdDrawMeshTasksEXT = (PFN_vkCmdDrawMeshTasksEXT)vkGetDeviceProcAddr(mDevice, "vkCmdDrawMeshTasksEXT");
+			fn_vkCmdDrawMeshTasksIndirectEXT = (PFN_vkCmdDrawMeshTasksIndirectEXT)vkGetDeviceProcAddr(mDevice, "vkCmdDrawMeshTasksIndirectEXT");
+			if (fn_vkCmdDrawMeshTasksEXT == nullptr)
+			{
+				mVulkanExt.IsMeshShader = false;
+				mCaps.IsSupportMeshShader = false;
+			}
+		}
+		if (bDeviceFault)
+		{
+			fn_vkGetDeviceFaultInfoEXT = (PFN_vkGetDeviceFaultInfoEXT)vkGetDeviceProcAddr(mDevice, "vkGetDeviceFaultInfoEXT");
+		}
 		
 		FFenceDesc fcDesc{};
 		mFrameFence = MakeWeakRef(this->CreateFence(&fcDesc, "Vulkan Frame Fence", __FILE__, __LINE__));
@@ -784,8 +960,18 @@ namespace NxRHI
 	}
 	void VKGpuDevice::QueryDevice()
 	{
-		mCaps.IsSupportRayTracing = HasExtension(VK_NV_RAY_TRACING_EXTENSION_NAME);
+		//align with DX12GpuDevice caps query
+		mCaps.IsSupportRayTracing = mVulkanExt.IsRayQuery;
+		mCaps.IsSupportMeshShader = mVulkanExt.IsMeshShader;
 		mCaps.IsSupportCSInRenderPass = mVulkanExt.IsDynamicRendering;
+
+		VkPhysicalDeviceMultiviewProperties multiviewProps = {};
+		multiviewProps.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_PROPERTIES;
+		VkPhysicalDeviceProperties2 props2 = {};
+		props2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+		props2.pNext = &multiviewProps;
+		vkGetPhysicalDeviceProperties2(mPhysicalDevice, &props2);
+		mCaps.MaxViewInstanceCount = multiviewProps.maxMultiviewViewCount;
 	}
 	IBuffer* VKGpuDevice::CreateBuffer(const FBufferDesc* desc, const char* file, int line)
 	{
@@ -916,15 +1102,39 @@ namespace NxRHI
 	}
 	IAccelerationStructure* VKGpuDevice::CreateAccelerationStructure(const FAccelerationStructureDesc* rpass, const char* file, int line)
 	{
-		return nullptr;
+		if (mVulkanExt.IsRayQuery == false)
+			return nullptr;
+		auto result = NewObjectWithInfo<VKAccelerationStructure>(file ? file : __FILE__, line);
+		if (result->Init(this, rpass) == false)
+		{
+			result->Release();
+			return nullptr;
+		}
+		return result;
 	}
 	IAStructureInstance* VKGpuDevice::CreateAccelerationStructureInstance(const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure, const char* file, int line)
 	{
-		return nullptr;
+		if (mVulkanExt.IsRayQuery == false)
+			return nullptr;
+		auto result = NewObjectWithInfo<VKAStructureInstance>(file ? file : __FILE__, line);
+		if (result->Init(this, desc, pAStructrure) == false)
+		{
+			result->Release();
+			return nullptr;
+		}
+		return result;
 	}
 	ITopAccelerationStructure* VKGpuDevice::CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc, const char* file, int line)
 	{
-		return nullptr;
+		if (mVulkanExt.IsRayQuery == false)
+			return nullptr;
+		auto result = NewObjectWithInfo<VKTopAccelerationStructure>(file ? file : __FILE__, line);
+		if (result->Init(this, desc) == false)
+		{
+			result->Release();
+			return nullptr;
+		}
+		return result;
 	}
 	IGpuPipeline* VKGpuDevice::CreatePipeline(const FGpuPipelineDesc* desc, const char* file, int line)
 	{
@@ -1166,15 +1376,56 @@ namespace NxRHI
 	{
 		return mFlushFence->WaitToExpect();
 	}
+	void VKCmdQueue::BeginEvent(const char* info, DWORD color)
+	{
+		//align with DX12CmdQueue::BeginEvent(PIXBeginEvent on queue)
+		if (VKGpuSystem::vkQueueBeginDebugUtilsLabelEXT != nullptr && mGraphicsQueue != nullptr)
+		{
+			VkDebugUtilsLabelEXT markerInfo{};
+			markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
+			markerInfo.pLabelName = info;
+			markerInfo.color[0] = ((color >> 16) & 0xFF) / 255.0f;
+			markerInfo.color[1] = ((color >> 8) & 0xFF) / 255.0f;
+			markerInfo.color[2] = (color & 0xFF) / 255.0f;
+			markerInfo.color[3] = ((color >> 24) & 0xFF) / 255.0f;
+			VAutoVSLLock locker(mQueueLocker);
+			VKGpuSystem::vkQueueBeginDebugUtilsLabelEXT(mGraphicsQueue, &markerInfo);
+		}
+	}
+	void VKCmdQueue::EndEvent(const char* info)
+	{
+		if (VKGpuSystem::vkQueueEndDebugUtilsLabelEXT != nullptr && mGraphicsQueue != nullptr)
+		{
+			VAutoVSLLock locker(mQueueLocker);
+			VKGpuSystem::vkQueueEndDebugUtilsLabelEXT(mGraphicsQueue);
+		}
+	}
 	VkResult VKCmdQueue::SafeQueueSubmit(uint32_t submitCount, const VkSubmitInfo* pSubmits, VkFence fence, EQueueType type)
 	{
-		VAutoVSLLock locker(mQueueLocker);
-		return vkQueueSubmit(mGraphicsQueue, submitCount, pSubmits, fence);
+		VkResult hr;
+		{
+			VAutoVSLLock locker(mQueueLocker);
+			hr = vkQueueSubmit(mGraphicsQueue, submitCount, pSubmits, fence);
+		}
+		if (hr == VK_ERROR_DEVICE_LOST)
+		{
+			//align with DX12(DXGI_ERROR_DEVICE_REMOVED at the submit points)
+			mDevice->OnDeviceRemoved();
+		}
+		return hr;
 	}
 	VkResult VKCmdQueue::SafeQueuePresentKHR(const VkPresentInfoKHR* pPresentInfo, EQueueType type)
 	{
-		VAutoVSLLock locker(mQueueLocker);
-		return vkQueuePresentKHR(mPresentQueue, pPresentInfo);
+		VkResult hr;
+		{
+			VAutoVSLLock locker(mQueueLocker);
+			hr = vkQueuePresentKHR(mPresentQueue, pPresentInfo);
+		}
+		if (hr == VK_ERROR_DEVICE_LOST)
+		{
+			mDevice->OnDeviceRemoved();
+		}
+		return hr;
 	}
 }
 

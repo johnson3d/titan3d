@@ -10,6 +10,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Controller\EditorCameraController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Infrastructure\Undo\TtEditorCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Infrastructure\Undo\TtEditorHistory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Infrastructure\Undo\TtEditorHistoryPanel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Infrastructure\Undo\EditorUndoUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Infrastructure\Favorites\TtEditorFavoritePaths.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Infrastructure\Favorites\TtPGFavoritePathAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\GpuProfiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\MemoryProfiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\AnimationBlendSpaceEditor.cs" />

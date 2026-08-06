@@ -186,10 +186,18 @@ namespace EngineNS.Editor.Forms
         public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
         public EGui.Controls.PropertyGrid.TtPropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public EGui.Controls.PropertyGrid.TtPropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退旧流程时把mEditorHistory改为null即可
+        public bool EnableUndoRedo => EditorHistory != null;
+        public Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        Infrastructure.TtEditorHistory mEditorHistory = new Infrastructure.TtEditorHistory();
+        Infrastructure.TtEditorHistoryPanel mHistoryPanel = new Infrastructure.TtEditorHistoryPanel();
+        #endregion
+
         EngineNS.GamePlay.Scene.TtMeshNode mCurrentMeshNode;
         //EngineNS.GamePlay.Scene.TtMeshNode mArrowMeshNode;
         int mLastPickedProxyCount = 0;
-        Graphics.Pipeline.IProxiable mLastPickedBoneOrShape = null;
         float mCurrentMeshRadius = 1.0f;
         public float PlaneScale = 5.0f;
         EngineNS.GamePlay.Scene.TtMeshNode PlaneMeshNode;
@@ -283,7 +291,9 @@ namespace EngineNS.Editor.Forms
             CoreSDK.DisposeObject(ref QuarkVisBufferViewport);
             CoreSDK.DisposeObject(ref PreviewViewport);
             MeshPropGrid.Target = null;
+            MeshPropGrid.HistoryHost = null;
             EditorPropGrid.Target = null;
+            mEditorHistory?.Clear();
         }
         public async Thread.Async.TtTask<bool> Initialize()
         {
@@ -513,6 +523,8 @@ namespace EngineNS.Editor.Forms
             await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
 
             MeshPropGrid.Target = Mesh;
+            mEditorHistory?.Clear();
+            MeshPropGrid.HistoryHost = mEditorHistory;
             EditorPropGrid.Target = this;
             TtEngine.Instance.TickableManager.AddTickable(this);
 
@@ -559,6 +571,10 @@ namespace EngineNS.Editor.Forms
             DrawMeshDetails();
             DrawSkeleton();
             DrawQuarkDAG();
+            if (mEditorHistory != null)
+            {
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+            }
         }
         bool mDockInitialized = false;
         protected void ResetDockspace(bool force = false)
@@ -592,6 +608,7 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightUpId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MeshDetails", mDockKeyClass), rightUpId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("BoneDetails", mDockKeyClass), rightUpId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), rightDownId);
 
             ImGuiAPI.DockBuilderFinish(id);
         }
@@ -601,6 +618,7 @@ namespace EngineNS.Editor.Forms
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 Mesh.SaveAssetTo(Mesh.AssetName);
+                mEditorHistory?.SetSavePoint();
                 //var unused = TtEngine.Instance.GfxDevice.MaterialInstanceManager.ReloadMaterialInstance(Mesh.AssetName);
 
                 //USnapshot.Save(Mesh.AssetName, Mesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
@@ -611,15 +629,9 @@ namespace EngineNS.Editor.Forms
 
             }
             ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))
-            {
-                
-            }
-            ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Redo", in btSize))
-            {
-                
-            }
+            // mEditorHistory为null时按钮/快捷键均为空操作, 与旧行为一致
+            Infrastructure.EditorUndoUtils.DrawUndoRedoButtons(mEditorHistory);
+            Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
             //ImGuiAPI.SameLine(0, -1);
             //if (EGui.UIProxy.CustomButton.ToolButton("BuildCluster", in btSize))
             //{
@@ -1671,46 +1683,7 @@ namespace EngineNS.Editor.Forms
             }
 
             // 检测 HitProxy 选中/取消 Shape 或骨骼（强制单选）
-            var policy = PreviewViewport.RenderPolicy as Graphics.Pipeline.TtRenderPolicy;
-            if (policy != null)
-            {
-                // 在 PickedProxies 中查找最新的 bone/shape（取最后一个，即最新点击的）
-                Graphics.Pipeline.IProxiable latestPicked = null;
-                foreach (var proxy in policy.PickedProxiableManager.PickedProxies)
-                {
-                    if (proxy is TtBoneHitProxy || proxy is Graphics.Mesh.PhysicsAsset.TtCollisionShape)
-                        latestPicked = proxy;
-                }
-
-                // 强制单选：清除 PickedProxies 中除 latestPicked 外的所有 bone/shape
-                for (int i = policy.PickedProxiableManager.PickedProxies.Count - 1; i >= 0; i--)
-                {
-                    var p = policy.PickedProxiableManager.PickedProxies[i];
-                    if (p == latestPicked)
-                        continue;
-                    if (p is TtBoneHitProxy || p is Graphics.Mesh.PhysicsAsset.TtCollisionShape)
-                        policy.PickedProxiableManager.Unselected(p);
-                }
-
-                // 选中对象发生变化时处理
-                if (latestPicked != mLastPickedBoneOrShape)
-                {
-                    mLastPickedBoneOrShape = latestPicked;
-
-                    if (latestPicked is TtBoneHitProxy pickedBone)
-                    {
-                        SkeletonTreePanel.TryHandleHitProxy(pickedBone);
-                    }
-                    else if (latestPicked is Graphics.Mesh.PhysicsAsset.TtCollisionShape pickedShape)
-                    {
-                        SkeletonTreePanel.SelectShape(pickedShape);
-                    }
-                    else
-                    {
-                        // 无选中 — 如有需要可清除
-                    }
-                }
-            }
+            SkeletonTreePanel.TickViewportPicking(PreviewViewport.RenderPolicy as Graphics.Pipeline.TtRenderPolicy);
 
             SkeletonTreePanel.TickShapeProxy();
         }

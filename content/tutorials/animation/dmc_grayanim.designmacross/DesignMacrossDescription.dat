@@ -105,7 +105,7 @@
               <e_0 Type="EngineNS.Bricks.Animation.Macross.StateMachine.SubState.TtAnimSubStateClassDescription@EngineCore">
                 <Attachments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.StateMachine.Macross.StateAttachment.TtTimedStateAttachmentClassDescription@EngineCore,&gt;@Unknown" Count="1">
                   <e_0 Type="EngineNS.Bricks.StateMachine.Macross.StateAttachment.TtClipPlayAttachmentClassDescription@EngineCore">
-                    <AnimationClip Type="EngineNS.RName@EngineCore" Value="Game,tutorials/animation/thirdpersonidle.animclip,f81f5e5e-d323-49a5-a0bc-53f9dc6f5004" />
+                    <AnimationClip Type="EngineNS.RName@EngineCore" Value="Game,tutorials/animation/thirdpersonrun.animclip,215714d9-1708-4aa2-983e-ecd9f4706370" />
                     <Id Type="System.Guid@Unknown" Value="ba2e0c27-c399-4fce-a338-1006b60c4959" />
                     <IsLoop Type="System.Boolean@Unknown" Value="True" />
                     <IsStruct Type="System.Boolean@Unknown" Value="False" />
@@ -199,10 +199,114 @@
             <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
           </e_0>
           <e_1 Type="EngineNS.Animation.Macross.BlendTree.TtBlendTree_KawaiiPhysicsClassDescription@EngineCore">
+            <ApplyComponentPhysicsSettings Type="System.Boolean@Unknown" Value="False" />
             <ChainSetups Type="System.Collections.Generic.List&lt;EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiChainSetup@EngineCore,&gt;@Unknown" Count="1">
-              <e_0 />
+              <e_0 Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiChainSetup@EngineCore">
+                <BoneLengthConstraintBlend Type="System.Single@Unknown" Value="1" />
+                <ConstrainBoneLength Type="System.Boolean@Unknown" Value="True" />
+                <DampingCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore">
+                  <KeysData Type="System.String@Unknown" Value="" />
+                  <ViewYMax Type="System.Single@Unknown" Value="0" />
+                  <ViewYMin Type="System.Single@Unknown" Value="0" />
+                </DampingCurve>
+                <DragCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore">
+                  <KeysData Type="System.String@Unknown" Value="" />
+                  <ViewYMax Type="System.Single@Unknown" Value="0" />
+                  <ViewYMin Type="System.Single@Unknown" Value="0" />
+                </DragCurve>
+                <EndBoneIndex Type="EngineNS.Animation.LimbIndexInSkeleton@EngineCore">
+                  <Index Type="System.Int32@Unknown" Value="24" />
+                  <Name Type="System.String@Unknown" Value="TwintailE_L" />
+                  <Skeleton Type="System.String@Unknown" Value="tutorials/animation/graychan" />
+                </EndBoneIndex>
+                <LimitAngleCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore">
+                  <KeysData Type="System.String@Unknown" Value="" />
+                  <ViewYMax Type="System.Single@Unknown" Value="0" />
+                  <ViewYMin Type="System.Single@Unknown" Value="0" />
+                </LimitAngleCurve>
+                <LODThreshold Type="System.Int32@Unknown" Value="-1" />
+                <Name Type="System.String@Unknown" Value="Twintail_L" />
+                <PhysicsCurveMode Type="EngineNS.Bricks.Animation.KawaiiPhysics.EKawaiiCurveEvalMode@EngineCore" Value="LengthRate" />
+                <PhysicsSettings Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiPhySettings@EngineCore">
+                  <Damping Type="System.Single@Unknown" Value="0.1" />
+                  <DragCoefficient Type="System.Single@Unknown" Value="0" />
+                  <LimitAngle Type="System.Single@Unknown" Value="0" />
+                  <MaxFrameDisplacement Type="System.Single@Unknown" Value="0" />
+                  <Radius Type="System.Single@Unknown" Value="3" />
+                  <Stiffness Type="System.Single@Unknown" Value="0.1" />
+                  <WindCoefficient Type="System.Single@Unknown" Value="1" />
+                  <WorldDampingLocation Type="System.Single@Unknown" Value="0.8" />
+                  <WorldDampingRotation Type="System.Single@Unknown" Value="0.8" />
+                </PhysicsSettings>
+                <PhysicsSettingsRandom Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiPhySettings@EngineCore">
+                  <Damping Type="System.Single@Unknown" Value="0" />
+                  <DragCoefficient Type="System.Single@Unknown" Value="0" />
+                  <LimitAngle Type="System.Single@Unknown" Value="0" />
+                  <MaxFrameDisplacement Type="System.Single@Unknown" Value="0" />
+                  <Radius Type="System.Single@Unknown" Value="0" />
+                  <Stiffness Type="System.Single@Unknown" Value="0" />
+                  <WindCoefficient Type="System.Single@Unknown" Value="0" />
+                  <WorldDampingLocation Type="System.Single@Unknown" Value="0" />
+                  <WorldDampingRotation Type="System.Single@Unknown" Value="0" />
+                </PhysicsSettingsRandom>
+                <RadiusCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore">
+                  <KeysData Type="System.String@Unknown" Value="" />
+                  <ViewYMax Type="System.Single@Unknown" Value="0" />
+                  <ViewYMin Type="System.Single@Unknown" Value="0" />
+                </RadiusCurve>
+                <RootBoneIndex Type="EngineNS.Animation.LimbIndexInSkeleton@EngineCore">
+                  <Index Type="System.Int32@Unknown" Value="20" />
+                  <Name Type="System.String@Unknown" Value="TwintailA_L" />
+                  <Skeleton Type="System.String@Unknown" Value="tutorials/animation/graychan" />
+                </RootBoneIndex>
+                <RootCollision Type="System.Boolean@Unknown" Value="False" />
+                <StiffnessCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore">
+                  <KeysData Type="System.String@Unknown" Value="" />
+                  <ViewYMax Type="System.Single@Unknown" Value="0" />
+                  <ViewYMin Type="System.Single@Unknown" Value="0" />
+                </StiffnessCurve>
+                <TailBoneAxis Type="EngineNS.Bricks.Animation.KawaiiPhysics.EKawaiiTailBoneAxis@EngineCore" Value="X_Positive" />
+                <TailBoneLength Type="System.Single@Unknown" Value="0.1" />
+                <WindCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore">
+                  <KeysData Type="System.String@Unknown" Value="" />
+                  <ViewYMax Type="System.Single@Unknown" Value="0" />
+                  <ViewYMin Type="System.Single@Unknown" Value="0" />
+                </WindCurve>
+                <WorldDampingLocationCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore">
+                  <KeysData Type="System.String@Unknown" Value="" />
+                  <ViewYMax Type="System.Single@Unknown" Value="0" />
+                  <ViewYMin Type="System.Single@Unknown" Value="0" />
+                </WorldDampingLocationCurve>
+                <WorldDampingRotationCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore">
+                  <KeysData Type="System.String@Unknown" Value="" />
+                  <ViewYMax Type="System.Single@Unknown" Value="0" />
+                  <ViewYMin Type="System.Single@Unknown" Value="0" />
+                </WorldDampingRotationCurve>
+              </e_0>
             </ChainSetups>
             <ClothSetups Type="System.Collections.Generic.List&lt;EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiClothSetup@EngineCore,&gt;@Unknown" Count="0" />
+            <ComponentPhysicsSettings Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiPhySettings@EngineCore">
+              <Damping Type="System.Single@Unknown" Value="0.1" />
+              <DragCoefficient Type="System.Single@Unknown" Value="0" />
+              <LimitAngle Type="System.Single@Unknown" Value="0" />
+              <MaxFrameDisplacement Type="System.Single@Unknown" Value="0" />
+              <Radius Type="System.Single@Unknown" Value="3" />
+              <Stiffness Type="System.Single@Unknown" Value="0.4" />
+              <WindCoefficient Type="System.Single@Unknown" Value="1" />
+              <WorldDampingLocation Type="System.Single@Unknown" Value="0.8" />
+              <WorldDampingRotation Type="System.Single@Unknown" Value="0.8" />
+            </ComponentPhysicsSettings>
+            <ComponentPhysicsSettingsRandom Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiPhySettings@EngineCore">
+              <Damping Type="System.Single@Unknown" Value="0" />
+              <DragCoefficient Type="System.Single@Unknown" Value="0" />
+              <LimitAngle Type="System.Single@Unknown" Value="0" />
+              <MaxFrameDisplacement Type="System.Single@Unknown" Value="0" />
+              <Radius Type="System.Single@Unknown" Value="0" />
+              <Stiffness Type="System.Single@Unknown" Value="0" />
+              <WindCoefficient Type="System.Single@Unknown" Value="0" />
+              <WorldDampingLocation Type="System.Single@Unknown" Value="0" />
+              <WorldDampingRotation Type="System.Single@Unknown" Value="0" />
+            </ComponentPhysicsSettingsRandom>
             <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="1">
               <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore">
                 <CanMutilLink Type="System.Boolean@Unknown" Value="False" />
@@ -213,6 +317,9 @@
               </e_0>
             </DataInPins>
             <DataOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <EnableComponentMovementPhysics Type="System.Boolean@Unknown" Value="True" />
+            <Gravity Type="EngineNS.Vector3@EngineCore" Value="0,-9.8,0" />
+            <GravityScale Type="System.Single@Unknown" Value="1" />
             <Id Type="System.Guid@Unknown" Value="82694f61-3584-41d5-8fe2-3850535afdc1" />
             <IsStruct Type="System.Boolean@Unknown" Value="False" />
             <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Count="0" />
@@ -247,13 +354,13 @@
         <PoseLines Type="System.Collections.Generic.List&lt;EngineNS.Animation.Macross.BlendTree.TtPoseLineDescription@EngineCore,&gt;@Unknown" Count="2">
           <e_0 Type="EngineNS.Animation.Macross.BlendTree.TtPoseLineDescription@EngineCore">
             <FromId Type="System.Guid@Unknown" Value="ee13c76b-1603-4f8a-a414-992005125d0d" />
-            <Id Type="System.Guid@Unknown" Value="82ef981c-c684-45bd-8afe-c13ee7c1ef1e" />
-            <Name Type="System.String@Unknown" Value="Exec_BlendTree_StateMachine_To_KawaiiPhysics" />
+            <Id Type="System.Guid@Unknown" Value="e9a020c0-013f-46b7-bbf5-3de2537ca8fc" />
+            <Name Type="System.String@Unknown" Value="Data_BlendTree_StateMachine_To_KawaiiPhysics" />
             <ToId Type="System.Guid@Unknown" Value="18468d1a-4131-426e-8226-feaad3c6fbaa" />
           </e_0>
           <e_1 Type="EngineNS.Animation.Macross.BlendTree.TtPoseLineDescription@EngineCore">
             <FromId Type="System.Guid@Unknown" Value="2e20aa87-8cea-427b-8344-123bb422cb80" />
-            <Id Type="System.Guid@Unknown" Value="223d673d-5731-40b8-a8bd-bee0935d36cb" />
+            <Id Type="System.Guid@Unknown" Value="ea39ce30-bb9a-40e1-910b-a214d8661ffe" />
             <Name Type="System.String@Unknown" Value="Data_KawaiiPhysics_To_PoseOutput" />
             <ToId Type="System.Guid@Unknown" Value="99279899-6c39-48db-ba45-687967dba201" />
           </e_1>
@@ -307,7 +414,27 @@
     <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
       <e_0 Value="EngineNS.DesignMacross.TtDesignMacrossBase" />
     </SupperClassNames>
-    <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+    <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Type="EngineNS.DesignMacross.Design.TtVariableDescription@EngineCore">
+        <Comment Type="EngineNS.Bricks.CodeBuilder.TtCommentStatement@EngineCore">
+          <CommentString Type="System.String@Unknown" Value="This is a Variable" />
+        </Comment>
+        <Id Type="System.Guid@Unknown" Value="84dc2546-5682-4aa6-bb92-1bedc8fccd8b" />
+        <InitValue Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
+          <ObjectStr Type="System.String@Unknown" Value="False" />
+          <Type Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+          <TypeIsTypeof Type="System.Boolean@Unknown" Value="True" />
+          <ValueStr Type="System.String@Unknown" Value="false" />
+        </InitValue>
+        <Name Type="System.String@Unknown" Value="New_Var_0" />
+        <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+          <IsEnum Type="System.Boolean@Unknown" Value="False" />
+          <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+          <TypeFullName Type="System.String@Unknown" Value="System.Boolean" />
+        </VariableType>
+        <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+      </e_0>
+    </Variables>
     <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
   </DesignedClassDescription>
   <DesignMacrossBaseClass Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.DesignMacross.TtDesignMacrossBase@EngineCore" />

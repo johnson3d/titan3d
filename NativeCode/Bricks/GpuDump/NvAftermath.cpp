@@ -4,6 +4,8 @@
 #include "../../Base/io/vfxfile.h"
 
 #include <filesystem>
+#include <chrono>
+#include <thread>
 
 #define VULKAN_HPP_NO_TO_STRING
 #include "NsightDumpVK/NsightAftermathGpuCrashTracker.h"
@@ -669,6 +671,27 @@ namespace GpuDump
 			default:
 				break;
 		}
+	}
+	void NvAftermath::WaitDumpComplete()
+	{
+		if (gNvGpuCrashTracker.IsInitialized() == false)
+			return;
+		//official Aftermath device lost flow: poll the crash dump status until finished before the app quits
+		GFSDK_Aftermath_CrashDump_Status status = GFSDK_Aftermath_CrashDump_Status_Unknown;
+		if (GFSDK_Aftermath_GetCrashDumpStatus(&status) != GFSDK_Aftermath_Result_Success)
+			return;
+		auto tStart = std::chrono::steady_clock::now();
+		auto tElapsed = std::chrono::milliseconds::zero();
+		while (status != GFSDK_Aftermath_CrashDump_Status_CollectingDataFailed &&
+			status != GFSDK_Aftermath_CrashDump_Status_Finished &&
+			status != GFSDK_Aftermath_CrashDump_Status_Unknown &&
+			tElapsed < std::chrono::seconds(5))
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+			GFSDK_Aftermath_GetCrashDumpStatus(&status);
+			tElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - tStart);
+		}
+		VFX_LTRACE(ELTT_Graphics, "NVAftermath WaitDumpComplete: status=%d elapsed=%dms\r\n", (int)status, (int)tElapsed.count());
 	}
 };
 

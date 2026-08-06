@@ -21,6 +21,15 @@ namespace EngineNS.Editor.Forms
         public TtBlendSpace2D BlendSpace;
         public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
         public EGui.Controls.PropertyGrid.TtPropertyGrid AnimationPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退旧流程时把mEditorHistory改为null即可
+        public bool EnableUndoRedo => EditorHistory != null;
+        public Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        Infrastructure.TtEditorHistory mEditorHistory = new Infrastructure.TtEditorHistory();
+        Infrastructure.TtEditorHistoryPanel mHistoryPanel = new Infrastructure.TtEditorHistoryPanel();
+        #endregion
+
         ~TtAnimationBlendSpaceEditor()
         {
             Dispose();
@@ -30,6 +39,8 @@ namespace EngineNS.Editor.Forms
             BlendSpace = null;
             CoreSDK.DisposeObject(ref PreviewViewport);
             AnimationPropGrid.Target = null;
+            AnimationPropGrid.HistoryHost = null;
+            mEditorHistory?.Clear();
         }
         #region IAssetEditor
         public RName AssetName { get; set; }
@@ -76,6 +87,7 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Left", mDockKeyClass), leftId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Right", mDockKeyClass), rightId);
             ImGuiAPI.DockBuilderFinish(id);
         }
@@ -110,6 +122,10 @@ namespace EngineNS.Editor.Forms
 
             DrawLeft();
             DrawRight();
+            if (mEditorHistory != null)
+            {
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+            }
         }
         protected unsafe void DrawToolBar()
         {
@@ -118,6 +134,7 @@ namespace EngineNS.Editor.Forms
             {
                 BlendSpace.SaveAssetTo(BlendSpace.AssetName);
                 var unused = TtEngine.Instance.GfxDevice.MaterialMeshManager.ReloadMaterialMesh(BlendSpace.AssetName);
+                mEditorHistory?.SetSavePoint();
 
                 //USnapshot.Save(AnimationClip.AssetName, AnimationClip.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
@@ -127,15 +144,9 @@ namespace EngineNS.Editor.Forms
 
             }
             ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))
-            {
-
-            }
-            ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Redo", in btSize))
-            {
-
-            }
+            // mEditorHistory为null时按钮/快捷键均为空操作, 与旧行为一致
+            Infrastructure.EditorUndoUtils.DrawUndoRedoButtons(mEditorHistory);
+            Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
         }
         bool mLeftShow = true;
         protected unsafe void DrawLeft()
@@ -207,6 +218,8 @@ namespace EngineNS.Editor.Forms
             AnimationPreview.Editor = this;
             AnimationPreview.Animation = BlendSpace;
             AnimationPropGrid.Target = AnimationPreview;
+            mEditorHistory?.Clear();
+            AnimationPropGrid.HistoryHost = mEditorHistory;
             TtEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }

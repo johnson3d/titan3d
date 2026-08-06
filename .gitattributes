@@ -1,0 +1,107 @@
+# ============================================================
+# TitanEngine 换行与文件类型规范
+#
+# 本文件优先级高于各开发者本地的 core.autocrlf 设置，
+# 用于保证所有平台/所有开发者拿到一致的换行风格。
+#
+# 仓库内统一以 LF 存储（现状已是 43487 : 5，无需反向迁移）。
+# ============================================================
+
+# 默认：由 Git 自动判定文本/二进制，文本一律以 LF 存入仓库
+* text=auto
+
+
+# ------------------------------------------------------------
+# 引擎生成的资产元数据
+# 引擎侧 C# 显式以 "\n" 写出，若工作区强制 CRLF，
+# 每次 cook 都会与 Git 互相改写、产生假差分
+# ------------------------------------------------------------
+*.metadata      text eol=lf
+*.ameta         text eol=lf
+typedesc.txt    text eol=lf
+
+
+# ------------------------------------------------------------
+# 脚本：换行风格错误会直接导致执行失败
+# ------------------------------------------------------------
+*.sh            text eol=lf
+*.bash          text eol=lf
+
+*.bat           text eol=crlf
+*.cmd           text eol=crlf
+*.ps1           text eol=crlf
+*.psm1          text eol=crlf
+
+
+# ------------------------------------------------------------
+# 二进制：关闭一切换行转换与 diff，
+# 防止 Git 的文本启发式判定误伤导致文件损坏
+# ------------------------------------------------------------
+
+# 图片 / 贴图
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.bmp           binary
+*.tga           binary
+*.gif           binary
+*.ico           binary
+*.psd           binary
+*.dds           binary
+*.ktx           binary
+*.astc          binary
+*.exr           binary
+*.hdr           binary
+
+# 模型 / 动画
+*.fbx           binary
+*.dae           binary
+*.gltf          binary
+*.glb           binary
+
+# 字体
+*.ttf           binary
+*.otf           binary
+*.ttc           binary
+
+# 音频 / 视频
+*.wav           binary
+*.mp3           binary
+*.ogg           binary
+*.flac          binary
+*.mp4           binary
+
+# 编译产物 / 库
+*.dll           binary
+*.exe           binary
+*.lib           binary
+*.pdb           binary
+*.so            binary
+*.a             binary
+*.dylib         binary
+*.exp           binary
+# .obj 兼指 MSVC 目标文件与 Wavefront 网格，
+# 本仓库现有 5 个 .obj 均为二进制
+*.obj           binary
+*.ilk           binary
+
+# 着色器编译产物
+*.spv           binary
+*.cso           binary
+
+# 压缩包 / 包
+*.zip           binary
+*.7z            binary
+*.rar           binary
+*.gz            binary
+*.nupkg         binary
+
+# 其它工具产物
+*.rdc           binary
+*.nvdbg         binary
+
+# 注意：*.dat 未整体标记为 binary。
+# 实测 81 个 .dat 中 77 个是文本（class_graph.dat / DesignMacrossDescription.dat /
+# GraphElementStyles.dat 等节点图数据均为文本），整体标 binary 会丢失 diff 能力。
+# 仅对确认为二进制的单个文件做例外：
+content/tutorials/helloword/hello.ui/editoronlydata.dat binary

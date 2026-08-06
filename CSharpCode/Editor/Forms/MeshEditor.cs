@@ -29,6 +29,14 @@ namespace EngineNS.Editor.Forms
         }
         public EGui.Controls.PropertyGrid.TtPropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public EGui.Controls.PropertyGrid.TtPropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退旧流程时把mEditorHistory改为null即可
+        public bool EnableUndoRedo => EditorHistory != null;
+        public Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        Infrastructure.TtEditorHistory mEditorHistory = new Infrastructure.TtEditorHistory();
+        Infrastructure.TtEditorHistoryPanel mHistoryPanel = new Infrastructure.TtEditorHistoryPanel();
+        #endregion
         [Category("Option")]
         public bool IsCastShadow
         {
@@ -135,7 +143,9 @@ namespace EngineNS.Editor.Forms
             CoreSDK.DisposeObject(ref PreviewViewport);
             CoreSDK.DisposeObject(ref sdfViewport);
             MeshPropGrid.Target = null;
+            MeshPropGrid.HistoryHost = null;
             EditorPropGrid.Target = null;
+            mEditorHistory?.Clear();
         }
         public async Thread.Async.TtTask<bool> Initialize()
         {
@@ -252,6 +262,8 @@ namespace EngineNS.Editor.Forms
             #endregion
 
             MeshPropGrid.Target = Mesh;
+            mEditorHistory?.Clear();
+            MeshPropGrid.HistoryHost = mEditorHistory;
             EditorPropGrid.Target = this;
             TtEngine.Instance.TickableManager.AddTickable(this);
             return true;
@@ -295,6 +307,10 @@ namespace EngineNS.Editor.Forms
             DrawEditorDetails();
             DrawMeshDetails();
             DrawSkeleton();
+            if (mEditorHistory != null)
+            {
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+            }
         }
         bool mDockInitialized = false;
         protected void ResetDockspace(bool force = false)
@@ -328,6 +344,7 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightUpId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MeshDetails", mDockKeyClass), rightUpId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("BoneDetails", mDockKeyClass), rightUpId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), rightDownId);
 
             ImGuiAPI.DockBuilderFinish(id);
         }
@@ -338,6 +355,7 @@ namespace EngineNS.Editor.Forms
             {
                 Mesh.SaveAssetTo(Mesh.AssetName);
                 var unused = TtEngine.Instance.GfxDevice.MaterialMeshManager.ReloadMaterialMesh(Mesh.AssetName);
+                mEditorHistory?.SetSavePoint();
 
                 //USnapshot.Save(Mesh.AssetName, Mesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
@@ -347,15 +365,9 @@ namespace EngineNS.Editor.Forms
                 Mesh.UpdateSubMeshes();
             }
             ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))
-            {
-
-            }
-            ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Redo", in btSize))
-            {
-
-            }
+            // mEditorHistory为null时按钮/快捷键均为空操作, 与旧行为一致
+            Infrastructure.EditorUndoUtils.DrawUndoRedoButtons(mEditorHistory);
+            Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.ToggleButton("N", ref mShowNormal, in btSize, 0))
             {
@@ -461,6 +473,8 @@ namespace EngineNS.Editor.Forms
         #region Tickable
         public override void TickLogic(float ellapse)
         {
+            // 骨骼/Shape 的 HitProxy 拾取收敛为单选, 并同步到骨骼树和 BoneDetails
+            SkeletonTreePanel.TickViewportPicking(PreviewViewport.RenderPolicy as Graphics.Pipeline.TtRenderPolicy);
             PreviewViewport.TickLogic(ellapse);
             sdfViewport.TickLogic(ellapse);
         }

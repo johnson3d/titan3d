@@ -1029,7 +1029,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 get => mValue;
                 set
                 {
-                    GamePlay.Action.UAction.OnChanged(HostMaterial, this, "Value", mValue, value);
                     mValue = value;
                     if (HostMaterial != null)
                         HostMaterial.SerialId++;

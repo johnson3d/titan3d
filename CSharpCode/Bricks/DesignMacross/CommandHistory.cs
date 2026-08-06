@@ -4,95 +4,55 @@
     {
 
     }
-    public interface IOperationCommand
-    {
-        public string Name { get; set; }
-
-        public void UndoOperation();
-        public void DoOperation();
-    }
-    public class TtOperationCommand : IOperationCommand
-    {
-        public TtOperationCommand(string commandName, 
-            IOperationCommandData doData, 
-            Action<IOperationCommandData> doAction, 
-            IOperationCommandData undoData, 
-            Action<IOperationCommandData> undoAction)
-        {
-            mName = commandName;
-            mDoData = doData;
-            mDoAction = doAction;
-            mUndoData = undoData;
-            mUndoAction = undoAction;
-        }
-
-        IOperationCommandData mDoData;
-        public IOperationCommandData DoData { get => mDoData; }
-        IOperationCommandData mUndoData;
-        public IOperationCommandData UndoData { get => mUndoData; }
-        Action<IOperationCommandData> mDoAction;
-        public Action<IOperationCommandData> Do { get => mDoAction; }
-        Action<IOperationCommandData> mUndoAction;
-        public Action<IOperationCommandData> Undo { get => mUndoAction; }
-        string mName;
-        public string Name 
-        { 
-            get => mName; 
-            set => mName = value;
-        }
-
-        public void UndoOperation()
-        {
-            Undo(UndoData);
-        }
-        public void DoOperation()
-        {
-            Do(DoData);
-        }
-    }
+    /// <summary>
+    /// 统一Undo/Redo架构适配器: 旧TtCommandHistory的API保持不变, 内部委托给编辑器级TtEditorHistory,
+    /// 使DesignMacross的命令与统一历史栈(工具栏按钮/Ctrl+Z快捷键/History面板)合流。
+    /// </summary>
     public class TtCommandHistory
     {
-        Stack<IOperationCommand> DoStack = new Stack<IOperationCommand>();
-        Stack<IOperationCommand> UndoStack = new Stack<IOperationCommand>();
+        public EngineNS.Editor.Infrastructure.TtEditorHistory History { get; }
+        public TtCommandHistory()
+        {
+            History = new EngineNS.Editor.Infrastructure.TtEditorHistory();
+        }
+        public TtCommandHistory(EngineNS.Editor.Infrastructure.TtEditorHistory history)
+        {
+            History = history ?? new EngineNS.Editor.Infrastructure.TtEditorHistory();
+        }
         public void Undo()
         {
-            if (UndoStack.Count == 0)
-                return;
-
-            var command = UndoStack.Pop();
-            command.UndoOperation();
-            DoStack.Push(command);
+            History.Undo();
         }
         public void Redo()
         {
-            if (DoStack.Count == 0)
-                return;
-
-            var command = DoStack.Pop();
-            command.DoOperation();
-            UndoStack.Push(command);
+            History.Redo();
         }
-        public void CreateAndExtuteCommand(string commandName,Action<IOperationCommandData> doAction, Action<IOperationCommandData> undoAction)
+        public void CreateAndExtuteCommand(string commandName, Action<IOperationCommandData> doAction, Action<IOperationCommandData> undoAction)
         {
-            var command = new TtOperationCommand(commandName, null, doAction, null, undoAction);
-            command.DoOperation();
-            UndoStack.Push(command);
+            History.ExecuteCommand(new EngineNS.Editor.Infrastructure.TtDelegateCommand(commandName,
+                () => doAction?.Invoke(null),
+                () => undoAction?.Invoke(null)));
         }
         public void CreateAndExtuteCommand(string commandName, IOperationCommandData doData, Action<IOperationCommandData> doAction, IOperationCommandData undoData, Action<IOperationCommandData> undoAction)
         {
-            var command = new TtOperationCommand(commandName, doData, doAction, undoData, undoAction);
-            command.DoOperation();
-            UndoStack.Push(command);
+            History.ExecuteCommand(new EngineNS.Editor.Infrastructure.TtDelegateCommand(commandName,
+                () => doAction?.Invoke(doData),
+                () => undoAction?.Invoke(undoData)));
         }
+        /// <summary>
+        /// 操作已在外部执行完毕, 仅入栈记录
+        /// </summary>
         public void CreateCommand(string commandName, Action<IOperationCommandData> doAction, Action<IOperationCommandData> undoAction)
         {
-            var command = new TtOperationCommand(commandName, null, doAction, null, undoAction);
-            UndoStack.Push(command);
+            History.PushCommand(new EngineNS.Editor.Infrastructure.TtDelegateCommand(commandName,
+                () => doAction?.Invoke(null),
+                () => undoAction?.Invoke(null)));
         }
         public void CreateCommand(string commandName, IOperationCommandData doData, Action<IOperationCommandData> doAction, IOperationCommandData undoData, Action<IOperationCommandData> undoAction)
         {
-            var command = new TtOperationCommand(commandName, doData, doAction, undoData, undoAction);
-            UndoStack.Push(command);
+            History.PushCommand(new EngineNS.Editor.Infrastructure.TtDelegateCommand(commandName,
+                () => doAction?.Invoke(doData),
+                () => undoAction?.Invoke(undoData)));
         }
     }
 }

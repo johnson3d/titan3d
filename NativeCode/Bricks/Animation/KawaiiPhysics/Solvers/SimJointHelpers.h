@@ -38,6 +38,15 @@ namespace KawaiiPhysics
 			const FKawaiiPhySettings& PhysicsSettingsRandom,
 			uint32_t RandomSeed);
 
+		// Per-particle physics settings with along-chain parameter curves.
+		// Base = MakeRandomizedPhysicsSettings(Setup); then each field is multiplied by its
+		// curve sampled at rate (Setup.CurveMode: index rate or NormalizedLength), clamped.
+		// Empty curve -> multiplier 1.0 (== uniform, matches ApplyPhysicsSettings behaviour).
+		void UpdatePhysicsSettings(
+			std::vector<FSimParticle>& Particles,
+			const FKawaiiChainSetup& Setup,
+			uint32_t RandomSeed);
+
 		// Compute rest lengths for distance constraints
 		void BuildVerticalConstraints(
 			const std::vector<FSimParticle>& Particles,

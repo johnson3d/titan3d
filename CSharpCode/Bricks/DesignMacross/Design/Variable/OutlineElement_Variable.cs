@@ -120,6 +120,7 @@ public class TtOutlineElementsListRender_Variables : IOutlineElementsListRender
             var elementContext = new FOutlineElementRenderingContext();
             elementContext.CommandHistory = context.CommandHistory;
             elementContext.EditorInteroperation = context.EditorInteroperation;
+            elementContext.DesignMacrossAssetName = context.DesignMacrossAssetName;
             var elements = elementsList.ConstructListElements();
             foreach (var element in elements)
             {

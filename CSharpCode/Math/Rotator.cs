@@ -139,7 +139,9 @@ namespace EngineNS
                     {
                         v.YawDegree = rv.X;
                         v.PitchDegree = rv.Y;
-                        v.Roll = rv.Z;
+                        // rv 三个分量都是角度值(上面用 RollDegree 读出), 这里必须写回 RollDegree;
+                        // 写 Roll 会把角度当弧度存, 导致任意一个分量拖动都会顺带把 Roll 改坏
+                        v.RollDegree = rv.Z;
                         newValue = v;
                         retValue = true;
                     }

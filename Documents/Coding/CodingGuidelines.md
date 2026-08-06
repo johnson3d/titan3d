@@ -1813,3 +1813,352 @@ mCBuffer.SetValue("LightVP", in lightVP);  // GPU 读到的是转置后的矩阵
 - `CSharpCode/Grapics/Pipeline/CCamera.cs` — `SetMatrix` 用法
 
 ---
+
+## 4. 编辑器 Undo/Redo 规范 (统一撤销重做架构)
+
+本章约束所有资产编辑器 (`IAssetEditor` 实现) 的撤销重做行为。引擎已经建立统一的
+命令式 Undo/Redo 基础设施, **所有新编辑器必须接入, 所有可撤销操作必须走命令记录**。
+旧的 `UAction / UActionRecorder / IActionRecordable` 机制已于统一架构落地时整体删除,
+**严禁复活**。
+
+### 4.0 架构总览 (先读这节再看细则)
+
+基础设施位于 `CSharpCode/Editor/Infrastructure/Undo/` (4 个文件, 新增文件需登记
+`Editor.projitems`):
+
+| 类 | 职责 |
+|---|---|
+| `TtEditorCommand` | 命令基类: `Name` / `Do()` / `Undo()` / `TryMerge()` (连续修改合并) / `Seal()` (封口后不再合并) |
+| `TtPropertyChangeCommand` | 属性修改命令: 宿主 + 成员名 + 新旧值, 反射写回; 由 PropertyGrid 写入漏斗自动创建 |
+| `TtDelegateCommand` | do/undo 委托包装, 编辑器专有操作 (增删节点/控件等) 的首选载体 |
+| `TtTransactionCommand` | 复合命令: `BeginTransaction..EndTransaction` 期间收集的子命令合为一条历史记录 |
+| `TtEditorHistory` | 每编辑器独立历史栈: `ExecuteCommand` / `PushCommand` / `Undo` / `Redo` / `JumpTo` / `SetSavePoint` / `IsApplying`; `MaxHistorySteps` 实例属性 (缺省 64) |
+| `TtEditorHistoryPanel` | 操作栈历史 dock 面板, 点击条目多步跳转 |
+| `EditorUndoUtils` | 工具栏 Undo/Redo 按钮 + `HandleUndoShortcut` (Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z) |
+
+三条自动记录通道 (业务代码通常只需"挂接", 不需要手写命令):
+
+1. **PropertyGrid 拦截**: `TtPropertyGrid.HistoryHost` 挂上历史栈后, 所有属性修改
+   自动记录 (PGRenderer 的 `SetValueWithHistory` 写入漏斗)。
+2. **NodeGraph 命令化**: `TtNodeGraph.HistoryHost` 挂上后, 增删节点/连线/移动/粘贴
+   自动记录 (含级联断线的嵌套事务)。
+3. **编辑器专有命令**: 场景节点增删 (`TtSceneEditor.DeleteNodeWithHistory` /
+   `PushNodeCreateCommand`)、gizmo 拖动 (`TtAxis.HistoryHost`)、UI 控件树增删等,
+   用 `TtDelegateCommand` 手工记录。
+
+### 4.1 控制门: 是否 new 出历史栈, 无任何全局配置
+
+**适用场景**: 所有实现 `Editor.IAssetEditor` 的编辑器类。
+
+**强制规则**:
+
+1. `IAssetEditor` 通过 **默认接口成员** 提供控制门, 缺省全关:
+   ```csharp
+   Infrastructure.TtEditorHistory EditorHistory { get => null; }
+   bool EnableUndoRedo { get => false; }
+   ```
+2. 编辑器开门 = 在类上声明**同签名公开成员** (隐式实现, **没有 override 关键字**):
+   ```csharp
+   public bool EnableUndoRedo => EditorHistory != null;
+   public Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+   Infrastructure.TtEditorHistory mEditorHistory = new Infrastructure.TtEditorHistory();
+   Infrastructure.TtEditorHistoryPanel mHistoryPanel = new Infrastructure.TtEditorHistoryPanel();
+   ```
+3. **回退方式 = 把 `mEditorHistory` 字段改为 null** (所有 `Clear()` 调用必须写成
+   `mEditorHistory?.Clear()` 防空)。**不允许**引入任何全局开关 / jscfg 配置项来控制
+   Undo 启用与否 —— 这是评审时被明确否决过的方案。
+4. 默认接口成员**只能经接口类型访问**: 管理器/工具代码取门状态必须通过
+   `IAssetEditor` 引用; 编辑器自身代码用 `this.EnableUndoRedo` 时必须在类上声明了
+   该成员, 否则用 `mEditorHistory != null` 判断。
+5. 历史栈容量按需调整用实例属性: `mEditorHistory.MaxHistorySteps = 128;`
+
+### 4.2 编辑器标准接线 6 步 (新编辑器照抄)
+
+```csharp
+// ① 字段 region: 见 §4.1 第 2 条
+
+// ② OpenEditor: 资产 PG 挂 HistoryHost (先 Clear 防重开残留);
+//    编辑器自身设置类 PG (EditorPropGrid 等非资产数据) 不挂
+mEditorHistory?.Clear();
+AssetPropGrid.HistoryHost = mEditorHistory;
+// 图编辑器另挂: graph.HistoryHost = mEditorHistory;  (在 SetGraph 之后)
+
+// ③ DrawToolBar: 替换 Undo/Redo 按钮 + 快捷键 (必须在编辑器主窗口 Begin/End 作用域内)
+Infrastructure.EditorUndoUtils.DrawUndoRedoButtons(mEditorHistory);
+Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
+
+// ④ OnDraw 尾部画历史面板 + ResetDockspace 登记 dock 窗口
+if (mEditorHistory != null)
+    mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+// ResetDockspace 内: DockBuilderDockWindow(GetDockWindowName("History", mDockKeyClass), 某分区Id);
+
+// ⑤ Save 成功后设保存点 (联动 IsDirtyFromHistory 脏标记)
+mEditorHistory?.SetSavePoint();
+
+// ⑥ OnCloseEditor / Dispose 清理
+AssetPropGrid.HistoryHost = null;
+mEditorHistory?.Clear();
+```
+
+**已有合规实现的参考位置** (按复杂度递增):
+
+- 属性型最小接线: `CSharpCode/Bricks/PhysicsCore/PhyMaterialEditor.cs`
+- 属性型 + 多 PG: `CSharpCode/Editor/Forms/MaterialInstanceEditor.cs` (首个试点)
+- 图编辑器: `CSharpCode/Bricks/CodeBuilder/ShaderNode/MaterialEditor.cs`
+- 多方法图共用编辑器级栈: `CSharpCode/Bricks/CodeBuilder/MacrossNode/MacrossEditor.cs`
+  (`OpenMethodGraph` 时逐图挂 `method.HistoryHost`, 图切换**不** Clear 历史)
+- 场景编辑器全家桶: `CSharpCode/Editor/Forms/SceneEditor.cs` (PG 拦截 + gizmo 事务 +
+  节点增删命令 + WorldOutliner.HistoryHost)
+- UI 编辑器: `CSharpCode/Bricks/UI/Editor/TtUIEditor.cs` (控件树增删记录 index 供
+  undo 插回原位)
+
+### 4.3 PropertyGrid 拦截通道的边界
+
+**强制规则**:
+
+1. `TtPropertyGrid.HistoryHost` 为 null 或 `history.IsApplying == true` 时, 写入路径
+   与旧行为**完全一致** —— 不挂就是不记录, 不会有额外开销。
+2. **只给"资产数据"的 PG 挂 HistoryHost**。编辑器自身设置 (预览转速、相机参数、
+   EditorPropGrid) 不属于资产修改, 不挂, 避免污染历史栈。
+3. 嵌套 struct 属性修改由 PGRenderer 级联写回机制保证**只在最外层引用类型宿主记录
+   一次**, 业务代码不需要也不应该额外处理。
+4. 拖滑条产生的连续修改靠 `TryMerge` + "无激活控件时封口" 自动合并为一条记录,
+   不要在业务代码里手工去抖。
+5. 列表/字典元素的增删 (ListEditor/DictionaryEditor 路径) **当前未接入拦截**,
+   如需支持请在 PGRenderer 漏斗处扩展, 并同步更新本节, 不要在编辑器里散写特例。
+
+### 4.4 NodeGraph / 编辑器专有命令的编写规范
+
+**强制规则**:
+
+1. **修改图结构必须走 `TtNodeGraph` 的公开方法** (`AddNode` / `RemoveNode` /
+   `AddLink` / `RemoveLink` / `DeleteSelectedNodes` / `Paste`), 它们已内置命令记录。
+   **禁止**直接操作 `graph.Nodes` / `graph.Linkers` 集合 —— 绕过后该操作不可撤销,
+   且 undo 其它命令时可能因图状态不一致而崩溃。
+2. **命令回放防重入统一靠 `IsApplying`**: 命令的 Do/Undo 闭包里调用图/场景的公开
+   方法是安全的 —— 回放期间 `history.IsApplying == true`, 埋点会自动走无记录路径。
+   自己新增埋点时必须遵守同一模式:
+   ```csharp
+   var history = HistoryHost;
+   if (history != null && history.IsApplying == false)
+   {
+       history.PushCommand(new TtDelegateCommand("Xxx", () => DoIt(), () => UndoIt()));
+   }
+   ```
+3. **复合操作必须包事务**: 多选删除、粘贴、克隆、gizmo 整次拖动等一个用户动作产生
+   多条子命令的场景, 用 `BeginTransaction(name) .. EndTransaction()` 包成历史面板里
+   的一条记录。`BeginTransaction` 支持嵌套计数 (删多选节点时外层事务包含每个
+   RemoveNode 自身的级联断线事务), 只有最外层 End 才入栈。
+4. **`ExecuteCommand` vs `PushCommand`**: 操作尚未执行 → `ExecuteCommand(cmd)`
+   (帮你调 Do 再入栈); 操作已经在外部执行完毕 → `PushCommand(cmd)` (只入栈,
+   **不要**再手动调一次 Do, 否则操作执行两遍)。
+5. **Do/Undo 必须严格对称**, 且闭包捕获的对象引用生命周期由命令持有者保证:
+   - 删除类命令的 Undo 要恢复**全部**副作用 (例: 场景节点删除的 undo 除了恢复
+     `Parent` 还必须从 `Scene.PendingDeleteNodeFiles` 移除待删文件, 否则 undo 后
+     Save 会把磁盘上的 .node 文件误删 —— 用 `TtSceneEditor.DeleteNodeWithHistory`
+     而不要自己写);
+   - 插入类命令要记录 index, undo/redo 插回原位 (参考 TtUIEditor 控件树命令)。
+6. **拖动类操作在"结束"时刻封一条命令**, 不要拖动过程中每帧记录:
+   - 图节点移动: `LeftPress` 记旧位置 → `LeftRelease` 封 `Move` 命令 (已内置);
+   - gizmo: `TtAxis.HistoryHost` 挂上后 `EndTransAxis` 自动把整次拖动封为一条
+     Transform 命令, 无位移不产生记录。
+
+**反例**:
+
+```csharp
+// ❌ 反例 1: 绕过公开方法直接改集合 (不可撤销 + 状态不一致)
+graph.Nodes.Remove(node);              // 应该: graph.RemoveNode(node)
+parentGraph.Linkers.RemoveAt(i);       // 应该: graph.RemoveLink(...)
+
+// ❌ 反例 2: PushCommand 之后又手动执行一遍 (操作跑两次)
+var cmd = new TtDelegateCommand("Add", () => list.Add(x), () => list.Remove(x));
+history.PushCommand(cmd);
+list.Add(x);                           // ← Push 前已 Add 过才对; 要么改用 ExecuteCommand
+
+// ❌ 反例 3: 多选删除不包事务 (历史面板出现 N 条零散记录, undo 要按 N 次)
+foreach (var n in selected) TtSceneEditor.DeleteNodeWithHistory(history, n);
+// 应该: history?.BeginTransaction("Delete N Nodes"); foreach(...); history?.EndTransaction();
+
+// ❌ 反例 4: 命令闭包里再判断/记录历史 (回放时重复入栈)
+history.PushCommand(new TtDelegateCommand("X",
+    () => { DoIt(); history.PushCommand(...); },   // ← Do 回放时 IsApplying=true,
+    () => UndoIt()));                              //   PushCommand 会被忽略, 但这种写法
+                                                   //   说明你没理解防重入模型, 禁止
+```
+
+### 4.5 禁止事项与文本编辑器例外
+
+1. **严禁复活旧机制**: `UAction` / `UActionRecorder` / `IActionRecordable` /
+   `UMaterialInstanceEditorRecorder` 已整体删除 (原 `CSharpCode/GamePlay/Action/`),
+   不要以任何形式重新引入"在属性 setter 里手工埋 OnChanged"的模式 —— 统一走
+   PropertyGrid 拦截或显式命令。
+2. **DesignMacross 的 `TtCommandHistory` 是适配器**
+   (`CSharpCode/Bricks/DesignMacross/CommandHistory.cs`), 内部委托编辑器级
+   `TtEditorHistory`。新代码可以继续用它的 `CreateAndExtuteCommand` API, 但**不要**
+   再造第二套独立命令栈 —— 一个编辑器只有一个历史栈。
+3. **纯文本编辑器 (TtCodeEditor) 例外**: ShaderAsset / ShadingEnv 等纯 HLSL 文本
+   编辑的撤销由 TtCodeEditor **原生托管** (含 Ctrl+Z), 按钮直接转发
+   `mShaderEditor.mCoreObject.Undo()/Redo()`, **不进** `TtEditorHistory`
+   (文本粒度命令成本过高, 收益低)。混合型编辑器 (如 MaterialEditor 的 TextEditor
+   面板) 同理: 图/属性走统一栈, 文本面板走原生。
+4. **只读查看器不放 Undo/Redo 按钮** (参考 MetaViewEditor 的清理), 不要为了
+   工具栏对齐摆两个死按钮。
+
+**自检清单** (新写/修改编辑器时过一遍):
+
+- [ ] 编辑器类上有 `EnableUndoRedo` / `EditorHistory` / `mEditorHistory` /
+      `mHistoryPanel` 四件套? 回退路径 (`mEditorHistory` 置 null) 下所有调用都
+      `?.` 防空?
+- [ ] 资产 PG 挂了 `HistoryHost`, 编辑器设置 PG **没**挂?
+- [ ] 图编辑器在 `SetGraph` 之后挂了 `graph.HistoryHost`?
+- [ ] 所有结构性修改走公开方法或显式命令, 没有裸改集合?
+- [ ] 一个用户动作 = 历史面板一条记录 (复合操作包了事务)?
+- [ ] Save 后调了 `SetSavePoint()`? 关闭编辑器时 `HistoryHost = null` + `Clear()`?
+- [ ] 实机验证: 改属性/拖滑条/结构操作 → Ctrl+Z / Ctrl+Y 对称还原, 历史面板跳转
+      正常, undo 后 Save 无副作用 (场景编辑器重点验证 .node 文件不被误删)?
+
+---
+
+## 5. 跨编辑器共享状态 (路径收藏夹)
+
+本章约束"在 A 编辑器里选中一个东西, 到 B 编辑器里引用它"这类需求。引擎已有统一机制
+(`CSharpCode/Editor/Infrastructure/Favorites/`: `TtEditorFavoritePaths` +
+`TtPGFavoritePathAttribute`), **接入步骤与代码模板见 `CodeLib.md` §13**, 本节只列强制约束。
+
+### 5.1 共享入口唯一, 不得再造全局状态
+
+**强制规则**:
+
+1. 跨编辑器传递的"选中 / 收藏 / 最近使用"路径数据**只能放 `TtEditorFavoritePaths`**。
+   不要在各编辑器里再写 static 字段 / 单例 / 往 `UIProxyManager` 塞业务数据
+   (`UIProxyManager` 只放 UI 代理对象, 例如 SearchBar)。
+2. **加入收藏夹的入口只能是 `TtPGFavoritePathAttribute` 在 Details 面板上的按钮**。
+   不得在资源树 / 视口 / 右键菜单里散落第二个"拷贝路径"入口 —— 这是评审时明确
+   定下的交互约束, 保证用户只需记住一个地方。
+3. 不得把机制改成"按类型强绑定"。底层键是 **channel 字符串**, 类型只是通过
+   `RegisterTypeChannel` 推导默认 channel 的便捷手段; 同一类型必须能分出多个用途通道。
+
+### 5.2 路径字符串里禁止编码 index / 运行时 id
+
+**适用场景**: 所有往收藏夹写入的路径, 以及消费端的解析代码。
+
+**强制规则**:
+
+1. 路径只能由"重开工程也稳定的名字"组成, 统一格式 `资产名:条目名`,
+   且必须在 `TtEditorFavoritePaths` 里**成对**提供 `MakeXxxPath` / `TryParseXxxPath`,
+   不得让业务代码自行拼接或拆分字符串。
+2. **绝不把骨骼 index / 节点 id / 运行时句柄编进路径**。骨骼 index 会随 FBX 重导入变化,
+   存了就会出现"选的是 A 骨骼, 重导入后指到 B 骨骼"这种难排查问题。
+3. 消费端必须**每次按名字到当前数据里重新解析**出 index / 引用, 解析失败时跳过
+   该条目而不是写入一个非法值 (参考 `AnimUtil.cs` 的 `TryResolveFavoritePath`)。
+4. 用这个格式前必须确认**同一容器内条目名唯一** (骨骼成立: `TtSkinSkeleton.HashDic`
+   以 NameHash 为键)。不唯一的域要改用层级路径, 并同步更新本节与 `CodeLib.md` §13.3。
+
+### 5.3 生命周期与持久化
+
+**强制规则**:
+
+1. 收藏夹是**会话级内存**, 关掉编辑器即清空。业务代码**不得假设条目跨重启仍存在**,
+   也不得把它当作资产数据的存储位置 (资产必须自己存完整引用)。
+2. 将来要持久化必须走 `[IO.TtConfig]` + `TtConfigManager` (参考 `CodeLib.md` §10),
+   **不得**在收藏夹里自己读写文件或往 `DynConfigData` 塞结构化数据。
+3. 每个 channel 有容量上限 (`Capacity`, 缺省 32), 不要把它当无限长的历史记录用。
+
+### 5.4 只读属性上必须关掉 Pick
+
+**强制规则**: 生产端的路径属性是 getter-only 时, attribute 必须写 `AllowPick = false`。
+PropertyGrid 对自定义编辑器返回 `true` 的行为是"去 SetValue", 只读属性上返回 `true`
+会直接报错。同理, 自己写新的 `TtPGCustomValueEditorAttribute` 时, `info.Readonly == true`
+的分支必须保证不会返回 `true`。
+
+**自检清单** (新接一个收藏夹通道时过一遍):
+
+- [ ] channel 常量集中定在 `TtEditorFavoritePaths` 里, 没有在业务代码里裸写字符串?
+- [ ] `MakeXxxPath` / `TryParseXxxPath` 成对提供, 且路径里没有 index / 运行时 id?
+- [ ] 生产端 `AllowPick = false`, 消费端 `AllowAdd = false` (各只开一面)?
+- [ ] 消费端解析失败时是"跳过该条目", 不会写出非法值?
+- [ ] 新增文件登记到 `.projitems`?
+- [ ] 实机验证: A 编辑器 `[+]` → B 编辑器下拉能看到并选中, 选完写回的值正确?
+
+---
+
+## 6. 引擎单位与坐标系约定 (米制 + Y-up)
+
+引擎的长度单位是 **米**, 坐标系是 **Y-up**。这是全局硬约定, 所有几何 / 物理 /
+光照数据都建立在它上面。违反的表现**不是崩溃也不是报错, 而是行为诡异但看着"能跑"**
+(见 §6.2 的真实案例), 编译器不会帮你查 —— 只能靠本章的规则和 review 拦住。
+
+### 6.0 事实锚点 (改任何带单位的常量前先看这里)
+
+| 锚点 | 值 | 位置 |
+|---|---|---|
+| 骨骼 mesh space | 人形角色脚 Y≈0.06, 头顶 Y≈1.47 (人高 ~1.5) | `content/tutorials/animation/graychan.skt` |
+| PhysX 主场景重力 | `new Vector3(0, -9.8f, 0)` | `CSharpCode/Bricks/PhysicsCore/PhyScene.cs` |
+| Kawaii 物理重力 | `v3dxVector3(0, -9.8f, 0)` | `NativeCode/Bricks/Animation/KawaiiPhysics/KawaiiPhySettings.h` |
+| 世界坐标 | `DVector3` (double), 进渲染前转本地坐标 | 见 §1.5 |
+| 碰撞体轴向 / 上方向 | `Vector3.UnitY` | — |
+| 导入期换算钩子 | `TtAssetImportOption_Mesh.UnitScale` | `CSharpCode/Bricks/AssetImpExp/AssetImporter.cs` 的 `MakeBoneDesc` |
+
+### 6.1 强制规则
+
+1. 新写的任何带长度 / 速度 / 加速度单位的常量, 一律用米 (m, m/s, m/s²)。物理与
+   光学公式直接用 SI 数值 (g=9.8, 声速 343, 光度学 lux=lm/m², 体积雾 extinction per
+   meter), **不要引入单位换算因子** —— 那是永久性的维护税。
+2. **从外部代码移植时必须逐个字面量换算**。重点是 UE 系插件 (UE 的 1 单位 = 1cm,
+   所有默认值都是厘米): 除以 100。换算后必须在类型头部或字段注释里写明
+   "原始单位 = cm, 已换算", 供下一个人对账 (参考 `KawaiiPhySettings.h` 顶部的
+   UNIT CONVENTION 块)。
+3. 单位是约定而非类型, 编译器不查。**带单位的常量禁止裸写在算法里**, 必须是命名
+   常量 / 可配置字段, 并在注释里注明单位。典型容易漏的一批: 重力、碰撞半径、
+   contact/rest offset、sleep 阈值、snap 网格、LOD 距离、near/far、shadow bias、
+   decal offset、传送阈值、风力。
+4. 外部资产的单位元数据必须在**导入期**归一到米: glTF 规范强制米制; USD 看
+   `metersPerUnit`; FBX 看 `UnitScaleFactor` (Maya/Max 默认厘米)。不要把 DCC 的单位
+   带进运行时数据, 更不要在运行时到处补系数。
+5. Y-up: 重力沿 -Y, 骨骼 mesh space +Y 朝上, 碰撞体轴向用 `Vector3.UnitY`。移植
+   Z-up 来源 (部分 UE / Blender 数据、Assimp 的 Z-up 场景) 的向量常量时, **轴和量级要
+   一起换**, 只改一个比两个都不改更难查。
+
+### 6.2 为何必须当强制规则: 真实案例
+
+Kawaii 物理马尾"完全垂下、纹丝不动": 重力保留了上游 UE 插件的厘米值 -980, 在米制
+骨架上等于 100 倍过强。dt=1/60 时单帧自由落体位移约 0.27m, 超过一整节马尾骨长 (~0.1m),
+长度约束每帧把链投影回正下方, 动画位移被 10:1 淹没。同批厘米遗留:
+`Radius 3→0.03`、`TeleportSpeedThreshold 300→3`、`ClothThickness 1→0.01`。
+**全程不报错、不崩溃、日志干净**, 只能靠算量级发现。
+
+### 6.3 精度: 单位不是精度问题, 世界尺寸才是
+
+1. float32 的**相对**精度恒定 (24 位有效位, 半个 ULP ≈ 6e-8), 整个世界乘 100 精度
+   一位不差 —— 所以"米还是厘米"**对 float 精度没有影响**。真正决定精度的是
+   *世界最大坐标 / 需要分辨的最小细节* 之比:
+   - 保证 1mm 误差: 约 ±16 km (米制与厘米制完全相同)
+   - 地球半径 6371 km 处 float32 ULP ≈ 0.76 m → 行星级世界**必须** double 世界坐标 +
+     相机相对渲染, 与单位无关 (见 §1.5)。
+2. **fp16 是唯一米制 / 厘米制不等价的地方**: half 最大值 65504、10 位尾数。厘米制下
+   655 m 就溢出 fp16; 米制下 65 km 才溢出。shader 里用 half 存位置 / 世界偏移 /
+   运动矢量时, 米制的安全余量大两个数量级 —— 这也是本引擎选米的实际收益之一。
+3. 反过来, 需要"1 单位 = 1 个整数刻度"的定点 / 量化管线 (int16 顶点压缩、网络坐标
+   同步、voxel / navmesh 体素、lightmap texels-per-unit) 在米制下要**显式**引入分数
+   刻度 (如 1/1024 m)。禁止为了省事把某个子系统偷偷改回厘米 —— **混用单位比统一用
+   哪个都糟**。
+
+### 6.4 已有资产的迁移
+
+改默认值**不会**修正已经 authored 进资产的旧数值 (序列化数据里存的是具体数字, 不是
+"跟随默认值"的引用)。换算单位后必须:
+
+1. 列出受影响字段, 在编辑器面板里重新填写 (如 dmc_grayanim 链上的 `Radius=3` → `0.03`);
+2. GenCode 类资产重新 GenCode 一次, 让生成代码带上新值;
+3. 无法自动判定旧值时不要猜, 去看当时的原始单位 (UE = cm) 再除 100。
+
+**自检清单** (引入或移植带单位的数据时过一遍):
+
+- [ ] 新常量是米 / m/s / m/s², 注释里写了单位?
+- [ ] 从 UE 或 DCC 搬来的默认值逐个除过 100 了? 注明了原始单位?
+- [ ] Z-up 来源的向量常量把轴换成 Y-up 了?
+- [ ] shader 里有 half 存位置 / 偏移吗? 量级在 fp16 安全范围内?
+- [ ] 需要大世界精度的路径走了 `DVector3` + `ToLocalPosition` (§1.5)?
+- [ ] 已 authored 的旧资产数值列出来并重新填过了?
+
+---

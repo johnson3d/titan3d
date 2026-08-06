@@ -215,11 +215,8 @@ namespace EngineNS.Bricks.NodeGraph
 
             if (TtEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_DELETE))
             {
-                foreach(var node in graph.SelectedNodes)
-                {
-                    graph.RemoveNode(node.Node);
-                }
-                graph.ClearSelected();
+                // 统一走DeleteSelectedNodes: 开门时整批删除包为一条可撤销事务
+                graph.DeleteSelectedNodes();
             }
             if (TtEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_TAB))
             {
@@ -248,12 +245,30 @@ namespace EngineNS.Bricks.NodeGraph
             //    return;
             if (graph.CurMenuType != TtNodeGraph.EGraphMenu.None)
                 return;
-            bool isHovered = false;
-            if (ImGuiAPI.IsWindowHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_ChildWindows))
-            {
+            bool isHovered = ImGuiAPI.IsWindowHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_ChildWindows);
+            // 焦点/悬停丢失处理: 图既没被 hover, 也没有正在进行的、由图自己发起的鼠标
+            // 交互时, 直接返回, 不读任何全局鼠标状态(Zoom/PressDrag/IsMouseDown/Released/
+            // DoubleClicked)。否则模态对话框/属性面板等其它窗口里的点击会"点透"到图里
+            // (旧逻辑直接读全局 IsMouseXXX, 没处理焦点丢失)。保留 owns-interaction 分支是为了
+            // 让在图内发起的拖拽即使鼠标移出窗口也能正常结束。
+            // owns-interaction: 必须"对应键确实还按着"才算图正在进行的交互。
+            // 不能只看 mIs*MouseFocusOnGraph 标志 —— 它可能因双击等路径漏清而卡在 true,
+            // 若仅凭标志判定, 卡死后 graphOwnsInteraction 永为真 → 下面两道 guard 全被旁路
+            // → 右键到处点透。加上 IsMouseDown 后, 键已松开时即使标志卡死也不会认为"拥有交互"。
+            bool graphOwnsInteraction =
+                (mIsLeftMouseFocusOnGraph && ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left)) ||
+                (mIsRightMouseFocusOnGraph && ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Right)) ||
+                (mIsMiddleMouseFocusOnGraph && ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Middle));
+            // 外部 popup/模态处理: 本引擎多 dock + viewport 下模态屏障(barrier)不可靠,
+            // IsWindowHovered 可能仍返回 true → 光靠 hover 门控挡不住。只要有任意 popup/模态
+            // 打开(图自己的右键菜单已在上面 CurMenuType 分支提前返回, 不受影响), 且当前
+            // 不是图正在进行的交互, 就不读任何全局鼠标状态 —— 从根上杠除点透。
+            if (!graphOwnsInteraction && ImGuiAPI.IsPopupOpen("", ImGuiPopupFlags_.ImGuiPopupFlags_AnyPopup))
+                return;
+            if (!isHovered && !graphOwnsInteraction)
+                return;
+            if (isHovered)
                 graph.Zoom(screenPt, ImGuiAPI.GetIO().MouseWheel);
-                isHovered = true;
-            }
             graph.PressDrag(in screenPt);
 
             var clickPos = Vector2.Zero;
@@ -291,6 +306,9 @@ namespace EngineNS.Bricks.NodeGraph
                 {
                     graph.LeftRelease(in screenPt);
                     graph.LeftDoubleClicked(in screenPt);
+                    // 双击路径已调 LeftRelease(内部清了 ButtonPress[Left]), 必须同步清掉 focus 标志,
+                    // 否则下面 release 段因 ButtonPress[Left]==false 进不去, mIsLeftFocus 会卡在 true。
+                    mIsLeftMouseFocusOnGraph = false;
                 }
 
                 if (graph.ButtonPress[(int)TtNodeGraph.EMouseButton.Right] == false)
@@ -305,6 +323,9 @@ namespace EngineNS.Bricks.NodeGraph
                 {
                     graph.RightRelease(in screenPt);
                     graph.RightDoubleClicked(screenPt);
+                    // 同左键双击: RightRelease 内部清了 ButtonPress[Right], 这里同步清 focus 标志,
+                    // 避免 mIsRightFocus 卡在 true 使 graphOwnsInteraction 永真、右键到处点透。
+                    mIsRightMouseFocusOnGraph = false;
                 }
             }
             if(graph.ButtonPress[(int)TtNodeGraph.EMouseButton.Middle] == true)

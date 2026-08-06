@@ -110,6 +110,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\DesignMacrossEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\DesignableUIRender.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\GraphEditPanel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Preview\TtAnimationPreviewPanel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Preview\TtAnimationPreviewRender.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Preview\TtRNameSelector.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Design\Class\" />

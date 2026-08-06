@@ -24,21 +24,77 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
         private int[] mParentIndices;
         private int mNumBones;
         private bool mInitialized = false;
-        private EngineNS.KawaiiPhysics.FKawaiiPhySettings mPhysicsSettings = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettings();
-        private EngineNS.KawaiiPhysics.FKawaiiPhySettings mPhysicsSettingsRandom = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettingsRandom();
+        private TtKawaiiPhySettings mPhysicsSettings = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettings();
+        private TtKawaiiPhySettings mPhysicsSettingsRandom = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettingsRandom();
 
         [Rtti.Meta]
         public bool ApplyComponentPhysicsSettings { get; set; } = true;
 
+        private bool mEnableComponentMovementPhysics = true;
+        private bool mComponentTransformInitialized = false;
+        private Vector3 mGravity = new Vector3(0, -9.8f, 0);
+        private float mGravityScale = 1.0f;
+
+        /// <summary>
+        /// Gravity in mesh space, m/s². Mesh space is Y-up and METERS (a humanoid is ~1.5 tall,
+        /// PhysX main scene gravity is -9.8), so this must NOT carry upstream KawaiiPhysics'
+        /// centimeter value (-980): at 60fps that is 0.27m of free fall per frame, which is longer
+        /// than a whole twintail segment, and the bone-length constraint then pins the chain
+        /// straight down every frame (hair hangs dead, never swings).
+        /// Pushed to the native context here rather than relying on the native default, because
+        /// nothing else in the pipeline authors gravity.
+        /// </summary>
+        public Vector3 Gravity
+        {
+            get => mGravity;
+            set
+            {
+                mGravity = value;
+                mContext.Gravity = value;
+            }
+        }
+
+        /// <summary>
+        /// Multiplier on <see cref="Gravity"/>: 0 = weightless hair, 1 = engine gravity.
+        /// Authorable per node (TtBlendTree_KawaiiPhysicsClassDescription.GravityScale).
+        /// </summary>
+        public float GravityScale
+        {
+            get => mGravityScale;
+            set
+            {
+                mGravityScale = value;
+                mContext.GravityScale = value;
+            }
+        }
+
+        /// <summary>
+        /// When true, the component's world-space movement (actor placement) drives
+        /// hair inertia: dynamic particles lag behind the moving root via length
+        /// constraints, producing flow/swing effects. When false, particles are
+        /// unaffected by actor movement.
+        /// Set via <see cref="TtKawaiiPhysicsCommandDesc.EnableComponentMovementPhysics"/>
+        /// during Initialize, not directly in the editor.
+        /// </summary>
+        public bool EnableComponentMovementPhysics
+        {
+            get => mEnableComponentMovementPhysics;
+            set
+            {
+                mComponentTransformInitialized = false;
+                mEnableComponentMovementPhysics = value;
+            }
+        }
+
         [Rtti.Meta]
-        public EngineNS.KawaiiPhysics.FKawaiiPhySettings PhysicsSettings
+        public TtKawaiiPhySettings PhysicsSettings
         {
             get => mPhysicsSettings;
             set => mPhysicsSettings = value;
         }
 
         [Rtti.Meta]
-        public EngineNS.KawaiiPhysics.FKawaiiPhySettings PhysicsSettingsRandom
+        public TtKawaiiPhySettings PhysicsSettingsRandom
         {
             get => mPhysicsSettingsRandom;
             set => mPhysicsSettingsRandom = value;
@@ -49,8 +105,10 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
             if (!ApplyComponentPhysicsSettings || setup == null)
                 return;
 
-            setup.PhysicsSettings = mPhysicsSettings;
-            setup.PhysicsSettingsRandom = mPhysicsSettingsRandom;
+            // Clone so each setup owns its own instance (this was a value-copy when the
+            // settings type was a struct; TtKawaiiPhySettings is now a reference type).
+            setup.PhysicsSettings = mPhysicsSettings?.Clone();
+            setup.PhysicsSettingsRandom = mPhysicsSettingsRandom?.Clone();
         }
 
         private void ApplyPhysicsSettings(TtKawaiiRodSetup setup)
@@ -58,8 +116,8 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
             if (!ApplyComponentPhysicsSettings || setup == null)
                 return;
 
-            setup.PhysicsSettings = mPhysicsSettings;
-            setup.PhysicsSettingsRandom = mPhysicsSettingsRandom;
+            setup.PhysicsSettings = mPhysicsSettings?.Clone();
+            setup.PhysicsSettingsRandom = mPhysicsSettingsRandom?.Clone();
         }
 
         private struct BoneColliderBinding
@@ -101,6 +159,11 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
             Array.Copy(boneRotations, mBoneRotations, mNumBones);
             Array.Copy(boneScales, mBoneScales, mNumBones);
             Array.Copy(parentIndices, mParentIndices, mNumBones);
+
+            // Re-push gravity: values may have been authored before Initialize (GenCode assigns the
+            // component properties first), and the native default is only a fallback.
+            mContext.Gravity = mGravity;
+            mContext.GravityScale = mGravityScale;
 
             // Build chains
             if (chainSetups != null && chainSetups.Length > 0)
@@ -178,7 +241,7 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
                 mBoneColliders.Add(new BoneColliderBinding
                 {
                     ColliderIndex = colliderIndex,
-                    BoneIndex = definition.AttachBoneIndex,
+                    BoneIndex = definition.AttachBoneIndex.Index,
                     Definition = definition
                 });
             }
@@ -207,10 +270,10 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
         private Vector3 ComputeColliderWorldPosition(TtKawaiiColliderDef def)
         {
             var localOffset = def.Shape?.Offset ?? Vector3.Zero;
-            if (def.AttachBoneIndex >= 0 && def.AttachBoneIndex < mNumBones)
+            if (def.AttachBoneIndex.Index >= 0 && def.AttachBoneIndex.Index < mNumBones)
             {
-                var bonePos = mBonePositions[def.AttachBoneIndex];
-                var boneRot = mBoneRotations[def.AttachBoneIndex];
+                var bonePos = mBonePositions[def.AttachBoneIndex.Index];
+                var boneRot = mBoneRotations[def.AttachBoneIndex.Index];
                 return bonePos + Vector3.TransformNormal(localOffset, Matrix.RotationQuaternion(boneRot));
             }
             return localOffset;
@@ -219,8 +282,8 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
         private Quaternion ComputeColliderWorldRotation(TtKawaiiColliderDef def)
         {
             var localRotation = def.Shape?.Rotation ?? Quaternion.Identity;
-            if (def.AttachBoneIndex >= 0 && def.AttachBoneIndex < mNumBones)
-                return mBoneRotations[def.AttachBoneIndex] * localRotation;
+            if (def.AttachBoneIndex.Index >= 0 && def.AttachBoneIndex.Index < mNumBones)
+                return mBoneRotations[def.AttachBoneIndex.Index] * localRotation;
             return localRotation;
         }
 
@@ -441,6 +504,14 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
         public void SetComponentTransform(in Vector3 position, in Quaternion rotation, in Vector3 scale)
         {
             mContext.SetComponentTransform(position, rotation, scale);
+
+            if (!mComponentTransformInitialized || !mEnableComponentMovementPhysics)
+            {
+                // Sync Prev=Current: on first call (initialization), or when
+                // movement physics is disabled (zero delta to prevent hair drift)
+                mContext.SetComponentTransform(position, rotation, scale);
+                mComponentTransformInitialized = true;
+            }
         }
 
         #endregion

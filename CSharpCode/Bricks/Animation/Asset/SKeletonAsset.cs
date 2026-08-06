@@ -6,7 +6,7 @@ using EngineNS.Animation.SkeletonAnimation.Skeleton;
 
 namespace EngineNS.Animation.Asset
 {
-    [Rtti.Meta("")]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Animation.Asset.USkeletonAssetAMeta@EngineCore", "EngineNS.Animation.Asset.USkeletonAssetAMeta" })]
     public partial class TtSkeletonAssetAMeta : IO.IAssetMeta
     {
         public override string TypeExt

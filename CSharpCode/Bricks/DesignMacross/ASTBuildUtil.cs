@@ -81,6 +81,7 @@ namespace EngineNS.DesignMacross
             declaration.Namespace = classBuildContext.MainClassDescription.Namespace;
             declaration.VisitMode = description.VisitMode;
             declaration.SupperClassNames = description.SupperClassNames;
+            declaration.IsAutoSaveLoad = true;
 
             classBuildContext.ClassDeclaration = declaration;
             classBuildContext.ClassDescription = description;
@@ -264,6 +265,14 @@ namespace EngineNS.DesignMacross
             method.MethodBody.Sequence.Add(listCreate);
             foreach (var property in itemType.GetProperties())
             {
+                // 跳过不可赋值的属性: 只读属性(如 => 计算属性)、无 public setter 的属性,
+                // 以及索引器。否则下面无条件生成 "host.Prop = xxx;" 会导致生成的代码
+                // 编译不过(CS0200: 无法为属性或索引器赋值 - 它是只读的)。
+                if (property.GetIndexParameters().Length > 0)
+                    continue;
+                if (property.GetSetMethod(false) == null)
+                    continue;
+
                 var propertyType = property.PropertyType;
                 if (propertyType.IsValueType && (propertyType.IsPrimitive || propertyType.IsEnum))
                 {

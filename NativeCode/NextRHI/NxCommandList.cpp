@@ -237,7 +237,7 @@ namespace NxRHI
 			if (BufferWriters[i].Buffer->Map(0, &mapped, false))
 			{
 				auto ptr = (UINT*)((BYTE*)mapped.pData + BufferWriters[i].Offset);
-				ptr[i] = BufferWriters[i].Value;
+				ptr[0] = BufferWriters[i].Value;
 				BufferWriters[i].Buffer->Unmap(0);
 				continue;
 			}
@@ -247,7 +247,7 @@ namespace NxRHI
 			cpDraw->BindBufferSrc(copyBuffer);
 			cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
 			cpDraw->FootPrint.Format = EPixelFormat::PXF_UNKNOWN;
-			cpDraw->FootPrint.X = 0;
+			cpDraw->FootPrint.X = i * sizeof(UINT);
 			cpDraw->FootPrint.Y = 0;
 			cpDraw->FootPrint.Z = 0;
 			cpDraw->FootPrint.Width = sizeof(UINT);

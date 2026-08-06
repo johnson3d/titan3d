@@ -144,6 +144,28 @@ namespace EngineNS.Rtti
             }
             return src;
         }
+        public static object CloneProperty(System.Type type, object src)
+        {
+            if (src == null)
+                return null;
+            var prop = type;
+            if (prop.IsValueType)
+                return src;
+            else if (prop.IsEnum)
+                return src;
+            else if (prop == typeof(string))
+                return src;
+            else if (prop == typeof(TtTypeDesc))
+                return src;
+            var meta = Rtti.TtClassMetaManager.Instance.TryGetMeta(TtTypeDesc.TypeStr(prop));
+            if (meta != null)
+            {
+                var result = Rtti.TtTypeDescManager.CreateInstance(prop);
+                meta.CopyObjectMetaField(result, src);
+                return result;
+            }
+            return src;
+        }
         public void CopyObjectMetaField(object tar, object src)
         {
             if (TtEngine.Instance.DataCopyer.DataCopy(tar, src))
@@ -182,9 +204,9 @@ namespace EngineNS.Rtti
                 var srcProp = srcType.GetProperty(i.PropertyName);
                 if (srcProp == null)
                     continue;
-                if (tarProp.PropertyType == srcProp.PropertyType && tarProp.CanWrite)
+                if (tarProp.PropertyType.FullName == srcProp.PropertyType.FullName && tarProp.CanWrite)
                 {
-                    var v = CloneProperty(srcProp.GetValue(src));
+                    var v = CloneProperty(tarProp.PropertyType, srcProp.GetValue(src));
                     tarProp.SetValue(tar, v);
                 }
             }

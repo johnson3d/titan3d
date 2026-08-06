@@ -3,6 +3,7 @@
 #include "VKGpuDevice.h"
 #include "VKEvent.h"
 #include "VKDrawcall.h"
+#include "../NxGeomMesh.h"
 
 #define new VNEW
 
@@ -89,6 +90,14 @@ namespace NxRHI
 		{
 			bufferInfo.usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT;
 			memFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+			if (desc.MiscFlags & EResourceMiscFlag::RM_BUFFER_ALLOW_RAW_VIEWS)
+			{
+				auto pAlignment = device->GetGpuResourceAlignment();
+				if (pAlignment->RawSrvUavAlignment > 0 && bufferInfo.size % pAlignment->RawSrvUavAlignment)
+				{
+					bufferInfo.size = (bufferInfo.size / pAlignment->RawSrvUavAlignment + 1) * pAlignment->RawSrvUavAlignment;
+				}
+			}
 		}
 		if (desc.Type & EBufferType::BFT_SRV)
 		{
@@ -113,6 +122,20 @@ namespace NxRHI
 		if (desc.Type & EBufferType::BFT_DSV)
 		{
 			ASSERT(false);
+		}
+		if (desc.Type & EBufferType::BFT_RTAS)
+		{
+			//storage of BLAS/TLAS, align with DX12 D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE
+			bufferInfo.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR;
+		}
+		if (device->mVulkanExt.IsRayQuery)
+		{
+			//BLAS build reads VB/IB, TLAS build reads instance buffer, all of them are addressed by VkDeviceAddress
+			bufferInfo.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+			if (desc.Type & (EBufferType::BFT_Vertex | EBufferType::BFT_Index | EBufferType::BFT_SRV))
+			{
+				bufferInfo.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+			}
 		}
 		
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -166,7 +189,11 @@ namespace NxRHI
 
 		FTransientCmd tsCmd(device, QU_Transfer, "TextureInit");
 		auto cmd = (VKCommandList*)tsCmd.GetCmdList();
-		if (Desc.Type & EBufferType::BFT_SRV)
+		if (Desc.Type & EBufferType::BFT_RTAS)
+		{
+			GpuState = EGpuResourceState::GRS_GenericRead;
+		}
+		else if (Desc.Type & EBufferType::BFT_SRV)
 		{
 			FTransitionScope::TryAutoTransition(cmd, this, EGpuResourceState::GRS_GenericRead, false);
 		}
@@ -223,7 +250,9 @@ namespace NxRHI
 				FMappedSubResource subRes{};
 				if (this->Map(0, &subRes, false))
 				{
-					auto size = std::min(desc.InitData->RowPitch, desc.Size);
+					//for texture upload the whole subresource data size is DepthPitch(RowPitch is bytes per row)
+					auto size = std::max(desc.InitData->RowPitch, desc.InitData->DepthPitch);
+					size = std::min(size, desc.Size);
 					memcpy(subRes.pData, desc.InitData->pData, size);
 					this->Unmap(0);
 				}
@@ -306,37 +335,53 @@ namespace NxRHI
 	}
 	void VKBuffer::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
 	{
-		auto device = mDeviceRef.GetPtr();
-		auto copyDesc = this->Desc;
-		copyDesc.Usage = EGpuUsage::USAGE_STAGING;
-		copyDesc.Type = EBufferType::BFT_NONE;
-		copyDesc.Size = footPrint->TotalSize;
-		FMappedSubResource initData{};
-		initData.pData = pData;
-		initData.RowPitch = footPrint->TotalSize;
-		copyDesc.InitData = &initData;
-		copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
-
-		auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
-
-		//cmd->CopyBufferRegion(this, footPrint->GetOffset(), bf, 0, footPrint->TotalSize);
+		if (cmd != nullptr && Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
-			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
-			cpDraw->BindBufferDest(this);
-			cpDraw->BindBufferSrc(bf);
-			cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
-			cpDraw->FootPrint.Format = EPixelFormat::PXF_UNKNOWN;
-			cpDraw->FootPrint.X = 0;
-			cpDraw->FootPrint.Y = 0;
-			cpDraw->FootPrint.Z = 0;
-			cpDraw->FootPrint.Width = footPrint->Width;
-			cpDraw->FootPrint.Height = footPrint->Height;
-			cpDraw->FootPrint.Depth = footPrint->Depth;
-			cpDraw->FootPrint.RowPitch = footPrint->RowPitch;
-			cpDraw->FootPrint.TotalSize = footPrint->RowPitch * footPrint->Height;
-			cpDraw->DstX = footPrint->X;
+			auto device = mDeviceRef.GetPtr();
+			auto copyDesc = this->Desc;
+			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
+			copyDesc.Type = EBufferType::BFT_NONE;
+			copyDesc.Size = footPrint->TotalSize;
+			FMappedSubResource initData{};
+			initData.pData = pData;
+			initData.RowPitch = copyDesc.Size;
+			copyDesc.InitData = &initData;
+			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
-			cmd->PushGpuDraw(cpDraw.GetPtr());
+			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
+
+			//cmd->CopyBufferRegion(this, footPrint->GetOffset(), bf, 0, footPrint->TotalSize);
+			{
+				AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
+				cpDraw->BindBufferDest(this);
+				cpDraw->BindBufferSrc(bf);
+				cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Buffer;
+				cpDraw->FootPrint.Format = footPrint->Format;
+				cpDraw->FootPrint.X = 0;
+				cpDraw->FootPrint.Y = 0;
+				cpDraw->FootPrint.Z = 0;
+				cpDraw->FootPrint.Width = footPrint->Width;
+				cpDraw->FootPrint.Height = footPrint->Height;
+				cpDraw->FootPrint.Depth = footPrint->Depth;
+				cpDraw->FootPrint.RowPitch = footPrint->RowPitch;
+				cpDraw->FootPrint.TotalSize = footPrint->RowPitch * footPrint->Height;
+				cpDraw->DstX = footPrint->X;
+
+				cmd->PushGpuDraw(cpDraw.GetPtr());
+			}
+		}
+		else
+		{
+			FMappedSubResource mapped{};
+			if (this->Map(subRes, &mapped, false))
+			{
+				memcpy(mapped.pData, pData, footPrint->RowPitch);
+				this->Unmap(subRes);
+			}
+			else
+			{
+				ASSERT(false);
+			}
 		}
 	}
 
@@ -580,6 +625,7 @@ namespace NxRHI
 			{
 				UINT w = Desc.Width;
 				UINT h = Desc.Height;
+				UINT d = (Desc.Depth == 0) ? 1 : Desc.Depth;
 				for (UINT k = 0; k < desc.MipLevels; k++)
 				{
 					UINT j = i * Desc.MipLevels + k;
@@ -594,8 +640,11 @@ namespace NxRHI
 					copyDesc.SetDefault();
 					copyDesc.Usage = EGpuUsage::USAGE_STAGING;
 					copyDesc.Type = EBufferType::BFT_NONE;
-					copyDesc.Size = desc.InitData[j].DepthPitch;
-					copyDesc.InitData = &desc.InitData[j];
+					//3D texture: InitData.DepthPitch is the size of one slice, upload all slices(align with DX12 CreateUploadResource)
+					copyDesc.Size = desc.InitData[j].DepthPitch * d;
+					FMappedSubResource sliceInitData = desc.InitData[j];
+					sliceInitData.DepthPitch = copyDesc.Size;
+					copyDesc.InitData = &sliceInitData;
 					copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
 					auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
@@ -612,7 +661,7 @@ namespace NxRHI
 					cpDraw->FootPrint.Z = 0;
 					cpDraw->FootPrint.Width = w;
 					cpDraw->FootPrint.Height = h;
-					cpDraw->FootPrint.Depth = (Desc.Depth == 0) ? 1 : Desc.Depth;
+					cpDraw->FootPrint.Depth = d;
 					cpDraw->FootPrint.RowPitch = desc.InitData[j].RowPitch;
 					cpDraw->FootPrint.TotalSize = copyDesc.Size; //desc.InitData[k].RowPitch * footPrint.Footprint.Height;
 					//device->mPostCmdRecorder->PushGpuDraw(cpDraw);
@@ -620,10 +669,13 @@ namespace NxRHI
 
 					w = w / 2;
 					h = h / 2;
+					d = d / 2;
 					if (w == 0)
 						w = 1;
 					if (h == 0)
 						h = 1;
+					if (d == 0)
+						d = 1;
 				}
 			}
 		}
@@ -705,6 +757,49 @@ namespace NxRHI
 		outFootPrint->RowPitch = desc.RowPitch;
 
 		return result;
+	}
+	bool VKTexture::GetFootprint(FSubResourceFootPrint* fp, UINT64* rowSize, UINT64* totalSize, UINT subRes, UINT64 offset)
+	{
+		//keep the same semantic as DX12Texture::GetFootprint(GetCopyableFootprints)
+		auto device = mDeviceRef.GetPtr();
+		UINT mipLevels = Desc.MipLevels > 0 ? Desc.MipLevels : 1;
+		UINT mip = subRes % mipLevels;
+		UINT w = Desc.Width >> mip;
+		if (w == 0)
+			w = 1;
+		UINT h = Desc.Height >> mip;
+		if (h == 0)
+			h = 1;
+		UINT d = Desc.Depth >> mip;
+		if (d == 0)
+			d = 1;
+
+		UINT pixelWidth = GetPixelByteWidth(Desc.Format);
+		UINT rowPitch = pixelWidth * w;
+		VkMemoryRequirements memRequirements;
+		vkGetImageMemoryRequirements(device->mDevice, mImage, &memRequirements);
+		auto alignment = (UINT)memRequirements.alignment;
+		if (alignment > 0 && rowPitch % alignment > 0)
+		{
+			rowPitch = (rowPitch / alignment + 1) * alignment;
+		}
+
+		fp->Format = Desc.Format;
+		fp->X = 0;
+		fp->Y = 0;
+		fp->Z = 0;
+		fp->Width = w;
+		fp->Height = h;
+		fp->Depth = d;
+		fp->RowPitch = rowPitch;
+		fp->TotalSize = rowPitch * h;
+
+		if (rowSize != nullptr)
+			*rowSize = (UINT64)pixelWidth * w;
+		if (totalSize != nullptr)
+			*totalSize = (UINT64)rowPitch * h * d;
+
+		return true;
 	}
 	bool VKTexture::Map(UINT subRes, FMappedSubResource* res, bool forRead)
 	{
@@ -1566,6 +1661,306 @@ namespace NxRHI
 		if (vkCreateImageView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mView->mImageView) != VK_SUCCESS)
 		{
 			return false;
+		}
+
+		return true;
+	}
+
+	UINT64 VKBuffer::GetGPUVirtualAddress()
+	{
+		auto device = mDeviceRef.GetPtr();
+		if (device == nullptr || mBuffer == nullptr)
+			return 0;
+		VkBufferDeviceAddressInfo info{};
+		info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+		info.buffer = mBuffer;
+		return (UINT64)vkGetBufferDeviceAddress(device->mDevice, &info);
+	}
+
+	//align with DX12AccelerationStructure::Init
+	VKAccelerationStructure::~VKAccelerationStructure()
+	{
+		auto device = mDeviceRef.GetPtr();
+		if (device != nullptr && mAccelerationStructure != VK_NULL_HANDLE && device->fn_vkDestroyAccelerationStructureKHR != nullptr)
+		{
+			device->fn_vkDestroyAccelerationStructureKHR(device->mDevice, mAccelerationStructure, device->GetVkAllocCallBacks());
+			mAccelerationStructure = VK_NULL_HANDLE;
+		}
+	}
+	bool VKAccelerationStructure::Init(VKGpuDevice* device, const FAccelerationStructureDesc* desc)
+	{
+		mDeviceRef.FromObject(device);
+		if (device->mVulkanExt.IsRayQuery == false)
+			return false;
+
+		mMeshes.resize(desc->GeometryCount);
+		std::vector<VkAccelerationStructureGeometryKHR> geometries(desc->GeometryCount);
+		std::vector<VkAccelerationStructureBuildRangeInfoKHR> ranges(desc->GeometryCount);
+		std::vector<UINT> primCounts(desc->GeometryCount);
+		for (UINT i = 0; i < desc->GeometryCount; i++)
+		{
+			mMeshes[i] = desc->Geometries[i];
+
+			auto mesh = mMeshes[i].GetPtr();
+			auto ib = mesh->GetGeomtryMesh()->IndexBuffer->Buffer.UnsafeConvertTo<VKBuffer>();
+			auto vb = mesh->GetGeomtryMesh()->VertexArray->GetVB(EVertexStreamType::VST_Position)->Buffer.UnsafeConvertTo<VKBuffer>();
+			bool isIndex32 = mesh->GetGeomtryMesh()->IsIndex32;
+			auto indexCount = (UINT)(ib->Desc.Size / (isIndex32 ? sizeof(UINT) : sizeof(USHORT)));
+			auto vertexCount = (UINT)(vb->Desc.Size / sizeof(v3dxVector3));
+
+			auto& geomDesc = geometries[i];
+			geomDesc.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
+			geomDesc.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+			if (desc->GeomFlags != nullptr)
+				geomDesc.flags = (VkGeometryFlagsKHR)desc->GeomFlags[i];//ERayTracingGeomFlags values match VkGeometryFlagBitsKHR
+			else
+				geomDesc.flags = 0;
+			auto& tri = geomDesc.geometry.triangles;
+			tri.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
+			tri.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT;
+			tri.vertexData.deviceAddress = vb->GetGPUVirtualAddress();
+			tri.vertexStride = sizeof(v3dxVector3);
+			tri.maxVertex = vertexCount > 0 ? vertexCount - 1 : 0;
+			tri.indexType = isIndex32 ? VK_INDEX_TYPE_UINT32 : VK_INDEX_TYPE_UINT16;
+			tri.indexData.deviceAddress = ib->GetGPUVirtualAddress();
+			tri.transformData.deviceAddress = 0;
+
+			ranges[i] = {};
+			ranges[i].primitiveCount = indexCount / 3;
+			primCounts[i] = indexCount / 3;
+		}
+
+		VkAccelerationStructureBuildGeometryInfoKHR buildInfo{};
+		buildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
+		buildInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+		buildInfo.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+		buildInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+		buildInfo.geometryCount = (UINT)geometries.size();
+		buildInfo.pGeometries = geometries.data();
+
+		VkAccelerationStructureBuildSizesInfoKHR sizeInfo{};
+		sizeInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+		device->fn_vkGetAccelerationStructureBuildSizesKHR(device->mDevice, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, primCounts.data(), &sizeInfo);
+		mScratchSize = (UINT)sizeInfo.buildScratchSize;
+
+		FBufferDesc bfDesc{};
+		bfDesc.SetDefault(false, (EBufferType)(EBufferType::BFT_RTAS | EBufferType::BFT_UAV));
+		bfDesc.Size = (UINT)sizeInfo.accelerationStructureSize;
+		bfDesc.RowPitch = bfDesc.Size;
+		bfDesc.DepthPitch = bfDesc.Size;
+		mGpuBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+		if (mGpuBuffer == nullptr)
+			return false;
+
+		VkAccelerationStructureCreateInfoKHR asCreateInfo{};
+		asCreateInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
+		asCreateInfo.buffer = (VkBuffer)mGpuBuffer->GetHWBuffer();
+		asCreateInfo.offset = 0;
+		asCreateInfo.size = sizeInfo.accelerationStructureSize;
+		asCreateInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+		if (device->fn_vkCreateAccelerationStructureKHR(device->mDevice, &asCreateInfo, device->GetVkAllocCallBacks(), &mAccelerationStructure) != VK_SUCCESS)
+			return false;
+		mGpuBuffer.UnsafeConvertTo<VKBuffer>()->mAccelerationStructure = mAccelerationStructure;
+
+		bfDesc.SetDefault(false, EBufferType::BFT_UAV);
+		bfDesc.Size = mScratchSize;
+		bfDesc.RowPitch = bfDesc.Size;
+		bfDesc.DepthPitch = bfDesc.Size;
+		auto pScratchBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+
+		buildInfo.dstAccelerationStructure = mAccelerationStructure;
+		buildInfo.scratchData.deviceAddress = pScratchBuffer.UnsafeConvertTo<VKBuffer>()->GetGPUVirtualAddress();
+		{
+			FTransientCmd cmd(device, EQueueType::QU_Default, "BuildBLAStructure");
+			auto cmdlist = (VKCommandList*)cmd.GetCmdList();
+			cmdlist->GetCmdRecorder()->UseResource(this);
+			cmdlist->GetCmdRecorder()->UseResource(pScratchBuffer);
+			const VkAccelerationStructureBuildRangeInfoKHR* pRanges = ranges.data();
+			device->fn_vkCmdBuildAccelerationStructuresKHR(cmdlist->GetVKCmdRecorder()->mCommandBuffer, 1, &buildInfo, &pRanges);
+		}
+
+		VkAccelerationStructureDeviceAddressInfoKHR addrInfo{};
+		addrInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
+		addrInfo.accelerationStructure = mAccelerationStructure;
+		mDeviceAddress = device->fn_vkGetAccelerationStructureDeviceAddressKHR(device->mDevice, &addrInfo);
+		return true;
+	}
+	bool VKAStructureInstance::Init(VKGpuDevice* device, const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure)
+	{
+		mDesc = *desc;
+		mAStructure = pAStructrure;
+
+		return true;
+	}
+	static void MakeVKInstanceDesc(VkAccelerationStructureInstanceKHR& instDesc, IAStructureInstance* i)
+	{
+		instDesc = {};
+		instDesc.accelerationStructureReference = ((VKAccelerationStructure*)i->mAStructure.GetPtr())->mDeviceAddress;
+		instDesc.flags = i->mDesc.Flags;//ERayTracingInstanceFlags values match VkGeometryInstanceFlagBitsKHR
+		instDesc.instanceShaderBindingTableRecordOffset = i->mDesc.InstanceContributionToHitGroupIndex;
+		instDesc.instanceCustomIndex = i->mDesc.InstanceID;
+		instDesc.mask = i->mDesc.InstanceMask;
+		v3dxMatrix4 tMat;
+		v3dxMatrix4Transpose(&tMat, &i->mDesc.Matrix);
+		memcpy(&instDesc.transform.matrix[0], &tMat.m11, sizeof(float) * 4);
+		memcpy(&instDesc.transform.matrix[1], &tMat.m21, sizeof(float) * 4);
+		memcpy(&instDesc.transform.matrix[2], &tMat.m31, sizeof(float) * 4);
+	}
+	//align with DX12TopAccelerationStructure
+	VKTopAccelerationStructure::~VKTopAccelerationStructure()
+	{
+		auto device = mDeviceRef.GetPtr();
+		if (device != nullptr && mAccelerationStructure != VK_NULL_HANDLE && device->fn_vkDestroyAccelerationStructureKHR != nullptr)
+		{
+			device->fn_vkDestroyAccelerationStructureKHR(device->mDevice, mAccelerationStructure, device->GetVkAllocCallBacks());
+			mAccelerationStructure = VK_NULL_HANDLE;
+		}
+	}
+	bool VKTopAccelerationStructure::Init(VKGpuDevice* device, const FTopAccelerationStructureDesc* desc)
+	{
+		mDeviceRef.FromObject(device);
+		if (device->mVulkanExt.IsRayQuery == false)
+			return false;
+
+		VkAccelerationStructureGeometryKHR geomDesc{};
+		geomDesc.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
+		geomDesc.geometryType = VK_GEOMETRY_TYPE_INSTANCES_KHR;
+		geomDesc.geometry.instances.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR;
+		geomDesc.geometry.instances.arrayOfPointers = VK_FALSE;
+
+		VkAccelerationStructureBuildGeometryInfoKHR buildInfo{};
+		buildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
+		buildInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
+		buildInfo.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+		buildInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+		buildInfo.geometryCount = 1;
+		buildInfo.pGeometries = &geomDesc;
+
+		//align with DX12TopAccelerationStructure::Init: NumDescs = 1
+		UINT maxInstanceCount = 1;
+		VkAccelerationStructureBuildSizesInfoKHR sizeInfo{};
+		sizeInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+		device->fn_vkGetAccelerationStructureBuildSizesKHR(device->mDevice, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &maxInstanceCount, &sizeInfo);
+		mScratchSize = (UINT)sizeInfo.buildScratchSize;
+
+		FBufferDesc bfDesc{};
+		bfDesc.SetDefault(true, (EBufferType)(EBufferType::BFT_UAV | EBufferType::BFT_SRV | EBufferType::BFT_RTAS));
+		bfDesc.Size = (UINT)sizeInfo.accelerationStructureSize;
+		bfDesc.Size = ((bfDesc.Size + (sizeof(UINT) - 1)) / sizeof(UINT)) * sizeof(UINT);
+		bfDesc.RowPitch = bfDesc.Size;
+		bfDesc.DepthPitch = bfDesc.Size;
+		mGpuBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+		if (mGpuBuffer == nullptr)
+			return false;
+
+		VkAccelerationStructureCreateInfoKHR asCreateInfo{};
+		asCreateInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
+		asCreateInfo.buffer = (VkBuffer)mGpuBuffer->GetHWBuffer();
+		asCreateInfo.offset = 0;
+		asCreateInfo.size = sizeInfo.accelerationStructureSize;
+		asCreateInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
+		if (device->fn_vkCreateAccelerationStructureKHR(device->mDevice, &asCreateInfo, device->GetVkAllocCallBacks(), &mAccelerationStructure) != VK_SUCCESS)
+			return false;
+		mGpuBuffer.UnsafeConvertTo<VKBuffer>()->mAccelerationStructure = mAccelerationStructure;
+
+		FSrvDesc srvDesc{};
+		srvDesc.SetRTAS();
+		mGpuBufferSRV = MakeWeakRef(device->CreateSRV(mGpuBuffer, &srvDesc, __FILE__, __LINE__));
+
+		FUavDesc uavDesc{};
+		uavDesc.SetBuffer(true);
+		uavDesc.Buffer.NumElements = bfDesc.Size / sizeof(UINT);
+		mGpuBufferUAV = MakeWeakRef(device->CreateUAV(mGpuBuffer, &uavDesc, __FILE__, __LINE__));
+
+		bfDesc.SetDefault(false, (EBufferType)(EBufferType::BFT_UAV));
+		bfDesc.Size = mScratchSize;
+		bfDesc.RowPitch = bfDesc.Size;
+		bfDesc.DepthPitch = bfDesc.Size;
+		mGpuScratchBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+
+		return true;
+	}
+	bool VKTopAccelerationStructure::IsBuild(VKGpuDevice* device)
+	{
+		if (mInstDescs.size() != mBottomASInstances.size())
+		{
+			mInstDescs.clear();
+			for (auto& i : mBottomASInstances)
+			{
+				VkAccelerationStructureInstanceKHR instDesc;
+				MakeVKInstanceDesc(instDesc, i);
+				mInstDescs.push_back(instDesc);
+			}
+			mInstanceHash = Hash128::GetHash128((const char*)mInstDescs.data(), (UINT)(sizeof(VkAccelerationStructureInstanceKHR) * mInstDescs.size()));
+
+			FBufferDesc bfDesc{};
+			bfDesc.SetDefault(false, BFT_SRV);
+			bfDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+			bfDesc.Usage = EGpuUsage::USAGE_STAGING;
+			bfDesc.Size = (UINT)(sizeof(VkAccelerationStructureInstanceKHR) * mBottomASInstances.size());
+			bfDesc.RowPitch = bfDesc.Size;
+			bfDesc.DepthPitch = bfDesc.Size;
+			FMappedSubResource initData{};
+			initData.pData = mInstDescs.data();
+			initData.RowPitch = bfDesc.Size;
+			bfDesc.InitData = &initData;
+			auto buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+			mInstanceGpuBuffer = MakeWeakRef(new FUploadBuffer(buffer));
+			return true;
+		}
+		else
+		{
+			auto saved = mInstanceHash;
+			mInstDescs.clear();
+			for (auto& i : mBottomASInstances)
+			{
+				VkAccelerationStructureInstanceKHR instDesc;
+				MakeVKInstanceDesc(instDesc, i);
+				mInstDescs.push_back(instDesc);
+			}
+			mInstanceHash = Hash128::GetHash128((const char*)mInstDescs.data(), (UINT)(sizeof(VkAccelerationStructureInstanceKHR) * mInstDescs.size()));
+			auto result = saved != mInstanceHash;
+			if (result)
+			{
+				UINT size = (UINT)(sizeof(VkAccelerationStructureInstanceKHR) * mBottomASInstances.size());
+				memcpy(mInstanceGpuBuffer->GetPtr(), mInstDescs.data(), size);
+			}
+			return result;
+		}
+	}
+	bool VKTopAccelerationStructure::BuildAcclerationStruture()
+	{
+		auto device = mDeviceRef.GetPtr();
+		if (IsBuild(device) == false)
+			return true;
+
+		VkAccelerationStructureGeometryKHR geomDesc{};
+		geomDesc.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
+		geomDesc.geometryType = VK_GEOMETRY_TYPE_INSTANCES_KHR;
+		geomDesc.geometry.instances.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR;
+		geomDesc.geometry.instances.arrayOfPointers = VK_FALSE;
+		geomDesc.geometry.instances.data.deviceAddress = ((VKBuffer*)mInstanceGpuBuffer->GetBuffer())->GetGPUVirtualAddress();
+
+		VkAccelerationStructureBuildGeometryInfoKHR buildInfo{};
+		buildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
+		buildInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
+		buildInfo.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+		buildInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+		buildInfo.geometryCount = 1;
+		buildInfo.pGeometries = &geomDesc;
+		buildInfo.dstAccelerationStructure = mAccelerationStructure;
+		buildInfo.scratchData.deviceAddress = mGpuScratchBuffer.UnsafeConvertTo<VKBuffer>()->GetGPUVirtualAddress();
+
+		{
+			FTransientCmd cmd(device, EQueueType::QU_Default, "BuildTLAStructure");
+			auto cmdlist = (VKCommandList*)cmd.GetCmdList();
+			cmdlist->GetCmdRecorder()->UseResource(this);
+			cmdlist->GetCmdRecorder()->UseResource(mInstanceGpuBuffer->GetBuffer());
+			VkAccelerationStructureBuildRangeInfoKHR range{};
+			range.primitiveCount = (UINT)mBottomASInstances.size();
+			const VkAccelerationStructureBuildRangeInfoKHR* pRange = &range;
+			device->fn_vkCmdBuildAccelerationStructuresKHR(cmdlist->GetVKCmdRecorder()->mCommandBuffer, 1, &buildInfo, &pRange);
+			//DX12 clones dest into mSourceGpuBuffer here, the transient cmd is flushed synchronously on VK so the clone is unnecessary
 		}
 
 		return true;

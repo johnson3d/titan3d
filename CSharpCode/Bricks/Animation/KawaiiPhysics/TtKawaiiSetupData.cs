@@ -1,5 +1,6 @@
-﻿using EngineNS.EGui.Controls.PropertyGrid;
+﻿using EngineNS.Animation;
 using EngineNS.Graphics.Mesh.PhysicsAsset;
+using EngineNS.IO;
 using System;
 
 namespace EngineNS.Bricks.Animation.KawaiiPhysics
@@ -17,45 +18,138 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
         Z_Negative,
     }
 
+    /// <summary>
+    /// 物理参数曲线的采样模式(与 native KawaiiTypes.h EKawaiiCurveEvalMode 一致)。
+    /// </summary>
+    public enum EKawaiiCurveEvalMode : byte
+    {
+        /// <summary>按关键点索引: i/(n-1)。</summary>
+        IndexRate = 0,
+        /// <summary>按链长归一化位置: LengthFromRoot/TotalLength。</summary>
+        LengthRate,
+        /// <summary>按节点内最长链归一化(保留与上游对齐, 目前同 LengthRate 处理)。</summary>
+        AbsoluteLengthRate,
+    }
+
+    /// <summary>
+    /// Managed, serializable wrapper that INTERNALLY holds the native value-struct
+    /// EngineNS.KawaiiPhysics.FKawaiiPhySettings and exposes its fields as [Rtti.Meta]
+    /// properties so the engine serializer can persist them.
+    ///
+    /// Why not AuxPtrType&lt;FKawaiiPhySettings&gt;: AuxPtrType is for ref-counted native heap
+    /// objects (IUnknown, real NativePointer). FKawaiiPhySettings is a plain inline value
+    /// struct whose NativePointer is always Zero, so there is nothing to ref-count/dispose.
+    /// We therefore hold it by value and view its raw m_ fields (managed access, no P/Invoke).
+    /// Convert to the native struct at the solver boundary via ToNative().
+    /// </summary>
+    public class TtKawaiiPhySettings : BaseSerializer
+    {
+        private EngineNS.KawaiiPhysics.FKawaiiPhySettings mSettings;
+
+        public TtKawaiiPhySettings()
+        {
+            // A native value-struct constructed in managed memory is zero-initialised and
+            // does NOT get the C++ default values; apply the engine defaults explicitly.
+            // Lengths are in mesh space = METERS (see FKawaiiPhySettings in KawaiiPhySettings.h);
+            // upstream KawaiiPhysics is a UE plugin and authored these in centimeters.
+            mSettings.m_Stiffness = 0.05f;
+            mSettings.m_Damping = 0.1f;
+            mSettings.m_WorldDampingLocation = 0.8f;
+            mSettings.m_WorldDampingRotation = 0.8f;
+            mSettings.m_LimitAngle = 0.0f;
+            mSettings.m_Radius = 0.03f;      // meters (upstream cm default was 3.0)
+            mSettings.m_WindCoefficient = 1.0f;
+            mSettings.m_DragCoefficient = 0.0f;
+            mSettings.m_MaxFrameDisplacement = 0.0f;
+        }
+
+        /// <summary> Pull back toward the animated pose: 0 = pure physics (never returns to the
+        /// animated shape), 1 = snap to animation. </summary>
+        [Rtti.Meta]
+        public float Stiffness { get => mSettings.m_Stiffness; set => mSettings.m_Stiffness = value; }
+        [Rtti.Meta]
+        public float Damping { get => mSettings.m_Damping; set => mSettings.m_Damping = value; }
+        /// <summary> How much of the actor's world motion this particle does NOT follow:
+        /// 1 = keeps its world position (max flow), 0 = rigidly glued to the actor. </summary>
+        [Rtti.Meta]
+        public float WorldDampingLocation { get => mSettings.m_WorldDampingLocation; set => mSettings.m_WorldDampingLocation = value; }
+        [Rtti.Meta]
+        public float WorldDampingRotation { get => mSettings.m_WorldDampingRotation; set => mSettings.m_WorldDampingRotation = value; }
+        [Rtti.Meta]
+        public float LimitAngle { get => mSettings.m_LimitAngle; set => mSettings.m_LimitAngle = value; }
+        /// <summary> Collision radius in meters (upstream cm default was 3.0). </summary>
+        [Rtti.Meta]
+        public float Radius { get => mSettings.m_Radius; set => mSettings.m_Radius = value; }
+        [Rtti.Meta]
+        public float WindCoefficient { get => mSettings.m_WindCoefficient; set => mSettings.m_WindCoefficient = value; }
+        [Rtti.Meta]
+        public float DragCoefficient { get => mSettings.m_DragCoefficient; set => mSettings.m_DragCoefficient = value; }
+        [Rtti.Meta]
+        public float MaxFrameDisplacement { get => mSettings.m_MaxFrameDisplacement; set => mSettings.m_MaxFrameDisplacement = value; }
+
+        /// <summary> Return the wrapped native value-struct for passing into the solver. </summary>
+        public EngineNS.KawaiiPhysics.FKawaiiPhySettings ToNative() => mSettings;
+
+        /// <summary> Deep copy (setups previously copied by value when this was a struct). </summary>
+        public TtKawaiiPhySettings Clone()
+        {
+            var r = new TtKawaiiPhySettings();
+            r.mSettings = mSettings; // struct value-copy
+            return r;
+        }
+    }
+
     public static class TtKawaiiPhysicsSetupDefaults
     {
-        public static EngineNS.KawaiiPhysics.FKawaiiPhySettings CreatePhysicsSettings()
+        public static TtKawaiiPhySettings CreatePhysicsSettings()
         {
-            return new EngineNS.KawaiiPhysics.FKawaiiPhySettings()
+            return new TtKawaiiPhySettings()
             {
                 Stiffness = 0.05f,
                 Damping = 0.1f,
                 WorldDampingLocation = 0.8f,
                 WorldDampingRotation = 0.8f,
                 LimitAngle = 0.0f,
-                Radius = 3.0f,
+                Radius = 0.03f,          // meters (upstream cm default was 3.0)
                 WindCoefficient = 1.0f,
                 DragCoefficient = 0.0f,
                 MaxFrameDisplacement = 0.0f,
             };
         }
 
-        public static EngineNS.KawaiiPhysics.FKawaiiPhySettings CreatePhysicsSettingsRandom()
+        public static TtKawaiiPhySettings CreatePhysicsSettingsRandom()
         {
-            return new EngineNS.KawaiiPhysics.FKawaiiPhySettings();
+            return new TtKawaiiPhySettings()
+            {
+                Stiffness = 0.0f,
+                Damping = 0.0f,
+                WorldDampingLocation = 0.0f,
+                WorldDampingRotation = 0.0f,
+                LimitAngle = 0.0f,
+                Radius = 0.0f,
+                WindCoefficient = 0.0f,
+                DragCoefficient = 0.0f,
+                MaxFrameDisplacement = 0.0f,
+            };
         }
     }
 
     /// <summary>
     /// Chain simulation setup data. Configures a single bone chain for physics simulation.
     /// </summary>
-    public class TtKawaiiChainSetup
+    [EGui.Controls.PropertyGrid.TtPropertyOrder(Order = EGui.Controls.PropertyGrid.TtPropertyOrderAttribute.EPropertyOrder.DefinitionOrder)]
+    public class TtKawaiiChainSetup : BaseSerializer
     {
         [Rtti.Meta]
         public string Name { get; set; } = "Chain";
 
         [Rtti.Meta]
         [TtSkeletonBoneIndexPickerEditorAttribute]
-        public int RootBoneIndex { get; set; } = -1;
+        public LimbIndexInSkeleton RootBoneIndex { get; set; }
 
         [Rtti.Meta]
         [TtSkeletonBoneIndexPickerEditorAttribute]
-        public int EndBoneIndex { get; set; } = -1;
+        public LimbIndexInSkeleton EndBoneIndex { get; set; }
 
         [Rtti.Meta]
         public float TailBoneLength { get; set; } = 0.0f;
@@ -79,81 +173,129 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
         public int LODThreshold { get; set; } = -1;
 
         [Rtti.Meta]
-        public EngineNS.KawaiiPhysics.FKawaiiPhySettings PhysicsSettings { get; set; } = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettings();
+        public TtKawaiiPhySettings PhysicsSettings { get; set; } = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettings();
 
         [Rtti.Meta]
-        public EngineNS.KawaiiPhysics.FKawaiiPhySettings PhysicsSettingsRandom { get; set; } = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettingsRandom();
+        public TtKawaiiPhySettings PhysicsSettingsRandom { get; set; } = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettingsRandom();
+
+        // ─── 沿链逐骨骼参数曲线 ────────────────────────────────────────
+        // 运行时每粒子按 PhysicsCurveMode 采样得到 rate, 将对应基准标量乘以
+        // Curve.Eval(rate)(曲线为空时乘 1, 即全链一致, 与旧行为兼容)。
+        //
+        // 下面的 YMax 只是编辑器量程的**默认值**, 每条曲线可在面板上自己改(存在
+        // TtKawaiiCurve.ViewYMin/ViewYMax 里随资产持久化)。
+        // Stiffness/Damping/WorldDamping* 四项最终会被 clamp 到 0..1, 但曲线上限不能
+        // 封在 1 —— 两个 0..1 相乘只会更小, 封顶就只能衰减。给 4 倍余量, 使
+        // "base 取小值 + 曲线局部拉到 1" 这种用法可行。
+
+        [Rtti.Meta]
+        public EKawaiiCurveEvalMode PhysicsCurveMode { get; set; } = EKawaiiCurveEvalMode.LengthRate;
+
+        /// <summary> Stiffness 沿链乘子(最终 clamp 到 0..1)。 </summary>
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 4.0f)]
+        public TtKawaiiCurve StiffnessCurve { get; set; } = new TtKawaiiCurve();
+
+        /// <summary> Damping 沿链乘子(最终 clamp 到 0..1)。 </summary>
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 4.0f)]
+        public TtKawaiiCurve DampingCurve { get; set; } = new TtKawaiiCurve();
+
+        /// <summary> WorldDampingLocation 沿链乘子(最终 clamp 到 0..1)。 </summary>
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 4.0f)]
+        public TtKawaiiCurve WorldDampingLocationCurve { get; set; } = new TtKawaiiCurve();
+
+        /// <summary> WorldDampingRotation 沿链乘子(最终 clamp 到 0..1)。 </summary>
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 4.0f)]
+        public TtKawaiiCurve WorldDampingRotationCurve { get; set; } = new TtKawaiiCurve();
+
+        /// <summary> LimitAngle 沿链乘子(0..2, 允许放大角度限制)。 </summary>
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 2.0f)]
+        public TtKawaiiCurve LimitAngleCurve { get; set; } = new TtKawaiiCurve();
+
+        /// <summary> Radius 沿链乘子(0..2, 尖端可比根部细/粗)。 </summary>
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 2.0f)]
+        public TtKawaiiCurve RadiusCurve { get; set; } = new TtKawaiiCurve();
+
+        /// <summary> Drag 沿链乘子(0..2)。 </summary>
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 2.0f)]
+        public TtKawaiiCurve DragCurve { get; set; } = new TtKawaiiCurve();
+
+        /// <summary> Wind 沿链乘子(0..2)。 </summary>
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 2.0f)]
+        public TtKawaiiCurve WindCurve { get; set; } = new TtKawaiiCurve();
+
         public TtKawaiiChainSetup()
         {
 
         }
-        public TtKawaiiChainSetup(
-            string name = "Chain",
-            int rootBoneIndex = -1,
-            int endBoneIndex = -1,
-            float tailBoneLength = 0.0f,
-            EKawaiiTailBoneAxis tailBoneAxis = EKawaiiTailBoneAxis.X_Positive,
-            bool constrainBoneLength = true,
-            float boneLengthConstraintBlend = 1.0f,
-            bool rootCollision = false,
-            int lodThreshold = -1)
-        {
-            Name = name;
-            RootBoneIndex = rootBoneIndex;
-            EndBoneIndex = endBoneIndex;
-            TailBoneLength = tailBoneLength;
-            TailBoneAxis = tailBoneAxis;
-            ConstrainBoneLength = constrainBoneLength;
-            BoneLengthConstraintBlend = boneLengthConstraintBlend;
-            RootCollision = rootCollision;
-            LODThreshold = lodThreshold;
-        }
-
     }
 
     /// <summary>
     /// Cloth simulation setup data. Extends chain setup with cloth-specific settings.
     /// </summary>
+    [EGui.Controls.PropertyGrid.TtPropertyOrder(Order = EGui.Controls.PropertyGrid.TtPropertyOrderAttribute.EPropertyOrder.DefinitionOrder)]
     public class TtKawaiiClothSetup : TtKawaiiChainSetup
     {
         [Rtti.Meta]
         public bool LoopChains { get; set; } = false;
+
+        // ─── 布料结构约束刚度曲线(沿链位置采样, 值为刚度) ────────────────
+        // native 将 (1 - Eval(rate)) 作为 XPBD compliance; 曲线为空时视为刚度 0(完全柔)。
+        // 这里的值是刚度本身(不是乘子), 有意义区间就是 0..1, 所以默认量程保持 0..1。
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 1.0f)]
+        public TtKawaiiCurve VerticalShrinkStiffness { get; set; } = new TtKawaiiCurve();
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 1.0f)]
+        public TtKawaiiCurve VerticalStretchStiffness { get; set; } = new TtKawaiiCurve();
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 1.0f)]
+        public TtKawaiiCurve HorizontalShrinkStiffness { get; set; } = new TtKawaiiCurve();
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 1.0f)]
+        public TtKawaiiCurve HorizontalStretchStiffness { get; set; } = new TtKawaiiCurve();
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 1.0f)]
+        public TtKawaiiCurve VerticalBendStiffness { get; set; } = new TtKawaiiCurve();
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 1.0f)]
+        public TtKawaiiCurve HorizontalBendStiffness { get; set; } = new TtKawaiiCurve();
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 1.0f)]
+        public TtKawaiiCurve ShearShrinkStiffness { get; set; } = new TtKawaiiCurve();
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 1.0f)]
+        public TtKawaiiCurve ShearStretchStiffness { get; set; } = new TtKawaiiCurve();
+
         public TtKawaiiClothSetup()
         {
 
-        }
-        public TtKawaiiClothSetup(
-            string name = "Cloth",
-            int rootBoneIndex = -1,
-            int endBoneIndex = -1,
-            float tailBoneLength = 0.0f,
-            EKawaiiTailBoneAxis tailBoneAxis = EKawaiiTailBoneAxis.X_Positive,
-            bool constrainBoneLength = true,
-            float boneLengthConstraintBlend = 1.0f,
-            bool rootCollision = false,
-            int lodThreshold = -1,
-            bool loopChains = false)
-            : base(name, rootBoneIndex, endBoneIndex, tailBoneLength, tailBoneAxis, constrainBoneLength, boneLengthConstraintBlend, rootCollision, lodThreshold)
-        {
-            LoopChains = loopChains;
         }
     }
 
     /// <summary>
     /// Cosserat rod simulation setup data.
     /// </summary>
-    public class TtKawaiiRodSetup
+    [EGui.Controls.PropertyGrid.TtPropertyOrder(Order = EGui.Controls.PropertyGrid.TtPropertyOrderAttribute.EPropertyOrder.DefinitionOrder)]
+    public class TtKawaiiRodSetup : BaseSerializer
     {
         [Rtti.Meta]
         public string Name { get; set; } = "Rod";
 
         [Rtti.Meta]
   		[TtSkeletonBoneIndexPickerEditorAttribute]
-        public int RootBoneIndex { get; set; } = -1;
+        public LimbIndexInSkeleton RootBoneIndex { get; set; }
 
         [Rtti.Meta]
   		[TtSkeletonBoneIndexPickerEditorAttribute]
-        public int EndBoneIndex { get; set; } = -1;
+        public LimbIndexInSkeleton EndBoneIndex { get; set; }
 
         [Rtti.Meta]
         public float StretchShearStiffness { get; set; } = 1.0f;
@@ -171,32 +313,29 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
         public int LODThreshold { get; set; } = -1;
 
         [Rtti.Meta]
-        public EngineNS.KawaiiPhysics.FKawaiiPhySettings PhysicsSettings { get; set; } = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettings();
+        public TtKawaiiPhySettings PhysicsSettings { get; set; } = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettings();
 
         [Rtti.Meta]
-        public EngineNS.KawaiiPhysics.FKawaiiPhySettings PhysicsSettingsRandom { get; set; } = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettingsRandom();
+        public TtKawaiiPhySettings PhysicsSettingsRandom { get; set; } = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettingsRandom();
+
+        // ─── Cosserat rod 逐段刚度曲线(与基准刚度相乘, 最终 clamp 到 0..1) ────────
+        // 同样给 4 倍余量: 封顶在 1 的乘子只能衰减, 无法把某段拉得更硬。
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 4.0f)]
+        public TtKawaiiCurve StretchShearStiffnessCurve { get; set; } = new TtKawaiiCurve();
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 4.0f)]
+        public TtKawaiiCurve BendTwistStiffnessCurve { get; set; } = new TtKawaiiCurve();
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 4.0f)]
+        public TtKawaiiCurve PointAttachStiffnessCurve { get; set; } = new TtKawaiiCurve();
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 4.0f)]
+        public TtKawaiiCurve OrientAttachStiffnessCurve { get; set; } = new TtKawaiiCurve();
+
         public TtKawaiiRodSetup()
         {
 
-        }
-        public TtKawaiiRodSetup(
-            string name = "Rod",
-            int rootBoneIndex = -1,
-            int endBoneIndex = -1,
-            float stretchShearStiffness = 1.0f,
-            float bendTwistStiffness = 0.05f,
-            float pointAttachStiffness = 0.10f,
-            float orientAttachStiffness = 0.05f,
-            int lodThreshold = -1)
-        {
-            Name = name;
-            RootBoneIndex = rootBoneIndex;
-            EndBoneIndex = endBoneIndex;
-            StretchShearStiffness = stretchShearStiffness;
-            BendTwistStiffness = bendTwistStiffness;
-            PointAttachStiffness = pointAttachStiffness;
-            OrientAttachStiffness = orientAttachStiffness;
-            LODThreshold = lodThreshold;
         }
     }
 
@@ -218,6 +357,6 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
         /// Bone index that drives this collider's transform. -1 for world-space static colliders.
         /// </summary>
         [Rtti.Meta]
-        public int AttachBoneIndex { get; set; } = -1;
+        public LimbIndexInSkeleton AttachBoneIndex { get; set; }
     }
 }

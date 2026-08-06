@@ -1,12 +1,11 @@
 ﻿using EngineNS.Animation.Command;
 using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
 using EngineNS.Bricks.Animation.KawaiiPhysics;
+using EngineNS.DesignMacross;
 using EngineNS.Thread.Async;
-using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using static NPOI.HSSF.Util.HSSFColor;
 
 namespace EngineNS.Animation.BlendTree.Node
 {
@@ -90,6 +89,14 @@ namespace EngineNS.Animation.BlendTree.Node
         public override void Tick(float elapseSecond, ref FAnimBlendTreeContext context)
         {
             mAnimationCommand.Desc.ElapseSecond = elapseSecond;
+            if (KawaiiComponent != null && CenterData is TtDesignMacrossBase dmc && dmc.MacrossNode != null)
+            {
+                var abs = dmc.MacrossNode.Placement.AbsTransform;
+                KawaiiComponent.SetComponentTransform(
+                    abs.Position.ToSingleVector3(),
+                    abs.Quat,
+                    abs.Scale);
+            }
         }
     }
 }

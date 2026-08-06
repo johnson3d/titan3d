@@ -129,6 +129,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public EGui.Controls.PropertyGrid.TtPropertyGrid PGMember { get; set; } = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public List<TtMacrossMethodGraph> OpenFunctions = new List<TtMacrossMethodGraph>();
+
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退旧流程时把mEditorHistory改为null即可。
+        // History挂编辑器级: 所有打开的方法图共用同一个栈(OpenMethodGraph时挂接), 图切换不清空历史
+        public bool EnableUndoRedo => EditorHistory != null;
+        public EngineNS.Editor.Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        EngineNS.Editor.Infrastructure.TtEditorHistory mEditorHistory = new EngineNS.Editor.Infrastructure.TtEditorHistory();
+        EngineNS.Editor.Infrastructure.TtEditorHistoryPanel mHistoryPanel = new EngineNS.Editor.Infrastructure.TtEditorHistoryPanel();
+        #endregion
+
         public MemberVar DraggingMember { get; set; }
         public bool IsDraggingMember { get; set; } = false;
         public MethodLocalVar DraggingLocalVar { get; set; }
@@ -170,6 +180,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             SaveClassGraph(AssetName);
             GenerateCode();
             CompileCode();
+            mEditorHistory?.SetSavePoint();
 
             var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as TtMacrossAMeta;
             if (ameta != null)
@@ -702,19 +713,21 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         void SaveCSFile(string code)
         {
             var fileName = AssetName.Address + FolderExt + "/" + DefClass.ClassName + ".cs";
-            using(var sr = new System.IO.StreamWriter(fileName, false, Encoding.UTF8))
-            {
-                sr.Write(code);
-            }
+            //using(var sr = new System.IO.StreamWriter(fileName, false, Encoding.UTF8))
+            //{
+            //    sr.Write(code);
+            //}
+            IO.TtFileManager.WriteAllText(fileName, code, Encoding.UTF8);
             TtEngine.Instance.SourceControlModule.AddFile(fileName);
         }
         void SaveHlslFile(string code)
         {
             var fileName = AssetName.Address + FolderExt + "/" + DefClass.ClassName + ".shader";
-            using (var sr = new System.IO.StreamWriter(fileName, false, Encoding.UTF8))
-            {
-                sr.Write(code);
-            }
+            //using (var sr = new System.IO.StreamWriter(fileName, false, Encoding.UTF8))
+            //{
+            //    sr.Write(code);
+            //}
+            IO.TtFileManager.WriteAllText(fileName, code, Encoding.UTF8);
             TtEngine.Instance.SourceControlModule.AddFile(fileName);
         }
 
@@ -792,6 +805,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("GraphWindow", mDockKeyClass), graphId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName(GetCodeEditorWindowTitle(), mDockKeyClass), graphId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeProperty", mDockKeyClass), propertyId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), propertyId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("UnionNodeConfig", mDockKeyClass), unionConfigId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("ClassView", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderFinish(id);
@@ -805,6 +819,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         enum EToolBarButton : int
         {
             Save,
+            Undo,
+            Redo,
             Debug,
             Disable,
             GenCode,
@@ -835,6 +851,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 ref mToolBtnDatas[(int)EToolBarButton.Save].IsMouseDown, ref mToolBtnDatas[(int)EToolBarButton.Save].IsMouseHover, null, "  Save "))
             {
                 Save();
+            }
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
+            if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
+                ref mToolBtnDatas[(int)EToolBarButton.Undo].IsMouseDown, ref mToolBtnDatas[(int)EToolBarButton.Undo].IsMouseHover, null, "Undo", false, -1, 0, spacing))
+            {
+                mEditorHistory?.Undo();
+            }
+            if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
+                ref mToolBtnDatas[(int)EToolBarButton.Redo].IsMouseDown, ref mToolBtnDatas[(int)EToolBarButton.Redo].IsMouseHover, null, "Redo", false, -1, 0, spacing))
+            {
+                mEditorHistory?.Redo();
             }
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawCheckBox(in drawList, null, "EditorDebug", ref mCSCodeGen.IsEditorDebug))
@@ -918,6 +945,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (result)
             {
                 DrawToolbar();
+                // mEditorHistory为null时快捷键为空操作
+                EngineNS.Editor.Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
 
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
@@ -936,6 +965,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             DrawGraph();
             DrawPropertyGrid();
             DrawUnionNodeConfig();
+            if (mEditorHistory != null)
+            {
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+            }
 
             if (IsDraggingMember == true && ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left) == false)
             {
@@ -1465,6 +1498,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (mSettingCurrentFuncIndex < 0)
             {
                 method.VisibleInClassGraphTables = true;
+                // 编辑器级历史栈: 所有方法图共用, 跨图操作在同一栈里(命令闭包持有各自的graph引用)
+                method.HistoryHost = mEditorHistory;
                 method.GraphRenderer.SetGraph(method);
                 mSettingCurrentFuncIndex = OpenFunctions.Count;
                 OpenFunctions.Add(method);
@@ -1871,6 +1906,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             LoadClassGraph(AssetName);
             //LoadClassGraph(RName.GetRName("UTest/class_graph.xml"));
+            mEditorHistory?.Clear();
+            PGMember.HistoryHost = mEditorHistory;
             await Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }

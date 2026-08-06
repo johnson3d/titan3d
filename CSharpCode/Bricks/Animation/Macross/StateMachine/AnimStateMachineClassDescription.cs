@@ -18,7 +18,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine
 {
     [OutlineElement_Branch(typeof(TtOutlineElement_AnimStateMachine))]
     [Designable(typeof(TtAnimStateMachine), "AnimStateMachine")]
-    public class TtAnimStateMachineClassDescription : TtTimedStateMachineClassDescription
+    public class TtAnimStateMachineClassDescription : TtTimedStateMachineClassDescription, IAnimMacrossClassDescription
     {
         [Rtti.Meta("")]
         [Category("Option")]

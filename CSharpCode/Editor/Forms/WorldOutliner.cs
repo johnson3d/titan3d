@@ -20,6 +20,8 @@ namespace EngineNS.Editor.Forms
             }
         }
         public EGui.Slate.TtWorldViewportSlate WorldViewportState { get; set; }
+        // 统一Undo/Redo接入点: 宿主编辑器开门时挂接, 右键删除节点等操作记录为可撤销命令; 为null时行为不变
+        public EngineNS.Editor.Infrastructure.TtEditorHistory HistoryHost;
 
         public TtWorldOutliner(EGui.Slate.TtWorldViewportSlate viewport, bool regRoot = true)
         {
@@ -475,7 +477,7 @@ namespace EngineNS.Editor.Forms
             {
                 if (World.Root != node)
                 {
-                    node.DeleteFromScene();
+                    TtSceneEditor.DeleteNodeWithHistory(HistoryHost, node);
                 }
             }
         }

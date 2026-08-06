@@ -18,6 +18,15 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         public TtGraphRenderer GraphRenderer { get; } = new TtGraphRenderer();
         public EGui.Controls.PropertyGrid.TtPropertyGrid NodePropGrid { get; } = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public EGui.Controls.PropertyGrid.TtPropertyGrid PolicyPropGrid { get; } = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退旧流程时把mEditorHistory改为null即可
+        public bool EnableUndoRedo => EditorHistory != null;
+        public EngineNS.Editor.Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        EngineNS.Editor.Infrastructure.TtEditorHistory mEditorHistory = new EngineNS.Editor.Infrastructure.TtEditorHistory();
+        EngineNS.Editor.Infrastructure.TtEditorHistoryPanel mHistoryPanel = new EngineNS.Editor.Infrastructure.TtEditorHistoryPanel();
+        #endregion
+
         public float LeftWidth = 0;
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
@@ -32,7 +41,12 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         public void Dispose()
         {
             NodePropGrid.Target = null;
+            NodePropGrid.HistoryHost = null;
             PolicyPropGrid.Target = null;
+            PolicyPropGrid.HistoryHost = null;
+            if (PolicyGraph != null)
+                PolicyGraph.PolicyGraph.HistoryHost = null;
+            mEditorHistory?.Clear();
         }
         public IRootForm GetRootForm()
         {
@@ -69,6 +83,10 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             PolicyPropGrid.Target = PolicyGraph.PolicyGraph.RenderPolicy;
 
             GraphRenderer.SetGraph(this.PolicyGraph.PolicyGraph);
+            mEditorHistory?.Clear();
+            PolicyGraph.PolicyGraph.HistoryHost = mEditorHistory;
+            NodePropGrid.HistoryHost = mEditorHistory;
+            PolicyPropGrid.HistoryHost = mEditorHistory;
 
             return true;
         }
@@ -112,6 +130,10 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             DrawRenderGraph();
             DrawPolicyDetails();
             DrawNodeDetails();
+            if (mEditorHistory != null)
+            {
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+            }
         }
         protected void DrawToolBar()
         {
@@ -120,6 +142,10 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             {
                 var noused = Save();
             }
+            ImGuiAPI.SameLine(0, -1);
+            // mEditorHistory为null时按钮/快捷键均为空操作
+            EngineNS.Editor.Infrastructure.EditorUndoUtils.DrawUndoRedoButtons(mEditorHistory);
+            EngineNS.Editor.Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Compile", in btSize))
             {
@@ -160,6 +186,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("RenderGraph", mDockKeyClass), middleId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("PolicyDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), rightUpId);
 
             ImGuiAPI.DockBuilderFinish(id);
         }
@@ -199,6 +226,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         private async System.Threading.Tasks.Task Save()
         {
             PolicyGraph.SaveAssetTo(AssetName);
+            mEditorHistory?.SetSavePoint();
 
             //Editor.USnapshot.Save(AssetName, PolicyGraph.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
         }

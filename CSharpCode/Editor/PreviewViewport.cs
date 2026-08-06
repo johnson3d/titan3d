@@ -121,7 +121,10 @@ namespace EngineNS.Editor
 
             IsInlitialized = true;
             StartTime = System.DateTime.Now;
-            HasAssetSnap = IO.TtFileManager.FileExists(PreviewAsset.Address + ".snap");
+            if (PreviewAsset != null)
+            {
+                HasAssetSnap = IO.TtFileManager.FileExists(PreviewAsset.Address + ".snap");
+            }
             return true;
         }
         public bool HasAssetSnap = false;

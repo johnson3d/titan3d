@@ -19,6 +19,10 @@ namespace GpuDump
 
 		static void OnDredDump(NxRHI::IGpuDevice* device, const char* dir);
 
+		// Poll the Aftermath crash dump status until finished, expected to be called on device removed/lost
+		// before notifying the application(see GFSDK_Aftermath_GpuCrashDump.h device lost flow)
+		static void WaitDumpComplete();
+
 		// Set the root directory where all Aftermath output files (crash dumps, shader debug info,
 		// shader binaries, JSON, etc.) will be written. The directory is created if it does not
 		// exist. Trailing slashes are normalized. Pass an empty string to fall back to the current

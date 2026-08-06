@@ -1,4 +1,6 @@
 #pragma once
+#include <set>
+#include <atomic>
 #include "../NxGpuDevice.h"
 #include "../NxEvent.h"
 #include "VKPreHead.h"
@@ -59,6 +61,8 @@ namespace NxRHI
 		DefineVKFunctionPtr(vkSetDebugUtilsObjectNameEXT);
 		DefineVKFunctionPtr(vkCmdBeginDebugUtilsLabelEXT);
 		DefineVKFunctionPtr(vkCmdEndDebugUtilsLabelEXT);
+		DefineVKFunctionPtr(vkQueueBeginDebugUtilsLabelEXT);
+		DefineVKFunctionPtr(vkQueueEndDebugUtilsLabelEXT);
 		DefineVKFunctionPtr(vkDebugMarkerSetObjectNameEXT);
 		DefineVKFunctionPtr(vkCmdDebugMarkerBeginEXT);
 		DefineVKFunctionPtr(vkCmdDebugMarkerEndEXT);
@@ -152,6 +156,15 @@ namespace NxRHI
 		virtual IComputeDraw* CreateComputeDraw(const char* file, int line) override;
 		virtual IGpuScope* CreateGpuScope(const char* file, int line) override;
 		virtual void SetBreakOnID(int id, bool open) override;
+		virtual void ShowDeviceMessage(int id, bool show) override;
+		bool IsBreakOnID(int id) const {
+			return mBreakOnIDs.find(id) != mBreakOnIDs.end();
+		}
+		bool IsMessageHidden(int id) const {
+			return mHiddenMessageIDs.find(id) != mHiddenMessageIDs.end();
+		}
+		//align with DX12GpuDevice::OnDeviceRemoved: wait aftermath dump/log device fault/notify the application
+		void OnDeviceRemoved();
 
 		virtual void TickPostEvents() override;
 	private: 
@@ -218,8 +231,25 @@ namespace NxRHI
 			bool IsDynamicRendering = false;
 			bool IsDynamicRenderingLocalRead = false;
 			bool IsSynchronization2 = false;
+			bool IsRayQuery = false;
+			bool IsMeshShader = false;
 		};
 		FVulkanExt mVulkanExt;
+		std::set<int>						mBreakOnIDs;
+		std::set<int>						mHiddenMessageIDs;
+
+		//VK_KHR_acceleration_structure/VK_EXT_mesh_shader device functions(loaded when the extension is enabled)
+		PFN_vkCreateAccelerationStructureKHR			fn_vkCreateAccelerationStructureKHR = nullptr;
+		PFN_vkDestroyAccelerationStructureKHR			fn_vkDestroyAccelerationStructureKHR = nullptr;
+		PFN_vkGetAccelerationStructureBuildSizesKHR		fn_vkGetAccelerationStructureBuildSizesKHR = nullptr;
+		PFN_vkCmdBuildAccelerationStructuresKHR			fn_vkCmdBuildAccelerationStructuresKHR = nullptr;
+		PFN_vkGetAccelerationStructureDeviceAddressKHR	fn_vkGetAccelerationStructureDeviceAddressKHR = nullptr;
+		PFN_vkCmdCopyAccelerationStructureKHR			fn_vkCmdCopyAccelerationStructureKHR = nullptr;
+		PFN_vkCmdDrawMeshTasksEXT						fn_vkCmdDrawMeshTasksEXT = nullptr;
+		PFN_vkCmdDrawMeshTasksIndirectEXT				fn_vkCmdDrawMeshTasksIndirectEXT = nullptr;
+		//VK_EXT_device_fault(the DRED counterpart on VK)
+		PFN_vkGetDeviceFaultInfoEXT						fn_vkGetDeviceFaultInfoEXT = nullptr;
+		std::atomic<bool>								mDeviceRemovedHandled = false;
 	private:
 		bool GetAllocatorInfo(VkBufferUsageFlags flags, VkMemoryPropertyFlags prop, UINT& typeIndex, UINT& alignment);
 		void CreateNullObjects();
@@ -233,6 +263,8 @@ namespace NxRHI
 		virtual void ReleaseIdleCmdlist(ICommandList* cmd) override;
 		virtual UINT64 Flush(EQueueType type) override;
 		virtual void WaitFence(IFence* fence, UINT64 value, EQueueType type) override;
+		virtual void BeginEvent(const char* info, DWORD color = 0) override;
+		virtual void EndEvent(const char* info) override;
 		bool GraphicsEqualPresentQueue() const {
 			return mGraphicsQueueIndex == mPresentQueueIndex;
 		}

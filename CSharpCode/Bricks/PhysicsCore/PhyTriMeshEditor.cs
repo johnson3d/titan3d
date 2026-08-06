@@ -23,6 +23,15 @@ namespace EngineNS.Bricks.PhysicsCore
         public Graphics.Mesh.TtMaterialMesh ShowMesh;
         public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
         public EGui.Controls.PropertyGrid.TtPropertyGrid TriMeshPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
+
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退旧流程时把mEditorHistory改为null即可
+        public bool EnableUndoRedo => EditorHistory != null;
+        public Editor.Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        Editor.Infrastructure.TtEditorHistory mEditorHistory = new Editor.Infrastructure.TtEditorHistory();
+        Editor.Infrastructure.TtEditorHistoryPanel mHistoryPanel = new Editor.Infrastructure.TtEditorHistoryPanel();
+        #endregion
+
         ~UPhyTriMeshEditor()
         {
             Dispose();
@@ -31,6 +40,8 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             TriMesh = null;
             TriMeshPropGrid.Target = null;
+            TriMeshPropGrid.HistoryHost = null;
+            mEditorHistory?.Clear();
 
             CoreSDK.DisposeObject(ref PreviewViewport);
         }
@@ -107,6 +118,8 @@ namespace EngineNS.Bricks.PhysicsCore
             TtEngine.Instance.TickableManager.AddTickable(this);
 
             TriMeshPropGrid.Target = TriMesh;
+            mEditorHistory?.Clear();
+            TriMeshPropGrid.HistoryHost = mEditorHistory;
             return true;
         }
         public void OnCloseEditor()
@@ -133,6 +146,7 @@ namespace EngineNS.Bricks.PhysicsCore
             ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("LeftView", mDockKeyClass), leftId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Right", mDockKeyClass), rightId);
             ImGuiAPI.DockBuilderFinish(id);
         }
@@ -168,6 +182,10 @@ namespace EngineNS.Bricks.PhysicsCore
 
             DrawLeft();
             DrawRight();
+            if (mEditorHistory != null)
+            {
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+            }
         }
         protected unsafe void DrawToolBar()
         {
@@ -176,6 +194,10 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 //Editor.USnapshot.Save(TriMesh.AssetName, TriMesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
+            ImGuiAPI.SameLine(0, -1);
+            // mEditorHistory为null时按钮/快捷键均为空操作
+            Editor.Infrastructure.EditorUndoUtils.DrawUndoRedoButtons(mEditorHistory);
+            Editor.Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
         }
         bool mLeftDraw = true;
         protected unsafe void DrawLeft()

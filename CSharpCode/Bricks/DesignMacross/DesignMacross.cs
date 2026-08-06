@@ -73,6 +73,12 @@ namespace EngineNS.DesignMacross
         }
         [Rtti.Meta("")]
         public string BaseTypeStr { get; set; }
+        /// <summary>
+        /// 动画预览面板使用的预览模型, 参考TtAnimationClipAMeta.PreviewMeshName
+        /// </summary>
+        [Rtti.Meta("")]
+        [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
+        public RName PreviewMeshName { get; set; }
         public override string GetAssetTypeName()
         {
             return "DesignMacross";

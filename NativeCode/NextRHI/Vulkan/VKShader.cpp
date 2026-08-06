@@ -402,7 +402,7 @@ namespace NxRHI
 			binder->Space = descriptorSet;
 			binder->Size = 0;
 			binder->Slot = binding;
-			binder->IsStructuredBuffer = TRUE;
+			binder->ResourceType = EShaderBindResourceType::SBRT_Buffer;
 
 			if (decl_block_name.rfind("type.RWStructuredBuffer") == 0 ||
 				decl_block_name.rfind("type.RWByteAddressBuffer") == 0)
@@ -520,7 +520,7 @@ namespace NxRHI
 			binder->Size = 0;
 			binder->Slot = binding;
 			binder->Type = EShaderBindType::SBT_UAV;
-			binder->IsStructuredBuffer = FALSE;
+			binder->ResourceType = EShaderBindResourceType::SBRT_Image;
 
 			Reflector->Uavs.push_back(binder);
 		}
@@ -540,7 +540,7 @@ namespace NxRHI
 				binder->Size = 0;
 				binder->Slot = binding;
 				binder->Type = EShaderBindType::SBT_SRV;
-				binder->IsStructuredBuffer = FALSE;
+				binder->ResourceType = EShaderBindResourceType::SBRT_Image;
 				Reflector->Srvs.push_back(binder);
 			}
 			{
@@ -568,7 +568,7 @@ namespace NxRHI
 			binder->Size = 0;
 			binder->Slot = binding;
 			binder->Type = EShaderBindType::SBT_SRV;
-			binder->IsStructuredBuffer = FALSE;
+			binder->ResourceType = EShaderBindResourceType::SBRT_Image;
 			Reflector->Srvs.push_back(binder);
 		}
 
@@ -586,8 +586,26 @@ namespace NxRHI
 			binder->Size = 0;
 			binder->Slot = binding;
 			binder->Type = EShaderBindType::SBT_Sampler;
-			binder->IsStructuredBuffer = FALSE;
+			binder->ResourceType = EShaderBindResourceType::SBRT_Image;
 			Reflector->Samplers.push_back(binder);
+		}
+
+		spvc_resources_get_resource_list_for_type(resources, SPVC_RESOURCE_TYPE_ACCELERATION_STRUCTURE, &list, &count);
+		ASSERT(count < typeMaxBinding);
+		for (i = 0; i < count; i++)
+		{//TLAS: RaytracingAccelerationStructure -> VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR
+			auto name = spvc_compiler_get_name(compiler_glsl, list[i].id);
+			auto descriptorSet = spvc_compiler_get_decoration(compiler_glsl, list[i].id, SpvDecorationDescriptorSet);
+			auto binding = spvc_compiler_get_decoration(compiler_glsl, list[i].id, SpvDecorationBinding);
+
+			auto binder = MakeWeakRef(new FShaderBinder(desc->Type));
+			binder->Name = name;
+			binder->Space = descriptorSet;
+			binder->Size = 0;
+			binder->Slot = binding;
+			binder->Type = EShaderBindType::SBT_SRV;
+			binder->ResourceType = EShaderBindResourceType::SBRT_AccelerationStructure;
+			Reflector->Srvs.push_back(binder);
 		}
 
 		const char* output_str = NULL;

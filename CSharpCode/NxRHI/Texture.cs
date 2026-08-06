@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using static EngineNS.EGui.Controls.PropertyGrid.PGPropertyOrderAttribute;
+using static EngineNS.EGui.Controls.PropertyGrid.TtPropertyOrderAttribute;
 using static EngineNS.NxRHI.TtTextureUtility;
 using static EngineNS.RName;
 
@@ -329,7 +329,7 @@ namespace EngineNS.NxRHI
         {
             System.Threading.Interlocked.Decrement(ref NumOfInstance);
         }
-        [PGPropertyOrder(PGPropertyOrderAttribute.EPropertyOrder.DefinitionOrder)]
+        [TtPropertyOrder(Order = TtPropertyOrderAttribute.EPropertyOrder.DefinitionOrder)]
         public class TtPicDesc
         {
             public TtPicDesc()

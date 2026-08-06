@@ -24,7 +24,15 @@ namespace EngineNS.Editor.Forms
         public Editor.TtPreviewViewport PreviewViewport { get; set; } = new Editor.TtPreviewViewport();
         public EGui.Controls.PropertyGrid.TtPropertyGrid MaterialPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public EGui.Controls.PropertyGrid.TtPropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
-        public UMaterialInstanceEditorRecorder ActionRecorder = new UMaterialInstanceEditorRecorder();
+
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退时把mEditorHistory改为null即可(旧ActionRecorder机制已废弃删除)
+        public bool EnableUndoRedo => EditorHistory != null;
+        public Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        Infrastructure.TtEditorHistory mEditorHistory = new Infrastructure.TtEditorHistory();
+        Infrastructure.TtEditorHistoryPanel mHistoryPanel = new Infrastructure.TtEditorHistoryPanel();
+        #endregion
+
         public TtRenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
         GamePlay.Scene.TtMeshNode PreviewNode;
         ~UMaterialInstanceEditor()
@@ -40,9 +48,9 @@ namespace EngineNS.Editor.Forms
                 PreviewViewport = null;
             }
             MaterialPropGrid.Target = null;
+            MaterialPropGrid.HistoryHost = null;
             EditorPropGrid.Target = null;
-            ActionRecorder?.ClearRecords();
-            ActionRecorder = null;
+            mEditorHistory?.Clear();
         }
         public async Thread.Async.TtTask<bool> Initialize()
         {
@@ -133,8 +141,12 @@ namespace EngineNS.Editor.Forms
             LoadingPercent = 0.1f;
             ProgressText = "Initialize PreviewViewport";
 
-            ActionRecorder.ClearRecords();
-            Material.ActionRecorder = ActionRecorder;
+            // 属性修改由PropertyGrid写入漏斗自动记录到统一历史栈
+            if (EnableUndoRedo)
+            {
+                mEditorHistory.Clear();
+                MaterialPropGrid.HistoryHost = mEditorHistory;
+            }
 
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"Material:{name}";
@@ -151,8 +163,8 @@ namespace EngineNS.Editor.Forms
         }
         public void OnCloseEditor()
         {
-            Material.ActionRecorder = null;
-            ActionRecorder.ClearRecords();
+            MaterialPropGrid.HistoryHost = null;
+            mEditorHistory?.Clear();
             TtEngine.Instance.TickableManager.RemoveTickable(this);
             Dispose();
         }
@@ -184,6 +196,7 @@ namespace EngineNS.Editor.Forms
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MaterialDetails", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), rightUpId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), middleId);
 
             ImGuiAPI.DockBuilderFinish(id);
@@ -238,6 +251,10 @@ namespace EngineNS.Editor.Forms
 
             DrawEditorDetails();
             DrawMaterialDetails();
+            if (EnableUndoRedo)
+            {
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+            }
 
             DrawPreview();
         }
@@ -284,6 +301,10 @@ namespace EngineNS.Editor.Forms
                 Material.SaveAssetTo(Material.AssetName);
                 Material.SerialId++;
                 var unused = TtEngine.Instance.GfxDevice.MaterialInstanceManager.ReloadMaterialInstance(Material.AssetName);
+                if (EnableUndoRedo)
+                {
+                    mEditorHistory.SetSavePoint();
+                }
 
                 //USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
@@ -293,15 +314,9 @@ namespace EngineNS.Editor.Forms
                 
             }
             ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))
-            {
-                ActionRecorder.Undo();
-            }
-            ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Redo", in btSize))
-            {
-                ActionRecorder.Redo();
-            }
+            // mEditorHistory为null时按钮/快捷键均为空操作
+            Infrastructure.EditorUndoUtils.DrawUndoRedoButtons(mEditorHistory);
+            Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
         }
         
         public void OnEvent(in Bricks.Input.Event e)
@@ -334,30 +349,6 @@ namespace EngineNS.Editor.Forms
             return AssetName.Name;
         }
         #endregion
-    }
-
-    public class UMaterialInstanceEditorRecorder : GamePlay.Action.UActionRecorder
-    {
-        public override GamePlay.Action.UAction CurrentAction
-        {
-            get
-            {
-                if (mCurrentAction == null)
-                {
-                    mCurrentAction = this.NewAction();
-                }
-                return mCurrentAction;
-            }
-            set => mCurrentAction = value;
-        }
-        public override void OnChanged(GamePlay.Action.UAction.UPropertyModifier modifier)
-        {
-            if (mCurrentAction != null)
-            {
-                mCurrentAction.Name = $"Set:{modifier.PropertyName}";
-            }
-            this.CloseAction();
-        }
     }
 }
 

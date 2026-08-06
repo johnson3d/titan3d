@@ -483,6 +483,9 @@ namespace NxRHI
 		if (Desc.Width == w && Desc.Height == h)
 			return true;
 		
+		//align with DX12SwapChain::Resize: flush all queues before recreating, in-flight commands may still reference the old images
+		device1->GetCmdQueue()->Flush((EQueueType)(EQueueType::QU_Default | EQueueType::QU_Compute | EQueueType::QU_Transfer));
+
 		if (BackBuffers.size() != Desc.BufferCount)
 		{
 			for (auto& i : BackBuffers)
@@ -519,11 +522,20 @@ namespace NxRHI
 		if (false == CheckSwapSurfaceFormat(surfaceFormat, scs.formats))
 			return false;
 
-		VkPresentModeKHR presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+		VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
+		for (auto& i : scs.presentModes)
+		{
+			if (i == VK_PRESENT_MODE_MAILBOX_KHR)
+			{
+				presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+				break;
+			}
+		}
 
 		VkExtent2D extent;
-		extent.width = Desc.Width;
-		extent.height = Desc.Height;
+		extent.width = std::max(scs.capabilities.minImageExtent.width, std::min(scs.capabilities.maxImageExtent.width, Desc.Width));
+		extent.height = std::max(scs.capabilities.minImageExtent.height, std::min(scs.capabilities.maxImageExtent.height, Desc.Height));
+		mCapabilities = scs.capabilities;
 
 		VkSwapchainCreateInfoKHR createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;

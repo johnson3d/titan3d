@@ -11,7 +11,7 @@ namespace EngineNS.Bricks.StateMachine.Macross
 {
     [OutlineElement_Branch(typeof(TtOutlineElement_TimedStateMachine))]
     [Designable(typeof(TtTimedStateMachine), "TimedStateMachine")]
-    public class TtTimedStateMachineClassDescription : TtDesignableVariableDescription
+    public class TtTimedStateMachineClassDescription : TtDesignableVariableDescription, IAnimMacrossClassDescription
     {
         [Rtti.Meta("")]
         public override string Name { get; set; } = "TimeStateMachine";

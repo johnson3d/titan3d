@@ -6,6 +6,85 @@ namespace KawaiiPhysics
 {
 namespace XPBDSolver
 {
+	void ApplyWorldMoveLag(
+		std::vector<FSimParticle>& Particles,
+		const FKawaiiPhysicsContext& Context)
+	{
+		// Component translation this frame, expressed in mesh space.
+		const v3dxVector3 deltaLocCS = QuatRotateVector(
+			QuatInverse(Context.ComponentRotation),
+			Context.ComponentLocation - Context.PrevComponentLocation);
+
+		// Mesh-space operator that undoes this frame's component rotation: Inverse(Cur) * Prev
+		// maps a mesh-space point onto the mesh-space position that keeps its previous world
+		// orientation, i.e. "the particle did not turn with the actor".
+		const v3dxQuaternion lagRot = QuatMultiply(
+			QuatInverse(Context.ComponentRotation), Context.PrevComponentRotation);
+
+		const bool bMoved = !Vec3IsNearlyZero(deltaLocCS);
+		const bool bRotated = fabsf(lagRot.W) < 1.0f - KAWAII_SMALL_NUMBER;
+		if (!bMoved && !bRotated) return;
+
+		for (FSimParticle& P : Particles)
+		{
+			if (P.PinMode != KPM_Dynamic) continue;
+
+			// Position and PrevPosition are shifted together on purpose: a change of reference
+			// frame must not inject velocity by itself. The resulting offset from the (kinematic)
+			// root is what the length constraint turns into a real pull, and UpdateVelocities
+			// then converts that pull into velocity - that is the hair flow.
+			if (bMoved)
+			{
+				const v3dxVector3 lag = deltaLocCS * KawaiiClamp(P.PhysicsSettings.WorldDampingLocation, 0.0f, 1.0f);
+				P.Position = P.Position - lag;
+				P.PrevPosition = P.PrevPosition - lag;
+			}
+
+			if (bRotated)
+			{
+				const float w = KawaiiClamp(P.PhysicsSettings.WorldDampingRotation, 0.0f, 1.0f);
+				const v3dxVector3 rotated = QuatRotateVector(lagRot, P.Position);
+				const v3dxVector3 rotatedPrev = QuatRotateVector(lagRot, P.PrevPosition);
+				P.Position = P.Position + (rotated - P.Position) * w;
+				P.PrevPosition = P.PrevPosition + (rotatedPrev - P.PrevPosition) * w;
+			}
+		}
+	}
+
+	void ApplyPoseStiffness(
+		std::vector<FSimParticle>& Particles,
+		float dt,
+		int32_t TargetFPS)
+	{
+		if (Particles.size() < 2) return;
+
+		// Frame-rate independent blend: alpha = 1 - (1 - Stiffness)^(dt * TargetFPS), so an
+		// authored Stiffness keeps the same feel at 30 / 60 / 120 fps.
+		const float exponent = dt * (float)((TargetFPS > 0) ? TargetFPS : 60);
+
+		// Root -> tip so the parent's already corrected Position is used as the anchor: the whole
+		// chain may lag as a unit while every joint is still pulled back toward its animated shape.
+		for (size_t i = 1; i < Particles.size(); ++i)
+		{
+			FSimParticle& P = Particles[i];
+			if (P.PinMode != KPM_Dynamic) continue;
+
+			const float stiffness = KawaiiClamp(P.PhysicsSettings.Stiffness, 0.0f, 1.0f);
+			if (stiffness < KAWAII_SMALL_NUMBER) continue;
+
+			// Target = the animated offset from the parent applied at the parent's simulated
+			// position (upstream KawaiiPhysics "Pull to Pose Location").
+			const FSimParticle& Parent = Particles[i - 1];
+			const v3dxVector3 target = Parent.Position + (P.PosePosition - Parent.PosePosition);
+
+			const float alpha = (exponent > 0.0f) ? (1.0f - powf(1.0f - stiffness, exponent)) : stiffness;
+
+			// PrevPosition is intentionally left alone: this correction should show up as velocity
+			// in UpdateVelocities, which is what makes the chain spring back instead of teleporting.
+			P.Position = P.Position + (target - P.Position) * alpha;
+		}
+	}
+
 	void ApplyAerodynamics(
 		std::vector<FSimParticle>& Particles,
 		float dt,

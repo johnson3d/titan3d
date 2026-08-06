@@ -40,6 +40,13 @@ namespace KawaiiPhysics
 		float PointAttachmentStiffness = 0.10f;
 		float OrientationAttachmentStiffness = 0.05f;
 
+		// Per-segment stiffness multiplier curves (empty -> 1.0). Sampled by normalized
+		// element/particle position along the rod. Copied from FKawaiiRodSetup in BuildRods.
+		FKawaiiCurve StretchAndShearStiffnessCurve;
+		FKawaiiCurve BendAndTwistStiffnessCurve;
+		FKawaiiCurve PointAttachmentStiffnessCurve;
+		FKawaiiCurve OrientationAttachmentStiffnessCurve;
+
 		int32_t LODThreshold = -1;
 
 		bool IsLODValid(int32_t SimLOD) const

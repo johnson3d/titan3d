@@ -16,14 +16,25 @@ namespace EngineNS.DesignMacross.Editor
         //public TtClassDescription ClassDescription { get => mClassDescription; set => mClassDescription = value; }
         public TtOutlineEditPanel DeclarationEditPanel { get; set; } = new TtOutlineEditPanel();
         public TtGraphEditPanel DefinitionGraphPanel { get; set; } = new TtGraphEditPanel();
-        TtCommandHistory CommandHistory { get; set; } = new TtCommandHistory();
+        public Preview.TtAnimationPreviewPanel AnimationPreviewPanel { get; set; } = new Preview.TtAnimationPreviewPanel();
+
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退旧流程时把mEditorHistory改为null即可。
+        // 旧TtCommandHistory已改为适配器, 内部委托到同一个mEditorHistory, 命令与统一栈合流
+        public bool EnableUndoRedo => EditorHistory != null;
+        public EngineNS.Editor.Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        EngineNS.Editor.Infrastructure.TtEditorHistory mEditorHistory = new EngineNS.Editor.Infrastructure.TtEditorHistory();
+        EngineNS.Editor.Infrastructure.TtEditorHistoryPanel mHistoryPanel = new EngineNS.Editor.Infrastructure.TtEditorHistoryPanel();
+        #endregion
+
+        TtCommandHistory CommandHistory { get; set; }
 
         TtGraphElementStyleCollection GraphElementCollection = new TtGraphElementStyleCollection();
 
         public Dictionary<Guid, IGraphElement> DescriptionsElement { get; set; } = new Dictionary<Guid, IGraphElement>();
         public TtDesignMacrossEditor()
         {
-
+            CommandHistory = new TtCommandHistory(mEditorHistory);
         }
         public EGui.Controls.PropertyGrid.TtPropertyGrid PGMember = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public async Thread.Async.TtTask<bool> Initialize()
@@ -31,6 +42,7 @@ namespace EngineNS.DesignMacross.Editor
             DeclarationEditPanel.Initialize();
             InitializeMainMenu();
             await PGMember.Initialize();
+            await AnimationPreviewPanel.Initialize();
             return true;
         }
 
@@ -41,6 +53,8 @@ namespace EngineNS.DesignMacross.Editor
             if (result)
             {
                 DrawToolbar();
+                // 统一快捷键处理(Ctrl+Z/Ctrl+Y/Ctrl+Shift+Z), 替代旧的按键轮询
+                EngineNS.Editor.Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
                     if (TtEngine.Instance.GfxDevice.SlateApplication is EngineNS.Editor.TtMainEditorApplication mainEditor)
@@ -61,6 +75,7 @@ namespace EngineNS.DesignMacross.Editor
             rendingContext.EditorInteroperation.OutlineEditPanel = DeclarationEditPanel;
             rendingContext.EditorInteroperation.GraphEditPanel = DefinitionGraphPanel;
             rendingContext.EditorInteroperation.PGMember = PGMember;
+            rendingContext.EditorInteroperation.AnimationPreviewPanel = AnimationPreviewPanel;
             rendingContext.CommandHistory = CommandHistory;
             rendingContext.GraphElementStyleManager = GraphElementCollection;
             rendingContext.DescriptionsElement = DescriptionsElement;
@@ -90,49 +105,23 @@ namespace EngineNS.DesignMacross.Editor
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
 
-            if (TtEngine.Instance.InputSystem.IsKeyPressed(EngineNS.Bricks.Input.Keycode.KEY_z))
+            if(AnimationPreviewPanel.IsShow)
             {
-                if (bIsZKeyDown)
+                bool mAnimationPreviewShow = true;
+                show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "AnimationPreview", ref mAnimationPreviewShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+                if (show)
                 {
-                    bIsZKeyHasDown = true;
+                    var previewRender = new Preview.TtAnimationPreviewRender();
+                    previewRender.Draw(AnimationPreviewPanel, rendingContext);
                 }
-                bIsZKeyDown = true;
-            }
-            else
-            {
-                bIsZKeyDown = false;
-                bIsZKeyHasDown = false;
+                EGui.UIProxy.DockProxy.EndPanel(show);
             }
 
-            if (TtEngine.Instance.InputSystem.IsKeyPressed(EngineNS.Bricks.Input.Keycode.KEY_y))
+            if (mEditorHistory != null)
             {
-                if (bIsYKeyDown)
-                {
-                    bIsYKeyHasDown = true;
-                }
-                bIsYKeyDown = true;
-            }
-            else
-            {
-                bIsYKeyDown = false;
-                bIsYKeyHasDown = false;
-            }
-
-            if (bIsZKeyDown && !bIsZKeyHasDown && TtEngine.Instance.InputSystem.IsCtrlKeyDown())
-            {
-                CommandHistory.Undo();
-            }
-
-            if (TtEngine.Instance.InputSystem.IsCtrlKeyDown() && bIsYKeyDown && !bIsYKeyHasDown)
-            {
-                CommandHistory.Redo();
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
             }
         }
-
-        bool bIsZKeyHasDown = false;
-        bool bIsZKeyDown = false;
-        bool bIsYKeyHasDown = false;
-        bool bIsYKeyDown = false;
 
         #region Save Load
 
@@ -177,10 +166,11 @@ namespace EngineNS.DesignMacross.Editor
                     codeGenerator.GenerateClassCode(classDeclaration, AssetName, ref code);
                 }
                 var fileName = AssetName.Address + "/" + mDesignMacross.DesignedClassDescription.ClassName + ".cs";
-                using (var sr = new System.IO.StreamWriter(fileName, false, Encoding.UTF8))
-                {
-                    sr.Write(code);
-                }
+                //using (var sr = new System.IO.StreamWriter(fileName, false, Encoding.UTF8))
+                //{
+                //    sr.Write(code);
+                //}
+                IO.TtFileManager.WriteAllText(fileName, code, Encoding.UTF8);
                 AssetName.AMeta.AddAssetFile(fileName);
                 TtEngine.Instance.SourceControlModule.AddFile(fileName, true);
                 EngineNS.TtEngine.Instance.MacrossManager.GenerateProjects();
@@ -223,9 +213,12 @@ namespace EngineNS.DesignMacross.Editor
                     }
                 }
             }
+            else
+            {
+                //AnimationPreviewPanel.Reset();
+            }
 
-            
- 
+
         }
         #endregion CodeGen
 
@@ -238,7 +231,7 @@ namespace EngineNS.DesignMacross.Editor
             public bool IsMouseDown;
             public bool IsMouseHover;
         }
-        STToolButtonData[] mToolBtnDatas = new STToolButtonData[7];
+        STToolButtonData[] mToolBtnDatas = new STToolButtonData[9];
         protected void DrawToolbar()
         {
             var drawList = ImGuiAPI.GetWindowDrawList();
@@ -253,6 +246,20 @@ namespace EngineNS.DesignMacross.Editor
                 SaveElements(AssetName);
                 GenerateCode();
                 CompileCode();
+                mEditorHistory?.SetSavePoint();
+            }
+            toolBarItemIdx++;
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
+            if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
+                ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Undo", false, -1, 0, spacing))
+            {
+                mEditorHistory?.Undo();
+            }
+            toolBarItemIdx++;
+            if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
+                ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Redo", false, -1, 0, spacing))
+            {
+                mEditorHistory?.Redo();
             }
             toolBarItemIdx++;
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
@@ -327,9 +334,13 @@ namespace EngineNS.DesignMacross.Editor
             ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir.ImGuiDir_Right, 0.2f, ref propertyId, ref graphId);
             uint unionConfigId = 0;
             ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir.ImGuiDir_Right, 0.4f, ref unionConfigId, ref graphId);
+            uint previewId = 0;
+            ImGuiAPI.DockBuilderSplitNode(propertyId, ImGuiDir.ImGuiDir_Down, 0.5f, ref previewId, ref propertyId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("GraphWindow", mDockKeyClass), graphId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeProperty", mDockKeyClass), propertyId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), propertyId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("AnimationPreview", mDockKeyClass), previewId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("UnionNodeConfig", mDockKeyClass), unionConfigId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("ClassView", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderFinish(id);
@@ -361,12 +372,16 @@ namespace EngineNS.DesignMacross.Editor
             //LoadClassDescription(AssetName);
             LoadElements(AssetName);
             DeclarationEditPanel.ClassDesc = mDesignMacross.DesignedClassDescription;
+            mEditorHistory?.Clear();
+            PGMember.HistoryHost = mEditorHistory;
             return true;
         }
 
         public void OnCloseEditor()
         {
-
+            PGMember.HistoryHost = null;
+            mEditorHistory?.Clear();
+            AnimationPreviewPanel.Dispose();
         }
 
         public void OnEvent(in Bricks.Input.Event e)
@@ -404,6 +419,7 @@ namespace EngineNS.DesignMacross.Editor
                                 SaveElements(AssetName);
                                 GenerateCode();
                                 CompileCode();
+                                mEditorHistory?.SetSavePoint();
                             },
                         },
                     },

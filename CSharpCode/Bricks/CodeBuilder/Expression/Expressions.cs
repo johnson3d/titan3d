@@ -1319,6 +1319,8 @@ namespace EngineNS.Bricks.CodeBuilder
         [Rtti.Meta("")]
         public string ClassName { get; set; } = "Unknow";
         [Rtti.Meta("")]
+        public bool IsAutoSaveLoad { get; set; } = false;
+        [Rtti.Meta("")]
         public List<string> SupperClassNames { get; set; } = new List<string>();
         [Rtti.Meta("")]
         public List<TtVariableDeclaration> Properties { get; set; } = new List<TtVariableDeclaration>();

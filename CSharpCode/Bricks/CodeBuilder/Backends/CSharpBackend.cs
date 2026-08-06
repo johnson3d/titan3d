@@ -396,6 +396,8 @@ namespace EngineNS.Bricks.CodeBuilder
                     data.CodeGen.PushSegment(ref sourceCode);
                 }
                 GenCommentCodes(classDec.Comment, ref data, ref sourceCode);
+                if (classDec.IsAutoSaveLoad)
+                    data.CodeGen.AddLine("[EngineNS.Rtti.Meta]", ref sourceCode);
                 data.CodeGen.AddLine("[EngineNS.Macross.TtMacross]", ref sourceCode);
                 data.CodeGen.AddLine($"[EngineNS.Macross.TtMacrossSign(RName_Name = \"{data.AssetName.Name}\", RName_Type = {RName.GetRNameTypeCodeString(data.AssetName.RNameType)})]", ref sourceCode);
                 string tempCode = "";
@@ -930,10 +932,17 @@ namespace EngineNS.Bricks.CodeBuilder
             public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
                 var primitiveExp = obj as TtPrimitiveExpression;
+                // 浮点分量的值类型: 必须生成 new Type(xf, yf, ...)
                 if (primitiveExp.Type.IsEqual(typeof(Vector2)) ||
                     primitiveExp.Type.IsEqual(typeof(Vector3)) ||
-                    primitiveExp.Type.IsEqual(typeof(Vector4)))
-                    sourceCode += primitiveExp.Type.FullName + "(" + primitiveExp.ValueStr + ")";
+                    primitiveExp.Type.IsEqual(typeof(Vector4)) ||
+                    primitiveExp.Type.IsEqual(typeof(Color3f)))
+                    sourceCode += BuildValueTypeCtorCall(primitiveExp, true);
+                // 整数分量的值类型: 同样要 new, 但不能加 f 后缀
+                else if (primitiveExp.Type.IsEqual(typeof(Vector2i)) ||
+                         primitiveExp.Type.IsEqual(typeof(Vector3i)) ||
+                         primitiveExp.Type.IsEqual(typeof(Vector4i)))
+                    sourceCode += BuildValueTypeCtorCall(primitiveExp, false);
                 else if (primitiveExp.Type.IsEqual(typeof(string)))
                     sourceCode += $"\"{primitiveExp.ValueStr}\"";
                 else if (primitiveExp.Type.IsEqual(typeof(float)))
@@ -942,6 +951,63 @@ namespace EngineNS.Bricks.CodeBuilder
                     sourceCode += data.CodeGen.GetTypeString(primitiveExp.Type) + "." + primitiveExp.ValueStr;
                 else
                     sourceCode += primitiveExp.ValueStr;
+                // 未覆盖(落最后一个 else, 会生成编不过的裸数值)的字面量类型:
+                //   Matrix : ToString() 是 "[[M11:.. M12:..]]" 调试格式, 根本不能当构造参数,
+                //            要支持得先给 Matrix 加一个可循环的 ToString/16 参构造函数。
+                //   Color4f : ToString() 是 "R,G,B,A" 但 4 参构造函数是 (alpha, red, green, blue),
+                //            顺序不一致。直接补 new 会把通道错位静默写进生成代码,
+                //            所以此处不处理; 修之前得先确定已有资产怎么迁移
+                //            (TtPrimitiveExpression.CalculateValueString 里的 Color4f 分支同样错位)。
+                //            对比: Color4b 的 ToString 与 (r,g,b,a) 构造函数是一致的, 无问题。
+            }
+
+            /// <summary>
+            /// 把 "x,y,z" 形态的 ValueStr 生成为 "new EngineNS.Vector3(xf, yf, zf)"。
+            ///
+            /// 为何不能把 new 写进 ValueStr: TtPrimitiveExpression.GetValue() 要用
+            /// Vector3.FromString(ValueStr) 把字符串反解回值(编辑器改引脚值、资产回读都靠它),
+            /// 所以 ValueStr 必须保持纯数值形式, new 与 f 后缀只能在生成端补。
+            /// HLSL 后端不需要这一步(float3(...) 本身就是构造语法), 那边是独立实现。
+            /// </summary>
+            static string BuildValueTypeCtorCall(TtPrimitiveExpression exp, bool bFloatComponents)
+            {
+                var valueStr = exp.ValueStr;
+                if (string.IsNullOrEmpty(valueStr))
+                    return "new " + exp.Type.FullName + "()";
+
+                // 历史数据兼容: CalculateValueString 对 Color 系列会把 "new EngineNS.Color4b(...)"
+                // 整句烤进 ValueStr(已有资产依赖这个形态), 这种已经是完整表达式的直接原样
+                // 输出, 否则会生成 new Type(new Type(...))。
+                if (valueStr.Contains('('))
+                    return valueStr;
+
+                var components = valueStr.Split(',');
+                for (int i = 0; i < components.Length; i++)
+                {
+                    var component = components[i].Trim();
+                    if (bFloatComponents && NeedFloatSuffix(component))
+                        component += "f";
+                    components[i] = component;
+                }
+                return "new " + exp.Type.FullName + "(" + string.Join(", ", components) + ")";
+            }
+
+            /// <summary>
+            /// 只给"确实是数字字面量"的分量补 f: 0 / -9.8 / 1E-05 都必须补,
+            /// 否则 -9.8 是 double 字面量, 传不进 float 形参(CS1503); 已带后缀的、
+            /// 或者 NaN / 变量名之类解析不出数字的一律不动。
+            /// 注: 这里和 Vector3.FromString 一样隐含假设小数点是 '.', 逗号小数点的
+            /// locale 下 ToString 会把分量数拆错(既有问题, 不在本函数能修的范围)。
+            /// </summary>
+            static bool NeedFloatSuffix(string component)
+            {
+                if (string.IsNullOrEmpty(component))
+                    return false;
+                var tail = component[component.Length - 1];
+                if (tail == 'f' || tail == 'F' || tail == 'd' || tail == 'D' || tail == 'm' || tail == 'M')
+                    return false;
+                return float.TryParse(component, System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out _);
             }
         }
 

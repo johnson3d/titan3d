@@ -113,8 +113,8 @@ namespace NxRHI
 		case EngineNS::PXF_R24G8_TYPELESS:
 		case EngineNS::PXF_X24_TYPELESS_G8_UINT:
 		case EngineNS::PXF_D24_UNORM_S8_UINT:
-			//return VK_FORMAT_D24_UNORM_S8_UINT;
-            return VK_FORMAT_X8_D24_UNORM_PACK32;
+			//align with DX12: D24S8 owns a stencil plane(StencilSrv for TtAttachBuffer), VK_FORMAT_X8_D24_UNORM_PACK32 has no stencil
+			return VK_FORMAT_D24_UNORM_S8_UINT;
 		case EngineNS::PXF_D32_FLOAT:
 			return VK_FORMAT_D32_SFLOAT;
 		case EngineNS::PXF_D32_FLOAT_S8X24_UINT:
@@ -126,18 +126,66 @@ namespace NxRHI
         case EngineNS::PXF_B8G8R8A8_UNORM_SRGB:
             return VK_FORMAT_B8G8R8A8_SRGB;
         case EngineNS::PXF_R11G11B10_FLOAT:
-			ASSERT(false);
-			break;
+			//DXGI_FORMAT_R11G11B10_FLOAT: R in the lowest bits, matches VK_FORMAT_B10G11R11_UFLOAT_PACK32(packed from MSB)
+			return VK_FORMAT_B10G11R11_UFLOAT_PACK32;
+		case EngineNS::PXF_R8G8_TYPELESS:
 		case EngineNS::PXF_R8G8_UNORM:
 			return VK_FORMAT_R8G8_UNORM;
+		case EngineNS::PXF_R8G8_UINT:
+			return VK_FORMAT_R8G8_UINT;
+		case EngineNS::PXF_R8G8_SNORM:
+			return VK_FORMAT_R8G8_SNORM;
+		case EngineNS::PXF_R8G8_SINT:
+			return VK_FORMAT_R8G8_SINT;
+		case EngineNS::PXF_R8_TYPELESS:
 		case EngineNS::PXF_R8_UNORM:
 			return VK_FORMAT_R8_UNORM;
-		case EngineNS::PXF_R10G10B10A2_UNORM:
-			return VK_FORMAT_A2R10G10B10_UNORM_PACK32;
-		case EngineNS::PXF_R10G10B10A2_UINT:
-			return VK_FORMAT_A2R10G10B10_UINT_PACK32;
+		case EngineNS::PXF_R8_UINT:
+			return VK_FORMAT_R8_UINT;
+		case EngineNS::PXF_R8_SNORM:
+			return VK_FORMAT_R8_SNORM;
+		case EngineNS::PXF_R8_SINT:
+			return VK_FORMAT_R8_SINT;
+		case EngineNS::PXF_R8G8B8A8_TYPELESS:
+			return VK_FORMAT_R8G8B8A8_UNORM;
+		case EngineNS::PXF_B8G8R8A8_TYPELESS:
+			return VK_FORMAT_B8G8R8A8_UNORM;
+		case EngineNS::PXF_R16G16B16A16_TYPELESS:
+			return VK_FORMAT_R16G16B16A16_SFLOAT;
+		case EngineNS::PXF_R32G32B32A32_TYPELESS:
+			return VK_FORMAT_R32G32B32A32_SFLOAT;
+		case EngineNS::PXF_R32G32B32_TYPELESS:
+			return VK_FORMAT_R32G32B32_SFLOAT;
+		case EngineNS::PXF_R32G32_TYPELESS:
+			return VK_FORMAT_R32G32_SFLOAT;
+		case EngineNS::PXF_R32G8X24_TYPELESS:
+		case EngineNS::PXF_R32_FLOAT_X8X24_TYPELESS:
+			return VK_FORMAT_D32_SFLOAT_S8_UINT;
+		case EngineNS::PXF_B5G6R5_UNORM:
+			return VK_FORMAT_R5G6B5_UNORM_PACK16;
+		case EngineNS::PXF_B4G4R4A4_UNORM:
+			return VK_FORMAT_B4G4R4A4_UNORM_PACK16;
+		//DXGI 10bit formats: R in the lowest bits, VK PACK32 formats are packed from MSB, so R10G10B10A2 -> A2B10G10R10
 		case EngineNS::PXF_R10G10B10A2_TYPELESS:
+		case EngineNS::PXF_R10G10B10A2_UNORM:
+		case EngineNS::PXF_R10G10B10A2_UNORM_SRGB:
+			return VK_FORMAT_A2B10G10R10_UNORM_PACK32;
+		case EngineNS::PXF_R10G10B10A2_SNORM:
+			return VK_FORMAT_A2B10G10R10_SNORM_PACK32;
+		case EngineNS::PXF_R10G10B10A2_UINT:
+			return VK_FORMAT_A2B10G10R10_UINT_PACK32;
+		case EngineNS::PXF_R10G10B10A2_SINT:
+			return VK_FORMAT_A2B10G10R10_SINT_PACK32;
+		case EngineNS::PXF_B10G10R10A2_TYPELESS:
+		case EngineNS::PXF_B10G10R10A2_UNORM:
+		case EngineNS::PXF_B10G10R10A2_UNORM_SRGB:
+			return VK_FORMAT_A2R10G10B10_UNORM_PACK32;
+		case EngineNS::PXF_B10G10R10A2_SNORM:
+			return VK_FORMAT_A2R10G10B10_SNORM_PACK32;
+		case EngineNS::PXF_B10G10R10A2_UINT:
 			return VK_FORMAT_A2R10G10B10_UINT_PACK32;
+		case EngineNS::PXF_B10G10R10A2_SINT:
+			return VK_FORMAT_A2R10G10B10_SINT_PACK32;
         case PXF_BC1_TYPELESS:
             return VK_FORMAT_BC1_RGB_UNORM_BLOCK;
 		case PXF_BC1_UNORM:
@@ -327,30 +375,31 @@ namespace NxRHI
             break;
         case VK_FORMAT_A8B8G8R8_SRGB_PACK32:
             break;
+        //DXGI 10bit formats: R in the lowest bits, VK PACK32 formats are packed from MSB
         case VK_FORMAT_A2R10G10B10_UNORM_PACK32:
-            return EPixelFormat::PXF_R10G10B10A2_UNORM;
+            return EPixelFormat::PXF_B10G10R10A2_UNORM;
         case VK_FORMAT_A2R10G10B10_SNORM_PACK32:
-            return EPixelFormat::PXF_R10G10B10A2_SNORM;
+            return EPixelFormat::PXF_B10G10R10A2_SNORM;
         case VK_FORMAT_A2R10G10B10_USCALED_PACK32:
             break;
         case VK_FORMAT_A2R10G10B10_SSCALED_PACK32:
             break;
         case VK_FORMAT_A2R10G10B10_UINT_PACK32:
-            return EPixelFormat::PXF_R10G10B10A2_UINT;
+            return EPixelFormat::PXF_B10G10R10A2_UINT;
         case VK_FORMAT_A2R10G10B10_SINT_PACK32:
-            return EPixelFormat::PXF_R10G10B10A2_SINT;
+            return EPixelFormat::PXF_B10G10R10A2_SINT;
         case VK_FORMAT_A2B10G10R10_UNORM_PACK32:
-            return EPixelFormat::PXF_B10G10R10A2_UNORM;
+            return EPixelFormat::PXF_R10G10B10A2_UNORM;
         case VK_FORMAT_A2B10G10R10_SNORM_PACK32:
-            return EPixelFormat::PXF_B10G10R10A2_SNORM;
+            return EPixelFormat::PXF_R10G10B10A2_SNORM;
         case VK_FORMAT_A2B10G10R10_USCALED_PACK32:
             break;
         case VK_FORMAT_A2B10G10R10_SSCALED_PACK32:
             break;
         case VK_FORMAT_A2B10G10R10_UINT_PACK32:
-            return EPixelFormat::PXF_B10G10R10A2_UINT;
+            return EPixelFormat::PXF_R10G10B10A2_UINT;
         case VK_FORMAT_A2B10G10R10_SINT_PACK32:
-            return EPixelFormat::PXF_B10G10R10A2_SINT;
+            return EPixelFormat::PXF_R10G10B10A2_SINT;
         case VK_FORMAT_R16_UNORM:
             return EPixelFormat::PXF_R16_UNORM;
         case VK_FORMAT_R16_SNORM:
@@ -456,7 +505,7 @@ namespace NxRHI
         case VK_FORMAT_R64G64B64A64_SFLOAT:
             break;
         case VK_FORMAT_B10G11R11_UFLOAT_PACK32:
-            break;
+            return EPixelFormat::PXF_R11G11B10_FLOAT;
         case VK_FORMAT_E5B9G9R9_UFLOAT_PACK32:
             break;
         case VK_FORMAT_D16_UNORM:
@@ -827,18 +876,30 @@ namespace NxRHI
         {
         case EPixelFormat::PXF_D16_UNORM:
         case EPixelFormat::PXF_D32_FLOAT:
-        case EPixelFormat::PXF_D32_FLOAT_S8X24_UINT:
         {
             result |= VK_IMAGE_ASPECT_DEPTH_BIT;
         }
         break;
         case EPixelFormat::PXF_R24G8_TYPELESS:
         case EPixelFormat::PXF_D24_UNORM_S8_UINT:
+        case EPixelFormat::PXF_D32_FLOAT_S8X24_UINT:
         {
             if (sampledDepth)
                 result |= VK_IMAGE_ASPECT_DEPTH_BIT;
-            /*if (sampledStencil)
-                result |= VK_IMAGE_ASPECT_STENCIL_BIT;*/
+            if (sampledStencil)
+                result |= VK_IMAGE_ASPECT_STENCIL_BIT;
+        }
+        break;
+        case EPixelFormat::PXF_R24_UNORM_X8_TYPELESS:
+        {
+            //depth plane view of D24S8(TypelessToViewDefaultFormat)
+            result = VK_IMAGE_ASPECT_DEPTH_BIT;
+        }
+        break;
+        case EPixelFormat::PXF_X24_TYPELESS_G8_UINT:
+        {
+            //stencil plane view of D24S8(StencilSrv for TtAttachBuffer)
+            result = VK_IMAGE_ASPECT_STENCIL_BIT;
         }
         break;
         default:

@@ -30,7 +30,8 @@ namespace NxRHI
 		pAttr->Write(Slot);
 		pAttr->Write(BindCount);
 		pAttr->Write(Size);
-		pAttr->Write(IsStructuredBuffer);
+		//keeps the layout of the legacy IsStructuredBuffer(vBOOL) in cooked shaders
+		pAttr->Write(ResourceType);
 		pAttr->Write(DescriptorIndex);
 		pAttr->Write((UINT)Fields.size());
 		for (auto& i : Fields)
@@ -51,7 +52,7 @@ namespace NxRHI
 		pAttr->Read(Slot); 
 		pAttr->Read(BindCount);
 		pAttr->Read(Size);
-		pAttr->Read(IsStructuredBuffer);
+		pAttr->Read(ResourceType);
 		pAttr->Read(DescriptorIndex);
 		UINT count = 0;
 		pAttr->Read(count);

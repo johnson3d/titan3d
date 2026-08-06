@@ -374,6 +374,7 @@ namespace NxRHI
 	
 	bool VKCommandList::BeginRendering(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
 	{
+		ASSERT(mCurrentFrameBuffers == nullptr);
 		mCurrentFrameBuffers = fb;
 
 		AutoRef<VKCmdBeginRenderingDraw>	mBeginRenderingDraw;
@@ -390,6 +391,7 @@ namespace NxRHI
 		
 		mBeginRenderingDraw->mColorAttachments.clear();
 		auto pass = GetCurrentRenderPass();
+		ASSERT(pass->BeginCopyDraws->Step == 0);
 		pass->BeginCopyDraws->OnBeginPass(this);
 		pass->BeginBarriers->OnBeginPass(this);
 		for (UINT i = 0; i < fb->mRenderPass->Desc.NumOfMRT; i++)
@@ -482,6 +484,11 @@ namespace NxRHI
 		}
 		renderingInfo.renderArea = { {0, 0}, {width, height} };
 		renderingInfo.layerCount = 1;
+		//align with DX12 view instancing: multiview mask must match VkPipelineRenderingCreateInfo.viewMask
+		if (fb->mRenderPass->Desc.ViewInstanceDesc.ViewInstanceCount > 0)
+		{
+			renderingInfo.viewMask = (1u << fb->mRenderPass->Desc.ViewInstanceDesc.ViewInstanceCount) - 1;
+		}
 		renderingInfo.colorAttachmentCount = (UINT)mBeginRenderingDraw->mColorAttachments.size();
 		renderingInfo.pColorAttachments = mBeginRenderingDraw->mColorAttachments.data();
 		renderingInfo.pDepthAttachment = &depthAttachment;
@@ -523,6 +530,7 @@ namespace NxRHI
 		else
 		{
 			ASSERT(mCmdListState == ECmdListState::Recording);
+			ASSERT(mCurrentFrameBuffers == nullptr);
 			this->BeginEvent(name);
 			mDebugName = name;
 			mCurRtvs.clear();
@@ -530,6 +538,7 @@ namespace NxRHI
 			
 			mCurrentFrameBuffers = fb;
 			auto pass = GetCurrentRenderPass();
+			ASSERT(pass->BeginCopyDraws->Step == 0);
 			pass->BeginCopyDraws->OnBeginPass(this);
 			pass->BeginBarriers->OnBeginPass(this);
 			for (UINT i = 0; i < fb->mRenderPass->Desc.NumOfMRT; i++)
@@ -651,16 +660,19 @@ namespace NxRHI
 		{
 			auto& mVkViewport = mCurrentViewports[i];
 
-			mVkViewport.x = pViewports->TopLeftX;
+			mVkViewport.x = pViewports[i].TopLeftX;
 			//mVkViewport.y = vp->TopLeftY;
-			mVkViewport.y = pViewports->TopLeftY + pViewports->Height;
-			mVkViewport.width = pViewports->Width;
+			mVkViewport.y = pViewports[i].TopLeftY + pViewports[i].Height;
+			mVkViewport.width = pViewports[i].Width;
 			//mVkViewport.height = vp->Height;
-			mVkViewport.height = -pViewports->Height;
-			mVkViewport.minDepth = pViewports->MinDepth;
-			mVkViewport.maxDepth = pViewports->MaxDepth;
+			mVkViewport.height = -pViewports[i].Height;
+			mVkViewport.minDepth = pViewports[i].MinDepth;
+			mVkViewport.maxDepth = pViewports[i].MaxDepth;
 		}
-		vkCmdSetViewport(GetVKCmdRecorder()->mCommandBuffer, 0, Num, (const VkViewport*)pViewports);
+		if (Num > 0)
+		{
+			vkCmdSetViewport(GetVKCmdRecorder()->mCommandBuffer, 0, Num, mCurrentViewports.data());
+		}
 	}
 	void VKCommandList::UseCurrentViewports()
 	{
@@ -673,13 +685,27 @@ namespace NxRHI
 		ASSERT(mCmdListState == ECmdListState::Recording);
 		//mContext->RSSetScissorRects(Num, (const D3D12_RECT*)pScissor);
 		ASSERT(Num < 32);
-		mCurrentScissorRects.resize(Num);
 		if (Num == 0)
 		{
+			mCurrentScissorRects.clear();
 			vkCmdSetScissor(GetVKCmdRecorder()->mCommandBuffer, 0, 0, nullptr);
+		}
+		else if (pScissor == nullptr)
+		{
+			if (mCurrentViewports.size() > 0)
+			{
+				mCurrentScissorRects.resize(1);
+				mCurrentScissorRects[0].offset.x = (int)mCurrentViewports[0].x;
+				mCurrentScissorRects[0].offset.y = (int)(mCurrentViewports[0].y + mCurrentViewports[0].height);
+
+				mCurrentScissorRects[0].extent.width = (UINT)mCurrentViewports[0].width;
+				mCurrentScissorRects[0].extent.height = (UINT)(-mCurrentViewports[0].height);
+				vkCmdSetScissor(GetVKCmdRecorder()->mCommandBuffer, 0, 1, &mCurrentScissorRects[0]);
+			}
 		}
 		else
 		{
+			mCurrentScissorRects.resize(Num);
 			for (UINT i = 0; i < Num; i++)
 			{
 				mCurrentScissorRects[i].offset.x = pScissor[i].MinX;
@@ -687,23 +713,6 @@ namespace NxRHI
 
 				mCurrentScissorRects[i].extent.width = (UINT)(pScissor[i].MaxX - pScissor[i].MinX);
 				mCurrentScissorRects[i].extent.height = (UINT)(pScissor[i].MaxY - pScissor[i].MinY);
-			}
-			if (pScissor == nullptr)
-			{
-				if (mCurrentViewports.size() > 0)
-				{
-					mCurrentScissorRects.resize(1);
-					mCurrentScissorRects[0].offset.x = (int)mCurrentViewports[0].x;
-					mCurrentScissorRects[0].offset.y = (int)(mCurrentViewports[0].y + mCurrentViewports[0].height);
-
-					mCurrentScissorRects[0].extent.width = (UINT)mCurrentViewports[0].width;
-					mCurrentScissorRects[0].extent.height = (UINT)(-mCurrentViewports[0].height);
-					Num = 1;
-				}
-				else
-				{
-					return;
-				}
 			}
 			vkCmdSetScissor(GetVKCmdRecorder()->mCommandBuffer, 0, Num, &mCurrentScissorRects[0]);
 		}
@@ -830,6 +839,8 @@ namespace NxRHI
 	{
 		ASSERT(mCmdListState == ECmdListState::Recording);
 		vkCmdBindPipeline(GetVKCmdRecorder()->mCommandBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, ((VKGpuDrawState*)drawState)->mGraphicsPipeline);
+		//align with DX12CommandList::SetGraphicsPipeline(OMSetStencilRef)
+		vkCmdSetStencilReference(GetVKCmdRecorder()->mCommandBuffer, VK_STENCIL_FACE_FRONT_AND_BACK, drawState->Pipeline->Desc.StencilRef);
 	}
 	void VKCommandList::SetComputePipeline(const IComputeEffect* drawState)
 	{
@@ -843,7 +854,11 @@ namespace NxRHI
 	}
 	void VKCommandList::SetViewInstanceMask(UINT Mask)
 	{
-		ASSERT(false);
+		ASSERT(mCmdListState == ECmdListState::Recording);
+		//VK multiview: the view mask is baked into the renderpass/pipeline(VkRenderingInfo/VkPipelineRenderingCreateInfo viewMask),
+		//it comes from RenderPass->Desc.ViewInstanceDesc, so the per draw mask can not be changed here like DX12 SetViewInstanceMask.
+		//record it for debugging purpose
+		mViewInstanceMask = Mask;
 	}
 	inline VkPrimitiveTopology PrimitiveTopology2VK(EPrimitiveType type, UINT NumPrimitives, UINT& indexCount)
 	{
@@ -929,11 +944,27 @@ namespace NxRHI
 	}
 	void VKCommandList::DispatchMesh(UINT x, UINT y, UINT z)
 	{
-		ASSERT(false);		
+		ASSERT(mCmdListState == ECmdListState::Recording);
+		auto device = GetVKDevice();
+		if (device->fn_vkCmdDrawMeshTasksEXT == nullptr)
+		{
+			ASSERT(false);
+			return;
+		}
+		device->fn_vkCmdDrawMeshTasksEXT(GetVKCmdRecorder()->mCommandBuffer, x, y, z);
 	}
 	void VKCommandList::IndirectDispatchMesh(IBuffer* indirectArg, UINT indirectArgOffset)
 	{
-		ASSERT(false);
+		ASSERT(mCmdListState == ECmdListState::Recording);
+		auto device = GetVKDevice();
+		if (device->fn_vkCmdDrawMeshTasksIndirectEXT == nullptr)
+		{
+			ASSERT(false);
+			return;
+		}
+		GetCmdRecorder()->UseResource(indirectArg);
+		FTransitionScope::TryAutoTransition(this, indirectArg, EGpuResourceState::GRS_UavIndirect, false);
+		device->fn_vkCmdDrawMeshTasksIndirectEXT(GetVKCmdRecorder()->mCommandBuffer, (VkBuffer)indirectArg->GetHWBuffer(), indirectArgOffset, 1, sizeof(VkDrawMeshTasksIndirectCommandEXT));
 	}
 	VkAccessFlags BarrierAccessToVK(EBarrierAccess flags)
 	{
@@ -1188,43 +1219,7 @@ namespace NxRHI
 	{
 		auto oldLayout = GpuStateToVKImageLayout(srcAccess);
 		auto newLayout = GpuStateToVKImageLayout(dstAccess);
-		if (oldLayout != newLayout)
 		{
-			if (false)
-			{
-				VkImageMemoryBarrier barrier{};
-				barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-				barrier.oldLayout = oldLayout;
-				barrier.newLayout = newLayout;
-				barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-				barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-				barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-				barrier.image = (VkImage)pResource->GetHWBuffer();
-				barrier.subresourceRange.baseArrayLayer = 0;
-				barrier.subresourceRange.layerCount = pResource->Desc.ArraySize;
-				barrier.subresourceRange.baseMipLevel = subResource;//All
-				barrier.subresourceRange.levelCount = levelCount;//pResource->Desc.MipLevels;
-				
-				if (pResource->Desc.BindFlags & EBufferType::BFT_SRV)
-					barrier.subresourceRange.aspectMask = FormatToVKImageAspectFlags(pResource->Desc.Format, true, false);
-				else
-					barrier.subresourceRange.aspectMask = FormatToVKImageAspectFlags(pResource->Desc.Format, true, true);
-				
-				VkPipelineStageFlagBits srcStages, dstStages;
-				GpuResourceStateToVKAccessAndPipeline(srcAccess, barrier.srcAccessMask, srcStages);
-				GpuResourceStateToVKAccessAndPipeline(dstAccess, barrier.dstAccessMask, dstStages);
-
-				vkCmdPipelineBarrier(
-					GetVKCmdRecorder()->mCommandBuffer,
-					srcStages, //VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-					dstStages, //VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,//VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-					VK_DEPENDENCY_BY_REGION_BIT,
-					0, nullptr,
-					0, nullptr,
-					1, &barrier
-				);
-			}
-			else
 			{
 				VkImageMemoryBarrier2 barrier2 = {};
 				barrier2.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
@@ -1233,10 +1228,25 @@ namespace NxRHI
 				barrier2.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 				barrier2.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 				barrier2.image = (VkImage)pResource->GetHWBuffer();
-				barrier2.subresourceRange.baseArrayLayer = 0;
-				barrier2.subresourceRange.layerCount = pResource->Desc.ArraySize;
-				barrier2.subresourceRange.baseMipLevel = 0;//All
-				barrier2.subresourceRange.levelCount = pResource->Desc.MipLevels;
+				UINT mipLevels = pResource->Desc.MipLevels > 0 ? pResource->Desc.MipLevels : 1;
+				UINT arraySize = pResource->Desc.ArraySize > 0 ? pResource->Desc.ArraySize : 1;
+				if (subResource == 0 && levelCount == mipLevels)
+				{
+					//All subresources, keep the same semantic as DX12CommandList::SetTextureBarrier
+					barrier2.subresourceRange.baseArrayLayer = 0;
+					barrier2.subresourceRange.layerCount = arraySize;
+					barrier2.subresourceRange.baseMipLevel = 0;
+					barrier2.subresourceRange.levelCount = mipLevels;
+				}
+				else
+				{
+					//subresource = arrayLayer * mipLevels + mipLevel
+					UINT baseMip = subResource % mipLevels;
+					barrier2.subresourceRange.baseArrayLayer = subResource / mipLevels;
+					barrier2.subresourceRange.layerCount = 1;
+					barrier2.subresourceRange.baseMipLevel = baseMip;
+					barrier2.subresourceRange.levelCount = std::min(levelCount, mipLevels - baseMip);
+				}
 
 				if (pResource->Desc.BindFlags & EBufferType::BFT_SRV)
 					barrier2.subresourceRange.aspectMask = FormatToVKImageAspectFlags(pResource->Desc.Format, true, false);
@@ -1289,9 +1299,15 @@ namespace NxRHI
 	//}
 	void VKCommandList::CopyBufferRegion(IBuffer* target, UINT64 DstOffset, IBuffer* src, UINT64 SrcOffset, UINT64 Size)
 	{
+		if (target == nullptr || src == nullptr)
+			return;
 		GetCmdRecorder()->UseResource(target);
 		GetCmdRecorder()->UseResource(src);
 
+		if (Size == 0)
+		{
+			Size = std::min(target->Desc.Size - DstOffset, src->Desc.Size - SrcOffset);
+		}
 		VkBufferCopy copyRegion{};
 		copyRegion.srcOffset = SrcOffset;
 		copyRegion.dstOffset = DstOffset;
@@ -1301,16 +1317,19 @@ namespace NxRHI
 	}
 	void VKCommandList::CopyTextureRegion(ITexture* target, UINT tarSubRes, UINT DstX, UINT DstY, UINT DstZ, ITexture* source, UINT srcSubRes, const FSubresourceBox* box)
 	{
+		if (target == nullptr || source == nullptr)
+			return;
 		GetCmdRecorder()->UseResource(target);
 		GetCmdRecorder()->UseResource(source);
 		
+		//subresource = arrayLayer * mipLevels + mipLevel, keep the same semantic as DX12CommandList::CopyTextureRegion
+		UINT srcMipLevels = source->Desc.MipLevels > 0 ? source->Desc.MipLevels : 1;
+		UINT tarMipLevels = target->Desc.MipLevels > 0 ? target->Desc.MipLevels : 1;
 		VkImageCopy region{};
-		// We copy the image aspect, layer 0, mip 0:
 		region.srcSubresource.aspectMask = ((VKTexture*)source)->GetImageAspect();
-		region.srcSubresource.baseArrayLayer = srcSubRes;
+		region.srcSubresource.baseArrayLayer = srcSubRes / srcMipLevels;
 		region.srcSubresource.layerCount = 1;
-		region.srcSubresource.mipLevel = 0;
-		// (0, 0, 0) in the first image corresponds to (0, 0, 0) in the second image:
+		region.srcSubresource.mipLevel = srcSubRes % srcMipLevels;
 		if (box != nullptr)
 		{
 			region.srcOffset = { (int)box->Left, (int)box->Top, (int)box->Front };
@@ -1319,18 +1338,25 @@ namespace NxRHI
 		else
 		{
 			region.srcOffset = { 0, 0, 0 };
-			region.extent = { source->Desc.Width, 
-				source->Desc.Height == 0 ? 1 : source->Desc.Height,
-				source->Desc.Depth == 0 ? 1 : source->Desc.Depth };
+			UINT w = source->Desc.Width >> region.srcSubresource.mipLevel;
+			UINT h = source->Desc.Height >> region.srcSubresource.mipLevel;
+			UINT d = source->Desc.Depth >> region.srcSubresource.mipLevel;
+			region.extent = { w == 0 ? 1 : w,
+				h == 0 ? 1 : h,
+				d == 0 ? 1 : d };
 		}
-		region.dstSubresource = region.srcSubresource;
-		region.dstSubresource.baseArrayLayer = tarSubRes;
+		region.dstSubresource.aspectMask = ((VKTexture*)target)->GetImageAspect();
+		region.dstSubresource.baseArrayLayer = tarSubRes / tarMipLevels;
+		region.dstSubresource.layerCount = 1;
+		region.dstSubresource.mipLevel = tarSubRes % tarMipLevels;
 		region.dstOffset = { (int)DstX, (int)DstY, (int)DstZ };
 
 		vkCmdCopyImage(GetVKCmdRecorder()->mCommandBuffer, (VkImage)source->GetHWBuffer(), ((VKTexture*)source)->GetImageLayout(), (VkImage)target->GetHWBuffer(), ((VKTexture*)target)->GetImageLayout(), 1, &region);
 	}
 	void VKCommandList::CopyBufferToTexture(ITexture* target, UINT subRes, IBuffer* src, const FSubResourceFootPrint* footprint)
 	{
+		if (target == nullptr || src == nullptr)
+			return;
 		GetCmdRecorder()->UseResource(target);
 		GetCmdRecorder()->UseResource(src);
 
@@ -1353,6 +1379,8 @@ namespace NxRHI
 	}
 	void VKCommandList::CopyTextureToBuffer(IBuffer* target, const FSubResourceFootPrint* footprint, ITexture* source, UINT subRes)
 	{
+		if (target == nullptr || source == nullptr)
+			return;
 		GetCmdRecorder()->UseResource(target);
 		GetCmdRecorder()->UseResource(source);
 		
@@ -1376,6 +1404,25 @@ namespace NxRHI
 		auto device = (VKGpuDevice*)mDevice.GetPtr();
 		vkGetImageMemoryRequirements(device->mDevice, vkSource->mImage, &memRequirements);*/
 		vkCmdCopyImageToBuffer(GetVKCmdRecorder()->mCommandBuffer, vkSource->mImage, vkSource->GetImageLayout(), (VkBuffer)target->GetHWBuffer(), 1, &region);
+	}
+
+	void VKCommandList::WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters)
+	{
+		if (Count == 0)
+			return;
+		if (GetVKCmdRecorder() == nullptr || mCmdListState != ECmdListState::Recording)
+		{
+			ICommandList::WriteBufferUINT32(Count, BufferWriters);
+			return;
+		}
+		//vkCmdUpdateBuffer plays the same role as WriteBufferImmediate in DX12CommandList::WriteBufferUINT32
+		for (UINT i = 0; i < Count; i++)
+		{
+			auto saveState = FTransitionScope::TryAutoTransition(this, BufferWriters[i].Buffer, EGpuResourceState::GRS_CopyDst, false);
+			UINT value = BufferWriters[i].Value;
+			vkCmdUpdateBuffer(GetVKCmdRecorder()->mCommandBuffer, (VkBuffer)BufferWriters[i].Buffer->GetHWBuffer(), BufferWriters[i].Offset, sizeof(UINT), &value);
+			FTransitionScope::TryAutoTransition(this, BufferWriters[i].Buffer, saveState, false);
+		}
 	}
 }
 

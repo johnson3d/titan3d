@@ -152,7 +152,8 @@ namespace EngineNS.Macross
                 var newObj = TtEngine.Instance.MacrossModule.NewInnerObject<T>(Name);
                 if (mInnerObject != null)
                 {
-                    var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDescGetter<T>.TypeDesc);
+                    //var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDescGetter<T>.TypeDesc);
+                    var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDesc.TypeOf(mInnerObject.GetType()));
                     meta?.CopyObjectMetaField(newObj, mInnerObject);
                 }
                 mInnerObject = newObj;

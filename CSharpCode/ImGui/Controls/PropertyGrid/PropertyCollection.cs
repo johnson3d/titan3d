@@ -147,6 +147,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
         public int DefinitionOrder { get; set; } = -1;
 
+        // Category内的显示顺序，由PGPropertyOrderAttribute的DisplayOrder指定，未指定时为0
+        public int DisplayOrder { get; set; } = 0;
+
         PropertyMultiValue mMultiValue;
 
         #region UI
@@ -174,6 +177,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             mIsReadonly = property.IsReadOnly;
             IsBrowsable = property.IsBrowsable;
             DefinitionOrder = definitionOrder;
+            DisplayOrder = 0;
             foreach(var att in property.Attributes)
             {
                 if(att is TtPGCustomValueEditorAttribute)
@@ -190,6 +194,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 if(att is IExternalPropertyData)
                 {
                     ExternalData = att as IExternalPropertyData;
+                }
+                if(att is TtPropertyOrderAttribute)
+                {
+                    DisplayOrder = ((TtPropertyOrderAttribute)att).DisplayOrder;
                 }
             }
             Category = property.Category;
@@ -210,6 +218,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 mDisplayName = ((DisplayNameAttribute)disNameAtt[0]).DisplayName;
             mPropertyType = Rtti.TtTypeDesc.TypeOf(field.FieldType);
             DefinitionOrder = definitionOrder;
+            DisplayOrder = 0;
             var browsableAtt = field.GetCustomAttributes(typeof(BrowsableAttribute), true);
             if (browsableAtt != null && browsableAtt.Length > 0)
                 IsBrowsable = ((BrowsableAttribute)browsableAtt[0]).Browsable;
@@ -236,6 +245,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 if (atts[i] is IExternalPropertyData)
                 {
                     ExternalData = atts[i] as IExternalPropertyData;
+                }
+                if (atts[i] is TtPropertyOrderAttribute)
+                {
+                    DisplayOrder = ((TtPropertyOrderAttribute)atts[i]).DisplayOrder;
                 }
             }
             Attributes = new AttributeCollection(tAtts);
@@ -551,6 +564,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             IsBrowsable = default;
             ExternalData = null;
             DeclaringType = default;            
+            DefinitionOrder = -1;
+            DisplayOrder = 0;
             CustomValueEditor?.Cleanup();
             CustomValueEditor = default;
             mMultiValue?.Cleanup();
@@ -580,6 +595,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             IsBrowsable = proDesc.IsBrowsable;
             ExternalData = proDesc.ExternalData;
             DeclaringType = proDesc.DeclaringType;
+            DefinitionOrder = proDesc.DefinitionOrder;
+            DisplayOrder = proDesc.DisplayOrder;
             CustomValueEditor?.Cleanup();
             CustomValueEditor = proDesc.CustomValueEditor;
             var noUse = CustomValueEditor?.Initialize();
@@ -1114,6 +1131,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             Count = count;
         }
+        // 属性与字段是两条独立的收集路径，DefinitionOrder都从0开始；
+        // 给字段加上基准值，使字段稳定地排在属性之后而不与属性交错
+        const int FieldDefinitionOrderBase = 1000000;
         public void InitValue(object objIns, Rtti.TtTypeDesc ins, System.Reflection.FieldInfo[] fields, bool parentIsValueType, bool useDefinitionOrder = false)
         {
             Cleanup();
@@ -1132,7 +1152,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     continue;
 
                 var proDesc = PropertyCollection.PropertyDescPool.QueryObjectSync();
-                proDesc.InitValue(objIns, ins, fields[i], parentIsValueType, useDefinitionOrder ? count : -1);
+                proDesc.InitValue(objIns, ins, fields[i], parentIsValueType, useDefinitionOrder ? FieldDefinitionOrderBase + count : -1);
                 mProperties[count] = proDesc;
                 count++;
             }
@@ -1228,21 +1248,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 if (proX != null && proY == null)
                     return -1;
 
-                var nameX = proX.GetDisplayName(null);
-                var nameY = proY.GetDisplayName(null);
+                // PGPropertyOrder的DisplayOrder优先，未标记的为0
+                if (proX.DisplayOrder != proY.DisplayOrder)
+                    return proX.DisplayOrder.CompareTo(proY.DisplayOrder);
 
-                var minLength = Math.Min(nameX.Length, nameY.Length);
-                for(int i=0; i<minLength; i++)
-                {
-                    if (nameX[i] > nameY[i])
-                        return 1;
-                    if (nameX[i] < nameY[i])
-                        return -1;
-                }
-
-                if (nameX.Length == nameY.Length)
-                    return 0;
-                return (nameX.Length > nameY.Length) ? 1 : -1;
+                return CompareDisplayName(proX, proY);
             }
         }
         class PropertyDefinitionOrderComparer : IComparer<CustomPropertyDescriptor>
@@ -1256,6 +1266,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 if (proX != null && proY == null)
                     return -1;
 
+                // PGPropertyOrder的DisplayOrder优先，未标记的为0
+                if (proX.DisplayOrder != proY.DisplayOrder)
+                    return proX.DisplayOrder.CompareTo(proY.DisplayOrder);
+
                 // 如果有定义顺序，按定义顺序排序
                 if (proX.DefinitionOrder != -1 && proY.DefinitionOrder != -1)
                 {
@@ -1268,22 +1282,26 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     return 1;
 
                 // 都没有定义顺序，按显示名称排序
-                var nameX = proX.GetDisplayName(null);
-                var nameY = proY.GetDisplayName(null);
-
-                var minLength = Math.Min(nameX.Length, nameY.Length);
-                for(int i=0; i<minLength; i++)
-                {
-                    if (nameX[i] > nameY[i])
-                        return 1;
-                    if (nameX[i] < nameY[i])
-                        return -1;
-                }
-
-                if (nameX.Length == nameY.Length)
-                    return 0;
-                return (nameX.Length > nameY.Length) ? 1 : -1;
+                return CompareDisplayName(proX, proY);
             }
+        }
+        static int CompareDisplayName(CustomPropertyDescriptor proX, CustomPropertyDescriptor proY)
+        {
+            var nameX = proX.GetDisplayName(null);
+            var nameY = proY.GetDisplayName(null);
+
+            var minLength = Math.Min(nameX.Length, nameY.Length);
+            for (int i = 0; i < minLength; i++)
+            {
+                if (nameX[i] > nameY[i])
+                    return 1;
+                if (nameX[i] < nameY[i])
+                    return -1;
+            }
+
+            if (nameX.Length == nameY.Length)
+                return 0;
+            return (nameX.Length > nameY.Length) ? 1 : -1;
         }
         public readonly static IComparer<CustomPropertyDescriptor> CompareByDisplayName = new PropertyDisplayNameComparer();
         public readonly static IComparer<CustomPropertyDescriptor> CompareByDefinitionOrder = new PropertyDefinitionOrderComparer();
@@ -1326,16 +1344,16 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             CustomPropertyDescriptorCollection properties = null;
             CustomPropertyDescriptorCollection fields = null;
 
-            // 检查是否需要按定义顺序排序
-            bool useDefinitionOrder = false;
+            // 缺省按定义顺序，类型上标了TtPropertyOrder时以其Order为准
+            bool useDefinitionOrder = true;
             if (instance != null)
             {
                 var insType = instance.GetType();
-                var orderAtt = insType.GetCustomAttribute(typeof(PGPropertyOrderAttribute));
+                var orderAtt = insType.GetCustomAttribute(typeof(TtPropertyOrderAttribute));
                 if (orderAtt != null)
                 {
-                    var pgOrder = orderAtt as PGPropertyOrderAttribute;
-                    useDefinitionOrder = (pgOrder.Order == PGPropertyOrderAttribute.EPropertyOrder.DefinitionOrder);
+                    var pgOrder = orderAtt as TtPropertyOrderAttribute;
+                    useDefinitionOrder = (pgOrder.Order == TtPropertyOrderAttribute.EPropertyOrder.DefinitionOrder);
                 }
             }
 

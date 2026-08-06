@@ -512,5 +512,119 @@ submit 到 GPU。**不依赖任何 policy 的生命周期**。
   mHitBuffer.GpuBuffer.FetchGpuData(0, blob.mCoreObject); // 现在 GPU 一定写完了
   ```
 
+## 13.给属性加一个"收藏夹"下拉 (跨编辑器共享字符串路径)
+
+场景: 在 A 编辑器里选中了某个东西 (骨骼 / 插槽 / 节点路径 / 资源子项...), 想在 B 编辑器的
+Details 里用下拉直接选到它, 而不是在"全量候选项"里翻 (典型反例: DMC 的骨骼 picker 会
+把工程里所有 `.skt` × 所有骨骼铺成一棵树)。
+
+机制两个文件, 位于 `CSharpCode/Editor/Infrastructure/Favorites/`:
+
+| 类 | 职责 |
+|---|---|
+| `TtEditorFavoritePaths` | channel(字符串通道) → 有序去重的路径列表; `Get/Add/Remove/Clear/Contains/Find`, 最近添加排最前, 默认容量 32; 纯静态内存, **只活本次会话** |
+| `TtPGFavoritePathAttribute` | PG 自定义编辑器: 在 Details 行内画出 `[+]` 加入收藏夹 / `[v]` 从收藏夹挑选 (下拉里每条右侧 `x` 移除) |
+
+设计前提: 机制本身**与类型无关**, 只存字符串; 语义由同一 channel 的生产端与消费端约定。
+
+### 13.1 三步接入
+
+**① 定义通道**。直接用字符串常量; 如果希望"属性上不写 Channel 也能自动映射", 再给属性类型登记一个默认值:
+
+```csharp
+// 通道常量建议放在 TtEditorFavoritePaths 里集中管理 (已有: ChannelBone = "Bone")
+TtEditorFavoritePaths.RegisterTypeChannel(typeof(TtSocketRef), "Socket");   // 可选
+```
+
+**② 生产端** (能"选中一个东西"的编辑器): 暴露一个**只读 `string` 属性**给出规范路径, 只开 Add:
+
+```csharp
+[Category("General")]
+[ReadOnly(true)]
+[Editor.Infrastructure.TtPGFavoritePath(
+    Channel = Editor.Infrastructure.TtEditorFavoritePaths.ChannelBone, AllowPick = false)]
+public string BonePath =>
+    Editor.Infrastructure.TtEditorFavoritePaths.MakeBonePath(mSkeletonAssetName, Desc?.Name);
+```
+
+**③ 消费端** (要引用它的地方): 可写 `string` 属性, 只开 Pick:
+
+```csharp
+[Editor.Infrastructure.TtPGFavoritePath(
+    Channel = Editor.Infrastructure.TtEditorFavoritePaths.ChannelBone, AllowAdd = false)]
+public string TargetBonePath { get; set; }
+```
+
+两端都不需要知道对方存在, 也不需要任何初始化/注册时机 —— channel 就是契约。
+
+### 13.2 消费端不是 `string` 类型怎么接
+
+很多老属性存的是结构体 (例如 `LimbIndexInSkeleton { Name, Index, Skeleton }`), 通用 attribute 挂不上去。
+做法: 在它自己的 combo 顶部多画一段 `Favorites`, 把路径解析回自己的值类型 —— 参考
+`CSharpCode/Bricks/Animation/AnimUtil.cs` 的 `TtSkeletonBoneIndexPickerEditorAttribute`:
+
+```csharp
+var favorites = Editor.Infrastructure.TtEditorFavoritePaths.Get(
+    Editor.Infrastructure.TtEditorFavoritePaths.ChannelBone);
+if (favorites.Count > 0)
+{
+    ImGuiAPI.TextDisabled("Favorites");
+    for (int fi = 0; fi < favorites.Count; fi++)
+    {
+        if (!TryResolveFavoritePath(favorites[fi].Path, out var favVal))   // 自定义解析
+            continue;
+        bool favSel = ...;
+        if (ImGuiAPI.Selectable($"...##fav{fi}", ref favSel, ..., in Vector2.Zero))
+        {
+            comboNewVal = favVal;
+            comboChanged = true;
+        }
+    }
+    ImGuiAPI.Separator();
+}
+```
+
+解析函数里用 `TryParseBonePath` 拆出"资产名 + 条目名", 再**按名字到当前数据里重新查 index**,
+不要相信路径里的任何索引式信息 (原因见 §13.3)。
+
+### 13.3 路径格式约定
+
+- 格式统一为 **`资产名:条目名`**, 并在 `TtEditorFavoritePaths` 里**成对**提供
+  `MakeXxxPath` / `TryParseXxxPath` (已有 `MakeBonePath` / `TryParseBonePath`), 不要让业务
+  代码自己拼字符串。
+- **绝不把 index / 运行时 id / 指针 编进路径**。骨骼 index 会随骨架重导入漂移, 路径只能放
+  "重开工程也稳定"的名字; index 由消费端现场解析。
+- 同一容器内名字必须唯一才能用这个格式。骨骼成立 (因为 `TtSkinSkeleton.HashDic` 以 NameHash
+  为键), 其他域接入前先确认这一点, 否则要改成层级路径并同步这节。
+- `TtFavoritePathEntry.Display` 只影响下拉里的显示文字, 判重与写回一律用 `Path`。
+
+### 13.4 UI 实现上的坑 (照抄 `TtPGFavoritePathAttribute`)
+
+- **`ImGuiAPI` 没绑 `BeginDisabled` / `EndDisabled`** (只有 `TextDisabled`)。按钮置灰的写法是
+  "按钮照画 + `&& canDo` 守卫 + tooltip 说明为何不能点", 与 `InstanceMeshNode.cs` 的
+  `Button(...) && !disabled` 一致。
+- **`OpenPopup` 与 `BeginPopup` 必须在同一个 `PushID` 作用域内**, 否则 popup id 算不上,
+  表现为"点了没反应"。
+- **PG 表格单元格里要自己算宽度**, 可用宽 = `GetColumnWidth(TableGetColumnIndex())` 减掉
+  `按钮数 * (GetFrameHeight() + 间距)` 与 `StyleConfig.Instance.PGCellPadding.X`, 给文本框
+  `SetNextItemWidth` 前预留最小宽。
+- **只读 (getter-only) 属性上的编辑器必须保证 `OnDraw` 永不返回 true**, 否则 PG 会去
+  `SetValue` 报错 —— 所以生产端一定要写 `AllowPick = false`。
+- 遍历收藏列表时若在循环体内 `Remove`, 必须立即 `break`。
+- 值本身用只读 `InputText` 展示, **不提供手敲路径**的入口 (手敲必错且无校验)。
+
+### 13.5 参考位置
+
+- 机制本体: `CSharpCode/Editor/Infrastructure/Favorites/TtEditorFavoritePaths.cs`,
+  `.../TtPGFavoritePathAttribute.cs`
+- 生产端范例: `CSharpCode/Editor/Forms/SkeletonTreePanel.cs` 的 `TtBoneEditProxy.BonePath`
+  (骨架资产名由 `TtSkeletonEditor` 通过 `SkeletonTreePanel.SkeletonAssetName` 注入)
+- 非 string 消费端范例: `CSharpCode/Bricks/Animation/AnimUtil.cs` 的
+  `TtSkeletonBoneIndexPickerEditorAttribute` (combo 顶部 Favorites 分段 + `TryResolveFavoritePath`)
+- 强制约束见 `CodingGuidelines.md` §5
+
+❗ 新增的 `.cs` 文件要登记到对应 `.projitems` (本机制在 `CSharpCode/Editor/Editor.projitems`),
+projitems 是显式文件列表, 不做通配。
+
 ## 这是没用的LaTex测试，请忽略
 $$\sum_{i=0}^{^9}{\left(\frac{a_i}{b_i}\right)}$$

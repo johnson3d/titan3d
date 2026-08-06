@@ -190,6 +190,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public TtSubsurfaceProfileData ProfileData;
         public EGui.Controls.PropertyGrid.TtPropertyGrid ProfilePropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
 
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退旧流程时把mEditorHistory改为null即可
+        public bool EnableUndoRedo => EditorHistory != null;
+        public EngineNS.Editor.Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        EngineNS.Editor.Infrastructure.TtEditorHistory mEditorHistory = new EngineNS.Editor.Infrastructure.TtEditorHistory();
+        EngineNS.Editor.Infrastructure.TtEditorHistoryPanel mHistoryPanel = new EngineNS.Editor.Infrastructure.TtEditorHistoryPanel();
+        #endregion
+
         ~TtSubsurfaceProfileEditor()
         {
             Dispose();
@@ -198,6 +206,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             ProfileData = null;
             ProfilePropGrid.Target = null;
+            ProfilePropGrid.HistoryHost = null;
+            mEditorHistory?.Clear();
         }
         public async Thread.Async.TtTask<bool> Initialize()
         {
@@ -218,6 +228,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 return false;
 
             ProfilePropGrid.Target = ProfileData;
+            mEditorHistory?.Clear();
+            ProfilePropGrid.HistoryHost = mEditorHistory;
             Visible = true;
             return true;
         }
@@ -244,6 +256,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             uint leftId = 0;
             ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Left", mDockKeyClass), leftId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Right", mDockKeyClass), rightId);
             ImGuiAPI.DockBuilderFinish(id);
         }
@@ -274,6 +287,10 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             EGui.UIProxy.DockProxy.EndMainForm(result);
 
             DrawLeft();
+            if (mEditorHistory != null)
+            {
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+            }
         }
         protected unsafe void DrawToolBar()
         {
@@ -282,12 +299,17 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             {
                 ProfileData.SaveAssetTo(ProfileData.AssetName);
                 var unused = TtEngine.Instance.GfxDevice.SubsurfaceProfileManager.ReloadProfile(ProfileData.AssetName);
+                mEditorHistory?.SetSavePoint();
             }
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Reload", in btSize))
             {
                 var unused = TtEngine.Instance.GfxDevice.SubsurfaceProfileManager.ReloadProfile(ProfileData.AssetName);
             }
+            ImGuiAPI.SameLine(0, -1);
+            // mEditorHistory为null时按钮/快捷键均为空操作
+            EngineNS.Editor.Infrastructure.EditorUndoUtils.DrawUndoRedoButtons(mEditorHistory);
+            EngineNS.Editor.Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Apply to GPU", in btSize))
             {

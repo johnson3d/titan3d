@@ -461,7 +461,14 @@ namespace EngineNS.Bricks.DataSet
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
         public EGui.Controls.PropertyGrid.TtPropertyGrid DataPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();        
-        
+
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退旧流程时把mEditorHistory改为null即可
+        public bool EnableUndoRedo => EditorHistory != null;
+        public Editor.Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        Editor.Infrastructure.TtEditorHistory mEditorHistory = new Editor.Infrastructure.TtEditorHistory();
+        Editor.Infrastructure.TtEditorHistoryPanel mHistoryPanel = new Editor.Infrastructure.TtEditorHistoryPanel();
+        #endregion
 
         ~TtDataSetEditor()
         {
@@ -470,6 +477,8 @@ namespace EngineNS.Bricks.DataSet
         public void Dispose()
         {
             DataPropGrid.Target = null;
+            DataPropGrid.HistoryHost = null;
+            mEditorHistory?.Clear();
         }
         public async Thread.Async.TtTask<bool> Initialize()
         {
@@ -496,6 +505,8 @@ namespace EngineNS.Bricks.DataSet
             DataSet = new TtDataSet();
             DataSet.DataType = ameta.DataType;
             DataSet.LoadDataSet(name, ameta.DataType.SystemType);
+            mEditorHistory?.Clear();
+            DataPropGrid.HistoryHost = mEditorHistory;
             return true;
         }
         public void OnCloseEditor()
@@ -534,6 +545,10 @@ namespace EngineNS.Bricks.DataSet
 
             DrawDataSets();
             DrawData();
+            if (mEditorHistory != null)
+            {
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+            }
         }
         bool mDockInitialized = false;
         protected void ResetDockspace(bool force = false)
@@ -562,6 +577,7 @@ namespace EngineNS.Bricks.DataSet
             ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("DataSets", mDockKeyClass), leftId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Data", mDockKeyClass), middleId);
 
             ImGuiAPI.DockBuilderFinish(id);
@@ -572,7 +588,12 @@ namespace EngineNS.Bricks.DataSet
             if (EGui.UIProxy.CustomButton.ToolButton("Save XLSX", in btSize))
             {
                 DataSet.SaveDataSetToExcel(AssetName.Address + ".xlsx");
+                mEditorHistory?.SetSavePoint();
             }
+            ImGuiAPI.SameLine(0, -1);
+            // mEditorHistory为null时按钮/快捷键均为空操作
+            Editor.Infrastructure.EditorUndoUtils.DrawUndoRedoButtons(mEditorHistory);
+            Editor.Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
             ImGuiAPI.SameLine(0, -1);
         }
         //bool ShowDataSets = true;

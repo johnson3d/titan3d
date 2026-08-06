@@ -1,4 +1,5 @@
-﻿using EngineNS.Bricks.StateMachine.Macross.CompoundState;
+﻿using EngineNS.Animation.Macross.BlendTree;
+using EngineNS.Bricks.StateMachine.Macross.CompoundState;
 using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.DesignMacross.Base.Render;
 
@@ -74,7 +75,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
             {
                 if (isTreeNodeDoubleClicked)
                 {
-                    context.EditorInteroperation.GraphEditPanel.EditGraph(graph.Description);
+                    context.EditorInteroperation.OpenGraph(graph.Description, context);
                 }
                 else if (isTreeNodeIsItemClicked)
                 {

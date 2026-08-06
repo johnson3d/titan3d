@@ -17,7 +17,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
 {
     [OutlineElement_Branch(typeof(TtOutlineElement_AnimCompoundStateGraph))]
     [Graph(typeof(TtGraph_AnimCompoundState))]
-    public class TtAnimCompoundStateClassDescription : TtTimedCompoundStateClassDescription
+    public class TtAnimCompoundStateClassDescription : TtTimedCompoundStateClassDescription, IAnimMacrossClassDescription
     {
         [Rtti.Meta("")]
         [Category("Option")]

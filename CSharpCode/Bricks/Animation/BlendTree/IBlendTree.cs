@@ -97,7 +97,7 @@ namespace EngineNS.Animation.BlendTree
         public override void Tick(float elapseSecond, ref FAnimBlendTreeContext context)
         {
             base.Tick(elapseSecond, ref context);
-            FromNode.Tick(elapseSecond, ref context);
+            FromNode?.Tick(elapseSecond, ref context);
 
             FConstructAnimationCommandTreeContext constructContext = new();
             constructContext.CmdExecuteStack = new();

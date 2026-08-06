@@ -87,13 +87,39 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
         {
             mCoreObject.SetChainSetup(index,
                 setup.Name,
-                setup.RootBoneIndex, setup.EndBoneIndex,
+                setup.RootBoneIndex.Index, setup.EndBoneIndex.Index,
                 setup.TailBoneLength, (int)setup.TailBoneAxis,
                 setup.ConstrainBoneLength, setup.BoneLengthConstraintBlend,
                 setup.RootCollision, setup.LODThreshold);
             mCoreObject.SetChainPhysicsSettings(index,
-                setup.PhysicsSettings,
-                setup.PhysicsSettingsRandom);
+                setup.PhysicsSettings.ToNative(),
+                setup.PhysicsSettingsRandom.ToNative());
+            PushChainCurves(index, setup);
+        }
+
+        // 把一条曲线的关键点 fixed 下推到 native(空曲线也下推, 使 native 侧 clear)。
+        unsafe void PushPhysicsCurve(int index, int curveId, TtKawaiiCurve curve)
+        {
+            curve.ToArrays(out var times, out var values);
+            int count = times.Length;
+            fixed (float* pt = times)
+            fixed (float* pv = values)
+            {
+                mCoreObject.SetChainPhysicsCurve(index, curveId, pt, pv, count);
+            }
+        }
+
+        void PushChainCurves(int index, TtKawaiiChainSetup setup)
+        {
+            mCoreObject.SetChainCurveMode(index, (int)setup.PhysicsCurveMode);
+            PushPhysicsCurve(index, 0, setup.StiffnessCurve);
+            PushPhysicsCurve(index, 1, setup.DampingCurve);
+            PushPhysicsCurve(index, 2, setup.WorldDampingLocationCurve);
+            PushPhysicsCurve(index, 3, setup.WorldDampingRotationCurve);
+            PushPhysicsCurve(index, 4, setup.LimitAngleCurve);
+            PushPhysicsCurve(index, 5, setup.RadiusCurve);
+            PushPhysicsCurve(index, 6, setup.DragCurve);
+            PushPhysicsCurve(index, 7, setup.WindCurve);
         }
 
         public unsafe void BuildChains(Vector3[] bonePositions, Quaternion[] boneRotations, Vector3[] boneScales, int[] parentIndices)
@@ -126,14 +152,60 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
         {
             mCoreObject.SetClothSetup(index,
                 setup.Name,
-                setup.RootBoneIndex, setup.EndBoneIndex,
+                setup.RootBoneIndex.Index, setup.EndBoneIndex.Index,
                 setup.TailBoneLength, (int)setup.TailBoneAxis,
                 setup.ConstrainBoneLength, setup.BoneLengthConstraintBlend,
                 setup.RootCollision, setup.LODThreshold,
                 setup.LoopChains);
             mCoreObject.SetClothPhysicsSettings(index,
-                setup.PhysicsSettings,
-                setup.PhysicsSettingsRandom);
+                setup.PhysicsSettings.ToNative(),
+                setup.PhysicsSettingsRandom.ToNative());
+            PushClothCurves(index, setup);
+        }
+
+        unsafe void PushClothPhysicsCurve(int index, int curveId, TtKawaiiCurve curve)
+        {
+            curve.ToArrays(out var times, out var values);
+            int count = times.Length;
+            fixed (float* pt = times)
+            fixed (float* pv = values)
+            {
+                mCoreObject.SetClothPhysicsCurve(index, curveId, pt, pv, count);
+            }
+        }
+
+        unsafe void PushClothStructuralCurve(int index, int curveId, TtKawaiiCurve curve)
+        {
+            curve.ToArrays(out var times, out var values);
+            int count = times.Length;
+            fixed (float* pt = times)
+            fixed (float* pv = values)
+            {
+                mCoreObject.SetClothStructuralCurve(index, curveId, pt, pv, count);
+            }
+        }
+
+        void PushClothCurves(int index, TtKawaiiClothSetup setup)
+        {
+            mCoreObject.SetClothCurveMode(index, (int)setup.PhysicsCurveMode);
+            // 物理参数曲线(与 chain 同 CurveId 映射)
+            PushClothPhysicsCurve(index, 0, setup.StiffnessCurve);
+            PushClothPhysicsCurve(index, 1, setup.DampingCurve);
+            PushClothPhysicsCurve(index, 2, setup.WorldDampingLocationCurve);
+            PushClothPhysicsCurve(index, 3, setup.WorldDampingRotationCurve);
+            PushClothPhysicsCurve(index, 4, setup.LimitAngleCurve);
+            PushClothPhysicsCurve(index, 5, setup.RadiusCurve);
+            PushClothPhysicsCurve(index, 6, setup.DragCurve);
+            PushClothPhysicsCurve(index, 7, setup.WindCurve);
+            // 结构约束刚度曲线
+            PushClothStructuralCurve(index, 0, setup.VerticalShrinkStiffness);
+            PushClothStructuralCurve(index, 1, setup.VerticalStretchStiffness);
+            PushClothStructuralCurve(index, 2, setup.HorizontalShrinkStiffness);
+            PushClothStructuralCurve(index, 3, setup.HorizontalStretchStiffness);
+            PushClothStructuralCurve(index, 4, setup.VerticalBendStiffness);
+            PushClothStructuralCurve(index, 5, setup.HorizontalBendStiffness);
+            PushClothStructuralCurve(index, 6, setup.ShearShrinkStiffness);
+            PushClothStructuralCurve(index, 7, setup.ShearStretchStiffness);
         }
 
         public unsafe void BuildCloth(Vector3[] bonePositions, Quaternion[] boneRotations, Vector3[] boneScales, int[] parentIndices)
@@ -161,13 +233,33 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
         {
             mCoreObject.SetRodSetup(index,
                 setup.Name,
-                setup.RootBoneIndex, setup.EndBoneIndex,
+                setup.RootBoneIndex.Index, setup.EndBoneIndex.Index,
                 setup.StretchShearStiffness, setup.BendTwistStiffness,
                 setup.PointAttachStiffness, setup.OrientAttachStiffness,
                 setup.LODThreshold);
             mCoreObject.SetRodPhysicsSettings(index,
-                setup.PhysicsSettings,
-                setup.PhysicsSettingsRandom);
+                setup.PhysicsSettings.ToNative(),
+                setup.PhysicsSettingsRandom.ToNative());
+            PushRodCurves(index, setup);
+        }
+
+        unsafe void PushRodCurve(int index, int curveId, TtKawaiiCurve curve)
+        {
+            curve.ToArrays(out var times, out var values);
+            int count = times.Length;
+            fixed (float* pt = times)
+            fixed (float* pv = values)
+            {
+                mCoreObject.SetRodPhysicsCurve(index, curveId, pt, pv, count);
+            }
+        }
+
+        void PushRodCurves(int index, TtKawaiiRodSetup setup)
+        {
+            PushRodCurve(index, 0, setup.StretchShearStiffnessCurve);
+            PushRodCurve(index, 1, setup.BendTwistStiffnessCurve);
+            PushRodCurve(index, 2, setup.PointAttachStiffnessCurve);
+            PushRodCurve(index, 3, setup.OrientAttachStiffnessCurve);
         }
 
         public unsafe void BuildRods(Vector3[] bonePositions, Quaternion[] boneRotations, Vector3[] boneScales, int[] parentIndices)

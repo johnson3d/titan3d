@@ -96,6 +96,7 @@ namespace EngineNS.DesignMacross.Design
                 var elementContext = new FOutlineElementRenderingContext();
                 elementContext.CommandHistory = context.CommandHistory;
                 elementContext.EditorInteroperation = context.EditorInteroperation;
+                elementContext.DesignMacrossAssetName = context.DesignMacrossAssetName;
                 var elements = elementsList.ConstructListElements();
                 foreach (var element in elements)
                 {

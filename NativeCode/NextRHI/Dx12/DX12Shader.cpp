@@ -424,7 +424,7 @@ namespace NxRHI
 				binder->Slot = csibDesc.BindPoint;
 				binder->BindCount = csibDesc.BindCount;
 				binder->Space = csibDesc.Space;
-				binder->IsStructuredBuffer = TRUE;
+				binder->ResourceType = EShaderBindResourceType::SBRT_Buffer;
 
 				Reflector->Uavs.push_back(binder);
 			}
@@ -457,7 +457,10 @@ namespace NxRHI
 				binder->Slot = csibDesc.BindPoint;
 				binder->BindCount = csibDesc.BindCount;
 				binder->Space = csibDesc.Space;
-				binder->IsStructuredBuffer = TRUE;
+				if (csibDesc.Type == D3D_SIT_RTACCELERATIONSTRUCTURE)
+					binder->ResourceType = EShaderBindResourceType::SBRT_AccelerationStructure;
+				else
+					binder->ResourceType = EShaderBindResourceType::SBRT_Buffer;
 
 				Reflector->Srvs.push_back(binder);
 			}

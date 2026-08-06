@@ -99,6 +99,16 @@ namespace KawaiiPhysics
 			PoseScale = InScale;
 			IsLODValidToEvaluate = true;
 
+			// Kinematic/Static particles have no dynamics: their simulated Position must
+			// track the driving bone every frame. Otherwise Position stays frozen at the
+			// value captured during Initialize() (e.g. a stale bind/zero pose) and anchors
+			// the whole chain to that spot (the "twintail falls to the ground" bug).
+			if (PinMode == KPM_Kinematic || PinMode == KPM_Static)
+			{
+				Position = PosePosition;
+				PrevPosition = PosePosition;
+			}
+
 			if (wasInvalid)
 			{
 				SnapToPose();

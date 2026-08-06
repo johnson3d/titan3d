@@ -167,10 +167,34 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             OnDraw(false, true, false);
         }
         public Func<object, object, CustomPropertyDescriptor, bool> CanSetPropertyValueAction = null;
+        /// <summary>
+        /// 统一Undo/Redo架构接入点: 开门的编辑器把自己的历史栈挂到这里,
+        /// 属性修改会自动记录为TtPropertyChangeCommand; 为null时代码路径与旧行为完全一致
+        /// </summary>
+        public Editor.Infrastructure.TtEditorHistory HistoryHost { get; set; } = null;
+        void SetValueWithHistory(CustomPropertyDescriptor propDesc, ref object target, object newValue)
+        {
+            var history = HistoryHost;
+            if (history == null || history.IsApplying)
+            {
+                propDesc.SetValue(ref target, newValue);
+                return;
+            }
+            // 写入前捕获旧值; 值类型宿主的修改由外层引用类型宿主的级联写回时记录(TryCreate内部过滤)
+            var cmd = Editor.Infrastructure.TtPropertyChangeCommand.TryCreate(propDesc, target, newValue);
+            propDesc.SetValue(ref target, newValue);
+            if (cmd != null)
+            {
+                history.PushCommand(cmd);
+            }
+        }
         public void OnDraw(bool bShowReadOnly, bool bNewForm/*=true*/, bool bKeepColums/*=false*/, ImGuiWindowFlags_ flags = ImGuiWindowFlags_.ImGuiWindowFlags_None, ImGuiChildFlags_ child_flags = ImGuiChildFlags_.ImGuiChildFlags_None)
         {
             if (Visible == false)
                 return;
+            // 拖拽/连续输入结束(无激活控件)时封口栈顶命令, 后续同属性修改不再合并
+            if (HistoryHost != null && ImGuiAPI.IsAnyItemActive() == false)
+                HistoryHost.SealTopCommand();
             //mCallstack.Clear();
             //mCallstack.Add(new KeyValuePair<object, System.Reflection.PropertyInfo>(null, null));
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, EGui.UIProxy.StyleConfig.Instance.PGWindowPadding);
@@ -646,7 +670,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                     canSet = CanSetPropertyValueAction.Invoke(target, newValue, propDesc);
                                 if (changed && canSet)
                                 {
-                                    propDesc.SetValue(ref target, newValue);
+                                    SetValueWithHistory(propDesc, ref target, newValue);
                                     if(propDesc.ParentIsValueType)
                                     {
                                         retVal = true;
@@ -674,7 +698,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                                 canSet = CanSetPropertyValueAction.Invoke(target, newValue, propDesc);
                                             if (changed && canSet)
                                             {
-                                                propDesc.SetValue(ref target, newValue);
+                                                SetValueWithHistory(propDesc, ref target, newValue);
                                                 retValue = true;
                                                 if(propDesc.ParentIsValueType)
                                                 {
@@ -711,7 +735,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                                 canSet = CanSetPropertyValueAction.Invoke(target, newValue, propDesc);
                                             if (changed && canSet)
                                             {
-                                                propDesc.SetValue(ref target, newValue);
+                                                SetValueWithHistory(propDesc, ref target, newValue);
                                                 retValue = true;
                                                 if(propDesc.ParentIsValueType)
                                                 {
@@ -751,7 +775,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                         canSet = CanSetPropertyValueAction.Invoke(target, newValue, propDesc);
                                     if (valueChanged && canSet)
                                     {
-                                        propDesc.SetValue(ref target, newValue);
+                                        SetValueWithHistory(propDesc, ref target, newValue);
                                         retValue = true;
                                         if(propDesc.ParentIsValueType)
                                         {
@@ -951,9 +975,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     valueChanged = DrawPropertyGridObjectItem(ref info, out newValue);
                 }
             }
-            catch
+            catch(Exception ex)
             {
-
+                Profiler.Log.WriteException(ex);
             }
             PopPGEditorStyleValues();
             return valueChanged;

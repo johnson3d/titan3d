@@ -29,6 +29,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\GraphElement_BlendTree_AnimStateMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\GraphElement_BlendTree_PoseOutput.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\OutlineElement_BlendTreeGraph.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\IAnimMacrossClassDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\Postprocessing\AnimFinalBlendTreeClassDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\Postprocessing\OutlineElement_AnimFinalPoseOutput.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\StateMachine\Attachment\AnimPlay\GraphElement_AnimPlayAttachment.cs" />
@@ -112,6 +113,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AnimationModule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\TtKawaiiPhysicsContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\TtKawaiiSetupData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\TtKawaiiCurve.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\TtKawaiiPhysicsComponent.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -20,6 +20,16 @@ namespace NxRHI
 			SBT_IBV,
 	};
 
+	//what kind of resource a SBT_SRV/SBT_UAV binder binds, each RHI backend maps it to its own descriptor type
+	//SBRT_Image(0)/SBRT_Buffer(1) keep the binary compatibility with the legacy IsStructuredBuffer(vBOOL) in cooked shaders
+	enum TR_ENUM(SV_EnumNoFlags)
+		EShaderBindResourceType
+	{
+		SBRT_Image = 0,
+			SBRT_Buffer = 1,
+			SBRT_AccelerationStructure = 2,
+	};
+
 	enum TR_ENUM()
 		EShaderType
 	{
@@ -70,7 +80,7 @@ namespace NxRHI
 			BindCount = 1;
 			Size = 0;
 			DescriptorIndex = -1;
-			IsStructuredBuffer = FALSE;
+			ResourceType = EShaderBindResourceType::SBRT_Image;
 			ShaderStage = EShaderType::SDT_Unknown;
 		}
 		FShaderBinder(EShaderType stage)
@@ -80,7 +90,7 @@ namespace NxRHI
 			BindCount = 1;
 			Size = 0;
 			DescriptorIndex = -1;
-			IsStructuredBuffer = FALSE;
+			ResourceType = EShaderBindResourceType::SBRT_Image;
 			ShaderStage = stage;
 		}
 		EShaderType ShaderStage = EShaderType::SDT_Unknown;
@@ -90,10 +100,13 @@ namespace NxRHI
 		int					Slot = 0;
 		int					BindCount = 1;
 		UINT				Size = 0;
-		vBOOL				IsStructuredBuffer = FALSE;
+		EShaderBindResourceType	ResourceType = EShaderBindResourceType::SBRT_Image;
 		int					DescriptorIndex = -1;
 		bool IsBindless() const { 
 			return BindCount == 0;
+		}
+		bool IsStructuredBuffer() const {
+			return ResourceType == EShaderBindResourceType::SBRT_Buffer;
 		}
 		std::vector<AutoRef<FShaderVarDesc>>		Fields;
 		const FShaderVarDesc* FindField(const char* name) const;

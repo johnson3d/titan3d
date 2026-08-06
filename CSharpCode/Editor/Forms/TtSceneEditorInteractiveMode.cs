@@ -63,12 +63,16 @@ namespace EngineNS.Editor.Forms
                 return;
 
             var world = SceneEditorViewport?.World;
+            // 开门时整批删除封为一条可撤销事务; history为null时行为与旧流程一致
+            var history = host.EditorHistory;
+            history?.BeginTransaction(selected.Count == 1 ? $"Delete Node {selected[0]?.NodeName}" : $"Delete {selected.Count} Nodes");
             foreach (var node in selected)
             {
                 if (node == null || node == world?.Root)
                     continue;
-                node.DeleteFromScene();
+                TtSceneEditor.DeleteNodeWithHistory(history, node);
             }
+            history?.EndTransaction();
             selected.Clear();
             host.NodeInspector.Target = null;
             SceneEditorViewport?.Axis?.SetSelectedNodes(selected);
@@ -155,6 +159,18 @@ namespace EngineNS.Editor.Forms
 
             if (clones.Count == 0)
                 return;
+
+            // 克隆操作记录为一条可撤销事务(undo时整批移除克隆体)
+            var cloneHistory = host.EditorHistory;
+            if (cloneHistory != null)
+            {
+                cloneHistory.BeginTransaction(clones.Count == 1 ? $"Clone Node {clones[0].NodeName}" : $"Clone {clones.Count} Nodes");
+                foreach (var c in clones)
+                {
+                    TtSceneEditor.PushNodeCreateCommand(cloneHistory, c, "Clone Node");
+                }
+                cloneHistory.EndTransaction();
+            }
 
             // 把原来的节点 Selected 标记清掉, 选中切换到新克隆的节点。
             for (int i = 0; i < selected.Count; i++)

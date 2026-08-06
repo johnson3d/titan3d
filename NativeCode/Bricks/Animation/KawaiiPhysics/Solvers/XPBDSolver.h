@@ -9,9 +9,28 @@ namespace KawaiiPhysics
 {
 	// XPBD solver utility (pure static methods).
 	// AnimNode calls these methods each substep to assemble the pipeline:
-	//   PredictPositions -> ClearLambdas -> constraint solving -> UpdateVelocities -> ApplyDamping -> ClampAndSleep
+	//   ApplyWorldMoveLag -> PredictPositions -> ApplyPoseStiffness -> ClearLambdas ->
+	//   constraint solving -> UpdateVelocities -> ApplyDamping -> ClampAndSleep
 	namespace XPBDSolver
 	{
+		// Frame-of-reference lag caused by the component (actor) moving/rotating in world.
+		// Physics runs in mesh space, so a particle that stays put in mesh space follows the
+		// actor perfectly and shows no inertia; this pulls each dynamic particle back by the
+		// part of the component motion it is not supposed to follow, weighted per particle by
+		// WorldDampingLocation / WorldDampingRotation. Call once per frame before gravity.
+		void ApplyWorldMoveLag(
+			std::vector<FSimParticle>& Particles,
+			const FKawaiiPhysicsContext& Context);
+
+		// "Pull to pose": per-particle Stiffness spring toward the animated bone offset taken
+		// from the parent's simulated position. This is the only force that brings a chain back
+		// to its animated shape - without it gravity is the sole input and the chain just hangs.
+		// Particles must be ordered root -> tip. Call once per frame after PredictPositions.
+		void ApplyPoseStiffness(
+			std::vector<FSimParticle>& Particles,
+			float dt,
+			int32_t TargetFPS);
+
 		// Semi-implicit Euler position prediction
 		void PredictPositions(
 			std::vector<FSimParticle>& Particles,

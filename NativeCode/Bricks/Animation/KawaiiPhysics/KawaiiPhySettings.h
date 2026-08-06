@@ -33,16 +33,29 @@ namespace KawaiiPhysics
 	// =====================================================================
 	// FKawaiiPhySettings - Base physics simulation parameters per particle
 	// =====================================================================
+	//
+	// UNIT CONVENTION: all lengths / speeds / accelerations here are in the engine's
+	// skeleton mesh space, which is METERS (a humanoid is ~1.5 tall, PhysX main scene
+	// gravity is -9.8). The upstream KawaiiPhysics plugin is a UE plugin and authored
+	// every default in CENTIMETERS; those numbers must be divided by 100 when ported.
+	// Leaving a cm-era default in place (e.g. Gravity -980) makes one frame of free fall
+	// longer than a whole bone chain, and the length constraint then pins the chain
+	// straight down every frame == "hair hangs dead, never swings".
 
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FKawaiiPhySettings
 	{
+		// Pull back toward the animated pose. 0 = pure physics (chain never returns to the
+		// animated shape), 1 = snap to animation. Applied by XPBDSolver::ApplyPoseStiffness.
 		float Stiffness = 0.05f;
 		float Damping = 0.1f;
+		// How much of the component's world motion this particle does NOT follow (= lag).
+		// 1 = keeps its world position (max flow), 0 = rigidly glued to the actor (no flow).
+		// Applied by XPBDSolver::ApplyWorldMoveLag.
 		float WorldDampingLocation = 0.8f;
 		float WorldDampingRotation = 0.8f;
 		float LimitAngle = 0.0f;
-		float Radius = 3.0f;
+		float Radius = 0.03f;            // meters (upstream cm default was 3.0)
 		float WindCoefficient = 1.0f;
 		float DragCoefficient = 0.0f;
 		float MaxFrameDisplacement = 0.0f;
@@ -65,7 +78,14 @@ namespace KawaiiPhysics
 		v3dxVector3 PrevComponentLocation = v3dxVector3(0, 0, 0);
 		v3dxQuaternion PrevComponentRotation = v3dxQuaternion(0, 0, 0, 1);
 
-		v3dxVector3 Gravity = v3dxVector3(0, 0, -980.0f);
+		// Engine world/skeleton space is Y-up AND METERS: matches the PhysX main scene
+		// gravity (0,-9.8,0) and the skeleton mesh-space where +Y points up (foot Y~0.06,
+		// head top Y~1.47). Two historical bugs lived on this single line:
+		//   1) Z-up (0,0,-980) made chains fall toward -Z ("backwards") and curl into a ball;
+		//   2) the cm-era magnitude 980 is 100x too strong for a meter-scale skeleton, so one
+		//      frame of free fall (~0.27m at 60fps) exceeded a whole twintail segment and the
+		//      bone-length constraint pinned the chain straight down every frame.
+		v3dxVector3 Gravity = v3dxVector3(0, -9.8f, 0);
 		float GravityScale = 1.0f;
 
 		v3dxVector3 WindForce = v3dxVector3(0, 0, 0);
@@ -80,7 +100,7 @@ namespace KawaiiPhysics
 		int32_t SimulationFPS = 120;
 
 		float TeleportDistanceThreshold = -1.0f;
-		float TeleportSpeedThreshold = 300.0f;
+		float TeleportSpeedThreshold = 3.0f;         // m/s (upstream cm default was 300)
 		float TeleportRotationThreshold = -1.0f;
 		float TeleportAngularSpeedThreshold = 100.0f;
 
@@ -107,6 +127,19 @@ namespace KawaiiPhysics
 		float TailBoneLength = 0.0f;
 		ETailBoneAxis TailBoneForwardAxis = TBA_X_Positive;
 		int32_t LODThreshold = -1;
+
+		// Per-bone parameter curves sampled by CurveMode along the chain. Each is a multiplier
+		// on the corresponding base scalar in PhysicsSettings (empty curve -> 1.0 = uniform).
+		// Applied per particle in SimJointHelpers::UpdatePhysicsSettings.
+		EKawaiiCurveEvalMode CurveMode = KCEM_LengthRate;
+		FKawaiiCurve StiffnessCurve;
+		FKawaiiCurve DampingCurve;
+		FKawaiiCurve WorldDampingLocationCurve;
+		FKawaiiCurve WorldDampingRotationCurve;
+		FKawaiiCurve LimitAngleCurve;
+		FKawaiiCurve RadiusCurve;
+		FKawaiiCurve DragCurve;
+		FKawaiiCurve WindCurve;
 	};
 
 	// =====================================================================
@@ -141,7 +174,7 @@ namespace KawaiiPhysics
 		FKawaiiCurve ShearShrinkStiffness;
 		FKawaiiCurve ShearStretchStiffness;
 
-		float ClothThickness = 1.0f;
+		float ClothThickness = 0.01f;                // meters (upstream cm default was 1.0)
 		float ClothFriction = 0.2f;
 	};
 
@@ -161,6 +194,12 @@ namespace KawaiiPhysics
 		FKawaiiPhySettings PhysicsSettings;
 		FKawaiiPhySettings PhysicsSettingsRandom;
 		int32_t LODThreshold = -1;
+
+		// Per-segment stiffness curves (multiplier on the base scalar; empty -> 1.0).
+		FKawaiiCurve StretchAndShearStiffnessCurve;
+		FKawaiiCurve BendAndTwistStiffnessCurve;
+		FKawaiiCurve PointAttachmentStiffnessCurve;
+		FKawaiiCurve OrientationAttachmentStiffnessCurve;
 	};
 
 	// =====================================================================

@@ -33,6 +33,7 @@ namespace EngineNS.DesignMacross.Editor
             var outlineContext = new FOutlineRenderingContext();
             outlineContext.CommandHistory = context.CommandHistory;
             outlineContext.EditorInteroperation = context.EditorInteroperation;
+            outlineContext.DesignMacrossAssetName = context.DesignMacrossAssetName;
             render.Draw(classDeclarationPanel.Outline, ref outlineContext);
         }
     }

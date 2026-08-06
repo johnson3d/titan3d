@@ -8,21 +8,22 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     public class PGHideBaseClassPropertiesAttribute : Attribute { }
     public class TtShowInPropertyGridAttribute : Attribute { }
 
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)]
-    public class PGPropertyOrderAttribute : Attribute
+    // 只允许具名参数，避免Order与DisplayOrder互相误写：
+    //   类型级 [TtPropertyOrder(Order = EPropertyOrder.Alphabetical)] 指定成员的排序方式（不标时为定义顺序）
+    //   成员级 [TtPropertyOrder(DisplayOrder = -1)] 指定在所属Category内的显示顺序
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
+    public class TtPropertyOrderAttribute : Attribute
     {
         public enum EPropertyOrder
         {
-            Alphabetical,    // 按字母排序（默认）
-            DefinitionOrder  // 按定义顺序
+            Alphabetical,    // 按字母排序
+            DefinitionOrder  // 按定义顺序（默认）
         }
 
-        public EPropertyOrder Order { get; set; }
-
-        public PGPropertyOrderAttribute(EPropertyOrder order)
-        {
-            Order = order;
-        }
+        // 类型级：成员的排序方式，缺省按定义顺序
+        public EPropertyOrder Order { get; set; } = EPropertyOrder.DefinitionOrder;
+        // 成员级：Category内的显示顺序，值小的在前，未标记的成员为0
+        public int DisplayOrder { get; set; } = 0;
     }
     public class TtCategoryFilters : Attribute 
     {

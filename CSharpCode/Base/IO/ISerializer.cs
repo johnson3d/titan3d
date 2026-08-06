@@ -686,7 +686,7 @@ namespace EngineNS.IO
                     if (subObject == null)
                         subObject = Rtti.TtTypeDescManager.CreateInstance(type);
                     ReadObjectMetaFields(paramObject, i, ref subObject, obj);
-                    if (prop.CanWrite)
+                    if (prop.CanWrite && Rtti.TtTypeDesc.CanCast(type, prop.PropertyType))
                         prop.SetValue(obj, subObject);
                 }
                 (obj as ISerializer)?.OnPropertyRead(paramObject, prop.Name, true);

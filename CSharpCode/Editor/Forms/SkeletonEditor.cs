@@ -120,6 +120,15 @@ namespace EngineNS.Editor.Forms
                 return boneProxy;
             return null;
         }
+
+        /// <summary>
+        /// 按骨骼索引取 HitProxy，供编辑器把树选中和视口拾取状态保持一致
+        /// </summary>
+        public TtBoneHitProxy GetBoneProxy(int boneIndex)
+        {
+            BoneProxies.TryGetValue(boneIndex, out var proxy);
+            return proxy;
+        }
         public TtSkeletonAsset SkeletonAsset { get; set; } = null;
         public TtLocalSpaceRuntimePose CurrentPose = null;
         bool mXRay = false;
@@ -315,6 +324,15 @@ namespace EngineNS.Editor.Forms
         public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
         public EGui.Controls.PropertyGrid.TtPropertyGrid AnimationClipPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         TtSkeletonTreePanel SkeletonTreePanel = new TtSkeletonTreePanel();
+
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退旧流程时把mEditorHistory改为null即可
+        public bool EnableUndoRedo => EditorHistory != null;
+        public Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        Infrastructure.TtEditorHistory mEditorHistory = new Infrastructure.TtEditorHistory();
+        Infrastructure.TtEditorHistoryPanel mHistoryPanel = new Infrastructure.TtEditorHistoryPanel();
+        #endregion
+
         ~TtSkeletonEditor()
         {
             Dispose();
@@ -324,6 +342,9 @@ namespace EngineNS.Editor.Forms
             SkeletonAsset = null;
             CoreSDK.DisposeObject(ref PreviewViewport);
             AnimationClipPropGrid.Target = null;
+            AnimationClipPropGrid.HistoryHost = null;
+            SkeletonTreePanel.HistoryHost = null;
+            mEditorHistory?.Clear();
         }
         #region IAssetEditor
         public RName AssetName { get; set; }
@@ -375,6 +396,7 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Skeleton", mDockKeyClass), leftUpId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("BoneDetails", mDockKeyClass), leftDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Left", mDockKeyClass), leftDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), leftDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Right", mDockKeyClass), rightId);
             ImGuiAPI.DockBuilderFinish(id);
         }
@@ -410,6 +432,10 @@ namespace EngineNS.Editor.Forms
             DrawSkeleton();
             DrawLeft();
             DrawRight();
+            if (mEditorHistory != null)
+            {
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+            }
         }
         protected unsafe void DrawToolBar()
         {
@@ -418,6 +444,7 @@ namespace EngineNS.Editor.Forms
             {
                 SkeletonAsset.SaveAssetTo(SkeletonAsset.AssetName);
                 var unused = TtEngine.Instance.GfxDevice.MaterialMeshManager.ReloadMaterialMesh(SkeletonAsset.AssetName);
+                mEditorHistory?.SetSavePoint();
 
                 //USnapshot.Save(AnimationClip.AssetName, AnimationClip.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
@@ -427,15 +454,9 @@ namespace EngineNS.Editor.Forms
 
             }
             ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))
-            {
-
-            }
-            ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Redo", in btSize))
-            {
-
-            }
+            // mEditorHistory为null时按钮/快捷键均为空操作, 与旧行为一致
+            Infrastructure.EditorUndoUtils.DrawUndoRedoButtons(mEditorHistory);
+            Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
         }
         public void OnBoneSelected(ILimb selectedBone)
         {
@@ -537,7 +558,17 @@ namespace EngineNS.Editor.Forms
             AnimationClipPreview = new TtAnimationClipPreview();
             AnimationClipPreview.SkeletonEditor = this;
             AnimationClipPropGrid.Target = AnimationClipPreview;
+            mEditorHistory?.Clear();
+            AnimationClipPropGrid.HistoryHost = mEditorHistory;
             SkeletonTreePanel.SetSkeleton(SkeletonAsset.Skeleton, this);
+            SkeletonTreePanel.SetWorld(PreviewViewport.World);
+            // 复用预览场景里已创建的骨架节点，骨骼高亮和 HitProxy 单选都依赖它
+            SkeletonTreePanel.SetSkeletonShowNode(SkeletonShowNode);
+            // 骨架资产编辑器允许直接改绑定姿势
+            SkeletonTreePanel.AllowBoneTransformEdit = true;
+            // 供 BoneDetails 拼出 "骨架资产名:骨骼名" 的跨编辑器骨骼路径
+            SkeletonTreePanel.SkeletonAssetName = SkeletonAsset.AssetName;
+            SkeletonTreePanel.HistoryHost = mEditorHistory;
             TtEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
@@ -599,6 +630,8 @@ namespace EngineNS.Editor.Forms
                 AnimationPlayer.Evaluate();
                 SkeletonShowNode.CurrentPose = AnimationPlayer.OutPose;
             }
+            // 视口点选的骨骼收敛为单选，并把选中同步到骨骼树和 BoneDetails
+            SkeletonTreePanel.TickViewportPicking(PreviewViewport?.RenderPolicy as Graphics.Pipeline.TtRenderPolicy);
             PreviewViewport.TickLogic(ellapse);
         }
 

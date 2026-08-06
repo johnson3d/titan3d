@@ -44,7 +44,8 @@ namespace NxRHI
 
 		dsSetInfos[index] = FDescriptorSetInfo{};
 		VkDescriptorImageInfo& imageInfo = dsSetInfos[index].imageInfo;
-		VkDescriptorBufferInfo& bufferInfo = dsSetInfos[index].bufferInfo;\
+		VkDescriptorBufferInfo& bufferInfo = dsSetInfos[index].bufferInfo;
+		FDescriptorSetInfo::FRtasInfo& rtasInfo = dsSetInfos[index].rtasInfo;
 		index++;
 
 		if (pBinder != nullptr)
@@ -79,7 +80,26 @@ namespace NxRHI
 				}
 				case EShaderBindType::SBT_SRV:
 				{
-					if (pBinder->IsStructuredBuffer)
+					if (pBinder->ResourceType == EShaderBindResourceType::SBRT_AccelerationStructure)
+					{
+						//TLAS binding, align with DX12 D3D12_SRV_DIMENSION_RAYTRACING_ACCELERATION_STRUCTURE
+						rtasInfo.asInfo = {};
+						rtasInfo.asInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+						rtasInfo.asInfo.accelerationStructureCount = 1;
+						if (resource != nullptr)
+						{
+							auto pBuffer = ((VKSrView*)resource)->Buffer.UnsafeConvertTo<VKBuffer>();
+							rtasInfo.asHandle = pBuffer->mAccelerationStructure;
+						}
+						else
+						{
+							rtasInfo.asHandle = VK_NULL_HANDLE;
+						}
+						rtasInfo.asInfo.pAccelerationStructures = &rtasInfo.asHandle;
+						descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+						descriptorWrite.pNext = &rtasInfo.asInfo;
+					}
+					else if (pBinder->ResourceType == EShaderBindResourceType::SBRT_Buffer)
 					{
 						if (resource)
 						{
@@ -112,7 +132,7 @@ namespace NxRHI
 				}
 				case EShaderBindType::SBT_UAV:
 				{
-					if (pBinder->IsStructuredBuffer)
+					if (pBinder->ResourceType == EShaderBindResourceType::SBRT_Buffer)
 					{
 						if (resource)
 						{
@@ -306,6 +326,11 @@ namespace NxRHI
 			return;
 
 		auto device = cmdlist->mDevice.GetCastPtr<VKGpuDevice>();
+
+		if (ScissorRect != nullptr)
+		{
+			cmdlist->SetScissor(1, &ScissorRect->ScissorRect);
+		}
 
 		UpdateGpuDrawState(cmdlist->GetGpuDevice(), cmdlist, cmdlist->mCurrentFrameBuffers->mRenderPass);
 		cmdlist->SetGraphicsPipeline(GpuDrawState);

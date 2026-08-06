@@ -39,11 +39,40 @@ namespace EngineNS.UI.Editor
         public EditorUIHost mUIHost;
         public TtUINode mUINode;
         Vector2 mNewCreateUISize = new Vector2(100, 50);
+
+        #region 统一Undo/Redo(开门)
+        // 控制门就是是否new出历史栈: 需回退旧流程时把mEditorHistory改为null即可。
+        // 控件属性由PropertyGrid拦截; 控件树增删走下方helper
+        public bool EnableUndoRedo => EditorHistory != null;
+        public EngineNS.Editor.Infrastructure.TtEditorHistory EditorHistory => mEditorHistory;
+        EngineNS.Editor.Infrastructure.TtEditorHistory mEditorHistory = new EngineNS.Editor.Infrastructure.TtEditorHistory();
+        EngineNS.Editor.Infrastructure.TtEditorHistoryPanel mHistoryPanel = new EngineNS.Editor.Infrastructure.TtEditorHistoryPanel();
+
+        // 控件已加入父容器后记录可撤销命令(捕获当前index供redo插回原位)
+        void PushElementCreateCommand(TtContainer parent, TtUIElement element)
+        {
+            if (mEditorHistory == null || mEditorHistory.IsApplying || parent == null || element == null)
+                return;
+            var index = parent.Children.IndexOf(element);
+            mEditorHistory.PushCommand(new EngineNS.Editor.Infrastructure.TtDelegateCommand($"Add {element.Name}",
+                () =>
+                {
+                    if (index >= 0 && index <= parent.Children.Count)
+                        parent.Children.Insert(index, element);
+                    else
+                        parent.Children.Add(element);
+                },
+                () => parent.Children.Remove(element)));
+        }
+        #endregion
+
         public void Dispose()
         {
             CoreSDK.DisposeObject(ref UIAsset);
             CoreSDK.DisposeObject(ref PreviewViewport);
             DetailsGrid.Target = null;
+            DetailsGrid.HistoryHost = null;
+            mEditorHistory?.Clear();
         }
 
         public async Thread.Async.TtTask<bool> Initialize()
@@ -162,6 +191,7 @@ namespace EngineNS.UI.Editor
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Designer", mDockKeyClass), designerId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Hierachy", mDockKeyClass), hierachyId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Details", mDockKeyClass), detailsId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), detailsId);
             ImGuiAPI.DockBuilderFinish(id);
         }
         public ImGuiMouseCursor_ mMouseCursor;
@@ -241,6 +271,10 @@ namespace EngineNS.UI.Editor
             DrawDetails();
             DrawHierachy();
             DrawControls();
+            if (mEditorHistory != null)
+            {
+                mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
+            }
             //if (!mIsDragDroping)
             {
                 mDragTips = mDragItemName;
@@ -258,6 +292,7 @@ namespace EngineNS.UI.Editor
             //UIAsset.MacrossEditor.CompileCode();
             UIAsset.UIHost = mUIHost;
             UIAsset.SaveAssetTo(UIAsset.AssetName);
+            mEditorHistory?.SetSavePoint();
             EngineNS.Editor.TtSnapshot.Save(AssetName, TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName), PreviewViewport.RenderPolicy.GetFinalShowRSV());
         }
         protected unsafe void DrawToolBar()
@@ -303,15 +338,9 @@ namespace EngineNS.UI.Editor
             ImGuiAPI.SameLine(0, -1);
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))
-            {
-
-            }
-            ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("Redo", in btSize))
-            {
-
-            }
+            // mEditorHistory为null时按钮/快捷键均为空操作, 与旧行为一致
+            EngineNS.Editor.Infrastructure.EditorUndoUtils.DrawUndoRedoButtons(mEditorHistory);
+            EngineNS.Editor.Infrastructure.EditorUndoUtils.HandleUndoShortcut(mEditorHistory);
             ImGuiAPI.SameLine(0, -1);
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             ImGuiAPI.SameLine(0, -1);
@@ -891,14 +920,32 @@ namespace EngineNS.UI.Editor
                     menuName += $"{mSelectedElements.Count} items";
                 if (EGui.UIProxy.MenuItemProxy.MenuItem(menuName, null, false, null, drawList, menuData, ref element.HierachyContextMenuState))
                 {
+                    // 开门时整批删除封为一条可撤销事务(记录index供undo插回原位)
+                    mEditorHistory?.BeginTransaction(menuName);
                     for(int i=0; i<mSelectedElements.Count; i++)
                     {
                         if (mSelectedElements[i] == mUIHost)
                             continue;
                         if (mSelectedElements[i].TemplateParent != null)
                             continue;
-                        mSelectedElements[i].Parent.Children.Remove(mSelectedElements[i]);
+                        var delElement = mSelectedElements[i];
+                        var delParent = delElement.Parent;
+                        var delIndex = delParent.Children.IndexOf(delElement);
+                        delParent.Children.Remove(delElement);
+                        if (mEditorHistory != null && mEditorHistory.IsApplying == false)
+                        {
+                            mEditorHistory.PushCommand(new EngineNS.Editor.Infrastructure.TtDelegateCommand($"Delete {delElement.Name}",
+                                () => delParent.Children.Remove(delElement),
+                                () =>
+                                {
+                                    if (delIndex >= 0 && delIndex <= delParent.Children.Count)
+                                        delParent.Children.Insert(delIndex, delElement);
+                                    else
+                                        delParent.Children.Add(delElement);
+                                }));
+                        }
                     }
+                    mEditorHistory?.EndTransaction();
                     ProcessSelectElement(null, false);
                 }
                 ImGuiAPI.EndPopup();
@@ -959,6 +1006,7 @@ namespace EngineNS.UI.Editor
                         }
                         Vector2 offset = getOffsetFunc.Invoke(parent);
                         parent.ProcessNewAddChild(uiControl, offset, size);
+                        PushElementCreateCommand(parent, uiControl);
                         mNeedExpandElement.Add(parent);
                     }
 
@@ -1014,6 +1062,7 @@ namespace EngineNS.UI.Editor
                     }
                     Vector2 offset = getOffsetFunc.Invoke(parent);
                     parent.ProcessNewAddChild(userControl, offset, size);
+                    PushElementCreateCommand(parent, userControl);
                     mNeedExpandElement.Add(parent);
                 }
             }
@@ -1669,11 +1718,15 @@ namespace EngineNS.UI.Editor
             var aMeta = UIAsset.GetAMeta() as TtUIAssetAMeta;
             DesignResolution = aMeta.DesignResolution;
             //DetailsGrid.Target = UIAsset;
+            mEditorHistory?.Clear();
+            DetailsGrid.HistoryHost = mEditorHistory;
             TtEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
         public void OnCloseEditor()
         {
+            DetailsGrid.HistoryHost = null;
+            mEditorHistory?.Clear();
             TtEngine.Instance.TickableManager.RemoveTickable(this);
             Dispose();
         }

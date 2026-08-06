@@ -24,6 +24,19 @@ namespace EngineNS.Editor
         IRootForm GetRootForm();
         Thread.Async.TtTask<bool> Initialize();
         string GetWindowsName();
+
+        #region 统一Undo/Redo架构控制门
+        /// <summary>
+        /// 统一Undo/Redo架构的编辑器控制门, 缺省关闭。
+        /// 是否启用完全由每个编辑器自己override决定(迁移完成后返回true), 不设全局开关;
+        /// 关门时所有新机制代码路径(PropertyGrid拦截/快捷键/历史面板)保持旧行为不变。
+        /// </summary>
+        bool EnableUndoRedo { get => false; }
+        /// <summary>
+        /// 编辑器独立的操作历史栈, 开门的编辑器override返回自己的实例
+        /// </summary>
+        Infrastructure.TtEditorHistory EditorHistory { get => null; }
+        #endregion
     }
     public class TtAssetEditorManager
     {

@@ -410,7 +410,7 @@ namespace NxRHI
 				binder->Name = csibDesc.Name;
 				binder->Slot = csibDesc.BindPoint;
 				binder->BindCount = csibDesc.BindCount;
-				binder->IsStructuredBuffer = TRUE;
+				binder->ResourceType = EShaderBindResourceType::SBRT_Buffer;
 
 				Reflector->Uavs.push_back(binder);
 			}
@@ -450,7 +450,7 @@ namespace NxRHI
 				binder->Name = csibDesc.Name;
 				binder->Slot = csibDesc.BindPoint;
 				binder->BindCount = csibDesc.BindCount;
-				binder->IsStructuredBuffer = TRUE;
+				binder->ResourceType = EShaderBindResourceType::SBRT_Buffer;
 				Reflector->Srvs.push_back(binder);
 			}
 			break;

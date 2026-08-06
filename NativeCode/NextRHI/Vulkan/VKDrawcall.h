@@ -9,10 +9,16 @@ namespace NxRHI
 {
 	struct FDescriptorSetInfo
 	{
+		struct FRtasInfo
+		{
+			VkWriteDescriptorSetAccelerationStructureKHR asInfo;
+			VkAccelerationStructureKHR asHandle;
+		};
 		union
 		{
 			VkDescriptorImageInfo imageInfo;
 			VkDescriptorBufferInfo bufferInfo;
+			FRtasInfo rtasInfo;
 		};
 	};
 	class VKCommandList;

@@ -1,5 +1,4 @@
-﻿using EngineNS.GamePlay.Action;
-using EngineNS.GamePlay.Scene;
+﻿using EngineNS.GamePlay.Scene;
 using EngineNS.Thread.Async;
 using System;
 using System.Collections.Generic;
@@ -7,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    public partial class TtAxis : GamePlay.Action.IActionRecordable
+    public partial class TtAxis
     {
         public readonly static RName mAxisMaterial_Focus = RName.GetRName(@"axis\axis_focus_matins.uminst", RName.ERNameType.Engine);
         public readonly static RName mAxisMaterial_Face_Focus = RName.GetRName(@"axis\axis_face_focus_matins.uminst", RName.ERNameType.Engine);
@@ -732,12 +731,8 @@ namespace EngineNS.GamePlay
             }
         }
 
-        public UActionRecorder ActionRecorder 
-        { 
-            get; 
-            set;
-        }
-
+        // 统一Undo/Redo接入点: 宿主编辑器开门时把自己的历史栈挂到下方HistoryHost(旧UActionRecorder机制已废弃删除)
+        
         DVector3 GetCenterAxisPosition()
         {
             var camera = mCameraController.Camera;
@@ -1081,12 +1076,14 @@ namespace EngineNS.GamePlay
             public FTransform StartTransform;
         }
         List<FSelectedNodeData> mSelectedNodes;
+        // 统一Undo/Redo接入点: 宿主编辑器开门时把自己的历史栈挂到这里,
+        // gizmo拖动结束(EndTransAxis)时把整次拖动封为一条Transform命令; 为null时行为不变
+        public EngineNS.Editor.Infrastructure.TtEditorHistory HistoryHost;
         List<FSelectedNodeData> SelectedNodes
         {
             get => mSelectedNodes;
             set
             {
-                GamePlay.Action.UAction.OnChanged(this, this, "SelectedNodes", mSelectedNodes, value);
                 mSelectedNodes = value;
             }
         }
@@ -2756,6 +2753,7 @@ namespace EngineNS.GamePlay
         {
             if (!mInitialized)
                 return;
+            RecordTransAxisCommand();
             mIsTransAxisOperation = false;
             mRotArrowAssetNode.Parent = null;
 
@@ -2765,6 +2763,46 @@ namespace EngineNS.GamePlay
                     mRootNode.Placement.Quat = Quaternion.Identity;
                     break;
             }
+        }
+        // 把本次gizmo拖动(StartTransAxis记录的StartTransform -> 当前Transform)封为一条可撤销命令
+        void RecordTransAxisCommand()
+        {
+            var history = HistoryHost;
+            if (history == null || history.IsApplying || mIsTransAxisOperation == false || mSelectedNodes == null)
+                return;
+            var moved = new List<(GamePlay.Scene.TtNode Node, FTransform OldT, FTransform NewT)>();
+            for (int i = 0; i < mSelectedNodes.Count; i++)
+            {
+                var node = mSelectedNodes[i].Node;
+                if (node == null)
+                    continue;
+                var oldT = mSelectedNodes[i].StartTransform;
+                var newT = ((TtPlacement)node.Placement).TransformData;
+                if (newT.mPosition != oldT.mPosition || newT.mQuat != oldT.mQuat || newT.mScale != oldT.mScale)
+                    moved.Add((node, oldT, newT));
+            }
+            if (moved.Count == 0)
+                return;
+            history.PushCommand(new EngineNS.Editor.Infrastructure.TtDelegateCommand(
+                moved.Count == 1 ? $"Transform {moved[0].Node.NodeName}" : $"Transform {moved.Count} Nodes",
+                () =>
+                {
+                    foreach (var m in moved)
+                    {
+                        m.Node.Placement.Position = m.NewT.mPosition;
+                        m.Node.Placement.Quat = m.NewT.mQuat;
+                        m.Node.Placement.Scale = m.NewT.mScale;
+                    }
+                },
+                () =>
+                {
+                    foreach (var m in moved)
+                    {
+                        m.Node.Placement.Position = m.OldT.mPosition;
+                        m.Node.Placement.Quat = m.OldT.mQuat;
+                        m.Node.Placement.Scale = m.OldT.mScale;
+                    }
+                }));
         }
 
         #region UI

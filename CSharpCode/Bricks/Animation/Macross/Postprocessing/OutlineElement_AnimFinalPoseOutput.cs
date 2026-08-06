@@ -1,4 +1,5 @@
-﻿using EngineNS.DesignMacross.Base.Outline;
+﻿using EngineNS.Animation.Macross.BlendTree;
+using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.DesignMacross.Design;
 using System;
@@ -41,7 +42,7 @@ namespace EngineNS.Animation.Macross.Postprocessing
             {
                 if (treeNodeDoubleClicked)
                 {
-                    context.EditorInteroperation.GraphEditPanel.EditGraph(outlineElement_AnimFinalPoseOutput.Description);
+                    context.EditorInteroperation.OpenGraph(outlineElement_AnimFinalPoseOutput.Description, context);
                 }
                 else if (treeNodeIsItemClicked)
                 {

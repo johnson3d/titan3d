@@ -21,7 +21,7 @@ namespace EngineNS.Animation.Macross.BlendTree.Node
             ExecuteSequenceStatement.Sequence.Add(statement);
         }
     }
-    public class TtBlendTreeNodeClassDescription : TtDesignableVariableDescription, IDataPinOperator, IPosePinOperator
+    public class TtBlendTreeNodeClassDescription : TtDesignableVariableDescription, IDataPinOperator, IPosePinOperator, IAnimMacrossClassDescription
     {
         [Rtti.Meta("")]
         public List<TtDataInPinDescription> DataInPins { get; set; } = new();

@@ -67,15 +67,14 @@ namespace NxRHI
 		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) override;
 		virtual void SetDebugName(const char* name) override;
 
-		UINT64 GetGPUVirtualAddress()
-		{
-			return 0;
-		}
+		UINT64 GetGPUVirtualAddress();
 	public:
 		TWeakRefHandle<VKGpuDevice>		mDeviceRef;
 		VkBuffer mBuffer = nullptr;
 		VmaAllocation mAllocation = nullptr;
 		VmaAllocationInfo mAllocationInfo{};
+		//valid when this buffer is the storage of a BLAS/TLAS(BFT_RTAS)
+		VkAccelerationStructureKHR mAccelerationStructure = VK_NULL_HANDLE;
 	};
 
 	class VKTexture : public ITexture
@@ -94,6 +93,7 @@ namespace NxRHI
 		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) override;
 		virtual void SetDebugName(const char* name) override;
 		virtual IGpuBufferData* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) override;
+		virtual bool GetFootprint(FSubResourceFootPrint* fp, UINT64* rowSize, UINT64* totalSize, UINT subRes, UINT64 offset) override;
 
 		VkImageLayout GetImageLayout();
 		VkImageAspectFlagBits GetImageAspect();
@@ -205,6 +205,39 @@ namespace NxRHI
 	public:
 		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
 		AutoRef<VKMemoryViewWrapper> mView;
+	};
+
+	class VKAccelerationStructure : public IAccelerationStructure
+	{
+	public:
+		~VKAccelerationStructure();
+		bool Init(VKGpuDevice* device, const FAccelerationStructureDesc* desc);
+
+		TWeakRefHandle<VKGpuDevice>					mDeviceRef;
+		std::vector<AutoRef<FMeshPrimitives>>		mMeshes;
+		VkAccelerationStructureKHR					mAccelerationStructure = VK_NULL_HANDLE;
+		VkDeviceAddress								mDeviceAddress = 0;
+	};
+
+	class VKAStructureInstance : public IAStructureInstance
+	{
+	public:
+		bool Init(VKGpuDevice* device, const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure);
+	};
+
+	class VKTopAccelerationStructure : public ITopAccelerationStructure
+	{
+	public:
+		~VKTopAccelerationStructure();
+		bool Init(VKGpuDevice* device, const FTopAccelerationStructureDesc* desc);
+		virtual bool BuildAcclerationStruture() override;
+
+		TWeakRefHandle<VKGpuDevice>					mDeviceRef;
+		Hash128										mInstanceHash;
+		std::vector<VkAccelerationStructureInstanceKHR>	mInstDescs;
+		VkAccelerationStructureKHR					mAccelerationStructure = VK_NULL_HANDLE;
+	private:
+		bool IsBuild(VKGpuDevice* device);
 	};
 }
 

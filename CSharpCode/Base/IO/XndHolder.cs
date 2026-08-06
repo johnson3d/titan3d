@@ -81,6 +81,7 @@ namespace EngineNS.IO
         }
         public void SaveXnd(string file)
         {
+            file = file.ToLower();
             var path = IO.TtFileManager.GetParentPathName(file);
             IO.TtFileManager.SureDirectory(path);
             TtRes2Memory.OnBeforeWriteFile(file);
