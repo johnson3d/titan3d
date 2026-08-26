@@ -186,6 +186,11 @@ namespace EngineNS.Graphics.Pipeline
                 usedSize.Y = ImGuiAPI.GetFrameHeight();
                 ImGuiAPI.SameLine(0, -1);
             }
+
+            var modeSize = CurrentIntercativeMode != null ? CurrentIntercativeMode.OnDrawViewportUI(in startDrawPos) : Vector2.Zero;
+            usedSize.X += modeSize.X;
+            if (modeSize.Y > usedSize.Y)
+                usedSize.Y = modeSize.Y;
             return usedSize;
         }
         public bool IsHoverGuiItem { get; set; }
@@ -894,6 +899,17 @@ namespace EngineNS.Graphics.Pipeline
         public virtual void TickOnFocus()
         {
 
+        }
+        /// <summary>
+        /// 在视口内置 UI 区画当前模式自己的 ImGui 内容 (笔刷参数面板、范围预览圈等),
+        /// 返回占用的尺寸。由 TtViewportSlate.OnDrawViewportUI 转发。
+        ///
+        /// Tick 不在 ImGui 帧作用域内 (它从 TickLogic 进来), 所以模式想画 UI 必须有
+        /// 这个单独的钩子, 不能在 Tick 里直接调 ImGuiAPI。
+        /// </summary>
+        public virtual Vector2 OnDrawViewportUI(in Vector2 startDrawPos)
+        {
+            return Vector2.Zero;
         }
     }
     

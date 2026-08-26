@@ -10,7 +10,7 @@ namespace EngineNS.Bricks.Procedure.Node
     {
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
         public UFloat3ValueNode()
         {
             Icon.Size = new Vector2(25, 25);
@@ -55,8 +55,8 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false)]
         public PinOut ZPin { get; set; } = new PinOut();
 
-        public UBufferCreator InputFloat3Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UBufferCreator OutputFloatDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator InputFloat3Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator OutputFloatDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UFloat3UnpackNodes()
         {
             Icon.Size = new Vector2(25, 25);
@@ -124,8 +124,8 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false)]
         public PinOut OutXYZ { get; set; } = new PinOut();
 
-        public UBufferCreator InputFloatDesc { get; } = UBufferCreator.CreateInstance< USuperBuffer <float, FFloatOperator>>(-1, -1, -1);
-        public UBufferCreator OutputFloat3Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator InputFloatDesc { get; } = UBufferCreator.CreateInstance< TtSuperBuffer <float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat3Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
 
         public UFloat3PackNodes()
         {
@@ -189,7 +189,7 @@ namespace EngineNS.Bricks.Procedure.Node
     {
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
         public UUVWNode()
         {
             Icon.Size = new Vector2(25, 25);
@@ -236,8 +236,8 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false)]
         public PinOut Normal { get; set; } = new PinOut();
 
-        public UBufferCreator InputFloatDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UBufferCreator OutputFloat3Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator InputFloatDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat3Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
 
         public UFloat3HeightToNormal()
         {
@@ -369,8 +369,8 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn InXYZ { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut OutXYZ { get; set; } = new PinOut();
-        public UBufferCreator InputFloat3Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UBufferCreator OutputFloat3Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator InputFloat3Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat3Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
         public UFloat3Normalize()
         {
             Icon.Size = new Vector2(25, 25);
@@ -423,9 +423,9 @@ namespace EngineNS.Bricks.Procedure.Node
     {
         public UFloat3Dot()
         {
-            InputLeftDesc.BufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
-            InputRightDesc.BufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
-            OutputDesc.BufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
+            InputLeftDesc.BufferType = Rtti.TtTypeDesc.TypeOf<TtSuperBuffer<Vector3, FFloat3Operator>>();
+            InputRightDesc.BufferType = Rtti.TtTypeDesc.TypeOf<TtSuperBuffer<Vector3, FFloat3Operator>>();
+            OutputDesc.BufferType = Rtti.TtTypeDesc.TypeOf<TtSuperBuffer<float, FFloatOperator>>();
         }
         public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
@@ -447,7 +447,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 ParentGraph.RemoveLinkedInExcept(iPin, OutNode, oPin.Name);
             }
         }
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -482,8 +482,8 @@ namespace EngineNS.Bricks.Procedure.Node
         };
         public UFloat3Gaussion()
         {
-            SourceDesc.BufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
-            ResultDesc.BufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
+            SourceDesc.BufferType = Rtti.TtTypeDesc.TypeOf<TtSuperBuffer<Vector3, FFloat3Operator>>();
+            ResultDesc.BufferType = Rtti.TtTypeDesc.TypeOf<TtSuperBuffer<Vector3, FFloat3Operator>>();
         }
         [Rtti.Meta("")]
         public bool ClampBorder { get; set; } = true;
@@ -673,7 +673,7 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false)]
         public PinOut OutXYZ { get; set; } = new PinOut();
 
-        public UBufferCreator XYZBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator XYZBufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
 
         public enum EFactorAxis
         {
@@ -826,7 +826,7 @@ namespace EngineNS.Bricks.Procedure.Node
             get => mTransform; 
             set { mTransform = value; } 
         }
-        public UBufferCreator XYZBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator XYZBufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
         public UFloat3Transform()
         {
             Icon.Size = new Vector2(25, 25);

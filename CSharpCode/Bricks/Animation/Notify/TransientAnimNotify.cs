@@ -16,6 +16,19 @@ namespace EngineNS.Animation.Notify
             get => mTriggerTime;
             set => mTriggerTime = value;
         }
+        public Int64 BeginTime
+        {
+            get => mTriggerTime;
+            set => mTriggerTime = value;
+        }
+        /// <summary>
+        /// 瞬时通知没有长度, 结束时刻永远等于触发时刻, 写入无效
+        /// </summary>
+        public Int64 EndTime
+        {
+            get => mTriggerTime;
+            set { }
+        }
         string mName;
         public string Name
         {

@@ -4,7 +4,7 @@ namespace EngineNS.Bricks.Procedure.Algorithm.Common
 {
     public class WrapNode
     {
-        public static float[] Unpack(UBufferComponent input)
+        public static float[] Unpack(TtBufferComponent input)
         {
             int width = input.Width;
             float[] result = new float[width * width];
@@ -18,10 +18,10 @@ namespace EngineNS.Bricks.Procedure.Algorithm.Common
             return result;
         }
 
-        public static UBufferComponent Pack(float[] values, int width)
+        public static TtBufferComponent Pack(float[] values, int width)
         {
-            var creator = UBufferCreator.CreateInstance<USuperBuffer<Vector4, FFloat4Operator>>(width, width, 1);
-            var output = UBufferComponent.CreateInstance(creator);
+            var creator = UBufferCreator.CreateInstance<TtSuperBuffer<Vector4, FFloat4Operator>>(width, width, 1);
+            var output = TtBufferComponent.CreateInstance(creator);
             for (int i = 0; i < width; i++)
             {
                 for (int j = 0; j < width; j++)
@@ -34,10 +34,10 @@ namespace EngineNS.Bricks.Procedure.Algorithm.Common
             return output;
         }
 
-        public static UBufferComponent PackMask(int[] values, int width)
+        public static TtBufferComponent PackMask(int[] values, int width)
         {
-            var creator = UBufferCreator.CreateInstance<USuperBuffer<Vector4, FFloat4Operator>>(width, width, 1);
-            var output = UBufferComponent.CreateInstance(creator);
+            var creator = UBufferCreator.CreateInstance<TtSuperBuffer<Vector4, FFloat4Operator>>(width, width, 1);
+            var output = TtBufferComponent.CreateInstance(creator);
             for (int i = 0; i < width; i++)
             {
                 for (int j = 0; j < width; j++)
@@ -50,7 +50,7 @@ namespace EngineNS.Bricks.Procedure.Algorithm.Common
             return output;
         }
 
-        public static void SaveTexture2D(UBufferComponent toSave, string FileName, bool silent = true)
+        public static void SaveTexture2D(TtBufferComponent toSave, string FileName, bool silent = true)
         { 
             
         }

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="512a00b881725affe0684d0dc5e88e98a7b866da2236f51c3028c84fc72d64de" />
+      <Path Type="System.String@Unknown" Value="terrainidmap.material" />
+    </e_0>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="3a5bde1e-39df-4c8a-a2cc-6eadaeabcefe" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,material/terrainidmap.material,3a5bde1e-39df-4c8a-a2cc-6eadaeabcefe" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.TtMaterial&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="Default" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
+</Root>

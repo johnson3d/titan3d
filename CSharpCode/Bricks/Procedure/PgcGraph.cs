@@ -26,10 +26,10 @@ namespace EngineNS.Bricks.Procedure
         [Rtti.Meta("")]
         public uint Version { get; set; } = 0;
         [Rtti.Meta("")]
-        public UBufferCreator DefaultCreator { get; set; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(1, 1, 1);
+        public UBufferCreator DefaultCreator { get; set; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(1, 1, 1);
 
         public UPgcEditor GraphEditor;
-        public UPgcBufferCache BufferCache { get; set; } = new UPgcBufferCache();
+        public TtPgcBufferCache BufferCache { get; set; } = new TtPgcBufferCache();
         public Node.UEndingNode Root { get; set; }
         public UPgcGraph()
         {
@@ -252,7 +252,7 @@ namespace EngineNS.Bricks.Procedure
             }
         }
         [Rtti.Meta("")]
-        public UBufferComponent RegBuffer(PinOut pin, UBufferComponent buffer)
+        public TtBufferComponent RegBuffer(PinOut pin, TtBufferComponent buffer)
         {
             return this.BufferCache.RegBuffer(pin, buffer);
         }
@@ -319,7 +319,7 @@ namespace EngineNS.Bricks.Procedure
 {
 	partial class UPgcGraph
 	{
-		public unsafe UBufferComponent macross_RegBuffer (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, PinOut pin, UBufferComponent buffer) 
+		public unsafe TtBufferComponent macross_RegBuffer (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, PinOut pin, TtBufferComponent buffer) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_13980121139680494653 Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiChainSetup@EngineCore">
+  <BoneLengthConstraintBlend Type="System.Single@Unknown" Order="0" />
+  <ConstrainBoneLength Type="System.Boolean@Unknown" Order="0" />
+  <EndBoneIndex Type="EngineNS.Animation.FLimbIndexInSkeleton@EngineCore" Order="0" />
+  <LODThreshold Type="System.Int32@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <PhysicsSettings Type="EngineNS.KawaiiPhysics.FKawaiiPhySettings@EngineCore" Order="0" />
+  <PhysicsSettingsRandom Type="EngineNS.KawaiiPhysics.FKawaiiPhySettings@EngineCore" Order="0" />
+  <RootBoneIndex Type="EngineNS.Animation.FLimbIndexInSkeleton@EngineCore" Order="0" />
+  <RootCollision Type="System.Boolean@Unknown" Order="0" />
+  <TailBoneAxis Type="EngineNS.Bricks.Animation.KawaiiPhysics.EKawaiiTailBoneAxis@EngineCore" Order="0" />
+  <TailBoneLength Type="System.Single@Unknown" Order="0" />
+</Hash_13980121139680494653>

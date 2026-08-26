@@ -35,9 +35,13 @@ namespace EngineNS.GamePlay.Scene
             [Rtti.Meta("")]
             [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
             public RName CollideName { get; set; }
+            /// <summary>
+            /// 为 null 表示"本节点不指定", 交由 TtRenderMesh.Initialize 自动选型
+            /// (见 CodingGuidelines.md §7.7)。
+            /// </summary>
             [Rtti.Meta("")]
             [ReadOnly(true)]
-            public string MdfQueueType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMdfStaticMesh));
+            public string MdfQueueType { get; set; } = null;
             [Rtti.Meta("")]
             [ReadOnly(true)]
             public string AtomType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtRenderMesh.TtAtom));
@@ -47,6 +51,9 @@ namespace EngineNS.GamePlay.Scene
             {
                 get
                 {
+                    // 挡掉空值: TypeOf(null/"") 会打 "Typeof failed:" 警告日志
+                    if (string.IsNullOrEmpty(MdfQueueType))
+                        return null;
                     return Rtti.TtTypeDesc.TypeOf(MdfQueueType);
                 }
                 set

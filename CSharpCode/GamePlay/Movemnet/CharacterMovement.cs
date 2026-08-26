@@ -42,15 +42,24 @@ namespace EngineNS.GamePlay.Movemnet
             }
             currentAngularVelocity = settedAngularVelocity;
 
+            // RootMotion位移与速度位移合并后交给胶囊, 保证碰撞阻挡同样生效
+            FTransform rootMotionDelta;
+            DVector3 rootMotionTranslation = DVector3.Zero;
+            if (ConsumeRootMotion(out rootMotionDelta))
+            {
+                rootMotionTranslation = ApplyRootMotionRotationAndGetTranslation(in rootMotionDelta);
+            }
+
             DVector3 newPosition = DVector3.Zero;
+            var displacement = currentLinearVelocity.AsDVector() * world.DeltaTimeSecond + rootMotionTranslation;
             var phyControlNode = Parent.FindFirstChild<TtPhyControllerNodeBase>() as TtPhyControllerNodeBase;
             if (phyControlNode != null)
             {
-                phyControlNode.TryMove(currentLinearVelocity.AsDVector() * world.DeltaTimeSecond, world.DeltaTimeSecond, out newPosition);
+                phyControlNode.TryMove(displacement, world.DeltaTimeSecond, out newPosition);
             }
             else
             {
-                newPosition = Parent.Placement.Position + currentLinearVelocity * world.DeltaTimeSecond;
+                newPosition = Parent.Placement.Position + displacement;
             }
 
             Parent.Placement.Position = newPosition;

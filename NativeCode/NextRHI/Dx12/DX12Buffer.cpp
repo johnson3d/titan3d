@@ -606,6 +606,39 @@ namespace NxRHI
 
 		return uploadBuffer;
 	}
+	// 是否为"局部区域上传": 目标偏移非 0 时走区域路径。
+	// 全量上传的调用方一律先 SetDefault() 把 X/Y/Z 归零, 因此不受影响。
+	static inline bool IsPartialRegionFootPrint(const FSubResourceFootPrint* fp)
+	{
+		return fp != nullptr && (fp->X != 0 || fp->Y != 0 || fp->Z != 0);
+	}
+	// 把 CPU 侧紧凑排列的区域数据传到纹理的 (X, Y, Z) 偏移处。
+	// D3D12 要求 placed footprint 的 RowPitch 按 D3D12_TEXTURE_DATA_PITCH_ALIGNMENT 对齐,
+	// 故暖区缓冲按对齐后的 pitch 逐行重排 (由 CreateUploadResource 内部完成)。
+	static AutoRef<ICopyDraw> MakeRegionCopyDraw(DX12GpuDevice* device, ITexture* target, UINT subRes, void* pData, const FSubResourceFootPrint* fp, EPixelFormat texFormat)
+	{
+		const UINT rowSize = fp->RowPitch;
+		// 行数由 TotalSize / RowPitch 推出, 对块压缩格式得到的是块行数, 同样成立。
+		const UINT numOfRows = (rowSize > 0 && fp->TotalSize >= rowSize) ? (fp->TotalSize / rowSize) : 1;
+		const UINT alignedRowPitch = Align(rowSize, D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
+		const UINT64 uploadSize = (UINT64)alignedRowPitch * numOfRows;
+
+		FMappedSubResource initData{};
+		initData.pData = pData;
+		initData.RowPitch = rowSize;
+		initData.DepthPitch = rowSize * numOfRows;
+		auto bf = CreateUploadResource(device, alignedRowPitch, uploadSize, rowSize, numOfRows, 1, texFormat, &initData, "Upload Texture Region");
+
+		AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
+		cpDraw->BindTextureDest(target);
+		cpDraw->BindBufferSrc(bf);
+		cpDraw->DestSubResource = subRes;
+		cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Texture;
+		cpDraw->FootPrint = *fp;
+		cpDraw->FootPrint.RowPitch = alignedRowPitch;
+		cpDraw->FootPrint.TotalSize = (UINT)uploadSize;
+		return cpDraw;
+	}
 	bool DX12Texture::Init(DX12GpuDevice* device, const FTextureDesc& desc)
 	{
 		Desc = desc;
@@ -919,6 +952,13 @@ namespace NxRHI
 		if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
 			auto device = mDeviceRef.GetPtr();
+
+			if (IsPartialRegionFootPrint(pFootPrint))
+			{
+				auto cpDraw = MakeRegionCopyDraw(device, this, subRes, pData, pFootPrint, Desc.Format);
+				cmd->PushGpuDraw(cpDraw.GetPtr());
+				return;
+			}
 			
 			D3D12_PLACED_SUBRESOURCE_FOOTPRINT footPrint{};
 			UINT numX;
@@ -971,6 +1011,14 @@ namespace NxRHI
 		if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
 			auto device = mDeviceRef.GetPtr();
+
+			if (IsPartialRegionFootPrint(pFootPrint))
+			{
+				auto cpDraw = MakeRegionCopyDraw(device, this, subRes, pData, pFootPrint, Desc.Format);
+				FTransientCmd tsCmd(device, EQueueType::QU_Transfer, "Texture.UpdateGpuDataRegion");
+				tsCmd.GetCmdList()->PushGpuDraw(cpDraw.GetPtr());
+				return;
+			}
 			/*D3D12_PLACED_SUBRESOURCE_FOOTPRINT footPrint{};
 			UINT numX;
 			UINT64 rowSize, totalSize;

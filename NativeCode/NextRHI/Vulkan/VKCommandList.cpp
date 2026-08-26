@@ -1370,7 +1370,8 @@ namespace NxRHI
 		else
 			region.bufferRowLength = 0;
 		region.bufferImageHeight = 0;// height;
-		region.imageSubresource.aspectMask = ((VKTexture*)src)->GetImageAspect();
+		// aspect 取自目标纹理; src 是 IBuffer, 不能强转 VKTexture。
+		region.imageSubresource.aspectMask = ((VKTexture*)target)->GetImageAspect();
 		region.imageSubresource.layerCount = 1;// Desc.ArraySize;
 		region.imageOffset = { (int)footprint->X, (int)footprint->Y, (int)footprint->Z };
 		region.imageExtent = { footprint->Width, footprint->Height, footprint->Depth };

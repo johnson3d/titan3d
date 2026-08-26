@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_405713674853271231 Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiClothSetup@EngineCore">
+  <BoneLengthConstraintBlend Type="System.Single@Unknown" Order="0" />
+  <ConstrainBoneLength Type="System.Boolean@Unknown" Order="0" />
+  <DampingCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+  <DragCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+  <EndBoneIndex Type="EngineNS.Animation.LimbIndexInSkeleton@EngineCore" Order="0" />
+  <HorizontalBendStiffness Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+  <HorizontalShrinkStiffness Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+  <HorizontalStretchStiffness Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+  <LimitAngleCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+  <LODThreshold Type="System.Int32@Unknown" Order="0" />
+  <LoopChains Type="System.Boolean@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <PhysicsCurveMode Type="EngineNS.Bricks.Animation.KawaiiPhysics.EKawaiiCurveEvalMode@EngineCore" Order="0" />
+  <PhysicsSettings Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiPhySettings@EngineCore" Order="0" />
+  <PhysicsSettingsRandom Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiPhySettings@EngineCore" Order="0" />
+  <RadiusCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+  <RootBoneIndex Type="EngineNS.Animation.LimbIndexInSkeleton@EngineCore" Order="0" />
+  <RootCollision Type="System.Boolean@Unknown" Order="0" />
+  <ShearShrinkStiffness Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+  <ShearStretchStiffness Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+  <StiffnessCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+  <TailBoneAxis Type="EngineNS.Bricks.Animation.KawaiiPhysics.EKawaiiTailBoneAxis@EngineCore" Order="0" />
+  <TailBoneLength Type="System.Single@Unknown" Order="0" />
+  <VerticalBendStiffness Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+  <VerticalShrinkStiffness Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+  <VerticalStretchStiffness Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+  <WindCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+  <WorldDampingLocationCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+  <WorldDampingRotationCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+</Hash_405713674853271231>

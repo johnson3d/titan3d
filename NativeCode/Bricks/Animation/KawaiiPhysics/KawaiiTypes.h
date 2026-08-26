@@ -171,6 +171,8 @@ namespace KawaiiPhysics
 
 	static constexpr float KAWAII_SMALL_NUMBER = 1.e-4f;
 	static constexpr float KAWAII_KINDA_SMALL_NUMBER = 1.e-4f;
+	static constexpr float KAWAII_PI = 3.14159265f;
+	static constexpr float KAWAII_DEG_TO_RAD = KAWAII_PI / 180.0f;
 
 	// =====================================================================
 	// v3dxVector3 helper functions (matching UE FVector static methods)
@@ -269,6 +271,14 @@ namespace KawaiiPhysics
 		);
 	}
 
+	// Rotation of AngleRadians about Axis. Axis must already be normalized.
+	inline v3dxQuaternion QuatFromAxisAngle(const v3dxVector3& Axis, float AngleRadians)
+	{
+		const float halfAngle = AngleRadians * 0.5f;
+		const float s = sinf(halfAngle);
+		return v3dxQuaternion(Axis.X * s, Axis.Y * s, Axis.Z * s, cosf(halfAngle));
+	}
+
 	// =====================================================================
 	// GetBoneForwardVector - Returns the forward vector for a given axis enum
 	// =====================================================================
@@ -342,6 +352,38 @@ namespace KawaiiPhysics
 		if (angle < 0.0f) angle += 360.0f;
 		angle -= 180.0f;
 		return KawaiiClamp(angle, MinAngleDegrees, MaxAngleDegrees);
+	}
+
+	// =====================================================================
+	// Stiffness -> XPBD compliance mapping
+	// =====================================================================
+	//
+	// Maps an authored 0..1 stiffness value to an XPBD compliance.
+	//
+	// The solvers use the compliance as alpha = compliance / dt^2, so at 120 Hz it is divided
+	// by ~7e-5, i.e. multiplied by ~14400. Interpolating it linearly (the old
+	// compliance = 1 - Stiffness) therefore made almost the whole slider useless: 1.0 gave a
+	// perfectly rigid constraint, while 0.9 already produced an alpha (~1400) vastly larger
+	// than the inverse-mass sum (~2), so the constraint effectively vanished. Everything below
+	// ~0.99 felt identically limp, which is not a tunable range.
+	//
+	// Interpolating the compliance geometrically instead spreads the useful range across the
+	// whole slider: each step down multiplies the compliance by a constant factor, so
+	// 0.9 / 0.7 / 0.5 are each perceptibly softer than the last. 1.0 still means exactly rigid.
+	inline float StiffnessToCompliance(float Stiffness)
+	{
+		// Softest end of the range. Beyond roughly this the constraint is already fully slack at
+		// any sane substep rate, so pushing further only wastes slider travel.
+		constexpr float MaxUsefulCompliance = 1.0e-2f;
+		// Stiffest non-rigid end: still noticeably firm, but not exactly rigid.
+		constexpr float MinUsefulCompliance = 1.0e-8f;
+
+		Stiffness = KawaiiClamp(Stiffness, 0.0f, 1.0f);
+		if (Stiffness >= 1.0f - KAWAII_KINDA_SMALL_NUMBER)
+			return 0.0f; // fully rigid
+
+		// Geometric interpolation: Stiffness 1 -> MinUseful, 0 -> MaxUseful.
+		return MinUsefulCompliance * powf(MaxUsefulCompliance / MinUsefulCompliance, 1.0f - Stiffness);
 	}
 
 } // namespace KawaiiPhysics

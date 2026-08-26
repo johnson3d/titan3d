@@ -1334,6 +1334,43 @@ void TraverseBvhClosest(StructuredBuffer<FGpuBvhNode> nodes, ...)  // ← X3000:
       解析失败, 检查报错信息里的相对路径段是否对应到 `enginecontent/Shaders/Inc/`
       就能定位。
 
+### 3.4 文件名不带 `Tt` / `C` / `F` / `E` 类型前缀, 前缀只给类型名
+
+**适用场景**: 在 `CSharpCode/` 下新建或重命名任何 `.cs` 文件。
+
+**强制规则**:
+
+1. **文件名用纯概念名**, 不携带任何类型前缀: `MorphModifier.cs` / `MeshPrimitives.cs` /
+   `PoseAsset.cs`。
+2. **前缀只属于类型名本身** —— `class` 用 `Tt`、`struct` 用 `F`、`enum` 用 `E`
+   (见 §3.1)。文件名不参与这套区分。
+3. 一个文件内常同时包含 `Tt` 类、`F` struct、`E` enum (例如 `MorphTarget.cs` 里有
+   `FMorphDelta` / `TtMorphTarget` / `TtMorphTargetSet`), 把任一前缀放进文件名都是片面的。
+4. 文件名不需要与主类名逐字对齐, 去前缀后能说清内容就行。
+
+**为何**:
+
+- 前缀存在的理由是"在代码里一眼分清 class / struct / enum", 而文件名不存在这个歧义,
+  带上只是噪声。
+- 带前缀会让目录排序失去意义: `CSkinModifier.cs` / `CStaticModifier.cs` 会被排到
+  `InstanceModifier.cs` / `MeshletModifier.cs` 之前, 同一类 modifier 在文件列表里被拆成两段。
+- 仓库里无前缀写法已经是多数 (`Modifier/` 下 `InstanceModifier.cs`、`MeshletModifier.cs`
+  无前缀, 只有两个历史文件带 `C`)。
+
+**正例 / 反例**:
+
+| 文件名 | 内含类型 | 结论 |
+|---|---|---|
+| `Modifier/MorphModifier.cs` | `TtMorphModifier` | ✓ |
+| `Modifier/MeshletModifier.cs` | `TtMeshletModifier` | ✓ |
+| `MorphTarget.cs` | `FMorphDelta` / `TtMorphTarget` / `TtMorphTargetSet` | ✓ 一文件多类型, 更不应带前缀 |
+| `Modifier/CMorphModifier.cs` | `TtMorphModifier` | ✗ `C` 无意义 (本仓库已改名修正) |
+| `Modifier/TtMorphModifier.cs` | `TtMorphModifier` | ✗ 不要把类名前缀搬到文件名 |
+
+**存量文件不强制改名**: `CSkinModifier.cs` / `CStaticModifier.cs` 等已有带 `C` 前缀的文件
+保持原样 (改名会影响 git 历史与并行分支), 但 **不要把它们当作命名参照去拉新文件**。
+遇到需要动到这些文件的重构时可以顺手改名, 记得同步 `.projitems` (§8)。
+
 
 
 | target | 性质 | 典型用途 | 反例 |
@@ -1471,6 +1508,29 @@ TtEngine.Instance.EventPoster.RunOn((state) =>     // ← 隐式分配 closure �
   - `restir_first_frame_hang.rdc`
   - `gbuffer_split.rdc`
 - 太大的 RDC（> 500MB）分析完应及时清理，避免本地 cache 膨胀
+- **分析产物**（导出的 RT png、pixel dump、中间结论文本）统一放子目录
+  `cache/renderdoc/analysis/`，不要和 `.rdc` 混在一起，也不要写到仓库其它位置
+
+**RenderDoc MCP 的能力边界**（实测记录，避免重复试错）：
+
+| 工具 | 结论 |
+|---|---|
+| `open_capture` | 接受**相对路径**（`cache/renderdoc/xxx.rdc`），不需要绝对路径 |
+| `save_texture` / `save_render_target` | `output_path` **必须自带 `.png` 扩展名**，否则落盘成无扩展名文件，后续无法当图片读 |
+| `get_draw_call_state` / `get_pipeline_state` | **拿不到** blend / depth-stencil / rasterizer / viewport（报 `'renderdoc.PipeState' object has no attribute 'GetColorBlend'` 等）。要确认混合与深度状态只能回读 C# 端 `TtRenderPolicy` / `ShadingEnv` 代码 |
+| `debug_shader_at_pixel` | 在 D3D12 抓帧上**经常不可用**（`DebugPixel returned no trace data`），不要把它当主力手段 |
+| `pixel_history` | **定位"某个 draw 为什么没写进 RT"的首选**：逐事件给出 `passed` 与 `failure_reasons`（如 `shader_discarded` / `depth_test_failed`），能直接区分"被 discard"和"被深度剔掉" |
+| `get_cbuffer_contents` | `cbuffer_index` 因 shader 而异，越界会报 `out of range`。先用 `get_draw_call_state` 看该 draw 的 pixel stage 有几个 cbuffer 再取 |
+| `get_post_vs_data` | 返回的 `SV_Position` 是 **clip space**，判断屏幕覆盖范围要自己 `/w` 再映射到视口尺寸 |
+
+**排查"某个 pass 好像没生效"的标准顺序**（不要靠导出图的肉眼相似性下结论）：
+
+1. `search_actions` / `analyze_render_passes` 确认 drawcall 存在、RT 绑对
+2. `pixel_history` 在目标像素上查**真正的写入者是哪个 EID**
+   —— 屏幕上看着像的效果，很可能是别的 draw 画的
+3. 若目标 EID `passed == false`，看 `failure_reasons` 定位是 discard 还是深度/模板
+4. 若是 `shader_discarded`，回读 shader 里所有 `discard` 分支，用
+   `get_cbuffer_contents` + `read_texture_pixels` 逐条验证哪个条件命中
 
 ---
 
@@ -2160,5 +2220,299 @@ Kawaii 物理马尾"完全垂下、纹丝不动": 重力保留了上游 UE 插�
 - [ ] shader 里有 half 存位置 / 偏移吗? 量级在 fp16 安全范围内?
 - [ ] 需要大世界精度的路径走了 `DVector3` + `ToLocalPosition` (§1.5)?
 - [ ] 已 authored 的旧资产数值列出来并重新填过了?
+
+---
+
+## 7. Mesh Modifier 与 MdfQueue 编写约束
+
+本章约束 `Pipeline.Shader.IMeshModifier` 实现与 `TtMdfQueueBase` 派生类。规则全部来自
+Morph Target 系统落地时踩到的真实问题 —— 共同特征是 **违反后不报错、不崩溃, 只是
+"静默不生效"或"另一个系统突然失效"**, 完全靠 review 拦。
+
+### 7.1 modifier 的 VS 函数必须同时写 vert 和 vsOut
+
+**适用场景**: 所有提供 `ModifierNameVS` 的 modifier。
+
+各 ShadingEnv 的 `VS_Main` 里, `Default_VSInput2PSInput(output, input)` 在
+`MdfQueueDoModifiers(output, input)` **之前**就已经执行了 (见
+`enginecontent/Shaders/ShadingEnv/Deferred/DeferredOpaque.cginc` 第 23 行与第 32 行,
+Forword / Mobile / HitProxy / SSM 等各入口同构)。
+
+即进入 modifier 时 `vsOut` 里已经是**未经任何 modifier 处理**的顶点副本。因此:
+
+1. 只修改 `vert` 的 modifier, 其结果 **不会** 自动进入 `vsOut` —— 除非链上后面还有
+   另一个 modifier 会整体覆写 `vsOut` (例如 `DoSkinModifierVS` 就显式写
+   `vsOut.vPosition.xyz = Pos.xyz;`)。
+2. 想让改动一定生效, modifier 必须 **两边都写**: 写 `vert` 供后续 modifier 继续加工,
+   写 `vsOut` 保证没有后续覆写者时也成立。
+
+**反例 (本仓库踩过)**: `DoMorphModifierVS` 初版只写 `vert.vPosition`。蒙皮角色路径正常
+(skin 随后覆写了 vsOut), 但纯 morph 的静态网格 **完全没有形变, 且不报任何错**。
+
+**合规参考**: `enginecontent/Shaders/Modifier/MorphModifier.cginc`。
+
+### 7.2 modifier 执行顺序 = Modifiers 列表顺序, 插入后必须重新生成代码
+
+`TtMdfQueueBase.BuildMdfFunctions` (`CSharpCode/Grapics/Pipeline/Shader/MdfQueue.cs`
+第 233-245 行) 生成的 `MdfQueueDoModifiers` 会按 `Modifiers` 列表顺序依次发射
+`{ModifierNameVS}(output, input);`。`TtMdfQueue2<T0, T1>` 构造时先加 T0 再加 T1, 所以
+**T0 一定先于 T1 执行**, 这是确定的, 可以依赖。
+
+向已有队列插入 modifier 时, `Modifiers.Insert(...)` 之后 **必须重新调一次
+`UpdateShaderCode()`**, 否则生成的 HLSL 还是插入前的顺序。
+参考: `TtMdfSkinMorphMesh` 构造器 (`CSharpCode/Grapics/Mesh/MdfMorphMesh.cs`)。
+
+### 7.3 vert 是函数体内的局部副本: modifier 之间可传递, 不回传调用方
+
+生成的签名是 `void MdfQueueDoModifiers(inout PS_INPUT output, VS_MODIFIER input)` ——
+注意 `input` **不是** `inout`。所以:
+
+- 前一个 modifier 对 `input` 的修改, 同一函数体内后续的 modifier **能**读到
+  (这是 morph delta 能叠加进蒙皮的前提);
+- 但这些修改 **不会** 回传给 `MdfQueueDoModifiers` 的调用方 (即 `VS_Main`)。
+
+因此不要指望"改了 vert 就万事大吉", 也不要把最终结果只放在 `vert` 里。
+
+### 7.4 蒙皮类 MdfQueue 必须派生自 TtMdfSkinMesh, 不得做兄弟类型
+
+引擎里大量位置用 `MdfQueue is TtMdfSkinMesh` / `as TtMdfSkinMesh` 给蒙皮喂数据:
+
+- `CSharpCode/GamePlay/Scene/MeshNode.cs` —— 灌 `PerSkinMeshCBuffer` (骨骼位置/四元数)、
+  `IsNoTick` 判定;
+- `TtSkeletonAnimPlayNode` / `TtBlendSpaceAnimPlayNode` —— 驱动动画。
+
+新增的蒙皮类 MdfQueue (例如蒙皮 + morph) 如果写成 `TtMdfQueue2<...>` 的兄弟类型,
+以上判断全部落空, 表现为 **"换了 MdfQueue 之后骨骼动画整体失效"**。
+正确做法: 派生自 `TtMdfSkinMesh`, 在构造器里按 §7.2 插入自己的 modifier。
+
+同时, **不要用类型相等判定蒙皮** (`MdfQueue == TtTypeDescGetter<TtMdfSkinMesh>.TypeDesc`),
+这种写法会把派生类型排除在外。用
+`typeof(TtMdfSkinMesh).IsAssignableFrom(MdfQueue?.SystemType)`。已修正点: `TtMeshNode.HasSkin`。
+
+### 7.5 MdfQueue 是 TtMesh 级的, per-instance 逐顶点状态必须按 SubMesh 分开持有
+
+一个 `MdfQueue` 服务整个 `TtMaterialMesh`, 而 `TtMaterialMesh.SubMeshes` 里每个
+`TtMeshPrimitives` 有 **各自独立的顶点编号 (即各自独立的 `vVertexID` 空间)**。
+
+所以任何"逐顶点"的 per-instance 数据 (morph 稠密表、逐顶点自定义属性等) **不能用一张表混用**,
+必须按 SubMesh 分数组持有; 在 `OnDrawCall` 里用 `atom.SubMesh.MeshIndex` 选对应那份。
+参考: `TtMorphModifier.mStates` (`CSharpCode/Grapics/Mesh/Modifier/MorphModifier.cs`)。
+
+注: 骨骼 CBuffer 不存在这个问题 —— 同一骨架共享一套骨骼变换, 所以
+`TtMdfSkinMesh.PerSkinMeshCBuffer` 只有一份是对的。**不要拿它类比逐顶点数据**。
+
+### 7.6 TtGraphicDraw 用 BindSRV, TtComputeDraw 用 BindSrv
+
+两类 drawcall 的方法名大小写 **不一致**, 定义均在 `CSharpCode/NxRHI/Drawcall.cs`:
+
+| drawcall 类型 | SRV | UAV | CBV |
+|---|---|---|---|
+| `TtGraphicDraw` | `BindSRV` | `BindUAV` | `BindCBV` |
+| `TtComputeDraw` / `TtRayTracingDraw` | `BindSrv` | `BindUav` | `BindCBV` |
+
+两边都有 `string` 重载, 依照 §1.2 的精神优先用 string 重载。写错大小写是编译期错误、
+不会静默失效, 但写代码前先看一眼这张表能省一轮构建。
+
+### 7.7 MdfQueue 选型的授权链: 导入期写 .ums, 运行期不要覆盖
+
+`TtRenderMesh.Initialize` (`CSharpCode/Grapics/Mesh/Mesh.cs`) 里选型有**三级固定优先级**:
+
+1. 调用方传入的 `mdfQueueType` 参数 (最高);
+2. `TtMaterialMesh.MdfQueueType` —— .ums 资产上 `[Rtti.Meta("")]` 序列化的字段;
+3. 按资产内容自动兜底 (有无 `PartialSkeleton` × 有无 `MorphTargets`, 四路)。
+
+**强制规则**:
+
+1. **新增一种“资产内容决定队列”的能力时, 写在导入期的 .ums 生成处**
+   (`Bricks/AssetImpExp/PartialMeshPrimitives.cs` 的 `ImportAndSaveMesh`), 而不是在某个节点类里判。
+   写到 .ums 后, 所有不显式指定的消费方 (场景节点 / gameplay / 各编辑器) 一次性受益。
+2. **不要在运行期根据资产内容覆盖已授权的 `MdfQueueType`**。理由按严重程度:
+   - 会**摧毁用户自定义队列**: 项目里写了 `TtMdfMySkinMesh` (自己的 modifier 链) 时,
+     “检测到 morph 就换成 TtMdfSkinMorphMesh”会把整条链换掉 —— 比“morph 不生效”严重得多;
+   - `MdfQueueType` 是 `[Rtti.Meta]` 持久化数据, 覆盖会让序列化值与运行值分叉, re-save 时
+     可能把覆盖值写回去, 静默改掉用户的选择;
+   - “远处 NPC 故意不挂 morph”是合理的性能取舍。
+3. 错配 (资产有 morph 但队列里没 `TtMorphModifier`) 的处理方式是 **打一条 Info 日志让它可发现**,
+   不是静默失效、也不是自作主张修正。已在 `TtRenderMesh.Initialize` 尾部实现。
+
+**节点侧的空值语义**: `TtMeshNode` / `PBRTestNode` / `PrimitiveMeshNode` 的
+`TtXxxNodeData.MdfQueueType` 默认值是 **null**, 语义是"本节点不指定, 走自动选型"。两个
+配套约束:
+
+1. 这些类的 `MdfQueue` getter **必须先挡空**再调 `Rtti.TtTypeDesc.TypeOf` —— `TypeOf(null/"")`
+   会打一条 `Typeof failed:` 警告日志, 而空值在这里是合法语义, 不应该刷日志。
+2. 判定"有没有蒙皮"之类的问题 (`TtMeshNode.HasSkin`) 必须看 **实际创建出来的
+   `RenderMesh.MdfQueue`**, 不能只看 NodeData 的类型字符串 —— 字符串为 null 时会误判为
+   无蒙皮, 进而拿不到 `PerSkinMeshCBuffer`、`IsNoTick` 永为 true, **骨骼动画整体失效**。
+   三个灌 `PerSkinMeshCBuffer` 的调用点都已在 `RenderMesh = mesh;` 之后才判定, 可以安全地
+   读 `RenderMesh?.MdfQueue`。
+
+**自检清单** (新写 modifier / MdfQueue 时过一遍):
+
+- [ ] modifier 的 VS 函数是否按 §7.1 同时写了 `vert` 和 `vsOut` (或已确认链上有覆写者)?
+- [ ] 插入 modifier 后调了 `UpdateShaderCode()`?
+- [ ] 蒙皮类新 MdfQueue 是否派生自 `TtMdfSkinMesh`? 判定蒙皮用的是 `IsAssignableFrom`?
+- [ ] 逐顶点 per-instance 数据是否按 SubMesh 分开, 并用 `atom.SubMesh.MeshIndex` 选取?
+- [ ] 新建的 `.cginc` 首行 include 了 `GlobalDefine.cginc` (§3.3)? `[TtShaderDefine]` struct
+      字段带 `m` 前缀而 HLSL 端用剥 `m` 后的裸名 (§3.2)?
+- [ ] 新建的 `.cs` 登记到了正确的 `.projitems` (§8)?
+- [ ] 新增的“资产内容决定队列”能力是写在导入期 .ums 而不是节点类里 (§7.7)? 没有在运行期覆盖已授权的 `MdfQueueType`?
+
+---
+
+## 8. C# 新建源码文件必须登记到 .projitems
+
+**强制规则**: 在 `CSharpCode/` 下新建 / 重命名 / 移动任何 `.cs` 后, 必须同步更新所属模块的
+`.projitems`, 否则 **不会被任何 csproj 编译**, 引用方报 `CS0246`。
+
+`CSharpCode/` 下全部是 Shared Project: `Xxx.projitems` 是 **显式文件清单**, 逐行列出
+`<Compile Include="$(MSBuildThisFileDirectory).." />`, **没有通配**, 不会自动收集新文件。
+
+### 8.1 不要背映射表, 沿目录向上找最近的 .projitems
+
+模块划分 **不是一层**, 也不是每个一级目录一份。真实形态差异很大:
+
+| 形态 | 例子 |
+|---|---|
+| 一级目录一份 | `Editor/Editor.projitems`、`GamePlay/GamePlay.projitems`、`NxRHI/`、`Base/`、`Rtti/`、`Math/`、`ImGui/` |
+| 一级目录下拆多份 | `Grapics/Mesh/Mesh.projitems` + `Grapics/Pipeline/Pipeline.projitems` (**不存在 `Grapics/Grapics.projitems`**) |
+| 每个砖块各一份 | `Bricks/Animation/Animation.projitems`、`Bricks/AssetImpExp/AssetImpExp.projitems` … (**不存在 `Bricks/Bricks.projitems`**) |
+| 砖块内再嵌一层 | `Bricks/FX/Water/Water.projitems`、`Bricks/GI/PRT/PRT.projitems`、`Bricks/DestinyPX/NxPhysics/NxPhysics.projitems` |
+| 平台分支 | `Platform/Windows/Windows.projitems`、`Platform/Android/Android.projitems` |
+
+唯一可靠的做法: **从新文件所在目录沿父级向上找, 第一个碰到的 `*.projitems` 就是它的宿主**。
+列全量清单核对:
+
+```powershell
+Get-ChildItem -Recurse -Filter *.projitems -Path CSharpCode | ForEach-Object { $_.FullName }
+```
+
+登记行的路径是 **相对那份 projitems 所在目录** 的, 分隔符用反斜杠:
+
+```xml
+<!-- 写在 CSharpCode/Grapics/Mesh/Mesh.projitems 里 -->
+<Compile Include="$(MSBuildThisFileDirectory)Modifier\MorphModifier.cs" />
+```
+
+### 8.2 lint 通过 ≠ 编译通过, 反之也成立
+
+- 只写入磁盘而没登记 projitems 时, **lint 可能不报错** (它能扫到磁盘上的 .cs), 但 MSBuild
+  报 `CS0246 未能找到类型或命名空间名`。
+- 反过来, **刚改完 projitems 后 lint 可能还报一阵假错误** (分析器未重载共享项目清单),
+  表现为"新加的类型不存在"。
+
+**结论**: 涉及新增 / 改名 `.cs` 时, 以
+`dotnet build Module/Engine.Window/Engine.Window.csproj` (需要时再加
+`Module/MainEditor/MainEditor.csproj`) 的结果为准, **不要单凭 lint 判定成败**。
+
+---
+
+## 9. 场景节点参数必须在 TtNode 上包装成 Details 可编辑属性
+
+**适用场景**: 新写 / 改写任何 `TtNode` 子类 (`TtVisual` / `TtMeshNode` / 各种灯光、
+Volume、Capture、Decal 节点), 只要它的 `TtNodeData` 里有希望美术 / 策划在编辑器里调的字段。
+
+**为什么**: Details 面板 (`TtPropertyGrid`) 的 target 是 **节点对象本体**, 它靠
+`TypeDescriptor.GetProperties(obj)` + `IsBrowsable` 反射出要画的行
+(`PropertyGrid.cs` 的 `PropertyCustomizationHelper<T>.GetProperties`)。把 `NodeData` 整个
+对象开成一个属性 (如 `public TtDecalNodeData DecalData { get; }`) **等于没有暴露参数** ——
+PG 只会画出一行不可编辑的对象值, 美术在面板里什么都改不了。
+反之, `[Rtti.Meta]` 只管序列化, **与能不能在 Details 里显示无关**。
+
+### 9.1 强制规则
+
+1. **逐字段包装**: `NodeData` 里每个面向编辑器的字段, 都在节点类上写一个 **同名**
+   转发属性 (带 `[Category]`)。同名是硬要求: undo/redo 的 `TtPropertyChangeCommand`
+   记的是 "宿主 + 成员名", 宿主就是这个节点对象 (§4)。
+2. **包装属性禁止再加 `[Rtti.Meta]`**。数据本体在 `NodeData` 上已经 Meta 过了,
+   节点再标一遍会让同一份值序列化两份, 反序列化时两条赋值路径互相覆盖。
+3. **强类型 `NodeData` 访问器必须 `[Browsable(false)]`**。保留它给引擎代码用 (渲染
+   节点、cbuffer 填值), 但不要让它在 Details 里多占一行、与包装属性重复。
+4. **`RName` 属性必须带资产过滤**:
+   `[RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterial.AssetExt)]`,
+   否则面板里选资产时不过滤后缀, 很容易挂错类型的资产。
+5. **setter 必须把"该刷的状态"刷到位** (见 §9.2 三类写法)。PG 只会写值, 不会帮你
+   重建 mesh / RT / 重新加载资产 —— 改完看不到变化几乎都是这一条没做。
+6. **刷新优先写在 `NodeData` 的 setter 里**, 只有需要节点侧资源 (mesh / RT / drawcall /
+   AABB) 时才写在节点的包装 setter。否则代码路径 (脚本、Macross、反序列化后修正)
+   直改 `NodeData` 时会绕过刷新。
+7. **setter 要幂等、可重入, 且 get 能原值读回**。undo/redo 是反射回写旧值 (§4),
+   get/set 不对称或 setter 有不可重入的副作用时, 撤销会静默失败。
+8. **不要在 setter 里 `await`**。PG 是同步调用; 资产加载一律做成 "标 dirty +
+   每帧 `EnsureXxx()` 补加载" 或 `AddWaitTask()` 的 fire-and-forget。
+
+### 9.2 三类 setter 写法
+
+**类型 A —— 纯转发** (值每帧被重新读取: cbuffer 每帧重灌 / 每帧重排序):
+
+```csharp
+[Category("Blend")]
+public float ColorWeight
+{
+    get => DecalData.ColorWeight;
+    set => DecalData.ColorWeight = value;   // cbDecal 每帧 FillDecalCBuffer, 下一帧自然生效
+}
+```
+
+**类型 B —— 值变了要重建 GPU 资源 / 重算派生量** (先相等就 return, 避免拖滑块时
+每帧重建):
+
+```csharp
+[Category("Capture")]
+public uint CubeFaceSize
+{
+    get => GetNodeData<TtSceneCubeCaptureData>().CubeFaceSize;
+    set
+    {
+        var nd = GetNodeData<TtSceneCubeCaptureData>();
+        if (nd.CubeFaceSize == value)
+            return;
+        nd.CubeFaceSize = value;
+        CubeRenderer?.OnResize(value);       // 重建 RT
+        UpdateCubeCameras();                 // 派生状态
+    }
+}
+```
+
+影响包围盒 / 位姿的参数还要补 `UpdateAbsTransform()` / `UpdateAABB()` /
+`Parent?.UpdateAABB()`。
+
+**类型 C —— 换资产 (异步)**: setter 里只改 RName + 丢弃旧对象 + 标 dirty, 真正的加载
+放到每帧 `EnsureXxx()`; 加载回来要再比一次 RName 防乱序:
+
+```csharp
+public RName DecalMaterial
+{
+    get => mDecalMaterial;
+    set
+    {
+        if (mDecalMaterial == value)
+            return;
+        mDecalMaterial = value;
+        MaterialInstance = null;
+        mMaterialLoadState = EMaterialLoadState.Dirty;   // 渲染节点下一帧 EnsureMaterial
+    }
+}
+```
+
+### 9.3 参考实现
+
+| 场景 | 参考 |
+|---|---|
+| 整组包装 + `[Browsable(false)]` 藏 NodeData 访问器 | `GamePlay/Scene/DecalNode.cs` 的 `#region 编辑器属性` |
+| 纯转发 | `GamePlay/Scene/SceneCubeCapture.cs` 的 `CaptureMode` / `VolumeExtent` / `CaptureInterval` |
+| 值变了重建 GPU 资源 | `SceneCubeCapture.cs` 的 `CubeFaceSize`; `SceneCapture.cs` 的 `TargetSize` (`RenderPolicy.OnResize`) |
+| 换资产 (异步重载) | `SkyNode.cs` 的 `SunMaterialName`; `DecalNode.cs` 的 `DecalMaterial` |
+
+### 9.4 自检清单
+
+- [ ] `NodeData` 里每个要调的字段在节点上都有同名包装属性, 并分好了 `[Category]`?
+- [ ] 包装属性 **没有** `[Rtti.Meta]`? 强类型 NodeData 访问器 **有** `[Browsable(false)]`?
+- [ ] `RName` 属性带了 `[RName.PGRName(FilterExts = ...)]`?
+- [ ] 需要重建/重载的属性, setter 里先做了相等就 return, 再触发刷新?
+   影响包围盒的补了 `UpdateAABB` / `Parent?.UpdateAABB()`?
+- [ ] 刷新逻辑能放 `NodeData` setter 的都放过去了 (而不是只在节点层)?
+- [ ] setter 里没有 `await`, 资产加载走 dirty + 每帧 `EnsureXxx()`?
+- [ ] 节点需要引用资产时, 补了 `AddAssetReferences` (cook / 打包依赖收集)?
 
 ---

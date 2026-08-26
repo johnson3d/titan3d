@@ -98,6 +98,14 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 cbuffer.SetValue(coreBinder.StartPosition, in StartPosition);
                 cbuffer.SetValue(coreBinder.CurrentLOD, mCurrentLOD);
                 cbuffer.SetValue(coreBinder.TexUVOffset, in TexUVOffset);
+                // 0 = "参数不在本 cbuffer 里", 是两条路径里更保守的默认值:
+                // 它让 shader 去读 instance data 而不是相信一份还没填好的 patch 参数。
+                cbuffer.SetValue(coreBinder.UsePatchRVTParams, (uint)0);
+                cbuffer.SetValue(coreBinder.HeightMapTexID, (uint)0);
+                cbuffer.SetValue(coreBinder.NormalMapTexID, (uint)0);
+                cbuffer.SetValue(coreBinder.MaterialIdTexID, (uint)0);
+                cbuffer.MarkDirty();
+                cbuffer.FlushDirty();
             }
             if (TerrainNode.TerrainCBuffer == null)
             {
@@ -113,6 +121,18 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
 
         public UTerrainGrassManager GrassManager;
+
+        // 把本 patch 用到的四张图标记为本帧活跃, 供 TtVirtualTextureBase.TickSync 分配 slot 并上传到 atlas。
+        // ActiveTexIDs 每帧会被 ProcessChanged 清空, 所以只要 patch 还可见就必须每帧重新调一次。
+        // 幂等: ActiveRVT 内部会对 UniqueTexID 去重, 同一 level 的多个 patch 重复调用无副作用。
+        public void ActiveRVTs()
+        {
+            var terrain = TerrainNode.Terrain;
+            terrain.HeightmapRVT.ActiveRVT(Level.HeightMapSRV);
+            terrain.HeightmapRVT.ActiveRVT(Level.WaterHMapSRV);
+            terrain.NormalmapRVT.ActiveRVT(Level.NormalMapSRV);
+            terrain.MaterialIdRVT.ActiveRVT(Level.MaterialIdMapSRV);
+        }
 
         public Vector3 StartPosition = new Vector3(0);
         public Vector2 TexUVOffset;        
@@ -158,11 +178,17 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
             CoreSDK.DisposeObject(ref GrassManager);
         }
-        public void Initialize(UTerrainLevelData level, int x, int z, Bricks.Procedure.UBufferComponent HeightMap)
+        public void Initialize(UTerrainLevelData level, int x, int z, Bricks.Procedure.TtBufferComponent HeightMap)
         {
             Level = level;
 
-            if (x == 16 || z == 16)
+            // 原本这里是 `if (x == 16 || z == 16) return;`, 硬编码了 PatchSide 的默认值。
+            // PatchSide == 16 时索引范围是 0..15, 所以它从来没真正生效过; 而一旦 PatchSide
+            // 被调大, 它反而会让 x/z == 16 的 patch 静默地半初始化 (XInLevel/IndexX/AABB 全留 0),
+            // 表现为地形中间少一行一列并且剔除盒错位。换成真正的边界检查。
+            var patchSide = level.Level.PatchSide;
+            System.Diagnostics.Debug.Assert(x >= 0 && x < patchSide && z >= 0 && z < patchSide);
+            if (x < 0 || x >= patchSide || z < 0 || z >= patchSide)
             {
                 return;
             }
@@ -185,7 +211,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             tMaterials[0] = terrain.Material;
 
             var tWireFrameMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
-            tWireFrameMaterials[0] = (terrain as UTerrainSystem).WireFrameMaterial;
+            tWireFrameMaterials[0] = (terrain as TtTerrainSystem).WireFrameMaterial;
 
             var twMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
             twMaterials[0] = terrain.WaterMaterial;
@@ -246,7 +272,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             GrassManager = new UTerrainGrassManager(this);
         }
-        public void UpdateAABB(Bricks.Procedure.UBufferComponent HeightMap, Bricks.Procedure.UBufferComponent WaterHMap)
+        public void UpdateAABB(Bricks.Procedure.TtBufferComponent HeightMap, Bricks.Procedure.TtBufferComponent WaterHMap)
         {
             int TexSizePerPatch = Level.GetTerrainNode().TexSizePerPatch;
             for (int i = 0; i < TexSizePerPatch; i++)
@@ -354,13 +380,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             switch (Level.GetTerrainNode().Terrain.ShowMode)
             {
-                case UTerrainSystem.EShowMode.Normal:
+                case TtTerrainSystem.EShowMode.Normal:
                     rp.AddVisibleMesh(TerrainMesh[CurrentLOD]);
                     break;
-                case UTerrainSystem.EShowMode.WireFrame:
+                case TtTerrainSystem.EShowMode.WireFrame:
                     rp.AddVisibleMesh(WireFrameTerrainMesh[CurrentLOD]);
                     break;
-                case UTerrainSystem.EShowMode.Both:
+                case TtTerrainSystem.EShowMode.Both:
                     {
                         rp.AddVisibleMesh(TerrainMesh[CurrentLOD]);
                         rp.AddVisibleMesh(WireFrameTerrainMesh[CurrentLOD]);

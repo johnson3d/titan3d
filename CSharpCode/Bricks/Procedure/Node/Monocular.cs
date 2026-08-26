@@ -12,9 +12,9 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
         [Rtti.Meta("")]
-        public UBufferCreator SourceDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator SourceDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         [Rtti.Meta("")]
-        public UBufferCreator ResultDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator ResultDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public virtual UBufferCreator GetResultDesc()
         {
             return ResultDesc;
@@ -56,16 +56,16 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn MaskPin { get; set; } = new PinIn();
         public UMonocularWithMask()
         {
-            AddInput(MaskPin, "Mask", UBufferCreator.CreateInstance<USuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
+            AddInput(MaskPin, "Mask", UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
         }
-        public bool IsMask(int x, int y, int z, USuperBuffer<sbyte, FSByteOperator> maskBuffer)
+        public bool IsMask(int x, int y, int z, TtSuperBuffer<sbyte, FSByteOperator> maskBuffer)
         {
             if (maskBuffer == null)
                 return true;
             var uvw = maskBuffer.GetUVW(x, y, z);
             return maskBuffer.GetPixel<sbyte>(in uvw) == 1;
         }
-        public bool IsMask(in Vector3 uvw, USuperBuffer<sbyte, FSByteOperator> maskBuffer)
+        public bool IsMask(in Vector3 uvw, TtSuperBuffer<sbyte, FSByteOperator> maskBuffer)
         {
             if (maskBuffer == null)
                 return true;
@@ -202,7 +202,7 @@ namespace EngineNS.Bricks.Procedure.Node
         public float Value { get; set; } = 1.0f;
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
-            var mask = graph.BufferCache.FindBuffer(MaskPin) as USuperBuffer<sbyte, FSByteOperator>; ;
+            var mask = graph.BufferCache.FindBuffer(MaskPin) as TtSuperBuffer<sbyte, FSByteOperator>; ;
             var left = graph.BufferCache.FindBuffer(SrcPin);
             var result = graph.BufferCache.FindBuffer(ResultPin);
             var op = result.PixelOperator;
@@ -250,7 +250,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
-            var mask = graph.BufferCache.FindBuffer(MaskPin) as USuperBuffer<sbyte, FSByteOperator>; ;
+            var mask = graph.BufferCache.FindBuffer(MaskPin) as TtSuperBuffer<sbyte, FSByteOperator>; ;
             var left = graph.BufferCache.FindBuffer(SrcPin);
             var result = graph.BufferCache.FindBuffer(ResultPin);
             var op = result.PixelOperator;

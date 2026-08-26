@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_5134551942874409055 Type="EngineNS.Graphics.Pipeline.Deferred.TtDecalPassNode@EngineCore">
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <GlobalIntensity Type="System.Single@Unknown" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_5134551942874409055>

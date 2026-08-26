@@ -363,7 +363,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PythonRuntime", "NativeCode
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "JitherOpenEXR", "3rd\csharp\JitherOpenEXR\JitherOpenEXR.shproj", "{B1766C5B-0A9B-442E-A42D-39AE93B6FDF2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crnlib", "3rd\native\crunch\crnlib\crnlib.2008.vcxproj", "{CF2E70E8-7133-4D96-92C7-68BB406C0664}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crnlib.2008", "3rd\native\crunch\crnlib\crnlib.2008.vcxproj", "{CF2E70E8-7133-4D96-92C7-68BB406C0664}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "VirtualShadowMaps", "CSharpCode\Bricks\VirtualShadowMaps\VirtualShadowMaps.shproj", "{91C46B9C-A9C1-4AB1-9C41-E493041E9244}"
 EndProject

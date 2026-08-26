@@ -1068,6 +1068,25 @@ namespace EngineNS.Graphics.Mesh
                         {
                             ums.Skeleton = RName.GetRName(mDir.Name + improtSetting.FileName + Animation.Asset.TtSkeletonAsset.AssetExt, mDir.RNameType);
                         }
+                        // 导入期就把 MdfQueueType 写进 .ums: 这是选型的正确授权位置。
+                        // TtRenderMesh.Initialize 的优先级是 "调用方显式指定 > .ums 上的 MdfQueueType >
+                        // 按资产内容自动兜底", 写了这里, 所有不显式指定的消费方都能拿到带
+                        // morph / 骨骼 的正确队列, 而不需要任何运行期 override。
+                        // 四路都显式写出, 让 .ums 自描述; 用户之后可在资产上改成自定义队列。
+                        var umsHasSkin = mesh.Mesh.PartialSkeleton != null;
+                        var umsHasMorph = mesh.Mesh.MorphTargets != null && mesh.Mesh.MorphTargets.IsValid;
+                        if (umsHasSkin)
+                        {
+                            ums.MdfQueueType = umsHasMorph
+                                ? Rtti.TtTypeDescGetter<TtMdfSkinMorphMesh>.TypeDesc
+                                : Rtti.TtTypeDescGetter<TtMdfSkinMesh>.TypeDesc;
+                        }
+                        else
+                        {
+                            ums.MdfQueueType = umsHasMorph
+                                ? Rtti.TtTypeDescGetter<TtMdfMorphMesh>.TypeDesc
+                                : Rtti.TtTypeDescGetter<TtMdfStaticMesh>.TypeDesc;
+                        }
                         ums.SubMeshes[0].Mesh = mesh.Mesh;
                         for(int i = 0; i < ums.SubMeshes[0].Materials.Count; i++)
                         {

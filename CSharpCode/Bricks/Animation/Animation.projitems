@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AnimUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_KawaiiPhysics.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_KawaiiRibbon.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_AnimStateMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_PoseOutput.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\AnimASTBuildUtil.cs" />
@@ -20,8 +21,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\GraphElement_PoseLine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\BlendTreeNodeClassDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\BlendTree_KawaiiPhysicsClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\BlendTree_KawaiiRibbonClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\BlendTree_PoseDriverClassDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\GraphElement_BlendTreeNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\GraphElement_BlendTree_KawaiiPhysics.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\GraphElement_BlendTree_KawaiiRibbon.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\PoseLineDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Graph_BlendTree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\BlendTree_AnimStateMachineClassDescription.cs" />
@@ -58,6 +62,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_AdditiveBlendSpace2D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_AdditivePose.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_AnimationClip.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_PoseDriver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_BindedPose.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_BlendPose.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_BlendSpace1D.cs" />
@@ -90,6 +95,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Base\AnimatedObjectDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset\IAnimationAsset.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset\AnimationClip.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\PoseAsset.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\PoseAssetUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Curve.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset\AnimationChunk.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Track.cs" />
@@ -114,7 +121,21 @@
     <Compile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\TtKawaiiPhysicsContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\TtKawaiiSetupData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\TtKawaiiCurve.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RBF\TtRBFTypes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RBF\TtRBFMath.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RBF\TtRBFInterpolator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RBF\TtRBFSolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\TtKawaiiPhysicsComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RootMotion\RootMotionTypes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RootMotion\IRootMotionSource.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RootMotion\ClipRootMotionExtractor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RootMotion\RootMotionUTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Montage\ClipPoseSampler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Montage\AnimMontageInstance.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Montage\AnimMontageHost.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Montage\AnimMontageUTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\AnimMontage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_Slot.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Animation.brick" />

@@ -190,6 +190,8 @@ namespace EngineNS.GamePlay
                 SetStyle(ENodeStyles.Transient);
                 await base.OnPostInitNode(parent, extArg);
             }
+            /// <summary>gizmo 不进 Outliner 树 (与下面 DrawNode 返回 false 保持一致)。</summary>
+            public override bool IsShowInOutliner => false;
             public override bool DrawNode(EngineNS.Editor.INodeUIProvider parent, EngineNS.Editor.TtTreeNodeDrawer tree, int index, int NumOfChild)
             {
                 return false;

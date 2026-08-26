@@ -88,8 +88,8 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn IdMapPin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UBufferCreator OutputFloat1Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UHeightMappingNode()
         {
             Icon.Size = new Vector2(25, 25);
@@ -239,8 +239,8 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn MatIdPin { get; set; } = new PinIn();
         [System.ComponentModel.Browsable(false)]
         public PinIn WaterPin { get; set; } = new PinIn();
-        public UBufferCreator NormalBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator NormalBufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UHeightmapPreviewNode()
         {
             PrevSize = new Vector2(100, 60);
@@ -274,12 +274,12 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             return true;
         }
-        public Terrain.CDLOD.UTerrainSystem.EShowMode ShowMode
+        public Terrain.CDLOD.TtTerrainSystem.EShowMode ShowMode
         {
             get
             {
                 if (PreviewTerrainNode == null)
-                    return Terrain.CDLOD.UTerrainSystem.EShowMode.Normal;
+                    return Terrain.CDLOD.TtTerrainSystem.EShowMode.Normal;
                 return PreviewTerrainNode.Terrain.ShowMode;
             }
             set
@@ -354,7 +354,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 terrainNode.IsAcceptShadow = false;
                 terrainNode.SetActiveCenter(in DVector3.Zero);
                 PreviewTerrainNode = terrainNode;
-                PreviewTerrainNode.Terrain.ShowMode = Terrain.CDLOD.UTerrainSystem.EShowMode.Both;
+                PreviewTerrainNode.Terrain.ShowMode = Terrain.CDLOD.TtTerrainSystem.EShowMode.Both;
             }
             else
             {
@@ -433,9 +433,9 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinOut WaterPin { get; set; } = new PinOut();
         [System.ComponentModel.Browsable(false)]
         public PinOut VelocityPin { get; set; } = new PinOut();
-        public UBufferCreator NormalBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UBufferCreator VelocityBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UBufferCreator OutputFloat1Creator { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator NormalBufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator VelocityBufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat1Creator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UWaterNode()
         {
             PrevSize = new Vector2(100, 60);
@@ -496,7 +496,7 @@ namespace EngineNS.Bricks.Procedure.Node
             public int NumOfLowWater = 0;
         }
 
-        private Vector2i DoPixel(int x, int y, UBufferComponent curHMap, FPixelWater[,] PixelWaters, UProcedureProfiler profiler)
+        private Vector2i DoPixel(int x, int y, TtBufferComponent curHMap, FPixelWater[,] PixelWaters, UProcedureProfiler profiler)
         {
             ref var center = ref curHMap.GetPixel<Vector2>(x, y, 0);
             if (center.Y <= 0)
@@ -549,8 +549,8 @@ namespace EngineNS.Bricks.Procedure.Node
             var water = graph.BufferCache.FindBuffer(WaterPin);
             var velocity = graph.BufferCache.FindBuffer(VelocityPin);
 
-            var opMapCreator = UBufferCreator.CreateInstance<USuperBuffer<Vector2, FFloat2Operator>>(height.Width, height.Height, height.Depth); ;
-            var curHMap = UBufferComponent.CreateInstance(opMapCreator);            
+            var opMapCreator = UBufferCreator.CreateInstance<TtSuperBuffer<Vector2, FFloat2Operator>>(height.Width, height.Height, height.Depth); ;
+            var curHMap = TtBufferComponent.CreateInstance(opMapCreator);            
             curHMap.DispatchPixels((result, x, y, z) =>
             {
                 Vector2 tmp;
@@ -741,7 +741,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
 
         List<UGrassPinDefine> mGrassDefines = new List<UGrassPinDefine>();
-        UBufferCreator mInBufferCreator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>();
+        UBufferCreator mInBufferCreator = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>();
         [Rtti.Meta("")]
         public List<UGrassPinDefine> GrassDefines
         {
@@ -802,7 +802,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             OnPositionChanged();
         }
-        public override UBufferComponent GetResultBuffer(int index)
+        public override TtBufferComponent GetResultBuffer(int index)
         {
             if (index < 0 || index >= Inputs.Count)
                 return null;

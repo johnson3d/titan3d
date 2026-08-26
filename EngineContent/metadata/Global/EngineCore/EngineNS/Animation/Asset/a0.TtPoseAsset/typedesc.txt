@@ -1,0 +1,2 @@
+EngineCore
+EngineNS.Animation.Asset.TtPoseAsset@EngineCore

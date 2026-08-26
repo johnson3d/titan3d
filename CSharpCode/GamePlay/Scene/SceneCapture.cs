@@ -462,8 +462,7 @@ namespace EngineNS.GamePlay.Scene
                 This.WorldRenderer.TickLogic(TtEngine.Instance.ElapsedSecond);
             }, this);
 
-            var renderFinished = new System.Threading.AutoResetEvent(false);
-            TtEngine.Instance.ThreadRender.WaitFinishRenderAction(renderFinished);
+            TtEngine.Instance.ThreadRender.WaitFinishRenderAction(null);
 
             WorldRenderer.RenderPolicy?.TickSync();
             return true;

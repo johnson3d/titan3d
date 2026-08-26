@@ -876,9 +876,10 @@ namespace NxRHI
 		cpDraw->DestSubResource = subRes;
 		cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Texture;
 		cpDraw->FootPrint.Format = footPrint->Format;
-		cpDraw->FootPrint.X = 0;
-		cpDraw->FootPrint.Y = 0;
-		cpDraw->FootPrint.Z = 0;
+		// 透传目标偏移, 支持局部区域上传 (全量上传的调用方 X/Y/Z 为 0, 行为不变)。
+		cpDraw->FootPrint.X = footPrint->X;
+		cpDraw->FootPrint.Y = footPrint->Y;
+		cpDraw->FootPrint.Z = footPrint->Z;
 		cpDraw->FootPrint.Width = footPrint->Width;
 		cpDraw->FootPrint.Height = footPrint->Height;
 		cpDraw->FootPrint.Depth = footPrint->Depth;
@@ -912,9 +913,10 @@ namespace NxRHI
 			cpDraw->DestSubResource = subRes;
 			cpDraw->Mode = ECopyDrawMode::CDM_Buffer2Texture;
 			cpDraw->FootPrint.Format = footPrint->Format;
-			cpDraw->FootPrint.X = 0;
-			cpDraw->FootPrint.Y = 0;
-			cpDraw->FootPrint.Z = 0;
+			// 透传目标偏移, 支持局部区域上传 (全量上传的调用方 X/Y/Z 为 0, 行为不变)。
+			cpDraw->FootPrint.X = footPrint->X;
+			cpDraw->FootPrint.Y = footPrint->Y;
+			cpDraw->FootPrint.Z = footPrint->Z;
 			cpDraw->FootPrint.Width = footPrint->Width;
 			cpDraw->FootPrint.Height = footPrint->Height;
 			cpDraw->FootPrint.Depth = footPrint->Depth;

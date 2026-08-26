@@ -1,4 +1,5 @@
-﻿using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
+﻿using EngineNS.Animation.RootMotion;
+using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
 using EngineNS.Animation.SkeletonAnimation.Skeleton;
 using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
 using EngineNS.Rtti;
@@ -14,18 +15,25 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
         public int HashCode { get; }
         public List<ILimbDesc> Descs { get; set; }
         public List<FTransform> Transforms { get; set; }
+        /// <summary>
+        /// 本帧随该Pose一起流动的RootMotion增量。采样节点写入, 混合节点按与Pose相同的权重混合。
+        /// 这样不依赖BlendTree.Tick的递归结构就能拿到最终权重下的RootMotion。
+        /// </summary>
+        public FRootMotionData RootMotion { get; set; }
     }
     public class TtLocalSpaceRuntimePose : IRuntimePose  //or struct
     {
         public int HashCode => 0;
         public List<ILimbDesc> Descs { get; set; } = new List<ILimbDesc>();    //or array
         public List<FTransform> Transforms { get; set; } = new List<FTransform>();//or array
+        public FRootMotionData RootMotion { get; set; } = FRootMotionData.Empty;
     }
     public class TtMeshSpaceRuntimePose : IRuntimePose
     {
         public int HashCode => 0;
         public List<ILimbDesc> Descs { get; set; } = new List<ILimbDesc>();//or array
         public List<FTransform> Transforms { get; set; } = new List<FTransform>();//or array
+        public FRootMotionData RootMotion { get; set; } = FRootMotionData.Empty;
     }
 
     /// <summary>
@@ -36,6 +44,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
         public int HashCode => 0;
         public List<ILimbDesc> Descs { get; set; } = new List<ILimbDesc>();    //or array
         public List<FTransform> Transforms { get; set; } = new List<FTransform>();//or array
+        public FRootMotionData RootMotion { get; set; } = FRootMotionData.Empty;
     }
 
 
@@ -297,6 +306,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
             T temp = (T)TtTypeDescManager.CreateInstance(typeof(T));
             temp.Transforms.AddRange(pose.Transforms);
             temp.Descs.AddRange(pose.Descs);
+            temp.RootMotion = pose.RootMotion;
             return temp;
         }
         public static void CopyPose<T>(ref T descPose, T srcPose) where T : IRuntimePose
@@ -312,12 +322,14 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
             descPose.Descs.Clear();
             descPose.Transforms.AddRange(srcPose.Transforms);
             descPose.Descs.AddRange(srcPose.Descs);
+            descPose.RootMotion = srcPose.RootMotion;
         }
         public static void CopyTransforms<T>(ref T descPose, T srcPose) where T : IRuntimePose
         {
             System.Diagnostics.Debug.Assert(descPose != null && srcPose != null);
             descPose.Transforms.Clear();
             descPose.Transforms.AddRange(srcPose.Transforms);
+            descPose.RootMotion = srcPose.RootMotion;
         }
         public static void CopyTransforms(ref TtLocalSpaceRuntimePose descPose, AnimatablePose.TtAnimatableSkeletonPose srcPose)
         {
@@ -336,22 +348,74 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
                 var lerpedRot = Quaternion.Slerp(aPose.Transforms[i].Quat, bPose.Transforms[i].Quat, alpha);
                 outPose.Transforms[i] = FTransform.CreateTransform(lerpedPos, Vector3.One, lerpedRot);
             }
+            // RootMotion与Pose用同一个权重混合, 否则位移会与脑袋动画对不上
+            outPose.RootMotion = TtRootMotionUtil.Blend(aPose.RootMotion, bPose.RootMotion, alpha);
         }
+        /// <summary>
+        /// 多 pose 加权混合。位置为加权求和, 旋转为 NLERP 加权平均(加权求和后归一化)。
+        /// 权重归一化(和为 1)由调用方保证, 与 UE AccumulateWeightedTransform 语义一致。
+        /// scale 统一输出 Vector3.One, 与本文件其它 pose 运算的约定保持一致。
+        /// </summary>
         public static void BlendPoses<T>(ref T outPose, List<T> poses, List<float> weights) where T : IRuntimePose
         {
             System.Diagnostics.Debug.Assert(poses.Count > 0);
+            if (poses.Count == 0)
+                return;
+            System.Diagnostics.Debug.Assert(weights.Count >= poses.Count);
+
             int boneCount = poses[0].Transforms.Count;
-            DVector3 pos = DVector3.Zero;
-            Quaternion rot = Quaternion.Identity;
             for (int boneIndex = 0; boneIndex < boneCount; ++boneIndex)
             {
+                // 累加器必须每根骨骼归零, 否则会把前面所有骨骼的结果累进来
+                DVector3 pos = DVector3.Zero;
+                Quaternion rot = new Quaternion(0, 0, 0, 0);
+                bool hasRefQuat = false;
+                Quaternion refQuat = Quaternion.Identity;
+
                 for (int poseIndex = 0; poseIndex < poses.Count; ++poseIndex)
                 {
-                    pos += poses[poseIndex].Transforms[boneIndex].Position * weights[poseIndex];
-                    rot *= poses[poseIndex].Transforms[boneIndex].Quat * weights[poseIndex];
+                    float weight = weights[poseIndex];
+                    var transform = poses[poseIndex].Transforms[boneIndex];
+                    pos += transform.Position * weight;
+
+                    // 四元数加权平均: 先做符号对齐(q 与 -q 表示同一旋转, 不对齐会互相抵消),
+                    // 再加权求和, 最后归一化。不能用四元数乘法累积 —— 那是旋转复合而非加权平均。
+                    // 参考系取第一个权重非零的 pose: 锚应当是实际参与混合的旋转。
+                    var quat = transform.Quat;
+                    if (!hasRefQuat)
+                    {
+                        if (weight != 0.0f)
+                        {
+                            refQuat = quat;
+                            hasRefQuat = true;
+                        }
+                    }
+                    else if (Quaternion.Dot(refQuat, quat) < 0.0f)
+                    {
+                        quat = Quaternion.MultiplyFloat(in quat, -1.0f);
+                    }
+                    rot = Quaternion.Add(in rot, Quaternion.MultiplyFloat(in quat, weight));
                 }
+
+                // 权重全为 0 或四元数相互抵消时长度近于 0, 直接 Normalize 会产生 NaN
+                if (rot.LengthSquared() > 1e-8f)
+                    rot = Quaternion.Normalize(rot);
+                else
+                    rot = Quaternion.Identity;
+
                 outPose.Transforms[boneIndex] = FTransform.CreateTransform(pos, Vector3.One, rot);
             }
+
+            // RootMotion按与Pose完全相同的权重做多路加权累加
+            FRootMotionData rootMotion = FRootMotionData.Empty;
+            bool hasRootMotionRefQuat = false;
+            Quaternion rootMotionRefQuat = Quaternion.Identity;
+            for (int poseIndex = 0; poseIndex < poses.Count; ++poseIndex)
+            {
+                TtRootMotionUtil.AccumulateWeighted(ref rootMotion, ref hasRootMotionRefQuat, ref rootMotionRefQuat, poses[poseIndex].RootMotion, weights[poseIndex]);
+            }
+            TtRootMotionUtil.FinishAccumulate(ref rootMotion);
+            outPose.RootMotion = rootMotion;
         }
         public static void ZeroPose<T>(ref T descPose) where T : IRuntimePose
         {
@@ -359,6 +423,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
             {
                 descPose.Transforms[i] = FTransform.Identity;
             }
+            descPose.RootMotion = FRootMotionData.Empty;
         }
         public static void ZeroPosePosition<T>(ref T descPose) where T : IRuntimePose
         {
@@ -412,6 +477,35 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
 
                 outPose.Transforms[i] = FTransform.CreateTransform(position, Vector3.One, rotation);
             }
+        }
+
+        /// <summary>
+        /// RootMotion提取后将输出Pose的根骨骼锁定, 防止位移被应用两次(一次骨骼一次Actor)。
+        /// firstFrameTransform仅在AnimFirstFrame模式下使用。
+        /// </summary>
+        public static void ApplyRootLock<T>(ref T pose, RootMotion.ERootMotionRootLock rootLock, in FTransform firstFrameTransform) where T : IRuntimePose
+        {
+            var rootIndex = GetRoot(pose);
+            if (!rootIndex.IsValid())
+                return;
+
+            FTransform lockedTransform;
+            switch (rootLock)
+            {
+                case RootMotion.ERootMotionRootLock.RefPose:
+                    {
+                        var initMatrix = pose.Descs[rootIndex.Value].InitMatrix;
+                        lockedTransform = FTransform.CreateTransform(initMatrix.Translation.AsDVector(), initMatrix.Scale, initMatrix.Rotation);
+                    }
+                    break;
+                case RootMotion.ERootMotionRootLock.AnimFirstFrame:
+                    lockedTransform = firstFrameTransform;
+                    break;
+                default:
+                    lockedTransform = FTransform.Identity;
+                    break;
+            }
+            pose.Transforms[rootIndex.Value] = lockedTransform;
         }
     }
 

@@ -24,8 +24,8 @@ namespace EngineNS.Bricks.Procedure.Node
                 mPreviewResultIndex = -1;
             }
         }
-        public UBufferCreator IndexBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
-        public UBufferCreator Vec3BufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator IndexBufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
+        public UBufferCreator Vec3BufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
 
         public Graphics.Mesh.TtMaterialMesh PreviewMesh;
         public UMeshLoader()
@@ -93,7 +93,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 NunPfTrian += (int)desc.NumPrimitives;
             }
             
-            var idxBuffer = UBufferComponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector3i, FInt3Operator>>(NunPfTrian, 1, 1));
+            var idxBuffer = TtBufferComponent.CreateInstance(UBufferCreator.CreateInstance<TtSuperBuffer<Vector3i, FInt3Operator>>(NunPfTrian, 1, 1));
             
             if (Mesh.GetMeshPrimitives(0).MeshDataProvider.mCoreObject.IsIndex32)
             {
@@ -120,9 +120,9 @@ namespace EngineNS.Bricks.Procedure.Node
                 }
             }
 
-            var posBuffer = UBufferComponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>((int)builder.VertexNumber, 1, 1));
-            var norBuffer = UBufferComponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>((int)builder.VertexNumber, 1, 1));
-            var uvBuffer = UBufferComponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector2, FFloat2Operator>>((int)builder.VertexNumber, 1, 1));
+            var posBuffer = TtBufferComponent.CreateInstance(UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>((int)builder.VertexNumber, 1, 1));
+            var norBuffer = TtBufferComponent.CreateInstance(UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>((int)builder.VertexNumber, 1, 1));
+            var uvBuffer = TtBufferComponent.CreateInstance(UBufferCreator.CreateInstance<TtSuperBuffer<Vector2, FFloat2Operator>>((int)builder.VertexNumber, 1, 1));
 
             graph.BufferCache.RegBuffer(IndicesPin, idxBuffer);
             graph.BufferCache.RegBuffer(PosPin, posBuffer);
@@ -195,8 +195,8 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false)]
         public PinOut NorPin { get; set; } = new PinOut();
 
-        public UBufferCreator IndexBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
-        public UBufferCreator XYZBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator IndexBufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
+        public UBufferCreator XYZBufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
         public UPreviewMesh()
         {
             PrevSize = new Vector2(100, 100);
@@ -226,9 +226,9 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             {
-                var indices = graph.BufferCache.FindBuffer(InIndices) as USuperBuffer<Vector3i, FInt3Operator>;
-                var pos = graph.BufferCache.FindBuffer(InPos) as USuperBuffer<Vector3, FFloat3Operator>;
-                var nor = graph.BufferCache.FindBuffer(InNor) as USuperBuffer<Vector3, FFloat3Operator>;
+                var indices = graph.BufferCache.FindBuffer(InIndices) as TtSuperBuffer<Vector3i, FInt3Operator>;
+                var pos = graph.BufferCache.FindBuffer(InPos) as TtSuperBuffer<Vector3, FFloat3Operator>;
+                var nor = graph.BufferCache.FindBuffer(InNor) as TtSuperBuffer<Vector3, FFloat3Operator>;
 
                 var builder = meshBuilder.mCoreObject;
                 uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
@@ -334,9 +334,9 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         public override bool OnProcedure(UPgcGraph graph)
         {
-            var indices = graph.BufferCache.FindBuffer(InIndices) as USuperBuffer<Vector3i, FInt3Operator>;
-            var pos = graph.BufferCache.FindBuffer(InPos) as USuperBuffer<Vector3, FFloat3Operator>;
-            var nor = graph.BufferCache.FindBuffer(InNor) as USuperBuffer<Vector3, FFloat3Operator>;
+            var indices = graph.BufferCache.FindBuffer(InIndices) as TtSuperBuffer<Vector3i, FInt3Operator>;
+            var pos = graph.BufferCache.FindBuffer(InPos) as TtSuperBuffer<Vector3, FFloat3Operator>;
+            var nor = graph.BufferCache.FindBuffer(InNor) as TtSuperBuffer<Vector3, FFloat3Operator>;
 
             if (indices != null)
             {

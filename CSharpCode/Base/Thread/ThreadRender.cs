@@ -112,11 +112,15 @@ namespace EngineNS.Thread
                 return mScopeWaitRender;
             }
         }
-        public void WaitFinishRenderAction(System.Threading.AutoResetEvent finishedEvent)
+        public void WaitFinishRenderAction(System.Threading.AutoResetEvent finishedEvent = null)
         {
             if (this.IsFinished)
             {
                 return;
+            }
+            if (finishedEvent == null)
+            {
+                finishedEvent = new System.Threading.AutoResetEvent(false);
             }
             using (new Profiler.TimeScopeHelper(ScopeWaitRender))
             {

@@ -220,6 +220,10 @@ namespace EngineNS.Editor.ShaderCompiler
         }
         private TtHLSLInclude UserInclude;
         private Graphics.Pipeline.Shader.TtMaterial Material;
+        public Graphics.Pipeline.Shader.TtMaterial GetMaterial()
+        {
+            return Material;
+        }
         private Rtti.TtTypeDesc MdfQueueType;
         private string GetVertexStreamDefine(NxRHI.EVertexStreamType type)
         {
@@ -551,7 +555,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     defPtr.AddDefine("RHI_TYPE", "RHI_DX11");
                     defPtr.AddDefine("CP_SM_major", "5");
                     defPtr.AddDefine("CP_SM_minor", "0");
-                    compiled = mShaderCompiler.CompileShader(desc, shader, entry, type, "5_0", defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion, null, asModule);
+                    compiled = mShaderCompiler.CompileShader(this, desc, shader, entry, type, "5_0", defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion, null, asModule);
                 }
                 else if (shaderLang == NxRHI.EShaderLanguage.SL_DXIL)
                 {
@@ -561,7 +565,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     defPtr.AddDefine("CP_SM_major", CP_SM_major.ToString());
                     defPtr.AddDefine("CP_SM_minor", CP_SM_minor.ToString());
                     defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
-                    compiled = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXIL, bDebugShader, extHlslVersion, null, asModule);
+                    compiled = mShaderCompiler.CompileShader(this, desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXIL, bDebugShader, extHlslVersion, null, asModule);
                 }
                 else if (shaderLang == NxRHI.EShaderLanguage.SL_SPIRV)
                 {
@@ -571,7 +575,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     defPtr.AddDefine("CP_SM_major", CP_SM_major.ToString());
                     defPtr.AddDefine("CP_SM_minor", CP_SM_minor.ToString());
                     defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
-                    compiled = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_SPIRV, bDebugShader, extHlslVersion, null, asModule);
+                    compiled = mShaderCompiler.CompileShader(this, desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_SPIRV, bDebugShader, extHlslVersion, null, asModule);
                 }
                 else if (shaderLang == NxRHI.EShaderLanguage.SL_GLSL)
                 {
@@ -581,7 +585,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     defPtr.AddDefine("CP_SM_major", CP_SM_major.ToString());
                     defPtr.AddDefine("CP_SM_minor", CP_SM_minor.ToString());
                     defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
-                    compiled = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_GLSL, bDebugShader, extHlslVersion, null, asModule);
+                    compiled = mShaderCompiler.CompileShader(this, desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_GLSL, bDebugShader, extHlslVersion, null, asModule);
                 }
                 else if (shaderLang == NxRHI.EShaderLanguage.SL_METAL)
                 {
@@ -591,7 +595,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     defPtr.AddDefine("CP_SM_major", CP_SM_major.ToString());
                     defPtr.AddDefine("CP_SM_minor", CP_SM_minor.ToString());
                     defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
-                    compiled = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_METAL, bDebugShader, extHlslVersion, null, asModule);
+                    compiled = mShaderCompiler.CompileShader(this, desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_METAL, bDebugShader, extHlslVersion, null, asModule);
                 }
 
                 if (!compiled)

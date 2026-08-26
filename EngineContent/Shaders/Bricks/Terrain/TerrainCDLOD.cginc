@@ -21,10 +21,16 @@ SamplerState Samp_NormalMapTexture DX_AUTOBIND;
 SamplerState Samp_MaterialIdTexture DX_AUTOBIND;
 
 //instance for cbuffer
+// RVT 模式下参数有两条来路, 用 cbPerPatch.UsePatchRVTParams 区分 (详见 Common.cginc):
+//   非 0: 本 drawcall 不走 instancing, C# 已把参数填进 cbPerPatch;
+//   为 0: 走 instancing, 参数在 FVSInstanceData 里。
+// 分支条件是 cbuffer 常量, 对整个 drawcall uniform, 无分叉开销。
 float3 GetStartPosition(VS_MODIFIER input)
 {
     //return StartPosition;
 #if defined(FEATURE_USE_RVT)
+    if (UsePatchRVTParams != 0)
+        return StartPosition;
     FVSInstanceData result = GetInstanceData(input);
     return asfloat(result.UserData2.xyz);
 #else
@@ -36,6 +42,8 @@ uint GetCurrentLOD(VS_MODIFIER input)
 {
     //return CurrentLOD;
 #if defined(FEATURE_USE_RVT)
+    if (UsePatchRVTParams != 0)
+        return (uint) CurrentLOD;
     FVSInstanceData result = GetInstanceData(input);
     return result.UserData.w;
 #else
@@ -46,6 +54,8 @@ uint GetCurrentLOD(VS_MODIFIER input)
 float2 GetTexUVOffset(VS_MODIFIER input)
 {
 #if defined(FEATURE_USE_RVT)
+    if (UsePatchRVTParams != 0)
+        return TexUVOffset;
 	FVSInstanceData result = GetInstanceData(input);
     return float2(asfloat(result.UserData2.w),asfloat(result.Scale_Pad));
 #else
@@ -57,6 +67,8 @@ float2 GetTexUVOffset(VS_MODIFIER input)
 uint GetHeightmapTextureId(VS_MODIFIER input)
 {
 #if defined(FEATURE_USE_RVT)
+    if (UsePatchRVTParams != 0)
+        return HeightMapTexID;
     FVSInstanceData result = GetInstanceData(input);
     return result.UserData.x;
 #else
@@ -67,6 +79,8 @@ uint GetHeightmapTextureId(VS_MODIFIER input)
 uint GetNormalmapTextureId(VS_MODIFIER input)
 {
 #if defined(FEATURE_USE_RVT)
+    if (UsePatchRVTParams != 0)
+        return NormalMapTexID;
     FVSInstanceData result = GetInstanceData(input);
     return result.UserData.y;
 #else
@@ -77,6 +91,8 @@ uint GetNormalmapTextureId(VS_MODIFIER input)
 uint GetMaterailIdTextureId(VS_MODIFIER input)
 {
 #if defined(FEATURE_USE_RVT)
+    if (UsePatchRVTParams != 0)
+        return MaterialIdTexID;
     FVSInstanceData result = GetInstanceData(input);
     return result.UserData.z;
 #else
@@ -89,12 +105,12 @@ float GetTerrrainVertexHeight(float2 uv, int uniqueTextureId = 0)
     return SampleLevelRVT(Samp_HeightMapTexture, HeightMapTexture, uv, uniqueTextureId, 0).r;
 }
 
-float3 GetTerrrainVertexPosition(float2 uv, int uniqueTextureId = 0)
+float3 GetTerrrainVertexPosition(float2 uv, VS_MODIFIER input, int uniqueTextureId = 0)
 {
     float3 result = float3(0, 0, 0);
     result.xz = uv * PatchSize;
     float2 heightUV = uv * TexUVScale;
-    heightUV += TexUVOffset.xy;
+    heightUV += GetTexUVOffset(input).xy;
     result.y = GetTerrrainVertexHeight(heightUV, uniqueTextureId);
     return result;
 }
@@ -216,7 +232,7 @@ void DoTerrainModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
     uint normalmapID = GetNormalmapTextureId(vert);
     uint materialIdID = GetMaterailIdTextureId(vert);
 	
-    float3 pos = GetTerrrainVertexPosition(uv, heighmapID);
+    float3 pos = GetTerrrainVertexPosition(uv, vert, heighmapID);
 
     float3 eyePos = EyeCenter - GetStartPosition(vert);
 	float eyeDist = distance(pos.xyz, eyePos.xyz);

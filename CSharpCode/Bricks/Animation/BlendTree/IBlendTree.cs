@@ -28,6 +28,14 @@ namespace EngineNS.Animation.BlendTree
     public struct FAnimBlendTreeContext
     {
         public TtAnimatableSkeletonPose AnimatableSkeletonPose;
+        /// <summary>
+        /// 本次求值的RootMotion过滤模式, 采样节点据此决定是否贡献位移
+        /// </summary>
+        public RootMotion.ERootMotionMode RootMotionMode;
+        /// <summary>
+        /// Montage宿主, Slot节点在Initialize时捕获引用(命令Execute阶段拿不到上下文)
+        /// </summary>
+        public Montage.TtAnimMontageHost MontageHost;
     }
 
     public interface IBlendTree<S, T> where T : IRuntimePose

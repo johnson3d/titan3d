@@ -68,6 +68,24 @@ namespace EngineNS.Animation.Asset
         public float Duration { get; set; } = 0.0f;
         [Rtti.Meta("")]
         public List<IAnimNotify> Notifies { get; set; } = new List<IAnimNotify>();
+
+        #region RootMotion
+        /// <summary>
+        /// 开启后根骨骼的位移会被提取为RootMotion交给Movement, 而不是留在骨骼Pose里
+        /// </summary>
+        [Rtti.Meta("")]
+        public bool EnableRootMotion { get; set; } = false;
+        /// <summary>
+        /// 提取RootMotion后, 输出Pose中根骨骼锁定到哪个参考变换
+        /// </summary>
+        [Rtti.Meta("")]
+        public RootMotion.ERootMotionRootLock RootMotionRootLock { get; set; } = RootMotion.ERootMotionRootLock.RefPose;
+        /// <summary>
+        /// 即使未开启EnableRootMotion也强制锁定根骨骼(用于原地播放带位移的动画)
+        /// </summary>
+        [Rtti.Meta("")]
+        public bool ForceRootLock { get; set; } = false;
+        #endregion RootMotion
         public IAssetMeta CreateAMeta()
         {
             var result = new TtAnimationClipAMeta();

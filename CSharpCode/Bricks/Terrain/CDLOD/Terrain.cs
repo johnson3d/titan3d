@@ -1,10 +1,11 @@
-﻿using System;
+﻿using EngineNS.NxRHI;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EngineNS.Bricks.Terrain.CDLOD
 {
-    public class UTerrainSystem : IDisposable
+    public class TtTerrainSystem : IDisposable
     {
         public enum EShowMode
         {
@@ -20,18 +21,17 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public VirtualTexture.TtVirtualTextureArray HeightmapRVT;
         public VirtualTexture.TtVirtualTextureArray NormalmapRVT;
         public VirtualTexture.TtVirtualTextureArray MaterialIdRVT;
-        public NxRHI.TtCommandList UpdateRvtPass;
-
+        
         public int MipLevels { get; set; } = 6;
         public Graphics.Mesh.TtMeshPrimitives[] GridMipLevels;
 
         public TtLayerManager LayerManager { get; } = new TtLayerManager();
 
-        public async System.Threading.Tasks.Task<bool> Initialize(int mipLevel)
+        public async Thread.Async.TtTask<bool> Initialize(RName terrainMaterial, int mipLevel)
         {
             MipLevels = mipLevel;
             //Material = await TtEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("material/SysDft.material", RName.ERNameType.Engine));
-            Material = await RName.GetRName("utest/material/terrainidmap.material").CreateAsset<Graphics.Pipeline.Shader.TtMaterial>();
+            Material = await terrainMaterial.CreateAsset<Graphics.Pipeline.Shader.TtMaterial>();
             Material.IsEditingMaterial = false;
 
             if (TtEngine.Instance.Config.Feature_UseRVT)
@@ -67,7 +67,6 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             //Parameters.LODDistanceRatio = 0.6f;
             //Parameters.MorphStartRatio = 0.3f;
 
-            UpdateRvtPass = TtEngine.Instance.GfxDevice.RenderContext.CreateCommandList();
             return true;
         }
         public void Dispose()
@@ -80,9 +79,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }        
         public void TickSync()
         {
-            NormalmapRVT.TickSync(UpdateRvtPass);
-            HeightmapRVT.TickSync(UpdateRvtPass);
-            MaterialIdRVT.TickSync(UpdateRvtPass);
+            var cmdlist = TtCommandList.GetCmdList();
+            using (new NxRHI.TtCmdListScope(cmdlist, "RVT"))
+            {
+                NormalmapRVT.UpdateGpu(cmdlist);
+                HeightmapRVT.UpdateGpu(cmdlist);
+                MaterialIdRVT.UpdateGpu(cmdlist);
+                cmdlist.FlushDraws();
+            }
+            
+            TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(cmdlist, "RVT.UpdateData", NxRHI.EQueueType.QU_Transfer);
         }
     }
 }

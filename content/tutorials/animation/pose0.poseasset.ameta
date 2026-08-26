@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Animation.Asset.TtPoseAssetAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
+  <AssetId Type="System.Guid@Unknown" Value="acd7c8bb-988a-4982-8a81-ff860f3f333a" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/animation/pose0.poseasset,acd7c8bb-988a-4982-8a81-ff860f3f333a" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Animation.Asset.TtPoseAsset&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <ImportClipName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/animation/thirdpersonrun.animclip,215714d9-1708-4aa2-983e-ecd9f4706370" />
+  <ImportTime Type="System.Single@Unknown" Value="1" />
+  <PreviewMeshName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/animation/graychan_lod0.ums,7c682a4f-438f-40e9-8f02-f7545e7fd2f6" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Game,tutorials/animation/graychan_lod0.ums,7c682a4f-438f-40e9-8f02-f7545e7fd2f6" />
+    <e_1 Value="Game,tutorials/animation/thirdpersonrun.animclip,215714d9-1708-4aa2-983e-ecd9f4706370" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="Default" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Animation.Asset.TtPoseAsset@EngineCore" />
+</Root>

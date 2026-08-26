@@ -12,6 +12,7 @@ Usage:
 
 import sys
 import json
+import time
 import inspect
 import argparse
 from typing import Optional
@@ -26,11 +27,11 @@ def get_engine_url():
     return f"http://{ENGINE_HOST}:{ENGINE_PORT}"
 
 
-def call_engine_api(method: str, path: str, body: dict = None):
+def call_engine_api(method: str, path: str, body: dict = None, timeout: float = 10.0):
     """Send an HTTP request to the Titan Engine REST API."""
     url = f"{get_engine_url()}{path}"
     try:
-        with httpx.Client(timeout=10.0) as client:
+        with httpx.Client(timeout=timeout) as client:
             if method == "GET":
                 response = client.get(url)
             else:
@@ -113,18 +114,72 @@ def create_server() -> FastMCP:
         result = call_engine_api("GET", "/")
         return json.dumps(result, indent=2)
 
-    # Try to fetch tools from engine
+    # Probe the engine with a bounded retry loop.
+    #
+    # Why retry at all: the engine's HTTP endpoint is answered on the engine main thread, so while
+    # the editor is busy (loading a scene, compiling shaders) it goes unresponsive for a second or
+    # two. A single 2s probe loses that race and we fall through to the "engine not reachable"
+    # branch -- which is far worse than it looks, because tools registered later by refresh_tools
+    # are invisible to the client: FastMCP does not emit notifications/tools/list_changed, so the
+    # client keeps serving its startup snapshot of the tool list (2 tools) until it reconnects.
+    # Losing this race therefore bricks the whole server for the rest of the session.
+    #
+    # Why bounded: an unbounded wait would block stdio startup and trip the client's MCP init
+    # timeout, killing the server before any tool is registered. 6 attempts caps the worst case at
+    # roughly 9s (6 * 1.5s connect + 5 * 1s sleep), comfortably inside that budget.
     engine_tools = []
-    try:
-        result = call_engine_api("GET", "/tools")
-        if isinstance(result, list):
-            engine_tools = result
-    except Exception:
-        pass
+    for attempt in range(6):
+        try:
+            info = call_engine_api("GET", "/", timeout=1.5)
+            if isinstance(info, dict) and info.get("status") == "running":
+                print(f"Engine ready (tools_count={info.get('tools_count', '?')})", file=sys.stderr)
+                result = call_engine_api("GET", "/tools", timeout=5.0)
+                if isinstance(result, list) and len(result) > 0:
+                    engine_tools = result
+                elif isinstance(result, dict):
+                    engine_tools = result.get("value") or result.get("tools") or []
+                if engine_tools:
+                    break
+                # Reachable but the tool list came back empty: the plugin may still be mid-
+                # CollectTools, so keep waiting instead of giving up.
+                print("Engine reachable but returned no tools; retrying", file=sys.stderr)
+        except Exception:
+            pass
+        if attempt < 5:
+            time.sleep(1.0)
 
     if not engine_tools:
-        print("Warning: Engine not reachable. Only 'check_engine_status' registered.", file=sys.stderr)
-        print("Start the engine and restart this MCP server to get all tools.", file=sys.stderr)
+        print("Warning: Engine not reachable. Only 'check_engine_status' + 'refresh_tools' registered.", file=sys.stderr)
+        print("Start the engine first, then RESTART this MCP server (reconnect it in the client).", file=sys.stderr)
+        print("NOTE: refresh_tools registers tools server-side but the client will not see them "
+              "until it reconnects, because FastMCP does not send tools/list_changed.", file=sys.stderr)
+        # Register a refresh tool so the user can load engine tools on demand
+        # without restarting the MCP server.
+        _server_ref = server  # capture for closure
+        @server.tool(description="Re-fetch tool list from the running engine and register them. Call this after starting the engine.")
+        def refresh_tools() -> str:
+            """Re-fetch tool list from the running engine and register them dynamically."""
+            try:
+                r = call_engine_api("GET", "/tools", timeout=5.0)
+                tools_list = r if isinstance(r, list) else (r.get("value") or r.get("tools") or [])
+                if not tools_list:
+                    return json.dumps({"error": "Engine not reachable or no tools found"})
+                count = 0
+                for td in tools_list:
+                    n = td.get("name", "")
+                    d = td.get("description", "")
+                    rd = td.get("returnDescription", "")
+                    if rd:
+                        d = f"{d}\n\nReturns: {rd}"
+                    p = td.get("parameters", {})
+                    props = p.get("properties", {})
+                    req = p.get("required", [])
+                    fn = build_tool_function(n, d, props, req)
+                    _server_ref.tool(name=n, description=d)(fn)
+                    count += 1
+                return json.dumps({"refreshed": count, "total": count + 2})
+            except Exception as exc:
+                return json.dumps({"error": str(exc)})
         return server
 
     print(f"Fetched {len(engine_tools)} tools from Titan Engine", file=sys.stderr)

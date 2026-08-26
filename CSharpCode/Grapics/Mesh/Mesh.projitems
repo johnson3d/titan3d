@@ -10,15 +10,18 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Modifier\CSkinModifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Modifier\MorphModifier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Modifier\MeshletModifier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Modifier\InstanceModifier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MaterialMesh.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MdfGridUVMesh.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MdfSkinMesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MdfMorphMesh.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MdfStaticMesh.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mesh.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MeshDataProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MeshPrimitives.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MorphTarget.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Modifier\CStaticModifier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PhysicsAsset\TtPhysicsAsset.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PhysicsAsset\TtPhysicsAssetNode.cs" />

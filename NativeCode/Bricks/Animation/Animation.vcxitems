@@ -21,6 +21,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\CosseratRodSolver.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\KawaiiChainSolver.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\KawaiiClothSolver.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\KawaiiRibbonSolver.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Constraints\BoneConstraints.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Collision\ColliderBase.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Collision\CollisionUtils.cpp" />
@@ -36,6 +37,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\CosseratRodSolver.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\KawaiiChainSolver.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\KawaiiClothSolver.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\KawaiiRibbonSolver.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Constraints\DistanceConstraint.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Constraints\BendingConstraint.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Constraints\BoneConstraints.h" />

@@ -203,6 +203,76 @@ namespace KawaiiPhysics
 	};
 
 	// =====================================================================
+	// FKawaiiRibbonSetup - Ribbon simulation structure definition
+	// =====================================================================
+	//
+	// A ribbon is a PURE KINEMATIC wave generator, not a solver: it drives each joint by an
+	// analytical cascaded low-pass filter (see KawaiiRibbonSolver.h) plus optional wind, and
+	// outputs positions. It deliberately owns NO physics: no gravity, no collision, no bone
+	// length / angle / rotation constraints, no world-inertia. Those all live in KawaiiPhysics.
+	// The intended use is to feed a ribbon node's output pose into a downstream KawaiiPhysics
+	// node, which then applies inertia / collision / constraints on top of the authored wave.
+	// Keeping any of that here would just duplicate the downstream node's knobs.
+	//
+	// UNIT CONVENTION: angles here are DEGREES (editor-facing) and are converted to radians
+	// once when the runtime data is built. Lengths are meters, like everywhere else.
+
+	struct FKawaiiRibbonSetup
+	{
+		std::string Name;
+		int32_t RootBoneIndex = -1;
+		int32_t EndBoneIndex = -1;
+		float TailBoneLength = 0.0f;
+		ETailBoneAxis TailBoneForwardAxis = TBA_X_Positive;
+		int32_t LODThreshold = -1;
+
+		// ---- Sway ----
+		// Maximum swing angle of the root joint.
+		float SwingAngleDegrees = 30.0f;
+		// Oscillations per second.
+		float SwayFrequency = 1.5f;
+		// Phase lag of each joint behind its parent. 0 = rigid follow, 1 = heavy trailing wave.
+		float Inertia = 0.5f;
+		// How much that lag grows from root to tip. 0 = uniform, 1 = tip lags far more.
+		float InertiaFalloff = 0.3f;
+		// Tip amplitude multiplier relative to the root (ignored when SwingAmplitudeCurve is set).
+		float TipAmplify = 1.5f;
+		// Shape of the root->tip amplitude growth: <1 front-loaded, 1 linear, 2 accelerating.
+		float AmplifyCurvePower = 2.0f;
+
+		// ---- Swing plane ----
+		// Both angles are relative to the chain's own rest direction, so they mean the same
+		// thing regardless of how the ribbon is boned. The chain direction always lies in the
+		// swing plane.
+		// Rotation of the swing plane about the chain: 0 swings fore/aft, +-90 swings sideways.
+		float SwingPlaneAngleDegrees = 0.0f;
+		// Where the ribbon rests inside that plane - the 0 degree the oscillation centres on.
+		float RestTiltAngleDegrees = 0.0f;
+
+		// ---- Organic noise (fractal brownian motion) ----
+		// Blend between the pure sine wave (0) and fractal noise (1).
+		float NoiseMix = 0.0f;
+		int32_t NoiseLayers = 4;
+		// Amplitude decay per octave: lower = smoother, higher = rougher.
+		float NoiseRoughness = 0.5f;
+		float NoiseScale = 1.0f;
+
+		// ---- Wind ----
+		// Wind is kept on the ribbon (not delegated downstream) because gust modulation and the
+		// per-length wind curve are part of the authored wave feel and have no KawaiiPhysics
+		// equivalent.
+		float WindResponse = 2.0f;
+		// Sinusoidal gust modulation on top of the steady wind.
+		float WindGustiness = 0.5f;
+		float GustFrequency = 2.0f;
+
+		// Sampled by NormalizedLength (0 = root, 1 = tip). Empty -> Evaluate returns 1.
+		// SwingAmplitudeCurve overrides the TipAmplify / AmplifyCurvePower shaping when set.
+		FKawaiiCurve SwingAmplitudeCurve;
+		FKawaiiCurve WindInfluenceCurve;
+	};
+
+	// =====================================================================
 	// LOD Settings
 	// =====================================================================
 

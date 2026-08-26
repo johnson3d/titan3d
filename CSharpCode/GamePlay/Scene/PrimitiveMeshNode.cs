@@ -59,9 +59,13 @@ namespace EngineNS.GamePlay.Scene
                 FilterExts = Graphics.Pipeline.Shader.TtMaterial.AssetExt + "," + Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt)]
             public List<RName> MaterialNames { get; set; } = new List<RName>();
 
+            /// <summary>
+            /// 为 null 表示"本节点不指定", 交由 TtRenderMesh.Initialize 自动选型
+            /// (见 CodingGuidelines.md §7.7)。
+            /// </summary>
             [Rtti.Meta]
             [ReadOnly(true)]
-            public string MdfQueueType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMdfStaticMesh));
+            public string MdfQueueType { get; set; } = null;
 
             [Rtti.Meta]
             [ReadOnly(true)]
@@ -70,7 +74,8 @@ namespace EngineNS.GamePlay.Scene
             [EGui.Controls.PropertyGrid.TtPGTypeEditor(typeof(Graphics.Pipeline.Shader.TtMdfQueueBase))]
             public Rtti.TtTypeDesc MdfQueue
             {
-                get => Rtti.TtTypeDesc.TypeOf(MdfQueueType);
+                // 挡掉空值: TypeOf(null/"") 会打 "Typeof failed:" 警告日志
+                get => string.IsNullOrEmpty(MdfQueueType) ? null : Rtti.TtTypeDesc.TypeOf(MdfQueueType);
                 set => MdfQueueType = Rtti.TtTypeDesc.TypeStr(value);
             }
 

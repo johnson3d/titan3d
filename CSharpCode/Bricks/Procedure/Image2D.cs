@@ -49,28 +49,28 @@ namespace EngineNS.Bricks.Procedure
             Components = comps;
             if ((comps & EImageComponent.X) != 0)
             {
-                var creator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(w, h, 1);
-                CompX = UBufferComponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
+                var creator = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(w, h, 1);
+                CompX = TtBufferComponent.CreateInstance(in creator) as TtSuperBuffer<float, FFloatOperator>;
             }
             if ((comps & EImageComponent.Y) != 0)
             {
-                var creator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(w, h, 1);
-                CompY = UBufferComponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
+                var creator = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(w, h, 1);
+                CompY = TtBufferComponent.CreateInstance(in creator) as TtSuperBuffer<float, FFloatOperator>;
             }
             if ((comps & EImageComponent.Z) != 0)
             {
-                var creator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(w, h, 1);
-                CompZ = UBufferComponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
+                var creator = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(w, h, 1);
+                CompZ = TtBufferComponent.CreateInstance(in creator) as TtSuperBuffer<float, FFloatOperator>;
             }
             if ((comps & EImageComponent.W) != 0)
             {
-                var creator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(w, h, 1);
-                CompW = UBufferComponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
+                var creator = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(w, h, 1);
+                CompW = TtBufferComponent.CreateInstance(in creator) as TtSuperBuffer<float, FFloatOperator>;
             }
         }
         public void Initialize(int w, int h,
-            USuperBuffer<Vector3, FFloat3Operator> xyzComp,
-            USuperBuffer<float, FFloatOperator> wComp, int slice = 0)
+            TtSuperBuffer<Vector3, FFloat3Operator> xyzComp,
+            TtSuperBuffer<float, FFloatOperator> wComp, int slice = 0)
         {
             Width = w;
             Height = h;
@@ -82,10 +82,10 @@ namespace EngineNS.Bricks.Procedure
                 Components |= EImageComponent.W;
             }
 
-            var creator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(w, h, 1);
-            CompX = UBufferComponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
-            CompY = UBufferComponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
-            CompZ = UBufferComponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
+            var creator = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(w, h, 1);
+            CompX = TtBufferComponent.CreateInstance(in creator) as TtSuperBuffer<float, FFloatOperator>;
+            CompY = TtBufferComponent.CreateInstance(in creator) as TtSuperBuffer<float, FFloatOperator>;
+            CompZ = TtBufferComponent.CreateInstance(in creator) as TtSuperBuffer<float, FFloatOperator>;
 
             slice = slice % xyzComp.Slice;
 
@@ -102,10 +102,10 @@ namespace EngineNS.Bricks.Procedure
             }
         }
         public void Initialize(int w, int h, 
-            USuperBuffer<float, FFloatOperator> xComp, 
-            USuperBuffer<float, FFloatOperator> yComp, 
-            USuperBuffer<float, FFloatOperator> zComp, 
-            USuperBuffer<float, FFloatOperator> wComp)
+            TtSuperBuffer<float, FFloatOperator> xComp, 
+            TtSuperBuffer<float, FFloatOperator> yComp, 
+            TtSuperBuffer<float, FFloatOperator> zComp, 
+            TtSuperBuffer<float, FFloatOperator> wComp)
         {
             Width = w;
             Height = h;
@@ -137,27 +137,27 @@ namespace EngineNS.Bricks.Procedure
             result.Initialize(Width, Height, 0, Components);
             if (CompX != null)
             {
-                UBufferComponent.CopyData(CompX, result.CompX);
+                TtBufferComponent.CopyData(CompX, result.CompX);
             }
             if (CompY != null)
             {
-                UBufferComponent.CopyData(CompY, result.CompY);
+                TtBufferComponent.CopyData(CompY, result.CompY);
             }
             if (CompZ != null)
             {
-                UBufferComponent.CopyData(CompZ, result.CompZ);
+                TtBufferComponent.CopyData(CompZ, result.CompZ);
             }
             if (CompW != null)
             {
-                UBufferComponent.CopyData(CompW, result.CompW);
+                TtBufferComponent.CopyData(CompW, result.CompW);
             }
             return result;
         }
-        public USuperBuffer<float, FFloatOperator> CompX;
-        public USuperBuffer<float, FFloatOperator> CompY;
-        public USuperBuffer<float, FFloatOperator> CompZ;
-        public USuperBuffer<float, FFloatOperator> CompW;
-        public USuperBuffer<float, FFloatOperator> GetComponent(EImageComponent comp)
+        public TtSuperBuffer<float, FFloatOperator> CompX;
+        public TtSuperBuffer<float, FFloatOperator> CompY;
+        public TtSuperBuffer<float, FFloatOperator> CompZ;
+        public TtSuperBuffer<float, FFloatOperator> CompW;
+        public TtSuperBuffer<float, FFloatOperator> GetComponent(EImageComponent comp)
         {
             switch (comp)
             {

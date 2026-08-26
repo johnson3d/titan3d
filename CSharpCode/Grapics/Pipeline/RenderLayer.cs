@@ -18,6 +18,13 @@ namespace EngineNS.Graphics.Pipeline
         RL_Gizmos,
         RL_TranslucentGizmos,
 
+        /// <summary>
+        /// 延迟贴花材质专用。挂在贴花投影盒上, 不参与任何 RenderLayer 分桶 pass
+        /// (贴花由 TtDecalPassNode 自己收集渲染), 仅作为材质域标记 + 防错:
+        /// 非贴花 pass 不应该收到它, TtDecalNode 也拒绝非 RL_Decal 材质。
+        /// </summary>
+        RL_Decal,
+
         RL_Num,
     }
 

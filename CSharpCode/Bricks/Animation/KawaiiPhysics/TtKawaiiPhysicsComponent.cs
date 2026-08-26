@@ -147,7 +147,8 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
             int[] parentIndices,
             TtKawaiiChainSetup[] chainSetups = null,
             TtKawaiiClothSetup[] clothSetups = null,
-            TtKawaiiRodSetup[] rodSetups = null)
+            TtKawaiiRodSetup[] rodSetups = null,
+            TtKawaiiRibbonSetup[] ribbonSetups = null)
         {
             mNumBones = bonePositions.Length;
             mBonePositions = new Vector3[mNumBones];
@@ -199,6 +200,16 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
                     mContext.SetRodSetup(i, rodSetups[i]);
                 }
                 mContext.BuildRods(bonePositions, boneRotations, boneScales, parentIndices);
+            }
+
+            // Build ribbons. No ApplyPhysicsSettings pass: a ribbon is a pure kinematic wave
+            // generator and owns no physics settings.
+            if (ribbonSetups != null && ribbonSetups.Length > 0)
+            {
+                mContext.InitializeRibbons(ribbonSetups.Length);
+                for (int i = 0; i < ribbonSetups.Length; i++)
+                    mContext.SetRibbonSetup(i, ribbonSetups[i]);
+                mContext.BuildRibbons(bonePositions, boneRotations, boneScales, parentIndices);
             }
 
             mInitialized = true;

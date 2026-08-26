@@ -48,6 +48,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Collision\ClothUntangling.cpp">
       <Filter>KawaiiPhysics\Collision</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\KawaiiRibbonSolver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\KawaiiTypes.h">
@@ -107,5 +108,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Collision\ClothUntangling.h">
       <Filter>KawaiiPhysics\Collision</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)KawaiiPhysics\Solvers\KawaiiRibbonSolver.h" />
   </ItemGroup>
 </Project>

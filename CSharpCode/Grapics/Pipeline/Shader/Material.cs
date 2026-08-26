@@ -474,6 +474,34 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 mNormalMode = value;
             }
         }
+        /// <summary>
+        /// 贴花材质写哪几张 GBuffer RT (仅 <see cref="ERenderLayer.RL_Decal"/> 材质有意义)。
+        /// 决定贴花 pass 的 PSO 写掩码与 shader 变体 (ENV_DECAL_WRITE_NORMAL),
+        /// 对应 UE 的 DecalBlendMode。修改后需重新保存材质 (走 UpdateShaderCode →
+        /// MaterialHash 变化 → effect 自动 Refresh 的既有链路)。
+        /// </summary>
+        public enum EDecalMode : uint
+        {
+            /// <summary>缺省。只写 rt0 (base color) + rt2 (R/M/S), 两张都开硬件 alpha 混合, 不碰法线。</summary>
+            ColorAndMaterial = 0,
+            /// <summary>
+            /// 额外写 rt1 (法线)。rt1 上硬件混合关闭 (八面体编码不能线性混合),
+            /// 淡出改为世界空间 lerp(baseNormal, decalNormal, w) 烤进法线值本身。
+            /// 需要材质 NormalMode 提供法线 (NormalMap/Normal), 否则自动降级为 ColorAndMaterial。
+            /// </summary>
+            WithNormal,
+        }
+        EDecalMode mDecalMode = EDecalMode.ColorAndMaterial;
+        [Rtti.Meta("")]
+        [Category("Option")]
+        public virtual EDecalMode DecalMode
+        {
+            get => mDecalMode;
+            set
+            {
+                mDecalMode = value;
+            }
+        }
         [Rtti.Meta("")]
         [Category("Option")]
         public bool IsFlowMapTangent { get; set; } = false;
@@ -623,6 +651,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 default:
                     codeBuilder.AddLine("#define MTL_NORMAL_MODE MTL_NORMALNONE", ref sourceCode);
                     break;
+            }
+
+            // 贴花材质域: 生成 shader 变体开关。非 RL_Decal 材质不注入,
+            // DecalPS.cginc 里的 #ifndef 兜底为 0 (等效 ColorAndMaterial)。
+            // 材质没有法线手段 (NormalNone) 时强制降级, 避免写出全零法线。
+            if (mRenderLayer == ERenderLayer.RL_Decal)
+            {
+                var writeNormal = (mDecalMode == EDecalMode.WithNormal && mNormalMode != ENormalMode.NormalNone) ? 1 : 0;
+                codeBuilder.AddLine($"#define ENV_DECAL_WRITE_NORMAL {writeNormal}", ref sourceCode);
             }
 
             if (IsFlowMapTangent)

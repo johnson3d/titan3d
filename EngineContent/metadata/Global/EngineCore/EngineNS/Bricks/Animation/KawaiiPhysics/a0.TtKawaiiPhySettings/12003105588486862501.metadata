@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_12003105588486862501 Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiPhySettings@EngineCore">
+  <Damping Type="System.Single@Unknown" Order="0" />
+  <DragCoefficient Type="System.Single@Unknown" Order="0" />
+  <LimitAngle Type="System.Single@Unknown" Order="0" />
+  <MaxFrameDisplacement Type="System.Single@Unknown" Order="0" />
+  <Radius Type="System.Single@Unknown" Order="0" />
+  <Stiffness Type="System.Single@Unknown" Order="0" />
+  <WindCoefficient Type="System.Single@Unknown" Order="0" />
+  <WorldDampingLocation Type="System.Single@Unknown" Order="0" />
+  <WorldDampingRotation Type="System.Single@Unknown" Order="0" />
+</Hash_12003105588486862501>

@@ -345,6 +345,14 @@ namespace EngineNS.Graphics.Mesh
             {
                 ar.Write(PartialSkeleton);
             }
+            if (MorphTargets != null && MorphTargets.IsValid)
+            {
+                var morphAttr = xnd.RootNode.GetOrAddAttribute(TtMorphTargetSet.AttributeName, 0, 0, true);
+                using (var ar = morphAttr.GetWriter(1024))
+                {
+                    MorphTargets.Save(ar);
+                }
+            }
             if (Meshlets != null)
             {
                 var meshlets = xnd.RootNode.GetOrAddNode("Meshlets", 0, 0, true);
@@ -364,6 +372,19 @@ namespace EngineNS.Graphics.Mesh
 
         [Rtti.Meta("")]
         public Animation.SkeletonAnimation.Skeleton.TtSkinSkeleton PartialSkeleton
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Morph target (BlendShape) 数据, 由 FBX 导入期填充, 随 mesh 资产一起存取。
+        /// 为 null 表示该 mesh 没有 morph —— 绝大多数 mesh 都是这种情况, 不要假设非空。
+        ///
+        /// 存储走 XND attribute (与 PartialSkeleton 同一模式), 旧资产没有该 attribute 时
+        /// 加载后保持 null, 行为与加 morph 之前完全一致。
+        /// </summary>
+        public TtMorphTargetSet MorphTargets
         {
             get;
             set;
@@ -428,6 +449,23 @@ namespace EngineNS.Graphics.Mesh
                     if(partialSkeleton is Animation.SkeletonAnimation.Skeleton.TtSkinSkeleton)
                     {
                         result.PartialSkeleton = partialSkeleton as Animation.SkeletonAnimation.Skeleton.TtSkinSkeleton;
+                    }
+                }
+                var morphAttr = xnd.RootNode.TryGetAttribute(TtMorphTargetSet.AttributeName);
+                if (morphAttr.IsValidPointer)
+                {
+                    using (var ar = morphAttr.GetReader(manager))
+                    {
+                        try
+                        {
+                            result.MorphTargets = TtMorphTargetSet.Load(ar);
+                        }
+                        catch (Exception exp)
+                        {
+                            // morph 数据损坏不应该打断整个 mesh 的加载, 退化为"该 mesh 无 morph"
+                            result.MorphTargets = null;
+                            Profiler.Log.WriteException(exp);
+                        }
                     }
                 }
                 if (bTryLoadMeshlets)

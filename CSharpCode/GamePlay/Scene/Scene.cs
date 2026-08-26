@@ -281,6 +281,11 @@ namespace EngineNS.GamePlay.Scene
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
             SaveNodeList(dir, this, this);
 
+            // 节点自带的附属数据 (例如地形的高度覆盖层) 与 .node 文件无关, 单独保存。
+            // 放在这里而不是 SaveNodeList 里: SaveNodeList 对 hub 会递归调用自身, 在里面调
+            // 会重复保存; 而 OnSaveNodeExtraData 的默认实现自己递归子树, 从根调一次就够了。
+            OnSaveNodeExtraData(this);
+
             var t2 = Support.TtTime.HighPrecision_GetTickCount();
             Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Info, $"Scene({this.AssetName}): SaveRootNodes cost {(t2 - t1) / 1000} ms");
             //TtFileManager.SureDirectory(dir);

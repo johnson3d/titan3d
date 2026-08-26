@@ -30,7 +30,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             get;
             internal set;
         }
-        public void ReleaseLevel(ULevelStreaming streaming)
+        public void ReleaseLevel(TtLevelStreaming streaming)
         {
             streaming.PushUnloadLevel(this);
         }
@@ -44,7 +44,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             StartPosition.X = ((double)patchSide * patchSize) * LevelX;
             StartPosition.Z = ((double)patchSide * patchSize) * LevelZ;
         }
-        public void LoadLevelData(ULevelStreaming streaming, bool bForce)
+        public void LoadLevelData(TtLevelStreaming streaming, bool bForce)
         {
             streaming.PushStreamingLevel(this, bForce);
         }
@@ -55,7 +55,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
     }
 
-    public class UTerrainLevelData : IDisposable
+    public partial class UTerrainLevelData : IDisposable
     {
         public UTerrainLevel Level;
         public TtPatch[,] TiledPatch;
@@ -116,6 +116,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             CoreSDK.DisposeObject(ref HeightMapSRV);
             CoreSDK.DisposeObject(ref NormalMapSRV);
             CoreSDK.DisposeObject(ref MaterialIdMapSRV);
+
+            // SourceHeightMap 是 CreateFromBuffer 里 Clone 出来的, 生命周期归本对象,
+            // 必须释放, 否则每次 level streaming 卸载都会漏一份 4MB 的高度缓冲。
+            CoreSDK.DisposeObject(ref SourceHeightMap);
         }
         public TtTerrainNode GetTerrainNode()
         {
@@ -151,12 +155,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if (IdMapNode!=null)
                 IdMapNode.InitProcedure(terrainGen.AssetGraph);
 
-            var hMap = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
-            var norMap = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>>(1, 1, 1));
-            var idMap = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
-            Procedure.UBufferComponent waterMap = null;
-            Procedure.UBufferComponent transform = null;
-            Procedure.UBufferComponent plants = null;
+            var hMap = Procedure.TtBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
+            var norMap = Procedure.TtBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<Vector3, Procedure.FFloat3Operator>>(1, 1, 1));
+            var idMap = Procedure.TtBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
+            Procedure.TtBufferComponent waterMap = null;
+            Procedure.TtBufferComponent transform = null;
+            Procedure.TtBufferComponent plants = null;
 
             using (var xnd = IO.TtXndHolder.LoadXnd(file))
             {
@@ -193,21 +197,21 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 node = xnd.RootNode.TryGetChildNode("WaterMap");
                 if (node.IsValidPointer)
                 {
-                    waterMap = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
+                    waterMap = Procedure.TtBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
                     waterMap.LoadXnd(node, Hash160.Emtpy);
                 }
 
                 node = xnd.RootNode.TryGetChildNode("PlantTransform");
                 if (node.IsValidPointer)
                 {
-                    transform = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<FTransform, Procedure.FTransformOperator>>(1, 1, 1));
+                    transform = Procedure.TtBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<FTransform, Procedure.FTransformOperator>>(1, 1, 1));
                     transform.LoadXnd(node, Hash160.Emtpy);
                 }
 
                 node = xnd.RootNode.TryGetChildNode("PlantInfo");
                 if (node.IsValidPointer)
                 {
-                    plants = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Vector2i, Procedure.FInt2Operator>>(1, 1, 1));
+                    plants = Procedure.TtBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<Vector2i, Procedure.FInt2Operator>>(1, 1, 1));
                     plants.LoadXnd(node, Hash160.Emtpy);
                 }
                 
@@ -235,7 +239,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                             grassData = (UTerrainGrass)serializer;
                         }
 
-                        var gBuffer = Procedure.UBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
+                        var gBuffer = Procedure.TtBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
                         gBuffer.LoadXnd(subNode, Hash160.Emtpy);
 
                         UpdateGrass(grassData, gBuffer);
@@ -246,9 +250,39 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             return true;
         }
 
-        private void CreateFromBuffer(Procedure.UBufferComponent hMap, Procedure.UBufferComponent norMap, Procedure.UBufferComponent waterMap,
-            Procedure.UBufferComponent idMap, Procedure.UBufferComponent transform, Procedure.UBufferComponent plants)
+        private void CreateFromBuffer(Procedure.TtBufferComponent hMap, Procedure.TtBufferComponent norMap, Procedure.TtBufferComponent waterMap,
+            Procedure.TtBufferComponent idMap, Procedure.TtBufferComponent transform, Procedure.TtBufferComponent plants)
         {
+            // 先把手绘的高度覆盖层叠回去, 再建立任何派生数据 —— SourceHeightMap / GPU
+            // 高度图 / 法线 / patch AABB / physx heightfield 全部基于叠加后的数据。
+            // 放在 IsTerrainEditSupported 判断之外, 非编辑器态也生效 —— 游戏里看到的就是
+            // 编辑后的地形。
+            //
+            // 返回的是副本: BuildLevelDataFromPGC 传进来的 hMap 就是 PGC 的 result buffer,
+            // 它稍后会被 SaveLevelToCache 写进 .trlvl 基底缓存, 原地叠加会把 delta 烤进基底,
+            // 下次加载再叠一次 → 高度翻倍。
+            var overlaidHMap = ApplyHeightOverlayIfAny(hMap, norMap);
+            if (overlaidHMap != null)
+            {
+                hMap = overlaidHMap;
+            }
+
+            // 地形编辑需要 CPU 侧的 float 高度源数据 (从 PhyHeightfieldSamples 的 short 反推会累积量化误差)。
+            // 三条加载路径 (LoadLevelFromCache / BuildLevelDataFromPGC / BuildEmptyLevelData) 都汇聚到这里。
+            //
+            // 必须 Clone 而不能直接存引用: BuildLevelDataFromPGC 末尾会调
+            // terrainGen.AssetGraph.BufferCache.ResetCache(), 它对缓存里每个 buffer 调 Dispose()
+            // 把底层 SuperPixels 释放掉, 但 UBufferComponent 对象本身还活着 —— 直接存引用
+            // 会拿到一个 SuperPixels == null 的空壳, 下次 GetPixel 就是 NullReferenceException。
+            //
+            // 只 Clone 高度图 (1024²×float ≈ 4MB/level)。法线是纯派生数据, 编辑时从高度现算并
+            // 直接上传, 不再落 CPU 缓存 (省 12MB/level, 也避开了法线缓存与高度不同步)。
+            // 仅编辑器态保留, 避免运行时内存回归。
+            if (IsTerrainEditSupported)
+            {
+                SourceHeightMap = hMap.Clone();
+            }
+
             UpdateHeightMap(hMap);
 
             UpdateNormalMap(norMap);
@@ -260,9 +294,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             UpdatePlants(transform, plants);
 
             UpdateAABB(hMap, waterMap);
+
+            // 叠加副本的生命周期只到这里: 上面需要它的地方要么已经上传到 GPU,
+            // 要么已经 Clone 成了 SourceHeightMap。
+            CoreSDK.DisposeObject(ref overlaidHMap);
         }
 
-        public void UpdateAABB(Procedure.UBufferComponent hMap, Procedure.UBufferComponent waterMap)
+        public void UpdateAABB(Procedure.TtBufferComponent hMap, Procedure.TtBufferComponent waterMap)
         {
             if (TiledPatch == null)
                 return;
@@ -275,7 +313,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 }
             }
         }
-        public void UpdateHeightMap(Procedure.UBufferComponent hMap)
+        public void UpdateHeightMap(Procedure.TtBufferComponent hMap)
         {
             var patchSide = Level.PatchSide;
             TiledPatch = new TtPatch[patchSide, patchSide];
@@ -290,6 +328,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
 
             hMap.GetRangeUnsafe<float, Procedure.FFloatOperator>(out HeightMapMinHeight, out HeightMapMaxHeight);
+            // 编辑会话期间高度纹理的编码基准必须冻结, 否则一旦雕刻改变 min/max,
+            // 整层已上传的 texel 编码会同时失效。详见 TerrainEdit.cs 的 BeginEditSession。
+            ApplyFrozenHeightRangeIfEditing();
             float HeightfieldMidHeight = (HeightMapMinHeight + HeightMapMaxHeight) * 0.5f;
             PxHeightfieldScale = 0.1f;//0.1f精度为分米
             HeightfieldWidth = hMap.Width;
@@ -319,7 +360,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             HeightMapSRV.AssetName = RName.GetRName($"@Height_{this.GetTerrainNode().TerrainName}_{Level.LevelX}_{Level.LevelZ}@", RName.ERNameType.Transient);
         }
 
-        public void UpdateWaterMap(Procedure.UBufferComponent waterMap)
+        public void UpdateWaterMap(Procedure.TtBufferComponent waterMap)
         {
             if (waterMap == null)
                 return;
@@ -331,11 +372,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
         }
         
-        public void UpdateNormalMap(Procedure.UBufferComponent norMap)
+        public void UpdateNormalMap(Procedure.TtBufferComponent norMap)
         {
             var norImage = new Bricks.Procedure.UImage2D();
             norImage.Initialize(norMap.Width, norMap.Height,
-                norMap as Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>,
+                norMap as Procedure.TtSuperBuffer<Vector3, Procedure.FFloat3Operator>,
                 null, 0);
 
             var rvt = NormalMapSRV?.Rvt;
@@ -347,14 +388,14 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             NormalMapSRV.SetDebugName("NormalMapSRV");
             NormalMapSRV.AssetName = RName.GetRName($"@Normal_{this.GetTerrainNode().TerrainName}_{Level.LevelX}_{Level.LevelZ}@", RName.ERNameType.Transient);
         }
-        public void UpdateMaterialIdMap(Procedure.UBufferComponent idMap)
+        public void UpdateMaterialIdMap(Procedure.TtBufferComponent idMap)
         {
             if (idMap == null)
                 return;
 
             var idMapImage = new Bricks.Procedure.UImage2D();
             idMapImage.Initialize(idMap.Width, idMap.Height,
-                idMap as Procedure.USuperBuffer<float, Procedure.FFloatOperator>,
+                idMap as Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>,
                 null,
                 null,
                 null);
@@ -368,7 +409,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             MaterialIdMapSRV.SetDebugName("MaterialIdMapSRV");
             MaterialIdMapSRV.AssetName = RName.GetRName($"@MtlID_{this.GetTerrainNode().TerrainName}_{Level.LevelX}_{Level.LevelZ}@", RName.ERNameType.Transient);
         }
-        public void UpdatePlants(Procedure.UBufferComponent transform, Procedure.UBufferComponent plants)
+        public void UpdatePlants(Procedure.TtBufferComponent transform, Procedure.TtBufferComponent plants)
         {
             var terrainGen = Level.Node.TerrainGen;
             var IdMapNode = terrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.UMaterialIdMapNode;
@@ -397,7 +438,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 UpdateGrass(grassData, buffer);
             }
         }
-        public void UpdateGrass(UTerrainGrass grassData, Procedure.UBufferComponent buffer)
+        public void UpdateGrass(UTerrainGrass grassData, Procedure.TtBufferComponent buffer)
         {
             if (buffer == null)
                 return;
@@ -670,21 +711,21 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var root = terrainGen.AssetGraph.Root;
             terrainGen.Compile(root);
             var hMap = root.GetResultBuffer("Height");
-            var norMap = root.GetResultBuffer("Normal") as Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>;
+            var norMap = root.GetResultBuffer("Normal") as Procedure.TtSuperBuffer<Vector3, Procedure.FFloat3Operator>;
             if (norMap == null)
             {
-                var creator = Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>>(nodeData.LevelSideX, nodeData.LevelSideZ, 1);
-                norMap = Procedure.UBufferComponent.CreateInstance(creator) as Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>;
+                var creator = Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<Vector3, Procedure.FFloat3Operator>>(nodeData.LevelSideX, nodeData.LevelSideZ, 1);
+                norMap = Procedure.TtBufferComponent.CreateInstance(creator) as Procedure.TtSuperBuffer<Vector3, Procedure.FFloat3Operator>;
             }
-            var idMap = root.GetResultBuffer("MatId") as Procedure.USuperBuffer<float, Procedure.FFloatOperator>;
+            var idMap = root.GetResultBuffer("MatId") as Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>;
             if (idMap==null)
             {
-                var creator = Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(nodeData.LevelSideX, nodeData.LevelSideZ, 1);
-                idMap = Procedure.UBufferComponent.CreateInstance(creator) as Procedure.USuperBuffer<float, Procedure.FFloatOperator>;
+                var creator = Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(nodeData.LevelSideX, nodeData.LevelSideZ, 1);
+                idMap = Procedure.TtBufferComponent.CreateInstance(creator) as Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>;
             }
-            var waterMap = root.GetResultBuffer("Water") as Procedure.USuperBuffer<float, Procedure.FFloatOperator>;
-            var transform = root.GetResultBuffer("Transform") as Procedure.USuperBuffer<FTransform, Procedure.FTransformOperator>;
-            var plants = root.GetResultBuffer("Plants") as Procedure.USuperBuffer<Vector2i, Procedure.FInt2Operator>;
+            var waterMap = root.GetResultBuffer("Water") as Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>;
+            var transform = root.GetResultBuffer("Transform") as Procedure.TtSuperBuffer<FTransform, Procedure.FTransformOperator>;
+            var plants = root.GetResultBuffer("Plants") as Procedure.TtSuperBuffer<Vector2i, Procedure.FInt2Operator>;
             CreateFromBuffer(hMap, norMap, waterMap, idMap, transform, plants);
             var grassPin = root.FindPinIn("Grass");
             if (grassPin != null)
@@ -699,13 +740,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         protected void BuildEmptyLevelData(int xSize, int ySize)
         {
-            var creator = Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(xSize, ySize, 1);
-            var hMap = Procedure.UBufferComponent.CreateInstance(creator);
-            var waterMap = Procedure.UBufferComponent.CreateInstance(creator);
-            creator = Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>>(xSize, ySize, 1);
-            var norMap = Procedure.UBufferComponent.CreateInstance(creator);
-            creator = Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(xSize, ySize, 1);
-            var idMap = Procedure.UBufferComponent.CreateInstance(creator);
+            var creator = Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(xSize, ySize, 1);
+            var hMap = Procedure.TtBufferComponent.CreateInstance(creator);
+            var waterMap = Procedure.TtBufferComponent.CreateInstance(creator);
+            creator = Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<Vector3, Procedure.FFloat3Operator>>(xSize, ySize, 1);
+            var norMap = Procedure.TtBufferComponent.CreateInstance(creator);
+            creator = Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(xSize, ySize, 1);
+            var idMap = Procedure.TtBufferComponent.CreateInstance(creator);
 
             CreateFromBuffer(hMap, norMap, waterMap, idMap, null, null);
         }

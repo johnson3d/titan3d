@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_618786454862418069 Type="EngineNS.GamePlay.Scene.TtDecalNode.TtDecalNodeData@EngineCore">
+  <AngleFadeDegree Type="System.Single@Unknown" Order="0" />
+  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <ColorTexture Type="EngineNS.RName@EngineCore" Order="0" />
+  <ColorTint Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <ColorWeight Type="System.Single@Unknown" Order="0" />
+  <EdgeFade Type="System.Single@Unknown" Order="0" />
+  <FadeEndDistance Type="System.Single@Unknown" Order="0" />
+  <FadeStartDistance Type="System.Single@Unknown" Order="0" />
+  <MaterialTexture Type="EngineNS.RName@EngineCore" Order="0" />
+  <MaterialWeight Type="System.Single@Unknown" Order="0" />
+  <Metallic Type="System.Single@Unknown" Order="0" />
+  <Mode Type="EngineNS.GamePlay.Scene.EDecalMode@EngineCore" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.TtNode.ENodeStyles@EngineCore" Order="0" />
+  <NormalTexture Type="EngineNS.RName@EngineCore" Order="0" />
+  <NormalWeight Type="System.Single@Unknown" Order="0" />
+  <Opacity Type="System.Single@Unknown" Order="0" />
+  <Roughness Type="System.Single@Unknown" Order="0" />
+  <SortOrder Type="System.Int32@Unknown" Order="0" />
+  <Specular Type="System.Single@Unknown" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.TtBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.TtPlacementBase@EngineCore" Order="2" />
+</Hash_618786454862418069>

@@ -10,7 +10,7 @@ namespace EngineNS.Bricks.Procedure.Node
     {
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UFloat1ValueNode()
         {
             Icon.Size = new Vector2(25, 25);
@@ -52,8 +52,8 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn BezierPin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UFloat1CurveNode()
         {
             Icon.Size = new Vector2(25, 25);
@@ -101,7 +101,7 @@ namespace EngineNS.Bricks.Procedure.Node
     {
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator Float1Desc { get; set; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator Float1Desc { get; set; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UNoisePerlin()
         {
             Icon.Size = new Vector2(25, 25);
@@ -612,7 +612,7 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn SourcePin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UStretchFloat1()
         {
             Icon.Size = new Vector2(25, 25);
@@ -642,7 +642,7 @@ namespace EngineNS.Bricks.Procedure.Node
         [Rtti.Meta("")]
         public uint DstH { get; set; } = 1;
         [Rtti.Meta("")]
-        public UBufferComponent.EBufferSamplerType SamplerType { get; set; } = UBufferComponent.EBufferSamplerType.Linear;
+        public TtBufferComponent.EBufferSamplerType SamplerType { get; set; } = TtBufferComponent.EBufferSamplerType.Linear;
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (ResultPin == pin)
@@ -693,7 +693,7 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn BezierPin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UUVWBezierNode()
         {
             Icon.Size = new Vector2(25, 25);

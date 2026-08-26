@@ -1,0 +1,248 @@
+#ifndef _SSR_COMPUTE_H_
+#define _SSR_COMPUTE_H_
+
+#include "../../Inc/GlobalDefine.cginc"
+#include "../../Inc/SysFunction.cginc"
+#include "../../CBuffer/VarBase_PerCamera.cginc"
+#include "../../Inc/Math.cginc"
+
+// ---------------------------------------------------------------------------
+// Screen Space Reflection - Trace Pass
+//
+// 每像素投一条反射线, 在屏幕空间步进求交, 命中后采样 SceneColor 作为反射辐射度。
+//
+// ENV_SSR_USE_HZB == 1: 走 Inc/HzbRayCast.cginc 的 HZB 加速层级步进 (与 ContactShadow
+//                        共用同一份实现, roughness 参数控制每步的 mip 抬升速度)
+// ENV_SSR_USE_HZB == 0: 线性等步长步进 fallback, 不依赖 HZB
+//
+// 输出: rgb = 命中点的 SceneColor, a = 置信度 (0 = 未命中 / 被拒绝)
+//       BRDF 与强度在 SSRResolve pass 里施加, 本 pass 只负责"找到反射的是什么颜色"。
+//
+// 已知局限 (与业界屏幕空间方案一致, 不是 bug):
+//   - 只能反射当前帧屏幕上存在的东西; 屏幕外 / 被遮挡的内容反射不出来, 靠边缘淡出隐藏
+//   - SceneColor 取的是 DirLighting 的结果, 不含前向渲染物体与半透明
+//   - 需要非屏幕空间的完整反射时走 DXR / ReSTIR 路线
+// ---------------------------------------------------------------------------
+
+#ifndef ENV_SSR_USE_HZB
+#define ENV_SSR_USE_HZB 0
+#endif
+
+cbuffer cbSSR DX_AUTOBIND
+{
+    float2 SSRScreenSize;       // trace 输出的尺寸 (可能是半分辨率)
+    float  SSRMaxRoughness;     // 超过该粗糙度的像素不做 SSR
+    float  SSRMaxDistance;      // 反射线最长世界距离 (米)
+
+    int    SSRNumSteps;         // 步进次数
+    float  SSRThickness;        // 深度相交的厚度容差 (米), 仅线性 fallback 用
+    float  SSREdgeFadePower;     // 屏幕边缘淡出的指数
+    uint   SSRFrameIndex;       // 时域抖动用
+
+    float  SSRRayJitter;        // 按粗糙度扰动反射方向的强度 (0 = 纯镜面)
+    float  SSRPad0;
+    float  SSRPad1;
+    float  SSRPad2;
+};
+
+Texture2D<float> DepthBuffer DX_AUTOBIND;
+SamplerState Samp_DepthBuffer DX_AUTOBIND;
+
+Texture2D GBufferRT1 DX_AUTOBIND;
+SamplerState Samp_GBufferRT1 DX_AUTOBIND;
+
+Texture2D GBufferRT2 DX_AUTOBIND;
+SamplerState Samp_GBufferRT2 DX_AUTOBIND;
+
+Texture2D SceneColor DX_AUTOBIND;
+SamplerState Samp_SceneColor DX_AUTOBIND;
+
+#if ENV_SSR_USE_HZB
+Texture2D<float> HzbTexture DX_AUTOBIND;
+SamplerState Samp_HzbTexture DX_AUTOBIND;
+#include "../../Inc/HzbRayCast.cginc"
+#endif
+
+RWTexture2D<float4> SSRTraceOutput DX_AUTOBIND;
+
+// Interleaved gradient noise, 与 ContactShadow 用同一个式子保持抖动风格一致
+float SSR_IGN(float2 pixelPos, float frameId)
+{
+    pixelPos += frameId * float2(47.0, 17.0) * 0.695f;
+    float3 magic = float3(0.06711056, 0.00583715, 52.9829189);
+    return frac(magic.z * frac(dot(pixelPos, magic.xy)));
+}
+
+// 屏幕边缘淡出: 命中点越靠近屏幕边界, 置信度越低 (屏幕外的信息本来就取不到)
+float SSR_ScreenEdgeFade(float2 hitUV, float power)
+{
+    float2 d = abs(hitUV * 2.0 - 1.0);
+    float fade = saturate(1.0 - max(d.x, d.y));
+    return pow(fade, max(power, 0.01));
+}
+
+#if ENV_SSR_USE_HZB == 0
+// 线性等步长 fallback: 沿反射线在屏幕空间均匀走, 与深度缓冲比对。
+// 与 ContactShadow 的 fallback 同构, 区别是这里要把命中点的 UV 带回来。
+bool SSR_LinearMarch(float3 rayOriginWorld, float3 rayDirWorld, float rayLength,
+                     int numSteps, float dither, out float2 hitUV)
+{
+    hitUV = 0;
+
+    float4 startClip = mul(float4(rayOriginWorld, 1.0), GetViewPrjMtx());
+    if (startClip.w <= 0.0)
+        return false;
+
+    float3 endWorld = rayOriginWorld + rayDirWorld * rayLength;
+    float4 endClip = mul(float4(endWorld, 1.0), GetViewPrjMtx());
+    if (endClip.w <= 0.0)
+    {
+        // 反射线穿过近裁面, 截断到相机前一点点
+        float tClip = startClip.w / (startClip.w - endClip.w) * 0.95;
+        endWorld = rayOriginWorld + rayDirWorld * (rayLength * tClip);
+        endClip = mul(float4(endWorld, 1.0), GetViewPrjMtx());
+        if (endClip.w <= 0.0)
+            return false;
+    }
+
+    float3 startNDC = startClip.xyz / startClip.w;
+    float3 endNDC = endClip.xyz / endClip.w;
+
+    float2 startUV = float2(startNDC.x * 0.5 + 0.5, 0.5 - startNDC.y * 0.5);
+    float2 endUV = float2(endNDC.x * 0.5 + 0.5, 0.5 - endNDC.y * 0.5);
+
+    float2 dUV = endUV - startUV;
+    float dZ = endNDC.z - startNDC.z;
+
+    float stepSize = 1.0 / (float)numSteps;
+    float t = stepSize * (dither + 0.5);
+
+    [loop]
+    for (int i = 0; i < numSteps; i++)
+    {
+        float2 sampleUV = startUV + dUV * t;
+        float sampleZ = startNDC.z + dZ * t;
+
+        if (any(sampleUV < 0.0) || any(sampleUV > 1.0))
+            return false;
+
+        float sceneZ = DepthBuffer.SampleLevel(Samp_DepthBuffer, sampleUV, 0).r;
+        float sceneLinear = LinearFromDepth(sceneZ);
+        float rayLinear = LinearFromDepth(sampleZ);
+
+        // 射线跑到几何体后面, 且深度差在厚度容差内 -> 认为命中
+        float depthDiff = rayLinear - sceneLinear;
+        if (depthDiff > 0.0 && depthDiff < SSRThickness)
+        {
+            hitUV = sampleUV;
+            return true;
+        }
+        t += stepSize;
+    }
+    return false;
+}
+#endif
+
+[numthreads(8, 8, 1)]
+void CS_SSRTrace(uint3 dispatchThreadId : SV_DispatchThreadID)
+{
+    uint2 pixelCoord = dispatchThreadId.xy;
+    if (any(pixelCoord >= (uint2)SSRScreenSize))
+        return;
+
+    SSRTraceOutput[pixelCoord] = float4(0, 0, 0, 0);
+
+    float2 uv = ((float2)pixelCoord + 0.5) / SSRScreenSize;
+
+    float rawDepth = DepthBuffer.SampleLevel(Samp_DepthBuffer, uv, 0).r;
+    // 天空不反射
+#if USE_INVERSE_Z == 1
+    if (rawDepth <= 0.0)
+#else
+    if (rawDepth >= 1.0)
+#endif
+        return;
+
+    // rt2.b = Roughness (见 DeferredCommon.cginc 的 EncodeGBuffer)
+    float4 rt2 = GBufferRT2.SampleLevel(Samp_GBufferRT2, uv, 0);
+    float roughness = rt2.b;
+    if (roughness > SSRMaxRoughness)
+        return;
+
+    float4 rt1 = GBufferRT1.SampleLevel(Samp_GBufferRT1, uv, 0);
+    float3 N = (float3)DecodeNormalFromGBuffer((half4)rt1);
+    float nLen = length(N);
+    if (nLen < 0.001)
+        return;
+    N /= nLen;
+
+    float3 worldPos = GetWorldPositionFromDepthValue(uv, rawDepth).xyz;
+    float3 V = normalize(CameraPosition - worldPos);
+    float NoV = dot(N, V);
+    if (NoV <= 0.0)
+        return;
+
+    float3 R = reflect(-V, N);
+
+    float dither = SSR_IGN(float2(pixelCoord) + 0.5, (float)SSRFrameIndex);
+
+    // 粗糙表面把反射方向按粗糙度做一点扰动, 单像素一条线, 由 Resolve pass 做空间复用降噪。
+    // 这不是严格的 GGX 重要性采样, 但成本恒定且视觉上足够 (业界半分辨率 SSR 常见做法)。
+    if (SSRRayJitter > 0.0 && roughness > 0.0)
+    {
+        float jitterAmount = roughness * roughness * SSRRayJitter;
+        float a1 = dither * 6.2831853;
+        float a2 = SSR_IGN(float2(pixelCoord) * 1.37 + 11.3, (float)SSRFrameIndex + 3.0) * 2.0 - 1.0;
+        // 构造 R 的一组正交基, 在切平面上偏移
+        float3 t = abs(R.y) < 0.99 ? float3(0, 1, 0) : float3(1, 0, 0);
+        float3 b1 = normalize(cross(t, R));
+        float3 b2 = cross(R, b1);
+        R = normalize(R + (b1 * cos(a1) + b2 * sin(a1)) * jitterAmount * abs(a2));
+        // 扰动后可能钻到表面下面, 拉回来
+        if (dot(R, N) <= 0.0)
+            R = reflect(-V, N);
+    }
+
+    // 沿法线抬一点起点, 避免自相交
+    float3 rayOrigin = worldPos + N * (0.01 + LinearFromDepth(rawDepth) * 0.0005);
+
+    float2 hitUV = 0;
+    bool bHit = false;
+
+#if ENV_SSR_USE_HZB
+    FHzbRayCastResult r = HzbRayCastFromWorldRay(
+        HzbTexture, Samp_HzbTexture,
+        rayOrigin, R, SSRMaxDistance,
+        (uint)max(SSRNumSteps, 1), dither, roughness);
+    bHit = r.bHit;
+    hitUV = r.HitUV;
+#else
+    bHit = SSR_LinearMarch(rayOrigin, R, SSRMaxDistance,
+                           max(SSRNumSteps, 1), dither, hitUV);
+#endif
+
+    if (!bHit)
+        return;
+
+    // 命中点如果是天空, 说明穿出了几何体, 视为无效
+    float hitDepth = DepthBuffer.SampleLevel(Samp_DepthBuffer, hitUV, 0).r;
+#if USE_INVERSE_Z == 1
+    if (hitDepth <= 0.0)
+#else
+    if (hitDepth >= 1.0)
+#endif
+        return;
+
+    // 背面拒绝: 命中面的法线如果和反射方向同向, 说明看到的是背面, 反射不成立
+    float4 hitRt1 = GBufferRT1.SampleLevel(Samp_GBufferRT1, hitUV, 0);
+    float3 hitN = (float3)DecodeNormalFromGBuffer((half4)hitRt1);
+    if (dot(hitN, hitN) > 0.001 && dot(normalize(hitN), R) > 0.0)
+        return;
+
+    float3 reflectedColor = SceneColor.SampleLevel(Samp_SceneColor, hitUV, 0).rgb;
+    float confidence = SSR_ScreenEdgeFade(hitUV, SSREdgeFadePower);
+
+    SSRTraceOutput[pixelCoord] = float4(reflectedColor, confidence);
+}
+
+#endif // _SSR_COMPUTE_H_

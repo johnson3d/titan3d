@@ -120,7 +120,7 @@ namespace EngineNS.NxRHI
             mCoreObject.SetCallback(fn);
         }
 
-        public unsafe bool CompileShader(TtShaderDesc shaderDesc, string shader, string entry, EShaderType type, string sm, TtShaderDefinitions defines, EShaderLanguage sl, bool bDebugShader, string extHlslVersion, string dxcArgs, bool asModule)
+        public unsafe bool CompileShader(Editor.ShaderCompiler.TtHLSLCompiler hlslCompiler, TtShaderDesc shaderDesc, string shader, string entry, EShaderType type, string sm, TtShaderDefinitions defines, EShaderLanguage sl, bool bDebugShader, string extHlslVersion, string dxcArgs, bool asModule)
         {
             using (var blob = new Support.TtBlobObject())
             {
@@ -135,6 +135,12 @@ namespace EngineNS.NxRHI
                     var msg = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)blob.DataPointer, (int)blob.Size);
                     if (ret == false || msg.IndexOf("error ") >= 0)
                     {
+                        if (hlslCompiler.MaterialCodeForDebug != null)
+                        {
+                            Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, $"Begin Material Code:{hlslCompiler.GetMaterial()?.AssetName}");
+                            Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, hlslCompiler.MaterialCodeForDebug);
+                            Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, "End Material");
+                        }
                         Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, msg);
                     }
                 }

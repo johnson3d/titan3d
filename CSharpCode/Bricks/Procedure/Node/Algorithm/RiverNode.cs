@@ -20,9 +20,9 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false)]
         public PinOut FillElevationPin { get; set; } = new PinOut();
         [Rtti.Meta("")]
-        public UBufferCreator SourceDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator SourceDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         [Rtti.Meta("")]
-        public UBufferCreator ResultDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator ResultDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public TtRiverNode()
         {
             Icon.Size = new Vector2(25, 25);
@@ -31,11 +31,11 @@ namespace EngineNS.Bricks.Procedure.Node
             BackColor = 0x80808080;
 
             AddInput(HeightPin, "Height", SourceDesc);
-            AddInput(DryMaskPin, "DryMask", UBufferCreator.CreateInstance<USuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
-            AddInput(RiverMaskPin, "DryMask", UBufferCreator.CreateInstance<USuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
+            AddInput(DryMaskPin, "DryMask", UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
+            AddInput(RiverMaskPin, "DryMask", UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
             AddOutput(RiverMapPin, "RiverMap", ResultDesc);
-            AddOutput(FlowMaskMapPin, "FlowMaskMap", UBufferCreator.CreateInstance<USuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
-            AddOutput(FillElevationPin, "FillElevation", UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1)); 
+            AddOutput(FlowMaskMapPin, "FlowMaskMap", UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
+            AddOutput(FillElevationPin, "FillElevation", UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1)); 
         }
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {

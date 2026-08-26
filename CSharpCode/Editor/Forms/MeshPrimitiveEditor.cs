@@ -331,15 +331,27 @@ namespace EngineNS.Editor.Forms
             }
             var mesh = new Graphics.Mesh.TtRenderMesh();
             var meshNodeData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
+            // 有 morph 数据时选用带 morph modifier 的 MdfQueue, 否则预览里看不到表情效果
+            var hasMorph = Mesh.MorphTargets != null && Mesh.MorphTargets.IsValid;
             if (Mesh.PartialSkeleton != null)
             {
-                mesh.Initialize(Mesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfSkinMesh>.TypeDesc);
-                meshNodeData.MdfQueueType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtMdfSkinMesh));
+                var mdfType = hasMorph
+                    ? Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfSkinMorphMesh>.TypeDesc
+                    : Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfSkinMesh>.TypeDesc;
+                mesh.Initialize(Mesh, materials, mdfType);
+                meshNodeData.MdfQueueType = EngineNS.Rtti.TtTypeDesc.TypeStr(hasMorph
+                    ? typeof(EngineNS.Graphics.Mesh.TtMdfSkinMorphMesh)
+                    : typeof(EngineNS.Graphics.Mesh.TtMdfSkinMesh));
             }
             else
             {
-                mesh.Initialize(Mesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
-                meshNodeData.MdfQueueType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtMdfStaticMesh));
+                var mdfType = hasMorph
+                    ? Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfMorphMesh>.TypeDesc
+                    : Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc;
+                mesh.Initialize(Mesh, materials, mdfType);
+                meshNodeData.MdfQueueType = EngineNS.Rtti.TtTypeDesc.TypeStr(hasMorph
+                    ? typeof(EngineNS.Graphics.Mesh.TtMdfMorphMesh)
+                    : typeof(EngineNS.Graphics.Mesh.TtMdfStaticMesh));
             }
             meshNodeData.MeshName = Mesh.AssetName;
             var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, meshNodeData, typeof(GamePlay.TtPlacement), mesh,
@@ -570,6 +582,7 @@ namespace EngineNS.Editor.Forms
             DrawEditorDetails();
             DrawMeshDetails();
             DrawSkeleton();
+            DrawMorphTargets();
             DrawQuarkDAG();
             if (mEditorHistory != null)
             {
@@ -603,6 +616,7 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Skeleton", mDockKeyClass), leftId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MorphTargets", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), middleId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("QuarkDAG", mDockKeyClass), middleId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightUpId);
@@ -854,6 +868,63 @@ namespace EngineNS.Editor.Forms
                 SkeletonTreePanel.OnDrawBoneDetails();
             }
             EGui.UIProxy.DockProxy.EndPanel(showDetails);
+        }
+
+        bool mShowMorphPanel = true;
+        readonly List<string> mMorphNames = new List<string>();
+
+        /// <summary>
+        /// Morph target 权重预览面板。
+        ///
+        /// 这里调的是预览实例的运行时权重, 不是资产数据, 所以按 CodingGuidelines.md §4.3
+        /// 不接入撤销重做(不污染历史栈), 也不会被保存到资产里。
+        /// </summary>
+        protected void DrawMorphTargets()
+        {
+            // 面板显隐由**资产是否带 morph**决定, 而不是由 modifier 是否存在决定:
+            // 否则当 MdfQueue 选错(没挂 morph modifier)时面板直接消失, 用户无法得知原因。
+            // 资产本身没有 morph 时不画(给每个网格都摆个空面板是噪声)。
+            var morphSet = Mesh?.MorphTargets;
+            if (morphSet == null || morphSet.IsValid == false)
+                return;
+
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "MorphTargets", ref mShowMorphPanel, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                var morphModifier = mCurrentMeshNode?.RenderMesh?.MdfQueue?.FindModifier<Graphics.Mesh.Modifier.TtMorphModifier>();
+                if (morphModifier == null)
+                {
+                    // 资产有 morph 但队列没挂 morph modifier —— 把原因和做法直接告诉用户,
+                    // 而不是静默什么都不显示。
+                    ImGuiAPI.TextDisabled($"{morphSet.Targets.Count} morph target(s) in asset,");
+                    ImGuiAPI.TextDisabled("but current MdfQueue has no TtMorphModifier.");
+                    ImGuiAPI.TextDisabled("Reimport the mesh, or set MdfQueueType to");
+                    ImGuiAPI.TextDisabled("TtMdfSkinMorphMesh / TtMdfMorphMesh.");
+                }
+                else
+                {
+                    // 每帧重采一次, 避开切资产/重导入后名单陈旧的问题; 重用 list 不产生额外分配
+                    mMorphNames.Clear();
+                    morphModifier.CollectMorphNames(mMorphNames);
+
+                    if (ImGuiAPI.Button("Reset All", in Vector2.Zero))
+                    {
+                        morphModifier.ResetMorphWeights();
+                    }
+                    ImGuiAPI.Separator();
+
+                    for (int i = 0; i < mMorphNames.Count; i++)
+                    {
+                        var morphName = mMorphNames[i];
+                        var weight = morphModifier.GetMorphWeight(morphName);
+                        if (ImGuiAPI.SliderFloat(morphName, ref weight, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_None))
+                        {
+                            morphModifier.SetMorphWeight(morphName, weight);
+                        }
+                    }
+                }
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
 
         bool ShowEditorPropGrid = true;

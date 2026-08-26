@@ -6,6 +6,8 @@
     <Nullable>disable</Nullable>
     <BaseOutputPath>$(SolutionDir)\binaries\Plugins</BaseOutputPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <!-- RenderDoc 的 SetActiveWindow 收 void*, 抓帧工具绕不开 unsafe。 -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <Import Project="..\MCPServer\MCPServer.projitems" Label="Shared" />

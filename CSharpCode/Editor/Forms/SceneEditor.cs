@@ -39,6 +39,10 @@ namespace EngineNS.Editor.Forms
                 // 会自动被实例化并设为 CurrentIntercativeMode。
                 TtEngine.Instance.InteractiveModeManager
                     .RegisterMode<TtSceneEditorViewport, TtSceneEditorInteractiveMode>();
+                // 地形高度笔刷模式。注册后自动出现在 Mode 下拉里 (DrawInteractiveModeCombo),
+                // 切进去才接管左键, 不影响默认的选择/gizmo 操作。
+                TtEngine.Instance.InteractiveModeManager
+                    .RegisterMode<TtSceneEditorViewport, Bricks.Terrain.CDLOD.TtTerrainEditorInteractiveMode>();
             }
 
             public TtSceneEditor HostEditor;
@@ -488,6 +492,7 @@ namespace EngineNS.Editor.Forms
                     mEditorSettingsShow,
                     mCameraSettingsShow,
                     mOutlinerShow,
+                    mTerrainBrushShow,
                     mPreviewShow,
                     //mMacrossShow,
                     mContentBrowserShow,
@@ -691,6 +696,21 @@ namespace EngineNS.Editor.Forms
                 PreviewViewport.Axis.HistoryHost = mEditorHistory;
             if (mWorldOutliner != null)
                 mWorldOutliner.HistoryHost = mEditorHistory;
+            // 地形笔刷的 undo 也进同一个历史栈, 这样 History 面板和 Ctrl+Z 不需要任何改动。
+            // 没有 GetInteractiveMode<T>() 这种辅助方法, 只能自己遍历一遍列表。
+            mTerrainBrushMode = null;
+            if (PreviewViewport.InteractiveModes != null)
+            {
+                foreach (var mode in PreviewViewport.InteractiveModes)
+                {
+                    var terrainMode = mode as Bricks.Terrain.CDLOD.TtTerrainEditorInteractiveMode;
+                    if (terrainMode != null)
+                    {
+                        terrainMode.HistoryHost = mEditorHistory;
+                        mTerrainBrushMode = terrainMode;
+                    }
+                }
+            }
 
             mWorldOutliner.Title = $"Outliner:{name}";
 
@@ -754,6 +774,7 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("History", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Camera Settings", mDockKeyClass), rightUpId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Outliner", mDockKeyClass), rightUpId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Terrain Brush", mDockKeyClass), rightUpId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), middleId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Macross", mDockKeyClass), middleId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Content Browser", mDockKeyClass), downId);
@@ -793,6 +814,7 @@ namespace EngineNS.Editor.Forms
             EGui.UIProxy.DockProxy.EndMainForm(IsDrawing);
 
             DrawOutliner();
+            DrawTerrainBrush();
 
             DrawNodeDetails();
             DrawEditorSettings();
@@ -997,6 +1019,15 @@ namespace EngineNS.Editor.Forms
                 item.Selected = !item.Selected;
             },
         };
+        EGui.UIProxy.MenuItemProxy mTerrainBrushShow = new EGui.UIProxy.MenuItemProxy()
+        {
+            MenuName = "Terrain Brush",
+            Selected = true,
+            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
+            {
+                item.Selected = !item.Selected;
+            },
+        };
         EGui.UIProxy.MenuItemProxy mPreviewShow = new EGui.UIProxy.MenuItemProxy()
         {
             MenuName = "Preview",
@@ -1107,6 +1138,44 @@ namespace EngineNS.Editor.Forms
                     var up = PreviewViewport.CameraController.Camera.GetUp();
                     PreviewViewport.CameraController.Camera.LookAtLH(in camPos, lookAt - saved + camPos, up);
                 }
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
+        }
+        /// <summary>
+        /// 地形笔刷模式实例。Terrain Brush 面板只是它的参数 UI 外壳, 场景里没地形时依然
+        /// 存在 (笔刷参数是配置, 与场景内容无关), 所以不随场景重建。
+        /// </summary>
+        Bricks.Terrain.CDLOD.TtTerrainEditorInteractiveMode mTerrainBrushMode;
+        /// <summary>
+        /// 上一帧面板是否在画。从"没在画"转到"在画"的那一帧要主动抢一次焦点,
+        /// 否则切进雕刻模式后 tab 虽然出现了却藏在 Outliner 后面, 还得手动点一下。
+        /// </summary>
+        bool mTerrainBrushDrawnLastFrame = false;
+        protected void DrawTerrainBrush()
+        {
+            // 只在地形雕刻模式下出现。入口统一走工具栏的 Mode 下拉,
+            // 避免一个只对单一模式生效的面板常驻在 Outliner 旁边当噪声。
+            bool active = mTerrainBrushMode != null && PreviewViewport.CurrentIntercativeMode == mTerrainBrushMode;
+            if (!active || !mTerrainBrushShow.Selected)
+            {
+                mTerrainBrushDrawnLastFrame = false;
+                return;
+            }
+
+            if (mTerrainBrushDrawnLastFrame == false)
+                ImGuiAPI.SetNextWindowFocus();
+            mTerrainBrushDrawnLastFrame = true;
+
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Terrain Brush", ref mTerrainBrushShow.Selected, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                if (ImGuiAPI.Button("Stop Sculpting", in Vector2.Zero))
+                    PreviewViewport.SetDefaultInteractiveMode<TtSceneEditorInteractiveMode>();
+                ImGuiAPI.SameLine(0, -1);
+                ImGuiAPI.Text("左键雕刻 / Shift+左键反向 / Alt+左键转视角");
+                ImGuiAPI.Separator();
+
+                mTerrainBrushMode.DrawBrushParams();
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }

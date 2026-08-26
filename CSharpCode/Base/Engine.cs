@@ -683,7 +683,8 @@ namespace EngineNS
                             GfxDevice?.EndFrame();
                         }
                         if (bCapturing)
-                            GfxDevice.RenderQueue.EndFrameCapture();
+                            GfxDevice.RenderQueue.EndFrameCapture(GfxDevice.RenderQueue.CaptureTagName,
+                                GfxDevice.RenderQueue.OpenRenderDocAfterCapture);
                     }
 
                     using (new Profiler.TimeScopeHelper(ScopeInputSystem))

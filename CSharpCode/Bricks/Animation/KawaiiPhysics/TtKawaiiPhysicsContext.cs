@@ -276,6 +276,68 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
 
         #endregion
 
+        #region Ribbon Solver
+
+        // A ribbon is a pure kinematic wave generator: no physics settings, no collision, no
+        // constraints. Inertia / collision / bone constraints come from feeding the ribbon node's
+        // output pose into a downstream KawaiiPhysics node instead of being duplicated here.
+
+        public void InitializeRibbons(int count)
+        {
+            mCoreObject.InitializeRibbons(count);
+        }
+
+        public void SetRibbonSetup(int index, TtKawaiiRibbonSetup setup)
+        {
+            mCoreObject.SetRibbonSetup(index,
+                setup.Name,
+                setup.RootBoneIndex.Index, setup.EndBoneIndex.Index,
+                setup.TailBoneLength, (int)setup.TailBoneAxis,
+                setup.LODThreshold);
+
+            // Themed groups rather than one giant signature; native clamps every value.
+            mCoreObject.SetRibbonSway(index,
+                setup.SwingAngleDegrees, setup.SwayFrequency,
+                setup.Inertia, setup.InertiaFalloff,
+                setup.TipAmplify, setup.AmplifyCurvePower);
+            mCoreObject.SetRibbonSwingPlane(index, setup.SwingPlaneAngleDegrees, setup.RestTiltAngleDegrees);
+            mCoreObject.SetRibbonNoise(index, setup.NoiseMix, setup.NoiseLayers, setup.NoiseRoughness, setup.NoiseScale);
+            mCoreObject.SetRibbonWind(index, setup.WindResponse, setup.WindGustiness, setup.GustFrequency);
+
+            PushRibbonCurves(index, setup);
+        }
+
+        unsafe void PushRibbonCurve(int index, int curveId, TtKawaiiCurve curve)
+        {
+            curve.ToArrays(out var times, out var values);
+            int count = times.Length;
+            fixed (float* pt = times)
+            fixed (float* pv = values)
+            {
+                mCoreObject.SetRibbonCurve(index, curveId, pt, pv, count);
+            }
+        }
+
+        void PushRibbonCurves(int index, TtKawaiiRibbonSetup setup)
+        {
+            PushRibbonCurve(index, 0, setup.SwingAmplitudeCurve);
+            PushRibbonCurve(index, 1, setup.WindInfluenceCurve);
+        }
+
+        public unsafe void BuildRibbons(Vector3[] bonePositions, Quaternion[] boneRotations, Vector3[] boneScales, int[] parentIndices)
+        {
+            int numBones = bonePositions.Length;
+            fixed (Vector3* pPos = bonePositions)
+            fixed (Quaternion* pRot = boneRotations)
+            fixed (Vector3* pScale = boneScales)
+            fixed (int* pParent = parentIndices)
+            {
+                mCoreObject.BuildRibbons(pPos, pRot, pScale, pParent, numBones);
+            }
+        }
+
+        #endregion
+
         #region Colliders
 
         public int AddSphereCollider(in Vector3 center, float radius)
@@ -480,16 +542,56 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
 
         #endregion
 
+        #region Results Query - Ribbons
+
+        public int RibbonCount => mCoreObject.GetRibbonCount();
+
+        public int GetRibbonParticleCount(int ribbonIndex)
+        {
+            return mCoreObject.GetRibbonParticleCount(ribbonIndex);
+        }
+
+        public Vector3 GetRibbonParticlePosition(int ribbonIndex, int particleIndex)
+        {
+            float x = 0, y = 0, z = 0;
+            mCoreObject.GetRibbonParticlePosition(ribbonIndex, particleIndex, ref x, ref y, ref z);
+            return new Vector3(x, y, z);
+        }
+
+        public int GetRibbonParticleBoneIndex(int ribbonIndex, int particleIndex)
+        {
+            return mCoreObject.GetRibbonParticleBoneIndex(ribbonIndex, particleIndex);
+        }
+
+        public void ExtractRibbonResults(Vector3[] outBonePositions)
+        {
+            int ribbonCount = RibbonCount;
+            for (int r = 0; r < ribbonCount; r++)
+            {
+                int particleCount = GetRibbonParticleCount(r);
+                for (int p = 0; p < particleCount; p++)
+                {
+                    int boneIndex = GetRibbonParticleBoneIndex(r, p);
+                    if (boneIndex < 0 || boneIndex >= outBonePositions.Length)
+                        continue;
+                    outBonePositions[boneIndex] = GetRibbonParticlePosition(r, p);
+                }
+            }
+        }
+
+        #endregion
+
         #region Convenience - Extract All Results
 
         /// <summary>
-        /// Extracts all simulation results (chains + cloth + rods) into the provided bone position array.
+        /// Extracts all simulation results (chains + cloth + rods + ribbons) into the provided bone position array.
         /// </summary>
         public void ExtractAllResults(Vector3[] outBonePositions)
         {
             ExtractChainResults(outBonePositions);
             ExtractClothResults(outBonePositions);
             ExtractRodResults(outBonePositions);
+            ExtractRibbonResults(outBonePositions);
         }
 
         /// <summary>
@@ -501,6 +603,7 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
             ExtractChainResultsWithMask(outBonePositions, outModifiedMask);
             ExtractClothResultsWithMask(outBonePositions, outModifiedMask);
             ExtractRodResultsWithMask(outBonePositions, outModifiedMask);
+            ExtractRibbonResultsWithMask(outBonePositions, outModifiedMask);
         }
 
         private void ExtractChainResultsWithMask(Vector3[] outBonePositions, bool[] outModifiedMask)
@@ -553,6 +656,23 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
                     if (boneIndex < 0 || boneIndex >= outBonePositions.Length)
                         continue;
                     outBonePositions[boneIndex] = GetRodParticlePosition(r, p);
+                    outModifiedMask[boneIndex] = true;
+                }
+            }
+        }
+
+        private void ExtractRibbonResultsWithMask(Vector3[] outBonePositions, bool[] outModifiedMask)
+        {
+            int ribbonCount = RibbonCount;
+            for (int r = 0; r < ribbonCount; r++)
+            {
+                int particleCount = GetRibbonParticleCount(r);
+                for (int p = 0; p < particleCount; p++)
+                {
+                    int boneIndex = GetRibbonParticleBoneIndex(r, p);
+                    if (boneIndex < 0 || boneIndex >= outBonePositions.Length)
+                        continue;
+                    outBonePositions[boneIndex] = GetRibbonParticlePosition(r, p);
                     outModifiedMask[boneIndex] = true;
                 }
             }

@@ -446,6 +446,20 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
 
+        public override EDecalMode DecalMode
+        {
+            get
+            {
+                if (mParentMaterial == null)
+                    return EDecalMode.ColorAndMaterial;
+                return mParentMaterial.DecalMode;
+            }
+            set
+            {
+
+            }
+        }
+
         bool mHasRenderLayerOverride = false;
         ERenderLayer mRenderLayerOverride = ERenderLayer.RL_Opaque;
         [Browsable(false)]

@@ -4,6 +4,16 @@ using System.Text;
 
 namespace EngineNS.Animation
 {
+    /// <summary>
+    /// 动画系统的日志分类
+    /// </summary>
+    public class TtAnimationCategory : Profiler.TtLogCategory
+    {
+        public override string ToString()
+        {
+            return "Animation";
+        }
+    }
     public partial class TtAnimationModule : TtModule<TtEngine>
     {
 

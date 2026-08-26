@@ -282,7 +282,7 @@ namespace EngineNS.Bricks.Procedure
         public abstract UBufferCreator GetOutBufferCreator(PinOut pin);
 
         #region procedure
-        public virtual UBufferComponent GetResultBuffer(int index)
+        public virtual TtBufferComponent GetResultBuffer(int index)
         {
             if (index < 0 || index >= Outputs.Count)
                 return null;
@@ -358,7 +358,7 @@ namespace EngineNS.Bricks.Procedure
 
         }
         [Rtti.Meta("")]
-        public void DispatchBuffer(UPgcGraph graph, UBufferComponent result, object tag, bool bMultThread = false)
+        public void DispatchBuffer(UPgcGraph graph, TtBufferComponent result, object tag, bool bMultThread = false)
         {
             if (result == null)
                 return;
@@ -447,7 +447,7 @@ namespace EngineNS.Bricks.Procedure
                 smp.FreeSemaphore();
             }
         }
-        public virtual void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent resuilt, int x, int y, int z, object tag)
+        public virtual void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent resuilt, int x, int y, int z, object tag)
         {
 
         }
@@ -455,7 +455,7 @@ namespace EngineNS.Bricks.Procedure
 
         #region Macross
         [Rtti.Meta("")]
-        public UBufferComponent FindBuffer(string name)
+        public TtBufferComponent FindBuffer(string name)
         {
             var graph = this.ParentGraph as UPgcGraph;
             var pin = this.FindPinIn(name) as NodePin;
@@ -563,7 +563,7 @@ namespace EngineNS.Bricks.Procedure
 {
 	partial class UPgcNodeBase
 	{
-		public unsafe void macross_DispatchBuffer (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, UBufferComponent result, object tag, bool bMultThread) 
+		public unsafe void macross_DispatchBuffer (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, TtBufferComponent result, object tag, bool bMultThread) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
@@ -573,7 +573,7 @@ namespace EngineNS.Bricks.Procedure
 			}
 			DispatchBuffer(graph, result, tag, bMultThread);
 		}
-		public unsafe UBufferComponent macross_FindBuffer (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name) 
+		public unsafe TtBufferComponent macross_FindBuffer (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{

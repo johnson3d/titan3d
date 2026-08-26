@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_9576399302422398542 Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiRodSetup@EngineCore">
+  <BendTwistStiffness Type="System.Single@Unknown" Order="0" />
+  <EndBoneIndex Type="EngineNS.Animation.LimbIndexInSkeleton@EngineCore" Order="0" />
+  <LODThreshold Type="System.Int32@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <OrientAttachStiffness Type="System.Single@Unknown" Order="0" />
+  <PhysicsSettings Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiPhySettings@EngineCore" Order="0" />
+  <PhysicsSettingsRandom Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiPhySettings@EngineCore" Order="0" />
+  <PointAttachStiffness Type="System.Single@Unknown" Order="0" />
+  <RootBoneIndex Type="EngineNS.Animation.LimbIndexInSkeleton@EngineCore" Order="0" />
+  <StretchShearStiffness Type="System.Single@Unknown" Order="0" />
+</Hash_9576399302422398542>

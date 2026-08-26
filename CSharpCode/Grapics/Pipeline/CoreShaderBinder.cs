@@ -227,6 +227,15 @@ namespace EngineNS.Graphics.Pipeline
             public NxRHI.FShaderVarDesc CurrentLOD;// = 1.0f;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector2))]
             public NxRHI.FShaderVarDesc TexUVOffset;
+            // 顺序必须与 enginecontent/Shaders/Bricks/Terrain/Common.cginc 的 cbPerPatch 完全一致
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(uint))]
+            public NxRHI.FShaderVarDesc UsePatchRVTParams;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(uint))]
+            public NxRHI.FShaderVarDesc HeightMapTexID;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(uint))]
+            public NxRHI.FShaderVarDesc NormalMapTexID;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(uint))]
+            public NxRHI.FShaderVarDesc MaterialIdTexID;
         }
 
         public class TtPerParticleCBufferVarIndexer : NxRHI.TtShader.AuxCBufferVarIndexer<TtPerParticleCBufferVarIndexer>

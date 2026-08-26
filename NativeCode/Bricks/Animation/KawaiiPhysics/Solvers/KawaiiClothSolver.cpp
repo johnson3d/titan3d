@@ -52,8 +52,8 @@ namespace KawaiiPhysics
 			{
 				std::vector<FDistanceConstraint> vConstraints;
 				SimJointHelpers::BuildVerticalConstraints(chain, vConstraints,
-					setup.VerticalShrinkStiffness.IsEmpty() ? 0.0f : (1.0f - setup.VerticalShrinkStiffness.Evaluate(0.5f)),
-					setup.VerticalStretchStiffness.IsEmpty() ? 0.0f : (1.0f - setup.VerticalStretchStiffness.Evaluate(0.5f)));
+					StiffnessToCompliance(setup.VerticalShrinkStiffness.IsEmpty() ? 1.0f : setup.VerticalShrinkStiffness.Evaluate(0.5f)),
+					StiffnessToCompliance(setup.VerticalStretchStiffness.IsEmpty() ? 1.0f : setup.VerticalStretchStiffness.Evaluate(0.5f)));
 
 				// Remap indices to flat
 				int32_t chainIdx = (int32_t)(&chain - &cloth.ChainTable[0]);
@@ -71,8 +71,8 @@ namespace KawaiiPhysics
 			{
 				SimJointHelpers::BuildHorizontalConstraints(cloth.ChainTable, cloth.ChainOffsets,
 					cloth.HorizontalConstraints, setup.bLoopChains,
-					setup.HorizontalShrinkStiffness.IsEmpty() ? 0.0f : (1.0f - setup.HorizontalShrinkStiffness.Evaluate(0.5f)),
-					setup.HorizontalStretchStiffness.IsEmpty() ? 0.0f : (1.0f - setup.HorizontalStretchStiffness.Evaluate(0.5f)));
+					StiffnessToCompliance(setup.HorizontalShrinkStiffness.IsEmpty() ? 1.0f : setup.HorizontalShrinkStiffness.Evaluate(0.5f)),
+					StiffnessToCompliance(setup.HorizontalStretchStiffness.IsEmpty() ? 1.0f : setup.HorizontalStretchStiffness.Evaluate(0.5f)));
 			}
 
 			// Build shear constraints
@@ -80,8 +80,8 @@ namespace KawaiiPhysics
 			{
 				SimJointHelpers::BuildShearConstraints(cloth.ChainTable, cloth.ChainOffsets,
 					cloth.ShearConstraints, setup.bLoopChains,
-					setup.ShearShrinkStiffness.IsEmpty() ? 0.0f : (1.0f - setup.ShearShrinkStiffness.Evaluate(0.5f)),
-					setup.ShearStretchStiffness.IsEmpty() ? 0.0f : (1.0f - setup.ShearStretchStiffness.Evaluate(0.5f)));
+					StiffnessToCompliance(setup.ShearShrinkStiffness.IsEmpty() ? 1.0f : setup.ShearShrinkStiffness.Evaluate(0.5f)),
+					StiffnessToCompliance(setup.ShearStretchStiffness.IsEmpty() ? 1.0f : setup.ShearStretchStiffness.Evaluate(0.5f)));
 			}
 
 			// Build vertical bending constraints
@@ -90,7 +90,7 @@ namespace KawaiiPhysics
 				for (auto& chain : cloth.ChainTable)
 				{
 					std::vector<FBendingConstraint> bConstraints;
-					float compliance = setup.VerticalBendStiffness.IsEmpty() ? 0.0f : (1.0f - setup.VerticalBendStiffness.Evaluate(0.5f));
+					float compliance = StiffnessToCompliance(setup.VerticalBendStiffness.IsEmpty() ? 1.0f : setup.VerticalBendStiffness.Evaluate(0.5f));
 					SimJointHelpers::BuildChainBendingConstraints(chain, bConstraints, compliance, setup.VerticalBendDeadZone);
 
 					int32_t chainIdx = (int32_t)(&chain - &cloth.ChainTable[0]);
@@ -108,7 +108,7 @@ namespace KawaiiPhysics
 			// Build horizontal bending constraints
 			if (setup.bBendingHorizontalConstraint)
 			{
-				float compliance = setup.HorizontalBendStiffness.IsEmpty() ? 0.0f : (1.0f - setup.HorizontalBendStiffness.Evaluate(0.5f));
+				float compliance = StiffnessToCompliance(setup.HorizontalBendStiffness.IsEmpty() ? 1.0f : setup.HorizontalBendStiffness.Evaluate(0.5f));
 				SimJointHelpers::BuildHorizontalBendingConstraints(cloth.ChainTable, cloth.ChainOffsets,
 					cloth.HorizontalBendingConstraints, setup.bLoopChains, compliance, setup.HorizontalBendDeadZone);
 			}
@@ -214,8 +214,21 @@ namespace KawaiiPhysics
 				}
 			}
 
-			// Collider collision (every N iterations)
-			if (CollisionIterationInterval > 0 && iter % CollisionIterationInterval == 0)
+			// Collision runs LAST in the iteration, after the distance / bending / bone
+			// constraints, so those constraints can no longer pull the cloth back into the
+			// collider once it has been pushed out (which is why enlarging a capsule used to
+			// "help" - it was fighting the pull-back). Velocity is still derived once below from
+			// the final position, so this ordering does not pollute velocity.
+			//
+			// Throttling skips collision on most iterations for performance, but the FINAL
+			// iteration must always run it: otherwise the loop ends on a constraint solve that
+			// has just pulled the cloth back in, and nothing corrects that before the velocity
+			// derivation. With the defaults (ConstraintIterations 3, CollisionIterationInterval 3)
+			// collision only ran on iteration 0, so whether the last iteration happened to land
+			// on the interval decided how much the cloth penetrated - which is why raising the
+			// interval used to break collision outright.
+			const bool bFinalIteration = (iter == Context.ConstraintIterations - 1);
+			if (CollisionIterationInterval > 0 && (iter % CollisionIterationInterval == 0 || bFinalIteration))
 				HandleCollision(Cloth, Context, ColliderBVH);
 
 			// Multi-layer collision

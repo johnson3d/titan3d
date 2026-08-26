@@ -26,7 +26,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
         protected void UpdateWithType(Rtti.TtTypeDesc type)
         {
-            Type generic = typeof(USuperBuffer<,>);
+            Type generic = typeof(TtSuperBuffer<,>);
             var pros = type.SystemType.GetFields();
             Type[] typeArgs = new Type[2];
             for(int i = 0; i < pros.Length; i++)
@@ -61,7 +61,7 @@ namespace EngineNS.Bricks.Procedure.Node
             var input = graph.BufferCache.FindBuffer(ValuePin);
             if (input.ElementSize != System.Runtime.InteropServices.Marshal.SizeOf(Type.SystemType))
                 return false;
-            var buffers = new UBufferComponent[Outputs.Count];
+            var buffers = new TtBufferComponent[Outputs.Count];
             for(int i=0; i<Outputs.Count;++i)
             {
                 buffers[i] = graph.BufferCache.FindBuffer(Outputs[i]);
@@ -117,7 +117,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
         protected void UpdateWithType(Rtti.TtTypeDesc type)
         {
-            Type generic = typeof(USuperBuffer<,>);
+            Type generic = typeof(TtSuperBuffer<,>);
             var pros = type.SystemType.GetFields();
             Type[] typeArgs = new Type[2];
             for (int i=0; i < pros.Length; i++)
@@ -150,7 +150,7 @@ namespace EngineNS.Bricks.Procedure.Node
             if (result.ElementSize != System.Runtime.InteropServices.Marshal.SizeOf(Type.SystemType))
                 return false;
 
-            var buffers = new UBufferComponent[Inputs.Count];
+            var buffers = new TtBufferComponent[Inputs.Count];
             for(int i=0; i<Inputs.Count; i++)
             {
                 buffers[i] = graph.BufferCache.FindBuffer(Inputs[i]);

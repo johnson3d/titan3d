@@ -44,7 +44,7 @@ namespace EngineNS.Bricks.Procedure
         {
             get
             {
-                return Rtti.TtTypeDescGetter<USuperBuffer<float, FFloatOperator>>.TypeDesc;
+                return Rtti.TtTypeDescGetter<TtSuperBuffer<float, FFloatOperator>>.TypeDesc;
             }
         }
         public float MaxValue { get => float.MaxValue; }
@@ -191,7 +191,7 @@ namespace EngineNS.Bricks.Procedure
         {
             get
             {
-                return Rtti.TtTypeDescGetter<USuperBuffer<Vector2, FFloat2Operator>>.TypeDesc;
+                return Rtti.TtTypeDescGetter<TtSuperBuffer<Vector2, FFloat2Operator>>.TypeDesc;
             }
         }
         public Vector2 MaxValue { get => Vector2.MaxValue; }
@@ -354,7 +354,7 @@ namespace EngineNS.Bricks.Procedure
         {
             get
             {
-                return Rtti.TtTypeDescGetter<USuperBuffer<Vector3, FFloat3Operator>>.TypeDesc;
+                return Rtti.TtTypeDescGetter<TtSuperBuffer<Vector3, FFloat3Operator>>.TypeDesc;
             }
         }
         public Vector3 MaxValue { get => Vector3.MaxValue; }
@@ -518,7 +518,7 @@ namespace EngineNS.Bricks.Procedure
         {
             get
             {
-                return Rtti.TtTypeDescGetter<USuperBuffer<Vector4, FFloat4Operator>>.TypeDesc;
+                return Rtti.TtTypeDescGetter<TtSuperBuffer<Vector4, FFloat4Operator>>.TypeDesc;
             }
         }
         public Vector4 MaxValue { get => Vector4.MaxValue; }
@@ -683,7 +683,7 @@ namespace EngineNS.Bricks.Procedure
         {
             get
             {
-                return Rtti.TtTypeDescGetter<USuperBuffer<Quaternion, FQuaternionOperator>>.TypeDesc;
+                return Rtti.TtTypeDescGetter<TtSuperBuffer<Quaternion, FQuaternionOperator>>.TypeDesc;
             }
         }
         public Quaternion MaxValue { get => Quaternion.Identity; }
@@ -789,7 +789,7 @@ namespace EngineNS.Bricks.Procedure
         {
             get
             {
-                return Rtti.TtTypeDescGetter<USuperBuffer<int, FIntOperator>>.TypeDesc;
+                return Rtti.TtTypeDescGetter<TtSuperBuffer<int, FIntOperator>>.TypeDesc;
             }
         }
         public int MaxValue { get => int.MaxValue; }
@@ -935,7 +935,7 @@ namespace EngineNS.Bricks.Procedure
         {
             get
             {
-                return Rtti.TtTypeDescGetter<USuperBuffer<Vector2i, FInt2Operator>>.TypeDesc;
+                return Rtti.TtTypeDescGetter<TtSuperBuffer<Vector2i, FInt2Operator>>.TypeDesc;
             }
         }
         public Vector2i MaxValue { get => Vector2i.MaxValue; }
@@ -1101,7 +1101,7 @@ namespace EngineNS.Bricks.Procedure
         {
             get
             {
-                return Rtti.TtTypeDescGetter<USuperBuffer<Vector3i, FInt3Operator>>.TypeDesc;
+                return Rtti.TtTypeDescGetter<TtSuperBuffer<Vector3i, FInt3Operator>>.TypeDesc;
             }
         }
         public Vector3i MaxValue { get => Vector3i.MaxValue; }
@@ -1270,7 +1270,7 @@ namespace EngineNS.Bricks.Procedure
         {
             get
             {
-                return Rtti.TtTypeDescGetter<USuperBuffer<DVector3, FDouble3Operator>>.TypeDesc;
+                return Rtti.TtTypeDescGetter<TtSuperBuffer<DVector3, FDouble3Operator>>.TypeDesc;
             }
         }
         public DVector3 MaxValue { get => DVector3.MaxValue; }
@@ -1434,7 +1434,7 @@ namespace EngineNS.Bricks.Procedure
         {
             get
             {
-                return Rtti.TtTypeDescGetter<USuperBuffer<byte, FByteOperator>>.TypeDesc;
+                return Rtti.TtTypeDescGetter<TtSuperBuffer<byte, FByteOperator>>.TypeDesc;
             }
         }
         public byte MaxValue { get => byte.MaxValue; }
@@ -1580,7 +1580,7 @@ namespace EngineNS.Bricks.Procedure
         {
             get
             {
-                return Rtti.TtTypeDescGetter<USuperBuffer<sbyte, FSByteOperator>>.TypeDesc;
+                return Rtti.TtTypeDescGetter<TtSuperBuffer<sbyte, FSByteOperator>>.TypeDesc;
             }
         }
         public sbyte MaxValue { get => sbyte.MaxValue; }
@@ -1726,7 +1726,7 @@ namespace EngineNS.Bricks.Procedure
         {
             get
             {
-                return Rtti.TtTypeDescGetter<USuperBuffer<FTransform, FTransformOperator>>.TypeDesc;
+                return Rtti.TtTypeDescGetter<TtSuperBuffer<FTransform, FTransformOperator>>.TypeDesc;
             }
         }
         public FTransform MaxValue { get => FTransform.Identity; }
@@ -1880,7 +1880,7 @@ namespace EngineNS.Bricks.Procedure
         {
             get
             {
-                return Rtti.TtTypeDescGetter<USuperBuffer<FSquareSurface, FSquareSurfaceOperator>>.TypeDesc;
+                return Rtti.TtTypeDescGetter<TtSuperBuffer<FSquareSurface, FSquareSurfaceOperator>>.TypeDesc;
             }
         }
         public FSquareSurface MaxValue { get => FSquareSurface.Identity; }

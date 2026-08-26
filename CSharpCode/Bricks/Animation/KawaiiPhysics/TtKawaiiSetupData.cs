@@ -340,6 +340,134 @@ namespace EngineNS.Bricks.Animation.KawaiiPhysics
     }
 
     /// <summary>
+    /// Ribbon setup data. Configures a single bone chain driven by an analytical swing wave.
+    ///
+    /// A ribbon is a PURE KINEMATIC wave generator, not a solver. Its motion is a cascade of
+    /// first-order low-pass filters along the chain (see native KawaiiRibbonSolver.h), so it is
+    /// unconditionally stable and needs no tuning to avoid resonance.
+    ///
+    /// It deliberately has NO physics knobs — no gravity, collision, bone-length/angle
+    /// constraints or world inertia. To get those, wire this ribbon node's pose output into a
+    /// downstream KawaiiPhysics node: it treats the incoming waving pose as the animated pose,
+    /// so its Stiffness pulls toward the wave while its own gravity / collision / WorldDamping
+    /// act as corrections on top. Duplicating those parameters here would just be a second set
+    /// of knobs for the same thing.
+    ///
+    /// All angles here are DEGREES; native converts to radians once when the ribbon is built.
+    /// </summary>
+    [EGui.Controls.PropertyGrid.TtPropertyOrder(Order = EGui.Controls.PropertyGrid.TtPropertyOrderAttribute.EPropertyOrder.DefinitionOrder)]
+    public class TtKawaiiRibbonSetup : BaseSerializer
+    {
+        [Rtti.Meta]
+        public string Name { get; set; } = "Ribbon";
+
+        [Rtti.Meta]
+        [TtSkeletonBoneIndexPickerEditorAttribute]
+        public LimbIndexInSkeleton RootBoneIndex { get; set; }
+
+        [Rtti.Meta]
+        [TtSkeletonBoneIndexPickerEditorAttribute]
+        public LimbIndexInSkeleton EndBoneIndex { get; set; }
+
+        [Rtti.Meta]
+        public float TailBoneLength { get; set; } = 0.0f;
+
+        [Rtti.Meta]
+        public EKawaiiTailBoneAxis TailBoneAxis { get; set; } = EKawaiiTailBoneAxis.X_Positive;
+
+        /// <summary> LOD threshold. -1 means always active. </summary>
+        [Rtti.Meta]
+        public int LODThreshold { get; set; } = -1;
+
+        // ─── 摆动 ──────────────────────────────────────────────────────
+
+        /// <summary> 根关节的最大摆动角度(度)。10 轻微, 30 中等, 60 大幅。 </summary>
+        [Rtti.Meta]
+        public float SwingAngleDegrees { get; set; } = 30.0f;
+
+        /// <summary> 每秒摆动次数(Hz), 越大越快。 </summary>
+        [Rtti.Meta]
+        public float SwayFrequency { get; set; } = 1.5f;
+
+        /// <summary> 惯性延迟。0=即时跟随无延迟, 1=强烈拖尾/波浪感。 </summary>
+        [Rtti.Meta]
+        public float Inertia { get; set; } = 0.5f;
+
+        /// <summary> 惯性沿链递增。0=全链均匀延迟, 1=末端延迟远大于根部。 </summary>
+        [Rtti.Meta]
+        public float InertiaFalloff { get; set; } = 0.3f;
+
+        /// <summary> 末端振幅倍率。1=与根部相同, 2=末端摆幅翻倍。设置 SwingAmplitudeCurve 后本项失效。 </summary>
+        [Rtti.Meta]
+        public float TipAmplify { get; set; } = 1.5f;
+
+        /// <summary> 振幅增长曲线形状。0.5=前段快, 1=线性, 2=越靠末端放大越快(最自然)。 </summary>
+        [Rtti.Meta]
+        public float AmplifyCurvePower { get; set; } = 2.0f;
+
+        // ─── 摆动平面 ──────────────────────────────────────────────────
+        // 两个角度都相对链自身的静止方向, 所以无论条带怎么绑骨含义都一致。
+
+        /// <summary> 绕链自身旋转摆动平面(度)。0=前后摆, ±90=左右摆, 中间为斜向平面。 </summary>
+        [Rtti.Meta]
+        public float SwingPlaneAngleDegrees { get; set; } = 0.0f;
+
+        /// <summary> 条带在该平面内的静止位置, 即摆动围绕的 0 度(度)。±90 把整条带在平面内偏转四分之一圈。 </summary>
+        [Rtti.Meta]
+        public float RestTiltAngleDegrees { get; set; } = 0.0f;
+
+        /// <summary>
+        /// 沿链长的振幅曲线(乘子), 设置后覆盖 TipAmplify / AmplifyCurvePower。
+        /// 量程给到 4 倍: 封顶在 1 的乘子只能衰减, 无法把某段拉得更大。
+        /// </summary>
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 4.0f)]
+        public TtKawaiiCurve SwingAmplitudeCurve { get; set; } = new TtKawaiiCurve();
+
+        // ─── 有机噪声(FBM) ─────────────────────────────────────────────
+
+        /// <summary> 噪声混合比重。0=纯正弦, 1=纯噪声。 </summary>
+        [Rtti.Meta]
+        public float NoiseMix { get; set; } = 0.0f;
+
+        /// <summary> 噪声叠加层数(1..8)。 </summary>
+        [Rtti.Meta]
+        public int NoiseLayers { get; set; } = 4;
+
+        /// <summary> 高频细节强度。越低越平滑, 越高越粗糙。 </summary>
+        [Rtti.Meta]
+        public float NoiseRoughness { get; set; } = 0.5f;
+
+        /// <summary> 噪声整体尺度。越大细节越密, 越小起伏越宽。 </summary>
+        [Rtti.Meta]
+        public float NoiseScale { get; set; } = 1.0f;
+
+        // ─── 风 ────────────────────────────────────────────────────────
+
+        /// <summary> 风力响应强度。0=忽略风。 </summary>
+        [Rtti.Meta]
+        public float WindResponse { get; set; } = 2.0f;
+
+        /// <summary> 阵风强度, 叠加在稳定风之上。0=平滑风, 1=强湍流。 </summary>
+        [Rtti.Meta]
+        public float WindGustiness { get; set; } = 0.5f;
+
+        /// <summary> 阵风循环频率。 </summary>
+        [Rtti.Meta]
+        public float GustFrequency { get; set; } = 2.0f;
+
+        /// <summary> 沿链长的风力影响曲线(乘子)。 </summary>
+        [Rtti.Meta]
+        [EGui.Controls.PropertyGrid.TtKawaiiCurveEditor(YMin = 0.0f, YMax = 2.0f)]
+        public TtKawaiiCurve WindInfluenceCurve { get; set; } = new TtKawaiiCurve();
+
+        public TtKawaiiRibbonSetup()
+        {
+
+        }
+    }
+
+    /// <summary>
     /// Collider definition for bone-driven colliders.
     /// Updated each frame from bone transforms.
     /// Shape geometry is defined by the TtCollisionShape派生类 (TtSphereShape, TtCapsuleShape, etc.)

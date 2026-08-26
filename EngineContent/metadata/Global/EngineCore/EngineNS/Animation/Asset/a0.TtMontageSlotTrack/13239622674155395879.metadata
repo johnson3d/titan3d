@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_13239622674155395879 Type="EngineNS.Animation.Asset.TtMontageSlotTrack@EngineCore">
+  <Segments Type="System.Collections.Generic.List&lt;EngineNS.Animation.Asset.TtMontageSegment@EngineCore,&gt;@Unknown" Order="0" />
+  <SlotName Type="System.String@Unknown" Order="0" />
+</Hash_13239622674155395879>

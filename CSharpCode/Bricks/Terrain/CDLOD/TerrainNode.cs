@@ -1,5 +1,6 @@
 using EngineNS.GamePlay;
 using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Pipeline.Shader;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,7 +11,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     [Bricks.CodeBuilder.ContextMenu("TerrainNode", "Graphics\\TerrainNode", GamePlay.Scene.TtNode.EditorKeyword)]
     [GamePlay.Scene.TtNode(NodeDataType = typeof(TtTerrainData), DefaultNamePrefix = "Terrain")]
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Bricks.Terrain.CDLOD.UTerrainNode@EngineCore" })]
-    public class TtTerrainNode : GamePlay.Scene.TtVisual
+    public partial class TtTerrainNode : GamePlay.Scene.TtVisual
     {
         public TtTerrainNode() 
         { 
@@ -44,6 +45,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 LODRangeFloat.Add(400.0f);
                 LODRangeFloat.Add(600.0f);
                 LODRangeFloat.Add(950.0f);
+                //MaterialName = RName.GetRName("utest/material/terrainidmap.material");
+                MaterialName = RName.GetRName("material/terrainidmap.material", RName.ERNameType.Engine);
             }
             [Category("Option")]
             [Rtti.Meta("")]
@@ -70,12 +73,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             [Rtti.Meta("")]
             [RName.PGRName(FilterExts = Procedure.UPgcAsset.AssetExt)]
             public RName PgcName { get; set; }
-            
+            [Category("Option")]
+            [Rtti.Meta("")]
+            [RName.PGRName(FilterExts = TtMaterial.AssetExt)]
+            public RName MaterialName { get; set; }
+
             public int LevelSideX = 1024;
             public int LevelSideZ = 1024;
         }
         
-        public UTerrainSystem Terrain { get; } = new UTerrainSystem();
+        public TtTerrainSystem Terrain { get; } = new TtTerrainSystem();
         public int NumOfLevelX;
         public int NumOfLevelZ;
         public int ActiveLevel;
@@ -143,7 +150,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
         }
 
-        public ULevelStreaming LevelStreaming = new ULevelStreaming();
+        public TtLevelStreaming LevelStreaming = new TtLevelStreaming();
 
         public NxRHI.TtCbView TerrainCBuffer;
 
@@ -156,6 +163,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 return GetNodeData<TtTerrainData>()?.PgcName?.Name;
             }
         }
+        public TtTerrainData TerrainData { get => GetNodeData<TtTerrainData>(); }
 
         protected override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, GamePlay.Scene.TtNodeData data, GamePlay.Scene.EBoundVolumeType bvType, Type placementType)
         {
@@ -166,7 +174,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if (await base.InitializeNode(world, data, bvType, placementType) == false)
                 return false;
 
-            if (await Terrain.Initialize(GetNodeData<TtTerrainData>().MipLevels) == false)
+            if (await Terrain.Initialize(TerrainData.MaterialName, TerrainData.MipLevels) == false)
                 return false;
 
             var trData = data as TtTerrainData;
@@ -460,7 +468,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 {
                     TtEngine.Instance.TickableManager.AddTickSync(static (arg) =>
                     {
-                        var ts = arg as UTerrainSystem;
+                        var ts = arg as TtTerrainSystem;
                         ts.TickSync();
                     }, this.Terrain);
                 }
@@ -517,6 +525,19 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             foreach (var i in VisiblePatches)
             {
                 i.OnGatherVisibleMeshes(rp);
+            }
+
+            // RVT 上传不能依赖某个具体渲染节点存在。原来唯一的活跃点在
+            // TtGpuCullingNode.PushTerrainMeshBatch 里, 于是主 rpolicy 一旦换成不含
+            // TtGpuCullingNode 的 (例如 deferred_simple), ActiveTexIDs 永远是空的,
+            // TickSync 在 ProcessChanged() == false 处直接短路, atlas 从未写入 ——
+            // 表现为地形整块渲染成平板, 而 CPU 侧高度数据是完全正常的。
+            if (TtEngine.Instance.Config.Feature_UseRVT)
+            {
+                foreach (var i in VisiblePatches)
+                {
+                    i.ActiveRVTs();
+                }
             }
 
             foreach (var i in ActiveLevels)

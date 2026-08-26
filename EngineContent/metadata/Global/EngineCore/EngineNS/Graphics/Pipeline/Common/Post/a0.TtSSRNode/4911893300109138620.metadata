@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_4911893300109138620 Type="EngineNS.Graphics.Pipeline.Common.Post.TtSSRNode@EngineCore">
+  <EdgeFadePower Type="System.Single@Unknown" Order="0" />
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <HalfResolution Type="System.Boolean@Unknown" Order="0" />
+  <Intensity Type="System.Single@Unknown" Order="0" />
+  <MaxDistance Type="System.Single@Unknown" Order="0" />
+  <MaxRoughness Type="System.Single@Unknown" Order="0" />
+  <NumSteps Type="System.Int32@Unknown" Order="0" />
+  <RayJitter Type="System.Single@Unknown" Order="0" />
+  <ResolveDepthSigma Type="System.Single@Unknown" Order="0" />
+  <ResolveRadius Type="System.Int32@Unknown" Order="0" />
+  <Thickness Type="System.Single@Unknown" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_4911893300109138620>

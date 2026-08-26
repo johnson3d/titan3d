@@ -159,8 +159,8 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinOut YPin { get; set; } = new PinOut();
         [Browsable(false)]
         public PinOut ZPin { get; set; } = new PinOut();
-        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UBufferCreator OutputFloat1Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UCalcNormal()
         {
             Icon.Size = new Vector2(25, 25);
@@ -319,8 +319,8 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinOut YPin { get; set; } = new PinOut();
         [Browsable(false)]
         public PinOut ZPin { get; set; } = new PinOut();
-        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UBufferCreator OutputFloat1Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UNormalize3D()
         {
             Icon.Size = new Vector2(25, 25);
@@ -395,8 +395,8 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn BezierPin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UBufferCreator OutputFloat1Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UBezierValueMap()
         {
             Icon.Size = new Vector2(25, 25);
@@ -504,8 +504,8 @@ namespace EngineNS.Bricks.Procedure.Node
         [Rtti.Meta("")]
         public int CalculateDeep { get; set; } = 30;
 
-        public UBufferCreator FloatBuffer { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UBufferCreator OutputFloat3Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator FloatBuffer { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat3Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
 
         public UFastPoissonDiskSampling2DNode()
         {
@@ -514,7 +514,7 @@ namespace EngineNS.Bricks.Procedure.Node
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
 
-            AddInput(MaskPin, "Mask", UBufferCreator.CreateInstance<USuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
+            AddInput(MaskPin, "Mask", UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
             AddInput(HeightPin, "Height", FloatBuffer);
             AddInput(RadiusPin, "Radius", FloatBuffer);
             AddOutput(ResultPin, "Result", OutputFloat3Desc);
@@ -547,7 +547,7 @@ namespace EngineNS.Bricks.Procedure.Node
             return null;
         }
 
-        public bool IsMask(int x, int y, int z, USuperBuffer<sbyte, FSByteOperator> maskBuffer)
+        public bool IsMask(int x, int y, int z, TtSuperBuffer<sbyte, FSByteOperator> maskBuffer)
         {
             if (maskBuffer == null)
                 return true;
@@ -557,7 +557,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
         public override bool OnProcedure(UPgcGraph graph)
         {
-            var maskBuffer = graph.BufferCache.FindBuffer(MaskPin) as USuperBuffer<sbyte, FSByteOperator>;
+            var maskBuffer = graph.BufferCache.FindBuffer(MaskPin) as TtSuperBuffer<sbyte, FSByteOperator>;
             var heightBuffer = graph.BufferCache.FindBuffer(HeightPin);
             var resultBuffer = graph.BufferCache.FindBuffer(ResultPin);
             resultBuffer.ResizePixels();
@@ -617,7 +617,7 @@ namespace EngineNS.Bricks.Procedure.Node
             {
                 if(mPreviewResultIndex >= 0)
                 {
-                    var maskBuffer = graph.BufferCache.FindBuffer(MaskPin) as USuperBuffer<sbyte, FSByteOperator>;
+                    var maskBuffer = graph.BufferCache.FindBuffer(MaskPin) as TtSuperBuffer<sbyte, FSByteOperator>;
                     if (maskBuffer == null)
                         return;
 

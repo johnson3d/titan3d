@@ -32,7 +32,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     public struct FGrassTransformDataOperator : Procedure.ISuperPixelOperator<FGrassTransformData>
     {
         public Rtti.TtTypeDesc ElementType => Rtti.TtTypeDescGetter<FGrassTransformData>.TypeDesc;
-        public Rtti.TtTypeDesc BufferType => Rtti.TtTypeDescGetter<USuperBuffer<FGrassTransformData, FGrassTransformDataOperator>>.TypeDesc;
+        public Rtti.TtTypeDesc BufferType => Rtti.TtTypeDescGetter<TtSuperBuffer<FGrassTransformData, FGrassTransformDataOperator>>.TypeDesc;
         public FGrassTransformData MaxValue => FGrassTransformData.Identity;
         public FGrassTransformData MinValue => FGrassTransformData.Identity;
 
@@ -410,7 +410,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             tempArray.Dispose();
         }
-        public void AddGrass(in DVector3 patchOffset, UTerrainGrass grass, Procedure.UBufferComponent weights, float weightMin, float weightMax)
+        public void AddGrass(in DVector3 patchOffset, UTerrainGrass grass, Procedure.TtBufferComponent weights, float weightMin, float weightMax)
         {
             var patchSize = mHostPatch.Level.GetTerrainNode().PatchSize;
             var weightStride = (int)Math.Ceiling(patchSize);

@@ -7,7 +7,7 @@ namespace EngineNS.Bricks.Procedure.Node
     public class UNodePinDefine : NodeGraph.UNodePinDefineBase
     {
         [Rtti.Meta("")]
-        public UBufferCreator BufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, - 1, -1);
+        public UBufferCreator BufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, - 1, -1);
         protected override void InitFromPin<T>(T pin)
         {
             Name = pin.Name;
@@ -37,7 +37,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         [Rtti.Meta("")]
         public unsafe virtual void OnPerPixel(UPgcGraph graph, UProgramNode node, 
-            UBufferComponent resuilt, int x, int y, int z, object tag)
+            TtBufferComponent resuilt, int x, int y, int z, object tag)
         {
             //resuilt.GetSuperPixelAddress(x, y, z);
             //resuilt.GetPixel<float>(x, y, z);
@@ -227,7 +227,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 return false;
             return McProgram.Get().OnProcedure(graph, this);
         }
-        public void DispatchPixels(UPgcGraph graph, UBufferComponent result, object tag)
+        public void DispatchPixels(UPgcGraph graph, TtBufferComponent result, object tag)
         {
             var prog = McProgram.Get();
             for (int i = 0; i < result.Depth; i++)
@@ -287,7 +287,7 @@ namespace EngineNS.Bricks.Procedure.Node
 			var _return_value = OnProcedure(graph, node);
 			return _return_value;
 		}
-		public unsafe void macross_OnPerPixel (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, UProgramNode node, UBufferComponent resuilt, int x, int y, int z, object tag) 
+		public unsafe void macross_OnPerPixel (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, UProgramNode node, TtBufferComponent resuilt, int x, int y, int z, object tag) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{

@@ -69,6 +69,27 @@ namespace EngineNS.Graphics.Pipeline
             get;
             set;
         } = true;
+        /// <summary>
+        /// 延迟贴花总开关。关掉时 TtDecalPassNode 不 dispatch, DBuffer 用黑图占位
+        /// (alpha = 覆盖权重 = 0, 等价于场景里没有贴花)。
+        /// </summary>
+        [Rtti.Meta("")]
+        [Category("Feature")]
+        public bool EnableDecal
+        {
+            get;
+            set;
+        } = true;
+        /// <summary>
+        /// 屏幕空间反射总开关。关掉时 TtSSRNode 不 dispatch, 反射输出用黑图占位。
+        /// </summary>
+        [Rtti.Meta("")]
+        [Category("Feature")]
+        public bool EnableSSR
+        {
+            get;
+            set;
+        } = true;
         [Rtti.Meta("")]
         [Category("Feature")]
         public EShadowMode ShadowMode

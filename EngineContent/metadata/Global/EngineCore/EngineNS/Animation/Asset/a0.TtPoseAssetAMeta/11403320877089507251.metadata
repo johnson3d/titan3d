@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_11403320877089507251 Type="EngineNS.Animation.Asset.TtPoseAssetAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Order="0" />
+  <AssetId Type="System.Guid@Unknown" Order="0" />
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Description Type="System.String@Unknown" Order="0" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore" Order="0" />
+  <ImportClipName Type="EngineNS.RName@EngineCore" Order="0" />
+  <ImportTime Type="System.Single@Unknown" Order="0" />
+  <PreviewMeshName Type="EngineNS.RName@EngineCore" Order="0" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Order="0" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Order="0" />
+  <TypeStr Type="System.String@Unknown" Order="0" />
+</Hash_11403320877089507251>

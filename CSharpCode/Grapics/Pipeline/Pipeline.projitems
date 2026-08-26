@@ -17,6 +17,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\FogNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Post\DenoiseNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Post\SSAONode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Post\SSRNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Post\HemisphereCaptureNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Post\FsrNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\GpuScene_Instance.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)GI\TLAS.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GpuCullingNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\DeferredBasePassNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Deferred\DecalPassNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\DeferredDirLightingNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\SSSBlurNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\TtSubsurfaceProfile.cs" />

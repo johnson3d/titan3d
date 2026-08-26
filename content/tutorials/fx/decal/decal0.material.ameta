@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="37f9cb309ffd1c0800042e0e2c6d78bf38a09adb3b2f6ff9c3f0161de6966518" />
+      <Path Type="System.String@Unknown" Value="decal0.material" />
+    </e_0>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="f29f0aab-961a-40e7-99b4-934bb5a713e3" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/fx/decal/decal0.material,f29f0aab-961a-40e7-99b4-934bb5a713e3" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.TtMaterial&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Value="Engine,texture/default_vignette.srv,fe7095ff-a073-4f22-b740-b793c67d9c23" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="Default" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
+</Root>

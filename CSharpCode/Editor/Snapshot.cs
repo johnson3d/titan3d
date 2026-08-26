@@ -387,8 +387,8 @@ namespace EngineNS.Editor
                     This.Renderer.TickSync();
                 }, this);
 
-                System.Threading.AutoResetEvent mRenderFinishedEvent = new System.Threading.AutoResetEvent(false);
-                TtEngine.Instance.ThreadRender.WaitFinishRenderAction(mRenderFinishedEvent);
+                //System.Threading.AutoResetEvent mRenderFinishedEvent = new System.Threading.AutoResetEvent(false);
+                TtEngine.Instance.ThreadRender.WaitFinishRenderAction(null);
 
                 return Renderer.RenderPolicy.GetFinalShowRSV();
             }

@@ -116,7 +116,11 @@ namespace KawaiiPhysics
 			}
 		}
 
-		// Collision
+		// Collision runs LAST of all positional steps, after the whole constraint sweep, so the
+		// bone length / angle constraints can no longer pull the chain back into a collider once
+		// it has been pushed out. Nothing below this line moves a particle - UpdateVelocities
+		// derives velocity from the collision-resolved position - so do not insert a constraint
+		// solve after this call.
 		HandleCollision(Chain, Context, ColliderBVH);
 
 		// Update velocities

@@ -522,8 +522,7 @@ namespace EngineNS.GamePlay.Scene
                 This.CubeRenderer.CaptureCubeFaces(TtEngine.Instance.ElapsedSecond);
             }, this);
 
-            System.Threading.AutoResetEvent mRenderFinishedEvent = new System.Threading.AutoResetEvent(false);
-            TtEngine.Instance.ThreadRender.WaitFinishRenderAction(mRenderFinishedEvent);
+            TtEngine.Instance.ThreadRender.WaitFinishRenderAction(null);
 
             return true;
         }

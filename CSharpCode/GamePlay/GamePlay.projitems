@@ -41,6 +41,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Scene\CubeWorldRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\ScenePartitionNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\PointLightNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\DecalNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\VolumeNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\PostProcessVolumeNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\SpotLightNode.cs" />

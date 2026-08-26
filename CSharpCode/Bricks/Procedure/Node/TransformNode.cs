@@ -20,10 +20,10 @@ namespace EngineNS.Bricks.Procedure.Node
 
         public PinOut SinglePosPin { get; set; } = new PinOut();
 
-        public UBufferCreator InputTransDesc = UBufferCreator.CreateInstance<USuperBuffer<FTransform, FTransformOperator>>(-1, -1, -1);
-        public UBufferCreator OutputDouble3Desc = UBufferCreator.CreateInstance<USuperBuffer<DVector3, FDouble3Operator>>(-1, -1, -1);
-        public UBufferCreator OutputFloat3Desc = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UBufferCreator OutputFloat4Desc = UBufferCreator.CreateInstance<USuperBuffer<Vector4, FFloat4Operator>>(-1, -1, -1);
+        public UBufferCreator InputTransDesc = UBufferCreator.CreateInstance<TtSuperBuffer<FTransform, FTransformOperator>>(-1, -1, -1);
+        public UBufferCreator OutputDouble3Desc = UBufferCreator.CreateInstance<TtSuperBuffer<DVector3, FDouble3Operator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat3Desc = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat4Desc = UBufferCreator.CreateInstance<TtSuperBuffer<Vector4, FFloat4Operator>>(-1, -1, -1);
         public UTransformUnpackNodes()
         {
             Icon.Size = new Vector2(25, 25);
@@ -113,10 +113,10 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false)]
         public PinIn SinglePosPin { get; set; } = new PinIn();
 
-        public UBufferCreator InputDouble3Desc = UBufferCreator.CreateInstance<USuperBuffer<DVector3, FDouble3Operator>>(-1, -1, -1);
-        public UBufferCreator InputFloat3Desc = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UBufferCreator InputFloat4Desc = UBufferCreator.CreateInstance<USuperBuffer<Vector4, FFloat4Operator>>(-1, -1, -1);
-        public UBufferCreator OutputTransDesc = UBufferCreator.CreateInstance<USuperBuffer<FTransform, FTransformOperator>>(-1, -1, -1);
+        public UBufferCreator InputDouble3Desc = UBufferCreator.CreateInstance<TtSuperBuffer<DVector3, FDouble3Operator>>(-1, -1, -1);
+        public UBufferCreator InputFloat3Desc = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator InputFloat4Desc = UBufferCreator.CreateInstance<TtSuperBuffer<Vector4, FFloat4Operator>>(-1, -1, -1);
+        public UBufferCreator OutputTransDesc = UBufferCreator.CreateInstance<TtSuperBuffer<FTransform, FTransformOperator>>(-1, -1, -1);
         public UTransformPackNodes()
         {
             Icon.Size = new Vector2(25, 25);
@@ -199,12 +199,12 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinOut OutPlant { get; set; } = new PinOut();
         //[Browsable(false)]
         //public PinOut OutGrass { get; set; } = new PinOut();
-        public UBufferCreator InputHeightDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UBufferCreator InputNormDesc = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UBufferCreator InputMatIdDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UBufferCreator InputHMappinDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UBufferCreator OutputTransDesc = UBufferCreator.CreateInstance<USuperBuffer<FTransform, FTransformOperator>>(0, 0, 0);
-        public UBufferCreator OutputPlantDesc = UBufferCreator.CreateInstance<USuperBuffer<Vector2i, FInt2Operator>>(0, 0, 0);
+        public UBufferCreator InputHeightDesc = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator InputNormDesc = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator InputMatIdDesc = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator InputHMappinDesc = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator OutputTransDesc = UBufferCreator.CreateInstance<TtSuperBuffer<FTransform, FTransformOperator>>(0, 0, 0);
+        public UBufferCreator OutputPlantDesc = UBufferCreator.CreateInstance<TtSuperBuffer<Vector2i, FInt2Operator>>(0, 0, 0);
         //public UBufferCreator OutputGrassDesc = UBufferCreator.CreateInstance<USuperBuffer<FGrassTransformData, FGrassTransformDataOperator>>(0, 0, 0);
         public UTransformBuilder()
         {

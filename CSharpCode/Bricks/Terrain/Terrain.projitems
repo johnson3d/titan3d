@@ -12,6 +12,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\LevelStreaming.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\Patch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\Terrain.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainEdit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainEditorInteractiveMode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainHeightCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainHeightOverlay.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainLevel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainMaterial.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainMdfQueue.cs" />

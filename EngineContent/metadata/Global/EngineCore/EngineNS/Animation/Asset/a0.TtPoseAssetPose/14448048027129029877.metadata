@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_14448048027129029877 Type="EngineNS.Animation.Asset.TtPoseAssetPose@EngineCore">
+  <Name Type="System.String@Unknown" Order="0" />
+  <SourceClipName Type="EngineNS.RName@EngineCore" Order="0" />
+  <SourceClipTime Type="System.Single@Unknown" Order="0" />
+  <Transforms Type="System.Collections.Generic.List&lt;EngineNS.FTransform@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_14448048027129029877>

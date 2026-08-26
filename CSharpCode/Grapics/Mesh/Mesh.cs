@@ -636,26 +636,40 @@ namespace EngineNS.Graphics.Mesh
             if (atomType != Rtti.TtTypeDescGetter<TtAtom>.TypeDesc && atomType.IsSubclassOf(typeof(TtAtom)) == false)
                 return false;
 
+            // 骨骼与 morph 是两个正交维度, 扫一次供两处用: 下面的自动兜底选型,
+            // 以及选型完成后的错配提示。不能找到骨骼就提前退出 —— 得把 SubMesh 扫完
+            // 才知道有没有 morph。
+            bool assetHasSkin = false;
+            bool assetHasMorph = false;
+            foreach (var j in materialMesh.SubMeshes)
+            {
+                if (j.Mesh == null)
+                    continue;
+                if (j.Mesh.PartialSkeleton != null)
+                    assetHasSkin = true;
+                if (j.Mesh.MorphTargets != null && j.Mesh.MorphTargets.IsValid)
+                    assetHasMorph = true;
+                if (assetHasSkin && assetHasMorph)
+                    break;
+            }
+
             if (mdfQueueType == null)
             {
-                if (materialMesh.MdfQueueType!=null)
+                if (materialMesh.MdfQueueType != null)
+                {
                     mdfQueueType = materialMesh.MdfQueueType;
+                }
+                else if (assetHasSkin)
+                {
+                    mdfQueueType = assetHasMorph
+                        ? Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfSkinMorphMesh>.TypeDesc
+                        : Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfSkinMesh>.TypeDesc;
+                }
                 else
                 {
-                    foreach (var j in materialMesh.SubMeshes)
-                    {
-                        if (j.Mesh == null)
-                            continue;
-                        if (j.Mesh.PartialSkeleton!=null)
-                        {
-                            mdfQueueType = Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfSkinMesh>.TypeDesc;
-                            break;
-                        }
-                    }
-                    if (mdfQueueType == null)
-                    {
-                        mdfQueueType = Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc;
-                    }
+                    mdfQueueType = assetHasMorph
+                        ? Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfMorphMesh>.TypeDesc
+                        : Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc;
                 }
             }
 
@@ -663,6 +677,16 @@ namespace EngineNS.Graphics.Mesh
             if (MdfQueue == null)
                 return false;
             MdfQueue.Initialize(materialMesh);
+
+            // 资产带 morph 但队列里没有 morph modifier 时, morph 会静默不生效。这里只给一条
+            // 可检索的提示, **不去覆盖**调用方或资产已授权的 MdfQueueType —— 覆盖会把用户
+            // 自定义的 MdfQueue (自己的 modifier 链) 整体换掉, 后果比 morph 不生效严重得多。
+            if (assetHasMorph && MdfQueue.FindModifier<Modifier.TtMorphModifier>() == null)
+            {
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, "Mesh",
+                    $"{materialMesh.AssetName} has morph targets but MdfQueue {MdfQueue.GetType().Name} has no TtMorphModifier, " +
+                    $"morph will not take effect; set MdfQueueType to TtMdfSkinMorphMesh / TtMdfMorphMesh to enable it");
+            }
 
             MaterialMesh = materialMesh;
             MaterialMeshSerialId = MaterialMesh.SerialId;

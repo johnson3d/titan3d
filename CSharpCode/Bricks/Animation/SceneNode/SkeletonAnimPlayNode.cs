@@ -1,4 +1,5 @@
-﻿using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
+﻿using EngineNS.Animation.RootMotion;
+using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
 using EngineNS.GamePlay.Scene;
 using System;
 using System.Collections.Generic;
@@ -6,16 +7,39 @@ using System.Text;
 
 namespace EngineNS.Animation.SceneNode
 {
-    public class TtSkeletonAnimPlayNode : GamePlay.Scene.TtLightWeightNodeBase
+    public class TtSkeletonAnimPlayNode : GamePlay.Scene.TtLightWeightNodeBase, IRootMotionSource
     {
         public class TtSkeletonAnimPlayNodeData : TtNodeData
         {
             [Rtti.Meta("")]
             [RName.PGRName(FilterExts = Animation.Asset.TtAnimationClip.AssetExt)]
             public RName AnimatinName { get; set; }
+            [Rtti.Meta("")]
+            public ERootMotionMode RootMotionMode { get; set; } = ERootMotionMode.Ignore;
             public TtMeshNode AnimatedMeshNode { get; set; } = null;
         }
         public Animation.Player.TtSkeletonAnimationPlayer Player { get; set; }
+
+        #region IRootMotionSource
+        TtRootMotionAccumulator mRootMotionAccumulator = new TtRootMotionAccumulator();
+        ERootMotionMode mRootMotionMode = ERootMotionMode.Ignore;
+        public ERootMotionMode RootMotionMode
+        {
+            get => mRootMotionMode;
+            set
+            {
+                mRootMotionMode = value;
+                if (Player != null)
+                    Player.RootMotionMode = value;
+                if (NodeData is TtSkeletonAnimPlayNodeData data)
+                    data.RootMotionMode = value;
+            }
+        }
+        public bool ConsumeRootMotion(out FTransform delta)
+        {
+            return mRootMotionAccumulator.Consume(out delta);
+        }
+        #endregion IRootMotionSource
 
         protected override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
@@ -28,6 +52,7 @@ namespace EngineNS.Animation.SceneNode
             var animPlayNodeData = NodeData as TtSkeletonAnimPlayNodeData;
             var skeletonAnimClip = await animPlayNodeData.AnimatinName.GetAsset<Animation.Asset.TtAnimationClip>();
             Player = new Player.TtSkeletonAnimationPlayer(skeletonAnimClip);
+            RootMotionMode = animPlayNodeData.RootMotionMode;
             return true;
         }
         public void BindingTo(TtMeshNode meshNode)
@@ -47,9 +72,12 @@ namespace EngineNS.Animation.SceneNode
         TtLocalSpaceRuntimePose mAnimatedPose = null;
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
+            Player.RootMotionMode = mRootMotionMode;
             Player.Update(args.World.DeltaTimeSecond);
             Player.Evaluate();
             TtRuntimePoseUtility.CopyPose(ref mAnimatedPose, Player.OutPose);
+            if (Player.OutPose != null)
+                mRootMotionAccumulator.Submit(Player.OutPose.RootMotion);
             return true;
         }
 
@@ -66,9 +94,39 @@ namespace EngineNS.Animation.SceneNode
             return node;
         }
     }
-    public class TtAnimStateMachinePlayNode : GamePlay.Scene.TtLightWeightNodeBase
+    public class TtAnimStateMachinePlayNode : GamePlay.Scene.TtLightWeightNodeBase, IRootMotionSource
     {
+        public class TtAnimStateMachinePlayNodeData : TtNodeData
+        {
+            [Rtti.Meta("")]
+            public ERootMotionMode RootMotionMode { get; set; } = ERootMotionMode.Ignore;
+        }
         public Animation.Player.TtAnimStateMachinePlayer Player { get; set; }
+        /// <summary>
+        /// Montage宿主, 供Gameplay侧调用Montage_Play等接口
+        /// </summary>
+        public Montage.TtAnimMontageHost MontageHost { get => Player?.MontageHost; }
+
+        #region IRootMotionSource
+        TtRootMotionAccumulator mRootMotionAccumulator = new TtRootMotionAccumulator();
+        ERootMotionMode mRootMotionMode = ERootMotionMode.Ignore;
+        public ERootMotionMode RootMotionMode
+        {
+            get => mRootMotionMode;
+            set
+            {
+                mRootMotionMode = value;
+                if (Player != null)
+                    Player.RootMotionMode = value;
+                if (NodeData is TtAnimStateMachinePlayNodeData data)
+                    data.RootMotionMode = value;
+            }
+        }
+        public bool ConsumeRootMotion(out FTransform delta)
+        {
+            return mRootMotionAccumulator.Consume(out delta);
+        }
+        #endregion IRootMotionSource
 
         protected override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
@@ -80,6 +138,8 @@ namespace EngineNS.Animation.SceneNode
 
             Player = new Player.TtAnimStateMachinePlayer();
             Player.Initialize();
+            if (NodeData is TtAnimStateMachinePlayNodeData nodeData)
+                RootMotionMode = nodeData.RootMotionMode;
             return true;
         }
         public async Thread.Async.TtTask BindingTo(TtMeshNode meshNode)
@@ -90,6 +150,7 @@ namespace EngineNS.Animation.SceneNode
             var skinMDfQueue = meshNode.RenderMesh.MdfQueue as Graphics.Mesh.TtMdfSkinMesh;
             mAnimatedPose = SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animatablePose);
             meshNode.RuntimePose = mAnimatedPose;
+            Player.RootMotionMode = mRootMotionMode;
             await Player.BindingPose(animatablePose);
         }
         TtLocalSpaceRuntimePose mAnimatedPose = null;
@@ -104,6 +165,7 @@ namespace EngineNS.Animation.SceneNode
             if (Player.OutPose == null)
                 return true;
             TtRuntimePoseUtility.CopyPose(ref mAnimatedPose, Player.OutPose);
+            mRootMotionAccumulator.Submit(Player.OutPose.RootMotion);
             return true;
         }
 

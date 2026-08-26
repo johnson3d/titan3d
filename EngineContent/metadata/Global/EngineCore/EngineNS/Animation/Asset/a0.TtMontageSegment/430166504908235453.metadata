@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_430166504908235453 Type="EngineNS.Animation.Asset.TtMontageSegment@EngineCore">
+  <ClipEndTime Type="System.Single@Unknown" Order="0" />
+  <ClipName Type="EngineNS.RName@EngineCore" Order="0" />
+  <ClipStartTime Type="System.Single@Unknown" Order="0" />
+  <PlayRate Type="System.Single@Unknown" Order="0" />
+  <StartPos Type="System.Single@Unknown" Order="0" />
+</Hash_430166504908235453>

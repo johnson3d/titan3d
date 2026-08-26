@@ -187,10 +187,108 @@ Plugins目录下CopyPlugins.bat在修改*.plugin后目前需要手工执行，�
 	}
 ```
 
-## 7.增加一个TtMdfQueue处理顶点变换定制
-- 参阅EngineNS.Graphics.Mesh.TtMdfStaticMesh
-- 核心是实现GetBaseBuilder函数提供MdfQueue的hlsl代码
-- 通过继续派生本类的泛型版本来控制MdfQueu的shader permutation
+## 7.增加一个 Mesh Modifier / TtMdfQueue 定制顶点变换
+
+> 强制约束见 `CodingGuidelines.md` §7 (执行顺序 / vsOut 写入 / 蒙皮类必须派生 /
+> per-SubMesh 状态 / BindSRV 大小写)。下面只给可直接照抄的骨架。
+
+一个完整的顶点变换特性包含三个件:
+
+| 件 | 位置 | 职责 |
+|---|---|---|
+| `.cginc` | `enginecontent/Shaders/Modifier/Xxx.cginc` | VS 端的 `DoXxxModifierVS` |
+| modifier | `CSharpCode/Grapics/Mesh/Modifier/XxxModifier.cs` | 声明顶点流 / 绑定 per-instance 资源 |
+| MdfQueue | `CSharpCode/Grapics/Mesh/MdfXxxMesh.cs` | 组合 modifier, 供资产与节点选型 |
+
+### 7.1 modifier (参照 `Modifier/MorphModifier.cs`)
+
+```C#
+public class TtXxxModifier : Pipeline.Shader.IMeshModifier
+{
+    // 注意: 无需 native 对应物。既有 modifier 都继承 AuxPtrType<IXxxModifier>, 但 C# 侧
+    // 从不访问 modifier 的 mCoreObject, 纯 C# 实现完全可行。
+    public string ModifierNameVS { get => "DoXxxModifierVS"; }   // 与 cginc 里函数名一致
+    public string ModifierNamePS { get => null; }
+    public RName SourceName => RName.GetRName("shaders/modifier/Xxx.cginc", RName.ERNameType.Engine);
+
+    public NxRHI.EVertexStreamType[] GetNeedStreams()
+        => new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position };
+    public Graphics.Pipeline.Shader.EPixelShaderInput[] GetPSNeedInputs() => null;
+    public unsafe NxRHI.FShaderCode* GetHLSLCode(string inc, string oriInc) => (NxRHI.FShaderCode*)0;
+    public string GetUniqueText() => "";
+
+    public void Initialize(Graphics.Mesh.TtMaterialMesh materialMesh)
+    {
+        // 按 SubMesh 建 per-instance 状态 (CodingGuidelines §7.5)
+        // materialMesh.SubMeshes[i].Mesh 是那个 SubMesh 的 TtMeshPrimitives
+    }
+    public void OnBuildDrawCall(...) { }
+
+    public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue,
+        NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall,
+        Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtRenderMesh.TtAtom atom)
+    {
+        var state = mStates[atom.SubMesh.MeshIndex];        // 选对应那份
+        state.Buffer.Flush2GPU(cmd);                        // 首帧在这里创建 Srv, 必须先于 Bind
+        drawcall.BindSRV("XxxBuffer", state.Buffer.Srv);    // TtGraphicDraw 是 BindSRV (§7.6)
+    }
+    public void Dispose() { /* 释放自建 buffer */ }
+}
+```
+
+per-instance 的逐顶点 buffer 用 `Graphics.Pipeline.TtCpu2GpuBuffer<T>` (见 §1.5.1 与
+`CodingGuidelines.md` §1.6), `Initialize(BFT_SRV)` + `SetSize(vertexCount)` 一次定长,
+之后不重建, 绑定的 `Srv` 就不会被后续 flush 失效。
+
+### 7.2 cginc (参照 `Modifier/MorphModifier.cginc`)
+
+```hlsl
+#ifndef _XxxModifier_cginc_
+#define _XxxModifier_cginc_
+
+#include "../Inc/GlobalDefine.cginc"      // 用到 [TtShaderDefine] 注入类型时必需 (§3.3)
+
+StructuredBuffer<FXxxData> XxxBuffer;     // 名字跟 C# 端 BindSRV 的字符串一致
+
+void DoXxxModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
+{
+    FXxxData d = XxxBuffer[vert.vVertexID];   // vVertexID 无条件可用, 不需额外顶点流
+    vert.vPosition.xyz  += d.Offset;          // 给后续 modifier
+    vsOut.vPosition.xyz  = vert.vPosition.xyz; // 自己也得写 (§7.1, 否则可能静默无效)
+}
+#endif
+```
+
+### 7.3 MdfQueue (参照 `MdfMorphMesh.cs`)
+
+```C#
+// 不涉及蒙皮: 直接用泛型组合, T0 先于 T1 执行
+[Rtti.Meta("")]
+public class TtMdfXxxMesh : TtMdfQueue2<Mesh.Modifier.TtXxxModifier, Mesh.Modifier.TtStaticModifier> { }
+
+// 涉及蒙皮: 必须派生自 TtMdfSkinMesh (§7.4), 否则骨骼动画会整体失效
+[Rtti.Meta("")]
+public class TtMdfSkinXxxMesh : TtMdfSkinMesh
+{
+    public TtMdfSkinXxxMesh()
+    {
+        Modifiers.Insert(0, new Mesh.Modifier.TtXxxModifier());  // 插到 skin 之前
+        UpdateShaderCode();                                      // 必须重新生成 (§7.2)
+    }
+    public override void CopyFrom(TtMdfQueueBase mdf)
+    {
+        base.CopyFrom(mdf);   // 基类搬 PerSkinMeshCBuffer
+        // 再搬自己的运行时状态, 否则切 MdfQueue 类型时状态丢失
+    }
+}
+```
+
+❗ 三个新建 `.cs` 都要登记到 `CSharpCode/Grapics/Mesh/Mesh.projitems`
+(不是 `Grapics.projitems`, 该文件不存在; 规则见 `CodingGuidelines.md` §8)。
+
+选型提示: 资产/节点侧通过 `TtMeshNode.TtMeshNodeData.MdfQueueType` 指定类型字符串;
+编辑器预览可参照 `MeshPrimitiveEditor.Initialize_PreviewMaterialInstance` 里根据
+"有无骨骼 / 有无 morph" 四路选 MdfQueue 的写法。
 
 ## 8.增加一个TtShadingEnv处理Shader总流程
 - 参阅Graphics.Pipeline.Deferred.TtOpaqueShading

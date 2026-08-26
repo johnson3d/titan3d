@@ -48,12 +48,16 @@ namespace EngineNS.Plugins.MCPServer
         }
 
         [Bricks.AIGC.TtMCPTool("get_recent_logs",
-            "Returns recent engine log entries. Use tagFilter to filter by tag like 'Info','Warning','Error','MCP'",
-            returnDescription: "{logs: string[] - Log entries in format [timestamp][tag] message, " +
+            "Returns recent engine log entries from all log categories. The filter is a plain substring " +
+            "match against the whole formatted line, so it can select by tag ('Warning', 'Error') or by " +
+            "category ('Debug', 'MCP', 'Graphics') or by any message text. " +
+            "To read the output of a specific command, prefer execute_console_command, which returns only " +
+            "the lines that command produced.",
+            returnDescription: "{logs: string[] - Log entries in format [timestamp][tag][category] message, " +
             "count: number - Number of entries returned}")]
         public static string GetRecentLogs(
             [Bricks.AIGC.TtMCPParameter("Number of log entries to return")] double count = 50,
-            [Bricks.AIGC.TtMCPParameter("Filter logs by keyword, e.g. 'Info','Warning','Error'")] string tagFilter = "")
+            [Bricks.AIGC.TtMCPParameter("Substring filter, e.g. 'Error' or 'Debug' or 'Terrain'. Empty for all")] string tagFilter = "")
         {
             var logs = TtLogCollector.GetRecentLogs((int)count, tagFilter);
             return JsonSerializer.Serialize(new

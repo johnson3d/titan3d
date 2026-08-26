@@ -2,6 +2,7 @@
 #include "KawaiiPhySettings.h"
 #include "Solvers/KawaiiChainSolver.h"
 #include "Solvers/KawaiiClothSolver.h"
+#include "Solvers/KawaiiRibbonSolver.h"
 #include "Solvers/CosseratRodSolver.h"
 #include "Collision/DynamicCollider.h"
 #include "Collision/MeshCollider.h"
@@ -137,6 +138,41 @@ namespace KawaiiPhysics
 	int32_t NumBones);
 
 	// -----------------------------------------------------------------
+	// Ribbon solver interface
+	// -----------------------------------------------------------------
+	//
+	// The ribbon parameter set is far larger than the other solvers', so it is pushed in
+	// themed groups rather than one giant signature. Every group is optional: a ribbon that
+	// only gets SetRibbonSetup still runs with the FKawaiiRibbonSetup defaults.
+	// All angles are DEGREES here (converted once in BuildRibbons).
+
+	void InitializeRibbons(int32_t NumRibbons);
+	void SetRibbonSetup(int32_t Index,
+	const char* Name,
+	int32_t RootBoneIndex, int32_t EndBoneIndex,
+	float TailBoneLength, int32_t TailBoneAxis,
+	int32_t LODThreshold);
+
+	void SetRibbonSway(int32_t Index,
+	float SwingAngleDegrees, float SwayFrequency,
+	float Inertia, float InertiaFalloff,
+	float TipAmplify, float AmplifyCurvePower);
+	void SetRibbonSwingPlane(int32_t Index, float SwingPlaneAngleDegrees, float RestTiltAngleDegrees);
+	void SetRibbonNoise(int32_t Index, float NoiseMix, int32_t NoiseLayers, float NoiseRoughness, float NoiseScale);
+	void SetRibbonWind(int32_t Index, float WindResponse, float WindGustiness, float GustFrequency);
+
+	// Ribbon curves sampled by NormalizedLength. CurveId: 0=SwingAmplitude 1=WindInfluence.
+	void SetRibbonCurve(int32_t Index, int32_t CurveId,
+	const float* Times, const float* Values, int32_t Count);
+
+	void BuildRibbons(
+	const v3dxVector3* BonePositions,
+	const v3dxQuaternion* BoneRotations,
+	const v3dxVector3* BoneScales,
+	const int32_t* ParentIndices,
+	int32_t NumBones);
+
+	// -----------------------------------------------------------------
 	// Collider management
 	// -----------------------------------------------------------------
 
@@ -192,15 +228,23 @@ namespace KawaiiPhysics
 	float& OutX, float& OutY, float& OutZ) const;
 	int32_t GetRodParticleBoneIndex(int32_t RodIndex, int32_t ParticleIndex) const;
 
+	int32_t GetRibbonCount() const;
+	int32_t GetRibbonParticleCount(int32_t RibbonIndex) const;
+	void GetRibbonParticlePosition(int32_t RibbonIndex, int32_t ParticleIndex,
+	float& OutX, float& OutY, float& OutZ) const;
+	int32_t GetRibbonParticleBoneIndex(int32_t RibbonIndex, int32_t ParticleIndex) const;
+
 	private:
 	FKawaiiPhysicsContext SimContext;
 
 	KawaiiChainSolver ChainSolver;
 	KawaiiClothSolver ClothSolver;
+	KawaiiRibbonSolver RibbonSolver;
 
 	std::vector<FKawaiiChainSetup> ChainSetups;
 	std::vector<FKawaiiClothSetup> ClothSetups;
 	std::vector<FKawaiiRodSetup> RodSetups;
+	std::vector<FKawaiiRibbonSetup> RibbonSetups;
 	std::vector<FCosseratRodData> Rods;
 
 	FTopLevelBVH ColliderBVH;

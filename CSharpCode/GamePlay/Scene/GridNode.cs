@@ -182,6 +182,10 @@ namespace EngineNS.GamePlay.Scene
         }
         public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
+            // GridLine 是 VisibleAlways + DiscardAABB, 不走按 AABB 剔除那条路上的编辑器
+            // 可见性过滤, 所以这里显式再挡一次 —— Outliner 里网格那个小眼睛靠它生效。
+            if (rp.UseEditorVisibilityFilter && IsEditorVisibleInHierarchy == false)
+                return;
             base.OnGatherVisibleMeshes(rp);
         }
     }

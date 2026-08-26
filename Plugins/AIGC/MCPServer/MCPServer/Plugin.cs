@@ -46,27 +46,75 @@ namespace EngineNS.Plugins.MCPServer
 
     /// <summary>
     /// Ring buffer that captures engine log entries via Profiler.Log.OnReportLog.
-    /// Only collects logs with "MCP" category.
+    ///
+    /// 默认采集全部 category。早期版本只收 "MCP" 一个 category, 结果引擎自己的
+    /// 调试输出 (Debug / Graphics / IO 等) 全部抽不到, get_recent_logs 等于瞎了 ——
+    /// 而日志恰好是控制台命令唯一的输出通道。需要降开销时用
+    /// set_log_capture_filter 收窄到指定 category。
+    ///
+    /// 每条 entry 的格式是 [timestamp][tag][category] info, 把 category 写进去是为了
+    /// 让单一个子串过滤就能同时按 tag 和 category 筛。
     /// </summary>
     internal static class TtLogCollector
     {
         private static readonly object LogLock = new object();
-        private static readonly string[] LogBuffer = new string[500];
+        private static readonly string[] LogBuffer = new string[2000];
         private static int LogWriteIndex = 0;
         private static int LogCount = 0;
+        /// <summary>
+        /// 单调递增的写入总数 (不回绕)。拿它做游标就能取“某个时间点之后新增的日志”,
+        /// execute_console_command 靠这个把命令自己的输出从日志流里切出来。
+        /// </summary>
+        private static long TotalWritten = 0;
+        /// <summary>
+        /// 逗号分隔的 category 白名单。空 = 收全部。
+        /// </summary>
+        private static string[] CategoryFilter = null;
+
+        public static long CurrentSequence
+        {
+            get { lock (LogLock) { return TotalWritten; } }
+        }
+
+        public static string SetCategoryFilter(string categories)
+        {
+            lock (LogLock)
+            {
+                if (string.IsNullOrWhiteSpace(categories))
+                {
+                    CategoryFilter = null;
+                    return "";
+                }
+                CategoryFilter = categories.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                return string.Join(",", CategoryFilter);
+            }
+        }
 
         public static void OnReportLog(Profiler.ELogTag tag, string category, string memberName, string sourceFilePath, int sourceLineNumber, string info)
         {
-            if (category != "MCP")
-                return;
             var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
-            var entry = $"[{timestamp}][{tag}] {info}";
+            var entry = $"[{timestamp}][{tag}][{category}] {info}";
             lock (LogLock)
             {
+                if (CategoryFilter != null)
+                {
+                    bool matched = false;
+                    for (int i = 0; i < CategoryFilter.Length; i++)
+                    {
+                        if (CategoryFilter[i] == category)
+                        {
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (matched == false)
+                        return;
+                }
                 LogBuffer[LogWriteIndex] = entry;
                 LogWriteIndex = (LogWriteIndex + 1) % LogBuffer.Length;
                 if (LogCount < LogBuffer.Length)
                     LogCount++;
+                TotalWritten++;
             }
         }
 
@@ -89,6 +137,41 @@ namespace EngineNS.Plugins.MCPServer
             }
             if (result.Count > count)
                 result = result.GetRange(result.Count - count, count);
+            return result;
+        }
+
+        /// <summary>
+        /// 取序号 sinceSequence 之后写入的日志。新增量超过环形缓冲容量时只能拿到最新的
+        /// 那一批, 通过 droppedCount 告知丢了多少 —— 静默截断会让读日志的人误以为命令就
+        /// 输出了这么多。
+        /// </summary>
+        public static List<string> GetLogsSince(long sinceSequence, string tagFilter, out int droppedCount)
+        {
+            var result = new List<string>();
+            droppedCount = 0;
+            lock (LogLock)
+            {
+                long newCount = TotalWritten - sinceSequence;
+                if (newCount <= 0)
+                    return result;
+                if (newCount > LogCount)
+                {
+                    droppedCount = (int)(newCount - LogCount);
+                    newCount = LogCount;
+                }
+                // 从环形缓冲末尾往前数 newCount 条。
+                int startOffset = LogCount - (int)newCount;
+                int start = LogCount < LogBuffer.Length ? 0 : LogWriteIndex;
+                for (int i = startOffset; i < LogCount; i++)
+                {
+                    var idx = (start + i) % LogBuffer.Length;
+                    var entry = LogBuffer[idx];
+                    if (entry == null) continue;
+                    if (!string.IsNullOrEmpty(tagFilter) && !entry.Contains(tagFilter))
+                        continue;
+                    result.Add(entry);
+                }
+            }
             return result;
         }
     }

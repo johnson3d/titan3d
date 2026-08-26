@@ -10,7 +10,7 @@
         public EngineNS.Macross.TtMacrossBreak breaker_DispatchPixels_2032038249 = new EngineNS.Macross.TtMacrossBreak("breaker_DispatchPixels_2032038249");
         public EngineNS.Macross.TtMacrossBreak breaker_return_484331367 = new EngineNS.Macross.TtMacrossBreak("breaker_return_484331367");
         EngineNS.Macross.TtMacrossStackFrame mFrame_OnPerPixel = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("utest/pgc/testprog.macross", EngineNS.RName.ERNameType.Game));
-        public override void OnPerPixel(EngineNS.Bricks.Procedure.UPgcGraph graph,EngineNS.Bricks.Procedure.Node.UProgramNode node,EngineNS.Bricks.Procedure.UBufferComponent resuilt,System.Int32 x,System.Int32 y,System.Int32 z,System.Object tag)
+        public override void OnPerPixel(EngineNS.Bricks.Procedure.UPgcGraph graph,EngineNS.Bricks.Procedure.Node.UProgramNode node,EngineNS.Bricks.Procedure.TtBufferComponent resuilt,System.Int32 x,System.Int32 y,System.Int32 z,System.Object tag)
         {
             using(var guard_OnPerPixel = new EngineNS.Macross.TtMacrossStackGuard(mFrame_OnPerPixel))
             {
@@ -33,7 +33,7 @@
                 System.Boolean ret_3421051548 = default(System.Boolean);
                 mFrame_OnProcedure.SetWatchVariable("graph", graph);
                 mFrame_OnProcedure.SetWatchVariable("node", node);
-                EngineNS.Bricks.Procedure.UBufferComponent tmp_r_FindBuffer_227884761 = default(EngineNS.Bricks.Procedure.UBufferComponent);
+                EngineNS.Bricks.Procedure.TtBufferComponent tmp_r_FindBuffer_227884761 = default(EngineNS.Bricks.Procedure.TtBufferComponent);
                 mFrame_OnProcedure.SetWatchVariable("v_name_FindBuffer_227884761", "");
                 breaker_FindBuffer_227884761.TryBreak();
                 tmp_r_FindBuffer_227884761 = node.FindBuffer("");

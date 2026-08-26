@@ -58,6 +58,199 @@ namespace EngineNS.Graphics.Mesh
                 return mCoreObject.MergeFromMesh(mesh.mCoreObject, p);
             }
         }
+        /// <summary>
+        /// 合并另一个 provider 的几何, 可选择是否新增 atom。
+        ///
+        /// <paramref name="appendToLastAtom"/> == false 时与
+        /// <see cref="MergeFromMesh(TtMeshDataProvider, in Matrix)"/> 完全一致:
+        /// 源的每个 atom 都会在目标里新增一个 atom, 合并 N 段就得到 N 个 atom,
+        /// 渲染时必须提供同样数量的材质。
+        ///
+        /// == true 时几何**追加进目标的最后一个 atom**(目标还没有 atom 就新建一个), 不新增 atom,
+        /// 做法是把那个 atom 的 NumPrimitives 拉长到覆盖新追加的三角形。
+        /// 这是拼装编辑器 gizmo / 调试图元的常见需求 —— 几段几何共用一个材质,
+        /// 只想要一个 atom, 不想为了拼形状被迫准备一堆重复材质。
+        /// 该分支会在末尾重算 AABB (native 的不新增 atom 版本不会), 避免拼完后
+        /// AABB 只包住第一段几何导致被错误裁剪。
+        ///
+        /// <b>前提</b>: "拉长最后一个 atom" 只在该 atom 的索引区间本来就收尾于索引缓冲末尾时成立。
+        /// 因此目标是单 atom 单 LOD (Make* 生成的形状都是) 时可以直接用; 目标已有多个 atom 且
+        /// atom 顺序与索引区间顺序不一致、或最后一个 atom 有多个 LOD (各 LOD 是彼此独立的索引区间)
+        /// 时不满足前提, 此分支会**在改动任何数据之前**报错并返回 false, 而不是产出一个索引区间错乱的 mesh。
+        /// </summary>
+        public unsafe bool MergeFromMesh(TtMeshDataProvider mesh, bool appendToLastAtom)
+        {
+            if (appendToLastAtom == false)
+                return MergeFromMesh(mesh);
+            return MergeToLastAtom(mesh, null);
+        }
+        /// <summary>
+        /// 见 <see cref="MergeFromMesh(TtMeshDataProvider, bool)"/>, 额外对源顶点施加一个变换。
+        /// </summary>
+        public unsafe bool MergeFromMesh(TtMeshDataProvider mesh, in Matrix matrix, bool appendToLastAtom)
+        {
+            if (appendToLastAtom == false)
+                return MergeFromMesh(mesh, in matrix);
+            fixed (Matrix* p = &matrix)
+            {
+                return MergeToLastAtom(mesh, p);
+            }
+        }
+        unsafe bool MergeToLastAtom(TtMeshDataProvider mesh, Matrix* matrix)
+        {
+            if (mesh == null)
+                return false;
+            var srcVtxNum = mesh.mCoreObject.GetVertexNumber();
+            var srcTriNum = mesh.mCoreObject.GetPrimitiveNumber();
+            if (srcVtxNum == 0 || srcTriNum == 0)
+                return false;
+
+            // 前提校验必须在动任何数据之前: 顶点/索引一旦追加进去再返回 false, provider 就已经脏了。
+            // 末尾"拉长 NumPrimitives"的做法要求最后一个 atom 的索引区间正好收尾于索引缓冲末尾;
+            // 多 LOD 的 atom 各 LOD 是彼此独立的索引区间, 必然不满足 -> 直接拒绝,
+            // 把静默的索引错乱变成一条可见的报错
+            var triBefore = mCoreObject.GetPrimitiveNumber();
+            var atomNum = mCoreObject.GetAtomNumber();
+            if (atomNum > 0)
+            {
+                var checkAtom = atomNum - 1;
+                var checkLodNum = mCoreObject.GetAtomLOD(checkAtom);
+                for (uint lod = 0; lod < checkLodNum; lod++)
+                {
+                    var pCheck = mCoreObject.GetAtom(checkAtom, lod);
+                    if (pCheck == null)
+                        continue;
+                    // StartIndex 单位是索引数, 除 3 换成三角形数
+                    if (pCheck->m_StartIndex / 3 + pCheck->m_NumPrimitives == triBefore)
+                        continue;
+                    Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Error,
+                        $"MergeFromMesh(appendToLastAtom=true): atom[{checkAtom}].lod[{lod}] 的索引区间(start={pCheck->m_StartIndex}, numTri={pCheck->m_NumPrimitives}) 没有收尾于索引缓冲末尾(numTri={triBefore}), 无法安全追加, 请改用 appendToLastAtom=false");
+                    return false;
+                }
+            }
+
+            // 必须在追加顶点之前取, 索引要整体偏移这个量
+            var startVtx = mCoreObject.GetVertexNumber();
+            for (uint i = 0; i < srcVtxNum; i++)
+            {
+                // FMeshVertex 是按 native layout 布局的值结构, 直接读写 m_ 字段不走 pinvoke;
+                // Tangent / LightMap / SkinWeight 这些没导出成属性的部分随结构一起原样拷过去
+                var vtx = mesh.mCoreObject.GetVertex(i);
+                if (matrix != null)
+                {
+                    vtx.m_Position = Vector3.TransformCoordinate(in vtx.m_Position, in *matrix);
+                    // 与 native MergeFromMesh 保持一致: 法线只过 3x3
+                    var nor = Vector3.TransformNormal(in vtx.m_Normal, in *matrix);
+                    nor.Normalize();
+                    vtx.m_Normal = nor;
+                }
+                mCoreObject.AddVertex(in vtx);
+            }
+
+            for (uint i = 0; i < srcTriNum; i++)
+            {
+                uint a = 0, b = 0, c = 0;
+                mesh.mCoreObject.GetTriangle(ref a, ref b, ref c, i);
+                mCoreObject.AddTriangle(a + startVtx, b + startVtx, c + startVtx);
+            }
+
+            var totalTri = mCoreObject.GetPrimitiveNumber();
+            // 拼完后 AABB 必须重算: MakeXxx 里 SetAABB 进去的只包住第一段几何
+            mCoreObject.CalcAABB();
+            if (atomNum == 0)
+            {
+                // 目标是 Init(streams, isIndex32, 0) 建的, atom 表是空的
+                var desc = new NxRHI.FMeshAtomDesc();
+                desc.SetDefault();
+                desc.m_NumPrimitives = totalTri;
+                PushAtom(in desc);
+                return true;
+            }
+
+            // Init(streams, isIndex32, n) 会把 atom 表撑到 n 个, 但每个 atom 的 LOD 列表是空的,
+            // 此时 GetAtom 返回 null, 得先 PushAtomLOD 把 LOD 0 建出来
+            var lastAtom = atomNum - 1;
+            var lodNum = mCoreObject.GetAtomLOD(lastAtom);
+            if (lodNum == 0)
+            {
+                var desc = new NxRHI.FMeshAtomDesc();
+                desc.SetDefault();
+                desc.m_NumPrimitives = totalTri;
+                PushAtomLOD(lastAtom, in desc);
+                return true;
+            }
+
+            for (uint lod = 0; lod < lodNum; lod++)
+            {
+                var pDesc = mCoreObject.GetAtom(lastAtom, lod);
+                if (pDesc == null)
+                    continue;
+                // StartIndex 是索引偏移(三角形数 * 3), 把这个 atom 拉长到覆盖刚追加的三角形
+                pDesc->m_NumPrimitives = totalTri - pDesc->m_StartIndex / 3;
+            }
+            return true;
+        }
+        /// <summary>
+        /// 把整个 provider 的顶点数据(位置 / 法线 / 切线)就地乘上一个矩阵, 并重算 AABB。
+        ///
+        /// 存在的理由: Make* 系列生成器各有自己固定的主轴 (例如
+        /// <see cref="MakeCylinder"/> 是 <b>Y 轴</b>), 想要别的朝向以前只能靠
+        /// <see cref="MergeFromMesh(TtMeshDataProvider, in Matrix)"/> 顺带传矩阵 ——
+        /// 也就是必须先造一个空 provider 再合并一次, 单独换个朝向没有接口。
+        ///
+        /// 矩阵是行向量约定 (v' = v * M), 与 <see cref="Vector3.TransformCoordinate"/> 一致。
+        /// 法线只过矩阵的 3x3 部分 (与 native MergeFromMesh 一致): 旋转 / 平移 / 等比缩放下精确,
+        /// 非等比缩放下不是严格正确的法线变换 (严格做法要用逆转置)。
+        /// </summary>
+        public unsafe void ApplyTransform(in Matrix matrix)
+        {
+            var num = mCoreObject.GetVertexNumber();
+            if (num == 0)
+                return;
+
+            var posBlob = mCoreObject.GetStream(NxRHI.EVertexStreamType.VST_Position);
+            if (posBlob.IsValidPointer)
+            {
+                var pPos = (Vector3*)posBlob.GetData();
+                for (uint i = 0; i < num; i++)
+                {
+                    var v = pPos[i];
+                    pPos[i] = Vector3.TransformCoordinate(in v, in matrix);
+                }
+            }
+
+            var norBlob = mCoreObject.GetStream(NxRHI.EVertexStreamType.VST_Normal);
+            if (norBlob.IsValidPointer)
+            {
+                var pNor = (Vector3*)norBlob.GetData();
+                for (uint i = 0; i < num; i++)
+                {
+                    var n = Vector3.TransformNormal(in pNor[i], in matrix);
+                    n.Normalize();
+                    pNor[i] = n;
+                }
+            }
+
+            // 切线流是 float4, w 存手性符号, 只转 xyz
+            var tanBlob = mCoreObject.GetStream(NxRHI.EVertexStreamType.VST_Tangent);
+            if (tanBlob.IsValidPointer)
+            {
+                var pTan = (Vector4*)tanBlob.GetData();
+                for (uint i = 0; i < num; i++)
+                {
+                    var t = new Vector3(pTan[i].X, pTan[i].Y, pTan[i].Z);
+                    t = Vector3.TransformNormal(in t, in matrix);
+                    t.Normalize();
+                    pTan[i].X = t.X;
+                    pTan[i].Y = t.Y;
+                    pTan[i].Z = t.Z;
+                }
+            }
+
+            // CalcAABB 会无条件解引用 position 流, 没有位置流时不能调
+            if (posBlob.IsValidPointer)
+                mCoreObject.CalcAABB();
+        }
         public bool IsIndex32
         {
             get
@@ -984,6 +1177,17 @@ namespace EngineNS.Graphics.Mesh
             [EGui.Controls.PropertyGrid.TtColor4PickerEditor()]
             public Vector4 Color { get; set; } = Vector4.One;
         }
+        /// <summary>
+        /// 生成柱体 / 锥体 / 圆台。
+        ///
+        /// <b>主轴是 Y 轴</b>, 沿 Y 居中 (y ∈ [-length/2, +length/2]):
+        /// 生成过程是从 D3DX 移植的、沿 Z 轴算的, 但函数末尾把每个顶点的 Y / Z 对调了一次,
+        /// 所以对外交付的结果是 Y 轴的 (符合本引擎 Y-up 下"柱子立着"的直觉)。
+        /// <paramref name="radius2"/> 传 0 就退化成"尖端朝 +Y"的圆锥。
+        ///
+        /// 想要别的朝向, 用 <see cref="ApplyTransform"/>, 例如把主轴转到 +Z:
+        /// <c>provider.ApplyTransform(Matrix.RotationX(MathF.PI * 0.5f))</c>。
+        /// </summary>
         public static unsafe TtMeshDataProvider MakeCylinder(float radius1, float radius2, float length, uint slices, uint stacks, uint color)
         {
             uint number_of_vertices, number_of_faces;

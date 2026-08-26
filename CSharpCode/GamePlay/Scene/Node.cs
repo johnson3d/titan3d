@@ -558,6 +558,15 @@ namespace EngineNS.GamePlay.Scene
                 return true;
             }
         }
+        /// <summary>
+        /// 本节点会不会在 Outliner 树里画出自己那一行。
+        ///
+        /// 返回 false 的节点 (典型是 gizmo 的 AxisRootNode —— 它的 <c>DrawNode</c> 直接
+        /// 返回 false) 必须让 Outliner 连行首的装饰物一起跳过: 否则可见性小眼睛照画,
+        /// 而节点自己不画树行, 那个眼睛会挤到下一个节点的行首去 (表现为一行两个眼睛)。
+        /// </summary>
+        [Browsable(false)]
+        public virtual bool IsShowInOutliner => true;
         [Browsable(false)]
         public bool IsDirty 
         {
@@ -785,6 +794,22 @@ namespace EngineNS.GamePlay.Scene
             set { }
         }
         public string SaveHash { get; set; } = null;
+
+        /// <summary>
+        /// 保存 scene 时给节点一个写出"不适合放进 .node 文件"的附属数据的机会
+        /// (例如地形的高度覆盖层: 体量大、需要按块懒加载)。
+        /// 默认实现递归整棵子树, 所以嵌套在任意层级的节点也能被覆盖到。
+        ///
+        /// 存在的理由是 GamePlay 不能反向依赖 Bricks.Terrain 这类上层模块 ——
+        /// Scene 只能通过这个虚方法把保存时机转给具体节点类型。
+        /// </summary>
+        public virtual void OnSaveNodeExtraData(TtScene scene)
+        {
+            for (int i = 0; i < Children.Count; i++)
+            {
+                Children[i].OnSaveNodeExtraData(scene);
+            }
+        }
 
         public TtNode FindNode(in Guid nodeId, bool bRecursive)
         {

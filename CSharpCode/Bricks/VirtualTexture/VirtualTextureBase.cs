@@ -214,7 +214,7 @@ namespace EngineNS.Bricks.VirtualTexture
             ActiveTexIDs.Clear();
             return (AddTexIDs.Count + RemoveTexIDs.Count + DirtyTexIDs.Count) > 0;
         }
-        public void TickSync(NxRHI.TtCommandList cmd)
+        public void UpdateGpu(NxRHI.TtCommandList cmd)
         {
             if (ProcessChanged() == false)
                 return;
@@ -225,21 +225,20 @@ namespace EngineNS.Bricks.VirtualTexture
                 Rvts[(int)i].Slot = null;
             }
             RemoveTexIDs.Clear();
-            using (new NxRHI.TtCmdListScope(cmd, "RVT"))
+            
+            foreach (var i in AddTexIDs)
             {
-                foreach (var i in AddTexIDs)
-                {
-                    Rvts[(int)i].Slot = TextureSlotAllocator.Alloc();
-                    UpLoadRVT(cmd, Rvts[(int)i]);
-                }
-                AddTexIDs.Clear();
-                foreach (var i in DirtyTexIDs)
-                {
-                    UpLoadRVT(cmd, Rvts[(int)i]);
-                }
-                DirtyTexIDs.Clear();
-                cmd.FlushDraws();
+                Rvts[(int)i].Slot = TextureSlotAllocator.Alloc();
+                UpLoadRVT(cmd, Rvts[(int)i]);
             }
+            AddTexIDs.Clear();
+            foreach (var i in DirtyTexIDs)
+            {
+                UpLoadRVT(cmd, Rvts[(int)i]);
+            }
+            DirtyTexIDs.Clear();
+            cmd.FlushDraws();
+
             for (int i = 0; i < Rvts.Count; i++)
             {
                 var slot = Rvts[i].Slot;
@@ -248,8 +247,6 @@ namespace EngineNS.Bricks.VirtualTexture
                 else
                     TextureSlotBuffer.UpdateData(i, slot.GetGpuDesc());
             }
-            TextureSlotBuffer.Flush2GPU(cmd);
-            TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(cmd, "RVT.UpdateData", NxRHI.EQueueType.QU_Transfer);
         }
         public void UpLoadRVT(NxRHI.TtCommandList cmd, TtRVT rvt)
         {

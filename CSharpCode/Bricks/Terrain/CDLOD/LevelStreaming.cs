@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Bricks.Terrain.CDLOD
 {
-    public class ULevelStreaming : IDisposable
+    public class TtLevelStreaming : IDisposable
     {
-        ~ULevelStreaming()
+        ~TtLevelStreaming()
         {
             Dispose();
         }

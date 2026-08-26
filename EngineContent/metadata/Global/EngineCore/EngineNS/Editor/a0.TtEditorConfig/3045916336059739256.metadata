@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3045916336059739256 Type="EngineNS.Editor.TtEditorConfig@EngineCore">
+  <EnableRecovery Type="System.Boolean@Unknown" Order="0" />
+  <FontIconName Type="EngineNS.RName@EngineCore" Order="0" />
+  <FontSDFBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <GameModuleName Type="System.String@Unknown" Order="0" />
+  <GameProject Type="System.String@Unknown" Order="0" />
+  <MacrossIconName Type="EngineNS.RName@EngineCore" Order="0" />
+  <MaterialBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <MaterialFunctionBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <MaterialInstanceBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <MaterialMeshBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <MeshPrimitivesBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <NebulaBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <PgcBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <PhyMaterialIconName Type="EngineNS.RName@EngineCore" Order="0" />
+  <PrefabBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <RenderPolicyBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <SceneBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <StudioDefaultFloorMaterial Type="System.String@Unknown" Order="0" />
+  <StudioFallbackSkyColorBottom Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <StudioFallbackSkyColorTop Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <StudioFloorColor Type="EngineNS.Vector4@EngineCore" Order="0" />
+  <StudioGridFade Type="System.Single@Unknown" Order="0" />
+  <StudioGridHeightOffset Type="System.Single@Unknown" Order="0" />
+  <StudioGroundLightColor Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <StudioLightDirection Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <StudioSkyboxImageName Type="System.String@Unknown" Order="0" />
+  <StudioSkyLightColor Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <StudioSunLightColor Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <StudioSunLightIntensity Type="System.Single@Unknown" Order="0" />
+  <TextureBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <UseEditorTaskService Type="System.Boolean@Unknown" Order="0" />
+  <UseLegacyForcedGcOnClose Type="System.Boolean@Unknown" Order="0" />
+  <UseSessionFramework Type="System.Boolean@Unknown" Order="0" />
+  <UseTransactionalPropertyGrid Type="System.Boolean@Unknown" Order="0" />
+</Hash_3045916336059739256>

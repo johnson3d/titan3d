@@ -6,10 +6,10 @@ namespace EngineNS.Bricks.Procedure.Node
     {
         static float[] cr = { 0.5f, 0, 1, 0, 1, 0.5f, 0.5f, 0, 1 };
         static float[] cg = { 0.5f, 0, 0, 1, 1, 0, 1, 0.5f, 0.5f };
-        public unsafe static UBufferComponent GenerateFlowMap_GIS(UBufferComponent map)
+        public unsafe static TtBufferComponent GenerateFlowMap_GIS(TtBufferComponent map)
         {
-            var creator = UBufferCreator.CreateInstance<USuperBuffer<Vector4, FFloat4Operator>>(map.Width, map.Height, 1);
-            var flowMap = UBufferComponent.CreateInstance(creator);
+            var creator = UBufferCreator.CreateInstance<TtSuperBuffer<Vector4, FFloat4Operator>>(map.Width, map.Height, 1);
+            var flowMap = TtBufferComponent.CreateInstance(creator);
             int width = map.Width;
             int height = map.Height;
             int count = width * width;
@@ -31,10 +31,10 @@ namespace EngineNS.Bricks.Procedure.Node
 
         }
 
-        public static UBufferComponent GenearteFlowMap_Watershed(UBufferComponent map, int level = 20, int grad = 5, bool only_slope = true)
+        public static TtBufferComponent GenearteFlowMap_Watershed(TtBufferComponent map, int level = 20, int grad = 5, bool only_slope = true)
         {
-            var creator = UBufferCreator.CreateInstance<USuperBuffer<Vector4, FFloat4Operator>>(map.Width, map.Height, 1);
-            var flowMap = UBufferComponent.CreateInstance(creator);
+            var creator = UBufferCreator.CreateInstance<TtSuperBuffer<Vector4, FFloat4Operator>>(map.Width, map.Height, 1);
+            var flowMap = TtBufferComponent.CreateInstance(creator);
             int width = map.Width;
             int count = map.Width * map.Height;
             // Divide map date into different level
@@ -62,7 +62,7 @@ namespace EngineNS.Bricks.Procedure.Node
             //flowMap.Apply();
             return flowMap;
         }
-        public static unsafe int[] divide_tex(UBufferComponent toDivide, int level)
+        public static unsafe int[] divide_tex(TtBufferComponent toDivide, int level)
         {
             int[] result = new int[toDivide.Width * toDivide.Height];
             var pixels = (Color4f*)toDivide.GetSuperPixelAddress(0, 0, 0);

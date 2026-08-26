@@ -11,11 +11,13 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CodeEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\BezierControl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\TimelineControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\FolderView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ContentBrowser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\CtrlUtility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\Attributes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\TtKawaiiCurveEditorAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\TtPGButtonEditorAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\KeyValueCreator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PGRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PropertyCollection.cs" />

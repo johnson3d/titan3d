@@ -26,6 +26,21 @@ namespace EngineNS.NxRHI
         #region RenderDoc Capture
         public bool CaptureRenderDocFrame = false;
         public int RemainingCaptureFrames = 0;
+        /// <summary>
+        /// 抓完是否顺手用 RenderDoc UI 打开。交互式抓帧 (编辑器 Cap 菜单) 要 true;
+        /// 自动化抓帧 (MCP 工具) 置 false, 否则每抓一帧弹一个窗口。
+        /// </summary>
+        public bool OpenRenderDocAfterCapture = true;
+        /// <summary>
+        /// EndFrameCapture 传给文件名的后缀。抓帧是跨帧异步的, 发起方设好这里,
+        /// 主循环收帧时才用得上。
+        /// </summary>
+        public string CaptureTagName = null;
+        /// <summary>
+        /// 最近一次抓帧落盘的文件名 (相对 Cache/RenderDoc 目录)。
+        /// 主循环里 EndFrameCapture 的返回值本来是被丢弃的, 存在这里好让发起方拿到结果。
+        /// </summary>
+        public string LastCaptureFile = null;
         public bool BeginFrameCapture()
         {
             if (CaptureRenderDocFrame == false)
@@ -83,6 +98,7 @@ namespace EngineNS.NxRHI
                         IRenderDocTool.GetInstance().OpenFile(absTarFile);
                     }
                 }
+                LastCaptureFile = tarFile;
                 return tarFile;
             }
             return null;

@@ -1089,6 +1089,8 @@ namespace EngineNS.Bricks.AssetImpExp
             }
 
             SetMeshStreams(meshPrimitives, posStream, normalStream, tangentStream, uvStream, lightMapStream, vertexColorStream, null, null, renderIndex16, renderIndex32, isIndex32, indicesCount, vertexCount, false);
+            meshPrimitives.MorphTargets = BuildMorphTargetSet(meshes,
+                (int meshIdx) => GetVertexPreTransform(meshNodeRefs[meshIdx], scene, importOption), vertexCount);
             return meshPrimitives;
         }
         private static void SetMeshStreams(TtMeshPrimitives meshPrimitives,
@@ -1454,7 +1456,121 @@ namespace EngineNS.Bricks.AssetImpExp
             }
             meshPrimitives.mCoreObject.SetAABB(ref aabb);
 
+            meshPrimitives.MorphTargets = BuildMorphTargetSet(meshes,
+                (int meshIdx) => vertexPreTransform, vertextCount);
+
             return meshPrimitives;
+        }
+
+        /// <summary>
+        /// 位置 delta 小于此长度的顶点不入稀疏表。单位: 米 (CodingGuidelines.md §6),
+        /// 1e-5 m = 0.01 mm, 远低于可见阈值, 主要用于滤除 DCC 导出的浮点噪声。
+        /// </summary>
+        const float MorphPositionDeltaThreshold = 1e-5f;
+
+        /// <summary> 法线 delta 阈值(无量纲向量长度)。 </summary>
+        const float MorphNormalDeltaThreshold = 1e-3f;
+
+        /// <summary>
+        /// 从 Assimp 的 MeshAnimationAttachments (即 BlendShape / Morph Target) 提取稀疏 delta。
+        ///
+        /// 索引对齐的依据: 引擎顶点编号 = vertexCounting + j, 其中 j 就是 Assimp 的顶点下标
+        /// (见本文件两处 "posStream[vertexCounting + j] = ... subMesh.Vertices[j]" 的写法);
+        /// 而 aiAnimMesh 的 Vertices/Normals 数组与 aiMesh 的同序同长, 所以两边可以直接对应,
+        /// 不需要像 FBX SDK 那条路径那样做"控制点 -> 展开顶点"的重映射。
+        ///
+        /// delta 必须在变换后的空间里相减: 两个端点各自过一遍 vertexPreTransform 再作差,
+        /// 这样平移分量自然抵消, 旋转与缩放也被正确带入。
+        /// </summary>
+        /// <returns>没有任何有效 morph 时返回 null (绝大多数 mesh 都是这种情况)。</returns>
+        private static TtMorphTargetSet BuildMorphTargetSet(List<Mesh> meshes,
+            System.Func<int, FTransform> getVertexPreTransform, int totalVertexCount)
+        {
+            if (meshes == null || totalVertexCount <= 0)
+                return null;
+
+            // 同名 morph 可能出现在多个 sub-mesh 上(头/身体各一份), 合并成一个 target
+            var deltasByName = new Dictionary<string, List<FMorphVertexDelta>>();
+            var orderedNames = new List<string>();
+
+            int vertexCounting = 0;
+            for (int i = 0; i < meshes.Count; i++)
+            {
+                var subMesh = meshes[i];
+                var attachments = subMesh.MeshAnimationAttachments;
+                if (attachments == null || attachments.Count == 0)
+                {
+                    vertexCounting += subMesh.VertexCount;
+                    continue;
+                }
+
+                var vertexPreTransform = getVertexPreTransform(i);
+                for (int a = 0; a < attachments.Count; a++)
+                {
+                    var attachment = attachments[a];
+                    if (attachment == null || attachment.HasVertices == false)
+                        continue;
+
+                    // Assimp 对部分格式不一定给出 channel 名, 回退到稳定的位置命名
+                    var morphName = string.IsNullOrEmpty(attachment.Name) ? $"Morph_{i}_{a}" : attachment.Name;
+                    if (deltasByName.TryGetValue(morphName, out var deltaList) == false)
+                    {
+                        deltaList = new List<FMorphVertexDelta>();
+                        deltasByName.Add(morphName, deltaList);
+                        orderedNames.Add(morphName);
+                    }
+
+                    var count = System.Math.Min(attachment.VertexCount, subMesh.VertexCount);
+                    var hasNormals = attachment.HasNormals && subMesh.HasNormals;
+                    for (int j = 0; j < count; j++)
+                    {
+                        var basePos = vertexPreTransform.TransformPosition(AssimpSceneUtil.ConvertVector3(subMesh.Vertices[j]).AsDVector()).ToSingleVector3();
+                        var morphPos = vertexPreTransform.TransformPosition(AssimpSceneUtil.ConvertVector3(attachment.Vertices[j]).AsDVector()).ToSingleVector3();
+                        var deltaPosition = morphPos - basePos;
+
+                        var deltaNormal = Vector3.Zero;
+                        if (hasNormals)
+                        {
+                            var baseNormal = vertexPreTransform.TransformVector3NoScale(AssimpSceneUtil.ConvertVector3(subMesh.Normals[j]));
+                            var morphNormal = vertexPreTransform.TransformVector3NoScale(AssimpSceneUtil.ConvertVector3(attachment.Normals[j]));
+                            deltaNormal = morphNormal - baseNormal;
+                        }
+
+                        if (Vector3.Dot(deltaPosition, deltaPosition) <= MorphPositionDeltaThreshold * MorphPositionDeltaThreshold &&
+                            Vector3.Dot(deltaNormal, deltaNormal) <= MorphNormalDeltaThreshold * MorphNormalDeltaThreshold)
+                        {
+                            continue;
+                        }
+
+                        var entry = new FMorphVertexDelta();
+                        entry.VertexIndex = (uint)(vertexCounting + j);
+                        entry.DeltaPosition = deltaPosition;
+                        entry.DeltaNormal = deltaNormal;
+                        deltaList.Add(entry);
+                    }
+                }
+                vertexCounting += subMesh.VertexCount;
+            }
+
+            var result = new TtMorphTargetSet();
+            result.VertexCount = totalVertexCount;
+            for (int i = 0; i < orderedNames.Count; i++)
+            {
+                var deltaList = deltasByName[orderedNames[i]];
+                if (deltaList.Count == 0)
+                    continue;
+                var target = new TtMorphTarget();
+                target.Name = orderedNames[i];
+                target.Deltas = deltaList.ToArray();
+                result.Targets.Add(target);
+            }
+
+            if (result.IsValid == false)
+                return null;
+
+            Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Info,
+                $"Imported {result.Targets.Count} morph target(s) for mesh with {totalVertexCount} vertices");
+            return result;
         }
     }
     public class AnimationChunkGenerater

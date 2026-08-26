@@ -13,5 +13,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)AssetAction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EditorAction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UtilityAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SkeletalAnimationAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MainThreadDispatcher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DebugAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TerrainEditAction.cs" />
   </ItemGroup>
 </Project>

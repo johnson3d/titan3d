@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_9394226510019980904 Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiRibbonSetup@EngineCore">
+  <AmplifyCurvePower Type="System.Single@Unknown" Order="0" />
+  <EndBoneIndex Type="EngineNS.Animation.LimbIndexInSkeleton@EngineCore" Order="0" />
+  <GustFrequency Type="System.Single@Unknown" Order="0" />
+  <Inertia Type="System.Single@Unknown" Order="0" />
+  <InertiaFalloff Type="System.Single@Unknown" Order="0" />
+  <LODThreshold Type="System.Int32@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NoiseLayers Type="System.Int32@Unknown" Order="0" />
+  <NoiseMix Type="System.Single@Unknown" Order="0" />
+  <NoiseRoughness Type="System.Single@Unknown" Order="0" />
+  <NoiseScale Type="System.Single@Unknown" Order="0" />
+  <RestTiltAngleDegrees Type="System.Single@Unknown" Order="0" />
+  <RootBoneIndex Type="EngineNS.Animation.LimbIndexInSkeleton@EngineCore" Order="0" />
+  <SwayFrequency Type="System.Single@Unknown" Order="0" />
+  <SwingAmplitudeCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+  <SwingAngleDegrees Type="System.Single@Unknown" Order="0" />
+  <SwingPlaneAngleDegrees Type="System.Single@Unknown" Order="0" />
+  <TailBoneAxis Type="EngineNS.Bricks.Animation.KawaiiPhysics.EKawaiiTailBoneAxis@EngineCore" Order="0" />
+  <TailBoneLength Type="System.Single@Unknown" Order="0" />
+  <TipAmplify Type="System.Single@Unknown" Order="0" />
+  <WindGustiness Type="System.Single@Unknown" Order="0" />
+  <WindInfluenceCurve Type="EngineNS.Bricks.Animation.KawaiiPhysics.TtKawaiiCurve@EngineCore" Order="0" />
+  <WindResponse Type="System.Single@Unknown" Order="0" />
+</Hash_9394226510019980904>

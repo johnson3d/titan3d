@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="8d9ca993ddeaa57ecb5f8a5c2e72d125e77ccccce773045ff7d0e41902d47d8a" />
+      <Path Type="System.String@Unknown" Value="decal_scene.scene/decal_scene.scene" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="bdb2b3e520e6b3b61660de6ae055793628c0572b0203d6885cf35202ff9f4244" />
+      <Path Type="System.String@Unknown" Value="decal_scene.scene/class_graph.dat" />
+    </e_1>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="76c5f12e-6403-4c9b-a8be-c6b226f2a187" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/fx/decal/decal_scene.scene,76c5f12e-6403-4c9b-a8be-c6b226f2a187" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtScene&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
+    <e_0 Value="Game,tutorials/common/oldwood0.ums,dc6ec359-fb69-4d56-a6e0-c4551078cf05" />
+    <e_1 Value="Game,tutorials/fx/decal/decal0.material,f29f0aab-961a-40e7-99b4-934bb5a713e3" />
+    <e_2 Value="Engine,material/gridline.material,fe431749-ed31-45b1-93d8-34462bd00922" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="Default" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
+</Root>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_6777126914533535476 Type="EngineNS.Animation.Asset.TtPoseAsset@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <BoneNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Order="0" />
+  <Poses Type="System.Collections.Generic.List&lt;EngineNS.Animation.Asset.TtPoseAssetPose@EngineCore,&gt;@Unknown" Order="0" />
+  <PreviewMeshName Type="EngineNS.RName@EngineCore" Order="0" />
+</Hash_6777126914533535476>

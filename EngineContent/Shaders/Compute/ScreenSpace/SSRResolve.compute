@@ -1,0 +1,175 @@
+#ifndef _SSR_RESOLVE_COMPUTE_H_
+#define _SSR_RESOLVE_COMPUTE_H_
+
+#include "../../Inc/GlobalDefine.cginc"
+#include "../../Inc/SysFunction.cginc"
+#include "../../CBuffer/VarBase_PerCamera.cginc"
+#include "../../Inc/Math.cginc"
+
+// ---------------------------------------------------------------------------
+// Screen Space Reflection - Resolve Pass
+//
+// 做两件事:
+//   1. 空间复用降噪: 在 trace 结果上做一次按深度/法线/置信度加权的邻域滤波,
+//      半径随粗糙度增大 (粗糙表面的反射本来就该更糊, 也正好抹掉单像素一条线的噪声)
+//   2. 施加镜面 BRDF: 反射辐射度乘上 EnvBRDF(F0, Roughness, NoV), 输出可以直接
+//      被 Additive 节点加到场景色上的能量
+//
+// 输入 SSRTraceInput.a 是置信度 (0 = 未命中), 未命中处输出 0 —— 不做任何补全,
+// 屏幕空间方案取不到的信息就是取不到, 交给 IBL / ReSTIR 去兜。
+// ---------------------------------------------------------------------------
+
+cbuffer cbSSRResolve DX_AUTOBIND
+{
+    float2 SSRResolveScreenSize;
+    float  SSRIntensity;            // 反射强度总缩放
+    float  SSRResolveMaxRoughness;  // 与 trace pass 保持一致, 用于粗糙度淡出
+
+    int    SSRResolveRadius;        // 邻域滤波半径 (像素), 0 = 不滤波
+    float  SSRResolveDepthSigma;    // 深度差权重的敏感度 (越大越容易跨深度混)
+    float  SSRResolvePad0;
+    float  SSRResolvePad1;
+};
+
+Texture2D SSRTraceInput DX_AUTOBIND;
+SamplerState Samp_SSRTraceInput DX_AUTOBIND;
+
+Texture2D<float> ResolveDepthBuffer DX_AUTOBIND;
+SamplerState Samp_ResolveDepthBuffer DX_AUTOBIND;
+
+Texture2D ResolveGBufferRT0 DX_AUTOBIND;
+SamplerState Samp_ResolveGBufferRT0 DX_AUTOBIND;
+
+Texture2D ResolveGBufferRT1 DX_AUTOBIND;
+SamplerState Samp_ResolveGBufferRT1 DX_AUTOBIND;
+
+Texture2D ResolveGBufferRT2 DX_AUTOBIND;
+SamplerState Samp_ResolveGBufferRT2 DX_AUTOBIND;
+
+RWTexture2D<float4> SSRResolveOutput DX_AUTOBIND;
+
+// 解析型环境 BRDF (Call of Duty: Black Ops II 的近似)。
+// 与 Inc/LightCommon.cginc 的 EnvBRDFMobile 逐字同构 —— 这里内联一份是为了不把
+// LightCommon 整个拖进 compute (它带着一堆 DX_AUTOBIND 资源声明, 本 pass 一个都不绑)。
+float3 SSR_EnvBRDF(float3 incomingRadiance, float3 f0, float roughness, float NoV)
+{
+    float4 coeff0 = float4(-1.0, -0.0275, -0.572, 0.022);
+    float4 coeff1 = float4(1.0, 0.0425, 1.04, -0.04);
+
+    float4 coeff2 = roughness * coeff0 + coeff1;
+    float coeff3 = min(coeff2.x * coeff2.x, exp2(-9.28 * NoV)) * coeff2.x + coeff2.y;
+    float2 reflectance = float2(-1.04, 1.04) * coeff3 + coeff2.zw;
+    reflectance.y *= min(1.0, 50.0 * f0.g);
+
+    float3 brdf = f0 * reflectance.x + float3(reflectance.y, reflectance.y, reflectance.y);
+    return incomingRadiance * brdf;
+}
+
+[numthreads(8, 8, 1)]
+void CS_SSRResolve(uint3 dispatchThreadId : SV_DispatchThreadID)
+{
+    uint2 pixelCoord = dispatchThreadId.xy;
+    if (any(pixelCoord >= (uint2)SSRResolveScreenSize))
+        return;
+
+    SSRResolveOutput[pixelCoord] = float4(0, 0, 0, 0);
+
+    float2 uv = ((float2)pixelCoord + 0.5) / SSRResolveScreenSize;
+    float2 texelSize = 1.0 / SSRResolveScreenSize;
+
+    float centerDepth = ResolveDepthBuffer.SampleLevel(Samp_ResolveDepthBuffer, uv, 0).r;
+#if USE_INVERSE_Z == 1
+    if (centerDepth <= 0.0)
+#else
+    if (centerDepth >= 1.0)
+#endif
+        return;
+
+    float4 rt2 = ResolveGBufferRT2.SampleLevel(Samp_ResolveGBufferRT2, uv, 0);
+    float roughness = rt2.b;
+    float metallic = rt2.r;
+    float specular = rt2.g;
+    if (roughness > SSRResolveMaxRoughness)
+        return;
+
+    float4 rt1 = ResolveGBufferRT1.SampleLevel(Samp_ResolveGBufferRT1, uv, 0);
+    float3 N = (float3)DecodeNormalFromGBuffer((half4)rt1);
+    float nLen = length(N);
+    if (nLen < 0.001)
+        return;
+    N /= nLen;
+
+    float centerLinearZ = LinearFromDepth(centerDepth);
+
+    // ---- 空间复用: 半径随粗糙度增大 ----
+    int radius = (int)round(SSRResolveRadius * saturate(roughness / max(SSRResolveMaxRoughness, 1e-4)));
+    radius = clamp(radius, 0, SSRResolveRadius);
+
+    float3 sumColor = 0;
+    float sumWeight = 0;
+
+    [loop]
+    for (int dy = -radius; dy <= radius; dy++)
+    {
+        [loop]
+        for (int dx = -radius; dx <= radius; dx++)
+        {
+            float2 sampleUV = uv + float2(dx, dy) * texelSize;
+            if (any(sampleUV < 0.0) || any(sampleUV > 1.0))
+                continue;
+
+            float4 trace = SSRTraceInput.SampleLevel(Samp_SSRTraceInput, sampleUV, 0);
+            if (trace.a <= 0.0)
+                continue;
+
+            // 深度权重: 只跟同一个表面上的邻居混, 避免把前景的反射糊到背景上
+            float sampleDepth = ResolveDepthBuffer.SampleLevel(Samp_ResolveDepthBuffer, sampleUV, 0).r;
+            float sampleLinearZ = LinearFromDepth(sampleDepth);
+            float depthDelta = abs(sampleLinearZ - centerLinearZ);
+            float depthWeight = exp(-depthDelta * SSRResolveDepthSigma);
+
+            // 法线权重
+            float4 sampleRt1 = ResolveGBufferRT1.SampleLevel(Samp_ResolveGBufferRT1, sampleUV, 0);
+            float3 sampleN = (float3)DecodeNormalFromGBuffer((half4)sampleRt1);
+            float sampleNLen = length(sampleN);
+            if (sampleNLen < 0.001)
+                continue;
+            float normalWeight = saturate(dot(sampleN / sampleNLen, N));
+            normalWeight *= normalWeight;
+
+            float w = trace.a * depthWeight * normalWeight;
+            if (w <= 0.0)
+                continue;
+
+            sumColor += trace.rgb * w;
+            sumWeight += w;
+        }
+    }
+
+    if (sumWeight <= 0.0)
+        return;
+
+    float3 reflectedColor = sumColor / sumWeight;
+
+    // ---- 施加镜面 BRDF ----
+    float4 rt0 = ResolveGBufferRT0.SampleLevel(Samp_ResolveGBufferRT0, uv, 0);
+    float3 albedo = (float3)sRGB2Linear((half3)rt0.rgb);
+    // F0 = lerp(Specular, Albedo, Metallic), 与 DeferredDirLighting.cginc 的 OptSpecShading 一致
+    float3 f0 = specular - specular * metallic + metallic * albedo;
+
+    float3 worldPos = GetWorldPositionFromDepthValue(uv, centerDepth).xyz;
+    float3 V = normalize(CameraPosition - worldPos);
+    float NoV = saturate(dot(N, V));
+
+    float3 result = SSR_EnvBRDF(reflectedColor, f0, roughness, NoV);
+
+    // 只在靠近 MaxRoughness 的最后一段里淡出, 免得在阈值处出现硬边;
+    // 不能写成 1 - roughness/MaxRoughness —— 那等于只有完美镜面才有完整反射。
+    float fadeBand = max(SSRResolveMaxRoughness * 0.25, 1e-4);
+    float roughnessFade = saturate((SSRResolveMaxRoughness - roughness) / fadeBand);
+    result *= SSRIntensity * roughnessFade;
+
+    SSRResolveOutput[pixelCoord] = float4(max(result, 0.0), 1.0);
+}
+
+#endif // _SSR_RESOLVE_COMPUTE_H_

@@ -18,7 +18,7 @@ namespace EngineNS.Bricks.Procedure
     public struct FPgcSpawnSceneNodeDescOperator : ISuperPixelOperator<PgcSpawnSceneNodeDesc>
     {
         public Rtti.TtTypeDesc ElementType => Rtti.TtTypeDescGetter<PgcSpawnSceneNodeDesc>.TypeDesc;
-        public Rtti.TtTypeDesc BufferType => Rtti.TtTypeDescGetter<USuperBuffer<PgcSpawnSceneNodeDesc, FPgcSpawnSceneNodeDescOperator>>.TypeDesc;
+        public Rtti.TtTypeDesc BufferType => Rtti.TtTypeDescGetter<TtSuperBuffer<PgcSpawnSceneNodeDesc, FPgcSpawnSceneNodeDescOperator>>.TypeDesc;
         public PgcSpawnSceneNodeDesc MaxValue
         {
             get
@@ -125,7 +125,7 @@ namespace EngineNS.Bricks.Procedure
             }
             mNodes.Clear();
         }
-        public bool UpdatePgcSceneNodes(UBufferComponent buffer, GamePlay.Scene.TtNode node)
+        public bool UpdatePgcSceneNodes(TtBufferComponent buffer, GamePlay.Scene.TtNode node)
         {
             if (buffer.BufferCreator.ElementType != Rtti.TtTypeDesc.TypeOf(typeof(PgcSpawnSceneNodeDesc)))
                 return false;

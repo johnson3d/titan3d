@@ -35,9 +35,15 @@ namespace EngineNS.GamePlay.Scene
             [Rtti.Meta("")]
             [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
             public RName CollideName { get; set; }
+            /// <summary>
+            /// 为 null 表示"本节点不指定", 交由 TtRenderMesh.Initialize 按 .ums 上的 MdfQueueType
+            /// 或资产内容 (骨骼 / morph) 自动选型 (见 CodingGuidelines.md §7.7)。
+            /// 旧默认值是 TtMdfStaticMesh, 导致新建节点永远走"显式指定"分支, 拖一个蒙皮模型
+            /// 进场景骨骼动画不生效、带 morph 的也不生效, 必须手写才行。
+            /// </summary>
             [Rtti.Meta("")]
             [ReadOnly(true)]
-            public string MdfQueueType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMdfStaticMesh));
+            public string MdfQueueType { get; set; } = null;
             [Rtti.Meta("")]
             [ReadOnly(true)]
             public string AtomType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtRenderMesh.TtAtom));
@@ -47,6 +53,10 @@ namespace EngineNS.GamePlay.Scene
             {
                 get
                 {
+                    // 必须在这里挡掉空值: Rtti.TtTypeDesc.TypeOf(null/"") 会打一条
+                    // "Typeof failed:" 警告日志, 而空值在这里是合法语义(交给自动选型)。
+                    if (string.IsNullOrEmpty(MdfQueueType))
+                        return null;
                     return Rtti.TtTypeDesc.TypeOf(MdfQueueType);
                 }
                 set
@@ -494,7 +504,23 @@ namespace EngineNS.GamePlay.Scene
         }
         public bool HasSkin
         {
-            get => MdfQueue == TtTypeDescGetter<TtMdfSkinMesh>.TypeDesc;
+            // 以**实际创建出来的 MdfQueue**为准, 而不是 NodeData 里的类型字符串 —— MdfQueueType
+            // 现在可以为 null(交由 TtRenderMesh.Initialize 自动选型), 此时只看字符串会误判为
+            // 无蒙皮, 进而拿不到 PerSkinMeshCBuffer、IsNoTick 永为 true, 骨骼动画整体失效。
+            // 用可赋值判断而不是类型相等: 蒙皮类 MdfQueue 已经不只一种
+            // (TtMdfSkinMorphMesh 派生自 TtMdfSkinMesh)。
+            get
+            {
+                var actualMdfQueue = RenderMesh?.MdfQueue;
+                if (actualMdfQueue != null)
+                    return actualMdfQueue is TtMdfSkinMesh;
+
+                // RenderMesh 还没建好时退回看显式指定的类型
+                var mdfQueueType = MdfQueue?.SystemType;
+                if (mdfQueueType == null)
+                    return false;
+                return typeof(TtMdfSkinMesh).IsAssignableFrom(mdfQueueType);
+            }
         }
         public override Profiler.TimeScope GetScopeTickLogic()
         {

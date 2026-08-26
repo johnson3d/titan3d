@@ -7,9 +7,9 @@ namespace EngineNS.Bricks.Procedure.Node
 {
     public class ULeftRightBuffer
     {
-        public USuperBuffer<sbyte, FSByteOperator> Mask;
-        public UBufferComponent Left;
-        public UBufferComponent Right;
+        public TtSuperBuffer<sbyte, FSByteOperator> Mask;
+        public TtBufferComponent Left;
+        public TtBufferComponent Right;
         public Rtti.TtTypeDesc ResultType;
         public Rtti.TtTypeDesc LeftType;
         public Rtti.TtTypeDesc RightType;
@@ -23,11 +23,11 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
         [Rtti.Meta("")]
-        public UBufferCreator InputLeftDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator InputLeftDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         [Rtti.Meta("")]
-        public UBufferCreator InputRightDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator InputRightDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         [Rtti.Meta("")]
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UBinocular()
         {
             Icon.Size = new Vector2(25, 25);
@@ -128,16 +128,16 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn MaskPin { get; set; } = new PinIn();        
         public UBinocularWithMask()
         {
-            AddInput(MaskPin, "Mask", UBufferCreator.CreateInstance<USuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
+            AddInput(MaskPin, "Mask", UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
         }
-        public bool IsMask(int x, int y, int z, USuperBuffer<sbyte, FSByteOperator> maskBuffer)
+        public bool IsMask(int x, int y, int z, TtSuperBuffer<sbyte, FSByteOperator> maskBuffer)
         {
             if (maskBuffer == null)
                 return true;
             var uvw = maskBuffer.GetUVW(x, y, z);
             return maskBuffer.GetPixel<sbyte>(in uvw) == 1;
         }
-        public bool IsMask(in Vector3 uvw, USuperBuffer<sbyte, FSByteOperator> maskBuffer)
+        public bool IsMask(in Vector3 uvw, TtSuperBuffer<sbyte, FSByteOperator> maskBuffer)
         {
             if (maskBuffer == null)
                 return true;
@@ -167,7 +167,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 rightType = right.BufferCreator.ElementType;
 
             var arg = new ULeftRightBuffer();
-            arg.Mask = graph.BufferCache.FindBuffer(MaskPin) as USuperBuffer<sbyte, FSByteOperator>;
+            arg.Mask = graph.BufferCache.FindBuffer(MaskPin) as TtSuperBuffer<sbyte, FSByteOperator>;
             arg.Left = left;
             arg.LeftType = leftType;
             arg.Right = right;
@@ -184,7 +184,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Add", "BaseOp\\Add", UPgcGraph.PgcEditorKeyword)]
     public class UPixelAdd : UBinocularWithMask
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -209,7 +209,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Sub", "BaseOp\\Sub", UPgcGraph.PgcEditorKeyword)]
     public class UPixelSub : UBinocularWithMask
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -234,7 +234,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Mul", "BaseOp\\Mul", UPgcGraph.PgcEditorKeyword)]
     public class UPixelMul : UBinocularWithMask
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -259,7 +259,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Div", "BaseOp\\Div", UPgcGraph.PgcEditorKeyword)]
     public class UPixelDiv : UBinocularWithMask
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -284,7 +284,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Max", "BaseOp\\Max", UPgcGraph.PgcEditorKeyword)]
     public class UPixelMax : UBinocularWithMask
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -309,7 +309,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Min", "BaseOp\\Min", UPgcGraph.PgcEditorKeyword)]
     public class UPixelMin : UBinocularWithMask
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -338,12 +338,12 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn FactorPin { get; set; } = new PinIn();
         public UPixelLerp()
         {
-            AddInput(FactorPin, "Factor", UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1));
+            AddInput(FactorPin, "Factor", UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1));
         }
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
-            var mask = graph.BufferCache.FindBuffer(MaskPin) as USuperBuffer<sbyte, FSByteOperator>;
-            var factor = graph.BufferCache.FindBuffer(FactorPin) as USuperBuffer<sbyte, FSByteOperator>;
+            var mask = graph.BufferCache.FindBuffer(MaskPin) as TtSuperBuffer<sbyte, FSByteOperator>;
+            var factor = graph.BufferCache.FindBuffer(FactorPin) as TtSuperBuffer<sbyte, FSByteOperator>;
             var left = graph.BufferCache.FindBuffer(LeftPin);
             var right = graph.BufferCache.FindBuffer(RightPin);
             if (right != null)
@@ -389,7 +389,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 right.LifeCount--;
             return true;
         }
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;

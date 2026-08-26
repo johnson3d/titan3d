@@ -336,6 +336,105 @@ namespace KawaiiPhysics
 	}
 
 	// -----------------------------------------------------------------
+	// Ribbon solver
+	// -----------------------------------------------------------------
+
+	void KawaiiPhysicsContext::InitializeRibbons(int32_t NumRibbons)
+	{
+		RibbonSetups.clear();
+		RibbonSetups.resize(NumRibbons);
+	}
+
+	void KawaiiPhysicsContext::SetRibbonSetup(int32_t Index,
+		const char* Name,
+		int32_t RootBoneIndex, int32_t EndBoneIndex,
+		float TailBoneLength, int32_t TailBoneAxis,
+		int32_t LODThreshold)
+	{
+		if (Index < 0 || Index >= (int32_t)RibbonSetups.size()) return;
+		auto& s = RibbonSetups[Index];
+		s.Name = Name ? Name : "";
+		s.RootBoneIndex = RootBoneIndex;
+		s.EndBoneIndex = EndBoneIndex;
+		s.TailBoneLength = TailBoneLength;
+		s.TailBoneForwardAxis = (ETailBoneAxis)KawaiiClamp(TailBoneAxis, 0, 5);
+		s.LODThreshold = LODThreshold;
+	}
+
+	void KawaiiPhysicsContext::SetRibbonSway(int32_t Index,
+		float SwingAngleDegrees, float SwayFrequency,
+		float Inertia, float InertiaFalloff,
+		float TipAmplify, float AmplifyCurvePower)
+	{
+		if (Index < 0 || Index >= (int32_t)RibbonSetups.size()) return;
+		auto& s = RibbonSetups[Index];
+		s.SwingAngleDegrees = SwingAngleDegrees;
+		s.SwayFrequency = SwayFrequency;
+		s.Inertia = Inertia;
+		s.InertiaFalloff = InertiaFalloff;
+		s.TipAmplify = TipAmplify;
+		s.AmplifyCurvePower = AmplifyCurvePower;
+	}
+
+	void KawaiiPhysicsContext::SetRibbonSwingPlane(int32_t Index, float SwingPlaneAngleDegrees, float RestTiltAngleDegrees)
+	{
+		if (Index < 0 || Index >= (int32_t)RibbonSetups.size()) return;
+		auto& s = RibbonSetups[Index];
+		s.SwingPlaneAngleDegrees = SwingPlaneAngleDegrees;
+		s.RestTiltAngleDegrees = RestTiltAngleDegrees;
+	}
+
+	void KawaiiPhysicsContext::SetRibbonNoise(int32_t Index, float NoiseMix, int32_t NoiseLayers, float NoiseRoughness, float NoiseScale)
+	{
+		if (Index < 0 || Index >= (int32_t)RibbonSetups.size()) return;
+		auto& s = RibbonSetups[Index];
+		s.NoiseMix = NoiseMix;
+		s.NoiseLayers = NoiseLayers;
+		s.NoiseRoughness = NoiseRoughness;
+		s.NoiseScale = NoiseScale;
+	}
+
+	void KawaiiPhysicsContext::SetRibbonWind(int32_t Index, float WindResponse, float WindGustiness, float GustFrequency)
+	{
+		if (Index < 0 || Index >= (int32_t)RibbonSetups.size()) return;
+		auto& s = RibbonSetups[Index];
+		s.WindResponse = WindResponse;
+		s.WindGustiness = WindGustiness;
+		s.GustFrequency = GustFrequency;
+	}
+
+	void KawaiiPhysicsContext::SetRibbonCurve(int32_t Index, int32_t CurveId,
+		const float* Times, const float* Values, int32_t Count)
+	{
+		if (Index < 0 || Index >= (int32_t)RibbonSetups.size()) return;
+		auto& s = RibbonSetups[Index];
+		FKawaiiCurve* c = nullptr;
+		switch (CurveId)
+		{
+		case 0: c = &s.SwingAmplitudeCurve; break;
+		case 1: c = &s.WindInfluenceCurve; break;
+		default: break;
+		}
+		if (c)
+			FillKawaiiCurve(*c, Times, Values, Count);
+	}
+
+	void KawaiiPhysicsContext::BuildRibbons(
+		const v3dxVector3* BonePositions,
+		const v3dxQuaternion* BoneRotations,
+		const v3dxVector3* BoneScales,
+		const int32_t* ParentIndices,
+		int32_t NumBones)
+	{
+		CachedBonePositions.assign(BonePositions, BonePositions + NumBones);
+		CachedBoneRotations.assign(BoneRotations, BoneRotations + NumBones);
+		CachedBoneScales.assign(BoneScales, BoneScales + NumBones);
+		CachedParentIndices.assign(ParentIndices, ParentIndices + NumBones);
+
+		RibbonSolver.Initialize(RibbonSetups, CachedBonePositions, CachedBoneRotations, CachedBoneScales, CachedParentIndices);
+	}
+
+	// -----------------------------------------------------------------
 	// Collider management
 	// -----------------------------------------------------------------
 
@@ -464,6 +563,7 @@ namespace KawaiiPhysics
 
 		ChainSolver.UpdatePose(CachedBonePositions, CachedBoneRotations, CachedBoneScales);
 		ClothSolver.UpdatePose(CachedBonePositions, CachedBoneRotations, CachedBoneScales);
+		RibbonSolver.UpdatePose(CachedBonePositions, CachedBoneRotations, CachedBoneScales);
 
 		// Update rod poses
 		for (auto& rod : Rods)
@@ -489,6 +589,9 @@ namespace KawaiiPhysics
 		// Cloth simulation
 		ClothSolver.CollisionSubSteps = SimContext.CollisionSubSteps;
 		ClothSolver.Simulate(SimContext, &ColliderBVH);
+
+		// Ribbon simulation
+		RibbonSolver.Simulate(SimContext);
 
 		// Rod simulation
 		float dt = SimContext.SubstepDeltaTime > 0.0f ? SimContext.SubstepDeltaTime : SimContext.DeltaTime;
@@ -516,6 +619,7 @@ namespace KawaiiPhysics
 	{
 		ChainSolver.ResetDynamics();
 		ClothSolver.ResetDynamics();
+		RibbonSolver.ResetDynamics();
 		for (auto& rod : Rods)
 		{
 			for (auto& P : rod.Particles)
@@ -621,6 +725,36 @@ namespace KawaiiPhysics
 	{
 		if (RodIndex < 0 || RodIndex >= (int32_t)Rods.size()) return -1;
 		const auto& particles = Rods[RodIndex].Particles;
+		if (ParticleIndex < 0 || ParticleIndex >= (int32_t)particles.size()) return -1;
+		return particles[ParticleIndex].BoneIndex;
+	}
+
+	int32_t KawaiiPhysicsContext::GetRibbonCount() const { return (int32_t)RibbonSolver.GetRibbons().size(); }
+
+	int32_t KawaiiPhysicsContext::GetRibbonParticleCount(int32_t RibbonIndex) const
+	{
+		const auto& ribbons = RibbonSolver.GetRibbons();
+		if (RibbonIndex < 0 || RibbonIndex >= (int32_t)ribbons.size()) return 0;
+		return (int32_t)ribbons[RibbonIndex].Particles.size();
+	}
+
+	void KawaiiPhysicsContext::GetRibbonParticlePosition(int32_t RibbonIndex, int32_t ParticleIndex,
+		float& OutX, float& OutY, float& OutZ) const
+	{
+		const auto& ribbons = RibbonSolver.GetRibbons();
+		if (RibbonIndex < 0 || RibbonIndex >= (int32_t)ribbons.size()) { OutX = OutY = OutZ = 0; return; }
+		const auto& particles = ribbons[RibbonIndex].Particles;
+		if (ParticleIndex < 0 || ParticleIndex >= (int32_t)particles.size()) { OutX = OutY = OutZ = 0; return; }
+		OutX = particles[ParticleIndex].Position.X;
+		OutY = particles[ParticleIndex].Position.Y;
+		OutZ = particles[ParticleIndex].Position.Z;
+	}
+
+	int32_t KawaiiPhysicsContext::GetRibbonParticleBoneIndex(int32_t RibbonIndex, int32_t ParticleIndex) const
+	{
+		const auto& ribbons = RibbonSolver.GetRibbons();
+		if (RibbonIndex < 0 || RibbonIndex >= (int32_t)ribbons.size()) return -1;
+		const auto& particles = ribbons[RibbonIndex].Particles;
 		if (ParticleIndex < 0 || ParticleIndex >= (int32_t)particles.size()) return -1;
 		return particles[ParticleIndex].BoneIndex;
 	}

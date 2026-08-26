@@ -128,7 +128,7 @@ namespace KawaiiPhysics
 
 			float ssRate = (Rod.Elements.size() > 1) ? (float)ElementIndex / (float)(Rod.Elements.size() - 1) : 0.0f;
 			float ssStiff = KawaiiClamp(Rod.StretchAndShearStiffness * Rod.StretchAndShearStiffnessCurve.Evaluate(ssRate), 0.0f, 1.0f);
-			float compliance = (1.0f - ssStiff) / (dt * dt + KAWAII_SMALL_NUMBER);
+			float compliance = StiffnessToCompliance(ssStiff) / (dt * dt + KAWAII_SMALL_NUMBER);
 			v3dxVector3 correction = stretchError * (-1.0f / (wSum + compliance + KAWAII_SMALL_NUMBER));
 
 			P0.Position = P0.Position - correction * w0;
@@ -152,7 +152,7 @@ namespace KawaiiPhysics
 
 			float btRate = (Rod.Elements.size() > 1) ? (float)ElementIndex / (float)(Rod.Elements.size() - 1) : 0.0f;
 			float btStiff = KawaiiClamp(Rod.BendAndTwistStiffness * Rod.BendAndTwistStiffnessCurve.Evaluate(btRate), 0.0f, 1.0f);
-			float compliance = (1.0f - btStiff) / (dt * dt + KAWAII_SMALL_NUMBER);
+			float compliance = StiffnessToCompliance(btStiff) / (dt * dt + KAWAII_SMALL_NUMBER);
 			v3dxVector3 correction = darbouxError * (-1.0f / (2.0f + compliance + KAWAII_SMALL_NUMBER));
 
 			// Apply orientation corrections
@@ -187,7 +187,7 @@ namespace KawaiiPhysics
 				float paRate = (ptCount > 1) ? (float)i / (float)(ptCount - 1) : 0.0f;
 				float paStiff = KawaiiClamp(Rod.PointAttachmentStiffness * Rod.PointAttachmentStiffnessCurve.Evaluate(paRate), 0.0f, 1.0f);
 				if (paStiff < KAWAII_SMALL_NUMBER) continue;
-				float compliance = (1.0f - paStiff) / (dt * dt + KAWAII_SMALL_NUMBER);
+				float compliance = StiffnessToCompliance(paStiff) / (dt * dt + KAWAII_SMALL_NUMBER);
 
 				float w = P.InverseMass;
 				v3dxVector3 correction = error * (-1.0f / (w + compliance + KAWAII_SMALL_NUMBER));
@@ -218,7 +218,7 @@ namespace KawaiiPhysics
 				float oaRate = (oaCount > 1) ? (float)i / (float)(oaCount - 1) : 0.0f;
 				float oaStiff = KawaiiClamp(Rod.OrientationAttachmentStiffness * Rod.OrientationAttachmentStiffnessCurve.Evaluate(oaRate), 0.0f, 1.0f);
 				if (oaStiff < KAWAII_SMALL_NUMBER) continue;
-				float compliance = (1.0f - oaStiff) / (dt * dt + KAWAII_SMALL_NUMBER);
+				float compliance = StiffnessToCompliance(oaStiff) / (dt * dt + KAWAII_SMALL_NUMBER);
 
 				v3dxVector3 correction = errorAxis * (-1.0f / (1.0f + compliance + KAWAII_SMALL_NUMBER));
 				float halfAngle = Vec3Length(correction) * 0.5f;

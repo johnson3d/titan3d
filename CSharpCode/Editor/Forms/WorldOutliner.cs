@@ -204,7 +204,14 @@ namespace EngineNS.Editor.Forms
         }
         protected virtual bool ShouldDrawEditorVisibilityToggle(GamePlay.Scene.TtNode node)
         {
-            return node != null && node.HasStyle(GamePlay.Scene.TtNode.ENodeStyles.Transient) == false;
+            // Transient (不存盘的编辑器辅助物) 也给眼睛: 会画进 Outliner 树的 Transient
+            // 节点是 GridLine, “把网格关掉”是常见需求。IsEditorVisible 存在 runtime style
+            // 里, 不写进场景资产, 重开场景即恢复。
+            //
+            // 但自己不画树行的节点 (IsShowInOutliner == false, 如 gizmo 的 AxisRootNode)
+            // 必须跳过: 眼睛是个真实 item, 画了眼睛却没有后续树行时, SameLine 会把它
+            // 推到下一个节点的行首 —— 就是 GridLine 行里出现两个眼睛的成因。
+            return node != null && node.IsShowInOutliner;
         }
         protected virtual void DrawEditorVisibilityToggle(GamePlay.Scene.TtNode node)
         {

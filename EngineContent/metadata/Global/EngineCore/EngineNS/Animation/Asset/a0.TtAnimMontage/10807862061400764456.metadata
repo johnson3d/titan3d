@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_10807862061400764456 Type="EngineNS.Animation.Asset.TtAnimMontage@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <BlendInTime Type="System.Single@Unknown" Order="0" />
+  <BlendOutTime Type="System.Single@Unknown" Order="0" />
+  <BlendOutTriggerTime Type="System.Single@Unknown" Order="0" />
+  <DefaultPlayRate Type="System.Single@Unknown" Order="0" />
+  <EnableAutoBlendOut Type="System.Boolean@Unknown" Order="0" />
+  <Notifies Type="System.Collections.Generic.List&lt;EngineNS.Animation.Notify.IAnimNotify@EngineCore,&gt;@Unknown" Order="0" />
+  <PreviewMeshName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Sections Type="System.Collections.Generic.List&lt;EngineNS.Animation.Asset.TtMontageSection@EngineCore,&gt;@Unknown" Order="0" />
+  <SlotTracks Type="System.Collections.Generic.List&lt;EngineNS.Animation.Asset.TtMontageSlotTrack@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_10807862061400764456>

@@ -9,7 +9,7 @@ namespace EngineNS.Bricks.Procedure.Node
     {
         public UMaskBase()
         {
-            OutputDesc.BufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<sbyte, FSByteOperator>>();
+            OutputDesc.BufferType = Rtti.TtTypeDesc.TypeOf<TtSuperBuffer<sbyte, FSByteOperator>>();
         }
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
@@ -47,7 +47,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("GreatEqual", "Mask\\GreatEqual", UPgcGraph.PgcEditorKeyword)]
     public class UGreatEqual : UMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -76,7 +76,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Great", "Mask\\Great", UPgcGraph.PgcEditorKeyword)]
     public class UGreat : UMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -105,7 +105,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("LessEqual", "Mask\\LessEqual", UPgcGraph.PgcEditorKeyword)]
     public class ULessEqual : UMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -134,7 +134,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Less", "Mask\\Less", UPgcGraph.PgcEditorKeyword)]
     public class ULess : UMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -163,7 +163,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("Equal", "Mask\\Equal", UPgcGraph.PgcEditorKeyword)]
     public class UEqual : UMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -192,7 +192,7 @@ namespace EngineNS.Bricks.Procedure.Node
     [Bricks.CodeBuilder.ContextMenu("NotEqual", "Mask\\NotEqual", UPgcGraph.PgcEditorKeyword)]
     public class UNotEqual : UMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -227,8 +227,8 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn RightPin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator InputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
+        public UBufferCreator InputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
+        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
         public ULogicBoolean()
         {
             Icon.Size = new Vector2(25, 25);
@@ -349,8 +349,8 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn SrcPin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator InputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
+        public UBufferCreator InputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
+        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
         public UBooleanNot()
         {
             Icon.Size = new Vector2(25, 25);
@@ -399,10 +399,10 @@ namespace EngineNS.Bricks.Procedure.Node
     {
         [Browsable(false)]
         public PinOut ClosestPin { get; set; } = new PinOut();
-        public UBufferCreator ClosestDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
+        public UBufferCreator ClosestDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
         public USdfCalculator()
         {
-            SourceDesc.BufferType = Rtti.TtTypeDescGetter<USuperBuffer<sbyte, FSByteOperator>>.TypeDesc;
+            SourceDesc.BufferType = Rtti.TtTypeDescGetter<TtSuperBuffer<sbyte, FSByteOperator>>.TypeDesc;
 
             AddOutput(ClosestPin, "Closest", ClosestDesc);
         }

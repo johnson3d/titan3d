@@ -29,6 +29,16 @@ namespace EngineNS.Animation.Notify
                 }
             }
         }
+        public Int64 BeginTime
+        {
+            get => mBeginTriggerTime;
+            set => BeginTriggerTime = value;
+        }
+        public Int64 EndTime
+        {
+            get => mEndTriggerTime;
+            set => EndTriggerTime = value;
+        }
         string mName;
         public string Name
         {
@@ -84,15 +94,16 @@ namespace EngineNS.Animation.Notify
         }
         public void Trigger(long beforeTime, long afterTime)
         {
+           // 无订阅者时不能直接调用事件, 否则会抛NullReference
            if(IsTriggerStart(beforeTime, afterTime))
            {
-                OnNotifyStart(this);
+                OnNotifyStart?.Invoke(this);
            }
            if (IsTriggerStop(beforeTime, afterTime))
            {
-               OnNotifyStop(this);
+               OnNotifyStop?.Invoke(this);
            }
-            OnNotify(this);
+            OnNotify?.Invoke(this);
         }
     }
 }

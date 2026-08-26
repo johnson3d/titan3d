@@ -14,6 +14,10 @@ namespace EngineNS.Animation.Player
     {
         public float Time { get; set; } = 0;
         public float Duration { get => SkeletonAnimClip.Duration; }
+        /// <summary>
+        /// RootMotion过滤模式, 由持有本播放器的节点设置
+        /// </summary>
+        public RootMotion.ERootMotionMode RootMotionMode { get; set; } = RootMotion.ERootMotionMode.Ignore;
 
         public Asset.TtAnimationClip SkeletonAnimClip { get; protected set; } = null;
 
@@ -48,7 +52,10 @@ namespace EngineNS.Animation.Player
             Time %= SkeletonAnimClip.Duration;
 
             //make command
+            mAnimEvaluateCommand.PrevTime = beforeTime;
             mAnimEvaluateCommand.Time = Time;
+            mAnimEvaluateCommand.IsLoop = true;
+            mAnimEvaluateCommand.RootMotionMode = RootMotionMode;
 
             foreach(var notify in SkeletonAnimClip.Notifies)
             {

@@ -11,7 +11,7 @@ namespace EngineNS.Bricks.Procedure.Node
     {
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<DVector3, FDouble3Operator>>(-1, -1, -1);
+        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<DVector3, FDouble3Operator>>(-1, -1, -1);
         public UDouble3ValueNode()
         {
             Icon.Size = new Vector2(25, 25);
@@ -50,7 +50,7 @@ namespace EngineNS.Bricks.Procedure.Node
     {
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Quaternion, FQuaternionOperator>>(-1, -1, -1);
+        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Quaternion, FQuaternionOperator>>(-1, -1, -1);
         public UQuaternionValueNode()
         {
             Icon.Size = new Vector2(25, 25);
@@ -88,7 +88,7 @@ namespace EngineNS.Bricks.Procedure.Node
     {
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<int, FIntOperator>>(-1, -1, -1);
+        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<int, FIntOperator>>(-1, -1, -1);
         public UIntValueNode()
         {
             Icon.Size = new Vector2(25, 25);
