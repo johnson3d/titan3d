@@ -35,7 +35,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 NxRHI.EVertexStreamType.VST_Normal,
                 NxRHI.EVertexStreamType.VST_Tangent,
                 NxRHI.EVertexStreamType.VST_Color,
-                NxRHI.EVertexStreamType.VST_LightMap,
+                NxRHI.EVertexStreamType.VST_ExtraUV,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
         public TtPermutationItem DisableAO

@@ -77,6 +77,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             [Rtti.Meta("")]
             [RName.PGRName(FilterExts = TtMaterial.AssetExt)]
             public RName MaterialName { get; set; }
+            /// <summary>
+            /// 地形材质贴图的场景级覆盖, 按下标与 PGC 图表 MatIdMapping 节点的 MaterialIdArray 对齐。
+            /// 长度由 TtTerrainNode.EnsureMaterialTextures 跟随维护, 手动增删无意义。
+            /// </summary>
+            [Category("Option")]
+            [Rtti.Meta("")]
+            public List<TtTerrainMaterialTextureOverride> MaterialTextureOverrides { get; set; } = new List<TtTerrainMaterialTextureOverride>();
 
             public int LevelSideX = 1024;
             public int LevelSideZ = 1024;
@@ -155,7 +162,127 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public NxRHI.TtCbView TerrainCBuffer;
 
         public VirtualTexture.TtVirtualTextureArray RVTextureArray;
+        /// <summary>
+        /// 指向 PGC 图表 MatIdMapping 节点里的 manager 实例 (UPgcAsset.LoadAsset 不做实例缓存,
+        /// 所以每个地形节点持有自己那份副本)。在 Details 里改它只影响本节点的内存副本, 不落盘;
+        /// 要持久化贴图改动用 MaterialTextureOverrides。
+        /// </summary>
+        [Category("TerrainMaterial")]
         public UTerrainMaterialIdManager TerrainMaterialIdManager { get; set; }
+        /// <summary>
+        /// 地形材质贴图的场景级覆盖, 与 TerrainMaterialIdManager.MaterialIdArray 按下标对齐,
+        /// 某项留空即沿用 PGC 图表原值。改这里会存进 .scene, 不会动 .pgc。
+        /// 注意: 材质的"数量"以及 TransitionRange / Plants 是 PGC 生成 ID 图的输入 (并计入 level 缓存 hash),
+        /// 只能在 PGC 编辑器里改。
+        /// </summary>
+        [Category("TerrainMaterial")]
+        public List<TtTerrainMaterialTextureOverride> MaterialTextureOverrides
+        {
+            get => TerrainData?.MaterialTextureOverrides;
+            set
+            {
+                var nd = TerrainData;
+                if (nd == null)
+                    return;
+                nd.MaterialTextureOverrides = value ?? new List<TtTerrainMaterialTextureOverride>();
+                // 不在这里重建: 下一帧 EnsureMaterialTextures 比对签名后会自动重建
+            }
+        }
+        RName[] mBuiltTexDiffuse;
+        RName[] mBuiltTexNormal;
+        static bool SameRName(RName a, RName b)
+        {
+            return (a == null) ? (b == null) : a.Equals(b);
+        }
+        /// <summary>
+        /// 比对"最终生效的贴图组合", 变了就重建 diffuse / normal 的 Texture2DArray。
+        /// 之所以用签名比对而不是写在 setter 里: 用户在 Details 里改的是 MaterialTextureOverrides[i]
+        /// 或 MaterialIdArray[i] 的子对象属性, 宿主不是本节点, PropertyGrid 不会调到节点上任何 setter
+        /// (undo/redo 反射回写同理)。比对成本是材质数量次引用比较, 真正的重建 (读盘 + 建贴图数组) 只在变化时发生。
+        /// </summary>
+        /// <param name="immediateUpload">
+        /// true = 贴图上传立即在当前线程执行 (启动期用, 保证首帧就有贴图);
+        /// false = 进全局 RenderQueue, 由渲染线程下一 tick 消费。
+        /// </param>
+        public void EnsureMaterialTextures(bool immediateUpload = false)
+        {
+            var mgr = TerrainMaterialIdManager;
+            if (mgr == null)
+                return;
+            int count = mgr.MaterialIdArray.Count;
+            if (count == 0)
+                return;
+
+            // 覆盖列表长度跟随 MaterialIdArray: 材质数量只能在 PGC 图表里改, 这里只补齐 / 截断槽位
+            var overrides = MaterialTextureOverrides;
+            if (overrides != null)
+            {
+                while (overrides.Count < count)
+                    overrides.Add(new TtTerrainMaterialTextureOverride());
+                if (overrides.Count > count)
+                    overrides.RemoveRange(count, overrides.Count - count);
+                mgr.TextureOverrides = overrides;
+            }
+
+            if (mBuiltTexDiffuse != null && mBuiltTexDiffuse.Length == count)
+            {
+                bool same = true;
+                for (int i = 0; i < count; i++)
+                {
+                    if (SameRName(mBuiltTexDiffuse[i], mgr.GetEffectiveTexDiffuse(i)) == false ||
+                        SameRName(mBuiltTexNormal[i], mgr.GetEffectiveTexNormal(i)) == false)
+                    {
+                        same = false;
+                        break;
+                    }
+                }
+                if (same)
+                    return;
+            }
+
+            // BuildSRV 内部会先 Cleanup 掉旧的贴图数组, 再把每个 slice 上传。这是启动期 / 编辑期改材质
+            // 才会走到的路径, 运行期列表不变则一帧都不会重建。
+            // 上传命令按 CodingGuidelines §1.7 走 RenderQueue (同模块参考: TtTerrainSystem.TickSync 的 RVT 上传)。
+            var cmdlist = NxRHI.TtCommandList.GetCmdList();
+            using (new NxRHI.TtCmdListScope(cmdlist, "TerrainBuildSRV"))
+            {
+                mgr.BuildSRV(cmdlist.mCoreObject);
+                cmdlist.FlushDraws();
+            }
+            TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(cmdlist, "TerrainMaterial.BuildSRV",
+                NxRHI.EQueueType.QU_Default, immediateUpload);
+
+            mBuiltTexDiffuse = new RName[count];
+            mBuiltTexNormal = new RName[count];
+            for (int i = 0; i < count; i++)
+            {
+                mBuiltTexDiffuse[i] = mgr.GetEffectiveTexDiffuse(i);
+                mBuiltTexNormal[i] = mgr.GetEffectiveTexNormal(i);
+            }
+        }
+        public override void AddAssetReferences(IO.IAssetMeta ameta)
+        {
+            base.AddAssetReferences(ameta);
+            var nd = TerrainData;
+            if (nd == null)
+                return;
+            // PGC 图表本体: 图表内部引用的材质贴图 / 植被 mesh 由 UPgcAsset.UpdateAMetaReferences 收集, 经此传递
+            if (nd.PgcName != null)
+                ameta.AddReferenceAsset(nd.PgcName);
+            if (nd.MaterialName != null)
+                ameta.AddReferenceAsset(nd.MaterialName);
+            // 场景级贴图覆盖不在任何资产的引用链里, 必须显式收集, 否则 cook 后覆盖贴图会丢
+            if (nd.MaterialTextureOverrides != null)
+            {
+                foreach (var i in nd.MaterialTextureOverrides)
+                {
+                    if (i.TexDiffuse != null)
+                        ameta.AddReferenceAsset(i.TexDiffuse);
+                    if (i.TexNormal != null)
+                        ameta.AddReferenceAsset(i.TexNormal);
+                }
+            }
+        }
         public string TerrainName
         {
             get
@@ -227,10 +354,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if (hmNode != null)
             {
                 TerrainMaterialIdManager = hmNode.MaterialIdManager;
-                using (var tsCmd = new NxRHI.FTransientCmd(NxRHI.EQueueType.QU_Default, "TerrainBuildSRV"))
-                {
-                    TerrainMaterialIdManager.BuildSRV(tsCmd.CmdList);
-                }
+                // 补齐覆盖槽位 + 首次 BuildSRV (含场景级贴图覆盖), 启动期立即上传
+                EnsureMaterialTextures(true);
                 await hmNode.SureMaterialResources();
             }
 
@@ -444,6 +569,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
+                // Details 里改了材质贴图的话在这里被发现并重建贴图数组, 没变化时仅做引用比较
+                EnsureMaterialTextures();
+
                 EyeCenter = args.Policy.DefaultCamera.mCoreObject.GetPosition();
                 EyeLocalCenter = args.Policy.DefaultCamera.mCoreObject.GetLocalPosition();
 

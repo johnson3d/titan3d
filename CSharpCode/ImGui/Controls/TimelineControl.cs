@@ -38,6 +38,16 @@ namespace EngineNS.EGui.Controls
         public bool AllowMove = true;
         public bool AllowResize = false;
         /// <summary>
+        /// 缩放时范围必须始终盖住的区间 (秒), NaN 表示不约束。只作用于 ResizeBegin/
+        /// ResizeEnd, 整体拖动不受限 —— 那时区间里的东西跟着一起平移。
+        ///
+        /// 调用方拿它声明“这个条里装着东西, 别把它们露到范围外面”。Sequencer 传的是
+        /// 这一段最早/最晚的关键帧: 起点被拖到第一个关键帧右边的话, 那个关键帧就既
+        /// 不驱动任何东西 (段落在那个时刻还没生效) 又照旧画在轨道上。
+        /// </summary>
+        public float MustCoverBegin = float.NaN;
+        public float MustCoverEnd = float.NaN;
+        /// <summary>
         /// 调用方挂自己的数据对象, 控件不解释
         /// </summary>
         public object UserData;
@@ -86,6 +96,14 @@ namespace EngineNS.EGui.Controls
         /// </summary>
         public TtTimelineItem ChangedItem { get; private set; } = null;
         public TtTimelineItem ClickedItem { get; private set; } = null;
+        /// <summary>
+        /// 本帧是否刚结束一次项的拖拽 (松手那一帧为 true)。
+        ///
+        /// 判“拖拽结束”必须用它, 不要用 "ChangedItem == null": 那个字段的含义是
+        /// “本帧值发生了变化”, 鼠标按住不动的帧它就是 null。拿它当结束信号会把一次
+        /// 拖拽切成 N 段 (N = 拖拽过程中鼠标停顿的帧数), 撤销一次拖拽得按 N 次 Ctrl+Z。
+        /// </summary>
+        public bool ItemDragFinished { get; private set; } = false;
         public TtTimelineItem DoubleClickedItem { get; private set; } = null;
         public TtTimelineItem RightClickedItem { get; private set; } = null;
         /// <summary>
@@ -109,11 +127,18 @@ namespace EngineNS.EGui.Controls
 
         const float EdgeGrabPixels = 4.0f;
         const float MarkerHalfWidth = 5.0f;
+        /// <summary>播放头竖线的可抓半宽 (像素)。线宽 2px, 给宽裕一点免得要像素级对准。</summary>
+        const float PlayHeadGrabPixels = 5.0f;
+        /// <summary>播放头顶部手柄的尺寸。光杆自己看不出可拖, 给个手柄做 affordance。</summary>
+        const float PlayHeadHandleHalfWidth = 5.0f;
+        const float PlayHeadHandleHeight = 8.0f;
 
         static uint ColorBackground { get => UIProxy.StyleConfig.Instance.PanelBackground; }
         static uint ColorGrid { get => UIProxy.StyleConfig.Instance.GridColor; }
         static uint ColorText { get => UIProxy.StyleConfig.Instance.TextColor; }
         const uint ColorPlayHead = 0xFF3030FF;
+        /// <summary>悬停可抓 / 正在拖拽时的播放头颜色</summary>
+        const uint ColorPlayHeadHot = 0xFF9090FF;
         const uint ColorSelected = 0xFF00FFFF;
         const uint ColorTrackBgOdd = 0x20FFFFFF;
 
@@ -158,6 +183,7 @@ namespace EngineNS.EGui.Controls
             DoubleClickedItem = null;
             RightClickedItem = null;
             RightClickedTrack = -1;
+            ItemDragFinished = false;
 
             var origin = ImGuiAPI.GetCursorScreenPos();
             var canvasSize = size;
@@ -187,14 +213,25 @@ namespace EngineNS.EGui.Controls
 
             // 播放头: 竖线贯穿全部轨道
             float playX = TimeToScreenX(PlayPosition, areaX0, areaWidth);
+            // 可抓判定必须在 DrawTracksAndItems 之后算: mDragMode 非 None 说明本帧被某个 item 抢先
+            // 命中了, 那时不该报可抓。
+            bool playHeadGrabbable = canvasHovered && mDragMode == EDragMode.None &&
+                IsOverPlayHeadGrabZone(in mouse, in origin, in canvasEnd, areaX0, areaWidth);
+            bool playHeadHot = mDragMode == EDragMode.PlayHead || playHeadGrabbable;
+            if (playHeadHot)
+                ImGuiAPI.SetMouseCursor(ImGuiMouseCursor_.ImGuiMouseCursor_ResizeEW);
             if (playX >= areaX0 && playX <= canvasEnd.X)
             {
+                var headColor = playHeadHot ? ColorPlayHeadHot : ColorPlayHead;
                 var p0 = new Vector2(playX, origin.Y);
                 var p1 = new Vector2(playX, canvasEnd.Y);
-                drawList.AddLine(in p0, in p1, ColorPlayHead, 2.0f);
+                drawList.AddLine(in p0, in p1, headColor, playHeadHot ? 3.0f : 2.0f);
+                var handleMin = new Vector2(playX - PlayHeadHandleHalfWidth, origin.Y);
+                var handleMax = new Vector2(playX + PlayHeadHandleHalfWidth, origin.Y + PlayHeadHandleHeight);
+                drawList.AddRectFilled(in handleMin, in handleMax, headColor, 2.0f, ImDrawFlags_.ImDrawFlags_RoundCornersAll);
             }
 
-            changed |= UpdatePlayHeadDrag(canvasHovered, in mouse, in origin, areaX0, areaWidth);
+            changed |= UpdatePlayHeadDrag(canvasHovered, in mouse, in origin, in canvasEnd, areaX0, areaWidth);
             return changed;
         }
 
@@ -256,10 +293,20 @@ namespace EngineNS.EGui.Controls
 
                 if (!string.IsNullOrEmpty(track.Label))
                 {
+                    // 标签必须裁在行头区里: 文字宽度由数据定 (绑定名 + 轨道名很容易超过
+                    // LabelWidth), 溢出去就压在时间轴的刻度和条子上, 拼成一堆看不出来的字。
+                    var labelClipMin = new Vector2(origin.X, rowY);
+                    var labelClipMax = new Vector2(areaX0 - 2.0f, rowY + rowHeight);
+                    drawList.PushClipRect(in labelClipMin, in labelClipMax, true);
                     var labelPos = new Vector2(origin.X + 4, rowY + 3);
                     drawList.AddText(in labelPos, ColorText, track.Label, null);
+                    drawList.PopClipRect();
                 }
 
+                // 项一律裁在时间轴区内: 起点在 ViewStart 之前的条会一直画到行头标签上去。
+                var itemClipMin = new Vector2(areaX0, rowY);
+                var itemClipMax = new Vector2(canvasEnd.X, rowY + rowHeight);
+                drawList.PushClipRect(in itemClipMin, in itemClipMax, true);
                 for (int i = 0; i < Items.Count; ++i)
                 {
                     var item = Items[i];
@@ -296,6 +343,12 @@ namespace EngineNS.EGui.Controls
 
                     if (!canvasHovered || mDragMode != EDragMode.None)
                         continue;
+                    // 抓取区不能伸到行头区里去: 起点落在 ViewStart 上的条 (Sequencer 里就是
+                    // StartTick=0 的 Section) 左边缘正好压在 areaX0 这条分隔线上, ±EdgeGrabPixels
+                    // 跨过去之后, 点行头标签就会启动 ResizeBegin —— 用户想选轨道, 结果把条子
+                    // 的起点拖走了。
+                    if (mouse.X < areaX0)
+                        continue;
                     if (mouse.X < itemMin.X - EdgeGrabPixels || mouse.X > itemMax.X + EdgeGrabPixels ||
                         mouse.Y < itemMin.Y || mouse.Y > itemMax.Y)
                         continue;
@@ -310,6 +363,7 @@ namespace EngineNS.EGui.Controls
                             hitMode = EDragMode.ResizeEnd;
                     }
                 }
+                drawList.PopClipRect();
 
                 // 轨道空白处右键: 交给调用方弹新增菜单
                 if (canvasHovered && rightClicked && hitItem == null &&
@@ -354,13 +408,18 @@ namespace EngineNS.EGui.Controls
                 {
                     mDragMode = EDragMode.None;
                     mDragItemId = null;
+                    ItemDragFinished = true;
                 }
                 else
                 {
                     var item = FindItem(mDragItemId);
                     if (item == null)
                     {
+                        // 拖拽中项没了 (调用方重建了数据): 也得报一次结束, 否则调用方那边
+                        // 攒着的 undo 快照永远等不到收尾。
                         mDragMode = EDragMode.None;
+                        mDragItemId = null;
+                        ItemDragFinished = true;
                     }
                     else
                     {
@@ -385,6 +444,11 @@ namespace EngineNS.EGui.Controls
                             case EDragMode.ResizeBegin:
                                 {
                                     float newBegin = Math.Min(Snap(mouseTime), item.End);
+                                    // 缩放不能把 MustCover 区间露到范围外面去。不夹的话, 条子里那些
+                                    // 东西就变成了孤儿: 既不生效又还画在轨道上, 看着像“前面一段怎么
+                                    // 拖都不动, 到起点突然跳一下”。
+                                    if (float.IsNaN(item.MustCoverBegin) == false && newBegin > item.MustCoverBegin)
+                                        newBegin = item.MustCoverBegin;
                                     if (newBegin != item.Begin)
                                     {
                                         item.Begin = newBegin;
@@ -396,6 +460,8 @@ namespace EngineNS.EGui.Controls
                             case EDragMode.ResizeEnd:
                                 {
                                     float newEnd = Math.Max(Snap(mouseTime), item.Begin);
+                                    if (float.IsNaN(item.MustCoverEnd) == false && newEnd < item.MustCoverEnd)
+                                        newEnd = item.MustCoverEnd;
                                     if (newEnd != item.End)
                                     {
                                         item.End = newEnd;
@@ -411,12 +477,29 @@ namespace EngineNS.EGui.Controls
             return changed;
         }
 
-        bool UpdatePlayHeadDrag(bool canvasHovered, in Vector2 mouse, in Vector2 origin, float areaX0, float areaWidth)
+        /// <summary>
+        /// 鼠标是否落在能启动播放头拖拽的区域: 标尺行任意处, 或竖线本身附近。
+        /// 竖线贯穿整个画布高度, 就得在整个高度上都能抓住它, 否则用户按住线往旁边拖却没反应。
+        /// </summary>
+        bool IsOverPlayHeadGrabZone(in Vector2 mouse, in Vector2 origin, in Vector2 canvasEnd, float areaX0, float areaWidth)
+        {
+            // 上下界都要判: 只判 mouse.X >= areaX0 的话, 标尺右侧空白 (乃至画布之外) 的点击也会
+            // 启动拖拽, 而 ClampTime 会把它夹成 Duration —— 表现为播放头莫名跳到末尾。
+            if (mouse.X < areaX0 || mouse.X > areaX0 + areaWidth)
+                return false;
+            if (mouse.Y >= origin.Y && mouse.Y <= origin.Y + HeaderHeight)
+                return true;
+            if (mouse.Y < origin.Y || mouse.Y > canvasEnd.Y)
+                return false;
+            return Math.Abs(mouse.X - TimeToScreenX(PlayPosition, areaX0, areaWidth)) <= PlayHeadGrabPixels;
+        }
+
+        bool UpdatePlayHeadDrag(bool canvasHovered, in Vector2 mouse, in Vector2 origin, in Vector2 canvasEnd, float areaX0, float areaWidth)
         {
             bool leftDown = ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left);
-            bool inHeader = mouse.Y >= origin.Y && mouse.Y <= origin.Y + HeaderHeight && mouse.X >= areaX0;
 
-            if (mDragMode == EDragMode.None && canvasHovered && inHeader &&
+            if (mDragMode == EDragMode.None && canvasHovered &&
+                IsOverPlayHeadGrabZone(in mouse, in origin, in canvasEnd, areaX0, areaWidth) &&
                 ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Left, false))
             {
                 mDragMode = EDragMode.PlayHead;

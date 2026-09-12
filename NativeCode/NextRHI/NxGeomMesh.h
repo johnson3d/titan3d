@@ -32,7 +32,7 @@ namespace NxRHI
 			VOT_UV,//float2
 			VOT_WorldPos,//float3
 			VOT_Tangent,
-			VOT_Lightmap,
+			VOT_ExtraUV,
 
 			VOT_F4_1,//uint4
 			VOT_F4_2,
@@ -357,6 +357,9 @@ namespace NxRHI
 		struct FStreamTypeInfo
 		{
 			const char* XndName = nullptr;
+			// 该流曾经用过的旧 Xnd 名字。存盘只写 XndName, 读盘在 XndName 找不到时才回退到这里 ——
+			// 改名不能让盘上已有的资产静默掉流(TryGetAttribute 拿不到就直接跳过, 不报任何错)。
+			const char* LegacyXndName = nullptr;
 			int Stride = 0;
 		};
 		static inline FStreamTypeInfo GetStreamTypeInfo(EVertexStreamType type)
@@ -394,9 +397,13 @@ namespace NxRHI
 				result.Stride = sizeof(v3dxVector2);
 				break;
 			}
-			case VST_LightMap:
+			case VST_ExtraUV:
 			{
-				result.XndName = "LightMapUV";
+				result.XndName = "ExtraUV";
+				// 这条流原名 VST_LightMap, 盘上的 chunk 名是 "LightMapUV"。实际用它的地方几乎都不是
+				// lightmap(地形 level UV、GridUV 的第二套 UV、SunShaft 参数), 所以改名为 ExtraUV;
+				// 但已有资产里存的仍是旧名字, 必须留着回退路径。
+				result.LegacyXndName = "LightMapUV";
 				result.Stride = sizeof(v3dVector4_t);
 				break;
 			}

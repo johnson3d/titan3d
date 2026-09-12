@@ -166,7 +166,7 @@ namespace EngineNS.Bricks.DataSet
 
                 var ameta = new TtDataSetAMeta();
                 ameta.SetAssetName(rn);
-                ameta.AssetId = Guid.NewGuid();
+                ameta.AssetId = IO.IAssetMeta.AcquireAssetId(rn);
                 ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtDataSet)).TypeString;
                 ameta.Description = $"This is a {typeof(TtDataSet).FullName}\n";
                 ameta.DataType = dataset.DataType;

@@ -141,7 +141,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 var ameta = new TtBehaviorAMeta();
                 ameta.SetAssetName(assetName);
-                ameta.AssetId = Guid.NewGuid();
+                ameta.AssetId = IO.IAssetMeta.AcquireAssetId(assetName);
                 ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtBehavior)).TypeString;
                 ameta.Description = $"This is a behavior\n";
                 ameta.SaveAMeta((IO.IAsset)null);

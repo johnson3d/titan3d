@@ -283,7 +283,7 @@ namespace EngineNS.NxRHI
                 anim.AssetName = rname;
                 var ameta = anim.CreateAMeta() as EGui.TtUVAnimAMeta;
                 ameta.SetAssetName(rname);
-                ameta.AssetId = Guid.NewGuid();
+                ameta.AssetId = IO.IAssetMeta.AcquireAssetId(rname);
                 ameta.TextureName = AssetName;
                 ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(anim.GetType()).TypeString;
                 ameta.SaveAMeta((IAsset)null);
@@ -679,7 +679,7 @@ namespace EngineNS.NxRHI
                 {
                     var ameta = new TtSrViewAMeta();
                     ameta.SetAssetName(rn);
-                    ameta.AssetId = Guid.NewGuid();
+                    ameta.AssetId = IO.IAssetMeta.AcquireAssetId(rn);
                     ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtSrView)).TypeString;
                     ameta.Description = $"This is a {typeof(TtSrView).FullName}\n";
                     ameta.OriginImageAddress = mSourceFile;
@@ -725,7 +725,7 @@ namespace EngineNS.NxRHI
 
                 var ameta = new TtSrViewAMeta();
                 ameta.SetAssetName(rn);
-                ameta.AssetId = Guid.NewGuid();
+                ameta.AssetId = IO.IAssetMeta.AcquireAssetId(rn);
                 ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtSrView)).TypeString;
                 ameta.Description = $"This is a {typeof(TtSrView).FullName}\n";
                 ameta.SaveAMeta((IO.IAsset)null);
@@ -748,7 +748,7 @@ namespace EngineNS.NxRHI
 
                 var ameta = new TtSrViewAMeta();
                 ameta.SetAssetName(rn);
-                ameta.AssetId = Guid.NewGuid();
+                ameta.AssetId = IO.IAssetMeta.AcquireAssetId(rn);
                 ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtSrView)).TypeString;
                 ameta.Description = $"This is a {typeof(TtSrView).FullName}\n";
                 ameta.SaveAMeta((IO.IAsset)null);
@@ -770,7 +770,7 @@ namespace EngineNS.NxRHI
 
                 var ameta = new TtSrViewAMeta();
                 ameta.SetAssetName(rn);
-                ameta.AssetId = Guid.NewGuid();
+                ameta.AssetId = IO.IAssetMeta.AcquireAssetId(rn);
                 ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtSrView)).TypeString;
                 ameta.Description = $"This is a {typeof(TtSrView).FullName}\n";
                 ameta.SaveAMeta((IO.IAsset)null);

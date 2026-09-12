@@ -98,15 +98,15 @@ void GetEngineVertexLayout(std::vector<NxRHI::FLayoutElement>& GLayouts)
 		tmpElem.InstanceDataStepRate = 0;
 		GLayouts[VST_UV] = tmpElem;
 
-		//VST_LightMap,
+		//VST_ExtraUV,
 		tmpElem.SemanticName = "TEXCOORD";
 		tmpElem.SemanticIndex = 2;
 		tmpElem.Format = PXF_R32G32B32A32_FLOAT;
-		tmpElem.InputSlot = VST_LightMap;
+		tmpElem.InputSlot = VST_ExtraUV;
 		tmpElem.AlignedByteOffset = 0;
 		tmpElem.IsInstanceData = false;
 		tmpElem.InstanceDataStepRate = 0;
-		GLayouts[VST_LightMap] = tmpElem;
+		GLayouts[VST_ExtraUV] = tmpElem;
 
 		//VST_SkinIndex,
 		tmpElem.SemanticName = "TEXCOORD";

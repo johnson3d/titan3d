@@ -421,6 +421,61 @@ namespace EngineNS.GamePlay.Scene
             IsCollide = (1 << 18),
             Invisible = SelfInvisible | ChildrenInvisible,
         }
+        /// <summary>
+        /// 同步 Tick 的阶段基准值，供 <see cref="GetTickOrder"/> 参照。值越小越早被 Tick。
+        /// 允许在基准值上做小偏移(如 (int)ETickOrder.Animation + 10)来做同阶段内的细分。
+        /// </summary>
+        public enum ETickOrder : int
+        {
+            First = -10000,
+            /// <summary>动画求值：产出 Pose 与 RootMotion，必须早于消费方</summary>
+            Animation = -1000,
+            Default = 0,
+            /// <summary>位移求值：消费上游产出的 RootMotion</summary>
+            Movement = 1000,
+            Last = 10000,
+        }
+        /// <summary>
+        /// 同步 Tick 顺序。TtWorld.TickLogic 会按此值对同步 Tick 的节点做升序排序。
+        /// 注意几点:
+        /// 1. 只对**非** <see cref="ENodeStyles.ParallelTick"/> 的节点生效。声明了并行 Tick 就等于声明了
+        ///    「不关心顺序」，那批节点走 ParallelFor，不排序也无法排序，且**整体排在同步组之后**
+        ///    (相当于 order = +∞ 且组内无序)。所以“同步节点早于并行节点”是白送的，
+        ///    但反方向的依赖(要求某并行节点早于某同步节点)无法用本方法表达，
+        ///    只能先去掉那个节点的 ParallelTick 标记。
+        ///    两者同时出现属于自相矛盾的声明，会被 <see cref="CheckTickOrderIgnored"/> 捕获并告警。
+        /// 2. 排序用的是不稳定排序，且并行收集本身不保证入表顺序 → **相同返回值的节点之间相对顺序未定义**。
+        ///    有先后依赖的两个节点必须返回不同的值。
+        /// 3. 会在并行收集阶段被调用，实现必须是纯函数(按类型返回常量)，不要读写可变状态。
+        /// </summary>
+        public virtual int GetTickOrder()
+        {
+            return (int)ETickOrder.Default;
+        }
+        // CheckTickOrderIgnored 的一次性告警去重标记。纯运行时诊断状态，不序列化。
+        // 该标记在并行收集阶段被读写，竞争是良性的：最坏情况只是同一个节点多告警几次
+        bool mTickOrderIgnoredWarned = false;
+        /// <summary>
+        /// 哨兵检查：带 <see cref="ENodeStyles.ParallelTick"/> 的节点走 ParallelFor，它的
+        /// <see cref="GetTickOrder"/> 是被**静默忽略**的。两者同时出现说明节点声明的 Tick 顺序
+        /// 根本不会生效，最常见的来源是场景/prefab 资产里误勾了 IsParallelTick(该样式带
+        /// Rtti.Meta 会被序列化)，这种情况静态扫代码是查不出来的。
+        /// 每个节点只告警一次。由 TtWorld.TickLogic 在并行收集阶段对并行组的节点调用。
+        /// </summary>
+        internal void CheckTickOrderIgnored()
+        {
+            if (mTickOrderIgnoredWarned)
+                return;
+            var order = GetTickOrder();
+            if (order == (int)ETickOrder.Default)
+                return;
+
+            mTickOrderIgnoredWarned = true;
+            var msg = $"{GetType().FullName}:{NodeName} 同时声明了 ENodeStyles.ParallelTick 与非缺省的 GetTickOrder()={order}，后者在并行组里会被忽略。若该节点确实存在 Tick 先后依赖，应去掉 ParallelTick 让它回到同步组";
+            // 先落日志再断言：断言会把调试器停在这里，日志能保证信息已经被记录下来
+            Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, "TtNode", msg);
+            System.Diagnostics.Debug.Assert(false, msg);
+        }
         [Flags]
         public enum ENodeRuntimeStyles : uint
         {
@@ -1790,6 +1845,7 @@ namespace EngineNS.GamePlay.Scene
             public Graphics.Pipeline.IRenderViewport Viewport;
             public object Tag;
             public bool IsTickChildren = true;
+            public TtNode.TtIterateParameters IterateParameters = null;
         }
         public class TtOnTickLogicScope<T> : TtTypeScope<T, TtOnTickLogicScope<T>.OnTickLogic>
         {
@@ -1821,6 +1877,12 @@ namespace EngineNS.GamePlay.Scene
             public FVisitNode Callback;
             public object Arg;
             public int NodeNumLimit = 100;
+            public void Reset()
+            {
+                Callback = null;
+                Arg = null;
+                NodeNumLimit = 100;
+            }
         }
         public void ParallelIterateChildren(TtIterateParameters it)
         {

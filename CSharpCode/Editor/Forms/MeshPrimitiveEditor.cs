@@ -822,7 +822,7 @@ namespace EngineNS.Editor.Forms
             {
                 ameta = new TtSkeletonAssetAMeta();
                 ameta.SetAssetName(skeletonRName);
-                ameta.AssetId = Guid.NewGuid();
+                ameta.AssetId = IO.IAssetMeta.AcquireAssetId(skeletonRName);
                 ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtSkeletonAsset)).TypeString;
                 ameta.Description = $"Exported from {Mesh.AssetName}";
                 ameta.SaveAMeta((IO.IAsset)null);
@@ -982,7 +982,7 @@ namespace EngineNS.Editor.Forms
                         var rn = RName.GetRName(noExtName + DistanceField.TtSdfAsset.AssetExt, Mesh.AssetName.RNameType);
                         var ameta = new DistanceField.TtSdfAssetAMeta();
                         ameta.SetAssetName(rn);
-                        ameta.AssetId = Guid.NewGuid();
+                        ameta.AssetId = IO.IAssetMeta.AcquireAssetId(rn);
                         ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(DistanceField.TtSdfAsset)).TypeString;
                         ameta.Description = $"This is a {typeof(DistanceField.TtSdfAssetAMeta).FullName}\n";
                         ameta.SaveAMeta((IO.IAsset)null);

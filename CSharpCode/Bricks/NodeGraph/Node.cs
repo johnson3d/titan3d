@@ -603,7 +603,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return null;
         }
-        public PinOut FindPinOut(string name)
+        public virtual PinOut FindPinOut(string name)
         {
             foreach (var i in Outputs)
             {

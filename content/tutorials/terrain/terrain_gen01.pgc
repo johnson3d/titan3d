@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Bricks.Procedure.UPgcGraph@EngineCore">
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/terrain/terrain_gen01.pgc,d2a5fe45-8b63-4ce7-bf0e-59bacfa9efe3" />
   <DefaultCreator Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-    <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+    <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
     <XSize Type="System.Int32@Unknown" Value="1034" />
     <YSize Type="System.Int32@Unknown" Value="1034" />
     <ZSize Type="System.Int32@Unknown" Value="1" />
@@ -18,7 +18,7 @@
       <UserInputs Type="System.Collections.Generic.List&lt;EngineNS.Bricks.Procedure.Node.UNodePinDefine@EngineCore,&gt;@Unknown" Count="4">
         <e_0 Type="EngineNS.Bricks.Procedure.Node.UNodePinDefine@EngineCore">
           <BufferCreator Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-            <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+            <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
             <XSize Type="System.Int32@Unknown" Value="-1" />
             <YSize Type="System.Int32@Unknown" Value="-1" />
             <ZSize Type="System.Int32@Unknown" Value="-1" />
@@ -28,7 +28,7 @@
         </e_0>
         <e_1 Type="EngineNS.Bricks.Procedure.Node.UNodePinDefine@EngineCore">
           <BufferCreator Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-            <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;EngineNS.Vector3@EngineCore,EngineNS.Bricks.Procedure.FFloat3Operator@EngineCore,&gt;@EngineCore" />
+            <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
             <XSize Type="System.Int32@Unknown" Value="-1" />
             <YSize Type="System.Int32@Unknown" Value="-1" />
             <ZSize Type="System.Int32@Unknown" Value="-1" />
@@ -38,7 +38,7 @@
         </e_1>
         <e_2 Type="EngineNS.Bricks.Procedure.Node.UNodePinDefine@EngineCore">
           <BufferCreator Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-            <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+            <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
             <XSize Type="System.Int32@Unknown" Value="-1" />
             <YSize Type="System.Int32@Unknown" Value="-1" />
             <ZSize Type="System.Int32@Unknown" Value="-1" />
@@ -48,7 +48,7 @@
         </e_2>
         <e_3 Type="EngineNS.Bricks.Procedure.Node.UNodePinDefine@EngineCore">
           <BufferCreator Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-            <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+            <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
             <XSize Type="System.Int32@Unknown" Value="-1" />
             <YSize Type="System.Int32@Unknown" Value="-1" />
             <ZSize Type="System.Int32@Unknown" Value="-1" />
@@ -85,13 +85,13 @@
       <Position Type="EngineNS.Vector2@EngineCore" Value="736.3999,251.00003" />
       <PreviewResultIndex Type="System.Int32@Unknown" Value="0" />
       <ResultDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
         <XSize Type="System.Int32@Unknown" Value="1024" />
         <YSize Type="System.Int32@Unknown" Value="1024" />
         <ZSize Type="System.Int32@Unknown" Value="-1" />
       </ResultDesc>
       <SourceDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
         <XSize Type="System.Int32@Unknown" Value="-1" />
         <YSize Type="System.Int32@Unknown" Value="-1" />
         <ZSize Type="System.Int32@Unknown" Value="-1" />
@@ -125,13 +125,13 @@
       <Position Type="EngineNS.Vector2@EngineCore" Value="740.39996,465.80008" />
       <PreviewResultIndex Type="System.Int32@Unknown" Value="0" />
       <ResultDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;EngineNS.Vector3@EngineCore,EngineNS.Bricks.Procedure.FFloat3Operator@EngineCore,&gt;@EngineCore" />
+        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
         <XSize Type="System.Int32@Unknown" Value="1024" />
         <YSize Type="System.Int32@Unknown" Value="1024" />
         <ZSize Type="System.Int32@Unknown" Value="-1" />
       </ResultDesc>
       <SourceDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;EngineNS.Vector3@EngineCore,EngineNS.Bricks.Procedure.FFloat3Operator@EngineCore,&gt;@EngineCore" />
+        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
         <XSize Type="System.Int32@Unknown" Value="-1" />
         <YSize Type="System.Int32@Unknown" Value="-1" />
         <ZSize Type="System.Int32@Unknown" Value="-1" />
@@ -158,7 +158,7 @@
       <Position Type="EngineNS.Vector2@EngineCore" Value="-974.59973,914.19977" />
       <PreviewResultIndex Type="System.Int32@Unknown" Value="0" />
       <ResultDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
         <XSize Type="System.Int32@Unknown" Value="-1" />
         <YSize Type="System.Int32@Unknown" Value="-1" />
         <ZSize Type="System.Int32@Unknown" Value="-1" />
@@ -166,7 +166,7 @@
       <sediment_capacity_factor Type="System.Single@Unknown" Value="4" />
       <Seed Type="System.Int32@Unknown" Value="93288" />
       <SourceDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
         <XSize Type="System.Int32@Unknown" Value="-1" />
         <YSize Type="System.Int32@Unknown" Value="-1" />
         <ZSize Type="System.Int32@Unknown" Value="-1" />
@@ -180,13 +180,13 @@
       <Position Type="EngineNS.Vector2@EngineCore" Value="772.4,695.2" />
       <PreviewResultIndex Type="System.Int32@Unknown" Value="0" />
       <ResultDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
         <XSize Type="System.Int32@Unknown" Value="1024" />
         <YSize Type="System.Int32@Unknown" Value="1024" />
         <ZSize Type="System.Int32@Unknown" Value="-1" />
       </ResultDesc>
       <SourceDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
         <XSize Type="System.Int32@Unknown" Value="-1" />
         <YSize Type="System.Int32@Unknown" Value="-1" />
         <ZSize Type="System.Int32@Unknown" Value="-1" />
@@ -205,13 +205,13 @@
       <RainMap Type="EngineNS.RName@EngineCore" Value="Game,tutorials/terrain/rain.srv,d2ea56cf-55e9-408a-9c9f-492ad2e37de3" />
       <RainScalar Type="System.Single@Unknown" Value="20" />
       <ResultDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
         <XSize Type="System.Int32@Unknown" Value="-1" />
         <YSize Type="System.Int32@Unknown" Value="-1" />
         <ZSize Type="System.Int32@Unknown" Value="-1" />
       </ResultDesc>
       <SourceDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
         <XSize Type="System.Int32@Unknown" Value="-1" />
         <YSize Type="System.Int32@Unknown" Value="-1" />
         <ZSize Type="System.Int32@Unknown" Value="-1" />
@@ -222,13 +222,13 @@
     </e_8>
     <e_9 Type="EngineNS.Bricks.Procedure.Node.UPixelAdd@EngineCore">
       <InputLeftDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
         <XSize Type="System.Int32@Unknown" Value="-1" />
         <YSize Type="System.Int32@Unknown" Value="-1" />
         <ZSize Type="System.Int32@Unknown" Value="-1" />
       </InputLeftDesc>
       <InputRightDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
         <XSize Type="System.Int32@Unknown" Value="-1" />
         <YSize Type="System.Int32@Unknown" Value="-1" />
         <ZSize Type="System.Int32@Unknown" Value="-1" />
@@ -237,7 +237,7 @@
       <Name Type="System.String@Unknown" Value="Add" />
       <NodeId Type="System.Guid@Unknown" Value="6e806c33-cd74-4f2e-8b6a-8bcc79306819" />
       <OutputDesc Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
-        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.USuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+        <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
         <XSize Type="System.Int32@Unknown" Value="1034" />
         <YSize Type="System.Int32@Unknown" Value="1034" />
         <ZSize Type="System.Int32@Unknown" Value="1" />
@@ -249,14 +249,21 @@
     <e_10 Type="EngineNS.Bricks.Procedure.Node.UMaterialIdMapNode@EngineCore">
       <Label Type="System.String@Unknown" Value="MatIdMapping" />
       <MaterialIdManager Type="EngineNS.Bricks.Terrain.CDLOD.UTerrainMaterialIdManager@EngineCore">
-        <MaterialIdArray Type="System.Collections.Generic.List&lt;EngineNS.Bricks.Terrain.CDLOD.UTerrainMaterialId@EngineCore,&gt;@Unknown" Count="1">
+        <MaterialIdArray Type="System.Collections.Generic.List&lt;EngineNS.Bricks.Terrain.CDLOD.UTerrainMaterialId@EngineCore,&gt;@Unknown" Count="2">
           <e_0 Type="EngineNS.Bricks.Terrain.CDLOD.UTerrainMaterialId@EngineCore">
+            <NullPlantDensity Type="System.Int32@Unknown" Value="100000" />
+            <TexDiffuse Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/texture/ground6.srv,fad1e2aa-e0b0-4ccb-b6b5-57ab1bec03fe" />
+            <TexNormal Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/texture/ground6_nmp.srv,3db4d650-7358-4e19-aa8a-be32d2fdfb14" />
+            <TransitionRange Type="System.Single@Unknown" Value="5" />
+            <Plants Type="System.Collections.Generic.List&lt;EngineNS.Bricks.Terrain.CDLOD.UTerrainPlant@EngineCore,&gt;@Unknown" Count="0" />
+          </e_0>
+          <e_1 Type="EngineNS.Bricks.Terrain.CDLOD.UTerrainMaterialId@EngineCore">
             <NullPlantDensity Type="System.Int32@Unknown" Value="100000" />
             <TexDiffuse Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/texture/ground8.srv,6ac2a7ed-f664-472b-9bfd-f424b418f95a" />
             <TexNormal Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/texture/ground8_nmp.srv,e877d865-70bc-4319-8542-4d5c26cc99bb" />
             <TransitionRange Type="System.Single@Unknown" Value="5" />
             <Plants Type="System.Collections.Generic.List&lt;EngineNS.Bricks.Terrain.CDLOD.UTerrainPlant@EngineCore,&gt;@Unknown" Count="0" />
-          </e_0>
+          </e_1>
         </MaterialIdArray>
       </MaterialIdManager>
       <Name Type="System.String@Unknown" Value="MatIdMapping" />
@@ -266,7 +273,7 @@
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_10>
   </Nodes>
-  <Version Type="System.UInt32@Unknown" Value="60" />
+  <Version Type="System.UInt32@Unknown" Value="61" />
   <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore,&gt;@Unknown" Count="10">
     <e_0 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">

@@ -50,6 +50,7 @@ namespace EngineNS.Editor
                         var gpuDataBlob = new Support.TtBlobObject();
                         var bufferData = new Support.TtBlobObject();
                         readable.FetchGpuData(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, 0, (IBlobObject)gpuDataBlob.mCoreObject);
+                        readable.Dispose();
                         NxRHI.ITexture.BuildImage2DBlob((IBlobObject)bufferData.mCoreObject, (IBlobObject)gpuDataBlob.mCoreObject, tex.Desc);
                         TtEngine.Instance.EventPoster.RunOn((Thread.Async.FPostEvent<bool>)((state) =>
                         {
@@ -76,6 +77,7 @@ namespace EngineNS.Editor
                 var gpuDataBlob = new Support.TtBlobObject();
                 var bufferData = new Support.TtBlobObject();
                 readable.FetchGpuData(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, 0, (IBlobObject)gpuDataBlob.mCoreObject);
+                readable.Dispose();
                 NxRHI.ITexture.BuildImage2DBlob((IBlobObject)bufferData.mCoreObject, (IBlobObject)gpuDataBlob.mCoreObject, tex.Desc);
                 TtSnapshot.SavePng(ameta, file, (Support.TtBlobObject)bufferData, side);
             }
@@ -131,6 +133,48 @@ namespace EngineNS.Editor
                 TtEngine.Instance.SourceControlModule.AddFile(file);
             }
             return image;
+        }
+        /// <summary>
+        /// 把一张 GPU 纹理原封不动存成 png 文件 (absFilePath 是绝对路径)。
+        ///
+        /// 和上面那套 Save/SavePng 的区别: 那是给内容浏览器做资产缩略图的, 会裁中心方块再压到
+        /// 128px, 而且落点由 ameta 决定。自动化验证 (MCP capture_screenshot) 要的是"这一帧到底
+        /// 渲染成什么样"的原图, 所以单独开一条路。
+        ///
+        /// 之所以放在引擎侧而不是插件里: StbImageWriteSharp.ImageWriter 是 internal, 只有本程序集
+        /// 能写 png。
+        ///
+        /// 线程: 内部走 Texture2MemImage, 拷贝命令排进 RenderQueue 后在调用线程 fence.Wait,
+        /// 所以只能从非渲染线程调用 (主线程或工作线程都行)。
+        /// </summary>
+        /// <param name="maxSize">长边像素上限, 超了按比例降采样; 0 表示保持原始分辨率</param>
+        public unsafe static bool SaveTextureToFile(NxRHI.ITexture tex, string absFilePath, int maxSize = 0)
+        {
+            if (string.IsNullOrEmpty(absFilePath))
+                return false;
+
+            var image = TtSnapshotCreator.Texture2MemImage(tex);
+            if (image == null)
+                return false;
+
+            if (maxSize > 0 && (image.Width > maxSize || image.Height > maxSize))
+            {
+                float rate = maxSize / (float)Math.Max(image.Width, image.Height);
+                int w = Math.Max(1, (int)(image.Width * rate));
+                int h = Math.Max(1, (int)(image.Height * rate));
+                image = StbImageSharp.ImageProcessor.GetBoxDownSampler(image, w, h);
+            }
+
+            IO.TtFileManager.SureDirectory(IO.TtFileManager.GetParentPathName(absFilePath));
+            // FileMode.Create 而不是 OpenOrCreate: 覆盖写一张更小的图时 OpenOrCreate 会留下
+            // 上一张的尾部字节, 存出来的 png 是坏的。
+            using (var stream = new System.IO.FileStream(absFilePath, System.IO.FileMode.Create))
+            {
+                var writer = new StbImageWriteSharp.ImageWriter();
+                writer.WritePng(image.Data, image.Width, image.Height,
+                    StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+            }
+            return true;
         }
         public static async Thread.Async.TtTask<TtSnapshot> Load(IAssetMeta assetMeta, bool autoGenerate = true)
         {
@@ -285,8 +329,15 @@ namespace EngineNS.Editor
 
         public static unsafe StbImageSharp.TtMemImage Texture2MemImage(NxRHI.TtSrView srv)
         {
+            return Texture2MemImage(srv.GetTexture());
+        }
+        /// <summary>
+        /// 直接吃 ITexture 的版本。交换链后台缓冲 (ISwapChain.GetBackBuffer) 拿不到 TtSrView,
+        /// 整窗截图只能走这条。
+        /// </summary>
+        public static unsafe StbImageSharp.TtMemImage Texture2MemImage(NxRHI.ITexture tex)
+        {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            var tex = srv.GetTexture();
             var fenceDesc = new NxRHI.FFenceDesc();
             fenceDesc.m_InitValue = 0;
             var fence = rc.CreateFence(in fenceDesc, "NoName");

@@ -115,7 +115,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             return new EPixelShaderInput[] {
                 EPixelShaderInput.PST_Position,
                 EPixelShaderInput.PST_UV,
-                EPixelShaderInput.PST_LightMap,
+                EPixelShaderInput.PST_ExtraUV,
             };
         }
         public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall)

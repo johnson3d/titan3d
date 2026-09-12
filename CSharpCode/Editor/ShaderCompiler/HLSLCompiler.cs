@@ -239,8 +239,8 @@ namespace EngineNS.Editor.ShaderCompiler
                     return "USE_VS_Color";
                 case NxRHI.EVertexStreamType.VST_UV:
                     return "USE_VS_UV";
-                case NxRHI.EVertexStreamType.VST_LightMap:
-                    return "USE_VS_LightMap";
+                case NxRHI.EVertexStreamType.VST_ExtraUV:
+                    return "USE_VS_ExtraUV";
                 case NxRHI.EVertexStreamType.VST_SkinIndex:
                     return "USE_VS_SkinIndex";
                 case NxRHI.EVertexStreamType.VST_SkinWeight:
@@ -280,8 +280,8 @@ namespace EngineNS.Editor.ShaderCompiler
                     return "USE_PS_WorldPos";
                 case Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent:
                     return "USE_PS_Tangent";
-                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_LightMap:
-                    return "USE_PS_LightMap";
+                case Graphics.Pipeline.Shader.EPixelShaderInput.PST_ExtraUV:
+                    return "USE_PS_ExtraUV";
                 case Graphics.Pipeline.Shader.EPixelShaderInput.PST_Custom0:
                     return "USE_PS_Custom0";
                 case Graphics.Pipeline.Shader.EPixelShaderInput.PST_Custom1:

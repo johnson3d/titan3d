@@ -1989,7 +1989,7 @@ namespace EngineNS.NxRHI
             {
                 ameta = new TtSrViewAMeta();
                 ameta.SetAssetName(rn);
-                ameta.AssetId = Guid.NewGuid();
+                ameta.AssetId = IO.IAssetMeta.AcquireAssetId(rn);
                 ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtSrView)).TypeString;
                 ameta.Description = $"This is a {typeof(TtSrView).FullName}\n";
                 ameta.OriginImageAddress = importer.mSourceFile;

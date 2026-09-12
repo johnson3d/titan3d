@@ -50,7 +50,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             return new EPixelShaderInput[] {
                 EPixelShaderInput.PST_Normal,
                 EPixelShaderInput.PST_UV,
-                EPixelShaderInput.PST_LightMap,
+                EPixelShaderInput.PST_ExtraUV,
                 EPixelShaderInput.PST_SpecialData,
             };
         }

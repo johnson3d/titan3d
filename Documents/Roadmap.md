@@ -24,7 +24,7 @@
 - 骨骼动画播放、BlendSpace 1D/2D、动画状态机、动画 Notify（含时间轴编辑 UI）。
 - **RootMotion 与 AnimMontage**：已落地，详见 P0-4 条目（含实际方案与遗留缺口），规划动作类玩法时不要再当作缺口。
 - **Morph Target / BlendShape**：已落地，详见 P0-1。稀疏 delta 存 `.vms`，`TtMorphModifier` + `TtMdfSkinMorphMesh` / `TtMdfMorphMesh`，编辑器有权重滑条。**但权重尚未接动画曲线，且无切线 delta。**
-- **通用时间轴控件** `EGui.Controls.TtTimelineControl`（`CSharpCode/ImGui/Controls/TimelineControl.cs`）：标尺 / 播放头 / 多轨条与打点的选中·拖动·拉伸·右键，Montage 与 Notify 编辑器在用，Sequencer 可直接复用。
+- **通用时间轴控件** `EGui.Controls.TtTimelineControl`（`CSharpCode/ImGui/Controls/TimelineControl.cs`）：标尺 / 播放头 / 多轨条与打点的选中·拖动·拉伸·右键，Montage 与 Notify 编辑器在用，Sequencer 可以它为基底（但**没有**滚轮缩放 / 滚动 / 轨道树 / 多选 / 曲线绘制，需按 P2-12 阶段 3 扩能）。
 - Kawaii 次级物理（chain / cloth / rod，XPBD 求解）。
 - 两骨 IK（`TwoBoneIK`）。
 - Actor / Component 体系、CharacterMovement、BehaviorTree、Recast 导航（含 NavCrowd 群体避障）。
@@ -493,10 +493,18 @@ RName），在 `OnPostInitNode` 里 `await InitHitproxyMesh()` 建好 mesh **之
 
 ### 12. Sequencer 过场序列系统
 
-- **现状**：`Sequencer` / `Cutscene` 无有效命中，已有的曲线编辑器是动画曲线用途，不是序列器。但 Montage 编辑器落地时新增了可复用的 `EGui.Controls.TtTimelineControl`（标尺 / 播放头 / 多轨条与打点拖拽），多轨道 UI 不必从零写。
-- **目标**：多轨道时间轴（Transform / 相机 / 灯光 / 动画 / 音频 / 事件）、关键帧编辑、相机切换、事件触发、预览与导出。
-- **依赖**：音频系统（P0-2）应先落地，否则序列器缺音轨。
-- [ ] 未开始
+对标 UE 的 `LevelSequence` + Sequencer 编辑器：一份可保存的 `.sequence` 资产 + 多轨道时间轴编辑器 + 运行时播放器。
+
+- **执行计划**：[design/Sequencer.Plan.md](design/Sequencer.Plan.md) —— 四层数据模型（`Binding → Track → Section → Channel`）、`Int64` tick 双帧率时基、十条硬约束、UE 对标九条结论、可复用设施清单、四阶段任务表与逐阶段验收标准全在那份文档里维护。**本条只维护状态，细节不要往这里搬。**
+- **现状**：阶段 1 代码已全部落地（brick `CSharpCode/Bricks/Sequencer` + `Editor/Forms/SequenceEditor.cs`，`Engine.Window` 与 `MainEditor` 全量重编 0 错误），**未经引擎实跑验收**。前置清理两件已做完：① 从未被调用过的反射式属性 setter 注册表（`TtPropertySetterModule` 一整套）已删除，`Animatable.cs` 309 → 160 行；② 废弃前身 `TtSceneAnimationPlayer` 连同 `Animation.projitems` 的引用行已删除。
+- **阶段状态**（每阶段自身可验收，判据见计划文档 §5；阶段 1 的实施偏离见 §8）
+  - [x] **阶段 1｜骨架 + Transform 轨**：资产四层结构、`TtSequencerModule` 驱动、绑定解析（父 Guid + 相对路径）、播放头 scrub、**原值快照与恢复**、Undo/Redo —— 代码完成，**待按计划文档 §5 的 4 条验收标准实跑（含 `UTest_Sequencer` 的 6 组断言）**
+  - [ ] **阶段 2｜镜头 + 动画 + 事件**：相机切换轨、骨骼动画轨、事件轨；顺带修好 `TtGamePlayCamera` 的 tick 与 `NodeId`
+  - [ ] **阶段 3｜编辑体验**：时间轴扩能（缩放/滚动/多选）、曲线与切线编辑、通用属性轨 —— 其中 3.4 通用属性轨的**运行时与资产层已提前完成**（值适配器体系 + `RName` 资产轨 + 反射访问器，见计划文档 §9），**编辑器 UI 未做，界面上还用不起来**
+  - [ ] **阶段 4｜输出**：PIE 与游戏内播放两条路、PNG 图像序列导出
+  - [ ] **音轨**：随音频系统（P0-2）落地后补，不阻塞前四阶段
+- **依赖**：音频系统（P0-2）应先落地，否则序列器缺音轨；镜头语言的表现力依赖 P2-13。
+- [~] 进行中（阶段 1 代码完成待实跑验收，阶段 2-4 未开始）
 
 ### 13. 电影级后处理：DOF 与 MotionBlur
 
@@ -598,12 +606,11 @@ RName），在 `OnPostInitNode` 里 `await InitHitproxyMesh()` 建好 mesh **之
 
 - **现状**：地形的渲染与物理完整，但**编辑是零**。`brush` / `sculpt` / `splat` / `paint` / `weightmap` 在 `CSharpCode` 与 `NativeCode` 均无有效命中（已按附录要求逐扩展名重扫），不存在 TerrainEditor；高度与材质的唯一来源是 PGC 程序化图（`UTerrainLevelData.BuildLevelDataFromPGC`），想改地形只能改图重生成。`Patch.cs` 里的 `TtPatchLayers` / `TtLayerManager` 分层权重骨架全库无引用，是死代码。
 - **目标**：阶段1 高度雕刻（Raise / Lower / Smooth / Flatten）→ 阶段2 材质 ID 绘制 → 阶段3 权重层与植被绘制。路线已定：走 `TtInteractiveMode` 扩展新增一个并发 mode，不新建编辑器框架、不改基类。
-- **完整实施计划见 [Documents/design/TerrainEdit.Plan.md](design/TerrainEdit.Plan.md)**，含六条硬约束（均有代码依据）、分层设计、逐阶段任务清单与验收标准。动手前先读那份。
-- **三条最致命的约束（摘要，完整版在计划文件 §3）**
+- **三条最致命的约束**
   - 地表不进 HitProxy、也无 Terrain 专用 `LineCheck`，落笔点必须自己写 heightfield ray march。
   - 编辑结果绝不能写进 `cache/terrain/*.trlvl` —— 它由 `TerrainGenHash` 门禁，PGC 图一改就整块重建、手工编辑被静默吞掉；必须另立稀疏 delta 覆盖层。
   - DX12 / VK 的 `Texture::UpdateGpuData` 都把 `FootPrint.X/Y/Z` 硬编码为 0，**GPU 局部区域上传不可用**，只能整层重传 + 按 level 节流。
-- **验收入口**：拖拽能实时抬高地形且抬手后角色能站上去；Ctrl+Z 逐笔回退（视觉与物理同步）；**改 PGC 图重新生成后手工 delta 仍叠加生效**。完整清单见计划文件 §9。
+- **验收入口**：拖拽能实时抬高地形且抬手后角色能站上去；Ctrl+Z 逐笔回退（视觉与物理同步）；**改 PGC 图重新生成后手工 delta 仍叠加生效**。
 
 - [ ] 未开始
 
@@ -652,8 +659,17 @@ RName），在 `OnPostInitNode` 里 `await InitHitproxyMesh()` 建好 mesh **之
 - [ ] **`DO_VS_MATERIAL` 与 `MdfQueueDoModifiers` 的执行顺序在各 ShadingEnv 里不一致**：共 13 处调用点，其中 **先材质后 modifier** 的有 `DeferredOpaque` / `DeferredTranslucent` / `MobileOpaque` / `MobileTranslucent` / `ForwordTranslucent` / `SSM`（shadow）/ `pick_setup` / `DummyShading`；**先 modifier 后材质** 的有 `ForwordOpaque` / `HitProxy` / `MultiViewID/BasePass` / `DrawViewportShading` / `ScreenSpaceUI`。由于 `DO_VS_MATERIAL(output, mtl)` 的第一个形参是 `in PS_INPUT`（只读），材质的 VertexOffset 表达式一旦**读了 `output` 的位置或法线**（例如「沿法线膨胀」、按局部位置算噪声），就会在不同 pass 里读到不同的值：先材质时是未形变的原始顶点，先 modifier 时是已蒙皮/已 morph 的顶点。最值得注意的两个组合：`DeferredOpaque`（先材质）vs `HitProxy`（先 modifier）→ 点选位置与渲染位置对不上；`ForwordOpaque`（先 modifier）vs `SSM` shadow（先材质）→ 前向管线下阴影与本体错位。**对不读 `output` 的表达式（包括 P2-18 VAT，只需 UV + 时间）无影响**，所以目前没有暴露为 bug；但应统一为一种顺序（建议先 modifier 后材质，让材质能看到真实的形变后顶点），或至少在文档里明确声明「VertexOffset 表达式不得依赖顶点位置/法线」。
 - [ ] **`SoundAnimNotify.Trigger()` 为空实现**：随音频系统（P0-2）点亮。
 - [ ] **Montage Slot 缺 Macross 图节点**：`TtBlendTree_Slot` 目前只能由 `TtAnimStateMachinePlayer` 在顶层自动挂（SlotName 由 `MontageSlotName` 配），在 BlendTree 图里不可见、也无法插到图的任意位置。需补 `BlendTreeNodeClassDescription` + `GraphElement` 两个描述类（参照 `BlendTree_KawaiiPhysicsClassDescription`）。
-- [ ] **RootMotion 可能延迟一帧被消费**：场景节点 Tick 是深度优先按 Children 顺序，若 Movement 节点排在持有动画节点的 MeshNode 之前，消费到的是上一帧的位移。`TtRootMotionAccumulator` 已用帧号检测并警告一次，但未从机制上解决（彻底解法是给节点 Tick 引入阶段划分或依赖声明）。
+- [x] **RootMotion 可能延迟一帧被消费**（已接入 `GetTickOrder`，待运行时验收）：根因比「按 Children 顺序」更坏 —— `World.TickLogic` 是用 `Root.ParallelIterateChildren` **并行**收集节点、靠 `lock (list)` 往 `TickNodes` / `ParallelTickNodes` 里塞（`GamePlay/World.cs:565-593`），所以**连 `TickNodes` 那轮同步 `foreach`（:609）的顺序也是逐帧不稳定的**，`ParallelTickNodes` 更是直接 `ParallelFor`（:621）。真正抢顺序的是 `TtSkeletonAnimPlayNode`（`IRootMotionSource`）与 `TtMovement`：两者都是 `TtLightWeightNodeBase`、都没有 `ParallelTick` 标记，**同在 `TickNodes` 里**，若 Movement 这帧排在前面，消费到的就是上一帧的位移。`TtRootMotionAccumulator` 已用帧号检测并警告一次，但未从机制上解决。机制与接入已完成：`TtNode.GetTickOrder()`（`GamePlay/Scene/Node.cs`）+ `World.TickLogic` 对同步组 `TickNodes` 的升序排序；`TtSkeletonAnimPlayNode` 与 `TtAnimStateMachinePlayNode` 返回 `ETickOrder.Animation`（-1000），`TtMovement` 返回 `ETickOrder.Movement`（1000，`TtCharacterMovement` 继承），两边均已证实在同步组。`TtRootMotionAccumulator` 的帧号检测保留作哨兵，警告文案已改为指向 `GetTickOrder`。**验收：跑一个带 RootMotion 的角色（`RootMotionMode != Ignore`），确认日志里不再出现「RootMotion被延迟一帧消费」警告。**
+      同源的跨组问题（`TtMeshNode` 在并行组，却要消费同步组动画节点写入的 `RuntimePose`）已由「同步组先于并行组」的执行顺序反转一并解决，见下条。
+- [x] **蒙皮 pose 比动画求值晚一帧（已由「同步组先于并行组」解决，待运行时验收）**：`TtMeshNode` 在构造时 `SetStyle(ENodeStyles.ParallelTick)`（`GamePlay/Scene/MeshNode.cs:111`）→ 落在**并行组**；而写 pose 的 `TtSkeletonAnimPlayNode` / `TtAnimStateMachinePlayNode` 没有该标记 → 在**同步组**。**原先** `World.TickLogic` 里并行组整体跑完才轮到同步组，所以 `TtMeshNode.OnTickLogic`（`MeshNode.cs:563`）在 :573 把 `RuntimePose` 转成 MeshSpace、再于 :576-596 填 `PerSkinMeshCBuffer` 的 `AbsBonePos` / `AbsBoneQuat` 并 `FlushWrite` 时，**读到的永远是上一帧动画写入的内容**。关键细节：`BindingTo` 里 `meshNode.RuntimePose = mAnimatedPose` 两边持的是**同一个对象引用**，动画节点每帧 `CopyPose(ref mAnimatedPose, Player.OutPose)` 是原地改内容，所以不会报错、只是数据晚一帧。（两个组是前后串行的两个阶段，**不是** 数据竞争。）
+      修复前的影响：单看表现是“整体动画晚一帧”，视觉上几乎不可察；但跟 RootMotion 叠起来就是“位移用本帧、姿态用上一帧”的恒定错配，理论上会产生轻微滑步。
+      修法：把 `World.TickLogic` 的两组执行顺序反转为**先同步组（`GamePlay/World.cs:602-617`，含 `GetTickOrder` 升序排序）、再并行组（:619-627）**，不需要动 `TtMeshNode` 本身、也不损失并行度。依据是 `ENodeStyles.ParallelTick` 的语义就是「我不关心顺序」，而不关心顺序的节点不可能是被依赖方（没人能保证在它之后跑），只能是下游消费方 —— 它天然该排在有序的同步组之后；反转后节点层成为一条可推理的单调时间轴：同步组按 `GetTickOrder` 升序，并行组等价于 `order = +∞` 且组内无序。影响面已核查：并行组里 override 了 `OnTickLogic` 的只有 `TtMeshNode`（`TtPrimitiveMeshNode` 未 override），而 `ENodeStyles` 带 `[Rtti.Meta("")]` 会序列化进场景/prefab、`IsParallelTick` 又是 PropertyGrid 里可勾的可写属性，所以并行组成员不限于代码里那两处 —— 但按上述语义它们都只能是消费方，反转对它们同样是变好。
+      残留风险与哨兵：反转后“并行组的产出被同步组消费”变成了会晚一帧的方向，而这种依赖无法静态穷举（`ENodeStyles` 会序列化进资产）。为此在并行收集阶段加了 `TtNode.CheckTickOrderIgnored()`（`GamePlay/Scene/Node.cs`，由 `World.TickLogic` 对并行组节点调用）：一个节点若**同时**带 `ParallelTick` 和非缺省 `GetTickOrder()`，就是自相矛盾的声明（后者在并行组里被静默忽略），会打一次 `ELogTag.Warning` 日志 + `Debug.Assert`，每节点只报一次（靠节点上的非序列化标记去重，首帧之后开销为一次布尔判断）。已核实现有三处 `GetTickOrder` override 均无 `ParallelTick`，因此当前代码不会误触发。**注意这个哨兵只能盖住「声明了顺序却又并行」这一类；若一个并行节点从未 override `GetTickOrder`、却有同步节点暗自依赖它的产出，仍无法检出 —— 彻底解法要等节点层有显式依赖声明。**
+      **验收：跑带蒙皮动画的角色，确认姿态与位移不再有一帧错配；并对比 `ScopeTick_SyncTick` / `ScopeTick_ParallelTick` 的耗时，确认并行度没被这次调整意外压缩。**
 - [ ] **骨骼上限 360 硬编码**：`cbSkinMesh` 中 `AbsBonePos[360]` / `AbsBoneQuat[360]` 固定占用较大 CBuffer 空间。若后续要做大规模人群或更精细骨架，考虑改为 StructuredBuffer 或按骨架规模分档 Permutation。同时这也是 Morph 数据不应再挤进该 CBuffer 的原因。
+- [ ] **`TtTrack.AddKeyframeBack` 不排序，但 `Evaluate` 靠 `BinarySearch`**：`Bricks/Animation/Base/Track.cs` 里 `AddKeyframeBack` 自带注释 `//should check time and sort by time` 却直接 `Add`，而 `Evaluate` 用 `KeyFramesList.BinarySearch` 定区间 —— 一旦调用方不按时间递增插入，求值结果就是错的且不报错。应要么在插入时保序，要么改名为 `AddKeyframeUnsafe` 并补一个显式 `Sort`。Sequencer（P2-12）会大量做任意位置打点，这条必须先修。同文件的 `EvaluateClamp` 是 `return default;` 空壳，`FKeyframe.InSlope` / `OutSlope` 与 `FTrackCache.Coeff0..3` 定义了但求值完全不用。
+- [ ] **`FCurveValue` 是个危险的 explicit union**：`Bricks/Animation/Base/Curve.cs` 中 `[StructLayout(LayoutKind.Explicit, Size = 3)]`，`Nullable<float> FloatValue` 与 `FNullableVector3 Vector3Value` 都在 `FieldOffset(0)`。`Size = 3` 与实际载荷（约 24 字节）自相矛盾，两个字段内存重叠，两个构造函数只是靠写入顺序碰对。目前使用面窄所以未暴露，但任何新增的曲线类型都会踩上。应拆成正常结构体（tag + 分开的字段）或直接改成逐通道 float。另，`TtQuaternionCurve.Evaluate` 用 `Quaternion.Lerp`（非 Slerp）且输出转成 Euler，大角度旋转会失真。
+- [ ] **`TtGamePlayCamera` 的 `OnTickLogic` 被整段注释**：`GamePlay/Camera/Camera.cs:128-133`。后果是**移动相机节点不会改变视图**，节点的 `Placement` 与它持有的 `TtCamera` 完全脱钩；而且 `mCamera` 自己从不创建，只是在 `GameBase.cs:317` / `:387` 被赋为 `RenderPolicy.DefaultCamera`（借用）。同时它继承 `TtLightWeightNodeBase` → `NodeId` 永远是 `Guid.Empty`，无法被持久引用。随 Sequencer（P2-12）一并修。
 - [ ] **README 网络能力措辞**：与 P1-10 同步修正。
 
 ---

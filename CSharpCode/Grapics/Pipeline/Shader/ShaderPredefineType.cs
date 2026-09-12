@@ -24,8 +24,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             ShaderName = "vUV", Condition = "USE_VS_UV == 1", Binder = "VK_LOCATION(4)", Semantic = "TEXCOORD1")]
         public Vector2 vUV;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(
-            ShaderName = "vLightMap", Condition = "USE_VS_LightMap == 1", Binder = "VK_LOCATION(5)", Semantic = "TEXCOORD2")]
-        public Vector4 vLightMap;
+            ShaderName = "vExtraUV", LegacyShaderName = "vLightMap", Condition = "USE_VS_ExtraUV == 1", Binder = "VK_LOCATION(5)", Semantic = "TEXCOORD2")]
+        public Vector4 vExtraUV;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(
             ShaderName = "vSkinIndex", Condition = "USE_VS_SkinIndex == 1", Binder = "VK_LOCATION(6)", Semantic = "TEXCOORD3")]
         public Vector4ui vSkinIndex;
@@ -87,8 +87,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     return EngineNS.NxRHI.EVertexStreamType.VST_UV;
                 case "vTangent":
                     return EngineNS.NxRHI.EVertexStreamType.VST_Tangent;
-                case "vLightMap":
-                    return EngineNS.NxRHI.EVertexStreamType.VST_LightMap;
+                case "vExtraUV":
+                    return EngineNS.NxRHI.EVertexStreamType.VST_ExtraUV;
             }
             return EngineNS.NxRHI.EVertexStreamType.VST_Number;
         }
@@ -107,8 +107,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public Vector4 vColor;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "vUV")]
         public Vector2 vUV;
-        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "vLightMap")]
-        public Vector4 vLightMap;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "vExtraUV", LegacyShaderName = "vLightMap")]
+        public Vector4 vExtraUV;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "vSkinIndex")]
         public Vector4ui vSkinIndex;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "vSkinWeight")]
@@ -191,8 +191,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             ShaderName = "vWorldPos", Condition = "USE_PS_WorldPos == 1", Binder = "VK_LOCATION(0)", Semantic = "TEXCOORD1")]
         public Vector3 vWorldPos;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(Flags = Editor.ShaderCompiler.EShaderDefine.HasGet | Editor.ShaderCompiler.EShaderDefine.HasSet,
-            ShaderName = "vLightMap", Condition = "USE_PS_LightMap == 1", Binder = "VK_LOCATION(6)", Semantic = "TEXCOORD3")]
-        public Vector4 vLightMap;
+            ShaderName = "vExtraUV", LegacyShaderName = "vLightMap", Condition = "USE_PS_ExtraUV == 1", Binder = "VK_LOCATION(6)", Semantic = "TEXCOORD3")]
+        public Vector4 vExtraUV;
 
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(Flags = Editor.ShaderCompiler.EShaderDefine.HasGet | Editor.ShaderCompiler.EShaderDefine.HasSet,
             ShaderName = "psCustomUV0", Condition = "USE_PS_Custom0 == 1", Binder = "VK_LOCATION(7)", Semantic = "TEXCOORD4")]
@@ -256,8 +256,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     return Graphics.Pipeline.Shader.EPixelShaderInput.PST_WorldPos;
                 case "vTangent":
                     return Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent;
-                case "vLightMap":
-                    return Graphics.Pipeline.Shader.EPixelShaderInput.PST_LightMap;
+                case "vExtraUV":
+                    return Graphics.Pipeline.Shader.EPixelShaderInput.PST_ExtraUV;
                 case "psCustomUV0":
                     return Graphics.Pipeline.Shader.EPixelShaderInput.PST_Custom0;
                 case "psCustomUV1":

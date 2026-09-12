@@ -12,9 +12,11 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="4">
     <e_0 Value="Game,tutorials/common/texture/ground8.srv,6ac2a7ed-f664-472b-9bfd-f424b418f95a" />
     <e_1 Value="Game,tutorials/common/texture/ground8_nmp.srv,e877d865-70bc-4319-8542-4d5c26cc99bb" />
+    <e_2 Value="Game,tutorials/common/texture/ground6.srv,fad1e2aa-e0b0-4ccb-b6b5-57ab1bec03fe" />
+    <e_3 Value="Game,tutorials/common/texture/ground6_nmp.srv,3db4d650-7358-4e19-aa8a-be32d2fdfb14" />
   </RefAssetRNames>
   <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.UPgcAsset@EngineCore" />

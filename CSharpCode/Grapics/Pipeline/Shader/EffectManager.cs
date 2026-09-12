@@ -29,7 +29,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public class TtEffectDesc : IO.BaseSerializer
         {
-            public const uint CurrentEffectVersion = 7;
+            // 8: VS_INPUT/PS_INPUT 的 vLightMap 改名为 vExtraUV, USE_VS_LightMap/USE_PS_LightMap 改为
+            // USE_VS_ExtraUV/USE_PS_ExtraUV。这些结构体是从 ShaderPredefineType.cs 生成的, 不在 CodeHash
+            // 的覆盖范围内(CodeHash 只算 ShadingEnv 的 .cginc), 所以必须靠版本号强制失效旧缓存。
+            public const uint CurrentEffectVersion = 8;
             [Rtti.Meta("")]
             public uint EffectVersion { get; set; } = CurrentEffectVersion;
             [Rtti.Meta("")]

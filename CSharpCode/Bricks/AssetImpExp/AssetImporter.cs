@@ -1027,7 +1027,7 @@ namespace EngineNS.Bricks.AssetImpExp
             Vector3[] normalStream = new Vector3[vertexCount];
             Vector4[] tangentStream = new Vector4[vertexCount];
             Vector2[] uvStream = new Vector2[vertexCount];
-            Vector4[] lightMapStream = new Vector4[vertexCount];
+            Vector4[] extraUVStream = new Vector4[vertexCount];
             UInt32[] vertexColorStream = hasVertexColor ? new UInt32[vertexCount] : null;
             bool isIndex32 = indicesCount > 65535;
             UInt16[] renderIndex16 = isIndex32 ? null : new UInt16[indicesCount];
@@ -1080,15 +1080,15 @@ namespace EngineNS.Bricks.AssetImpExp
                         uvStream[vertexIndex] = AssimpSceneUtil.ConvertVector2(uvChannel[j].X, uvChannel[j].Y);
                         if (uvChannels == 2)
                         {
-                            var lightMapChannel = subMesh.TextureCoordinateChannels[1];
-                            lightMapStream[vertexIndex] = new Vector4(lightMapChannel[j].X, lightMapChannel[j].Y, 0, 0);
+                            var extraUVChannel = subMesh.TextureCoordinateChannels[1];
+                            extraUVStream[vertexIndex] = new Vector4(extraUVChannel[j].X, extraUVChannel[j].Y, 0, 0);
                         }
                     }
                 }
                 vertexCounting += subMesh.VertexCount;
             }
 
-            SetMeshStreams(meshPrimitives, posStream, normalStream, tangentStream, uvStream, lightMapStream, vertexColorStream, null, null, renderIndex16, renderIndex32, isIndex32, indicesCount, vertexCount, false);
+            SetMeshStreams(meshPrimitives, posStream, normalStream, tangentStream, uvStream, extraUVStream, vertexColorStream, null, null, renderIndex16, renderIndex32, isIndex32, indicesCount, vertexCount, false);
             meshPrimitives.MorphTargets = BuildMorphTargetSet(meshes,
                 (int meshIdx) => GetVertexPreTransform(meshNodeRefs[meshIdx], scene, importOption), vertexCount);
             return meshPrimitives;
@@ -1098,7 +1098,7 @@ namespace EngineNS.Bricks.AssetImpExp
             Vector3[] normalStream,
             Vector4[] tangentStream,
             Vector2[] uvStream,
-            Vector4[] lightMapStream,
+            Vector4[] extraUVStream,
             UInt32[] vertexColorStream,
             Byte[] skinIndexsStream,
             float[] skinWeightsStream,
@@ -1135,9 +1135,9 @@ namespace EngineNS.Bricks.AssetImpExp
                 {
                     meshPrimitives.mCoreObject.SetGeomtryMeshStream(cmd.mCoreObject, EVertexStreamType.VST_UV, data, (uint)(sizeof(Vector2) * vertexCount), (uint)sizeof(Vector2), ECpuAccess.CAS_DEFAULT);
                 }
-                fixed (void* data = lightMapStream)
+                fixed (void* data = extraUVStream)
                 {
-                    meshPrimitives.mCoreObject.SetGeomtryMeshStream(cmd.mCoreObject, EVertexStreamType.VST_LightMap, data, (uint)(sizeof(Vector4) * vertexCount), (uint)sizeof(Vector4), ECpuAccess.CAS_DEFAULT);
+                    meshPrimitives.mCoreObject.SetGeomtryMeshStream(cmd.mCoreObject, EVertexStreamType.VST_ExtraUV, data, (uint)(sizeof(Vector4) * vertexCount), (uint)sizeof(Vector4), ECpuAccess.CAS_DEFAULT);
                 }
                 if (isIndex32)
                 {
@@ -1213,7 +1213,7 @@ namespace EngineNS.Bricks.AssetImpExp
             Vector3[] normalStream = new Vector3[vertextCount];
             Vector4[] tangentStream = new Vector4[vertextCount];
             Vector2[] uvStream = new Vector2[vertextCount];
-            Vector4[] lightMapStream = new Vector4[vertextCount];
+            Vector4[] extraUVStream = new Vector4[vertextCount];
             UInt32[] vertexColorStream = null;
             Byte[] skinIndexsStream = null;
             float[] skinWeightsStream = null;
@@ -1316,9 +1316,9 @@ namespace EngineNS.Bricks.AssetImpExp
                         uvStream[vertexIndex] = AssimpSceneUtil.ConvertVector2(uvChannel[j].X, uvChannel[j].Y);
                         if (uvChannels == 2)
                         {
-                            var lightMapChannel = subMesh.TextureCoordinateChannels[1];
-                            var lightMapUV = new Vector4(lightMapChannel[j].X, lightMapChannel[j].Y, 0, 0);
-                            lightMapStream[vertexIndex] = lightMapUV;
+                            var extraUVChannel = subMesh.TextureCoordinateChannels[1];
+                            var extraUV = new Vector4(extraUVChannel[j].X, extraUVChannel[j].Y, 0, 0);
+                            extraUVStream[vertexIndex] = extraUV;
                         }
                     }
 
@@ -1417,9 +1417,9 @@ namespace EngineNS.Bricks.AssetImpExp
                 {
                     meshPrimitives.mCoreObject.SetGeomtryMeshStream(cmd.mCoreObject, EVertexStreamType.VST_UV, data, (uint)(sizeof(Vector2) * vertextCount), (uint)sizeof(Vector2), ECpuAccess.CAS_DEFAULT);
                 }
-                fixed (void* data = lightMapStream)
+                fixed (void* data = extraUVStream)
                 {
-                    meshPrimitives.mCoreObject.SetGeomtryMeshStream(cmd.mCoreObject, EVertexStreamType.VST_LightMap, data, (uint)(sizeof(Vector4) * vertextCount), (uint)sizeof(Vector4), ECpuAccess.CAS_DEFAULT);
+                    meshPrimitives.mCoreObject.SetGeomtryMeshStream(cmd.mCoreObject, EVertexStreamType.VST_ExtraUV, data, (uint)(sizeof(Vector4) * vertextCount), (uint)sizeof(Vector4), ECpuAccess.CAS_DEFAULT);
                 }
                 if (isIndex32)
                 {
@@ -1472,6 +1472,12 @@ namespace EngineNS.Bricks.AssetImpExp
         const float MorphNormalDeltaThreshold = 1e-3f;
 
         /// <summary>
+        /// 切线 delta 阈值(无量纲向量长度)。与法线取同一量级: 两者都是单位向量之差,
+        /// 而且切线的可见性并不比法线低 —— 法线贴图的扰动方向整个挂在切线基上。
+        /// </summary>
+        const float MorphTangentDeltaThreshold = 1e-3f;
+
+        /// <summary>
         /// 从 Assimp 的 MeshAnimationAttachments (即 BlendShape / Morph Target) 提取稀疏 delta。
         ///
         /// 索引对齐的依据: 引擎顶点编号 = vertexCounting + j, 其中 j 就是 Assimp 的顶点下标
@@ -1492,6 +1498,10 @@ namespace EngineNS.Bricks.AssetImpExp
             // 同名 morph 可能出现在多个 sub-mesh 上(头/身体各一份), 合并成一个 target
             var deltasByName = new Dictionary<string, List<FMorphVertexDelta>>();
             var orderedNames = new List<string>();
+            int recomputedNormalShapeCount = 0;
+            int unrecoverableNormalShapeCount = 0;
+            int recomputedTangentShapeCount = 0;
+            int unrecoverableTangentShapeCount = 0;
 
             int vertexCounting = 0;
             for (int i = 0; i < meshes.Count; i++)
@@ -1505,6 +1515,16 @@ namespace EngineNS.Bricks.AssetImpExp
                 }
 
                 var vertexPreTransform = getVertexPreTransform(i);
+
+                // 重算法线用的 base 侧数据。与 attachment 无关, 所以按 sub-mesh 缓存:
+                // 一个角色几十个 blendshape, 不必每个都重新遍历一遍全部面。
+                // 延迟到真的遇到"源没带法线"的 attachment 才算, 免得给正常资产白加开销。
+                Vector3[] transformedBasePositions = null;
+                Vector3[] recomputedBaseNormals = null;
+                bool recomputedNormalsFlipped = false;
+                Vector3[] recomputedBaseTangents = null;
+                bool recomputedTangentsFlipped = false;
+
                 for (int a = 0; a < attachments.Count; a++)
                 {
                     var attachment = attachments[a];
@@ -1521,7 +1541,94 @@ namespace EngineNS.Bricks.AssetImpExp
                     }
 
                     var count = System.Math.Min(attachment.VertexCount, subMesh.VertexCount);
-                    var hasNormals = attachment.HasNormals && subMesh.HasNormals;
+
+                    // 这里要判定的不是"源有没有法线数组", 而是"源的法线能不能产出非零 delta"。
+                    // 两者不等价, 而且差别正是一类静默失效的来源: DCC 导出 shape 时常把基础网格的
+                    // 法线原样复制一份进去(Blender 的 shape key 未勾选重算时就这样), 于是
+                    // HasNormals == true 而 morphNormal - baseNormal 恒等于 0。若只看 HasNormals,
+                    // 这种文件会落进死角 —— 既不走下面的重算, 又存不出任何 delta, 表现与
+                    // "源完全没带法线"一模一样, 但两者的代码路径不同, 排查时极易误判。
+                    var sourceNormalsCarryDelta = attachment.HasNormals && subMesh.HasNormals
+                        && SourceNormalsDifferFromBase(subMesh, attachment, count);
+                    // 切线同理, 而且比法线更少见: Assimp 的 CalculateTangentSpace
+                    // (DefaultSceneFlags 里带着)只处理 aiMesh, 不给 aiAnimMesh 算切线,
+                    // 所以绝大多数文件走的都是下面的重算路径。
+                    var sourceTangentsCarryDelta = attachment.HasTangentBasis && subMesh.HasTangentBasis
+                        && SourceTangentsDifferFromBase(subMesh, attachment, count);
+
+                    // FBX/glTF 里 shape 的法线是可选项, Blender/Maya 导出 shape key 默认不写,
+                    // 所以"源没有可用法线"是常态而不是个例。这种情况下不能就存零 delta 了事:
+                    // VS 里 vNormal + 0 == vNormal, 形状变了而光照仍按基础网格的朝向算,
+                    // 大幅形变(box 变球)时明暗完全不跟着动。
+                    // 于是用形变后的顶点位置配合基础网格的面拓扑重算法线。
+                    //
+                    // 关键取舍: base 法线也用同一套算法从 base 顶点重算, delta = morph' - base',
+                    // 而不是拿 DCC 给的 subMesh.Normals 当基准。DCC 的平滑组/硬边处理与这里的
+                    // 面积加权平均必然存在差异, 若混用, 那个差异会变成与权重无关的常量偏移,
+                    // 于是权重为 0 时法线也被推歪 —— 而权重 0 本该与基础网格逐比特一致。
+                    Vector3[] recomputedMorphNormals = null;
+                    Vector3[] recomputedMorphTangents = null;
+                    // 切线多一个前提: 它是 UV 梯度的方向, 没有 UV0 就无从重算(而法线只需要面拓扑)。
+                    var needRecomputedNormals = sourceNormalsCarryDelta == false && subMesh.HasFaces;
+                    var needRecomputedTangents = sourceTangentsCarryDelta == false && subMesh.HasFaces
+                        && subMesh.TextureCoordinateChannelCount > 0;
+                    if (needRecomputedNormals || needRecomputedTangents)
+                    {
+                        // 形变后的顶点位置是法线与切线重算的共同输入, 算一次共用。
+                        if (transformedBasePositions == null)
+                        {
+                            transformedBasePositions = TransformMorphPositions(subMesh.Vertices,
+                                subMesh.VertexCount, null, in vertexPreTransform);
+                        }
+                        // attachment 顶点数少于 base 时缺的那些回退到 base 位置(= 该处无形变)
+                        var morphPositions = TransformMorphPositions(attachment.Vertices,
+                            subMesh.VertexCount, transformedBasePositions, in vertexPreTransform);
+
+                        if (needRecomputedNormals)
+                        {
+                            if (recomputedBaseNormals == null)
+                            {
+                                recomputedBaseNormals = AccumulateVertexNormals(subMesh.Faces, transformedBasePositions);
+                                recomputedNormalsFlipped = ShouldFlipRecomputedVectors(recomputedBaseNormals,
+                                    subMesh.HasNormals ? subMesh.Normals : null, in vertexPreTransform);
+                                if (recomputedNormalsFlipped)
+                                    NegateAll(recomputedBaseNormals);
+                            }
+                            recomputedMorphNormals = AccumulateVertexNormals(subMesh.Faces, morphPositions);
+                            // 翻转决定必须与 base 侧一致, 否则 delta 直接反向
+                            if (recomputedNormalsFlipped)
+                                NegateAll(recomputedMorphNormals);
+                            recomputedNormalShapeCount++;
+                        }
+
+                        if (needRecomputedTangents)
+                        {
+                            // 两侧用同一套 base UV: morph 不改 UV, 所以切线 delta 里装的正好是
+                            // "几何变形让 UV 梯度方向在 3D 里转了多少", 而这一项是 VS 里那步
+                            // Gram-Schmidt 重投影无论如何也恢复不出来的。
+                            var baseUVs = subMesh.TextureCoordinateChannels[0];
+                            if (recomputedBaseTangents == null)
+                            {
+                                recomputedBaseTangents = AccumulateVertexTangents(subMesh.Faces, transformedBasePositions, baseUVs);
+                                recomputedTangentsFlipped = ShouldFlipRecomputedVectors(recomputedBaseTangents,
+                                    subMesh.HasTangentBasis ? subMesh.Tangents : null, in vertexPreTransform);
+                                if (recomputedTangentsFlipped)
+                                    NegateAll(recomputedBaseTangents);
+                            }
+                            recomputedMorphTangents = AccumulateVertexTangents(subMesh.Faces, morphPositions, baseUVs);
+                            if (recomputedTangentsFlipped)
+                                NegateAll(recomputedMorphTangents);
+                            recomputedTangentShapeCount++;
+                        }
+                    }
+
+                    // 没有面拓扑就无从重算(点云/线段网格), 没有 UV 则算不了切线。这种 shape 只能
+                    // 留零 delta, 计数出来在日志里点明, 免得又变成一个查不出原因的"光照不跟着变"。
+                    if (sourceNormalsCarryDelta == false && needRecomputedNormals == false)
+                        unrecoverableNormalShapeCount++;
+                    if (sourceTangentsCarryDelta == false && needRecomputedTangents == false)
+                        unrecoverableTangentShapeCount++;
+
                     for (int j = 0; j < count; j++)
                     {
                         var basePos = vertexPreTransform.TransformPosition(AssimpSceneUtil.ConvertVector3(subMesh.Vertices[j]).AsDVector()).ToSingleVector3();
@@ -1529,15 +1636,49 @@ namespace EngineNS.Bricks.AssetImpExp
                         var deltaPosition = morphPos - basePos;
 
                         var deltaNormal = Vector3.Zero;
-                        if (hasNormals)
+                        if (sourceNormalsCarryDelta)
                         {
                             var baseNormal = vertexPreTransform.TransformVector3NoScale(AssimpSceneUtil.ConvertVector3(subMesh.Normals[j]));
                             var morphNormal = vertexPreTransform.TransformVector3NoScale(AssimpSceneUtil.ConvertVector3(attachment.Normals[j]));
                             deltaNormal = morphNormal - baseNormal;
                         }
+                        else if (recomputedMorphNormals != null)
+                        {
+                            var baseNormal = recomputedBaseNormals[j];
+                            var morphNormal = recomputedMorphNormals[j];
+                            // 退化顶点(孤立点/零面积面)任一侧为零向量时不给 delta:
+                            // morph - 0 或 0 - base 都会把 VS 里的法线推到错的方向上去。
+                            if (Vector3.Dot(baseNormal, baseNormal) > 0.0f &&
+                                Vector3.Dot(morphNormal, morphNormal) > 0.0f)
+                            {
+                                deltaNormal = morphNormal - baseNormal;
+                            }
+                        }
+
+                        var deltaTangent = Vector3.Zero;
+                        if (sourceTangentsCarryDelta)
+                        {
+                            var baseTangent = vertexPreTransform.TransformVector3NoScale(AssimpSceneUtil.ConvertVector3(subMesh.Tangents[j]));
+                            var morphTangent = vertexPreTransform.TransformVector3NoScale(AssimpSceneUtil.ConvertVector3(attachment.Tangents[j]));
+                            deltaTangent = morphTangent - baseTangent;
+                        }
+                        else if (recomputedMorphTangents != null)
+                        {
+                            var baseTangent = recomputedBaseTangents[j];
+                            var morphTangent = recomputedMorphTangents[j];
+                            // 与法线同样的退化保护。切线这边零向量更容易出现: UV 退化
+                            // (整个三角形卡在同一个 UV 点上, lightmap 接缝处常见)就会让该顶点
+                            // 拿不到任何有效的 UV 梯度。
+                            if (Vector3.Dot(baseTangent, baseTangent) > 0.0f &&
+                                Vector3.Dot(morphTangent, morphTangent) > 0.0f)
+                            {
+                                deltaTangent = morphTangent - baseTangent;
+                            }
+                        }
 
                         if (Vector3.Dot(deltaPosition, deltaPosition) <= MorphPositionDeltaThreshold * MorphPositionDeltaThreshold &&
-                            Vector3.Dot(deltaNormal, deltaNormal) <= MorphNormalDeltaThreshold * MorphNormalDeltaThreshold)
+                            Vector3.Dot(deltaNormal, deltaNormal) <= MorphNormalDeltaThreshold * MorphNormalDeltaThreshold &&
+                            Vector3.Dot(deltaTangent, deltaTangent) <= MorphTangentDeltaThreshold * MorphTangentDeltaThreshold)
                         {
                             continue;
                         }
@@ -1546,6 +1687,7 @@ namespace EngineNS.Bricks.AssetImpExp
                         entry.VertexIndex = (uint)(vertexCounting + j);
                         entry.DeltaPosition = deltaPosition;
                         entry.DeltaNormal = deltaNormal;
+                        entry.DeltaTangent = deltaTangent;
                         deltaList.Add(entry);
                     }
                 }
@@ -1568,9 +1710,241 @@ namespace EngineNS.Bricks.AssetImpExp
             if (result.IsValid == false)
                 return null;
 
+            // 把法线/切线是怎么来的写进日志: 这几条路径产生的资产肉眼无法区分, 而它们的
+            // 排查方向完全不同(改导出设置 / 看重算质量 / 补面拓扑或 UV)。
+            var normalNote = recomputedNormalShapeCount > 0
+                ? $", recomputed normals for {recomputedNormalShapeCount} shape(s) whose source carried no usable normal data"
+                : "";
+            if (unrecoverableNormalShapeCount > 0)
+                normalNote += $", {unrecoverableNormalShapeCount} shape(s) left with zero normal deltas (no face topology to recompute from)";
+            if (recomputedTangentShapeCount > 0)
+                normalNote += $", recomputed tangents for {recomputedTangentShapeCount} shape(s)";
+            if (unrecoverableTangentShapeCount > 0)
+                normalNote += $", {unrecoverableTangentShapeCount} shape(s) left with zero tangent deltas (no face topology or no UV0 to recompute from)";
             Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Info,
-                $"Imported {result.Targets.Count} morph target(s) for mesh with {totalVertexCount} vertices");
+                $"Imported {result.Targets.Count} morph target(s) for mesh with {totalVertexCount} vertices{normalNote}");
             return result;
+        }
+
+        /// <summary>
+        /// 源 shape 的法线是否真的与基础网格不同。
+        ///
+        /// 存在的意义: HasNormals 只能说明数组在不在, 说明不了里面是不是 base 的副本。
+        /// 按位置 delta 的阅读习惯会以为"数组在 => 能算出差"而直接相减, 但法线不同:
+        /// 位置是形变的定义, 必然不同; 法线却完全依赖导出器愿不愿意重算。
+        ///
+        /// 只要有一个顶点的差异超过阈值就算"带了信息", 立即返回 —— 真带法线的文件
+        /// 通常头几个顶点就能判定, 只有副本型的才会真的跑完全程。
+        ///
+        /// 在 Assimp 原始空间里比就行: vertexPreTransform 对两侧是同一个变换,
+        /// 不会把相等变成不相等, 省下白做的变换。
+        /// </summary>
+        private static bool SourceNormalsDifferFromBase(Mesh subMesh, MeshAnimationAttachment attachment, int count)
+        {
+            var baseNormals = subMesh.Normals;
+            var morphNormals = attachment.Normals;
+            if (baseNormals == null || morphNormals == null)
+                return false;
+
+            var limit = System.Math.Min(count, System.Math.Min(baseNormals.Count, morphNormals.Count));
+            for (int v = 0; v < limit; v++)
+            {
+                var diff = AssimpSceneUtil.ConvertVector3(morphNormals[v]) - AssimpSceneUtil.ConvertVector3(baseNormals[v]);
+                if (Vector3.Dot(diff, diff) > MorphNormalDeltaThreshold * MorphNormalDeltaThreshold)
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 源 shape 的切线是否真的与基础网格不同。理由与 SourceNormalsDifferFromBase 一样:
+        /// HasTangentBasis 只能说明数组在不在。切线这边副本的概率反而更高 —— 导出器
+        /// 很少为 shape 单独算切线, 拿 base 的直接填上是常见做法。
+        /// </summary>
+        private static bool SourceTangentsDifferFromBase(Mesh subMesh, MeshAnimationAttachment attachment, int count)
+        {
+            var baseTangents = subMesh.Tangents;
+            var morphTangents = attachment.Tangents;
+            if (baseTangents == null || morphTangents == null)
+                return false;
+
+            var limit = System.Math.Min(count, System.Math.Min(baseTangents.Count, morphTangents.Count));
+            for (int v = 0; v < limit; v++)
+            {
+                var diff = AssimpSceneUtil.ConvertVector3(morphTangents[v]) - AssimpSceneUtil.ConvertVector3(baseTangents[v]);
+                if (Vector3.Dot(diff, diff) > MorphTangentDeltaThreshold * MorphTangentDeltaThreshold)
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 把 Assimp 顶点位置数组变换到与 delta 相同的空间。
+        ///
+        /// 法线必须在变换后的空间里算, 而不是在原始空间算完再变换过去: 非均匀缩放下
+        /// 法线需要用逆转置矩阵变换, TransformVector3NoScale 做不到。先变位置再叉积就
+        /// 自然避开了这个问题。
+        /// </summary>
+        /// <param name="vertexCount">输出长度, 以基础网格的顶点数为准(面索引指向的是它)。</param>
+        /// <param name="fallback">
+        /// vertices 不够长时缺的部分取这里的值(传 base 位置 = 该处无形变); 为 null 则留零向量。
+        /// </param>
+        private static Vector3[] TransformMorphPositions(List<System.Numerics.Vector3> vertices, int vertexCount,
+            Vector3[] fallback, in FTransform vertexPreTransform)
+        {
+            var result = new Vector3[vertexCount];
+            var available = vertices != null ? vertices.Count : 0;
+            for (int v = 0; v < vertexCount; v++)
+            {
+                if (v < available)
+                    result[v] = vertexPreTransform.TransformPosition(AssimpSceneUtil.ConvertVector3(vertices[v]).AsDVector()).ToSingleVector3();
+                else if (fallback != null && v < fallback.Length)
+                    result[v] = fallback[v];
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 面法线累加到顶点后归一化, 得到面积加权的顶点法线。
+        /// 叉积不归一化直接累加 —— 它的模长正比于 2x 三角形面积, 所以加权是免费的。
+        ///
+        /// 注意这里不做按位置的顶点缝合: 硬边/UV 接缝处同一位置的多个顶点会各自算出不同
+        /// 法线, 与 DCC 的平滑组结果并不相同。这对 delta 无害: base 与 morph 过的是同一套
+        /// 算法, 差值里的系统偏差会相互抵消。
+        /// </summary>
+        private static Vector3[] AccumulateVertexNormals(List<Assimp.Face> faces, Vector3[] positions)
+        {
+            var normals = new Vector3[positions.Length];
+            for (int f = 0; f < faces.Count; f++)
+            {
+                var indices = faces[f].Indices;
+                if (indices == null || indices.Count < 3)
+                    continue;
+
+                // DefaultSceneFlags 带 Triangulate, 正常只会是三角形; 仍按扇形拆分处理多边形,
+                // 以防谁拿其他 flags 调进来。
+                for (int t = 1; t + 1 < indices.Count; t++)
+                {
+                    int i0 = indices[0], i1 = indices[t], i2 = indices[t + 1];
+                    if (i0 < 0 || i1 < 0 || i2 < 0)
+                        continue;
+                    if (i0 >= positions.Length || i1 >= positions.Length || i2 >= positions.Length)
+                        continue;
+
+                    var faceNormal = Vector3.Cross(positions[i1] - positions[i0], positions[i2] - positions[i0]);
+                    normals[i0] += faceNormal;
+                    normals[i1] += faceNormal;
+                    normals[i2] += faceNormal;
+                }
+            }
+
+            for (int v = 0; v < normals.Length; v++)
+            {
+                var lenSq = Vector3.Dot(normals[v], normals[v]);
+                // 退化顶点(不被任何面引用, 或周围全是零面积面)留零向量,
+                // 由调用方识别并跳过, 不能归一化成个任意方向。
+                if (lenSq > 1e-24f)
+                    normals[v] = normals[v] * (1.0f / (float)System.Math.Sqrt(lenSq));
+                else
+                    normals[v] = Vector3.Zero;
+            }
+            return normals;
+        }
+
+        /// <summary>
+        /// UV 梯度方向的面切线累加到顶点后归一化。与 AccumulateVertexNormals 一样, 两侧过的是
+        /// 同一套算法, 所以与 Assimp 自己的 CalculateTangentSpace 之间的系统差异会在 delta 里抵消。
+        ///
+        /// 公式源自解 P = p0 + u*T + v*B 的线性方程组:
+        ///   T ∝ (duv2.y * e1 - duv1.y * e2) / det,  det = duv1.x*duv2.y - duv2.x*duv1.y
+        ///
+        /// 这里只取 det 的符号而不除 det, 是有意为之: 一旦除了它, 面切线的模长就变成反比于
+        /// UV 面积, 于是 UV 被压得很小的三角形(接缝、碎面)会拿到近乎无限大的权重, 把周围
+        /// 顶点的切线全拉过去。去掉这个因子后模长正比于几何尺寸, 与法线那边的面积加权是
+        /// 同一个口径; 方向则靠 sign(det) 保住 —— det 为负时真正的 T 是反的, 丢了符号会让
+        /// UV 镜像区域的切线与邻区相互抵消。
+        /// </summary>
+        /// <param name="uvs">UV0 通道, 只用 X/Y。与 positions 同长(不够长的面直接跳过)。</param>
+        private static Vector3[] AccumulateVertexTangents(List<Assimp.Face> faces, Vector3[] positions,
+            List<System.Numerics.Vector3> uvs)
+        {
+            var tangents = new Vector3[positions.Length];
+            var uvCount = uvs != null ? uvs.Count : 0;
+            for (int f = 0; f < faces.Count; f++)
+            {
+                var indices = faces[f].Indices;
+                if (indices == null || indices.Count < 3)
+                    continue;
+
+                for (int t = 1; t + 1 < indices.Count; t++)
+                {
+                    int i0 = indices[0], i1 = indices[t], i2 = indices[t + 1];
+                    if (i0 < 0 || i1 < 0 || i2 < 0)
+                        continue;
+                    if (i0 >= positions.Length || i1 >= positions.Length || i2 >= positions.Length)
+                        continue;
+                    if (i0 >= uvCount || i1 >= uvCount || i2 >= uvCount)
+                        continue;
+
+                    var e1 = positions[i1] - positions[i0];
+                    var e2 = positions[i2] - positions[i0];
+                    float du1 = uvs[i1].X - uvs[i0].X, dv1 = uvs[i1].Y - uvs[i0].Y;
+                    float du2 = uvs[i2].X - uvs[i0].X, dv2 = uvs[i2].Y - uvs[i0].Y;
+
+                    var det = du1 * dv2 - du2 * dv1;
+                    // UV 退化(三个顶点共线或重合在 UV 空间里)时方程组无解, 跳过这个面。
+                    if (det > -1e-20f && det < 1e-20f)
+                        continue;
+                    var faceTangent = (e1 * dv2 - e2 * dv1) * (det > 0.0f ? 1.0f : -1.0f);
+
+                    tangents[i0] += faceTangent;
+                    tangents[i1] += faceTangent;
+                    tangents[i2] += faceTangent;
+                }
+            }
+
+            for (int v = 0; v < tangents.Length; v++)
+            {
+                var lenSq = Vector3.Dot(tangents[v], tangents[v]);
+                // 退化顶点(没有任何非退化 UV 面引用它)留零向量, 由调用方识别并跳过。
+                if (lenSq > 1e-24f)
+                    tangents[v] = tangents[v] * (1.0f / (float)System.Math.Sqrt(lenSq));
+                else
+                    tangents[v] = Vector3.Zero;
+            }
+            return tangents;
+        }
+
+        /// <summary>
+        /// 判定重算出的向量场是否整体反向。
+        ///
+        /// 叉积/UV 梯度的朝向都取决于顶点绕序与 UV 轴方向, 而这两项都被 DefaultSceneFlags 里的
+        /// MakeLeftHanded|FlipWindingOrder|FlipUVs 改写过。与其把约定硬编进来(日后改 flags 就默默
+        /// 坏掉), 不如拿重算的 base 向量与源文件自带的同类向量整体比对, 反向就翻转。
+        ///
+        /// 源文件没得比时(sourceVectors 为 null)不翻转: 此时 base 与 morph 用的是同一套约定,
+        /// delta 依旧自洽。
+        /// </summary>
+        private static bool ShouldFlipRecomputedVectors(Vector3[] recomputedBaseVectors,
+            List<System.Numerics.Vector3> sourceVectors, in FTransform vertexPreTransform)
+        {
+            if (sourceVectors == null)
+                return false;
+
+            var count = System.Math.Min(recomputedBaseVectors.Length, sourceVectors.Count);
+            float dotSum = 0.0f;
+            for (int v = 0; v < count; v++)
+            {
+                var sourceVector = vertexPreTransform.TransformVector3NoScale(AssimpSceneUtil.ConvertVector3(sourceVectors[v]));
+                dotSum += Vector3.Dot(recomputedBaseVectors[v], sourceVector);
+            }
+            return dotSum < 0.0f;
+        }
+
+        private static void NegateAll(Vector3[] vectors)
+        {
+            for (int v = 0; v < vectors.Length; v++)
+                vectors[v] = -vectors[v];
         }
     }
     public class AnimationChunkGenerater

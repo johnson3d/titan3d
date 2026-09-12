@@ -176,7 +176,14 @@ namespace EngineNS.Bricks.Procedure
 
         public NxRHI.TtSrView CreateRGBA8Texture2D(bool bNormalized = true)
         {
-            NxRHI.TtTexture texture;
+            return CreateRGBA8Texture2D(out var texture, bNormalized);
+        }
+        /// <summary>
+        /// 带 out texture 的重载。局部上传 (TtTexture.UpdateGpuData) 需要纹理对象本身,
+        /// 光拿 SRV 是不够的 —— 地形材质 ID 笔刷靠这个做脏区上传。
+        /// </summary>
+        public NxRHI.TtSrView CreateRGBA8Texture2D(out NxRHI.TtTexture texture, bool bNormalized = true)
+        {
             unsafe
             {
                 var desc = new NxRHI.FTextureDesc();

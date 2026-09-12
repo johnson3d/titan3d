@@ -104,7 +104,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     [TtMaterial.MaterialImport]
     [IO.AssetCreateMenu(MenuName = "Graphics/Material")]
     [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public partial class TtMaterial : IO.BaseSerializer, IO.IAsset, IShaderCodeProvider
+    public partial class TtMaterial : IO.BaseSerializer, IO.IAsset, IO.IAssetSerializedDataMigration, IShaderCodeProvider
     {
         public const string AssetExt = ".material";
         public string TypeExt { get => AssetExt; }
@@ -190,38 +190,46 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 f.UpdateAMetaReferences(ameta, MaterialGraph);
             }
         }
-        [Rtti.Meta("")]
-        public virtual void SaveAssetTo(RName name)
+        /// <summary>
+        /// 把 GraphXMLString 反序列化成一张临时图。图里的连线存的是 pin 名字符串,
+        /// 所以这一步会走到加载期的兼容回退 (见 UUniformVar.FindPinOut 对 LegacyShaderName 的处理)。
+        /// </summary>
+        private Bricks.CodeBuilder.ShaderNode.TtMaterialGraph LoadGraphFromXMLString()
         {
-            var MaterialGraph = new Bricks.CodeBuilder.ShaderNode.TtMaterialGraph();
+            var materialGraph = new Bricks.CodeBuilder.ShaderNode.TtMaterialGraph();
             var xml = IO.TtFileManager.LoadXmlFromString(this.GraphXMLString);
             if (xml != null)
             {
                 var node = xml.LastChild as System.Xml.XmlElement;
-                var thisTypeStr = node.GetAttribute("Type");
-                //var typeDesc = Rtti.TtTypeDesc.TypeOf(thisTypeStr);
-                //if (typeDesc == Rtti.TtTypeDescGetter<Bricks.CodeBuilder.ShaderNode.TtMaterialEditor>.TypeDesc)
-                //{
-                //    System.Diagnostics.Debug.Assert(false);
-                //    object pThis = new Bricks.CodeBuilder.ShaderNode.TtMaterialEditor();
-                //    IO.SerializerHelper.ReadObjectMetaFields(this, node, ref pThis, null);
-                //    MaterialGraph = (pThis as Bricks.CodeBuilder.ShaderNode.TtMaterialEditor).MaterialGraph;
-                //    {   
-                //        var xml2 = new System.Xml.XmlDocument();
-                //        var xmlRoot2 = xml2.CreateElement($"Root", xml2.NamespaceURI);
-                //        xml2.AppendChild(xmlRoot2);
-                //        IO.SerializerHelper.WriteObjectMetaFields(xml2, xmlRoot2, MaterialGraph);
-                //        var xmlText = IO.TtFileManager.GetXmlText(xml2);
-                //        this.GraphXMLString = xmlText;
-                //    }
-                //}
-                //else
-                {
-                    object pThis = MaterialGraph;
-                    IO.SerializerHelper.ReadObjectMetaFields(this, node, ref pThis, null);
-                }
+                object pThis = materialGraph;
+                IO.SerializerHelper.ReadObjectMetaFields(this, node, ref pThis, null);
             }
-            
+            return materialGraph;
+        }
+        /// <summary>
+        /// 把 GraphXMLString 按当前引擎结构重新生成一遍。SaveAssetTo 只重新生成 HLSLCode,
+        /// GraphXMLString 是原样写回的 —— 意味着字段改名后旧 pin 名会一直留在资产里, 永久依赖
+        /// 加载期回退。这里把回退后的 live 图重新序列化回去, 旧名就真正变成新名了。
+        /// 只处理本来就有图数据的资产: 空模板材质 (GraphXMLString 为空) 不能因为迁移就被填上一张图。
+        /// </summary>
+        public virtual bool MigrateSerializedData()
+        {
+            if (string.IsNullOrEmpty(this.GraphXMLString))
+                return false;
+
+            var materialGraph = LoadGraphFromXMLString();
+            var xmlDoc = new System.Xml.XmlDocument();
+            var xmlRoot = xmlDoc.CreateElement("Root", xmlDoc.NamespaceURI);
+            xmlDoc.AppendChild(xmlRoot);
+            IO.SerializerHelper.WriteObjectMetaFields(xmlDoc, xmlRoot, materialGraph);
+            this.GraphXMLString = IO.TtFileManager.GetXmlText(xmlDoc);
+            return true;
+        }
+        [Rtti.Meta("")]
+        public virtual void SaveAssetTo(RName name)
+        {
+            var MaterialGraph = LoadGraphFromXMLString();
+
             var MaterialOutput = MaterialGraph.FindFirstTypedNode<Bricks.CodeBuilder.ShaderNode.TtMaterialOutput>("Output", false);
             if (MaterialOutput == null)
             {
@@ -779,7 +787,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     EPixelShaderInput.PST_UV,
                     EPixelShaderInput.PST_WorldPos,
                     EPixelShaderInput.PST_Tangent,
-                    EPixelShaderInput.PST_LightMap,
+                    EPixelShaderInput.PST_ExtraUV,
                     EPixelShaderInput.PST_Custom0,
                     EPixelShaderInput.PST_Custom1,
                     EPixelShaderInput.PST_Custom2,

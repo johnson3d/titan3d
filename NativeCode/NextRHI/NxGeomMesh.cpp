@@ -1440,6 +1440,10 @@ namespace NxRHI
 			if (info.XndName == nullptr)
 				continue;
 			auto pAttr = pNode->TryGetAttribute(info.XndName);
+			// 旧资产里这条流存的可能是旧名字(如 ExtraUV 之前叫 LightMapUV), 回退再试一次。
+			// 存盘侧只写新名, 所以资产一旦重存就自然迁到新名上。
+			if (pAttr == nullptr && info.LegacyXndName != nullptr)
+				pAttr = pNode->TryGetAttribute(info.LegacyXndName);
 			if (pAttr != nullptr)
 			{	
 				auto vb = LoadVB(device, pAttr, info.Stride, mMopherKeys[i], resSize, (EVertexStreamType)i);

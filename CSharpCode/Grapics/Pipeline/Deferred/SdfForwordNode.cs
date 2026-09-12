@@ -46,7 +46,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 NxRHI.EVertexStreamType.VST_Normal,
                 NxRHI.EVertexStreamType.VST_Tangent,
                 NxRHI.EVertexStreamType.VST_Color,
-                NxRHI.EVertexStreamType.VST_LightMap,
+                NxRHI.EVertexStreamType.VST_ExtraUV,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
         public override EPixelShaderInput[] GetPSNeedInputs()
@@ -75,7 +75,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 NxRHI.EVertexStreamType.VST_Normal,
                 NxRHI.EVertexStreamType.VST_Tangent,
                 NxRHI.EVertexStreamType.VST_Color,
-                NxRHI.EVertexStreamType.VST_LightMap,
+                NxRHI.EVertexStreamType.VST_ExtraUV,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
         public override EPixelShaderInput[] GetPSNeedInputs()

@@ -171,10 +171,57 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         //    return -1;
         //}
     }
+    /// <summary>
+    /// 地形材质贴图的场景级覆盖项, 按下标与 UTerrainMaterialIdManager.MaterialIdArray 对齐。
+    /// RName 为 null 表示该槽沿用 PGC 图表里的原值。
+    /// 只覆盖"表现"(贴图), 不覆盖"生成参数"(TransitionRange / Plants) —— 后者是 PGC 生成 ID 图与撒植被的输入,
+    /// 且计入 UMaterialIdMapNode.GetOutBufferHash, 改了会失效 level 缓存, 必须回 PGC 编辑器改。
+    /// </summary>
+    public partial class TtTerrainMaterialTextureOverride : IO.BaseSerializer
+    {
+        public override string ToString()
+        {
+            var result = "";
+            if (TexDiffuse != null)
+                result += TexDiffuse.Name;
+            if (TexNormal != null)
+                result += TexNormal.Name;
+            return result;
+        }
+        [Rtti.Meta("")]
+        [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
+        public RName TexDiffuse { get; set; }
+        [Rtti.Meta("")]
+        [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
+        public RName TexNormal { get; set; }
+    }
     public class UTerrainMaterialIdManager : IO.BaseSerializer
     {
         [Rtti.Meta("")]
         public List<Terrain.CDLOD.UTerrainMaterialId> MaterialIdArray { get; set; } = new List<Terrain.CDLOD.UTerrainMaterialId>();
+        /// <summary>
+        /// 由宿主 TtTerrainNode 注入的场景级贴图覆盖 (见 TtTerrainNode.EnsureMaterialTextures)。
+        /// manager 本体属于 PGC 图表节点, 这里只是让 BuildSRV 能取到"最终生效"的贴图;
+        /// 不参与序列化, PGC 编辑器里预览时为 null, 取的就是图表原值。
+        /// </summary>
+        [System.ComponentModel.Browsable(false)]
+        public IReadOnlyList<TtTerrainMaterialTextureOverride> TextureOverrides { get; set; }
+        /// <summary>
+        /// 取下标 idx 最终生效的 diffuse 贴图: 有场景覆盖用覆盖值, 否则用 PGC 图表里的原值。
+        /// </summary>
+        public RName GetEffectiveTexDiffuse(int idx)
+        {
+            var ov = (TextureOverrides != null && idx < TextureOverrides.Count) ? TextureOverrides[idx] : null;
+            return ov?.TexDiffuse ?? MaterialIdArray[idx].TexDiffuse;
+        }
+        /// <summary>
+        /// 取下标 idx 最终生效的 normal 贴图, 规则同 GetEffectiveTexDiffuse。
+        /// </summary>
+        public RName GetEffectiveTexNormal(int idx)
+        {
+            var ov = (TextureOverrides != null && idx < TextureOverrides.Count) ? TextureOverrides[idx] : null;
+            return ov?.TexNormal ?? MaterialIdArray[idx].TexNormal;
+        }
         public NxRHI.TtTexture DiffuseTextureArray;
         public NxRHI.TtTexture NormalTextureArray;
         public NxRHI.TtSrView DiffuseTextureArraySRV;
@@ -200,9 +247,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             if (MaterialIdArray.Count == 0)
                 return false;
-            var dftLayer = MaterialIdArray[0];
+            // 整个贴图数组的尺寸 / mip 数以下标 0 为基准, 后面尺寸不符的 slice 会被跳过
             {
-                var txDesc = NxRHI.TtTextureHelper.LoadPictureDesc(dftLayer.TexDiffuse);
+                var txDesc = NxRHI.TtTextureHelper.LoadPictureDesc(GetEffectiveTexDiffuse(0));
 
                 var desc = new NxRHI.FTextureDesc();
                 desc.SetDefault();
@@ -229,7 +276,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
                 for (int i = 0; i < MaterialIdArray.Count; i++)
                 {
-                    var mipDatas = NxRHI.TtSrView.LoadPixelMipLevels(MaterialIdArray[i].TexDiffuse, 0, txDesc);
+                    var mipDatas = NxRHI.TtSrView.LoadPixelMipLevels(GetEffectiveTexDiffuse(i), 0, txDesc);
                     if (txDesc.Width != desc.Width || txDesc.Height != desc.Height || mipDatas.Length != desc.m_MipLevels)
                     {
                         continue;
@@ -260,9 +307,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 }
             }
 
-            if (dftLayer.TexNormal != null)
+            var dftNormal = GetEffectiveTexNormal(0);
+            if (dftNormal != null)
             {
-                var txDesc = NxRHI.TtTextureHelper.LoadPictureDesc(dftLayer.TexNormal);
+                var txDesc = NxRHI.TtTextureHelper.LoadPictureDesc(dftNormal);
 
                 var desc = new NxRHI.FTextureDesc();
                 desc.SetDefault();
@@ -289,7 +337,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 for (int i = 0; i < MaterialIdArray.Count; i++)
                 {
                     //var mipDatas = NxRHI.USrView.LoadImageLevels(MaterialIdArray[i].TexNormal, 0, ref txDesc);
-                    var mipDatas = NxRHI.TtSrView.LoadPixelMipLevels(MaterialIdArray[i].TexNormal, 0, txDesc);
+                    var mipDatas = NxRHI.TtSrView.LoadPixelMipLevels(GetEffectiveTexNormal(i), 0, txDesc);
                     if (txDesc.Width != desc.Width || txDesc.Height != desc.Height || mipDatas.Length != desc.m_MipLevels)
                     {
                         continue;

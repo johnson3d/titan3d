@@ -69,6 +69,14 @@ namespace EngineNS.Animation.SceneNode
         {
             return TtOnTickLogicScope<TtSkeletonAnimPlayNode>.Scope;
         }
+        /// <summary>
+        /// 动画求值会往 mRootMotionAccumulator 里 Submit 位移, 必须排在 TtMovement 的消费之前,
+        /// 否则 Movement 取到的是上一帧提交的位移
+        /// </summary>
+        public override int GetTickOrder()
+        {
+            return (int)ETickOrder.Animation;
+        }
         TtLocalSpaceRuntimePose mAnimatedPose = null;
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
@@ -157,6 +165,14 @@ namespace EngineNS.Animation.SceneNode
         public override Profiler.TimeScope GetScopeTickLogic()
         {
             return TtOnTickLogicScope<TtAnimStateMachinePlayNode>.Scope;
+        }
+        /// <summary>
+        /// 动画求值会往 mRootMotionAccumulator 里 Submit 位移, 必须排在 TtMovement 的消费之前,
+        /// 否则 Movement 取到的是上一帧提交的位移
+        /// </summary>
+        public override int GetTickOrder()
+        {
+            return (int)ETickOrder.Animation;
         }
         public override bool OnTickLogic(TtNodeTickParameters args)
         {

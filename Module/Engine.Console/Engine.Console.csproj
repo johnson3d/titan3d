@@ -67,6 +67,7 @@
 
   <Import Project="..\..\CSharpCode\Bricks\Network\Network.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\Animation\Animation.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\Sequencer\Sequencer.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\CodeCompiler\CodeCompiler.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\WorldSimulator\WorldSimulator.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\TcpServer\TcpServer.projitems" Label="Shared" />

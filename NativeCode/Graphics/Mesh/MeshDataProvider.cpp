@@ -152,7 +152,7 @@ namespace NxRHI
 	}
 	bool FMeshDataProvider::BuildLightMap(float& aspect)
 	{
-		mVertexBuffers[VST_LightMap] = CreateStream(EVertexStreamType::VST_LightMap);
+		mVertexBuffers[VST_ExtraUV] = CreateStream(EVertexStreamType::VST_ExtraUV);
 		xatlas::SetPrint(Print, false);
 		xatlas::Atlas* atlas = xatlas::Create();
 		xatlas::MeshDecl meshDecl;
@@ -176,7 +176,7 @@ namespace NxRHI
 		xatlas::AddMeshJoin(atlas); // Not necessary. Only called here so geometry totals are printed after the AddMesh progress indicator.
 		xatlas::Generate(atlas);
 		uint32_t firstVertex = 0;
-		auto pUV = mVertexBuffers[VST_LightMap]->GetDataPtr<v3dVector4_t>();
+		auto pUV = mVertexBuffers[VST_ExtraUV]->GetDataPtr<v3dVector4_t>();
 		ASSERT(atlas->meshCount == 1);
 		float width = (float)atlas->width;
 		float height = (float)atlas->height;
@@ -567,6 +567,9 @@ namespace NxRHI
 			if (streams & (1 << i))
 			{
 				pAttr = pNode->TryGetAttribute(info.XndName);
+				// 旧资产里可能存的是旧名字(如 ExtraUV 之前叫 LightMapUV), 回退再试一次。
+				if (pAttr == nullptr && info.LegacyXndName != nullptr)
+					pAttr = pNode->TryGetAttribute(info.LegacyXndName);
 				if (pAttr)
 				{
 					LoadVB(pAttr, info.Stride, (EVertexStreamType)i);
@@ -891,10 +894,11 @@ namespace NxRHI
 		{
 			cur->PushData(uv, sizeof(v3dxVector2));
 		}
-		cur = mVertexBuffers[VST_LightMap];
+		cur = mVertexBuffers[VST_ExtraUV];
 		if (cur != nullptr)
 		{
-			cur->PushData(&v3dxVector3::ZERO, sizeof(v3dxVector2));
+			// 这条流的 stride 是 16(float4), 不是 8 —— 只推 8 字节会让后续所有顶点在这条流里逐个错位。
+			cur->PushData(&v3dxQuaternion::ZERO, sizeof(v3dxQuaternion));
 		}
 		cur = mVertexBuffers[VST_SkinIndex];
 		if (cur != nullptr)
@@ -976,10 +980,11 @@ namespace NxRHI
 		{
 			cur->PushData(uv, sizeof(v3dxVector2));
 		}
-		cur = mVertexBuffers[VST_LightMap];
+		cur = mVertexBuffers[VST_ExtraUV];
 		if (cur != nullptr)
 		{
-			cur->PushData(&v3dxVector3::ZERO, sizeof(v3dxVector2));
+			// 这条流的 stride 是 16(float4), 不是 8 —— 只推 8 字节会让后续所有顶点在这条流里逐个错位。
+			cur->PushData(&v3dxQuaternion::ZERO, sizeof(v3dxQuaternion));
 		}
 		cur = mVertexBuffers[VST_SkinIndex];
 		if (cur != nullptr)
@@ -1035,7 +1040,7 @@ namespace NxRHI
 		{
 			cur->PushData(uv, sizeof(v3dxVector2));
 		}
-		cur = mVertexBuffers[VST_LightMap];
+		cur = mVertexBuffers[VST_ExtraUV];
 		if (cur != nullptr)
 		{
 			cur->PushData(lighmapUV, sizeof(v3dxQuaternion));
@@ -1193,10 +1198,10 @@ namespace NxRHI
 		{
 			cur->PushData(&vertex.UV, sizeof(v3dxVector2));
 		}
-		cur = mVertexBuffers[VST_LightMap];
+		cur = mVertexBuffers[VST_ExtraUV];
 		if (cur != nullptr)
 		{
-			cur->PushData(&vertex.LightMap, sizeof(v3dxQuaternion));
+			cur->PushData(&vertex.ExtraUV, sizeof(v3dxQuaternion));
 		}
 		cur = mVertexBuffers[VST_SkinIndex];
 		if (cur != nullptr)
@@ -1253,10 +1258,10 @@ namespace NxRHI
 		{
 			result.UV = cur->GetDataPtr<v3dxVector2>()[index];
 		}
-		cur = mVertexBuffers[VST_LightMap];
+		cur = mVertexBuffers[VST_ExtraUV];
 		if (cur != nullptr)
 		{
-			result.LightMap = cur->GetDataPtr<v3dxQuaternion>()[index];
+			result.ExtraUV = cur->GetDataPtr<v3dxQuaternion>()[index];
 		}
 		cur = mVertexBuffers[VST_SkinIndex];
 		if (cur != nullptr)

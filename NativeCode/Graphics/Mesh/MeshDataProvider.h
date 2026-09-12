@@ -18,10 +18,10 @@ namespace NxRHI
 			Tangent.W = 0;
 			Color = 0xffffffff;
 			UV.setValue(0, 0);
-			LightMap.X = 0;
-			LightMap.Y = 0;
-			LightMap.Z = 0;
-			LightMap.W = 0;
+			ExtraUV.X = 0;
+			ExtraUV.Y = 0;
+			ExtraUV.Z = 0;
+			ExtraUV.W = 0;
 			SkinIndex = 0;
 			SkinWeight.X = 0;
 			SkinWeight.Y = 0;
@@ -33,7 +33,7 @@ namespace NxRHI
 		v3dVector4_t Tangent;
 		DWORD Color;
 		v3dxVector2 UV;
-		v3dVector4_t LightMap;
+		v3dVector4_t ExtraUV;
 		DWORD SkinIndex;
 		v3dVector4_t SkinWeight;
 	};

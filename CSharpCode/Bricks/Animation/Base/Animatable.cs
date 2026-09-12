@@ -97,14 +97,6 @@ namespace EngineNS.Animation.Animatable
      
     }
 
-    public class IAnimatableClassBindingAttribute : Attribute
-    {
-        //public virtual void Binding(in IAnimatable animatableObject, in Asset.TtAnimationClip animationClip, ref TtAnimationPropertiesSetter animationPropertiesSetter)
-        //{
-
-        //}
-    }
-
     public interface IPropertySetter
     {
 
@@ -112,152 +104,18 @@ namespace EngineNS.Animation.Animatable
         public void SetPropertyValue(IAnimatable obj, Curve.ICurve curve, float time);
     }
 
-    [AttributeUsage(AttributeTargets.Class)]
-    public class PropertyTypeAssignAttribute : Attribute
-    {
-        public Type PropertyType { get;}
-        public PropertyTypeAssignAttribute(Type type)
-        {
-            PropertyType = type;
-        }
-    }
-    [AttributeUsage(AttributeTargets.Class)]
-    public class PropertyNameAssignAttribute : Attribute
-    {
-        public string PropertyName { get; }
-        public PropertyNameAssignAttribute(string name)
-        {
-            PropertyName = name;
-        }
-    }
-    public class TtAnimatablePropertyDesc
-    {
-        public Rtti.TtTypeDesc ClassType { get; set; } = new Rtti.TtTypeDesc();
-        public Rtti.TtTypeDesc PropertyType { get; set; } = new Rtti.TtTypeDesc();
-        public string PropertyName { get; set; }
-        public override bool Equals(object obj)
-        {
-            if (!(obj is TtAnimatablePropertyDesc))
-                return false;
-            var other = (TtAnimatablePropertyDesc)obj;
-            return ClassType == other.ClassType && PropertyType == other.PropertyType && PropertyName == other.PropertyName;
-        }
-        public override int GetHashCode()
-        {
-            return ClassType.GetHashCode() + PropertyType.GetHashCode() + PropertyName.GetHashCode();
-        }
-    }
-
-    //public class TtAnimationPropertiesSetter
-    //{
-    //    public Dictionary<Animatable.IPropertySetter, Curve.ICurve> PropertySetFuncMapping { get; set; } = new Dictionary<Animatable.IPropertySetter, Curve.ICurve>();
-    //    public void Evaluate(float time) // async
-    //    {
-    //        var it = PropertySetFuncMapping.GetEnumerator();
-    //        while (it.MoveNext())
-    //        {
-    //            it.Current.Key.SetProperty(it.Current.Value, time);
-    //        }
-    //    }
-
-    //    //DynamicInitialize will be refactoring in next version
-    //    public static TtAnimationPropertiesSetter Binding(in Asset.TtAnimationClip animationClip, SkeletonAnimation.AnimatablePose.IAnimatableLimbPose bindedPose)
-    //    {
-    //        System.Diagnostics.Debug.Assert(bindedPose != null);
-    //        System.Diagnostics.Debug.Assert(animationClip != null);
-
-    //        var attrs = bindedPose.GetType().GetCustomAttributes(typeof(IAnimatableClassBindingAttribute), true);
-    //        TtAnimationPropertiesSetter propertiesSetter = new TtAnimationPropertiesSetter();
-    //        if (attrs.Length == 0)
-    //        {
-    //            var binder = new CommonAnimatableBingAttribute();
-    //            binder.Binding(bindedPose, animationClip, ref propertiesSetter);
-    //        }
-    //        else
-    //        {
-    //            var binder = attrs[0] as IAnimatableClassBindingAttribute;
-    //            binder.Binding(bindedPose, animationClip, ref propertiesSetter);
-    //        }
-    //        return propertiesSetter;
-    //    }
-    //}
-
-    public partial class TtPropertySetterModule : EngineNS.TtModule<EngineNS.TtEngine>
-    {
-        //maybe can use hashcode to replace the AnimatablePropertyDesc as the key
-        Dictionary<TtAnimatablePropertyDesc, Rtti.TtTypeDesc> ObjectPropertySetFuncDic { get; set; } = new Dictionary<TtAnimatablePropertyDesc, Rtti.TtTypeDesc>();
-        bool bInitialized = false;
-        public override Thread.Async.TtTask<bool> Initialize(TtEngine host)
-        {
-            foreach (var i in Rtti.TtTypeDescManager.Instance.Services)
-            {
-                foreach (var j in i.Value.Types)
-                {
-                    if (j.Value.SystemType.IsAssignableTo(typeof(IPropertySetter)) && !j.Value.SystemType.IsInterface)
-                    {
-                        TtAnimatablePropertyDesc desc = Rtti.TtTypeDescManager.CreateInstance(typeof(TtAnimatablePropertyDesc)) as TtAnimatablePropertyDesc;
-                        
-                        var obj = j.Value.SystemType.GetProperty("AnimatableObject");
-                        {
-                            var assignAttrs = j.Value.SystemType.GetCustomAttributes(typeof(PropertyNameAssignAttribute), true);
-                            if (assignAttrs.Length > 0)
-                            {
-                                var assign = assignAttrs[0] as PropertyNameAssignAttribute;
-                                desc.PropertyName = assign.PropertyName;
-                            }
-                        }
-                        {
-                            var assignAttrs = j.Value.SystemType.GetCustomAttributes(typeof(PropertyTypeAssignAttribute), true);
-                            if (assignAttrs.Length > 0)
-                            {
-                                var assign = assignAttrs[0] as PropertyTypeAssignAttribute;
-                                desc.PropertyType = Rtti.TtTypeDesc.TypeOf(assign.PropertyType);
-                            }
-                        }
-                        desc.ClassType = Rtti.TtTypeDesc.TypeOfFullName(obj.PropertyType.FullName);
-                        ObjectPropertySetFuncDic.Add(desc, j.Value);
-                    }
-                }
-            }
-            bInitialized = true;
-            return base.Initialize(host);
-        }
-        public override void TickModule(TtEngine host)
-        {
-            if (!bInitialized)
-                return;
-
-            base.TickModule(host);
-
-            ////test
-            //AnimatedInstanceHierarchy.InstanceHierarchyNode node = new AnimatedInstanceHierarchy.InstanceHierarchyNode();
-            //node.Current = new AnimatedInstanceHierarchy.InstanceClassDesc();
-            //node.Current.ClassTypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TestObject));
-            //node.Current.Properties.Add(new AnimatedInstanceHierarchy.InstancePropertyDesc() { PropertyTypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(Vector3)), PropertyName = "Pos", CurveIndex = 0 });
-            //UAnimationClip clip = new UAnimationClip() { InstanceHierarchy = node };
-            //clip.AnimCurvesList.Add(new Vector3Curve());
-            //TestObject aObject = new TestObject();
-            //clip.Binding(aObject);
-            //clip.Evaluate(0);
-            //////////
-        }
-        public TtPropertySetterModule()
-        {
-
-        }
-        public IPropertySetter CreateInstance(TtAnimatablePropertyDesc objProperty)
-        {
-            Rtti.TtTypeDesc type;
-            if (ObjectPropertySetFuncDic.TryGetValue(objProperty, out type))
-            {
-                return Rtti.TtTypeDescManager.CreateInstance(type) as IPropertySetter;
-            }
-            System.Diagnostics.Debug.Assert(false);
-            return null;
-
-
-        }
-    }
+    // 这里原先有一套「反射式属性 setter 注册表」：PropertyTypeAssignAttribute /
+    // PropertyNameAssignAttribute / TtAnimatablePropertyDesc / TtPropertySetterModule，
+    // 由 TtPropertySetterModule.Initialize 扫全仓 IPropertySetter 实现建 ObjectPropertySetFuncDic，
+    // 再用 CreateInstance(desc) 按「(宿主类, 属性类型, 属性名)」取出 setter 实例。
+    // 已整套删除, 原因: 那个字典建完从来没被查过 —— CreateInstance 全仓活代码零调用,
+    // 唯一的两处引用在同批删掉的 Player\SceneAnimationPlayer.cs 注释里。真正在跑的绑定路径是下方
+    // TtBindedCurveUtil.BindingCurves, 它直接 new 具体 setter, 完全绕过反射。
+    // 因为从未执行过, 那套机制还带着三个未暴露的缺陷(无条件 GetProperty("AnimatableObject")
+    // 会 NRE、裸 Dictionary.Add 撞键即抛、缺特性时静默留缺省值导致键错位), 留着只会误导后来者
+    // 以为「通用属性绑定已经有了」。
+    // 场景里「任意节点任意属性驱动」由 Bricks\Sequencer 的显式访问器注册表
+    // (TtSequencePropertyRegistry) 承担, 走白名单而不是反射, 见 Documents/design/Sequencer.Plan.md。
 
 }
 
@@ -265,8 +123,8 @@ namespace EngineNS
 {
     namespace Animation.SkeletonAnimation
     {
-        [Animatable.PropertyTypeAssign(typeof(FNullableVector3))]
-        [Animatable.PropertyNameAssign("Position")]
+        // 只写 TtAnimatableBonePose.Position, 曲线值取 FNullableVector3。
+        // 原先带的 [PropertyTypeAssign] / [PropertyNameAssign] 已随反射注册表一同删除
         public class TtBonePosePositionSetter : Animatable.IPropertySetter
         {
             public AnimatablePose.TtAnimatableBonePose AnimatableObject { get; set; }
@@ -282,8 +140,8 @@ namespace EngineNS
             }
         }
 
-        [Animatable.PropertyTypeAssign(typeof(FNullableVector3))]
-        [Animatable.PropertyNameAssign("Rotation")]
+        // 只写 TtAnimatableBonePose.Rotation, 曲线值取 FNullableVector3(此处当作欧拉角用)。
+        // 原先带的 [PropertyTypeAssign] / [PropertyNameAssign] 已随反射注册表一同删除
         public class TtBonePoseRotationSetter : Animatable.IPropertySetter
         {
             public AnimatablePose.TtAnimatableBonePose AnimatableObject { get; set; }
@@ -299,11 +157,5 @@ namespace EngineNS
             }
         }
        
-    }
-
-
-    partial class TtEngine
-    {
-        public Animation.Animatable.TtPropertySetterModule AnimatablePropertySetterModule { get; } = new Animation.Animatable.TtPropertySetterModule();
     }
 }

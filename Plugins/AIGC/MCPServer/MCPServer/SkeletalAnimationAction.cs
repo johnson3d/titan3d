@@ -311,15 +311,46 @@ namespace EngineNS.Plugins.MCPServer
         // ----------------------------------------------------------------
 
         /// <summary>
-        /// Run an async TtTask on the main thread and block until it completes.
-        /// Uses TtTask.GetResultUntilCompleted() which routes the wait through
-        /// TtContextThread.CurrentContext.WaitTask, so the game thread drives
-        /// the task forward instead of parking a thread-pool thread with
-        /// GetAwaiter().GetResult() (which can deadlock on the engine's
-        /// custom sync context).
-        /// Used by tools that need to load assets (e.g. animation clip) synchronously.
+        /// 同步等一个 TtTask 出结果, 供需要加载资产的工具使用 (animation clip / mesh primitives 等)。
+        ///
+        /// 必须投递到主线程执行, 不能在 MCP 的工作线程上直接等: TtTask 的同步等待链是
+        /// GetResultUntilCompleted -> WaitCompleted -> TtContextThread.CurrentContext.WaitTask(this),
+        /// 而 CurrentContext 是 [ThreadStatic] 字段, 只在引擎自己启动/接管的线程上被赋值
+        /// (TtContextThread.ThreadMain 与 FromCurrent)。工具方法体跑在 ThreadPool 线程上
+        /// (TtMCPPlugin.InvokeTool 是裸 method.Invoke, 见 TtMainThreadDispatcher 的说明),
+        /// 那里 CurrentContext 恒为 null, WaitCompleted 会当场 NullReferenceException。
+        /// 引擎侧不给 CurrentContext 补判空是合理的: 即便判了空, ThreadPool 线程也不会去
+        /// TickAwaitEvent 驱动任务队列前进, 等待只会永远不返回 —— 裸用等于声明"只能在引擎线程调用"。
+        ///
+        /// 已经在引擎线程上时直接等待: 嵌套 TtMainThreadDispatcher.Invoke 会等到超时才返回
+        /// (主线程正卡在这里, 消费不了自己投的 TickSync 事件)。
         /// </summary>
-        private static T RunSync<T>(System.Func<Thread.Async.TtTask<T>> task)
+        private static T RunSync<T>(System.Func<Thread.Async.TtTask<T>> task,
+            int timeoutMs = TtMainThreadDispatcher.DefaultTimeoutMs)
+        {
+            if (Thread.TtContextThread.CurrentContext != null)
+                return RunSyncHere(task);
+
+            T result = default(T);
+            System.Exception captured = null;
+            var ok = TtMainThreadDispatcher.Invoke(() =>
+            {
+                // 在主线程回调里 catch 住业务异常自己带回去, 不让它穿过 dispatcher 被包成
+                // TtMainThreadInvokeException —— 调用方的 catch 期待的是原始异常。
+                try { result = RunSyncHere(task); }
+                catch (System.Exception ex) { captured = ex; }
+            }, timeoutMs);
+
+            if (ok == false)
+                throw new System.TimeoutException(
+                    $"Timed out after {timeoutMs} ms waiting for the engine main thread to run a TtTask.");
+            if (captured != null)
+                throw captured;
+            return result;
+        }
+
+        /// <summary> 就地同步等待, 调用者必须已经在引擎线程上。 </summary>
+        private static T RunSyncHere<T>(System.Func<Thread.Async.TtTask<T>> task)
         {
             try
             {
@@ -1666,8 +1697,8 @@ namespace EngineNS.Plugins.MCPServer
                     if (meta != null && meta.TypeExt != null &&
                         meta.TypeExt.Equals(".skt", StringComparison.OrdinalIgnoreCase))
                     {
-                        var task = TtEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(rn);
-                        var asset = task.GetResultUntilCompleted();
+                        var asset = RunSync(() =>
+                            TtEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(rn));
                         if (asset != null) { sk = asset.Skeleton; source = "skeletonAsset"; }
                     }
                 }
@@ -1684,8 +1715,7 @@ namespace EngineNS.Plugins.MCPServer
                         {
                             try
                             {
-                                var skAssetTask = mesh.RenderMesh.MaterialMesh.GetSkeletonAsset();
-                                var sklAsset = skAssetTask.GetResultUntilCompleted();
+                                var sklAsset = RunSync(() => mesh.RenderMesh.MaterialMesh.GetSkeletonAsset());
                                 sk = sklAsset?.Skeleton;
                                 if (sk != null) source = "meshFallback";
                             }
@@ -1750,8 +1780,8 @@ namespace EngineNS.Plugins.MCPServer
                 try
                 {
                     var rn = RName.GetRName(clipAssetName);
-                    var task = TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(rn);
-                    clip = task.GetResultUntilCompleted();
+                    clip = RunSync(() =>
+                        TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(rn));
                 }
                 catch (Exception ex)
                 {

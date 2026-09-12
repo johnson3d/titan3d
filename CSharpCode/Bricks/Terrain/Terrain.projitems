@@ -18,6 +18,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainHeightOverlay.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainLevel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainMaterial.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainMaterialEdit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainMaterialIdCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainMaterialIdOverlay.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainMdfQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainPlant.cs" />

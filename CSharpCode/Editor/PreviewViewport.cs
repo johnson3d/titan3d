@@ -33,6 +33,7 @@ namespace EngineNS.Editor
         }
         public override void Dispose()
         {
+            OnNodeSelectedChanged = null;
             PresentWindow?.UnregEventProcessor(this);
             RenderPolicy?.Dispose();
             RenderPolicy = null;
@@ -42,6 +43,29 @@ namespace EngineNS.Editor
                 mVisParameter = null;
             }
             base.Dispose();
+        }
+        /// <summary>
+        /// 视口里点选节点后回调, 点空白处取消选中时传 null。宿主编辑器想把选中节点
+        /// 送进自己的属性面板时挂它, 不想管就不挂。
+        ///
+        /// 做成回调而不是让宿主派生子类改写 OnHitproxySelected: 预览视口统一用
+        /// TtPreviewViewport, 一人一个子类会把这个统一拆掉。
+        /// </summary>
+        public Action<GamePlay.Scene.TtNode> OnNodeSelectedChanged;
+        public override void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
+        {
+            base.OnHitproxySelected(proxy);
+            // proxy 为 null 是点到了空白 (见 ProcessHitproxySelected: 拾不到也照样调进来),
+            // 拾到的也不一定是 TtNode —— 两种情况都当“没选中节点”往下传
+            OnNodeSelectedChanged?.Invoke(proxy as GamePlay.Scene.TtNode);
+        }
+        public override void OnHitproxySelectedMulti(bool clearPre, params Graphics.Pipeline.IProxiable[] proxies)
+        {
+            base.OnHitproxySelectedMulti(clearPre, proxies);
+            // 属性面板一次只能摆一个目标, 所以取首个。预览视口的交互模式目前只走
+            // 单选 (ProcessHitproxySelected), 这里是为以后真出现框选时不至于漏掉回调
+            var first = (proxies != null && proxies.Length > 0) ? proxies[0] as GamePlay.Scene.TtNode : null;
+            OnNodeSelectedChanged?.Invoke(first);
         }
         new protected async Thread.Async.TtTask<bool> Initialize_Default(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {

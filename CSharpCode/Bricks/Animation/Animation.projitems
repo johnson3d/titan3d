@@ -105,7 +105,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Pipeline\AnimationPipeline.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Command\ExtractPoseFromClipCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\IAnimationPlayer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Player\SceneAnimationPlayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\SkeletonAnimationPlayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\RuntimePose\Control\IPoseControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\RuntimePose\RuntimePose.cs" />

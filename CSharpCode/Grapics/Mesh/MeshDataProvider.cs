@@ -134,7 +134,7 @@ namespace EngineNS.Graphics.Mesh
             for (uint i = 0; i < srcVtxNum; i++)
             {
                 // FMeshVertex 是按 native layout 布局的值结构, 直接读写 m_ 字段不走 pinvoke;
-                // Tangent / LightMap / SkinWeight 这些没导出成属性的部分随结构一起原样拷过去
+                // Tangent / ExtraUV / SkinWeight 这些没导出成属性的部分随结构一起原样拷过去
                 var vtx = mesh.mCoreObject.GetVertex(i);
                 if (matrix != null)
                 {
@@ -1960,7 +1960,7 @@ namespace EngineNS.Graphics.Mesh
                 (1 << (int)NxRHI.EVertexStreamType.VST_Normal) |
                 (1 << (int)NxRHI.EVertexStreamType.VST_Color) |
                 (1 << (int)NxRHI.EVertexStreamType.VST_UV) |
-                (1 << (int)NxRHI.EVertexStreamType.VST_LightMap));
+                (1 << (int)NxRHI.EVertexStreamType.VST_ExtraUV));
             builder.Init(streams, true, 1);
 
             var dpDesc = new NxRHI.FMeshAtomDesc();
@@ -1971,7 +1971,7 @@ namespace EngineNS.Graphics.Mesh
             using (var posArray = Support.TtNativeArray<Vector3>.CreateInstance())
             using (var normalArray = Support.TtNativeArray<Vector3>.CreateInstance())
             using (var tangentArray = Support.TtNativeArray<Vector4>.CreateInstance())
-            using (var lightmapUVArray = Support.TtNativeArray<Vector4>.CreateInstance())
+            using (var extraUVArray = Support.TtNativeArray<Vector4>.CreateInstance())
             using (var uvArray = Support.TtNativeArray<Vector2>.CreateInstance())
             using (var indexArray = Support.TtNativeArray<UInt32>.CreateInstance())
             {
@@ -1999,11 +1999,11 @@ namespace EngineNS.Graphics.Mesh
                         float U0 = x0 * 0.5f + 0.5f;
                         float U1 = x1 * 0.5f + 0.5f;
 
-                        var lightmapUV = new Quaternion();
-                        lightmapUV.X = U0;
-                        lightmapUV.Y = U1;
-                        lightmapUV.Z = V0;
-                        lightmapUV.W = V1;
+                        var extraUV = new Quaternion();
+                        extraUV.X = U0;
+                        extraUV.Y = U1;
+                        extraUV.Z = V0;
+                        extraUV.W = V1;
 
                         // Calculate verts for a face pointing down Z
                         var pos = new Vector3(x0, 0, z0);
@@ -2011,22 +2011,22 @@ namespace EngineNS.Graphics.Mesh
                         //var uv = new Vector2(U0, V0);
                         var uv = new Vector2(0, 0);
 
-                        builder.AddVertex(in pos, in nor, in uv, in lightmapUV, 0xFFFFFFFF);
+                        builder.AddVertex(in pos, in nor, in uv, in extraUV, 0xFFFFFFFF);
                         pos = new Vector3(x0, 0, z1);
                         nor = new Vector3(0, 1, 0);
                         //uv = new Vector2(U0, V1);
                         uv = new Vector2(1, 0);
-                        builder.AddVertex(in pos, in nor, in uv, in lightmapUV, 0xFFFFFFFF);
+                        builder.AddVertex(in pos, in nor, in uv, in extraUV, 0xFFFFFFFF);
                         pos = new Vector3(x1, 0, z1);
                         nor = new Vector3(0, 1, 0);
                         //uv = new Vector2(U1, V1);
                         uv = new Vector2(2, 0);
-                        builder.AddVertex(in pos, in nor, in uv, in lightmapUV, 0xFFFFFFFF);
+                        builder.AddVertex(in pos, in nor, in uv, in extraUV, 0xFFFFFFFF);
                         pos = new Vector3(x1, 0, z0);
                         nor = new Vector3(0, 1, 0);
                         //uv = new Vector2(U1, V0);
                         uv = new Vector2(3, 0);
-                        builder.AddVertex(in pos, in nor, in uv, in lightmapUV, 0xFFFFFFFF);
+                        builder.AddVertex(in pos, in nor, in uv, in extraUV, 0xFFFFFFFF);
 
                         UInt32 Index = (UInt32)((x + y * tileCount) * 4);
                         builder.AddTriangle(Index + 0, Index + 1, Index + 2);

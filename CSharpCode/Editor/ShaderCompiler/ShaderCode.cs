@@ -16,6 +16,13 @@ namespace EngineNS.Editor.ShaderCompiler
     {
         public EShaderDefine Flags = (EShaderDefine)0;
         public string ShaderName;
+        /// <summary>
+        /// 该字段改名前用过的旧 ShaderName。材质图里 UUniformVar 的 out pin 名字就是 ShaderName,
+        /// 而 UPinLinker.TSaveData 存盘存的是 pin 名字符串, 一旦改名旧资产的连线会 FindPinOut 失败,
+        /// 被 Linker 静默 Remove 掉 (连线无声丢失, 比编译报错更难发现)。填了这里之后
+        /// UUniformVar.FindPinOut 会按旧名回退到新 pin, 资产重存一次即自然迁移到新名。
+        /// </summary>
+        public string LegacyShaderName;
         public string Condition;
         public string Semantic;
         public string Binder;

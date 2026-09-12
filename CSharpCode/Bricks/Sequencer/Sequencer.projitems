@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>135ed5f5-bd8e-41b6-9459-8eeb18343eca</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Sequencer</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Base\ChannelKey.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Base\FrameRate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Base\QuatChannel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Base\ScalarChannel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Base\NameChannel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Property\ISequencePropertyAccessor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Property\ISequenceValueAdapter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Property\ValueAdapters.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Property\ReflectedPropertyAccessor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Property\NodeTransformAccessors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Runtime\PreAnimatedStore.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Runtime\SequenceEvalTable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Runtime\BindingResolver.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Runtime\SequencePlayer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\SequenceSection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\TransformSection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\PropertySection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\SequenceTrack.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\Sequence.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SequencerCategory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SequencerModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UTest\UTest_Sequencer.cs" />
+  </ItemGroup>
+</Project>

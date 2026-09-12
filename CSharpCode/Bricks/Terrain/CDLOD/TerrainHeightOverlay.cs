@@ -4,6 +4,22 @@ using System.Collections.Generic;
 namespace EngineNS.Bricks.Terrain.CDLOD
 {
     /// <summary>
+    /// level 级覆盖层的公共契约。抽出来是为了让节点级的管理逻辑
+    /// (惰加载 / levellist / 落盘) 能在高度与材质 ID 两个通道上泛型复用。
+    /// </summary>
+    public interface ITtTerrainLevelOverlay
+    {
+        int LevelX { get; }
+        int LevelZ { get; }
+        bool IsEmpty { get; }
+        /// <summary>
+        /// 写出一个 level 文件, 返回内容 hash (供 levellist.txt 记录); 空覆盖层返回 null。
+        /// </summary>
+        string SaveToFile(string file);
+        bool LoadFromFile(string file);
+    }
+
+    /// <summary>
     /// 单个 level 的高度覆盖层: 相对 PGC 基底的 delta。
     ///
     /// 地形高度本身不是资产 —— 它由 TtTerrainData.PgcName 指向的 PGC 程序化生成, .trlvl 只是
@@ -14,7 +30,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     /// oldHeight / newHeight 同处"基底 + 已有 delta"域, 所以在同一处累积 (newHeight - oldHeight)
     /// 得到的就是相对基底的 delta。
     /// </summary>
-    public class TtTerrainLevelHeightOverlay
+    public class TtTerrainLevelHeightOverlay : ITtTerrainLevelOverlay
     {
         public const uint CurrentVersion = 1;
         /// <summary>
@@ -258,20 +274,18 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     /// 一个地形节点的全部 level 覆盖层。
     ///
     /// 落盘位置在 scene 目录下, 组织方式仿 nodes (不进资产系统, 没有 ameta):
-    ///   xxx.scene/terrainheight/{TerrainNodeId}/{levelX}_{levelZ}.thl
-    ///   xxx.scene/terrainheight/{TerrainNodeId}/levellist.txt   ({levelX}_{levelZ}#{SHA256} 每行一条)
+    ///   xxx.scene/{OverlayDirName}/{TerrainNodeId}/{levelX}_{levelZ}{OverlayExt}
+    ///   xxx.scene/{OverlayDirName}/{TerrainNodeId}/levellist.txt   ({levelX}_{levelZ}#{SHA256} 每行一条)
     ///
-    /// level 文件按需懒加载 —— 100×100 个 level 全读一遍是不可接受的。levellist.txt 的作用
-    /// 就是让"某个 level 到底有没有 delta"这个判断不需要碰文件系统。
+    /// level 文件按需惰加载 —— 100×100 个 level 全读一遍是不可接受的。levellist.txt 的作用
+    /// 就是让"某个 level 到底有没有数据"这个判断不需要碰文件系统。
     /// </summary>
-    public class TtTerrainHeightOverlay
+    public abstract class TtTerrainOverlayManager<TLevel> where TLevel : class, ITtTerrainLevelOverlay
     {
-        public const string OverlayExt = ".thl";
-        public const string OverlayDirName = "terrainheight";
         public const string LevelListName = "levellist.txt";
 
-        TtTerrainNode mNode;
-        Dictionary<long, TtTerrainLevelHeightOverlay> mLevels = new Dictionary<long, TtTerrainLevelHeightOverlay>();
+        protected TtTerrainNode mNode;
+        Dictionary<long, TLevel> mLevels = new Dictionary<long, TLevel>();
         /// <summary>
         /// 磁盘上已有的 level → hash。未加载进内存的 level 也在这里, 保存时要原样带上,
         /// 否则一次编辑就会把没碰过的 level 从 levellist.txt 里抹掉。
@@ -279,10 +293,17 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         Dictionary<long, string> mDiskHashes = new Dictionary<long, string>();
         bool mDiskListLoaded = false;
 
-        public TtTerrainHeightOverlay(TtTerrainNode node)
+        protected TtTerrainOverlayManager(TtTerrainNode node)
         {
             mNode = node;
         }
+
+        /// <summary>
+        /// scene 目录下的一级子目录名, 区分不同通道的覆盖层。
+        /// </summary>
+        protected abstract string OverlayDirName { get; }
+        protected abstract string OverlayExt { get; }
+        protected abstract TLevel CreateLevel(int levelX, int levelZ);
 
         static long MakeKey(int levelX, int levelZ)
         {
@@ -350,34 +371,34 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
         }
 
-        public TtTerrainLevelHeightOverlay FindLevel(int levelX, int levelZ)
+        public TLevel FindLevel(int levelX, int levelZ)
         {
             mLevels.TryGetValue(MakeKey(levelX, levelZ), out var result);
             return result;
         }
         /// <summary>
-        /// 取出 (必要时创建) 某个 level 的覆盖层, 供编辑累积 delta。
+        /// 取出 (必要时创建) 某个 level 的覆盖层, 供编辑累积。
         /// </summary>
-        public TtTerrainLevelHeightOverlay GetOrCreateLevel(int levelX, int levelZ)
+        public TLevel GetOrCreateLevel(int levelX, int levelZ)
         {
             var key = MakeKey(levelX, levelZ);
             if (mLevels.TryGetValue(key, out var result))
                 return result;
 
-            // 先看盘上有没有已存的 delta, 有就接着它累积, 不然一次编辑会把旧 delta 冲掉。
+            // 先看盘上有没有已存的记录, 有就接着它累积, 不然一次编辑会把旧数据冲掉。
             result = TryLoadLevel(levelX, levelZ);
             if (result == null)
             {
-                result = new TtTerrainLevelHeightOverlay(levelX, levelZ);
+                result = CreateLevel(levelX, levelZ);
                 mLevels.Add(key, result);
             }
             return result;
         }
         /// <summary>
-        /// 供 level 构建时使用: 已在内存里就直接返回, 否则按 levellist 判断有没有盘上数据再懒加载。
-        /// 没有 delta 时返回 null, 不会凭空建一个空对象。
+        /// 供 level 构建时使用: 已在内存里就直接返回, 否则按 levellist 判断有没有盘上数据再惰加载。
+        /// 没有数据时返回 null, 不会凭空建一个空对象。
         /// </summary>
-        public TtTerrainLevelHeightOverlay TryLoadLevel(int levelX, int levelZ)
+        public TLevel TryLoadLevel(int levelX, int levelZ)
         {
             var key = MakeKey(levelX, levelZ);
             if (mLevels.TryGetValue(key, out var cached))
@@ -392,7 +413,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 return null;
 
             var file = IO.TtFileManager.CombinePath(dir, MakeLevelKeyString(levelX, levelZ) + OverlayExt);
-            var overlay = new TtTerrainLevelHeightOverlay(levelX, levelZ);
+            var overlay = CreateLevel(levelX, levelZ);
             if (overlay.LoadFromFile(file) == false)
             {
                 Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, "TerrainOverlay",
@@ -447,6 +468,30 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             TtEngine.Instance.SourceControlModule.AddFile(listFile, true);
 
             mDiskHashes = finalHashes;
+        }
+    }
+
+    /// <summary>
+    /// 高度覆盖层的节点级管理器。落盘到 xxx.scene/terrainheight/{NodeId}/*.thl。
+    /// </summary>
+    public class TtTerrainHeightOverlay : TtTerrainOverlayManager<TtTerrainLevelHeightOverlay>
+    {
+        public TtTerrainHeightOverlay(TtTerrainNode node)
+            : base(node)
+        {
+        }
+
+        protected override string OverlayDirName
+        {
+            get { return "terrainheight"; }
+        }
+        protected override string OverlayExt
+        {
+            get { return ".thl"; }
+        }
+        protected override TtTerrainLevelHeightOverlay CreateLevel(int levelX, int levelZ)
+        {
+            return new TtTerrainLevelHeightOverlay(levelX, levelZ);
         }
     }
 }

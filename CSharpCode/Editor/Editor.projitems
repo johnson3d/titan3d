@@ -25,6 +25,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Forms\SkeletonTreePanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\AnimationClipEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\AnimMontageEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\SequenceEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\PoseAssetEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\AssetReferViewer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\CpuProfiler.cs" />

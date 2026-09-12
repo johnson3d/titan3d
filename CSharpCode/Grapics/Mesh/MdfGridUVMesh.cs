@@ -31,7 +31,7 @@ namespace EngineNS.Graphics.Mesh
         {
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,
-                NxRHI.EVertexStreamType.VST_LightMap};
+                NxRHI.EVertexStreamType.VST_ExtraUV};
         }
         public Graphics.Pipeline.Shader.EPixelShaderInput[] GetPSNeedInputs()
         {

@@ -20,6 +20,11 @@ namespace EngineNS.Graphics.Mesh
     {
         public Vector3 mDeltaPosition;
         public Vector3 mDeltaNormal;
+        /// <summary>
+        /// 切线 delta。与法线同源(导入器用形变后的位置 + UV 重算), VS 端相加后再沿 morph
+        /// 后的法线重正交化。没有它的话法线贴图会一直用基础网格的切线基, 形变越大偏得越多。
+        /// </summary>
+        public Vector3 mDeltaTangent;
     }
 
     /// <summary>
@@ -37,6 +42,11 @@ namespace EngineNS.Graphics.Mesh
         public uint VertexIndex;
         public Vector3 DeltaPosition;
         public Vector3 DeltaNormal;
+        /// <summary>
+        /// 切线 delta (只有 xyz; 手性 w 不随 morph 改变, 因为 morph 不改 UV 拓扑)。
+        /// 加于 Version 2, v1 资产读进来时留零向量。
+        /// </summary>
+        public Vector3 DeltaTangent;
     }
 
     /// <summary>
@@ -67,8 +77,26 @@ namespace EngineNS.Graphics.Mesh
 
         /// <summary>
         /// 数据版本。加字段时递增, 并在 Load 里按版本分支, 保证旧资产仍可读。
+        ///
+        /// v2: FMorphVertexDelta 增加 DeltaTangent。
         /// </summary>
-        public const int CurrentVersion = 1;
+        public const int CurrentVersion = 2;
+
+        /// <summary>
+        /// Version 1 的稀疏条目布局(没有切线 delta)。
+        ///
+        /// 保留它是硬性要求, 不是为了好看: Save/Load 走的是 WritePtr/ReadPtr 整块搬运,
+        /// 结构体一加字段 sizeof 就变, 拿新布局去读 v1 数据会让每条记录整体错位 ——
+        /// 而且不会抛任何异常, 只会得到一堆乱跳的顶点和随机法线, 极难往"序列化布局"上想。
+        /// 以后每次给 FMorphVertexDelta 加字段, 都必须同步新增一个这样的旧布局副本。
+        /// </summary>
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 4)]
+        private struct FMorphVertexDeltaV1
+        {
+            public uint VertexIndex;
+            public Vector3 DeltaPosition;
+            public Vector3 DeltaNormal;
+        }
 
         /// <summary>
         /// 该 mesh 展开后的顶点总数。稠密累加表按这个长度分配; 同时用于加载时校验
@@ -151,9 +179,29 @@ namespace EngineNS.Graphics.Mesh
                 if (deltaCount > 0)
                 {
                     var deltas = new FMorphVertexDelta[deltaCount];
-                    fixed (FMorphVertexDelta* p = &deltas[0])
+                    if (version >= 2)
                     {
-                        ar.ReadPtr(p, deltaCount * sizeof(FMorphVertexDelta));
+                        fixed (FMorphVertexDelta* p = &deltas[0])
+                        {
+                            ar.ReadPtr(p, deltaCount * sizeof(FMorphVertexDelta));
+                        }
+                    }
+                    else
+                    {
+                        // v1: 按旧布局读进来再逐条搬字段。DeltaTangent 留零向量 ——
+                        // VS 端的重正交化在 delta 为零时依然工作, 所以旧资产不会因为
+                        // 缺这个字段而比升级前更差, 只是拿不到切线绕法线旋转那部分精度。
+                        var legacy = new FMorphVertexDeltaV1[deltaCount];
+                        fixed (FMorphVertexDeltaV1* p = &legacy[0])
+                        {
+                            ar.ReadPtr(p, deltaCount * sizeof(FMorphVertexDeltaV1));
+                        }
+                        for (int d = 0; d < deltaCount; d++)
+                        {
+                            deltas[d].VertexIndex = legacy[d].VertexIndex;
+                            deltas[d].DeltaPosition = legacy[d].DeltaPosition;
+                            deltas[d].DeltaNormal = legacy[d].DeltaNormal;
+                        }
                     }
                     target.Deltas = deltas;
                 }

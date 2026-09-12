@@ -217,7 +217,7 @@ namespace NxRHI
 			VST_Tangent,
 			VST_Color,
 			VST_UV,
-			VST_LightMap,
+			VST_ExtraUV,
 			VST_SkinIndex,
 			VST_SkinWeight,
 			VST_TerrainIndex,
@@ -285,11 +285,15 @@ namespace NxRHI
 			if (varType != nullptr)
 				*varType = EShaderVarType::SVT_Float;
 			break;
-		case EngineNS::NxRHI::VST_LightMap:
+		case EngineNS::NxRHI::VST_ExtraUV:
+			// float4, 不是 float2: 该流的 InputLayout 是 PXF_R32G32B32A32_FLOAT(IMesh.cpp),
+			// FMeshPrimitives::GetStreamTypeInfo 给的也是 sizeof(v3dVector4_t), 导入器写的同样是 Vector4。
+			// 这里曾经写的是 Vector2/2 元素, 于是 FMeshDataProvider::CreateStream 会把 blob 只开到
+			// 一半大小, BuildLightMap 随后按 v3dVector4_t 往里写就越界了。
 			if (stride != nullptr)
-				*stride = sizeof(v3dxVector2);
+				*stride = sizeof(v3dVector4_t);
 			if (element != nullptr)
-				*element = 2;
+				*element = 4;
 			if (varType != nullptr)
 				*varType = EShaderVarType::SVT_Float;
 			break;

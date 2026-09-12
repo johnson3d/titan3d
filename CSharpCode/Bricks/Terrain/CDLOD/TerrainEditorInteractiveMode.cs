@@ -4,7 +4,17 @@ using System.Collections.Generic;
 namespace EngineNS.Bricks.Terrain.CDLOD
 {
     /// <summary>
-    /// 地形高度笔刷的视口交互模式。注册到某个 viewport 类型后会自动出现在
+    /// 地形编辑的通道。两个通道共用同一套拾取 / 圆环 / 半径与软度,
+    /// 写入对象不同 (高度图 vs 材质 ID 图)。
+    /// </summary>
+    public enum ETerrainEditChannel
+    {
+        Height,
+        Material,
+    }
+
+    /// <summary>
+    /// 地形笔刷的视口交互模式 (高度 / 材质双通道)。注册到某个 viewport 类型后会自动出现在
     /// InteractiveMode 下拉里 (SceneEditor 把这个下拉画在自己的工具栏上)。
     ///
     /// 与基类的分工: 左键落笔期间完全不走 base.OnEvent, 从而同时屏蔽掉
@@ -39,6 +49,17 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         float mStrengthBlend = 0.5f;
 
         readonly TtTerrainHeightDragRecorder mRecorder = new TtTerrainHeightDragRecorder();
+        readonly TtTerrainMaterialIdDragRecorder mMaterialRecorder = new TtTerrainMaterialIdDragRecorder();
+
+        /// <summary>
+        /// 当前编辑通道。Radius / Falloff 两通道共用 mBrush 里的那两个值 (同一个视口圆环,
+        /// 手感一致, 也少两个滑条), 其余参数各自独立。
+        /// </summary>
+        ETerrainEditChannel mChannel = ETerrainEditChannel.Height;
+        /// <summary>
+        /// 材质通道要刷的 ID = UTerrainMaterialIdManager.MaterialIdArray 的下标。
+        /// </summary>
+        byte mPaintMaterialId = 0;
         /// <summary>
         /// 本次进入模式以来 BeginEditSession 过的 level, 离开模式时要逐个 EndEditSession
         /// 把高度纹理的编码基准收回到真实范围 (会话期间是拉开 headroom 的低精度编码)。
@@ -49,8 +70,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         bool mHasHover = false;
         DVector3 mHoverPos = DVector3.Zero;
         /// <summary>
-        /// 本笔是否反向 (Raise↔Lower)。在 MOUSEBUTTONDOWN 时锁定, 不跟随拖动中的
-        /// Shift 抵起 —— 否则一笔里会出现一半抬一半压的鬼影。
+        /// 本笔是否反向: 高度通道下是 Raise↔Lower 互换, 材质通道下是“本笔是擦除”。
+        /// 在 MOUSEBUTTONDOWN 时锁定, 不跟随拖动中的 Shift 抵起 —— 否则一笔里会出现
+        /// 一半抬一半压 (或一半刷一半擦) 的鬼影。
         /// </summary>
         bool mInvertStroke = false;
 
@@ -62,11 +84,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             mHasHover = false;
             mInvertStroke = false;
             mRecorder.Reset();
+            mMaterialRecorder.Reset();
         }
         public override void OnLeaveMode()
         {
-            // 先把还没封口的那一段拖动变成历史记录, 再收会话 —— 顺序反了的话
-            // EndEditSession 里的整层重建会把 after 快照的取值时机搞乱。
+            // 先把还没封口的那一段拖动变成历史记录 (两个通道的记录器都会封), 再收会话 ——
+            // 顺序反了的话 EndEditSession 里的整层重建会把 after 快照的取值时机搞乱。
             CommitCommand();
             mIsPainting = false;
             mHasHover = false;
@@ -347,13 +370,20 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             return input.IsKeyDown(Bricks.Input.Keycode.KEY_LSHIFT) || input.IsKeyDown(Bricks.Input.Keycode.KEY_RSHIFT);
         }
         /// <summary>
+        /// 本笔是不是“反向”。没落笔时取实时键盘状态, 落笔中用锁定值,
+        /// 这样圆环颜色能提前预告方向。
+        /// </summary>
+        bool IsInvertStroke()
+        {
+            return mIsPainting ? mInvertStroke : IsShiftDown();
+        }
+        /// <summary>
         /// Strength 滑条只给正值 (负的 Raise 强度读起来很反直觉), 压下去靠 Shift 反向
         /// —— 这是地形/油漆类笔刷的通行约定。Flatten/Smooth 本身无"方向"可言, 不反。
-        /// 没落笔时取实时键盘状态, 落笔中用锁定值, 这样圆环颜色能提前预告方向。
         /// </summary>
         ETerrainBrushTool GetEffectiveTool()
         {
-            bool invert = mIsPainting ? mInvertStroke : IsShiftDown();
+            bool invert = IsInvertStroke();
             if (invert == false)
                 return mBrush.Tool;
             if (mBrush.Tool == ETerrainBrushTool.Raise)
@@ -377,7 +407,26 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             return tool == ETerrainBrushTool.Flatten || tool == ETerrainBrushTool.Smooth;
         }
+        FTerrainMaterialBrushParam MakeMaterialParam()
+        {
+            var param = FTerrainMaterialBrushParam.Default;
+            param.MaterialId = mPaintMaterialId;
+            // 两通道共用半径与软度: 视口里就一个圆环, 分开存只会让它跟不上手感。
+            param.Radius = mBrush.Radius;
+            param.Falloff = mBrush.Falloff;
+            param.bErase = IsInvertStroke();
+            return param;
+        }
         void Stroke(TtTerrainNode terrain, in DVector3 worldPos)
+        {
+            if (mChannel == ETerrainEditChannel.Material)
+            {
+                StrokeMaterial(terrain, in worldPos);
+                return;
+            }
+            StrokeHeight(terrain, in worldPos);
+        }
+        void StrokeHeight(TtTerrainNode terrain, in DVector3 worldPos)
         {
             var levelData = terrain.GetLevelDataAtWorld(in worldPos, out var localX, out var localZ);
             if (levelData == null || levelData.IsEditable == false)
@@ -410,8 +459,42 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             // 只做 GPU 局部上传; 物理留到抬手时补一次。
             levelData.FlushDirty(false);
         }
+        /// <summary>
+        /// 材质通道不调 BeginEditSession (ID 图是 R8 原值, 没有 min/max 编码基准可冻结),
+        /// 也不进 mSessionLevels; FlushMaterialIdDirty 只做局部上传 + RVT 标脏, 没有法线重算
+        /// 也没有物理重建, 每帧调没问题。
+        /// </summary>
+        void StrokeMaterial(TtTerrainNode terrain, in DVector3 worldPos)
+        {
+            var levelData = terrain.GetLevelDataAtWorld(in worldPos, out var localX, out var localZ);
+            if (levelData == null || levelData.IsMaterialIdEditable == false)
+                return;
+
+            var param = MakeMaterialParam();
+            var strokeRect = levelData.CalcMaterialBrushRect(localX, localZ, in param);
+            if (strokeRect.IsValid == false)
+                return;
+
+            if (mMaterialRecorder.PreStroke(levelData, in strokeRect))
+            {
+                // 拖过了 level 边界: 一条命令只描述一个 level 的一块矩形。
+                CommitCommand();
+                mMaterialRecorder.PreStroke(levelData, in strokeRect);
+            }
+
+            levelData.ApplyMaterialBrush(localX, localZ, in param);
+            levelData.FlushMaterialIdDirty();
+        }
         void EndStroke()
         {
+            if (mChannel == ETerrainEditChannel.Material)
+            {
+                // 材质通道没有抬手补物理这一步 —— ID 图不参与碰撞。
+                CommitCommand();
+                mIsPainting = false;
+                return;
+            }
+
             var levelData = mRecorder.LevelData;
             // 先封口再清 mIsPainting: GetEffectiveTool 靠 mIsPainting 判定该用锁定值还是
             // 实时键盘状态, 顺序反了命令名会跟着抬手瞬间的 Shift 状态乱跳。
@@ -421,15 +504,40 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             // 在脏区为空时仍会走到物理重建, 正是这里需要的。
             levelData?.FlushDirty(true);
         }
+        /// <summary>
+        /// 两个通道的记录器都封一次口 —— 没在记录的那个 BuildCommand 会返回 null。
+        /// 离开模式 / 切通道 / 跨 level 都靠这个统一收尾。
+        /// </summary>
         void CommitCommand()
         {
             // 名字用实际生效的工具, 否则 Shift 压下去的一笔在 History 里依旧写着 Raise。
-            var cmd = mRecorder.BuildCommand($"Terrain {GetEffectiveTool()}");
+            PushCommand(mRecorder.BuildCommand($"Terrain {GetEffectiveTool()}"));
+            PushCommand(mMaterialRecorder.BuildCommand(MakeMaterialCommandName()));
+        }
+        void PushCommand(Editor.Infrastructure.TtEditorCommand cmd)
+        {
             if (cmd == null || HistoryHost == null)
                 return;
-            // 高度已经在外部改完了, 只入栈记录; 一次拖动就是一步, 立刻封口不参与合并。
+            // 数据已经在外部改完了, 只入栈记录; 一次拖动就是一步, 立刻封口不参与合并。
             HistoryHost.PushCommand(cmd);
             cmd.Seal();
+        }
+        string MakeMaterialCommandName()
+        {
+            if (IsInvertStroke())
+                return "Terrain Erase Material";
+            return $"Terrain Paint {GetMaterialDisplayName(mPaintMaterialId)}";
+        }
+        /// <summary>
+        /// 材质列表可能根本没配 (地形没有 MatIdMapping 节点), 拿不到名字时退回下标。
+        /// </summary>
+        string GetMaterialDisplayName(int index)
+        {
+            var list = FindTerrain()?.TerrainMaterialIdManager?.MaterialIdArray;
+            if (list == null || index < 0 || index >= list.Count)
+                return index.ToString();
+            var tex = list[index].TexDiffuse;
+            return tex != null ? tex.PureName : index.ToString();
         }
         #endregion
 
@@ -455,6 +563,34 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             const float LabelWidth = -80.0f;
 
+            ImGuiAPI.SetNextItemWidth(LabelWidth);
+            if (ImGuiAPI.BeginCombo("Channel", mChannel.ToString(), ImGuiComboFlags_.ImGuiComboFlags_None))
+            {
+                var channels = Enum.GetValues<ETerrainEditChannel>();
+                for (int i = 0; i < channels.Length; i++)
+                {
+                    var channel = channels[i];
+                    if (ImGuiAPI.Selectable(channel.ToString(), channel == mChannel, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero)
+                        && channel != mChannel)
+                    {
+                        // 切通道等于抬手: 半段拖动必须先封口, 否则这段编辑会永久进不了 undo 栈。
+                        CommitCommand();
+                        mChannel = channel;
+                    }
+                }
+                ImGuiAPI.EndCombo();
+            }
+            ImGuiAPI.Separator();
+
+            if (mChannel == ETerrainEditChannel.Material)
+            {
+                DrawMaterialBrushParams(LabelWidth);
+                return;
+            }
+            DrawHeightBrushParams(LabelWidth);
+        }
+        void DrawHeightBrushParams(float LabelWidth)
+        {
             ImGuiAPI.SetNextItemWidth(LabelWidth);
             if (ImGuiAPI.BeginCombo("Tool", mBrush.Tool.ToString(), ImGuiComboFlags_.ImGuiComboFlags_None))
             {
@@ -511,6 +647,50 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 else
                     ImGuiAPI.Text("按住 Shift 反向落笔");
             }
+
+            if (mHasHover)
+                ImGuiAPI.Text($"Cursor: ({mHoverPos.X:F1}, {mHoverPos.Y:F1}, {mHoverPos.Z:F1})");
+            else
+                ImGuiAPI.Text("Cursor: --");
+        }
+        /// <summary>
+        /// 材质通道的参数 UI。没有 Tool 下拉 (只有“刷”一个动作, 擦除走 Shift), 也没有
+        /// Strength (ID 是整数下标, 不存在“刷多少”这回事)。
+        /// </summary>
+        void DrawMaterialBrushParams(float LabelWidth)
+        {
+            var list = FindTerrain()?.TerrainMaterialIdManager?.MaterialIdArray;
+            if (list == null || list.Count == 0)
+            {
+                ImGuiAPI.Text("地形没有 MatIdMapping 节点或材质列表为空");
+            }
+            else
+            {
+                ImGuiAPI.Text("Material");
+                for (int i = 0; i < list.Count; i++)
+                {
+                    var tex = list[i].TexDiffuse;
+                    var text = $"[{i}] {(tex != null ? tex.PureName : "<none>")}";
+                    if (ImGuiAPI.Selectable(text, i == mPaintMaterialId, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                    {
+                        mPaintMaterialId = (byte)i;
+                    }
+                }
+                ImGuiAPI.Separator();
+            }
+
+            ImGuiAPI.SetNextItemWidth(LabelWidth);
+            ImGuiAPI.SliderFloat("Radius", ref mBrush.Radius, 1.0f, 200.0f, "%.1f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+
+            ImGuiAPI.SetNextItemWidth(LabelWidth);
+            ImGuiAPI.SliderFloat("Falloff", ref mBrush.Falloff, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+            if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                ImGuiAPI.SetTooltip("材质是整数 ID, 无法插值; Falloff 越大, 边缘的散点抖动带越宽");
+
+            if (IsInvertStroke())
+                ImGuiAPI.Text("Shift 擦除中 -> 回基底材质");
+            else
+                ImGuiAPI.Text("按住 Shift 擦除回基底");
 
             if (mHasHover)
                 ImGuiAPI.Text($"Cursor: ({mHoverPos.X:F1}, {mHoverPos.Y:F1}, {mHoverPos.Z:F1})");
@@ -581,11 +761,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var drawOffset = new Vector2(winPos.X + vpMin.X, winPos.Y + vpMin.Y);
 
             var cmdlst = ImGuiAPI.GetWindowDrawList();
-            // 黄 = 抬, 青 = 压 (Shift 反向后也跑这一支), 不用看面板就知道落笔方向。
-            var effectiveTool = GetEffectiveTool();
-            uint color = effectiveTool == ETerrainBrushTool.Lower
-                ? (uint)Color4b.Cyan.ToR8G8B8A8()
-                : (uint)Color4b.Yellow.ToR8G8B8A8();
+            uint color = GetRingColor();
 
             bool hasFirst = false;
             var firstPt = Vector2.Zero;
@@ -630,6 +806,22 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 cmdlst.AddLine(in prevPt, firstPt, color, 1.5f);
             }
+        }
+        /// <summary>
+        /// 不用看面板就知道落笔会发生什么: 高度通道黄 = 抬 / 青 = 压,
+        /// 材质通道洋红 = 刷 / 白 = 擦除。未落笔时跟随实时 Shift 预告。
+        /// </summary>
+        uint GetRingColor()
+        {
+            if (mChannel == ETerrainEditChannel.Material)
+            {
+                return IsInvertStroke()
+                    ? (uint)Color4b.White.ToR8G8B8A8()
+                    : (uint)Color4b.Magenta.ToR8G8B8A8();
+            }
+            return GetEffectiveTool() == ETerrainBrushTool.Lower
+                ? (uint)Color4b.Cyan.ToR8G8B8A8()
+                : (uint)Color4b.Yellow.ToR8G8B8A8();
         }
         #endregion
     }

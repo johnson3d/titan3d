@@ -67,6 +67,36 @@ namespace EngineNS
                 NativeWindows.Add(window);
             }
         }
+        /// <summary>
+        /// 面积最大的那个可渲染窗口。
+        ///
+        /// 多窗口模式 (Config.SupportMultWindows) 下 GfxDevice 建出来的主 NativeWindow 只是个
+        /// 10x10 的占位窗, 界面实际画在 ImGui 派生出来的 platform 窗口上, 所以"整个界面在哪个
+        /// 窗口" 只能按尺寸挑。给整窗截图 (MCP capture_screenshot source='window') 用。
+        ///
+        /// 内部要读 SDL 窗口状态, 只能在主线程调用。
+        /// </summary>
+        public TtNativeWindow GetLargestRenderableWindow()
+        {
+            lock (NativeWindowsLocker)
+            {
+                TtNativeWindow ret = null;
+                long maxArea = 0;
+                foreach (var i in NativeWindows)
+                {
+                    if (i.IsRenderable == false)
+                        continue;
+                    var size = i.WindowSize;
+                    long area = (long)size.X * (long)size.Y;
+                    if (area > maxArea)
+                    {
+                        maxArea = area;
+                        ret = i;
+                    }
+                }
+                return ret;
+            }
+        }
         public void UnregisterNativeWindow(TtNativeWindow window)
         {
             lock (NativeWindowsLocker)

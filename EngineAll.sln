@@ -117,6 +117,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Network", "CSharpCode\Brick
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Animation", "CSharpCode\Bricks\Animation\Animation.shproj", "{FD56162E-FCD2-46A7-89FB-E4A0079DFE3E}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Sequencer", "CSharpCode\Bricks\Sequencer\Sequencer.shproj", "{135ED5F5-BD8E-41B6-9459-8EEB18343ECA}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpCodeTools", "Module\CSharpCodeTools\CSharpCodeTools.csproj", "{9536C797-8D72-4B0D-BE38-BD1EA4A2FC97}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CodeCompiler", "CSharpCode\Bricks\CodeCompiler\CodeCompiler.shproj", "{9A454650-729C-496E-BAE4-71B863EA036E}"
@@ -363,7 +365,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PythonRuntime", "NativeCode
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "JitherOpenEXR", "3rd\csharp\JitherOpenEXR\JitherOpenEXR.shproj", "{B1766C5B-0A9B-442E-A42D-39AE93B6FDF2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crnlib.2008", "3rd\native\crunch\crnlib\crnlib.2008.vcxproj", "{CF2E70E8-7133-4D96-92C7-68BB406C0664}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crnlib", "3rd\native\crunch\crnlib\crnlib.2008.vcxproj", "{CF2E70E8-7133-4D96-92C7-68BB406C0664}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "VirtualShadowMaps", "CSharpCode\Bricks\VirtualShadowMaps\VirtualShadowMaps.shproj", "{91C46B9C-A9C1-4AB1-9C41-E493041E9244}"
 EndProject
@@ -592,6 +594,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CodeGen", "codegen\NativeBinder\CodeGen.vcxitems", "{7B7B0D28-CD9D-4E61-8B18-7D5D0EDCF0AD}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CodeGenCSharp", "codegen\NativeBinder\CodeGenCSharp.shproj", "{CBEC1EAE-ECA1-4442-935F-0D923ABA94B9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cache", "cache", "{8D9D945D-F447-945B-7FF7-1EA07C640C84}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1281,6 +1285,7 @@ Global
 		{FA20DF81-66D6-4949-B053-7F33852AA1E1} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{78931D6F-319B-4176-9E0D-C4057910315B} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{FD56162E-FCD2-46A7-89FB-E4A0079DFE3E} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
+		{135ED5F5-BD8E-41B6-9459-8EEB18343ECA} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{9536C797-8D72-4B0D-BE38-BD1EA4A2FC97} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
 		{9A454650-729C-496E-BAE4-71B863EA036E} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{C88C6D79-B722-489E-BCA2-0E5309C0CECD} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
@@ -1522,6 +1527,7 @@ Global
 		CSharpCode\Bricks\PythonRuntime\PythonRuntime.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Recast\Recast.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\RenderPolicyEditor\RenderPolicyEditor.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		CSharpCode\Bricks\Sequencer\Sequencer.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\SourceControl\SourceControl.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\StateMachine\StateMachine.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\TcpServer\TcpServer.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -1547,6 +1553,7 @@ Global
 		Plugins\GameServer\ClientCommon\ClientCommon.projitems*{12f552ba-c1ba-49a1-a7db-f32d98761d1c}*SharedItemsImports = 5
 		Plugins\GameServer\ClientRobot\ClientRobot\ClientRobot.projitems*{12f552ba-c1ba-49a1-a7db-f32d98761d1c}*SharedItemsImports = 5
 		Plugins\GameServer\CSCommon\CSCommon.projitems*{12f552ba-c1ba-49a1-a7db-f32d98761d1c}*SharedItemsImports = 5
+		CSharpCode\Bricks\Sequencer\Sequencer.projitems*{135ed5f5-bd8e-41b6-9459-8eeb18343eca}*SharedItemsImports = 13
 		CSharpCode\Bricks\DesignMacross\DesignMacross.projitems*{14aa6ea6-9c49-459b-8242-0e509fd2fcb2}*SharedItemsImports = 13
 		3rd\native\wykobi\wykobi.vcxitems*{176139b1-26bb-4cdd-897b-b934bee034e2}*SharedItemsImports = 9
 		Plugins\GameServer\Root\RootServer\RootServer.projitems*{17aa8006-bb92-4396-8fab-5eb9a54eec0d}*SharedItemsImports = 5
@@ -1590,6 +1597,7 @@ Global
 		CSharpCode\Bricks\ProjectGen\ProjectGen.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Recast\Recast.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\RenderPolicyEditor\RenderPolicyEditor.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\Sequencer\Sequencer.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\SourceControl\SourceControl.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\StateMachine\StateMachine.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\TcpServer\TcpServer.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
@@ -1769,6 +1777,7 @@ Global
 		CSharpCode\Bricks\PythonRuntime\PythonRuntime.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
 		CSharpCode\Bricks\Recast\Recast.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
 		CSharpCode\Bricks\RenderPolicyEditor\RenderPolicyEditor.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
+		CSharpCode\Bricks\Sequencer\Sequencer.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
 		CSharpCode\Bricks\SourceControl\SourceControl.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
 		CSharpCode\Bricks\StateMachine\StateMachine.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
 		CSharpCode\Bricks\TcpServer\TcpServer.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5

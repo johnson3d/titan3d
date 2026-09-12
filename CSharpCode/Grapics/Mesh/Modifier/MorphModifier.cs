@@ -317,6 +317,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                     var accumulated = buffer.DataArray[vertexIndex];
                     accumulated.mDeltaPosition += deltas[d].DeltaPosition * weight;
                     accumulated.mDeltaNormal += deltas[d].DeltaNormal * weight;
+                    accumulated.mDeltaTangent += deltas[d].DeltaTangent * weight;
                     buffer.UpdateData(vertexIndex, in accumulated);
 
                     state.TouchedVertices.Add(deltas[d].VertexIndex);

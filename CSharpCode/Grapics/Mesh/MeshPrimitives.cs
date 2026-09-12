@@ -87,6 +87,24 @@ namespace EngineNS.Graphics.Mesh
         /// </summary>
         [Rtti.Meta("")]
         public bool HasBLAS { get; set; } = false;
+
+        /// <summary>
+        /// 导入该 mesh 的源文件路径 (FBX/OBJ/glTF 等), 空串表示不是导入来的
+        /// (程序化生成的 Box/Sphere 等, 或导入于本字段存在之前)。
+        ///
+        /// 对应 TtSrViewAMeta.OriginImageAddress: 资产必须能回答"我是从哪个文件来的",
+        /// 否则出了问题只能靠猜 —— 例如 blendshape 法线缺失时, 无法分清是源文件本身
+        /// 没带法线还是导入器丢了。AssetFiles 记的是资产自己的文件, 语义不同, 不能兼用。
+        ///
+        /// 与 OriginImageAddress 的一处刻意差异: 不做"探测同名同目录文件"的 getter 回退。
+        /// 纹理的源 png/hdr 常与资产同目录, 而 FBX 通常在 content 之外的美术目录, 探测
+        /// 只会编出一个不存在的路径, 比返回空串更难排查。
+        ///
+        /// 路径是当时导入机器上的绝对路径, 换人/换机器后可能失效 —— 它是溯源线索而不是
+        /// 可信依赖, 不要拿它做自动重导入之类依赖它必然存在的事。
+        /// </summary>
+        [Rtti.Meta("")]
+        public string OriginSourceAddress { get; set; } = null;
     }
 
     [Rtti.Meta("",NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMeshPrimitives@EngineCore" })]

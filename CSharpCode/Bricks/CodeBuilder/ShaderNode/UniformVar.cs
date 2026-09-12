@@ -101,6 +101,32 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             }
         }
         public List<PinOut> Swizzles { get; set; } = new List<PinOut>();
+        /// <summary>
+        /// out pin 名字直接来自 TtShaderDefineAttribute.ShaderName (见 BuildOutPins), 而旧资产里
+        /// UPinLinker.TSaveData 存的是当时的 pin 名字符串。结构体字段一旦改名, 旧连线就会
+        /// FindPinOut 拿不到 pin, 被 Linker.SaveData 静默 Remove 掉 —— 图看上去只是少了根线,
+        /// 不报任何错。这里按 LegacyShaderName 回退到改名后的 pin, 资产重存一次后
+        /// SaveData 会写回新 pin 名, 自然完成迁移。
+        /// </summary>
+        public override PinOut FindPinOut(string name)
+        {
+            var pin = base.FindPinOut(name);
+            if (pin != null)
+                return pin;
+
+            if (VarType == null || VarType.SystemType == null || VarType.IsValueType == false)
+                return null;
+            foreach (var i in VarType.SystemType.GetFields())
+            {
+                var attrs = i.GetCustomAttributes(typeof(Editor.ShaderCompiler.TtShaderDefineAttribute), false);
+                if (attrs.Length == 0)
+                    continue;
+                var attr = attrs[0] as Editor.ShaderCompiler.TtShaderDefineAttribute;
+                if (string.IsNullOrEmpty(attr.LegacyShaderName) == false && attr.LegacyShaderName == name)
+                    return base.FindPinOut(attr.ShaderName);
+            }
+            return null;
+        }
         public UUniformVar()
         {
             VarType = Rtti.TtTypeDescGetter<float>.TypeDesc;

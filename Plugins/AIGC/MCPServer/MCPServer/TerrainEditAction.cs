@@ -141,11 +141,13 @@ namespace EngineNS.Plugins.MCPServer
             returnDescription: "{playMode: string, isTerrainEditSupported: boolean, featureUseRVT: boolean - " +
             "when true a local upload is invisible unless the RVT page is marked dirty, sceneName: string, " +
             "terrain: {nodeName, numOfLevelX, numOfLevelZ, levelSize, gridSize, patchSide, patchSize, " +
-            "heightMapTexels, placement:{x,y,z}}, brushHint: {suggestedRadius, suggestedStrength, note} - " +
-            "radius is in WORLD units not texels, camera: {x,y,z, isOverTerrain}, loadedLevelCount, " +
-            "editableLevelCount, levels: [{x, z, isEditable, sourceHeightMap, sourcePixelsAlive - false " +
-            "means the buffer was disposed and is a hollow shell, heightMin, heightMax, isInEditSession, " +
-            "hasPhyActor, heightfield}], error}")]
+            "heightMapTexels, placement:{x,y,z}}, materialCount: number - entries in MaterialIdArray, the " +
+            "valid range of materialId for terrain_paint_material, brushHint: {suggestedRadius, " +
+            "suggestedStrength, note} - radius is in WORLD units not texels, camera: {x,y,z, isOverTerrain}, " +
+            "loadedLevelCount, editableLevelCount, levels: [{x, z, isEditable, sourceHeightMap, " +
+            "sourcePixelsAlive - false means the buffer was disposed and is a hollow shell, heightMin, " +
+            "heightMax, isInEditSession, hasPhyActor, heightfield, materialIdPixelsAlive - false means the " +
+            "CPU material id copy is missing so material painting is silently ignored}], error}")]
         public static string TerrainGetInfo(
             [Bricks.AIGC.TtMCPParameter("Maximum number of levels to detail")] double levelLimit = 8)
         {
@@ -185,6 +187,9 @@ namespace EngineNS.Plugins.MCPServer
                     heightMapTexels = terrain.GridSize > 0.0f ? (int)(terrain.LevelSize / terrain.GridSize) : 0,
                     placement = new { x = placement.X, y = placement.Y, z = placement.Z },
                 };
+                // 材质笔刷能刷的 ID 就是 [0, materialCount) 的下标; 为 0 时地形根本没配
+                // MatIdMapping 节点, terrain_paint_material 会写下无效 ID。
+                common["materialCount"] = terrain.TerrainMaterialIdManager?.MaterialIdArray?.Count ?? 0;
 
                 // 半径单位是世界单位而不是 texel, 很容易给小了 —— 一个 level 宽 levelSize,
                 // 半径给到 levelSize 的 1/10 才在屏幕上有明显一块。
@@ -247,6 +252,7 @@ namespace EngineNS.Plugins.MCPServer
                             isInEditSession = ld.IsInEditSession,
                             hasPhyActor = ld.PhyActor != null,
                             heightfield = $"{ld.HeightfieldWidth}x{ld.HeightfieldHeight}",
+                            materialIdPixelsAlive = ld.IsMaterialIdEditable,
                         });
                     }
                 }
@@ -665,6 +671,284 @@ namespace EngineNS.Plugins.MCPServer
                     level = new { x = lx, z = lz },
                     isInEditSession = ld.IsInEditSession,
                     encodeRange = new { min = ld.HeightMapMinHeight, max = ld.HeightMapMaxHeight },
+                };
+            });
+
+            if (ok == false)
+                return FailJson("timed out waiting for the engine main thread");
+            return JsonSerializer.Serialize(payload);
+        }
+
+        [Bricks.AIGC.TtMCPTool("terrain_list_materials",
+            "Lists the terrain material layers. The index of a row IS the materialId written into the " +
+            "material id map, so call this first to know what terrain_paint_material can paint.",
+            returnDescription: "{count, materials: [{index, texDiffuse, texNormal, transitionRange}], error}")]
+        public static string TerrainListMaterials()
+        {
+            object payload = null;
+
+            var ok = TtMainThreadDispatcher.Invoke(() =>
+            {
+                var ctx = LocateTerrain();
+                if (ctx.Terrain == null)
+                {
+                    payload = new { error = ctx.Error };
+                    return;
+                }
+
+                var list = ctx.Terrain.TerrainMaterialIdManager?.MaterialIdArray;
+                if (list == null || list.Count == 0)
+                {
+                    payload = new { count = 0, error = "the terrain has no material layers; its PGC graph " +
+                        "probably has no MatIdMapping node" };
+                    return;
+                }
+
+                var materials = new List<object>();
+                for (int i = 0; i < list.Count; i++)
+                {
+                    materials.Add(new
+                    {
+                        index = i,
+                        texDiffuse = list[i].TexDiffuse?.ToString(),
+                        texNormal = list[i].TexNormal?.ToString(),
+                        transitionRange = list[i].TransitionRange,
+                    });
+                }
+                payload = new { count = list.Count, materials };
+            });
+
+            if (ok == false)
+                return FailJson("timed out waiting for the engine main thread");
+            return JsonSerializer.Serialize(payload);
+        }
+
+        [Bricks.AIGC.TtMCPTool("terrain_paint_material",
+            "Paints one material brush stroke on the engine main thread and reports what changed in the " +
+            "CPU material id buffer. Unlike the height brush there is no edit session and no physics " +
+            "rebuild - the id map is raw R8 with no encode range, so every stroke is a pure partial " +
+            "upload. KEY READING: if changedTexels is 0 the stroke never touched the buffer (radius " +
+            "smaller than one grid cell, or the position is outside every loaded level, or the target id " +
+            "already equals what is there). If changedTexels is large but the screen does not change, the " +
+            "fault is the partial GPU upload or the RVT dirty marking.",
+            returnDescription: "{applied: boolean, materialId, erase, radius, falloff, worldPos:{x,z}, " +
+            "probeSource, localX, localZ, texel:{x,y}, centerIdBefore, centerIdAfter, changedTexels: " +
+            "number - texels whose id actually changed, affected:{minX,minY,maxX,maxY}, verdict: string, " +
+            "error}")]
+        public static string TerrainPaintMaterial(
+            [Bricks.AIGC.TtMCPParameter("Material layer index to paint. See terrain_list_materials")] double materialId = 0,
+            [Bricks.AIGC.TtMCPParameter("Brush radius in WORLD units (not texels). See terrain_get_info brushHint")] double radius = 200,
+            [Bricks.AIGC.TtMCPParameter("Edge softness 0-1. Material ids cannot be interpolated so the soft " +
+                "edge is a deterministic dither of scattered texels; 0 is a hard edge")] double falloff = 0.5,
+            [Bricks.AIGC.TtMCPParameter("Erase instead of paint: write back the PGC base id")] bool erase = false,
+            [Bricks.AIGC.TtMCPParameter("World X. Leave both X and Z at 0 to stroke under the camera")] double worldX = 0,
+            [Bricks.AIGC.TtMCPParameter("World Z. Leave both X and Z at 0 to stroke under the camera")] double worldZ = 0)
+        {
+            if (materialId < 0 || materialId > 255)
+                return FailJson($"materialId {materialId} is out of the byte range [0,255]");
+
+            object payload = null;
+            bool hasExplicit = worldX != 0.0 || worldZ != 0.0;
+
+            var param = FTerrainMaterialBrushParam.Default;
+            param.MaterialId = (byte)materialId;
+            param.Radius = (float)radius;
+            param.Falloff = (float)falloff;
+            param.bErase = erase;
+
+            var ok = TtMainThreadDispatcher.Invoke(() =>
+            {
+                var ctx = LocateTerrain();
+                if (ctx.Terrain == null)
+                {
+                    payload = new { applied = false, error = ctx.Error };
+                    return;
+                }
+                if (ResolveTerrainProbe(ctx, worldX, worldZ, hasExplicit, out var pos, out var how) == false)
+                {
+                    payload = new { applied = false, error = "no loaded level found; move the camera near " +
+                        "the terrain so streaming loads it, or pass explicit worldX/worldZ" };
+                    return;
+                }
+
+                var terrain = ctx.Terrain;
+                var ld = terrain.GetLevelDataAtWorld(in pos, out var localX, out var localZ);
+                if (ld == null)
+                {
+                    payload = new { applied = false, probeSource = how,
+                        error = "the stroke position is not inside any loaded level" };
+                    return;
+                }
+                if (ld.IsMaterialIdEditable == false)
+                {
+                    payload = new { applied = false, probeSource = how,
+                        error = "the level has no CPU material id buffer, the stroke would be silently " +
+                                "ignored. Run terrain_get_info and check materialIdPixelsAlive." };
+                    return;
+                }
+
+                int matCount = terrain.TerrainMaterialIdManager?.MaterialIdArray?.Count ?? 0;
+                if (erase == false && matCount > 0 && param.MaterialId >= matCount)
+                {
+                    payload = new { applied = false, probeSource = how,
+                        error = $"materialId {param.MaterialId} is out of range [0,{matCount}); " +
+                                "the shader would sample a nonexistent texture array slice" };
+                    return;
+                }
+
+                int texX = Math.Clamp((int)(localX / terrain.GridSize), 0, ld.MaterialIdWidth - 1);
+                int texY = Math.Clamp((int)(localZ / terrain.GridSize), 0, ld.MaterialIdHeight - 1);
+                byte beforeId = ld.SourceMaterialIdMap[texY * ld.MaterialIdWidth + texX];
+
+                var affected = ld.ApplyMaterialBrush(localX, localZ, in param);
+                ld.FlushMaterialIdDirty();
+
+                byte afterId = ld.SourceMaterialIdMap[texY * ld.MaterialIdWidth + texX];
+
+                // affected 是“真的改动过的 texel”的包围盒, 但盒子内部因为抖动与同值跳过
+                // 并不是全部被改, 所以 changedTexels 只能当上限读。
+                long boxTexels = affected.IsValid ? (long)affected.Width * affected.Height : 0;
+                string verdict;
+                if (affected.IsValid == false)
+                {
+                    verdict = "NOTHING CHANGED. Either the radius is smaller than one grid cell " +
+                        $"(gridSize={terrain.GridSize}), or every texel in range already had this id. " +
+                        "This is a CPU-side result, unrelated to the GPU.";
+                }
+                else
+                {
+                    verdict = "Material ids changed on the CPU and a partial upload was issued " +
+                        "(plus an RVT dirty mark when Feature_UseRVT is on). If the screen still does not " +
+                        "change, capture a frame with capture_renderdoc_frame and inspect the material id " +
+                        "texture. Note plants/grass are NOT regenerated by material painting.";
+                }
+
+                payload = new
+                {
+                    applied = true,
+                    materialId = param.MaterialId,
+                    erase,
+                    radius = param.Radius,
+                    falloff = param.Falloff,
+                    worldPos = new { x = pos.X, z = pos.Z },
+                    probeSource = how,
+                    localX,
+                    localZ,
+                    texel = new { x = texX, y = texY },
+                    centerIdBefore = beforeId,
+                    centerIdAfter = afterId,
+                    changedTexels = boxTexels,
+                    affected = affected.IsValid
+                        ? new { minX = affected.MinX, minY = affected.MinY, maxX = affected.MaxX, maxY = affected.MaxY }
+                        : null,
+                    verdict,
+                };
+            });
+
+            if (ok == false)
+                return FailJson("timed out waiting for the engine main thread");
+            return JsonSerializer.Serialize(payload);
+        }
+
+        [Bricks.AIGC.TtMCPTool("terrain_dump_material_region",
+            "Dumps a downsampled grid of the CPU material id buffer over a texel region, plus a histogram " +
+            "of the ids present. Call before and after a stroke to see the shape and placement of the " +
+            "change - this catches strokes that landed in the wrong place rather than not at all.",
+            returnDescription: "{level:{x,z}, region:{minX,minY,maxX,maxY}, texelCount, histogram: " +
+            "{id: count}, grid: number[][] - Downsampled ids, row major, north-west origin, gridStep, " +
+            "error}")]
+        public static string TerrainDumpMaterialRegion(
+            [Bricks.AIGC.TtMCPParameter("Level index X")] double levelX = 0,
+            [Bricks.AIGC.TtMCPParameter("Level index Z")] double levelZ = 0,
+            [Bricks.AIGC.TtMCPParameter("Region min texel X. Negative means the whole level")] double minX = -1,
+            [Bricks.AIGC.TtMCPParameter("Region min texel Y")] double minY = -1,
+            [Bricks.AIGC.TtMCPParameter("Region max texel X")] double maxX = -1,
+            [Bricks.AIGC.TtMCPParameter("Region max texel Y")] double maxY = -1,
+            [Bricks.AIGC.TtMCPParameter("Side length of the returned downsampled grid")] double gridSide = 16)
+        {
+            object payload = null;
+            int lx = (int)levelX;
+            int lz = (int)levelZ;
+            int side = Math.Clamp((int)gridSide, 2, 64);
+
+            var ok = TtMainThreadDispatcher.Invoke(() =>
+            {
+                var ctx = LocateTerrain();
+                if (ctx.Terrain == null)
+                {
+                    payload = new { error = ctx.Error };
+                    return;
+                }
+                var terrain = ctx.Terrain;
+                if (terrain.Levels == null ||
+                    lx < 0 || lx >= terrain.NumOfLevelX || lz < 0 || lz >= terrain.NumOfLevelZ)
+                {
+                    payload = new { error = $"level index ({lx},{lz}) is out of range " +
+                        $"[0,{terrain.NumOfLevelX})x[0,{terrain.NumOfLevelZ})" };
+                    return;
+                }
+                var ld = terrain.Levels[lz, lx]?.LevelData;
+                if (ld == null)
+                {
+                    payload = new { error = $"level ({lx},{lz}) is not loaded" };
+                    return;
+                }
+                if (ld.IsMaterialIdEditable == false)
+                {
+                    payload = new { error = $"level ({lx},{lz}) has no readable CPU material id buffer; " +
+                        "run terrain_get_info and check materialIdPixelsAlive" };
+                    return;
+                }
+
+                var ids = ld.SourceMaterialIdMap;
+                int bw = ld.MaterialIdWidth;
+                int bh = ld.MaterialIdHeight;
+                int x0 = minX < 0 ? 0 : Math.Clamp((int)minX, 0, bw - 1);
+                int y0 = minY < 0 ? 0 : Math.Clamp((int)minY, 0, bh - 1);
+                int x1 = maxX < 0 ? bw - 1 : Math.Clamp((int)maxX, 0, bw - 1);
+                int y1 = maxY < 0 ? bh - 1 : Math.Clamp((int)maxY, 0, bh - 1);
+                if (x1 < x0 || y1 < y0)
+                {
+                    payload = new { error = "the region is empty after clamping to the buffer" };
+                    return;
+                }
+
+                // 直直给直方图而不是 min/max: ID 是分类量, 均值与极值没有意义。
+                var histogram = new Dictionary<string, long>();
+                long count = 0;
+                for (int y = y0; y <= y1; y++)
+                {
+                    for (int x = x0; x <= x1; x++)
+                    {
+                        var key = ids[y * bw + x].ToString();
+                        histogram.TryGetValue(key, out var c);
+                        histogram[key] = c + 1;
+                        count++;
+                    }
+                }
+
+                int w = x1 - x0 + 1;
+                int h2 = y1 - y0 + 1;
+                var grid = new int[side][];
+                for (int gy = 0; gy < side; gy++)
+                {
+                    grid[gy] = new int[side];
+                    for (int gx = 0; gx < side; gx++)
+                    {
+                        int sx = x0 + (int)((double)gx / (side - 1) * (w - 1));
+                        int sy = y0 + (int)((double)gy / (side - 1) * (h2 - 1));
+                        grid[gy][gx] = ids[sy * bw + sx];
+                    }
+                }
+
+                payload = new
+                {
+                    level = new { x = lx, z = lz },
+                    region = new { minX = x0, minY = y0, maxX = x1, maxY = y1 },
+                    texelCount = count,
+                    histogram,
+                    grid,
+                    gridStep = new { x = (double)w / side, y = (double)h2 / side },
                 };
             });
 

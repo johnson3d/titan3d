@@ -260,7 +260,7 @@ namespace NxRHI
 		}
 		else if (name == "TEXCOORD" && desc.SemanticIndex == 2)
 		{
-			return VST_LightMap;
+			return VST_ExtraUV;
 		}
 		else if (name == "TEXCOORD" && desc.SemanticIndex == 3)
 		{

@@ -14,8 +14,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)EditorAction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UtilityAction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SkeletalAnimationAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MorphTargetAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetImportAction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MainThreadDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DebugAction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TerrainEditAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetMigrationAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewportAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SequencerAction.cs" />
   </ItemGroup>
 </Project>

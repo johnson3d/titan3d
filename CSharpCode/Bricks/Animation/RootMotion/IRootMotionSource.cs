@@ -22,9 +22,11 @@ namespace EngineNS.Animation.RootMotion
     /// <summary>
     /// RootMotion的收集与消费缓冲。播放节点每帧Submit, Movement每帧Consume。
     ///
-    /// 注意: 场景节点的Tick是深度优先且按Children顺序, 若Movement节点排在
-    /// MeshNode(动画节点挂在其下)之前, 消费到的会是上一帧提交的位移, 即有一帧延迟。
-    /// 这里用帧号检测该情况并只警告一次, 不改变行为(一帧延迟对表现无实质影响)。
+    /// 两边的先后靠 TtNode.GetTickOrder() 保证: 动画播放节点取 ETickOrder.Animation,
+    /// TtMovement 取 ETickOrder.Movement, World.TickLogic 会按此对同步Tick的节点升序排序。
+    /// 下面的帧号检测是个哨兵: 若哪天排序被破坏(例如新的消费方忘了 override GetTickOrder,
+    /// 或者消费方被标上了 ENodeStyles.ParallelTick —— 并行组虽然排在同步组之后,
+    /// 但组内无序, 且如果提交方也在并行组就彻底没保证了), 会警告一次并保持原行为。
     /// </summary>
     public class TtRootMotionAccumulator
     {
@@ -78,7 +80,7 @@ namespace EngineNS.Animation.RootMotion
             {
                 mStaleWarned = true;
                 Profiler.Log.WriteLine<TtAnimationCategory>(Profiler.ELogTag.Warning,
-                    "RootMotion被延迟一帧消费: Movement节点的Tick早于动画节点, 建议把动画所在的MeshNode排在Movement之前");
+                    "RootMotion被延迟一帧消费: 消费方的Tick早于动画节点, 请检查两边的 TtNode.GetTickOrder() 是否满足 动画 < 消费方, 以及两边是否都没有 ENodeStyles.ParallelTick 标记");
             }
 
             delta = mPending.Delta;

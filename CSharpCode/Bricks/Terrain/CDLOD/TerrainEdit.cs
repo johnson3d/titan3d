@@ -1006,14 +1006,15 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
 
         /// <summary>
-        /// 高度覆盖层不进 .node 文件 (它是上百 MB 量级的数据, 且需要按 level 懒加载),
-        /// 走 scene 目录下的旁路存。
+        /// 高度 / 材质 ID 覆盖层都不进 .node 文件 (它们是上百 MB 量级的数据, 且需要按 level
+        /// 懒加载), 走 scene 目录下的旁路存。
         /// </summary>
         public override void OnSaveNodeExtraData(GamePlay.Scene.TtScene scene)
         {
             base.OnSaveNodeExtraData(scene);
             // 用字段而不是属性: 避免每次保存都凭空造一个空管理器。
             mHeightOverlay?.Save(scene);
+            MaterialIdOverlayIfCreated?.Save(scene);
         }
 
         /// <summary>

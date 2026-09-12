@@ -137,7 +137,7 @@ namespace EngineNS.Animation.Asset
                         {
                             var ameta = new TtAnimationClipAMeta();
                             ameta.SetAssetName(rn);
-                            ameta.AssetId = Guid.NewGuid();
+                            ameta.AssetId = IO.IAssetMeta.AcquireAssetId(rn);
                             ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(typeof(TtAnimationClip)).TypeString;
                             ameta.Description = $"This is a {typeof(TtAnimationClip).FullName}\n";
                             ameta.SaveAMeta(animClip);

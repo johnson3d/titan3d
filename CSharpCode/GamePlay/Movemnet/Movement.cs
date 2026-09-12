@@ -130,6 +130,15 @@ namespace EngineNS.GamePlay.Movemnet
         {
             return TtOnTickLogicScope<TtMovement>.Scope;
         }
+        /// <summary>
+        /// 本节点要消费动画节点本帧提交的 RootMotion, 所以必须排在动画求值之后。
+        /// 取 ETickOrder.Movement 而不是缺省值, 是为了跟动画节点的 ETickOrder.Animation 拉开 ——
+        /// 相同返回值的节点之间相对顺序是未定义的。
+        /// </summary>
+        public override int GetTickOrder()
+        {
+            return (int)ETickOrder.Movement;
+        }
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
             DVector3 posBeforeMove = Parent.Placement.AbsTransform.Position;

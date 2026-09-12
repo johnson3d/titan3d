@@ -210,7 +210,7 @@ namespace EngineNS.Plugins.BlenderImporter
                 if (mtl.AssetName.AMeta == null)
                 {
                     var ameta = mtl.CreateAMeta();
-                    ameta.AssetId = Guid.NewGuid();
+                    ameta.AssetId = IO.IAssetMeta.AcquireAssetId(mtl.AssetName);
                     ameta.SetAssetName(mtl.AssetName);
                     ameta.SaveAMeta(mtl);
                     TtEngine.Instance.AssetMetaManager.RegAsset(ameta);

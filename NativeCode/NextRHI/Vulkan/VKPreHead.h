@@ -841,7 +841,7 @@ namespace NxRHI
         case 4:
             return VST_UV;
         case 5:
-            return VST_LightMap;
+            return VST_ExtraUV;
         case 6:
             return VST_SkinIndex;
         case 7:

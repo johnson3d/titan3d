@@ -527,6 +527,9 @@ namespace EngineNS.GamePlay
         private TtNode.TtNodeTickParameters NodeTickParameters = new TtNode.TtNodeTickParameters();
         private List<TtNode> TickNodes = new List<TtNode>();
         private List<TtNode> ParallelTickNodes = new List<TtNode>();
+        // 本帧收集到的同步 Tick 节点里是否出现过非缺省的 TtNode.GetTickOrder()。
+        // 没人自定义顺序时可以整帧跳过排序，保持原有开销不变
+        private bool NeedSortTickNodes = false;
         public virtual void TickLogic(Graphics.Pipeline.TtRenderPolicy policy, float ellapse)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
@@ -544,8 +547,16 @@ namespace EngineNS.GamePlay
 
                 TickNodes.Clear();
                 ParallelTickNodes.Clear();
+                NeedSortTickNodes = false;
 
-                var it = new TtNode.TtIterateParameters();//todo: no gc
+                if (NodeTickParameters.IterateParameters == null)
+                {
+                    NodeTickParameters.IterateParameters = new TtNode.TtIterateParameters();
+                }
+                else
+                {
+                    NodeTickParameters.IterateParameters.Reset();
+                }
                 using (new Profiler.TimeScopeHelper(ScopeTick_Iterate))
                 {
                     //Root.IterateNodes(static (nd, arg) =>
@@ -558,22 +569,60 @@ namespace EngineNS.GamePlay
                     //    list.Add(nd);
                     //    return true;
                     //}, this);
-                    it.Callback = static (nd, arg) =>
+                    NodeTickParameters.IterateParameters.Callback = static (nd, arg) =>
                     {
                         if (nd.IsNoTick)
                             return true;
 
                         var world = ((TtWorld)arg);
-                        var list = nd.HasStyle(TtNode.ENodeStyles.ParallelTick) ? world.ParallelTickNodes : world.TickNodes;
-                        lock (list)
+                        if (nd.HasStyle(TtNode.ENodeStyles.ParallelTick))
                         {
-                            list.Add(nd);
+                            // 并行 Tick 的节点已经声明了自己不关心顺序，不参与 GetTickOrder 排序。
+                            // 但若它同时又声明了非缺省的 GetTickOrder，那个声明就被静默作废了，告警一次
+                            nd.CheckTickOrderIgnored();
+                            lock (world.ParallelTickNodes)
+                            {
+                                world.ParallelTickNodes.Add(nd);
+                            }
+                        }
+                        else
+                        {
+                            var order = nd.GetTickOrder();
+                            lock (world.TickNodes)
+                            {
+                                world.TickNodes.Add(nd);
+                                if (order != (int)TtNode.ETickOrder.Default)
+                                    world.NeedSortTickNodes = true;
+                            }
                         }
                         return true;
                     };
-                    it.Arg = this;
-                    it.NodeNumLimit = 1000;
-                    Root.ParallelIterateChildren(it);
+                    NodeTickParameters.IterateParameters.Arg = this;
+                    NodeTickParameters.IterateParameters.NodeNumLimit = 1000;
+                    Root.ParallelIterateChildren(NodeTickParameters.IterateParameters);
+                }
+
+                // 先跑同步组、再跑并行组。顺序不能翻:
+                // 声明了 ParallelTick 就等于声明「我不关心顺序」, 而不关心顺序的节点不可能是被依赖方
+                // (没人能保证在它之后跑), 只能是下游消费方 → 它们必须排在有序的同步组之后,
+                // 否则并行组永远只能看到上一帧的同步组产出(例如 TtMeshNode 蒙皮读不到
+                // 本帧动画节点写入的 RuntimePose)。
+                // 合起来看: 同步组按 GetTickOrder 升序, 并行组等价于 order = +∞ 且组内无序。
+                using (new Profiler.TimeScopeHelper(ScopeTick_SyncTick))
+                {
+                    // 上面的收集是并行的，入表顺序不定，所以有先后依赖的节点靠 GetTickOrder 定序。
+                    // 注意这是不稳定排序，同值节点之间的相对顺序依然是未定义的
+                    if (NeedSortTickNodes)
+                        TickNodes.Sort(static (x, y) => x.GetTickOrder().CompareTo(y.GetTickOrder()));
+
+                    foreach (var i in TickNodes)
+                    {
+                        using (new Profiler.TimeScopeHelper(i.GetScopeTickLogic()))
+                        {
+                            i.OnTickLogic(NodeTickParameters);
+                        }
+                    }
+                    TickNodes.Clear();
                 }
 
                 using (new Profiler.TimeScopeHelper(ScopeTick_ParallelTick))
@@ -584,18 +633,6 @@ namespace EngineNS.GamePlay
                         world.ParallelTickNodes[index].OnTickLogic(world.NodeTickParameters);
                     }, -1, this);
                     ParallelTickNodes.Clear();
-                }
-
-                using (new Profiler.TimeScopeHelper(ScopeTick_SyncTick))
-                {
-                    foreach (var i in TickNodes)
-                    {
-                        using (new Profiler.TimeScopeHelper(i.GetScopeTickLogic()))
-                        {
-                            i.OnTickLogic(NodeTickParameters);
-                        }
-                    }
-                    TickNodes.Clear();
                 }
 
                 using (new Profiler.TimeScopeHelper(ScopeTick_After))

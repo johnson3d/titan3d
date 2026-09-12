@@ -65,6 +65,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public NxRHI.TtSrView WaterHMapSRV;
         public NxRHI.TtTexture NormalMap;
         public NxRHI.TtSrView NormalMapSRV;
+        /// <summary>
+        /// 材质 ID 图的纹理对象。与 HeightMap / NormalMap 一致: 只持引用,
+        /// 不在 Dispose 里单独释放, 靠 SRV 的引用计数。材质笔刷的局部上传需要它。
+        /// </summary>
+        public NxRHI.TtTexture MaterialIdMap;
         public NxRHI.TtSrView MaterialIdMapSRV;
         public float HeightMapMinHeight;
         public float HeightMapMaxHeight;
@@ -120,6 +125,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             // SourceHeightMap 是 CreateFromBuffer 里 Clone 出来的, 生命周期归本对象,
             // 必须释放, 否则每次 level streaming 卸载都会漏一份 4MB 的高度缓冲。
             CoreSDK.DisposeObject(ref SourceHeightMap);
+
+            // 材质 ID 的 CPU 副本是纯托管 byte[], 置 null 就行; 同时让 IsMaterialIdEditable
+            // 变 false, 避免已卸载 level 上的 undo 命令去碰一个已释放的纹理。
+            SourceMaterialIdMap = null;
+            mBaseMaterialIdMap = null;
         }
         public TtTerrainNode GetTerrainNode()
         {
@@ -289,6 +299,15 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             UpdateWaterMap(waterMap);
 
+            // 材质 ID 覆盖层同样要在建纹理之前叠回去。和高度一样必须拿副本:
+            // 传进来的 idMap 就是 PGC 的 result buffer, 随后会被 SaveLevelToCache 写进 .trlvl,
+            // 原地叠加会把手绘材质烤进基底。
+            var overlaidIdMap = ApplyMaterialIdOverlayIfAny(idMap);
+            if (overlaidIdMap != null)
+            {
+                idMap = overlaidIdMap;
+            }
+
             UpdateMaterialIdMap(idMap);
 
             UpdatePlants(transform, plants);
@@ -298,6 +317,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             // 叠加副本的生命周期只到这里: 上面需要它的地方要么已经上传到 GPU,
             // 要么已经 Clone 成了 SourceHeightMap。
             CoreSDK.DisposeObject(ref overlaidHMap);
+            CoreSDK.DisposeObject(ref overlaidIdMap);
         }
 
         public void UpdateAABB(Procedure.TtBufferComponent hMap, Procedure.TtBufferComponent waterMap)
@@ -401,13 +421,20 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 null);
 
             var rvt = MaterialIdMapSRV?.Rvt;
-            MaterialIdMapSRV = idMapImage.CreateRGBA8Texture2D(false);
+            MaterialIdMapSRV = idMapImage.CreateRGBA8Texture2D(out MaterialIdMap, false);
             if (rvt != null)
             {
                 rvt.UpdateTexture(MaterialIdMapSRV);
             }
             MaterialIdMapSRV.SetDebugName("MaterialIdMapSRV");
             MaterialIdMapSRV.AssetName = RName.GetRName($"@MtlID_{this.GetTerrainNode().TerrainName}_{Level.LevelX}_{Level.LevelZ}@", RName.ERNameType.Transient);
+
+            // 材质笔刷需要 CPU 侧的 byte ID 副本 (1MB/level)。只在编辑器态建,
+            // 且必须建在 idMap 已经叠过覆盖层之后 —— 它是“当前生效的 ID”而不是基底。
+            if (IsTerrainEditSupported)
+            {
+                CaptureSourceMaterialIdMap(idMap);
+            }
         }
         public void UpdatePlants(Procedure.TtBufferComponent transform, Procedure.TtBufferComponent plants)
         {

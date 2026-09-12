@@ -174,7 +174,7 @@ namespace EngineNS.IO
         {
             var ameta = mAsset.CreateAMeta();
             ameta.SetAssetName(mAsset.AssetName);
-            ameta.AssetId = Guid.NewGuid();
+            ameta.AssetId = IAssetMeta.AcquireAssetId(mAsset.AssetName);
             ameta.TypeStr = Rtti.TtTypeDesc.TypeOf(mAsset.GetType()).TypeString;
             ameta.Description = $"This is a {mAsset.GetType().FullName}\n";
             ameta.SaveAMeta((IAsset)null);
@@ -197,6 +197,17 @@ namespace EngineNS.IO
         IAssetMeta CreateAMeta();
         IAssetMeta GetAMeta();
         void SaveAssetTo(RName name);
+    }
+    /// <summary>
+    /// 资产内部缓存了一整份序列化数据 (比如材质把整张图存成 GraphXMLString) 时实现这个接口。
+    /// 这类缓存在引擎结构改名/改版后仍是旧结构, 平时只能靠加载期的兼容回退撑着, SaveAssetTo
+    /// 一般也只是把它原样写回去。实现方在这里把缓存按当前结构重新生成一遍, 由资产迁移流程
+    /// (MCP resave_assets) 在 SaveAssetTo 之前调用, 旧名才会真正落地成新名。
+    /// </summary>
+    public interface IAssetSerializedDataMigration
+    {
+        /// <returns>true 表示确实重写了缓存数据, false 表示没有可迁移的内容</returns>
+        bool MigrateSerializedData();
     }
     public enum EAssetState
     {
@@ -920,6 +931,51 @@ namespace EngineNS.IO
         public string Description { get; set; } = "This is a Asset";
         [Rtti.Meta("")]
         public Guid AssetId { get; set; }
+
+        /// <summary>
+        /// 取"该给这个资产用的 AssetId": 同名资产已存在就沿用它的, 否则新建一个。
+        /// 建 ameta 时一律用它代替裸写 Guid.NewGuid()。
+        ///
+        /// 为何必须沿用: AssetId 是引用解析的稳定锚点。IReader.Read(out RName) 先拿存档里的
+        /// AssetId 去查 AssetMetaManager, 查到就用它当前的名字, 查不到才回退到存档里的名字字符串
+        /// (IReader.cs 的 Version101 分支)。也就是说 AssetId 存在的唯一目的就是"资产改名/移动后
+        /// 旧引用仍能找到它"。重新导入若换掉 AssetId, 这个能力就被静默废掉: 只要资产还没改名,
+        /// 名字回退兜得住, 一切看着正常; 等哪天有人挪了目录或重命名, 所有旧引用一起断。
+        ///
+        /// 另一个立即可见的后果: GetSnapshotPath 按 AssetId 分桶存缩略图, 换 Id 会让已有 snap
+        /// 变成没人引用的孤儿文件, 同时 AssetMetaManager.Assets 里也会残留旧 Guid 的幽灵条目。
+        ///
+        /// 注册表里查不到时还要落盘找一次: 导入可能发生在没做过全量 LoadMetas 的场合
+        /// (命令行 cook、各类工具进程), 那时注册表是空的, 只认注册表就会把磁盘上原有的 Id 丢掉。
+        /// </summary>
+        public static Guid AcquireAssetId(RName name)
+        {
+            if (name == null)
+                return Guid.NewGuid();
+
+            var registered = TtEngine.Instance.AssetMetaManager.GetAssetMeta(name);
+            if (registered != null && registered.AssetId != Guid.Empty)
+                return registered.AssetId;
+
+            var metaFile = name.Address + IAssetMeta.MetaExt;
+            if (IO.TtFileManager.FileExists(metaFile))
+            {
+                try
+                {
+                    var onDisk = IO.TtFileManager.LoadXmlToObject(metaFile) as IAssetMeta;
+                    if (onDisk != null && onDisk.AssetId != Guid.Empty)
+                        return onDisk.AssetId;
+                }
+                catch (Exception ex)
+                {
+                    // .ameta 坏了不能挡住导入 —— 新建一个 Id 让导入跑完, 但要留下记录,
+                    // 因为这意味着那个资产的旧引用确实会断, 不该悄无声息。
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning,
+                        $"Failed to read existing AssetId from '{metaFile}' ({ex.Message}); a new AssetId will be assigned and references that relied on the old one will break.");
+                }
+            }
+            return Guid.NewGuid();
+        }
         [Rtti.Meta("")]
         public List<RName> RefAssetRNames { get; set; } = new List<RName>();
         public List<IO.IAssetMeta> mRefAssetMetas = null;
